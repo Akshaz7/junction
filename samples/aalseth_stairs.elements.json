@@ -1,0 +1,1119 @@
+{
+ "source": "junction-dataset-preview/data/opening_design/Aalseth_Residence/Models & CAD/BIM/stairs.blend.ifc",
+ "schema": "IFC4",
+ "units": "metres",
+ "axes": "IFC world, Z-up (GLB exported with --y-up: glb=(x, z, -y))",
+ "storeys": [
+  {
+   "name": "Ground Floor",
+   "elevation_m": 0.0
+  }
+ ],
+ "element_count": 46,
+ "elements": [
+  {
+   "guid": "1FilKDsvD5PPvJJGW2_z5F",
+   "step_id": 5919,
+   "name": "Landing Beam",
+   "ifc_class": "IfcBeam",
+   "category": "beam",
+   "predefined_type": "BEAM",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    217.1448,
+    59.5366,
+    2.1846
+   ],
+   "bbox_max": [
+    217.2464,
+    61.5178,
+    2.337
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "36yP_blT9Cf9jtpQcFNjnK",
+   "step_id": 5933,
+   "name": "Outer Stringer",
+   "ifc_class": "IfcMember",
+   "category": "member",
+   "predefined_type": "STRINGER",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    216.1861,
+    59.467,
+    0.7109
+   ],
+   "bbox_max": [
+    219.1863,
+    61.5874,
+    3.756
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "0AoI_77qb5U8ybTDvvuaSm",
+   "step_id": 5947,
+   "name": "Inner Stringer B",
+   "ifc_class": "IfcMember",
+   "category": "member",
+   "predefined_type": "STRINGER",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    217.2464,
+    60.5336,
+    2.083
+   ],
+   "bbox_max": [
+    219.1863,
+    60.6032,
+    3.756
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "3GYCMp9Hv71fGLvBwbn9TP",
+   "step_id": 5954,
+   "name": "Inner Stringer A",
+   "ifc_class": "IfcMember",
+   "category": "member",
+   "predefined_type": "STRINGER",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    217.2464,
+    60.451,
+    0.7109
+   ],
+   "bbox_max": [
+    219.1339,
+    60.5206,
+    2.4159
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "0u$aeOIJf8C9KzGPzjNOGb",
+   "step_id": 5940,
+   "name": "End Plate 1",
+   "ifc_class": "IfcPlate",
+   "category": "plate",
+   "predefined_type": "NOTDEFINED",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0244,
+    60.2732,
+    0.4699
+   ],
+   "bbox_max": [
+    219.0402,
+    60.6288,
+    0.7747
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "33yP521GT8uw9NtCP_2n9Q",
+   "step_id": 6003,
+   "name": "End Plate 2",
+   "ifc_class": "IfcPlate",
+   "category": "plate",
+   "predefined_type": "NOTDEFINED",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0244,
+    59.3588,
+    0.4699
+   ],
+   "bbox_max": [
+    219.0402,
+    59.7144,
+    0.7747
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "3BCIO_Ffr7RQwpbBJB3R6Q",
+   "step_id": 6038,
+   "name": "Top Plate 1",
+   "ifc_class": "IfcPlate",
+   "category": "plate",
+   "predefined_type": "NOTDEFINED",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.045,
+    60.3748,
+    0.7906
+   ],
+   "bbox_max": [
+    219.1339,
+    60.5272,
+    0.8001
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "20qylVhiLCIRo8YQrG4Px1",
+   "step_id": 6045,
+   "name": "Back Plate 1",
+   "ifc_class": "IfcPlate",
+   "category": "plate",
+   "predefined_type": "NOTDEFINED",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.1292,
+    60.2986,
+    0.4699
+   ],
+   "bbox_max": [
+    219.1339,
+    60.6034,
+    0.7239
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "1FaAP1bWr2ahXz9jsuYc94",
+   "step_id": 6052,
+   "name": "Top Plate 2",
+   "ifc_class": "IfcPlate",
+   "category": "plate",
+   "predefined_type": "NOTDEFINED",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.045,
+    59.4604,
+    0.7906
+   ],
+   "bbox_max": [
+    219.1339,
+    59.6128,
+    0.8001
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "1ksitOFHL9cQHf5B8T27N6",
+   "step_id": 6059,
+   "name": "Back Plate 2",
+   "ifc_class": "IfcPlate",
+   "category": "plate",
+   "predefined_type": "NOTDEFINED",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.1292,
+    59.3842,
+    0.4699
+   ],
+   "bbox_max": [
+    219.1339,
+    59.689,
+    0.7239
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "3xNGSfncTC686$3oYhaAlE",
+   "step_id": 6080,
+   "name": "End Plate 3",
+   "ifc_class": "IfcPlate",
+   "category": "plate",
+   "predefined_type": "NOTDEFINED",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.1863,
+    60.4256,
+    3.3814
+   ],
+   "bbox_max": [
+    219.2022,
+    60.7812,
+    3.7116
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "07PObV8m14oA_1GDfwXzGQ",
+   "step_id": 6115,
+   "name": "Back Plate 3",
+   "ifc_class": "IfcPlate",
+   "category": "plate",
+   "predefined_type": "NOTDEFINED",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.3324,
+    60.451,
+    3.3814
+   ],
+   "bbox_max": [
+    219.3371,
+    60.7558,
+    3.6481
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "2yc3w5Irj4VBJZ5kmkk9_x",
+   "step_id": 6122,
+   "name": "Railing",
+   "ifc_class": "IfcRailing",
+   "category": "railing",
+   "predefined_type": "HANDRAIL",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    216.2018,
+    59.486,
+    0.9881
+   ],
+   "bbox_max": [
+    219.1863,
+    61.5718,
+    4.7498
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "1M89azg311K8jLLDKHzROI",
+   "step_id": 6143,
+   "name": "Stair Landing",
+   "ifc_class": "IfcSlab",
+   "category": "slab",
+   "predefined_type": "LANDING",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    216.2557,
+    59.5366,
+    2.337
+   ],
+   "bbox_max": [
+    217.602,
+    61.5178,
+    2.3878
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "3AbPjsRrH4ePKdjayLuJcj",
+   "step_id": 5926,
+   "name": "Stair Flight A",
+   "ifc_class": "IfcStairFlight",
+   "category": "stair",
+   "predefined_type": "STRAIGHT",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    217.3226,
+    59.5366,
+    0.9561
+   ],
+   "bbox_max": [
+    219.126,
+    60.451,
+    2.1905
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "37yqt1Iqr0NRDlf4ABbNlc",
+   "step_id": 6150,
+   "name": "Stair Flight B",
+   "ifc_class": "IfcStairFlight",
+   "category": "stair",
+   "predefined_type": "STRAIGHT",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    217.5766,
+    60.6034,
+    2.5343
+   ],
+   "bbox_max": [
+    219.38,
+    61.5178,
+    3.7687
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "1TTCvesY55zQcKewzRd3ug",
+   "step_id": 5968,
+   "name": "TJI Bracket 1",
+   "ifc_class": "IfcDiscreteAccessory",
+   "category": "accessory",
+   "predefined_type": "BRACKET",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.1292,
+    60.0158,
+    0.7271
+   ],
+   "bbox_max": [
+    219.2308,
+    60.1174,
+    0.7715
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "2U76bJ91b0WwtrUcQFKZ3i",
+   "step_id": 5975,
+   "name": "TJI Bracket 2",
+   "ifc_class": "IfcDiscreteAccessory",
+   "category": "accessory",
+   "predefined_type": "BRACKET",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.1292,
+    60.4222,
+    0.7271
+   ],
+   "bbox_max": [
+    219.2308,
+    60.5238,
+    0.7715
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "1Xt4Y4Zsb4nfsU_Ues9cD1",
+   "step_id": 6066,
+   "name": "TJI Bracket 3",
+   "ifc_class": "IfcDiscreteAccessory",
+   "category": "accessory",
+   "predefined_type": "BRACKET",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.3323,
+    60.7225,
+    3.6481
+   ],
+   "bbox_max": [
+    219.4339,
+    60.8241,
+    3.6925
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "26EwLo1MPERuB5rW8JWaVI",
+   "step_id": 6073,
+   "name": "TJI Bracket 4",
+   "ifc_class": "IfcDiscreteAccessory",
+   "category": "accessory",
+   "predefined_type": "BRACKET",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.3323,
+    61.1289,
+    3.6481
+   ],
+   "bbox_max": [
+    219.4339,
+    61.2305,
+    3.6925
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "0R0EtLBtf9_eArcG3dWMTq",
+   "step_id": 6129,
+   "name": "Railing Base Plate 2",
+   "ifc_class": "IfcDiscreteAccessory",
+   "category": "accessory",
+   "predefined_type": "NOTDEFINED",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.1497,
+    60.5338,
+    3.756
+   ],
+   "bbox_max": [
+    219.38,
+    60.6034,
+    3.7687
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "29JhRR3OvC5gHWjta0tRrY",
+   "step_id": 6136,
+   "name": "Railing Base Plate 3",
+   "ifc_class": "IfcDiscreteAccessory",
+   "category": "accessory",
+   "predefined_type": "NOTDEFINED",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.1497,
+    61.5178,
+    3.756
+   ],
+   "bbox_max": [
+    219.38,
+    61.5874,
+    3.7687
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "38him0GtD5xvqGCI$von55",
+   "step_id": 6199,
+   "name": "TJI Bracket 6",
+   "ifc_class": "IfcDiscreteAccessory",
+   "category": "accessory",
+   "predefined_type": "BRACKET",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.1292,
+    59.6094,
+    0.7271
+   ],
+   "bbox_max": [
+    219.2308,
+    59.711,
+    0.7715
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "3koB_uajz6hgas$0jYR$3A",
+   "step_id": 6220,
+   "name": "TJI Bracket 7",
+   "ifc_class": "IfcDiscreteAccessory",
+   "category": "accessory",
+   "predefined_type": "BRACKET",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.3323,
+    61.5353,
+    3.6481
+   ],
+   "bbox_max": [
+    219.4339,
+    61.6369,
+    3.6925
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "2o$M9IIYr7zwMJN14PP0jM",
+   "step_id": 5961,
+   "name": "Thru Bolt 1",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "BOLT",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0117,
+    60.5082,
+    0.5296
+   ],
+   "bbox_max": [
+    219.1568,
+    60.5463,
+    0.5626
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "1ieFejHFbCP9mhF9oj$cP2",
+   "step_id": 5982,
+   "name": "Thru Bolt 2",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "BOLT",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0117,
+    60.3558,
+    0.5296
+   ],
+   "bbox_max": [
+    219.1568,
+    60.3939,
+    0.5626
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "0hokTzeDHB9PwaH3WrCmGe",
+   "step_id": 5989,
+   "name": "Thru Bolt 3",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "BOLT",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0117,
+    60.5082,
+    0.682
+   ],
+   "bbox_max": [
+    219.1568,
+    60.5463,
+    0.715
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "14nVBlJmD1LxF1zqGG1OQu",
+   "step_id": 5996,
+   "name": "Thru Bolt 4",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "BOLT",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0117,
+    60.3558,
+    0.682
+   ],
+   "bbox_max": [
+    219.1568,
+    60.3939,
+    0.715
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "0YKRvwq0b0ZvtmCtb9cPXT",
+   "step_id": 6010,
+   "name": "Thru Bolt 5",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "BOLT",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0117,
+    59.5938,
+    0.5296
+   ],
+   "bbox_max": [
+    219.1568,
+    59.6319,
+    0.5626
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "3w_z$xQaL5U9wG2oWkUtPi",
+   "step_id": 6017,
+   "name": "Thru Bolt 6",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "BOLT",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0117,
+    59.4414,
+    0.5296
+   ],
+   "bbox_max": [
+    219.1568,
+    59.4795,
+    0.5626
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "3B56$b0SLDjehO1DpLBp4B",
+   "step_id": 6024,
+   "name": "Thru Bolt 7",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "BOLT",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0117,
+    59.5938,
+    0.682
+   ],
+   "bbox_max": [
+    219.1568,
+    59.6319,
+    0.715
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "1F9PvTT656whCXJ5RtAHkR",
+   "step_id": 6031,
+   "name": "Thru Bolt 8",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "BOLT",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0117,
+    59.4414,
+    0.682
+   ],
+   "bbox_max": [
+    219.1568,
+    59.4795,
+    0.715
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "0GqVvlRGv4j9ZfkNcLlGtQ",
+   "step_id": 6087,
+   "name": "Thru Bolt 9",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "BOLT",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.1736,
+    60.6606,
+    3.4411
+   ],
+   "bbox_max": [
+    219.36,
+    60.6987,
+    3.4741
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "1dB6Lp5ibAGg90xJiaQzJK",
+   "step_id": 6094,
+   "name": "Thru Bolt 10",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "BOLT",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.1736,
+    60.5082,
+    3.4411
+   ],
+   "bbox_max": [
+    219.36,
+    60.5463,
+    3.4741
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "0ryPO6I3vD1eaq6U2kkoyy",
+   "step_id": 6101,
+   "name": "Thru Bolt 11",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "BOLT",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.1736,
+    60.6606,
+    3.5935
+   ],
+   "bbox_max": [
+    219.36,
+    60.6987,
+    3.6265
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "0DCjJQY192FhVISdkfTKzE",
+   "step_id": 6108,
+   "name": "Thru Bolt 12",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "BOLT",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.1736,
+    60.5082,
+    3.5935
+   ],
+   "bbox_max": [
+    219.36,
+    60.5463,
+    3.6265
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "0EvJOIpe53HQU0tffp156P",
+   "step_id": 6157,
+   "name": "Lag Screw 1",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "SCREW",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0792,
+    59.4866,
+    0.6477
+   ],
+   "bbox_max": [
+    219.0998,
+    59.5104,
+    0.8065
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "23mji$3nz5lBdneLX429oM",
+   "step_id": 6164,
+   "name": "Lag Screw 2",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "SCREW",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0792,
+    59.5628,
+    0.6477
+   ],
+   "bbox_max": [
+    219.0998,
+    59.5866,
+    0.8065
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "1GXkq0pM5FAxYenXWoUkl7",
+   "step_id": 6171,
+   "name": "Lag Screw 3",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "SCREW",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0792,
+    60.401,
+    0.6477
+   ],
+   "bbox_max": [
+    219.0998,
+    60.4248,
+    0.8065
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "15rbX39Jn378C$OPTaCWPX",
+   "step_id": 6178,
+   "name": "Lag Screw 4",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "SCREW",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0792,
+    60.4772,
+    0.6477
+   ],
+   "bbox_max": [
+    219.0998,
+    60.501,
+    0.8065
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "0sKTrJbJj7nxqQ2MQajI__",
+   "step_id": 6185,
+   "name": "Screws 1",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "SCREW",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.2927,
+    61.4956,
+    3.6662
+   ],
+   "bbox_max": [
+    219.4244,
+    61.6289,
+    3.6744
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "3dNbDSfnv3yR1TkSUEprmk",
+   "step_id": 6192,
+   "name": "Screws 2",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "SCREW",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0895,
+    60.3825,
+    0.7452
+   ],
+   "bbox_max": [
+    219.2213,
+    60.5159,
+    0.7534
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "37U$SapKT9PAdTokvGtu5Q",
+   "step_id": 6206,
+   "name": "Screws 3",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "SCREW",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0895,
+    59.9761,
+    0.7452
+   ],
+   "bbox_max": [
+    219.2213,
+    60.1095,
+    0.7534
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "3ve3Ys7AjBxfLHxet9$Sj7",
+   "step_id": 6213,
+   "name": "Screws 4",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "SCREW",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.0895,
+    59.5697,
+    0.7452
+   ],
+   "bbox_max": [
+    219.2213,
+    59.7031,
+    0.7534
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "2xWbpzOWv7SQYlulcq4WkE",
+   "step_id": 6227,
+   "name": "Screws 5",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "SCREW",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.2927,
+    61.0892,
+    3.6662
+   ],
+   "bbox_max": [
+    219.4244,
+    61.2225,
+    3.6744
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  },
+  {
+   "guid": "3nMwhG6TnB1vfn4XOHLvKl",
+   "step_id": 6234,
+   "name": "Screws 6",
+   "ifc_class": "IfcMechanicalFastener",
+   "category": "fastener",
+   "predefined_type": "SCREW",
+   "object_type": null,
+   "type_name": null,
+   "storey": "Ground Floor",
+   "storey_elevation_m": null,
+   "bbox_min": [
+    219.2927,
+    60.6828,
+    3.6662
+   ],
+   "bbox_max": [
+    219.4244,
+    60.8161,
+    3.6744
+   ],
+   "has_geometry": true,
+   "bbox_source": "own"
+  }
+ ]
+}
