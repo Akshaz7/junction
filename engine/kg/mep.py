@@ -150,7 +150,8 @@ def resolve_source(meta, root, fmt):
 def cache_dependencies(project, root):
     """Include optional-reader installation and original sheet/source modifications."""
     base = Path(__file__).resolve().parents[2]
-    paths = [base / "pipeline" / "pdf_mep.py", base / "pipeline" / "pdf_vector.py", base / "engine" / "mep.py"]
+    paths = [base / "pipeline" / name for name in ("pdf_mep.py", "pdf_vector.py", "pdf_rooms.py")]
+    paths.append(base / "engine" / "mep.py")
     for doc in documents(project):
         did = doc.get("doc_id")
         if not did or Path(did).name != did or did in {".", ".."}:
@@ -479,6 +480,9 @@ def room_services(graph, room_node_id):
         n = nodes.get(e["from"])
         if e["kind"] not in {"serves", "in_room"} or e["to"] not in rooms or not n or n["kind"] not in SERVICE_KINDS:
             continue
+        if n.get("props", {}).get("original_kind") in {"text", "dimension"}:
+            # The core's generic fallback kind must not turn printed labels into services.
+            continue
         path = [e, *rooms[e["to"]]]
         confidence = min(x["confidence"] for x in path)
         # Matching depictions of one service count once; keep the strongest path.
@@ -491,12 +495,19 @@ def room_services(graph, room_node_id):
                               "systems": systems.get(n["id"], []),
                               "element_length_m": n.get("props", {}).get("length_m"),
                               "length_in_room_m": e.get("evidence", {}).get("length_in_room_m"),
-                              "length_method": e.get("evidence", {}).get("length_method")}
+                              "length_method": e.get("evidence", {}).get("length_method"),
+                              "boundary_source": e.get("evidence", {}).get("boundary_source"),
+                              "boundary_method": e.get("evidence", {}).get("boundary_method")}
     counts = Counter(row["node"]["kind"] for row in selected.values())
     lengths = Counter()
     for row in selected.values():
         if row["length_in_room_m"] is not None:
             lengths[row["node"]["kind"]] += row["length_in_room_m"]
+    notes = ["Only recorded links are listed; missing links do not prove a room has no services.",
+             "Element length is the whole run; length inside the room is unknown unless separately recorded."]
+    if any(row["node"].get("props", {}).get("extraction", "").startswith("vector PDF") for row in selected.values()):
+        notes.append("Vector-PDF services are unverified line/symbol candidates; counts are incomplete and may include annotations.")
+    if room.get("props", {}).get("reference_only"):
+        notes.append("This room is identified by a printed number; its architectural boundary is not established.")
     return {"room": room, "services": list(selected.values()), "count_by_kind": dict(counts),
-            "length_m_by_kind": dict(lengths), "notes": ["Only recorded links are listed; missing links do not prove a room has no services.",
-                "Element length is the whole run; length inside the room is unknown unless separately recorded."]}
+            "length_m_by_kind": dict(lengths), "notes": notes}

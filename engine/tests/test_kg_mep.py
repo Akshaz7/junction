@@ -275,3 +275,69 @@ def test_optional_pdf_adapter_clips_lengths_and_cites_original_sheet(tmp_path, m
     assert duct["element_length_m"] == pytest.approx(.4)
     assert duct["source"]["doc_id"] == "services" and duct["source"]["bbox"][1] < duct["source"]["bbox"][3]
     assert all(s["confidence"] < .6 for s in result["services"])
+
+
+def test_printed_room_number_links_across_languages_without_fabricated_boundary():
+    from engine.kg.mep_room_refs import link_number_references
+    graph = {"nodes": [], "edges": []}
+    writer = Writer(graph)
+    pm = {"page": 2, "image": {"w": 100, "h": 100}, "items": []}
+    src = {"W_pt": 100, "H_pt": 100, "words": [{"text": "A12", "bbox": [18,18,22,22]}]}
+    dst = {"W_pt": 100, "H_pt": 100, "words": [{"text": "A12", "bbox": [18,18,22,22]}]}
+    T = {"s": 1, "R": [[1,0],[0,1]], "t": [0,0], "matches": 5, "residual": .1}
+    raw = [{"label": "Kokoustila", "number": "A12", "polygon": [[10,10],[30,10],[30,30],[10,30]]}]
+    regions = link_number_references(writer,"m","a",pm,pm,src,dst,T,.01,raw)
+    assert len(regions) == 1
+    target, shape, _, source = regions[0]
+    assert target["props"]["reference_only"] and target["label"] == "Room A12"
+    assert shape.area == 400 and source["doc_id"] == "m" and source["page"] == 2
+    assert source["bbox"] == [10,10,30,30]
+    assert target["source"]["bbox"] == [18,18,22,22]  # text citation, never a room outline
+    edge = graph["edges"][0]
+    assert edge["kind"] == "same_as" and edge["confidence"] > .5
+    assert edge["evidence"]["text_sources"][1]["quote"] == "A12"
+    # Repeated numbers, merged regions and unprinted parser-assigned tags cannot establish identity.
+    for records in ([{**raw[0], "merged": True}], raw*2, [{**raw[0], "number": "unprinted-9"}]):
+        empty = {"nodes": [], "edges": []}
+        assert not link_number_references(Writer(empty),"m","a",pm,pm,src,dst,T,.01,records)
+        assert not empty["edges"]
+    # The same room ID can also appear on its door tag; registration disambiguates printings.
+    src["words"].append({"text": "A12", "bbox": [70,70,74,74]})
+    dst["words"].append({"text": "A12", "bbox": [70,70,74,74]})
+    repeated = {"nodes": [], "edges": []}
+    assert len(link_number_references(Writer(repeated),"m","a",pm,pm,src,dst,T,.01,raw)) == 1
+    # A bare decimal is ambiguous with the printed floor area and is not a room identity.
+    src["words"] = [{"text":"12.0","bbox":[18,18,22,22]}]
+    dst["words"] = list(src["words"])
+    assert not link_number_references(Writer({"nodes":[],"edges":[]}),"m","a",pm,pm,src,dst,T,.01,
+                                      [{**raw[0],"number":"12.0"}])
+
+
+def test_composite_room_and_text_box_cannot_claim_service_containment():
+    from engine.kg.mep_sheets import _services
+    from types import SimpleNamespace
+    graph = {"nodes": [node("room","a","merged",label="Office / Corridor"),
+                       node("room","a","label",label="Office")], "edges": []}
+    pm = {"page": 1, "image": {"w": 100, "h": 100}, "items": [
+        {"item_id": "merged", "bbox_px": [10,10,30,30], "polygon_px": [[10,10],[30,10],[30,30],[10,30]]},
+        {"item_id": "label", "bbox_px": [10,10,30,30]}]}
+    api = SimpleNamespace(split_mep=lambda *a,**kw:{"mep":[]},ducts=lambda *a:[],
+                          terminals=lambda *a:[{"center_pt":[20,20],"size_pt":2}])
+    T = {"s":1,"R":[[1,0],[0,1]],"t":[0,0],"residual":.1,"matches":5}
+    report = _services(Writer(graph),"m",1,pm,{"W_pt":100,"H_pt":100},"a",pm,
+                       {"W_pt":100,"H_pt":100},T,.01,api)
+    assert report["room_regions"] == 0 and report["terminals"] == 1
+    assert not any(e["kind"] in {"in_room","serves"} for e in graph["edges"])
+
+
+def test_room_services_never_counts_text_as_a_physical_fixture():
+    room, text, sink = node("room","a","r"), node("fixture","a","label"), node("fixture","a","sink")
+    text["props"]["original_kind"] = "text"
+    sink["props"]["original_kind"] = "sink"
+    graph = {"nodes":[room,text,sink],"edges":[]}
+    writer = Writer(graph)
+    for item in (text,sink):
+        writer.edge("in_room",item,room,"containment_geom",.5,{})
+    result = room_services(graph,room["id"])
+    assert result["count_by_kind"] == {"fixture":1}
+    assert result["services"][0]["node"]["id"] == sink["id"]

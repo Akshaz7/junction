@@ -61,6 +61,8 @@ def _room_shape(n, pm, pdf):
 def link_sheet_rooms(writer, source_did, target_did, source_pm, target_pm, source_pdf, target_pdf, T, m_per_pt):
     """Match existing underlay rooms after measured alignment; retain both sources."""
     from shapely.geometry import Point
+    from engine.kg.confidence import confidence
+    from engine.kg.mep_room_refs import composite, number
     sources = [n for n in writer.nodes.values() if n["kind"] == "room" and (n.get("source") or {}).get("doc_id") == source_did
                and (n.get("source") or {}).get("page", 1) == source_pm.get("page", 1)]
     targets = [n for n in writer.nodes.values() if n["kind"] == "room" and (n.get("source") or {}).get("doc_id") == target_did
@@ -72,16 +74,20 @@ def link_sheet_rooms(writer, source_did, target_did, source_pm, target_pm, sourc
         return
     proposals = []
     for src in sources:
+        if composite(src):
+            continue
         shape = _room_shape(src, source_pm, source_pdf)
         if not shape:
             continue
         center = _apply(T, list(shape[0].centroid.coords)[0])
         hits = []
         for target in targets:
+            if composite(target):
+                continue
             dst = _room_shape(target, target_pm, target_pdf)
             if not dst or not dst[0].contains(Point(center)):
                 continue
-            a, b = src.get("props", {}).get("room_number"), target.get("props", {}).get("room_number")
+            a, b = number(src.get("props", {})), number(target.get("props", {}))
             # Repeated generic names ("Office") are not unique room identities.
             label_match = bool(a and b and _norm(a) == _norm(b)) or _norm(src["label"]) == _norm(target["label"])
             if not label_match:
@@ -97,15 +103,17 @@ def link_sheet_rooms(writer, source_did, target_did, source_pm, target_pm, sourc
     for src, dst, distance in proposals:
         if counts[dst["id"]] != 1:
             continue
-        writer.edge("same_as", src, dst, "position", 0.5,
-                    {"rule": "unique same-label room centres after shared-text sheet alignment",
+        evidence = {"rule": "unique same-label room centres after shared-text sheet alignment",
                      "residual_m": distance, "alignment": {"T": T, "residual": residual,
                      "matches": T.get("matches", T.get("n_inliers"))},
-                     "sources": [src["source"], dst["source"]], "calibration": "not yet empirically calibrated"})
+                     "sources": [src["source"], dst["source"]],
+                     "calibration": "KG-EVAL non-heldout position reference-matcher table; identity only."}
+        writer.edge("same_as", src, dst, "position", confidence("position", evidence=evidence), evidence)
 
 
-def _services(writer, did, page_number, pm, page, target_did, target_pm, target_page, T, scale, api):
+def _services(writer, did, page_number, pm, page, target_did, target_pm, target_page, T, scale, api, reference_regions=()):
     from shapely.geometry import LineString, Point
+    from engine.kg.mep_room_refs import composite
     # Explicit scale overrides pdf_mep's printed-scale fallback.
     split = api.split_mep(page, target_page, m_per_pt=scale)
     source_scale = scale * T["s"]
@@ -116,10 +124,13 @@ def _services(writer, did, page_number, pm, page, target_did, target_pm, target_
     rooms = []
     for n in list(writer.nodes.values()):
         source = n.get("source") or {}
-        if n["kind"] == "room" and source.get("doc_id") == target_did and source.get("page", 1) == target_pm.get("page", 1):
+        if (n["kind"] == "room" and source.get("doc_id") == target_did
+                and source.get("page", 1) == target_pm.get("page", 1) and not composite(n)):
             shape = _room_shape(n, target_pm, target_page)
-            if shape:
-                rooms.append((n, *shape))
+            if shape and shape[1] == "room polygon":
+                rooms.append((n, *shape, n["source"]))
+    existing_rooms = {r[0]["id"] for r in rooms}
+    rooms.extend(r for r in reference_regions if r[0]["id"] not in existing_rooms)
     residual = float(T.get("residual", T.get("rms_pt", math.inf))) * scale
     alignment = {"T": T, "residual": residual, "matches": T.get("matches", T.get("n_inliers"))}
     for kind, rows in (("duct", ducts), ("terminal", terms)):
@@ -143,19 +154,26 @@ def _services(writer, did, page_number, pm, page, target_did, target_pm, target_
             n = writer.node(kind, did, f"mep-{page_number}-{kind}-{i}", row.get("label") or kind.capitalize(),
                             props, page=page_number, bbox=bbox)
             writer.doc_link(n, did)
-            hits = [(room, region, method) for room, region, method in rooms if region.intersects(shape)]
+            hits = [(room, region, method, boundary_source) for room, region, method, boundary_source in rooms
+                    if (region.contains(shape) if kind == "terminal" else region.intersection(shape).length > 0)]
             if kind == "terminal" and len(hits) != 1:
                 continue
-            for room, region, method in hits:
+            for room, region, method, boundary_source in hits:
                 ev = {"rule": f"aligned vector service intersects {method}", "alignment": alignment,
-                      "residual_m": residual, "sources": [n["source"], room["source"]]}
-                if kind == "duct" and method == "room polygon":
+                      "residual_m": residual, "sources": [n["source"], room["source"]],
+                      "boundary_source": boundary_source, "boundary_method": method,
+                      "boundary_clearance_m": shape.distance(region.boundary)*scale if kind == "terminal" else None,
+                      "calibration": "Uncalibrated service-symbol and room-boundary detection; measured alignment alone does not establish link accuracy."}
+                if kind == "duct":
                     ev.update({"length_in_room_m": region.intersection(shape).length * scale,
                                "length_method": "aligned vector centreline clipped to room polygon"})
                 writer.edge("in_room", n, room, "containment_geom", 0.5, ev)
                 if kind == "terminal":
                     writer.edge("serves", n, room, "containment_geom", 0.5, ev)
-    return {"ducts": len(ducts), "terminals": len(terms), "alignment": alignment}
+    return {"ducts": len(ducts), "terminals": len(terms), "alignment": alignment,
+            "room_regions": len(rooms), "room_reference_regions": len(reference_regions),
+            "notes": ["Counts are detected candidates, not complete installed quantities.",
+                      "Composite room regions and text-label boxes cannot supply room boundaries."]}
 
 
 def enrich_sheets(writer, project, root: Path, deadline):
@@ -217,7 +235,14 @@ def enrich_sheets(writer, project, root: Path, deadline):
                     continue
                 tdid, tpm, target, T, scale = candidates[0]
                 link_sheet_rooms(writer, did, tdid, pm, tpm, page, target, T, scale)
-                report = _services(writer, did, page_no, pm, page, tdid, tpm, target, T, scale, api)
+                reference_regions = []
+                try:
+                    from engine.kg.mep_room_refs import link_number_references, read_rooms
+                    raw_rooms = read_rooms(path, page_no)
+                    reference_regions = link_number_references(writer, did, tdid, pm, tpm, page, target, T, scale, raw_rooms)
+                except (ImportError, OSError, RuntimeError, ValueError, TypeError, AttributeError) as exc:
+                    notes.append(f"Optional room-number references unavailable: {type(exc).__name__}: {exc}")
+                report = _services(writer, did, page_no, pm, page, tdid, tpm, target, T, scale, api, reference_regions)
                 writer.graph["mep"].setdefault("documents", {}).setdefault(did, {}).setdefault("pdf_pages", {})[str(page_no)] = report
             except (OSError, RuntimeError, ValueError, ImportError, TimeoutError, AttributeError, TypeError, KeyError) as exc:
                 notes.append(f"Vector-PDF services unavailable on page {page_no}: {type(exc).__name__}: {exc}")
