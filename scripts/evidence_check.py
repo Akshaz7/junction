@@ -68,8 +68,9 @@ def read_json(path):
 
 class Sources:
     """Resolve against raw artifacts, not the solver that produced the answer."""
-    def __init__(self, root):
+    def __init__(self, root, repo=ROOT):
         self.root = Path(root)
+        self.repo = Path(repo)
         self.cache = {}
         self.indexes = {}
         self.fingerprints = {}
@@ -154,6 +155,17 @@ class Sources:
                 candidate = path / str(ref)
             if not candidate.resolve().is_relative_to(self.root.resolve()) or not candidate.is_file():
                 errors.append(f"artifact reference does not resolve: {ref}")
+            elif source.get("pointer") is not None:
+                pointer = source["pointer"]
+                try:
+                    if not isinstance(pointer, str) or pointer and not pointer.startswith("/"):
+                        raise ValueError("invalid JSON pointer")
+                    data = self.json(candidate)
+                    for part in pointer.split("/")[1:]:
+                        key = part.replace("~1", "/").replace("~0", "~")
+                        data = data[int(key)] if isinstance(data, list) else data[key]
+                except (KeyError, IndexError, ValueError, TypeError):
+                    errors.append(f"artifact JSON pointer does not resolve: {pointer!r}")
         if require_anchor and not iid and box is None and not ref:
             errors.append("source names a document but no element, region or artifact")
         return errors
@@ -438,8 +450,8 @@ def audit(res, sources):
     for row in rows:
         source = row.get("source")
         source_check(source, "calculation row")
-        identity = ((source or {}).get("doc_id", default_doc), (source or {}).get("page"), row.get("item_id")) if isinstance(source, dict) else None
-        if identity and identity[2]:
+        identity = ((source or {}).get("doc_id", default_doc), row.get("item_id")) if isinstance(source, dict) else None
+        if identity and identity[1]:
             if identity in seen:
                 fail("calc.duplicate_row", f"element counted twice: {identity}")
             seen.add(identity)
@@ -494,6 +506,9 @@ def audit(res, sources):
     margins = [("reasoning.margin", reasoning.get("margin"))]
     if calc:
         margins.append(("calc.margin", calc.get("margin")))
+    if isinstance(value, dict):
+        for name, parent in list(margins):
+            margins.extend((f"{name}.{kind}", (parent or {}).get("by_kind", {}).get(kind)) for kind in value)
     for name, margin in margins:
         if not isinstance(margin, dict):
             fail("scale.margin_missing" if u != "count" else "calc.margin_missing", f"{name} is missing")
@@ -502,13 +517,20 @@ def audit(res, sources):
             fail("calc.margin_unit", f"{name} unit differs from the measured quantity")
         if not margin.get("why"):
             fail("calc.margin_reason", f"{name} has no explanation")
+        for reference in margin.get("sources") or []:
+            if isinstance(reference, dict):
+                source_check(reference, name, anchor=False)
+            elif isinstance(reference, str):
+                doc_id = reference.partition(":")[0]
+                if sources.doc(doc_id) is None and not (sources.repo / reference).is_file():
+                    fail("source.margin_reference", f"{name}: source reference does not resolve: {reference}")
         err, pct = margin.get("value"), margin.get("pct")
         if err is not None and (number(err) is None or err < 0):
             fail("calc.margin_invalid", f"{name} has an invalid absolute margin")
         if pct is not None and (number(pct) is None or pct < 0):
             fail("calc.margin_pct", f"{name} has an invalid percentage")
-        elif pct is not None and number(value) is not None:
-            expected_pct = abs(err / value) * 100 if number(err) is not None and value else 0 if err == 0 else None
+        elif pct is not None and number(margin_value := value.get(name.rsplit(".", 1)[-1]) if isinstance(value, dict) else value) is not None:
+            expected_pct = abs(err / margin_value) * 100 if number(err) is not None and margin_value else 0 if err == 0 else None
             if expected_pct is None or not close(pct, expected_pct, 0.05):
                 fail("calc.margin_pct", f"{name} percentage {pct!r} does not match absolute margin {err!r} and value {value!r}")
         if err is None and pct is not None:
@@ -516,6 +538,8 @@ def audit(res, sources):
 
     checks = calc.get("checks") or []
     for check in checks:
+        for reference in (check.get("sources") or []) + ([check["source"]] if check.get("source") else []):
+            source_check(reference, "independent comparison", anchor=False)
         if not check.get("method"):
             fail("check.method", "comparison does not name its second method")
         second = number(check.get("value"))
@@ -536,6 +560,8 @@ def audit(res, sources):
         fail("confidence.missing", "numeric answer lacks a valid confidence label")
     if label == "Cross-checked" and not checked:
         fail("confidence.unchecked", "Cross-checked label has no recorded agreeing comparison")
+    if label == "Cross-checked" and checks and all(c.get("independent") is False for c in checks):
+        fail("confidence.correlated", "Cross-checked label is supported only by correlated measurements")
     if label == "Verified":
         if disagreement or based.get("estimated") or based.get("unresolved"):
             fail("confidence.overclaim", "Verified label has disagreeing, estimated or unresolved evidence")
@@ -550,6 +576,9 @@ def audit(res, sources):
         n, correct = calibration.get("n"), calibration.get("correct")
         if number(pct) is None or not 0 <= pct <= 100 or type(n) is not int or type(correct) is not int or not 0 <= correct <= n or n <= 0 or not close(pct, round(correct / n * 100)):
             fail("confidence.uncalibrated", "confidence percentage is not backed by valid observed correct/n counts")
+        ref = calibration.get("source")
+        if not isinstance(ref, str) or not (sources.repo / ref).is_file():
+            fail("confidence.calibration_source", "confidence percentage has no resolvable calibration report")
     if u == "count" and number(value) is not None:
         boxes = evidence.get("boxes") or []
         unique = {(b.get("doc_id") or default_doc, b.get("page"), b.get("item_id")) for b in boxes}
@@ -687,7 +716,7 @@ def run(repo, artifacts, rows, output, timeout=20):
         os.environ.update(ARTIFACTS_DIR=str(shadow), RESULTS_DIR=str(local / "results"),
                           MODELS_CACHE_DIR=str(local / "models"), MODELS_COSTS_LOG=str(local / "costs.jsonl"))
         from engine.answer import answer
-        sources = Sources(shadow)
+        sources = Sources(shadow, repo)
         for i, row in enumerate(rows, 1):
             t0 = time.perf_counter()
             try:

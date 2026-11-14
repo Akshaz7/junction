@@ -24,7 +24,7 @@ def git(*args, cwd=ROOT, check=True):
     return subprocess.run(["git", "-C", str(cwd), *args], text=True, capture_output=True, check=check)
 
 
-def once(limit, handoff=HANDOFF, final_blind=False, branches=BRANCHES):
+def once(limit, handoff=HANDOFF, final_blind=False, branches=BRANCHES, base="HEAD"):
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
     print(datetime.now().astimezone().isoformat(), flush=True)
     scratch = ROOT / ".evqa-scratch" / stamp
@@ -32,7 +32,7 @@ def once(limit, handoff=HANDOFF, final_blind=False, branches=BRANCHES):
     output_dir.mkdir(parents=True, exist_ok=True)
     report_path = output_dir / f"run-{stamp}.json"
     merge_path = output_dir / f"merge-{stamp}.json"
-    baseline = git("rev-parse", "HEAD").stdout.strip()
+    baseline = git("rev-parse", base).stdout.strip()
     refs = {branch: git("rev-parse", branch, check=False).stdout.strip() for branch in branches}
     metadata = {"created_at": datetime.now(UTC).isoformat(), "baseline": baseline,
                 "branches": refs, "merges": [], "complete_merge": False, "audit_report": report_path.name}
@@ -91,6 +91,7 @@ def main():
     parser.add_argument("--limit", type=int, default=200)
     parser.add_argument("--final-blind", action="store_true", help="test the reserved document once, at final validation")
     parser.add_argument("--branch", action="append", choices=BRANCHES, help="isolate a branch for diagnosis; default merges all four")
+    parser.add_argument("--base", default="HEAD", help="baseline revision; use a branch itself to audit its exact committed state")
     args = parser.parse_args()
     if args.interval < 60 or args.limit < 1:
         parser.error("interval must be at least 60 seconds and limit positive")
@@ -98,7 +99,7 @@ def main():
         parser.error("the blind document is tested once, not in watch mode")
     while True:
         start = time.monotonic()
-        code = once(args.limit, final_blind=args.final_blind, branches=tuple(args.branch or BRANCHES))
+        code = once(args.limit, final_blind=args.final_blind, branches=tuple(args.branch or BRANCHES), base=args.base)
         if not args.watch:
             return code
         remaining = max(0, args.interval - (time.monotonic() - start))

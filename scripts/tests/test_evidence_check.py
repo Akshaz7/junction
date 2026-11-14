@@ -153,8 +153,11 @@ def test_unparseable_headline_does_not_silently_pass(source):
 
 def test_calibration_uses_measured_sample_counts(source):
     res = good()
-    res["reasoning"]["confidence"].update(pct=75, calibration={"n": 4, "correct": 3})
+    source.repo = source.root
+    (source.repo / "calibration.json").write_text('{"n": 4, "correct": 3}')
+    res["reasoning"]["confidence"].update(pct=75, calibration={"n": 4, "correct": 3, "source": "calibration.json"})
     assert "confidence.uncalibrated" not in codes(res, source)
+    assert "confidence.calibration_source" not in codes(res, source)
 
 
 def test_count_card_contradiction_requires_an_explanation(source):
@@ -265,3 +268,18 @@ def test_numeric_prose_cannot_bypass_audit_with_null_value(source, text):
 @pytest.mark.parametrize("value", [float("nan"), float("inf"), True, 10**1000])
 def test_nonfinite_or_nonnumeric_is_never_a_valid_measurement(value):
     assert checker.number(value) is None
+
+
+def test_json_pointer_locates_a_real_value_in_the_source(source):
+    ref = {"doc_id": "generated__audit", "artifact": "planmap-1.json", "pointer": "/items/0/props/area_m2"}
+    assert not source.resolve(ref)
+    ref["pointer"] = "/items/99/props/area_m2"
+    assert source.resolve(ref)
+
+
+def test_repeated_item_on_different_pages_is_still_a_duplicate(source):
+    res = good()
+    other = copy.deepcopy(res["reasoning"]["calc"]["rows"][0])
+    other["source"]["page"] = 2
+    res["reasoning"]["calc"]["rows"].append(other)
+    assert "calc.duplicate_row" in codes(res, source)
