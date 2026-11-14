@@ -5,13 +5,13 @@ export interface HighlightOptions {
   /** CONTRACT 5.7 evidence.boxes labels, keyed by the same item_id. */
   labels?: Record<string, string>;
   cameraTargetItemId?: string;
-  /** Isolation supplies its own dimming layer. */
+  /** Retained for callers; answer highlighting always preserves other materials. */
   dimOthers?: boolean;
 }
 
 export interface HighlightState {
   highlighted: string[];
-  /** Number of other resolved items, including items on hidden storeys. */
+  /** Legacy count of other resolved items (their materials remain unchanged). */
   dimmed: number;
   labels: Record<string, string>;
 }
@@ -27,22 +27,10 @@ export function itemBounds(scene: LoadedScene, ids: readonly string[]): Box3 {
   return bounds;
 }
 
-/** Reads the visible mode accent each time highlighting is requested. */
-export function readHighlightColor(element: HTMLElement): Color {
-  const fallback = '#166ed1';
-  const token = getComputedStyle(element).getPropertyValue('--mode-accent').trim();
-  if (!token || !CSS.supports('color', token)) return new Color(fallback);
-  // Resolve CSS color syntax (including oklch/var()) to sRGB for three.js.
-  const probe = document.createElement('span');
-  probe.style.color = token;
-  probe.style.display = 'none';
-  element.parentElement?.append(probe);
-  const resolved = getComputedStyle(probe).color;
-  probe.remove();
-  // Current tokens use hex, hence browsers return rgb(). Retain a safe fallback
-  // if the browser preserves a newer color space three.js cannot parse.
-  return new Color(/^rgba?\(/.test(resolved) ? resolved : /^#/.test(token) ? token : fallback);
-}
+export const HIGHLIGHT_AMBER = '#f5a623';
+
+/** Evidence uses amber independently of the surrounding UI's mode accent. */
+export function readHighlightColor(_element: HTMLElement): Color { return new Color(HIGHLIGHT_AMBER); }
 
 /** Material ownership is isolated from WebGL/DOM so it can be tested directly. */
 export function createHighlightController(scene: LoadedScene) {
@@ -59,7 +47,8 @@ export function createHighlightController(scene: LoadedScene) {
   }
 
   return {
-    highlight(ids: readonly string[], options: HighlightOptions = {}, accent = new Color('#166ed1')): void {
+    /** `accent` is one colour for all ids, or a per-id resolver (the fixed per-kind colours). */
+    highlight(ids: readonly string[], options: HighlightOptions = {}, accent: Color | ((id: string) => Color) = new Color(HIGHLIGHT_AMBER)): void {
       clearHighlight();
       const selected = new Set(ids.filter((id) => scene.items.has(id)));
       if (!selected.size) return;
@@ -78,25 +67,18 @@ export function createHighlightController(scene: LoadedScene) {
           if (owner) break;
         }
         const highlighted = owner !== undefined && selected.has(owner);
+        if (!highlighted) return;
         originals.set(mesh, mesh.material);
+        const color = typeof accent === 'function' ? accent(owner!) : accent;
         const modify = (material: Material): Material => {
           const clone = material.clone();
           clones.add(clone);
           const surface = clone as Material & { color?: Color; emissive?: Color; emissiveIntensity?: number };
           if (highlighted) {
             if (surface.emissive) {
-              surface.emissive.copy(accent);
+              surface.emissive.copy(color);
               surface.emissiveIntensity = 1.5;
-            } else surface.color?.copy(accent);
-          } else if (options.dimOthers !== false) {
-            if (surface.color) {
-              const gray = surface.color.r * 0.2126 + surface.color.g * 0.7152 + surface.color.b * 0.0722;
-              surface.color.lerp(new Color().setRGB(gray, gray, gray), 0.85);
-            }
-            surface.emissive?.set(0);
-            clone.opacity *= 0.18;
-            clone.transparent = true;
-            clone.depthWrite = false;
+            } else surface.color?.copy(color);
           }
           clone.needsUpdate = true;
           return clone;

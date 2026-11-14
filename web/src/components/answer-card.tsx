@@ -1,4 +1,4 @@
-import { FileText, Layers3 } from 'lucide-react'
+import { FileText, Layers3, Box } from 'lucide-react'
 import { Tooltip } from './ui'
 import type { Answer, Citation, Document } from '../lib/types'
 import { SpeakButton } from './voice-controls'
@@ -56,6 +56,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
         <CitationChip citation={citation} selected={activeCitation} onOpenCitation={onOpenCitation} /> {citation.item_ids.join(', ')} · Page {citation.page}
       </p>)}</details>}
       <SpeakButton text={answer.answer.text_md} />
+      {!!citations.length && <button type="button" className="show-on-table visualise-from-answer" onClick={() => onOpenCitation(citations[0])}><Box size={15} aria-hidden="true" /><span>Visualise it</span></button>}
       {table && <ShowOnTableButton docId={table.doc_id} itemIds={table.item_ids} chatId={chatId} />}
       {cost}
     </div>

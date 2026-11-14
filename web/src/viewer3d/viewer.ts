@@ -3,7 +3,7 @@ import {
   Plane, Raycaster, Scene, Sphere, Vector2, Vector3, WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import { type CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import {
   createHighlightController, itemBounds, readHighlightColor, type HighlightOptions, type HighlightState,
 } from './highlight';
@@ -12,7 +12,7 @@ import {
 } from './scene';
 import { createCutawayController, type CutawayState } from './cutaway';
 import { createLinkedHighlightController } from './linkedHighlight';
-import { createRiseAnimation, scheduleRiseTransitions, type RisePhase, type RiseState } from './rise';
+import { createBuildAnimation, scheduleBuildTransitions, FLAT_DURATION_MS, type BuildAnimation, type BuildState, type RisePhase, type RiseState } from './rise';
 import { applyCommand, applyState, emptyCommandState, readCommandState, resolveCommandLabels, type SceneCommand, type SceneSnapshot, type CommandTestState } from './commands';
 import { createCommandVisuals } from './commandVisuals';
 import { createFrameProbe, type ViewerPerf } from './perf';
@@ -20,7 +20,9 @@ import { createRenderBatches, PICK_LAYER } from './renderBatches';
 import { withAbort, type LoadProgress } from './loadGLTF';
 import { createWalkController, type WalkState } from './walk';
 import { createEditLayer, type ItemEdit, type EditState, type WallMaterial } from './edits';
+import { createItemAnnotation, layoutAnnotations } from './annotations';
 import { createFindingsLayer, type Finding, type FindingPinState } from './findings';
+import { kindColor } from '../lib/kind-colors';
 
 export const SCENE_LOAD_BUDGET_MS = 60_000;
 
@@ -29,6 +31,7 @@ export interface Viewer {
   readonly camera: PerspectiveCamera;
   readonly controls: OrbitControls;
   readonly scene: LoadedScene | null;
+  itemScreenPosition(item_id: string): { x: number; y: number; visible: boolean } | null;
   perf(): ViewerPerf;
   resetPerf(): void;
   setFindings(findings: readonly Finding[], onSelect?: (findings: Finding[]) => void): void;
@@ -68,6 +71,13 @@ export interface Viewer {
   endMove(cancel?: boolean): ItemEdit | null;
   /** Show the flat plan/top-down IFC view, then raise the architectural items. */
   visualise(onStateChange?: (state: RiseState) => void): void;
+  /** Staged build-up (FIX-5): null until visualise() has run, and after walk/edit end it. */
+  getBuildState(): BuildState | null;
+  onBuildChange(callback: (state: BuildState | null) => void): () => void;
+  /** Show steps 1..index complete (1-based). Pauses playback; the camera is not touched. */
+  setBuildStep(index: number): void;
+  playBuild(): void;
+  pauseBuild(): void;
   /** Coordinates are viewport client pixels, as in PointerEvent.clientX/clientY. */
   pick(x: number, y: number): string | null;
   resize(): void;
@@ -131,10 +141,23 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     setStorey,
     onChange(state) { for (const callback of walkListeners) callback(state); },
   });
-  let rise: {
-    animation: ReturnType<typeof createRiseAnimation>; from: Vector3; to: Vector3;
-    phase: RisePhase; onStateChange?: (state: RiseState) => void; cancelTransitions: () => void;
+  let build: {
+    animation: BuildAnimation; from: Vector3; to: Vector3; introStart: number; intro: boolean; dirty: boolean;
+    key: string; phase: RisePhase; onStateChange?: (state: RiseState) => void; cancelTransitions: () => void;
   } | null = null;
+  const buildListeners = new Set<(state: BuildState | null) => void>();
+  function emitBuild(state: BuildState | null): void { for (const listener of buildListeners) listener(state); }
+  /** Back to the finished model: restores every transform and hides the slider. */
+  function endBuild(): void {
+    if (!build) return;
+    build.cancelTransitions();
+    build.animation.restore();
+    const previous = build;
+    build = null;
+    batchesDirty = true;
+    previous.onStateChange?.({ phase: 'done', progress: 1 });
+    emitBuild(null);
+  }
   const raycaster = new Raycaster();
   raycaster.layers.enable(PICK_LAYER);
   const pointer = new Vector2();
@@ -188,6 +211,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
 
   function clearHighlight(): void {
     batchesDirty = true;
+    if (build) build.dirty = true;
     commandVisuals?.clearMaterials();
     flight = null;
     cameraTarget = null;
@@ -231,24 +255,12 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     const id = linked.selected;
     if (!id || !active.items.has(id) || labels.some((label) => label.element.dataset.itemId === id)) return;
     // A selection can arrive while the plan is still flat. Position its label
-    // in the full geometry frame before returning to the current rise phase.
-    rise?.animation.restore();
+    // in the full geometry frame before returning to the current build step.
+    build?.animation.restore();
     const bounds = itemBounds(active, [id]);
-    if (bounds.isEmpty()) { rise?.animation.sample(performance.now()); return; }
-    const element = document.createElement('span');
-    const text = getLinkedHighlightState().labels[id];
-    element.className = 'viewer3d-item-label';
-    element.dataset.itemId = id;
-    element.textContent = text;
-    element.setAttribute('aria-label', `Item ${text}: ${id}`);
-    element.style.backgroundColor = accent.getStyle();
-    linkedLabel = new CSS2DObject(element);
-    const top = bounds.getCenter(new Vector3());
-    top.y = bounds.max.y + Math.max(bounds.getSize(new Vector3()).length() * 0.04, 0.08);
-    const object = active.items.get(id)!;
-    linkedLabel.position.copy(object.worldToLocal(top));
-    object.add(linkedLabel);
-    rise?.animation.sample(performance.now());
+    if (bounds.isEmpty()) { build?.animation.sample(performance.now()); return; }
+    linkedLabel = createItemAnnotation(active, id, getLinkedHighlightState().labels[id]);
+    build?.animation.sample(performance.now());
   }
 
   function flyTo(bounds: Box3): void {
@@ -287,31 +299,21 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     commandVisuals?.captureVisibility();
     notifyCutaway();
     // Compute labels using full geometry: a flat node has a singular world matrix.
-    rise?.animation.restore();
-    const accent = readHighlightColor(canvas);
-    highlights.highlight(ids, options, accent);
+    build?.animation.restore();
+    const scene = active;
+    highlights.highlight(ids, options, (id) => new Color(kindColor(scene.manifest.items[id]?.kind)));
     const state = highlights.getHighlightState();
     for (const id of state.highlighted) {
-      const object = active.items.get(id)!;
-      const bounds = itemBounds(active, [id]);
-      if (bounds.isEmpty()) continue;
-      const element = document.createElement('span');
-      element.className = 'viewer3d-item-label';
-      element.dataset.itemId = id;
-      element.textContent = state.labels[id];
-      element.setAttribute('aria-label', `Item ${state.labels[id]}: ${id}`);
-      element.style.backgroundColor = accent.getStyle();
-      const label = new CSS2DObject(element);
-      const top = bounds.getCenter(new Vector3());
-      top.y = bounds.max.y + Math.max(bounds.getSize(new Vector3()).length() * 0.04, 0.08);
-      label.position.copy(object.worldToLocal(top));
-      object.add(label);
-      labels.push(label);
+      const label = createItemAnnotation(active, id, state.labels[id]);
+      if (label) labels.push(label);
     }
-    const target = options.cameraTargetItemId;
+    const target = options.cameraTargetItemId && active.items.has(options.cameraTargetItemId)
+      ? options.cameraTargetItemId : state.highlighted[0];
+    cameraTarget = target ?? null;
     applyLinkedVisuals();
-    if (rise) rise.animation.sample(performance.now());
-    else if (!walk.state().active) flyTo(itemBounds(active, target && active.items.has(target) ? [target] : state.highlighted));
+    // Highlights stay fully visible while the model builds up (they are pinned in the animation).
+    if (build) build.animation.sample(performance.now());
+    if (!(build && build.phase !== 'done') && !walk.state().active) flyTo(itemBounds(active, target ? [target] : []));
     notifyHighlight();
   }
 
@@ -336,9 +338,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     if (disposed || !active) return;
     walk.exit();
     batchesDirty = true;
-    rise?.cancelTransitions();
-    rise?.animation.restore();
-    rise = null;
+    endBuild();
     flight = null;
     fit(active);
     const to = camera.position.clone();
@@ -346,45 +346,63 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     // A tiny Z offset avoids the camera-up singularity at an exact overhead view.
     const from = controls.target.clone().add(new Vector3(0, distance, distance * 0.001));
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const animation = createRiseAnimation(active, performance.now(), reducedMotion);
-    const state = animation.sample(performance.now());
+    const now = performance.now();
+    const animation = createBuildAnimation(active, now, {
+      reducedMotion, pinned: () => highlights?.getHighlightState().highlighted ?? [],
+    });
+    const state = animation.sample(now);
+    build = { animation, from, to, introStart: now, intro: !reducedMotion, dirty: false, phase: state.phase,
+      key: `${state.index}|${state.playing}|${state.phase}`, onStateChange,
+      cancelTransitions: scheduleBuildTransitions(sampleRise, animation.timeline(now)) };
     if (!reducedMotion) {
-      rise = { animation, from, to, phase: state.phase, onStateChange,
-        cancelTransitions: scheduleRiseTransitions(sampleRise) };
       camera.position.copy(from);
       camera.lookAt(controls.target);
     }
-    onStateChange?.(state);
+    onStateChange?.({ phase: state.phase, progress: state.progress });
+    emitBuild(state);
   }
 
   function sampleRise(): void {
-    const current = rise;
+    const current = build;
     if (!current || disposed) return;
-    const state = current.animation.sample(performance.now());
-    camera.position.lerpVectors(current.from, current.to, state.progress);
-    camera.lookAt(controls.target);
-    if (state.phase !== current.phase) {
-      current.phase = state.phase;
-      current.onStateChange?.(state);
+    const now = performance.now();
+    const peek = current.animation.state(now);
+    if (!peek.playing && !current.dirty && peek.phase === current.phase) return;
+    current.dirty = false;
+    const state = current.animation.sample(now);
+    // The overhead-to-3/4 move only happens on the first, hands-off play; any orbit/zoom ends it.
+    if (current.intro) {
+      const t = Math.min(1, Math.max(0, (now - current.introStart - FLAT_DURATION_MS) / 1000));
+      camera.position.lerpVectors(current.from, current.to, t * t * (3 - 2 * t));
+      camera.lookAt(controls.target);
+      if (t >= 1) current.intro = false;
     }
-    if (state.phase === 'done') {
-      current.cancelTransitions();
-      rise = null;
+    if (state.playing) batchesDirty = true;
+    const key = `${state.index}|${state.playing}|${state.phase}`;
+    if (key !== current.key) { current.key = key; batchesDirty = true; emitBuild(state); }
+    if (state.phase !== current.phase) {
+      const previous = current.phase;
+      current.phase = state.phase;
+      current.onStateChange?.({ phase: state.phase, progress: state.progress });
+      if (state.phase === 'done') {
+        current.intro = false;
+        if (previous !== 'done' && cameraTarget && active) flyTo(itemBounds(active, [cameraTarget]));
+      }
     }
   }
 
-  // Direct orbit/zoom input takes over from a camera flight.
+  function touchBuild(): void {
+    if (!build) return;
+    build.dirty = true;
+    build.cancelTransitions();
+    build.cancelTransitions = scheduleBuildTransitions(sampleRise, build.animation.timeline(performance.now()));
+    sampleRise();
+  }
+
+  // Direct orbit/zoom input takes over the camera (and the intro move), never the build-up itself.
   controls.addEventListener('start', () => {
     flight = null;
-    // User input takes over both the camera and the animation.
-    if (rise) {
-      const previous = rise;
-      rise = null;
-      previous.cancelTransitions();
-      previous.animation.restore();
-      batchesDirty = true;
-      previous.onStateChange?.({ phase: 'done', progress: 1 });
-    }
+    if (build) build.intro = false;
   });
 
   function fit(scene: LoadedScene): void {
@@ -410,9 +428,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   function attach(scene: LoadedScene): void {
     if (active === scene) return;
     walk.exit();
-    rise?.cancelTransitions();
-    rise?.animation.restore();
-    rise = null;
+    endBuild();
     endMove(true);
     clearHighlight();
     findingPins?.dispose(); findingPins = null;
@@ -459,7 +475,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     previousFrame = now;
     if (walk.state().active) walk.update(dt);
     else controls.update();
-    const wasRising = rise !== null;
+    const wasRising = build !== null && build.animation.state(performance.now()).playing;
     sampleRise();
     const fading = commandVisuals?.sample(performance.now());
     if (flight) {
@@ -476,7 +492,11 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     }
     findingPins?.update(camera, canvas.clientHeight);
     renderer.render(world, camera);
-    if (labels.length || linkedLabel || findingPins) labelRenderer.render(world, camera);
+    if (labels.length || linkedLabel || findingPins) {
+      labelRenderer.render(world, camera);
+      if (active) layoutAnnotations(linkedLabel ? [...labels, linkedLabel] : labels, active, camera,
+        canvas.clientWidth, canvas.clientHeight);
+    }
     probe.frame(performance.now(), active !== null);
     frame = requestAnimationFrame(render);
   }
@@ -491,6 +511,18 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
 
   const api: Viewer = {
     renderer, camera, controls,
+    itemScreenPosition(id) {
+      if (!active || disposed) return null;
+      const object = active.items.get(id);
+      if (!object) return null;
+      const bounds = itemBounds(active, [id]);
+      if (bounds.isEmpty()) return null;
+      const point = bounds.getCenter(new Vector3());
+      const projected = point.project(camera);
+      return { x: (projected.x + 1) * canvas.clientWidth / 2, y: (1 - projected.y) * canvas.clientHeight / 2,
+        visible: itemIdForObject(active, object) !== null && projected.z >= -1 && projected.z <= 1
+          && Math.abs(projected.x) <= 1 && Math.abs(projected.y) <= 1 };
+    },
     perf: () => probe.read(renderer.info.render.calls, renderer.info.render.triangles),
     resetPerf: () => probe.reset(),
     setFindings(findings, onSelect = () => {}) {
@@ -511,13 +543,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       if (!value) { walk.exit(); return false; }
       if (walk.state().active) return true;
       flight = null;
-      if (rise) {
-        const previous = rise;
-        rise = null;
-        previous.cancelTransitions(); previous.animation.restore();
-        previous.onStateChange?.({ phase: 'done', progress: 1 });
-        batchesDirty = true;
-      }
+      endBuild();
       return walk.enter();
     },
     setWalkJoystick: (x, y) => walk.joystick(x, y),
@@ -607,7 +633,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       if (disposed || !active || walk.state().active || !active.items.has(id) || commandState.hidden.has(id)) return false;
       endMove(true);
       flight = null;
-      rise?.cancelTransitions(); rise?.animation.restore(); rise = null;
+      endBuild();
       const object = active.items.get(id)!;
       const bounds = itemBounds(active, [id]);
       if (bounds.isEmpty()) return false;
@@ -636,6 +662,11 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       return () => { highlightListeners.delete(callback); };
     },
     visualise,
+    getBuildState: () => build?.animation.state(performance.now()) ?? null,
+    onBuildChange(callback) { buildListeners.add(callback); return () => { buildListeners.delete(callback); }; },
+    setBuildStep(index) { if (build) { build.animation.setStep(index); touchBuild(); } },
+    playBuild() { if (build) { build.animation.play(performance.now()); touchBuild(); } },
+    pauseBuild() { if (build) { build.animation.pause(performance.now()); touchBuild(); } },
     pickFinding(x, y) {
       if (disposed || !findingPins) return false;
       const rect = canvas.getBoundingClientRect();
@@ -686,9 +717,8 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       observer.disconnect();
       window.removeEventListener('resize', resize);
       controls.dispose();
-      rise?.cancelTransitions();
-      rise?.animation.restore();
-      rise = null;
+      endBuild();
+      buildListeners.clear();
       endMove(true);
       clearHighlight();
       findingPins?.dispose(); findingPins = null;

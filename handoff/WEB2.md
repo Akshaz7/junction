@@ -1,12 +1,15 @@
-# Handoff: WEB2 (Codex, second WEB-scoped worker)
-
-Row ID: E-17 web follow-up (attempt 1) — show rule-source changes in the Changes screen
-The backend now adds `GET /api/changes` rows with `type: "rule_change"` (a Context.dev monitor saw a building-rule source page change; doc_a/doc_b are null; summary.kind = "rule_change"; detail has the rule URL/title and a short diff text — read server/watch_routes.py, server/files_routes.py `_change`, docs/API.md for exact fields). Today web/src/components/changes-screen.tsx assumes every row compares two drawings.
-Do: render rule_change rows in the Changes list as a distinct card ("Rule source changed" + rule title + source link opening in a new tab + detected time + "Findings rerun" note), with no drawing compare view; the existing new_version rows stay exactly as they are. Handle missing fields gracefully. Add vitest for the mapping and extend an e2e (new file web/e2e/rule-change.spec.ts) that posts a signed-or-secret test webhook is NOT possible from the browser — instead mock the /api/changes response with page.route for one rule_change row + one new_version row and assert both render.
-Allowed files: web/src/components/changes-screen.tsx (+ its css), web/src/lib/ (new files only, or types.ts additive), web/e2e/rule-change.spec.ts. WEB is editing chat-screen.tsx, drawing-model.tsx, use-scene-edits.ts, scene-commands.spec.ts — don't touch those.
-Done test (LEAD): `cd web && npx vitest run && npx tsc --noEmit && npx playwright test e2e/rule-change.spec.ts e2e/changes.spec.ts` → pass (if e2e/changes.spec.ts doesn't exist, use whichever existing spec covers the Changes screen).
-Last failed attempt (if any): none
-
----
-<!-- Worker appends RESULT: or NEEDS: lines below. -->
-NEEDS: E-17 web follow-up implemented; `cd web && npx vitest run && npx tsc --noEmit` passes (38 files, 210 tests). LEAD must run `cd web && ../scripts/heavy.sh npx playwright test e2e/rule-change.spec.ts e2e/changes.spec.ts` outside the sandbox: all 3 cases stopped before test execution at Chromium launch (`bootstrap_check_in ... Permission denied (1100)`, SIGTRAP). Exact implementation scope: web/src/components/changes-screen.tsx, web/src/components/changes-screen.css (new), web/src/lib/types.ts (additive), web/src/lib/rule-change.ts (new), web/src/lib/rule-change.test.ts (new), web/e2e/rule-change.spec.ts (new). Rule cards include source/title/diff/detection time/Findings rerun and missing-field fallbacks, never open a drawing comparison; existing drawing rows retained. No commit.
+# WEB2: row W-21 (Codex). Viewer tools + spec panel (Stoa parity)
+Scope: web/src/components/document-viewer.tsx, document-viewer.css, and new files under web/src/components/viewer-tools/ only. Other workers are editing other web screens at the same time.
+Everything must be LIVE against the real API. No mocks. refs/stoa-hero is a visual reference only; never copy its source.
+Make every button in the viewer toolbar work:
+- search: find text on the sheet (use /api/docs/{id} text or planmap labels) and highlight hits with numbered yellow boxes
+- highlight/marker
+- pen annotations on top of the page, kept per doc in localStorage
+- download: original source via /api/docs/{id}/source
+- zoom: keep it working
+When an answer cites a text passage (spec/notes), show a side spec panel with the passage highlighted in yellow, like Stoa.
+Done test:
+- Playwright specs in web/e2e/viewer-tools.spec.ts, run with `scripts/heavy.sh scripts/test_snapshot.sh 4187 "web" -- e2e/viewer-tools.spec.ts`. Use port 4187 only.
+- `cd web && npx tsc --noEmit && npx vitest run` must pass.
+Do not commit. When done, append one line starting with RESULT: plus the test numbers.
+NEEDS: LEAD run `scripts/heavy.sh scripts/test_snapshot.sh 4187 "web" -- e2e/viewer-tools.spec.ts` outside the sandbox: prescribed harness cannot create `.git/worktrees/junction-snap-4187` (Operation not permitted); a temporary copy on 4187 built successfully but all 5 browser tests stopped at Chromium launch (SIGABRT/EPERM), before assertions. W-21 implementation is in the two scoped viewer files, four new viewer-tools files and the requested e2e spec; TypeScript passes, Vitest 39 files / 213 tests pass, production build passes. Browser verification blocked; no passing RESULT claimed.

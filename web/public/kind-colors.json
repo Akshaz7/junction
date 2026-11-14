@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "source": "web/src/lib/kind-colors.ts",
+  "palette": "Okabe-Ito",
+  "kinds": {
+    "door": {
+      "color": "#D55E00",
+      "on": "#FFFFFF",
+      "label": "Door",
+      "plural": "Doors"
+    },
+    "window": {
+      "color": "#0072B2",
+      "on": "#FFFFFF",
+      "label": "Window",
+      "plural": "Windows"
+    },
+    "wall": {
+      "color": "#E69F00",
+      "on": "#1A1A1A",
+      "label": "Wall",
+      "plural": "Walls"
+    },
+    "room": {
+      "color": "#009E73",
+      "on": "#FFFFFF",
+      "label": "Room",
+      "plural": "Rooms"
+    },
+    "toilet": {
+      "color": "#CC79A7",
+      "on": "#1A1A1A",
+      "label": "Toilet",
+      "plural": "Toilets"
+    },
+    "sink": {
+      "color": "#56B4E9",
+      "on": "#1A1A1A",
+      "label": "Sink",
+      "plural": "Sinks"
+    },
+    "shower": {
+      "color": "#F0E442",
+      "on": "#1A1A1A",
+      "label": "Shower",
+      "plural": "Showers"
+    },
+    "bathtub": {
+      "color": "#882255",
+      "on": "#FFFFFF",
+      "label": "Bathtub",
+      "plural": "Bathtubs"
+    },
+    "stairs": {
+      "color": "#999933",
+      "on": "#FFFFFF",
+      "label": "Stairs",
+      "plural": "Stairs"
+    },
+    "other": {
+      "color": "#7F7F7F",
+      "on": "#FFFFFF",
+      "label": "Other",
+      "plural": "Other"
+    }
+  }
+}

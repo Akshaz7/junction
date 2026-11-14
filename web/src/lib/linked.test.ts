@@ -32,7 +32,7 @@ describe('linked drawing references', () => {
   })
   it('focuses the selected location and never projects a previous page box onto a location without coordinates', () => {
     const first = placeEvidence(fixture.places[0], fixture)
-    expect(first.regions).toEqual([{ id: fixture.item_id, label: 'D15', bbox: [10, 20, 30, 40], text: false }])
+    expect(first.regions).toEqual([{ id: fixture.item_id, label: 'D15', bbox: [10, 20, 30, 40], text: false, kind: fixture.kind }])
     expect(first.sources[0].itemIds).toEqual([fixture.item_id])
     const other = placeEvidence(fixture.places[1], fixture)
     expect(other.regions).toEqual([])

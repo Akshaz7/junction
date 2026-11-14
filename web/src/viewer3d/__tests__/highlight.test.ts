@@ -2,7 +2,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { BoxGeometry, Color, Group, Mesh, MeshStandardMaterial, Texture } from 'three';
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { createHighlightController, itemBounds } from '../highlight';
+import { createHighlightController, HIGHLIGHT_AMBER, itemBounds } from '../highlight';
 import { createScene, setStorey, type SceneManifest } from '../scene';
 import { answerToVisualise } from '../visualise';
 import { applyCommand, applyState, emptyCommandState, resolveCommandLabels, type SceneCommand } from '../commands';
@@ -110,29 +110,38 @@ describe('highlight materials and contract item state', () => {
     controller.clearHighlight();
   });
 
-  it('glows only selected IDs, dims/desaturates other items, and uses citation labels', () => {
+  it('glows amber on selected IDs and preserves exact surrounding materials and textures', () => {
     const { controller, material, a, b, c } = fixture();
     const originalColor = material.color.clone();
-    const accent = new Color('#166ed1');
-    controller.highlight(['window-a', 'wall-c'], { labels: { 'window-a': '7', 'wall-c': '12' } }, accent);
+    const accent = new Color(HIGHLIGHT_AMBER);
+    controller.highlight(['window-a', 'wall-c'], { labels: { 'window-a': '7', 'wall-c': '12' } });
     expect(controller.getHighlightState()).toEqual({
       highlighted: ['window-a', 'wall-c'], dimmed: 1, labels: { 'window-a': '7', 'wall-c': '12' },
     });
     expect(a.material).not.toBe(material);
     expect(a.material.emissive.equals(accent)).toBe(true);
     expect(a.material.emissiveIntensity).toBeGreaterThan(1);
-    expect(b.material.opacity).toBeLessThan(material.opacity);
-    expect(b.material.transparent).toBe(true);
-    expect(b.material.depthWrite).toBe(false);
-    const saturation = (color: Color) => Math.max(color.r, color.g, color.b) - Math.min(color.r, color.g, color.b);
-    expect(saturation(b.material.color)).toBeLessThan(saturation(originalColor));
-    expect(b.material.emissive.getHex()).toBe(0);
+    expect(b.material).toBe(material);
+    expect(b.material.map).toBe(material.map);
+    expect(b.material.color.equals(originalColor)).toBe(true);
+    expect(b.material.opacity).toBe(0.8);
+    expect(b.material.emissive.getHex()).toBe(material.emissive.getHex());
     for (const cloned of c.material) {
       expect(cloned.emissive.equals(accent)).toBe(true);
       expect(cloned).not.toBe(a.material);
     }
     expect(material.color.equals(originalColor)).toBe(true);
     expect(material.opacity).toBe(0.8);
+    controller.clearHighlight();
+  });
+
+  it('accepts a per-id accent so each kind glows in its own colour', () => {
+    const { controller, a, c } = fixture();
+    const window = new Color('#0072B2');
+    const wall = new Color('#E69F00');
+    controller.highlight(['window-a', 'wall-c'], {}, (id) => (id.startsWith('window') ? window : wall));
+    expect(a.material.emissive.equals(window)).toBe(true);
+    for (const cloned of c.material) expect(cloned.emissive.equals(wall)).toBe(true);
     controller.clearHighlight();
   });
 
@@ -164,7 +173,7 @@ describe('highlight materials and contract item state', () => {
     const disposeClone = vi.spyOn(a.material, 'dispose');
     controller.highlight(['window-b']);
     expect(disposeClone).toHaveBeenCalledOnce();
-    expect(a.material.opacity).toBeLessThan(material.opacity);
+    expect(a.material).toBe(material);
     expect(b.material.emissiveIntensity).toBe(1.5);
     expect(controller.getHighlightState().highlighted).toEqual(['window-b']);
     const snapshot = controller.getHighlightState();

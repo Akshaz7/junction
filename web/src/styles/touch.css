@@ -1,0 +1,16 @@
+/* Phone touch targets: keep the Stoa-sized visuals, extend the tappable area to 44px. */
+@media (max-width: 800px) {
+  .button, .voice-button, .document-context, .mobile-project select {
+    position: relative;
+  }
+  .button::after, .voice-button::after, .document-context::after {
+    content: ''; position: absolute; left: 50%; top: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%);
+  }
+  .data-files .mobile-folder-select { height: 44px; margin-block: -12px; }
+}
+@media (max-width: 800px) {
+  /* Neighbouring controls would cover an extended hit area, so grow the box and cancel it with margin. */
+  .voice-button { width: 44px; height: 44px; margin: -6px; }
+  .data-screen-toolbar > .button { min-width: 44px; min-height: 44px; margin: -4px; }
+  .library-tabs button { min-height: 44px; padding-block: 12px; }
+}

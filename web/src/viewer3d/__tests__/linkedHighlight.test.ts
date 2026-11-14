@@ -43,12 +43,12 @@ describe('local linked glow over answer highlights', () => {
     expect(a.material).toBe(material);
   });
 
-  it('reveals a dimmed item at its original opacity then restores the exact answer material and labels', () => {
+  it('selects an item at its original opacity then restores the exact answer material and labels', () => {
     const { a, b, material, linked, answer } = fixture();
     answer.highlight(['door-001'], { labels: { 'door-001': '7' } });
     const answerMaterial = a.material;
     const otherMaterial = b.material;
-    expect(answerMaterial.opacity).toBeLessThan(material.opacity);
+    expect(answerMaterial).toBe(material);
     linked.apply(null, 'window-003', new Color('#166ed1'));
     expect(a.material.opacity).toBe(material.opacity);
     expect(a.material.color.equals(material.color)).toBe(true);

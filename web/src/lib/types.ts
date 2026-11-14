@@ -56,6 +56,8 @@ export interface SavedChat {
   id: string
   doc_id: string | null
   messages: { id: string; role: string; content: string; answer: Answer | null }[]
+  /** Set while a question in this chat is still being answered (late joiners catch up from it). */
+  active?: { question: string; statuses: string[]; traces: TraceStep[] }
 }
 
 export interface ChangeEntry {

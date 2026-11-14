@@ -21,20 +21,57 @@
 .drawing-plane { position: absolute; top: 0; left: 0; transform-origin: 0 0; background: white; box-shadow: var(--shadow-card); pointer-events: none; }
 .drawing-plane > img { display: block; width: 100%; height: 100%; max-width: none; }
 .drawing-evidence { position: absolute; inset: 0; overflow: visible; }
-.evidence-region { color: var(--info-text); pointer-events: all; cursor: pointer; }
-.evidence-region > rect { fill: var(--blue-500); fill-opacity: .1; stroke: currentColor; stroke-width: 2; }
-.evidence-region.is-active { color: var(--brand-forest); }
-.evidence-region.is-active > rect { stroke-width: 3; fill: var(--forest-500); fill-opacity: .22; }
+.evidence-region { animation: evidence-in .4s ease-out; }
+.evidence-region.is-leaving { animation: evidence-out .4s ease-in forwards; pointer-events: none; }
+@keyframes evidence-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes evidence-out { from { opacity: 1 } to { opacity: 0 } }
+@media (prefers-reduced-motion: reduce) { .evidence-region, .evidence-region.is-leaving { animation-duration: .01s } }
+.evidence-region { color: var(--kind-color, var(--info-text)); pointer-events: all; cursor: pointer; }
+.evidence-region > rect { fill: var(--kind-color, var(--blue-500)); fill-opacity: .14; stroke: currentColor; stroke-width: 2; }
+.evidence-region.is-active > rect { stroke-width: 4; fill-opacity: .3; }
+.evidence-region:not([data-kind]).is-active { color: var(--brand-forest); }
+.evidence-region:not([data-kind]).is-active > rect { fill: var(--forest-500); }
+.kind-legend-2d { position: absolute; left: 8px; bottom: 8px; z-index: 3; }
 .evidence-region.text-highlight > rect { fill: var(--amber-400); fill-opacity: .4; }
 .evidence-region.is-hidden { opacity: .4; color: var(--muted-foreground); }
 .evidence-region.is-hidden > rect { fill: var(--muted-foreground); fill-opacity: .1; stroke-dasharray: 5 4; }
 .evidence-region .evidence-label-bg { fill: currentColor; }
-.evidence-region text { fill: white; font-family: var(--font-sans); font-size: 12px; font-weight: 600; }
+.evidence-region text { fill: var(--kind-on, white); font-family: var(--font-sans); font-size: 12px; font-weight: 600; }
 .evidence-region .evidence-secondary-tag text { fill: currentColor; font-size: 10px; }
 .viewer-message { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center; color: var(--muted-foreground); font-size: var(--text-body-sm); }
 .drawing-credit { flex-shrink: 0; padding: 10px 12px max(10px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border); font-size: var(--text-caption); line-height: var(--text-caption--line-height); color: var(--muted-foreground); overflow-wrap: anywhere; background: var(--card); }
+.document-viewer .viewer-markup-tools { display: flex; gap: 2px; margin-right: 0; }
+.document-viewer .viewer-item-layout[hidden], .document-viewer .viewer-toolbar[hidden] { display: none; }
+.viewer-markup-tools button[aria-pressed="true"], .viewer-markup-tools button[aria-expanded="true"] { color: var(--brand-forest); background: var(--neutral-100); }
+.viewer-sheet-search, .viewer-annotation-controls { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: var(--text-caption); flex-shrink: 0; }
+.viewer-sheet-search input { flex: 1; min-width: 100px; width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; background: var(--background); color: var(--foreground); font: inherit; user-select: text; }
+.viewer-sheet-search > span { max-width: 100%; color: var(--muted-foreground); }
+.viewer-annotation-controls > span { flex: 1; min-width: 120px; color: var(--muted-foreground); }
+.viewer-tool-error { margin: 0; padding: 8px 12px; font-size: var(--text-caption); color: var(--foreground); }
+.drawing-stage[data-tool="marker"], .drawing-stage[data-tool="pen"] { cursor: crosshair; }
+.drawing-stage:not([data-tool="pan"]) .evidence-region, .drawing-stage:not([data-tool="pan"]) .sheet-search-hit { pointer-events: none; }
+.drawing-annotations { pointer-events: none; }
+.sheet-search-hit { pointer-events: all; cursor: pointer; }
+.sheet-search-hit > rect { fill: #fde047; fill-opacity: .48; stroke: #b78a00; stroke-width: 1.5; }
+.sheet-search-hit.is-current > rect { fill-opacity: .7; stroke-width: 3; }
+.sheet-search-hit svg rect { fill: #fde047; }
+.sheet-search-hit text { fill: #342700; font-family: var(--font-sans); font-size: 12px; font-weight: 600; }
+.document-viewer .viewer-item-layout:has(.viewer-spec-panel) { display: flex; flex: 1; min-height: 0; min-width: 0; }
+.viewer-item-layout:has(.viewer-spec-panel) > .drawing-stage { min-width: 0; }
+.viewer-spec-panel { width: clamp(200px, 42%, 320px); flex-shrink: 0; display: flex; flex-direction: column; border-left: 1px solid var(--border); min-height: 0; background: var(--card); font-size: var(--text-body-sm); }
+.viewer-spec-panel > header { display: flex; align-items: start; gap: 4px; padding: 12px; border-bottom: 1px solid var(--border); }
+.viewer-spec-panel header > div { flex: 1; min-width: 0; }
+.viewer-spec-panel strong { font-weight: 500; }
+.viewer-spec-panel small { display: block; color: var(--muted-foreground); margin-top: 4px; overflow-wrap: anywhere; }
+.viewer-spec-content { overflow: auto; padding: 16px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; }
+.viewer-spec-content p { margin: 0; }
+.viewer-spec-content mark { background: #fef08a; color: #342700; padding: 2px 0; box-decoration-break: clone; }
 @media (max-width: 800px) {
   .chat-workspace.has-viewer { display: flex; }
   .viewer-split-handle { display: none; }
   .viewer-sheet { position: fixed; inset: 0; width: 100%; height: 100dvh; z-index: 30; padding-top: env(safe-area-inset-top); }
+  .document-viewer .viewer-item-layout:has(.viewer-spec-panel) { flex-direction: column; }
+  .viewer-spec-panel { width: 100%; max-height: 35dvh; border-left: 0; border-top: 1px solid var(--border); }
+  .document-viewer .viewer-toolbar { padding-inline: 6px; gap: 2px; }
+  .document-viewer .viewer-markup-tools { gap: 0; }
 }

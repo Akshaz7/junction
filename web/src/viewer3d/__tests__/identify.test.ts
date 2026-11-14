@@ -39,7 +39,8 @@ describe('item card model', () => {
   it('falls back to the scene without inventing dimensions from bounding boxes', () => {
     expect(buildItemDetails(manifest, 'door-001')).toEqual({
       item_id: 'door-001', name: 'door-001', hasElement: false,
-      fields: [{ label: 'Kind', value: 'door' }, { label: 'Storey', value: 'Ground' }],
+      fields: [{ label: 'Kind', value: 'door' }, { label: 'Storey', value: 'Ground' },
+        { label: 'Type', value: 'door' }, { label: 'Size', value: 'Not available' }],
     });
     expect(buildItemDetails(manifest, 'missing', element)).toBeNull();
     expect(buildItemDetails(manifest, 'door-001', { ...element, item_id: 'different' })?.hasElement).toBe(false);
@@ -54,7 +55,7 @@ describe('item card model', () => {
     expect(details.name).toBe('door-001');
     expect(details.fields).toEqual([
       { label: 'Kind', value: 'door' }, { label: 'Storey', value: 'Not available' },
-      { label: 'Area', value: '0 m²' }, { label: 'External', value: 'Yes' },
+      { label: 'Type', value: 'door' }, { label: 'Area', value: '0 m²' }, { label: 'External', value: 'Yes' },
     ]);
   });
 

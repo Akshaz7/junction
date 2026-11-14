@@ -88,3 +88,30 @@
   .data-pagination { padding-inline: 8px; gap: 4px; }
 }
 @media (prefers-reduced-motion: reduce) { .data-spinner { animation: none; } }
+
+.data-folder-line { display: flex; align-items: center; }
+.data-folders .data-folder-line > button:last-child { flex: 1; min-width: 0; }
+.data-folders .data-folder-expand { flex: 0 0 22px; width: 22px; padding: 8px 3px; }
+.data-folder-children { margin-left: 14px; border-left: 1px solid var(--border); padding-left: 3px; }
+.data-folder-message { padding: 10px; font-size: var(--text-caption); color: var(--muted-foreground); }
+.data-file-facts { display: flex; flex-direction: column; gap: 4px; max-width: 200px; font-size: var(--text-caption); color: var(--muted-foreground); }
+.data-version-picker { display: grid; gap: 4px; min-width: 0; }
+.data-version-picker select { max-width: 100%; width: 160px; padding: 4px; border: 1px solid var(--border); border-radius: 4px; background: var(--card); color: var(--foreground); font: inherit; }
+.data-upload-status progress { display: block; width: min(240px, 100%); height: 5px; margin-top: 8px; accent-color: var(--primary); }
+@media (max-width: 640px) {
+  .data-folders { display: block; max-height: 160px; overflow: auto; }
+  .data-folders button { width: 100%; max-width: none; }
+  .data-file-row { flex-wrap: wrap; }
+  .data-open-file { flex-basis: calc(100% - 70px); }
+  .data-file-facts { order: 2; flex-basis: 100%; max-width: 100%; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding-left: 48px; }
+  .data-version-picker { display: flex; align-items: center; flex-wrap: wrap; }
+}
+.data-screen .data-file-row { height: auto; min-height: 76px; padding-block: 10px; }
+.data-screen .data-file-meta { overflow-wrap: anywhere; }
+.data-screen .data-file-facts { flex-shrink: 0; }
+.data-screen .data-folders .all-files:not([aria-current]) { background: transparent; font-weight: 400; }
+@media (max-width: 640px) {
+  .data-screen .data-file-row { min-height: 94px; }
+  .data-screen .data-file-facts { flex-shrink: 1; padding-left: 40px; }
+  .data-screen .data-open-file { flex-basis: calc(100% - 60px); height: auto; }
+}

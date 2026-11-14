@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ChevronDown, ChevronLeft, ChevronRight, Download, FileSymlink, FileText, Highlighter, Maximize2, Minus, PenLine, Plus, Search, X } from 'lucide-react'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document } from '../lib/types'
@@ -13,7 +13,13 @@ import { itemIsHidden, type DrawingEdits } from '../lib/scene-edits'
 import type { SceneCommand } from '../viewer3d/commands'
 import { DrawingModel, ViewerModeToggle, type ViewerMode } from './drawing-model'
 import { ItemPanel } from './item-panel'
+import { KindLegend } from '../viewer3d/KindLegend'
+import { kindStyle } from '../lib/kind-colors'
 import { placeEvidence, type ItemPlace, type LinkedItem } from '../lib/linked'
+import { AnnotationLayer, useAnnotations, type Annotation, type MarkupTool } from './viewer-tools/annotations'
+import { findSheetText, loadSheetText, type SheetText } from './viewer-tools/sheet-text'
+import { SpecPanel } from './viewer-tools/spec-panel'
+import { downloadSource } from './viewer-tools/download-source'
 
 export function useViewerSheet() {
   const [sheet, setSheet] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 800px)').matches)
@@ -37,9 +43,10 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   function changeMode(next: ViewerMode) { setMode(next); if (next === '3d') setModelVisited(true) }
   const [place, setPlace] = useState<{ location: ItemPlace; item: LinkedItem } | null>(null)
   const [selectedItem, setSelectedItem] = useState<{ docId: string; itemId: string } | null>(null)
+  const [pageNumber, setPageNumber] = useState(originalCitation.page)
   const itemTrigger = useRef<Element | null>(null)
-  const citation = place ? { ...originalCitation, doc_id: place.location.doc_id, page: place.location.page, item_ids: [place.item.item_id] } : originalCitation
-  const { regions, sources, initial } = useMemo(() => place ? placeEvidence(place.location, place.item) : viewerEvidence(answer, originalCitation), [answer, originalCitation, place])
+  const citation = useMemo(() => place ? { ...originalCitation, kind: 'element' as const, quote: null, doc_id: place.location.doc_id, page: place.location.page, item_ids: [place.item.item_id] } : { ...originalCitation, page: pageNumber }, [originalCitation, place, pageNumber])
+  const { regions, sources, initial } = useMemo(() => place ? placeEvidence(place.location, place.item) : viewerEvidence(answer, citation), [answer, citation, place])
   const table = answerTableSelection(answer)
   const [active, setActive] = useState(initial)
   const [doc, setDoc] = useState<Document | null>(null)
@@ -49,6 +56,28 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   const [view, setView] = useState<PageTransform>({ x: 0, y: 0, scale: 1 })
   const [error, setError] = useState('')
   const [retry, setRetry] = useState(0)
+  const [tool, setTool] = useState<MarkupTool>('pan')
+  const [draft, setDraft] = useState<Annotation | null>(null)
+  const drawingPointer = useRef<number | null>(null)
+  const draftRef = useRef<Annotation | null>(null)
+  const annotations = useAnnotations(citation.doc_id, citation.page)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [sheetText, setSheetText] = useState<SheetText[]>([])
+  const [textStatus, setTextStatus] = useState('')
+  const [hitIndex, setHitIndex] = useState(0)
+  const hits = useMemo(() => searchOpen ? findSheetText(sheetText, query) : [], [sheetText, query, searchOpen])
+  const [specOpen, setSpecOpen] = useState(originalCitation.kind === 'text' || !!originalCitation.quote)
+  function sourcePassage(index: number) {
+    const source = sources[index]
+    return source && answer.citations.find((entry) => entry.doc_id === citation.doc_id && entry.page === citation.page && (entry.kind === 'text' || entry.quote) &&
+      (`citation-${entry.n}` === source.id || entry.item_ids.some((id) => source.itemIds.includes(id)) || (entry.bbox_px && source.bbox && entry.bbox_px.every((value, axis) => value === source.bbox![axis]))))
+  }
+  const activeTextCitation = sourcePassage(active)
+    ?? (citation.doc_id === originalCitation.doc_id && citation.page === originalCitation.page ? citation : null)
+  const specCitation = activeTextCitation && (activeTextCitation.kind === 'text' || activeTextCitation.quote) ? activeTextCitation : null
+  const [downloading, setDownloading] = useState(false)
+  const [downloadError, setDownloadError] = useState('')
   const [documentTags, setDocumentTags] = useState<Record<string, string>>({})
   const tags = { ...documentTags, ...edits?.tags }
   const visualiseAnswer = useMemo(() => commands ? {
@@ -61,7 +90,29 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   const pointers = useRef(new Map<number, Point>())
   const returnFocus = useRef(typeof document !== 'undefined' ? document.activeElement as HTMLElement | null : null)
 
-  useEffect(() => { setPlace(null); setSelectedItem(null) }, [originalCitation])
+  useEffect(() => {
+    setPlace(null); setSelectedItem(null); setPageNumber(originalCitation.page)
+    setSpecOpen(originalCitation.kind === 'text' || !!originalCitation.quote)
+  }, [originalCitation])
+  useEffect(() => { setActive(initial) }, [initial, citation.doc_id, citation.page])
+  useEffect(() => {
+    setDraft(null); draftRef.current = null; drawingPointer.current = null; pointers.current.clear()
+    setQuery(''); setHitIndex(0); setSheetText([]); setDownloadError(''); setTool('pan')
+  }, [citation.doc_id, citation.page])
+  useEffect(() => {
+    if (!searchOpen && !(specOpen && specCitation)) return
+    const controller = new AbortController()
+    setTextStatus('Loading sheet text…')
+    loadSheetText(citation.doc_id, citation.page, controller.signal).then((text) => {
+      if (controller.signal.aborted) return
+      setSheetText(text); setTextStatus(text.length ? '' : 'No searchable text is available on this sheet.')
+    }).catch((err: unknown) => { if (!controller.signal.aborted) setTextStatus(err instanceof Error ? err.message : 'Sheet text could not be loaded.') })
+    return () => controller.abort()
+  }, [citation.doc_id, citation.page, searchOpen, specOpen, !!specCitation])
+  useEffect(() => {
+    const bbox = hits[hitIndex]?.bbox
+    if (image && bbox && viewport.width && viewport.height) setView(focusBox(bbox, viewport, fitPage(image, viewport).scale))
+  }, [hits, hitIndex, image, viewport])
   function closeItem() {
     setSelectedItem(null)
     requestAnimationFrame(() => {
@@ -72,6 +123,8 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   }
   function openItem(index: number, id: string, trigger: Element) {
     setActive(index); setSelected(id, '2d')
+    if (sourcePassage(index)) { setSpecOpen(true); setSelectedItem(null); return }
+    setSpecOpen(false)
     itemTrigger.current = trigger
     setSelectedItem({ docId: citation.doc_id, itemId: sources[index]?.itemIds[0] ?? id })
   }
@@ -100,6 +153,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
     let disposed = false
     let url = ''
     setError('')
+    setDoc(null)
     setImageUrl('')
     setImage(null)
     // Let StrictMode's setup/cleanup replay finish before starting network requests.
@@ -129,8 +183,31 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
     return () => observer.disconnect()
   }, [])
 
+  // A new answer about the open sheet swaps the boxes in place: keep zoom/pan, fade old boxes out and new ones in.
+  const answerId = useRef(answer.answer_id)
+  const keepView = useRef(false)
+  const previousRegions = useRef({ key: `${citation.doc_id}:${citation.page}`, regions })
+  const [leaving, setLeaving] = useState<typeof regions>([])
+  useEffect(() => {
+    if (answerId.current !== answer.answer_id) { answerId.current = answer.answer_id; keepView.current = true }
+  }, [answer.answer_id])
+  useEffect(() => {
+    const key = `${citation.doc_id}:${citation.page}`
+    const before = previousRegions.current
+    previousRegions.current = { key, regions }
+    if (before.regions === regions) return
+    if (before.key !== key) { setLeaving([]); return }
+    const next = new Set(regions.map((region) => region.id))
+    const gone = before.regions.filter((region) => !next.has(region.id))
+    setLeaving(gone)
+    if (!gone.length) return
+    const timer = window.setTimeout(() => setLeaving([]), 450)
+    return () => window.clearTimeout(timer)
+  }, [regions, citation.doc_id, citation.page])
+
   useEffect(() => {
     if (!image || !viewport.width || !viewport.height) return
+    if (keepView.current) { keepView.current = false; return }
     const fitted = fitPage(image, viewport)
     const bbox = sources[active]?.bbox
     setView(bbox ? focusBox(bbox, viewport, fitted.scale) : fitted)
@@ -172,17 +249,38 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
     return { x: (points[0].x + points[1].x) / 2, y: (points[0].y + points[1].y) / 2 }
   }
   function distance(points: Point[]) { return Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y) }
+  function pagePoint(clientX: number, clientY: number): Point {
+    const point = pointerPoint(clientX, clientY)
+    return { x: Math.max(0, Math.min(image?.width ?? 0, (point.x - view.x) / view.scale)), y: Math.max(0, Math.min(image?.height ?? 0, (point.y - view.y) / view.scale)) }
+  }
+  function finishAnnotation(pointerId: number, save: boolean) {
+    if (drawingPointer.current !== pointerId) return
+    if (save && draftRef.current) annotations.add(draftRef.current)
+    drawingPointer.current = null; draftRef.current = null; setDraft(null)
+  }
+  function chooseTool(next: MarkupTool) {
+    drawingPointer.current = null; draftRef.current = null; setDraft(null); pointers.current.clear()
+    setTool((previous) => previous === next ? 'pan' : next)
+  }
+  function changePage(next: number) { setPlace(null); setSelectedItem(null); setPageNumber(next); setActive(0) }
+  async function download() {
+    setDownloading(true); setDownloadError('')
+    try { await downloadSource(citation.doc_id) }
+    catch (err) { setDownloadError(err instanceof Error ? err.message : 'The source could not be downloaded.') }
+    finally { setDownloading(false) }
+  }
   function selectSource(index: number) {
     setActive(index)
+    if (sourcePassage(index)) { setSpecOpen(true); setSelectedItem(null) }
     setSelected(sources[index]?.itemIds[0] ?? null, '2d')
   }
 
   return <aside ref={panel} className={`document-viewer ${sheet ? 'viewer-sheet' : ''}`} role={sheet ? 'dialog' : 'region'} aria-modal={sheet || undefined} aria-label="Drawing viewer"
     onKeyDown={(event) => {
       if (mode === '3d' && event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); changeMode('2d'); return }
-      if (event.key === 'Escape') { event.stopPropagation(); if (selectedItem) closeItem(); else onClose() }
+      if (event.key === 'Escape') { event.stopPropagation(); if (searchOpen) setSearchOpen(false); else if (tool !== 'pan') chooseTool('pan'); else if (selectedItem) closeItem(); else onClose() }
       if (sheet && event.key === 'Tab') {
-        const controls = Array.from(panel.current?.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], [tabindex="0"]') ?? []).filter((node) => node.getClientRects().length)
+        const controls = Array.from(panel.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), a[href], [tabindex="0"]') ?? []).filter((node) => node.getClientRects().length)
         if (!controls?.length) return
         const first = controls[0], last = controls[controls.length - 1]
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus() }
@@ -203,10 +301,14 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       <button ref={close} type="button" className="button button-ghost button-size-icon" aria-label="Close drawing viewer" onClick={onClose}><X size={18} /></button>
     </header>
     <div className="viewer-toolbar" aria-label="Drawing controls" hidden={mode === '3d'}>
-      <div className="viewer-page-position"><ChevronLeft size={14} /><span className="page-number">{citation.page}</span><span>/ {doc?.pages ?? '…'}</span><ChevronRight size={14} /></div>
+      <div className="viewer-page-position"><Button variant="ghost" size="icon-xs" aria-label="Previous page" disabled={citation.page <= 1} onClick={() => changePage(citation.page - 1)}><ChevronLeft size={14} /></Button><span className="page-number">{citation.page}</span><span>/ {doc?.pages ?? '…'}</span><Button variant="ghost" size="icon-xs" aria-label="Next page" disabled={!doc || citation.page >= doc.pages} onClick={() => changePage(citation.page + 1)}><ChevronRight size={14} /></Button></div>
       <span className="toolbar-spacer" />
-      <span className="viewer-markup-tools" aria-hidden="true"><Search size={16} /><Highlighter size={16} /><PenLine size={16} /></span>
-      <a className="viewer-download" aria-label="Download drawing page" href={imageUrl || undefined} download={`${doc?.title ?? citation.doc_id}-page-${citation.page}.png`}><Download size={16} /></a>
+      <div className="viewer-markup-tools">
+        <Button variant="ghost" size="icon-sm" aria-label="Search sheet" aria-expanded={searchOpen} aria-controls="viewer-sheet-search" onClick={() => setSearchOpen(!searchOpen)}><Search size={16} /></Button>
+        <Button variant="ghost" size="icon-sm" aria-label="Highlight marker" aria-pressed={tool === 'marker'} disabled={!image} onClick={() => chooseTool('marker')}><Highlighter size={16} /></Button>
+        <Button variant="ghost" size="icon-sm" aria-label="Pen annotations" aria-pressed={tool === 'pen'} disabled={!image} onClick={() => chooseTool('pen')}><PenLine size={16} /></Button>
+      </div>
+      <Button className="viewer-download" variant="ghost" size="icon-sm" aria-label="Download original source" disabled={downloading} onClick={() => void download()}><Download size={16} /></Button>
       <span className="viewer-toolbar-divider" />
       <div className="viewer-zoom-controls">
         <Button variant="ghost" size="icon" aria-label="Zoom out" disabled={!image} onClick={() => zoom(1 / 1.25)}><Minus size={16} /></Button>
@@ -214,8 +316,20 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
         <Button variant="ghost" size="icon" aria-label="Zoom in" disabled={!image} onClick={() => zoom(1.25)}><Plus size={16} /></Button>
       </div>
     </div>
+    {mode === '2d' && searchOpen && <div id="viewer-sheet-search" className="viewer-sheet-search" role="search" aria-label="Find text on sheet">
+      <input autoFocus type="search" aria-label="Find on sheet" placeholder="Find text on this sheet…" value={query} onChange={(event) => { setQuery(event.target.value); setHitIndex(0) }} onKeyDown={(event) => {
+        if (event.key === 'Enter' && hits.length) { event.preventDefault(); setHitIndex((index) => (index + (event.shiftKey ? hits.length - 1 : 1)) % hits.length) }
+      }} />
+      <span role="status">{textStatus || (query.trim() ? hits.length ? `${hitIndex + 1} of ${hits.length} matches` : 'No matches' : 'Enter text to find')}</span>
+      <Button variant="ghost" size="icon-xs" aria-label="Previous match" disabled={!hits.length} onClick={() => setHitIndex((hitIndex + hits.length - 1) % hits.length)}><ChevronLeft size={14} /></Button>
+      <Button variant="ghost" size="icon-xs" aria-label="Next match" disabled={!hits.length} onClick={() => setHitIndex((hitIndex + 1) % hits.length)}><ChevronRight size={14} /></Button>
+      <Button variant="ghost" size="icon-xs" aria-label="Close sheet search" onClick={() => setSearchOpen(false)}><X size={14} /></Button>
+    </div>}
+    {mode === '2d' && (tool !== 'pan' || annotations.marks.length > 0) && <div className="viewer-annotation-controls"><span>{tool === 'marker' ? 'Drag to highlight an area' : tool === 'pen' ? 'Draw on the sheet' : 'Annotations saved on this device'}</span><Button variant="ghost" size="xs" disabled={!annotations.marks.length} onClick={annotations.undo}>Undo annotation</Button><Button variant="ghost" size="xs" disabled={!annotations.marks.length} onClick={annotations.clear}>Clear page annotations</Button>{tool !== 'pan' && <Button variant="ghost" size="xs" onClick={() => chooseTool('pan')}>Done</Button>}</div>}
+    {(downloadError || annotations.warning) && <p className="viewer-tool-error" role="alert">{downloadError || annotations.warning}</p>}
+    {mode === '2d' && specCitation && !specOpen && <Button className="viewer-passage-control" variant="ghost" size="sm" onClick={() => setSpecOpen(true)}>Show cited passage</Button>}
     <div className="viewer-item-layout" hidden={mode === '3d'}>
-    <div className="drawing-stage" ref={stage} data-testid="drawing-viewport" tabIndex={0} aria-label="Drawing canvas. Drag to pan, scroll or pinch to zoom. Arrow keys pan, plus and minus zoom, zero fits."
+    <div className="drawing-stage" data-tool={tool} ref={stage} data-testid="drawing-viewport" tabIndex={0} aria-label="Drawing canvas. Drag to pan, scroll or pinch to zoom. Arrow keys pan, plus and minus zoom, zero fits."
       onKeyDown={(event) => {
         if (event.target !== event.currentTarget) return
         const moves: Record<string, Point> = { ArrowLeft: { x: 40, y: 0 }, ArrowRight: { x: -40, y: 0 }, ArrowUp: { x: 0, y: 40 }, ArrowDown: { x: 0, y: -40 } }
@@ -224,13 +338,27 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
         if (event.key === '-') { event.preventDefault(); zoom(1 / 1.25) }
         if (event.key === '0' && image) { event.preventDefault(); setView(fitPage(image, viewport)) }
       }}
-      onDoubleClick={(event) => zoom(2, pointerPoint(event.clientX, event.clientY))}
+      onDoubleClick={(event) => { if (tool === 'pan') zoom(2, pointerPoint(event.clientX, event.clientY)) }}
       onPointerDown={(event) => {
         if (!image || (event.pointerType === 'mouse' && event.button !== 0)) return
         event.currentTarget.setPointerCapture(event.pointerId)
+        if (tool !== 'pan') {
+          if (drawingPointer.current !== null) return
+          const stagePoint = pointerPoint(event.clientX, event.clientY)
+          if (stagePoint.x < view.x || stagePoint.y < view.y || stagePoint.x > view.x + image.width * view.scale || stagePoint.y > view.y + image.height * view.scale) return
+          const point = pagePoint(event.clientX, event.clientY)
+          const mark: Annotation = { id: crypto.randomUUID(), tool, page: citation.page, points: [point, point], width: 2.5 / view.scale }
+          drawingPointer.current = event.pointerId; draftRef.current = mark; setDraft(mark); return
+        }
         pointers.current.set(event.pointerId, pointerPoint(event.clientX, event.clientY))
       }}
       onPointerMove={(event) => {
+        if (drawingPointer.current === event.pointerId && draftRef.current) {
+          const point = pagePoint(event.clientX, event.clientY)
+          const mark = draftRef.current
+          const next = { ...mark, points: mark.tool === 'marker' ? [mark.points[0], point] : [...mark.points, point] }
+          draftRef.current = next; setDraft(next); return
+        }
         if (!pointers.current.has(event.pointerId)) return
         const before = [...pointers.current.values()]
         const old = pointers.current.get(event.pointerId)!
@@ -246,9 +374,9 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
           return { ...previous, x: previous.x + point.x - old.x, y: previous.y + point.y - old.y }
         })
       }}
-      onPointerUp={(event) => pointers.current.delete(event.pointerId)}
-      onPointerCancel={(event) => pointers.current.delete(event.pointerId)}
-      onLostPointerCapture={(event) => pointers.current.delete(event.pointerId)}>
+      onPointerUp={(event) => { finishAnnotation(event.pointerId, true); pointers.current.delete(event.pointerId) }}
+      onPointerCancel={(event) => { finishAnnotation(event.pointerId, false); pointers.current.delete(event.pointerId) }}
+      onLostPointerCapture={(event) => { finishAnnotation(event.pointerId, false); pointers.current.delete(event.pointerId) }}>
       {imageUrl && <div className="drawing-plane" style={{ width: image?.width, height: image?.height, transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`, visibility: image ? 'visible' : 'hidden' }}>
         <img src={imageUrl} alt={`Drawing: ${doc?.title ?? citation.doc_id}, page ${citation.page}`} draggable={false}
           onLoad={(event) => setImage({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })}
@@ -261,7 +389,8 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
             const tag = tags[region.id]
             const secondaryTag = answer.evidence.scene.commands?.length && tag !== label ? tag : undefined
             const hidden = itemIsHidden(edits, region.id)
-            return <g key={region.id} className={`evidence-region ${region.text ? 'text-highlight' : ''} ${index === active || linked.selected === region.id || linked.hovered === region.id ? 'is-active' : ''} ${hidden ? 'is-hidden' : ''}`} data-testid={`evidence-box-${region.label}`} aria-label={`${region.text ? 'Text source' : 'Box'} ${label}${secondaryTag ? `, ${secondaryTag}` : ''}${hidden ? ', hidden' : ''}`}
+            const kind = region.text ? null : kindStyle(region.kind)
+            return <g key={region.id} data-kind={kind ? region.kind ?? 'other' : undefined} style={kind ? { '--kind-color': kind.color, '--kind-on': kind.on } as CSSProperties : undefined} className={`evidence-region ${region.text ? 'text-highlight' : ''} ${index === active || linked.selected === region.id || linked.hovered === region.id ? 'is-active' : ''} ${hidden ? 'is-hidden' : ''}`} data-testid={`evidence-box-${region.label}`} aria-label={`${region.text ? 'Text source' : 'Box'} ${label}${secondaryTag ? `, ${secondaryTag}` : ''}${hidden ? ', hidden' : ''}`}
               data-item-id={region.id} data-linked={linked.selected === region.id || linked.hovered === region.id ? 'true' : undefined}
               data-hidden={String(hidden)} data-tag={tag}
               role="button" tabIndex={0} aria-haspopup={sheet ? 'dialog' : undefined}
@@ -277,11 +406,25 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
               {secondaryTag && <svg className="evidence-secondary-tag" x={x + labelSize * Math.max(1, label.length / 2)} y={y} width={labelSize * Math.max(1, secondaryTag.length / 2)} height={labelSize} viewBox={`0 0 ${22 * Math.max(1, secondaryTag.length / 2)} 22`}><text x="4" y="15">{secondaryTag}</text></svg>}
             </g>
           })}
+          {leaving.map((region) => {
+            const [x, y, right, bottom] = region.bbox
+            const kind = region.text ? null : kindStyle(region.kind)
+            return <g key={`leaving-${region.id}`} className="evidence-region is-leaving" aria-hidden="true" data-testid="evidence-box-leaving" data-kind={kind ? region.kind ?? 'other' : undefined} style={kind ? { '--kind-color': kind.color, '--kind-on': kind.on } as CSSProperties : undefined}>
+              <rect x={x} y={y} width={Math.max(0, right - x)} height={Math.max(0, bottom - y)} vectorEffect="non-scaling-stroke" />
+            </g>
+          })}
+          {hits.map((hit, index) => hit.bbox && <g key={`${index}-${hit.text}`} className={`sheet-search-hit ${index === hitIndex ? 'is-current' : ''}`} data-testid="sheet-search-hit" role="button" tabIndex={0} aria-label={`Search match ${index + 1}: ${hit.text}`} onPointerDown={(event) => event.stopPropagation()} onClick={() => setHitIndex(index)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setHitIndex(index) } }}>
+            <rect x={hit.bbox[0]} y={hit.bbox[1]} width={Math.max(1, hit.bbox[2] - hit.bbox[0])} height={Math.max(1, hit.bbox[3] - hit.bbox[1])} vectorEffect="non-scaling-stroke" />
+            <svg x={hit.bbox[0]} y={hit.bbox[1] - 18 / view.scale} width={20 / view.scale} height={18 / view.scale} viewBox="0 0 20 18"><rect width="20" height="18" rx="3" /><text x="10" y="13" textAnchor="middle">{index + 1}</text></svg>
+          </g>)}
+          <AnnotationLayer marks={annotations.marks} draft={draft} />
         </svg>}
       </div>}
+      {image && regions.some((region) => !region.text) && <KindLegend className="kind-legend-2d" kinds={regions.filter((region) => !region.text).map((region) => region.kind)} />}
       {error ? <div className="viewer-message"><p role="alert">{error}</p><Button variant="raised" onClick={() => setRetry(retry + 1)}>Try again</Button></div>
         : !image && <p className="viewer-message" role="status">Loading drawing…</p>}
     </div>
+    {specOpen && specCitation && <SpecPanel citation={specCitation} title={doc?.title ?? citation.doc_id} text={sheetText} onClose={() => setSpecOpen(false)} />}
     {selectedItem && <ItemPanel docId={selectedItem.docId} itemId={selectedItem.itemId} sheet={sheet} onClose={closeItem} onOpenPlace={(location, item) => {
       setPlace({ location, item }); setActive(0); setSelected(item.item_id, '2d')
       if (sheet) closeItem()

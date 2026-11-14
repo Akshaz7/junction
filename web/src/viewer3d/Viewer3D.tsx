@@ -4,7 +4,9 @@ import { buildItemDetails, type IFCElement } from './identify';
 import { ItemDetailsCard } from './ItemDetailsCard';
 import { createViewer, type Viewer } from './viewer';
 import type { HighlightOptions, HighlightState } from './highlight';
-import type { RiseState } from './rise';
+import type { BuildState, RiseState } from './rise';
+import { KindLegend } from './KindLegend';
+import { BuildSlider } from './BuildSlider';
 import { bindLiveCommands, bindLiveHighlight } from './liveViewerHighlight';
 import type { CommandTestState, SceneCommand } from './commands';
 import { cutawayStoreys, isRoof, type CutawayState } from './cutaway';
@@ -65,6 +67,8 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
   const onPickRef = useRef(onPick);
   const linked = useLinkedItem();
   const [highlightState, setHighlightState] = useState<HighlightState>({ highlighted: [], dimmed: 0, labels: {} });
+  const [answerKinds, setAnswerKinds] = useState<(string | null)[]>([]);
+  const [build, setBuild] = useState<BuildState | null>(null);
   const pointerStart = useRef<{ id: number; x: number; y: number } | null>(null);
   const [cutaway, setCutaway] = useState<CutawayState>({ activeStorey: null, showRoof: false, hiddenCount: 0 });
   const [hasRoof, setHasRoof] = useState(false);
@@ -79,6 +83,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
   const [edits, setEdits] = useState<EditState>({ undoCount: 0, moved: {}, materials: {} });
   const advice = useEditAdvisor(manifest?.doc_id, chat_id);
   const [elements, setElements] = useState<Map<string, IFCElement>>(new Map());
+  const [detailsLoading, setDetailsLoading] = useState(false);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState('');
   const [progress, setProgress] = useState<LoadProgress>({ phase: 'manifest' });
@@ -86,6 +91,19 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
   const helpId = useId();
   const closeDetails = useCallback(() => setPicked(null), []);
   const details = manifest && picked ? buildItemDetails(manifest, picked, elements.get(picked)) : null;
+
+  useEffect(() => {
+    if (!picked || !manifest || elements.has(picked) || !/^\/api\/docs\//.test(sceneUrl)) return;
+    const controller = new AbortController();
+    setDetailsLoading(true);
+    void fetch(`/api/docs/${encodeURIComponent(manifest.doc_id)}/items/${encodeURIComponent(picked)}`,
+      { signal: controller.signal }).then(async (response) => {
+      if (!response.ok) return;
+      const item = await response.json() as IFCElement;
+      if (!controller.signal.aborted && item.item_id === picked) setElements((previous) => new Map(previous).set(picked, item));
+    }).catch(() => {}).finally(() => { if (!controller.signal.aborted) setDetailsLoading(false); });
+    return () => { controller.abort(); setDetailsLoading(false); };
+  }, [picked, manifest, sceneUrl, elements]);
 
   function finishEdit(edit: ItemEdit | null) {
     setEdits(viewerRef.current?.getEditState() ?? { undoCount: 0, moved: {}, materials: {} });
@@ -136,6 +154,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     let unsubscribeCutaway: (() => void) | undefined;
     let unsubscribeHighlight: (() => void) | undefined;
     let unsubscribeWalk: (() => void) | undefined;
+    let unsubscribeBuild: (() => void) | undefined;
     setState('loading');
     setProgress({ phase: 'manifest' });
     setError('');
@@ -149,6 +168,8 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     setWalking(false);
     setWalkMessage('');
     setHighlightState({ highlighted: [], dimmed: 0, labels: {} });
+    setAnswerKinds([]);
+    setBuild(null);
     pointerStart.current = null;
 
     function fail(reason: unknown) {
@@ -165,7 +186,12 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       viewer = createViewer(canvas);
       viewerRef.current = viewer;
       unsubscribeCutaway = viewer.onCutawayChange(setCutaway);
-      unsubscribeHighlight = viewer.onHighlightChange(() => setHighlightState(viewer!.getLinkedHighlightState()));
+      unsubscribeHighlight = viewer.onHighlightChange(() => {
+        setHighlightState(viewer!.getLinkedHighlightState());
+        const items = viewer!.scene?.manifest.items;
+        setAnswerKinds(viewer!.getHighlightState().highlighted.map((id) => items?.[id]?.kind ?? null));
+      });
+      unsubscribeBuild = viewer.onBuildChange(setBuild);
       unsubscribeWalk = viewer.onWalkChange((next) => setWalking(next.active));
       live = bindLiveHighlight(viewer, doc_id);
       liveCommands = bindLiveCommands(viewer, doc_id);
@@ -191,6 +217,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       unsubscribeCutaway?.();
       unsubscribeHighlight?.();
       unsubscribeWalk?.();
+      unsubscribeBuild?.();
       setHover(null, '3d');
       live?.dispose();
       liveCommands?.dispose();
@@ -334,13 +361,15 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
           : 'Loading 3D scene…'}
       </p>}
       {state === 'error' && <p className="viewer3d-message" role="alert">{error}</p>}
+      {state === 'ready' && answerKinds.length > 0 && <KindLegend className="kind-legend-3d" kinds={answerKinds} />}
       {picked && <output className="viewer3d-picked-overlay" aria-label="Picked item" aria-live="polite">{picked}</output>}
       {walking && <WalkJoystick onMove={(x, y) => viewerRef.current?.setWalkJoystick(x, y)} />}
       {state === 'ready' && details && !editing && <ItemDetailsCard key={details.item_id} details={details}
-        loading={false} onClose={closeDetails}
+        loading={detailsLoading} viewer={viewerRef.current} onClose={closeDetails}
         onHighlight={() => viewerRef.current?.highlight([details.item_id])} />}
     </div>
     <div className="viewer3d-footer">
+      {state === 'ready' && build && <BuildSlider build={build} viewer={viewerRef.current} />}
       {state === 'ready' && editing && manifest && <EditPanel selected={picked} manifest={manifest} edits={edits}
         moving={moveItem !== null} advice={advice}
         onRemove={() => { cancelMove(); if (picked) { finishEdit(viewerRef.current?.removeItem(picked) ?? null); selectItem(null); } }}

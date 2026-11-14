@@ -1,7 +1,10 @@
 import { liveSocketUrl } from './live-url'
+import type { TraceStep } from './types'
 export type ChatLiveEvent =
-  | { type: 'chat.message'; chat_id: string; message_id: string; role: string }
+  | { type: 'chat.message'; chat_id: string; message_id: string; role: string; text?: string }
   | { type: 'chat.status'; chat_id: string; text: string }
+  | { type: 'chat.trace'; chat_id: string; step: TraceStep }
+  | { type: 'chat.done'; chat_id: string }
   | { type: 'connected' }
   | { type: 'disconnected' }
 
@@ -11,7 +14,11 @@ export function decodeChatEvent(raw: unknown): Extract<ChatLiveEvent, { chat_id:
   try { event = JSON.parse(raw) } catch { return null }
   if (!event || typeof event !== 'object' || typeof event.chat_id !== 'string' || !event.chat_id) return null
   if (event.type === 'chat.message' && typeof event.message_id === 'string' && typeof event.role === 'string')
-    return { type: event.type, chat_id: event.chat_id, message_id: event.message_id, role: event.role }
+    return { type: event.type, chat_id: event.chat_id, message_id: event.message_id, role: event.role,
+      ...(typeof event.text === 'string' ? { text: event.text } : {}) }
+  if (event.type === 'chat.trace' && event.step && typeof event.step === 'object' && !Array.isArray(event.step))
+    return { type: event.type, chat_id: event.chat_id, step: event.step as TraceStep }
+  if (event.type === 'chat.done') return { type: event.type, chat_id: event.chat_id }
   if (event.type === 'chat.status' && typeof event.text === 'string')
     return { type: event.type, chat_id: event.chat_id, text: event.text }
   return null

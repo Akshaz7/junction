@@ -41,7 +41,7 @@ export function placeEvidence(place: ItemPlace, item: LinkedItem): { regions: Vi
   const bbox = place.bbox_px?.length === 4 && place.bbox_px.every(Number.isFinite) ? place.bbox_px : null
   const label = item.tag || '1'
   return {
-    regions: bbox ? [{ id: item.item_id, label, bbox, text: false }] : [],
+    regions: bbox ? [{ id: item.item_id, label, bbox, text: false, kind: item.kind }] : [],
     sources: [{ id: item.item_id, label, bbox, itemIds: [item.item_id] }],
     initial: 0,
   }

@@ -1,9 +1,10 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { ArrowRight, CalendarClock, FileSearch, HardHat, Scale } from 'lucide-react'
 import { formatPercent, formatUsd } from '../lib/dashboard'
-import { chatHref, chatPreview, findingCounts, overviewApi, overviewDate, overviewStarters, starterHref, topFindings, weeklyChanges } from '../lib/overview'
+import { chatHref, chatPreview, findingCounts, overviewApi, overviewDate, topFindings, weeklyChanges } from '../lib/overview'
 import type { Document } from '../lib/types'
 import './overview-screen.css'
+import { workspaceApi } from '../lib/api'
 import { chatLive } from '../lib/chat-live'
 
 function useOverviewSection<T>(load: (signal: AbortSignal) => Promise<T>, liveChats = false) {
@@ -36,7 +37,12 @@ const loadChanges = (signal: AbortSignal) => overviewApi.getChanges(signal)
 const loadFindings = (signal: AbortSignal) => overviewApi.getFindings(signal)
 const loadChats = (signal: AbortSignal) => overviewApi.getChats(signal)
 const loadBench = (signal: AbortSignal) => overviewApi.getBench(signal)
-const starterIcons = [Scale, CalendarClock, HardHat, FileSearch]
+const constructionStarters = [
+  { title: 'Draft claim', detail: 'Build a claim from documented changes.', icon: Scale, question: 'Draft a construction claim using the available project documents. Identify documented changes, affected work, dates, and supporting citations. State where cost, delay, or entitlement evidence is missing.' },
+  { title: 'Meeting prep', detail: 'Bring the right questions to the table.', icon: CalendarClock, question: 'Prepare a construction coordination meeting agenda from the project documents. Summarise drawing revisions, open questions, interfaces between trades, and decisions needed, with citations.' },
+  { title: 'Plan work phase', detail: 'Turn drawing information into next steps.', icon: HardHat, question: 'Plan the next construction work phase from the project documents. Outline the work sequence, dependencies, access needs, and checks. Cite the drawings and flag missing information without inventing durations.' },
+  { title: 'Review contract', detail: 'Find obligations and gaps in the evidence.', icon: FileSearch, question: 'Review the available construction contract documents for scope, responsibilities, change procedures, and notice requirements. Cite each finding. If no contract is available, say so and identify the documents needed.' },
+]
 
 function OverviewCard({ title, href, children, loading, error }: {
   title: string; href?: string; children: ReactNode; loading: boolean; error: string
@@ -48,6 +54,24 @@ function OverviewCard({ title, href, children, loading, error }: {
 }
 
 export function OverviewScreen({ docs = [] }: { docs?: Document[] }) {
+  const [starting, setStarting] = useState<string | null>(null)
+  const [starterError, setStarterError] = useState('')
+  const [starterStatus, setStarterStatus] = useState('')
+  const [createdChat, setCreatedChat] = useState<string | null>(null)
+  const startingRequest = useRef(false)
+  async function startChat(starter: typeof constructionStarters[number]) {
+    if (startingRequest.current || !docs.length || workspaceApi.isDemo) return
+    startingRequest.current = true
+    const sourceRoute = window.location.hash
+    setStarting(starter.title); setStarterError(''); setStarterStatus(''); setCreatedChat(null)
+    try {
+      const id = await workspaceApi.createChat([], starter.title)
+      setCreatedChat(id)
+      await workspaceApi.askQuestion(id, starter.question, [], { onStatus: setStarterStatus, onTrace: () => {} })
+      if (window.location.hash === sourceRoute) window.location.hash = `/chat?chat=${encodeURIComponent(id)}`
+    } catch (error) { setStarterError(error instanceof Error ? error.message : 'Could not start this chat.') }
+    finally { startingRequest.current = false; setStarting(null) }
+  }
   const changes = useOverviewSection(loadChanges)
   const findings = useOverviewSection(loadFindings)
   const chats = useOverviewSection(loadChats, true)
@@ -87,9 +111,9 @@ export function OverviewScreen({ docs = [] }: { docs?: Document[] }) {
         </> : <p className="overview-empty">No bench run yet.</p>}
       </OverviewCard>
     </div>
-    <section className="overview-start" aria-label="Start a question"><h3>Where shall we start?</h3><div className="overview-starters">{overviewStarters.map((starter, index) => {
-      const Icon = starterIcons[index]
-      return <a key={starter.title} className="overview-starter" href={starterHref(starter.question)} aria-label={starter.question}><Icon size={20} /><strong>{starter.title}</strong><ArrowRight size={14} /></a>
-    })}</div></section>
+    <section className="overview-start" aria-label="Start a question"><h3>Where shall we start?</h3><div className="overview-starters">{constructionStarters.map((starter) => {
+      const Icon = starter.icon
+      return <button type="button" key={starter.title} className="overview-starter" aria-label={starter.title} disabled={!!starting || !docs.length || workspaceApi.isDemo} onClick={() => void startChat(starter)}><Icon size={20} /><strong>{starter.title}</strong><span>{starter.detail}</span><ArrowRight size={14} /></button>
+    })}</div>{starting && <p role="status">{starterStatus || `Starting ${starting.toLowerCase()}…`}</p>}{starterError && <p role="alert">{starterError} {createdChat && <a href={chatHref(createdChat)}>Open saved chat</a>}</p>}{workspaceApi.isDemo && <p>Connect to the workspace to start a chat.</p>}</section>
   </section>
 }

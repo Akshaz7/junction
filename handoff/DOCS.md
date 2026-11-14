@@ -1,13 +1,9 @@
-# DOCS (Codex): row X-10. Demo script + submission docs
-Scope: docs/DEMO.md, docs/SUBMISSION.md (new), README.md (top section only).
-Read DECISIONS.md (last 40 lines), docs/MASTER_PROMPT.md (pitch + judging), results/ (numbers only from there) and docs/ACCURACY.md.
-Write docs/DEMO.md: the exact click path for the live judging demo.
-- Laptop: judge asks → 2D proof → 3D "Visualise it".
-- Phone: same chat streams live → Show on table → AR build-up from the 2D plan → voice "show me the doors" → highlights spin in → voice turn appears on the laptop.
-- The upload-your-own-drawing path, with a Plan B for each step (offline AR_DEMO build, recorded video, a backup question list).
-- A 2-minute and a 5-minute version, plus the pitch lines: "We rebuilt Stoa's product in two days. Then we built the part that does not exist yet."
-- Map every step to the 4 criteria (accuracy / visual verifiability / creativity / low inference cost).
-Write docs/SUBMISSION.md: the checklist for the 10:00 submission (links, video, report, repo, licences).
-Use placeholders for numbers that are not in results/ yet.
+# DOCS (Codex): row X-11. API + models docs current
+Scope: docs/API.md and docs/MODELS.md only.
+1. docs/API.md: document every route that exists now in server/*_routes.py and server/app.py. Read the code, never guess. New since the last update: /api/folders, /api/docs/{id}/source, /api/docs/{id}/ingest, POST /api/changes/refresh, compare, linked items/tags, advise (ops hide/restore/move/material/undo + detail), bench list/latest, health fields (build_rev, uptime_s, models_ok), RATE_LIMIT_PER_MIN, and the upload error codes 413/415. Give each one's request, response and errors.
+2. docs/MODELS.md: list every model and provider in engine/models/models.yaml with its task chain and price, plus:
+   - datasets: CubiCasa5K (CC BY-NC-SA 4.0), FloorPlanCAD (Voxel51 mirror; its card says CC BY-NC 4.0 while the metadata says CC BY-SA 4.0, so treat it as NC), synthetic plans (generated for demo)
+   - fine-tunes: RT-DETR PekingU/rtdetr_r50vd (Apache-2.0) and the ResNet34-UNet (Yytsi weights; check train/ for the source and licence)
+   - the licence consequences for the fine-tuned weights
+   - the ifcopenshell (LGPL) and usd-core licences used in the deploy image
 Do not commit. Append a RESULT: line.
-RESULT: X-10 passed local documentation validation (links, required demo/upload/Plan B coverage, continuous 120s/300s shot budgets, candidate and sample200-r10 facts, README top-only scope) and git diff --check; updated docs/DEMO.md, docs/SUBMISSION.md and README.md top section; physical AR/build-up/spin/live-sync rehearsal and final submission links/metrics remain explicitly pending; no commit.

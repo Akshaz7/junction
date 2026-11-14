@@ -12,6 +12,8 @@ import { chatLive } from '../lib/chat-live'
 import { useSceneEdits } from '../lib/use-scene-edits'
 import { DrawingEditsContext } from '../lib/scene-edit-context'
 import { SkillPicker } from './skills-screen'
+import { FollowBanner, useFollow } from './follow-banner'
+import './follow-banner.css'
 
 const starters = [
   { title: 'Count on a plan', label: 'Count something on a plan', question: 'How many windows are there?', icon: Scale },
@@ -56,6 +58,21 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const generation = useRef(0)
   const sceneEdits = useSceneEdits(liveChatId, answers, demo)
   const viewerDoc = viewer?.citation.doc_id
+  // FIX-2: a new answer about the document already open updates the open 2D/3D pane in place (no remount, no reload).
+  const lastAnswerId = useRef<string | null>(null)
+  useEffect(() => {
+    const latest = [...answers].reverse().find((exchange) => exchange.answer)?.answer
+    if (!latest || lastAnswerId.current === latest.answer_id) return
+    const seen = lastAnswerId.current !== null
+    lastAnswerId.current = latest.answer_id
+    if (!seen || latest.answer.abstained) return
+    const docId = latest.evidence.scene.doc_id || latest.doc_ids[0]
+    setViewer((previous) => {
+      if (!previous || previous.citation.doc_id !== docId) return previous
+      const citation = latest.citations.find((entry) => entry.doc_id === docId && entry.page === previous.citation.page) ?? latest.citations.find((entry) => entry.doc_id === docId)
+      return citation ? { answer: latest, citation, request: previous.request + 1 } : previous
+    })
+  }, [answers])
   const viewerCommands = answers.flatMap((exchange) => {
     const answer = exchange.answer
     return answer && !answer.answer.abstained && (answer.evidence.scene.doc_id || answer.doc_ids[0]) === viewerDoc
@@ -72,7 +89,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       submitting.current = false
       chatId.current = null
       setLiveChatId(null)
-      setBusy(false); setAnswers([]); setViewer(null); setError('')
+      setBusy(false); setAnswers([]); setViewer(null); setError(''); lastAnswerId.current = null
       setMention(null); setToolsOpen(false); setPendingQuestion(''); setStatuses([]); setTraces([])
       setSelected([]); setRestoredDocIds(null); setDraft('')
       if (link.kind === 'question') {
@@ -105,7 +122,6 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     if (demo || !liveChatId) return
     let controller: AbortController | undefined
     const version = generation.current
-    let pendingMessageId: string | null = null
     function refresh() {
       // The sender owns its SSE stream; socket echoes must not duplicate its exchange.
       if (submitting.current) return
@@ -116,13 +132,15 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         if (signal.aborted || generation.current !== version || submitting.current) return
         const exchanges = savedExchanges(chat)
         const last = exchanges.at(-1)
-        // A stored unanswered question is history. Only a user notification
-        // observed on this connection establishes an active remote request.
-        const pending = last?.id === pendingMessageId && !last.answer && !last.content ? exchanges.pop() : null
+        // The server reports a question that is still being answered (also to a device that joined
+        // mid-answer): show its status lines and trace so far, then keep following live events.
+        const active = chat.active
+        const pending = active && last && !last.answer && !last.content ? exchanges.pop() : null
         setAnswers(exchanges)
-        setPendingQuestion(pending?.question ?? '')
+        setPendingQuestion(pending ? pending.question : '')
         setBusy(!!pending)
-        if (!pending) { setStatuses([]); setTraces([]) }
+        setStatuses(pending ? (active!.statuses.length ? active!.statuses : ['Thinking…']) : [])
+        setTraces(pending ? active!.traces ?? [] : [])
         setError('')
       }).catch((err: unknown) => {
         if (!signal.aborted && generation.current === version && !submitting.current)
@@ -130,25 +148,36 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       })
     }
     const unsubscribe = chatLive.subscribe((event) => {
-      if (event.type === 'connected' || event.type === 'disconnected') {
-        // A remote request observed before suspension may never produce another
-        // notification here. A reconnect snapshot is history, not an active job.
-        pendingMessageId = null
-        if (!submitting.current) {
-          setBusy(false); setPendingQuestion(''); setStatuses([]); setTraces([])
-        }
-        if (event.type === 'connected') refresh()
-        return
-      }
+      // A (re)connect snapshot also recovers everything missed while backgrounded or in native AR.
+      if (event.type === 'connected') { refresh(); return }
+      if (event.type === 'disconnected') return
       if (event.chat_id !== liveChatId || submitting.current) return
-      if (event.type === 'chat.message') {
-        pendingMessageId = event.role === 'user' ? event.message_id : null
-        refresh()
-      }
-      else setStatuses((previous) => previous.at(-1) === event.text ? previous : [...previous, event.text])
+      if (event.type === 'chat.message' || event.type === 'chat.done') refresh()
+      else if (event.type === 'chat.status') setStatuses((previous) => previous.at(-1) === event.text ? previous : [...previous, event.text])
+      else if (event.type === 'chat.trace') setTraces((previous) => JSON.stringify(previous.at(-1)) === JSON.stringify(event.step) ? previous : [...previous, event.step])
     })
     return () => { controller?.abort(); unsubscribe() }
   }, [demo, liveChatId])
+
+  // Another device asked a question in a different chat: banner (or auto-open when "follow" is on).
+  const [incoming, setIncoming] = useState<{ chatId: string; question: string } | null>(null)
+  const [following] = useFollow()
+  const followingRef = useRef(following)
+  useEffect(() => { followingRef.current = following }, [following])
+  useEffect(() => {
+    if (demo) return
+    return chatLive.subscribe((event) => {
+      if (event.type !== 'chat.message' || event.role !== 'user' || submitting.current) return
+      if (event.chat_id === chatId.current) return
+      if (followingRef.current) { window.location.hash = `#/chat?chat=${encodeURIComponent(event.chat_id)}`; return }
+      setIncoming({ chatId: event.chat_id, question: event.text ?? 'New question' })
+    })
+  }, [demo])
+  useEffect(() => { if (liveChatId) setIncoming((previous) => previous?.chatId === liveChatId ? null : previous) }, [liveChatId])
+  function openIncoming(id: string) {
+    setIncoming(null)
+    window.location.hash = `#/chat?chat=${encodeURIComponent(id)}`
+  }
 
   useEffect(() => {
     let frame = 0
@@ -294,7 +323,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     }
   }
 
-  return <div ref={splitContainer} className={`chat-workspace ${viewer ? 'has-viewer' : ''}`} hidden={hidden} style={{ '--chat-split': `${split}%` } as CSSProperties}>
+  return <><FollowBanner incoming={incoming} onOpen={openIncoming} onDismiss={() => setIncoming(null)} />
+  <div ref={splitContainer} className={`chat-workspace ${viewer ? 'has-viewer' : ''}`} hidden={hidden} style={{ '--chat-split': `${split}%` } as CSSProperties}>
     <section className="chat-page" aria-label="Drawing questions" inert={!!viewer && sheet}>
     <div ref={conversation} className={`conversation ${answers.length || busy ? 'has-answers' : ''}`}>
       {restoring && <p className="chat-loading" role="status">Loading chat…</p>}
@@ -380,10 +410,10 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         }}
         onPointerUp={(event) => event.currentTarget.releasePointerCapture(event.pointerId)} />
       <DrawingEditsContext value={sceneEdits}>
-        <DocumentViewer key={viewer.request} answer={viewer.answer} citation={viewer.citation} sheet={sheet}
+        <DocumentViewer key={viewer.citation.doc_id} answer={viewer.answer} citation={viewer.citation} sheet={sheet}
           chatId={liveChatId}
           edits={sceneEdits[viewer.citation.doc_id]} commands={viewerCommands.length ? viewerCommands : undefined} onClose={() => setViewer(null)} />
       </DrawingEditsContext>
     </>}
-  </div>
+  </div></>
 }

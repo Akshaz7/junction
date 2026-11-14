@@ -12,6 +12,34 @@ const PAGE_SIZE = 40
 const ACCEPTED = '.ifc,.dxf,.dwg,.pdf,.svg,.png,.jpg,.jpeg,.tif,.tiff'
 const terminal = new Set(['ready', 'partial', 'failed', 'stored'])
 
+type Version = { doc_id: string; index: number; date: string | null; size: number | null; label: string }
+export type FileDocument = Document & {
+  folder?: string; size?: number | null; updated_at?: string | null; date?: string | null
+  version_count?: number | null; version_index?: number | null; versions?: Version[]
+}
+type FolderNode = { name: string; path: string; count: number; children: FolderNode[] }
+const inFolder = (doc: FileDocument, path: string) => !path || doc.folder === path || !!doc.folder?.startsWith(`${path}/`)
+function fileSize(size?: number | null) {
+  if (size == null) return 'Size unavailable'
+  if (size < 1024) return `${size} B`
+  return size < 1024 * 1024 ? `${(size / 1024).toFixed(1)} KB` : `${(size / (1024 * 1024)).toFixed(1)} MB`
+}
+function fileDate(value?: string | null) {
+  return value && !Number.isNaN(Date.parse(value)) ? new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date unavailable'
+}
+function FolderBranch({ node, active, onSelect }: { node: FolderNode; active: string; onSelect: (path: string) => void }) {
+  const [expanded, setExpanded] = useState(false)
+  const open = expanded || active === node.path || active.startsWith(`${node.path}/`)
+  return <div className="data-folder-branch">
+    <div className="data-folder-line">{node.children.length > 0 && <button className="data-folder-expand" type="button" aria-label={`${open ? 'Collapse' : 'Expand'} ${node.path}`} aria-expanded={open} onClick={() => { if (open && active.startsWith(node.path)) onSelect(''); setExpanded(!open) }}>{open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}</button>}
+      <button type="button" aria-label={`Open ${node.path} folder`} aria-current={active === node.path ? 'page' : undefined} onClick={() => { onSelect(node.path); setExpanded(true) }}><Folder size={14} /><span>{node.name}</span><small>{node.count}</small></button></div>
+    {open && node.children.length > 0 && <div className="data-folder-children">{node.children.map((child) => <FolderBranch key={child.path} node={child} active={active} onSelect={onSelect} />)}</div>}
+  </div>
+}
+function folderOptions(nodes: FolderNode[], depth = 0): { path: string; label: string }[] {
+  return nodes.flatMap((node) => [{ path: node.path, label: `${' '.repeat(depth)}${node.name}` }, ...folderOptions(node.children, depth + 1)])
+}
+
 function DocumentTitle({ title }: { title: string }) {
   const suffix = title.match(/^(.*?)(\s*[—–-]?\s*generated for demo)$/i)
   return suffix ? <><span className="document-title-name">{suffix[1]}</span><small className="document-demo-label">{suffix[2]}</small></> : <span className="document-title-name">{title}</span>
@@ -91,10 +119,32 @@ function DocumentDetail({ doc, docked, onClose, onAsk }: { doc: Document; docked
 }
 
 export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
-  docs: Document[]; loading: boolean; demo: boolean; hidden: boolean
+  docs: FileDocument[]; loading: boolean; demo: boolean; hidden: boolean
   onRefresh: () => Promise<void>; onAsk: (doc: Document) => void
 }) {
-  const [folder, setFolder] = useState<string | null>(null)
+  const [folder, setFolder] = useState('')
+  const [folders, setFolders] = useState<FolderNode[]>([])
+  const [folderError, setFolderError] = useState('')
+  const [folderLoading, setFolderLoading] = useState(true)
+  const [folderRetry, setFolderRetry] = useState(0)
+  const [olderDoc, setOlderDoc] = useState<FileDocument | null>(null)
+  const [versionError, setVersionError] = useState('')
+  const [versionLoading, setVersionLoading] = useState(false)
+  const versionRequest = useRef(0)
+  const openedUpload = useRef<string | null>(null)
+  useEffect(() => {
+    if (demo || hidden) return
+    const controller = new AbortController()
+    setFolderLoading(true)
+    setFolderError('')
+    fetch('/api/folders', { signal: controller.signal }).then(async (response) => {
+      if (!response.ok) throw new Error(`Could not load folders (${response.status}).`)
+      const result = await response.json() as { folders: FolderNode[] }
+      if (!controller.signal.aborted) setFolders(result.folders)
+    }).catch((error: unknown) => { if (!controller.signal.aborted) setFolderError(error instanceof Error ? error.message : 'Could not load folders.') })
+      .finally(() => { if (!controller.signal.aborted) setFolderLoading(false) })
+    return () => controller.abort()
+  }, [demo, hidden, docs, folderRetry])
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -126,6 +176,13 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
         setUpload((previous) => previous ? { ...previous, ...result } : previous)
         if (terminal.has(result.status)) {
           await onRefresh()
+          if (controller.signal.aborted) return
+          if (result.status === 'ready' || result.status === 'partial') {
+            setOlderDoc(null)
+            setPreviewDocked(false)
+            setSelectedId(docId)
+            openedUpload.current = docId
+          }
         } else {
           timer = setTimeout(poll, 1500)
         }
@@ -151,7 +208,7 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
     try {
       const receipt = await workspaceApi.uploadDocument(file)
       setUpload({ name: file.name, docId: receipt.doc_id, status: receipt.status === 'stored' ? 'stored' : 'running', detail: receipt.status === 'stored' ? receipt.detail : '', stages: [] })
-      setFolder('uploads')
+      setFolder('Uploads')
       setSearch('')
       setPage(1)
       await onRefresh()
@@ -174,16 +231,45 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
     requestAnimationFrame(() => lastOpened.current?.focus())
   }
 
-  const sources = [...new Set(docs.map((doc) => doc.source))].sort()
-  const activeFolder = folder === null ? sources[0] || '' : folder
+  useEffect(() => {
+    if (!upload?.docId || upload.status !== 'stored' || openedUpload.current === upload.docId || !docs.some((doc) => doc.doc_id === upload.docId)) return
+    openedUpload.current = upload.docId
+    setOlderDoc(null)
+    setPreviewDocked(false)
+    setSelectedId(upload.docId)
+  }, [docs, upload])
+
+  async function openVersion(id: string) {
+    const request = ++versionRequest.current
+    setVersionError('')
+    const existing = docs.find((doc) => doc.doc_id === id)
+    if (existing) { setVersionLoading(false); setSelectedId(id); setOlderDoc(null); setPreviewDocked(false); return }
+    setVersionLoading(true)
+    try {
+      const doc = await workspaceApi.getDocument(id)
+      if (request !== versionRequest.current) return
+      setOlderDoc(doc); setSelectedId(id); setPreviewDocked(false)
+    } catch (error) {
+      if (request !== versionRequest.current) return
+      // Older revisions are not always in the document catalogue; their page images still are.
+      const latest = docs.find((doc) => doc.versions?.some((version) => version.doc_id === id))
+      const version = latest?.versions?.find((item) => item.doc_id === id)
+      if (latest && version) { setOlderDoc({ ...latest, doc_id: id, title: `${latest.title} (${version.label})` }); setSelectedId(id); setPreviewDocked(false) }
+      else setVersionError(error instanceof Error ? error.message : 'Could not open this version.')
+    }
+    finally { if (request === versionRequest.current) setVersionLoading(false) }
+  }
+
+  const activeFolder = folder
+  const options = folderOptions(folders)
   const query = search.trim().toLowerCase()
   // Searching always spans every source, even with a folder selected.
-  const filtered = docs.filter((doc) => query ? `${doc.title} ${doc.doc_id} ${doc.source} ${doc.formats.join(' ')} ${doc.licence || ''} ${doc.credit || ''}`.toLowerCase().includes(query) : !activeFolder || doc.source === activeFolder)
+  const filtered = docs.filter((doc) => query ? `${doc.title} ${doc.doc_id} ${doc.source} ${doc.folder || ''} ${doc.formats.join(' ')} ${doc.licence || ''} ${doc.credit || ''}`.toLowerCase().includes(query) : inFolder(doc, activeFolder))
   if (upload?.docId) filtered.sort((a, b) => Number(b.doc_id === upload.docId) - Number(a.doc_id === upload.docId))
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, pageCount)
   const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
-  const selected = docs.find((doc) => doc.doc_id === selectedId)
+  const selected = docs.find((doc) => doc.doc_id === selectedId) || (olderDoc?.doc_id === selectedId ? olderDoc : null)
   const uploadLabel = !upload ? '' : upload.status === 'uploading' ? 'Uploading…' : upload.status === 'running' || upload.status === 'none' ? 'Processing document…' : upload.status === 'ready' ? 'Ready to use' : upload.status === 'partial' ? 'Page preview ready; some processing is unavailable.' : upload.status === 'failed' ? 'Processing failed. The original file is stored.' : 'File stored. Processing is unavailable on this server.'
 
   return <section className="data-screen" aria-label="Project documents" hidden={hidden} onDragOver={(event) => {
@@ -204,7 +290,7 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
       <Upload size={18} aria-hidden="true" /><span>{demo ? 'Connect to the server to upload a drawing.' : 'Drop a drawing here, or use Upload.'}<small>One file at a time · IFC, DXF, DWG, PDF, SVG, PNG, JPG, TIF · up to 100 MB</small></span>
     </div>
     {upload && <div className="data-upload-status" role="status" aria-live="polite" aria-busy={pending && !uploadError}>
-      {pending && !uploadError && <LoaderCircle size={16} className="data-spinner" />}<div><strong>{upload.name}</strong><p>{uploadLabel}</p>
+      {pending && !uploadError && <LoaderCircle size={16} className="data-spinner" />}<div><strong>{upload.name}</strong><p>{uploadLabel}</p>{pending && <progress aria-label="Document processing" />} {upload.detail && !terminal.has(upload.status) && <p>{upload.detail}</p>}
         {!!upload.stages.length && <ul>{upload.stages.map((stage, index) => <li key={`${stage.stage}-${index}`}>{stage.stage}: {stage.ok ? 'complete' : 'unavailable'}</li>)}</ul>}
         {upload.detail && terminal.has(upload.status) && <p>{upload.detail}</p>}</div>
     </div>}
@@ -213,20 +299,22 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
       setPollAttempt((attempt) => attempt + 1)
       try { await onRefresh() } catch (error) { setUploadError(error instanceof Error ? error.message : 'Could not refresh documents.') }
     }}>Retry status</Button>}</div>}
+    {versionError && <p className="data-upload-error" role="alert">{versionError}</p>}
     <div className={`data-browser ${selected ? 'has-detail' : ''}`}>
       <nav className="data-folders" aria-label="Document folders"><h2>Folders<FolderPlus size={14} /></h2>
         <button className="all-files" type="button" aria-current={!activeFolder && !query ? 'page' : undefined} onClick={() => { setFolder(''); setSearch(''); setPage(1) }}><Layers size={16} /><span>All Files</span><small>{docs.length}</small></button>
-        {sources.map((source) => <div key={source}><button type="button" aria-label={`Open ${source} folder`} aria-current={activeFolder === source && !query ? 'page' : undefined} onClick={() => { setFolder(source); setSearch(''); setPage(1) }}>
-          <Folder size={14} /><span>{source}</span><small>{docs.filter((doc) => doc.source === source).length}</small></button>
-          {activeFolder === source && <div className="folder-file-tree">{docs.filter((doc) => doc.source === source).slice(0, 10).map((doc) => <button type="button" key={doc.doc_id} aria-label={`Preview ${doc.title}`} aria-current={selectedId === doc.doc_id ? 'page' : undefined} onClick={(event) => { lastOpened.current = event.currentTarget; setPreviewDocked(false); setSelectedId(doc.doc_id) }}><FileText size={14} /><span className="document-title"><DocumentTitle title={doc.title} /></span></button>)}</div>}
-        </div>)}
+        {folderLoading && <p role="status" className="data-folder-message">Loading folders…</p>}
+        {folderError && <div className="data-folder-message"><p role="alert">{folderError}</p><button type="button" onClick={() => setFolderRetry((n) => n + 1)}>Retry folders</button></div>}
+        {folders.map((node) => <FolderBranch key={node.path} node={node} active={query ? '' : activeFolder} onSelect={(path) => { setFolder(path); setSearch(''); setPage(1) }} />)}
       </nav>
       <label className={`data-folder-search ${search ? 'has-query' : ''}`}><Search size={16} /><Input type="search" aria-label="Search documents" placeholder="Search all documents" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} /></label>
-      <div className="data-files"><header><h2>{query ? 'Search results · all folders' : activeFolder || 'All Files'}</h2><ChevronLeft className="mobile-folder-back" size={14} /><select className="mobile-folder-select" aria-label="Document folder" value={activeFolder} onChange={(event) => { setFolder(event.target.value); setSearch(''); setPage(1) }}><option value="">All Files</option>{sources.map((source) => <option key={source} value={source}>{source}</option>)}</select><SlidersHorizontal className="mobile-folder-filter" size={14} /><span>Files ({filtered.length})</span></header>
+      <div className="data-files"><header><h2>{query ? 'Search results · all folders' : activeFolder || 'All Files'}</h2><ChevronLeft className="mobile-folder-back" size={14} /><select className="mobile-folder-select" aria-label="Document folder" value={activeFolder} onChange={(event) => { setFolder(event.target.value); setSearch(''); setPage(1) }}><option value="">All Files</option>{options.map((option) => <option key={option.path} value={option.path}>{option.label}</option>)}</select><SlidersHorizontal className="mobile-folder-filter" size={14} /><span>Files ({filtered.length})</span></header>
         {loading ? <p className="data-empty" role="status">Loading documents…</p> : !visible.length ? <p className="data-empty">No documents found.</p> : <div className="data-file-list">{visible.map((doc) => <article key={doc.doc_id} className="data-file-row" data-doc-id={doc.doc_id} data-selected={selectedId === doc.doc_id || undefined}>
           <button className="data-open-file" type="button" aria-label={`Open ${doc.title}`} aria-expanded={selectedId === doc.doc_id} onClick={(event) => { lastOpened.current = event.currentTarget; setPreviewDocked(false); setSelectedId(doc.doc_id) }}>
-            <span className="file-checkbox" aria-hidden="true" /><DocumentImage key={doc.doc_id} doc={doc} /><span><h3><DocumentTitle title={doc.title} /></h3><span className="data-file-meta">{doc.source} · {doc.pages} {doc.pages === 1 ? 'page' : 'pages'}</span><small>{doc.licence || 'Licence not provided'} · {doc.credit || 'Credit not provided'}</small></span>
-          </button><FormatBadges doc={doc} /><MoreHorizontal className="file-row-more" size={16} />
+            <span className="file-checkbox" aria-hidden="true" /><DocumentImage key={doc.doc_id} doc={doc} /><span><h3><DocumentTitle title={doc.title} /></h3><span className="data-file-meta">{doc.folder || doc.source} · {doc.pages} {doc.pages === 1 ? 'page' : 'pages'}</span><small>{doc.licence || 'Licence not provided'} · {doc.credit || 'Credit not provided'}</small></span>
+          </button><div className="data-file-facts"><span aria-label="File size">{fileSize(doc.size)}</span><time aria-label="File date" dateTime={doc.date || doc.updated_at || undefined}>{fileDate(doc.date || doc.updated_at)}</time>
+            {doc.versions?.length ? <label className="data-version-picker"><span>{doc.version_count ?? doc.versions.length} versions</span><select aria-label={`Versions of ${doc.title}`} value={doc.versions.some((version) => version.doc_id === selectedId) ? selectedId! : doc.doc_id} disabled={versionLoading} onChange={(event) => void openVersion(event.target.value)}>{doc.versions.map((version) => <option key={version.doc_id} value={version.doc_id}>{version.label}</option>)}</select></label> : <span>{doc.version_count == null ? 'Version count unavailable' : `${doc.version_count} ${doc.version_count === 1 ? 'version' : 'versions'}`}</span>}
+          </div><FormatBadges doc={doc} /><MoreHorizontal className="file-row-more" size={16} />
         </article>)}</div>}
         {!loading && filtered.length > 0 && <div className="data-pagination" aria-label="Document pagination"><span>{(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} of {filtered.length}</span>
           <Button variant="ghost" size="icon" aria-label="Previous document page" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}><ChevronLeft size={17} /></Button>

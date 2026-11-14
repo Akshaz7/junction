@@ -27,7 +27,7 @@ test('Visualise it raises the plan and retains the five answer citation labels',
   // the test timeout. Timer transitions still run when frames are skipped.
   await page.clock.fastForward(1000);
   await expect(panel).toHaveAttribute('data-rise-state', 'rising');
-  await page.clock.fastForward(1000);
+  await page.clock.fastForward(1600); // flat 600 ms + 3 steps x 600 ms = 2400 ms
   await expect(panel).toHaveAttribute('data-rise-state', 'done');
   await page.clock.runFor(32);
   const state = await page.evaluate(() => (window as typeof window & {

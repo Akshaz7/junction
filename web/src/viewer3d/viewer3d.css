@@ -98,19 +98,18 @@
 .viewer3d-findings-card dd { margin: 2px 0 0; }
 .viewer3d-findings-card button { padding: 6px 10px; font: inherit; border: 1px solid var(--border, #e7e7e7); border-radius: 6px; background: var(--card, #fff); color: inherit; cursor: pointer; }
 .viewer3d-findings-card .viewer3d-findings-close { position: absolute; right: 8px; top: 8px; padding: 2px 8px; }
-.viewer3d-item-label {
-  display: grid;
-  place-items: center;
-  min-width: 26px;
-  height: 26px;
-  padding: 0 6px;
-  box-sizing: border-box;
-  border: 2px solid #fff;
-  border-radius: 999px;
-  color: #fff;
-  font: 600 12px/1 var(--font-sans, system-ui, sans-serif);
-  box-shadow: 0 2px 8px #0004;
-  pointer-events: none;
+.viewer3d-annotation { position: absolute; pointer-events: none; }
+.viewer3d-label-pill {
+  position: relative; display: grid; justify-items: center; gap: 3px;
+  width: max-content; min-width: 42px; max-width: 150px; padding: 7px 11px;
+  box-sizing: border-box; border: 1px solid #ffffff30; border-radius: 14px;
+  background: #252723; color: #fff; box-shadow: 0 3px 12px #0003;
+  font-family: var(--font-sans, system-ui, sans-serif);
+}
+.viewer3d-item-label { font-size: 14px; font-weight: 750; line-height: 1; overflow-wrap: anywhere; }
+.viewer3d-label-kind { color: #dedfd9; font-size: 9px; line-height: 1; text-transform: capitalize; }
+.viewer3d-label-leader {
+  position: absolute; height: 1px; background: #53574bbb; transform-origin: 0 50%; pointer-events: none;
 }
 .viewer3d-footer { display: grid; gap: 6px; padding: 12px 16px; font-size: 12px; }
 .viewer3d-footer p { margin: 0; color: var(--muted-foreground, #666); }
@@ -139,8 +138,9 @@
 .viewer3d-item-card {
   position: absolute;
   top: 16px;
-  right: 16px;
-  width: min(320px, calc(100% - 32px));
+  left: 16px;
+  z-index: 3;
+  width: min(260px, calc(100% - 32px));
   max-height: calc(100% - 32px);
   overflow: auto;
   box-sizing: border-box;
@@ -152,19 +152,19 @@
   overflow-wrap: anywhere;
 }
 .viewer3d-item-card-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
-.viewer3d-item-card h2 { margin: 0; font-size: 16px; line-height: 1.4; }
+.viewer3d-item-card h2 { margin: 0; font-size: 14px; line-height: 1.4; }
 .viewer3d-item-card button {
   flex: none;
-  width: 28px;
-  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
   border: 1px solid var(--border, #e7e7e7);
   border-radius: 6px;
   background: var(--card, #fff);
   color: inherit;
-  font: 20px/1 system-ui, sans-serif;
+  font: 12px/1 system-ui, sans-serif;
   cursor: pointer;
 }
-.viewer3d-item-card dl { display: grid; gap: 8px; margin: 16px 0 0; font-size: 13px; }
+.viewer3d-item-card dl { display: grid; gap: 6px; margin: 12px 0 0; font-size: 12px; }
 .viewer3d-item-card dl div { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 12px; }
 .viewer3d-item-card dt, .viewer3d-item-note { color: var(--muted-foreground, #666); }
 .viewer3d-item-card dd { margin: 0; }
@@ -241,3 +241,15 @@
 
 .viewer3d-footer:empty { display: none; }
 .viewer3d-picked-overlay { position: absolute; left: 12px; bottom: 12px; max-width: calc(100% - 24px); padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--foreground); font: 11px/16px monospace; overflow-wrap: anywhere; pointer-events: none; }
+
+/* FIX-5 build-up slider and FIX-3 legend */
+.kind-legend-3d { position: absolute; left: 12px; top: 12px; z-index: 2; }
+.viewer3d-build { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 12px; }
+.viewer3d-build button {
+  min-width: 32px; padding: 4px 10px; border: 1px solid var(--border, #e7e7e7); border-radius: 8px;
+  color: inherit; background: var(--card, #fff); font: inherit; cursor: pointer;
+}
+.viewer3d-build button:disabled { opacity: .4; cursor: default; }
+.viewer3d-build input[type="range"] { flex: 1 1 120px; min-width: 80px; accent-color: var(--forest-600, #2f6b4f); }
+.viewer3d-build output { flex: 0 1 auto; min-width: 0; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 520px) { .viewer3d-build { flex-wrap: wrap; } .viewer3d-build output { flex-basis: 100%; } }

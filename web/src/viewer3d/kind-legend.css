@@ -1,0 +1,11 @@
+.kind-legend {
+  display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0; padding: 4px 10px; list-style: none;
+  width: fit-content; max-width: calc(100% - 16px);
+  font: 500 12px/1.4 var(--font-sans, system-ui, sans-serif); font-variant-numeric: tabular-nums;
+  color: var(--foreground, #1a1a1a); background: color-mix(in srgb, var(--background, #fff) 88%, transparent);
+  border: 1px solid color-mix(in srgb, currentColor 14%, transparent); border-radius: 8px;
+  pointer-events: none;
+}
+.kind-legend li { display: inline-flex; align-items: center; gap: 6px; }
+.kind-legend li + li::before { content: '·'; margin-right: 6px; margin-left: -6px; opacity: .5; }
+.kind-legend-swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; box-shadow: 0 0 0 1px color-mix(in srgb, #000 35%, transparent); }

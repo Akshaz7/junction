@@ -54,17 +54,20 @@ export function buildItemDetails(
   }
   add('Tag', sceneItem.tag);
   add('IFC class', element?.ifc_class);
-  add('Type', element?.type_name);
+  add('Type', element?.type_name ?? sceneItem.type_name ?? sceneItem.kind);
   add('Predefined type', element?.predefined_type);
   for (const [key, label, unit] of [
     ['width_m', 'Width', 'm'], ['height_m', 'Height', 'm'], ['length_m', 'Length', 'm'],
     ['area_m2', 'Area', 'm²'], ['volume_m3', 'Volume', 'm³'],
   ]) {
-    const value = element?.quantities?.[key];
+    const value = element?.quantities?.[key] ?? sceneItem.quantities?.[key] ?? element?.props?.[key] ?? sceneItem.props?.[key];
     if (typeof value === 'number' && Number.isFinite(value)) add(label, `${value} ${unit}`);
+  }
+  if (!fields.some(({ label }) => ['Width', 'Height', 'Length', 'Area', 'Volume'].includes(label))) {
+    add('Size', 'Not available');
   }
   add('Material', element?.props?.material);
   add('Fire rating', element?.props?.fire_rating);
   add('External', element?.props?.is_external);
-  return { item_id, name: text(element?.name) ?? item_id, fields, hasElement: element !== undefined };
+  return { item_id, name: text(element?.name) ?? text(sceneItem.name) ?? item_id, fields, hasElement: element !== undefined };
 }

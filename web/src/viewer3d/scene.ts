@@ -8,6 +8,10 @@ export type Storey = string | { name: string; elevation_m?: number };
 export type SceneAsset = string | { url?: string; path?: string; local_path?: string };
 
 export interface SceneItem {
+  name?: string | null;
+  type_name?: string | null;
+  quantities?: Record<string, number | null> | null;
+  props?: Record<string, unknown> | null;
   /** CONTRACT 5.11 stable document tag; older scene manifests may omit it. */
   tag?: string;
   node: string;
