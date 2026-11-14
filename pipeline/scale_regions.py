@@ -179,9 +179,13 @@ def annotate_cached(pm, directory, allow_ocr=False):
             dd = im.info.get("dpi")
             if dd and positive(dd[0]) and positive(dd[1]) and abs(dd[0] / dd[1] - 1) < .01:
                 dpi = dpi or positive(dd[0])
-            if allow_ocr and not words:
+            # VLM room labels are not an OCR pass. They used to prevent OCR,
+            # hiding printed scales on precisely the scanned upload path.
+            if allow_ocr and not scale_anchors(words) and not (d / f"scale-ocr-{page}.json").exists():
                 from engine.reader.text import ocr_words
-                words = ocr_words(d / f"page-{page}.png")
+                extra = ocr_words(d / f"page-{page}.png")
+                words.extend(extra)
+                (d / f"scale-ocr-{page}.json").write_text(json.dumps({"image": pm["image"], "words": extra}))
             return annotate_planmap(pm, words, im, dpi)
     except (OSError, ImportError):
         return annotate_planmap(pm, words, dpi=dpi)

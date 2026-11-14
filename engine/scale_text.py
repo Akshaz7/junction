@@ -105,18 +105,14 @@ def imperial_ratio(words: list[dict]) -> int | None:
 
 
 def ratio_and_sheet(words: list[dict]) -> tuple[int | None, str | None]:
+    from engine.scales import scale_anchors
     texts = [str(w.get("text") or "") for w in words]
-    ratio = None
-    for i in range(len(texts)):
-        for n in (1, 2, 3):
-            m = RATIO_RE.search("".join(texts[i:i + n]))
-            if m and int(m.group(1)) in RATIOS:
-                ratio = int(m.group(1))
-                break
-        if ratio:
-            break
-    if ratio is None:
-        ratio = imperial_ratio(words)
+    ratios = {a["ratio"] for a in scale_anchors(words)}
+    # Different views can have different scales. Never select the first one
+    # and use it for the whole sheet. Spatial assignment lives in scale_regions.
+    ratio = next(iter(ratios)) if len(ratios) == 1 else None
+    if ratio is not None and ratio.is_integer():
+        ratio = int(ratio)
     sheet = None
     for t in texts:
         m = SHEET_RE.match(t.strip())
@@ -143,6 +139,9 @@ def from_ratio(ratio: int | None, sheet: str | None, W: int, H: int, dpi: float 
 
 
 def detect(words: list[dict], W: int, H: int, dpi: float | None = None, prior: float | None = None) -> dict | None:
+    from engine.scales import scale_anchors
+    if len({a["ratio"] for a in scale_anchors(words)}) > 1:
+        return None
     ratio, sheet = ratio_and_sheet(words)
     bar = scalebar(words)
     cand = from_ratio(ratio, sheet, W, H, dpi)

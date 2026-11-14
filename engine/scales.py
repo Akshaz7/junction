@@ -156,7 +156,8 @@ def scale_description(scale, title=None):
     name = f"detail '{title}'" if title else "view"
     mpp = positive((scale or {}).get("m_per_px"))
     if not mpp:
-        return f"{name}: scale unavailable"
+        printed = ratio or positive((scale or {}).get("unverified_printed_ratio"))
+        return f"{name}: printed 1:{printed:g}; physical scale unavailable" if printed else f"{name}: scale unavailable"
     if ratio:
         return f"{name} at 1:{ratio:g}"
     return f"{name} at {mpp:.5g} m/px"
