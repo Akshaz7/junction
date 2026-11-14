@@ -40,3 +40,23 @@ def test_api(kg_client):
     assert c.get('/api/projects/no-uuid/graph').status_code==404
     assert not any(n['kind']=='door' for n in c.get(base).json()['nodes'])
     assert len(c.get(base+'?depth=full&doc_id=unknown').json()['nodes'])==1
+
+
+def test_slow_build_returns_partial_then_finishes(kg_client,monkeypatch):
+    import time
+
+    import engine.kg
+    c,pid=kg_client
+    original=engine.kg.build
+    def slow(project,root):
+        time.sleep(.1)
+        return original(project,root)
+    monkeypatch.setattr(engine.kg,'build',slow)
+    monkeypatch.setattr(kg_routes,'BUILD_WAIT_S',.01)
+    base=f'/api/projects/{pid}/graph'
+    first=c.get(base)
+    assert first.status_code==202 and first.headers['Retry-After']=='3'
+    assert first.json()['building'] and first.json()['stats']['nodes']==2
+    time.sleep(.15)
+    done=c.get(base+'?depth=full')
+    assert done.status_code==200 and done.json()['stats']['nodes']==5

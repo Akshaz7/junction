@@ -162,10 +162,13 @@ def enrich_sheets(writer, project, root: Path, deadline):
     docs = []
     for entry in project.get("docs", []):
         entry = {"doc_id": entry} if isinstance(entry, str) else entry
+        if not isinstance(entry, dict):
+            continue
         did = entry.get("doc_id")
         if not did:
             continue
-        meta = {**read_json(root / did / "doc.json", {}), **entry}
+        stored = read_json(root / did / "doc.json", {})
+        meta = {**(stored if isinstance(stored, dict) else {}), **entry}
         if (path := resolve_source(meta, root, "pdf")):
             docs.append((did, meta, path))
     if not docs:

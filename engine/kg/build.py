@@ -16,6 +16,11 @@ def read_json(path, default=None):
         return default
 
 
+def read_dict(path):
+    value = read_json(path, {})
+    return value if isinstance(value, dict) else {}
+
+
 class Builder(Records):
     def __init__(self, project, root):
         super().__init__()
@@ -43,17 +48,44 @@ class Builder(Records):
         return next((n for n in ids if page is None or self.nodes[n]['source']['page'] == page), None)
 
     def populate(self):
-        from engine.projects.combine import combine
+        from engine.projects.combine import DocInfo, combine
+        from engine.projects.roles import classify
         docs = self.project.get('docs') or self.project.get('doc_ids') or []
-        safe = []
+        safe, unreadable = [], {}
         for d in docs:
+            if not isinstance(d, (str, dict)):
+                self.warnings.append({'note': 'Invalid document record; skipped.'})
+                continue
             d = {'doc_id': d} if isinstance(d, str) else dict(d)
             did = str(d.get('doc_id') or '')
             if not did or Path(did).name != did or did in ('.', '..'):
                 self.warnings.append({'doc_id': did, 'note': 'Invalid document identifier; skipped.'})
                 continue
+            meta = read_json(self.root / did / 'doc.json', {})
+            if not isinstance(meta, dict):
+                unreadable[did] = DocInfo(did, title=d.get('title') or 'Unreadable document')
+                continue
+            if not d.get('role'):
+                try:
+                    classified = classify({**meta, 'doc_id': did}, self.root)
+                    d['role'] = classified['role']
+                    d['level'] = d.get('level') or classified.get('level')
+                except Exception:  # noqa: BLE001 - malformed extraction must not break unrelated documents
+                    d['role'] = 'other'
             safe.append(d)
-        self.combined = combine(safe, self.root)
+        try:
+            self.combined = combine(safe, self.root)
+        except Exception:  # noqa: BLE001 - isolate malformed quantity/index records
+            good = []
+            for d in safe:
+                try:
+                    combine([d], self.root)
+                    good.append(d)
+                except Exception:  # noqa: BLE001 - retain an unreadable document as a reference
+                    did = d['doc_id']
+                    unreadable[did] = DocInfo(did, title=d.get('title') or 'Unreadable document')
+            self.combined = combine(good, self.root)
+        self.combined.infos.update(unreadable)
         pn = self.node('project', self.pid, 'root', self.project.get('name') or 'Project', doc_ids=[])
         for did, info in self.combined.infos.items():
             dn = self.node('doc', did, 'root', info.title, level=info.level,
@@ -106,6 +138,7 @@ class Builder(Records):
                                   1 if it.source == 'ifc' else .8, {'level': level, 'source': source})
                 self.properties(nid, did, it)
         self.geometry()
+        self.wall_geometry()
         return self
 
     def properties(self, nid, did, it):
@@ -164,6 +197,58 @@ class Builder(Records):
                                'point_px': next(iter(p.coords)), 'page': it.page,
                                'item_source': n['source'], 'room_source': self.nodes[room]['source']})
 
+    def wall_geometry(self):
+        """Only unique geometric hosts; room bounds require actual wall and room outlines."""
+        try:
+            from shapely.geometry import Point, Polygon, box
+            from shapely.strtree import STRtree
+        except ImportError:
+            return
+        pages = defaultdict(list)
+        for nid, it in self.items.items():
+            if it.source != 'ifc' and it.bbox_px:
+                pages[(self.nodes[nid]['source']['doc_id'], it.page)].append(nid)
+        for ids in pages.values():
+            walls, shapes = [], []
+            for nid in ids:
+                it = self.items[nid]
+                if self.nodes[nid]['kind'] != 'wall':
+                    continue
+                try:
+                    shape = Polygon(it.polygon_px).buffer(0) if it.polygon_px else box(*it.bbox_px)
+                    if not shape.is_empty and shape.area > 0:
+                        walls.append(nid)
+                        shapes.append(shape)
+                except (ValueError, TypeError):
+                    continue
+            if not shapes:
+                continue
+            tree = STRtree(shapes)
+            for nid in ids:
+                it, n = self.items[nid], self.nodes[nid]
+                if n['kind'] in ('door', 'window'):
+                    bb = it.bbox_px
+                    point = Point((bb[0]+bb[2])/2, (bb[1]+bb[3])/2)
+                    hits = [int(i) for i in tree.query(point) if shapes[int(i)].covers(point)]
+                    if len(hits) == 1:
+                        wall = walls[hits[0]]
+                        self.edge('hosted_by', nid, wall, 'containment_geom', .55,
+                                  {'rule': 'unique_wall_contains_opening_centre', 'point_px': next(iter(point.coords)),
+                                   'opening_source': n['source'], 'wall_source': self.nodes[wall]['source']})
+                elif n['kind'] == 'room' and it.polygon_px:
+                    try:
+                        shape = Polygon(it.polygon_px).buffer(0)
+                        for index in tree.query(shape):
+                            wall = walls[int(index)]
+                            if self.items[wall].polygon_px:
+                                length = shape.boundary.intersection(shapes[int(index)]).length
+                                if length > 0:
+                                    self.edge('bounds', wall, nid, 'containment_geom', .7,
+                                              {'rule': 'wall_outline_intersects_room_boundary', 'contact_length_px': length,
+                                               'wall_source': self.nodes[wall]['source'], 'room_source': n['source']})
+                    except (ValueError, TypeError):
+                        continue
+
     def graph(self):
         return {'project_id': self.pid, 'version': 1, 'built_at': datetime.now(UTC).isoformat(),
                 'nodes': list(self.nodes.values()), 'edges': list(self.edges.values()), 'warnings': self.warnings}
@@ -186,5 +271,8 @@ def build_uncached(project, root):
     except ImportError:
         enrich = None
     if enrich:
-        graph = enrich(graph, project, Path(root)) or graph
+        readable_docs = [{'doc_id': did, 'role': info.role, 'level': info.level}
+                         for did, info in b.combined.infos.items()
+                         if isinstance(read_json(Path(root) / did / 'doc.json', {}), dict)]
+        graph = enrich(graph, {**project, 'docs': readable_docs}, Path(root)) or graph
     return finalise(graph, b.counterpart_docs)

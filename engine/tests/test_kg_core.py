@@ -77,3 +77,25 @@ def test_missing_corrupt_and_invalid_documents(tmp_path):
     assert g['stats']['linked_pct'] is None and g['stats']['agree_pct'] is None
     with pytest.raises(ValueError):
         load('../bad',tmp_path)
+
+
+def test_cache_membership_can_return_to_an_existing_docset(sample):
+    root,p=sample
+    a=build(p,root)
+    empty={**p,'docs':[]}
+    build(empty,root)
+    assert load('sample',root)['stats']['nodes']==1
+    assert build(p,root)==a
+    assert load('sample',root)==a
+    (root/'drawing'/'source.txt').write_text('Additional schedule text')
+    assert load('sample',root) is None
+
+
+def test_invalid_metadata_does_not_hide_other_files(sample):
+    root,p=sample
+    write(root/'malformed'/'doc.json',['wrong','shape'])
+    g=build({**p,'docs':[*p['docs'],{'doc_id':'malformed'},None]},root)
+    valid(g)
+    assert any(n['kind']=='door' for n in g['nodes'])
+    assert any(n['kind']=='doc' and n['doc_ids']==['malformed'] for n in g['nodes'])
+    assert g['warnings']

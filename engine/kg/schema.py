@@ -47,7 +47,7 @@ class Records:
         if nid not in self.nodes:
             self.nodes[nid] = {'id': nid, 'kind': kind, 'label': readable(label, kind.title()),
                                    'doc_ids': doc_ids if doc_ids is not None else [doc], 'level': level,
-                                   'props': finite(props or {}), 'source': source, 'canonical': None, 'degree': 0}
+                                   'props': finite(props or {}), 'source': finite(source), 'canonical': None, 'degree': 0}
         return nid
 
     def edge(self, kind, a, b, method, confidence, evidence, doc_ids=None):
@@ -57,12 +57,13 @@ class Records:
             raise ValueError(f'Unknown graph method: {method}')
         evidence = finite(evidence or {})
         # Several comparisons (door counts, room counts) legitimately connect the same pair of levels.
-        discriminator = str(evidence.get('property') or evidence.get('rule') or '')
-        eid = 'e-' + hashlib.sha256(f'{kind}\0{a}\0{b}\0{discriminator}'.encode()).hexdigest()[:24]
+        discriminator = str(evidence.get('property') or '') if kind in ('agrees', 'differs') else ''
+        ka, kb = sorted((a, b)) if kind in ('same_as', 'connects') else (a, b)
+        eid = 'e-' + hashlib.sha256(f'{kind}\0{ka}\0{kb}\0{discriminator}'.encode()).hexdigest()[:24]
         rec = dict(id=eid, kind=kind, **{'from': a, 'to': b}, method=method,
                    confidence=round(max(0., min(1., float(confidence))), 4), evidence=evidence,
                    doc_ids=sorted(set(doc_ids or self.nodes[a]['doc_ids'] + self.nodes[b]['doc_ids'])))
-        if eid not in self.edges or self.edges[eid]['confidence'] < rec['confidence']:
+        if eid not in self.edges or self.edges[eid]['confidence'] <= rec['confidence']:
             self.edges[eid] = rec
         return eid
 
