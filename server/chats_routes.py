@@ -52,7 +52,26 @@ def _no_data_answer(question, doc_ids, on_event=None):
         return None
 
 
-def _run_engine(question, doc_ids, on_event, scene_state=None, history=None):
+def _run_engine(question, doc_ids, on_event, scene_state=None, history=None, catalogue=None):
+    if ENGINE is _real_engine:
+        from engine.library import CATALOGUE, drawing_selection_answer, library_answer, library_search_answer, sheet_count_answer
+        token = CATALOGUE.set(catalogue)
+        try:
+            root = config.artifacts_dir()
+            quick = library_answer(question, root) or sheet_count_answer(question, doc_ids, root)
+            if quick is None and not doc_ids:
+                quick = library_search_answer(question, root) or drawing_selection_answer(question, root, history)
+            if quick is not None:
+                for step in quick.get("trace", []):
+                    on_event("trace", step)
+                return quick
+            return _selected_engine(question, doc_ids, on_event, scene_state, history)
+        finally:
+            CATALOGUE.reset(token)
+    return _selected_engine(question, doc_ids, on_event, scene_state, history)
+
+
+def _selected_engine(question, doc_ids, on_event, scene_state=None, history=None):
     quick = _no_data_answer(question, doc_ids, on_event)
     if quick is not None:
         return quick
@@ -210,7 +229,7 @@ async def ask(chat_id: str, body: NewMessage):
     c = await pool.fetchrow("select id, doc_id from chats where id=$1", cid)
     if c is None:
         raise HTTPException(404, "chat not found")
-    doc_ids = body.doc_ids or ([c["doc_id"]] if c["doc_id"] else [])
+    doc_ids = body.doc_ids if body.doc_ids is not None else ([c["doc_id"]] if c["doc_id"] else [])
     if doc_ids:
         from .changes_source import visible_doc_ids
         listed = await visible_doc_ids(pool)
@@ -260,16 +279,33 @@ async def ask(chat_id: str, body: NewMessage):
             hidden = []
         sstate = {"hidden": hidden} if hidden else None
 
+        catalogue = None
+        if ENGINE is _real_engine:
+            from engine.library import wants_library, _SHEETS
+            if not doc_ids or wants_library(body.content) or _SHEETS.search(body.content):
+                from .docs_routes import library_catalogue
+                catalogue = await library_catalogue(pool)
+
+        from .answer_progress import AnswerProgress, partial_deadline
+        progress = AnswerProgress(body.content, doc_ids)
         loop = asyncio.get_running_loop()
         q: asyncio.Queue = asyncio.Queue()
+        accepting = True
 
         def on_event(kind, payload):
-            loop.call_soon_threadsafe(q.put_nowait, (kind, payload))
+            if accepting:
+                try:
+                    loop.call_soon_threadsafe(q.put_nowait, (kind, payload))
+                except RuntimeError:  # a disconnected request's loop may already be closed
+                    pass
 
-        task = asyncio.create_task(asyncio.to_thread(_run_engine, body.content, doc_ids, on_event, sstate, history))
-        task.add_done_callback(lambda _: loop.call_soon_threadsafe(q.put_nowait, None))
+        task = asyncio.create_task(asyncio.to_thread(_run_engine, body.content, doc_ids, on_event, sstate, history, catalogue))
+        task.add_done_callback(lambda _: q.put_nowait(None) if accepting else None)
+        deadline = time.monotonic() + partial_deadline()
         last_delta = 0.0
-        while (item := await q.get()) is not None:
+        # Kept inside this request so delta throttling and ACTIVE always belong to this chat.
+        async def relay(item):
+            nonlocal last_delta
             act = ACTIVE.get(str(cid))
             if item[0] == "status":
                 text = item[1].get("text", "")
@@ -285,15 +321,52 @@ async def ask(chat_id: str, body: NewMessage):
                     last_delta = now
                     await publish({"type": "chat.delta", "chat_id": str(cid), "text": txt})
                     yield {"event": "delta", "data": json.dumps({"text": txt})}
-                continue
+                return
+            elif item[0] == "answer.partial":
+                # Snapshots include citations and are persisted if the deadline expires.
+                # Existing clients see ordinary delta text while the engine keeps checking.
+                txt = str(progress.snapshot["answer"].get("text_md") or "") if progress.snapshot else ""
+                if act is not None and txt:
+                    act["text"] = txt[:MAX_DELTA_CHARS]
+                if txt:
+                    await publish({"type": "chat.delta", "chat_id": str(cid), "text": txt[:MAX_DELTA_CHARS]})
+                    yield {"event": "delta", "data": json.dumps({"text": txt})}
+                return
             elif item[0] == "trace" and isinstance(item[1], dict):
                 ev = _trace_event(str(cid), item[1])
                 if act is not None and len(act["traces"]) < MAX_TRACE_EVENTS:
                     act["traces"].append(ev["step"])
                     await publish(ev)
             yield {"event": item[0], "data": json.dumps(item[1])}
+
+        ans = None
         try:
-            ans = task.result()
+            while True:
+                left = deadline - time.monotonic()
+                if left <= 0 and not task.done():
+                    while not q.empty():
+                        pending = q.get_nowait()
+                        if pending is not None:
+                            progress.update(*pending)
+                    ans = progress.partial()
+                    break
+                try:
+                    item = await asyncio.wait_for(q.get(), timeout=max(0.001, left))
+                except asyncio.TimeoutError:
+                    if not task.done():
+                        ans = progress.partial()
+                    break
+                if item is None:
+                    break
+                progress.update(*item)
+                async for event in relay(item):
+                    yield event
+        finally:
+            accepting = False
+            if not task.done():
+                task.cancel()  # suppress late events/results; Python cannot interrupt a provider's running thread
+        try:
+            ans = ans if ans is not None else task.result()
             validate_answer(ans)
         except Exception as e:
             yield {"event": "error", "data": json.dumps({"detail": f"engine failed: {e}"})}
@@ -302,15 +375,17 @@ async def ask(chat_id: str, body: NewMessage):
         mid = await pool.fetchval(
             "insert into messages (chat_id, role, content) values ($1,'assistant',$2) returning id",
             cid, ans["answer"]["text_md"])
+        answer_docs = ans.get("doc_ids") or doc_ids
         await pool.execute("insert into answers (message_id, chat_id, doc_id, answer) values ($1,$2,$3,$4::jsonb)",
-                           mid, cid, doc_ids[0] if doc_ids else None, json.dumps(ans))
+                           mid, cid, answer_docs[0] if answer_docs else None, json.dumps(ans))
         ACTIVE.pop(str(cid), None)  # before the notification, so the resync snapshot shows no live job
         await publish({"type": "chat.message", "chat_id": str(cid), "message_id": str(mid), "role": "assistant"})
         scene = ans["evidence"]["scene"]
-        for n, cmd in enumerate(scene.get("commands") or []):  # answer commands become persisted, relayed edits
+        for n, cmd in enumerate(scene.get("commands") or []):
             if isinstance(cmd, dict):
                 await record_edit({**cmd, "doc_id": scene.get("doc_id") or (doc_ids[0] if doc_ids else ""),
                                    "edit_id": f"{ans['answer_id']}-{n}"}, chat_id=cid)
         yield {"event": "answer", "data": json.dumps(ans)}
+
 
     return EventSourceResponse(stream())

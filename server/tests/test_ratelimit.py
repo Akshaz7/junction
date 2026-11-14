@@ -26,12 +26,13 @@ def limited_app(limit=None):
     return app
 
 
-@pytest.mark.parametrize("value, limit", [(None, 30), ("2", 2), ("", 30),
-                                         ("invalid", 30), ("0", 30), ("-1", 30)])
+@pytest.mark.parametrize("value, limit", [(None, 600), ("2", 2), ("", 600),
+                                         ("invalid", 600), ("0", 600), ("-1", 600)])
 def test_configurable_limit(monkeypatch, value, limit):
     monkeypatch.delenv("RATE_LIMIT_PER_MIN", raising=False)
     if value is not None:
         monkeypatch.setenv("RATE_LIMIT_PER_MIN", value)
+    monkeypatch.setenv("RATE_LIMIT_BURST", "1000")
     with TestClient(limited_app()) as c:
         assert [c.get("/api/chats").status_code for _ in range(limit)] == [200] * limit
         r = c.get("/api/chats")
@@ -163,3 +164,27 @@ def test_health_reports_database_available(health_client, monkeypatch):
     monkeypatch.setattr(db, "db_ok", db_ok)
     c, _ = health_client
     assert c.get("/api/health").json()["db"] is True
+
+
+def test_shared_wifi_allows_600_per_minute_but_caps_bursts(monkeypatch):
+    from server import ratelimit
+    clock = [100.0]
+    monkeypatch.delenv("RATE_LIMIT_PER_MIN", raising=False)
+    monkeypatch.delenv("RATE_LIMIT_BURST", raising=False)
+    monkeypatch.setattr(ratelimit.time, "monotonic", lambda: clock[0])
+    with TestClient(limited_app()) as c:
+        # Ten requests each second are sustainable throughout the minute.
+        for second in range(60):
+            clock[0] = 100.0 + second
+            assert all(c.get("/api/chats").status_code == 200 for _ in range(10))
+        r = c.post("/api/chats")
+        assert r.status_code == 429 and r.headers["Retry-After"] == "1"
+        clock[0] = 160.0
+        assert c.get("/api/chats").status_code == 200
+        # A separate IP still cannot flood a single second.
+        headers = {"x-forwarded-for": "192.0.2.8"}
+        assert all(c.get("/api/chats", headers=headers).status_code == 200 for _ in range(30))
+        r = c.get("/api/chats", headers=headers)
+        assert r.status_code == 429 and r.headers["Retry-After"] == "1"
+        clock[0] += 1
+        assert c.get("/api/chats", headers=headers).status_code == 200
