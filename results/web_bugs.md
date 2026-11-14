@@ -1,0 +1,2 @@
+# Web bugs found by LEAD tests (for WEB's next handoff)
+- 06:13 phone, Data screen: the document preview `<img alt="First page of …">` inside main#main-content intercepts pointer events over the bottom tab bar (390x844): tapping "Chat" in navigation "Mobile navigation" never lands (X-06 attempt 2, results/e2e/x06-attempt2/). The bottom tabs must always be on top and tappable (z-index / pointer-events / main padding-bottom for the tab bar height + safe area).
