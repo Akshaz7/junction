@@ -1,16 +1,19 @@
 # Handoff: WEB (Codex worker)
 
-Row ID: W-04 (attempt 2)
-Task: App shell following the reference pack: sidebar, layout, type, colours, controls. Study `refs/stoa-hero/00-hero-reference.png`, `01-desktop-contact-sheet.png`, `01-phone-contact-sheet.png`, `01-design-tokens-and-shell.md`, `03-build-guide.md` (component map, Button variants, type scale, spacing) and a few frames in `refs/stoa-hero/desktop-frames/`. Build: left sidebar with our own wordmark "Hologram" (text wordmark, no Stoa logo), nav items Overview, Chat, Changes, Data, Accuracy, Skills, Automations, a project switcher showing "Demo workspace", main content area with a router (react-router or a tiny hash router) and placeholder pages for each nav item. Reusable components in `web/src/components/ui/` (Button with the variants from the build guide, Card, Badge, Chip, Input, Tooltip) using the CSS variables from `web/src/styles/tokens.css`. Fonts as named in the build guide (Google Fonts only). The UI copy follows `refs/stoabuild-full-text.md` in tone. Never copy code from `refs/stoa-hero/source/`.
-Playwright cannot launch Chrome inside your sandbox: write the e2e test, make sure it type-checks, and the LEAD runs it.
-Input files: as above; CONTRACT.md 5.8
-Done test (LEAD runs): `cd web && npm run build && npx playwright test e2e/shell.spec.ts` — the test finds all nav items and checks 10 CSS variables on :root against `refs/stoa-hero/theme-tokens.css` values.
-Last failed attempt (if any): attempt 1 — LEAD ran `npx playwright test e2e/shell.spec.ts`: 3 passed, 1 failed:
-  e2e/shell.spec.ts:42 "phone navigation keeps all pages reachable without horizontal overflow"
-  Error: expect(locator).toHaveAttribute('aria-current','page') — element not found: getByRole('navigation', { name: 'Mobile navigation' }).getByRole('link', { name: 'Accuracy' })
-At phone width the mobile navigation has no "Accuracy" link. Per the plan (W-11) the phone bottom tabs are Overview, Chat, Changes, Data, More — put Accuracy, Skills, Automations under "More" and make the test follow that (open More, then the link), or include them in the mobile nav. Keep all pages reachable on phone with no horizontal overflow. The LEAD will re-run all 4 tests.
+Row ID: W-05 (attempt 1)
+Task: Chat screen against the REAL backend (S-03 is done: read docs/API.md; the API runs on http://localhost:8000, proxied by Vite at /api and /ws; start it yourself for local checks with `uv run uvicorn server.app:app --port 8000` only if nothing is on :8000 — `make db-up` first; the database is seeded). Keep the mock as a fallback when the API is unreachable.
+- Start screen with four starter cards (as in the reference pack; English copy, our voice per CONTRACT 5.8 and refs/stoabuild-full-text.md), e.g. "Count something on a plan", "Find a room's area", "Where is it on level N?", "What does this drawing say about …".
+- Composer with an `@` document picker (type @ to search /api/docs; selected docs become chips; sent as doc_ids). Create a chat with POST /api/chats, then POST /api/chats/{id}/messages and read the SSE stream.
+- Live status lines from `status` events ("Thinking…", "Exploring document: <name>"), trace lines feed "Show thought process".
+- Answer: key fact bold (markdown bold from text_md), citation chips [1] [2] inline after sentences, "Where it is set out" list, "Sources (n)", "Show thought process", a cost chip (answer.cost.usd_total formatted like "$0.0000" or "< $0.0001", tooltip with calls), "AI can make mistakes. Verify important information." under the composer.
+- Abstained answers render the plain sentence with no chips.
+- Clicking a chip must call a prop/callback `onOpenCitation(citation)` (W-06 builds the viewer next; for now open nothing or log).
+The backend currently uses a STUB engine: "How many windows are there?" on doc `cubicasa5k__colorful-11397` returns 13 boxes; other questions abstain. That is enough for the e2e test.
+Playwright can't run in your sandbox: write `e2e/chat.spec.ts` (asks the fixture question against the real API, sees the bold answer, at least one citation chip and the cost chip); make it type-check; the LEAD runs it with the API up.
+Rules: only edit web/ except web/src/viewer3d/ and web/src/main.tsx (LEAD wired a dev route there). Never copy code from refs/stoa-hero/source/.
+Done test (LEAD runs, API up): `cd web && npm run build && npx vitest run && npx playwright test e2e/chat.spec.ts`
+Last failed attempt (if any): none
 
 ---
 <!-- Worker appends RESULT: or NEEDS: lines below. -->
-RESULT: W-04 implemented seven hash routes, responsive Hologram sidebar/mobile navigation, Demo workspace selector, Google Fonts Inter, and Button/Card/Badge/Chip/Input/Tooltip; npm run build and npm test pass (9 tests), and all 4 shell Playwright tests are discovered and type-checked; browser execution remains with LEAD per handoff.
-RESULT: W-04 attempt 2 corrected the phone Playwright flow to reopen More after navigation before checking Accuracy/Skills/Automations active links; checks route URLs, menu closure, and overflow on every page with More open and closed. npm run build passes (including e2e type-check); all 4 shell tests discovered via scripts/heavy.sh. LEAD must run browser tests per handoff.
+RESULT: W-05 implemented real chat creation/content+doc_ids SSE, four starters, searchable @ document chips, live status/trace, citation callbacks, sources, cost tooltip, plain abstentions and labeled offline fallback; npm run build and npx vitest run pass (29 tests), direct localhost:8000 create/stream/stored fixture answer check passes; e2e/chat.spec.ts written and type-checked, browser execution remains for LEAD outside sandbox. No commits; web/src/main.tsx and web/src/viewer3d/ untouched by WEB.

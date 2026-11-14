@@ -46,16 +46,20 @@ export function makeDemoAnswer(question: string, docIds: string[] = [demoDocumen
 /** Only these temporary endpoints are mocked; all other routes reach the backend. */
 export async function handleMockRequest(request: Request): Promise<Response | null> {
   const { pathname } = new URL(request.url)
-  if (request.method === 'GET' && pathname === '/api/docs') return Response.json([demoDocument])
+  if (request.method === 'GET' && pathname === '/api/docs') return Response.json({
+    total: 1, sources: [{ source: demoDocument.source, count: 1, docs: [demoDocument] }],
+  })
+  if (request.method === 'POST' && pathname === '/api/chats') return Response.json({ id: 'demo', title: 'Offline demo' })
   if (request.method !== 'POST' || !/^\/api\/chats\/[^/]+\/messages$/.test(pathname)) return null
-  const body = await request.json() as { question?: unknown; doc_ids?: unknown }
-  if (typeof body.question !== 'string' || !body.question.trim() ||
+  const body = await request.json() as { content?: unknown; doc_ids?: unknown }
+  if (typeof body.content !== 'string' || !body.content.trim() ||
       (body.doc_ids !== undefined && (!Array.isArray(body.doc_ids) || !body.doc_ids.every((id) => typeof id === 'string')))) {
-    return Response.json({ detail: 'A question and optional doc_ids array are required.' }, { status: 400 })
+    return Response.json({ detail: 'Message content and optional doc_ids array are required.' }, { status: 400 })
   }
-  const answer = makeDemoAnswer(body.question, body.doc_ids as string[] | undefined)
+  const answer = makeDemoAnswer(body.content, body.doc_ids as string[] | undefined)
   const events = [
-    ['status', { detail: `Exploring document: ${demoDocument.title}` }],
+    ['status', { text: 'Thinking…' }],
+    ['status', { text: `Exploring document: ${demoDocument.title}` }],
     ['trace', answer.trace[0]],
     ['answer', answer],
   ]

@@ -1,4 +1,4 @@
-// CONTRACT.md v1, sections 5.3 and 5.7. Coordinates are page-image pixels.
+// CONTRACT.md v2, sections 5.3 and 5.7. Coordinates are page-image pixels.
 export type Bbox = [number, number, number, number]
 
 export interface Document {
@@ -23,8 +23,11 @@ export interface Answer {
     boxes: { item_id: string; page: number; bbox_px: Bbox; label: string }[]
     scene: { doc_id: string; highlight_item_ids: string[]; camera_target_item_id: string | null }
   }
-  trace: { step: string; detail: string; ms: number; model: string | null; cost_usd: number }[]
+  trace: { step: string; detail: string; ms: number; model: string | null; cost_usd: number; stub?: boolean }[]
   route: 'index' | 'planmap' | 'vlm' | 'hybrid'
   cost: { usd_total: number; calls: unknown[] }
   latency_ms: number
 }
+
+export type Citation = Answer['citations'][number]
+export type TraceStep = Answer['trace'][number]

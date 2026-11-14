@@ -6,7 +6,7 @@ import { handleMockRequest } from './src/mock/handler'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_')
-  const useMock = (process.env.VITE_USE_MOCK ?? env.VITE_USE_MOCK) !== 'false'
+  const useMock = (process.env.VITE_USE_MOCK ?? env.VITE_USE_MOCK) === 'true'
   return {
     plugins: [
       react(),

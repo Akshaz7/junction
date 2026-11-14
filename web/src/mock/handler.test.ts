@@ -6,13 +6,13 @@ describe('temporary contract endpoints', () => {
   it('lists explicitly generated sample documents', async () => {
     const response = await handleMockRequest(new Request('http://localhost/api/docs'))
     const docs = await response!.json()
-    expect(docs).toEqual([demoDocument])
-    expect(docs[0].title).toContain('generated for demo')
+    expect(docs.sources[0].docs).toEqual([demoDocument])
+    expect(docs.sources[0].docs[0].title).toContain('generated for demo')
   })
 
   it('streams an answer with matching citation, box and scene item IDs', async () => {
     const response = await handleMockRequest(new Request('http://localhost/api/chats/demo/messages', {
-      method: 'POST', body: JSON.stringify({ question: 'How many windows are in the sample plan?', doc_ids: [demoDocument.doc_id] }),
+      method: 'POST', body: JSON.stringify({ content: 'How many windows are in the sample plan?', doc_ids: [demoDocument.doc_id] }),
     }))
     expect(response!.headers.get('content-type')).toBe('text/event-stream')
     const stream = await response!.text()
@@ -29,8 +29,8 @@ describe('temporary contract endpoints', () => {
 
   it('abstains on unsupported questions and documents, and leaves other endpoints alone', async () => {
     for (const body of [
-      { question: 'What is the floor area?' },
-      { question: 'How many windows?', doc_ids: ['unknown__drawing'] },
+      { content: 'What is the floor area?' },
+      { content: 'How many windows?', doc_ids: ['unknown__drawing'] },
     ]) {
       const response = await handleMockRequest(new Request('http://localhost/api/chats/demo/messages', { method: 'POST', body: JSON.stringify(body) }))
       expect(await response!.text()).toContain('"abstained":true')

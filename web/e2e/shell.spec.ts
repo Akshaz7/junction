@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { readFileSync } from 'node:fs'
+import { handleMockRequest } from '../src/mock/handler'
 
 const navItems = ['Overview', 'Chat', 'Changes', 'Data', 'Accuracy', 'Skills', 'Automations']
 
@@ -66,9 +67,17 @@ test('phone navigation keeps all pages reachable without horizontal overflow', a
 })
 
 test('demo chat and document navigation', async ({ page }) => {
+  await page.route('**/api/**', async (route) => {
+    const req = route.request()
+    const response = await handleMockRequest(new Request(req.url(), {
+      method: req.method(), ...(req.postData() ? { body: req.postData()! } : {}),
+    }))
+    if (!response) return route.continue()
+    await route.fulfill({ status: response.status, contentType: response.headers.get('content-type') ?? undefined, body: await response.text() })
+  })
   await page.goto('/#/chat')
   await expect(page).toHaveTitle('Hologram')
-  await page.getByRole('button', { name: /Start with the drawing/ }).click()
+  await page.getByRole('button', { name: /Count something on a plan/ }).click()
   await expect(page.getByText('2 windows', { exact: true })).toBeVisible()
   await page.getByText('Sources (1)', { exact: true }).click()
   await expect(page.getByText(/window-001, window-002/)).toBeVisible()

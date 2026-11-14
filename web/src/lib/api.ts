@@ -1,56 +1,107 @@
-import type { Answer, Document } from './types'
+import type { Answer, Document, TraceStep } from './types'
 
-// Temporary switch until S-03. Explicitly set false to use the backend.
-export const useMock = import.meta.env.VITE_USE_MOCK !== 'false'
+type Mode = 'auto' | 'real' | 'demo'
+type StreamCallbacks = { onStatus: (text: string) => void; onTrace: (trace: TraceStep) => void }
 
-async function request(path: string, init?: RequestInit): Promise<Response> {
-  if (useMock) {
-    const { handleMockRequest } = await import('../mock/handler')
-    const response = await handleMockRequest(new Request(new URL(path, window.location.origin), init))
-    if (response) return response
-  }
-  const response = await fetch(path, init)
-  if (!response.ok) throw new Error(`Request failed (${response.status}). Please try again.`)
-  return response
+class ApiError extends Error {
+  constructor(message: string, readonly status: number, readonly empty: boolean) { super(message) }
 }
 
-export async function getDocuments(): Promise<Document[]> {
-  const response = await request('/api/docs')
-  return response.json()
-}
-
-export async function askQuestion(question: string, docIds: string[], onStatus: (detail: string) => void): Promise<Answer> {
-  const response = await request('/api/chats/demo/messages', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question, doc_ids: docIds }),
-  })
-  if (!response.ok || !response.body) throw new Error('The answer stream could not be opened.')
+/** A POST stream may split UTF-8, JSON and CRLF across arbitrary network chunks. */
+export async function readAnswerStream(response: Response, callbacks: StreamCallbacks): Promise<Answer> {
+  if (!response.body) throw new Error('The answer stream could not be opened.')
   const reader = response.body.getReader()
   const decoder = new TextDecoder()
   let buffer = ''
   let answer: Answer | undefined
+  function consume(block: string) {
+    const lines = block.split('\n')
+    const event = lines.find((line) => line.startsWith('event:'))?.slice(6).trim()
+    const data = lines.filter((line) => line.startsWith('data:')).map((line) => line.slice(5).trimStart()).join('\n')
+    if (!data || !['status', 'trace', 'answer', 'error'].includes(event ?? '')) return
+    const payload = JSON.parse(data)
+    if (event === 'error') throw new Error(payload.detail || 'The answer could not be completed. Please try again.')
+    if (event === 'status' && typeof payload.text === 'string') callbacks.onStatus(payload.text)
+    if (event === 'trace') callbacks.onTrace(payload as TraceStep)
+    if (event === 'answer') answer = payload as Answer
+  }
   try {
     while (true) {
       const { value, done } = await reader.read()
-      buffer += decoder.decode(value, { stream: !done }).replace(/\r\n/g, '\n')
+      buffer = (buffer + decoder.decode(value, { stream: !done })).replace(/\r\n/g, '\n')
       let boundary: number
       while ((boundary = buffer.indexOf('\n\n')) !== -1) {
-        const block = buffer.slice(0, boundary)
+        consume(buffer.slice(0, boundary))
         buffer = buffer.slice(boundary + 2)
-        const event = block.split('\n').find((line) => line.startsWith('event:'))?.slice(6).trim()
-        const data = block.split('\n').filter((line) => line.startsWith('data:')).map((line) => line.slice(5).trimStart()).join('\n')
-        if (!data) continue
-        if (event === 'answer') answer = JSON.parse(data) as Answer
-        if (event === 'status') {
-          const status = JSON.parse(data) as { detail?: string }
-          if (status.detail) onStatus(status.detail)
-        }
       }
-      if (done) break
+      if (done) { if (buffer.trim()) consume(buffer); break }
     }
   } finally {
+    await reader.cancel().catch(() => {})
     reader.releaseLock()
   }
-  if (!answer) throw new Error('The response ended before an answer arrived.')
+  if (!answer) throw new Error('The response ended before an answer arrived. Please try again.')
   return answer
 }
+
+export class WorkspaceApi {
+  isDemo: boolean
+  constructor(private mode: Mode = 'auto', private transport: typeof fetch = (...args) => fetch(...args)) {
+    this.isDemo = mode === 'demo'
+  }
+
+  private async request(path: string, init?: RequestInit): Promise<Response> {
+    let response: Response
+    if (this.isDemo) {
+      const { handleMockRequest } = await import('../mock/handler')
+      const mocked = await handleMockRequest(new Request(new URL(path, 'http://localhost'), init))
+      if (!mocked) throw new Error('This action is unavailable in the offline demo.')
+      response = mocked
+    } else {
+      response = await this.transport(path, init)
+    }
+    if (!response.ok) {
+      const body = await response.text()
+      let detail = `Request failed (${response.status}). Please try again.`
+      try { detail = JSON.parse(body).detail || detail } catch { /* Proxy errors may have no JSON body. */ }
+      throw new ApiError(detail, response.status, !body.trim())
+    }
+    return response
+  }
+
+  async getDocuments(): Promise<Document[]> {
+    let response: Response
+    try {
+      response = await this.request('/api/docs', { signal: AbortSignal.timeout(10_000) })
+    } catch (error) {
+      const unreachable = error instanceof TypeError || (error instanceof DOMException && error.name === 'TimeoutError') ||
+        (error instanceof ApiError && ([502, 504].includes(error.status) || (error.status === 500 && error.empty)))
+      if (this.mode !== 'auto' || !unreachable) throw error
+      // Choose the offline dataset before selecting docs; never substitute fake answers for real docs.
+      this.isDemo = true
+      response = await this.request('/api/docs')
+    }
+    const data = await response.json() as { sources: { docs: Document[] }[] }
+    return data.sources.flatMap((source) => source.docs)
+  }
+
+  async createChat(docIds: string[], title: string): Promise<string> {
+    const response = await this.request('/api/chats', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ doc_ids: docIds, title }),
+    })
+    const chat = await response.json() as { id: string }
+    return chat.id
+  }
+
+  async askQuestion(chatId: string, content: string, docIds: string[], callbacks: StreamCallbacks): Promise<Answer> {
+    const response = await this.request(`/api/chats/${encodeURIComponent(chatId)}/messages`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+      body: JSON.stringify({ content, doc_ids: docIds }),
+    })
+    return readAnswerStream(response, callbacks)
+  }
+}
+
+const setting = import.meta.env.VITE_USE_MOCK
+export const workspaceApi = new WorkspaceApi(setting === 'true' ? 'demo' : setting === 'false' ? 'real' : 'auto')
