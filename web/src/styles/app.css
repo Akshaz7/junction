@@ -982,3 +982,17 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 @keyframes stoa-rise-opacity { from { opacity: 0; } to { opacity: 1; } }
 @keyframes stoa-rise-lift { from { translate: 0 16px; } to { translate: 0 0; } }
 @media (prefers-reduced-motion: reduce) { .data-detail { animation: none; } }
+
+/* M-SHELL: chat polish (Stoa mirror) */
+.chat-header-actions[data-has-chat="false"] > .button { opacity: .5; transition: opacity .25s ease; }
+.chat-header-actions > .button { transition: opacity .25s ease, transform .18s ease; }
+.chat-header-actions > .button:active { transform: scale(.94); }
+@keyframes stoa-slide-in-x { from { transform: translateX(32px); } to { transform: none; } }
+@keyframes stoa-highlight-in { from { fill-opacity: 0; } to { fill-opacity: .45; } }
+@media (min-width: 801px) {
+  .chat-workspace.has-viewer .document-viewer { animation: stoa-rise-opacity .35s ease both, stoa-slide-in-x .55s var(--ease-settle-wide) both; }
+}
+.evidence-region.text-highlight > rect { fill: rgb(250 204 21); fill-opacity: .45; animation: stoa-highlight-in .35s ease .45s both; }
+@media (prefers-reduced-motion: reduce) {
+  .chat-workspace.has-viewer .document-viewer, .evidence-region.text-highlight > rect { animation: none; }
+}
