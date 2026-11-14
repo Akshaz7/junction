@@ -1,0 +1,450 @@
+{
+  "created": "2026-11-14T21:17:17+00:00",
+  "revision": "1906d78cdfa9ac81a3a9a0b93e300c2f2c99a612",
+  "commit": "1906d78cdfa9ac81a3a9a0b93e300c2f2c99a612",
+  "mode": "code",
+  "runner_sha256": "c34c946f4849d9e9ccab23d7004715f98a86cc4b506a93ff061276f62a05dd5b",
+  "case_file_sha256": "fe265520efdcf8bbf55a59f3175d5db657a25f6c2bab97828541ec1fea55f084",
+  "selected_cases_sha256": "9c89e42d874985aa3161810f4b3a6c2d00a497db7afd6b84565b008acbd5ad72",
+  "selected_questions": 9,
+  "owners": null,
+  "question_timeout_s": 20.0,
+  "grading_version": 2,
+  "budget_cap_usd": 0.0,
+  "row_cap_usd": 3,
+  "artifact_json_hashes": {
+    "cubicasa5k__high-quality-architectural-1269": {
+      "scene.json": "b12e513072ab83014cd725f83eeb7d37ea205ca3c3d350fa8f1463d7736f1905",
+      "doc.json": "0b56621da625ded3210c4893ff8c4a5c3981aa66cef0bea52cfbb99be8662ec6",
+      "planmap-1.json": "b1fd3f2e8bb6123c0a96a6434ad691bca1ed42e1ad02ca683ec1a19f46790888",
+      "planmap-seg.json": "51c459822b864ac01dbcd61a95fd8023663d407875242ef3865bd6dc6200a9b0",
+      "pages.json": "93025394f0a162d740eadc13ede91e082f978e78f390c2ecd3a9a882ba01f55e"
+    },
+    "opening_design__crema-cafe-models-crema-cafe-6-blend": {
+      "doc.json": "f145e2bb6e0e2d68bbd8b929af457868f2e7559f492ee135a473e835a0c9fe4b",
+      "pages.json": "5b3e65a0e53027de055ec0ae3ff7c0729fab0e9e408a74d4f8014f93c82b6341"
+    },
+    "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives": {
+      "doc.json": "9d106e2ca1a441fc500ad81291e48c5d75c2eed2b2d903d291ffd1035e900792"
+    },
+    "swiss_dwellings__site961-bldg2019-floor8945": {
+      "scene.json": "33efb8601f1bcd13a03dc5859ff88ef7ecfe398a97d321160c8df5eca3a11a24",
+      "doc.json": "8c3aab7f7a667c1c9dc8a790fcdf694aca530a8d1ecb7c1ef117812410dbfe91",
+      "planmap-1.json": "b8b0e4808d46e8ca81ad62ea112ea678bd4812e1001fcd18ee750a03c37b80e8",
+      "pages.json": "87bfe9c7f17fa6520e7dfd46823addd05d8e83e4f2fb8ae23c6b222cd385ee1e",
+      "text-1.json": "1f5db8651b860429387c9eca326a4c51ff275934c1b55851a13be2b3de555e87"
+    },
+    "wikimedia__79521417": {
+      "doc.json": "c29a6d1de1400d30c8fe854de0e8926dd26e8e6ec24f1faa25974c205a4e6c3b",
+      "pages.json": "eaa20b8a1868ce0a22ecd06cf75c5f42aba6a18b5d70fc72c08ecb8da4bcd47d"
+    }
+  },
+  "corpus_sha256": "e1d150b48ad168b491a9b4d6d793cf2c9dde53c67b971d4b7878f4ef1fefc928",
+  "worker_runner_sha256": "f36bc2c3773b9eb5e7d8225c1facb0edc6f57e1740c8d75d394c93d659d9e1df",
+  "sessions": [
+    {
+      "resumed_at": "2026-11-14T21:17:17+00:00",
+      "previously_completed": 0,
+      "runner_sha256": "c34c946f4849d9e9ccab23d7004715f98a86cc4b506a93ff061276f62a05dd5b"
+    }
+  ],
+  "run_id": "20261114T211716835573Z",
+  "wall_s": 20.718,
+  "latest_session_wall_s": 20.734,
+  "complete": true,
+  "budget": {
+    "accounted_usd": 0,
+    "reported_usd": 0,
+    "unsettled_reserve_usd": 0,
+    "requests": 0
+  },
+  "row_budget": {
+    "accounted_usd": 0.91923,
+    "reported_usd": 0.640718,
+    "unsettled_reserve_usd": 0.278512,
+    "requests": 261
+  },
+  "summaries": {
+    "public": {
+      "questions": 9,
+      "statuses": {
+        "correct": 1,
+        "honest-abstain": 6,
+        "incorrect": 2
+      },
+      "numeric_questions": 0,
+      "numeric_correct": 0,
+      "behaviour_only_questions": 9,
+      "issues": {
+        "headline_not_bold": 7,
+        "no_source_citations": 1,
+        "no_reasoning_card": 1,
+        "no_confidence_label": 1
+      },
+      "timeouts": 0,
+      "latency_ms_median": 933,
+      "latency_ms_max": 10732,
+      "model_requests_blocked": 168,
+      "exact_evidence_checked": 0,
+      "exact_evidence_matches": 0
+    }
+  },
+  "results": [
+    {
+      "status": "correct",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": 1180.56,
+      "abstained": false,
+      "has_citations": true,
+      "citation_count": 1,
+      "cited_item_count": 133,
+      "exact_count_evidence": null,
+      "has_reasoning_card": true,
+      "has_reasoning_label": true,
+      "confidence_label": "Verified",
+      "confidence_pct": 95,
+      "jargon": [],
+      "bold_first_line": true,
+      "bullets": 2,
+      "issues": [],
+      "answer_text": "**The total floor area is about 1,180.6 m² across 133 rooms, with outdoor spaces left out.** [1]\n\n- The drawing's printed scale isn't available in the facts I have, so I can't confirm it.\n- Areas were sized from the drawing's own units, not from a stated scale.",
+      "answer_cost_usd": 0,
+      "route": "planmap",
+      "engine_latency_ms": 195,
+      "latency_ms": 258,
+      "blocked_model_requests": {},
+      "id": "swiss_dwellings__site961-bldg2019-floor8945:area",
+      "question": "What is the total floor area in square metres, and what printed scale supports it?",
+      "doc_ids": [
+        "swiss_dwellings__site961-bldg2019-floor8945"
+      ],
+      "split": "public",
+      "owner": "SCALES",
+      "wall_latency_ms": 508,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "honest-abstain",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": null,
+      "abstained": false,
+      "has_citations": false,
+      "citation_count": 0,
+      "cited_item_count": 0,
+      "exact_count_evidence": null,
+      "has_reasoning_card": false,
+      "has_reasoning_label": false,
+      "confidence_label": null,
+      "confidence_pct": null,
+      "jargon": [],
+      "bold_first_line": false,
+      "bullets": 0,
+      "issues": [
+        "headline_not_bold"
+      ],
+      "answer_text": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+      "answer_cost_usd": 0.0,
+      "route": "hybrid",
+      "engine_latency_ms": 117,
+      "latency_ms": 341,
+      "blocked_model_requests": {
+        "code_only": 12
+      },
+      "id": "swiss_dwellings__site961-bldg2019-floor8945:width",
+      "question": "Which doors are narrower than 0.9 metres? Say if widths cannot be verified.",
+      "doc_ids": [
+        "swiss_dwellings__site961-bldg2019-floor8945"
+      ],
+      "split": "public",
+      "owner": "SCALES",
+      "wall_latency_ms": 470,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "honest-abstain",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": null,
+      "abstained": false,
+      "has_citations": false,
+      "citation_count": 0,
+      "cited_item_count": 0,
+      "exact_count_evidence": null,
+      "has_reasoning_card": false,
+      "has_reasoning_label": false,
+      "confidence_label": null,
+      "confidence_pct": null,
+      "jargon": [],
+      "bold_first_line": false,
+      "bullets": 0,
+      "issues": [
+        "headline_not_bold"
+      ],
+      "answer_text": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+      "answer_cost_usd": 0.0,
+      "route": "hybrid",
+      "engine_latency_ms": 921,
+      "latency_ms": 933,
+      "blocked_model_requests": {
+        "code_only": 15
+      },
+      "id": "opening_design__crema-cafe-models-crema-cafe-6-blend:area",
+      "question": "What is the total floor area in square metres, and what printed scale supports it?",
+      "doc_ids": [
+        "opening_design__crema-cafe-models-crema-cafe-6-blend"
+      ],
+      "split": "public",
+      "owner": "SCALES",
+      "wall_latency_ms": 1093,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "honest-abstain",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": null,
+      "abstained": false,
+      "has_citations": false,
+      "citation_count": 0,
+      "cited_item_count": 0,
+      "exact_count_evidence": null,
+      "has_reasoning_card": false,
+      "has_reasoning_label": false,
+      "confidence_label": null,
+      "confidence_pct": null,
+      "jargon": [],
+      "bold_first_line": false,
+      "bullets": 0,
+      "issues": [
+        "headline_not_bold"
+      ],
+      "answer_text": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+      "answer_cost_usd": 0.0,
+      "route": "hybrid",
+      "engine_latency_ms": 1135,
+      "latency_ms": 1147,
+      "blocked_model_requests": {
+        "code_only": 42
+      },
+      "id": "opening_design__crema-cafe-models-crema-cafe-6-blend:width",
+      "question": "Which doors are narrower than 0.9 metres? Say if widths cannot be verified.",
+      "doc_ids": [
+        "opening_design__crema-cafe-models-crema-cafe-6-blend"
+      ],
+      "split": "public",
+      "owner": "SCALES",
+      "wall_latency_ms": 1315,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "incorrect",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": 138.66,
+      "abstained": false,
+      "has_citations": true,
+      "citation_count": 1,
+      "cited_item_count": 17,
+      "exact_count_evidence": null,
+      "has_reasoning_card": true,
+      "has_reasoning_label": true,
+      "confidence_label": "Estimate",
+      "confidence_pct": 68,
+      "jargon": [],
+      "bold_first_line": false,
+      "bullets": 0,
+      "issues": [
+        "headline_not_bold"
+      ],
+      "answer_text": "This place is about **138.7 m²** in total, adding up the **17 rooms** found on the drawing (outdoor spaces left out). [1] Areas are estimated from door sizes because no printed scale was found, so treat them as approximate.",
+      "answer_cost_usd": 0.0,
+      "route": "planmap",
+      "engine_latency_ms": 10607,
+      "latency_ms": 10732,
+      "blocked_model_requests": {
+        "code_only": 3
+      },
+      "id": "cubicasa5k__high-quality-architectural-1269:area",
+      "question": "What is the total floor area in square metres, and what printed scale supports it?",
+      "doc_ids": [
+        "cubicasa5k__high-quality-architectural-1269"
+      ],
+      "split": "public",
+      "owner": "SCALES",
+      "wall_latency_ms": 10933,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "honest-abstain",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": null,
+      "abstained": false,
+      "has_citations": true,
+      "citation_count": 8,
+      "cited_item_count": 8,
+      "exact_count_evidence": null,
+      "has_reasoning_card": true,
+      "has_reasoning_label": true,
+      "confidence_label": "Estimate",
+      "confidence_pct": 57,
+      "jargon": [],
+      "bold_first_line": false,
+      "bullets": 0,
+      "issues": [
+        "headline_not_bold"
+      ],
+      "answer_text": "Door widths cannot be verified from the drawing, so no door can be confirmed as narrower than 0.9 metres. [1][2][3][4][5][6][7][8]",
+      "answer_cost_usd": 0.0,
+      "route": "hybrid",
+      "engine_latency_ms": 3059,
+      "latency_ms": 3084,
+      "blocked_model_requests": {
+        "code_only": 39
+      },
+      "id": "cubicasa5k__high-quality-architectural-1269:width",
+      "question": "Which doors are narrower than 0.9 metres? Say if widths cannot be verified.",
+      "doc_ids": [
+        "cubicasa5k__high-quality-architectural-1269"
+      ],
+      "split": "public",
+      "owner": "SCALES",
+      "wall_latency_ms": 3265,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "incorrect",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": null,
+      "abstained": false,
+      "has_citations": false,
+      "citation_count": 0,
+      "cited_item_count": 0,
+      "exact_count_evidence": null,
+      "has_reasoning_card": false,
+      "has_reasoning_label": false,
+      "confidence_label": null,
+      "confidence_pct": null,
+      "jargon": [],
+      "bold_first_line": true,
+      "bullets": 0,
+      "issues": [
+        "no_source_citations",
+        "no_reasoning_card",
+        "no_confidence_label"
+      ],
+      "answer_text": "**This file does not show areas.** Its printed text has no room table or note with areas. Upload the plan with its room table, or ask about what the sheet does list.",
+      "answer_cost_usd": 0.0,
+      "route": "index",
+      "engine_latency_ms": 1759,
+      "latency_ms": 1777,
+      "blocked_model_requests": {},
+      "id": "wikimedia__79521417:area",
+      "question": "What is the total floor area in square metres, and what printed scale supports it?",
+      "doc_ids": [
+        "wikimedia__79521417"
+      ],
+      "split": "public",
+      "owner": "SCALES",
+      "wall_latency_ms": 1967,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "honest-abstain",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": null,
+      "abstained": false,
+      "has_citations": false,
+      "citation_count": 0,
+      "cited_item_count": 0,
+      "exact_count_evidence": null,
+      "has_reasoning_card": false,
+      "has_reasoning_label": false,
+      "confidence_label": null,
+      "confidence_pct": null,
+      "jargon": [],
+      "bold_first_line": false,
+      "bullets": 0,
+      "issues": [
+        "headline_not_bold"
+      ],
+      "answer_text": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+      "answer_cost_usd": 0.0,
+      "route": "hybrid",
+      "engine_latency_ms": 690,
+      "latency_ms": 715,
+      "blocked_model_requests": {
+        "code_only": 37
+      },
+      "id": "wikimedia__79521417:width",
+      "question": "Which doors are narrower than 0.9 metres? Say if widths cannot be verified.",
+      "doc_ids": [
+        "wikimedia__79521417"
+      ],
+      "split": "public",
+      "owner": "SCALES",
+      "wall_latency_ms": 914,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "honest-abstain",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": null,
+      "abstained": false,
+      "has_citations": false,
+      "citation_count": 0,
+      "cited_item_count": 0,
+      "exact_count_evidence": null,
+      "has_reasoning_card": false,
+      "has_reasoning_label": false,
+      "confidence_label": null,
+      "confidence_pct": null,
+      "jargon": [],
+      "bold_first_line": false,
+      "bullets": 0,
+      "issues": [
+        "headline_not_bold"
+      ],
+      "answer_text": "The total floor area cannot be directly verified from Sheet A-900 - PERSPECTIVES because perspective views are unscaled (printed scale: \"Not to Scale\" or blank) and do not contain floor area schedules, though an open-source metal building of this type typically has an estimated footprint of around 150 to 300 square metres. Because 3D perspective views distort linear dimensions, no printed scale on this specific sheet supports an area calculation. Floor area metrics and supporting scales (such as 1:100 or 1/4\" = 1'-0\") would instead be located on the corresponding floor plan sheets (e.g., Sheet A-100).",
+      "answer_cost_usd": 0.0,
+      "route": "hybrid",
+      "engine_latency_ms": 69,
+      "latency_ms": 81,
+      "blocked_model_requests": {
+        "code_only": 20
+      },
+      "id": "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:area",
+      "question": "What is the total floor area in square metres, and what printed scale supports it?",
+      "doc_ids": [
+        "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives"
+      ],
+      "split": "public",
+      "owner": "SCALES",
+      "wall_latency_ms": 253,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    }
+  ]
+}

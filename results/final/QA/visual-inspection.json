@@ -1,0 +1,13 @@
+{
+  "inspected_at": "2026-11-14T20:15:47+00:00",
+  "files": [
+    {
+      "raw_file": "data/full/junction-dataset/data/wikimedia/79521417.jpg",
+      "observation": "Dense historical scan: courtyard buildings, repeated rooms and openings, fine hatching and handwritten labels. No independently certified fixture count or metric scale; all numeric expectations remain null."
+    },
+    {
+      "raw_file": "data/full/junction-dataset/data/cubicasa5k/high_quality_architectural-1269.png",
+      "observation": "Rotated two-level architectural scan with door swings, fixture symbols, handwritten dimensions and Finnish labels. Ambiguous symbols and upper-level voids; no count promoted to gold without a complete independently verified visual tally."
+    }
+  ]
+}

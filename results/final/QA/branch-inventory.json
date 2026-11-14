@@ -1,0 +1,73 @@
+{
+  "time": "2026-11-14T21:10:44Z",
+  "worktrees": [
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/3d",
+      "tip": "fe52a9f5302bead4838970cefe71334e44aafbc3 WIP F-3D: paused by LEAD (Codex worker stopped mid-row; see handoff/F-3D.md)"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/changes",
+      "tip": "faae60b314822253036dbb4bc52a46945fbfa130 WIP F-CHANGES: paused by LEAD (Codex worker stopped mid-row; see handoff/F-CHANGES.md)"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/e2e",
+      "tip": "1e59ab9738c5ee583e764495a983bfc4883454ed F-E2E: validate exported evidence and page-scoped IFC citations"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/evidence2",
+      "tip": "60efc46c0671dbd10026f2351d4720b15836d1ce chore: release regression bench (sample200 156/200) and decision note"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/mep",
+      "tip": "5018513d3a1af17ae4163e6a5438eddded26c9ba F-MEP: tests, route guards (where/area/roof/wall, architectural fixtures), no-services answers, before/after"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/mistakes",
+      "tip": "e61c1b40e0f8add3a93fc69dce7ff8b5b03cb2ac F-MISTAKES: code-found mistakes (areas, duplicates, openings, quantities, missing values, clashes) with API route and chat answer"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/order",
+      "tip": "f2df35d0715252e6aeb613e502d25e606e803c04 WIP F-ORDER: paused by LEAD (Codex worker stopped mid-row; see handoff/F-ORDER.md)"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/perf",
+      "tip": "872cf77bea0ddb2dda30b058d353ad20039cbfad WIP F-PERF: paused by LEAD (Codex worker stopped mid-row; see handoff/F-PERF.md)"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/proj-engine",
+      "tip": "c6c37806f3f06f9d0eabda3c0a3e9f72b2c65c5a F-PROJ-ENGINE: verified WIP (26 project tests pass, live overview + seed on :8010 ok)"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/proj-ui",
+      "tip": "8b3cc9db21c8febf569c8be0ca4a1ba43b237d1c F-PROJ-UI: Projects UI final screenshots; e2e 11/11, tsc clean"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/props",
+      "tip": "a5a44093822e0587e59e0f03da52492fff0167e5 WIP F-PROPS: paused by LEAD (Codex worker stopped mid-row; see handoff/F-PROPS.md)"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/qa",
+      "tip": "aa436a771bd17c9f2eb2231dd61b0b5de9601e21 WIP F-QA: paused by LEAD (Codex worker stopped mid-row; see handoff/F-QA.md)"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/qa2",
+      "tip": "5cb56946572abb17126a33e3c52212b2ecedd7e7 WIP F-QA2: paused by LEAD (Codex worker stopped mid-row; see handoff/F-QA2.md)"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/robust",
+      "tip": "9a08558542b6454e9f97546b3dc2ed7e1b8743d5 WIP F-ROBUST: paused by LEAD (Codex worker stopped mid-row; see handoff/F-ROBUST.md)"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/scales",
+      "tip": "1906d78cdfa9ac81a3a9a0b93e300c2f2c99a612 WIP F-SCALES: paused by LEAD (Codex worker stopped mid-row; see handoff/F-SCALES.md)"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/scansym",
+      "tip": "b041d486a9a0558aeb4087d1117438404a18dd27 F-SCANSYM: closed outlines are not line work; tests use a faithful model check"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/wallarea",
+      "tip": "2a725c5e2240206f904ed5c71fac54200c36e72e WIP F-WALLAREA: paused by LEAD (Codex worker stopped mid-row; see handoff/F-WALLAREA.md)"
+    }
+  ]
+}

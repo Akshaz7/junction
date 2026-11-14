@@ -1,0 +1,109 @@
+{
+  "created": "2026-11-14T20:11:43+00:00",
+  "revision": "main",
+  "commit": "60efc46c0671dbd10026f2351d4720b15836d1ce",
+  "mode": "code",
+  "runner_sha256": "ab3f6d495ef70088b5c670aac536197532a25b5b93980c98c857a0afee4afe52",
+  "case_file_sha256": "61e26a6285ce121f862d0c7790fad0a3bc20291be4384caf2bcc1f00aa79de3c",
+  "budget_cap_usd": 0.0,
+  "row_cap_usd": 3,
+  "artifact_json_hashes": {
+    "ifc_bench__sixty5-arc": {
+      "planmap-4.json": "b23814bd3ab9db30b52d477b3d8cde8550300bf8369ef1d411d51cc6c0b09a59",
+      "planmap-8.json": "8c6a2638f9ed0ab56322b4eabf59c1b99e072a84ead038b200906f324da70038",
+      "planmap-16.json": "3997c2d52a3fb5bd5e341274b468cac2b8b6b7fa2f8637578590713c952f0f82",
+      "planmap-17.json": "d1cedb3e12989673cf4d851bd561f53f22ec7831b42744b5aedf2ebfa7486a8f",
+      "planmap-9.json": "d90892c8d50bd43765ad459454401e4b02be89458f9cd41c63e4934d05face5f",
+      "planmap-5.json": "cb33550ff020020074260b8fbee59c13b935f5b5e0af609ca952fe0243770584",
+      "planmap-10.json": "05ceaf762cf93aae267a574b297f8e34c146e7d2e21ffa86081f6b6d8a60a658",
+      "planmap-2.json": "33dd1b0756fdb171446eedec8161e606de9d208b6b9f9349143001747cf4b2d6",
+      "planmap-3.json": "be5e3bcf05cc27d239e7cab5f4126036ee4232f367ef34765c8c097eea3c2d0d",
+      "elements.json": "20ac646de99f7184b89b50487dfb6f250c4f5fca8ddb7996c18c280822344326",
+      "planmap-11.json": "a37c6797cf7f707de4504647ad776799faec3c57ab80a013c32afdd44ef809b0",
+      "scene.json": "9a5ee52f5c6d5907ec9404b6364b64465339608c5b105c71539254a333c10c54",
+      "planmap-12.json": "252df4ac31e74026186a0649bb34030cb27ddcd907e669fabb54712dde525993",
+      "doc.json": "78d7220f33a3875fb382ae2cbe39463cab5815801e9ffc9fd6fb603d47eb2f0f",
+      "planmap-1.json": "fee43ccc53b785fa1fcea2b2b5a51ab3da6fcea2b47b83d83f6798c5430bcdd4",
+      "planmap-13.json": "20fdf3d4d7d093caa8e41b0354e961a816cf078dd419c47a8911931e1330bf61",
+      "planmap-18.json": "a61dfe306f93d14668246b6d13df4a32147f21aa58275195cc6986c06a97da9b",
+      "planmap-6.json": "20b736cd2b52cb5bbde8076c3aea263831d304eecf23654d807b086f86f80b4c",
+      "planmap-14.json": "91182188c9275c2e8cdf1dd9dddeba26c00372383601eb4cb870d03836eec32b",
+      "pages.json": "f614d3ddaf66f8cdd5b5f68d24963d60ad9b326fc7256dce2cfdfa5f932681e3",
+      "planmap-15.json": "689cabdee7f35b4dc3a19d9e97597de52a16d173191d919d817c00916e5dfabc",
+      "planmap-7.json": "e89546eeb0182e3c5529db0bc5e50a0c42e1942229da1a645f3031f71447fc83",
+      "planmap-19.json": "2de8040c00d46849f3fab73e6c1657b791672d9256eb53846f6f46064d4bebcb"
+    }
+  },
+  "corpus_sha256": "c621f4d68319d7f0a1c549fd3ad65a9c13aa5ed938fd6bdaef7acbd992c603df",
+  "wall_s": 3.882,
+  "budget": {
+    "accounted_usd": 0,
+    "reported_usd": 0,
+    "unsettled_reserve_usd": 0,
+    "requests": 0
+  },
+  "row_budget": {
+    "accounted_usd": 0,
+    "reported_usd": 0,
+    "unsettled_reserve_usd": 0,
+    "requests": 0
+  },
+  "summaries": {
+    "public": {
+      "questions": 1,
+      "statuses": {
+        "incorrect": 1
+      },
+      "numeric_questions": 1,
+      "numeric_correct": 1,
+      "behaviour_only_questions": 0,
+      "issues": {
+        "headline_not_bold": 1
+      },
+      "timeouts": 0,
+      "latency_ms_median": 3681,
+      "latency_ms_max": 3681,
+      "model_requests_blocked": 4
+    }
+  },
+  "results": [
+    {
+      "status": "incorrect",
+      "grading_scope": "numeric_and_behaviour",
+      "numeric_correct": true,
+      "expected": 1049,
+      "actual": 1049,
+      "abstained": false,
+      "has_citations": true,
+      "citation_count": 17,
+      "cited_item_count": 1049,
+      "exact_count_evidence": true,
+      "has_reasoning_card": true,
+      "has_reasoning_label": true,
+      "confidence_label": "Verified",
+      "confidence_pct": 97,
+      "jargon": [],
+      "bold_first_line": false,
+      "bullets": 0,
+      "issues": [
+        "headline_not_bold"
+      ],
+      "answer_text": "There are **1049 doors** in this model. [1][2][3][4][5][6][7][8][9][10][11][12][13][14][15][16][17]",
+      "answer_cost_usd": 0,
+      "route": "index",
+      "engine_latency_ms": 3106,
+      "latency_ms": 3681,
+      "blocked_model_requests": {
+        "code_only": 4
+      },
+      "id": "ifc_bench__sixty5-arc:door",
+      "question": "How many doors are recorded in this model, across all storeys?",
+      "doc_ids": [
+        "ifc_bench__sixty5-arc"
+      ],
+      "split": "public",
+      "owner": "PROPS",
+      "wall_latency_ms": 3881
+    }
+  ]
+}
