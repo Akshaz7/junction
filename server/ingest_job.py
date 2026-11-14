@@ -65,12 +65,17 @@ def _normalise_raster(doc_id: str, art: Path):
     from PIL import Image
     d = json.loads((art / doc_id / "doc.json").read_text())
     key, rel = next(iter(d["files"].items()))
-    if key == "png":
-        return
     src = REPO / rel
-    dst = src.with_suffix(".png")
-    Image.open(src).convert("RGB").save(dst)
-    d["files"] = {"png": str(Path(rel).with_suffix(".png"))}
+    from pipeline.pages import MAX_SIDE, cap_raster
+    with Image.open(src) as probe:
+        big = max(probe.size) > MAX_SIDE
+    if key == "png" and not big:
+        return
+    # FIX-15: huge rasters are shrunk before any RGB conversion; the vision read then sees the capped copy too
+    dst = src.with_name(src.stem + ("-capped" if big else "") + ".png")
+    img = cap_raster(Image.open(src))
+    (img if img.mode in ("RGB", "L", "LA", "RGBA") else img.convert("RGB")).save(dst)
+    d["files"] = {"png": str(Path(rel).with_name(dst.name))}
     (art / doc_id / "doc.json").write_text(json.dumps(d, indent=1))
 
 

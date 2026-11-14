@@ -223,8 +223,21 @@ def do_dxf(dxf: Path, out: Path, px=3000):
     return [{"page": 1, "w": W, "h": H, "dpi": None, "px_per_unit": s, "words": 0}]
 
 
+def cap_raster(img: Image.Image, side: int | None = None) -> Image.Image:
+    """FIX-15: shrink a huge raster in its own (often 1-byte palette/grey) mode before any RGB copy, so a
+    14000x9902 PNG never needs 2 x 416 MB of RGB on a 512 MB container."""
+    side = side or MAX_SIDE
+    if img.format == "JPEG":
+        img.draft("RGB", (side, side))  # decode at reduced size straight from the JPEG
+    if max(img.size) > side:
+        if img.mode == "P":
+            img = img.convert("L") if not img.info.get("transparency") else img.convert("LA")
+        img.thumbnail((side, side), Image.BILINEAR, reducing_gap=2.0)
+    return img
+
+
 def do_raster(f: Path, out: Path):
-    img = Image.open(f)
+    img = cap_raster(Image.open(f))
     img.load()
     W, H = save_page(img, out, 1)
     return [{"page": 1, "w": W, "h": H, "dpi": None, "words": 0}]
