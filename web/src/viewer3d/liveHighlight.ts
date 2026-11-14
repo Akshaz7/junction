@@ -1,5 +1,6 @@
 import { applyCommand, applyState, emptyCommandState, type SceneCommand, type SceneSnapshot } from './commands';
 import { decodeAdvisorEvent, type AdvisorEvent } from './advisor';
+import { liveSocketUrl } from '../lib/live-url';
 
 /** The viewer depends only on these two methods, so W-10 can replace this transport. */
 export interface HighlightChannel {
@@ -161,7 +162,7 @@ export function createLiveHighlightClient(options: {
   function connect() {
     if (socket || retry !== undefined) return;
     try {
-      const url = options.url ?? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`;
+      const url = options.url ?? liveSocketUrl();
       const connection = (options.connect ?? ((url) => new WebSocket(url)))(url);
       socket = connection;
       connection.addEventListener('open', () => {

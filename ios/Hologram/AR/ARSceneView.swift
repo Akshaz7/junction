@@ -82,6 +82,15 @@ final class ARSceneController: ObservableObject {
         }
         let configuration = ARWorldTrackingConfiguration()
         configuration.planeDetection = [.horizontal]
+        // Hands and people in front of the model must hide it (otherwise the model draws over your finger).
+        if ARWorldTrackingConfiguration.supportsFrameSemantics(.personSegmentationWithDepth) {
+            configuration.frameSemantics.insert(.personSegmentationWithDepth)
+        }
+        // LiDAR phones: real-world mesh occludes the model too (table edges, objects in front).
+        if ARWorldTrackingConfiguration.supportsSceneReconstruction(.mesh) {
+            configuration.sceneReconstruction = .mesh
+            view.environment.sceneUnderstanding.options.insert(.occlusion)
+        }
         view.session.run(configuration)
         updateSubscription = view.scene.subscribe(to: SceneEvents.Update.self) { [weak self] _ in
             self?.syncGestureScale()
