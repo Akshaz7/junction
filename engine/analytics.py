@@ -342,6 +342,42 @@ def named_rooms(question: str, doc: Doc, t0) -> dict | None:
     return _done(question, doc, text, len(hit), "count", hit, trace, t0=t0)
 
 
+# ------------------------------------------------------------------ "where is the kitchen" on plan maps (labels from the drawing)
+WHERE = re.compile(r"^\W*(?:please\s+)?(?:where(?:'s| is| are| can i find)?|find|locate|show(?: me)?|point (?:to|out))\b", re.I)
+WSYN = {**SYN, "bedroom": r"zimmer|schlaf|bedroom|makuu|\bmh\b|\bsh\b|\bk\d?\b", "living room": r"wohn|living|oleskelu|\bol\b|stube",
+        "balcony": r"balkon|balcon|parveke|loggia", "terrace": r"terrass|terassi|terrace", "hall": r"entr[eé]e|\bhall\b|eteinen|\bet\b|diele"}
+WALIAS = {"bathrooms": "bathroom", "toilets": "bathroom", "toilet": "bathroom", "wcs": "bathroom", "wc": "bathroom", "bedrooms": "bedroom",
+          "kitchens": "kitchen", "offices": "office", "balconies": "balcony", "terraces": "terrace", "corridors": "corridor",
+          "hallway": "corridor", "hallways": "corridor", "living": "living room"}
+
+
+def where_rooms(question: str, doc: Doc, t0) -> dict | None:
+    """"where is the kitchen / are the bathrooms" on a plan map: rooms whose drawn label matches. None when nothing is labelled that way."""
+    if doc.mode != "planmap" or not WHERE.search(question) or re.search(r"\bhow many\b", question, re.I):
+        return None
+    ql = question.lower()
+    word = None
+    for a, base in list(WALIAS.items()) + [(k, k) for k in WSYN]:
+        if re.search(rf"\b{re.escape(a)}\b", ql):
+            word = base
+            break
+    if word is None:
+        return None
+    rx = re.compile(WSYN[word], re.I)
+    hit = [r for r in _of_kind(doc, "room") if r.bbox_px and rx.search(_room_label(r))]
+    if not hit:
+        return None
+    vals = [_qty(r, "room", "area") for r in hit]
+    noun = {"bathroom": "bathroom/WC", "living room": "living room"}.get(word, word)
+    labels = sorted({(r.props.get("long_name") or r.label or "").strip() for r in hit if (r.props.get("long_name") or r.label)})
+    where = f" (drawn as {', '.join(labels[:4])})" if labels else ""
+    area = [v for v in vals if v]
+    extra = f" Total area **{_fmt(sum(area))} m²**." if area else ""
+    trace = [_step("route", f"locate / room / '{word}' from drawn labels -> code, no model"), _step("filter", f"{len(hit)} rooms match {word}")]
+    text = f"**{len(hit)} {noun}{'s' if len(hit) != 1 else ''}** on this floor plan{where}, numbered on the drawing.{extra} {{marks}}"
+    return _done(question, doc, text, len(hit), "count", hit, trace, t0=t0)
+
+
 # ------------------------------------------------------------------ material take-off with waste
 TAKEOFF = re.compile(r"\b(?:how (?:many|much)|calculate|work out|estimate)\b.*\b(?:m2|m²|sq\.? ?m|square met(?:er|re)s)\b|\bhow much\b.*\b(?:tiles?|flooring|floor covering|paint|carpet|laminate|parquet|screed|plaster)\b", re.I)
 WASTE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(?:%|percent)\s*(?:extra|waste|wastage|overage|spare|allowance|margin|buffer|more|on top|added)?|(?:waste|wastage|overage|allowance|margin)\s*(?:of)?\s*(\d+(?:[.,]\d+)?)\s*(?:%|percent)", re.I)
@@ -498,7 +534,7 @@ def superlative_room(question: str, doc: Doc, t0) -> dict | None:
 
 def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
     """First handler that recognises the shape wins; every handler may return None."""
-    for fn in (storey_pair, storey_compare, total_and_storey, cond_count, exact_size, kind_compare, compliance, superlative_room):
+    for fn in (storey_pair, storey_compare, total_and_storey, cond_count, exact_size, kind_compare, compliance, superlative_room, where_rooms):
         res = fn(question, doc, t0)
         if res is not None:
             return res

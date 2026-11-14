@@ -1,0 +1,1469 @@
+{
+ "rows": [
+  {
+   "doc": "colorful_10481",
+   "kind": "window",
+   "gold": 5,
+   "plan": 8,
+   "vision_boxes": 4,
+   "merged": 8,
+   "usd": 0.003576
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "door",
+   "gold": 7,
+   "plan": 8,
+   "vision_boxes": 0,
+   "merged": 8,
+   "usd": 0.002666
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.003128
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 1,
+   "vision_boxes": 0,
+   "merged": 1,
+   "usd": 0.002656
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "window",
+   "gold": 4,
+   "plan": 6,
+   "vision_boxes": 4,
+   "merged": 6,
+   "usd": 0.00352
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "door",
+   "gold": 4,
+   "plan": 5,
+   "vision_boxes": 5,
+   "merged": 9,
+   "usd": 0.00381
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.003052
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 1,
+   "merged": 1,
+   "usd": 0.0029
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "window",
+   "gold": 5,
+   "plan": 5,
+   "vision_boxes": 5,
+   "merged": 5,
+   "usd": 0.00359
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "door",
+   "gold": 9,
+   "plan": 10,
+   "vision_boxes": 9,
+   "merged": 15,
+   "usd": 0.00438
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.003162
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 1,
+   "merged": 1,
+   "usd": 0.00292
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision_boxes": 3,
+   "merged": 3,
+   "usd": 0.003378
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "door",
+   "gold": 6,
+   "plan": 6,
+   "vision_boxes": 6,
+   "merged": 11,
+   "usd": 0.003828
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 4,
+   "vision_boxes": 1,
+   "merged": 4,
+   "usd": 0.00316
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002688
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "window",
+   "gold": 4,
+   "plan": 5,
+   "vision_boxes": 4,
+   "merged": 5,
+   "usd": 0.003508
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "door",
+   "gold": 2,
+   "plan": 7,
+   "vision_boxes": 2,
+   "merged": 8,
+   "usd": 0.003158
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.00316
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002688
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision_boxes": 3,
+   "merged": 3,
+   "usd": 0.003402
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "door",
+   "gold": 5,
+   "plan": 5,
+   "vision_boxes": 5,
+   "merged": 7,
+   "usd": 0.003872
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 3,
+   "vision_boxes": 2,
+   "merged": 3,
+   "usd": 0.003184
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 1,
+   "merged": 1,
+   "usd": 0.002942
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "window",
+   "gold": 9,
+   "plan": 9,
+   "vision_boxes": 9,
+   "merged": 9,
+   "usd": 0.004726
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "door",
+   "gold": 13,
+   "plan": 13,
+   "vision_boxes": 13,
+   "merged": 26,
+   "usd": 0.005606
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 3,
+   "vision_boxes": 4,
+   "merged": 5,
+   "usd": 0.003588
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002656
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "window",
+   "gold": 4,
+   "plan": 14,
+   "vision_boxes": 7,
+   "merged": 19,
+   "usd": 0.004294
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "door",
+   "gold": 2,
+   "plan": 8,
+   "vision_boxes": 2,
+   "merged": 9,
+   "usd": 0.003164
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002716
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002704
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision_boxes": 3,
+   "merged": 3,
+   "usd": 0.003254
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "door",
+   "gold": 2,
+   "plan": 3,
+   "vision_boxes": 1,
+   "merged": 4,
+   "usd": 0.003174
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 3,
+   "vision_boxes": 2,
+   "merged": 3,
+   "usd": 0.003176
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002704
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "window",
+   "gold": 4,
+   "plan": 3,
+   "vision_boxes": 3,
+   "merged": 3,
+   "usd": 0.003382
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "door",
+   "gold": 6,
+   "plan": 6,
+   "vision_boxes": 6,
+   "merged": 10,
+   "usd": 0.003852
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.003184
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 2,
+   "vision_boxes": 1,
+   "merged": 3,
+   "usd": 0.002942
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "window",
+   "gold": 6,
+   "plan": 7,
+   "vision_boxes": 4,
+   "merged": 7,
+   "usd": 0.003792
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "door",
+   "gold": 6,
+   "plan": 7,
+   "vision_boxes": 5,
+   "merged": 12,
+   "usd": 0.003852
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.003184
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 1,
+   "merged": 1,
+   "usd": 0.002942
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "window",
+   "gold": 3,
+   "plan": 4,
+   "vision_boxes": 3,
+   "merged": 4,
+   "usd": 0.003402
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "door",
+   "gold": 6,
+   "plan": 6,
+   "vision_boxes": 5,
+   "merged": 10,
+   "usd": 0.004102
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.003184
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 1,
+   "merged": 1,
+   "usd": 0.002942
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "window",
+   "gold": 8,
+   "plan": 5,
+   "vision_boxes": 8,
+   "merged": 5,
+   "usd": 0.004198
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "door",
+   "gold": 11,
+   "plan": 11,
+   "vision_boxes": 11,
+   "merged": 19,
+   "usd": 0.005228
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 3,
+   "vision_boxes": 3,
+   "merged": 3,
+   "usd": 0.00339
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 1,
+   "merged": 1,
+   "usd": 0.002918
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "window",
+   "gold": 12,
+   "plan": 10,
+   "vision_boxes": 12,
+   "merged": 17,
+   "usd": 0.004878
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "door",
+   "gold": 17,
+   "plan": 15,
+   "vision_boxes": 16,
+   "merged": 30,
+   "usd": 0.006358
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "sink",
+   "gold": 3,
+   "plan": 3,
+   "vision_boxes": 3,
+   "merged": 3,
+   "usd": 0.00325
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002688
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "window",
+   "gold": 5,
+   "plan": 4,
+   "vision_boxes": 4,
+   "merged": 4,
+   "usd": 0.003562
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "door",
+   "gold": 7,
+   "plan": 7,
+   "vision_boxes": 7,
+   "merged": 12,
+   "usd": 0.004332
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 3,
+   "vision_boxes": 3,
+   "merged": 3,
+   "usd": 0.003414
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002712
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "window",
+   "gold": 4,
+   "plan": 9,
+   "vision_boxes": 3,
+   "merged": 9,
+   "usd": 0.003632
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "door",
+   "gold": 6,
+   "plan": 11,
+   "vision_boxes": 6,
+   "merged": 16,
+   "usd": 0.003842
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.003184
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002712
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "window",
+   "gold": 2,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.003172
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "door",
+   "gold": 3,
+   "plan": 3,
+   "vision_boxes": 2,
+   "merged": 4,
+   "usd": 0.003412
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.003184
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "plan": 2,
+   "vision_boxes": 1,
+   "merged": 2,
+   "usd": 0.002942
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "window",
+   "gold": 6,
+   "plan": 6,
+   "vision_boxes": 6,
+   "merged": 6,
+   "usd": 0.00395
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "door",
+   "gold": 6,
+   "plan": 5,
+   "vision_boxes": null,
+   "merged": null,
+   "usd": 0.0
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 1,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.003062
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 1,
+   "merged": 1,
+   "usd": 0.00291
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "window",
+   "gold": 6,
+   "plan": 4,
+   "vision_boxes": 3,
+   "merged": 4,
+   "usd": 0.003562
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "door",
+   "gold": 7,
+   "plan": 7,
+   "vision_boxes": 5,
+   "merged": 12,
+   "usd": 0.004102
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.003184
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 1,
+   "merged": 1,
+   "usd": 0.002942
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "window",
+   "gold": 9,
+   "plan": 5,
+   "vision_boxes": 5,
+   "merged": 5,
+   "usd": 0.003618
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "door",
+   "gold": 6,
+   "plan": 9,
+   "vision_boxes": 7,
+   "merged": 15,
+   "usd": 0.004018
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.00307
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002688
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "window",
+   "gold": 3,
+   "plan": 6,
+   "vision_boxes": 9,
+   "merged": 9,
+   "usd": 0.004618
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "door",
+   "gold": 5,
+   "plan": 9,
+   "vision_boxes": 8,
+   "merged": 14,
+   "usd": 0.004538
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 5,
+   "vision_boxes": 2,
+   "merged": 5,
+   "usd": 0.00316
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 1,
+   "vision_boxes": 1,
+   "merged": 2,
+   "usd": 0.002908
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "window",
+   "gold": 1,
+   "plan": 1,
+   "vision_boxes": 0,
+   "merged": 1,
+   "usd": 0.002916
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "door",
+   "gold": 2,
+   "plan": 4,
+   "vision_boxes": 2,
+   "merged": 6,
+   "usd": 0.003066
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 3,
+   "vision_boxes": 2,
+   "merged": 3,
+   "usd": 0.003178
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002706
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "window",
+   "gold": 4,
+   "plan": 4,
+   "vision_boxes": 3,
+   "merged": 4,
+   "usd": 0.003346
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "door",
+   "gold": 7,
+   "plan": 6,
+   "vision_boxes": 5,
+   "merged": 9,
+   "usd": 0.003596
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 3,
+   "vision_boxes": 2,
+   "merged": 3,
+   "usd": 0.003128
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "plan": 1,
+   "vision_boxes": 1,
+   "merged": 1,
+   "usd": 0.002886
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision_boxes": 3,
+   "merged": 3,
+   "usd": 0.003288
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "door",
+   "gold": 5,
+   "plan": 5,
+   "vision_boxes": 5,
+   "merged": 6,
+   "usd": 0.003878
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.0032
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 2,
+   "vision_boxes": 1,
+   "merged": 2,
+   "usd": 0.002958
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "window",
+   "gold": 5,
+   "plan": 7,
+   "vision_boxes": 10,
+   "merged": 7,
+   "usd": 0.004848
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "door",
+   "gold": 1,
+   "plan": 8,
+   "vision_boxes": 3,
+   "merged": 10,
+   "usd": 0.003448
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 3,
+   "usd": 0.00313
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002748
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "window",
+   "gold": 4,
+   "plan": 6,
+   "vision_boxes": 4,
+   "merged": 6,
+   "usd": 0.003454
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "door",
+   "gold": 5,
+   "plan": 6,
+   "vision_boxes": 4,
+   "merged": 9,
+   "usd": 0.003864
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.003086
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002704
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "window",
+   "gold": 11,
+   "plan": 10,
+   "vision_boxes": 11,
+   "merged": 10,
+   "usd": 0.005186
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "door",
+   "gold": 11,
+   "plan": 11,
+   "vision_boxes": 11,
+   "merged": 20,
+   "usd": 0.005176
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 5,
+   "vision_boxes": 4,
+   "merged": 5,
+   "usd": 0.003588
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "plan": 0,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.003116
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "window",
+   "gold": 5,
+   "plan": 4,
+   "vision_boxes": 4,
+   "merged": 4,
+   "usd": 0.003632
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "door",
+   "gold": 7,
+   "plan": 11,
+   "vision_boxes": 10,
+   "merged": 20,
+   "usd": 0.004612
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002724
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 1,
+   "merged": 1,
+   "usd": 0.002942
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "window",
+   "gold": 13,
+   "plan": 10,
+   "vision_boxes": 13,
+   "merged": 10,
+   "usd": 0.005668
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "door",
+   "gold": 12,
+   "plan": 13,
+   "vision_boxes": 11,
+   "merged": 21,
+   "usd": 0.004758
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "sink",
+   "gold": 4,
+   "plan": 2,
+   "vision_boxes": 3,
+   "merged": 5,
+   "usd": 0.00339
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 1,
+   "merged": 1,
+   "usd": 0.002918
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "window",
+   "gold": 4,
+   "plan": 6,
+   "vision_boxes": 4,
+   "merged": 6,
+   "usd": 0.003618
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "door",
+   "gold": 5,
+   "plan": 6,
+   "vision_boxes": 5,
+   "merged": 8,
+   "usd": 0.003648
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.00317
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002698
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision_boxes": 2,
+   "merged": 3,
+   "usd": 0.00312
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "door",
+   "gold": 7,
+   "plan": 7,
+   "vision_boxes": 6,
+   "merged": 12,
+   "usd": 0.00428
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 3,
+   "vision_boxes": 3,
+   "merged": 3,
+   "usd": 0.003362
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.00266
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "window",
+   "gold": 5,
+   "plan": 5,
+   "vision_boxes": 5,
+   "merged": 5,
+   "usd": 0.003872
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "door",
+   "gold": 5,
+   "plan": 6,
+   "vision_boxes": 5,
+   "merged": 11,
+   "usd": 0.003902
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 1,
+   "vision_boxes": 1,
+   "merged": 1,
+   "usd": 0.002984
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002742
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "window",
+   "gold": 4,
+   "plan": 4,
+   "vision_boxes": 4,
+   "merged": 4,
+   "usd": 0.003632
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "door",
+   "gold": 6,
+   "plan": 6,
+   "vision_boxes": 6,
+   "merged": 9,
+   "usd": 0.004102
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.003184
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002712
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "window",
+   "gold": 4,
+   "plan": 6,
+   "vision_boxes": 4,
+   "merged": 6,
+   "usd": 0.003406
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "door",
+   "gold": 11,
+   "plan": 11,
+   "vision_boxes": 11,
+   "merged": 12,
+   "usd": 0.005196
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "sink",
+   "gold": 3,
+   "plan": 3,
+   "vision_boxes": 3,
+   "merged": 3,
+   "usd": 0.003228
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002656
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "window",
+   "gold": 2,
+   "plan": 3,
+   "vision_boxes": 2,
+   "merged": 3,
+   "usd": 0.003118
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "door",
+   "gold": 5,
+   "plan": 6,
+   "vision_boxes": 5,
+   "merged": 10,
+   "usd": 0.003638
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 3,
+   "vision_boxes": 2,
+   "merged": 3,
+   "usd": 0.00308
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002698
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision_boxes": 3,
+   "merged": 3,
+   "usd": 0.003368
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "door",
+   "gold": 5,
+   "plan": 7,
+   "vision_boxes": 5,
+   "merged": 9,
+   "usd": 0.003828
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 3,
+   "usd": 0.00315
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 1,
+   "merged": 1,
+   "usd": 0.002898
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "window",
+   "gold": 7,
+   "plan": 7,
+   "vision_boxes": 7,
+   "merged": 7,
+   "usd": 0.003976
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "door",
+   "gold": 12,
+   "plan": 13,
+   "vision_boxes": 12,
+   "merged": 22,
+   "usd": 0.005426
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.003128
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.002656
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "window",
+   "gold": 5,
+   "plan": 5,
+   "vision_boxes": 5,
+   "merged": 5,
+   "usd": 0.003838
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "door",
+   "gold": 9,
+   "plan": 9,
+   "vision_boxes": 7,
+   "merged": 13,
+   "usd": 0.004308
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "sink",
+   "gold": 3,
+   "plan": 3,
+   "vision_boxes": 3,
+   "merged": 3,
+   "usd": 0.00339
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 1,
+   "merged": 1,
+   "usd": 0.002918
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "window",
+   "gold": 23,
+   "plan": 16,
+   "vision_boxes": 18,
+   "merged": 16,
+   "usd": 0.006808
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "door",
+   "gold": 19,
+   "plan": 16,
+   "vision_boxes": 17,
+   "merged": 28,
+   "usd": 0.006588
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "sink",
+   "gold": 4,
+   "plan": 5,
+   "vision_boxes": 4,
+   "merged": 5,
+   "usd": 0.00361
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "plan": 0,
+   "vision_boxes": 0,
+   "merged": 0,
+   "usd": 0.003048
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision_boxes": 3,
+   "merged": 3,
+   "usd": 0.003346
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "door",
+   "gold": 5,
+   "plan": 5,
+   "vision_boxes": 5,
+   "merged": 9,
+   "usd": 0.003606
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision_boxes": 2,
+   "merged": 2,
+   "usd": 0.003128
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision_boxes": 1,
+   "merged": 1,
+   "usd": 0.002886
+  }
+ ],
+ "usd": 0.5559,
+ "window": {
+  "n": 40,
+  "plan": 0.425,
+  "vision_boxes": 0.625,
+  "merged": 0.425
+ },
+ "door": {
+  "n": 39,
+  "plan": 0.41,
+  "vision_boxes": 0.538,
+  "merged": 0.0
+ },
+ "sink": {
+  "n": 40,
+  "plan": 0.225,
+  "vision_boxes": 0.275,
+  "merged": 0.2
+ },
+ "shower_bathtub": {
+  "n": 40,
+  "plan": 0.15,
+  "vision_boxes": 0.5,
+  "merged": 0.475
+ }
+}

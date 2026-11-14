@@ -160,7 +160,8 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
         if doc is None or doc.mode != "planmap" or not any(i.source == "det" for i in doc.items):
             return res
         det = Path(root) / did / "planmap-det.json"
-        if det.exists():   # the fine-tuned RT-DETR detector is the preferred box source
+        # calibration: the fine-tuned detector is far below the vision recount (shower/bath .28 vs .89 exact count), so it is opt-in (DET_BOXES=1)
+        if det.exists() and os.environ.get("DET_BOXES") == "1":
             alld = json.loads(det.read_text()).get("items", [])
             if any(i.get("kind") in ("door", "window", "toilet", "sink", "shower", "bathtub") for i in alld):   # a detector run, not a segmentation-only file
                 its = [i for i in alld if i.get("kind") in _PM_KINDS[kk] and (i.get("conf") or 1) >= 0.25]
@@ -350,6 +351,13 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             sel = ", ".join(_title(d, root) for d in doc_ids)
             return _abstained(question, doc_ids, f"The question names **{other}**, which is not among the selected documents ({sel}). "
                               "Select that document and ask again, or ask about the selected one.", trace, t0)
+
+        from engine.titleblock import answer_text
+        if (res := answer_text(question, doc_ids, root, t0)) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
+            return res
 
         # 0-. "where is the stairs / lift / entrance (on level N)": code over IFC elements, no model
         from engine.locate import locate_answer, thing as _thing
