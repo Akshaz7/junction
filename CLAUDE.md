@@ -18,7 +18,7 @@ Deadlines (Finland time): hard freeze Sun 15 Nov 07:00, final report 08:30, subm
 
 ## Fixed decisions (do not reopen; see DECISIONS.md)
 - English only answers. Filter non-English questions out of tests.
-- No accounts. No security/code reviews, no CI. Only: keys never in git; 30 req/min/IP rate limit on deployed backend.
+- No accounts. No security/code reviews, no CI. Only: keys never in git; 120 req/min/IP rate limit on deployed backend (raised from 30 by Ash, Sat 14 Nov).
 - Web on Vercel. Backend (API + live sync) one container on Aiven Runtime. Aiven PostgreSQL. EU region.
 - Local first: `make dev` runs everything with NO keys (Docker Postgres, `fake` model provider).
 - GPU: Modal (fine-tuning, optional vision endpoints). No training on the Mac.
