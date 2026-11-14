@@ -19,3 +19,5 @@ Not OK: modal login MISSING (fixed 02:50, workspace awaisraf20), aiven login MIS
 
 ## Hourly log
 - 2026-11-14 02:45 PHASE A complete. Waiting for /goal.
+- 03:40 D-11 preview batch: 773 docs, 739 pages, 13 IFC scenes, 306 extruded scenes, 319 USDZ, 0 failures. Full dataset zip complete (9.8 GB, 16,902 files).
+- 2026-11-14 03:45 32/94 rows done (tier 1 25/44). Spend $0.03. All 7 workers busy. Full dataset downloaded.

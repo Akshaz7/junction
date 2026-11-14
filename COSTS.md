@@ -15,3 +15,4 @@ Caps for run 1. The lead may not raise them; only Ash can. The model layer enfor
 ## Hourly spend (from `results/costs.jsonl`)
 | Time | Runware | Anthropic | Gemini | Modal | ElevenLabs | Context.dev | NVIDIA calls | Total USD |
 |---|---|---|---|---|---|---|---|---|
+| 03:45 | 0.017 | 0 | 0 | 0 | 0.010 | 0 | ~120 | 0.027 |
