@@ -213,3 +213,25 @@ def test_plain_remove_from_chat_runs_the_rule_checks(monkeypatch):
         a = answer("remove the front door", [doc])
         assert not a["answer"]["abstained"] and a["advisor_cards"], doc
         assert want in a["answer"]["text_md"] and "33" in a["answer"]["text_md"], a["answer"]["text_md"]
+
+
+@pytest.mark.parametrize("q", [
+    "Remove the front door. Is it still compliant?",
+    "What if we remove the main entrance?",
+    "What happens if I remove the front door?",
+    "Delete the entrance door. Does it still meet the fire code?",
+    "Take out the front door. Are the exits still OK?",
+])
+def test_demo_phrasings_hide_the_front_door_and_give_the_exit_violation(q, monkeypatch):
+    """E-46: full-stop, what-if and 'main entrance' phrasings are the same edit as the comma form, at $0 and without the model."""
+    monkeypatch.setenv("MODELS_FAKE", "1")
+    from engine.answer import answer
+    from engine.solvers import ARTIFACTS
+    doc = "ifc_bench__ac20-arc"
+    if not (Path(ARTIFACTS) / doc).exists():
+        pytest.skip("real artifacts not present")
+    a = answer(q, [doc])
+    cmds = a["evidence"]["scene"]["commands"]
+    assert any(c.get("op") == "hide" and "D34" in (c.get("labels") or {}).values() for c in cmds), cmds
+    assert "Fewer than two exits" in a["answer"]["text_md"] and "33" in a["answer"]["text_md"]
+    assert a["cost"]["usd_total"] == 0

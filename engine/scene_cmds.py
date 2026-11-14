@@ -82,8 +82,13 @@ def tags(doc: Doc) -> dict[str, str]:
     return out
 
 
+_WHATIF = re.compile(r"^\W*(?:what(?:'s| is| would| will)? (?:happen(?:s)? )?if|suppose|imagine|if)\s+(?:we|i|you|they|someone)?\s*(?:were to\s+|was to\s+|would\s+|will\s+)?(?=(?:remove|delete|hide|take out|get rid of|drop)\b)", re.I)
+
+
 def parse_scene(question: str) -> SceneIntent | None:
     q = question.strip()
+    # "what if we remove the main entrance?" / "what happens if I delete the front door" is the edit itself, asked as a what-if
+    q = _WHATIF.sub("", q, count=1) if _WHATIF.match(q) else q
     if re.match(r"\s*(how many|what|which|where|why|how (?:much|long|big|large)|count|list|is |are |does |do |can you tell)", q, re.I):
         return None
     if _UNDO.match(q):
@@ -104,9 +109,14 @@ def parse_scene(question: str) -> SceneIntent | None:
     if op == "highlight" and p.type in ("area", "length", "volume"):
         return None
     tg = [f"{m.group(1).upper()}{int(m.group(2))}" for m in TAG_RE.finditer(q)]
-    if not p.kind and not tg:
+    kind = p.kind
+    if not kind and not tg:
+        from engine import entrance      # lazy: advisor imports this module
+        if entrance.is_entrance_phrase(q):   # "remove the main entrance" names no door word but means the entrance door
+            kind = "door"
+    if not kind and not tg:
         return SceneIntent(op, None, [], None) if op == "restore" else None
-    return SceneIntent(op, p.kind, tg, p.scope)
+    return SceneIntent(op, kind, tg, p.scope)
 
 
 _ODD = re.compile(r"^\W*(?:please\s+|can you\s+|could you\s+|would you\s+|i(?:'d| would) like (?:to )?|i want (?:to )?|let'?s\s+|just\s+)?"
