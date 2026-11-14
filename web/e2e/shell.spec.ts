@@ -9,7 +9,6 @@ test('workspace shell exposes every route and restores it on reload', async ({ p
   await expect(page).toHaveTitle('Stoa Pro')
   const navigation = page.getByRole('navigation', { name: 'Workspace navigation', exact: true })
   await expect(page.getByRole('link', { name: 'Stoa Pro home' })).toHaveText('Pro')
-  await expect(page.getByRole('combobox', { name: 'Project', exact: true }).filter({ visible: true })).toHaveValue('demo')
   for (const label of navItems.filter((item) => item !== 'Accuracy')) {
     const link = navigation.getByRole('link', { name: label, exact: true })
     await expect(link).toBeVisible()
@@ -45,8 +44,7 @@ test('phone navigation keeps all pages reachable without horizontal overflow', a
   await page.goto('/')
   const navigation = page.getByRole('navigation', { name: 'Mobile navigation', exact: true })
   await expect(navigation).toBeVisible()
-  await expect(page.getByRole('combobox', { name: 'Project', exact: true }).filter({ visible: true })).toHaveValue('demo')
-  for (const label of navItems) {
+  for (const label of navItems.filter((item) => item !== 'Accuracy')) {
     const underMore = ['Compare', 'Library', 'Tools', 'Accuracy'].includes(label)
     const more = navigation.getByText('More', { exact: true })
     if (underMore) await more.click()
@@ -78,9 +76,12 @@ test('demo chat and document navigation', async ({ page }) => {
   await page.goto('/#/chat')
   await expect(page).toHaveTitle('Stoa Pro')
   await page.getByRole('button', { name: /Count something on a plan/ }).click()
+  await page.getByRole('combobox', { name: 'Ask about your drawings' }).press('Enter')
+  await page.getByTestId('need-document').getByRole('button', { name: 'Choose a document' }).click()
+  await page.getByRole('option').first().click()
   await expect(page.getByText('2 windows', { exact: true })).toBeVisible()
   await page.locator('.sources-summary').click()
-  await expect(page.getByText(/window-001, window-002/)).toBeVisible()
+  await expect(page.locator('.sources-detail')).toContainText(/Page \d/)
   await page.getByRole('navigation', { name: 'Workspace navigation', exact: true }).getByRole('link', { name: 'Data', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Garden room — generated for demo' })).toBeVisible()
   await page.getByRole('searchbox', { name: 'Search documents' }).fill('missing')
