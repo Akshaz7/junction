@@ -1,0 +1,32 @@
+{
+  "branch": "final/overlay",
+  "implementation_commit": "6d07956",
+  "checks": {
+    "engine_pytest": {
+      "passed": 17
+    },
+    "api_pytest": {
+      "passed": 8
+    },
+    "vitest": {
+      "passed": 41
+    },
+    "typescript": "pass",
+    "playwright": {
+      "passed": 3,
+      "browsers": 1,
+      "port": 5367,
+      "heavy_wrapper": "scripts/heavy.sh"
+    }
+  },
+  "sources": "Screenshots use judges source images and the real engine-computed registration. Browser HTTP transport is isolated; no shared server chats/uploads are created.",
+  "shared_component": "SheetCompare files taken from final/mirror-changes at 9603fa9; overlay wraps it without editing its API.",
+  "limitations": [
+    "Sports Complex early-to-later revision: insufficient automatic raster features; manual two-point fit shown, independent third-corner discrepancy 11.18 px; no accuracy claim.",
+    "Anchor consensus percentage describes correspondence support, not measurement accuracy.",
+    "Chat overlay actions and manual fits stay in the current browser session; no backend chat history write.",
+    "pipeline.pdf_mep is not present in fetched awais/pdf3d; provider_alignment adapter supports its promised T/residual/matches return shape; current text/raster fallback is active."
+  ],
+  "model_calls": 0,
+  "cost_usd": 0
+}
