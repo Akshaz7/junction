@@ -919,3 +919,6 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 }
 /* W-66f: stacked PRO set like the STOA letters (same serif, size and tracking), centred under them. */
 .rail .brand-mark .brand-pro { font-size: 1.02em; letter-spacing: .04em; margin-right: 0; translate: .78em 0; }
+/* W-66g: stacked lockup: PRO starts under the S of STOA and spans the same width, same serif and cap height. */
+.rail .brand-mark { align-items: flex-start; left: 14px; width: auto; }
+.rail .brand-mark .brand-pro { translate: none; margin-left: 1.07em; font-size: 1.02em; letter-spacing: .2em; margin-right: -.2em; }
