@@ -43,7 +43,7 @@ it('says where a source is and what can be highlighted', () => {
 
 it('picks the key numbers for the compact card', () => {
   const k = keyNumbers(scanCalc)
-  expect(k.map((x) => x.label)).toEqual(expect.arrayContaining(['Result', 'Scale', 'Margin']))
-  expect(k.find((x) => x.label === 'Scale')?.text).toBe('0.02903 m/px')
+  expect(k.map((x) => x.label)).toEqual(expect.arrayContaining(['Result', 'Method', 'Margin', 'Checks']))
+  expect(k.find((x) => x.label === 'Checks')?.text).toBe('1 of 2 agree')
   expect(keyNumbers(undefined)).toEqual([])
 })

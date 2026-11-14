@@ -64,3 +64,26 @@ it('expands to full width and has a resize separator', async () => {
   expect(host.querySelector('.viewer-calc-panel.is-expanded')).toBeTruthy()
   expect(host.querySelector('[role="separator"]')).toBeNull()
 })
+
+import { scanCalc, scanPrintedCalc, ifcCountCalc, ifcWallAreaCalc } from '../lib/__fixtures__/calc-fixture'
+import type { Calculation } from '../lib/types'
+
+for (const [name, calc] of [['scan door prior', scanCalc], ['scan printed scale', scanPrintedCalc], ['IFC count', ifcCountCalc], ['IFC wall area', ifcWallAreaCalc]] as [string, Calculation][]) {
+  it(`renders whatever the ${name} calculation contains, with its method`, async () => {
+    await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc, graph_path: undefined }} onClose={() => {}} />))
+    expect(host.querySelector('[data-testid="calc-method"]')?.textContent).toContain(calc.method!.label)
+    expect(host.querySelector('[data-testid="calc-method"]')?.textContent).toContain('chosen because')
+    expect(host.querySelector('.calc-alternatives')?.textContent).toContain(calc.method!.alternatives![0].rejected_because)
+    expect([...host.querySelectorAll('.calc-steps > li strong')].map((n) => n.textContent)).toEqual(calc.steps.map((s) => s.label))
+    expect(!!host.querySelector('.calc-table')).toBe(calc.rows.length > 0)
+    expect(!!host.querySelector('.calc-checks')).toBe(calc.checks.length > 0)
+  })
+}
+
+it('survives a calculation with only a formula and a result', async () => {
+  const bare = { formula: 'x = 1', result: { value: 1, unit: 'count', rounded_as: 'whole' } } as unknown as Calculation
+  await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc: bare, margin: undefined, graph_path: undefined }} onClose={() => {}} />))
+  expect(host.querySelector('[data-testid="calc-formula"]')).toBeTruthy()
+  expect(host.querySelector('[data-testid="calc-method"]')).toBeNull()
+  expect(host.querySelector('.calc-table, .calc-checks, .calc-steps')).toBeNull()
+})

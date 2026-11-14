@@ -40,8 +40,11 @@ export interface CalculationSource {
   crop?: string
   origin?: string; record?: Record<string, unknown>
 }
+/** How the engine chose to measure this answer, and the other ways it considered. */
+export interface CalculationMethod { id: string; label: string; why_chosen: string; alternatives?: { id: string; label?: string; value?: number | string | null; unit?: string; rejected_because: string }[] }
 export interface Calculation {
   formula: string
+  method?: CalculationMethod
   steps: { id: string; label: string; expr: string; value: number | null; unit: string; note?: string; operation?: string;
     inputs: { name: string; value: unknown; unit: string; source: CalculationSource }[] }[]
   rows: { item_id: string; label: string; values: Record<string, unknown>; source: CalculationSource }[]

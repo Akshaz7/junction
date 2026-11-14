@@ -61,7 +61,8 @@ function RowsTable({ calc, onFocus, docTitle }: { calc: Calculation; onFocus?: (
 export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle }: {
   reasoning: Reasoning; title?: string; onClose: () => void; onFocus?: (target: FocusTarget) => void; docTitle?: (id: string) => string
 }) {
-  const calc = reasoning.calc
+  // Engine output is data-driven and may omit any part: fill the gaps so every section simply disappears when empty.
+  const calc: Calculation | undefined = reasoning.calc && { ...reasoning.calc, steps: (reasoning.calc.steps ?? []).map((s) => ({ ...s, inputs: s.inputs ?? [] })), rows: reasoning.calc.rows ?? [], checks: reasoning.calc.checks ?? [] }
   const [width, setWidth] = useState(440)
   const [expanded, setExpanded] = useState(false)
   const drag = useRef<{ x: number; w: number } | null>(null)
@@ -90,6 +91,13 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
         <code>{calc.formula}</code>
         {result && typeof result.value === 'number' && <p className="calc-result"><span>=</span> <b>{withUnit(result.value, result.unit)}</b>{result.rounded_as && <small>rounded to {result.rounded_as}</small>}</p>}
         {result && typeof result.value !== 'number' && <p className="calc-result">{Object.entries(result.value).map(([k, v]) => <span key={k}><b>{fmt(v)}</b> <small>{k}</small> </span>)}</p>}
+      </div>}
+      {calc?.method && <div className="calc-method" data-testid="calc-method">
+        <p><strong>Method:</strong> {calc.method.label}{calc.method.why_chosen && <>, chosen because {calc.method.why_chosen.replace(/^because\s+/i, '').replace(/\.$/, '')}.</>}</p>
+        {!!calc.method.alternatives?.length && <details className="calc-inputs calc-alternatives"><summary>Other methods considered ({calc.method.alternatives.length})</summary>
+          <table aria-label="Other methods considered"><thead><tr><th scope="col">Method</th><th scope="col" className="num">Value</th><th scope="col">Why not used</th></tr></thead>
+            <tbody>{calc.method.alternatives.map((alt, i) => <tr key={i}><th scope="row">{alt.label ?? alt.id}</th><td className="num">{alt.value == null ? '-' : typeof alt.value === 'number' ? withUnit(alt.value, alt.unit ?? '') : alt.value}</td><td>{alt.rejected_because}</td></tr>)}</tbody></table>
+        </details>}
       </div>}
       {calc?.status === 'incomplete' && <p className="calc-warning" role="status">This calculation could not be reproduced in full.{calc.issues?.length ? ` ${calc.issues.join(' ')}` : ''}</p>}
       {!calc && <p className="calc-none">No calculation was recorded for this answer. The steps are listed on the card.</p>}
@@ -128,8 +136,8 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
         {margin.value != null && Number.isFinite(margin.value)
           ? <p className="calc-margin"><b>± {withUnit(margin.value, margin.unit)}</b>{margin.pct != null && <> <span>(± {fmt(margin.pct, 2)}%)</span></>}</p>
           : <p className="calc-margin">Not known</p>}
-        <p className="calc-note">{margin.why}</p>
-        {margin.sources.length > 0 && <p className="calc-note">Based on: {margin.sources.join('; ')}</p>}
+        {margin.why && <p className="calc-note">{margin.why}</p>}
+        {!!margin.sources?.length && <p className="calc-note">Based on: {(margin.sources ?? []).join('; ')}</p>}
       </Section>}
 
       <Section id="confidence" title="Confidence" hint={confidence.pct != null ? `${confidence.label} · ${confidence.pct}%` : confidence.label}>

@@ -99,16 +99,16 @@ export function sourceText(source: CalculationSource | undefined, docTitle?: (id
 export const signed = (delta: number) => `${delta > 0 ? '+' : delta < 0 ? '−' : ''}${fmt(Math.abs(delta), 1)}`
 
 /** The headline numbers for the compact card: result, scale, a few counts, margin. */
+/** The few numbers for the compact card. Driven only by what the calculation contains: no step names are assumed. */
 export function keyNumbers(calc: Calculation | undefined): { label: string; text: string }[] {
   if (!calc) return []
   const out: { label: string; text: string }[] = []
   const r = calc.result
   if (r && typeof r.value === 'number') out.push({ label: 'Result', text: withUnit(r.value, r.unit) })
-  const scale = calc.steps.find((s) => /scale/i.test(s.label) && typeof s.value === 'number')
-  if (scale) out.push({ label: 'Scale', text: withUnit(scale.value, scale.unit) })
-  const counts = calc.steps.filter((s) => s.unit === 'count' && typeof s.value === 'number' && s !== scale).slice(0, 3)
-  for (const s of counts) out.push({ label: s.label, text: fmt(s.value) })
+  if (calc.method?.label) out.push({ label: 'Method', text: calc.method.label })
   const m = calc.margin
   if (m && m.value != null && Number.isFinite(m.value)) out.push({ label: 'Margin', text: `± ${withUnit(m.value, m.unit)}${m.pct != null ? ` (± ${fmt(m.pct, 2)}%)` : ''}` })
+  const judged = (calc.checks ?? []).filter((c) => c.agrees != null)
+  if (judged.length) out.push({ label: 'Checks', text: `${judged.filter((c) => c.agrees).length} of ${judged.length} agree` })
   return out
 }

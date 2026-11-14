@@ -82,3 +82,8 @@ button.calc-node:hover, button.calc-node:focus-visible { background: var(--ink-w
   .document-viewer:has(.viewer-calc-panel) .viewer-zoom-controls { display: none; }
   .calc-back { display: inline-flex; }
 }
+
+.calc-method { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.calc-method p { margin: 0; }
+.calc-method strong { font-weight: 500; }
+.calc-alternatives { margin-left: 0; margin-top: 6px; }
