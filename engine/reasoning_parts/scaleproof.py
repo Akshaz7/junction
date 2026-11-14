@@ -61,6 +61,19 @@ def run(ctx, quantitative):
                           'value': term['value'], 'unit': ctx['unit'],
                           'inputs': [operand(f'operand {j + 1}', p['value'], p['unit'], src) for j, p in enumerate(measure['operands'])],
                           'note': 'Uses the scale recorded for this page. Outline and box errors are not measured.'})
+    if terms:
+        total = sum(t['value'] for t in terms)
+        steps.append({'id': 'source-quantity-sum', 'label': 'Add source quantities', 'expr': 'sum(all calculation rows)',
+                      'value': total, 'unit': ctx['unit'],
+                      'inputs': [operand('source quantity', t['value'], ctx['unit'], calc_rows[i]['source']) for i, t in enumerate(terms)],
+                      'note': 'All cited terms are retained in the table.'})
+        if abs(total - ctx['value']) > 1e-12:
+            steps.append({'id': 'display-rounding', 'label': 'Display rounding', 'expr': 'reported result = source sum + display rounding adjustment',
+                          'value': ctx['value'], 'unit': ctx['unit'],
+                          'inputs': [operand('source sum', total, ctx['unit'], {'calc_step': 'source-quantity-sum'}),
+                                     operand('display rounding adjustment', ctx['value'] - total, ctx['unit'],
+                                             {'answer_field': 'answer.value', 'calculation': 'reported value minus source sum'})],
+                          'note': 'The source sum reproduces the reported result within its displayed precision.'})
     margin = copy.deepcopy(quantitative.get('margin') or {})
     spreads = []
     power = {'m': 1, 'm2': 2, 'm3': 3}[ctx['unit']]
@@ -84,3 +97,25 @@ def run(ctx, quantitative):
                      'steps': steps, 'rows': calc_rows,
                      'result': {'value': ctx['value'], 'unit': ctx['unit'], 'rounded_as': 'answer precision'},
                      'checks': checks, 'margin': margin}}
+
+
+def supplement(res, question, root):
+    """Routes with their own evidence card still receive scale/calc provenance."""
+    card = res.get('reasoning') or {}
+    ans = res.get('answer') or {}
+    if card.get('calc') or ans.get('abstained'):
+        return res
+    ctx = {'root': Path(root), 'res': res, 'question': question, 'ans': ans,
+           'cites': res.get('citations') or [], 'doc': None, 'steps': [],
+           'unit': str(ans.get('unit') or '').replace('²', '2').replace('³', '3'), 'value': ans.get('value'),
+           'models_used': any(s.get('model') for s in res.get('trace') or [])}
+    from engine.reasoning_parts import margin
+    quantitative = margin.run(ctx)
+    if card.get('margin'):
+        quantitative['margin'] = copy.deepcopy(card['margin'])
+    extra = run(ctx, quantitative)
+    if extra:
+        card.update(extra)
+        card['margin'] = quantitative['margin']
+        res['reasoning'] = card
+    return res

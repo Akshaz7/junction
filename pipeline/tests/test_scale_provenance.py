@@ -56,3 +56,25 @@ def test_ifc_absent_or_ambiguous_units_never_defaults_to_metres():
     ass = f.create_entity('IfcUnitAssignment', Units=units)
     f.create_entity('IfcProject', GlobalId=ifcopenshell.guid.new(), UnitsInContext=ass)
     assert ifc_units(f, 'test')['m_per_unit'] is None
+
+
+def test_rotated_cad_registration_keeps_positive_distance_scale():
+    doc = ezdxf.new(); doc.header['$INSUNITS'] = 4
+    out = dxf_scale(doc, {'a': -2, 'rms_px': 0}, 'test')
+    assert out['m_per_px'] == pytest.approx(.0005)
+    assert out['derivation']['inputs'][-1]['value'] == -2
+
+
+def test_printed_room_area_retains_its_actual_label_and_segmented_outline(monkeypatch):
+    from pathlib import Path
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[2] / 'vision'))
+    from rooms_scale import estimate_scale
+    room = {'bbox_px': [0, 0, 100, 100], 'polygon_px': [[0, 0], [100, 0], [100, 100], [0, 100]],
+            'props': {'room_type': 'living', 'area_px': 10000}}
+    scale = estimate_scale([room], [{'text': '100 m2', 'bbox': [10, 10, 50, 30]}],
+                           [{'bbox_px': [0, 0, 9, 5]}, {'bbox_px': [20, 0, 29, 5]}])
+    assert scale['m_per_px'] == pytest.approx(.1)
+    area, pixels = scale['derivation']['inputs']
+    assert area['value'] == 100 and area['source']['text'] == '100 m2'
+    assert pixels['value'] == 10000 and pixels['source']['regions'][0]['polygon_px'] == room['polygon_px']
+    assert 'inferred' in scale['derivation']['note']

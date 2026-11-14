@@ -122,8 +122,12 @@ def build(res: dict, question: str, root: Path) -> dict | None:
 
 
 def attach(res: dict, question: str, root: Path) -> dict:
-    if res.get("reasoning"):   # these routes bring their own card
-        return res
+    if res.get("reasoning"):   # preserve route-specific prose, add scale provenance
+        try:
+            from engine.reasoning_parts.scaleproof import supplement
+            return supplement(res, question, root)
+        except Exception:  # noqa: BLE001 - missing provenance must not lose an answer
+            return res
     try:
         r = build(res, question, root)
         if r:

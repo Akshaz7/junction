@@ -4,6 +4,8 @@ The API consumes the resulting JSON and never imports IFC/DXF libraries.
 """
 from __future__ import annotations
 
+import math
+
 from engine.scale_proof import candidate, operand, positive, source
 
 PREFIX = {'EXA': 1e18, 'PETA': 1e15, 'TERA': 1e12, 'GIGA': 1e9, 'MEGA': 1e6, 'KILO': 1e3,
@@ -48,7 +50,7 @@ def ifc_units(model, doc_id):
                 inputs.append(operand('declared conversion factor', val, 'base unit/native unit', {
                     **src, 'name': u.Name, 'entity': f'#{cf.id()}', 'attribute': 'ValueComponent'}))
                 base = resolve(cf.UnitComponent)
-                return val * base if base else None
+                return positive(val * base) if base else None
             return None
 
         factor = resolve(units[0])
@@ -91,12 +93,13 @@ def dxf_units(doc, doc_id):
 def dxf_scale(doc, transform, doc_id, page=1):
     native = dxf_units(doc, doc_id)
     factor = native['m_per_unit']
-    a = positive(transform.get('a'))
+    signed = transform.get('a')
+    a = positive(abs(signed)) if isinstance(signed, (int, float)) and math.isfinite(signed) else None
     if not factor or not a:
         return {'m_per_px': None, 'method': 'none', 'confidence': 0, 'native_units': native}
     src = source(doc_id, page, file=f'planmap-{page}.json', pointer='/registration')
-    derivation = candidate('dxf-units', factor / a, 'scale = metres per drawing unit / registered pixels per drawing unit',
-                          native['inputs'] + [operand('registered pixels per drawing unit', a, 'px/native unit', src)],
+    derivation = candidate('dxf-units', factor / a, 'scale = metres per drawing unit / abs(registered pixels per drawing unit)',
+                          native['inputs'] + [operand('registered signed pixels per drawing unit', signed, 'px/native unit', src)],
                           'Registration residual measures alignment, not physical unit correctness.', independent=False)
     derivation.pop('method'); derivation.pop('m_per_px')
     # Preserve each inlier so the registration can be recomputed from real anchors.
@@ -105,4 +108,4 @@ def dxf_scale(doc, transform, doc_id, page=1):
             **src, 'text': anchor['text'], 'bbox': anchor['bbox'], 'native_xy': anchor['native'], 'residual_px': anchor['residual_px']}))
     return {'m_per_px': factor / a, 'method': 'dxf_units_fit', 'confidence': 1.0 if transform.get('rms_px', 0) < 6 else .6,
             'native_units': native, 'derivation': derivation,
-            'selection_rule': 'Use declared DXF units divided by the recorded CAD-to-page transform; reject missing units or non-positive transforms.'}
+            'selection_rule': 'Use declared DXF units divided by the recorded CAD-to-page transform; reject missing units or zero or non-finite transforms.'}

@@ -3,7 +3,8 @@ import json
 
 import pytest
 
-from engine import scale_proof as sp, scale_text
+from engine import scale_proof as sp
+from engine import scale_text
 from engine.reasoning import build
 
 
@@ -135,8 +136,9 @@ def test_conflicting_detail_ratios_cannot_choose_arbitrary_first_ratio():
 
 
 def test_refinement_scales_only_items_on_that_page(tmp_path):
-    from engine.solvers.data import load_doc
     from PIL import Image
+
+    from engine.solvers.data import load_doc
     folder = tmp_path / 'uploads__scales'; folder.mkdir()
     for n, dpi in ((1, 254), (2, 127)):
         Image.new('RGB', (1000, 700), 'white').save(folder / f'page-{n}.png')
@@ -167,3 +169,62 @@ def test_method_spread_propagates_quadratically_as_sensitivity_only(tmp_path):
     assert sensitivity['scale_pct'] == pytest.approx(10)
     assert sensitivity['value'] == pytest.approx(21)
     assert 'not a physical error bound' in sensitivity['why']
+
+
+def test_ratio_tokens_on_unrelated_lines_are_not_a_printed_scale():
+    assert scale_text.detect([word('1', 10), word(':', 10, 200), word('100', 10, 400)], 1000, 700, dpi=200) is None
+
+
+def test_routes_with_their_own_card_also_receive_calc(tmp_path):
+    from engine.reasoning import attach
+    res = {'doc_ids': [], 'answer': {'value': 12.3, 'unit': 'm2', 'text_md': '**12.3 m²**'},
+           'reasoning': {'steps': [{'kind': 'read', 'text': 'A route-specific reading.'}]}, 'citations': [], 'trace': []}
+    out = attach(res, 'area', tmp_path)
+    assert out['reasoning']['steps'][0]['text'] == 'A route-specific reading.'
+    assert out['reasoning']['calc']['result']['value'] == 12.3
+    assert not out['reasoning']['calc']['rows']
+
+
+def test_imperial_ratio_keeps_fractional_denominator_and_mixed_fraction():
+    assert scale_text.imperial_ratio([word('5/16"=1\'-0"', 10)]) == pytest.approx(38.4)
+    assert scale_text.imperial_ratio([word('1 1/2"=1\'-0"', 10)]) == pytest.approx(8)
+
+
+def test_dimension_formula_carries_the_actual_conversion_factor():
+    pm = page(); pm['items'] = [{'item_id': 'dim', 'kind': 'dimension', 'label': '900 mm', 'bbox_px': [0, 0, 90, 20],
+                                'props': {'dimension_line_px': [[0, 0], [90, 0]]}}]
+    c = sp.dimensions(pm)[0]
+    assert [i['value'] for i in c['inputs']] == [900, .001, 90]
+    assert c['inputs'][0]['value'] * c['inputs'][1]['value'] / c['inputs'][2]['value'] == pytest.approx(c['m_per_px'])
+
+
+def test_uniform_resize_adjusts_resolution_and_records_the_factor(tmp_path):
+    folder = tmp_path / 'test'; folder.mkdir()
+    (folder / 'text-1.json').write_text(json.dumps({'dpi': 200, 'image': {'w': 500, 'h': 350}, 'words': [word('1:100', 10)]}))
+    pm = page({'method': 'ratio-dpi', 'm_per_px': 100 * .0254 / 400})
+    sc = sp.enrich(pm, folder)
+    step = next(s for s in sc['proof']['steps'] if s['label'] == 'ratio dpi')
+    assert step['value'] == pytest.approx(100 * .0254 / 400)
+    assert step['inputs'][-1]['name'] == 'uniform image resizing' and step['inputs'][-1]['value'] == 2
+    assert step['inputs'][0]['source']['bbox'] == [20, 20, 80, 60]
+
+
+def test_unequal_resize_does_not_produce_one_fictitious_scale(tmp_path):
+    folder = tmp_path / 'test'; folder.mkdir()
+    (folder / 'text-1.json').write_text(json.dumps({'dpi': 200, 'image': {'w': 500, 'h': 700}, 'words': [word('1:100', 10)]}))
+    sc = sp.enrich(page(), folder)
+    assert not any(s['label'] == 'ratio dpi' for s in sc['proof']['steps'])
+    assert 'unequal X/Y' in sc['proof']['selection_rule']
+
+
+def test_display_rounding_explicitly_reconciles_source_rows(tmp_path):
+    folder = tmp_path / 'test'; folder.mkdir()
+    pm = page({'method': 'dimension', 'm_per_px': .01})
+    pm['items'] = [{'item_id': 'r', 'kind': 'room', 'props': {'area_m2': 1.234}, 'source': 'seg', 'conf': 1}]
+    (folder / 'planmap-1.json').write_text(json.dumps(pm))
+    res = {'doc_ids': ['test'], 'route': 'planmap', 'answer': {'value': 1.23, 'unit': 'm2', 'text_md': '**1.23 m²**'},
+           'citations': [{'n': 1, 'doc_id': 'test', 'item_ids': ['r']}], 'trace': []}
+    calc = build(res, 'area', tmp_path)['calc']
+    total = sum(r['values']['m2'] for r in calc['rows'])
+    rounding = next(s for s in calc['steps'] if s['id'] == 'display-rounding')
+    assert total + rounding['inputs'][1]['value'] == pytest.approx(calc['result']['value'])

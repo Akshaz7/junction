@@ -95,21 +95,22 @@ def scalebar(words: list[dict]) -> dict | None:
     return best[1] if best else None
 
 
-def imperial_ratio(words: list[dict]) -> int | None:
-    """3/16"=1'-0", 1/8"=1'-0", 1"=20' -> N of 1:N (rounded)."""
+def imperial_ratio(words: list[dict]) -> float | None:
+    """3/16"=1'-0", 1/8"=1'-0", 1"=20' -> N of 1:N (without rounding the scale)."""
     texts = [str(w.get("text") or "") for w in words]
     for i in range(len(texts)):
         for n in (1, 2, 3, 4, 5):
             m = IMP_RE.search(" ".join(texts[i:i + n]))
             if m:
                 try:
-                    a = m.group(1).replace(" ", "")
-                    inch = (int(a.split("/")[0]) / int(a.split("/")[1])) if "/" in a else float(a)
+                    a = m.group(1).strip()
+                    fraction = re.fullmatch(r"(?:(\d+)\s+)?(\d+)\s*/\s*(\d+)", a)
+                    inch = (float(fraction[1] or 0) + float(fraction[2]) / float(fraction[3])) if fraction else float(a)
                 except (ValueError, ZeroDivisionError):
                     continue
                 feet = int(m.group(2)) + int(m.group(3) or 0) / 12
                 if inch > 0 and 0 < feet <= 500:
-                    r = round(feet * 12 / inch)
+                    r = feet * 12 / inch
                     if 4 <= r <= 5000:
                         return r
     return None
@@ -154,15 +155,17 @@ def from_ratio(ratio: int | None, sheet: str | None, W: int, H: int, dpi: float 
     return None
 
 
-def detect(words: list[dict], W: int, H: int, dpi: float | None = None, prior: float | None = None) -> dict | None:
+def detect(words: list[dict], W: int, H: int, dpi: float | None = None, prior: float | None = None, dpi_source=None) -> dict | None:
     ratio, sheet = ratio_and_sheet(words)
     bar = scalebar(words)
-    readings = evidenced_candidates(words, W, H, dpi)
+    readings = evidenced_candidates(words, W, H, dpi, dpi_source)
     printed = [r for r in readings if r['method'].startswith('ratio-')]
     # Detail drawings can carry different scales on the same sheet. Without a
     # region association there is no single safe ratio to apply to the page.
     ratio_values = {round(r['m_per_px'], 12) for r in printed}
-    cand = from_ratio(ratio, sheet, W, H, dpi) if len(ratio_values) <= 1 else None
+    cand = from_ratio(ratio, sheet, W, H, dpi) if len(ratio_values) == 1 else None
+    if cand and round(cand["m_per_px"], 12) not in ratio_values:
+        cand = None
     if printed and cand is None and len(ratio_values) == 1:
         r = printed[0]
         cand = {'m_per_px': r['m_per_px'], 'method': r['method'], 'confidence': .8,
@@ -179,7 +182,7 @@ def detect(words: list[dict], W: int, H: int, dpi: float | None = None, prior: f
         pass
     if prior and not (0.3 < pick["m_per_px"] / prior < 3.5):
         return None     # nowhere near the size of the doors on the drawing: a misread, not a scale
-    pick = {**pick, "candidates": evidenced_candidates(words, W, H, dpi),
+    pick = {**pick, "candidates": evidenced_candidates(words, W, H, dpi, dpi_source),
             "selection_rule": ("Use the printed bar when it differs from the ratio by more than 25%; otherwise use the printed ratio with known DPI or sheet size. "
                                "This is a selection policy, not an accuracy threshold. Reject readings outside 0.3–3.5 times the door-size prior.")}
     return pick
@@ -211,7 +214,21 @@ def _page_words(doc_dir: Path, page: int) -> tuple[list[dict], int, int, float |
             except OSError:
                 pass
         words += ocr
-    return words, pt.w, pt.h, dpi
+    # The page may have been uniformly resized after rendering. Keep the
+    # original DPI and the explicit factor in the evidence inputs.
+    from engine.scale_proof import positive, read_json
+    text = read_json(doc_dir / f"text-{page}.json")
+    pages = read_json(doc_dir / "pages.json")
+    entry = next((p for p in pages.get("pages", []) if p.get("page") == page), {}) if isinstance(pages, dict) else {}
+    if not dpi:
+        dpi = entry.get("dpi")
+    dims = text.get("image") or {} if isinstance(text, dict) and text.get("dpi") else entry
+    sx = pt.w / dims["w"] if positive(dims.get("w")) else 1
+    sy = pt.h / dims["h"] if positive(dims.get("h")) else 1
+    meta = {"file": f"text-{page}.json" if isinstance(text, dict) and text.get("dpi") else "pages.json",
+            "raw_dpi": dpi, "resize_factor": sx, "recorded_image": dims, "current_image": {"w": pt.w, "h": pt.h}}
+    dpi = float(dpi) * sx if positive(dpi) and abs(sx - sy) <= 1e-6 * max(sx, sy) else None
+    return words, pt.w, pt.h, dpi, meta
 
 
 def _anchor_crops(doc_dir: Path, page: int, words: list[dict]) -> list[dict]:
@@ -263,7 +280,9 @@ def refine_scale(doc_dir: Path, page: int, scale: dict | None) -> dict | None:
         return None   # already a measured scale (dimension, dxf, ifc)
     if not doc_dir.name.startswith("uploads") and not (doc_dir / f"scale-ocr-{page}.json").exists():
         return None   # dataset plans keep their stored scale; OCR only runs for uploads (or where it already ran)
-    key = (str(doc_dir), page, (scale or {}).get("m_per_px"))
+    stamps = tuple(p.stat().st_mtime_ns if p.exists() else 0 for p in
+                   (doc_dir / f"page-{page}.png", doc_dir / f"text-{page}.json", doc_dir / f"scale-ocr-{page}.json", doc_dir / "pages.json"))
+    key = (str(doc_dir), page, (scale or {}).get("m_per_px"), stamps)
     if key in _memo:
         return _memo[key]
     res = _refine(doc_dir, page, scale)
@@ -277,17 +296,17 @@ _memo: dict = {}
 def _refine(doc_dir: Path, page: int, scale: dict | None) -> dict | None:
     if not (doc_dir / f"page-{page}.png").exists():
         return None
-    words, W, H, dpi = _page_words(doc_dir, page)
+    words, W, H, dpi, dpi_source = _page_words(doc_dir, page)
     if not W:
         return None
     prior = (scale or {}).get("m_per_px")
-    res = detect(words, W, H, dpi, prior)
+    res = detect(words, W, H, dpi, prior, dpi_source)
     if res is None or res["method"] not in ("scalebar",) and "agrees" not in res["evidence"]:
         extra = _anchor_crops(doc_dir, page, words)
         if extra:
             have = {(str(w.get("text")), round(_cx(w["bbox_px"]) / 8)) for w in words if w.get("bbox_px")}
             words = words + [e for e in extra if (str(e["text"]), round(_cx(e["bbox_px"]) / 8)) not in have]
-            res = detect(words, W, H, dpi, prior) or res
+            res = detect(words, W, H, dpi, prior, dpi_source) or res
     if res is None:
         res = _rotated_bar(doc_dir, page, W, H, prior)
     return res
@@ -407,11 +426,17 @@ def evidenced_candidates(words, W, H, dpi=None, dpi_source=None):
                 break
             seen.add(key)
             src = {**ws[0].get("_source", {}), "bbox": box, "text": text}
+            if m is None:
+                src["interpretation"] = "ratio = (printed feet × 12 + printed inches) / printed paper inches; fractions and mixed fractions evaluated exactly before division"
             inputs = [operand("printed ratio denominator", ratio, "ratio", src)]
             if positive(dpi):
-                inputs += [operand("page resolution", float(dpi), "px/in", dpi_source or {"metadata": "page render DPI"}),
+                resize = (dpi_source or {}).get("resize_factor", 1)
+                raw_dpi = (dpi_source or {}).get("raw_dpi") or float(dpi)
+                inputs += [operand("page render resolution", float(raw_dpi), "px/in", dpi_source or {"metadata": "page render DPI"}),
                            operand("metres per inch", .0254, "m/in", {"definition": "1 international inch = 0.0254 m"})]
-                out.append(candidate("ratio-dpi", ratio * .0254 / float(dpi), "scale = printed ratio × 0.0254 m/in / page DPI", inputs,
+                if resize != 1:
+                    inputs.append(operand("uniform image resizing", resize, "current px/render px", dpi_source))
+                out.append(candidate("ratio-dpi", ratio * .0254 / float(dpi), "scale = printed ratio × 0.0254 m/in / (page render DPI × uniform image resizing)", inputs,
                                      "Assumes the raster retains the recorded resolution and has not been resized or distorted."))
             else:
                 for sw in words:
