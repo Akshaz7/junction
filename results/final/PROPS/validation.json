@@ -1,0 +1,543 @@
+{
+  "worker": "F-PROPS",
+  "time": "2026-11-14 23:12:47 EET",
+  "evaluation": "Code-route checks against native IFC door IDs/fire properties and the existing SI dimension index. Before disables only the new property hook; both modes use fake models and disable the reader.",
+  "criteria": {
+    "width": "Correct strict >900 mm count and exact matching evidence IDs; for zero matches, cite the checked population.",
+    "schedule": "Correct door count, markdown schedule and citations for every scheduled element.",
+    "fire_rating": "Every recorded native common-set value appears; missing coverage is explicit; all inspected doors are cited. No values means an explicit missing-data statement."
+  },
+  "blind_selected_before_development": "ifc_bench__fantasy-hotel-1-arc",
+  "blind_run_last": true,
+  "files": [
+    {
+      "doc_id": "ifc_bench__ac20-arc",
+      "blind": false,
+      "schema": "IFC4",
+      "native_doors": 77,
+      "doors_with_recorded_fire_rating": 0,
+      "authoring_applications": [
+        "ARCHICAD-64"
+      ],
+      "questions": [
+        {
+          "kind": "width",
+          "question": "Which doors are wider than 900 mm?",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.9,
+            "citation_elements": 77,
+            "cost_usd": 0.0,
+            "latency_ms": 123,
+            "answer_excerpt": "**Total doors: 77.** [1]\n\n- IFC Tür - Eine Öffnunsgrichtung: 67 (87.0%)\n- IFC Doppeltür - Eine Öffnungsrichtung: 6 (7.8%)\n- IFC Doppeltür - Zwei Öffnungsrichtungen: 3 (3.9%)\n- IFC Tür - Drehtür: 1 (1.3%)",
+            "content_passed": false
+          },
+          "after": {
+            "passed": true,
+            "value": 77,
+            "confidence": 1.0,
+            "citation_elements": 77,
+            "cost_usd": 0.0,
+            "latency_ms": 637,
+            "answer_excerpt": "**77 doors match the recorded filters.**\n\n| Element | Level | Width |\n|---|---|---|\n| Tür-014 [1] | Keller | 1000 mm |\n| Tür-015 [2] | Keller | 1000 mm |\n| Tür-016 [3] | Keller | 1000 mm |\n| Tür-016 [4] | Keller | 1000 mm |\n| Tür-016 [5] | Keller | 1000 mm |\n| Tür-016 [6] | Keller | 1000 mm |\n| Tür-002 [7] | Keller | 1000 mm |\n| Tür-004 [8] | Kelle",
+            "content_passed": true
+          }
+        },
+        {
+          "kind": "schedule",
+          "question": "Door schedule",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.2,
+            "citation_elements": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 51,
+            "answer_excerpt": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+            "content_passed": false
+          },
+          "after": {
+            "passed": true,
+            "value": 77,
+            "confidence": 0.0,
+            "citation_elements": 77,
+            "cost_usd": 0.0,
+            "latency_ms": 33,
+            "answer_excerpt": "**77 doors in the requested schedule.**\n\n| Element | Level | Reference | Width | Height | Fire rating | Material |\n|---|---|---|---|---|---|---|\n| Tür-014 [1] | Keller | Not recorded | 1000 mm | 2100 mm | Not recorded | Leer; Luftschicht |\n| Tür-015 [2] | Keller | Not recorded | 1000 mm | 2100 mm | Not recorded | Leer; Luftschicht |\n| Tür-016 [3] |",
+            "content_passed": true
+          }
+        },
+        {
+          "kind": "fire_rating",
+          "question": "What is the fire rating of the doors?",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.5,
+            "citation_elements": 0,
+            "cost_usd": 0,
+            "latency_ms": 32,
+            "answer_excerpt": "**The model does not record fire rating data for doors.** ",
+            "content_passed": true
+          },
+          "after": {
+            "passed": true,
+            "value": null,
+            "confidence": 0.0,
+            "citation_elements": 77,
+            "cost_usd": 0.0,
+            "latency_ms": 59,
+            "answer_excerpt": "**This model does not record fire ratings for doors.** [1] [2] [3]",
+            "content_passed": true
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+      "blind": false,
+      "schema": "IFC2X3",
+      "native_doors": 211,
+      "doors_with_recorded_fire_rating": 110,
+      "authoring_applications": [
+        "ARCHICAD-64"
+      ],
+      "questions": [
+        {
+          "kind": "width",
+          "question": "Which doors are wider than 900 mm?",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.9,
+            "citation_elements": 211,
+            "cost_usd": 0.0,
+            "latency_ms": 1632,
+            "answer_excerpt": "**Total doors: 211.** [1]\n\n- Door 22: 187 (88.6%)\n- Double Door with Sidelight 22: 10 (4.7%)\n- Double Door 22: 7 (3.3%)\n- Exterior Sliding Door 22: 5 (2.4%)\n- Door with Sidelight on Side 1 22: 1 (0.5%)\n- Exterior Double Sliding Door 22: 1 (0.5%)",
+            "content_passed": false
+          },
+          "after": {
+            "passed": true,
+            "value": 194,
+            "confidence": 1.0,
+            "citation_elements": 194,
+            "cost_usd": 0.0,
+            "latency_ms": 1255,
+            "answer_excerpt": "**194 doors match the recorded filters.**\n\n| Element | Level | Width |\n|---|---|---|\n| ARUKS - 012 [1] | 1.korrus | 1450 mm |\n| ARSU [2] | 1.korrus | 1000 mm |\n| ARSU [3] | 1.korrus | 1000 mm |\n| ARSU [4] | 1.korrus | 1000 mm |\n| ARSU [5] | 1.korrus | 1000 mm |\n| ARSU [6] | 1.korrus | 1000 mm |\n| ARSU [7] | 1.korrus | 1000 mm |\n| ARSU [8] | 1.korru",
+            "content_passed": true
+          }
+        },
+        {
+          "kind": "schedule",
+          "question": "Door schedule",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.2,
+            "citation_elements": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 390,
+            "answer_excerpt": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+            "content_passed": false
+          },
+          "after": {
+            "passed": true,
+            "value": 211,
+            "confidence": 0.0,
+            "citation_elements": 211,
+            "cost_usd": 0.0,
+            "latency_ms": 212,
+            "answer_excerpt": "**211 doors in the requested schedule.**\n\n| Element | Level | Reference | Width | Height | Fire rating | Material |\n|---|---|---|---|---|---|---|\n| ARUKS - 012 [1] | 1.korrus | Not recorded | 1450 mm | 2180 mm | Not recorded | Not recorded |\n| ARSU [2] | 1.korrus | Not recorded | 900 mm | 2100 mm | Not recorded | Not recorded |\n| ARSU [3] | 1.korru",
+            "content_passed": true
+          }
+        },
+        {
+          "kind": "fire_rating",
+          "question": "What is the fire rating of the doors?",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.5,
+            "citation_elements": 0,
+            "cost_usd": 0,
+            "latency_ms": 220,
+            "answer_excerpt": "**The model does not record fire rating data for doors.** ",
+            "content_passed": false
+          },
+          "after": {
+            "passed": true,
+            "value": null,
+            "confidence": 0.0,
+            "citation_elements": 211,
+            "cost_usd": 0.0,
+            "latency_ms": 145,
+            "answer_excerpt": "**Recorded fire rating: EI30 S200 (110 doors).**\n\n101 of 211 doors have no recorded fire rating. [1] [2] [3]",
+            "content_passed": true
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "ifc_bench__molio-arc",
+      "blind": false,
+      "schema": "IFC2X3",
+      "native_doors": 119,
+      "doors_with_recorded_fire_rating": 0,
+      "authoring_applications": [
+        "ARCHICAD"
+      ],
+      "questions": [
+        {
+          "kind": "width",
+          "question": "Which doors are wider than 900 mm?",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.9,
+            "citation_elements": 119,
+            "cost_usd": 0.0,
+            "latency_ms": 10617,
+            "answer_excerpt": "**Total doors: 119.** [1]\n\n- Door 25: 99 (83.2%)\n- Double Door 25: 10 (8.4%)\n- Exterior Double Sliding Door 25: 8 (6.7%)\n- Pocket Door 25: 1 (0.8%)\n- Revolving Door 25: 1 (0.8%)",
+            "content_passed": false
+          },
+          "after": {
+            "passed": true,
+            "value": 119,
+            "confidence": 1.0,
+            "citation_elements": 119,
+            "cost_usd": 0.0,
+            "latency_ms": 6006,
+            "answer_excerpt": "**119 doors match the recorded filters.**\n\n| Element | Level | Width |\n|---|---|---|\n| [L]QQC [1] | Kælder | 910 mm |\n| [L]QQC [2] | Kælder | 1010 mm |\n| [L]QQC [3] | Kælder | 1010 mm |\n| [L]QQC [4] | Kælder | 1010 mm |\n| [L]QQC [5] | Kælder | 1010 mm |\n| [L]QQC [6] | Kælder | 1810 mm |\n| [L]QQC [7] | Kælder | 910 mm |\n| [L]QQC [8] | Kælder | 910 m",
+            "content_passed": true
+          }
+        },
+        {
+          "kind": "schedule",
+          "question": "Door schedule",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.2,
+            "citation_elements": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 303,
+            "answer_excerpt": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+            "content_passed": false
+          },
+          "after": {
+            "passed": true,
+            "value": 119,
+            "confidence": 0.0,
+            "citation_elements": 119,
+            "cost_usd": 0.0,
+            "latency_ms": 512,
+            "answer_excerpt": "**119 doors in the requested schedule.**\n\n| Element | Level | Reference | Width | Height | Fire rating | Material |\n|---|---|---|---|---|---|---|\n| [L]QQC [1] | Kælder | Not recorded | 910 mm | 2100 mm | Not recorded | Not recorded |\n| [L]QQC [2] | Kælder | Not recorded | 1010 mm | 2100 mm | Not recorded | Not recorded |\n| [L]QQC [3] | Kælder | Not",
+            "content_passed": true
+          }
+        },
+        {
+          "kind": "fire_rating",
+          "question": "What is the fire rating of the doors?",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.5,
+            "citation_elements": 0,
+            "cost_usd": 0,
+            "latency_ms": 552,
+            "answer_excerpt": "**The model does not record fire rating data for doors.** ",
+            "content_passed": true
+          },
+          "after": {
+            "passed": true,
+            "value": null,
+            "confidence": 0.0,
+            "citation_elements": 119,
+            "cost_usd": 0.0,
+            "latency_ms": 464,
+            "answer_excerpt": "**This model does not record fire ratings for doors.** [1] [2] [3]",
+            "content_passed": true
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "ifc_bench__fzk-house-arc",
+      "blind": false,
+      "schema": "IFC4",
+      "native_doors": 5,
+      "doors_with_recorded_fire_rating": 0,
+      "authoring_applications": [
+        "ARCHICAD-64"
+      ],
+      "questions": [
+        {
+          "kind": "width",
+          "question": "Which doors are wider than 900 mm?",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.9,
+            "citation_elements": 5,
+            "cost_usd": 0.0,
+            "latency_ms": 885,
+            "answer_excerpt": "**Total doors: 5.** [1]\n\n- IFC Tür - Eine Öffnunsgrichtung: 3 (60.0%)\n- Eingangstür: 1 (20.0%)\n- Schiebetür_3-teilig: 1 (20.0%)",
+            "content_passed": false
+          },
+          "after": {
+            "passed": true,
+            "value": 2,
+            "confidence": 1.0,
+            "citation_elements": 2,
+            "cost_usd": 0.0,
+            "latency_ms": 280,
+            "answer_excerpt": "**2 doors match the recorded filters.**\n\n| Element | Level | Width |\n|---|---|---|\n| Haustuer [1] | Erdgeschoss | 1010 mm |\n| Terrassentuer [2] | Erdgeschoss | 2010 mm | [1] [2]",
+            "content_passed": true
+          }
+        },
+        {
+          "kind": "schedule",
+          "question": "Door schedule",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.2,
+            "citation_elements": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 91,
+            "answer_excerpt": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+            "content_passed": false
+          },
+          "after": {
+            "passed": true,
+            "value": 5,
+            "confidence": 0.0,
+            "citation_elements": 5,
+            "cost_usd": 0.0,
+            "latency_ms": 14,
+            "answer_excerpt": "**5 doors in the requested schedule.**\n\n| Element | Level | Reference | Width | Height | Fire rating | Material |\n|---|---|---|---|---|---|---|\n| Innentuer-1 [1] | Erdgeschoss | Not recorded | 885 mm | 2010 mm | Not recorded | Holz |\n| Innentuer-2 [2] | Erdgeschoss | Not recorded | 885 mm | 2010 mm | Not recorded | Holz |\n| Innentuer-3 [3] | Erdges",
+            "content_passed": true
+          }
+        },
+        {
+          "kind": "fire_rating",
+          "question": "What is the fire rating of the doors?",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.5,
+            "citation_elements": 0,
+            "cost_usd": 0,
+            "latency_ms": 44,
+            "answer_excerpt": "**The model does not record fire rating data for doors.** ",
+            "content_passed": true
+          },
+          "after": {
+            "passed": true,
+            "value": null,
+            "confidence": 0.0,
+            "citation_elements": 5,
+            "cost_usd": 0.0,
+            "latency_ms": 48,
+            "answer_excerpt": "**This model does not record fire ratings for doors.** [1] [2] [3]",
+            "content_passed": true
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "ifc_bench__dental-clinic-arc",
+      "blind": false,
+      "schema": "IFC2X3",
+      "native_doors": 254,
+      "doors_with_recorded_fire_rating": 0,
+      "authoring_applications": [
+        "Autodesk Revit Architecture 2011"
+      ],
+      "questions": [
+        {
+          "kind": "width",
+          "question": "Which doors are wider than 900 mm?",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.9,
+            "citation_elements": 254,
+            "cost_usd": 0.0,
+            "latency_ms": 30241,
+            "answer_excerpt": "**Total doors: 254.** [1]\n\n- 0915 x 2134mm: 215 (84.6%)\n- 0865 x 1500mm: 8 (3.1%)\n- 0915 x 2134mm Exterior: 7 (2.8%)\n- 0915 x 2134mm Rated: 5 (2.0%)\n- 1830 x 2134mm Exterior: 4 (1.6%)\n- M_Curtain Wall Dbl Chain Link: 4 (1.6%)\n- M_Curtain Wall Sgl Glass: 4 (1.6%)\n- M_Curtain Wall Dbl Glass: 2 (0.8%)\n- 1.220 x 2134mm: 1 (0.4%)\n- 1.220 x 2134mm Exteri",
+            "content_passed": false
+          },
+          "after": {
+            "passed": true,
+            "value": 244,
+            "confidence": 1.0,
+            "citation_elements": 244,
+            "cost_usd": 0.0,
+            "latency_ms": 1799,
+            "answer_excerpt": "**244 doors match the recorded filters.**\n\n| Element | Level | Width |\n|---|---|---|\n| M_Double-Flush:1730 x 2134mm [1] | First Floor | 1730 mm |\n| M_Single-Flush:0915 x 2134mm [2] | First Floor | 915 mm |\n| M_Single-Flush:0915 x 2134mm [3] | Second Floor | 915 mm |\n| M_Single-Flush:0915 x 2134mm [4] | First Floor | 915 mm |\n| M_Double-Flush:1830 x",
+            "content_passed": true
+          }
+        },
+        {
+          "kind": "schedule",
+          "question": "Door schedule",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.2,
+            "citation_elements": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 342,
+            "answer_excerpt": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+            "content_passed": false
+          },
+          "after": {
+            "passed": true,
+            "value": 254,
+            "confidence": 0.0,
+            "citation_elements": 254,
+            "cost_usd": 0.0,
+            "latency_ms": 193,
+            "answer_excerpt": "**254 doors in the requested schedule.**\n\n| Element | Level | Reference | Width | Height | Fire rating | Material |\n|---|---|---|---|---|---|---|\n| M_Double-Flush:1730 x 2134mm [1] | First Floor | M_Double-Flush:1730 x 2134mm | 1730 mm | 2134 mm | Not recorded | Not recorded |\n| M_Single-Flush:0915 x 2134mm [2] | First Floor | M_Single-Flush:0915 x",
+            "content_passed": true
+          }
+        },
+        {
+          "kind": "fire_rating",
+          "question": "What is the fire rating of the doors?",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.5,
+            "citation_elements": 0,
+            "cost_usd": 0,
+            "latency_ms": 259,
+            "answer_excerpt": "**The model does not record fire rating data for doors.** ",
+            "content_passed": true
+          },
+          "after": {
+            "passed": true,
+            "value": null,
+            "confidence": 0.0,
+            "citation_elements": 254,
+            "cost_usd": 0.0,
+            "latency_ms": 88,
+            "answer_excerpt": "**This model does not record fire ratings for doors.** [1] [2] [3]",
+            "content_passed": true
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "ifc_bench__fantasy-hotel-1-arc",
+      "blind": true,
+      "schema": "IFC4",
+      "native_doors": 25,
+      "doors_with_recorded_fire_rating": 0,
+      "authoring_applications": [
+        "Autodesk Revit 2024 (ENU)"
+      ],
+      "questions": [
+        {
+          "kind": "width",
+          "question": "Which doors are wider than 900 mm?",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.9,
+            "citation_elements": 25,
+            "cost_usd": 0.0,
+            "latency_ms": 3128,
+            "answer_excerpt": "**Total doors: 25.** [1]\n\n- Doors_IntAys_1:1210x2110mm-Sgl_Swing: 8 (32.0%)\n- M_Door-Passage-Single-Flush:900 x 2400mm: 8 (32.0%)\n- M_Door-Passage-Single-Flush:900 x 2200mm: 5 (20.0%)\n- M_Door-Interior-Single-1_Panel-Wood:300 x 2000mm: 3 (12.0%)\n- M_Door-Passage-Single-Vision_Lite:750 x 2000mm: 1 (4.0%)",
+            "content_passed": false
+          },
+          "after": {
+            "passed": true,
+            "value": 21,
+            "confidence": 1.0,
+            "citation_elements": 21,
+            "cost_usd": 0.0,
+            "latency_ms": 716,
+            "answer_excerpt": "**21 doors match the recorded filters.**\n\n| Element | Level | Width |\n|---|---|---|\n| 900 x 2400mm [1] | GROUND FLOOR | 1000 mm |\n| 900 x 2400mm [2] | GROUND FLOOR | 1000 mm |\n| 900 x 2400mm [3] | GROUND FLOOR | 1000 mm |\n| 900 x 2400mm [4] | GROUND FLOOR | 1000 mm |\n| 900 x 2400mm [5] | GROUND FLOOR | 1000 mm |\n| 900 x 2400mm [6] | GROUND FLOOR | ",
+            "content_passed": true
+          }
+        },
+        {
+          "kind": "schedule",
+          "question": "Door schedule",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.2,
+            "citation_elements": 0,
+            "cost_usd": 0.0,
+            "latency_ms": 132,
+            "answer_excerpt": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+            "content_passed": false
+          },
+          "after": {
+            "passed": true,
+            "value": 25,
+            "confidence": 0.0,
+            "citation_elements": 25,
+            "cost_usd": 0.0,
+            "latency_ms": 70,
+            "answer_excerpt": "**25 doors in the requested schedule.**\n\n| Element | Level | Reference | Width | Height | Fire rating | Material |\n|---|---|---|---|---|---|---|\n| 900 x 2400mm [1] | GROUND FLOOR | 900 x 2400mm | 1000 mm | 2500 mm | Not recorded | Aluminum; Wood - Birch; Metal - Paint Finish - Grey |\n| 900 x 2400mm [2] | GROUND FLOOR | 900 x 2400mm | 1000 mm | 2500",
+            "content_passed": true
+          }
+        },
+        {
+          "kind": "fire_rating",
+          "question": "What is the fire rating of the doors?",
+          "before": {
+            "passed": false,
+            "value": null,
+            "confidence": 0.5,
+            "citation_elements": 0,
+            "cost_usd": 0,
+            "latency_ms": 178,
+            "answer_excerpt": "**The model does not record fire rating data for doors.** ",
+            "content_passed": true
+          },
+          "after": {
+            "passed": true,
+            "value": null,
+            "confidence": 0.0,
+            "citation_elements": 25,
+            "cost_usd": 0.0,
+            "latency_ms": 132,
+            "answer_excerpt": "**This model does not record fire ratings for doors.** [1] [2] [3]",
+            "content_passed": true
+          }
+        }
+      ]
+    }
+  ],
+  "before_passed": 0,
+  "after_passed": 18,
+  "questions": 18,
+  "live_model_spend_usd": 0,
+  "drawing_schedule_search": {
+    "planmaps_searched": 6730,
+    "heading_matches": [],
+    "limitation": "No printed schedule headings found in available plan maps; tag-to-row links validated only on generated fixtures."
+  },
+  "tests": {
+    "initial_saved_wip": "31 passed in 8.39s",
+    "final_properties": "50 passed in 9.30s",
+    "compile": "py_compile passed for all three changed Python files",
+    "whitespace": "git diff --check passed",
+    "final_focused_suite": "142 passed in 19.18s: props, answer, analytics, complex_q, reasoning_checked, scene_cmds"
+  },
+  "commit_blocker": "git add and git commit denied: cannot create .git/worktrees/props/index.lock (Operation not permitted).",
+  "cross_file": [
+    "engine/answer.py"
+  ],
+  "before_content_passed": 5,
+  "after_content_passed": 18,
+  "score_note": "before_passed/after_passed require both correct content and complete element evidence. Five baseline missing-fire-rating statements were correct but had no element citations; baseline missed the 110 recorded Esplanades ratings.",
+  "branch": "final/props",
+  "last_commit": "a5a44093822e0587e59e0f03da52492fff0167e5 (saved WIP; final changes remain uncommitted because sandbox denied Git index writes)"
+}

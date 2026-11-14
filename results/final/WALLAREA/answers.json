@@ -1,0 +1,149 @@
+[
+  {
+    "question": "Net wall area per floor",
+    "value": 4880.455604,
+    "unit": "m\u00b2",
+    "route": "index",
+    "cost_usd": 0.0,
+    "elapsed_s": 6.515,
+    "citations": 6,
+    "highlights": 687,
+    "wallarea_routed": true,
+    "reasoning": {
+      "steps": [
+        {
+          "kind": "measured",
+          "title": "Measured",
+          "text": "121 walls, both faces: gross 5,857.2956 m\u00b2.",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "calculated",
+          "title": "Deducted",
+          "text": "283 hosted openings; actual cut 976.8400 m\u00b2. 5,857.2956 \u2212 976.8400 = 4,880.4556 m\u00b2. Void extents include 1 \u00d7 1.5 m, 1 \u00d7 1.5 m, 1 \u00d7 1.5 m.",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "checked",
+          "title": "Checked",
+          "text": "On 121 walls, model NetSideArea 2,378.6224 m\u00b2; measured mean of both sides 2,440.2278 m\u00b2 (2.5900% apart). Whole-wall check, not a floor-clipped or room finish total.",
+          "cite": 1,
+          "ok": false
+        },
+        {
+          "kind": "calculated",
+          "title": "Uncertainty",
+          "text": "Numerical/orientation allowance \u00b10.148858 m\u00b2 (0.00305%). Source-model accuracy and construction tolerances are not quantified.",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Estimate",
+        "pct": 70,
+        "reason": "Outside/inside orientation is not recorded; both possible side areas bound the result. Stored IFC side quantities disagree; check their measurement convention and the model.",
+        "improve": "Check heights, openings, exterior flags and room boundaries against the source."
+      }
+    }
+  },
+  {
+    "question": "What is the facade area of the ground floor?",
+    "value": 228.52,
+    "unit": "m\u00b2",
+    "route": "index",
+    "cost_usd": 0.0,
+    "elapsed_s": 0.018,
+    "citations": 2,
+    "highlights": 122,
+    "wallarea_routed": true,
+    "reasoning": {
+      "steps": [
+        {
+          "kind": "measured",
+          "title": "Measured",
+          "text": "12 walls, facade faces: gross 314.8200 m\u00b2.",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "calculated",
+          "title": "Deducted",
+          "text": "55 hosted openings; actual cut 86.3000 m\u00b2. 314.8200 \u2212 86.3000 = 228.5200 m\u00b2. Void extents include 0.9 \u00d7 1.5 m, 0.9 \u00d7 1.5 m, 1 \u00d7 1.5 m.",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "checked",
+          "title": "Checked",
+          "text": "On 12 walls, model NetSideArea 216.6400 m\u00b2; measured mean of both sides 222.8500 m\u00b2 (2.8665% apart). Whole-wall check, not a floor-clipped or room finish total.",
+          "cite": 1,
+          "ok": false
+        },
+        {
+          "kind": "calculated",
+          "title": "Uncertainty",
+          "text": "Numerical/orientation allowance \u00b10.017296 m\u00b2 (0.00757%). Source-model accuracy and construction tolerances are not quantified.",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Estimate",
+        "pct": 70,
+        "reason": "Outside/inside orientation is not recorded; both possible side areas bound the result. Stored IFC side quantities disagree; check their measurement convention and the model.",
+        "improve": "Check heights, openings, exterior flags and room boundaries against the source."
+      }
+    }
+  },
+  {
+    "question": "How many plasterboard sheets do I need on the first floor? Per wall take-off.",
+    "value": 342,
+    "unit": "count",
+    "route": "index",
+    "cost_usd": 0.0,
+    "elapsed_s": 0.019,
+    "citations": 29,
+    "highlights": 181,
+    "wallarea_routed": true,
+    "reasoning": {
+      "steps": [
+        {
+          "kind": "measured",
+          "title": "Measured",
+          "text": "29 walls, inside faces: gross 1,163.1600 m\u00b2.",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "calculated",
+          "title": "Deducted",
+          "text": "76 hosted openings; actual cut 179.8200 m\u00b2. 1,163.1600 \u2212 179.8200 = 983.3400 m\u00b2. Void extents include 1 \u00d7 1.5 m, 1 \u00d7 1.5 m, 1 \u00d7 1.5 m.",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "checked",
+          "title": "Checked",
+          "text": "On 29 walls, model NetSideArea 589.8300 m\u00b2; measured mean of both sides 602.5200 m\u00b2 (2.1515% apart). Whole-wall check, not a floor-clipped or room finish total.",
+          "cite": 1,
+          "ok": false
+        },
+        {
+          "kind": "calculated",
+          "title": "Uncertainty",
+          "text": "Numerical/orientation allowance \u00b10.035216 m\u00b2 (0.00358%). Source-model accuracy and construction tolerances are not quantified.",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Estimate",
+        "pct": 70,
+        "reason": "Outside/inside orientation is not recorded; both possible side areas bound the result. Stored IFC side quantities disagree; check their measurement convention and the model.",
+        "improve": "Check heights, openings, exterior flags and room boundaries against the source."
+      }
+    }
+  }
+]

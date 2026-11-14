@@ -32,6 +32,9 @@ def _plural(n: int, w: str) -> str:
 
 
 def run(ctx: dict) -> dict:
+    if ctx.get("wallarea_confidence") is not None:
+        from engine.reasoning_parts.wallarea_steps import card
+        return {**ctx["wallarea_confidence"], "_steps": card(ctx["res"]["wallarea"])["steps"]}
     ans, cites, route, unit = ctx['ans'], ctx['cites'], ctx['route'], ctx['unit']
     cited, models_used, is_ifc, sc, scale_w, scale_c, from_cad = ctx['cited'], ctx['models_used'], ctx['is_ifc'], ctx['sc'], ctx['scale_w'], ctx['scale_c'], ctx['from_cad']
     steps = ctx['steps']; checked = ctx.get('checked'); area_q = ctx.get('area_q')
@@ -42,19 +45,27 @@ def run(ctx: dict) -> dict:
 
     factors: list[tuple[float, str]] = []     # (signed effect, phrase for the reason line)
     exact = False
-    if is_ifc and not models_used:
-        base, src, exact = 97, "Read directly from the building model's own data", True
+    ordering = any(s.get("step") == "order" for s in ctx.get("trace") or [])
+    missing = bool(cites) and not any(c.get("item_ids") or c.get("bbox_px") or c.get("quote") for c in cites)
+    if missing:
+        base, src = 65, "The requested information could not be matched to a source measurement or element"
+    elif ordering and conf_raw is not None and conf_raw <= 0.5:
+        base, src = 65, "Some ordering measurements are missing or estimated; check the table before ordering"
+    elif is_ifc and not models_used:
+        base, src, exact = 97, "The result comes directly from the building model's own data", True
     elif from_cad and not models_used:
-        base, src, exact = 95, "Measured from the CAD file's exact geometry and units", True
+        base, src, exact = 95, ("The result was measured from the CAD file's geometry and units" if measured else "The objects were counted directly in the CAD drawing"), True
+    elif ctx.get("doc") is None and route == "index" and not models_used:
+        base, src = 85, "The result uses the cited source data; its geometry was unavailable for this evidence card"
     elif route == "index" and not models_used:
-        base, src, exact = 93, "Taken from the text printed in the file", True
+        base, src, exact = 93, "The result was taken from the text printed in the file", True
     elif route == "planmap":
         if "pdf_vector" in method:
-            base, src = 88, "Measured from the PDF's vector drawing"
+            base, src = 88, "The result was measured from the PDF's vector drawing"
         else:
-            base, src = 80, "Detected on a scanned image"
+            base, src = 80, "The objects were detected on a scanned image"
     else:
-        base, src = 65, "Read from the drawing image by a vision model"
+        base, src = 65, "The result was read from the drawing image by a vision model"
         if conf_raw is not None:
             factors.append((_clamp((conf_raw - 0.6) * 30, -8, 8), "the model's own confidence"))
 
@@ -62,7 +73,7 @@ def run(ctx: dict) -> dict:
         if measured and sc:
             sb = _method_bonus(method) + _clamp((scale_c - 0.7) * 20, -8, 4)
             sb = round(sb)
-            factors.append((sb, f"scale from {scale_w}"))
+            factors.append((sb, f"the drawing scale based on {scale_w}"))
         if not measured:
             confs = [float(it.conf) for it in cited if it.kind not in ("room", "space") and isinstance(it.conf, (int, float))]
             if confs:
@@ -71,9 +82,9 @@ def run(ctx: dict) -> dict:
         if conf_raw is not None and models_used:
             factors.append((round(_clamp((conf_raw - 0.7) * 20, -6, 3)), "the model's own confidence"))
     if checked is True and not exact:
-        factors.append((8 if route == "planmap" else 5, "an independent second look agrees"))
+        factors.append((8 if route == "planmap" else 5, "agreement from an independent second look"))
     elif checked is False:
-        factors.append((-10, "the second look disagreed"))
+        factors.append((-10, "disagreement from the second look"))
 
     pct = base + sum(e for e, _ in factors)
     pct = int(round(_clamp(pct, 40, 99 if exact else 91)))
@@ -86,23 +97,25 @@ def run(ctx: dict) -> dict:
     # reason: the source, then the one or two biggest factors
     top = sorted((f for f in factors if f[0]), key=lambda f: -abs(f[0]))[:2]
     if exact:
-        reason = src + (". Nothing is estimated." if base == 97 else ".")
+        reason = src + (". The waste allowance is stated in the order table." if ordering else ". Nothing is estimated." if base == 97 else ".")
     else:
         reason = src
         if top:
             good = [p for e, p in top if e > 0]
             bad = [p for e, p in top if e < 0]
             if bad:
-                reason += "; lowered because " + " and ".join(bad)
+                reason += ". Confidence is lower due to " + " and ".join(bad)
             if good:
-                reason += "; raised because " + " and ".join(good)
+                reason += ". Confidence is higher due to " + " and ".join(good)
         reason += "."
         if "pdf_vector" not in method and route == "planmap" and measured and "door" in method.lower():
-            reason = "Detected on a scanned image; scale estimated from door widths."
+            reason = "The objects were detected on a scanned image; the scale was estimated from door widths."
 
     improve = None
     if label == "Estimate":
-        if route == "planmap" and measured:
+        if ordering:
+            improve = "Check missing measurements and the finish specification before ordering."
+        elif route == "planmap" and measured:
             improve = "Add a printed scale (e.g. 1:100) or scale bar to make sizes exact."
         elif route == "planmap":
             nums = sorted({c.get("n") for c in cites if isinstance(c.get("n"), int)})
