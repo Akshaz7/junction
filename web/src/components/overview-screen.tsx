@@ -13,12 +13,14 @@ import { chatLive } from '../lib/chat-live'
 function useOverviewSection<T>(load: (signal: AbortSignal) => Promise<T>, liveChats = false) {
   const [state, setState] = useState<{ data?: T; loading: boolean; error: string }>({ loading: true, error: '' })
   const [live, setLive] = useState('connecting')
+  const [refreshKey, setRefreshKey] = useState(0)
   useEffect(() => {
     let controller: AbortController
     function refresh() {
       controller?.abort()
       controller = new AbortController()
       const signal = controller.signal
+      setState((previous) => ({ ...previous, loading: true, error: '' }))
       load(signal).then((data) => {
         if (!signal.aborted) setState({ data, loading: false, error: '' })
       }).catch((error: unknown) => {
@@ -32,8 +34,8 @@ function useOverviewSection<T>(load: (signal: AbortSignal) => Promise<T>, liveCh
       if (event.type === 'chat.message' || event.type === 'connected') refresh()
     }) : undefined
     return () => { controller.abort(); unsubscribe?.() }
-  }, [load, liveChats])
-  return { ...state, live }
+  }, [load, liveChats, refreshKey])
+  return { ...state, live, retry: () => setRefreshKey((value) => value + 1) }
 }
 
 const loadChanges = (signal: AbortSignal) => overviewApi.getChanges(signal)
@@ -47,12 +49,12 @@ const constructionStarters = [
   { title: 'Review contract', detail: 'Find obligations and gaps in the evidence.', icon: FileSearch, question: 'Review the available construction contract documents for scope, responsibilities, change procedures, and notice requirements. Cite each finding. If no contract is available, say so and identify the documents needed.' },
 ]
 
-function OverviewCard({ title, href, children, loading, error }: {
-  title: string; href?: string; children: ReactNode; loading: boolean; error: string
+function OverviewCard({ title, href, children, loading, error, onRetry }: {
+  title: string; href?: string; children: ReactNode; loading: boolean; error: string; onRetry: () => void
 }) {
   return <section className="overview-card" aria-label={title} aria-busy={loading}>
     <header><h3>{title}</h3>{href && <a href={href} aria-label={`View ${title.toLowerCase()}`}><ArrowRight size={16} /></a>}</header>
-    {loading ? <p className="overview-empty" role="status">Loading…</p> : error ? <p className="overview-empty" role="alert">{error}</p> : children}
+    {loading ? <p className="overview-empty" role="status">Loading…</p> : error ? <p className="overview-empty" role="alert">{error} <button type="button" onClick={onRetry}>Retry</button></p> : children}
   </section>
 }
 
@@ -61,16 +63,18 @@ export function OverviewScreen({ docs = [] }: { docs?: Document[] }) {
   const [starterError, setStarterError] = useState('')
   const [starterStatus, setStarterStatus] = useState('')
   const [createdChat, setCreatedChat] = useState<string | null>(null)
+  const [failedStarter, setFailedStarter] = useState<typeof constructionStarters[number] | null>(null)
   const startingRequest = useRef(false)
-  async function startChat(starter: typeof constructionStarters[number]) {
+  async function startChat(starter: typeof constructionStarters[number], existingChat?: string) {
     if (startingRequest.current || !docs.length || workspaceApi.isDemo) return
     startingRequest.current = true
     const sourceRoute = window.location.hash
-    setStarting(starter.title); setStarterError(''); setStarterStatus(''); setCreatedChat(null)
+    setStarting(starter.title); setStarterError(''); setStarterStatus(''); setCreatedChat(existingChat || null); setFailedStarter(starter)
     try {
-      const id = await workspaceApi.createChat([], starter.title)
+      const id = existingChat || await workspaceApi.createChat([], starter.title)
       setCreatedChat(id)
-      await workspaceApi.askQuestion(id, starter.question, [], { onStatus: setStarterStatus, onTrace: () => {} })
+      const result = await workspaceApi.askQuestion(id, starter.question, [], { onStatus: setStarterStatus, onTrace: () => {} })
+      setStarterStatus(result.answer.text_md)
       if (window.location.hash === sourceRoute) window.location.hash = `/chat?chat=${encodeURIComponent(id)}`
     } catch (error) { setStarterError(error instanceof Error ? error.message : 'Could not start this chat.') }
     finally { startingRequest.current = false; setStarting(null) }
@@ -87,26 +91,27 @@ export function OverviewScreen({ docs = [] }: { docs?: Document[] }) {
   return <section className="overview-screen" aria-label="Workspace overview" data-live={chats.live}>
     <header className="overview-greeting"><h2>Your workspace at a glance</h2><p>Pick up a question or see what has changed.</p></header>
     <div className="overview-grid">
-      <OverviewCard title="This week's changes" href="#/changes" loading={changes.loading} error={changes.error}>
+      <OverviewCard title="This week's changes" href="#/changes" loading={changes.loading} error={changes.error} onRetry={changes.retry}>
         {week.length ? <ul className="overview-list">{week.map((change) => {
           const doc = change.summary.doc_id || change.doc_b
           return <li key={change.id}><a href="#/changes" data-testid="overview-change"><strong>{change.summary.title || change.summary.headline || docTitle(doc)}</strong><span>{docTitle(doc)}</span><small>{Number.isFinite(Date.parse(change.created_at)) && <time dateTime={change.created_at}>{overviewDate(change.created_at)}</time>}{change.summary.generated_for_demo && ' · generated for demo'}</small></a></li>
         })}</ul> : <p className="overview-empty">No changes this week.</p>}
       </OverviewCard>
-      <OverviewCard title="Open findings" loading={findings.loading} error={findings.error}>
+      <OverviewCard title="Open findings" loading={findings.loading} error={findings.error} onRetry={findings.retry}>
         {findings.data?.length ? <>
           <dl className="overview-severities" aria-label="Findings by severity">{Object.entries(counts).map(([severity, count]) => <div key={severity}><dt>{severity}</dt><dd data-testid={`overview-${severity}-count`}>{count}</dd></div>)}</dl>
           <ul className="overview-list overview-findings">{topFindings(findings.data).map((finding) => <li key={finding.id} data-testid="overview-finding"><span className={`overview-severity overview-severity-${finding.severity}`}>{finding.severity}</span><p>{finding.message}</p><small>{docTitle(finding.doc_id)}</small>{finding.rule?.source_title && <details><summary>{finding.rule.source_title}</summary>{finding.rule.quote && <blockquote>{finding.rule.quote}</blockquote>}</details>}</li>)}</ul>
         </> : <p className="overview-empty">No findings yet.</p>}
       </OverviewCard>
-      <OverviewCard title="Latest answers" href="#/chat" loading={chats.loading} error={chats.error}>
+      <OverviewCard title="Latest answers" href="#/chat" loading={chats.loading} error={chats.error} onRetry={chats.retry}>
         {chats.data?.length ? <ul className="overview-list">{chats.data.map((chat) => {
           const preview = chatPreview(chat)
           return <li key={chat.id}><a href={chatHref(chat.id)} data-testid="overview-chat"><strong>{preview.question}</strong><span className="overview-answer">{preview.answer}</span>{typeof preview.cost === 'number' && Number.isFinite(preview.cost) && <small>Cost: {formatUsd(preview.cost)}</small>}</a></li>
         })}</ul> : <p className="overview-empty">No answers yet. Start with a question below.</p>}
       </OverviewCard>
-      <OverviewCard title="Accuracy" href="#/accuracy" loading={bench.loading} error={bench.error}>
+      <OverviewCard title="Accuracy" href="#/accuracy" loading={bench.loading} error={bench.error} onRetry={bench.retry}>
         {bench.data ? <>
+          {bench.data.recorded && <p className="overview-run-note">Latest bundled recorded run. Live results are temporarily unavailable. <button type="button" onClick={bench.retry}>Retry live results</button></p>}
           <dl className="overview-metrics">{typeof total?.accuracy === 'number' && <div><dt>Accuracy</dt><dd data-testid="overview-accuracy">{formatPercent(total?.accuracy)}</dd></div>}{typeof total?.cost_usd_per_answer === 'number' && <div><dt>Cost per answer</dt><dd data-testid="overview-cost-per-answer">{formatUsd(total?.cost_usd_per_answer)}</dd></div>}</dl>
           {bench.data.data.fake === true ? <p className="overview-run-note">test run, fake model</p> : bench.data.data.fake == null && <p className="overview-run-note">Model mode unknown.</p>}
           {bench.data.data.totals?.stopped_by_max_usd && <p className="overview-run-note">Partial run: stopped at the cost limit.</p>}
@@ -117,6 +122,6 @@ export function OverviewScreen({ docs = [] }: { docs?: Document[] }) {
     <section className="overview-start" aria-label="Start a question"><h3>Where shall we start?</h3><div className="overview-starters">{constructionStarters.map((starter) => {
       const Icon = starter.icon
       return <button type="button" key={starter.title} className="overview-starter" aria-label={starter.title} disabled={!!starting || !docs.length || workspaceApi.isDemo} onClick={() => void startChat(starter)}><Icon size={20} /><strong>{starter.title}</strong><span>{starter.detail}</span><ArrowRight size={14} /></button>
-    })}</div>{starting && <p role="status">{starterStatus || `Starting ${starting.toLowerCase()}…`}</p>}{starterError && <p role="alert">{starterError} {createdChat && <a href={chatHref(createdChat)}>Open saved chat</a>}</p>}{workspaceApi.isDemo && <p>Connect to the workspace to start a chat.</p>}</section>
+    })}</div>{(starting || starterStatus && !starterError) && <p role="status">{starterStatus || `Starting ${starting?.toLowerCase()}…`} {!starting && createdChat && <a href={chatHref(createdChat)}>Open saved chat</a>}</p>}{starterError && <p role="alert">{starterError} {failedStarter && <button type="button" disabled={!!starting} onClick={() => void startChat(failedStarter, createdChat || undefined)}>Retry</button>} {createdChat && <a href={chatHref(createdChat)}>Open saved chat</a>}</p>}{!docs.length && <p>Add a drawing in Data to start a question.</p>}{workspaceApi.isDemo && <p>Connect to the workspace to start a chat.</p>}</section>
   </section>
 }

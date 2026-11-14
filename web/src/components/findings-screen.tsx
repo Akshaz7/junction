@@ -7,6 +7,7 @@ import { DocumentViewer, useViewerSheet } from './document-viewer'
 import { VisualisePanel } from '../viewer3d/VisualiseIt'
 import type { Answer, Citation, Document } from '../lib/types'
 import { Button } from './ui'
+import { DrawingPicker, drawingDocuments } from './skills-screen'
 import './findings-screen.css'
 
 export function AdvisorCardsPanel({ cards, onShowItems }: { cards: AdvisorCard[]; onShowItems: (itemIds: string[], text: string) => void }) {
@@ -22,7 +23,7 @@ export function AdvisorCardsPanel({ cards, onShowItems }: { cards: AdvisorCard[]
 
 export function FindingsScreen({ docs }: { docs: Document[] }) {
   const [chosen, setChosen] = useState('')
-  const docId = chosen || docs[0]?.doc_id || ''
+  const docId = chosen || drawingDocuments(docs)[0]?.doc_id || ''
   const [findings, setFindings] = useState<Finding[]>([])
   const [cards, setCards] = useState<AdvisorCard[]>([])
   const [busy, setBusy] = useState(false)
@@ -31,12 +32,16 @@ export function FindingsScreen({ docs }: { docs: Document[] }) {
   const [notice, setNotice] = useState('')
   const [viewer, setViewer] = useState<{ answer: Answer; citation: Citation } | null>(null)
   const [opening, setOpening] = useState(false)
+  const [refresh, setRefresh] = useState(0)
+  const retry = useRef<() => void>(() => setRefresh((value) => value + 1))
   const operation = useRef<AbortController | null>(null)
   const sheet = useViewerSheet()
   useEffect(() => {
     const controller = new AbortController()
     setFindings([]); setCards([]); setViewer(null); setError(''); setNotice(''); setBusy(false); setOpening(false)
     operation.current?.abort()
+    retry.current = () => setRefresh((value) => value + 1)
+    setLoading(false)
     if (!docId) return
     const refresh = () => findingsApi.list(docId, controller.signal).then((rows) => { if (!controller.signal.aborted) setFindings(rows) }).catch((err: Error) => { if (!controller.signal.aborted) setError(err.message) })
     setLoading(true)
@@ -44,9 +49,10 @@ export function FindingsScreen({ docs }: { docs: Document[] }) {
     const stopFindings = onFindingsUpdated((event) => { if (event.doc_id === docId) void refresh() })
     const stopCards = onAdvisorCards((event) => { if (event.doc_id === docId && !event.chat_id) setCards(event.cards) })
     return () => { controller.abort(); operation.current?.abort(); stopFindings(); stopCards() }
-  }, [docId])
+  }, [docId, refresh])
 
   async function run() {
+    retry.current = () => { void run() }
     const controller = new AbortController(); operation.current = controller
     setBusy(true); setError(''); setNotice(''); setCards([])
     try {
@@ -54,14 +60,23 @@ export function FindingsScreen({ docs }: { docs: Document[] }) {
       if (controller.signal.aborted) return
       setFindings(result.findings)
       setNotice(result.status === 'no_checks' ? 'Checks are not available for this drawing yet.' : result.findings.length ? 'Checks complete.' : 'Checks complete. No findings were returned by the available rules.')
+      retry.current = () => { void loadAdvice() }
       const advice = await findingsApi.advise(docId, controller.signal)
       if (!controller.signal.aborted) setCards(advice)
     } catch (err) { if (!controller.signal.aborted) setError(err instanceof Error ? err.message : 'Checks could not be completed.') }
     finally { if (!controller.signal.aborted) setBusy(false) }
   }
+  async function loadAdvice() {
+    const controller = new AbortController(); operation.current = controller
+    setBusy(true); setError('')
+    try { const advice = await findingsApi.advise(docId, controller.signal); if (!controller.signal.aborted) setCards(advice) }
+    catch (err) { if (!controller.signal.aborted) setError(err instanceof Error ? err.message : 'Advice could not be loaded.') }
+    finally { if (!controller.signal.aborted) setBusy(false) }
+  }
   async function showItems(ids: string[], text: string) {
     const doc = docs.find((entry) => entry.doc_id === docId)
     if (!doc) return
+    retry.current = () => { void showItems(ids, text) }
     const controller = new AbortController(); operation.current?.abort(); operation.current = controller
     setOpening(true); setError('')
     try { const evidence = await openFindingEvidence(doc, ids, text, controller.signal); if (!controller.signal.aborted) setViewer(evidence) }
@@ -71,9 +86,9 @@ export function FindingsScreen({ docs }: { docs: Document[] }) {
   const drawing = viewer && viewer.answer.evidence.boxes.length > 0
   return <div className={`findings-workspace ${drawing ? 'has-evidence' : ''}`}>
     <section className="tools-screen" aria-label="Findings"><header className="tools-header"><div><h2><ClipboardCheck size={19} />Findings</h2><p>Inspect your drawings against sourced rules.</p></div><a href="#/data">Documents</a></header>
-      <div className="tools-controls"><label>Drawing<select aria-label="Drawing" value={docId} onChange={(event) => setChosen(event.target.value)} disabled={busy || opening || !docs.length}><option value="" disabled>Choose a drawing</option>{docs.map((doc) => <option key={doc.doc_id} value={doc.doc_id}>{doc.title}</option>)}</select></label>
+      <div className="tools-controls"><DrawingPicker docs={docs} label="Drawing" value={docId} onChange={setChosen} disabled={busy || opening} />
         <Button variant="raised" disabled={!docId || busy || opening || loading} onClick={() => void run()}>{busy ? 'Running checks…' : 'Run checks'}</Button></div>
-      {error && <p role="alert" className="tools-message">{error}</p>}
+      {error && <p role="alert" className="tools-message">{error} <Button disabled={busy || opening || loading} onClick={() => retry.current()}>Retry</Button></p>}
       {(busy || opening || loading || notice) && <p role="status" className="tools-message">{busy ? 'Checking the drawing and its sources…' : opening ? 'Opening cited items…' : loading ? 'Loading findings…' : notice}</p>}
       {!docs.length && <p className="tools-muted">No drawings available. Add a drawing in Data to run checks.</p>}
       {!loading && !busy && !findings.length && docId && <p className="tools-muted">No saved findings. Run checks to inspect this drawing.</p>}
