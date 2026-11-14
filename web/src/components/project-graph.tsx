@@ -70,6 +70,12 @@ function Crop({ docId, page, bbox }: { docId: string; page: number; bbox: number
   </div>
 }
 
+function ifcClass(props: Record<string, unknown> | undefined): string {
+  const key = Object.keys(props ?? {}).find((name) => name.toLowerCase().replace(/[^a-z]/g, '') === 'ifcclass')
+  const value = key ? props?.[key] : undefined
+  return typeof value === 'string' && /^Ifc/.test(value) ? value : ''
+}
+
 function Connections({ detail, onSelect }: { detail: KgNodeDetail; onSelect: (id: string, detail: KgNodeDetail) => void }) {
   const groups = useMemo(() => groupConnections(detail.neighbours.map((item) => ({ ...item, outgoing: item.edge.from === detail.node.id }))), [detail])
   const [open, setOpen] = useState<Set<string>>(new Set())
@@ -103,7 +109,7 @@ function NodePanel({ project, node, detail, loading, error, canShow3d, onClose, 
   const canOpen = !!docId && !!doc
   return <aside className="kg-panel" aria-label="Item details">
     <header>
-      <div><span className="kg-kind"><span className="kg-dot" data-group={kindGroup(shown.kind)} aria-hidden="true" />{kindLabel(shown.kind)}{shown.level ? ` · ${shown.level}` : ''}</span>
+      <div><span className="kg-kind"><span className="kg-dot" data-group={kindGroup(shown.kind)} aria-hidden="true" />{kindLabel(shown.kind)}{ifcClass(shown.props) ? ` (${ifcClass(shown.props)})` : ''}{shown.level ? ` · ${shown.level}` : ''}</span>
         <h3 title={shown.label}>{shown.label}</h3></div>
       <Button variant="ghost" size="icon-sm" aria-label="Close details" onClick={onClose}><X size={16} /></Button>
     </header>

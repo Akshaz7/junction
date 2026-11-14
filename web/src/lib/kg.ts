@@ -37,7 +37,7 @@ const GROUP: Record<string, KindGroup> = {
 export const kindGroup = (kind: string): KindGroup => GROUP[kind] ?? 'element'
 export const groupLabel: Record<KindGroup, string> = { structure: 'Files and levels', space: 'Rooms', element: 'Building elements', service: 'Services', issue: 'Issues' }
 /** Existing design tokens for each group (read from CSS at draw time). */
-export const groupToken: Record<KindGroup, string> = { structure: '--forest-700', space: '--blue-500', element: '--neutral-500', service: '--amber-600', issue: '--change-edited' }
+export const groupToken: Record<KindGroup, string> = { structure: '--forest-900', space: '--forest-500', element: '--neutral-500', service: '--amber-600', issue: '--change-edited' }
 
 const EDGE_OUT: Record<string, string> = {
   contains: 'contains', on_level: 'is on', in_room: 'is in', hosted_by: 'is hosted by', bounds: 'bounds', serves: 'serves', connects: 'connects to', part_of_system: 'is part of',
