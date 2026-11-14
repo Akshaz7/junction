@@ -140,6 +140,8 @@ struct ARScreen: View {
             liveSocket.onHighlight = { request in
                 controller.applyLiveHighlight(request)
             }
+            liveSocket.onEdit = { controller.applyLiveCommand(.edit($0)) }
+            liveSocket.onState = { controller.applyLiveCommand(.state($0)) }
             liveSocket.start()
         }
         .task(id: requestedDocID) {
@@ -151,6 +153,8 @@ struct ARScreen: View {
             voice.stop()
             liveSocket.stop()
             liveSocket.onHighlight = nil
+            liveSocket.onEdit = nil
+            liveSocket.onState = nil
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .background { voice.stop() }

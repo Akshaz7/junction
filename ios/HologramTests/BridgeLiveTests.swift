@@ -55,6 +55,34 @@ final class BridgeLiveTests: XCTestCase {
     }
 
     @MainActor
+    func testSocketDispatchesEditsAndJoinStateInReceiveOrder() async throws {
+        let connection = FakeLiveConnection()
+        connection.messages = [
+            .string(#"{"type":"scene.state","doc_id":"fixture__ios","hidden":["door-001"],"highlighted":[],"labels":{}}"#),
+            .string(#"{"type":"scene.edit","doc_id":"fixture__ios","op":"hide","item_ids":["window-001"],"edit_id":"1"}"#),
+            .string(#"{"type":"scene.edit","doc_id":"fixture__ios","op":"restore","item_ids":["window-001"],"edit_id":"2"}"#)
+        ]
+        let received = expectation(description: "State, hide, restore received")
+        received.expectedFulfillmentCount = 3
+        var order: [String] = []
+        let socket = LiveSocket(makeConnection: { _ in connection })
+        defer { socket.stop() }
+        socket.onState = { state in
+            XCTAssertEqual(state.hidden, ["door-001"])
+            order.append("state")
+            received.fulfill()
+        }
+        socket.onEdit = { edit in
+            XCTAssertEqual(edit.command.item_ids, ["window-001"])
+            order.append(edit.command.op.rawValue)
+            received.fulfill()
+        }
+        socket.start()
+        await fulfillment(of: [received], timeout: 2)
+        XCTAssertEqual(order, ["state", "hide", "restore"])
+    }
+
+    @MainActor
     func testSocketReceivesHighlightsRepliesToPingAndSendsSelection() async throws {
         let connection = FakeLiveConnection()
         let received = expectation(description: "Live highlight received")

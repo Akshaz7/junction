@@ -16,6 +16,7 @@ struct VoiceAnswer: Decodable, Equatable {
             let doc_id: String
             let highlight_item_ids: [String]
             let camera_target_item_id: String?
+            let commands: [SceneCommand]?
         }
         let boxes: [Box]
         let scene: Scene

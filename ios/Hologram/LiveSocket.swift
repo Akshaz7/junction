@@ -25,7 +25,7 @@ private final class SessionLiveConnection: LiveSocketConnection {
 @MainActor
 final class LiveSocket: ObservableObject {
     enum Command: Equatable {
-        case highlight(ARRequest), ping, ignored
+        case highlight(ARRequest), edit(SceneEditEvent), state(SceneStateEvent), ping, ignored
     }
 
     private struct Event: Codable {
@@ -35,6 +35,8 @@ final class LiveSocket: ObservableObject {
     }
 
     var onHighlight: ((ARRequest) -> Void)?
+    var onEdit: ((SceneEditEvent) -> Void)?
+    var onState: ((SceneStateEvent) -> Void)?
     private let url: URL
     private let makeConnection: (URL) -> any LiveSocketConnection
     private var connection: (any LiveSocketConnection)?
@@ -50,6 +52,12 @@ final class LiveSocket: ObservableObject {
         let event = try JSONDecoder().decode(Event.self, from: data)
         switch event.type {
         case "ping": return .ping
+        case "scene.edit":
+            let edit = try JSONDecoder().decode(SceneEditEvent.self, from: data)
+            return edit.doc_id.isEmpty ? .ignored : .edit(edit)
+        case "scene.state":
+            let state = try JSONDecoder().decode(SceneStateEvent.self, from: data)
+            return state.doc_id.isEmpty ? .ignored : .state(state)
         case "scene.highlight":
             guard let docID = event.doc_id, !docID.isEmpty, let itemIDs = event.item_ids else {
                 return .ignored
@@ -80,6 +88,8 @@ final class LiveSocket: ObservableObject {
                         failures = 0
                         switch command {
                         case .highlight(let request): self?.onHighlight?(request)
+                        case .edit(let edit): self?.onEdit?(edit)
+                        case .state(let state): self?.onState?(state)
                         case .ping: try await socket.send(.string("{\"type\":\"pong\"}"))
                         case .ignored: break
                         }

@@ -24,7 +24,12 @@ final class ARSceneController: ObservableObject {
     @Published private(set) var showRoof = false
     private(set) var activeDocID: String?
     private var requestedDocID: String?
-    private var pendingLiveHighlight: ARRequest?
+    private var pendingLiveCommands: [LiveSocket.Command] = []
+    private(set) var hiddenItemIDs: Set<String> = []
+    private var appliedEditIDs: Set<String> = []
+    private var visibilityTasks: [String: Task<Void, Never>] = [:]
+    private var visibilityTargets: [String: Bool] = [:]
+    private var originalOpacity: [String: Float] = [:]
 
     private(set) var sceneIndex: SceneIndex?
     private(set) var highlightController: HighlightController?
@@ -49,6 +54,18 @@ final class ARSceneController: ObservableObject {
     var canStepStoreyUp: Bool { storeyIndex.map { $0 + 1 < cutawayStoreys.count } ?? false }
     private var storeyIndex: Int? { cutawayStoreys.firstIndex { $0.name == activeStorey } }
 
+    /// Logical visibility updates immediately; the rendered entity may still be fading out.
+    var visibleItemIDs: Set<String> {
+        guard let manifest else { return [] }
+        let cutaway = CutawayPolicy(manifest: manifest).hiddenUSDNames(activeStorey: activeStorey,
+                                                                      showRoof: showRoof)
+        return Set(manifest.items.compactMap { id, item in
+            !hiddenItemIDs.contains(id) && !cutaway.contains(item.usd_name)
+                && (originalVisibility[item.usd_name] ?? true)
+                && sceneIndex?.entitiesByUSDName[item.usd_name] != nil ? id : nil
+        })
+    }
+
     func attach(to view: ARView) {
         arView = view
         guard isSupported else {
@@ -67,6 +84,7 @@ final class ARSceneController: ObservableObject {
     func load(docID: String? = nil, url: URL?, manifestURL: URL? = nil, itemIDs: [String] = [],
               cameraTargetItemID: String? = nil) async {
         resetPlacement()
+        cancelVisibilityTransitions()
         highlightController?.clear()
         isLoaded = false
         isFixture = false
@@ -79,7 +97,11 @@ final class ARSceneController: ObservableObject {
         tableScale = 0.01
         status = "Loading model…"
         requestedDocID = docID
-        pendingLiveHighlight = nil
+        pendingLiveCommands = []
+        hiddenItemIDs = []
+        appliedEditIDs = []
+        visibilityTargets = [:]
+        originalOpacity = [:]
         do {
             let loaded = try await ARSceneLoader.load(docID: docID, url: url, manifestURL: manifestURL)
             try Task.checkCancellation()
@@ -92,6 +114,9 @@ final class ARSceneController: ObservableObject {
             activeDocID = loaded.manifest?.doc_id ?? (loaded.isFixture ? "fixture__ios" : docID)
             sceneIndex = SceneIndex(root: content)
             originalVisibility = sceneIndex?.entitiesByUSDName.mapValues(\.isEnabled) ?? [:]
+            originalOpacity = sceneIndex?.entitiesByUSDName.mapValues {
+                $0.components[OpacityComponent.self]?.opacity ?? 1
+            } ?? [:]
             showRoof = false
             highlightController = HighlightController(root: content)
             itemPicker = loaded.manifest.map { ItemPicker(manifest: $0) }
@@ -115,8 +140,9 @@ final class ARSceneController: ObservableObject {
             // Never put evidence for an unavailable document on unrelated fixture items.
             setHighlights(docID == nil || docID == activeDocID ? itemIDs : [],
                           cameraTargetItemID: docID == nil || docID == activeDocID ? cameraTargetItemID : nil)
-            if let pendingLiveHighlight { applyLiveHighlight(pendingLiveHighlight) }
-            pendingLiveHighlight = nil
+            let pending = pendingLiveCommands
+            pendingLiveCommands = []
+            for command in pending { applyLiveCommand(command) }
             status = isSupported ? "Move your device to find a flat surface, then tap to place."
                 : "Augmented reality requires a supported iPhone or iPad."
         } catch is CancellationError {
@@ -202,10 +228,14 @@ final class ARSceneController: ObservableObject {
                        labels: [String: String] = [:]) {
         highlightedItemIDs = itemIDs
         // Measure label positions against the full model before hiding the new cutaway.
+        let visibility = sceneIndex?.entitiesByUSDName.mapValues(\.isEnabled) ?? [:]
         for item in manifest?.items.values ?? Dictionary<String, SceneManifest.Item>().values {
             sceneIndex?.entitiesByUSDName[item.usd_name]?.isEnabled = originalVisibility[item.usd_name] ?? true
         }
-        highlightController?.highlight(itemIDs: itemIDs, labels: labels)
+        var resolvedLabels = manifest?.items.compactMapValues(\.tag) ?? [:]
+        resolvedLabels.merge(labels) { _, explicit in explicit }
+        highlightController?.highlight(itemIDs: itemIDs, labels: resolvedLabels)
+        for (name, enabled) in visibility { sceneIndex?.entitiesByUSDName[name]?.isEnabled = enabled }
         targetItemID = ([cameraTargetItemID].compactMap { $0 } + itemIDs)
             .first { manifest?.items[$0]?.bbox_m != nil }
         activeStorey = manifest.map {
@@ -231,29 +261,90 @@ final class ARSceneController: ObservableObject {
         applyCutaway()
     }
 
-    private func applyCutaway() {
+    private func applyCutaway(animated: Bool = false) {
         guard let manifest else { return }
         let hidden = CutawayPolicy(manifest: manifest).hiddenUSDNames(activeStorey: activeStorey,
                                                                      showRoof: showRoof)
-        for item in manifest.items.values {
-            sceneIndex?.entitiesByUSDName[item.usd_name]?.isEnabled =
-                (originalVisibility[item.usd_name] ?? true) && !hidden.contains(item.usd_name)
+        let visible = visibleItemIDs
+        for (id, item) in manifest.items {
+            guard let entity = sceneIndex?.entitiesByUSDName[item.usd_name] else { continue }
+            let enabled = visible.contains(id)
+            // Cutaway wins immediately, even if an edit fade was in flight.
+            let cutAway = hidden.contains(item.usd_name)
+            guard visibilityTargets[id] != enabled || (cutAway && entity.isEnabled) else { continue }
+            visibilityTargets[id] = enabled
+            visibilityTasks[id]?.cancel()
+            visibilityTasks[id] = nil
+            let opacity = originalOpacity[item.usd_name] ?? 1
+            if animated && !cutAway && (originalVisibility[item.usd_name] ?? true) {
+                fade(entity, itemID: id, enabled: enabled, opacity: opacity)
+            } else {
+                entity.isEnabled = enabled
+                entity.components.set(OpacityComponent(opacity: opacity))
+            }
         }
         // Answer labels are siblings of item prims, so hide them explicitly as well.
         for (id, label) in highlightController?.labelsByItemID ?? [:] {
-            label.isEnabled = manifest.items[id].map { !hidden.contains($0.usd_name) } ?? true
+            label.isEnabled = visible.contains(id)
         }
-        if let selectedItem, let item = manifest.items[selectedItem.id], hidden.contains(item.usd_name) {
+        if let selectedItem, !visible.contains(selectedItem.id) {
             dismissSelectedItem()
         }
+    }
+
+    private func fade(_ entity: Entity, itemID: String, enabled: Bool, opacity: Float) {
+        let start: Float = entity.isEnabled ? (entity.components[OpacityComponent.self]?.opacity ?? opacity) : 0
+        let end: Float = enabled ? opacity : 0
+        entity.components.set(OpacityComponent(opacity: start))
+        entity.isEnabled = true
+        visibilityTasks[itemID] = Task { [weak self, weak entity] in
+            // Fifteen steps over 250 ms. Cancellation lets a later restore reverse a hide.
+            for step in 1...15 {
+                do { try await Task.sleep(for: .seconds(0.25 / 15)) }
+                catch { return }
+                guard !Task.isCancelled, let entity else { return }
+                entity.components.set(OpacityComponent(opacity: start + (end - start) * Float(step) / 15))
+            }
+            guard let self, let entity else { return }
+            entity.isEnabled = enabled
+            entity.components.set(OpacityComponent(opacity: opacity))
+            self.visibilityTasks[itemID] = nil
+        }
+    }
+
+    private func cancelVisibilityTransitions() {
+        for task in visibilityTasks.values { task.cancel() }
+        visibilityTasks = [:]
+    }
+
+    private func applySceneCommand(_ command: SceneCommand) {
+        let ids = Set(command.item_ids).intersection(Set(manifest?.items.keys.map { $0 } ?? []))
+        switch command.op {
+        case .highlight:
+            setHighlights(command.item_ids, labels: command.labels ?? [:])
+        case .hide:
+            hiddenItemIDs.formUnion(ids)
+        case .restore:
+            hiddenItemIDs.subtract(ids)
+        case .isolate:
+            hiddenItemIDs = Set(manifest?.items.keys.map { $0 } ?? []).subtracting(ids)
+        case .reset:
+            hiddenItemIDs = []
+            setHighlights([])
+        }
+        applyCutaway(animated: true)
     }
 
     @discardableResult
     func applyVoiceAnswer(_ answer: VoiceAnswer) -> Bool {
         guard answer.evidence.scene.doc_id == activeDocID else { return false }
-        setHighlights(answer.evidence.scene.highlight_item_ids,
-                      cameraTargetItemID: answer.evidence.scene.camera_target_item_id,
-                      labels: answer.highlightLabels)
+        if let commands = answer.evidence.scene.commands, !commands.isEmpty {
+            for command in commands { applySceneCommand(command) }
+        } else {
+            setHighlights(answer.evidence.scene.highlight_item_ids,
+                          cameraTargetItemID: answer.evidence.scene.camera_target_item_id,
+                          labels: answer.highlightLabels)
+        }
         return true
     }
 
@@ -263,12 +354,33 @@ final class ARSceneController: ObservableObject {
 
     @discardableResult
     func applyLiveHighlight(_ request: ARRequest) -> Bool {
-        if !isLoaded, request.docID == requestedDocID {
-            pendingLiveHighlight = request
+        applyLiveCommand(.highlight(request))
+    }
+
+    @discardableResult
+    func applyLiveCommand(_ command: LiveSocket.Command) -> Bool {
+        let docID: String
+        switch command {
+        case .highlight(let request): docID = request.docID
+        case .edit(let edit): docID = edit.doc_id
+        case .state(let state): docID = state.doc_id
+        case .ping, .ignored: return false
+        }
+        if !isLoaded, docID == requestedDocID {
+            pendingLiveCommands.append(command)
             return true
         }
-        guard request.docID == activeDocID else { return false }
-        setHighlights(request.itemIDs)
+        guard docID == activeDocID else { return false }
+        switch command {
+        case .highlight(let request): setHighlights(request.itemIDs)
+        case .edit(let edit):
+            if let id = edit.edit_id, !appliedEditIDs.insert(id).inserted { return true }
+            applySceneCommand(edit.command)
+        case .state(let state):
+            hiddenItemIDs = Set(state.hidden).intersection(Set(manifest?.items.keys.map { $0 } ?? []))
+            setHighlights(state.highlighted, labels: state.labels)
+        case .ping, .ignored: break
+        }
         return true
     }
 
@@ -313,6 +425,7 @@ final class ARSceneController: ObservableObject {
     }
 
     func detach() {
+        cancelVisibilityTransitions()
         dismissSelectedItem()
         highlightController?.clear()
         updateSubscription?.cancel()

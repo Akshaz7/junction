@@ -34,6 +34,7 @@ struct SceneManifest: Decodable {
         let name: String?
         let kind: String?
         let storey: String?
+        let tag: String?
         let props: [String: SceneProperty]?
     }
 
