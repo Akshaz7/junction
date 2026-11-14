@@ -156,6 +156,7 @@ def _vlm_pages(doc_id: str, ddir: Path, st: "Status", cost: dict):
     st.stage("planmap_vlm", run_all)
     try:
         drop_empty_rooms(ddir)
+        drop_photo_rooms(ddir)
     except Exception as e:  # noqa: BLE001
         print('drop_empty_rooms skipped:', repr(e)[:200], file=sys.stderr)
     return sorted(found)
@@ -182,6 +183,39 @@ def _extrude(doc_id: str, ddir: Path, page: int):
 
 
 ASSUMED_M_PER_PX = 0.02
+
+
+def _photo_like(gray, box, paper) -> bool:
+    """A box over a photograph or tone fill, not line art: a large share of mid-grey pixels (line art is paper plus thin black)."""
+    import numpy as np
+    x0, y0, x1, y1 = (int(v) for v in box)
+    c = gray[max(0, y0):y1, max(0, x0):x1]
+    if c.size < 400:
+        return False
+    return float(((c > 0.25 * paper) & (c < 0.75 * paper)).mean()) > PHOTO_MID_SHARE
+
+
+PHOTO_MID_SHARE = 0.25
+
+
+def drop_photo_rooms(ddir: Path) -> int:
+    """Drop room boxes that sit over photographs (mid-grey share above PHOTO_MID_SHARE). Needs numpy and the page image."""
+    import numpy as np
+    from PIL import Image
+    n = 0
+    for f in ddir.glob("planmap-[0-9]*.json"):
+        img = ddir / f"page-{f.stem.split('-')[1]}.png"
+        if not img.is_file():
+            continue
+        gray = np.asarray(Image.open(img).convert("L"), dtype=float)
+        paper = float(np.percentile(gray, 60))
+        pm = json.loads(f.read_text())
+        keep = [i for i in pm["items"] if not (i["kind"] == "room" and _photo_like(gray, i["bbox_px"], paper))]
+        if len(keep) != len(pm["items"]):
+            n += len(pm["items"]) - len(keep)
+            pm["items"] = keep
+            f.write_text(json.dumps(pm))
+    return n
 
 
 def drop_empty_rooms(ddir: Path) -> int:
