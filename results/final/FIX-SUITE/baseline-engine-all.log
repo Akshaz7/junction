@@ -25,9 +25,9 @@ _______________ test_baseboard_ifc_total_and_per_room_arithmetic _______________
         validate_answer(a)
 >       assert a["answer"]["unit"] == "m" and a["answer"]["value"] > 500 and a["route"] == "index" and len(a["evidence"]["boxes"]) == 82
 E       AssertionError: assert ('m' == 'm'
-E         
+E
 E           m and 1564.2 > 500 and 'index' == 'index'
-E         
+E
 E           index and 159 == 82)
 E        +  where 159 = len([{'item_id': '3Gz7u_d1P7IA35Wmtg48Rc', 'page': 1, 'bbox_px': [1050.9, 56.6, 1349.1, 537.1], 'label': '1', ...}, {'item.....}, {'item_id': '2NO$Il8fr1n8x3zsU1IoYc', 'page': 1, 'bbox_px': [708.4, 167.0, 863.0, 410.1], 'label': '6', ...}, ...])
 
@@ -115,7 +115,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x129cecc50>
             assert a['route'] == 'index' and not a['answer']['abstained']
 >           assert (a['answer']['value'], a['answer']['unit']) == (value, unit)
 E           AssertionError: assert (None, None) == (2, 'count')
-E             
+E
 E             At index 0 diff: None != 2
 E             Use -v to get more diff
 
@@ -134,7 +134,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1232e7aa0>
         a = answer(Q, [DOC])
 >       assert not a["answer"]["abstained"] and a["route"] == "vlm"
 E       AssertionError: assert (not False and 'hybrid' == 'vlm'
-E         
+E
 E         - vlm
 E         + hybrid)
 
@@ -150,7 +150,7 @@ monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1232e4260>
         a = answer(Q, [DOC])
 >       assert a["citations"] == [] and "unchecked" in a["answer"]["text_md"] and a["answer"]["confidence"] < 0.5
 E       AssertionError: assert ([] == []
-E         
+E
 E         Use -v to get more diff and 'unchecked' in '**Something.**\n\n_Based on the objects found on the drawing and the drawing image._')
 
 engine/tests/test_readdraw.py:55: AssertionError
