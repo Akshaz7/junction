@@ -28,12 +28,10 @@ struct ARScreen: View {
                            onShow: { card in selectAdvisorCard(card) })
             VStack(spacing: 10) {
                 topBar
-                // Own row below Done + logo so the long scene name never runs under the lockup.
-                HStack { Spacer(); sceneMenu }
+                storeyChip
                 placementPill
                 kindLegend
                 spotlightCaption
-                storeyChip
                 if controller.isWalking && controller.isPlaced {
                     HStack {
                         if let manifest = controller.manifest {
@@ -111,10 +109,17 @@ struct ARScreen: View {
         #endif
     }
 
+    /// Compact pill title: the full name when short, else its first word ("AC20 Institute / ..." becomes "AC20").
+    private var pillName: String {
+        let name = sceneName
+        guard name.count > 12, let first = name.split(separator: " ").first, first.count >= 2 else { return name }
+        return String(first)
+    }
+
     private var sceneName: String {
-        // While loading show the building's name if known, else "Loading…"; "Scene unavailable" only after a failure.
+        // While loading show "Loading…", then the building name; "Scene unavailable" only after a failure.
         if controller.manifest == nil && !controller.loadFailed {
-            return DemoScenes.all.first { $0.id == requestedDocID }?.title ?? "Loading…"
+            return "Loading…"
         }
         return controller.sceneIdentity.title
     }
@@ -128,6 +133,7 @@ struct ARScreen: View {
             }
             .accessibilityIdentifier("ar-done")
             Spacer()
+            sceneMenu
         }
         .overlay(alignment: .top) { StoaProLockup() }
     }
@@ -284,20 +290,9 @@ struct ARScreen: View {
 
     private var sceneMenu: some View {
         Menu {
-            Picker("Buildings", selection: Binding(
-                get: { requestedDocID ?? "" },
-                set: { voice.stop(); controller.demoDocID = $0 }
-            )) {
-                if !DemoScenes.all.contains(where: { $0.id == requestedDocID }) {
-                    Text("Choose a building").tag(requestedDocID ?? "")
-                }
-                ForEach(DemoScenes.all) { demo in
-                    Text(demo.title).tag(demo.id)
-                }
-            }
-            .pickerStyle(.menu)
-            .accessibilityIdentifier("demo-scenes-picker")
             Section {
+                // Full building name (the pill only shows a short one).
+                Text(sceneName)
                 Toggle("Show roof", isOn: Binding(get: { controller.showRoof },
                                                   set: { controller.setShowRoof($0) }))
                     .disabled(!controller.isLoaded)
@@ -345,11 +340,11 @@ struct ARScreen: View {
         } label: {
             HologramCapsule {
                 HStack(spacing: 6) {
-                    Text(controller.isWalking ? "Walk · \(sceneName)" : sceneName).lineLimit(1)
+                    Text(controller.isWalking ? "Walk" : pillName).lineLimit(1).truncationMode(.tail)
                         .accessibilityIdentifier("scene-name")
                     Image(systemName: "chevron.down").font(.system(size: 10, weight: .bold))
                 }
-                .frame(maxWidth: 220)
+                .frame(maxWidth: 104)
             }
         }
         .accessibilityIdentifier("ar-scene-menu")
