@@ -49,7 +49,10 @@
     "truth_scope": "Independent IFC relationships and existing CAD geometry; checks graph reasoning over indexes, not raster detection accuracy.",
     "unseen_doc_id": "ifc_bench__sixty5-str",
     "unseen_read_only_at_end": true,
-    "gold_corrections": "gold-correction.json; both prior real development runs retained."
+    "gold_corrections": "gold-correction.json; both prior real development runs retained.",
+    "specified_shape_checks": 27,
+    "sparse_source_robustness_checks": 3,
+    "accuracy_caveat": "Three unseen structural-wall impact cases have no independent positive dependency gold; they test graceful sparse-data handling/schema/confidence only. The 30/30 figure is a check pass rate, not a claim of 100% drawing-answer accuracy."
   },
   "model_calls": 0,
   "model_cost_usd": 0,
