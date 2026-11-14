@@ -1,186 +1,259 @@
-# API (S-03, stub engine)
+# Hologram API
 
-Base: `http://localhost:8000`. All JSON unless noted. Errors: `{"detail": "..."}`; missing artifacts return
-`404 {"status": "not_built", "detail": "..."}`. DB-backed endpoints return `503` if Postgres is down.
-Answers come from `server/stub_engine.py` until S-04 (the trace is marked `"stub": true`).
-The only question the stub answers is "how many windows" on `cubicasa5k__colorful-11397` (13 fake boxes);
-anything else returns a valid abstained answer.
+Source snapshot: 2026-11-14, read from [app.py](../server/app.py) and all `server/*_routes.py`, with WebSocket behavior from [live.py](../server/live.py). Base URL locally: `http://localhost:8000`; use HTTPS/WSS for deployment. No accounts or authentication. JSON unless a route states otherwise. Shapes below use type names and `?` for optional fields; they are schemas, not measured results.
+
+## Common requests and errors
+
+Send `Content-Type: application/json` for JSON bodies. GET and DELETE requests have no body. Successful HTTP responses are 200 unless stated. FastAPI validates typed path/query/body fields: invalid or missing required fields return **422** with `{"detail":[...]}`. Route errors normally return `{"detail":"..."}`. Unhandled failures can return 500; routes do not all translate internal failures into JSON errors.
+
+In the tables, **DB** means **503** `{"detail":"database unavailable"}` if PostgreSQL cannot be reached. This applies only to the routes marked DB, not every endpoint. Missing derived files use **404** `{"status":"not_built","detail":"<asset> not available"}`. Artifact doc IDs allow only ASCII letters, digits, `_`, `.`, `-`; routes using `_doc_dir` return **400** `bad doc_id` otherwise.
+
+With `RATE_LIMIT=1`, the in-memory middleware limits each IP per rolling 60-second window. `RATE_LIMIT_PER_MIN` is a positive integer, default **30** (invalid/nonpositive values fall back to 30). Excess requests return **429** `{"detail":"rate limit exceeded"}` with `Retry-After: 60`. The first `X-Forwarded-For` address is used, else the connection IP. Counters are per process. Exempt GETs: `/api/health`, `/api/docs/{doc_id}/files/{name}`, `/api/docs/{doc_id}/pages/{n}/image`, `/api/docs/{doc_id}/scene`, `/api/docs/{doc_id}/ingest`. WebSocket upgrades bypass this HTTP middleware. Local default is `RATE_LIMIT=0`; the deploy Dockerfile sets it to 1. See [ratelimit.py](../server/ratelimit.py).
+
+## Health
 
 ### GET /api/health
-`curl localhost:8000/api/health` -> `{"ok": true, "db": true}`
 
-### GET /api/docs
--> `{"total": 1, "sources": [{"source": "cubicasa5k", "count": 1, "docs": [{"doc_id": "cubicasa5k__colorful-11397", "source": "cubicasa5k", "title": "...", "kind": "raster", "formats": ["png"], "pages": 1, "licence": "CC BY-NC-SA 4.0", "credit": "...", "heldout": false, "files": {"png": "data/cubicasa5k/..."}}]}]}`
+Request: no parameters. Response: `{ok: true, db: bool, build_rev: string, uptime_s: number, models_ok: bool}`. `build_rev` is `BUILD_REV` or an empty string; uptime is monotonic seconds since lifespan startup. `models_ok` means at least one configured non-fake provider has a nonblank key; it does **not** probe a model or confirm credentials. `ok` stays true and HTTP status stays 200 when `db` or `models_ok` is false. No route-specific error response.
 
-### GET /api/docs/{doc_id}
-`curl localhost:8000/api/docs/cubicasa5k__colorful-11397` -> one doc object (as above). 404 if unknown.
-Both doc endpoints carry additive metadata (derived by `engine/docmeta.py`, overlaid with `artifacts/docmeta.json`): `size` (bytes of the original, null if not on this server), `updated_at` (issue date from the folder/file name, else file mtime / upload time), `project`, `folder` ("Project/Discipline[/Sub]") and `folder_path` (list), `discipline` (Architecture|Structural|MEP|Civil|General|Floor plans|Drawings|Reference drawings), `subdiscipline` (MEP only: Plumbing|Ventilation|Heating|Electrical|Fire protection), `sheet`, `date`, `series_id`, `version_index`, `version_count`, `versions`: `[{"doc_id", "index", "date", "size", "label", "pages"}]` (empty when the doc is in no series).
+```sh
+curl http://localhost:8000/api/health
+```
 
-### GET /api/folders
--> `{"total": 14545, "folders": [{"name": "Sports Complex", "path": "Sports Complex", "count": 120, "children": [{"name": "MEP", "path": "Sports Complex/MEP", "count": 9, "children": [{"name": "Plumbing", ...}]}]}]}` (Project > Discipline > MEP sub-discipline, sorted by name, counts of documents).
+## Documents and artifacts
 
-### GET /api/docs/{doc_id}/source
-Downloads the original file (pdf, ifc, dxf, image) as an attachment. 404 `{"status": "not_built"}` when the container does not hold it (the deployed image ships only the demo docs).
+Sources: [docs_routes.py](../server/docs_routes.py), [files_routes.py](../server/files_routes.py), [docmeta_store.py](../server/docmeta_store.py).
 
-### GET /api/docs/{doc_id}/pages/{n}/image
-`curl -o p.png localhost:8000/api/docs/cubicasa5k__colorful-11397/pages/1/image` -> `image/png`
-(`artifacts/<doc_id>/page-<n>.png`). Else `404 {"status":"not_built"}`.
+`Document` contains `doc_id, source, title, kind, formats[], pages, licence, credit, heldout, files{format:path}`. Metadata enrichment adds `size` (bytes, nullable), `updated_at`, `project`, `folder`, `folder_path[]`, `discipline`, `subdiscipline`, `sheet`, `date`, `series_id`, `version_index`, `version_count`, `versions[]`. Version entries contain `doc_id, index, date, size, label, pages`; dates/size can be unknown. Enrichment is derived from document metadata and overlaid with `artifacts/docmeta.json` and the series files.
 
-### GET /api/docs/{doc_id}/planmap/{n}
--> plan map JSON (CONTRACT 5.4) from `planmap-<n>.json`, e.g. `{"doc_id": "...", "page": 1, "image": {"w": 1200, "h": 900}, "scale": {...}, "items": [...]}`. Else not_built.
+| Route | Request | Response | Errors |
+|---|---|---|---|
+| GET /api/docs | None | `{total, sources:[{source,count,docs:[Document]}]}` ordered by source, title, doc ID | DB |
+| GET /api/docs/{doc_id} | Document ID | `Document` | DB; 404 `document not found` |
+| GET /api/folders | None | `{total,folders:[Folder]}`; `Folder={name,path,count,children:[Folder]}`; project → discipline → optional MEP subdiscipline, sorted by name, document counts | DB |
+| GET /api/docs/{doc_id}/source | Safe document ID | Original file bytes as an attachment, filename from the source file; content type inferred from filename | 400 bad doc ID; DB; 404 `document not found`; 404 `{status:"not_built",detail:"original file is not available on this server"}` |
+| GET /api/docs/{doc_id}/pages/{n}/image | Safe document ID; integer page `n` | `image/png` from `page-<n>.png` | 400 bad doc ID; 404 not_built |
+| GET /api/docs/{doc_id}/planmap/{n} | Safe document ID; integer page `n` | Plan map JSON, [CONTRACT 5.4](../CONTRACT.md): `{doc_id,page,image,scale,items,provenance}` | 400 bad doc ID; 404 not_built |
+| GET /api/docs/{doc_id}/scene | Safe document ID | Manifest JSON, [CONTRACT 5.5](../CONTRACT.md): `{doc_id,glb,usdz,units,up,origin_offset_m,storeys,items,...}` | 400 bad doc ID; 404 not_built |
+| GET /api/docs/{doc_id}/files/{name} | Safe document ID; allowed filename below | File bytes, MIME inferred by `FileResponse` | 400 bad doc ID; 404 `unknown file` for disallowed names; 404 not_built for missing allowed files |
+| GET /api/docs/{doc_id}/ingest | Safe document ID | Ingestion state described below | 400 bad doc ID; missing state returns 200 `status:"none"` |
 
-### GET /api/docs/{doc_id}/scene
--> `scene.json` (CONTRACT 5.5). Else `404 {"status": "not_built"}` (S-04 will trigger extrusion).
-
-### GET /api/docs/{doc_id}/files/{name}
-`name` is `scene.glb`, `scene.usdz`, `scene.json`, `elements.json` (IFC element index), `planmap-<n>.json`, `page-<n>.png` or `page-<n>.thumb.png`. Returns the file bytes; 404 `{"status":"not_built"}` if the file does not exist yet. Other names 404.
+The scene route serves an existing manifest; it does not currently trigger extrusion. File routes restore persisted upload artifacts from PostgreSQL when available, but do not require a document row before serving an existing file. Allowed names: `scene.glb`, `scene.usdz`, `scene.json`, `elements.json`, `text.json`, `ingest.json`, `page-<n>.png`, `page-<n>.thumb.png`, `planmap-<n>.json`, `text-<n>.json` (numeric `<n>`).
 
 ### POST /api/upload
-`curl -F file=@plan.pdf localhost:8000/api/upload`
--> `{"doc_id": "uploads__plan-3fa2b1", "status": "ingesting", "detail": "..."}` (`"stored"` on a server without the pipeline, e.g. the deployed container).
-Accepts ifc, dxf, dwg, pdf, svg, png, jpg, tif (max 100 MB; 415 otherwise). Stored in `artifacts/uploads/`; a documents row is inserted (source `uploads`) and `doc.new` fires. Where the pipeline is installed, a background job then builds pages, plan map, scene and USDZ (raster about 6 s, DXF seconds, IFC minutes), one job at a time, and fires `doc.new` again when done.
 
-### GET /api/docs/{doc_id}/ingest
--> `{"status": "none|running|ready|partial|failed", "stages": [{"stage": "pages", "ok": true, "s": 0.1}], "detail": ""}`. `partial` = page image only (pdf/svg have no plan map yet).
+Request: multipart field **file**; accepted filename extensions are **.pdf, .png, .jpg, .jpeg, .dxf, .ifc** (case-insensitive). The endpoint checks the extension, not the MIME type. Maximum **100 MiB (104857600 bytes)**. DWG, SVG and TIFF are not accepted by this route.
 
-### POST /api/chats
-`curl -X POST localhost:8000/api/chats -H 'content-type: application/json' -d '{"doc_ids":["cubicasa5k__colorful-11397"],"title":"Windows"}'`
--> `{"id": "<uuid>", "doc_id": "cubicasa5k__colorful-11397", "title": "Windows", "created_at": "2026-11-14T03:00:00+00:00"}`
-(only the first doc_id is stored on the chat; unknown doc -> 404).
-
-### GET /api/chats
--> `{"chats": [{"id": "<uuid>", "doc_id": "...", "title": "...", "created_at": "..."}]}` newest first.
-
-### GET /api/chats/{id}
--> chat plus `"messages": [{"id", "role": "user|assistant", "content", "created_at", "answer": null | <answer object 5.7>}]`.
-
-### POST /api/chats/{id}/messages
-`curl -N -X POST localhost:8000/api/chats/<id>/messages -H 'content-type: application/json' -d '{"content":"How many windows are there?"}'`
-Optional `"doc_ids"` overrides the chat's doc. Response is `text/event-stream`:
+```sh
+curl -F file=@plan.pdf http://localhost:8000/api/upload
 ```
-event: status
-data: {"text": "Thinking…"}
 
+Response: `{doc_id:"uploads__<slug>-<six hex chars>",status:"ingesting"|"stored",detail:string}`. Creates a document row and stores the original plus `doc.json`; publishes `doc.new`. With the pipeline installed and `INGEST` not `0`, ingestion runs in a background subprocess and status starts as `running`, step `queued`. Otherwise the file is stored without ingestion. The original/derived upload artifacts are mirrored to PostgreSQL for restoration after restarts. The completed job updates document metadata and publishes `doc.new` again.
+
+Errors: **400** `File is empty. Upload a non-empty pdf, png, jpg, dxf or ifc file.`; **413** `File too large. Maximum upload size is 100 MiB (104857600 bytes).`; **415** `Unsupported file type <extension or (none)>. Supported types: pdf, png, jpg (jpeg), dxf, ifc.`; DB; 422 missing multipart field.
+
+Poll `GET /api/docs/{doc_id}/ingest`: `{status:"none"|"running"|"ready"|"partial"|"failed",step,progress,stages:[{stage,ok,s?,error?}],detail,reason?,mode?,started_at?,cost_usd?,updated?}`. `progress` is a completed-stage fraction, not a time estimate: 1 for ready, otherwise `len(stages)/(len(stages)+1)`. Missing state gives `none`, progress 0 and an empty stage list even for an unknown doc. `partial` means some outputs are available. Failed states include a readable `reason`. Jobs are serialized and have a five-minute timeout including queue time; polling also marks stale restored jobs failed. Stage details come from [ingest_job.py](../server/ingest_job.py); `INGEST_MODE=vlm|full` selects the deployed VLM or local vision pipeline.
+
+## Linked items and tags
+
+Source: [linked_routes.py](../server/linked_routes.py). Encode path values in URLs; the item/tag path converters allow embedded slashes.
+
+| Route | Request | Response | Errors |
+|---|---|---|---|
+| GET /api/docs/{doc_id}/items/{item_id:path} | Document ID and exact item ID | `LinkedItem` | 404 `item not found`, including missing document/artifacts or a name/tag passed instead of an exact ID |
+| GET /api/docs/{doc_id}/tags/{tag:path} | Document ID and tag/reference, e.g. `W7` | `LinkedItem` resolved by `engine.linked.lookup` | 404 `tag not found`, including missing document/artifacts |
+
+`LinkedItem={doc_id,item_id,kind,tag,name,storey,type_name,ifc_class,props,quantities,places:[{doc_id,page,bbox_px,storey}]}`. Optional source properties can be null; `props`/`quantities` default to `{}`. `bbox_px` is in page-image pixels, origin top-left, and can be null. No database is required for these lookups.
+
+## Chats and streamed answers
+
+Source: [chats_routes.py](../server/chats_routes.py). `Chat={id,doc_id,title,created_at}`; ID is a UUID, doc/title can be null, timestamps are ISO-8601.
+
+| Route | Request | Response | Errors |
+|---|---|---|---|
+| GET /api/chats | None | `{chats:[Chat]}`, newest first | DB |
+| POST /api/chats | `{doc_ids?:string[] (default []),title?:string\|null}` | `Chat` (200); only first doc ID is stored, or null for general conversation | DB; 404 `document not found` for unknown first doc ID |
+| GET /api/chats/{chat_id} | UUID | `Chat` plus `messages:[{id,role,content,created_at,answer}]`; `answer` is null or a full answer object. During a request, optional `active:{question,statuses,traces}` provides this process's in-flight state | DB; 404 `chat not found` for invalid/missing UUID |
+| GET /api/chats/{chat_id}/scene-state | UUID; optional query `doc_id` | `{chat_id,states:[{doc_id,hidden,highlighted,labels,isolated}]}` | DB; 404 `chat not found` |
+| POST /api/chats/{chat_id}/messages | UUID; `{content:string,doc_ids?:string[]\|null}` | `text/event-stream`, described below | DB; 404 `chat not found`; engine/answer validation failure after stream opens is an SSE `error` |
+
+Message `doc_ids` overrides the stored document only when nonempty (empty/null falls back to the chat's doc). The real engine is the default. `ENGINE_IMPL=stub` explicitly selects the fixture engine; import failure can also select it. Existing hidden scene items and up to ten earlier messages are passed to the real engine. The user message is saved before streaming; a validated answer is saved as an assistant message.
+
+```sh
+curl -N -X POST http://localhost:8000/api/chats/CHAT_UUID/messages \
+  -H 'Content-Type: application/json' -d '{"content":"How many windows are there?"}'
+```
+
+Stream framing (payload shapes):
+
+```text
 event: status
-data: {"text": "Exploring document: cubicasa5k__colorful-11397"}
+data: {"text":"Thinking…"}
 
 event: trace
-data: {"step": "route", "detail": "stub engine: no real routing", "ms": 1, "model": null, "cost_usd": 0, "stub": true}
+data: {"step":"<step>","detail":"<detail>","ms":0,"model":null,"cost_usd":0}
 
 event: answer
-data: {"answer_id": "...", "question": "How many windows are there?", "doc_ids": ["cubicasa5k__colorful-11397"],
-       "answer": {"text_md": "There are **13 windows** on this floor plan. [1]", "value": 13, "unit": "count", "confidence": 0.5, "abstained": false},
-       "citations": [...], "evidence": {"boxes": [{"item_id": "window-001", "page": 1, "bbox_px": [40,40,90,56], "label": "1"}, ...], "scene": {...}},
-       "trace": [...], "route": "planmap", "cost": {"usd_total": 0.0, "calls": []}, "latency_ms": 2}
+data: <full answer JSON>
 ```
-`status` and `trace` events repeat; `answer` is always last. If the engine fails an `error` event `{"detail": ...}` ends the stream. The user message and the answer are stored.
 
-### GET /api/changes, GET /api/changes/{id}, POST /api/changes/refresh
-Everything is computed from REAL files: version series (`artifacts/series/*.json`, built by `python -m pipeline.series`) and their cached PDF revision diffs (`artifacts/series/diffs/`, `python -m pipeline.series --diff`, engine `engine/pdf_changes.py`, no model call). No synthetic revisions are served; old `doc@v1 -> doc@v2` rows are purged at startup and `/api/docs/{id}/revisions/...` is gone.
-Feed, newest first: `{"changes": [...], "checked_at": "<ISO utc>", "groups": [{"key": "today|yesterday|earlier", "label", "ids": [...]}]}`; each entry also has `"group"`. Entry: `{"id", "type": "new_version"|"new_document"|"rule_change", "doc_a", "doc_b", "summary", "created_at", "group"}`.
-- `new_version` from a series: `id` `ser:<series_id>:<n>` (version n -> n+1), `doc_a`/`doc_b` are real doc ids, `created_at` is the later version's date, `summary` = `{"doc_id", "series_id", "title", "n_changes" (null if the diff is not computed on this server), "headline", "source": "pdf-diff", "generated_for_demo": false, "version_a", "version_b", "date_a", "date_b", "pages_changed"}`.
-- `new_version` from an upload that matches a series (same sheet code or same normalised title): `id` `upl:<doc_id>`, `doc_a` = latest series version, `doc_b` = the upload; diffed on `POST /api/changes/refresh` (needs numpy; otherwise `n_changes` null).
-- `new_document`: any other upload (`id` `doc:<doc_id>`). `rule_change`: Context.dev watch events (see Watch).
-- `checked_at` is the time of the last scan (startup or refresh). `POST /api/changes/refresh` reloads series, diffs matching uploads, restamps `checked_at` and returns the same body as the feed.
-`GET /api/changes/{id}[?page=N]` for `ser:` / `upl:` ids (N is a page of the newer version; default: first page with changes):
+Status/trace events repeat; a successful stream ends with `answer`. On engine/answer validation failure it ends with `event: error`, `data: {"detail":"engine failed: ..."}`. This is not an HTTP error status after headers have been sent. Trace values above illustrate framing only.
+
+Full answer shape is [CONTRACT 5.7](../CONTRACT.md): `{answer_id,question,doc_ids,answer:{text_md,value,unit,confidence,abstained},citations,evidence:{boxes,scene},trace,route,cost:{usd_total,calls},latency_ms}`. Scene commands are saved/relayed as edits with ID `<answer_id>-<command index>`. Hide commands may attach `advisor_cards` to the answer and publish `advisor.cards`. All answer values and citations are engine results, not a fixed window-count fixture.
+
+For scene-state, no edits and no doc filter gives `states:[]`; a supplied doc filter gives an empty state for that doc when needed. `isolated` is an array or null. State semantics are documented under WebSocket below.
+
+## Changes and comparison
+
+Sources: [files_routes.py](../server/files_routes.py), [changes_source.py](../server/changes_source.py).
+
+| Route | Request | Response | Errors |
+|---|---|---|---|
+| GET /api/changes | None | `ChangeFeed` | DB |
+| POST /api/changes/refresh | No body | Rescans series, computes diffs for matching uploads, stamps `checked_at`, returns `ChangeFeed` | DB |
+| GET /api/changes/{change_id} | Feed ID; optional integer query `page` (newer version's page) | Comparison for `ser:`/`upl:` IDs; stored change row for UUIDs | DB; 404 `change not found` for unknown/malformed ID; 422 noninteger page |
+
+`ChangeFeed={changes:[Change],checked_at,groups:[{key,label,ids}]}`; `key`/entry `group` is `today|yesterday|earlier`. `Change={id,type,doc_a,doc_b,summary,created_at,group}`; type is `new_version|new_document|rule_change`. A stored UUID detail row contains `id,type,doc_a,doc_b,summary,created_at` without the feed's added group. Summary varies by source.
+
+Real version pairs come from `artifacts/series/*.json` and cached PDF diffs under `artifacts/series/diffs/`; `ser:<series_id>:<n>` compares version n to n+1. Uploads matching a series produce `upl:<doc_id>` comparisons; unmatched uploads are `new_document` entries with ID `doc:<doc_id>` (feed-only; there is no detail handler for those IDs). Rule-change UUIDs come from the watch webhook. Version summaries include `doc_id,series_id,title,n_changes,headline,source:"pdf-diff",generated_for_demo:false,version_a,version_b,date_a,date_b,pages_changed`; `n_changes` can be null without a computed diff.
+
+Comparison is this GET detail route; there is no separate `/api/compare` route. It returns:
+
+```text
+{id,type:"new_version",series_id,source:"pdf-diff",generated_for_demo:false,note,
+ image,image_v1,page,pages:[{page,page_v1,page_v2,n_changes}],
+ v1:{label,doc_id,date,page_image,thumb},v2:{label,doc_id,date,page_image,thumb},
+ changes:[{n,change_id,type,kind,sentence,description,v1,v2,field,old,new,page}],
+ created_at?}
 ```
-{"id": "ser:<sid>:1", "type": "new_version", "series_id", "source": "pdf-diff", "generated_for_demo": false, "note", "created_at",
- "image": {"w": 5100, "h": 3301}, "image_v1": {...}, "page": 1,
- "pages": [{"page": 1, "page_v1": 5, "page_v2": 1, "n_changes": 3}],
- "v1": {"label": "Version 1 · 2017-05-03", "doc_id", "date", "page_image": "/api/docs/<doc>/pages/5/image", "thumb": "/api/docs/<doc>/files/page-5.thumb.png"},
- "v2": {...},
- "changes": [{"n": 1, "change_id": "c1", "type": "added|removed|modified", "kind": "region|page", "sentence": "Text changed from 'A' to 'B'.",
-              "v1": {"item_id": null, "bbox_px": [x0,y0,x1,y1]} | null, "v2": {...} | null, "old": "A", "new": "B", "page": 1}]}
+
+Each change's `v1`/`v2` is null or `{item_id:null,bbox_px:[x0,y0,x1,y1]}`. Boxes use their respective version's image coordinates. With no requested/matching page, the first changed page is selected, else the first page. Missing diff cache is **200**, with `status:"not_built"`, `image:null`, `changes:[]`, `pages:[]`, note and abbreviated `v1`/`v2` (`label,doc_id`). This differs from a missing artifact's 404.
+
+## Benchmarks and costs
+
+Source: [files_routes.py](../server/files_routes.py). These endpoints read files without requiring PostgreSQL.
+
+| Route | Request | Response | Errors |
+|---|---|---|---|
+| GET /api/bench | None | `{benches:[{tag,set,fake,file,mtime}]}` newest mtime first; UTC ISO-8601 `mtime`; empty list if absent | No route-specific error |
+| GET /api/bench/latest | Optional query `tag` matching summary's tag or file stem | `{file,tag,data:<summary JSON>}` | 404 `{status:"no_bench",detail}` if absent or unmatched |
+| GET /api/costs | None | `{total_usd,calls,by_provider:{<provider>:{calls,usd}},by_task:{<task>:{calls,usd}}}` | No route-specific error |
+
+Bench summaries are parseable dictionary-valued `results/bench/*.json`; row dumps are ignored. Costs aggregate `results/costs.jsonl` (`provider,task,cost_usd`; task falls back to row, then `unknown`); absent logs yield zero totals and empty maps. Runtime directories follow `RESULTS_DIR`.
+
+## Speech
+
+Source: [speech_routes.py](../server/speech_routes.py). Both routes use `engine.models.call()` and can return **200** JSON `{fallback:"device",reason}` instead of media/transcription when no usable provider, provider failure or budget exhaustion occurs. Clients must check Content-Type and use device speech in this case.
+
+| Route | Request | Response | Errors |
+|---|---|---|---|
+| POST /api/tts | `{text:string,voice?:string\|null}`; trimmed text 1–1500 chars; nonempty voice ID must match `[A-Za-z0-9]{10,40}` | `audio/mpeg` bytes, or device fallback JSON | 400 `text is empty` or `bad voice id`; 413 `text longer than 1500 characters`; 422 invalid body |
+| POST /api/speech-intent | Multipart `file`, max 5 MiB (5242880 bytes); accepted MIME types below | `{text,intent,provider}` or device fallback JSON; intent `ask\|visualise\|show_on_table\|changes\|other` | 400 `empty audio`; 413 `audio too large`; 415 `unsupported audio type <type or (none)>`; 422 missing file |
+
+TTS headers: `X-TTS-Provider`, `X-TTS-Cache: hit|miss`, `Cache-Control: public, max-age=86400`, `ETag` (audio SHA-1). Chain: ElevenLabs → Runware (see [MODELS.md](MODELS.md)). Speech MIME allowlist: `audio/wav`, `audio/x-wav`, `audio/mpeg`, `audio/mp3`, `audio/ogg`, `audio/flac`, `audio/aac`, `audio/aiff`, `audio/webm`, `audio/mp4`, `audio/x-m4a`, `video/webm`; MIME parameters are stripped. Only Gemini is considered usable for audio input; without its key, speech-intent returns device fallback even if text-model keys exist.
+
+## Advisor
+
+Source: [advise_routes.py](../server/advise_routes.py).
+
+### POST /api/advise
+
+Request: `{doc_id:string,chat_id?:UUID|null,edit?:{op:string,item_ids?:string[],detail?:object|null}|null}`. `item_ids` defaults to `[]`; up to **200**, each nonblank and at most **200 characters**. `detail` is limited to **4000 characters of JSON serialization** by the route. Accepted operations: **hide, restore, move, material, undo, resize, narrow, scale, set_width**. The route validates these operation names and size limits; interpretation of `detail` belongs to the engine. `move` may carry `delta_m`/`position_m`; `material` may carry `material`; `undo` may describe the inverse edit. These are local what-if inputs; this endpoint does not persist a scene edit or change source data.
+
+Example body: `{"doc_id":"ifc_bench__ac20-arc","edit":{"op":"move","item_ids":["ITEM_ID"],"detail":{"delta_m":[0.2,0,0]}}}`.
+
+Response: `{cards:[Card]}`, at most three. Also broadcasts `{type:"advisor.cards",doc_id,chat_id:null|UUID,cards}` even when empty. Engine absence/failure yields `cards:[]` with 200. Errors: DB; **404** `document not found` or `chat not found` (including invalid UUID); **422** `invalid edit` for unsupported op/size limits or FastAPI validation detail for a malformed body.
+
+`Card={card_id,kind:"warning"|"option"|"info",title,body,item_ids,source:{type:"rule"|"material_table"|"document",ref,title,quote},severity:"violation"|"suggestion"|"info",checked?:string[]}`. Title ≤60 chars, body ≤200, quote ≤200. Cards missing a complete source are dropped; rule references must exist in `engine/rules/*.yaml` and quote actual rule text (whitespace normalized). Long quotes are dropped; title/body are shortened. Optional `checked` keeps at most 40 strings of up to 80 chars.
+
+## Findings
+
+Source: [findings_routes.py](../server/findings_routes.py). `Finding={id,doc_id,rule_id,item_ids,severity,message,detail,rule:{id,text,source_title,section,url,quote,translation},created_at}`. Severity is `info|suggestion|violation`.
+
+| Route | Request | Response | Errors |
+|---|---|---|---|
+| POST /api/findings/run | `{doc_id:string}` | `{status:"ok",findings:[Finding]}`; replaces that doc's findings and publishes `findings.updated` | DB; 404 `document not found`; 502 `checks failed: <exception type>` |
+| GET /api/findings | Optional query `doc_id`, `rule_id`, `severity` (string filters) | `{findings:[Finding]}` | DB |
+
+Only findings naming a known library rule and at least one item survive. Unrecognized severity is normalized to suggestion. If checks cannot be imported, run returns 200 `{status:"no_checks",detail,findings:[]}`. The list endpoint does not validate the severity filter as an enum; unmatched filters yield an empty list.
+
+## Saved skills
+
+Source: [skills_routes.py](../server/skills_routes.py). `Skill={id,slug,name,description,prompt,builtin,created_at}`. Four built-in starter skills are seeded at startup and cannot be deleted. All routes require DB.
+
+| Route | Request | Response | Errors (plus DB) |
+|---|---|---|---|
+| GET /api/skills | None | `{skills:[Skill]}`, builtins first, then creation time/ID | No additional route error |
+| POST /api/skills | `{name:string (1–80 chars),prompt:string (1–2000),description?:string (≤200, default "")}` | **201** `Skill`; fields trimmed after length validation | 422 invalid body |
+| DELETE /api/skills/{skill_id} | UUID | **204**, no body | 404 missing skill/invalid UUID; 403 `starter skills cannot be deleted` |
+| POST /api/skills/{skill_id}/run | UUID; `{doc_ids?:string[] (default [], max 20)}` | `{skill_id,prompt,answer:<full answer object>}` | 404 missing skill/document or invalid UUID; 502 `engine failed: ...`; 422 invalid body |
+
+Skill runs use the chat engine without storing a chat turn.
+
+## Automations and reports
+
+Source: [skills_routes.py](../server/skills_routes.py). All routes require DB. `Automation={id,name,prompt,doc_ids,interval_minutes,enabled,last_run_at,next_run_at,last_report,created_at}`. `last_run_at`/`last_report` can be null; `next_run_at` is null when disabled. `Report={report_id,ran_at,ok,markdown,answer}`; a failed run has `ok:false` and `answer:null`.
+
+| Route | Request | Response | Errors (plus DB) |
+|---|---|---|---|
+| GET /api/automations | None | `{automations:[Automation]}`, creation time/ID order | No additional route error |
+| POST /api/automations | `{name (1–80 chars),prompt (1–2000),doc_ids (1–20 IDs),interval_minutes?:integer (1–44640, default 1440),enabled?:bool (default true)}` | **201** `Automation` | 404 unknown document; 422 invalid body |
+| GET /api/automations/{automation_id} | UUID | `Automation` | 404 missing automation/invalid UUID |
+| PATCH /api/automations/{automation_id} | UUID; any of `{name?,prompt?,interval_minutes?,enabled?}` with same limits as creation; null fields ignored; doc_ids not editable | Updated `Automation` | 404 missing automation/invalid UUID; 422 invalid body |
+| DELETE /api/automations/{automation_id} | UUID | **204**, no body | 404 missing automation/invalid UUID |
+| POST /api/automations/{automation_id}/run | UUID; no body | Updated `Automation` including latest report | 404 missing automation/invalid UUID; engine failure is stored in a report, not returned as 502 |
+| GET /api/automations/{automation_id}/report.md | UUID | Latest report Markdown (`text/markdown; charset=utf-8`) | 404 missing automation/invalid UUID or `no report yet` |
+| GET /api/automations/{automation_id}/report.pdf | UUID | Latest report as `application/pdf`, attachment `report.pdf` | 404 missing automation/invalid UUID or `no report yet` |
+
+Scheduler starts after five seconds, checks every 30 seconds and claims due rows before running them. `AUTOMATIONS=0` disables scheduling. Each run stores only the latest report and publishes `{type:"automation.report",automation_id,report_id}`. Manual run works even if the automation is disabled.
+
+## Rule-source watch
+
+Sources: [watch_routes.py](../server/watch_routes.py), [engine/watch.py](../engine/watch.py). Context.dev monitors rule URLs; sync uses `CONTEXT_DEV_API_KEY` and optional public `WATCH_WEBHOOK_URL`.
+
+| Route | Request | Response | Errors |
+|---|---|---|---|
+| GET /api/watch/monitors | None | Saved `{status,monitors:[{url,rule_ids,monitor_id,created,webhook_url?}],...}` plus `rule_urls:string[]`; absent file gives `status:"none",monitors:[]` | No route-specific error |
+| POST /api/watch/sync | No body | `{status:"ok"\|"partial"\|"no_key"\|"api_error"\|"unreachable",monitors:[],error?,http_status?}`; idempotently creates/reuses monitors and saves results | Provider/key failures above are reported in a **200** body |
+| POST /api/watch/webhook | JSON `change.detected` event plus signature/shared secret, below | `{status:"ok",change_id,findings_rerun_docs}`; duplicate `{status:"duplicate"}`; unrecognized event `{status:"ignored"}` | 400 `invalid JSON`; 401 `invalid webhook signature`; 503 `no webhook secret configured`; DB |
+
+Webhook body: `{id,event:"change.detected",created_at?,data:{change:{monitor_id,url,title?,summary?,importance?,detected_at?}}}`. `X-Context-Id` overrides the event ID for deduplication. A valid event inserts a rule-change row and reruns findings for documents; failed individual reruns are skipped. Feed summary carries `kind:"rule_change",source:"context.dev",event_id,monitor_id,url,rule_ids,title,summary,importance,detected_at,headline`.
+
+Authenticate with `X-Context-Signature: t=<unix>,v1=<hex HMAC-SHA256(secret, "t.body")>` with five-minute tolerance and a saved per-monitor secret, or `WATCH_WEBHOOK_SECRET`. Without a signature header, the shared secret can be supplied as `X-Watch-Secret` or query `secret`. The endpoint never accepts unsigned events when no secret is configured. Monitor IDs/results live under `results/watch/monitors.json`; signing secrets under git-ignored `artifacts/watch/secrets.json`.
+
+## WS /ws
+
+Connect `ws://localhost:8000/ws` (WSS in production). Optional query `chat_id=<UUID>&doc_id=<doc ID>` sends current scene states first; later send `{type:"scene.join",chat_id,doc_id?}` to request them. This does not filter the broadcast subscription: all sockets receive live events. Bad JSON, nonobject messages and unknown types are ignored. Invalid joins yield no state rather than an HTTP error. Database absence permits process-local broadcasts; persistence and initial state require a database.
+
+Client requests and responses:
+
+| Client message | Server behavior |
+|---|---|
+| `{type:"ping"}` | Replies `{type:"pong"}` to sender. After 20 seconds without an incoming message the server sends `{type:"ping"}`; reply is optional. |
+| `{type:"scene.highlight",doc_id,item_ids,labels?}` | Relays to all sockets, including sender; first 500 IDs converted to strings; valid labels retained. Does not persist state. |
+| `{type:"scene.edit",doc_id,chat_id?,op,item_ids?,labels?,edit_id?}` | Validates, optionally persists and broadcasts `{type:"scene.edit",doc_id,chat_id?,op,item_ids,labels?,edit_id,ts}`. Invalid edit: sender-only `{type:"scene.error",detail:"invalid scene.edit"}`. Duplicate stored edit ID is silently ignored. |
+| `{type:"scene.join",chat_id,doc_id?}` | Sends `{type:"scene.state",chat_id,doc_id,hidden,highlighted,labels,isolated}` per doc with edits; supplied doc gets an empty state if none. |
+
+Scene edit operations: `highlight|hide|restore|reset|isolate`. Safe edit `doc_id` here means a nonempty string ≤200 chars (not the artifact route's character regex). The server considers the first 500 supplied item IDs, drops duplicates/invalid strings, and retains nonempty strings ≤120 chars. `highlight`, `hide`, `isolate` require at least one surviving ID. `restore` with no IDs restores all hidden items. `reset` clears the whole layer. Labels apply only to highlight/isolate: item-ID keys must be in the selected IDs; values may be strings or integers (not booleans), converted to stripped nonblank strings ≤8 chars. `edit_id` is a nonempty string ≤64 chars or a generated UUID hex. With a valid chat UUID and database, edits persist per chat; without it they can be relayed only. A missing referenced chat is silently rejected. This operation set is separate from advisor what-if operations.
+
+State folding: highlight replaces highlighted/labels; hide adds hidden IDs and removes them from highlighted/labels/isolated; restore clears specified hidden IDs (or all), without resetting isolation; isolate sets isolated/highlighted/labels and unhides the selected IDs; reset clears hidden/highlighted/labels and sets isolated to null. Source files never change.
+
+Other server events:
+
+```text
+{type:"chat.message",chat_id,message_id,role,text?}   // refetch GET chat; user text may be truncated
+{type:"chat.status",chat_id,text}
+{type:"chat.trace",chat_id,step}                    // scalar trace fields, strings trimmed to 600 chars
+{type:"chat.done",chat_id}                          // failed/abandoned active request: resync
+{type:"doc.new",doc_id}                             // refetch docs/ingestion state
+{type:"changes.new",id}                             // refetch changes
+{type:"advisor.cards",doc_id,chat_id,cards}
+{type:"findings.updated",doc_id,count}
+{type:"automation.report",automation_id,report_id}
 ```
-`bbox_px` of v1 is in the v1 page-image frame, of v2 in the v2 frame (frames differ when the sheets were re-plotted at another size; shifts under 3% are corrected). If the diff cache is absent: `{"status": "not_built", "changes": []}`. 404 for unknown ids. Rule-change ids (uuid) return the stored row.
 
+Successful assistant persistence publishes `chat.message`; late readers can fetch `active` from GET chat while this process is running an answer. Live traces keep at most 60 steps and statuses at most 20 entries. PostgreSQL LISTEN/NOTIFY fans out across processes; a dropped listener reconnects. Clients applying both answer commands and socket edits must deduplicate by `edit_id`.
 
-### GET /api/bench/latest
--> `{"file": "fake200.json", "tag": "fake200", "data": {set, tag, fake, totals, cells}}`: the newest summary `results/bench/<tag>.json`. The `<tag>.rows.jsonl` row dumps are ignored. `?tag=<tag>` picks one (matches the file name or the `tag` field). 404 `{"status": "no_bench"}` if none or the tag is unknown.
+## Framework documentation routes
 
-### GET /api/bench
--> `{"benches": [{"tag", "set", "fake", "file", "mtime"}]}`, newest first (summaries only, ISO-8601 UTC `mtime`).
-
-### GET /api/costs
--> `{"total_usd": 0.035, "calls": 3, "by_provider": {"gemini": {"calls": 2, "usd": 0.03}}, "by_task": {"read_drawing": {"calls": 2, "usd": 0.015}}}` from `results/costs.jsonl` (fields `provider`, `task`, `cost_usd`).
-
-### POST /api/tts (S-08)
-Body `{"text": "...", "voice": "<elevenlabs voice id, optional>"}` (text 1-1500 chars; 400 empty or bad voice, 413 too long).
--> `200 audio/mpeg` bytes (headers `X-TTS-Provider`, `X-TTS-Cache: hit|miss`, `Cache-Control: public, max-age=86400`). Play with `new Audio(URL.createObjectURL(await r.blob()))`.
--> `200 {"fallback": "device", "reason": "..."}` (JSON) when no TTS key is set, the budget cap is hit or the provider fails: the client must use the browser's `speechSynthesis`. Check `content-type` to tell the two apart.
-Backend: ElevenLabs `eleven_flash_v2_5` (about 0.00017 USD per character, logged in `results/costs.jsonl`), fallback Runware fishaudio. Identical text is served from the disk cache and costs nothing.
-
-### POST /api/speech-intent (S-08)
-Multipart upload, field `file`, audio/wav, mpeg, mp4, ogg, webm, flac, aac or aiff, max 5 MB.
--> `{"text": "how many windows are there", "intent": "ask", "provider": "gemini"}`; `intent` is one of `ask`, `visualise`, `show_on_table`, `changes`, `other`.
--> `200 {"fallback": "device", "reason": "..."}` when no provider can take audio. Only Gemini accepts audio (the NVIDIA and Runware adapters reject it), so without `GEMINI_API_KEY` this always returns the fallback: the client should use the browser's `SpeechRecognition` and send the text to `/api/chats/{id}/messages`.
-
-### Not yet
-Findings/advise (tier 3).
-
-### WS /ws (live sync, S-06)
-`ws://localhost:8000/ws` (use `wss://` when deployed). Server-to-client events are small JSON objects; refetch the thing they name.
-```
-{"type": "chat.message", "chat_id": "<uuid>", "message_id": "<uuid>", "role": "user|assistant"}   // refetch GET /api/chats/{id}
-{"type": "chat.status",  "chat_id": "<uuid>", "text": "Thinking…"}                                // same lines as the SSE status events
-{"type": "scene.highlight", "doc_id": "...", "item_ids": ["window-001", "window-002"], "labels": {"window-001": "1", "window-002": "2"}}
-{"type": "doc.new", "doc_id": "uploads__plan-3fa2b1"}                                              // refetch GET /api/docs
-{"type": "changes.new", "id": "<uuid>"}                                                           // refetch GET /api/changes
-{"type": "ping"}                                                                                    // every 20 s; any reply is optional
-```
-Client-to-server: `{"type": "scene.highlight", "doc_id": "...", "item_ids": [...], "labels": {...}}` is re-broadcast to every client, including the sender. `labels` is optional (the 2D citation numbers): item_id -> string of 1-8 characters, only for ids in `item_ids`; invalid entries are dropped and the key is omitted when none remain
-(web 3D viewer and iOS AR follow it). `{"type": "ping"}` gets `{"type": "pong"}`. Other types are ignored.
-Mechanism: writers call `pg_notify('hologram_events', ...)`; each server process holds one LISTEN connection and fans out to its sockets
-(works across several server instances; reconnects after a drop). `changes.new` comes from a DB trigger, so any writer of `changes` fires it.
-Without a database the server broadcasts to its own sockets directly. Delivery is well under 2 s.
-
-## Scene edits (S-10, CONTRACT 5.11)
-
-An edit layer per chat: "show all windows tagged W1..Wn", "remove window W7". Edits never change source data.
-
-Client-to-server over `/ws`:
-`{"type":"scene.edit","doc_id":"...","chat_id":"<uuid, optional>","op":"highlight|hide|restore|reset|isolate","item_ids":[...],"labels":{"id":"W7"},"edit_id":"<optional, up to 64 chars>"}`.
-- `item_ids`: strings, at most 500, duplicates dropped. Required (non-empty) for `highlight`, `hide`, `isolate`; `restore` with none restores everything hidden; `reset` takes none.
-- `labels` (only for `highlight` and `isolate`): same rules as `scene.highlight` labels.
-- With `chat_id` the edit is stored (table `scene_edits`) and a repeated `edit_id` is applied once. Without it the edit is only relayed.
-- An invalid edit gets `{"type":"scene.error","detail":"invalid scene.edit"}` back to the sender only.
-
-Server-to-client (to every socket, including the sender): `{"type":"scene.edit","doc_id","chat_id"?,"op","item_ids","labels"?,"edit_id","ts"}`. Clients apply edits in arrival order.
-
-State (what the layer looks like after folding all edits of a chat, per doc):
-`{"type":"scene.state","chat_id","doc_id","hidden":[...],"highlighted":[...],"labels":{...},"isolated":[...]|null}`.
-`highlight` replaces highlighted and labels; `hide` adds to hidden and removes from highlighted, labels and isolated; `restore` removes from hidden; `isolate` sets isolated and highlighted to the ids (only these should stay visible) and unhides them; `reset` clears everything. `isolated` is an addition to the contract text: null unless `isolate` was used.
-Late joiners get it by connecting to `/ws?chat_id=<uuid>[&doc_id=...]` (sent first, one message per doc with edits; with `doc_id` always one message), or by sending `{"type":"scene.join","chat_id":"...","doc_id":"..."?}` later.
-
-`GET /api/chats/{id}/scene-state[?doc_id=]` -> `{"chat_id","states":[{doc_id,hidden,highlighted,labels,isolated}]}` (no `type` key; `states` is empty when the chat has no edits and no `doc_id` is given; 404 for an unknown chat).
-
-Answers: `evidence.scene.commands` (`[{op,item_ids,labels?}]`) is stored and relayed by the server when the answer is saved, as `scene.edit` events with `edit_id` `<answer_id>-<n>`, so clients that already apply the answer's commands should ignore a `scene.edit` whose `edit_id` they have seen.
-
-## Advisor cards (CONTRACT 5.12)
-
-`POST /api/advise` `{"doc_id", "chat_id"?, "edit"?: {"op", "item_ids"}}` -> `{"cards": [Card]}`, at most 3. 404 for an unknown document or chat, 422 for an invalid edit. The same cards are pushed over `/ws` as `{"type":"advisor.cards","doc_id","chat_id"|null,"cards":[...]}` after every call (also when empty, so clients can clear).
-Card: `{card_id, kind: warning|option|info, title (<=60), body (<=200), item_ids, source: {type: rule|material_table|document, ref, title, quote (<=200, verbatim)}}`.
-The cards come from `engine.advisor.advise(doc_id, edit, chat_id) -> list[dict]` (E-16); until it exists the answer is `{"cards": []}`. The server enforces the hard rule on what the engine returns: a card without type, ref, title and quote in its source is dropped; a `rule` card must name an id from `engine/rules/*.yaml` and quote text found in that rule (`quote`, `quote_en` or `finnish_quote`); a card with a quote over 200 characters is dropped; title and body are cut to their limits. An engine error gives no cards.
-
-## Findings, skills and automations (S-09)
-
-Findings (rule checks, engine hook `engine.findings.run(doc_id)`; until E-15 lands the run answers `{"status":"no_checks","findings":[]}`):
-- `POST /api/findings/run {doc_id}` runs the checks, replaces that document's findings, publishes `findings.updated`. Findings that cite no rule from `engine/rules/*.yaml` or name no item are dropped. Returns `{status, findings}`.
-- `GET /api/findings[?doc_id=&rule_id=&severity=]` returns `{findings:[{id, doc_id, rule_id, item_ids, severity, message, detail, rule:{id,text,source_title,section,url,quote,translation}, created_at}]}`. Severity is `info`, `suggestion` or `violation`.
-
-Skills (saved prompts; four builtin starters from the start screen cannot be deleted):
-- `GET /api/skills`, `POST /api/skills {name, prompt, description?}` (201), `DELETE /api/skills/{id}` (204, 403 for builtin).
-- `POST /api/skills/{id}/run {doc_ids}` runs the prompt through the chat engine, returns `{skill_id, prompt, answer}` (a full answer object).
-
-Automations (a prompt on a schedule; the latest run is kept as a report):
-- `GET/POST /api/automations`, `GET/PATCH/DELETE /api/automations/{id}`. Body: `{name, prompt, doc_ids, interval_minutes (default 1440), enabled}`.
-- `POST /api/automations/{id}/run` runs now. `GET /api/automations/{id}/report.md` returns the report as Markdown (404 before the first run).
-- `GET /api/automations/{id}/report.pdf` returns the same report as a PDF (`application/pdf`, built without extra dependencies; 404 before the first run).
-- A background loop checks every 30 s and runs due automations (`AUTOMATIONS=0` turns it off). A failed run is stored as a report with `ok: false`. Each run publishes `automation.report`.
-
-## Watch loop (E-17)
-
-Context.dev monitors (docs.context.dev, `POST /v1/monitors`, Bearer `CONTEXT_DEV_API_KEY`) watch every rule `url` in `engine/rules/*.yaml` (exact page change, every 6 h). `python -m engine.watch` (or `POST /api/watch/sync`) creates them idempotently (reuses by name/target URL) and writes ids to `results/watch/monitors.json`; signing secrets go to `artifacts/watch/secrets.json` (git-ignored). Set `WATCH_WEBHOOK_URL` to the public `https://<api>/api/watch/webhook` before syncing to attach the webhook (Context.dev refuses non-public URLs).
-- `POST /api/watch/webhook` receives `change.detected`. Verified with `X-Context-Signature: t=<unix>,v1=hex(HMAC-SHA256(secret, "t.body"))` (5 min tolerance). Fallback: env `WATCH_WEBHOOK_SECRET` as `?secret=` or `X-Watch-Secret`. No secret known: 503; bad signature: 401. A valid event inserts a `changes` row (fires `changes.new`), dedupes on the event id, and reruns findings for all documents. Returns `{status: ok|duplicate|ignored, change_id, findings_rerun_docs}`.
-- Feed entries appear in `GET /api/changes` with `type: "rule_change"` and `summary: {kind: "rule_change", source: "context.dev", url, rule_ids, title, summary, importance, headline, monitor_id, event_id}`; `doc_a`/`doc_b` are null.
-- `GET /api/watch/monitors` returns the monitor list and rule URLs.
+FastAPI also exposes GET `/openapi.json` (JSON schema), GET `/docs` (Swagger UI), GET `/docs/oauth2-redirect` (Swagger OAuth redirect HTML) and GET `/redoc` (ReDoc HTML). No request body or route-specific errors; the HTTP rate limiter applies when enabled.

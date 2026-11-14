@@ -1,0 +1,532 @@
+{
+  "base_url": "http://localhost:8000",
+  "finished_at": "2026-11-14T12:21:27.663494+00:00",
+  "passed": true,
+  "failures": 0,
+  "interrupted": false,
+  "created": [
+    {
+      "kind": "upload",
+      "id": "uploads__smoke-121944-49d1d8-generated-for-demo-f30fd7",
+      "deleted": false,
+      "reason": "no delete API"
+    },
+    {
+      "kind": "chat",
+      "id": "ede48c7a-6edb-43b8-9206-29f7d57160c6",
+      "deleted": false,
+      "reason": "no delete API"
+    },
+    {
+      "kind": "skill",
+      "id": "6168aa9a-482e-4a3a-98c3-1e5aaf9065dd",
+      "deleted": true
+    },
+    {
+      "kind": "automation",
+      "id": "abb0d41c-897e-4ca0-a0a4-cfcbc50caf61",
+      "deleted": true
+    }
+  ],
+  "notes": [
+    "Comparison is GET /api/changes/{change_id}; server has no separate /api/compare route.",
+    "Documented not_built/no_bench/device/no_key fallbacks are shape-checked and noted, not full feature coverage.",
+    "No chat or uploaded-document delete API exists; created IDs are recorded for the lead."
+  ],
+  "checks": [
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200,
+      "latency_ms": 25.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs",
+      "status": 200,
+      "latency_ms": 107.2,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/folders",
+      "status": 200,
+      "latency_ms": 24.2,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc",
+      "status": 200,
+      "latency_ms": 3.1,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/source",
+      "status": 200,
+      "latency_ms": 16.6,
+      "ok": true,
+      "content_type": "application/octet-stream",
+      "check": "shape/signature OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/pages/1/image",
+      "status": 200,
+      "latency_ms": 2.2,
+      "ok": true,
+      "content_type": "image/png",
+      "check": "shape/signature OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/planmap/1",
+      "status": 200,
+      "latency_ms": 2.9,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape/signature OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/scene",
+      "status": 200,
+      "latency_ms": 137.0,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape/signature OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/files/scene.glb",
+      "status": 200,
+      "latency_ms": 8.9,
+      "ok": true,
+      "content_type": "application/octet-stream",
+      "check": "shape/signature OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/files/scene.usdz",
+      "status": 200,
+      "latency_ms": 5.9,
+      "ok": true,
+      "content_type": "application/octet-stream",
+      "check": "shape/signature OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/files/scene.json",
+      "status": 200,
+      "latency_ms": 205.9,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape/signature OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/files/elements.json",
+      "status": 200,
+      "latency_ms": 6.3,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape/signature OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/files/page-1.thumb.png",
+      "status": 200,
+      "latency_ms": 5.2,
+      "ok": true,
+      "content_type": "image/png",
+      "check": "shape/signature OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/ingest",
+      "status": 200,
+      "latency_ms": 1.4,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "POST",
+      "path": "/api/upload",
+      "status": 200,
+      "latency_ms": 6.7,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/uploads__smoke-121944-49d1d8-generated-for-demo-f30fd7",
+      "status": 200,
+      "latency_ms": 3.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/uploads__smoke-121944-49d1d8-generated-for-demo-f30fd7/ingest",
+      "status": 200,
+      "latency_ms": 2.3,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chats",
+      "status": 200,
+      "latency_ms": 4.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats",
+      "status": 200,
+      "latency_ms": 3.6,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chats/ede48c7a-6edb-43b8-9206-29f7d57160c6",
+      "status": 200,
+      "latency_ms": 4.2,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chats/ede48c7a-6edb-43b8-9206-29f7d57160c6/scene-state",
+      "status": 200,
+      "latency_ms": 3.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/ede48c7a-6edb-43b8-9206-29f7d57160c6/messages",
+      "status": 200,
+      "latency_ms": 42.1,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chats/ede48c7a-6edb-43b8-9206-29f7d57160c6",
+      "status": 200,
+      "latency_ms": 11.7,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/changes",
+      "status": 200,
+      "latency_ms": 30.4,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "POST",
+      "path": "/api/changes/refresh",
+      "status": 200,
+      "latency_ms": 63.1,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/changes/ser%3Actr--t-binder-29602f%3A1",
+      "status": 200,
+      "latency_ms": 11.2,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/changes/ser%3Actr--t-binder-29602f%3A1?page=3",
+      "status": 200,
+      "latency_ms": 13.6,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/skills",
+      "status": 200,
+      "latency_ms": 9.3,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "POST",
+      "path": "/api/skills",
+      "status": 201,
+      "latency_ms": 5.4,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "POST",
+      "path": "/api/skills/6168aa9a-482e-4a3a-98c3-1e5aaf9065dd/run",
+      "status": 200,
+      "latency_ms": 77.0,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations",
+      "status": 200,
+      "latency_ms": 4.1,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "POST",
+      "path": "/api/automations",
+      "status": 201,
+      "latency_ms": 7.0,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations/abb0d41c-897e-4ca0-a0a4-cfcbc50caf61",
+      "status": 200,
+      "latency_ms": 3.3,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/automations/abb0d41c-897e-4ca0-a0a4-cfcbc50caf61",
+      "status": 200,
+      "latency_ms": 23.1,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "POST",
+      "path": "/api/automations/abb0d41c-897e-4ca0-a0a4-cfcbc50caf61/run",
+      "status": 200,
+      "latency_ms": 15.3,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations/abb0d41c-897e-4ca0-a0a4-cfcbc50caf61/report.md",
+      "status": 200,
+      "latency_ms": 4.4,
+      "ok": true,
+      "content_type": "text/markdown; charset=utf-8",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations/abb0d41c-897e-4ca0-a0a4-cfcbc50caf61/report.pdf",
+      "status": 200,
+      "latency_ms": 5.9,
+      "ok": true,
+      "content_type": "application/pdf",
+      "check": "shape OK"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/automations/abb0d41c-897e-4ca0-a0a4-cfcbc50caf61",
+      "status": 204,
+      "latency_ms": 12.3,
+      "ok": true,
+      "content_type": "",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations/abb0d41c-897e-4ca0-a0a4-cfcbc50caf61",
+      "status": 404,
+      "latency_ms": 4.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/skills/6168aa9a-482e-4a3a-98c3-1e5aaf9065dd",
+      "status": 204,
+      "latency_ms": 6.7,
+      "ok": true,
+      "content_type": "",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/skills",
+      "status": 200,
+      "latency_ms": 3.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "POST",
+      "path": "/api/findings/run",
+      "status": 200,
+      "latency_ms": 59.3,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/findings?doc_id=ifc_bench__ac20-arc",
+      "status": 200,
+      "latency_ms": 4.2,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "POST",
+      "path": "/api/advise",
+      "status": 200,
+      "latency_ms": 55.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/items/3qloCPnZDEQBom1ZjBlwJP",
+      "status": 200,
+      "latency_ms": 12.4,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/tags/D8",
+      "status": 200,
+      "latency_ms": 9.7,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/bench",
+      "status": 200,
+      "latency_ms": 4.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/bench/latest",
+      "status": 200,
+      "latency_ms": 2.7,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "GET",
+      "path": "/api/costs",
+      "status": 200,
+      "latency_ms": 28.1,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "POST",
+      "path": "/api/tts",
+      "status": 200,
+      "latency_ms": 225.4,
+      "ok": true,
+      "content_type": "audio/mpeg",
+      "check": "shape OK"
+    },
+    {
+      "method": "POST",
+      "path": "/api/speech-intent",
+      "status": 200,
+      "latency_ms": 3.6,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "documented fallback: device"
+    },
+    {
+      "method": "GET",
+      "path": "/api/watch/monitors",
+      "status": 200,
+      "latency_ms": 11.4,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "POST",
+      "path": "/api/watch/sync",
+      "status": 200,
+      "latency_ms": 1350.9,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "POST",
+      "path": "/api/watch/webhook",
+      "status": 503,
+      "latency_ms": 1.6,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK"
+    },
+    {
+      "method": "WS",
+      "path": "/ws",
+      "status": 101,
+      "latency_ms": 1.8,
+      "ok": true,
+      "check": "WebSocket upgrade and JSON pong"
+    }
+  ]
+}

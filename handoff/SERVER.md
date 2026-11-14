@@ -8,3 +8,4 @@ For each endpoint: status, latency, and a basic shape check against docs/API.md.
 - Never print keys; it needs none.
 Done test: `python3 scripts/smoke_live.py --dry-run` lists every endpoint it will call. A real run against http://localhost:8000 passes if a local server is up; otherwise say so.
 Do not commit. Append a RESULT: line.
+RESULT: S-14 passed: python3 scripts/smoke_live.py --dry-run covers all 45 router operations; http://localhost:8000 passed 55 checks, 0 failures (results/qa/smoke-1421.json and .md). Pacing <=24 requests/min; SSE persistence, WebSocket ping/pong and cleanup verified; speech used documented device fallback. Created skill/automation deleted; chat/upload IDs retained in report (no delete APIs). No commit.

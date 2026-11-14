@@ -7,3 +7,5 @@ Scope: docs/API.md and docs/MODELS.md only.
    - the licence consequences for the fine-tuned weights
    - the ifcopenshell (LGPL) and usd-core licences used in the deploy image
 Do not commit. Append a RESULT: line.
+NEEDS: VISION/LEAD: train/manifest.json lists FloorPlanCAD only as CC BY-SA 4.0; record the Voxel51 card's conflicting CC BY-NC 4.0 narrative and conservative noncommercial treatment (documented in docs/MODELS.md).
+RESULT: X-11 PASS — docs/API.md covers all 45 declared HTTP/WS routes with requests, responses and errors; docs/MODELS.md covers 9 providers, 21 configured prices, 13 exact task chains, training/dataset terms and deploy-library licences. Local done check `.venv/bin/python /tmp/junction_docs_done.py` and `git diff --check -- docs/API.md docs/MODELS.md handoff/DOCS.md` passed; no commit.
