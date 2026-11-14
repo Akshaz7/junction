@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Answer object (CONTRACT 5.7)",
+  "type": "object",
+  "required": ["answer_id", "question", "doc_ids", "answer", "citations", "evidence", "trace", "route", "cost", "latency_ms"],
+  "properties": {
+    "answer_id": {"type": "string", "minLength": 1},
+    "question": {"type": "string"},
+    "doc_ids": {"type": "array", "items": {"type": "string"}},
+    "answer": {
+      "type": "object",
+      "required": ["text_md", "value", "unit", "confidence", "abstained"],
+      "properties": {
+        "text_md": {"type": "string"},
+        "value": {},
+        "unit": {"type": ["string", "null"]},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "abstained": {"type": "boolean"}
+      }
+    },
+    "citations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["n", "doc_id", "page", "kind", "bbox_px", "item_ids", "quote"],
+        "properties": {
+          "n": {"type": "integer", "minimum": 1},
+          "doc_id": {"type": "string"},
+          "page": {"type": "integer", "minimum": 1},
+          "kind": {"enum": ["region", "text", "element"]},
+          "bbox_px": {"type": ["array", "null"], "items": {"type": "number"}, "minItems": 4, "maxItems": 4},
+          "item_ids": {"type": "array", "items": {"type": "string"}},
+          "quote": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["boxes", "scene"],
+      "properties": {
+        "boxes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["item_id", "page", "bbox_px", "label"],
+            "properties": {
+              "item_id": {"type": "string"},
+              "page": {"type": "integer", "minimum": 1},
+              "bbox_px": {"type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4},
+              "label": {"type": "string"}
+            }
+          }
+        },
+        "scene": {
+          "type": "object",
+          "required": ["doc_id", "highlight_item_ids", "camera_target_item_id"],
+          "properties": {
+            "doc_id": {"type": "string"},
+            "highlight_item_ids": {"type": "array", "items": {"type": "string"}},
+            "camera_target_item_id": {"type": ["string", "null"]}
+          }
+        }
+      }
+    },
+    "trace": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["step", "detail", "ms", "model", "cost_usd"],
+        "properties": {
+          "step": {"type": "string"},
+          "detail": {"type": "string"},
+          "ms": {"type": "number"},
+          "model": {"type": ["string", "null"]},
+          "cost_usd": {"type": "number"}
+        }
+      }
+    },
+    "route": {"enum": ["index", "planmap", "vlm", "hybrid"]},
+    "cost": {
+      "type": "object",
+      "required": ["usd_total", "calls"],
+      "properties": {"usd_total": {"type": "number"}, "calls": {"type": "array"}}
+    },
+    "latency_ms": {"type": "number"}
+  }
+}

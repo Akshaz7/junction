@@ -15,3 +15,16 @@ def database_url() -> str:
 
 def rate_limit_enabled() -> bool:
     return os.environ.get("RATE_LIMIT", "0") == "1"
+
+
+REPO = __import__("pathlib").Path(__file__).resolve().parent.parent
+
+
+def artifacts_dir():
+    from pathlib import Path
+    return Path(os.environ.get("ARTIFACTS_DIR") or REPO / "artifacts")
+
+
+def results_dir():
+    from pathlib import Path
+    return Path(os.environ.get("RESULTS_DIR") or REPO / "results")

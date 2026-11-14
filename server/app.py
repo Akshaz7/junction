@@ -6,6 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from . import config, db
 from .migrate import apply_migrations
 from .docs_routes import router as docs_router
+from .chats_routes import router as chats_router
+from .files_routes import router as files_router
 from .ratelimit import RateLimitMiddleware
 
 
@@ -29,6 +31,8 @@ if config.rate_limit_enabled():
 
 
 app.include_router(docs_router)
+app.include_router(files_router)
+app.include_router(chats_router)
 
 
 @app.get("/api/health")

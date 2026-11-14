@@ -1,0 +1,118 @@
+"""Chats and streamed questions (CONTRACT 5.9)."""
+import asyncio
+import json
+import uuid
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from sse_starlette.sse import EventSourceResponse
+
+from . import db, stub_engine
+from .schema import validate_answer
+
+router = APIRouter(prefix="/api")
+
+# S-04 swaps this for engine.answer.
+ENGINE = stub_engine.answer
+
+
+class NewChat(BaseModel):
+    doc_ids: list[str] = []
+    title: str | None = None
+
+
+class NewMessage(BaseModel):
+    content: str
+    doc_ids: list[str] | None = None
+
+
+async def _pool():
+    pool = await db.get_pool()
+    if pool is None:
+        raise HTTPException(503, "database unavailable")
+    return pool
+
+
+def _uuid(s: str) -> uuid.UUID:
+    try:
+        return uuid.UUID(s)
+    except ValueError:
+        raise HTTPException(404, "chat not found")
+
+
+def _chat(r) -> dict:
+    return {"id": str(r["id"]), "doc_id": r["doc_id"], "title": r["title"], "created_at": r["created_at"].isoformat()}
+
+
+@router.get("/chats")
+async def list_chats():
+    pool = await _pool()
+    rows = await pool.fetch("select id, doc_id, title, created_at from chats order by created_at desc")
+    return {"chats": [_chat(r) for r in rows]}
+
+
+@router.post("/chats")
+async def create_chat(body: NewChat):
+    pool = await _pool()
+    doc_id = body.doc_ids[0] if body.doc_ids else None
+    if doc_id and not await pool.fetchval("select 1 from documents where doc_id=$1", doc_id):
+        raise HTTPException(404, "document not found")
+    r = await pool.fetchrow("insert into chats (doc_id, title) values ($1,$2) returning id, doc_id, title, created_at",
+                            doc_id, body.title)
+    return _chat(r)
+
+
+@router.get("/chats/{chat_id}")
+async def get_chat(chat_id: str):
+    pool = await _pool()
+    cid = _uuid(chat_id)
+    c = await pool.fetchrow("select id, doc_id, title, created_at from chats where id=$1", cid)
+    if c is None:
+        raise HTTPException(404, "chat not found")
+    msgs = await pool.fetch(
+        "select m.id, m.role, m.content, m.created_at, a.answer from messages m "
+        "left join answers a on a.message_id = m.id where m.chat_id=$1 order by m.created_at, m.id", cid)
+    out = []
+    for m in msgs:
+        a = m["answer"]
+        out.append({"id": str(m["id"]), "role": m["role"], "content": m["content"],
+                    "created_at": m["created_at"].isoformat(),
+                    "answer": json.loads(a) if isinstance(a, str) else a})
+    return {**_chat(c), "messages": out}
+
+
+@router.post("/chats/{chat_id}/messages")
+async def ask(chat_id: str, body: NewMessage):
+    pool = await _pool()
+    cid = _uuid(chat_id)
+    c = await pool.fetchrow("select id, doc_id from chats where id=$1", cid)
+    if c is None:
+        raise HTTPException(404, "chat not found")
+    doc_ids = body.doc_ids or ([c["doc_id"]] if c["doc_id"] else [])
+    await pool.execute("insert into messages (chat_id, role, content) values ($1,'user',$2)", cid, body.content)
+
+    async def stream():
+        loop = asyncio.get_running_loop()
+        q: asyncio.Queue = asyncio.Queue()
+
+        def on_event(kind, payload):
+            loop.call_soon_threadsafe(q.put_nowait, (kind, payload))
+
+        task = asyncio.create_task(asyncio.to_thread(ENGINE, body.content, doc_ids, on_event))
+        task.add_done_callback(lambda _: loop.call_soon_threadsafe(q.put_nowait, None))
+        while (item := await q.get()) is not None:
+            yield {"event": item[0], "data": json.dumps(item[1])}
+        try:
+            ans = task.result()
+            validate_answer(ans)
+        except Exception as e:
+            yield {"event": "error", "data": json.dumps({"detail": f"engine failed: {e}"})}
+            return
+        mid = await pool.fetchval(
+            "insert into messages (chat_id, role, content) values ($1,'assistant',$2) returning id",
+            cid, ans["answer"]["text_md"])
+        await pool.execute("insert into answers (message_id, chat_id, doc_id, answer) values ($1,$2,$3,$4::jsonb)",
+                           mid, cid, doc_ids[0] if doc_ids else None, json.dumps(ans))
+        yield {"event": "answer", "data": json.dumps(ans)}
+
+    return EventSourceResponse(stream())
