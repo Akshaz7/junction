@@ -1,5 +1,5 @@
 import { test as base, expect, type Page, type APIRequestContext } from '@playwright/test'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { Answer, Document } from '../src/lib/types'
@@ -8,6 +8,22 @@ import type { LinkedViewerCanvas } from '../src/viewer3d/Viewer3D'
 export const production = !/^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(process.env.E2E_BASE ?? 'http://localhost:5173')
 export const repoRoot = fileURLToPath(new URL('../../', import.meta.url))
 export const fixtureManifest = JSON.parse(readFileSync(resolve(repoRoot, 'results/final/E2E/fixtures.json'), 'utf8')) as Record<string, [string, number]>
+const budgetPath = resolve(repoRoot, 'results/final/E2E/budget.json')
+type Budget = { scope?: string; recorded_usd: number; answers: Record<string, { usd: number }>; ingests: Record<string, { usd: number }> }
+function budget(): Budget {
+  return existsSync(budgetPath) ? JSON.parse(readFileSync(budgetPath, 'utf8')) : { recorded_usd: 0, answers: {}, ingests: {} }
+}
+export function checkBudget() {
+  // Leave room for a request already in flight; every browser/API run shares this ledger.
+  expect(budget().recorded_usd, 'F-E2E $3 cap: reserve at least $0.50 before another live operation').toBeLessThan(2.5)
+}
+export function recordSpend(kind: 'answers' | 'ingests', id: string, usd: number) {
+  const ledger = budget()
+  ledger[kind][id] = { usd }
+  ledger.recorded_usd = Number([...Object.values(ledger.answers), ...Object.values(ledger.ingests)].reduce((total, row) => total + row.usd, 0).toFixed(8))
+  writeFileSync(budgetPath, JSON.stringify(ledger, null, 2) + '\n')
+  expect(ledger.recorded_usd, 'F-E2E live spend remains below $3').toBeLessThanOrEqual(3)
+}
 export const test = base.extend<{ monitor: void }>({
   monitor: [async ({ page, context }, use, info) => {
     const errors: string[] = [], http: { method: string; path: string; status: number }[] = []
@@ -83,6 +99,7 @@ export async function observeLoading(page: Page) {
 
 export async function ask(page: Page, question: string): Promise<Answer> {
   if (production) throw new Error('Production questions disabled: reuse saved answers; zero question budget used')
+  checkBudget()
   await observeLoading(page)
   const count = await page.getByTestId('answer-card').count()
   const composer = page.getByRole('combobox', { name: 'Ask about your drawings' })
@@ -101,6 +118,7 @@ export async function ask(page: Page, question: string): Promise<Answer> {
   expect(answers, 'Exactly one completed answer in the live stream').toHaveLength(1)
   expect(stream).not.toMatch(/"stub"\s*:\s*true/)
   const answer = answers[0]
+  recordSpend('answers', answer.answer_id, answer.cost?.usd_total ?? 0)
   await test.info().attach('answer.json', { body: JSON.stringify(answer, null, 2), contentType: 'application/json' })
   await expect(page.getByTestId('answer-card')).toHaveCount(count + 1)
   await expect(page.getByTestId('answer-card').last().locator('.answer-text')).toBeVisible()

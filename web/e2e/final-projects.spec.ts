@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { basename, resolve } from 'node:path'
-import { test, expect, production, chooseDocument, ask, fixtureManifest, repoRoot } from './final-helpers'
+import { test, expect, production, chooseDocument, ask, fixtureManifest, repoRoot, checkBudget, recordSpend } from './final-helpers'
 import type { Document } from '../src/lib/types'
 
 // Contract: handoff/F-PROJECTS-CONTRACT.md v1. Enable when both feature branches have commits.
@@ -138,6 +138,7 @@ test('[PROJECTS] Create, attach, classify, edit metadata, overview, project chat
 
 test('[PROJECTS] Upload a real file directly to a project and show ingestion status', async ({ page, request }) => {
   test.skip(production, 'Production is read-only: no project uploads')
+  checkBudget()
   const create = await request.post('/api/projects', { data: { name: `E2E upload project ${Date.now()}` } })
   expect(create.ok()).toBe(true)
   const { id } = await create.json()
@@ -158,8 +159,11 @@ test('[PROJECTS] Upload a real file directly to a project and show ingestion sta
     const row = page.locator(`[data-doc-id="${receipt.doc_id}"]`)
     await expect(row).toBeVisible()
     await expect(row).toContainText(/Reading the file|Set automatically/)
-    await expect.poll(async () => (await (await request.get(`/api/docs/${receipt.doc_id}/ingest`)).json()).status,
+    let ingest: { status?: string; cost_usd?: number } = {}
+    await expect.poll(async () => { ingest = await (await request.get(`/api/docs/${receipt.doc_id}/ingest`)).json(); return ingest.status },
       { timeout: 285_000, intervals: [1000, 2000, 5000] }).toMatch(/^(ready|partial)$/)
+    recordSpend('ingests', receipt.doc_id, ingest.cost_usd ?? 0)
+    await test.info().attach('ingest.json', { body: JSON.stringify({ receipt, state: ingest }), contentType: 'application/json' })
     await expect(row).toContainText('Set automatically', { timeout: 30_000 })
     await page.screenshot({ path: test.info().outputPath('project-upload-ready.png') })
   } finally {

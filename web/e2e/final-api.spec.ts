@@ -1,7 +1,7 @@
 import { test, expect, type APIRequestContext } from '@playwright/test'
 import { readFileSync, writeFileSync } from 'node:fs'
 import { basename, resolve } from 'node:path'
-import { chooseDocument, fixtureManifest, production, repoRoot } from './final-helpers'
+import { chooseDocument, fixtureManifest, production, repoRoot, checkBudget, recordSpend } from './final-helpers'
 import type { Answer } from '../src/lib/types'
 
 // API-only fallback: this does not claim to verify browser behavior when macOS denies Chromium launch.
@@ -15,6 +15,7 @@ function record(name: string, value: unknown) {
 
 async function answer(request: APIRequestContext, docId: string, question: string) {
   expect(spent, 'F-E2E live spend remains below $3').toBeLessThan(3)
+  checkBudget()
   const created = await request.post('/api/chats', { data: { doc_ids: [docId] } })
   expect(created.ok()).toBe(true)
   const chat = await created.json()
@@ -32,6 +33,7 @@ async function answer(request: APIRequestContext, docId: string, question: strin
   expect(answers, 'The request must finish with one answer').toHaveLength(1)
   const result = answers[0].data as Answer
   spent += result.cost?.usd_total ?? 0
+  recordSpend('answers', result.answer_id, result.cost?.usd_total ?? 0)
   record('answer-and-budget.json', { doc_id: docId, chat_id: chat.id, answer: result, row_spend_usd: spent })
   expect(stream).not.toMatch(/"stub"\s*:\s*true/)
   expect(events.some((e) => e.event === 'status' || e.event === 'trace'), 'Live status/trace precedes answer').toBe(true)
@@ -79,6 +81,7 @@ for (const kind of ['dxf', 'ifc', 'raster']) {
 for (const extension of ['.png', '.jpg', '.dxf', '.ifc']) {
   test(`[SERVER] API fallback upload ${extension}: real ingestion and first question${extension === '.ifc' ? ' on reserved unseen IFC' : ''}`, async ({ request }) => {
     test.skip(production, 'Production is read-only: no uploads')
+    checkBudget()
     const [relative, bytes] = fixtureManifest[extension]
     const upload = await request.post('/api/upload', { multipart: { file: {
       name: `e2e-${Date.now()}-${basename(relative)}`, mimeType: extension === '.png' ? 'image/png' : extension === '.jpg' ? 'image/jpeg' : 'application/octet-stream',
@@ -94,6 +97,7 @@ for (const extension of ['.png', '.jpg', '.dxf', '.ifc']) {
       return state.status
     }, { timeout: 285_000, intervals: [1000, 2000, 5000] }).not.toBe('running')
     spent += Number(state.cost_usd ?? 0)
+    recordSpend('ingests', receipt.doc_id, Number(state.cost_usd ?? 0))
     record('ingest.json', { fixture: relative, fixture_bytes: bytes, receipt, state, row_spend_usd: spent })
     expect(state.status, JSON.stringify(state)).toMatch(/^(ready|partial)$/)
     const metadata = await request.get(`/api/docs/${receipt.doc_id}`)

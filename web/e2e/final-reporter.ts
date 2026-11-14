@@ -9,6 +9,15 @@ export default class FinalReporter implements Reporter {
   private run = process.env.E2E_RUN_ID ?? 'local'
   private root = resolve(fileURLToPath(new URL('../../results/final/E2E/', import.meta.url)), this.run)
   onTestEnd(test: TestCase, result: TestResult) {
+    // Playwright body attachments otherwise disappear on successful runs when traces are discarded.
+    const attachments = resolve(this.root, 'attachments', test.id.replace(/[^a-zA-Z0-9_-]/g, '-'))
+    for (const attachment of result.attachments) {
+      if (!attachment.body) continue
+      mkdirSync(attachments, { recursive: true })
+      const path = resolve(attachments, attachment.name.replace(/[^a-zA-Z0-9_.-]/g, '-'))
+      writeFileSync(path, attachment.body)
+      attachment.path = path
+    }
     const owner = test.title.match(/\[(WEB|3D|ENGINE|SERVER|PROJECTS)\]/)?.[1] ?? 'WEB'
     const row = {
       title: test.titlePath().join(' > '), owner, status: result.status, duration_ms: result.duration,

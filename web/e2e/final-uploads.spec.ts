@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { basename, resolve } from 'node:path'
-import { test, expect, production, fixtureManifest, repoRoot, ask } from './final-helpers'
+import { test, expect, production, fixtureManifest, repoRoot, ask, checkBudget, recordSpend } from './final-helpers'
 
 test.setTimeout(360_000) // LONG: real ingestion can take up to the server's five-minute deadline.
 test.use({ viewport: { width: 1440, height: 1000 } })
@@ -9,6 +9,7 @@ test.use({ viewport: { width: 1440, height: 1000 } })
 for (const extension of ['.png', '.jpg', '.dxf', '.ifc']) {
   test(`[SERVER] Upload real ${extension} file, show status, finish ingestion and answer first question${extension === '.ifc' ? ' (reserved unseen file)' : ''}`, async ({ page, request }) => {
     test.skip(production, 'Production is read-only: no uploads or new chats')
+    checkBudget()
     const [relative, bytes] = fixtureManifest[extension]
     test.info().annotations.push({ type: 'real-file', description: `${relative} (${bytes} bytes)` })
     await page.goto('/#/data')
@@ -34,6 +35,7 @@ for (const extension of ['.png', '.jpg', '.dxf', '.ifc']) {
       return state.status
     }, { timeout: 270_000, intervals: [1000, 2000, 5000], message: 'Real ingestion must terminate' }).not.toBe('running')
     await test.info().attach('ingest.json', { body: JSON.stringify({ fixture: relative, receipt, state }, null, 2), contentType: 'application/json' })
+    recordSpend('ingests', receipt.doc_id, Number(state.cost_usd ?? 0))
     expect(state.status, JSON.stringify(state)).toMatch(/^(ready|partial)$/)
     await expect(dialog.getByRole('button', { name: 'Open', exact: true })).toBeEnabled({ timeout: 20_000 })
     await page.screenshot({ path: test.info().outputPath('upload-ready.png') })
@@ -45,7 +47,8 @@ for (const extension of ['.png', '.jpg', '.dxf', '.ifc']) {
     expect(answer.doc_ids).toContain(receipt.doc_id)
     expect(answer.answer.text_md.trim().length).toBeGreaterThan(0)
     expect(answer.answer.abstained, 'Readable uploads should answer their first question').toBe(false)
-    expect(answer.reasoning?.steps?.length, 'First answer explains its evidence').toBeGreaterThan(0)
-    expect(answer.citations.length, 'First answer is cited').toBeGreaterThan(0)
+    expect.soft(answer.reasoning?.steps?.length ?? 0, 'First answer explains its evidence').toBeGreaterThan(0)
+    expect.soft(answer.reasoning?.confidence?.label, 'First answer labels confidence honestly').toMatch(/^(Verified|Cross-checked|Estimate)$/)
+    expect.soft(answer.citations.length, 'First answer is cited').toBeGreaterThan(0)
   })
 }
