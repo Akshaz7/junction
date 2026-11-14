@@ -909,3 +909,11 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 .rail .brand-mark .brand-pro { font-size: .78em; letter-spacing: .32em; margin-right: -.32em; }
 .rail nav { top: 100px; }
 .rail .brand-mark .brand-pro { translate: .62em 0; }
+/* W-71: phone: Stoa Pro mark top left; the 4 starter cards sit 2x2 and all fit on screen. */
+@media (max-width: 640px) {
+  .topbar .project-title { justify-content: flex-start; }
+  .starter-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: calc(100% - 32px); margin: 20px auto 0; overflow: visible; padding: 0; }
+  .starter-grid .starter-card { width: auto; height: 76px; padding: 12px; }
+  .starter-grid .starter-card > svg { top: 12px; left: 12px; width: 20px; height: 20px; }
+  .starter-grid .starter-card > strong { top: auto; bottom: 10px; left: 12px; right: 8px; font-size: 13px; line-height: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
