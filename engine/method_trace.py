@@ -96,14 +96,21 @@ def attach(res, question, root):
     conditions = res.get('conditions') or {}
     filters.extend({'step': 'applied condition', 'detail': c} for c in conditions.get('applied', []))
     filters.extend({'step': 'unresolved condition', 'detail': c} for c in conditions.get('left', []))
+    classified = {}
     for r in calc.get('rows', []):
         ref = r.get('source') or {}
         did, pg = ref.get('doc_id'), ref.get('page', 1)
-        if not did: continue
+        if not did:
+            matches = [(key, records) for key, (_, _, records) in cache.items() if r.get('item_id') in records]
+            if len(matches) != 1: continue
+            (did, pg), _ = matches[0]
         if (did, pg) not in cache: cache[(did, pg)] = _records(root, did, pg)
         artifact, _, items = cache[(did, pg)]
-        raw = items.get(ref.get('item_id'))
-        if raw: _quantity(r, raw, artifact)
+        raw = items.get(ref.get('item_id') or r.get('item_id'))
+        if raw:
+            _quantity(r, raw, artifact)
+            classified[(did, raw['item_id'])] = (raw.get('kind') or 'other', {'kind': 'element', 'doc_id': did, 'page': pg,
+                                                                          'item_id': raw['item_id'], 'artifact': artifact, 'field': 'indexed item present'})
     population_steps = []
     for (did, pg), (artifact, data, items) in cache.items():
         if not data: continue
@@ -156,6 +163,13 @@ def attach(res, question, root):
         from engine.method_rescale import capture as capture_rescale
         capture_rescale(calc, loaded)
     calc['scope'] = {'sources': scopes, 'filters': filters}
+    for kind in sorted({k for k, _ in classified.values()}):
+        refs = [ref for k, ref in classified.values() if k == kind]
+        sid = 'method-source-items-' + kind
+        population_steps.append(step(sid, 'Cited ' + kind + ' items', 'count distinct cited source items of this kind', len(refs), 'count',
+                                     [input_value('cited item', 1, 'count', ref) for ref in refs],
+                                     'Deduplicated by document and item ID; this source count is separate from filters, differences and material allowances.', 'sum'))
+        calc['result'].setdefault('additional', []).append({'label': 'Cited ' + kind + ' items', 'value': len(refs), 'unit': 'count', 'step_id': sid})
     calc['steps'] = population_steps + calc.get('steps', [])
     if ans.get('value') is None:
         calc['sources'] = [{k: c.get(k) for k in ('doc_id', 'page', 'item_ids', 'bbox_px', 'quote') if c.get(k) is not None}
