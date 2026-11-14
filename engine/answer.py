@@ -434,6 +434,11 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             if doc is not None:
                 emit("status", {"text": f"Exploring document: {_title(doc_ids[0], root)}"})
                 res = scene_answer(question, doc, intent, scene_state, t0)
+                if intent.op == "highlight" and res["answer"].get("abstained"):   # "show me all the WCs": toilets are rooms, not elements
+                    from engine.analytics import where_rooms
+                    alt = where_rooms(question, doc, t0)
+                    if alt is not None:
+                        res = alt
                 _hide_ids = next((c.get("item_ids") for c in (res.get("evidence", {}).get("scene", {}).get("commands") or [])
                                   if isinstance(c, dict) and c.get("op") == "hide" and c.get("item_ids")), None)
                 if _hide_ids:

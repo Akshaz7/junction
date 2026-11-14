@@ -124,3 +124,34 @@ def test_typo_how_mny_dors():
     a = answer("how mny dors", [C1])
     validate_answer(a)
     assert a["answer"]["value"] == 11
+
+
+def test_toilet_slang_and_show_all_wcs_locate_the_rooms():
+    for q in ["where's the loo", "show me all the WCs", "locate the restrooms in this building", "which rooms are toilets and where"]:
+        a = answer(q, [AC20])
+        validate_answer(a)
+        assert a["answer"]["value"] == 8 and len(a["evidence"]["boxes"]) == 8 and not a["answer"]["abstained"], q
+
+
+# ---- E-52 baseboard
+def test_baseboard_ifc_total_and_per_room_arithmetic():
+    a = answer("how many linear metres of baseboard in total", [AC20])
+    validate_answer(a)
+    assert a["answer"]["unit"] == "m" and a["answer"]["value"] > 500 and a["route"] == "index" and len(a["evidence"]["boxes"]) == 82
+    assert "minus 1 door" in a["answer"]["text_md"]
+    one = answer("how many linear metres of baseboard in the classrooms", [AC20])
+    validate_answer(one)
+    t = one["answer"]["text_md"]
+    assert "Seminarraum" in t and one["answer"]["value"] == 44.2 and "1 classroom" in t   # outline 46.0 m minus a 1.8 m door
+
+
+def test_baseboard_scaled_raster_uses_the_drawn_scale():
+    a = answer("how many linear metres of baseboard per room", ["cubicasa5k__colorful-10711"])
+    validate_answer(a)
+    assert a["route"] == "planmap" and not a["answer"]["abstained"] and a["answer"]["value"] > 20 and "dimension" in a["answer"]["text_md"] and a["evidence"]["boxes"]
+
+
+def test_baseboard_never_invents_a_scale():
+    a = answer("how many linear metres of skirting in total", ["cubicasa5k__colorful-10052"])
+    validate_answer(a)
+    assert a["answer"]["value"] is None and "invented" in a["answer"]["text_md"] and not a["evidence"]["boxes"]

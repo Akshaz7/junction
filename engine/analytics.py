@@ -343,10 +343,11 @@ def named_rooms(question: str, doc: Doc, t0) -> dict | None:
 
 
 # ------------------------------------------------------------------ "where is the kitchen" on plan maps (labels from the drawing)
-WHERE = re.compile(r"^\W*(?:please\s+)?(?:where(?:'s| is| are| can i find)?|find|locate|show(?: me)?|point (?:to|out))\b", re.I)
+WHERE = re.compile(r"^\W*(?:please\s+)?(?:where(?:'s| is| are| can i find)?|find|locate|show(?: me)?|point (?:to|out)|which rooms? (?:are|is))\b", re.I)
 WSYN = {**SYN, "bedroom": r"zimmer|schlaf|bedroom|makuu|\bmh\b|\bsh\b|\bk\d?\b", "living room": r"wohn|living|oleskelu|\bol\b|stube",
         "balcony": r"balkon|balcon|parveke|loggia", "terrace": r"terrass|terassi|terrace", "meeting room": r"besprechung|meeting|conference|sitzung|kokous", "hall": r"entr[eé]e|\bhall\b|eteinen|\bet\b|diele"}
-WALIAS = {"bathrooms": "bathroom", "toilets": "bathroom", "toilet": "bathroom", "wcs": "bathroom", "wc": "bathroom", "bedrooms": "bedroom",
+WALIAS = {"bathrooms": "bathroom", "toilets": "bathroom", "toilet": "bathroom", "loo": "bathroom", "loos": "bathroom", "lavatory": "bathroom", "lavatories": "bathroom",
+          "restroom": "bathroom", "restrooms": "bathroom", "washroom": "bathroom", "washrooms": "bathroom", "powder room": "bathroom", "wcs": "bathroom", "wc": "bathroom", "bedrooms": "bedroom",
           "kitchens": "kitchen", "offices": "office", "balconies": "balcony", "terraces": "terrace", "corridors": "corridor",
           "hallway": "corridor", "hallways": "corridor", "meeting": "meeting room", "meetings": "meeting room", "living": "living room"}
 
@@ -491,6 +492,103 @@ def room_list(question: str, doc: Doc, t0) -> dict | None:
     head = f"**{len(rows)} rooms**{f' on **{st}**' if st else ''}, total **{_fmt(tot)} m²**, largest first:"
     trace = [_step("route", "list rooms with areas -> room items sorted by area, no model"), _step("filter", f"{len(rows)} rooms")]
     return _done(question, doc, head + "\n" + "\n".join(lines) + more, tot, "m2", [r for _l, _a, r in rows], trace, t0=t0)
+
+
+# ------------------------------------------------------------------ E-52: baseboard / skirting in linear metres
+BASEQ = re.compile(r"\b(?:base ?boards?|skirting(?: boards?)?|wall bases?|floor mouldings?|floor moldings?)\b", re.I)
+SYN_CLASS = {"classroom": r"classroom|klassen|luokka|schulzimmer|unterricht|lehr|seminar|school"}
+DOOR_BAND = 0.4     # m: a door belongs to a room when its centre is within the wall thickness of the room outline
+
+
+def _foot(it: Item, ifc: bool):
+    """(x0, y0, x1, y1) footprint of an item: IFC bbox is y-up so the plan plane is x/z; plan maps use pixels."""
+    if ifc:
+        b = it.bbox_m
+        return (b[0][0], b[0][2], b[1][0], b[1][2]) if b else None
+    b = it.bbox_px
+    return tuple(b) if b else None
+
+
+def baseboard(question: str, doc: Doc, t0) -> dict | None:
+    """"how many linear metres of baseboard per room / in the classrooms / in total": room outline minus door openings, code only.
+    IFC: room footprint rectangle (bbox) and IfcDoor widths on its walls. Plan map: room box x scale, only when the drawing has a real scale."""
+    if not BASEQ.search(question):
+        return None
+    ifc = doc.mode == "ifc"
+    ql = question.lower()
+    st = resolve_storey(question, doc.storeys) if ifc else None
+    rooms = [r for r in _of_kind(doc, "room") if _foot(r, ifc) and (not st or r.storey == st)]
+    word, rx = None, None
+    for a, base in list(SYN_ALIAS.items()) + [(k, k) for k in {**SYN, **SYN_CLASS}] + [("classrooms", "classroom")]:
+        if re.search(rf"\b{a}\b", ql):
+            word, rx = base, re.compile({**SYN, **SYN_CLASS}[base], re.I)
+            break
+    if word is None:
+        m = re.search(r"\b(?:in|for|of)\s+(?:all\s+)?(?:the\s+|our\s+)?([a-zäöüß][\wäöüß\-]{2,}?)s?(?:\s+rooms?)?\s*(?:\?|$|,|\.|\bper\b|\band\b|\bin total\b)", ql)
+        w = m.group(1) if m else ""
+        if w and not BASEQ.search(w) and not re.fullmatch(r"base|skirting|linear|running|baseboard", w) and w not in ("total", "all", "each", "every", "this", "the", "building", "model", "plan", "drawing", "floor", "ground", "first", "second", "room", "metre", "meter", "linear") and not re.search(r"floor|storey|level", w) and _kind(w) != "room":
+            word, rx = w, re.compile(re.escape(w), re.I)
+    scale = None
+    if not ifc:
+        sc = doc.scale or {}
+        mpp = sc.get("m_per_px")
+        if not mpp or sc.get("method") in (None, "none", "door-prior"):
+            why = ("this drawing has no scale" if not mpp or sc.get("method") in (None, "none") else
+                   "the only scale available is a guess from door-icon sizes (it assumes 0.9 m doors), not a drawn scale")
+            trace = [_step("route", "baseboard -> needs a real scale; none on this drawing, no model"), _step("scale", why)]
+            text = f"**I can't give baseboard lengths for this plan**: {why}, so any length in metres would be invented. Add a scale or a drawn dimension and ask again."
+            return _answer_obj(question, [doc.doc_id], text, None, "m", 0.9, False, [], [], {"doc_id": doc.doc_id, "highlight_item_ids": [], "camera_target_item_id": None},
+                               trace, "planmap", t0 or time.perf_counter())
+        scale = float(mpp)
+    if rx is not None:
+        rooms = [r for r in rooms if rx.search(_room_label(r))]
+        if not rooms:
+            trace = [_step("route", f"baseboard / {word} rooms -> none match, no model")]
+            text = f"**No {word} rooms found** among this drawing's rooms, so there is no baseboard to measure for them."
+            return _answer_obj(question, [doc.doc_id], text, 0, "m", 0.7, False, [], [], {"doc_id": doc.doc_id, "highlight_item_ids": [], "camera_target_item_id": None},
+                               trace, "index" if ifc else "planmap", t0 or time.perf_counter())
+    if not rooms:
+        return None
+    doors = [d for d in _of_kind(doc, "door") if _foot(d, ifc)]
+    band = DOOR_BAND if ifc else DOOR_BAND / scale
+    rows = []
+    for r in rooms:
+        x0, y0, x1, y1 = _foot(r, ifc)
+        k = 1.0 if ifc else scale
+        per = 2 * ((x1 - x0) + (y1 - y0)) * k
+        opening, n = 0.0, 0
+        for d in doors:
+            if ifc and d.storey != r.storey:
+                continue
+            f = _foot(d, ifc)
+            cx, cy = (f[0] + f[2]) / 2, (f[1] + f[3]) / 2
+            inside = x0 - band <= cx <= x1 + band and y0 - band <= cy <= y1 + band
+            core = x0 + band * 0.4 < cx < x1 - band * 0.4 and y0 + band * 0.4 < cy < y1 - band * 0.4
+            if inside and not core:
+                w = d.q.get("width_m") if ifc else None
+                w = float(w) if w else max(f[2] - f[0], f[3] - f[1]) * k
+                opening += min(w, 3.0)
+                n += 1
+        rows.append((r, per, opening, n, max(per - opening, 0.0)))
+    total = round(sum(x[4] for x in rows), 1)
+    boxes, cites, scene = _evidence(doc, [x[0] for x in rows])
+    num = {b["item_id"]: b["label"] for b in boxes}
+    if ifc:
+        order = {x["name"]: x.get("elevation_m", 0) for x in doc.storeys}
+        rows.sort(key=lambda x: (order.get(x[0].storey, 0), _room_label(x[0])))
+    lines = []
+    for r, per, op, n, net in rows[:25]:
+        tag = f" [{num[r.item_id]}]" if r.item_id in num else ""
+        lines.append(f"- {(_room_label(r) or 'room')[:36]}{f' ({r.storey})' if ifc and not st else ''}: {_fmt(net)} m (outline {_fmt(per)} m, minus {n} door{'s' if n != 1 else ''} {_fmt(op)} m){tag}")
+    more = f"\n- … and {len(rows) - 25} more rooms (all numbered on the drawing)" if len(rows) > 25 else ""
+    what = (f"{word} room{'s' if len(rows) != 1 else ''}" if not word.endswith("room") else f"{word}{'s' if len(rows) != 1 else ''}") if word else "rooms"
+    how = ("from each room's footprint rectangle minus the IfcDoor widths in its walls" if ifc else
+           f"from each room's drawn box at the drawing's scale ({scale:.4f} m/px, {doc.scale.get('method')}) minus detected door widths")
+    head = (f"**Baseboard: {_fmt(total)} linear metres** for {len(rows)} {what}{f' on **{st}**' if st else ''}, {how}. "
+            "Rooms are treated as rectangles and wall openings other than doors are not deducted, so L-shaped rooms are approximate.")
+    trace = [_step("route", "baseboard -> room outline minus door openings, code, no model"), _step("filter", f"{len(rows)} rooms, {len(doors)} doors considered")]
+    return _answer_obj(question, [doc.doc_id], head + "\n" + "\n".join(lines) + more, total, "m", 0.8, False, boxes, cites, scene, trace,
+                       "index" if ifc else "planmap", t0 or time.perf_counter())
 
 
 # ------------------------------------------------------------------ material take-off with waste
@@ -647,9 +745,105 @@ def superlative_room(question: str, doc: Doc, t0) -> dict | None:
     return _done(question, doc, text, v, "m2", [r], trace, t0=t0)
 
 
+SLABQ = re.compile(r"\bslabs?\b|\bfloor plates?\b", re.I)
+SLAB_BY = re.compile(r"\bby (?:type|thickness|reinforcement)|\b(?:thickness|reinforcement|rebar|bars)\b|\b\d{2,3}\s?mm\b|\b\d(?:[.,]\d+)?\s?cm\b", re.I)
+SLAB_MM = re.compile(r"\b(\d{2,3})\s?mm\b|\b(\d{1,2}(?:[.,]\d+)?)\s?cm\b", re.I)
+REBAR_KEY = re.compile(r"rebar|reinforc|bewehr|raudoit", re.I)
+
+
+def _slab_thickness(it: Item) -> tuple[float | None, str]:
+    """(metres, source): quantity set, then a thickness property, then the box height. The source is always named."""
+    w = it.q.get("width_m") or it.q.get("thickness_m")
+    if w and float(w) > 0:
+        return float(w), "quantity"
+    for k, v in it.props.items():
+        if re.search(r"thick|dicke", str(k), re.I):
+            try:
+                return float(v), "property"
+            except (TypeError, ValueError):
+                pass
+    if it.bbox_m:
+        h = it.bbox_m[1][1] - it.bbox_m[0][1]
+        if h > 0:
+            return round(h, 3), "bbox"
+    return None, "none"
+
+
+def _slab_area(it: Item) -> tuple[float | None, bool]:
+    foot = round((it.bbox_m[1][0] - it.bbox_m[0][0]) * (it.bbox_m[1][2] - it.bbox_m[0][2]), 2) if it.bbox_m else None
+    for k in ("area_m2", "gross_area_m2", "net_area_m2"):
+        if it.q.get(k):
+            a = float(it.q[k])
+            if foot and a < foot * 0.01:      # a quantity 100x under the slab's own footprint is a unit error in the model
+                return foot, True
+            return a, False
+    return (foot, True) if foot else (None, False)
+
+
+def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
+    """"slab area by type", "how much 250 mm slab", "slab areas by thickness and reinforcement": IfcSlab grouped by
+    type name and thickness, area summed per group. Reinforcement only when the model carries rebar data."""
+    if doc.mode != "ifc" or not SLABQ.search(question):
+        return None
+    if not (SLAB_BY.search(question) or re.search(r"\b(?:by|per|each)\b", question, re.I) or re.search(r"\bhow much\b", question, re.I)):
+        return None
+    if not (AREAQ.search(question) or SLAB_BY.search(question) or re.search(r"\bhow much\b", question, re.I)):
+        return None
+    slabs = [i for i in doc.items if i.kind == "slab" and i.props.get("ifc_class") == "IfcSlab"]
+    if not slabs:
+        return None
+    from engine.solvers.solve import MAX_BOXES, _reading_order
+    want = None
+    m = SLAB_MM.search(question)
+    if m:
+        want = float(m.group(1)) if m.group(1) else float(m.group(2).replace(",", ".")) * 10
+    groups: dict = {}
+    src_used: set = set()
+    approx = 0
+    for it in slabs:
+        t, src = _slab_thickness(it)
+        a, est = _slab_area(it)
+        if t is None or a is None:
+            continue
+        approx += est
+        src_used.add(src)
+        mm = int(round(t * 1000 / 5.0) * 5)
+        tn = it.type_name or it.props.get("material") or "Unnamed slab type"
+        groups.setdefault((tn, mm), []).append((it, a))
+    avail = sorted({k[1] for k in groups})
+    if want is not None:
+        groups = {k: v for k, v in groups.items() if abs(k[1] - want) <= 5}
+    if not groups:
+        text = (f"No **{int(want)} mm** slab in this model" + (f"; the slab thicknesses present are {', '.join(f'{m} mm' for m in avail[:8])}." if avail else ".")
+                if want is not None else "No slab in this model has a thickness and an area.")
+        return _done(question, doc, text, 0, "m2", [], [_step("route", "slab area by type -> IfcSlab grouped by type and thickness, no model")], t0=t0)
+    items_all = [it for v in groups.values() for it, _a in v]
+    order = {x.item_id: n for n, x in enumerate(_reading_order(items_all), 1)}
+    rows = sorted(groups.items(), key=lambda kv: -sum(a for _i, a in kv[1]))
+    lines = ["| Type | Thickness | Slabs | Area | Boxes |", "|---|---|---|---|---|"]
+    for (tn, mm), v in rows:
+        ns = sorted(order[i.item_id] for i, _a in v if order[i.item_id] <= MAX_BOXES)
+        marks = ", ".join(f"[{n}]" for n in ns[:6]) + (f" +{len(ns) - 6}" if len(ns) > 6 else "")
+        lines.append(f"| {tn} | {mm} mm | {len(v)} | {_fmt(sum(a for _i, a in v))} m² | {marks} |")
+    tot = round(sum(a for v in groups.values() for _i, a in v), 2)
+    srcname = {"quantity": "the model's thickness quantity", "property": "a thickness property", "bbox": "the box height (no thickness in the model)"}
+    thick_src = " and ".join(srcname[s] for s in sorted(src_used))
+    rebar = [i for i in doc.items if "Reinforc" in str(i.props.get("ifc_class") or "") or any(REBAR_KEY.search(str(k)) for k in i.props)]
+    if rebar:
+        bars = f"Reinforcement: the model has {len(rebar)} reinforcement elements or properties."
+    else:
+        bars = "Reinforcement: **the model has no reinforcement data** (no IfcReinforcingBar and no rebar properties), so bars cannot be reported."
+    head = (f"**{int(want)} mm slab:** " if want is not None else "**Slab area by type and thickness:** ") + f"**{_fmt(tot)} m²** in **{len(items_all)} slabs**, {len(groups)} type-and-thickness group{'s' if len(groups) != 1 else ''}."
+    foot = f"Thickness from {thick_src}." + (f" {approx} slab areas are the box footprint (upper bound), because the model has no usable area quantity for them." if approx else "")
+    text = "\n\n".join([head, "\n".join(lines), foot, bars])
+    trace = [_step("route", "slab area by type -> IfcSlab grouped by type name and thickness, area summed per group, no model"),
+             _step("filter", f"{len(slabs)} slabs, {len(items_all)} with thickness and area; thickness from {thick_src}")]
+    return _done(question, doc, text, tot, "m2", items_all, trace, t0=t0)
+
+
 def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
     """First handler that recognises the shape wins; every handler may return None."""
-    for fn in (room_list, wet_rooms, count_where, storey_pair, storey_compare, total_and_storey, cond_count, exact_size, kind_compare, compliance, superlative_room, where_rooms):
+    for fn in (slab_by_type, baseboard, room_list, wet_rooms, count_where, storey_pair, storey_compare, total_and_storey, cond_count, exact_size, kind_compare, compliance, superlative_room, where_rooms):
         res = fn(question, doc, t0)
         if res is not None:
             return res
