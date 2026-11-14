@@ -1,3 +1,4 @@
+import { liveSocketUrl } from './live-url'
 import { useEffect, useReducer } from 'react'
 import { flushSync } from 'react-dom'
 import { createLiveHighlightClient, type SceneEvent } from '../viewer3d/liveHighlight'
@@ -20,7 +21,7 @@ export function useSceneEdits(chatId: string | null, exchanges: ChatExchange[], 
   useEffect(() => {
     if (!chatId || demo) return
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const channel = createLiveHighlightClient({ url: `${protocol}//${window.location.host}/ws?chat_id=${encodeURIComponent(chatId)}` })
+    const channel = createLiveHighlightClient({ url: liveSocketUrl(`?chat_id=${encodeURIComponent(chatId)}`) })
     return channel.onSceneEvent((event) => {
       if (event.chat_id && event.chat_id !== chatId) return
       // Commit socket edits before answer rendering/refetches. The mounted

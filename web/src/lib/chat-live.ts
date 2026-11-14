@@ -1,3 +1,4 @@
+import { liveSocketUrl } from './live-url'
 export type ChatLiveEvent =
   | { type: 'chat.message'; chat_id: string; message_id: string; role: string }
   | { type: 'chat.status'; chat_id: string; text: string }
@@ -31,7 +32,7 @@ export function createChatLiveClient(options: { url?: string; connect?: (url: st
   function connect() {
     if (suspended || socket || retry !== undefined || !listeners.size) return
     try {
-      const url = options.url ?? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`
+      const url = options.url ?? liveSocketUrl()
       const connection = (options.connect ?? ((url) => new WebSocket(url)))(url)
       socket = connection
       connection.addEventListener('open', () => {

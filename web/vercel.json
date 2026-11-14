@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://hologram-api.vercel.app/api/:path*" }
+    { "source": "/api/:path*", "destination": "https://obviously-present-piglet.eur-1.aiven.app/api/:path*" }
   ]
 }

@@ -13,7 +13,11 @@ async def get_pool() -> asyncpg.Pool | None:
     global _pool, _pool_loop
     loop = asyncio.get_running_loop()
     if _pool is not None and _pool_loop is not loop:
-        _pool = None  # stale pool from another loop; drop it (its connections close with that loop)
+        try:
+            _pool.terminate()  # stale pool from another loop: close its connections now, or they pile up on the DB
+        except Exception:  # noqa: BLE001
+            pass
+        _pool = None
     if _pool is None:
         try:
             _pool = await asyncio.wait_for(

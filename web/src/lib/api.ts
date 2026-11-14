@@ -171,5 +171,5 @@ export class WorkspaceApi {
   }
 }
 
-const setting = import.meta.env.VITE_USE_MOCK
+const setting = import.meta.env?.VITE_USE_MOCK  // env is undefined when e2e specs import helpers from this module in Node
 export const workspaceApi = new WorkspaceApi(setting === 'true' ? 'demo' : setting === 'false' ? 'real' : 'auto')
