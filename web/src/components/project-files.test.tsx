@@ -19,19 +19,42 @@ const project: Project = {
   ],
 }
 
-it('labels automatic and user-set roles and saves a changed role', async () => {
+const clickText = async (text: string, scope: ParentNode = document) => act(async () => [...scope.querySelectorAll('button')].find((b) => b.textContent?.trim() === text)!.click())
+
+it('labels automatic and user-set roles and saves a changed type from the row menu', async () => {
+  HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', '') }
+  HTMLDialogElement.prototype.close = function () { this.removeAttribute('open') }
   const update = vi.spyOn(projectsApi, 'updateDoc').mockResolvedValue(project)
   const onProject = vi.fn()
   await act(async () => root.render(<FilesTab project={project} pending={[]} onDismiss={() => {}} onProject={onProject} onAdd={() => {}} />))
-  expect(host.textContent).toContain('Set automatically')
+  expect(host.textContent).not.toContain('Set automatically')
   expect(host.textContent).toContain('Set by you')
-  const select = host.querySelector<HTMLSelectElement>('select[aria-label="Type of Level 1 plan"]')!
+  expect(host.querySelector('select[aria-label^="Type of"]')).toBeNull()
+  await clickText('Change type and level', host.querySelector('[data-doc-id="a"]')!)
+  const select = document.querySelector<HTMLSelectElement>('dialog select[aria-label="Type"]')!
   await act(async () => {
     const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')!.set!
     setter.call(select, 'section'); select.dispatchEvent(new Event('change', { bubbles: true }))
   })
-  expect(update).toHaveBeenCalledWith('p', 'a', { role: 'section' })
+  await clickText('Save')
+  expect(update).toHaveBeenCalledWith('p', 'a', { role: 'section', level: null })
   expect(onProject).toHaveBeenCalledWith(project)
+})
+
+it('groups files into folders by type with counts and filters the list', async () => {
+  const mixed: Project = { ...project, docs: [...project.docs, { doc_id: 'c', title: 'ac20_arc', kind: 'ifc', formats: ['ifc'], role: 'model', level: null, role_source: 'auto' }] }
+  await act(async () => root.render(<FilesTab project={mixed} pending={[]} onDismiss={() => {}} onProject={() => {}} onAdd={() => {}} />))
+  const folders = host.querySelector('nav[aria-label="Document folders"]')!
+  expect(folders.textContent).toContain('All Files3')
+  expect(folders.textContent).toContain('Models1')
+  expect(folders.textContent).toContain('Plans2')
+  await act(async () => folders.querySelector<HTMLButtonElement>('[aria-label="Open Models folder"]')!.click())
+  expect(host.querySelectorAll('[data-doc-id]')).toHaveLength(1)
+})
+
+it('gives every file name a tooltip with the full name', async () => {
+  await act(async () => root.render(<FilesTab project={project} pending={[]} onDismiss={() => {}} onProject={() => {}} onAdd={() => {}} />))
+  expect(host.querySelector('[data-doc-id="a"] h3')!.getAttribute('title')).toBe('Level 1 plan')
 })
 
 it('removes a file from the project', async () => {

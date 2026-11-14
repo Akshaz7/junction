@@ -6,6 +6,11 @@ export const roleLabels: Record<ProjectRole, string> = {
   scan: 'Scan', photo: 'Photo', spec: 'Specification', revision: 'Revision', other: 'Other',
 }
 
+export const rolePlural: Record<ProjectRole, string> = {
+  model: 'Models', plan: 'Plans', section: 'Sections', elevation: 'Elevations', detail: 'Details', schedule: 'Schedules',
+  scan: 'Scans', photo: 'Photos', spec: 'Specifications', revision: 'Revisions', other: 'Other',
+}
+
 /** "19 hours ago", "Yesterday", or a short date. Never throws on a bad date. */
 export function relativeTime(value: string | undefined, now = Date.now()): string {
   const time = value ? Date.parse(value) : NaN
