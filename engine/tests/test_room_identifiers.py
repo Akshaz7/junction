@@ -75,6 +75,13 @@ def test_alphanumeric_ids_and_casefold_offsets():
     assert selected("What is the area of Straße Office a-214?", [room]) == ["a"]
 
 
+def test_type_codes_and_roman_name_ordinals_are_not_room_ids():
+    rooms = [Item("a", "room", name="214", type_name="Space Type 1", props={"long_name": "Office II"})]
+    assert selected("What is the area of room 1?", rooms) == []
+    assert selected("What is the area of room 2?", rooms) == []
+    assert selected("What is the area of Office 2?", rooms) == ["a"]
+
+
 def test_number_only_keeps_ambiguous_rooms_for_caller(offices):
     offices.append(Item("d", "room", name="214", props={"long_name": "Kitchen"}))
     assert selected("What is the area of room 214?", offices) == ["a", "d"]

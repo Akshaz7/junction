@@ -45,3 +45,34 @@ def test_legacy_and_multiformat_sidecars(tmp_path, monkeypatch, formats):
     asyncio.run(routes._persist(art.name))
     assert pool.execute.await_args.args[2] == 1
     assert pool.execute.await_args.args[4] == ["dxf", "pdf"]
+
+
+@pytest.mark.parametrize("fmt", [ext.lstrip(".") for ext in routes.UPLOAD_EXT])
+def test_postgres_round_trip_replaces_stale_formats(schema_url, tmp_path, monkeypatch, fmt):
+    import asyncpg
+    from server import config
+
+    monkeypatch.setenv("ARTIFACTS_DIR", str(tmp_path))
+    save = AsyncMock()
+    monkeypatch.setattr(routes.artifact_store, "save_doc", save)
+    art = tmp_path / "uploads__roundtrip"
+    art.mkdir()
+    files = {"png" if fmt in ("jpg", "jpeg") else fmt: "input"}
+    (art / "doc.json").write_text(json.dumps({"formats": [fmt], "files": files, "pages": 2}))
+
+    async def run():
+        conn = await asyncpg.connect(config.database_url())
+        try:
+            await conn.execute("create temporary table documents "
+                               "(doc_id text primary key, pages int, files jsonb, formats text[])")
+            await conn.execute("insert into documents values ($1, 1, '{}'::jsonb, array['stale'])", art.name)
+            monkeypatch.setattr(routes.db, "get_pool", AsyncMock(return_value=conn))
+            await routes._persist(art.name)
+            row = await conn.fetchrow("select pages, files, formats from documents where doc_id=$1", art.name)
+            assert row["formats"] == [fmt]
+            assert row["pages"] == 2 and json.loads(row["files"]) == files
+            save.assert_awaited_once_with(conn, art.name)
+        finally:
+            await conn.close()
+
+    asyncio.run(run())

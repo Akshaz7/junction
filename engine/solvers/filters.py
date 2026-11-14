@@ -76,11 +76,10 @@ def _numbered_rooms(target: str, rooms: list[Item]) -> tuple[str, list[Item]] | 
 
     def ids(room):
         found = set()
-        for label in _room_labels(room):
-            found.update(m.group() for m in _ROOM_NUMBER.finditer(label.casefold()))
-            # Preserve the existing Roman numeral spelling equivalence for names.
-            if not any(c.isdigit() for c in label):
-                found.update(m.group() for m in _ROOM_NUMBER.finditer(fold(label)))
+        # A type code (e.g. "Space Type 1") is not the room's identifier.
+        for label in (room.props.get("number"), room.name, room.label, room.props.get("long_name")):
+            if label is not None:
+                found.update(m.group() for m in _ROOM_NUMBER.finditer(str(label).casefold()))
         return found
 
     indexed = [(r, ids(r)) for r in rooms]
@@ -91,6 +90,11 @@ def _numbered_rooms(target: str, rooms: list[Item]) -> tuple[str, list[Item]] | 
     if name:
         pattern = ROOM_TYPES[base] if base else rf"(?<!\w){re.escape(name)}(?!\w)"
         hit = [r for r in hit if any(re.search(pattern, fold(v)) for v in _room_labels(r))]
+        if not hit:
+            # A full drawn name may use Roman numerals ('Prüfzimmer II' / 'Pruefzimmer 2').
+            # Its ordinal alone must never become a room number.
+            hit = [r for r in rooms if not any(c.isdigit() for c in room_name(r))
+                   and fold(room_name(r)) == fold(target)]
     return target, hit
 
 
