@@ -95,3 +95,19 @@ def test_unit_prefix_uses_dimensional_power():
     volume = f.create_entity("IfcSIUnit", UnitType="VOLUMEUNIT", Prefix="MILLI", Name="CUBIC_METRE")
     assert _unit_factor(area, 2) == pytest.approx(1e-6)
     assert _unit_factor(volume, 3) == pytest.approx(1e-9)
+
+
+def test_typed_length_property_compares_without_borrowing_geometry_unit(tmp_path):
+    f = make_file()
+    w = wall(f, [(0, 0), (3, 4)])
+    for relation in list(w.IsDefinedBy):
+        f.remove(relation)
+    prop = f.create_entity("IfcPropertySingleValue", Name="Pituus", NominalValue=f.create_entity("IfcLengthMeasure", 5.))
+    ps = f.create_entity("IfcPropertySet", GlobalId=ifcopenshell.guid.new(), Name="generated for demo", HasProperties=[prop])
+    f.create_entity("IfcRelDefinesByProperties", GlobalId=ifcopenshell.guid.new(), RelatedObjects=[w], RelatingPropertyDefinition=ps)
+    p = tmp_path / "generated.ifc"; f.write(str(p))
+    c = build(p, "generated", geometry=False)["elements"][w.GlobalId][0]
+    assert c["method"] == "IFC typed length / model axis" and c["agrees"]
+    prop.NominalValue = f.create_entity("IfcReal", 5.)
+    f.write(str(p))
+    assert build(p, "generated", geometry=False)["elements"] == {}

@@ -6,6 +6,8 @@ Run geometry jobs through scripts/heavy.sh. Native IFC Z-up is used here.
 from __future__ import annotations
 
 from pathlib import Path
+import re
+import hashlib
 
 from engine.xcheck import compare
 
@@ -118,6 +120,26 @@ def build(path: Path, doc_id: str, item_ids=None, *, geometry=True):
                         skipped.append({"item_id": el.GlobalId, "quantity": name, "reason": "No unit assigned for this quantity dimension"})
                         continue
                     pairs.append((pset_name, name, raw, unit, scale, quantity))
+        if not any(p[3] == "m" for p in pairs):
+            # A typed length property is also usable, but is labelled separately
+            # from Qto. Bare Reals without units never borrow a factor from the
+            # geometry being checked (that would make agreement circular).
+            names = {"length", "netlength", "länge", "laenge", "lengte", "pituus", "längd", "longueur"}
+            candidates = []
+            for pset_name, properties in element.get_psets(el, psets_only=True, verbose=True).items():
+                for name, entry in properties.items():
+                    if not isinstance(entry, dict) or re.sub(r"[\s_]", "", name.casefold()) not in names:
+                        continue
+                    prop = f.by_id(entry["id"])
+                    own = getattr(prop, "Unit", None)
+                    typed = entry.get("value_type") in ("IfcLengthMeasure", "IfcPositiveLengthMeasure", "IfcNonNegativeLengthMeasure")
+                    raw = entry.get("value")
+                    if (typed or (own and own.UnitType == "LENGTHUNIT")) and isinstance(raw, (int, float)) and not isinstance(raw, bool):
+                        factor = _unit_factor(own, 1) if own else length_scale
+                        candidates.append((pset_name, name, raw, "m", factor, prop))
+            # Multiple conflicting length properties have no principled winner.
+            if candidates and len({round(p[2] * p[4], 9) for p in candidates}) == 1:
+                pairs.append(candidates[0])
         if not pairs:
             continue
         try:
@@ -143,19 +165,29 @@ def build(path: Path, doc_id: str, item_ids=None, *, geometry=True):
                        "raw_value": raw, "si_factor": scale, "unit_conversion": f"source quantity × {scale:.12g} = {unit}"}
                 if unit == "m":
                     src.update(geometry_method=axis[1], geometry_entity=axis[2])
-                c = compare("IFC Qto / model axis" if unit == "m" else "IFC Qto / geometry footprint" if unit == "m2" else "IFC Qto / closed geometry volume", raw * scale, measured, unit, [src])
+                method = "IFC typed length / model axis" if quantity.is_a("IfcPropertySingleValue") else "IFC Qto / model axis"
+                c = compare(method if unit == "m" else "IFC Qto / geometry footprint" if unit == "m2" else "IFC Qto / closed geometry volume", raw * scale, measured, unit, [src])
                 if c:
                     records.setdefault(el.GlobalId, []).append(c)
         except (RuntimeError, ValueError, TypeError, AttributeError) as exc:
             skipped.append({"item_id": el.GlobalId, "reason": type(exc).__name__})
+    with Path(path).open("rb") as original:
+        source_hash = hashlib.file_digest(original, "sha256").hexdigest()
     return {"doc_id": doc_id, "schema": f.schema, "elements": records, "skipped": skipped,
-            "units": factors, "geometry_units": "SI metres from ifcopenshell.geom; footprint in XY (native Z-up)"}
+            "units": factors, "geometry_units": "SI metres from ifcopenshell.geom; footprint in XY (native Z-up)",
+            "source_file": str(path), "source_sha256": source_hash,
+            "originating_system": f.header.file_name.originating_system}
 
 
 def ingest_lengths(path: Path, doc_id: str, directory: Path):
     """Cheap ingest hook: parse axes/sweeps only, no additional geometry pass."""
     import json
-    checks = build(path, doc_id, geometry=False)
+    try:
+        checks = build(path, doc_id, geometry=False)
+    except (ImportError, OSError, RuntimeError, ValueError, KeyError, TypeError, AttributeError, IndexError) as exc:
+        # Optional evidence must not turn an otherwise usable upload into a
+        # failed ingestion. The missing method remains explicit in its sidecar.
+        checks = {"doc_id": doc_id, "elements": {}, "skipped": [{"reason": f"Length cross-check unavailable ({type(exc).__name__})"}]}
     temporary = directory / "xcheck.json.tmp"
     temporary.write_text(json.dumps(checks, allow_nan=False))
     temporary.replace(directory / "xcheck.json")

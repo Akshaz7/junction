@@ -13,6 +13,16 @@ from pathlib import Path
 
 REPORT = Path(__file__).resolve().parents[1] / "results/final/XCHECK/agreement.json"
 AREA = re.compile(r"(?<![\d.,])(\d+(?:[.,]\d+)?)\s*(m[²2]|ft[²2]|sq\.?\s*ft)(?!\w)", re.I)
+METHOD_WORDS = {
+    "printed area / room outline": "Printed area and measured outline",
+    "IFC Qto / geometry footprint": "Stored room area and measured floor shape",
+    "IFC Qto / closed geometry volume": "Stored volume and closed 3D shape",
+    "IFC Qto / model axis": "Stored length and drawn centreline",
+    "IFC typed length / model axis": "Stored length and drawn centreline",
+    "detector / drawing recount": "Detected items and a second drawing reading",
+    "room sum / outer outline minus walls": "Room areas and floor outline minus walls",
+    "vector segments / raster skeleton": "Drawn segments and image centreline",
+}
 
 
 def finite(value):
@@ -106,13 +116,12 @@ def calibration(check, cohort):
             a, b = row.get("within_1pct"), row.get("within_5pct")
             if type(n) is int and n > 0 and all(type(v) is int and 0 <= v <= n for v in (a, b)):
                 return {"n": n, "within_1pct": a, "within_5pct": b, "pct": b / n * 100,
+                        "documents": row.get("documents"),
                         "source": "results/final/XCHECK/agreement.json", "scope": "Observed method agreement, not accuracy or an error bound"}
     return None
 
 
 def item_checks(doc, item, unit, root):
-    if doc.mode != "ifc":
-        return room_checks(doc, item) if unit == "m2" and item.kind in ("room", "space") else []
     # Produced by xcheck_ifc offline, or at ingestion. Read only; never run an IFC
     # geometry pass in a request. Missing dependencies do not break the API.
     data = read(Path(root) / doc.doc_id / "xcheck.json")
@@ -128,6 +137,8 @@ def item_checks(doc, item, unit, root):
             cached.append({**fresh, "kind": item.kind})
     if cached:
         return cached
+    if doc.mode != "ifc":
+        return room_checks(doc, item) if unit == "m2" and item.kind in ("room", "space") else []
     # Reuse the already converted scene, where available. Provenance must prove
     # the primary is a quantity set, not a bbox/mesh fallback of the same shape.
     raw = read(Path(root) / doc.doc_id / "elements.json")
@@ -147,6 +158,30 @@ def item_checks(doc, item, unit, root):
     method = "IFC Qto / geometry footprint" if unit == "m2" else "IFC Qto / closed geometry volume"
     c = compare(method, item.q[key], measured, unit, [{**source(doc, item), "quantity": key, "geometry": "scene.glb", "geometry_units": "metres, Y-up"}])
     return [{**c, "kind": item.kind}] if c else []
+
+
+def raster_length_check(doc, item, primary_m, skeleton, skeleton_source, *, openings_m=0.0):
+    """Hook for a separately extracted wall/room-boundary raster skeleton.
+
+    `skeleton` is a one-pixel binary mask in original page coordinates (a crop
+    is permitted when skeleton_source has bbox). It must be extracted from the
+    page image, never rendered from the plan-map vectors. `openings_m` is the
+    shared, explicitly recorded door deduction for a baseboard comparison.
+    Source: {doc_id, page, item_id|bbox, method, input: 'page image'}.
+    """
+    from engine.xcheck_geometry import skeleton_length
+    scale = finite((doc.scale or {}).get("m_per_px"))
+    deduction = finite(openings_m)
+    if not scale or deduction is None or deduction < 0 or skeleton_source.get("input") != "page image":
+        return None
+    if skeleton_source.get("doc_id") != doc.doc_id or skeleton_source.get("page") != item.page:
+        return None
+    length = skeleton_length(skeleton, scale)
+    if length is None or length < deduction:
+        return None
+    return compare("vector segments / raster skeleton", primary_m, length - deduction, "m",
+                   [source(doc, item), skeleton_source], kind=item.kind,
+                   note=f"Skeleton edges: orthogonal 1 px, diagonal √2 px, multiplied by {scale:.12g} m/px; deduct {deduction:.12g} m of openings. Shared scale and opening uncertainty remain unbounded.")
 
 
 def floor_check(ctx, rows, arithmetic):
@@ -203,13 +238,33 @@ def run(ctx, rows, missing, arithmetic):
         for c in item_checks(doc, item, unit, ctx.get("root", ".")):
             per_item.append({**c, "item_id": item.item_id, "doc_id": doc.doc_id})
             groups.setdefault(c["method"], []).append((doc, item, c))
+    recovered = None
+    expected = {(d.doc_id, i.item_id) for d, i, _ in rows}
+    def complete(group):
+        return len(group) == len(rows) and {(d.doc_id, i.item_id) for d, i, _ in group} == expected
+    if not arithmetic and not missing and rows:
+        # MEP indices can store the source lengths in a sidecar instead of the
+        # generic Item.q. Recover arithmetic only from complete sourced pairs.
+        from engine.reasoning_parts.margin import rounding
+        for group in groups.values():
+            if not complete(group) or not all(c["independent"] for _, _, c in group):
+                continue
+            total = sum(c["primary_value"] for _, _, c in group)
+            if abs(total - value) <= rounding(value, ctx.get("ans", {}).get("text_md", ""), unit) + 1e-7:
+                terms = [{"doc_id": d.doc_id, "item_id": i.item_id, "cite": n,
+                          "value": c["primary_value"], "unit": unit} for (d, i, c), (_, _, n) in zip(group, rows)]
+                recovered = {"formula": "Add the independently sourced model quantities", "terms": terms,
+                             "result": value, "unit": unit, "text": f"Added {len(terms)} source quantities: {total:.12g} {unit}."}
+                arithmetic = recovered
+                break
     for method, group in groups.items():
         # Partial checks never stand for the complete headline quantity.
-        if arithmetic and not missing and len(group) == len(rows) and all(c["independent"] for _, _, c in group):
+        if arithmetic and not missing and complete(group) and all(c["independent"] for _, _, c in group):
             a = sum(c["primary_value"] for _, _, c in group)
             b = sum(c["value"] for _, _, c in group)
             # One reading must reproduce the headline; swapping is explicit.
-            tol = max(1e-6, abs(value) * 1e-6)
+            from engine.reasoning_parts.margin import rounding
+            tol = max(1e-6, rounding(value, ctx.get("ans", {}).get("text_md", ""), unit))
             if abs(a - value) <= tol or abs(b - value) <= tol:
                 second = b if abs(a-value) <= tol else a
                 c = compare(method, value, second, unit, [s for _, _, c in group for s in c["sources"]])
@@ -244,7 +299,7 @@ def run(ctx, rows, missing, arithmetic):
         ctx["steps"] = [s for s in ctx["steps"] if s.get("kind") != "checked"]
         c = max(checks, key=lambda c: c["diff_pct"])
         ctx["steps"].append({"kind": "checked", "title": "Checked", "ok": ctx["checked"], "cite": None,
-                             "text": f"{c['method']}: {c['primary_value']:.6g} and {c['value']:.6g} {unit}; {c['diff_pct']:.3g}% apart."})
+                             "text": f"{METHOD_WORDS.get(c['method'], 'Independent readings')}: {c['primary_value']:.6g} and {c['value']:.6g} {dict(m2='m²', m3='m³', count='items').get(unit, unit)}; {c['diff_pct']:.3g}% apart."})
     elif ctx.get("checked") is True and unit in ("m2", "m", "m3"):
         # A room's enclosing box is not an independent measurement of its area.
         ctx["checked"] = None
@@ -258,10 +313,13 @@ def run(ctx, rows, missing, arithmetic):
         label = i.label or i.name or i.kind.replace("_", " ").capitalize()
         calc_rows.append({"item_id": i.item_id, "label": label, "values": {unit: t["value"]}, "source": src})
         inputs.append({"name": label, "value": t["value"], "unit": unit, "source": src})
-    return {"formula": (arithmetic or {}).get("formula", "Full source arithmetic unavailable"),
+    result = {"formula": (arithmetic or {}).get("formula", "Full source arithmetic unavailable"),
             "steps": [{"id": "sum", "label": "Add cited quantities", "expr": "Σ source quantities", "value": value,
                        "unit": unit, "inputs": inputs}] if terms else [], "rows": calc_rows,
             "result": {"value": value, "unit": unit, "rounded_as": "as reported in the answer"},
             "checks": checks, "item_checks": per_item,
             "unavailable": [] if checks else ["No independent second reading covers the complete answer."],
             "reconciled": bool(arithmetic)}
+    if recovered:
+        result["_arithmetic"] = recovered
+    return result

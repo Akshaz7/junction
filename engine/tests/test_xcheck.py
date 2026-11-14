@@ -92,6 +92,14 @@ def test_disagreement_downgrades_exact_source_and_margin():
     assert confidence.run(ctx)["label"] == "Estimate"
 
 
+def test_one_to_five_percent_discrepancy_cannot_be_verified():
+    doc = Doc("d", "planmap", [room(label=97)], scale={"method": "dxf-units", "m_per_px": .1})
+    ctx = context(doc, value=97)
+    out = margin.run(ctx)
+    assert out["calc"]["checks"][0]["diff_pct"] == pytest.approx(3)
+    assert confidence.run(ctx)["label"] == "Cross-checked"
+
+
 def test_real_recount_not_fake_and_headline_policy_is_explicit():
     doc = Doc("d", "planmap", [])
     ctx = context(doc, value=6, unit="count", trace=[{"step": "recount", "model": "real", "detail": "plan map 4, drawing re-read 6"}])
@@ -173,3 +181,37 @@ def test_agreement_is_not_presented_as_accuracy_or_an_error_bound(tmp_path, monk
     conf = confidence.run(ctx)
     assert conf["pct"] is None and conf["agreement"][0]["pct"] == 80
     assert "8 of 10" in conf["reason"] and "not answer accuracy" in conf["reason"]
+
+
+def test_raster_skeleton_hook_keeps_shared_opening_deduction_explicit():
+    r = Item("w", "wall")
+    doc = Doc("d", "planmap", [r], scale={"m_per_px": .1})
+    src = {"doc_id": "d", "page": 1, "item_id": "w", "input": "page image", "method": "independent threshold and thinning"}
+    c = xcheck.raster_length_check(doc, r, .15, [[1, 1, 1]], src, openings_m=.05)
+    assert c["value"] == pytest.approx(.15) and c["agrees"]
+    src["input"] = "rendered vector outlines"
+    assert xcheck.raster_length_check(doc, r, .2, [[1, 1, 1]], src) is None
+
+
+def test_recovered_mep_arithmetic_uses_complete_sourced_pairs(tmp_path):
+    pipe = Item("p", "pipe", source="ifc")
+    doc = Doc("d", "ifc", [pipe])
+    folder = tmp_path / "d"; folder.mkdir()
+    c = xcheck.compare("IFC Qto / model axis", 5, 5, "m", [{"doc_id": "d", "item_id": "p", "quantity": "Length"}])
+    (folder / "xcheck.json").write_text(json.dumps({"elements": {"p": [c]}}))
+    ctx = context(doc, value=5, unit="m", root=tmp_path, cites=[{"doc_id": "d", "n": 1, "item_ids": ["p"]}])
+    result = margin.run(ctx)
+    assert result["calc"]["reconciled"] and result["arithmetic"][0]["terms"][0]["value"] == 5
+    assert result["calc"]["checks"][0]["agrees"]
+    assert "_arithmetic" not in result["calc"]
+
+
+def test_duplicate_checks_for_one_item_cannot_cover_missing_second_item(tmp_path):
+    a, b = Item("a", "pipe"), Item("b", "pipe")
+    doc = Doc("d", "ifc", [a, b])
+    folder = tmp_path / "d"; folder.mkdir()
+    check = xcheck.compare("IFC Qto / model axis", 5, 5, "m", [{"doc_id": "d", "item_id": "a"}])
+    (folder / "xcheck.json").write_text(json.dumps({"elements": {"a": [check, check]}}))
+    ctx = context(doc, value=10, unit="m", root=tmp_path)
+    calc = xcheck.run(ctx, [(doc, a, 1), (doc, b, 1)], 0, None)
+    assert not calc["reconciled"] and not calc["checks"]

@@ -63,7 +63,7 @@ def run(ctx: dict) -> dict:
     if exact:
         reason = "The cited source quantities reproduce the answer; the source's completeness is not verified."
     elif checked is True:
-        reason = "Two recorded readings agree; agreement does not establish an error bound."
+        reason = "Two recorded readings agree within the recorded tolerance; agreement does not establish an error bound."
     elif checked is False:
         reason = "The recorded readings disagree; check the highlighted evidence."
     else:
@@ -86,5 +86,7 @@ def run(ctx: dict) -> dict:
     if agreement:
         observed = min(agreement, key=lambda row: row['pct'])
         reason += f" Independent methods agreed within 5% on {observed['within_5pct']} of {observed['n']} measured comparisons; this is agreement, not answer accuracy."
+        if observed.get('documents') is not None:
+            reason += f" These comparisons cover {observed['documents']} source documents; measurements in one document can share errors."
     return {"label": label, "pct": calibration['pct'] if calibration else None, "reason": reason,
             "improve": improve, "calibration": calibration, "agreement": agreement, "_steps": steps}

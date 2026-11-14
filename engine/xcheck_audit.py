@@ -40,7 +40,7 @@ def cached_recount(question, doc, root, cache):
     return hits[0] if hits and len({h[0] for h in hits}) == 1 else None
 
 
-def audit(sets, root, output, recount_cache):
+def audit(sets, root, output, recount_cache, ifc_checks=()):
     from engine import analytics, reasoning
     from engine.router.parser import parse
     from engine.solvers import SolverUnsupported, solve
@@ -109,6 +109,32 @@ def audit(sets, root, output, recount_cache):
         print(f"Audited {len(rows)} questions from {set_path}", flush=True)
     if Path(recount_cache).exists():
         snapshots[str(recount_cache)] = digest(recount_cache)
+    validation = []
+    for path in ifc_checks:
+        data = xcheck.read(path)
+        did = data.get("doc_id")
+        doc = load_doc(did, root) if did else None
+        kinds = {i.item_id: i.kind for i in doc.items} if doc else {}
+        samples = []
+        by_pair = defaultdict(list)
+        for iid, checks in data.get("elements", {}).items():
+            for check in checks:
+                if not check.get("independent"):
+                    continue
+                kind = kinds.get(iid, "unindexed")
+                by_pair[check["method"], check["unit"], kind].append(check)
+                identity = (did, iid, check["method"], check["unit"])
+                if identity not in seen:
+                    seen.add(identity)
+                    observations.append({**check, "doc_id": did, "item_id": iid, "kind": kind,
+                                         "cohort": "ifc", "set": "native IFC validation", "source_report": str(path)})
+                if len(samples) < 6:
+                    samples.append({**check, "item_id": iid})
+        validation.append({"report": str(path), "doc_id": did, "source_file": data.get("source_file"),
+                           "source_sha256": data.get("source_sha256"), "originating_system": data.get("originating_system"),
+                           "schema": data.get("schema"), "checks": sum(map(len, data.get("elements", {}).values())),
+                           "skipped": len(data.get("skipped", [])), "samples": samples})
+        snapshots[str(path)] = digest(path)
     # Record exactly which indexed source state produced these observations.
     for did in sorted({o["doc_id"] for o in observations}):
         for path in sorted((Path(root) / did).glob("planmap-[0-9]*.json")) + [Path(root) / did / "elements.json"]:
@@ -133,6 +159,7 @@ def audit(sets, root, output, recount_cache):
                           "complete_checks": sum(c.get("checks", 0) > 0 for c in cases), "independent_observations": len(observations),
                           "unavailable": sum("unavailable" in c for c in cases), "live_cost_usd": 0},
               "cases": cases, "observations": observations}
+    report["native_validation"] = validation
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2, ensure_ascii=False, allow_nan=False) + "\n")
     return report
@@ -144,6 +171,7 @@ if __name__ == "__main__":
     p.add_argument("--root", type=Path, default=Path("artifacts"))
     p.add_argument("--output", type=Path, default=Path("results/final/XCHECK/agreement.json"))
     p.add_argument("--recount-cache", type=Path, default=Path("results/recount_cache/recount_cache.json"))
+    p.add_argument("--ifc-checks", nargs="*", type=Path, default=[])
     args = p.parse_args()
-    report = audit(args.sets, args.root, args.output, args.recount_cache)
+    report = audit(args.sets, args.root, args.output, args.recount_cache, args.ifc_checks)
     print(json.dumps(report["summary"], indent=2))
