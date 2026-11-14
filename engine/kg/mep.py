@@ -99,6 +99,8 @@ class Writer:
             return
         self.edges.add(key)
         eid = hashlib.sha256(json.dumps(key).encode()).hexdigest()[:20]
+        if confidence < 1:
+            evidence.setdefault("calibration", "Uncalibrated services inference; estimate.")
         self.graph["edges"].append({"id": f"mep:{eid}", "kind": kind, "from": a["id"], "to": b["id"],
                                     "method": method, "confidence": confidence, "evidence": evidence,
                                     "doc_ids": sorted(set(a.get("doc_ids", []) + b.get("doc_ids", [])))})
@@ -322,7 +324,7 @@ def enrich_ifc(writer, did, path, root, deadline):
             # Its service member is the citation; no fabricated item ID is cited.
             sn["source"] = None
             writer.doc_link(sn, did)
-            writer.edge("part_of_system", n, sn, "tag_text", 0.9,
+            writer.edge("part_of_system", n, sn, "tag_text", 0.5,
                         {"rule": "recorded system-name property; membership not independently checked",
                          "value": raw_system, "source": n["source"]})
     # Ports: IFC2x3 uses RelConnectsPortToElement, IFC4 also uses RelNests.
