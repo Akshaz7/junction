@@ -82,5 +82,9 @@ def run(ctx: dict) -> dict:
             improve = "Supply a known dimension and check the measured outlines."
     if not steps and ctx.get('cites'):
         steps.append({"kind": "read", "title": "Read", "text": f"{len(ctx['cites'])} cited source regions.", "cite": ctx['cites'][0].get('n'), "ok": None})
+    agreement = [c['calibration'] for c in ctx.get('xchecks', []) if c.get('calibration')]
+    if agreement:
+        observed = min(agreement, key=lambda row: row['pct'])
+        reason += f" Independent methods agreed within 5% on {observed['within_5pct']} of {observed['n']} measured comparisons; this is agreement, not answer accuracy."
     return {"label": label, "pct": calibration['pct'] if calibration else None, "reason": reason,
-            "improve": improve, "calibration": calibration, "_steps": steps}
+            "improve": improve, "calibration": calibration, "agreement": agreement, "_steps": steps}

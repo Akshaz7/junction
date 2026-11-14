@@ -290,6 +290,10 @@ def run(ctx):
         return result
     rnd = rounding(value, ctx["ans"].get("text_md"), unit)
     calc = arithmetic(ctx, rows, missing, value, unit, rnd) if unit in ("count", "m", "m2", "m3") else None
+    from engine import xcheck
+    independent = xcheck.run(ctx, rows, missing, calc)
+    if independent:
+        result["calc"] = independent
     if calc:
         result["arithmetic"] = [calc]
     else:
@@ -313,4 +317,10 @@ def run(ctx):
     else:
         margin = _unknown(unit, "This answer combines pages or sources without individual scale error budgets.", sources)
     result["margin"] = margin
+    if independent:
+        # Agreement is an observed discrepancy, never an uncertainty bound.
+        independent["margin"] = margin
+        observed = [c["calibration"] for c in independent["checks"] if c.get("calibration")]
+        if observed:
+            margin["agreement"] = observed
     return result
