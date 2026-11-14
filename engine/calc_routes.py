@@ -96,15 +96,28 @@ def mep(res, doc, index, ids, groups=None, values=None):
     if groups is not None:
         return grouped(res, doc, items, groups, "recorded category")
     indexed = {r["id"]: r for r in index.get("services", [])}
-    rows = []
-    for it in items:
+    rows, steps = [], []
+    for index, it in enumerate(items):
         r = indexed.get(it.item_id) or {}
         value = values.get(it.item_id) if values is not None else (r.get("L") if unit == "m" else 1)
+        if isinstance(value, dict):
+            component = value
+            value = component["value"]
+            ref = source(doc, it, "structure.v" if component.get("indexed") else "volume quantity")
+            if component.get("indexed"): ref["artifact"] = "mep.json"
+            sid = f"concrete-{index}"
+            steps.append(step(sid, "Volume of selected material", "element volume × material fraction", value, "m3",
+                              [input_value("element volume", component["volume"], "m3", ref),
+                               input_value("material fraction", component["fraction"], "fraction", {**ref, "field": "structure.cf (concrete layer thickness / total layer thickness)"})],
+                              "Layered elements contribute only the stored concrete thickness fraction; missing materials are excluded as stated.", "multiply"))
+        else:
+            sid = None
         rr = row(doc, it, value, unit)
+        if sid: rr["source"] = step_source(sid)
         if unit == "m":
             rr["source"].update({"artifact": "mep.json", "field": "services.L"})
         rows.append(rr)
-    return record(res, summed(res, rows, formula="total = Σ(selected element quantities)"))
+    return record(res, summed(res, rows, formula="total = Σ(selected element quantities)", steps=steps))
 
 
 def tile_order(res, need, boxes, box_area, rate, cost):
@@ -124,3 +137,171 @@ def tile_order(res, need, boxes, box_area, rate, cost):
     ])
     calc["result"]["additional"] = [{"label": "Whole boxes", "value": boxes, "unit": "boxes", "step_id": "boxes-whole", "rounded_as": "round up"},
                                         {"label": "Assumed price", "value": round(cost), "unit": "EUR", "step_id": "order-price", "rounded_as": "0 decimal places"}]
+
+
+def combine(res, parts, operation, formula, *, multiplier=None, denominator=None, absolute=False):
+    """Combine independent solver results, retaining each operand's full rows."""
+    from engine.calc import _default, evaluate, places
+    rows, steps, operands = [], [], []
+    for idx, part in enumerate(parts):
+        c = part.get("_calc")
+        if not c:
+            # Parts normally carry citations; attach at the caller when a root is needed.
+            c = part.get("reasoning", {}).get("calc")
+        if not c:
+            raise ValueError("Calculation operand was not retained")
+        prefix = f"part-{idx}-"
+        for old in c["steps"]:
+            import copy
+            s = copy.deepcopy(old)
+            s["id"] = prefix + s["id"]
+            for inp in s["inputs"]:
+                if inp["source"].get("kind") == "step": inp["source"]["step_id"] = prefix + inp["source"]["step_id"]
+            steps.append(s)
+        for old in c["rows"]:
+            import copy
+            r = copy.deepcopy(old)
+            if r["source"].get("kind") == "step": r["source"]["step_id"] = prefix + r["source"]["step_id"]
+            r["values"]["operand"] = idx
+            rows.append(r)
+        operands.append(input_value(part["question"], part["answer"]["value"], part["answer"]["unit"], step_source(prefix + "result")))
+    if denominator is not None: operands.append(denominator)
+    raw = evaluate(operation, [i["value"] for i in operands])
+    steps.append(step("combined", "Combine independent quantities", formula, raw, res["answer"].get("unit"), operands, operation=operation))
+    if multiplier is not None:
+        steps.append(step("multiplied", "Express as percent", "ratio × 100", raw * multiplier["value"], "%",
+                          [input_value("ratio", raw, "ratio", step_source("combined")), multiplier], operation="multiply"))
+        raw *= multiplier["value"]
+    sid = "multiplied" if multiplier is not None else "combined"
+    value = res["answer"]["value"]
+    steps.append(step("result", "Round for the answer", f"round({raw}, {places(value)})", value, res["answer"].get("unit"),
+                      [input_value("combined result", raw, res["answer"].get("unit"), step_source(sid)),
+                       input_value("decimal places", places(value), "decimal places", {"kind": "policy", "text": "Route's recorded answer precision"})], operation="round"))
+    return record(res, {"formula": formula, "steps": steps, "rows": rows, "result": {"value": value, "unit": unit_name(res["answer"].get("unit")), "rounded_as": f"{places(value)} decimal places"},
+                        "checks": [], "margin": {}, "row_note": "Rows are partitioned by operand; a source can legitimately appear in numerator and denominator. Each operand is summed before combination."})
+
+
+def chain(res, doc, pairs, base_unit, operations):
+    """Sequential arithmetic captured directly where a complex route uses it.
+
+    operations: [(label, operation, extra_inputs, output_unit)]. Each operation
+    takes the previous result followed by those explicit extra inputs.
+    """
+    from engine.calc import evaluate, places
+    rows = [row(doc, i, v, base_unit) for i, v in pairs]
+    c = summed(res, rows, base_unit)
+    c["steps"] = [s for s in c["steps"] if s["id"] != "result"]
+    prev, raw, unit = "sum", next(s["value"] for s in c["steps"] if s["id"] == "sum"), base_unit
+    extras = []
+    for index, (label, op, extra, new_unit) in enumerate(operations):
+        args = [input_value("previous quantity", raw, unit, step_source(prev)), *extra]
+        raw = evaluate(op, [i["value"] for i in args])
+        prev, unit = f"chain-{index}", new_unit
+        c["steps"].append(step(prev, label, label, raw, unit, args, operation=op))
+        extras.append({"label": label, "value": raw, "unit": unit, "step_id": prev})
+    value = res["answer"]["value"]
+    c["steps"].append(step("result", "Round for the answer", f"round({raw}, {places(value)})", value, unit,
+                           [input_value("unrounded quantity", raw, unit, step_source(prev)),
+                            input_value("decimal places", places(value), "decimal places", {"kind": "policy", "text": "Route's recorded answer precision"})], operation="round"))
+    c["formula"] += "; " + "; ".join(o[0] for o in operations)
+    c["result"] = {"value": value, "unit": unit, "rounded_as": f"{places(value)} decimal places", "additional": extras}
+    return record(res, c)
+
+
+def difference_groups(res, doc, items, a, b, area=False, by="storey"):
+    from engine.calc import record_items
+    from engine.solvers.solve import _qty
+    parts = []
+    for name in (a, b):
+        its = [i for i in items if getattr(i, by) == name]
+        vals = [(i, _qty(i, i.kind, "area") if area else 1) for i in its]
+        unit = "m2" if area else "count"
+        val = round(sum(v for i, v in vals if v is not None), 2) if area else len(its)
+        part = {"question": name, "answer": {"value": val, "unit": unit}}
+        record_items(part, doc, [(i, v) for i, v in vals if v is not None])
+        parts.append(part)
+    return combine(res, parts, "abs_difference", "difference = |first source subtotal − second source subtotal|")
+
+
+def individual(res, doc, items, columns):
+    """Several source quantities, intentionally no scalar total in the answer."""
+    steps, rows, results = [], [], []
+    for idx, it in enumerate(items):
+        values = {}
+        for key, (unit, getter) in columns.items():
+            value = getter(it)
+            values[key] = value
+            if number(value):
+                sid = f"item-{idx}-{key}"
+                ref = source(doc, it, key)
+                steps.append(step(sid, f"{it.label or it.name or it.kind}: {key}", "source quantity", value, unit,
+                                  [input_value(key, value, unit, ref)], operation="source"))
+                results.append({"label": f"{it.label or it.name or it.kind}: {key}", "value": value, "unit": unit, "step_id": sid})
+        rows.append(asdict(Row(it.item_id, it.label or it.name or it.kind, values, source(doc, it))))
+    ref = source(doc, field="items" if doc.mode != "ifc" else "elements")
+    steps.append(step("selected-items", "Number of selected items", "count selected source items", len(items), "count",
+                      [input_value("selected source items", len(items), "count", ref)], operation="source"))
+    results.append({"label": "Selected items", "value": len(items), "unit": "count", "step_id": "selected-items"})
+    return record(res, {"formula": "Read each source quantity separately; no combined total is claimed", "steps": steps, "rows": rows,
+                        "result": {"value": res["answer"].get("value"), "unit": unit_name(res["answer"].get("unit")), "rounded_as": "individual source quantities", "mode": "per-element", "additional": results},
+                        "checks": [], "margin": {}})
+
+
+def append_calculation(calc, child, prefix):
+    """Include a sub-report without colliding step ids or dropping source rows."""
+    import copy
+    for old in child["steps"]:
+        s = copy.deepcopy(old)
+        s["id"] = prefix + s["id"]
+        for i in s["inputs"]:
+            if i["source"].get("kind") == "step": i["source"]["step_id"] = prefix + i["source"]["step_id"]
+        calc["steps"].append(s)
+    for old in child["rows"]:
+        r = copy.deepcopy(old)
+        if r["source"].get("kind") == "step": r["source"]["step_id"] = prefix + r["source"]["step_id"]
+        r["values"]["count"] = 0
+        r["values"]["section"] = prefix.rstrip("-")
+        calc["rows"].append(r)
+    if number(child.get("result", {}).get("value")):
+        calc["result"].setdefault("additional", []).append({"label": prefix.rstrip("-"), "value": child["result"]["value"],
+                                                             "unit": child["result"]["unit"], "step_id": prefix + "result",
+                                                             "rounded_as": child["result"].get("rounded_as", "as reported")})
+
+
+def quantity_table(res, doc, room_results, doors, windows, baseboard_result, slab_result, piping):
+    rows = []
+    for result in room_results:
+        r = row(doc, result["r"], 1, "count", area_m2=result["area"], length_m=result["bb"],
+                area_method="bounding rectangle" if result["approx"] else "source quantity", section="rooms")
+        rows.append(r)
+    calc = summed(res, rows, "rooms", "room count = Σ(1 per room); other quantities have separate units and totals")
+    calc["result"]["additional"] = []
+    # Include full derivations before adding the per-room schedule values.
+    for prefix, report in (("baseboard-", baseboard_result), ("slabs-", slab_result)):
+        if report and report.get("_calc"):
+            append_calculation(calc, report["_calc"], prefix)
+    for idx, result in enumerate(room_results):
+        if not number(result["area"]): continue
+        it = result["r"]
+        ref = source(doc, it, "bbox_m (bounding rectangle)" if result["approx"] else "room area quantity")
+        sid = f"room-area-{idx}"
+        calc["steps"].append(step(sid, "Room floor area", "source room area" if not result["approx"] else "bounding rectangle area", result["area"], "m2",
+                                  [input_value("floor area", result["area"], "m2", ref)],
+                                  "Rectangle approximation, as stated in the answer" if result["approx"] else "", "source"))
+        calc["result"]["additional"].append({"label": it.label or it.name or "Room floor area", "value": result["area"], "unit": "m2", "step_id": sid})
+    for label, items in (("doors", doors), ("windows", windows)):
+        sid = f"schedule-{label}"
+        extra = [row(doc, it, 0, "count", **{label + "_count": 1}, section=label) for it in items]
+        calc["rows"].extend(extra)
+        calc["steps"].append(step(sid, f"Count {label}", "Σ(1 per selected item)", len(items), "count",
+                                  [input_value(it.label or it.name or label, 1, "count", source(doc, it)) for it in items], operation="sum"))
+        calc["result"]["additional"].append({"label": label, "value": len(items), "unit": "count", "step_id": sid})
+    if piping:
+        for index, (name, group) in enumerate((piping.get("rollups", {}).get("by_system") or {}).items()):
+            val = group.get("length_m")
+            if not number(val): continue
+            ref = {**source(doc), "artifact": "piping.json", "field": f"rollups.by_system.{name}.length_m"}
+            sid = f"piping-system-{index}"
+            calc["steps"].append(step(sid, f"Pipe length: {name}", "stored system length", val, "m", [input_value("system length", val, "m", ref)], operation="source"))
+            calc["result"]["additional"].append({"label": name, "value": val, "unit": "m", "step_id": sid})
+    return record(res, calc)

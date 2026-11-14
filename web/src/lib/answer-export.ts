@@ -2,6 +2,7 @@ import type { Answer, Bbox, Document, SavedChat } from './types'
 import { savedExchanges } from './chat-history'
 import { kindFromItemId, kindStyle } from './kind-colors'
 import { confidenceText, marginText } from './evidence-format'
+import { calculationLines } from './calc-export'
 
 export interface ReportSource {
   docId: string
@@ -182,6 +183,7 @@ function evidenceLines(reasoning: Answer['reasoning']): string[] {
       if (term.measurement) lines.push(`${term.measurement.formula}: ${term.measurement.operands.map((operand) => `${operand.value} ${operand.unit}`).join(' × ')} = ${term.value} ${term.unit}`)
     }
   }
+  if (reasoning.calc) lines.push(...calculationLines(reasoning.calc))
   return lines
 }
 

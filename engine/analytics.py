@@ -45,8 +45,12 @@ def _done(question, doc, text, value, unit, items, trace, route="analytics", t0=
     boxes, cites, scene = _evidence(doc, items)
     route = "index" if doc.mode == "ifc" else "planmap"  # answer.schema.json route enum has no "analytics"
     marks = "".join(f"[{c['n']}]" for c in cites)
-    return _answer_obj(question, [doc.doc_id], scrub(text.replace("{marks}", marks)), value, unit, 1.0 if doc.mode == "ifc" else 0.85, False,
-                       boxes, cites, scene, trace, route, t0 or time.perf_counter())
+    res = _answer_obj(question, [doc.doc_id], scrub(text.replace("{marks}", marks)), value, unit, 1.0 if doc.mode == "ifc" else 0.85, False,
+                      boxes, cites, scene, trace, route, t0 or time.perf_counter())
+    if value is None and unit in ("m2", "m²") and items:
+        from engine.calc_routes import individual
+        individual(res, doc, items, {"area_m2": ("m2", lambda i: _qty(i, "room", "area"))})
+    return res
 
 
 def filtered_question(question: str, doc: Doc, t0) -> dict | None:
@@ -165,11 +169,22 @@ def arithmetic_question(question: str, doc: Doc, t0, solve_fn) -> dict | None:
     def value(res):
         a = res.get("answer") or {}
         return a.get("value") if not a.get("abstained") and isinstance(a.get("value"), (int, float)) else None
-    def result(text, val, unit, parts):
+    def result(text, val, unit, parts, operation="sum", denominator=None, percent=False):
         ids = {i for r in parts for c in r.get("citations", []) for i in c.get("item_ids", [])}
         trace = [_step("route", "arithmetic -> independent solver results, no model"),
                  _step("calculate", "; ".join(f"{p['question']}: {value(p)}" for p in parts))]
-        return _done(question, doc, text + " {marks}", val, unit, [i for i in doc.items if i.item_id in ids], trace, t0=t0)
+        res = _done(question, doc, text + " {marks}", val, unit, [i for i in doc.items if i.item_id in ids], trace, t0=t0)
+        if val is not None:
+            from engine.calc import input_value, record_items
+            from engine.calc_routes import combine
+            for part in parts:
+                if not part.get("_calc"):
+                    selected = {iid for c in part.get("citations", []) for iid in c.get("item_ids", [])}
+                    pu = part["answer"].get("unit")
+                    record_items(part, doc, [(i, 1 if pu == "count" else _qty(i, i.kind, "area")) for i in doc.items if i.item_id in selected])
+            combine(res, parts, operation, "combine the independently cited source quantities", denominator=denominator,
+                    multiplier=input_value("percent factor", 100, "%/ratio", {"kind": "conversion", "text": "1 ratio = 100 percent"}) if percent else None)
+        return res
     def unavailable(parts):
         res = result("I cannot compute this comparison or ratio because an operand is missing, incomplete or the denominator is zero. No unfiltered count is substituted.", None, None, parts)
         res["answer"]["confidence"] = 0.5
@@ -185,7 +200,9 @@ def arithmetic_question(question: str, doc: Doc, t0, solve_fn) -> dict | None:
         correction = f"The model has **{n:g} {_noun(kind, n)}, not {premise[1]}**." if n != int(premise[1]) else f"The model has **{n:g} {_noun(kind, n)}**."
         if re.search(r"\baverage\b", q) and doc.storeys:
             avg = n / len(doc.storeys)
-            return result(f"{correction} Across the **{len(doc.storeys)} declared storeys**, the average is **{avg:.1f} per storey**, including storeys with zero.", round(avg, 4), "count", [total])
+            from engine.calc import input_value, source
+            return result(f"{correction} Across the **{len(doc.storeys)} declared storeys**, the average is **{avg:.1f} per storey**, including storeys with zero.", round(avg, 4), "count", [total], "divide",
+                          input_value("declared storeys", len(doc.storeys), "count", source(doc, field="storeys")))
         return result(correction, n, "count", [total])
     if re.search(r"\b(?:percentage|percent)\b", q) and kind and st:
         numerator, denominator = sub(kind), sub(kind, scoped=False)
@@ -193,14 +210,14 @@ def arithmetic_question(question: str, doc: Doc, t0, solve_fn) -> dict | None:
         if n is None or d is None or d == 0:
             return unavailable([numerator, denominator])
         pct = n / d * 100
-        return result(f"**{pct:.1f}%** of the {_noun(kind)} are on **{st}**: **{n:g} of {d:g}**.", round(pct, 1), "%", [numerator, denominator])
+        return result(f"**{pct:.1f}%** of the {_noun(kind)} are on **{st}**: **{n:g} of {d:g}**.", round(pct, 1), "%", [numerator, denominator], "divide", percent=True)
     if re.search(r"window[ -]to[ -]floor\s+area\s+ratio", q):
         numerator, denominator = sub("window", area=True), sub("room", area=True)
         n, d = value(numerator), value(denominator)
         if n is None or d is None or d == 0:
             return unavailable([numerator, denominator])
         pct = n / d * 100
-        return result(f"The window-to-floor area ratio{suffix} is **{pct:.1f}%**: **{n:.2f} m²** of windows ÷ **{d:.2f} m²** of net room floor area × 100.", round(pct, 1), "%", [numerator, denominator])
+        return result(f"The window-to-floor area ratio{suffix} is **{pct:.1f}%**: **{n:.2f} m²** of windows ÷ **{d:.2f} m²** of net room floor area × 100.", round(pct, 1), "%", [numerator, denominator], "divide", percent=True)
     pair = re.search(r"\b(more|fewer|less)\s+(windows?|doors?|walls?|rooms?)\s+than\s+(windows?|doors?|walls?|rooms?)\b", q)
     if pair:
         a, b = pair[2].rstrip("s"), pair[3].rstrip("s")
@@ -209,7 +226,7 @@ def arithmetic_question(question: str, doc: Doc, t0, solve_fn) -> dict | None:
         if n is None or d is None:
             return unavailable([left, right])
         yes = n > d if pair[1] == "more" else n < d
-        return result(f"**{'Yes' if yes else 'No'}**{suffix}: **{n:g} {_noun(a, n)}** vs **{d:g} {_noun(b, d)}**.", abs(n - d), "count", [left, right])
+        return result(f"**{'Yes' if yes else 'No'}**{suffix}: **{n:g} {_noun(a, n)}** vs **{d:g} {_noun(b, d)}**.", abs(n - d), "count", [left, right], "abs_difference")
     threshold = re.search(r"\b(?:are|is) there\s+(more than|fewer than|less than|at least|at most|over|under)\s+(\d+)\s+(doors?|windows?|walls?|rooms?)\b", q)
     if threshold:
         op, bound, kind = threshold[1], int(threshold[2]), threshold[3].rstrip("s")
@@ -316,7 +333,9 @@ def total_and_storey(question: str, doc: Doc, t0) -> dict | None:
     on = [i for i in items if i.storey == st]
     trace = [_step("route", f"count / {kind} / total + storey -> code, no model"), _step("count", f"{len(items)} total, {len(on)} on {st}")]
     text = f"There are **{len(items)} {_noun(kind, len(items))}** in total in this model and **{len(on)}** on **{st}**. {{marks}}"
-    return _done(question, doc, text, len(items), "count", on or items, trace, t0=t0)
+    res = _done(question, doc, text, len(items), "count", on or items, trace, t0=t0)
+    from engine.calc import record_items
+    return record_items(res, doc, [(i, 1) for i in items], note="The headline is the whole-building total; the citation also selects the requested storey.")
 
 
 
@@ -370,7 +389,9 @@ def storey_pair(question: str, doc: Doc, t0) -> dict | None:
     what = f"{kind} area" if area else _noun(kind)
     trace = [_step("route", f"storey pair / {kind} / {'area' if area else 'count'} -> code, no model"), _step("count", parts)]
     text = f"{verdict} By floor: {parts}. {{marks}}"
-    return _done(question, doc, text, score[hi] - score[lo], "m2" if area else "count", items, trace, t0=t0)
+    res = _done(question, doc, text, score[hi] - score[lo], "m2" if area else "count", items, trace, t0=t0)
+    from engine.calc_routes import difference_groups
+    return difference_groups(res, doc, items, hi, lo, area)
 
 
 def storey_table(question: str, doc: Doc, t0) -> dict | None:
@@ -460,7 +481,9 @@ def kind_compare(question: str, doc: Doc, t0) -> dict | None:
         hi, lo = (a, b) if na > nb else (b, a)
         verdict = f"There are more **{_noun(hi)}**: **{max(na, nb)}** {_noun(hi)} vs **{min(na, nb)}** {_noun(lo)}."
     trace = [_step("route", f"kind comparison / {a} vs {b} -> code, no model"), _step("count", f"{na} {_noun(a)}, {nb} {_noun(b)}")]
-    return _done(question, doc, f"{verdict} {{marks}}", abs(na - nb), "count", counts[a] + counts[b], trace, t0=t0)
+    res = _done(question, doc, f"{verdict} {{marks}}", abs(na - nb), "count", counts[a] + counts[b], trace, t0=t0)
+    from engine.calc_routes import difference_groups
+    return difference_groups(res, doc, counts[a] + counts[b], a, b, False, by="kind")
 
 
 EXACT = re.compile(r"\bhow many\s+(?:of the\s+)?(?:\w+\s+)?(doors?|windows?)\b.*?\b(?:are|is|have|with|measuring|measure)?\s*(?:a\s+)?(?:width|height|clear width)?\s*(?:of\s+)?(?:exactly\s+|about\s+|around\s+)?(\d+(?:[.,]\d+)?)\s*(mm|cm|m|metres?|meters?)\s*(wide|high|tall|in width|in height)\b", re.I)
@@ -811,7 +834,10 @@ def room_list(question: str, doc: Doc, t0) -> dict | None:
     tot = round(sum(a for _l, a, _r in rows if a), 2)
     head = f"**{len(rows)} rooms**{f' on **{st}**' if st else ''}, total **{_fmt(tot)} m²**, largest first:"
     trace = [_step("route", "list rooms with areas -> room items sorted by area, no model"), _step("filter", f"{len(rows)} rooms")]
-    return _done(question, doc, head + "\n" + "\n".join(lines) + more + (("\n\n" + scale_note(doc).strip()) if scale_note(doc) else ""), tot, "m2", [r for _l, _a, r in rows], trace, t0=t0)
+    res = _done(question, doc, head + "\n" + "\n".join(lines) + more + (("\n\n" + scale_note(doc).strip()) if scale_note(doc) else ""), tot, "m2", [r for _l, _a, r in rows], trace, t0=t0)
+    from engine.calc import record, row, summed
+    audit_rows = [row(doc, r, a if a is not None else 0, "m2", excluded_reason="Area missing; excluded from total" if a is None else "") for _l, a, r in rows]
+    return record(res, summed(res, audit_rows, note="Rows with no area contribute zero and explicitly say they are excluded. Bounding rectangle areas are approximations where stated."))
 
 
 # ------------------------------------------------------------------ E-52: baseboard / skirting in linear metres

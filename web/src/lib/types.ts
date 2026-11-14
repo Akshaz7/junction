@@ -33,12 +33,28 @@ export interface EvidenceMargin {
   value: number | null; unit: string; pct: number | null; why: string; sources: string[]; scope?: string
   by_kind?: Record<string, EvidenceMargin>
 }
+export interface CalculationSource {
+  kind?: string; doc_id?: string; page?: number; item_id?: string | null; bbox?: Bbox | null
+  artifact?: string; field?: string; text?: string; step_id?: string
+}
+export interface Calculation {
+  formula: string
+  steps: { id: string; label: string; expr: string; value: number | null; unit: string; note?: string; operation?: string;
+    inputs: { name: string; value: unknown; unit: string; source: CalculationSource }[] }[]
+  rows: { item_id: string; label: string; values: Record<string, unknown>; source: CalculationSource }[]
+  result: { value: number | Record<string, number>; unit: string; rounded_as: string;
+    additional?: { label: string; value: number; unit: string; rounded_as?: string; step_id?: string }[] }
+  checks: { method: string; value?: number; agrees?: boolean; diff_pct?: number | null; source?: CalculationSource }[]
+  margin: EvidenceMargin
+  status?: 'complete' | 'incomplete'; issues?: string[]
+}
 export interface Reasoning {
   steps: ReasoningStep[]
   confidence: { label: 'Verified' | 'Cross-checked' | 'Estimate'; pct: number | null; reason: string; improve?: string | null; calibration?: { n: number; correct: number; source: string; scope?: string; interval_95?: [number, number] | null } | null }
   margin?: EvidenceMargin
   based_on?: { elements: number; estimated: number; unresolved: number; text: string }
   arithmetic?: { formula: string; text: string; terms: { doc_id: string; item_id: string; cite?: number | null; value: number; unit: string; measurement?: { formula: string; operands: { value: number; unit: string }[] } }[]; result: number; unit: string }[]
+  calc?: Calculation
 }
 
 export interface Answer {

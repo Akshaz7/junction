@@ -17,7 +17,10 @@ from pathlib import Path
 
 
 def number(value):
-    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+    try:
+        return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+    except OverflowError:
+        return False
 
 
 def unit_name(unit):
@@ -56,6 +59,8 @@ class Row:
 
 
 def input_value(name, value, unit, source):
+    if source.get("origin") in ("det", "seg", "vlm", "vision"):
+        name = "Model output: " + name
     return asdict(Input(name, value, unit_name(unit), source))
 
 
@@ -64,10 +69,10 @@ def step(id, label, expr, value, unit, inputs=(), note="", operation="source"):
 
 
 def source(doc, item=None, field=""):
-    return {"doc_id": doc.doc_id, "page": item.page if item else 1,
+    return {"doc_id": doc.meta.get("sheet_of") or doc.doc_id, "page": item.page if item else 1,
             "item_id": item.item_id if item else None, "bbox": item.bbox_px if item else None,
             "artifact": "elements.json" if doc.mode == "ifc" else f"planmap-{item.page if item else 1}.json",
-            "field": field, "kind": "element" if item else "document"}
+            "field": field, "kind": "element" if item else "document", "origin": item.source if item else doc.mode}
 
 
 def question_source(question):
@@ -220,6 +225,45 @@ def _json(path):
         return {}
 
 
+def _measurement_steps(calc, root):
+    """Expose cached outline measurements using each page's recorded scale."""
+    cache, extra = {}, []
+    for index, r in enumerate(calc.get("rows", [])):
+        ref = r.get("source") or {}
+        artifact = ref.get("artifact") or ""
+        value = r.get("values", {}).get("area_m2")
+        if not number(value) or not artifact.startswith("planmap-") or not ref.get("item_id"):
+            continue
+        path = root / ref["doc_id"] / artifact
+        if path not in cache:
+            pm = _json(path)
+            cache[path] = (pm, {i.get("item_id"): i for i in pm.get("items", [])})
+        pm, items = cache[path]
+        item = items.get(ref["item_id"]) or {}
+        scale = (pm.get("scale") or {}).get("m_per_px")
+        props = item.get("props") or {}
+        poly = item.get("polygon_px")
+        px = props.get("area_px")
+        if not number(px) and poly:
+            from engine.reasoning import _shoelace
+            px = _shoelace(poly)
+        if not number(px) or not number(scale): continue
+        measured = px * scale * scale
+        printed = props.get("area_m2_label")
+        if number(printed):
+            calc.setdefault("checks", []).append({"method": "printed room area versus outline", "value": printed,
+                                                    "agrees": close(printed, measured, .005), "diff_pct": abs(printed - measured) / abs(printed) * 100 if printed else None,
+                                                    "source": ref})
+        if not close(measured, value, .005): continue
+        sid = f"outline-{index}"
+        extra.append(step(sid, "Outline area and scale", "outline area × metres per pixel × metres per pixel", measured, "m2",
+                          [input_value("outline area (shoelace)", px, "px2", {**ref, "field": "props.area_px / polygon_px"}),
+                           input_value("page scale", scale, "m/px", {**ref, "kind": "scale", "item_id": None, "field": "scale.m_per_px"}),
+                           input_value("page scale", scale, "m/px", {**ref, "kind": "scale", "item_id": None, "field": "scale.m_per_px"})],
+                          f"Page scale method: {(pm.get('scale') or {}).get('method')}; cached area may already be rounded. Scale confidence is not an error bound.", "multiply"))
+    calc["steps"] = extra + calc["steps"]
+
+
 def _cited(res, root):
     from engine.solvers.data import load_doc, load_sheet_parent
     docs, seen, result, missing = {}, set(), [], []
@@ -234,7 +278,7 @@ def _cited(res, root):
         lookup = {(i.page, i.item_id): i for i in doc.items} if doc else {}
         fallback = {i.item_id: i for i in doc.items} if doc else {}
         for iid in c.get("item_ids") or []:
-            identity = (did, c.get("page", 1), iid)
+            identity = (did, None if doc and doc.mode == "ifc" else c.get("page", 1), iid)
             if identity in seen: continue
             seen.add(identity)
             it = lookup.get((c.get("page", 1), iid)) or fallback.get(iid)
@@ -249,7 +293,7 @@ def _cited(res, root):
 def _default(res, question, root):
     from engine.solvers.solve import _qty
     ans = res["answer"]
-    unit, value = unit_name(ans.get("unit")), ans.get("value")
+    unit, value = unit_name(ans.get("unit")) or "count", ans.get("value")
     items, missing = _cited(res, root)
     rows, issues = [], []
     for doc, it in items:
@@ -275,9 +319,22 @@ def _default(res, question, root):
             calc["steps"].append(step(f"category-{kind}", f"Count {kind}", f"Σ({kind} items)", n, "count",
                                        [input_value(r["label"], 1, "count", r["source"]) for r in rs], operation="sum"))
     else:
-        calc = summed(res, rows, formula="count = Σ(1 per selected item)" if unit == "count" else "total = Σ(source quantities)")
+        calc = summed(res, rows, unit, formula="count = Σ(1 per selected item)" if unit == "count" else "total = Σ(source quantities)")
         if not rows and value != 0:
             issues.append("No per-element operands were recorded for this numeric answer.")
+        if not rows and value == 0:
+            for did in res.get("doc_ids") or []:
+                folder = root / did
+                files = [folder / "elements.json"] if (folder / "elements.json").is_file() else sorted(folder.glob("planmap-[0-9]*.json"))
+                for index, path in enumerate(files):
+                    data = _json(path)
+                    population = len(data.get("elements", data.get("items", [])))
+                    ref = {"kind": "document", "doc_id": did, "page": data.get("page", 1), "artifact": path.name, "field": "elements" if "elements" in data else "items"}
+                    calc["steps"].insert(0, step(f"scope-{did}-{index}", "Search scope", "source inventory before question filters", population, "count",
+                                                 [input_value("source inventory", population, "count", ref)],
+                                                 "Zero is the number of matches in this inventory, not proof that the building contains none.", "source"))
+            if not any(s["id"].startswith("scope-") for s in calc["steps"]):
+                issues.append("The inventory searched for this zero result is unavailable.")
     calc["issues"] = issues
     return calc
 
@@ -285,7 +342,32 @@ def _default(res, question, root):
 def validate(calc, root=None):
     """Return invariant failures; complete never means source completeness is known."""
     issues = list(calc.get("issues") or [])
-    known = {}
+    known, artifact_cache = {}, {}
+    def check_source(ref, label):
+        kind = ref.get("kind")
+        if kind == "step":
+            if ref.get("step_id") not in known: issues.append(f"{label}: source calculation step is missing.")
+        elif kind in ("question", "assumption", "policy", "conversion"):
+            if not ref.get("text"): issues.append(f"{label}: unlabelled {kind} input.")
+        elif kind in ("element", "document", "model", "scale", "geometry"):
+            if not ref.get("doc_id"): issues.append(f"{label}: source document missing.")
+            if root is not None and kind != "model":
+                artifact = ref.get("artifact")
+                p = Path(root) / str(ref.get("doc_id")) / str(artifact or "")
+                if not artifact or not p.is_file():
+                    issues.append(f"{label}: source artifact missing.")
+                elif p.suffix == ".json" and ref.get("item_id"):
+                    if p not in artifact_cache:
+                        data = _json(p)
+                        candidates = data.get("elements", data.get("items", []))
+                        if "services" in data:
+                            candidates = list(data.get("services") or []) + list(data.get("structure") or [])
+                        if isinstance(candidates, list):
+                            artifact_cache[p] = {x.get("item_id", x.get("id")) for x in candidates if isinstance(x, dict)}
+                        else: artifact_cache[p] = set(candidates)
+                    if ref["item_id"] not in artifact_cache[p]: issues.append(f"{label}: source item does not exist in its artifact.")
+        else:
+            issues.append(f"{label}: input source is not resolvable.")
     for s in calc.get("steps", []):
         for i in s.get("inputs", []):
             ref = i.get("source") or {}
@@ -294,27 +376,28 @@ def validate(calc, root=None):
                 prev = known.get(ref.get("step_id"))
                 if prev is None or not close(prev.get("value"), i.get("value")):
                     issues.append(f"{s['id']}: unresolved or mismatched calculation input {i.get('name')}.")
-            elif kind in ("question", "assumption", "policy", "conversion"):
-                if not ref.get("text"): issues.append(f"{s['id']}: unlabelled {kind} input.")
-            elif kind in ("element", "document", "model", "scale", "geometry"):
-                if not ref.get("doc_id"): issues.append(f"{s['id']}: source document missing.")
-                if root is not None and kind != "model":
-                    artifact = ref.get("artifact")
-                    p = Path(root) / str(ref.get("doc_id")) / str(artifact or "")
-                    if not artifact or not p.is_file(): issues.append(f"{s['id']}: source artifact missing.")
-            else:
-                issues.append(f"{s['id']}: input source is not resolvable.")
+            check_source(ref, s["id"])
         actual = evaluate(s.get("operation"), [i.get("value") for i in s.get("inputs", [])])
         if not close(actual, s.get("value")):
             issues.append(f"{s['id']}: operands do not reproduce the recorded value.")
         known[s["id"]] = s
+    for row in calc.get("rows", []):
+        check_source(row.get("source") or {}, row.get("item_id") or "row")
     value = calc.get("result", {}).get("value")
     if isinstance(value, dict):
         for k, v in value.items():
             if not close((known.get(f"category-{k}") or {}).get("value"), v):
                 issues.append(f"No matching result step for {k}.")
+    elif value is None and calc.get("result", {}).get("mode") == "per-element":
+        pass
     elif not close((known.get("result") or {}).get("value"), value):
         issues.append("Final calculation does not match the answer value.")
+    for result in calc.get("result", {}).get("additional", []):
+        s = known.get(result.get("step_id"))
+        precision = result.get("rounded_as", "")
+        tolerance = .5 * 10 ** -int(precision.split()[0]) if precision.split() and precision.split()[0].isdigit() else 1e-8
+        if not s or not close(s["value"], result.get("value"), tolerance):
+            issues.append(f"Secondary result {result.get('label')} does not match its calculation.")
     key, target = calc.get("row_key"), calc.get("row_total_step")
     if key and target:
         values = [r.get("values", {}).get(key) for r in calc.get("rows", [])]
@@ -323,16 +406,23 @@ def validate(calc, root=None):
     return list(dict.fromkeys(issues))
 
 
-def attach(res, question, root):
+def _attach(res, question, root):
     ans = res.get("answer") or {}
     value = ans.get("value")
-    if ans.get("abstained") or not (number(value) or isinstance(value, dict) and value and all(number(v) for v in value.values())):
+    if ans.get("abstained") or not (res.get("_calc") or number(value) or isinstance(value, dict) and value and all(number(v) for v in value.values())):
         res.pop("_calc", None)
         return res
     root = Path(root)
     calc = res.pop("_calc", None)
     if not calc or calc.get("result", {}).get("value") != value:
         calc = _default(res, question, root)
+    _measurement_steps(calc, root)
+    if number(value) and res.get("route") in ("hybrid", "vlm") and any(s.get("model") and s.get("step") not in ("explain", "context", "typos") for s in res.get("trace", [])):
+        cited = (res.get("citations") or [{}])[0]
+        calc["steps"].append(step("model-final", "Reported model output", "model-provided value (not independent arithmetic)", value, ans.get("unit"),
+                                  [input_value("model-reported answer", value, ans.get("unit"), {"kind": "model", "doc_id": cited.get("doc_id") or next(iter(res.get("doc_ids") or []), None),
+                                                                                           "page": cited.get("page", 1), "bbox": cited.get("bbox_px"), "field": "answer.value"})],
+                                  "The source rows above show what can be checked independently; unresolved differences stay marked incomplete.", "source"))
     reasoning = res.setdefault("reasoning", {"steps": [], "confidence": {"label": "Estimate", "pct": None,
                                                                             "reason": "Calculation sources have not been independently verified."}})
     calc["margin"] = copy.deepcopy(reasoning.get("margin") or {"value": None, "unit": unit_name(ans.get("unit")), "pct": None,
@@ -346,7 +436,39 @@ def attach(res, question, root):
                "text": model["label"], "field": "trace.recount"}
         calc["steps"].append(step(f"model-{idx}", model["label"], "recorded model output", model["value"], ans.get("unit"),
                                   [input_value(model["label"], model["value"], ans.get("unit"), ref)], model.get("policy", ""), "source"))
+    # Keep the exact API value and the rounded quantity printed in the headline.
+    if number(value):
+        import re
+        heads = re.findall(r"\*\*(.+?)\*\*", ans.get("text_md") or "")
+        for index, token in enumerate(re.findall(r"(?<![\w.])-?\d[\d,]*(?:\.\d+)?(?![\w.])", " ".join(heads))):
+            token = token.replace(",", "")
+            nd = len(token.partition(".")[2])
+            shown = float(token)
+            if close(round(value, nd), shown) and not close(value, shown):
+                sid = f"display-result-{index}"
+                calc["steps"].append(step(sid, "Round for display", f"round({value}, {nd})", shown, calc["result"]["unit"],
+                                          [input_value("recorded result", value, calc["result"]["unit"], step_source("result")),
+                                           input_value("display decimal places", nd, "decimal places", {"kind": "policy", "text": "Precision printed in the answer headline"})], operation="round"))
+                calc["result"].setdefault("additional", []).append({"label": "Displayed answer", "value": shown, "unit": calc["result"]["unit"], "step_id": sid, "rounded_as": f"{nd} decimal places"})
+                break
     issues = validate(calc, root)
     calc["issues"], calc["status"] = issues, "incomplete" if issues else "complete"
     reasoning["calc"] = calc
     return res
+
+
+def attach(res, question, root):
+    """Malformed/missing source data must never turn an answer into a crash."""
+    try:
+        return _attach(res, question, root)
+    except (ArithmeticError, ValueError, TypeError, KeyError, OSError) as exc:
+        for key in ("_calc", "_calc_models", "_calc_extras"):
+            res.pop(key, None)
+        reasoning = res.setdefault("reasoning", {"steps": [], "confidence": {"label": "Estimate", "pct": None,
+                                                                                "reason": "The calculation could not be reproduced from source data."}})
+        reasoning["calc"] = {"formula": "Calculation unavailable", "steps": [], "rows": [], "checks": [],
+                              "result": {"value": (res.get("answer") or {}).get("value"), "unit": unit_name((res.get("answer") or {}).get("unit")), "rounded_as": "as reported"},
+                              "margin": reasoning.get("margin") or {"value": None, "unit": unit_name((res.get("answer") or {}).get("unit")), "pct": None,
+                                                                      "why": "The source operands could not be resolved.", "sources": []},
+                              "status": "incomplete", "issues": [f"Source calculation unavailable ({type(exc).__name__})."]}
+        return res

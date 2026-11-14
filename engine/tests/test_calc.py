@@ -51,6 +51,12 @@ def test_cross_document_id_collision(tmp_path):
     assert c["status"] == "complete" and len(c["rows"]) == 4
 
 
+def test_ifc_citations_on_two_pages_do_not_double_count(tmp_path):
+    r = response(3)
+    r["citations"].append({"doc_id": "test", "page": 2, "item_ids": ["a"]})
+    assert calc.attach(r, r["question"], artifact(tmp_path))["reasoning"]["calc"]["status"] == "complete"
+
+
 def test_explicit_allowance_and_rounding(tmp_path):
     from engine.calc_routes import allowance
     root = artifact(tmp_path)
@@ -103,3 +109,40 @@ def test_invalid_source_step_is_incomplete():
     c = calc.summed(r, [calc.row(d, d.items[0], 1, "count")])
     c["steps"][0]["inputs"][0]["source"] = calc.step_source("missing")
     assert any("unresolved" in issue for issue in calc.validate(c))
+
+
+def test_source_item_must_exist_in_artifact(tmp_path):
+    r = response(1)
+    d = Doc("test", "ifc", [Item("not-in-file", "door")])
+    calc.record_items(r, d, [(d.items[0], 1)])
+    c = calc.attach(r, r["question"], artifact(tmp_path))["reasoning"]["calc"]
+    assert c["status"] == "incomplete" and any("does not exist" in s for s in c["issues"])
+
+
+def test_reader_number_is_labelled_as_model_input(tmp_path):
+    r = response(6)
+    r["route"] = "hybrid"
+    r["trace"] = [{"step": "answer", "model": "test-model"}]
+    c = calc.attach(r, r["question"], artifact(tmp_path))["reasoning"]["calc"]
+    assert c["status"] == "incomplete"
+    assert any(i["source"].get("kind") == "model" and i["value"] == 6 for s in c["steps"] for i in s["inputs"])
+
+
+def test_display_precision_keeps_api_value_and_headline(tmp_path):
+    root = artifact(tmp_path)
+    d = Doc("test", "ifc", [Item("a", "room", q={"area_m2": 16.5432})])
+    r = response(16.5432, "m2")
+    r["answer"]["text_md"] = "**16.5 m²**"
+    calc.record_items(r, d, [(d.items[0], 16.5432)])
+    c = calc.attach(r, r["question"], root)["reasoning"]["calc"]
+    assert c["status"] == "complete" and c["result"]["value"] == 16.5432
+    assert any(v["value"] == 16.5 for v in c["result"]["additional"])
+
+
+def test_non_finite_source_never_crashes_or_claims_complete(tmp_path):
+    root = artifact(tmp_path)
+    raw = json.loads((root / "test/elements.json").read_text())
+    raw["elements"][0]["quantities"] = {"area_m2": float("inf")}
+    (root / "test/elements.json").write_text(json.dumps(raw))
+    r = response(7, "m2")
+    assert calc.attach(r, r["question"], root)["reasoning"]["calc"]["status"] == "incomplete"

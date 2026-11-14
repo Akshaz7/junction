@@ -87,8 +87,7 @@ def convert(res: dict, question: str) -> dict:
         out = copy.deepcopy(res)
         out["answer"]["text_md"] = text.rstrip() + "\n\n" + "; ".join(clauses) + "."
         from engine.calc import converted_step, input_value, question_source, step
-        ref = {"kind": "model" if res.get("route") in ("hybrid", "vlm") else "document",
-               "doc_id": next(iter(res.get("doc_ids") or []), ""), "artifact": "doc.json", "field": "answer.value"}
+        ref = {"kind": "step", "step_id": "result"}
         extras = out.setdefault("_calc_extras", [])
         if tgt and tgt[2] == unit:
             label, factor, _ = tgt

@@ -1122,7 +1122,9 @@ def _struct_answer(c: _Ctx, kinds: list[str], want: str) -> dict | None:
                    found=f"{_int(n)} {word}{f' on {st}' if st else ''}", measured=f"Added the model's own volume of {_int(len(sel))} elements: {_n(tot)} m³",
                    cap_pct=cap, cap_reason=("Volumes are the model's own; some elements have no volume, no clear material, or are layered." if cap else None),
                    improve="Ask for a model with quantity take-off (volumes) and named materials." if cap else None,
-                   calc_values={i.item_id: v for _, i, _, v in sel})
+                   calc_values={i.item_id: {"value": v, "volume": next(x[3] for x in have if x[1].item_id == i.item_id),
+                                            "fraction": next(x[4] for x in have if x[1].item_id == i.item_id) if conc_only else 1,
+                                            "indexed": r is not None} for _, i, r, v in sel})
 
 
 def _loadbearing_walls(c: _Ctx) -> dict | None:
