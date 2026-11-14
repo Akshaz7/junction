@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+asyncpg
+httpx
+pydantic
+sse-starlette
+python-multipart
+python-dotenv
+pyyaml
+jsonschema

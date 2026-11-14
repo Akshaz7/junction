@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://hologram-api.vercel.app/api/:path*" }
+  ]
+}

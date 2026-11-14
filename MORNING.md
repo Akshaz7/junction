@@ -1,6 +1,6 @@
 # MORNING: report for Ash
 
-_Last updated: Sat 14 Nov 09:00 EET (run 1). See TASKS.md for every row._
+_Last updated: Sat 14 Nov 09:15 EET (run 1). See TASKS.md for every row._
 
 ## 1. What works
 | Demo step (MASTER_PROMPT §12) | Status |
@@ -25,8 +25,9 @@ _Last updated: Sat 14 Nov 09:00 EET (run 1). See TASKS.md for every row._
 - Spend so far (`results/costs.jsonl`): Runware $0.017, ElevenLabs $0.010, NVIDIA $0 (free tier). Modal $0.
 
 ## 3. Deployed URLs
-- Web (Vercel, offline demo mode, generated sample data): https://hologram-khaki.vercel.app — checked live at 09:00 (question answered with citations, 0 page errors).
-- Backend: not yet. Aiven Runtime needs the Aiven GitHub App (builds fail without it; see deploy/README.md). The image runs healthy against hologram-pg. Once the backend is up, the web gets an /api rewrite and drops demo mode.
+- Web: https://hologram-khaki.vercel.app (Connected workspace, real answers; checked live 09:15: 12 windows on colorful-11397 with 12 citations, 0 page errors).
+- API: https://hologram-api.vercel.app (Vercel Python function, same FastAPI app as the container) on Aiven PostgreSQL hologram-pg (EU). Health ok, rate limit 30/min/IP active. Demo docs baked in (deploy/demo_artifacts).
+- Not yet: live sync across devices (/ws) — Vercel can't hold WebSockets. That moves to Aiven Runtime once the Aiven GitHub App is installed (deploy/README.md); the container image is verified.
 
 ## 4. Rows blocked
 - V-06, V-07, V-08 (vision fine-tunes): the Modal workspace is paused (every call: "Workspace … is paused"). Un-pause it in the Modal dashboard; scripts are ready (results/vision/seg_finetuned.json, det_finetuned.json).
@@ -47,7 +48,7 @@ None now. OK: NVIDIA, Runware, HF, ElevenLabs, Modal, Aiven. Missing: GEMINI_API
 
 
 ## 7. Proposed plan for the next run
-Run 1 status: every row is done (98) or blocked with a reason. Blocked on Ash: S-05 deploy (Aiven GitHub App — tried without it at 08:50: Aiven builds fail without the integration; the image itself runs healthy against hologram-pg; service hologram-api exists, powered off), I-05 iPhone install, V-06/V-07/V-08 (Modal workspace paused), D-13/D-14/V-11/E-19 (missing keys: Gemini, Anthropic, Cloudinary, Google Drive). Next run: deploy as soon as the GitHub App is in, then fine-tunes on Modal, then the improve loop on the weakest cells (length/volume abstain on all questions; ifc_models abstains on 80 %).
+Run 1 status: every row is done (98) or blocked with a reason. Deployed on Vercel (S-05 done); for live sync, install the Aiven GitHub App so the backend can move to Aiven Runtime, I-05 iPhone install, V-06/V-07/V-08 (Modal workspace paused), D-13/D-14/V-11/E-19 (missing keys: Gemini, Anthropic, Cloudinary, Google Drive). Next run: deploy as soon as the GitHub App is in, then fine-tunes on Modal, then the improve loop on the weakest cells (length/volume abstain on all questions; ifc_models abstains on 80 %).
 
 ## 8. Known weak spots to avoid in the live demo
 - Bathtub/shower counts on raster plans (0/3 on colorful-11397).
