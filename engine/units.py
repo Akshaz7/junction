@@ -37,13 +37,6 @@ def _fmt(x, dec=None):
     return f"{x:,.{dec}f}"
 
 
-def _operand(value):
-    """Show the actual multiplier; rounding the source quantity changes the displayed arithmetic."""
-    from decimal import Decimal
-    exact = format(Decimal(str(value)), ",f")
-    return exact.rstrip("0").rstrip(".") if "." in exact else exact
-
-
 def _price(question, mkind):
     """Return (rate, currency) when the question gives a unit price for the answer's metric unit."""
     q = question.lower()
@@ -88,7 +81,7 @@ def convert(res: dict, question: str) -> dict:
         if pr:
             rate, cur = pr
             cost = val * rate
-            clauses.append(f"**{_fmt(cost, 2)} {cur}** at {_operand(rate)} {cur}/{_SUP[unit]} × {_operand(val)} {_SUP[unit]}")
+            clauses.append(f"**{_fmt(cost, 2)} {cur}** at {_fmt(rate, 2 if rate != int(rate) else 0)} {cur}/{_SUP[unit]} × {_fmt(val)} {_SUP[unit]}")
         if not clauses:
             return res
         out = copy.deepcopy(res)

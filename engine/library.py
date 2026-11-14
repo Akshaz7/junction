@@ -187,14 +187,6 @@ def sheet_count_answer(question, doc_ids=(), root=None, records=None):
     pdfs = [d for d in docs if str(d.get("kind", "")).lower() == "pdf" or "pdf" in (d.get("formats") or [])]
     if pdfs:
         docs = pdfs
-    if len(docs) > 1 and not doc_ids:
-        # Preserve issue qualifiers such as "pricing" or "permit" when several
-        # sets share a project name. A tie remains ambiguous.
-        from engine.project_index import tokenize
-        terms = set(tokenize(question)) - {"sheet", "page", "set"}
-        scores = [len(terms & set(tokenize(d.get("title") or ""))) for d in docs]
-        top = max(scores, default=0)
-        docs = [d for d, score in zip(docs, scores) if score == top]
     if len(docs) != 1:
         return None
     d = docs[0]
@@ -220,9 +212,7 @@ def library_answer(question: str, root=None, records=None) -> dict | None:
         text = f"**{len(found)} documents have IFC models:**"
         cites = []
         for n, d in enumerate(found, 1):
-            title = str(d.get('project') or d.get('title') or "Untitled model")
-            title = re.sub(r"(?<=[a-z])(?=[A-Z])", " ", title).replace("_", " ")
-            text += f"\n- {title}. [{n}]"
+            text += f"\n- {d.get('project') or d.get('title') or d['doc_id']} (`{d['doc_id']}`). [{n}]"
             cites.append({"n": n, "doc_id": d["doc_id"], "page": 1, "kind": "text", "bbox_px": None,
                           "item_ids": [], "quote": f"{d.get('title') or d['doc_id']} — IFC file in document metadata"})
         return _result(question, text, docs=[d["doc_id"] for d in found], value=len(found), unit="documents", cites=cites)

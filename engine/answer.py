@@ -275,13 +275,6 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
         return comparison
     # thread memory (engine/context.py): every route below sees the resolved, standalone question and document selection
     original, step = question, None
-    from engine.solvers.requests import quantity_followup, translate_count
-    if (translated := translate_count(question)) is not None:
-        question = translated
-        step = _step("language", "common count grammar translated to English with the same object and floor")
-    if (quantity_q := quantity_followup(question, history)) is not None:
-        question = quantity_q
-        step = _step("context", "retained the previous measured quantity and waste allowance for the unit-price follow-up")
     try:  # keyboard mash or nonsense: say so, never reuse the previous answer
         from engine.gibberish import MESSAGE, is_gibberish
         if is_gibberish(question):
@@ -311,18 +304,13 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
             step = _tstep if step is None else step
     except Exception:  # noqa: BLE001
         pass
-    from engine.solvers.requests import ensure_answer_text
-    res = ensure_answer_text(ensure_markers(_guarded(question, doc_ids, on_event, scene_state, history)))
-    from engine.solvers.printed import cite_sheet_numbers
-    res = cite_sheet_numbers(res, question, _root())
+    res = ensure_markers(_guarded(question, doc_ids, on_event, scene_state, history))
     try:   # E-61: implausible raster areas and sparse uploaded plans (engine/rastersanity.py)
         if len(doc_ids) == 1:
             from engine import rastersanity
             from engine.solvers.data import load_doc
             _doc = load_doc(doc_ids[0], _root())
-            printed = (res.get("route") == "index" and bool(res.get("citations"))
-                       and all(c.get("kind") == "text" and c.get("quote") and not c.get("item_ids") for c in res["citations"]))
-            if _doc is not None and not printed:
+            if _doc is not None:
                 res = rastersanity.guard(res, question, _doc)
     except Exception:  # noqa: BLE001 — a sanity note must never break an answer
         pass
@@ -476,20 +464,15 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                 add(_step("route", f"document task: {_task}"))
                 return run_task(_task, question, doc_ids, history, on_event, trace, t0, root, calls)
         if (question or "").strip() and not os.environ.get("LIBRARY_OFF"):
-            from engine.library import library_answer, app_feature_answer, sheet_count_answer, library_search_answer
+            from engine.library import library_answer, app_feature_answer   # FIX-6: $0 library and app-feature questions
             from engine.app_help import app_help_answer                    # E-55: how-to questions answered only from engine/app_guide.md
-            _lib = (sheet_count_answer(question, doc_ids, root) or library_answer(question, root)
-                    or (library_search_answer(question, root) if not doc_ids else None)
-                    or app_help_answer(question, doc_ids) or app_feature_answer(question, doc_ids, root))
+            _lib = library_answer(question, root) or app_help_answer(question, doc_ids) or app_feature_answer(question, doc_ids, root)
             if _lib is not None:
                 for s_ in _lib["trace"]:
                     add(s_)
                 _lib["trace"] = trace
                 return _lib
         if not doc_ids:
-            from engine.library import drawing_selection_answer
-            if parse(question).type in ("count", "area", "length", "volume") and (selection := drawing_selection_answer(question, root, history)) is not None:
-                return selection
             if (question or "").strip():
                 from engine.project_answer import project_answer
                 res = project_answer(question, history, on_event, trace, t0, root, calls)
@@ -515,13 +498,6 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             return _abstained(question, doc_ids, f"The question names **{other}**, which is not among the selected documents ({sel}). "
                               "Select that document and ask again, or ask about the selected one.", trace, t0)
 
-        from engine.solvers.requests import answer_request
-        if (res := answer_request(question, doc_ids, root, t0, (scene_state or {}).get("hidden") or [])) is not None:
-            for s_ in res["trace"]:
-                add(s_)
-            res["trace"] = trace
-            return res
-
         from engine.wallarea import answer as wallarea_answer
         if (res := wallarea_answer(question, doc_ids, root, t0, hidden=set((scene_state or {}).get("hidden") or []))) is not None:
             for s_ in res["trace"]:
@@ -543,7 +519,7 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             res["trace"] = trace
             return res
         # F-ORDER: keep ordering allowances and exportable quantities together.
-        if len(doc_ids) == 1 and not re.search(r"\b(?:brands?|manufacturers?|which (?:type|product)|what (?:type|product))\b", question, re.I):
+        if len(doc_ids) == 1:
             from engine.order import answer_order
             from engine.solvers.data import load_doc as _load_order
             if (order_doc := _load_order(doc_ids[0], root)) is not None and (res := answer_order(question, order_doc, t0, root=root)) is not None:
@@ -554,8 +530,7 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
 
         if not os.environ.get("COMPLEX_Q_OFF"):    # E-59: multi-condition questions, every condition applied or named
             from engine import complex_q
-            from engine.solvers.data import load_doc as _load_complex
-            if _load_complex(doc_ids[0], root) is not None and (res := complex_q.answer(question, doc_ids, root, t0)) is not None:
+            if (res := complex_q.answer(question, doc_ids, root, t0)) is not None:
                 for s_ in res["trace"]:
                     add(s_)
                 res["trace"] = trace
@@ -614,31 +589,6 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                     return res
             except Exception:  # never break the answer path
                 pass
-
-        from engine.solvers.printed import answer_printed
-        if (res := answer_printed(question, doc_ids, root, t0)) is not None:
-            for s_ in res["trace"]:
-                add(s_)
-            res["trace"] = trace
-            return res
-
-        from engine.solvers.raster import reading_reason
-        if (reason := reading_reason(question, doc_ids, root)) is not None:
-            rr = _reader(question, doc_ids, root, trace, calls, t0, emit)
-            if rr is not None and not rr["answer"].get("abstained"):
-                return rr
-            parsed_detection = parse(question)
-            if parsed_detection.type == "count" and parsed_detection.kind not in (None, "storey"):
-                detected = solve(question, doc_ids[0], parsed=parsed_detection, root=root)
-                if not detected["answer"].get("abstained") and isinstance(detected["answer"].get("value"), (int, float, dict)):
-                    detected["answer"]["text_md"] += " " + reason + " This is the automatic detection count, not a verified total from the drawing."
-                    detected["answer"]["confidence"] = .3
-                    detected["trace"] = [*trace, *detected["trace"]]
-                    detected["cost"] = {"usd_total": round(sum(c.get("cost_usd", 0) for c in calls), 6), "calls": calls}
-                    return detected
-            res = _abstained(question, doc_ids, reason + " I cannot give a verified figure from the available detection data.", trace, t0, "hybrid", calls)
-            res["answer"].update(abstained=False, confidence=.3)
-            return res
 
         # FIX-14: engineering sheets (M-/S-/P- ids, tag or SF tables) are answered from their own text, never from a plan map
         try:
@@ -763,10 +713,6 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                     res = None
                     add(_step("analytics", f"skipped: {type(e).__name__}"))
                 if res is not None:
-                    if res.pop("needs_drawing_read", False):
-                        rr = _reader(question, doc_ids, root, trace, calls, t0, emit)
-                        if rr is not None and not rr["answer"].get("abstained"):
-                            return rr
                     emit("status", {"text": f"Exploring document: {_title(doc_ids[0], root)}"})
                     for s_ in res["trace"]:
                         add(s_)
@@ -859,11 +805,6 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             except SolverUnsupported:
                 continue
             res = _recount_ladder(res, question, did, parsed, root, calls, hid)
-            if (not os.environ.get("MODELS_FAKE") and parsed.type == "count" and parsed.kind == "room"
-                    and any(s.get("step") == "filter" and "unlabelled room(s)" in s.get("detail", "") for s in res["trace"])):
-                rr = _reader(question, [did], root, [*trace, *res["trace"]], calls, t0, emit)
-                if rr is not None and not rr["answer"].get("abstained"):
-                    return rr
             for s in res["trace"]:
                 if s["step"] != "route":
                     add(s)
