@@ -61,8 +61,10 @@ def _room_shape(n, pm, pdf):
 def link_sheet_rooms(writer, source_did, target_did, source_pm, target_pm, source_pdf, target_pdf, T, m_per_pt):
     """Match existing underlay rooms after measured alignment; retain both sources."""
     from shapely.geometry import Point
-    sources = [n for n in writer.nodes.values() if n["kind"] == "room" and (n.get("source") or {}).get("doc_id") == source_did]
-    targets = [n for n in writer.nodes.values() if n["kind"] == "room" and (n.get("source") or {}).get("doc_id") == target_did]
+    sources = [n for n in writer.nodes.values() if n["kind"] == "room" and (n.get("source") or {}).get("doc_id") == source_did
+               and (n.get("source") or {}).get("page", 1) == source_pm.get("page", 1)]
+    targets = [n for n in writer.nodes.values() if n["kind"] == "room" and (n.get("source") or {}).get("doc_id") == target_did
+               and (n.get("source") or {}).get("page", 1) == target_pm.get("page", 1)]
     if T.get("matches", T.get("n_inliers", 0)) < 4:
         return
     residual = float(T.get("residual", T.get("rms_pt", math.inf))) * m_per_pt

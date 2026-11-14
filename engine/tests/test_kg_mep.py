@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from engine.kg.mep import Writer, enrich, enrich_ifc, room_services
+from engine.kg.mep import Writer, apply_ceiling_notes, enrich, enrich_ifc, room_services
 from engine.kg.mep_sheets import link_sheet_rooms
 from engine.kg.mep_spatial import enrich_spatial
 
@@ -189,6 +189,42 @@ def test_enrich_is_idempotent(tmp_path):
     counts = (len(graph["nodes"]), len(graph["edges"]))
     enrich(graph, project, tmp_path)
     assert (len(graph["nodes"]), len(graph["edges"])) == counts
+
+
+def test_writer_preserves_repeated_local_ids_on_different_pages():
+    graph = {"nodes": [], "edges": []}
+    w = Writer(graph)
+    first = w.node("terminal", "sheet", "outlet", "Outlet", page=1)
+    second = w.node("terminal", "sheet", "outlet", "Outlet", page=2)
+    assert first["id"] != second["id"]
+    assert first["source"]["page"] == 1 and second["source"]["page"] == 2
+    assert w.node("terminal", "sheet", "outlet", "Outlet", page=2) is second
+
+
+def test_ceiling_notes_require_room_and_source_and_preserve_disagreements():
+    room = node("room", "sheet", "r")
+    graph = {"nodes": [room], "edges": []}
+    note = {"room": {"doc_id": "sheet", "page": 1, "item_id": "r"}, "ceiling_height_m": 2.7,
+            "source": {"doc_id": "sheet", "page": 1, "bbox": [1, 2, 3, 4], "quote": "Clear ceiling height 2700 mm"}}
+    assert apply_ceiling_notes(graph, [{**note, "source": {}}]) == 0
+    assert apply_ceiling_notes(graph, [note]) == 1
+    assert room["props"]["ceiling_height_m"] == 2.7
+    assert apply_ceiling_notes(graph, [{**note, "ceiling_height_m": 3}]) == 1
+    assert room["props"]["ceiling_height_m"] == 2.7
+    assert len(room["props"]["ceiling_height_notes"]) == 2
+    assert "differ" in room["props"]["ceiling_height_note"]
+
+
+def test_original_pdf_change_invalidates_graph_fingerprint(tmp_path):
+    from engine.kg.cache import fingerprint
+    folder = tmp_path / "sheet"
+    folder.mkdir()
+    source = folder / "input.pdf"
+    source.write_bytes(b"first PDF revision")
+    project = {"id": "p", "docs": [{"doc_id": "sheet", "files": {"pdf": "input.pdf"}}]}
+    before = fingerprint(project, tmp_path)
+    source.write_bytes(b"second PDF revision has changed services")
+    assert fingerprint(project, tmp_path) != before
 
 
 def test_optional_pdf_adapter_clips_lengths_and_cites_original_sheet(tmp_path, monkeypatch):
