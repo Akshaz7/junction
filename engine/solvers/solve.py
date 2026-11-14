@@ -68,26 +68,38 @@ def _plural(kind: str, n: int) -> str:
 
 
 # ------------------------------------------------------------- scope filters
-_ORD = {"ground": 0, "first": 1, "1st": 1, "second": 2, "2nd": 2, "third": 3, "3rd": 3, "fourth": 4, "4th": 4, "fifth": 5}
+_ORD = {"ground": 0, "grund": 0, "first": 1, "second": 2, "third": 3, "fourth": 4, "fifth": 5,
+        "sixth": 6, "seventh": 7, "eighth": 8, "ninth": 9, "tenth": 10}
 
 
 def resolve_storey(q: str, storeys: list[dict]) -> str | None:
-    ql = q.lower()
+    from .filters import fold
+    ql = fold(q)
     names = [s["name"] for s in storeys]
     for n in sorted(names, key=len, reverse=True):
-        if n.lower() in ql:
+        if re.search(rf"(?<!\w){re.escape(fold(n))}(?!\w)", ql):
             return n
     if not storeys:
         return None
     srt = sorted(storeys, key=lambda s: s["elevation_m"])
     ground = next((i for i, s in enumerate(srt) if s["elevation_m"] >= -0.5), 0)   # a ground floor at -0.15 m (finished floor below the site datum) is still ground
-    m = re.search(r"\b(ground|first|1st|second|2nd|third|3rd|fourth|4th|fifth)\s+(?:floor|level|storey)", ql)
+    # German storey abbreviations and English numeric ordinals share the same level.
+    m = re.search(r"\b(\d+)\s+(?:og|obergeschoss)\b", ql)
     if m:
-        i = ground + _ORD[m.group(1)]
+        n = next((n for n in names if re.match(rf"^{m.group(1)}\s+(?:og|obergeschoss)\b", fold(n))), None)
+        if n:
+            return n
+    m = re.search(r"\b(ground|grund|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|\d+(?:st|nd|rd|th)?)\s+(?:floor|level|storey|story)\b|\b(?:floor|level|storey|story)\s+(\d+)\b", ql)
+    if m:
+        token = m.group(1) or m.group(2)
+        ordinal = _ORD[token] if token in _ORD else int(re.match(r"\d+", token).group())
+        i = ground + ordinal
         return srt[i]["name"] if 0 <= i < len(srt) else None
-    if re.search(r"\b(basement|underground|cellar)\b", ql):
+    if re.search(r"\b(eg|erdgeschoss)\b", ql):
+        return srt[ground]["name"]
+    if re.search(r"\b(basement|underground|cellar|keller)\b", ql):
         return srt[0]["name"] if srt[0]["elevation_m"] < 0 else None
-    if re.search(r"\b(top|upper most|roof) (?:floor|level|storey)", ql):
+    if re.search(r"\b(top|upper most|uppermost|roof) (?:floor|level|storey)|\b(dg|dachgeschoss)\b", ql):
         return srt[-1]["name"]
     return None
 
@@ -97,11 +109,12 @@ def _quoted(q: str) -> list[str]:
 
 
 def _label_matches(it: Item, text: str) -> bool:
+    from .filters import fold
     def norm(x):
         return x.casefold().replace("\u2019", "'").replace("\u2018", "'").strip()
     t = norm(re.sub(r"\s*\([^)]*\)\s*$", "", text))
-    cands = [it.label, it.name, it.type_name, it.props.get("room_type")]
-    return any(c and norm(c) == t for c in cands)
+    cands = [it.label, it.name, it.type_name, it.props.get("room_type"), it.props.get("long_name")]
+    return any(c and (norm(c) == t or (it.kind == "room" and re.search(rf"(?<!\w){re.escape(fold(t))}(?!\w)", fold(c)))) for c in cands)
 
 
 def _pt_in_poly(pt, poly) -> bool:
@@ -403,6 +416,15 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         return _abstain(question, doc_id, "I have no structured data for this document yet, so I cannot answer that reliably.",
                         trace, "index", t0)
     route = "index" if doc.mode == "ifc" else "planmap"
+    if doc.mode == "ifc":
+        from engine.analytics import filtered_question
+        from dataclasses import replace
+        filtered_doc = replace(doc, items=[i for i in doc.items if i.item_id not in hidden]) if hidden else doc
+        filtered = filtered_question(question, filtered_doc, t0)
+        if filtered is not None:
+            if hidden:
+                filtered["answer"]["text_md"] += " (with " + ", ".join(hidden.values()) + " hidden)"
+            return filtered
     kind = p.kind
     if kind == "apartment" and doc.mode == "planmap" and p.type in ("count", "area"):
         res = _apartments(question, doc, p, trace, route, t0)
@@ -484,9 +506,10 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
     # --- storey scope (IFC only; a plan map page is one level)
     if doc.mode == "ifc":
         st = resolve_storey(question, doc.storeys)
-        if st is None and p.scope == "storey":
-            return _abstain(question, doc_id, "I could not tell which floor you mean. Name it as it is called in the model, for example "
-                            + (f"\"{doc.storeys[0]['name']}\"." if doc.storeys else "\"Level 1\"."), trace, route, t0)
+        from .filters import storey_requested
+        if st is None and (p.scope == "storey" or storey_requested(question)):
+            return _abstain(question, doc_id, "No matching floor was found. Storeys present: "
+                            + ", ".join(s["name"] for s in doc.storeys) + ".", trace, route, t0)
         if st:
             items = [i for i in items if i.storey == st]
             where = f"on **{st}**"
@@ -510,6 +533,14 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
     # --- room / label filters
     subject = None
     sub_name = None
+    if kind == "room" and doc.mode == "ifc":
+        from .filters import room_filter, missing_room_text
+        selected = room_filter(question, items)
+        if selected:
+            subject, items = selected
+            if not items:
+                return _abstain(question, doc_id, missing_room_text(subject, [i for i in doc.items if i.kind == "room"]), trace, route, t0)
+            trace.append(_step("filter", f"room {subject}: {len(items)} matched"))
     quoted = _quoted(question)
     # a quoted name that is the model's / sheet's title or a storey is the scope, not an element label
     _scope_names = {str(x).casefold().strip() for x in [doc.title, doc.meta.get("project"), doc.meta.get("building"),
@@ -538,7 +569,7 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
             subject = f"{name}s"
             sub_name = name
             trace.append(_step("filter", f"room type {sorted(types)}: {len(items)} matched"))
-    if kind == "room" and (p.scope == "room" or quoted or _room_id(question)):
+    if kind == "room" and subject is None and (p.scope == "room" or quoted or _room_id(question)):
         rid = _room_id(question)
         sel = []
         if rid:   # a room number is unique: it beats the (shared) room name

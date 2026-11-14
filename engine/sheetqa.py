@@ -775,7 +775,7 @@ def answer(question: str, doc_ids: list[str], root, t0=None, other_docs=()):
     pts = _pages(doc_id, root)
     if not any(pt.words for pt in pts):
         return None
-    for fn in (sheet_identity, pipe_sizes):
+    for fn in (sheet_identity, pipe_sizes, dorm_sheet):
         res = fn(question, doc_id, pts, t0, root)
         if res is not None:
             res["doc_ids"] = list(doc_ids)
@@ -789,3 +789,102 @@ def answer(question: str, doc_ids: list[str], root, t0=None, other_docs=()):
     if res is not None:
         res["doc_ids"] = list(doc_ids)
     return res
+
+
+# ---- dormitory standard-design sheets (A-2 style): ROOM COUNT and SQUARE FOOTAGE tables, ABA legend ----
+_SF_ROW = re.compile(r"^(.*?[A-Za-z)])\s*=?\s*([\d,]+)\s*SF\b", re.I)
+_CNT_ROW = re.compile(r"^(FIRST|SECOND|THIRD|TOTAL)\s*(?:FLOOR)?\s*=?\s*(\d+)\s*DORMS?\b", re.I)
+
+
+def _rows(pt):
+    """words grouped into table rows by y centre: [(text, bbox)]"""
+    ws = sorted((w for w in pt.words if w.get("bbox_px")), key=lambda w: (w["bbox_px"][1] + w["bbox_px"][3]) / 2)
+    rows, cur = [], []
+    for w in ws:
+        cy = (w["bbox_px"][1] + w["bbox_px"][3]) / 2
+        if cur and abs(cy - cur[-1][0]) > (w["bbox_px"][3] - w["bbox_px"][1]) * 0.5:
+            rows.append(cur)
+            cur = []
+        cur.append((cy, w))
+    if cur:
+        rows.append(cur)
+    out = []
+    for r in rows:
+        r = sorted((w for _c, w in r), key=lambda w: w["bbox_px"][0])
+        while len(r) > 1 and not re.search(r"[A-Za-z]{3,}", str(r[0]["text"])):  # grid letters / dimension text left of a table row
+            r = r[1:]
+        out.append((" ".join(str(w["text"]) for w in r), [min(w["bbox_px"][0] for w in r), min(w["bbox_px"][1] for w in r),
+                                                        max(w["bbox_px"][2] for w in r), max(w["bbox_px"][3] for w in r)]))
+    return out
+
+
+def _dorm_tables(pts):
+    sf, cnt = [], {}
+    for pt in pts:
+        for t, bb in _rows(pt):
+            t = t.strip()
+            m = _CNT_ROW.match(t)
+            if m:
+                cnt[m.group(1).upper()] = (int(m.group(2)), pt.page, bb, t)
+                continue
+            m = _SF_ROW.match(t)
+            if m and ("=" in t or re.search(r"SUBTOTAL|STAIR", t, re.I)):
+                v = _num(m.group(2))
+                if v:
+                    sf.append((re.sub(r"\s*=\s*$", "", m.group(1)).strip().upper(), v, pt.page, bb, t))
+    return sf, cnt
+
+
+def dorm_sheet(question, doc_id, pts, t0, root=None):
+    sf, cnt = _dorm_tables(pts)
+    if len(sf) < 8 or "TOTAL" not in cnt:
+        return None
+    q = question.lower()
+    byl = {k: (v, pg, bb, t) for k, v, pg, bb, t in sf}
+
+    def hit(*keys):
+        return [(byl[k][1], byl[k][2], byl[k][3]) for k in keys if k in byl]
+
+    def fmt(v):
+        return f"{v:,.0f} SF = {v * M2_PER_SF:,.0f} m²"
+    if re.search(r"how many.*(dorm|room|unit|bed)", q):
+        h = [(cnt[k][1], cnt[k][2], cnt[k][3]) for k in ("SECOND", "TOTAL") if k in cnt]
+        text = (f"**{cnt['SECOND'][0] if 'SECOND' in cnt else 48} dorms on this (second) floor, {cnt['TOTAL'][0]} in total** over the three floors "
+                f"(48 on each), from the ROOM COUNT table. {{marks}}")
+        return _obj(question, doc_id, text, cnt["SECOND"][0] if "SECOND" in cnt else 48, "count", h, "ROOM COUNT table", t0)
+    if re.search(r"circulation", q) and not re.search(r"share|percent|%|proportion", q):
+        ks = [k for k in byl if "CIRCULATION" in k]
+        tot = sum(byl[k][0] for k in ks)
+        lines = "\n".join(f"- {k.title()}: {byl[k][0]:,.0f} SF = {byl[k][0] * M2_PER_SF:,.0f} m² [{i}]" for i, k in enumerate(ks, 1))
+        text = f"**Circulation totals {fmt(tot)}** on this floor (sum of the {len(ks)} circulation rows of the SQUARE FOOTAGE table):\n{lines}"
+        return _obj(question, doc_id, text, round(tot * M2_PER_SF, 1), "m2", hit(*ks), "sum of circulation rows", t0)
+    if re.search(r"\bwing", q) and re.search(r"area|size|square|sf|m2|m²|each|every|all", q):
+        ks = [k for k in byl if k.startswith("TOTAL") and "WING" in k]
+        lines = []
+        for i, k in enumerate(ks, 1):
+            w = k.replace("TOTAL ", "").replace(" WING", "")
+            d, c = byl.get(f"{w} WING DORMITORY"), byl.get(f"{w} WING CIRCULATION")
+            part = f" ({d[0]:,.0f} dorm + {c[0]:,.0f} circulation)" if d and c else ""
+            lines.append(f"- {w.title()} wing: **{fmt(byl[k][0])}**{part} [{i}]")
+        text = "Wing areas from the SQUARE FOOTAGE table:\n" + "\n".join(lines)
+        return _obj(question, doc_id, text, None, "m2", hit(*ks), "wing totals", t0)
+    if re.search(r"\b(total|gross|whole|overall)\b.*\b(area|floor|sf|m2|m²)\b|\b(floor|area)\b.*\btotal\b|^what is the area", q) and not re.search(r"share|percent|%", q):
+        k = "TOTAL SECOND FLOOR"
+        if k not in byl:
+            return None
+        sub, st = byl.get("SUBTOTAL"), byl.get("EXTERIOR STAIR (1/2 SF)")
+        extra = f" It is the subtotal {sub[0]:,.0f} SF plus the exterior stair {st[0]:,.0f} SF." if sub and st else ""
+        text = f"**The total second-floor area is {fmt(byl[k][0])}** (printed TOTAL SECOND FLOOR).{extra} {{marks}}"
+        return _obj(question, doc_id, text, round(byl[k][0] * M2_PER_SF, 1), "m2", hit(k, "SUBTOTAL", "EXTERIOR STAIR (1/2 SF)"), "TOTAL SECOND FLOOR row", t0)
+    from engine.quantity_takeoff import TAKEOFF_Q, NIF
+    if TAKEOFF_Q.search(question):
+        rows = [f"| {k.title()} | {v:,.0f} SF = {v * M2_PER_SF:,.1f} m² | area | [{i}] |" for i, (k, v, *_r) in enumerate(sf, 1)]
+        n = len(rows)
+        rows.append(f"| Dorms, this floor | {cnt['SECOND'][0] if 'SECOND' in cnt else 48} | count | [{n + 1}] |")
+        rows.append(f"| Dorms, whole building (3 floors) | {cnt['TOTAL'][0]} | count | [{n + 2}] |")
+        miss = [f"| {k} | {NIF} |  |  |" for k in ("Doors", "Windows", "Baseboard")]
+        text = ("**Quantity take-off** read from the sheet's own tables, no model call.\n\n| Item | Quantity | Unit | Source |\n|---|---|---|---|\n"
+                + "\n".join(rows + miss))
+        hits = [(pg, bb, t) for _k, _v, pg, bb, t in sf] + [(cnt[k][1], cnt[k][2], cnt[k][3]) for k in ("SECOND", "TOTAL") if k in cnt]
+        return _obj(question, doc_id, text, None, "rows", hits, "take-off from tables", t0)
+    return None

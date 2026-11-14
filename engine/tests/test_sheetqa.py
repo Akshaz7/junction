@@ -163,3 +163,28 @@ def test_piping_takeoff_rows(tmp_path):
     r = sheetqa.answer("Give me a quantity take-off", [d], tmp_path)
     t = r["answer"]["text_md"]
     assert "| Fuel pumps (FP-n) | 5 |" in t and 'Pipe callout 8"' in t and "not in this file" in t and r["citations"]
+
+
+def test_dorm_sheet_tables_and_aba(tmp_path):
+    rows = [("FIRST FLOOR =", "48 DORMS"), ("SECOND FLOOR =", "48 DORMS"), ("THIRD FLOOR =", "48 DORMS"), ("TOTAL =", "144 DORMS"),
+            ("WEST WING DORMITORY =", "6,095 SF"), ("WEST WING CIRCULATION =", "914 SF"), ("TOTAL WEST WING =", "7,009 SF"),
+            ("EAST WING DORMITORY =", "6,092 SF"), ("EAST WING CIRCULATION =", "913 SF"), ("TOTAL EAST WING =", "7,005 SF"),
+            ("NORTH WING DORMITORY =", "6,285 SF"), ("NORTH WING CIRCULATION =", "1,403 SF"), ("TOTAL NORTH WING =", "7,688 SF"),
+            ("COMMON SPACE CIRCULATION =", "1,240 SF"), ("SUBTOTAL", "26,181 SF"), ("TOTAL SECOND FLOOR =", "26,562 SF")]
+    words = [{"text": "E", "bbox_px": [10, 90, 30, 110]}]
+    for i, (lab, val) in enumerate(rows):
+        y = 100 + i * 40
+        words.append({"text": lab, "bbox_px": [100, y, 400, y + 20]})
+        for j, tok in enumerate(val.split()):
+            words.append({"text": tok, "bbox_px": [500 + j * 60, y, 550 + j * 60, y + 20]})
+    d = tmp_path / "a2dorm"
+    d.mkdir()
+    (d / "rtext-1.json").write_text(json.dumps({"doc_id": "a2dorm", "page": 1, "image": {"w": 1000, "h": 1000}, "source": "ocr", "words": words}))
+    (d / "page-1.png").write_bytes(b"\x89PNG\r\n\x1a\n" + b"\0" * 8 + (1000).to_bytes(4, "big") * 2 + b"\0" * 20)
+    ask = lambda q: sheetqa.answer(q, ["a2dorm"], tmp_path)
+    r = ask("How many dorm rooms are there?")
+    assert r["answer"]["value"] == 48 and "144" in r["answer"]["text_md"]
+    assert "26,562 SF" in ask("What is the total floor area?")["answer"]["text_md"]
+    assert "7,688" in ask("What is the area of each wing?")["answer"]["text_md"]
+    assert ask("What is the circulation area?")["answer"]["value"] == round((914 + 913 + 1403 + 1240) * sheetqa.M2_PER_SF, 1)
+    assert "26,562 SF" in ask("Give me a quantity take-off")["answer"]["text_md"]

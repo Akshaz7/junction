@@ -31,8 +31,8 @@ HOW IT WAS WORKED OUT:
 
 Write the answer in plain English, easy to scan: the direct answer in bold on the first line, then up to 4 short bullet points ('- ' prefix), one fact each. Content:
 1. Start with the direct answer in bold, using exactly the numbers from EXACT RESULT.
-2. Answer every part of the question that the elements above cover (for example names, sizes, areas, storeys, which ones), using only those values.
-3. Say briefly what the answer is based on (for example "the 18 door objects in the IFC model" or "the rooms detected on the scanned plan").
+2. Add bullets ONLY for parts of the question beyond the headline (e.g. 'and how big', 'which ones'); if the bold line already answers everything, output only that line. At most 3 bullets, each under 15 words. Never mention citations, listings or what you cannot see.
+3. Do NOT describe where the answer came from, how it was measured or how sure it is: a separate evidence panel shows that. Only give facts that answer the question.
 4. If part of the question cannot be answered from these facts, say so plainly in one sentence. Never invent a value, a rule or a source.
 Never show machine ids (long codes like 18PQUIFELEARLM4c0brquf or door-003); describe the element by its name, size or storey instead.
 Keep every [n] marker from EXACT RESULT next to the thing it cites. No headings, no long paragraphs, no preamble."""

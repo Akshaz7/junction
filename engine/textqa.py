@@ -176,6 +176,9 @@ def _furniture_in_room(question: str, items: list[Item], doc: Doc, st: str | Non
 def facts_for(question: str, doc: Doc) -> Facts:
     ql = question.lower()
     st = resolve_storey(question, doc.storeys)
+    from engine.solvers.filters import storey_requested
+    if doc.mode == "ifc" and storey_requested(question) and st is None:
+        return Facts(["No matching floor was found. Storeys present: " + ", ".join(s["name"] for s in doc.storeys) + "."], [], "missing-storey", available=False)
     if st is None and re.search(r"\b(attic|roof (?:floor|level)|top (?:floor|level))\b", ql) and doc.storeys:
         st = max(doc.storeys, key=lambda s: s["elevation_m"])["name"]
     kinds = [k for k, rx in KIND_KW if re.search(rx, ql)]
@@ -258,9 +261,11 @@ def facts_for(question: str, doc: Doc) -> Facts:
                 return Facts([f"{len(hit)} of {len(items)} rooms have the greatest ceiling height, {_f(top)} m."]
                              + ([f"All rooms have a ceiling height of {_f(top)} m."] if len(hs) == 1 else []), _ids(hit), "room-height")
             small = "smallest" in ql
+            if not rooms:
+                return Facts(["The model has no usable room areas to compare."], [], "no-prop", available=False)
             r = (min if small else max)(rooms, key=lambda t: t[1])
             i = r[0]
-            return Facts([f"{'Smallest' if small else 'Largest'} room: {i.name} ({i.type_name}), {_f(r[1])} m², on {i.storey}."], [i.item_id], "room-extreme")
+            return Facts([f"{'Smallest' if small else 'Largest'} room: {_rname(i)} (room {i.name}), {_f(r[1])} m², on {i.storey}."], [i.item_id], "room-extreme")
         by = _group(items, lambda i: i.storey)
         if re.search(r"by (level|floor|storey)|each (level|floor|storey)|per (level|floor|storey)|distribution|breakdown|total", ql) and not st:
             lines = [f"{len(items)} rooms in total, {_f(sum(a for _, a in rooms))} m² net."]
@@ -356,6 +361,8 @@ def text_answer(question: str, doc: Doc, use_model: bool | None = None) -> dict:
         try:
             ts = time.perf_counter()
             text, meta = _phrase(question, f)
+            if doc.mode == "ifc" and text and re.search(r"\bsingle floor plan\b|\bthis floor plan\b", text, re.I):
+                text = None
             calls.append(meta)
             trace.append({"step": "write", "detail": "written from the facts" if text else "model text rejected (numbers not in facts); code template used",
                           "ms": int((time.perf_counter() - ts) * 1000), "model": meta["model"], "cost_usd": meta["cost_usd"]})

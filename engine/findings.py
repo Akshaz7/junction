@@ -16,6 +16,19 @@ CORRIDOR = re.compile(r"flur|korridor|gang|corridor|hall|kaytava|käytävä", re
 LEVEL_TOL_M = 0.025
 
 
+def structural_edit_warning(doc: Doc, hidden_ids: list[str]) -> str | None:
+    """Our dimensional checks cannot establish structural safety after removing structure."""
+    hidden = set(hidden_ids)
+    structure = [i for i in doc.items if i.item_id in hidden and i.kind in ("wall", "column", "beam", "slab")
+                 and i.props.get("load_bearing") is not False]
+    if not structure:
+        return None
+    kinds = ", ".join(sorted({i.kind for i in structure}))
+    return (f"**Structural assessment is missing after this edit:** {len(structure)} structural or potentially load-bearing "
+            f"elements ({kinds}) would be removed. The remaining model does not establish a load path or stability. "
+            "These checks cannot establish compliance; a structural engineer must assess the change.")
+
+
 def _src(rule: dict) -> dict:
     return {"type": "rule", "ref": rule["id"], "title": f"{rule['source_title']}, {rule['section']}", "quote": rule["quote"],
             "url": rule.get("url"), "translation": rule.get("translation")}
