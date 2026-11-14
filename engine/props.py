@@ -327,7 +327,7 @@ def request(question):
         return None
     # Existing quantity/spatial solvers must retain their full question. A
     # property filter cannot silently replace a length, take-off or comparison.
-    if re.search(r"\b(?:total length|total area|volume|perimeter|waste|cost|price|percentage|proportion|ratio|share|near|nearest|adjacent|distance|between|except|excluding|or|thick\w*|narrowest|widest|tallest|shortest|greatest|smallest|largest|requirement\w*|accessib\w*|complian\w*|regulation\w*|meets?|standards?|compare|energy|savings?|g[ -]values?|connect\w*|beside|through)\b", q):
+    if re.search(r"\b(?:total length|total area|(?:net |gross |floor |wall )?area|net|gross|volume|perimeter|waste|cost|price|percentage|proportion|ratio|share|near|nearest|adjacent|distance|between|except|excluding|or|thick\w*|narrowest|widest|tallest|shortest|greatest|smallest|largest|requirement\w*|accessib\w*|complian\w*|regulation\w*|meets?|standards?|compare|energy|savings?|g[ -]values?|connect\w*|beside|through)\b", q):
         return None
     if re.search(r"\b(?:and|from)\b.*\b(?:floor|level|storey|story)\b", q) or re.search(r"\band\s+(?:what|how|which|are|is|do|does)\b", q):
         return None

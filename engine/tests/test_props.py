@@ -343,3 +343,8 @@ def test_real_models_dimension_filter_schedule_and_missing_properties(did):
     assert len(ids(r)) == len(doors)
     r = ask((root, did), "What is the fire rating of the doors?")
     assert "Recorded fire rating" in r["answer"]["text_md"] or "does not record fire ratings" in r["answer"]["text_md"]
+
+
+def test_area_questions_about_a_quoted_room_are_not_property_lookups():
+    from engine.props import request
+    assert request("What is the net floor area of the room 'ABIRUUM (304)' on '3.korrus', in m²?") is None
