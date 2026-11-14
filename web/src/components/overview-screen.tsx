@@ -4,18 +4,28 @@ import { formatPercent, formatUsd } from '../lib/dashboard'
 import { chatHref, chatPreview, findingCounts, overviewApi, overviewDate, overviewStarters, starterHref, topFindings, weeklyChanges } from '../lib/overview'
 import type { Document } from '../lib/types'
 import './overview-screen.css'
+import { chatLive } from '../lib/chat-live'
 
-function useOverviewSection<T>(load: (signal: AbortSignal) => Promise<T>) {
+function useOverviewSection<T>(load: (signal: AbortSignal) => Promise<T>, liveChats = false) {
   const [state, setState] = useState<{ data?: T; loading: boolean; error: string }>({ loading: true, error: '' })
   useEffect(() => {
-    const controller = new AbortController()
-    load(controller.signal).then((data) => {
-      if (!controller.signal.aborted) setState({ data, loading: false, error: '' })
-    }).catch((error: unknown) => {
-      if (!controller.signal.aborted) setState({ loading: false, error: error instanceof Error ? error.message : 'Could not load this section.' })
-    })
-    return () => controller.abort()
-  }, [load])
+    let controller: AbortController
+    function refresh() {
+      controller?.abort()
+      controller = new AbortController()
+      const signal = controller.signal
+      load(signal).then((data) => {
+        if (!signal.aborted) setState({ data, loading: false, error: '' })
+      }).catch((error: unknown) => {
+        if (!signal.aborted) setState({ loading: false, error: error instanceof Error ? error.message : 'Could not load this section.' })
+      })
+    }
+    refresh()
+    const unsubscribe = liveChats ? chatLive.subscribe((event) => {
+      if (event.type === 'chat.message' || event.type === 'connected') refresh()
+    }) : undefined
+    return () => { controller.abort(); unsubscribe?.() }
+  }, [load, liveChats])
   return state
 }
 
@@ -37,7 +47,7 @@ function OverviewCard({ title, href, children, loading, error }: {
 export function OverviewScreen({ docs = [] }: { docs?: Document[] }) {
   const changes = useOverviewSection(loadChanges)
   const findings = useOverviewSection(loadFindings)
-  const chats = useOverviewSection(loadChats)
+  const chats = useOverviewSection(loadChats, true)
   const bench = useOverviewSection(loadBench)
   const week = weeklyChanges(changes.data || [])
   const counts = findingCounts(findings.data || [])

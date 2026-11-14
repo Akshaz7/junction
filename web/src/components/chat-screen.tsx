@@ -8,6 +8,7 @@ import type { Answer, Citation, Document, TraceStep } from '../lib/types'
 import { ThinkingText } from './thinking-text'
 import { MicButton } from './voice-controls'
 import { chatLink, savedExchanges, type ChatExchange } from '../lib/chat-history'
+import { chatLive } from '../lib/chat-live'
 
 const starters = [
   { title: 'Count on a plan', label: 'Count something on a plan', question: 'How many windows are there?', icon: Scale },
@@ -39,6 +40,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const splitContainer = useRef<HTMLDivElement>(null)
   const sheet = useViewerSheet()
   const chatId = useRef<string | null>(null)
+  const [liveChatId, setLiveChatId] = useState<string | null>(null)
   const submitting = useRef(false)
   const textarea = useRef<HTMLTextAreaElement>(null)
   const conversation = useRef<HTMLDivElement>(null)
@@ -54,6 +56,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       const version = ++generation.current
       submitting.current = false
       chatId.current = null
+      setLiveChatId(null)
       setBusy(false); setAnswers([]); setViewer(null); setError('')
       setMention(null); setPendingQuestion(''); setStatuses([]); setTraces([])
       setSelected([]); setRestoredDocIds(null); setDraft('')
@@ -68,6 +71,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       workspaceApi.getChat(link.id, signal).then((chat) => {
         if (signal.aborted || generation.current !== version) return
         chatId.current = chat.id
+        setLiveChatId(chat.id)
         setAnswers(savedExchanges(chat))
         const ids = [...new Set(chat.messages.flatMap((message) => message.answer?.doc_ids ?? []))]
         setRestoredDocIds(ids.length ? ids : chat.doc_id ? [chat.doc_id] : [])
@@ -81,6 +85,46 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     window.addEventListener('hashchange', followLink)
     return () => { controller?.abort(); generation.current++; window.removeEventListener('hashchange', followLink) }
   }, [])
+
+  useEffect(() => {
+    if (demo || !liveChatId) return
+    let controller: AbortController | undefined
+    const version = generation.current
+    let pendingMessageId: string | null = null
+    function refresh() {
+      // The sender owns its SSE stream; socket echoes must not duplicate its exchange.
+      if (submitting.current) return
+      controller?.abort()
+      controller = new AbortController()
+      const signal = controller.signal
+      workspaceApi.getChat(liveChatId!, signal).then((chat) => {
+        if (signal.aborted || generation.current !== version || submitting.current) return
+        const exchanges = savedExchanges(chat)
+        const last = exchanges.at(-1)
+        // A stored unanswered question is history. Only a user notification
+        // observed on this connection establishes an active remote request.
+        const pending = last?.id === pendingMessageId && !last.answer && !last.content ? exchanges.pop() : null
+        setAnswers(exchanges)
+        setPendingQuestion(pending?.question ?? '')
+        setBusy(!!pending)
+        if (!pending) { setStatuses([]); setTraces([]) }
+        setError('')
+      }).catch((err: unknown) => {
+        if (!signal.aborted && generation.current === version && !submitting.current)
+          setError(err instanceof Error ? err.message : 'This chat could not be refreshed.')
+      })
+    }
+    const unsubscribe = chatLive.subscribe((event) => {
+      if (event.type === 'connected') { refresh(); return }
+      if (event.chat_id !== liveChatId || submitting.current) return
+      if (event.type === 'chat.message') {
+        pendingMessageId = event.role === 'user' ? event.message_id : null
+        refresh()
+      }
+      else setStatuses((previous) => previous.at(-1) === event.text ? previous : [...previous, event.text])
+    })
+    return () => { controller?.abort(); unsubscribe() }
+  }, [demo, liveChatId])
 
   useEffect(() => {
     if (restoredDocIds) setSelected(docs.filter((doc) => restoredDocIds.includes(doc.doc_id)))
@@ -143,6 +187,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         const id = await workspaceApi.createChat(docIds, question.trim().slice(0, 100))
         if (generation.current !== version) return
         chatId.current = id
+        setLiveChatId(id)
       }
       const answer = await workspaceApi.askQuestion(chatId.current, question.trim(), docIds, {
         onStatus: (text) => { if (generation.current === version) setStatuses((previous) => previous.at(-1) === text ? previous : [...previous, text]) },

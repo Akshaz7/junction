@@ -8,6 +8,8 @@ import { Button } from './ui'
 import { VisualiseItButton } from '../viewer3d/VisualiseIt'
 import { setHover, setSelected, useLinkedItem } from '../viewer3d'
 import './document-viewer.css'
+import { answerTableSelection } from '../lib/ar-bridge'
+import { ShowOnTableButton } from './show-on-table'
 
 export function useViewerSheet() {
   const [sheet, setSheet] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 800px)').matches)
@@ -25,6 +27,7 @@ export function DocumentViewer({ answer, citation, sheet, onClose }: {
   answer: Answer; citation: Citation; sheet: boolean; onClose: () => void
 }) {
   const { regions, initial } = useMemo(() => viewerEvidence(answer, citation), [answer, citation])
+  const table = answerTableSelection(answer)
   const [active, setActive] = useState(initial)
   const [doc, setDoc] = useState<Document | null>(null)
   const [imageUrl, setImageUrl] = useState('')
@@ -149,6 +152,7 @@ export function DocumentViewer({ answer, citation, sheet, onClose }: {
         <Button variant="ghost" size="icon" aria-label="Next source" disabled={!image || active >= regions.length - 1} onClick={() => setActive(active + 1)}><ChevronRight size={16} /></Button>
         <Button className="viewer-fit" variant="ghost" size="icon" aria-label="Fit drawing" disabled={!image} onClick={() => image && setView(fitPage(image, viewport))}><Maximize2 size={16} /></Button>
       </div>
+      <ShowOnTableButton docId={citation.doc_id} itemIds={table?.doc_id === citation.doc_id ? table.item_ids : citation.item_ids} />
       <button ref={close} type="button" className="button button-ghost button-size-icon" aria-label="Close drawing viewer" onClick={onClose}><X size={18} /></button>
     </header>
     <div className="viewer-toolbar" aria-label="Drawing controls">

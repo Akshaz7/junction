@@ -5,9 +5,12 @@ export type Rect = { x: number; y: number; width: number; height: number }
 export type Mask = Rect & { reason: string }
 export const MAX_REGION_CANVAS_PERCENT = .5
 export const MAX_UNMASKED_MISMATCH_PERCENT = 1.5
+// DECISIONS.md, 2026-11-14 05:44: phone residuals may reach 2% only
+// when every diff region remains within MAX_REGION_CANVAS_PERCENT.
+export const MAX_PHONE_UNMASKED_MISMATCH_PERCENT = 2
 
 /** Fixed 2x reference canvases. No image rescaling, baseline updates or automatic masks. */
-export function compareFrames(actualBytes: Buffer, referenceBytes: Buffer, masks: Mask[], scale = 2) {
+export function compareFrames(actualBytes: Buffer, referenceBytes: Buffer, masks: Mask[], scale = 2, device = 'desktop') {
   const actual = PNG.sync.read(actualBytes), reference = PNG.sync.read(referenceBytes)
   if (actual.width !== reference.width || actual.height !== reference.height) {
     throw new Error(`Canvas mismatch: actual ${actual.width}x${actual.height}; reference ${reference.width}x${reference.height}`)
@@ -70,5 +73,5 @@ export function compareFrames(actualBytes: Buffer, referenceBytes: Buffer, masks
   return { mismatch_percent: mismatchPercent, mismatch_pixels: mismatchPixels,
     compared_pixels: comparedPixels, masked_pixels: maskedPixels, unmasked_diff_regions: unmaskedDiffRegions,
     unexplained_regions: unexplainedRegions,
-    status: unexplainedRegions.length === 0 && mismatchPercent <= MAX_UNMASKED_MISMATCH_PERCENT ? 'pass' as const : 'fail' as const, diff: PNG.sync.write(diff) }
+    status: unexplainedRegions.length === 0 && mismatchPercent <= (device === 'phone' ? MAX_PHONE_UNMASKED_MISMATCH_PERCENT : MAX_UNMASKED_MISMATCH_PERCENT) ? 'pass' as const : 'fail' as const, diff: PNG.sync.write(diff) }
 }

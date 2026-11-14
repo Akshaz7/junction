@@ -34,7 +34,7 @@ describe('fidelity measurement', () => {
     const reference = new PNG({ width: 128, height: 128 }); reference.data.fill(255)
     const actual = new PNG({ width: 128, height: 128 }); actual.data.fill(255)
     for (const x of [2, 34, 66, 98]) for (const y of [2, 34, 66, 98]) {
-      for (let dx = 0; dx < 5; dx++) for (let dy = 0; dy < 5; dy++) {
+      for (let dx = 0; dx < 5; dx++) for (let dy = 0; dy < 4; dy++) {
         const index = ((y + dy) * 128 + x + dx) * 4
         actual.data[index] = 0; actual.data[index + 1] = 0; actual.data[index + 2] = 0
       }
@@ -44,6 +44,12 @@ describe('fidelity measurement', () => {
     expect(scattered.unexplained_regions).toEqual([])
     expect(scattered.mismatch_percent).toBeGreaterThan(1.5)
     expect(scattered.status).toBe('fail')
+    const phone = compareFrames(PNG.sync.write(actual), PNG.sync.write(reference), [], 1, 'phone')
+    expect(phone.mismatch_percent).toBeLessThan(2)
+    expect(phone.status).toBe('pass')
+    // The phone allowance does not relax the connected-region limit.
+    const connected = Array.from({ length: 36 }, (_, i) => [4 + i % 6, 4 + Math.floor(i / 6)] as [number, number])
+    expect(compareFrames(png(connected), png(), [], 2, 'phone').status).toBe('fail')
   })
   it('passes equal canvases and rejects empty comparisons and incompatible resolutions', () => {
     const equal = compareFrames(png(), png(), [])

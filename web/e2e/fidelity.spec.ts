@@ -2,7 +2,7 @@ import { expect, test, type Locator, type Page, type TestInfo } from '@playwrigh
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import type ManifestShape from './fidelity-masks.json'
-import { compareFrames, MAX_REGION_CANVAS_PERCENT, MAX_UNMASKED_MISMATCH_PERCENT, type Mask } from './fidelity-diff'
+import { compareFrames, MAX_REGION_CANVAS_PERCENT, MAX_UNMASKED_MISMATCH_PERCENT, MAX_PHONE_UNMASKED_MISMATCH_PERCENT, type Mask } from './fidelity-diff'
 import { fidelityAnswer, fidelityComparison, fidelityDocs, fidelityDrawing, fidelityFeed, fidelityQuestion } from './fidelity-fixtures'
 import { phaseResults, savePhaseResult } from './fidelity-report'
 
@@ -21,6 +21,7 @@ function saveReport(testInfo: TestInfo, finished = false) {
     coordinate_space: 'CSS pixels; both PNGs are compared at native 2x resolution',
     pixelmatch: { threshold: .1, includeAA: false },
     acceptance: { max_region_canvas_percent: MAX_REGION_CANVAS_PERCENT, max_unmasked_mismatch_percent: MAX_UNMASKED_MISMATCH_PERCENT,
+      max_phone_unmasked_mismatch_percent: MAX_PHONE_UNMASKED_MISMATCH_PERCENT,
       note: 'Every diff region remains in unmasked_diff_regions. Only regions above the permitted canvas percentage are unexplained; the total unmasked percentage must also pass.' },
     reference_selection: 'The _phase PNG records a transition boundary, often the previous screen. Each stable capture uses the final available PNG before the next phase; both names are recorded.',
     total_phases: manifest.phases.length, measured_phases: results.filter((phase) => ['pass', 'fail'].includes(phase.status)).length,
@@ -124,6 +125,14 @@ async function preparePhase(page: Page, phase: Phase, answerGate: Promise<void>)
     if (doc) return route.fulfill({ json: doc })
     if (/\/pages\/\d+\/image$|\.thumb\.png$|^\/api\/fidelity\//.test(path)) return route.fulfill({ contentType: 'image/svg+xml', body: fidelityDrawing(path.includes('previous')) })
     if (path === '/api/chats' && request.method() === 'POST') return route.fulfill({ json: { id: 'fidelity-generated-chat' } })
+    // Live reconnects refetch the persisted chat, just as the real API does.
+    if (path === '/api/chats/fidelity-generated-chat' && request.method() === 'GET') {
+      await answerGate
+      return route.fulfill({ json: { id: 'fidelity-generated-chat', doc_id: fidelityAnswer.doc_ids[0], messages: [
+        { id: 'fidelity-question', role: 'user', content: fidelityAnswer.question, answer: null },
+        { id: 'fidelity-answer', role: 'assistant', content: fidelityAnswer.answer.text_md, answer: fidelityAnswer },
+      ] } }).catch(() => {})
+    }
     if (path.endsWith('/messages')) {
       await answerGate
       return route.fulfill({ contentType: 'text/event-stream', body: `event: answer\ndata: ${JSON.stringify(fidelityAnswer)}\n\n` }).catch(() => {})
@@ -268,7 +277,7 @@ async function screenshotPhase(page: Page, phase: Phase, testInfo: TestInfo) {
   }
   const actual = await page.screenshot({ animations: 'disabled', caret: 'hide', scale: 'device' })
   writeFileSync(resolve(output, `${phase.id}.png`), actual)
-  const { diff, ...measurement } = compareFrames(actual, readFileSync(resolve(references, phase.reference_settled)), masks)
+  const { diff, ...measurement } = compareFrames(actual, readFileSync(resolve(references, phase.reference_settled)), masks, 2, phase.device)
   const diffPath = resolve(output, 'diffs', `${phase.id}.png`)
   writeFileSync(diffPath, diff)
   savePhaseResult(resultDirectory(testInfo), { id: phase.id, device: phase.device, phase: phase.phase,

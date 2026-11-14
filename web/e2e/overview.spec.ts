@@ -107,6 +107,12 @@ test('overview starter links carry all four questions and fit a phone', async ({
 })
 
 test('chat links load directly, switch saved conversations, and keep follow-ups in the saved chat', async ({ page }) => {
+  // These saved-chat fixtures also receive the socket-open snapshot refresh.
+  await page.routeWebSocket('**/ws', () => {})
+  let otherSnapshots = 0
+  page.on('response', (response) => {
+    if (response.ok() && new URL(response.url()).pathname === '/api/chats/other-chat') otherSnapshots++
+  })
   const { demoDocument, makeDemoAnswer } = await import('../src/mock/handler')
   const savedAnswer = makeDemoAnswer('How many windows are there?')
   const saved = {
@@ -141,8 +147,11 @@ test('chat links load directly, switch saved conversations, and keep follow-ups 
   expect(posts).toEqual(['/api/chats/saved-chat/messages'])
 
   await page.evaluate(() => { location.hash = '/chat?chat=other-chat' })
+  await expect.poll(() => otherSnapshots).toBeGreaterThanOrEqual(2)
   await expect(page.locator('.question-bubble')).toHaveText(['Where are the stairs?'])
   await expect(page.locator('.answer-text')).toHaveText('No answer yet.')
+  await expect(page.locator('.pending-exchange')).toHaveCount(0)
+  await expect(composer).toBeEnabled()
   const question = 'Where is A+B?'
   await page.evaluate((text) => { location.hash = `/chat?question=${encodeURIComponent(text)}` }, question)
   await expect(composer).toHaveValue(question)

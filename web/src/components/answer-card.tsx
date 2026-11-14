@@ -2,6 +2,8 @@ import { FileText, Layers3 } from 'lucide-react'
 import { Tooltip } from './ui'
 import type { Answer, Citation, Document } from '../lib/types'
 import { SpeakButton } from './voice-controls'
+import { answerTableSelection } from '../lib/ar-bridge'
+import { ShowOnTableButton } from './show-on-table'
 
 export function formatCost(total: number): string {
   return total > 0 && total < 0.0001 ? '< $0.0001' : `$${total.toFixed(4)}`
@@ -25,6 +27,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation 
   answer: Answer; docs: Document[]; demo: boolean; activeCitation?: Citation; onOpenCitation: (citation: Citation) => void
 }) {
   const citations = answer.answer.abstained ? [] : answer.citations
+  const table = answerTableSelection(answer)
   const generated = demo || answer.trace.some((step) => step.stub)
   const callDetails = answer.cost.calls.length ? JSON.stringify(answer.cost.calls, null, 2) : 'No model calls.'
   const sources = [...new Set(citations.map((citation) => citation.doc_id))].map((docId) => ({
@@ -48,6 +51,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation 
         <CitationChip citation={citation} selected={activeCitation} onOpenCitation={onOpenCitation} /> {citation.item_ids.join(', ')} · Page {citation.page}
       </p>)}</details>}
       <SpeakButton text={answer.answer.text_md} />
+      {table && <ShowOnTableButton docId={table.doc_id} itemIds={table.item_ids} />}
       {cost}
     </div>
     <div className="answer-footer">
