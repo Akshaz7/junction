@@ -1,0 +1,76 @@
+{
+  "status": "PASS",
+  "branch": "final/kg-answer",
+  "tested_commit": "5d85f2d091dca6b0ba467c2ec1e8ebc767f9e7ff",
+  "features": [
+    "Project chats with no explicit selection route graph questions before normal solvers; explicit file selections retain their semantics.",
+    "Cross-file agreement percentages count recorded checks, with a complete mismatch table and citations in both files.",
+    "Evidence-backed connections and appearances include matching items and sheet references.",
+    "engine.kg.impact traverses physical dependencies and equivalent appearances without changing source data.",
+    "Impact summaries deduplicate equivalent records; conditional full-face lining areas, service run lengths and door-height checks retain source proof.",
+    "Confidence is the exact minimum of the used graph edge confidences; missing links are explicit and cost zero."
+  ],
+  "contract_questions": {
+    "passed": 30,
+    "total": 30,
+    "label": "generated for demo: contract-fixture regression truth, not real accuracy"
+  },
+  "tests": {
+    "engine_kg_passed": 103,
+    "server_passed": 11,
+    "commands": [
+      "MODELS_FAKE=1 .venv/bin/python -m pytest engine/tests/test_kg_answer.py engine/tests/test_kg_core.py engine/tests/test_kg_semantics.py engine/tests/test_kg_mep.py engine/kg/test_evaluation.py -q",
+      "MODELS_FAKE=1 .venv/bin/python -m pytest server/tests/test_kg_answer_chat.py server/tests/test_projects.py server/tests/test_kg_routes.py -q"
+    ]
+  },
+  "real_questions": {
+    "passed": 30,
+    "total": 30,
+    "projects": [
+      {
+        "id": "kg-answer-ifc_bench__fzk-house-arc",
+        "passed": 10,
+        "total": 10,
+        "build_s": 0.432
+      },
+      {
+        "id": "kg-answer-dxf",
+        "passed": 10,
+        "total": 10,
+        "build_s": 0.025
+      },
+      {
+        "id": "kg-answer-ifc_bench__sixty5-str",
+        "passed": 10,
+        "total": 10,
+        "build_s": 0.31
+      }
+    ],
+    "truth_scope": "Independent IFC relationships and existing CAD geometry; checks graph reasoning over indexes, not raster detection accuracy.",
+    "unseen_doc_id": "ifc_bench__sixty5-str",
+    "unseen_read_only_at_end": true,
+    "gold_corrections": "gold-correction.json; both prior real development runs retained.",
+    "specified_shape_checks": 27,
+    "sparse_source_robustness_checks": 3,
+    "accuracy_caveat": "Three unseen structural-wall impact cases have no independent positive dependency gold; they test graceful sparse-data handling/schema/confidence only. The 30/30 figure is a check pass rate, not a claim of 100% drawing-answer accuracy."
+  },
+  "model_calls": 0,
+  "model_cost_usd": 0,
+  "cross_file": [
+    "server/chats_routes.py: project context and dispatch hook",
+    "engine/kg/__init__.py: export impact",
+    "engine/kg/mep.py: merge-conflict resolution retained MEP documents(project) normalization; other changes inherited via dependency branches"
+  ],
+  "dependencies": {
+    "kg_core": "db0c753",
+    "kg_mep": "bf649db; source/unit safety integrated, optional later PDF work remains on its own branch"
+  },
+  "limitations": [
+    "No link does not prove no effect; all impact rows are potential effects, not code-compliance or clash guarantees.",
+    "Wall lining changes assume a full wall face follows the ceiling; openings, room coverage, layers and waste require checking. Unknown dimensional uncertainty is not replaced by an arbitrary margin.",
+    "Whole service-run lengths are distinguished from length inside a room. Conflicting ceiling heights suppress quantity calculations.",
+    "PDF extraction is outside this row; existing optional graph readers and source-backed room_ceiling_notes hook are consumed when available."
+  ],
+  "needs_awais": "No PDF changes in this branch. To supply ceiling notes, existing planmap.room_ceiling_notes accepts [{room:{doc_id,page,item_id},ceiling_height_m,source:{doc_id,page,item_id|bbox,quote}}]. Works without this optional input.",
+  "needs": "Integrator: merge final/kg-answer; no deployment or main push performed."
+}

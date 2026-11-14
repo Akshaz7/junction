@@ -29,8 +29,10 @@ export interface UploadReceipt {
 }
 
 export interface ReasoningStep { kind: 'found' | 'measured' | 'checked' | 'calculated' | 'read'; title: string; text: string; cite?: number | null; ok?: boolean | null }
+export interface GraphPathStep { from_id?: string; to_id?: string; from_label: string; edge_kind: string; to_label: string; method?: string; confidence?: number }
 export interface Reasoning {
   steps: ReasoningStep[]
+  graph_path?: GraphPathStep[] | null
   confidence: { label: 'Verified' | 'Cross-checked' | 'Estimate'; pct: number; reason: string; improve?: string | null }
 }
 

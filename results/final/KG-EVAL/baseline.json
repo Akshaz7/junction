@@ -1,0 +1,247 @@
+{
+  "git_commit": "c2d621a52de5637cd83f1f98021d57f02c451798",
+  "projects": [
+    {
+      "project": {
+        "id": "kg-eval-institute",
+        "name": "Institute evaluation",
+        "docs": [
+          "ifc_bench__ac20-arc",
+          "ifc_models__kit-institute-ac20-institute-var-2",
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-01-keller",
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss",
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-03-1-obergeschoss",
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-04-2-obergeschoss",
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-05-dachgeschoss"
+        ]
+      },
+      "build_seconds": 0.13249099999666214,
+      "under_30_seconds": true,
+      "edges_by_kind": {
+        "contains": 2741,
+        "on_level": 2349,
+        "has_type": 2337,
+        "made_of": 2103
+      },
+      "invalid_edge_count": 0,
+      "invalid_edge_sample": [],
+      "same_as": {
+        "guid": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 2350,
+          "predicted": 0,
+          "expected": 2350,
+          "unknown": 0,
+          "precision": null,
+          "recall": 0.0,
+          "graph_edges": 0,
+          "known": 0,
+          "residual_m": {
+            "n": 0,
+            "min": null,
+            "p50": null,
+            "p90": null,
+            "p95": null,
+            "max": null
+          },
+          "sample": []
+        },
+        "tag_text": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 2350,
+          "predicted": 0,
+          "expected": 2350,
+          "unknown": 0,
+          "precision": null,
+          "recall": 0.0,
+          "graph_edges": 0,
+          "known": 0,
+          "residual_m": {
+            "n": 0,
+            "min": null,
+            "p50": null,
+            "p90": null,
+            "p95": null,
+            "max": null
+          },
+          "sample": []
+        },
+        "position": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 2350,
+          "predicted": 0,
+          "expected": 2350,
+          "unknown": 0,
+          "precision": null,
+          "recall": 0.0,
+          "graph_edges": 0,
+          "known": 0,
+          "residual_m": {
+            "n": 0,
+            "min": null,
+            "p50": null,
+            "p90": null,
+            "p95": null,
+            "max": null
+          },
+          "sample": []
+        },
+        "label_text": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 2350,
+          "predicted": 0,
+          "expected": 2350,
+          "unknown": 0,
+          "precision": null,
+          "recall": 0.0,
+          "graph_edges": 0,
+          "known": 0,
+          "residual_m": {
+            "n": 0,
+            "min": null,
+            "p50": null,
+            "p90": null,
+            "p95": null,
+            "max": null
+          },
+          "sample": []
+        }
+      },
+      "same_as_all_methods": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 2350,
+        "predicted": 0,
+        "expected": 2350,
+        "unknown": 0,
+        "precision": null,
+        "recall": 0.0
+      },
+      "truth_scope": "Cross-document graph node pairs retaining the same source IFC GlobalId. Unknown source identities excluded. Pairwise recall, not transitive cluster recall.",
+      "relation_samples": {}
+    },
+    {
+      "project": {
+        "id": "kg-eval-haus",
+        "name": "House evaluation",
+        "docs": [
+          "ifc_models__kit-fzk-haus-ac20-fzk-haus",
+          "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-01-erdgeschoss",
+          "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-02-dachgeschoss"
+        ]
+      },
+      "build_seconds": 0.007831709008314647,
+      "under_30_seconds": true,
+      "edges_by_kind": {
+        "contains": 242,
+        "on_level": 178,
+        "has_type": 86,
+        "made_of": 156
+      },
+      "invalid_edge_count": 0,
+      "invalid_edge_sample": [],
+      "same_as": {
+        "guid": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 89,
+          "predicted": 0,
+          "expected": 89,
+          "unknown": 0,
+          "precision": null,
+          "recall": 0.0,
+          "graph_edges": 0,
+          "known": 0,
+          "residual_m": {
+            "n": 0,
+            "min": null,
+            "p50": null,
+            "p90": null,
+            "p95": null,
+            "max": null
+          },
+          "sample": []
+        },
+        "tag_text": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 89,
+          "predicted": 0,
+          "expected": 89,
+          "unknown": 0,
+          "precision": null,
+          "recall": 0.0,
+          "graph_edges": 0,
+          "known": 0,
+          "residual_m": {
+            "n": 0,
+            "min": null,
+            "p50": null,
+            "p90": null,
+            "p95": null,
+            "max": null
+          },
+          "sample": []
+        },
+        "position": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 89,
+          "predicted": 0,
+          "expected": 89,
+          "unknown": 0,
+          "precision": null,
+          "recall": 0.0,
+          "graph_edges": 0,
+          "known": 0,
+          "residual_m": {
+            "n": 0,
+            "min": null,
+            "p50": null,
+            "p90": null,
+            "p95": null,
+            "max": null
+          },
+          "sample": []
+        },
+        "label_text": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 89,
+          "predicted": 0,
+          "expected": 89,
+          "unknown": 0,
+          "precision": null,
+          "recall": 0.0,
+          "graph_edges": 0,
+          "known": 0,
+          "residual_m": {
+            "n": 0,
+            "min": null,
+            "p50": null,
+            "p90": null,
+            "p95": null,
+            "max": null
+          },
+          "sample": []
+        }
+      },
+      "same_as_all_methods": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 89,
+        "predicted": 0,
+        "expected": 89,
+        "unknown": 0,
+        "precision": null,
+        "recall": 0.0
+      },
+      "truth_scope": "Cross-document graph node pairs retaining the same source IFC GlobalId. Unknown source identities excluded. Pairwise recall, not transitive cluster recall.",
+      "relation_samples": {}
+    }
+  ]
+}
