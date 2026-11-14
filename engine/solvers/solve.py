@@ -79,7 +79,7 @@ def resolve_storey(q: str, storeys: list[dict]) -> str | None:
     if not storeys:
         return None
     srt = sorted(storeys, key=lambda s: s["elevation_m"])
-    ground = next((i for i, s in enumerate(srt) if s["elevation_m"] >= -0.01), 0)
+    ground = next((i for i, s in enumerate(srt) if s["elevation_m"] >= -0.5), 0)   # a ground floor at -0.15 m (finished floor below the site datum) is still ground
     m = re.search(r"\b(ground|first|1st|second|2nd|third|3rd|fourth|4th|fifth)\s+(?:floor|level|storey)", ql)
     if m:
         i = ground + _ORD[m.group(1)]
@@ -578,6 +578,8 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
             conf = float(sc.get("confidence") or 0.3)
             if conf < 0.5:
                 scale_note = " This is approximate: the scale is estimated from the size of the doors."
+            elif sc.get("method") in ("scalebar", "ratio-dpi", "ratio-sheet"):
+                scale_note = f" Scale: {sc.get('evidence')} ({float(sc['m_per_px']):.4f} m per pixel)."
         else:
             return _abstain(question, doc_id, f"I do not measure {p.type} of {_plural(kind, 2)} from a plan reliably yet.", trace, route, t0)
         conf = min(conf, sum(i.conf for i, _ in have) / len(have)) if have else 0.0

@@ -155,3 +155,39 @@ def test_baseboard_never_invents_a_scale():
     a = answer("how many linear metres of skirting in total", ["cubicasa5k__colorful-10052"])
     validate_answer(a)
     assert a["answer"]["value"] is None and "invented" in a["answer"]["text_md"] and not a["evidence"]["boxes"]
+
+
+# ---- E-56 piping
+DH = "ifc_bench__digital-hub-plumbing"
+S65 = "ifc_bench__sixty5-plumbing"
+
+
+def test_piping_total_is_true_metres_and_glows_in_3d():
+    a = answer("how many metres of pipe", [DH])
+    validate_answer(a)
+    assert a["answer"]["unit"] == "m" and abs(a["answer"]["value"] - 301.11) < 0.01 and "Shown in 3D" in a["answer"]["text_md"]
+    assert len(a["evidence"]["scene"]["highlight_item_ids"]) == 504 and not a["evidence"]["boxes"]
+    big = answer("why does the benchmark say 301106 m for the pipe length?", [DH])
+    assert "really mm" in big["answer"]["text_md"]
+
+
+def test_piping_sizes_dn_length_systems_drains():
+    assert "DN100" in answer("what pipe sizes are used", [DH])["answer"]["text_md"]
+    d = answer("DN100 length", [DH])
+    assert abs(d["answer"]["value"] - 81.96) < 0.01 and len(d["evidence"]["scene"]["highlight_item_ids"]) == 108
+    assert "S_Schmutzwasser" in answer("pipes by system", [DH])["answer"]["text_md"]
+    dr = answer("where are the drains", [DH])
+    assert dr["answer"]["value"] == 2 and len(dr["evidence"]["scene"]["highlight_item_ids"]) == 2
+
+
+def test_piping_sixty5_no_waste_terminals_falls_back_honestly_and_missing_size():
+    dr = answer("where are the drains", [S65])
+    validate_answer(dr)
+    assert "No drain fittings are modelled" in dr["answer"]["text_md"] and dr["answer"]["value"] > 1000
+    none = answer("DN100 length", [S65])
+    assert none["answer"]["value"] == 0 and "Sizes present" in none["answer"]["text_md"]
+
+
+def test_ground_floor_slightly_below_datum_is_still_ground():
+    a = answer("how many metres of pipe on the ground floor", [DH])
+    assert "E00_OKRD" in a["answer"]["text_md"]

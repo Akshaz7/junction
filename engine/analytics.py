@@ -290,12 +290,30 @@ SYN = {
     "storage": r"lager|storage|varasto|abstell|reduit",
     "corridor": r"flur|korridor|corridor|k[aä]yt[aä]v",
     "bathroom": r"bad\b|bath|kylpy|wc|toilet",
+    "classroom": r"class\s?room|klassen|luokka|schulzimmer|unterricht|lehrer|seminar",
 }
-SYN_ALIAS = {"offices": "office", "kitchens": "kitchen", "corridors": "corridor", "hallways": "corridor", "storerooms": "storage"}
+SYN_ALIAS = {"classrooms": "classroom", "class rooms": "classroom", "offices": "office", "kitchens": "kitchen", "corridors": "corridor", "hallways": "corridor", "storerooms": "storage"}
 
 
 def _room_label(r: Item) -> str:
-    return f"{r.props.get('long_name') or ''} {r.label or ''} {r.name or ''} {r.props.get('room_type') or ''}".strip()
+    rt = r.props.get("room_type")
+    return f"{r.props.get('long_name') or ''} {r.label or ''} {r.name or ''} {'' if rt in (None, 'other', 'undefined') else rt}".strip()
+
+
+def scale_note(doc: Doc) -> str:
+    """Plan maps: where the m² come from, in one sentence (the scale source, and how each room was measured)."""
+    if doc.mode != "planmap":
+        return ""
+    sc = doc.scale or {}
+    if not sc.get("m_per_px"):
+        return ""
+    m = sc.get("method")
+    if m in ("scalebar", "ratio-dpi", "ratio-sheet"):
+        basis = "from each room's drawn box" if any(i.props.get("area_basis") == "box" for i in doc.items if i.kind == "room") else "from each room's drawn outline"
+        return f" Scale: {sc.get('evidence')} ({sc['m_per_px']:.4f} m per pixel); areas {basis}."
+    if m == "door-prior":
+        return " Scale: estimated from door sizes (no printed scale found), so areas are approximate."
+    return f" Scale: {sc.get('evidence') or m}."
 
 
 def named_rooms(question: str, doc: Doc, t0) -> dict | None:
@@ -310,6 +328,11 @@ def named_rooms(question: str, doc: Doc, t0) -> dict | None:
         if re.search(rf"\b{a}\b", ql):
             word, rx = base, re.compile(SYN[base], re.I)
             break
+    if word is None and doc.mode == "planmap":   # "area of the library": a room name printed on the plan
+        names = sorted({(r.label or "").strip() for r in _of_kind(doc, "room") if len((r.label or "").strip()) >= 2}, key=len, reverse=True)
+        named = [n for n in names if re.search(rf"(?<![\w]){re.escape(n.lower())}(?![\w])", ql)]
+        if named and not re.search(r"\b(?:each|every|all)\b", ql):
+            word, rx = named[0], re.compile(rf"^{re.escape(named[0])}$", re.I)
     if word is None:
         m = re.search(r"\b(?:how many|number of|area of|areas of)\s+(?:the\s+|all\s+|all the\s+)?([a-zäöüß][\wäöüß.\-]{2,})\s+(?:rooms?|spaces?|areas?)\b", question, re.I)
         if not m or _kind(m.group(1).lower()) or m.group(1).lower() in ("total", "many", "much", "these", "those", "different"):
@@ -331,12 +354,15 @@ def named_rooms(question: str, doc: Doc, t0) -> dict | None:
     where = f"on **{st}**" if st else ("in this model" if doc.mode == "ifc" else "on this floor plan")
     trace = [_step("route", f"count / room / named '{word}' -> code, no model"), _step("filter", f"{len(hit)} rooms match {word}")]
     plural = word + ("s" if not word.endswith("s") else "")
-    noun = {"office": "offices", "kitchen": "kitchens", "storage": "storage rooms", "corridor": "corridors", "bathroom": "bathrooms/WCs"}.get(word, f"{word} rooms")
+    noun = {"classroom": "classrooms", "office": "offices", "kitchen": "kitchens", "storage": "storage rooms", "corridor": "corridors", "bathroom": "bathrooms/WCs"}.get(word, f"{word} rooms")
+    if rx.pattern.startswith("^") and wants_area and not howmany:   # one room named on the plan
+        text = f"The area of **{word}** is **{_fmt(tot)} m²**" + (f" ({len(hit)} rooms carry that name, summed)" if len(hit) > 1 else "") + ". {marks}" + scale_note(doc)
+        return _done(question, doc, text, tot, "m2", hit, trace, t0=t0)
     if wants_area and (not howmany or re.search(r"\b(total|combined|sum)\b", ql)) or (wants_area and howmany):
         per = "; ".join(f"{(r.props.get('long_name') or r.label or r.name or r.item_id)} {_fmt(v)} m²" for r, v in sorted(zip(hit, vals), key=lambda t: -(t[1] or 0))[:8] if v)
         lead = f"There {'is' if len(hit) == 1 else 'are'} **{len(hit)} {noun}** {where} with a total area of **{_fmt(tot)} m²**." if howmany else \
                f"The total area of the **{len(hit)} {noun}** {where} is **{_fmt(tot)} m²**."
-        text = f"{lead}" + (f" Largest: {per}." if len(hit) > 1 else "") + " {marks}"
+        text = f"{lead}" + (f" Largest: {per}." if len(hit) > 1 else "") + " {marks}" + scale_note(doc)
         return _done(question, doc, text, tot if not howmany else len(hit), "m2" if not howmany else "count", hit, trace, t0=t0)
     text = f"There {'is' if len(hit) == 1 else 'are'} **{len(hit)} {noun}** {where}. {{marks}}"
     return _done(question, doc, text, len(hit), "count", hit, trace, t0=t0)
@@ -491,7 +517,7 @@ def room_list(question: str, doc: Doc, t0) -> dict | None:
     tot = round(sum(a for _l, a, _r in rows if a), 2)
     head = f"**{len(rows)} rooms**{f' on **{st}**' if st else ''}, total **{_fmt(tot)} m²**, largest first:"
     trace = [_step("route", "list rooms with areas -> room items sorted by area, no model"), _step("filter", f"{len(rows)} rooms")]
-    return _done(question, doc, head + "\n" + "\n".join(lines) + more, tot, "m2", [r for _l, _a, r in rows], trace, t0=t0)
+    return _done(question, doc, head + "\n" + "\n".join(lines) + more + (("\n\n" + scale_note(doc).strip()) if scale_note(doc) else ""), tot, "m2", [r for _l, _a, r in rows], trace, t0=t0)
 
 
 # ------------------------------------------------------------------ E-52: baseboard / skirting in linear metres
@@ -589,6 +615,112 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
     trace = [_step("route", "baseboard -> room outline minus door openings, code, no model"), _step("filter", f"{len(rows)} rooms, {len(doors)} doors considered")]
     return _answer_obj(question, [doc.doc_id], head + "\n" + "\n".join(lines) + more, total, "m", 0.8, False, boxes, cites, scene, trace,
                        "index" if ifc else "planmap", t0 or time.perf_counter())
+
+
+# ------------------------------------------------------------------ E-56: piping from the V-08 extract (plumbing IFCs), $0
+PIPEQ = re.compile(r"\b(pipes?|piping|pipework|plumbing|drains?|drainage|sewer|sewage|DN ?\d{2,4})\b", re.I)
+DRAINQ = re.compile(r"\b(drains?|drainage|waste|sewer|sewage)\b", re.I)
+DRAIN_PIPE = re.compile(r"riolering|afvoer|riool|hemelwater|hwa|abwasser|schmutz|regen|waste|drain|sewer|vwa|ht\b", re.I)
+PIPE_UNITQ = re.compile(r"\b(mm|millimet\w*|units?|301106\S*|benchmark|mislabel\w*)\b", re.I)
+HL_CAP = 3000
+
+
+def _piping_data(doc: Doc) -> dict | None:
+    """artifacts/<doc>/piping.json (written at ingest, S-38) first, then the committed results/vision/piping/<doc>.json."""
+    import json
+    import sys
+    from pathlib import Path
+    if doc.mode != "ifc":
+        return None
+    arts = getattr(sys.modules.get("engine.solvers.solve"), "ARTIFACTS", None)
+    repo = Path(__file__).resolve().parent.parent
+    for f in ([Path(arts) / doc.doc_id / "piping.json"] if arts else []) + [repo / "results/vision/piping" / f"{doc.doc_id}.json"]:
+        try:
+            if f.exists():
+                return json.loads(f.read_text())
+        except (OSError, ValueError):
+            continue
+    return None
+
+
+def _pipe_sum(rows: list[dict]) -> float:
+    return round(sum(r.get("length_m") or 0 for r in rows), 2)
+
+
+def _group(rows: list[dict], key: str) -> list[tuple[str, int, float]]:
+    by: dict = {}
+    for r in rows:
+        by.setdefault(str(r.get(key) or "unknown"), []).append(r)
+    return sorted(((k, len(v), _pipe_sum(v)) for k, v in by.items()), key=lambda x: -x[2])
+
+
+def piping(question: str, doc: Doc, t0) -> dict | None:
+    """"how many metres of pipe", "pipe sizes", "DN100 length", "where are the drains", "pipes by system" from the plumbing extract (vision/piping.py).
+    The model has no 2D geometry, so the answer is shown in 3D: item ids are IFC GlobalIds. Lengths are true metres (the extract converted the mm)."""
+    if not PIPEQ.search(question):
+        return None
+    d = _piping_data(doc)
+    if not d:
+        return None
+    pipes = d.get("pipes") or []
+    ql = question.lower()
+    by_id = {i.item_id: i for i in doc.items}
+    note = " The model's property sets store millimetres, so the benchmark's 301106 'm' is really mm: the true length is in metres here." if PIPE_UNITQ.search(ql) else ""
+    tail = " Shown in 3D: the piping model has no 2D plan, so the same pipes glow in the 3D view."
+    st = resolve_storey(question, doc.storeys)
+    if st:
+        pipes = [p for p in pipes if p.get("storey") == st]
+
+    def done(text, value, unit, ids, steps):
+        ids = [i for i in dict.fromkeys(ids) if i in by_id]
+        items = [by_id[i] for i in ids[:HL_CAP]]
+        _b, cites, _s = _evidence(doc, items)
+        scene = {"doc_id": doc.doc_id, "highlight_item_ids": [i.item_id for i in items], "camera_target_item_id": items[0].item_id if items else None}
+        trace = [_step("route", "piping -> V-08 plumbing extract (item ids = IFC GlobalIds), code, no model")] + [_step("filter", x) for x in steps]
+        return _answer_obj(question, [doc.doc_id], text + tail + note, value, unit, 1.0 if items else 0.7, False, [], cites, scene, trace, "index", t0 or time.perf_counter())
+
+    if DRAINQ.search(ql) and not re.search(r"\bpipes?\b.*\bby\b|\bsizes?\b", ql):
+        terms = [x for x in (d.get("drains") or []) if not st or x.get("storey") == st]
+        if terms:
+            lines = "; ".join(f"{x.get('type_name') or x.get('name')} on {x.get('storey')}" for x in terms[:12])
+            return done(f"**{len(terms)} drains** (waste terminals): {lines}. [1]", len(terms), "count", [x["item_id"] for x in terms], [f"{len(terms)} IfcWasteTerminal"])
+        dp = [p for p in pipes if DRAIN_PIPE.search(f"{p.get('type_name') or ''} {p.get('system') or ''}")]
+        if not dp:
+            return done("**No drains are modelled** in this plumbing model: no waste terminals and no pipe typed or named as drainage.", 0, "count", [], ["0 drains"])
+        stor = "; ".join(f"{n} pipes / {_fmt(m)} m on {k}" for k, n, m in _group(dp, "storey")[:6])
+        return done(f"**No drain fittings are modelled** (no waste terminals); the drainage system is **{len(dp)} pipe segments, {_fmt(_pipe_sum(dp))} m**: {stor}. [1]",
+                    len(dp), "count", [p["item_id"] for p in dp], [f"{len(dp)} drainage pipes"])
+    dn = re.search(r"\bDN ?(\d{2,4})\b|\b(\d{2,4}) ?mm\b", question, re.I)
+    if dn:
+        size = float(dn.group(1) or dn.group(2))
+        sel = [p for p in pipes if p.get("dn_mm") == size]
+        if not sel:
+            have = ", ".join(f"DN{int(float(k[2:]))}" for k, _n, _m in sorted(_group([p for p in pipes if p.get("dn_mm")], "dn_mm"), key=lambda x: -x[2])[:0]) if False else ""
+            sizes = sorted({int(p["dn_mm"]) for p in pipes if p.get("dn_mm")})
+            return done(f"**No DN{int(size)} pipes** in this model. Sizes present: {', '.join('DN' + str(x) for x in sizes)}.", 0, "count", [], ["0 matches"])
+        stor = "; ".join(f"{_fmt(m)} m on {k}" for k, _n, m in _group(sel, "storey")[:6])
+        return done(f"**DN{int(size)}: {_fmt(_pipe_sum(sel))} m** in **{len(sel)} pipe segments**{f' on {st}' if st else ''} ({stor}). [1]",
+                    _pipe_sum(sel), "m", [p["item_id"] for p in sel], [f"{len(sel)} DN{int(size)} pipes"])
+    if re.search(r"\bsizes?\b|diameters?", ql):
+        g = _group([p for p in pipes if p.get("dn_mm")], "dn_mm")
+        g = sorted(g, key=lambda x: float(x[0]))
+        txt = ", ".join(f"DN{int(float(k))}: {n} pipes / {_fmt(m)} m" for k, n, m in g[:20])
+        return done(f"**{len(g)} pipe sizes**{f' on {st}' if st else ''}: {txt}. [1]", len(g), "count", [p["item_id"] for p in pipes if p.get("dn_mm")], [f"{len(g)} sizes"])
+    if re.search(r"\bsystems?\b", ql):
+        g = _group(pipes, "system")
+        txt = "; ".join(f"{k}: {_fmt(m)} m ({n} pipes)" for k, n, m in g[:12])
+        more = f" … and {len(g) - 12} more systems" if len(g) > 12 else ""
+        return done(f"**{len(g)} piping systems**{f' on {st}' if st else ''}, longest first: {txt}{more}. Total {_fmt(_pipe_sum(pipes))} m. [1]", len(g), "count", [p["item_id"] for p in pipes], [f"{len(g)} systems"])
+    if re.search(r"by (?:storey|floor|level)|per (?:storey|floor|level)|each (?:storey|floor|level)", ql):
+        g = _group(pipes, "storey")
+        txt = "; ".join(f"{k}: {_fmt(m)} m ({n} pipes)" for k, n, m in g)
+        return done(f"**{_fmt(_pipe_sum(pipes))} m of pipe** by storey: {txt}. [1]", _pipe_sum(pipes), "m", [p["item_id"] for p in pipes], [f"{len(pipes)} pipes"])
+    if re.search(r"\b(metres?|meters?|m\b|length|how (?:long|much|many))", ql):
+        g = sorted(_group([p for p in pipes if p.get("dn_mm")], "dn_mm"), key=lambda x: -x[2])[:4]
+        top = ", ".join(f"DN{int(float(k))} {_fmt(m)} m" for k, _n, m in g)
+        return done(f"**{_fmt(_pipe_sum(pipes))} m of pipe** in **{len(pipes)} segments**{f' on {st}' if st else ''}; longest sizes: {top}. [1]",
+                    _pipe_sum(pipes), "m", [p["item_id"] for p in pipes], [f"{len(pipes)} pipes"])
+    return None
 
 
 # ------------------------------------------------------------------ material take-off with waste
@@ -843,7 +975,7 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
 
 def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
     """First handler that recognises the shape wins; every handler may return None."""
-    for fn in (slab_by_type, baseboard, room_list, wet_rooms, count_where, storey_pair, storey_compare, total_and_storey, cond_count, exact_size, kind_compare, compliance, superlative_room, where_rooms):
+    for fn in (piping, slab_by_type, baseboard, room_list, wet_rooms, count_where, storey_pair, storey_compare, total_and_storey, cond_count, exact_size, kind_compare, compliance, superlative_room, where_rooms):
         res = fn(question, doc, t0)
         if res is not None:
             return res
