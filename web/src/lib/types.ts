@@ -69,7 +69,11 @@ export interface ChangeEntry {
   doc_a: string | null
   doc_b: string
   created_at: string
-  summary: { doc_id?: string; title?: string; n_changes?: number; headline?: string; generated_for_demo?: boolean; source?: string; series_id?: string; version_a?: number; version_b?: number }
+  summary: { doc_id?: string; title?: string; n_changes?: number; headline?: string; generated_for_demo?: boolean; source?: string; series_id?: string; version_a?: number; version_b?: number
+    /** Any two versions of a drawing compare: version numbers of this pair and the id prefix for `<prefix><a>-<b>`. */
+    index_a?: number; index_b?: number; pair_prefix?: string
+    /** Saved 3D edits (design versions): generated from edits, not an issued drawing. */
+    edited?: boolean; generated?: string; counts?: { removed: number; added: number; moved: number; material: number } }
 }
 
 export interface RuleChangeEntry {
@@ -98,5 +102,9 @@ export interface Comparison extends ChangeEntry {
     n: number; change_id: string; type: 'added' | 'removed' | 'modified'; kind: string; sentence: string
     v1: { item_id: string; bbox_px: Bbox | null } | null
     v2: { item_id: string; bbox_px: Bbox | null } | null
+    /** Design-version diffs: exact item change (removed | added | moved | material), with the item's id and tag. */
+    edit?: boolean; action?: 'removed' | 'added' | 'moved' | 'material'; item_id?: string; tag?: string | null
   }[]
+  /** Design-version comparisons: counts over the whole document and every changed item id (for 3D/AR highlight). */
+  edited?: boolean; counts?: { removed: number; added: number; moved: number; material: number }; item_ids?: string[]
 }

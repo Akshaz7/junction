@@ -89,3 +89,4 @@ Format for new lines: `YYYY-MM-DD HH:MM — decision — reason`.
 15:02 Ash: no report/pitch/docs work until the product is done (report due Sun 08:30, submission 10:00). DOCS worker moved to product rows.
 15:16 Ash: rate limit raised from 30 to 120 requests/min/IP for every route (judges share one venue IP; Awais's review D-1). Set via RATE_LIMIT_PER_MIN in scripts/aiven_env.py.
 15:25 LEAD: CONTRACT 3.3 adds evidence.scene.open ("3d"|"ar") for app-feature answers (ENGINE-FIX FIX-6).
+22:10 Compare/versions: 'Save as new version' in 3D Edit stores the edit snapshot (removed/moved/materials over the original) as design_versions row n (parent-linked, labelled 'Edited version n', generated from edits; original never overwritten); Compare offers any two versions (dv:<doc>:<a>-<b>, ser:<sid>:<a>-<b>) and diffs edited versions by item id in code (engine/design_versions.py), no model call.
