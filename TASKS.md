@@ -120,7 +120,7 @@ Status values: `todo`, `doing`, `done`, `blocked`, `waiting-key`, `blocked-human
 | T-04 | 1 | T-02, D-09 | - | "Visualise it": a button on any answer or document. It requests the scene, shows the plan flat, raises the walls, keeps the answer highlighted. | A Playwright test presses the button on the `colorful-11397` window answer and reads 13 highlighted items. | done | VisualiseIt button + panel: flat -> rise, answer highlights + labels kept, 404 message; 24 vitest + 6 viewer e2e pass (LEAD ran), attempt 2. |
 | T-05 | 1 | T-01 | - | ◆ Tap to identify: a click on an item opens a card with its name, kind, storey and properties. | A click on an `ac20_arc` door shows its name and storey. | done | Click item -> card (name/kind/storey/quantities), ac20 via API; 17 vitest + 3 e2e pass (LEAD ran). |
 | T-06 | 2 | T-02, S-06 | - | Follow `scene.highlight` from the WebSocket, and send it when the user changes the highlight. | Two browser contexts stay in step. | done | Shared /ws client, doc-scoped highlights + labels, echo suppression; 7/7 viewer e2e incl. two-context live sync on stable snapshot (LEAD ran), attempt 3. |
-| T-07 | 2 | T-01 | - | Performance for large models: mesh compression and instancing where needed. | The largest safe demo model orbits smoothly on the Mac; frame time is recorded. | todo | |
+| T-07 | 2 | T-01 | - | Performance for large models: mesh compression and instancing where needed. | The largest safe demo model orbits smoothly on the Mac; frame time is recorded. | doing | 3D 05:02 |
 | T-08 | 3 | T-05, E-16 | - | Edit mode: move or remove an item, change a wall material. Each edit sends an event to the advisor and shows its cards. | An edit produces an advisor request and renders a returned card. | todo | |
 | T-09 | 3 | E-15, T-02 | - | Findings pins in 3D, red or amber, with tap to explain. | A finding on `ac20_arc` shows a pin at its item. | todo | |
 | T-10 | 3 | T-01 | - | ◆ First-person walk mode in the browser. | The camera moves at eye height inside the model. | todo | |
@@ -141,7 +141,7 @@ Status values: `todo`, `doing`, `done`, `blocked`, `waiting-key`, `blocked-human
 | I-06 | 2 | I-03 | - | Walk mode at 1:1: floor alignment, a small "you are here" map, and a guide arrow to the highlighted item. | The build succeeds; the guide logic has a unit test. | done | 1:1 walk toggle, mini-map, guide arrow, WalkGuide maths; 17 tests pass on simulator (LEAD ran). |
 | I-07 | 3 | I-04, S-08 | - | Voice in AR: a button to ask by speech; the spoken answer plays. | The speech request reaches the chat endpoint in a test. | done | Voice in AR: record, speech-intent or on-device transcription, chat SSE, numbered highlights, server/device speech; 35 tests (LEAD ran). |
 | I-08 | 3 | I-03 | - | Tap to identify in AR. | A tap on an entity returns its `item_id` and shows the card. | done | Tap -> item_id via ItemPicker, metadata card, selection outline; 21 tests pass on simulator (LEAD ran). |
-| I-09 | 3 | I-04, E-16 | - | Advisor cards in AR. | A card from the API renders in the AR overlay. | doing | attempt 2: UI test card not shown |
+| I-09 | 3 | I-04, E-16 | - | Advisor cards in AR. | A card from the API renders in the AR overlay. | done | LEAD 05:04: TEST SUCCEEDED, 84 tests 0 failures; sourced-only cards from fixture (CONTRACT 3.1); real API card when E-16 lands |
 
 ### LEAD
 | ID | Tier | Depends | Keys | Task | Done test | Status | Notes |

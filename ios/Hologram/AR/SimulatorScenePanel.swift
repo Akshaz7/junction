@@ -9,6 +9,7 @@ struct SimulatorScenePanel: View {
     var highlightedItemIDs: [String] = []
     @StateObject private var preview = SimulatorSceneMetadata()
     @StateObject private var liveSocket = LiveSocket()
+    @StateObject private var advisor = AdvisorCardsController()
     @Environment(\.dismiss) private var dismiss
 
     private var requestedDocID: String { preview.selectedDocID ?? docID }
@@ -68,24 +69,41 @@ struct SimulatorScenePanel: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            if !advisor.cards.isEmpty {
+                ScrollView {
+                    AdvisorCardsOverlay(cards: advisor.cards) { card in
+                        advisor.select(card) { request in
+                            applyHighlight(request)
+                            Task { await liveSocket.sendHighlight(docID: request.docID, itemIDs: request.itemIDs) }
+                        }
+                    }
+                }
+                .frame(maxHeight: 300)
+            }
         }
         .padding()
         .task(id: requestedDocID) {
+            advisor.clear()
             await preview.load(docID: requestedDocID,
                                manifestURL: requestedDocID == docID ? manifestURL : nil,
                                itemIDs: requestedDocID == docID ? highlightedItemIDs : [])
+            await advisor.load(docID: requestedDocID, fixtureURL: AppConfiguration.advisorFixtureURL)
         }
         .task {
-            liveSocket.onHighlight = { request in
-                guard request.docID == requestedDocID else { return }
-                preview.itemIDs = request.itemIDs
-            }
+            liveSocket.onHighlight = applyHighlight
+            liveSocket.onAdvisorCards = { advisor.receive($0) }
             liveSocket.start()
         }
         .onDisappear {
             liveSocket.stop()
             liveSocket.onHighlight = nil
+            liveSocket.onAdvisorCards = nil
         }
+    }
+
+    private func applyHighlight(_ request: ARRequest) {
+        guard request.docID == requestedDocID else { return }
+        preview.itemIDs = request.itemIDs
     }
 }
 

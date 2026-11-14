@@ -1,0 +1,37 @@
+{
+  "cards": [
+    {
+      "card_id": "demo-door",
+      "kind": "warning",
+      "title": "Door review · generated for demo",
+      "body": "**Check the highlighted door.** This sample shows how to follow a document citation. [1]",
+      "item_ids": ["door-001"],
+      "source": {
+        "type": "document",
+        "ref": "fixture__ios+page1",
+        "title": "Sample door note · generated for demo",
+        "quote": "Review door D1 in this generated demonstration scene."
+      }
+    },
+    {
+      "card_id": "demo-windows",
+      "kind": "option",
+      "title": "Window option · generated for demo",
+      "body": "**Review these windows together.** The sample note identifies the highlighted items. [1]",
+      "item_ids": ["window-001", "window-002"],
+      "source": {
+        "type": "document",
+        "ref": "fixture__ios+page1",
+        "title": "Sample window note · generated for demo",
+        "quote": "Compare windows W1 and W2 in this generated demonstration scene."
+      }
+    },
+    {
+      "card_id": "demo-unsupported",
+      "kind": "info",
+      "title": "Unsupported claim · generated for demo",
+      "body": "This generated test card has no source and must never be displayed.",
+      "item_ids": ["wall-001"]
+    }
+  ]
+}

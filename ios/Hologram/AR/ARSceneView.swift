@@ -364,7 +364,7 @@ final class ARSceneController: ObservableObject {
         case .highlight(let request): docID = request.docID
         case .edit(let edit): docID = edit.doc_id
         case .state(let state): docID = state.doc_id
-        case .ping, .ignored: return false
+        case .advisorCards, .ping, .ignored: return false
         }
         if !isLoaded, docID == requestedDocID {
             pendingLiveCommands.append(command)
@@ -379,7 +379,7 @@ final class ARSceneController: ObservableObject {
         case .state(let state):
             hiddenItemIDs = Set(state.hidden).intersection(Set(manifest?.items.keys.map { $0 } ?? []))
             setHighlights(state.highlighted, labels: state.labels)
-        case .ping, .ignored: break
+        case .advisorCards, .ping, .ignored: break
         }
         return true
     }

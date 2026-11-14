@@ -29,6 +29,13 @@ struct HologramApp: App {
                 ARScreen(docID: request.docID, highlightedItemIDs: request.itemIDs)
                     .id(request.docID)
             }
+            .task {
+                #if DEBUG
+                if AppConfiguration.advisorFixtureURL != nil {
+                    presentation.showAR(ARRequest(docID: "fixture__ios", itemIDs: []))
+                }
+                #endif
+            }
         }
     }
 }

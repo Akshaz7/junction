@@ -1,6 +1,6 @@
 # Handoff: IOS (Codex worker)
 
-Row ID: I-09 (attempt 1)  — Advisor cards in AR (tier 3; build against a fixture, ENGINE's E-16 lands later)
+Row ID: I-09 (attempt 2)  — Advisor cards in AR (tier 3; build against a fixture, ENGINE's E-16 lands later)
 Read CONTRACT.md §5.12 (advisor card shape, v3.1) and §5.8 (voice guide).
 Do:
 1. `AdvisorCard` Codable model exactly per §5.12; decode from `POST /api/advise` responses and from `/ws` event `advisor.cards` in LiveSocket.
@@ -8,7 +8,8 @@ Do:
 3. Fixture `ios/HologramTests/Fixtures/advisor_cards.json` (3 cards, one with no source to prove it is dropped), unit tests for decoding + dropping + tap→highlight, and an XCUITest that injects the fixture (launch argument) and sees 2 cards.
 Rules: only ios/. No device install. Build via scripts/heavy.sh with CODE_SIGNING_ALLOWED=NO.
 Done test (LEAD runs): `scripts/heavy.sh xcodebuild test -project ios/Hologram.xcodeproj -scheme Hologram -destination 'platform=iOS Simulator,name=Hologram iPhone' -derivedDataPath ios/build/DerivedData CODE_SIGNING_ALLOWED=NO` → `** TEST SUCCEEDED **`
-Last failed attempt (if any): none
-
+Last failed attempt (if any): attempt 1 (LEAD 04:47): build ok, 80 test cases passed, but the UI test fails: HologramUITests.swift:21 `door.waitForExistence(timeout: 10)` is false, so no advisor card button `advisor-card-demo-door` appears with `-ADVISOR_FIXTURE advisor_cards`. Check: (a) the fixture JSON is in the APP target bundle (not only HologramTests) — XcodeGen project.yml resources, regenerate the project; (b) AppConfiguration reads the launch argument (UserDefaults `-ADVISOR_FIXTURE` vs ProcessInfo arguments); (c) the overlay is actually on screen in the simulator path (SimulatorScenePanel) when the app launches, without the user first opening AR; (d) the card buttons carry accessibilityIdentifier exactly `advisor-card-<card_id>`. Full log: /tmp/i09.log.
 ---
 <!-- Worker appends RESULT: or NEEDS: lines below. -->
+NEEDS: I-09 implementation ready: sourced Codable cards from POST /api/advise and advisor.cards, bottom glass overlay with source disclosures and existing highlight/tag path, generated fixture plus 6 unit tests and fixture-launch XCUITest; simulator build-for-testing and native iOS build both succeeded via scripts/heavy.sh with CODE_SIGNING_ALLOWED=NO (ios/build/i09-build.log, ios/build/i09-device-build.log). LEAD must run the specified simulator done test outside the Codex sandbox because CoreSimulator is inaccessible here; runtime tests have not run, so I-09 is not yet marked done. No device install or commit.
+NEEDS: I-09 attempt 2 fixes the confirmed UI failure: exported attempt-1 accessibility hierarchy (ios/build/i09-failure-hierarchy.txt) shows both cards on screen but every button inherited the outer VStack identifier advisor-cards; removed that identifier and gave source expansion its own button/quote identifiers. XCUITest now also checks automatic fixture presentation and quote expand/collapse. Regenerated the project; scripts/heavy.sh xcodebuild build-for-testing -project ios/Hologram.xcodeproj -scheme Hologram -destination 'generic/platform=iOS Simulator' -derivedDataPath ios/build/DerivedData CODE_SIGNING_ALLOWED=NO passed (** TEST BUILD SUCCEEDED **; ios/build/i09-attempt2-build.log). LEAD must rerun the specified simulator done test outside the sandbox; runtime success is unverified. SDK 27.2 @State invokes a macro blocked by this sandbox, so disclosure uses the existing @StateObject pattern. No device install or commit.

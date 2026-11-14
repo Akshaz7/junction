@@ -28,6 +28,15 @@ enum AppConfiguration {
         return configured ?? Bundle.main.object(forInfoDictionaryKey: key) as? String
     }
 
+    static var advisorFixtureURL: URL? {
+        #if DEBUG
+        guard value(for: "ADVISOR_FIXTURE") == "advisor_cards" else { return nil }
+        return Bundle.main.url(forResource: "advisor_cards", withExtension: "json")
+        #else
+        return nil
+        #endif
+    }
+
     #if DEBUG
     // Exercise the actual JavaScript -> WKScriptMessageHandler path in XCUITest.
     static var debugBridgeScript: String? {

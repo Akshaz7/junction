@@ -23,6 +23,8 @@ targets:
       - path: Hologram/Resources/DemoScenes
         type: folder
         buildPhase: resources
+      - path: HologramTests/Fixtures/advisor_cards.json
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.teamrs3.hologram
@@ -34,7 +36,10 @@ targets:
     type: bundle.unit-test
     platform: iOS
     sources:
-      - HologramTests
+      - path: HologramTests
+        excludes: [Fixtures]
+      - path: HologramTests/Fixtures
+        buildPhase: resources
       - path: Hologram/Resources
         excludes: [DemoScenes]
         buildPhase: resources

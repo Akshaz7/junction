@@ -9,6 +9,7 @@ struct ARScreen: View {
     @StateObject private var controller = ARSceneController()
     @StateObject private var liveSocket = LiveSocket()
     @StateObject private var voice = ARVoiceController()
+    @StateObject private var advisor = AdvisorCardsController()
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
 
@@ -132,8 +133,14 @@ struct ARScreen: View {
                 }
                 .padding()
                 }
-                .frame(maxHeight: 420)
+                .frame(maxHeight: advisor.cards.isEmpty ? 420 : 160)
                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+                if !advisor.cards.isEmpty {
+                    ScrollView {
+                        AdvisorCardsOverlay(cards: advisor.cards, onSelect: selectAdvisorCard)
+                    }
+                    .frame(maxHeight: 300)
+                }
             }.padding()
         }
         .task {
@@ -142,12 +149,17 @@ struct ARScreen: View {
             }
             liveSocket.onEdit = { controller.applyLiveCommand(.edit($0)) }
             liveSocket.onState = { controller.applyLiveCommand(.state($0)) }
+            liveSocket.onAdvisorCards = { advisor.receive($0) }
             liveSocket.start()
         }
         .task(id: requestedDocID) {
+            advisor.clear()
             await controller.load(docID: requestedDocID, url: sceneURL, manifestURL: manifestURL,
                                   itemIDs: requestedDocID == docID ? highlightedItemIDs : [],
                                   cameraTargetItemID: requestedDocID == docID ? cameraTargetItemID : nil)
+            if let activeDocID = controller.activeDocID {
+                await advisor.load(docID: activeDocID, fixtureURL: AppConfiguration.advisorFixtureURL)
+            }
         }
         .onDisappear {
             voice.stop()
@@ -155,6 +167,7 @@ struct ARScreen: View {
             liveSocket.onHighlight = nil
             liveSocket.onEdit = nil
             liveSocket.onState = nil
+            liveSocket.onAdvisorCards = nil
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .background { voice.stop() }
@@ -176,5 +189,12 @@ struct ARScreen: View {
         guard let activeDocID = controller.activeDocID else { return }
         controller.setHighlights([itemID])
         Task { await liveSocket.sendHighlight(docID: activeDocID, itemIDs: [itemID]) }
+    }
+
+    private func selectAdvisorCard(_ card: AdvisorCard) {
+        advisor.select(card) { request in
+            guard controller.applyLiveHighlight(request) else { return }
+            Task { await liveSocket.sendHighlight(docID: request.docID, itemIDs: request.itemIDs) }
+        }
     }
 }

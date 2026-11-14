@@ -10,6 +10,44 @@ final class HologramUITests: XCTestCase {
     }
 
     @MainActor
+    func testAdvisorFixtureShowsOnlySourcedCardsAndTapHighlightsItems() throws {
+        let app = configuredApp()
+        app.launchArguments += ["-ADVISOR_FIXTURE", "advisor_cards"]
+        app.launch()
+        defer { app.terminate() }
+
+        #if targetEnvironment(simulator)
+        XCTAssertTrue(app.staticTexts["simulator-ar-fallback"].waitForExistence(timeout: 10),
+                      "The fixture launch must open the native scene without a toolbar tap")
+        #endif
+        let door = app.buttons["advisor-card-demo-door"]
+        let windows = app.buttons["advisor-card-demo-windows"]
+        XCTAssertTrue(door.waitForExistence(timeout: 10))
+        XCTAssertTrue(windows.waitForExistence(timeout: 5))
+        let cards = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "advisor-card-"))
+        XCTAssertEqual(cards.count, 2)
+        XCTAssertFalse(app.buttons["advisor-card-demo-unsupported"].exists)
+        XCTAssertFalse(app.staticTexts["Unsupported claim · generated for demo"].exists)
+
+        windows.tap()
+        #if targetEnvironment(simulator)
+        let first = app.staticTexts["highlighted-item-1"]
+        XCTAssertTrue(first.waitForExistence(timeout: 5))
+        XCTAssertEqual(first.label, "1 · window-001")
+        XCTAssertEqual(app.staticTexts["highlighted-item-2"].label, "2 · window-002")
+        #endif
+        let source = app.buttons["advisor-source-demo-windows"]
+        let quote = app.staticTexts["advisor-source-quote-demo-windows"]
+        XCTAssertEqual(source.value as? String, "Collapsed")
+        XCTAssertFalse(quote.exists)
+        source.tap()
+        XCTAssertTrue(quote.waitForExistence(timeout: 5))
+        XCTAssertEqual(quote.label, "Compare windows W1 and W2 in this generated demonstration scene.")
+        source.tap()
+        XCTAssertFalse(quote.exists)
+    }
+
+    @MainActor
     func testLocalWebShellAndNativeDemoScene() throws {
         let app = configuredApp()
         app.launch()
