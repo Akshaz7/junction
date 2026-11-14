@@ -1,0 +1,63 @@
+{
+  "expected_build_rev": "0254cc0",
+  "started_at": "2026-11-14T12:58:46.154907+00:00",
+  "samples": [
+    {
+      "at": "2026-11-14T12:58:46.154989+00:00",
+      "status": 200,
+      "ok": true,
+      "db": true,
+      "build_rev": "0a945e5",
+      "models_ok": true,
+      "uptime_s": 837.1255139169516
+    },
+    {
+      "at": "2026-11-14T12:59:16.161441+00:00",
+      "status": 200,
+      "ok": true,
+      "db": true,
+      "build_rev": "0a945e5",
+      "models_ok": true,
+      "uptime_s": 867.0960635679658
+    },
+    {
+      "at": "2026-11-14T12:59:46.158770+00:00",
+      "status": 200,
+      "ok": true,
+      "db": true,
+      "build_rev": "0a945e5",
+      "models_ok": true,
+      "uptime_s": 898.1924520749599
+    },
+    {
+      "at": "2026-11-14T13:00:16.163533+00:00",
+      "status": 200,
+      "ok": true,
+      "db": true,
+      "build_rev": "0a945e5",
+      "models_ok": true,
+      "uptime_s": 927.0871052109869
+    },
+    {
+      "at": "2026-11-14T13:00:46.157989+00:00",
+      "status": 200,
+      "ok": true,
+      "db": true,
+      "build_rev": "0a945e5",
+      "models_ok": true,
+      "uptime_s": 957.3580425739638
+    },
+    {
+      "at": "2026-11-14T13:01:16.157940+00:00",
+      "status": 200,
+      "ok": true,
+      "db": true,
+      "build_rev": "0254cc0",
+      "models_ok": true,
+      "uptime_s": 48.7934069809271
+    }
+  ],
+  "matched": true,
+  "elapsed_s": 150.7,
+  "finished": true
+}

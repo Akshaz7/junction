@@ -1,11 +1,11 @@
 # SERVER (Codex) — current row
 
-ROW: S-22 /api/bench/latest + cost per answer
-1. GET /api/bench/latest returns 404 on deployed (QA-LIVE). Implement it: read the newest results/bench/*.json that is a full real-provider run (fake=false), prefer the one docs/REPORT.md cites (e-s200-z1), and return {tag, n, numeric_correct, numeric_total, accuracy, abstentions, by_type, cost_usd_total, cost_per_answer, file}. Package results/bench/*.json (small files only, not *.rows.jsonl) into the deploy image if the Dockerfile doesn't already: check deploy/Dockerfile and say what you changed.
-2. GET /api/costs/summary: total model spend and the median cost per answer from the answers table (last 24 h), for the Accuracy page "low inference cost" story. If the table has no cost column, say so and compute from the trace instead.
-Tests: server/tests/test_bench_latest.py (tmp dir with two bench files, picks the right one; 404 → never).
-Allowed: server/ (new bench_routes.py, app.py include), deploy/Dockerfile (COPY only), docs/API.md, this file.
-Done test: .venv/bin/python -m pytest -q -p no:cacheprovider server/tests/test_bench_latest.py
+ROW: S-23 deployed health watch + smoke after 0254cc0
+1. Poll https://obviously-present-piglet.eur-1.aiven.app/api/health every 30 s until build_rev == 0254cc0 (max 25 min). If it never arrives or health fails, report the last state (the Aiven build may have failed: say so).
+2. Then run scripts/smoke_live.py against the deployed site (via https://hologram-khaki.vercel.app and the Aiven origin), including the new checks: GET /api/bench/latest returns 200 with accuracy 0.7647 (143/187) and abstentions 0; GET /api/costs/summary returns 200. Save results/smoke/deployed-0254cc0.json and .md.
+3. Measure p50/p95 latency for 10 cached and 5 novel AC20 questions (pace ≤ 25 req/min); add them to the md.
+Allowed: scripts/smoke_live.py, results/smoke/, this file.
 Never commit. Write one line at the end: RESULT: ...
-NEEDS: LEAD must allow results/bench/*.json through .dockerignore (currently excludes all results); append !results/, results/*, !results/bench/, results/bench/*, !results/bench/*.json in that order so the new Dockerfile COPY can build without row dumps. Also stage these small summary files in deploy/vercel_api/stage.sh for the current Vercel fallback host (outside S-22 allowed scope).
-RESULT: S-22 done test 8 passed; targeted benchmark regression tests 10 passed. Latest prefers completed real e-s200-z1 with numeric/per-type/cost fields and packaged-results fallback; absent measurements return 200/null. Added /api/costs/summary (runtime model-log total plus last-24h answer median; answers has no cost column, uses answer.cost.usd_total then trace). Dockerfile adds COPY results/bench/*.json /app/results/bench/ only; docs/API.md updated; deployment packaging NEEDS above remain for LEAD. No commit.
+
+NEEDS: S-23 /api/bench/latest returns 404 via Vercel and Aiven; deploy a stable revision serving the recorded bench. 0254cc0 arrived but changed to 52dd6f6 mid-smoke, so the origin smoke stopped at the revision guard.
+RESULT: S-23 FAIL: health watch matched 0254cc0 after 150.7 s; Vercel 77/79 passed (bench 404, revision changed), costs/summary 200 on both paths; Aiven full smoke stopped at revision guard. Vercel warm repeats n=10 p50/p95 667.6/1313.2 ms, novel n=5 1555.0/1827.2 ms (mixed deployment, no cache-hit claim). Reports: results/smoke/deployed-0254cc0.json and .md. Dry-run 47-route coverage and local latency-runner checks passed; no commit.

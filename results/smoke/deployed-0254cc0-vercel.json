@@ -1,0 +1,1090 @@
+{
+  "base_url": "https://hologram-khaki.vercel.app",
+  "started_at": "2026-11-14T13:01:35.836372+00:00",
+  "finished_at": "2026-11-14T13:05:52.367582+00:00",
+  "elapsed_s": 256.5,
+  "expected_build_rev": "0254cc0",
+  "passed": false,
+  "failures": 2,
+  "interrupted": false,
+  "created": [
+    {
+      "kind": "upload",
+      "id": "uploads__smoke-130311-4f823e-generated-for-demo-49a103",
+      "deleted": false,
+      "reason": "no delete API"
+    },
+    {
+      "kind": "chat",
+      "id": "be5344bf-15e2-4703-b7f2-440134679ce4",
+      "deleted": false,
+      "reason": "no delete API"
+    },
+    {
+      "kind": "skill",
+      "id": "7f1ec1ad-e8e6-4000-afa2-319b6040f026",
+      "deleted": true
+    },
+    {
+      "kind": "automation",
+      "id": "69b286de-582e-4b69-b09e-e9def89fbc80",
+      "deleted": true
+    },
+    {
+      "kind": "chat",
+      "id": "02e0c09c-57bc-41f7-8b5c-73806c04c09c",
+      "deleted": false,
+      "reason": "no delete API"
+    }
+  ],
+  "notes": [
+    "Comparison is GET /api/changes/{change_id}; server has no separate /api/compare route.",
+    "Documented not_built/no_bench/device/no_key fallbacks are shape-checked and noted, not full feature coverage.",
+    "No chat or uploaded-document delete API exists; created IDs are recorded for the lead.",
+    "HTTP 429 retries are recorded per check; latency includes Retry-After waits. A check passes only after its response validator passes.",
+    "Latency: end-to-end HTTP through terminal SSE answer, excluding pacing; p50/p95 use nearest rank. 'Cached' means exact questions repeated after warmup; the API exposes no cache-hit flag, so a response/model cache hit is not claimed. Novel questions have unique run labels; IFC code routes may use the same loaded index.",
+    "Vercel measurements only; deployment changed during the run, so timings cannot be attributed to revision 0254cc0. Cached means warmed repeated questions; cache hits are not observable."
+  ],
+  "checks": [
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200,
+      "latency_ms": 517.7,
+      "ok": true,
+      "content_type": "application/json",
+      "build_rev": "0254cc0",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs",
+      "status": 200,
+      "latency_ms": 1513.4,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/folders",
+      "status": 200,
+      "latency_ms": 353.0,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc",
+      "status": 200,
+      "latency_ms": 60599.3,
+      "ok": true,
+      "retries": [
+        {
+          "status": 429,
+          "wait_s": 60.0
+        }
+      ],
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/source",
+      "status": 404,
+      "latency_ms": 295.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "documented fallback: not_built",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/pages/1/image",
+      "status": 200,
+      "latency_ms": 213.5,
+      "ok": true,
+      "content_type": "image/png",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/pages/1.png",
+      "status": 200,
+      "latency_ms": 383.8,
+      "ok": true,
+      "content_type": "image/png",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/planmap/1",
+      "status": 200,
+      "latency_ms": 436.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/scene",
+      "status": 200,
+      "latency_ms": 344.9,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/files/scene.glb",
+      "status": 200,
+      "latency_ms": 953.9,
+      "ok": true,
+      "content_type": "application/octet-stream",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/files/scene.usdz",
+      "status": 200,
+      "latency_ms": 428.8,
+      "ok": true,
+      "content_type": "application/octet-stream",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/files/scene.json",
+      "status": 200,
+      "latency_ms": 405.9,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/files/elements.json",
+      "status": 200,
+      "latency_ms": 515.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/files/page-1.thumb.png",
+      "status": 200,
+      "latency_ms": 248.7,
+      "ok": true,
+      "content_type": "image/png",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/ingest",
+      "status": 200,
+      "latency_ms": 217.4,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/upload",
+      "status": 200,
+      "latency_ms": 328.7,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/uploads__smoke-130311-4f823e-generated-for-demo-49a103",
+      "status": 200,
+      "latency_ms": 250.7,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/uploads__smoke-130311-4f823e-generated-for-demo-49a103/ingest",
+      "status": 200,
+      "latency_ms": 226.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chats",
+      "status": 200,
+      "latency_ms": 414.2,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats",
+      "status": 200,
+      "latency_ms": 285.6,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chats/be5344bf-15e2-4703-b7f2-440134679ce4",
+      "status": 200,
+      "latency_ms": 200.1,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chats/be5344bf-15e2-4703-b7f2-440134679ce4/scene-state",
+      "status": 200,
+      "latency_ms": 226.9,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/be5344bf-15e2-4703-b7f2-440134679ce4/messages",
+      "status": 200,
+      "latency_ms": 2105.5,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chats/be5344bf-15e2-4703-b7f2-440134679ce4",
+      "status": 200,
+      "latency_ms": 290.2,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/changes",
+      "status": 200,
+      "latency_ms": 1025.9,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/changes/refresh",
+      "status": 200,
+      "latency_ms": 486.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/changes/ser%3Avacation-rental--s400-9872c2%3A3",
+      "status": 200,
+      "latency_ms": 271.6,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/changes/ser%3Avacation-rental--s400-9872c2%3A3?page=1",
+      "status": 200,
+      "latency_ms": 215.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/skills",
+      "status": 200,
+      "latency_ms": 334.9,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/skills",
+      "status": 201,
+      "latency_ms": 334.0,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/skills/7f1ec1ad-e8e6-4000-afa2-319b6040f026/run",
+      "status": 200,
+      "latency_ms": 2462.7,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations",
+      "status": 200,
+      "latency_ms": 925.0,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/automations",
+      "status": 201,
+      "latency_ms": 275.2,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations/69b286de-582e-4b69-b09e-e9def89fbc80",
+      "status": 200,
+      "latency_ms": 178.6,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/automations/69b286de-582e-4b69-b09e-e9def89fbc80",
+      "status": 200,
+      "latency_ms": 279.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/automations/69b286de-582e-4b69-b09e-e9def89fbc80/run",
+      "status": 200,
+      "latency_ms": 781.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations/69b286de-582e-4b69-b09e-e9def89fbc80/report.md",
+      "status": 200,
+      "latency_ms": 240.5,
+      "ok": true,
+      "content_type": "text/markdown; charset=utf-8",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations/69b286de-582e-4b69-b09e-e9def89fbc80/report.pdf",
+      "status": 200,
+      "latency_ms": 367.2,
+      "ok": true,
+      "content_type": "application/pdf",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/automations/69b286de-582e-4b69-b09e-e9def89fbc80",
+      "status": 204,
+      "latency_ms": 207.4,
+      "ok": true,
+      "content_type": "",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations/69b286de-582e-4b69-b09e-e9def89fbc80",
+      "status": 404,
+      "latency_ms": 264.9,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/skills/7f1ec1ad-e8e6-4000-afa2-319b6040f026",
+      "status": 204,
+      "latency_ms": 282.6,
+      "ok": true,
+      "content_type": "",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/skills",
+      "status": 200,
+      "latency_ms": 383.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/findings/run",
+      "status": 200,
+      "latency_ms": 1342.2,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/findings?doc_id=ifc_bench__ac20-arc",
+      "status": 200,
+      "latency_ms": 522.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/advise",
+      "status": 200,
+      "latency_ms": 1474.1,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/items/3qloCPnZDEQBom1ZjBlwJP",
+      "status": 200,
+      "latency_ms": 300.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/tags/D8",
+      "status": 200,
+      "latency_ms": 2713.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/bench",
+      "status": 200,
+      "latency_ms": 272.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/bench/latest",
+      "status": 404,
+      "latency_ms": 382.4,
+      "ok": false,
+      "content_type": "application/json",
+      "check": "unexpected HTTP status",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/costs",
+      "status": 200,
+      "latency_ms": 372.1,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/costs/summary",
+      "status": 200,
+      "latency_ms": 1141.8,
+      "ok": true,
+      "content_type": "application/json",
+      "measurement": {
+        "total_usd": 0.0216582,
+        "answers": 1930,
+        "answers_with_cost": 1930,
+        "median_cost_per_answer": 0.0
+      },
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/tts",
+      "status": 200,
+      "latency_ms": 390.7,
+      "ok": true,
+      "content_type": "audio/mpeg",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/speech-intent",
+      "status": 200,
+      "latency_ms": 318.0,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "documented fallback: device",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/watch/monitors",
+      "status": 200,
+      "latency_ms": 443.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/watch/sync",
+      "status": 200,
+      "latency_ms": 427.3,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "documented fallback: no_key",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/watch/webhook",
+      "status": 503,
+      "latency_ms": 269.1,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "WS",
+      "path": "/ws",
+      "status": 101,
+      "latency_ms": 543.6,
+      "ok": true,
+      "origin": "https://obviously-present-piglet.eur-1.aiven.app",
+      "check": "WebSocket upgrade and JSON pong",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats",
+      "status": 200,
+      "latency_ms": 216.0,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 696.1,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 300,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "warmup"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 667.4,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 254,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "warmup"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 562.3,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 188,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "warmup"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 556.9,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 187,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "warmup"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 470.4,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 189,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "warmup"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 679.1,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 267,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "cached",
+      "question": "How many windows are there in total across the whole AC20 building model?"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 984.3,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 508,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "cached",
+      "question": "How many doors are there in total across the whole AC20 building model?"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 600.6,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 192,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "cached",
+      "question": "How many walls are there in total across the whole AC20 building model?"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 632.4,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 192,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "cached",
+      "question": "How many rooms are there in total across the whole AC20 building model?"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 421.4,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 203,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "cached",
+      "question": "How many storeys are there in total across the whole AC20 building model?"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 855.9,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 299,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "cached",
+      "question": "How many windows are there in total across the whole AC20 building model?"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 667.6,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 293,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "cached",
+      "question": "How many doors are there in total across the whole AC20 building model?"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 595.3,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 166,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "cached",
+      "question": "How many walls are there in total across the whole AC20 building model?"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 673.2,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 152,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "cached",
+      "question": "How many rooms are there in total across the whole AC20 building model?"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 1313.2,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 144,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "cached",
+      "question": "How many storeys are there in total across the whole AC20 building model?"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 1827.2,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 230,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "novel",
+      "question": "In this AC20 model, what is the total number of windows in the whole building? (generated for demo; smoke khokjkfdlelkkmdbpagihifgghejbbfh)"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 1770.6,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 554,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "novel",
+      "question": "In this AC20 model, what is the total number of doors in the whole building? (generated for demo; smoke khokjkfdlelkkmdbpagihifgghejbbfh)"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 1555.0,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 190,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "novel",
+      "question": "In this AC20 model, what is the total number of walls in the whole building? (generated for demo; smoke khokjkfdlelkkmdbpagihifgghejbbfh)"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 1377.2,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 201,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "novel",
+      "question": "In this AC20 model, what is the total number of rooms in the whole building? (generated for demo; smoke khokjkfdlelkkmdbpagihifgghejbbfh)"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/02e0c09c-57bc-41f7-8b5c-73806c04c09c/messages",
+      "status": 200,
+      "latency_ms": 748.2,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "engine_latency_ms": 138,
+      "answer_route": "index",
+      "cost_usd": 0,
+      "check": "shape OK",
+      "result": "PASS",
+      "latency_group": "novel",
+      "question": "In this AC20 model, what is the total number of storeys in the whole building? (generated for demo; smoke khokjkfdlelkkmdbpagihifgghejbbfh)"
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200,
+      "latency_ms": 819.2,
+      "ok": false,
+      "content_type": "application/json",
+      "build_rev": "52dd6f6",
+      "check": "unexpected deployed build revision",
+      "result": "FAIL"
+    }
+  ],
+  "latency": {
+    "cached": {
+      "requested": 10,
+      "successful": 10,
+      "p50_ms": 667.6,
+      "p95_ms": 1313.2,
+      "samples": [
+        {
+          "latency_ms": 679.1,
+          "engine_latency_ms": 267,
+          "ok": true,
+          "answer_route": "index",
+          "cost_usd": 0,
+          "retries": null
+        },
+        {
+          "latency_ms": 984.3,
+          "engine_latency_ms": 508,
+          "ok": true,
+          "answer_route": "index",
+          "cost_usd": 0,
+          "retries": null
+        },
+        {
+          "latency_ms": 600.6,
+          "engine_latency_ms": 192,
+          "ok": true,
+          "answer_route": "index",
+          "cost_usd": 0,
+          "retries": null
+        },
+        {
+          "latency_ms": 632.4,
+          "engine_latency_ms": 192,
+          "ok": true,
+          "answer_route": "index",
+          "cost_usd": 0,
+          "retries": null
+        },
+        {
+          "latency_ms": 421.4,
+          "engine_latency_ms": 203,
+          "ok": true,
+          "answer_route": "index",
+          "cost_usd": 0,
+          "retries": null
+        },
+        {
+          "latency_ms": 855.9,
+          "engine_latency_ms": 299,
+          "ok": true,
+          "answer_route": "index",
+          "cost_usd": 0,
+          "retries": null
+        },
+        {
+          "latency_ms": 667.6,
+          "engine_latency_ms": 293,
+          "ok": true,
+          "answer_route": "index",
+          "cost_usd": 0,
+          "retries": null
+        },
+        {
+          "latency_ms": 595.3,
+          "engine_latency_ms": 166,
+          "ok": true,
+          "answer_route": "index",
+          "cost_usd": 0,
+          "retries": null
+        },
+        {
+          "latency_ms": 673.2,
+          "engine_latency_ms": 152,
+          "ok": true,
+          "answer_route": "index",
+          "cost_usd": 0,
+          "retries": null
+        },
+        {
+          "latency_ms": 1313.2,
+          "engine_latency_ms": 144,
+          "ok": true,
+          "answer_route": "index",
+          "cost_usd": 0,
+          "retries": null
+        }
+      ]
+    },
+    "novel": {
+      "requested": 5,
+      "successful": 5,
+      "p50_ms": 1555.0,
+      "p95_ms": 1827.2,
+      "samples": [
+        {
+          "latency_ms": 1827.2,
+          "engine_latency_ms": 230,
+          "ok": true,
+          "answer_route": "index",
+          "cost_usd": 0,
+          "retries": null
+        },
+        {
+          "latency_ms": 1770.6,
+          "engine_latency_ms": 554,
+          "ok": true,
+          "answer_route": "index",
+          "cost_usd": 0,
+          "retries": null
+        },
+        {
+          "latency_ms": 1555.0,
+          "engine_latency_ms": 190,
+          "ok": true,
+          "answer_route": "index",
+          "cost_usd": 0,
+          "retries": null
+        },
+        {
+          "latency_ms": 1377.2,
+          "engine_latency_ms": 201,
+          "ok": true,
+          "answer_route": "index",
+          "cost_usd": 0,
+          "retries": null
+        },
+        {
+          "latency_ms": 748.2,
+          "engine_latency_ms": 138,
+          "ok": true,
+          "answer_route": "index",
+          "cost_usd": 0,
+          "retries": null
+        }
+      ]
+    }
+  },
+  "build_consistent": false,
+  "not_reached": 0,
+  "observed_failures": 2
+}

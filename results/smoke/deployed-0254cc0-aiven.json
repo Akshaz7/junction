@@ -1,0 +1,449 @@
+{
+  "base_url": "https://obviously-present-piglet.eur-1.aiven.app",
+  "started_at": "2026-11-14T13:05:52.884280+00:00",
+  "finished_at": "2026-11-14T13:05:53.655771+00:00",
+  "elapsed_s": 0.8,
+  "expected_build_rev": "0254cc0",
+  "passed": false,
+  "failures": 47,
+  "interrupted": false,
+  "created": [],
+  "notes": [
+    "Comparison is GET /api/changes/{change_id}; server has no separate /api/compare route.",
+    "Documented not_built/no_bench/device/no_key fallbacks are shape-checked and noted, not full feature coverage.",
+    "No chat or uploaded-document delete API exists; created IDs are recorded for the lead.",
+    "HTTP 429 retries are recorded per check; latency includes Retry-After waits. A check passes only after its response validator passes.",
+    "The revision check stopped the smoke before remaining routes and latency samples."
+  ],
+  "checks": [
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200,
+      "latency_ms": 771.3,
+      "ok": false,
+      "content_type": "application/json",
+      "build_rev": "52dd6f6",
+      "check": "unexpected deployed build revision",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/folders",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/{doc_id}",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/{doc_id}/source",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/{doc_id}/pages/{n}/image",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/{doc_id}/pages/{n}.png",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/{doc_id}/planmap/{n}",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/{doc_id}/scene",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/{doc_id}/files/{name}",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/{doc_id}/ingest",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "POST",
+      "path": "/api/upload",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chats",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chats/{chat_id}",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chats/{chat_id}/scene-state",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/{chat_id}/messages",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/changes",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "POST",
+      "path": "/api/changes/refresh",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/changes/{change_id}",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/skills",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "POST",
+      "path": "/api/skills",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "POST",
+      "path": "/api/skills/{skill_id}/run",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/skills/{skill_id}",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "POST",
+      "path": "/api/automations",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations/{automation_id}",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/automations/{automation_id}",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "POST",
+      "path": "/api/automations/{automation_id}/run",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations/{automation_id}/report.md",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations/{automation_id}/report.pdf",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/automations/{automation_id}",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "POST",
+      "path": "/api/findings/run",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/findings",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "POST",
+      "path": "/api/advise",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/{doc_id}/items/{item_id:path}",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/{doc_id}/tags/{tag:path}",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/bench",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/bench/latest",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/costs",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/costs/summary",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "POST",
+      "path": "/api/tts",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "POST",
+      "path": "/api/speech-intent",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/watch/monitors",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "POST",
+      "path": "/api/watch/sync",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "POST",
+      "path": "/api/watch/webhook",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    },
+    {
+      "method": "WS",
+      "path": "/ws",
+      "status": null,
+      "latency_ms": 0,
+      "ok": false,
+      "check": "not reached",
+      "result": "FAIL"
+    }
+  ],
+  "latency": {},
+  "build_consistent": false,
+  "not_reached": 46,
+  "observed_failures": 1
+}

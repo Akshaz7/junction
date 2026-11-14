@@ -1,0 +1,58 @@
+{
+  "base_url": "https://obviously-present-piglet.eur-1.aiven.app",
+  "finished_at": "2026-11-14T13:06:49.883988+00:00",
+  "scope": "Supplemental read-only checks after the deployed revision changed; not verification of 0254cc0.",
+  "checks": [
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200,
+      "latency_ms": 281.6,
+      "ok": true,
+      "content_type": "application/json",
+      "measurement": {
+        "ok": true,
+        "db": true,
+        "build_rev": "52dd6f6",
+        "models_ok": true
+      },
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/bench/latest",
+      "status": 404,
+      "latency_ms": 216.7,
+      "ok": false,
+      "content_type": "application/json",
+      "measurement": {
+        "status": "no_bench",
+        "tag": null,
+        "n": null,
+        "accuracy": null,
+        "numeric_correct": null,
+        "numeric_total": null,
+        "abstentions": null
+      },
+      "check": "benchmark endpoint did not return 200",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/costs/summary",
+      "status": 200,
+      "latency_ms": 1032.6,
+      "ok": true,
+      "content_type": "application/json",
+      "measurement": {
+        "total_usd": 0.0534542,
+        "answers": 1955,
+        "window_hours": 24,
+        "median_cost_per_answer": 0.0
+      },
+      "check": "shape OK",
+      "result": "PASS"
+    }
+  ]
+}
