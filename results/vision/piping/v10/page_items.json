@@ -1,0 +1,638 @@
+[
+ {
+  "item_id": "pipe-pipelabel-001",
+  "kind": "pipe_label",
+  "label": "2\"\u00f8",
+  "bbox_px": [
+   1447,
+   1427,
+   1470,
+   1469
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "2\"\u00f8",
+   "size_in": "2\"",
+   "system": "pipe"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-002",
+  "kind": "pipe_label",
+  "label": "2\"\u00f8",
+  "bbox_px": [
+   1504,
+   1427,
+   1526,
+   1469
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "2\"\u00f8",
+   "size_in": "2\"",
+   "system": "pipe"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-003",
+  "kind": "pipe_label",
+  "label": "3\"\u00f8",
+  "bbox_px": [
+   1554,
+   1427,
+   1577,
+   1469
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "3\"\u00f8",
+   "size_in": "3\"",
+   "system": "pipe"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-004",
+  "kind": "pipe_label",
+  "label": "2\"\u00f8",
+  "bbox_px": [
+   1371,
+   1481,
+   1411,
+   1502
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "2\"\u00f8",
+   "size_in": "2\"",
+   "system": "pipe"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-005",
+  "kind": "pipe_label",
+  "label": "3\"\u00f8",
+  "bbox_px": [
+   1594,
+   1484,
+   1617,
+   1527
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "3\"\u00f8",
+   "size_in": "3\"",
+   "system": "pipe"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-006",
+  "kind": "pipe_label",
+  "label": "3\"VENT UP",
+  "bbox_px": [
+   1676,
+   1539,
+   1797,
+   1563
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "3\"VENT UP",
+   "size_in": "3\"",
+   "system": "vent"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-007",
+  "kind": "pipe_label",
+  "label": "3\"V UP",
+  "bbox_px": [
+   1241,
+   2382,
+   1317,
+   2404
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "3\"V UP",
+   "size_in": "3\"",
+   "system": "vent"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-008",
+  "kind": "pipe_label",
+  "label": "1-1/2\"V FROM KS-1",
+  "bbox_px": [
+   1532,
+   2370,
+   1741,
+   2391
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "1-1/2\"V FROM KS-1",
+   "size_in": "1-1/2\"",
+   "system": "vent"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-009",
+  "kind": "pipe_label",
+  "label": "1 1/2\"\u00f8",
+  "bbox_px": [
+   1611,
+   2470,
+   1687,
+   2491
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "1 1/2\"\u00f8",
+   "size_in": "1 1/2\"",
+   "system": "pipe"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-010",
+  "kind": "pipe_label",
+  "label": "1 1/2\"\u00f8",
+  "bbox_px": [
+   1625,
+   2512,
+   1701,
+   2537
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "1 1/2\"\u00f8",
+   "size_in": "1 1/2\"",
+   "system": "pipe"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-011",
+  "kind": "pipe_label",
+  "label": "2\"\u00f8",
+  "bbox_px": [
+   1075,
+   2506,
+   1097,
+   2549
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "2\"\u00f8",
+   "size_in": "2\"",
+   "system": "pipe"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-012",
+  "kind": "pipe_label",
+  "label": "3\"V DN",
+  "bbox_px": [
+   922,
+   2525,
+   998,
+   2546
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "3\"V DN",
+   "size_in": "3\"",
+   "system": "vent"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-013",
+  "kind": "pipe_label",
+  "label": "3\"\u00f8",
+  "bbox_px": [
+   1142,
+   2582,
+   1182,
+   2606
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "3\"\u00f8",
+   "size_in": "3\"",
+   "system": "pipe"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-014",
+  "kind": "pipe_label",
+  "label": "1 1/2\"\u00f8",
+  "bbox_px": [
+   1334,
+   2582,
+   1411,
+   2606
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "1 1/2\"\u00f8",
+   "size_in": "1 1/2\"",
+   "system": "pipe"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-015",
+  "kind": "pipe_label",
+  "label": "2\"\u00f8",
+  "bbox_px": [
+   1075,
+   2649,
+   1097,
+   2688
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "2\"\u00f8",
+   "size_in": "2\"",
+   "system": "pipe"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-016",
+  "kind": "pipe_label",
+  "label": "3\"VENT UP",
+  "bbox_px": [
+   1554,
+   2978,
+   1673,
+   2999
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "3\"VENT UP",
+   "size_in": "3\"",
+   "system": "vent"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-fixture-001",
+  "kind": "fixture",
+  "label": "LAV-1",
+  "bbox_px": [
+   1292,
+   1424,
+   1377,
+   1460
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "tag": "LAV-1",
+   "fixture_type": "lavatory"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-fixture-002",
+  "kind": "fixture",
+  "label": "WC-1",
+  "bbox_px": [
+   1498,
+   1569,
+   1571,
+   1602
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "tag": "WC-1",
+   "fixture_type": "water closet"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-fixture-003",
+  "kind": "fixture",
+  "label": "SH-1",
+  "bbox_px": [
+   1298,
+   1769,
+   1365,
+   1805
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "tag": "SH-1",
+   "fixture_type": "shower"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-fixture-004",
+  "kind": "fixture",
+  "label": "SH-1",
+  "bbox_px": [
+   1049,
+   2198,
+   1117,
+   2231
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "tag": "SH-1",
+   "fixture_type": "shower"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-fixture-005",
+  "kind": "fixture",
+  "label": "WC-1",
+  "bbox_px": [
+   1284,
+   2331,
+   1354,
+   2367
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "tag": "WC-1",
+   "fixture_type": "water closet"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-fixture-006",
+  "kind": "fixture",
+  "label": "KS-1",
+  "bbox_px": [
+   1854,
+   2479,
+   1921,
+   2512
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "tag": "KS-1",
+   "fixture_type": "kitchen sink"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-fixture-007",
+  "kind": "fixture",
+  "label": "LAV-1",
+  "bbox_px": [
+   1173,
+   2745,
+   1250,
+   2782
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "tag": "LAV-1",
+   "fixture_type": "lavatory"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-fixture-008",
+  "kind": "fixture",
+  "label": "WC-1",
+  "bbox_px": [
+   1284,
+   2812,
+   1354,
+   2848
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "tag": "WC-1",
+   "fixture_type": "water closet"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-fixture-009",
+  "kind": "fixture",
+  "label": "SH-1",
+  "bbox_px": [
+   1049,
+   2948,
+   1117,
+   2981
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "tag": "SH-1",
+   "fixture_type": "shower"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-drain-001",
+  "kind": "drain",
+  "label": "shower drain",
+  "bbox_px": [
+   1323,
+   1596,
+   1343,
+   1614
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "drain_kind": "shower drain"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-drain-002",
+  "kind": "drain",
+  "label": "shower drain",
+  "bbox_px": [
+   1075,
+   2391,
+   1094,
+   2410
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "drain_kind": "shower drain"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-drain-003",
+  "kind": "drain",
+  "label": "shower drain",
+  "bbox_px": [
+   1075,
+   2776,
+   1094,
+   2794
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "drain_kind": "shower drain"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-017",
+  "kind": "pipe_label",
+  "label": "3\"VTR",
+  "bbox_px": [
+   4720,
+   1651,
+   4792,
+   1675
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "3\"VTR",
+   "size_in": "3\"",
+   "system": "vent"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-018",
+  "kind": "pipe_label",
+  "label": "3\"VTR",
+  "bbox_px": [
+   4292,
+   2639,
+   4363,
+   2661
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "3\"VTR",
+   "size_in": "3\"",
+   "system": "vent"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-019",
+  "kind": "pipe_label",
+  "label": "3\"VTR",
+  "bbox_px": [
+   4573,
+   2999,
+   4645,
+   3024
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "3\"VTR",
+   "size_in": "3\"",
+   "system": "vent"
+  },
+  "conf": null,
+  "source": "vlm"
+ }
+]

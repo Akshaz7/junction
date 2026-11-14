@@ -1,0 +1,65 @@
+[
+ {
+  "item_id": "pipe-pipelabel-001",
+  "kind": "pipe_label",
+  "label": "3\"VTR",
+  "bbox_px": [
+   1315,
+   398,
+   1396,
+   424
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "3\"VTR",
+   "size_in": "3\"",
+   "system": "vent"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-002",
+  "kind": "pipe_label",
+  "label": "3\"VTR",
+  "bbox_px": [
+   798,
+   1577,
+   879,
+   1604
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "3\"VTR",
+   "size_in": "3\"",
+   "system": "vent"
+  },
+  "conf": null,
+  "source": "vlm"
+ },
+ {
+  "item_id": "pipe-pipelabel-003",
+  "kind": "pipe_label",
+  "label": "3\"VTR",
+  "bbox_px": [
+   1137,
+   2017,
+   1219,
+   2043
+  ],
+  "polygon_px": null,
+  "props": {
+   "model": "gemini-4-carbon",
+   "note": "Read by a model from the sheet, not measured",
+   "text": "3\"VTR",
+   "size_in": "3\"",
+   "system": "vent"
+  },
+  "conf": null,
+  "source": "vlm"
+ }
+]
