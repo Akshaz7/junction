@@ -50,8 +50,15 @@ BASE = os.environ.get("JUDGE_BASE")   # e.g. https://hologram-khaki.vercel.app :
 
 def remote(q):
     import httpx
+    def post(c, *a, **k):
+        for _ in range(6):
+            r = c.post(*a, **k)
+            if r.status_code != 429:
+                return r
+            time.sleep(int(r.headers.get("retry-after", "30")) + 2)
+        return r
     with httpx.Client(base_url=BASE, timeout=180) as c:
-        chat = c.post("/api/chats", json={"doc_ids": [q["doc_id"]]}).json()
+        chat = post(c, "/api/chats", json={"doc_ids": [q["doc_id"]]}).json()
         ev, ans = None, None
         with c.stream("POST", f"/api/chats/{chat['id']}/messages", json={"content": q["question"], "doc_ids": [q["doc_id"]]}) as r:
             for line in r.iter_lines():
@@ -61,7 +68,7 @@ def remote(q):
                     ans = json.loads(line[5:].strip())
                 elif line.startswith("data:") and ev == "error":
                     raise RuntimeError(line[:200])
-        time.sleep(2.2)
+        time.sleep(4.5)   # two requests per question, 30/min limit
         if ans is None:
             raise RuntimeError("no answer event")
         return ans

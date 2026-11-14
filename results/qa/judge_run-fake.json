@@ -1,0 +1,44 @@
+[
+ {
+  "id": "J01",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "How many windows are on the ground floor?",
+  "type": "count",
+  "value": 54,
+  "must": [],
+  "tol": 0.0,
+  "source": "artifacts/ifc_bench__ac20-arc/elements.json",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "correct",
+  "got": "{'text_md': 'There are **54 windows** on **Erdgeschoss**. [1]', 'value': 54, 'unit': 'count', 'confidence': 1.0, 'abstained': False}",
+  "value_got": null,
+  "route": "index",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 0,
+  "secs": 0.0
+ },
+ {
+  "id": "J33",
+  "doc_id": "opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules",
+  "question": "How many windows are listed in the window schedule in total?",
+  "type": "text",
+  "value": null,
+  "must": [
+   "39"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules/text-1.json (Room/Window/Door schedules)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "got": "{'text_md': '**0** (low confidence: an estimate from the printed text and the drawing image, not measured).', 'value': 0, 'unit': 'count', 'confidence': 0.2, 'abstained': False}",
+  "value_got": null,
+  "route": "hybrid",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 0,
+  "secs": 0.5
+ }
+]

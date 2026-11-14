@@ -1,0 +1,1831 @@
+{
+ "n_docs": 40,
+ "rows": [
+  {
+   "doc": "colorful_10481",
+   "kind": "window",
+   "gold": 5,
+   "plan": 8,
+   "vision": 5,
+   "usd": 0.040656,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "door",
+   "gold": 7,
+   "plan": 8,
+   "vision": 0,
+   "usd": 0.040888,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.040736,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.041016,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 1,
+   "vision": 0,
+   "usd": 0.04076,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "window",
+   "gold": 4,
+   "plan": 6,
+   "vision": 4,
+   "usd": 0.004976,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "door",
+   "gold": 4,
+   "plan": 5,
+   "vision": 6,
+   "usd": 0.005208,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.005056,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.005336,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.00504,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "window",
+   "gold": 5,
+   "plan": 5,
+   "vision": 5,
+   "usd": 0.006744,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "door",
+   "gold": 9,
+   "plan": 10,
+   "vision": 9,
+   "usd": 0.006936,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.006784,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.007104,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.006768,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": 4,
+   "usd": 0.00652,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "door",
+   "gold": 6,
+   "plan": 6,
+   "vision": 6,
+   "usd": 0.006752,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.0066,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 4,
+   "vision": 2,
+   "usd": 0.00688,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.006584,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "window",
+   "gold": 4,
+   "plan": 5,
+   "vision": 4,
+   "usd": 0.036864,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "door",
+   "gold": 2,
+   "plan": 7,
+   "vision": 2,
+   "usd": 0.037096,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 2,
+   "vision": 1,
+   "usd": 0.036944,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.037224,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.036928,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": 3,
+   "usd": 0.004408,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "door",
+   "gold": 5,
+   "plan": 5,
+   "vision": 5,
+   "usd": 0.00464,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 3,
+   "vision": 1,
+   "usd": 0.004488,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.004768,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.004432,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "window",
+   "gold": 9,
+   "plan": 9,
+   "vision": 9,
+   "usd": 0.040696,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "door",
+   "gold": 13,
+   "plan": 13,
+   "vision": 13,
+   "usd": 0.040888,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "toilet",
+   "gold": 2,
+   "plan": 5,
+   "vision": 2,
+   "usd": 0.040776,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 3,
+   "vision": 4,
+   "usd": 0.041016,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.04072,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "window",
+   "gold": 4,
+   "plan": 14,
+   "vision": 3,
+   "usd": 0.005968,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "door",
+   "gold": 2,
+   "plan": 8,
+   "vision": 2,
+   "usd": 0.0062,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "toilet",
+   "gold": 0,
+   "plan": 0,
+   "vision": 0,
+   "usd": 0.006048,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 0,
+   "vision": 0,
+   "usd": 0.006328,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "plan": 0,
+   "vision": 0,
+   "usd": 0.006032,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": 3,
+   "usd": 0.005224,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "door",
+   "gold": 2,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.005416,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.005304,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.005584,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.005288,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "window",
+   "gold": 4,
+   "plan": 3,
+   "vision": 4,
+   "usd": 0.011512,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "door",
+   "gold": 6,
+   "plan": 6,
+   "vision": 7,
+   "usd": 0.011744,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.011592,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.011872,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 2,
+   "vision": 1,
+   "usd": 0.011576,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "window",
+   "gold": 6,
+   "plan": 7,
+   "vision": 6,
+   "usd": 0.012056,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "door",
+   "gold": 6,
+   "plan": 7,
+   "vision": 7,
+   "usd": 0.012288,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.012096,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.012416,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.01212,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "window",
+   "gold": 3,
+   "plan": 4,
+   "vision": 4,
+   "usd": 0.005552,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "door",
+   "gold": 6,
+   "plan": 6,
+   "vision": 7,
+   "usd": 0.005824,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.005672,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.005952,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.005656,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "window",
+   "gold": 8,
+   "plan": 5,
+   "vision": 8,
+   "usd": 0.007376,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "door",
+   "gold": 11,
+   "plan": 11,
+   "vision": 11,
+   "usd": 0.007608,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.007496,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 3,
+   "vision": 3,
+   "usd": 0.007776,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.00748,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "window",
+   "gold": 12,
+   "plan": 10,
+   "vision": 5,
+   "usd": 0.00688,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "door",
+   "gold": 17,
+   "plan": 15,
+   "vision": 16,
+   "usd": 0.007072,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.00696,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "sink",
+   "gold": 3,
+   "plan": 3,
+   "vision": 3,
+   "usd": 0.00724,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.006944,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "window",
+   "gold": 5,
+   "plan": 4,
+   "vision": 4,
+   "usd": 0.009584,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "door",
+   "gold": 7,
+   "plan": 7,
+   "vision": 9,
+   "usd": 0.009776,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "toilet",
+   "gold": 2,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.009664,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 3,
+   "vision": 3,
+   "usd": 0.009904,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.009648,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "window",
+   "gold": 4,
+   "plan": 9,
+   "vision": 5,
+   "usd": 0.006104,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "door",
+   "gold": 6,
+   "plan": 11,
+   "vision": 6,
+   "usd": 0.006336,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.006144,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.006464,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 0,
+   "usd": 0.006168,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "window",
+   "gold": 2,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.006376,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "door",
+   "gold": 3,
+   "plan": 3,
+   "vision": 3,
+   "usd": 0.006608,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.006456,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.006736,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "plan": 2,
+   "vision": 1,
+   "usd": 0.00644,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "window",
+   "gold": 6,
+   "plan": 6,
+   "vision": 6,
+   "usd": 0.010344,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "door",
+   "gold": 6,
+   "plan": 5,
+   "vision": 5,
+   "usd": 0.010576,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.010384,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.010704,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.010368,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "window",
+   "gold": 6,
+   "plan": 4,
+   "vision": 4,
+   "usd": 0.009584,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "door",
+   "gold": 7,
+   "plan": 7,
+   "vision": 7,
+   "usd": 0.009816,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.009624,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.009944,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.009648,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "window",
+   "gold": 9,
+   "plan": 5,
+   "vision": 5,
+   "usd": 0.013296,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "door",
+   "gold": 6,
+   "plan": 9,
+   "vision": 7,
+   "usd": 0.013568,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.013416,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.013696,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.01336,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "window",
+   "gold": 3,
+   "plan": 6,
+   "vision": 5,
+   "usd": 0.012464,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "door",
+   "gold": 5,
+   "plan": 9,
+   "vision": 8,
+   "usd": 0.012736,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.012544,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 5,
+   "vision": 2,
+   "usd": 0.012864,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.012568,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "window",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.005328,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "door",
+   "gold": 2,
+   "plan": 4,
+   "vision": 2,
+   "usd": 0.00556,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 2,
+   "vision": 1,
+   "usd": 0.005408,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.005728,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 0,
+   "usd": 0.005392,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "window",
+   "gold": 4,
+   "plan": 4,
+   "vision": 4,
+   "usd": 0.004864,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "door",
+   "gold": 7,
+   "plan": 6,
+   "vision": 6,
+   "usd": 0.005136,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.004984,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.005264,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.004928,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": 3,
+   "usd": 0.014568,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "door",
+   "gold": 5,
+   "plan": 5,
+   "vision": 5,
+   "usd": 0.0148,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.014688,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 2,
+   "vision": 3,
+   "usd": 0.014968,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 2,
+   "vision": 1,
+   "usd": 0.018792,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "window",
+   "gold": 5,
+   "plan": 7,
+   "vision": 4,
+   "usd": 0.006616,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "door",
+   "gold": 1,
+   "plan": 8,
+   "vision": 3,
+   "usd": 0.006848,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "toilet",
+   "gold": 0,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.006696,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.006936,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.00664,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "window",
+   "gold": 4,
+   "plan": 6,
+   "vision": 3,
+   "usd": 0.004952,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "door",
+   "gold": 5,
+   "plan": 6,
+   "vision": 6,
+   "usd": 0.005184,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.005032,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.005312,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 0,
+   "usd": 0.005016,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "window",
+   "gold": 11,
+   "plan": 10,
+   "vision": 11,
+   "usd": 0.006576,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "door",
+   "gold": 11,
+   "plan": 11,
+   "vision": 12,
+   "usd": 0.006888,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "toilet",
+   "gold": 2,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.006656,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 5,
+   "vision": 4,
+   "usd": 0.006936,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.00664,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "window",
+   "gold": 5,
+   "plan": 4,
+   "vision": 4,
+   "usd": 0.010984,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "door",
+   "gold": 7,
+   "plan": 11,
+   "vision": 10,
+   "usd": 0.011216,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "toilet",
+   "gold": 0,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.011024,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.011304,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.011048,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "window",
+   "gold": 13,
+   "plan": 10,
+   "vision": 10,
+   "usd": 0.007984,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "door",
+   "gold": 12,
+   "plan": 13,
+   "vision": 10,
+   "usd": 0.008176,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.008064,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "sink",
+   "gold": 4,
+   "plan": 2,
+   "vision": 4,
+   "usd": 0.008344,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.008008,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "window",
+   "gold": 4,
+   "plan": 6,
+   "vision": 4,
+   "usd": 0.00608,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "door",
+   "gold": 5,
+   "plan": 6,
+   "vision": 6,
+   "usd": 0.006352,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.0062,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.00644,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.006184,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": 3,
+   "usd": 0.004752,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "door",
+   "gold": 7,
+   "plan": 7,
+   "vision": 6,
+   "usd": 0.004944,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.004832,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 3,
+   "vision": 3,
+   "usd": 0.005112,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.004776,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "window",
+   "gold": 5,
+   "plan": 5,
+   "vision": 5,
+   "usd": 0.010176,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "door",
+   "gold": 5,
+   "plan": 6,
+   "vision": 5,
+   "usd": 0.010368,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 0,
+   "vision": 0,
+   "usd": 0.010256,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 1,
+   "vision": 0,
+   "usd": 0.010496,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "plan": 0,
+   "vision": 0,
+   "usd": 0.01024,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "window",
+   "gold": 4,
+   "plan": 4,
+   "vision": 4,
+   "usd": 0.010264,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "door",
+   "gold": 6,
+   "plan": 6,
+   "vision": 7,
+   "usd": 0.010456,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.010344,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.010624,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.010328,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "window",
+   "gold": 4,
+   "plan": 6,
+   "vision": 4,
+   "usd": 0.011064,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "door",
+   "gold": 11,
+   "plan": 11,
+   "vision": 11,
+   "usd": 0.011256,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.011104,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "sink",
+   "gold": 3,
+   "plan": 3,
+   "vision": 3,
+   "usd": 0.011384,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 0,
+   "usd": 0.011088,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "window",
+   "gold": 2,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.00536,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "door",
+   "gold": 5,
+   "plan": 6,
+   "vision": 6,
+   "usd": 0.005552,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 3,
+   "vision": 1,
+   "usd": 0.0054,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.00572,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.005424,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": 4,
+   "usd": 0.006104,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "door",
+   "gold": 5,
+   "plan": 7,
+   "vision": 5,
+   "usd": 0.006336,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 2,
+   "vision": 1,
+   "usd": 0.006184,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.006464,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.006128,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "window",
+   "gold": 7,
+   "plan": 7,
+   "vision": 7,
+   "usd": 0.040656,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "door",
+   "gold": 12,
+   "plan": 13,
+   "vision": 13,
+   "usd": 0.040888,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "toilet",
+   "gold": 0,
+   "plan": 0,
+   "vision": 0,
+   "usd": 0.040736,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.041016,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.04072,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "window",
+   "gold": 5,
+   "plan": 5,
+   "vision": 4,
+   "usd": 0.005944,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "door",
+   "gold": 9,
+   "plan": 9,
+   "vision": 7,
+   "usd": 0.006136,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.006024,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "sink",
+   "gold": 3,
+   "plan": 3,
+   "vision": 3,
+   "usd": 0.006304,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.005968,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "window",
+   "gold": 23,
+   "plan": 16,
+   "vision": 25,
+   "usd": 0.01656,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "door",
+   "gold": 19,
+   "plan": 16,
+   "vision": 19,
+   "usd": 0.016832,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "toilet",
+   "gold": 2,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.01664,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "sink",
+   "gold": 4,
+   "plan": 5,
+   "vision": 4,
+   "usd": 0.01692,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.016624,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": 3,
+   "usd": 0.012376,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "door",
+   "gold": 5,
+   "plan": 5,
+   "vision": 5,
+   "usd": 0.012568,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.012456,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.012736,
+   "model": "claude-fable-5-2"
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.0124,
+   "model": "claude-fable-5-2"
+  }
+ ],
+ "usd": 2.3051,
+ "window": {
+  "n": 40,
+  "plan_acc": 0.425,
+  "vision_acc": 0.6
+ },
+ "door": {
+  "n": 40,
+  "plan_acc": 0.4,
+  "vision_acc": 0.45
+ },
+ "toilet": {
+  "n": 40,
+  "plan_acc": 0.75,
+  "vision_acc": 0.875
+ },
+ "sink": {
+  "n": 40,
+  "plan_acc": 0.225,
+  "vision_acc": 0.275
+ },
+ "shower_bathtub": {
+  "n": 40,
+  "plan_acc": 0.15,
+  "vision_acc": 0.8
+ }
+}

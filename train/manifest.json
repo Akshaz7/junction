@@ -1,0 +1,57 @@
+{
+ "built_by": "train/build_v05.py",
+ "labels_sha256": "c4c0fd68c2a035cba7172b33c43e608a6cd48d0da06bf7f107506538046d76d0",
+ "summary": {
+  "n": 2045,
+  "by_source": {
+   "cubicasa5k_clean": 56,
+   "floorplancad": 1983,
+   "synthetic": 6
+  },
+  "by_split": {
+   "val": 237,
+   "train": 1808
+  },
+  "items_by_kind": {
+   "room": 1112,
+   "wall": 2562,
+   "window": 2046,
+   "door": 8067,
+   "toilet": 762,
+   "sink": 404,
+   "shower": 67,
+   "bathtub": 295
+  },
+  "heldout_ids": 4787,
+  "heldout_docs": 5953,
+  "heldout_images_hashed": 4768,
+  "overlap": 0
+ },
+ "dropped_by_hash": 18,
+ "sources": [
+  {
+   "name": "CubiCasa5K clean (not question-referenced, not calibration)",
+   "n": 56,
+   "licence": "CC BY-NC-SA 4.0",
+   "url": "https://github.com/CubiCasa/CubiCasa5k",
+   "labels": "SVG -> boxes+polygons",
+   "note": "213 clean ids minus 156 calibration drawings kept for threshold picking"
+  },
+  {
+   "name": "FloorPlanCAD (Voxel51 mirror)",
+   "n": 1983,
+   "licence": "CC BY-SA 4.0 (per Voxel51 HF card)",
+   "url": "https://huggingface.co/datasets/Voxel51/FloorPlanCAD",
+   "labels": "boxes: door,window,toilet,sink,bathtub; no walls/rooms/showers",
+   "note": "CAD-rendered, not a question source"
+  },
+  {
+   "name": "Synthetic plans (pipeline/synth.py, V-05b DATA)",
+   "n": 6,
+   "licence": "generated for demo; source models non-question IFC/DXF",
+   "labels": "exact boxes + wall polygons"
+  }
+ ],
+ "held_out_check": "train/check_overlap.py -> overlap=0 (ids, sha256, dHash<=6 vs all question-referenced PNGs, preview+full)",
+ "calibration_excluded": "data/cubicasa5k/calib (156)"
+}

@@ -1,0 +1,19 @@
+{
+ "max_abs_diff": [
+  7.581710815429688e-05,
+  4.4226646423339844e-05,
+  5.7220458984375e-05
+ ],
+ "argmax_agreement": [
+  1.0,
+  1.0,
+  1.0
+ ],
+ "onnx_cpu_ms": 48,
+ "torch_mps_ms_note": "see results/vision/timing.json",
+ "fixtures": [
+  "cubicasa5k__colorful-11397",
+  "cubicasa5k__high-quality-1097",
+  "cubicasa5k__high-quality-architectural-10321"
+ ]
+}

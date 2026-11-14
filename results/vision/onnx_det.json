@@ -1,0 +1,23 @@
+{
+ "max_abs_diff_logits": [
+  0.0026247501373291016,
+  0.0031566619873046875,
+  0.0046389102935791016
+ ],
+ "max_abs_diff_boxes": [
+  0.00014090538024902344,
+  0.0001576542854309082,
+  0.0002614036202430725
+ ],
+ "same_detection_count_at_0.5": [
+  1.0,
+  1.0,
+  1.0
+ ],
+ "onnx_cpu_ms": 420,
+ "fixtures": [
+  "cubicasa5k__colorful-11397",
+  "cubicasa5k__high-quality-1097",
+  "cubicasa5k__high-quality-architectural-10321"
+ ]
+}

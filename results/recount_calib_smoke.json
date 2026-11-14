@@ -1,0 +1,571 @@
+{
+ "n_docs": 12,
+ "rows": [
+  {
+   "doc": "colorful_10481",
+   "kind": "window",
+   "gold": 5,
+   "plan": 8,
+   "vision": 5,
+   "usd": 0.000306,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "door",
+   "gold": 7,
+   "plan": 8,
+   "vision": 5,
+   "usd": 0.000311,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.000307,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.000312,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.000307,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "window",
+   "gold": 4,
+   "plan": 6,
+   "vision": 6,
+   "usd": 0.000308,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "door",
+   "gold": 4,
+   "plan": 5,
+   "vision": 6,
+   "usd": 0.000312,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.000308,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.000314,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.000308,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "window",
+   "gold": 5,
+   "plan": 5,
+   "vision": 6,
+   "usd": 0.000311,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "door",
+   "gold": 9,
+   "plan": 10,
+   "vision": 10,
+   "usd": 0.000317,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.000311,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 3,
+   "usd": 0.000316,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.000311,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": 4,
+   "usd": 0.00031,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "door",
+   "gold": 6,
+   "plan": 6,
+   "vision": 6,
+   "usd": 0.000315,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.000311,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 4,
+   "vision": 2,
+   "usd": 0.000316,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.000311,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "window",
+   "gold": 4,
+   "plan": 5,
+   "vision": 4,
+   "usd": 0.00031,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "door",
+   "gold": 2,
+   "plan": 7,
+   "vision": 2,
+   "usd": 0.000315,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 2,
+   "vision": 1,
+   "usd": 0.000311,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.000316,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.000311,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": 4,
+   "usd": 0.000313,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "door",
+   "gold": 5,
+   "plan": 5,
+   "vision": 6,
+   "usd": 0.000318,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 3,
+   "vision": 1,
+   "usd": 0.000314,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.000319,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.000314,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "window",
+   "gold": 9,
+   "plan": 9,
+   "vision": 13,
+   "usd": 0.000308,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "door",
+   "gold": 13,
+   "plan": 13,
+   "vision": 14,
+   "usd": 0.000313,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "toilet",
+   "gold": 2,
+   "plan": 5,
+   "vision": 2,
+   "usd": 0.000307,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 3,
+   "vision": 4,
+   "usd": 0.000312,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.000307,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "window",
+   "gold": 4,
+   "plan": 14,
+   "vision": 5,
+   "usd": 0.000312,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "door",
+   "gold": 2,
+   "plan": 8,
+   "vision": 2,
+   "usd": 0.000317,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "toilet",
+   "gold": 0,
+   "plan": 0,
+   "vision": 0,
+   "usd": 0.000313,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 0,
+   "vision": 0,
+   "usd": 0.000318,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "plan": 0,
+   "vision": 0,
+   "usd": 0.000313,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": 3,
+   "usd": 0.000312,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "door",
+   "gold": 2,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.000317,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.000313,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.000318,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.000313,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "window",
+   "gold": 4,
+   "plan": 3,
+   "vision": 4,
+   "usd": 0.000313,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "door",
+   "gold": 6,
+   "plan": 6,
+   "vision": 6,
+   "usd": 0.000318,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.000314,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.000319,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 2,
+   "vision": 1,
+   "usd": 0.000314,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "window",
+   "gold": 6,
+   "plan": 7,
+   "vision": 7,
+   "usd": 0.000313,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "door",
+   "gold": 6,
+   "plan": 7,
+   "vision": 7,
+   "usd": 0.000318,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.000314,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 3,
+   "usd": 0.000319,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.000314,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "window",
+   "gold": 3,
+   "plan": 4,
+   "vision": 3,
+   "usd": 0.000313,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "door",
+   "gold": 6,
+   "plan": 6,
+   "vision": 5,
+   "usd": 0.000318,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.000314,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.000319,
+   "model": "google:gemini@3.1-flash-lite"
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.000314,
+   "model": "google:gemini@3.1-flash-lite"
+  }
+ ],
+ "usd": 0.0188,
+ "window": {
+  "n": 12,
+  "plan_acc": 0.417,
+  "vision_acc": 0.417
+ },
+ "door": {
+  "n": 12,
+  "plan_acc": 0.417,
+  "vision_acc": 0.417
+ },
+ "toilet": {
+  "n": 12,
+  "plan_acc": 0.75,
+  "vision_acc": 1.0
+ },
+ "sink": {
+  "n": 12,
+  "plan_acc": 0.167,
+  "vision_acc": 0.167
+ },
+ "shower_bathtub": {
+  "n": 12,
+  "plan_acc": 0.167,
+  "vision_acc": 1.0
+ }
+}

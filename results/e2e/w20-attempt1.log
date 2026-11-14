@@ -1,0 +1,258 @@
+
+Running 104 tests using 1 worker
+
+  ✓    1 [chromium] › e2e/changes.spec.ts:8:1 › real synthetic revision shows numbered changes and a draggable wipe, then opens a new document (5.3s)
+  ✓    2 [chromium] › e2e/chat-header.spec.ts:9:1 › History lists real saved chats, Share copies the active link, and New clears the chat (4.3s)
+  ✓    3 [chromium] › e2e/chat-header.spec.ts:73:1 › History reports a failed read and can be reopened to retry (480ms)
+  ✓    4 [chromium] › e2e/chat.spec.ts:7:1 › real chat streams the fixture answer with bold text, citations and cost (9.3s)
+  ✓    5 [chromium] › e2e/dashboard.spec.ts:19:1 › accuracy and costs match the real API, including the no-bench state (298ms)
+  ✓    6 [chromium] › e2e/dashboard.spec.ts:48:1 › the run picker loads the selected real run (222ms)
+  ✓    7 [chromium] › e2e/data.spec.ts:5:1 › source folder opens a file with credit and passes its document to Chat (1.8s)
+  ✓    8 [chromium] › e2e/data.spec.ts:29:1 › PNG upload shows ingestion progress and appears in the uploads folder (5.8s)
+  ✓    9 [chromium] › e2e/data.spec.ts:49:1 › a document offers its scene, handles a missing preview, and retains phone navigation on return (716ms)
+  ✓   10 [chromium] › e2e/data.spec.ts:91:1 › search spans folders and large lists use pages (310ms)
+  -   11 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-18-0
+  -   12 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-0-500
+  ✓   13 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-1-1100 (930ms)
+  ✓   14 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-2-2600 (959ms)
+  ✓   15 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-3-2950 (828ms)
+  ✓   16 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-4-5350 (918ms)
+  ✓   17 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-5-5700 (746ms)
+  ✓   18 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-6-8000 (777ms)
+  ✓   19 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-7-8300 (970ms)
+  ✓   20 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-8-11000 (875ms)
+  ✓   21 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-9-13300 (931ms)
+  ✓   22 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-10-13650 (1.0s)
+  ✓   23 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-11-16450 (965ms)
+  ✓   24 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-12-16800 (808ms)
+  ✓   25 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-13-18000 (778ms)
+  ✓   26 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-14-18350 (893ms)
+  ✓   27 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-15-20750 (1.0s)
+  ✓   28 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-16-21100 (933ms)
+  ✓   29 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-17-23100 (1.0s)
+  -   30 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-18-26700
+  -   31 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › desktop › desktop-0-27200
+  -   32 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-22-0
+  -   33 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-0-500
+  ✓   34 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-1-1100 (595ms)
+  ✓   35 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-2-2600 (863ms)
+  ✓   36 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-3-2950 (845ms)
+  ✓   37 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-4-3950 (586ms)
+  ✓   38 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-5-5850 (745ms)
+  ✓   39 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-6-6200 (746ms)
+  ✓   40 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-7-6550 (482ms)
+  ✓   41 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-8-8850 (624ms)
+  ✓   42 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-9-9150 (531ms)
+  ✓   43 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-10-11850 (599ms)
+  ✘   44 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-11-14450 (623ms)
+  ✓   45 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-12-14800 (1.3s)
+  ✓   46 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-13-17400 (643ms)
+  ✓   47 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-14-17750 (688ms)
+  ✓   48 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-15-18100 (625ms)
+  ✓   49 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-16-19400 (580ms)
+  ✓   50 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-17-19750 (815ms)
+  ✓   51 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-18-20500 (792ms)
+  ✓   52 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-19-22400 (884ms)
+  ✓   53 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-20-22750 (977ms)
+  ✓   54 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-21-24750 (1.1s)
+  -   55 [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-22-28350
+  ✓   56 [chromium] › e2e/linked-2d3d.spec.ts:9:3 › desktop switches 2D → 3D → 2D in one pane with the same numbered items (3.0s)
+  ✓   57 [chromium] › e2e/linked-2d3d.spec.ts:9:3 › phone switches 2D → 3D → 2D in one pane with the same numbered items (2.8s)
+  ✓   58 [chromium] › e2e/linked-codes.spec.ts:8:3 › door codes open sourced item details and return focus (desktop) (4.5s)
+  ✓   59 [chromium] › e2e/linked-codes.spec.ts:8:3 › door codes open sourced item details and return focus (phone) (3.9s)
+  ✓   60 [chromium] › e2e/live-sync.spec.ts:43:1 › real messages and final answers sync between two independent devices in under two seconds (5.4s)
+  ✓   61 [chromium] › e2e/live-sync.spec.ts:56:1 › the overview chat list refreshes when another device asks a question (2.1s)
+  ✓   62 [chromium] › e2e/mobile-bridge.spec.ts:10:1 › phone tabs navigate and native AR receives the real answer evidence in order (4.1s)
+  ✓   63 [chromium] › e2e/mobile-bridge.spec.ts:62:1 › a plain phone browser has no native AR button (1.0s)
+  ✘   64 [chromium] › e2e/overview.spec.ts:13:1 › overview sections match the real workspace API (5.9s)
+  ✓   65 [chromium] › e2e/overview.spec.ts:93:1 › overview starter links carry all four questions and fit a phone (519ms)
+  ✓   66 [chromium] › e2e/overview.spec.ts:109:1 › chat links load directly, switch saved conversations, and keep follow-ups in the saved chat (451ms)
+  ✓   67 [chromium] › e2e/rule-change.spec.ts:14:3 › rule-source card alongside a drawing revision (349ms)
+  ✓   68 [chromium] › e2e/rule-change.spec.ts:14:3 › rule-source card alongside a drawing revision with missing rule metadata (357ms)
+  ✓   69 [chromium] › e2e/scene-commands.spec.ts:92:1 › real window commands, 2D tags, 3D and Undo stay in sync on two devices (9.0s)
+  ✓   70 [chromium] › e2e/shell.spec.ts:7:1 › workspace shell exposes every route and restores it on reload (760ms)
+  ✓   71 [chromium] › e2e/shell.spec.ts:27:1 › ten root CSS variables equal the supplied reference tokens (189ms)
+  ✓   72 [chromium] › e2e/shell.spec.ts:43:1 › phone navigation keeps all pages reachable without horizontal overflow (995ms)
+  ✓   73 [chromium] › e2e/shell.spec.ts:69:1 › demo chat and document navigation (1.3s)
+  ✓   74 [chromium] › e2e/skills.spec.ts:19:1 › create a real skill, run it on AC20, and pick its prompt in the composer (1.6s)
+  ✓   75 [chromium] › e2e/skills.spec.ts:70:1 › create a real automation, run it on AC20, and display and export its persisted report (2.3s)
+  ✓   76 [chromium] › e2e/viewer.spec.ts:63:1 › citation opens its page beside chat with numbered evidence, navigation and permanent credit (3.5s)
+  ✓   77 [chromium] › e2e/viewer.spec.ts:107:1 › phone opens a full-screen sheet and returns focus to the citation when closed (3.7s)
+  ✓   78 [chromium] › e2e/visibility-return.spec.ts:41:3 › new chat keeps its visible, enabled draft after background and socket recovery (1.1s)
+  ✓   79 [chromium] › e2e/visibility-return.spec.ts:41:3 › saved chat keeps its visible, enabled draft after background and socket recovery (1.7s)
+  ✓   80 [chromium] › e2e/visibility-return.spec.ts:73:1 › an interrupted remote request cannot disable the draft after reconnect (1.1s)
+  ✘   81 [chromium] › e2e/demo-flow.spec.ts:17:1 › desktop: live raster proof carries into 3D, then AC20 door evidence and scene edits (5.4s)
+  ✘   82 [chromium] › e2e/demo-flow.spec.ts:103:1 › phone: live count opens a full-screen numbered drawing sheet with bottom tabs visible (5.3s)
+  ✘   83 [chromium] › e2e/demo-flow.spec.ts:138:1 › phone: Data page preview leaves the Chat bottom tab tappable (5.4s)
+  ✓   84 [chromium] › e2e/findings.spec.ts:7:1 › real AC20 checks show the sourced fire-exit rule and open its exact item evidence (3.2s)
+  ✓   85 [chromium] › e2e/viewer3d-commands.spec.ts:46:1 › answer commands tag windows; real /ws hides W3 in a second context within 2 s and restores it (2.9s)
+  ✓   86 [chromium] › e2e/viewer3d-commands.spec.ts:80:1 › AC20 uses the same tags, command labels, isolate/reset, snapshot replacement and interrupted fades (1.7s)
+  ✓   87 [chromium] › e2e/viewer3d-cutaway.spec.ts:33:1 › AC20 opens as a roofless ground cutaway; roof toggle, stepper, highlights, and VisualisePanel follow the policy (3.8s)
+  ✓   88 [chromium] › e2e/viewer3d-cutaway.spec.ts:108:1 › light extruded plan has no roof control and keeps highlighted items visible (2.5s)
+  ✓   89 [chromium] › e2e/viewer3d-edit.spec.ts:45:1 › AC20 remove requests advice, renders only sourced advisor-fixture cards, highlights tags and undoes removal (2.7s)
+  ✓   90 [chromium] › e2e/viewer3d-edit.spec.ts:83:1 › AC20 edit renders the real advisor API cards or its honest empty state without stubs (1.6s)
+  ✓   91 [chromium] › e2e/viewer3d-edit.spec.ts:102:1 › wall materials and snapped floor dragging stay local and reset together (2.1s)
+  ✓   92 [chromium] › e2e/viewer3d-findings.spec.ts:19:1 › real AC20 checks pin the fire-exit finding above its item and show the sourced rule and tags (7.1s)
+  ✓   93 [chromium] › e2e/viewer3d-highlight.spec.ts:22:1 › highlight changes rendered geometry, shows citation numbers, and clears (2.3s)
+  ✓   94 [chromium] › e2e/viewer3d-identify.spec.ts:45:1 › clicking an AC20 door identifies its name and storey; close and Escape dismiss it (2.9s)
+[A +1ms] navigating
+[A +1182ms] WebSocket created
+[A +1328ms] fixture ready
+[A +1331ms] viewer API and live connection ready
+[B +0ms] navigating
+[B +377ms] WebSocket created
+[B +537ms] fixture ready
+[B +540ms] viewer API and live connection ready
+[live] A selects three items
+[live] B received three items; A changes citation labels
+[live] B received custom labels; B clears the highlight
+[live] bidirectional highlight sync passed
+  ✓   95 [chromium] › e2e/viewer3d-live.spec.ts:57:1 › two browser contexts share three highlighted items, their labels, and clear within 2 seconds (2.9s)
+  ✓   96 [chromium] › e2e/viewer3d-perf.spec.ts:43:1 › largest safe publishable model orbits for five seconds with p95 below 33 ms (8.0s)
+  ✓   97 [chromium] › e2e/viewer3d-visualise.spec.ts:11:1 › Visualise it raises the plan and retains the five answer citation labels (3.6s)
+  ✓   98 [chromium] › e2e/viewer3d-visualise.spec.ts:52:1 › missing scene shows an explanation and the panel can close (1.5s)
+  ✓   99 [chromium] › e2e/viewer3d-visualise.spec.ts:66:1 › reduced motion opens directly in the completed 3D view (2.2s)
+  ✓  100 [chromium] › e2e/viewer3d-walk.spec.ts:28:1 › AC20 walks at eye height inside the ground room, collides, changes storeys, preserves edits and restores orbit (4.0s)
+  ✓  101 [chromium] › e2e/viewer3d-walk.spec.ts:122:3 › phone walk controls › left joystick moves while a second touch drags the canvas to look (2.1s)
+  ✓  102 [chromium] › e2e/viewer3d.spec.ts:66:1 › DigitalHub renders with software GL, filters storeys, and picks an item (3.2s)
+  ✓  103 [chromium] › e2e/voice.spec.ts:9:1 › with a configured key the real TTS endpoint returns audio and plays it (407ms)
+  ✓  104 [chromium] › e2e/voice.spec.ts:27:1 › without a key the device voice speaks the answer and Stop cancels it (349ms)
+
+
+  1) [chromium] › e2e/demo-flow.spec.ts:17:1 › desktop: live raster proof carries into 3D, then AC20 door evidence and scene edits 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Connected workspace', { exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('Connected workspace', { exact: true }) with timeout 5000ms
+      - waiting for getByText('Connected workspace', { exact: true })
+
+
+      18 |   const raster = await rasterPick(page)
+      19 |   await page.goto('/?viewer3dTest=1#/overview')
+    > 20 |   await expect(page.getByText('Connected workspace', { exact: true })).toBeVisible()
+         |                                                                        ^
+      21 |   await selectFromData(page, raster.doc, false)
+      22 |   await shot(page, 'desktop-01-raster-selected')
+      23 |
+        at /private/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/junction-snap-4181/web/e2e/demo-flow.spec.ts:20:72
+
+    Error Context: test-results/demo-flow-desktop-live-ras-c9991-or-evidence-and-scene-edits-chromium/error-context.md
+
+  2) [chromium] › e2e/demo-flow.spec.ts:103:1 › phone: live count opens a full-screen numbered drawing sheet with bottom tabs visible 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Connected workspace', { exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('Connected workspace', { exact: true }) with timeout 5000ms
+      - waiting for getByText('Connected workspace', { exact: true })
+
+
+      105 |   const raster = await rasterPick(page)
+      106 |   await page.goto('/?viewer3dTest=1#/overview')
+    > 107 |   await expect(page.getByText('Connected workspace', { exact: true })).toBeVisible()
+          |                                                                        ^
+      108 |   const tabs = page.getByRole('navigation', { name: 'Mobile navigation', exact: true })
+      109 |   for (const label of ['Overview', 'Chat', 'Changes', 'Data']) {
+      110 |     await expect(tabs.getByRole('link', { name: label, exact: true })).toBeInViewport()
+        at /private/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/junction-snap-4181/web/e2e/demo-flow.spec.ts:107:72
+
+    Error Context: test-results/demo-flow-phone-live-count-694fe-et-with-bottom-tabs-visible-chromium/error-context.md
+
+  3) [chromium] › e2e/demo-flow.spec.ts:138:1 › phone: Data page preview leaves the Chat bottom tab tappable 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Connected workspace', { exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('Connected workspace', { exact: true }) with timeout 5000ms
+      - waiting for getByText('Connected workspace', { exact: true })
+
+
+      140 |   const raster = await rasterPick(page)
+      141 |   await page.goto('/?viewer3dTest=1#/overview')
+    > 142 |   await expect(page.getByText('Connected workspace', { exact: true })).toBeVisible()
+          |                                                                        ^
+      143 |   await selectFromData(page, raster.doc, true)
+      144 |   const tabs = page.getByRole('navigation', { name: 'Mobile navigation', exact: true })
+      145 |   await tabs.getByRole('link', { name: 'Data', exact: true }).click()
+        at /private/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/junction-snap-4181/web/e2e/demo-flow.spec.ts:142:72
+
+    Error Context: test-results/demo-flow-phone-Data-page--c5cb3-he-Chat-bottom-tab-tappable-chromium/error-context.md
+
+  4) [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-11-14450 ────
+
+    Error: phone-11-14450: 3.344% mismatch, 2 unexplained regions. See results/fidelity/report.json and diffs/.
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "pass"
+    Received: "fail"
+
+      295 |   saveReport(testInfo)
+      296 |   await testInfo.attach(`${phase.id}-diff`, { path: diffPath, contentType: 'image/png' })
+    > 297 |   expect(measurement.status, `${phase.id}: ${measurement.mismatch_percent.toFixed(3)}% mismatch, ${measurement.unexplained_regions.length} unexplained regions. See results/fidelity/report.json and diffs/.`).toBe('pass')
+          |                                                                                                                                                                                                                ^
+      298 | }
+      299 |
+      300 | test.describe('Stoa reference fidelity', () => {
+        at screenshotPhase (/private/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/junction-snap-4181/web/e2e/fidelity.spec.ts:297:208)
+        at /private/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/junction-snap-4181/web/e2e/fidelity.spec.ts:319:13
+
+    attachment #1: phone-11-14450 (image/png) ──────────────────────────────────────────────────────
+    test-results/fidelity-Stoa-reference-fidelity-phone-phone-11-14450-chromium/attachments/phone-11-14450-diff-b3ee9956b0b691e19c5a9e283d28b8fe5d04e7ae.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/fidelity-Stoa-reference-fidelity-phone-phone-11-14450-chromium/error-context.md
+
+    Error Context: test-results/fidelity-Stoa-reference-fidelity-phone-phone-11-14450-chromium/error-context.md
+
+  5) [chromium] › e2e/overview.spec.ts:13:1 › overview sections match the real workspace API ───────
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByRole('region', { name: 'Workspace overview', exact: true }).getByRole('region', { name: 'Latest answers', exact: true }).getByTestId('overview-chat')
+    Expected: 5
+    Received: 0
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" getByRole('region', { name: 'Workspace overview', exact: true }).getByRole('region', { name: 'Latest answers', exact: true }).getByTestId('overview-chat') with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Workspace overview', exact: true }).getByRole('region', { name: 'Latest answers', exact: true }).getByTestId('overview-chat')
+        14 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      56 |
+      57 |   const recentChats = [...chats.chats].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)).slice(0, 5)
+    > 58 |   await expect(chatsSection.getByTestId('overview-chat')).toHaveCount(recentChats.length)
+         |                                                           ^
+      59 |   if (!recentChats.length) await expect(chatsSection).toContainText('No answers yet.')
+      60 |   for (const chat of recentChats) {
+      61 |     const detail = await read(request, `/api/chats/${encodeURIComponent(chat.id)}`)
+        at /private/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/junction-snap-4181/web/e2e/overview.spec.ts:58:59
+
+    Error Context: test-results/overview-overview-sections-match-the-real-workspace-API-chromium/error-context.md
+
+  5 failed
+    [chromium] › e2e/demo-flow.spec.ts:17:1 › desktop: live raster proof carries into 3D, then AC20 door evidence and scene edits 
+    [chromium] › e2e/demo-flow.spec.ts:103:1 › phone: live count opens a full-screen numbered drawing sheet with bottom tabs visible 
+    [chromium] › e2e/demo-flow.spec.ts:138:1 › phone: Data page preview leaves the Chat bottom tab tappable 
+    [chromium] › e2e/fidelity.spec.ts:307:9 › Stoa reference fidelity › phone › phone-11-14450 ─────
+    [chromium] › e2e/overview.spec.ts:13:1 › overview sections match the real workspace API ────────
+  7 skipped
+  92 passed (3.5m)

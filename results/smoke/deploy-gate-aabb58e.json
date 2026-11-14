@@ -1,0 +1,53 @@
+{
+  "target_build_rev": "aabb58e",
+  "ready": true,
+  "expired": false,
+  "elapsed_s": 121.5,
+  "probes": [
+    {
+      "at": "2026-11-14T12:36:12.142160+00:00",
+      "target_build_rev": "aabb58e",
+      "status": 200,
+      "build_rev": "effbdee",
+      "ok": true,
+      "db": true,
+      "latency_ms": 359.9
+    },
+    {
+      "at": "2026-11-14T12:36:42.503774+00:00",
+      "target_build_rev": "aabb58e",
+      "status": 200,
+      "build_rev": "effbdee",
+      "ok": true,
+      "db": true,
+      "latency_ms": 277.0
+    },
+    {
+      "at": "2026-11-14T12:37:12.785651+00:00",
+      "target_build_rev": "aabb58e",
+      "status": 200,
+      "build_rev": "effbdee",
+      "ok": true,
+      "db": true,
+      "latency_ms": 299.2
+    },
+    {
+      "at": "2026-11-14T12:37:43.089137+00:00",
+      "target_build_rev": "aabb58e",
+      "status": 200,
+      "build_rev": "effbdee",
+      "ok": true,
+      "db": true,
+      "latency_ms": 279.5
+    },
+    {
+      "at": "2026-11-14T12:38:13.373706+00:00",
+      "target_build_rev": "aabb58e",
+      "status": 200,
+      "build_rev": "aabb58e",
+      "ok": true,
+      "db": true,
+      "latency_ms": 290.0
+    }
+  ]
+}

@@ -1,0 +1,287 @@
+{
+ "n": 20,
+ "gt": "DXF plan map counts",
+ "weights": "weights/onnx/rtdetr.onnx",
+ "cuts": {
+  "door": 0.2,
+  "window": 0.2,
+  "toilet": 0.2,
+  "sink": 0.2,
+  "shower": 0.2,
+  "bathtub": 0.2
+ },
+ "door": {
+  "exact": 0.0,
+  "within1": 0.0,
+  "mean_det": 6.0,
+  "mean_dxf": 25.3
+ },
+ "window": {
+  "exact": 0.0,
+  "within1": 0.05,
+  "mean_det": 2.9,
+  "mean_dxf": 17.4
+ },
+ "rows": [
+  {
+   "doc": "swiss_dwellings__site1000-bldg2082-floor9385",
+   "dxf": {
+    "door": 36,
+    "window": 28
+   },
+   "det": {
+    "door": 4,
+    "window": 0,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site1049-bldg2174-floor50837",
+   "dxf": {
+    "door": 18,
+    "window": 16
+   },
+   "det": {
+    "door": 5,
+    "window": 4,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site1108-bldg2248-floor10307",
+   "dxf": {
+    "door": 17,
+    "window": 13
+   },
+   "det": {
+    "door": 7,
+    "window": 3,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site11659-bldg18207-floor48758",
+   "dxf": {
+    "door": 20,
+    "window": 13
+   },
+   "det": {
+    "door": 3,
+    "window": 6,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site11864-bldg18511-floor50457",
+   "dxf": {
+    "door": 85,
+    "window": 42
+   },
+   "det": {
+    "door": 4,
+    "window": 3,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site133-bldg155-floor681",
+   "dxf": {
+    "door": 19,
+    "window": 12
+   },
+   "det": {
+    "door": 7,
+    "window": 1,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site176-bldg363-floor1475",
+   "dxf": {
+    "door": 14,
+    "window": 2
+   },
+   "det": {
+    "door": 6,
+    "window": 3,
+    "toilet": 0,
+    "sink": 1
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site2135-bldg2978-floor13581",
+   "dxf": {
+    "door": 9,
+    "window": 4
+   },
+   "det": {
+    "door": 5,
+    "window": 1,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site2275-bldg3354-floor14923",
+   "dxf": {
+    "door": 16,
+    "window": 31
+   },
+   "det": {
+    "door": 6,
+    "window": 4,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site267-bldg480-floor1901",
+   "dxf": {
+    "door": 36,
+    "window": 21
+   },
+   "det": {
+    "door": 6,
+    "window": 8,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site3254-bldg4938-floor22524",
+   "dxf": {
+    "door": 12,
+    "window": 4
+   },
+   "det": {
+    "door": 4,
+    "window": 1,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site348-bldg736-floor49934",
+   "dxf": {
+    "door": 14,
+    "window": 11
+   },
+   "det": {
+    "door": 6,
+    "window": 2,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site3702-bldg5709-floor24478",
+   "dxf": {
+    "door": 22,
+    "window": 11
+   },
+   "det": {
+    "door": 9,
+    "window": 1,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site399-bldg1000-floor4253",
+   "dxf": {
+    "door": 26,
+    "window": 18
+   },
+   "det": {
+    "door": 8,
+    "window": 3,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site458-bldg1107-floor4852",
+   "dxf": {
+    "door": 35,
+    "window": 21
+   },
+   "det": {
+    "door": 5,
+    "window": 1,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site576-bldg1289-floor51010",
+   "dxf": {
+    "door": 9,
+    "window": 43
+   },
+   "det": {
+    "door": 4,
+    "window": 0,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site668-bldg1427-floor46977",
+   "dxf": {
+    "door": 22,
+    "window": 17
+   },
+   "det": {
+    "door": 8,
+    "window": 10,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site735-bldg1587-floor6848",
+   "dxf": {
+    "door": 46,
+    "window": 24
+   },
+   "det": {
+    "door": 8,
+    "window": 4,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site851-bldg1805-floor9278",
+   "dxf": {
+    "door": 17,
+    "window": 6
+   },
+   "det": {
+    "door": 7,
+    "window": 2,
+    "toilet": 0,
+    "sink": 0
+   }
+  },
+  {
+   "doc": "swiss_dwellings__site935-bldg1968-floor8671",
+   "dxf": {
+    "door": 33,
+    "window": 11
+   },
+   "det": {
+    "door": 9,
+    "window": 0,
+    "toilet": 0,
+    "sink": 0
+   }
+  }
+ ]
+}

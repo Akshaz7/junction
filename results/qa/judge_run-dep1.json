@@ -1,0 +1,820 @@
+[
+ {
+  "id": "J01",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "How many windows are on the ground floor?",
+  "type": "count",
+  "value": 54,
+  "must": [],
+  "tol": 0.0,
+  "source": "artifacts/ifc_bench__ac20-arc/elements.json",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "got": "**24** (low confidence: an estimate from the model's data and the drawing image, not measured).",
+  "value_got": 24,
+  "route": "hybrid",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 0,
+  "secs": 5.7
+ },
+ {
+  "id": "J02",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "Which floor has the most doors?",
+  "type": "compare",
+  "value": null,
+  "must": [
+   "1. Obergeschoss"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/ifc_bench__ac20-arc/elements.json",
+  "expect_abstain": false,
+  "note": "{'Keller': 16, 'Erdgeschoss': 18, '1. Obergeschoss': 22, '2. Obergeschoss': 21}",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J03",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "How many doors are wider than 1 m?",
+  "type": "count_cond",
+  "value": 10,
+  "must": [],
+  "tol": 0.0,
+  "source": "artifacts/ifc_bench__ac20-arc/elements.json",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "got": "**0** (low confidence: an estimate from the model's data and the drawing image, not measured).",
+  "value_got": 0,
+  "route": "hybrid",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 0,
+  "secs": 4.2
+ },
+ {
+  "id": "J04",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "How many m2 of floor tiles do I need for all the WCs including 10% waste?",
+  "type": "takeoff",
+  "value": 108.9,
+  "must": [],
+  "tol": 0.03,
+  "source": "artifacts/ifc_bench__ac20-arc/elements.json",
+  "expect_abstain": false,
+  "note": "wc rooms 8 area 99.02",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J05",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "What is the total floor area of the WCs?",
+  "type": "area",
+  "value": 99.02,
+  "must": [],
+  "tol": 0.02,
+  "source": "artifacts/ifc_bench__ac20-arc/elements.json",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "RuntimeError('no answer event')",
+  "secs": 2.5
+ },
+ {
+  "id": "J06",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "How many offices are there in the building?",
+  "type": "count",
+  "value": 45,
+  "must": [],
+  "tol": 0.0,
+  "source": "artifacts/ifc_bench__ac20-arc/elements.json",
+  "expect_abstain": false,
+  "note": "rooms whose name starts with Buero",
+  "grade": "wrong",
+  "err": "RuntimeError('no answer event')",
+  "secs": 2.5
+ },
+ {
+  "id": "J07",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "What is the total floor area of the Erdgeschoss rooms?",
+  "type": "area",
+  "value": 442.1,
+  "must": [],
+  "tol": 0.02,
+  "source": "artifacts/ifc_bench__ac20-arc/elements.json",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J08",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "Which storey has the largest total room area?",
+  "type": "compare",
+  "value": null,
+  "must": [
+   "Erdgeschoss"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/ifc_bench__ac20-arc/elements.json",
+  "expect_abstain": false,
+  "note": "{'Keller': 438, 'Erdgeschoss': 442, '1. Obergeschoss': 428, '2. Obergeschoss': 428, 'Dachgeschoss': 202}",
+  "grade": "wrong",
+  "got": "The Keller storey has the largest total room area. This is evidenced by the presence of the building's largest individual room, 006 (Büroarbeit), which measures 128.3 m2.\n\n_Low confidence: a best-effort reading of the model's data and the drawing image, not checked against the data._",
+  "value_got": null,
+  "route": "hybrid",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 0,
+  "secs": 4.3
+ },
+ {
+  "id": "J09",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "What is the largest room and how big is it?",
+  "type": "compare",
+  "value": 128.3,
+  "must": [],
+  "tol": 0.02,
+  "source": "artifacts/ifc_bench__ac20-arc/elements.json",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.3
+ },
+ {
+  "id": "J10",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "How many windows are there in total on the building and how many on the 2nd floor?",
+  "type": "count_multi",
+  "value": null,
+  "must": [
+   "206",
+   "54"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/ifc_bench__ac20-arc/elements.json",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "partial",
+  "got": "There are 54 windows on the 2nd floor (2. Obergeschoss). The total number of windows for the entire building is not explicitly provided in the available data.\n\n_Low confidence: a best-effort reading of the model's data and the drawing image, not checked against the data._",
+  "value_got": null,
+  "route": "hybrid",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 0,
+  "secs": 4.4
+ },
+ {
+  "id": "J11",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "What is the total glazed area of the windows on the ground floor?",
+  "type": "takeoff",
+  "value": 82.1,
+  "must": [],
+  "tol": 0.03,
+  "source": "artifacts/ifc_bench__ac20-arc/elements.json",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.3
+ },
+ {
+  "id": "J12",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "Where is the stair core on the first floor?",
+  "type": "where",
+  "value": null,
+  "must": [
+   "1. Obergeschoss"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/ifc_bench__ac20-arc/elements.json (IfcStair, storey)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J13",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "Do the exits on the ground floor meet the Finnish fire-escape rules?",
+  "type": "rule",
+  "value": null,
+  "must": [
+   "848/2017"
+  ],
+  "tol": 0.0,
+  "source": "engine/rules/fire_escape.yaml",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.3
+ },
+ {
+  "id": "J14",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "Remove the front door. Is the building still compliant?",
+  "type": "edit",
+  "value": null,
+  "must": [
+   "848/2017",
+   "33"
+  ],
+  "tol": 0.0,
+  "source": "engine/rules/fire_escape.yaml §33 (two exits per storey)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J15",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "Do all doors meet the accessibility clear width requirement?",
+  "type": "rule",
+  "value": null,
+  "must": [
+   "241/2017"
+  ],
+  "tol": 0.0,
+  "source": "engine/rules/accessibility.yaml",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.3
+ },
+ {
+  "id": "J16",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "How many rooms are on the Keller level?",
+  "type": "count",
+  "value": 17,
+  "must": [],
+  "tol": 0.0,
+  "source": "artifacts/ifc_bench__ac20-arc/elements.json",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J17",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "Are the stairs wide enough according to the Finnish safety rules?",
+  "type": "rule",
+  "value": null,
+  "must": [
+   "1007/2017"
+  ],
+  "tol": 0.0,
+  "source": "engine/rules/safety_in_use.yaml (stair width §3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.3
+ },
+ {
+  "id": "J18",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "Is the headroom in the doorways sufficient?",
+  "type": "rule",
+  "value": null,
+  "must": [
+   "1007/2017",
+   "14"
+  ],
+  "tol": 0.0,
+  "source": "engine/rules/safety_in_use.yaml (§14)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J19",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "Do the stairs meet the riser and tread requirements?",
+  "type": "rule",
+  "value": null,
+  "must": [
+   "1007/2017"
+  ],
+  "tol": 0.0,
+  "source": "engine/rules/safety_in_use.yaml (§4)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J20",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "Does every storey have two exits as required?",
+  "type": "rule",
+  "value": null,
+  "must": [
+   "848/2017",
+   "33"
+  ],
+  "tol": 0.0,
+  "source": "engine/rules/fire_escape.yaml (§33)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J21",
+  "doc_id": "cubicasa5k__colorful-11397",
+  "question": "Does this plan meet the accessibility requirements?",
+  "type": "rule",
+  "value": null,
+  "must": [
+   "IFC"
+  ],
+  "tol": 0.0,
+  "source": "plan maps have no heights/exits; expect 'checks need an IFC model'",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J22",
+  "doc_id": "cubicasa5k__colorful-11397",
+  "question": "How many windows and doors are there?",
+  "type": "count_multi",
+  "value": null,
+  "must": [
+   "11 windows",
+   "11 doors"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/cubicasa5k__colorful-11397/planmap-1.json (scale 0.029 m/px, door-prior conf 0.3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.3
+ },
+ {
+  "id": "J23",
+  "doc_id": "cubicasa5k__colorful-11397",
+  "question": "How many bedrooms are there and what is their combined floor area?",
+  "type": "takeoff",
+  "value": null,
+  "must": [
+   "3",
+   "24.6"
+  ],
+  "tol": 0.05,
+  "source": "artifacts/cubicasa5k__colorful-11397/planmap-1.json (scale 0.029 m/px, door-prior conf 0.3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J24",
+  "doc_id": "cubicasa5k__colorful-11397",
+  "question": "How many m2 of flooring for the living room and kitchen with 10% extra?",
+  "type": "takeoff",
+  "value": 38.8,
+  "must": [],
+  "tol": 0.05,
+  "source": "artifacts/cubicasa5k__colorful-11397/planmap-1.json (scale 0.029 m/px, door-prior conf 0.3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.3
+ },
+ {
+  "id": "J25",
+  "doc_id": "cubicasa5k__colorful-11397",
+  "question": "What is the biggest room in this plan?",
+  "type": "compare",
+  "value": null,
+  "must": [
+   "terrace"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/cubicasa5k__colorful-11397/planmap-1.json (scale 0.029 m/px, door-prior conf 0.3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J26",
+  "doc_id": "cubicasa5k__colorful-11397",
+  "question": "Where is the entrance door?",
+  "type": "where",
+  "value": null,
+  "must": [
+   "door"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/cubicasa5k__colorful-11397/planmap-1.json (scale 0.029 m/px, door-prior conf 0.3) (entrance = door touching exterior extent)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J27",
+  "doc_id": "cubicasa5k__colorful-11397",
+  "question": "If I remove the front door, is there still an exit?",
+  "type": "edit",
+  "value": null,
+  "must": [
+   "exit"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/cubicasa5k__colorful-11397/planmap-1.json (scale 0.029 m/px, door-prior conf 0.3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J28",
+  "doc_id": "cubicasa5k__colorful-11398",
+  "question": "How many toilets and sinks does the plan have?",
+  "type": "count_multi",
+  "value": null,
+  "must": [
+   "2 toilets",
+   "3 sinks"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/cubicasa5k__colorful-11398/planmap-1.json (scale 0.0143 m/px, door-prior conf 0.3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J29",
+  "doc_id": "cubicasa5k__colorful-11398",
+  "question": "What is the area of the kitchen?",
+  "type": "area",
+  "value": 15.59,
+  "must": [],
+  "tol": 0.05,
+  "source": "artifacts/cubicasa5k__colorful-11398/planmap-1.json (scale 0.0143 m/px, door-prior conf 0.3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J30",
+  "doc_id": "cubicasa5k__colorful-11398",
+  "question": "How many bedrooms are there?",
+  "type": "count",
+  "value": 2,
+  "must": [],
+  "tol": 0.0,
+  "source": "artifacts/cubicasa5k__colorful-11398/planmap-1.json (scale 0.0143 m/px, door-prior conf 0.3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.3
+ },
+ {
+  "id": "J31",
+  "doc_id": "cubicasa5k__colorful-11398",
+  "question": "Which is bigger, the living room or the kitchen?",
+  "type": "compare",
+  "value": null,
+  "must": [
+   "living"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/cubicasa5k__colorful-11398/planmap-1.json (scale 0.0143 m/px, door-prior conf 0.3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J32",
+  "doc_id": "cubicasa5k__colorful-11398",
+  "question": "How many windows are there?",
+  "type": "count",
+  "value": 12,
+  "must": [],
+  "tol": 0.0,
+  "source": "artifacts/cubicasa5k__colorful-11398/planmap-1.json (scale 0.0143 m/px, door-prior conf 0.3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J33",
+  "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+  "question": "How many doors and windows does this floor have?",
+  "type": "count_multi",
+  "value": null,
+  "must": [
+   "36",
+   "28"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/swiss_dwellings__site1000-bldg2082-floor9385/planmap-1.json (dxf units, conf 1.0)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.3
+ },
+ {
+  "id": "J34",
+  "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+  "question": "What is the total area of all the kitchens?",
+  "type": "area",
+  "value": 34.59,
+  "must": [],
+  "tol": 0.03,
+  "source": "artifacts/swiss_dwellings__site1000-bldg2082-floor9385/planmap-1.json (dxf units, conf 1.0)",
+  "expect_abstain": false,
+  "note": "4 Küche rooms",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J35",
+  "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+  "question": "How many Zimmer rooms are there and what is their total area?",
+  "type": "takeoff",
+  "value": null,
+  "must": [
+   "9",
+   "127.5"
+  ],
+  "tol": 0.03,
+  "source": "artifacts/swiss_dwellings__site1000-bldg2082-floor9385/planmap-1.json (dxf units, conf 1.0)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.3
+ },
+ {
+  "id": "J36",
+  "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+  "question": "Which room is the largest?",
+  "type": "compare",
+  "value": null,
+  "must": [
+   "Reduit",
+   "31.05"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/swiss_dwellings__site1000-bldg2082-floor9385/planmap-1.json (dxf units, conf 1.0)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J37",
+  "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+  "question": "How many doors have a leaf wider than 0.9 m?",
+  "type": "count_cond",
+  "value": 23,
+  "must": [],
+  "tol": 0.0,
+  "source": "artifacts/swiss_dwellings__site1000-bldg2082-floor9385/planmap-1.json (dxf units, conf 1.0)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.3
+ },
+ {
+  "id": "J38",
+  "doc_id": "opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules",
+  "question": "How many windows are listed in the window schedule in total?",
+  "type": "text",
+  "value": null,
+  "must": [
+   "39"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules/text-1.json (Room/Window/Door schedules)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.3
+ },
+ {
+  "id": "J39",
+  "doc_id": "opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules",
+  "question": "How many type 07 windows are there and what is their size?",
+  "type": "text",
+  "value": null,
+  "must": [
+   "19",
+   "3'-3 1/4"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules/text-1.json (Room/Window/Door schedules)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.3
+ },
+ {
+  "id": "J40",
+  "doc_id": "opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules",
+  "question": "What is the width of exterior door 04?",
+  "type": "text",
+  "value": null,
+  "must": [
+   "5' 3-1/4"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules/text-1.json (Room/Window/Door schedules)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J41",
+  "doc_id": "opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules",
+  "question": "How many exterior door types are outswing?",
+  "type": "text",
+  "value": null,
+  "must": [
+   "3"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules/text-1.json (Room/Window/Door schedules)",
+  "expect_abstain": false,
+  "note": "02, 04, 05",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.3
+ },
+ {
+  "id": "J42",
+  "doc_id": "opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules",
+  "question": "What is the area of the basement boat house?",
+  "type": "text",
+  "value": null,
+  "must": [
+   "371|34.4"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules/text-1.json (Room/Window/Door schedules)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J43",
+  "doc_id": "opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules",
+  "question": "How many rooms are on the room schedule and what is the total area?",
+  "type": "text",
+  "value": null,
+  "must": [
+   "22",
+   "3672|3671"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules/text-1.json (Room/Window/Door schedules)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J44",
+  "doc_id": "opening_design__ctr-most-current-set-full-size-sheets-a020-life-safety",
+  "question": "What is the occupant load of the community room?",
+  "type": "text",
+  "value": null,
+  "must": [
+   "27.3"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/opening_design__ctr-most-current-set-full-size-sheets-a020-life-safety/text-1.json (life safety plan)",
+  "expect_abstain": false,
+  "note": "410 SF / 15 SF per occupant",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.3
+ },
+ {
+  "id": "J45",
+  "doc_id": "opening_design__ctr-most-current-set-full-size-sheets-a020-life-safety",
+  "question": "What is the area of the fitness room?",
+  "type": "text",
+  "value": null,
+  "must": [
+   "210"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/opening_design__ctr-most-current-set-full-size-sheets-a020-life-safety/text-1.json (life safety plan)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J46",
+  "doc_id": "opening_design__ctr-most-current-set-full-size-sheets-a020-life-safety",
+  "question": "Who is the architect on this project?",
+  "type": "text",
+  "value": null,
+  "must": [
+   "OpeningDesign"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/opening_design__ctr-most-current-set-full-size-sheets-a020-life-safety/text-1.json (life safety plan)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J47",
+  "doc_id": "opening_design__ctr-most-current-set-full-size-sheets-a020-life-safety",
+  "question": "Who is the general contractor?",
+  "type": "text",
+  "value": null,
+  "must": [
+   "Royal"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/opening_design__ctr-most-current-set-full-size-sheets-a020-life-safety/text-1.json (life safety plan)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ },
+ {
+  "id": "J48",
+  "doc_id": "opening_design__ctr-most-current-set-full-size-sheets-a020-life-safety",
+  "question": "What occupancy classification is the basement parking garage?",
+  "type": "text",
+  "value": null,
+  "must": [
+   "S-2"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/opening_design__ctr-most-current-set-full-size-sheets-a020-life-safety/text-1.json (life safety plan)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "wrong",
+  "err": "KeyError('id')",
+  "secs": 0.2
+ }
+]

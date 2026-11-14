@@ -1,0 +1,1831 @@
+{
+ "n_docs": 40,
+ "rows": [
+  {
+   "doc": "colorful_10481",
+   "kind": "window",
+   "gold": 5,
+   "plan": 8,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "door",
+   "gold": 7,
+   "plan": 8,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.005097,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 3,
+   "usd": 0.007599,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 1,
+   "vision": 3,
+   "usd": 0.006522,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "window",
+   "gold": 4,
+   "plan": 6,
+   "vision": 5,
+   "usd": 0.00408,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "door",
+   "gold": 4,
+   "plan": 5,
+   "vision": 4,
+   "usd": 0.004008,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.001875,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.003102,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.002655,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "window",
+   "gold": 5,
+   "plan": 5,
+   "vision": 6,
+   "usd": 0.003183,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "door",
+   "gold": 9,
+   "plan": 10,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.002553,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.003525,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.003078,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": 4,
+   "usd": 0.004659,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "door",
+   "gold": 6,
+   "plan": 6,
+   "vision": 5,
+   "usd": 0.004587,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.002394,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 4,
+   "vision": 2,
+   "usd": 0.002871,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.003009,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "window",
+   "gold": 4,
+   "plan": 5,
+   "vision": 3,
+   "usd": 0.006258,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "door",
+   "gold": 2,
+   "plan": 7,
+   "vision": 3,
+   "usd": 0.007536,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 2,
+   "vision": 1,
+   "usd": 0.006228,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.00759,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.006468,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": 5,
+   "usd": 0.002952,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "door",
+   "gold": 5,
+   "plan": 5,
+   "vision": 5,
+   "usd": 0.003255,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 3,
+   "vision": 1,
+   "usd": 0.001707,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.002589,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.001752,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "window",
+   "gold": 9,
+   "plan": 9,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "door",
+   "gold": 13,
+   "plan": 13,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "toilet",
+   "gold": 2,
+   "plan": 5,
+   "vision": 2,
+   "usd": 0.005982,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 3,
+   "vision": 4,
+   "usd": 0.007569,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "window",
+   "gold": 4,
+   "plan": 14,
+   "vision": 8,
+   "usd": 0.003957,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "door",
+   "gold": 2,
+   "plan": 8,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "toilet",
+   "gold": 0,
+   "plan": 0,
+   "vision": 0,
+   "usd": 0.001602,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.001674,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.002787,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": 3,
+   "usd": 0.002553,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "door",
+   "gold": 2,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.003636,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.002088,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.002505,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.002433,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "window",
+   "gold": 4,
+   "plan": 3,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "door",
+   "gold": 6,
+   "plan": 6,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.004851,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.004863,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 2,
+   "vision": 1,
+   "usd": 0.004191,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "window",
+   "gold": 6,
+   "plan": 7,
+   "vision": 4,
+   "usd": 0.00633,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "door",
+   "gold": 6,
+   "plan": 7,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.00456,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.005112,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.00501,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "window",
+   "gold": 3,
+   "plan": 4,
+   "vision": 3,
+   "usd": 0.003381,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "door",
+   "gold": 6,
+   "plan": 6,
+   "vision": 6,
+   "usd": 0.003309,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.002196,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.003768,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.003306,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "window",
+   "gold": 8,
+   "plan": 5,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "door",
+   "gold": 11,
+   "plan": 11,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.002805,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 3,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 3,
+   "usd": 0.00477,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "window",
+   "gold": 12,
+   "plan": 10,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "door",
+   "gold": 17,
+   "plan": 15,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 2,
+   "vision": 3,
+   "usd": 0.003234,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "sink",
+   "gold": 3,
+   "plan": 3,
+   "vision": 4,
+   "usd": 0.004746,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "plan": 0,
+   "vision": 3,
+   "usd": 0.003474,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "window",
+   "gold": 5,
+   "plan": 4,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "door",
+   "gold": 7,
+   "plan": 7,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "toilet",
+   "gold": 2,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.003933,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 3,
+   "vision": 3,
+   "usd": 0.0045,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.004953,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "window",
+   "gold": 4,
+   "plan": 9,
+   "vision": 7,
+   "usd": 0.003858,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "door",
+   "gold": 6,
+   "plan": 11,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.002673,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 3,
+   "usd": 0.004515,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.003978,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "window",
+   "gold": 2,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.002775,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "door",
+   "gold": 3,
+   "plan": 3,
+   "vision": 4,
+   "usd": 0.004293,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 2,
+   "usd": 0.00327,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.002892,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.002955,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "window",
+   "gold": 6,
+   "plan": 6,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "door",
+   "gold": 6,
+   "plan": 5,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.004053,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 1,
+   "vision": 2,
+   "usd": 0.005055,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.004413,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "window",
+   "gold": 6,
+   "plan": 4,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "door",
+   "gold": 7,
+   "plan": 7,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.004518,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 3,
+   "usd": 0.00531,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.004413,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "window",
+   "gold": 9,
+   "plan": 5,
+   "vision": 7,
+   "usd": 0.007095,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "door",
+   "gold": 6,
+   "plan": 9,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.005625,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.005997,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.006285,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "window",
+   "gold": 3,
+   "plan": 6,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "door",
+   "gold": 5,
+   "plan": 9,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.006078,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 5,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 1,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "window",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.002367,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "door",
+   "gold": 2,
+   "plan": 4,
+   "vision": 3,
+   "usd": 0.002565,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 2,
+   "vision": 1,
+   "usd": 0.002112,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.003759,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.002652,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "window",
+   "gold": 4,
+   "plan": 4,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "door",
+   "gold": 7,
+   "plan": 6,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.001998,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.003915,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.002463,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "door",
+   "gold": 5,
+   "plan": 5,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.005817,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.007074,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 2,
+   "vision": 1,
+   "usd": 0.006387,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "window",
+   "gold": 5,
+   "plan": 7,
+   "vision": 3,
+   "usd": 0.00294,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "door",
+   "gold": 1,
+   "plan": 8,
+   "vision": 3,
+   "usd": 0.004278,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "toilet",
+   "gold": 0,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.00261,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "sink",
+   "gold": 0,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.003117,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.00312,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "window",
+   "gold": 4,
+   "plan": 6,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "door",
+   "gold": 5,
+   "plan": 6,
+   "vision": 4,
+   "usd": 0.003414,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.001956,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.003093,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.002601,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "window",
+   "gold": 11,
+   "plan": 10,
+   "vision": 10,
+   "usd": 0.004335,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "door",
+   "gold": 11,
+   "plan": 11,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "toilet",
+   "gold": 2,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.003495,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 5,
+   "vision": 4,
+   "usd": 0.004527,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.00405,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "window",
+   "gold": 5,
+   "plan": 4,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "door",
+   "gold": 7,
+   "plan": 11,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "toilet",
+   "gold": 0,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.004923,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 0,
+   "vision": 3,
+   "usd": 0.006225,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.006183,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "window",
+   "gold": 13,
+   "plan": 10,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "door",
+   "gold": 12,
+   "plan": 13,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.003453,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "sink",
+   "gold": 4,
+   "plan": 2,
+   "vision": 4,
+   "usd": 0.004785,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.003573,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "window",
+   "gold": 4,
+   "plan": 6,
+   "vision": 6,
+   "usd": 0.003564,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "door",
+   "gold": 5,
+   "plan": 6,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.003384,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.003621,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.002769,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": 4,
+   "usd": 0.003906,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "door",
+   "gold": 7,
+   "plan": 7,
+   "vision": 5,
+   "usd": 0.003834,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.001986,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.002778,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.002826,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "window",
+   "gold": 5,
+   "plan": 5,
+   "vision": 4,
+   "usd": 0.00546,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "door",
+   "gold": 5,
+   "plan": 6,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.005535,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.005322,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.005385,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "window",
+   "gold": 4,
+   "plan": 4,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "door",
+   "gold": 6,
+   "plan": 6,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.004308,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.00414,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.004308,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "window",
+   "gold": 4,
+   "plan": 6,
+   "vision": 5,
+   "usd": 0.005418,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "door",
+   "gold": 11,
+   "plan": 11,
+   "vision": 8,
+   "usd": 0.006126,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.004233,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "sink",
+   "gold": 3,
+   "plan": 3,
+   "vision": 3,
+   "usd": 0.00579,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.005463,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "window",
+   "gold": 2,
+   "plan": 3,
+   "vision": 4,
+   "usd": 0.002724,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "door",
+   "gold": 5,
+   "plan": 6,
+   "vision": 4,
+   "usd": 0.003822,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 3,
+   "vision": 1,
+   "usd": 0.002229,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "sink",
+   "gold": 2,
+   "plan": 3,
+   "vision": 2,
+   "usd": 0.002481,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.002874,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": 5,
+   "usd": 0.004503,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "door",
+   "gold": 5,
+   "plan": 7,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 2,
+   "vision": 1,
+   "usd": 0.002463,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.003015,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.002898,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "window",
+   "gold": 7,
+   "plan": 7,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "door",
+   "gold": 12,
+   "plan": 13,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "toilet",
+   "gold": 0,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.006927,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 4,
+   "usd": 0.007824,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.007437,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "window",
+   "gold": 5,
+   "plan": 5,
+   "vision": 7,
+   "usd": 0.003243,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "door",
+   "gold": 9,
+   "plan": 9,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.002133,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "sink",
+   "gold": 3,
+   "plan": 3,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.002883,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "window",
+   "gold": 23,
+   "plan": 16,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "door",
+   "gold": 19,
+   "plan": 16,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "toilet",
+   "gold": 2,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.00603,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "sink",
+   "gold": 4,
+   "plan": 5,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "plan": 0,
+   "vision": 2,
+   "usd": 0.00741,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "window",
+   "gold": 3,
+   "plan": 3,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "door",
+   "gold": 5,
+   "plan": 5,
+   "vision": null,
+   "usd": 0.0,
+   "model": ""
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "toilet",
+   "gold": 1,
+   "plan": 1,
+   "vision": 1,
+   "usd": 0.004965,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "sink",
+   "gold": 1,
+   "plan": 2,
+   "vision": 2,
+   "usd": 0.005637,
+   "model": "anthropic:claude@sonnet-4.6"
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "plan": 0,
+   "vision": 1,
+   "usd": 0.00525,
+   "model": "anthropic:claude@sonnet-4.6"
+  }
+ ],
+ "usd": 0.612,
+ "window": {
+  "n": 22,
+  "plan_acc": 0.455,
+  "vision_acc": 0.182
+ },
+ "door": {
+  "n": 13,
+  "plan_acc": 0.462,
+  "vision_acc": 0.308
+ },
+ "toilet": {
+  "n": 40,
+  "plan_acc": 0.75,
+  "vision_acc": 0.85
+ },
+ "sink": {
+  "n": 36,
+  "plan_acc": 0.222,
+  "vision_acc": 0.222
+ },
+ "shower_bathtub": {
+  "n": 38,
+  "plan_acc": 0.132,
+  "vision_acc": 0.605
+ }
+}

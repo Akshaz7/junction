@@ -1,0 +1,91 @@
+[
+ {
+  "id": "J23",
+  "doc_id": "cubicasa5k__colorful-11398",
+  "question": "How many toilets and sinks does the plan have?",
+  "type": "count_multi",
+  "value": null,
+  "must": [
+   "2",
+   "4"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/cubicasa5k__colorful-11398/planmap-1.json (scale 0.0143 m/px, door-prior conf 0.3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "partial",
+  "got": "There are **2 toilets** and **3 sinks** on this floor plan. [1][2]",
+  "value_got": {
+   "toilet": 2,
+   "sink": 3
+  },
+  "route": "planmap",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 5,
+  "secs": 0.0
+ },
+ {
+  "id": "J27",
+  "doc_id": "cubicasa5k__colorful-11398",
+  "question": "How many windows are there?",
+  "type": "count",
+  "value": 12,
+  "must": [],
+  "tol": 0.0,
+  "source": "artifacts/cubicasa5k__colorful-11398/planmap-1.json (scale 0.0143 m/px, door-prior conf 0.3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "partial",
+  "got": "There are **11 windows** on this floor plan. [1]",
+  "value_got": 11,
+  "route": "planmap",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 11,
+  "secs": 0.1
+ },
+ {
+  "id": "J29",
+  "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+  "question": "What is the area of the kitchen?",
+  "type": "area",
+  "value": 12.05,
+  "must": [],
+  "tol": 0.03,
+  "source": "artifacts/swiss_dwellings__site1000-bldg2082-floor9385/planmap-1.json (dxf units, conf 1.0)",
+  "expect_abstain": false,
+  "note": "4 Küche rooms",
+  "grade": "wrong",
+  "got": "**34.59 m²** (low confidence: an estimate from detected plan elements and the printed text and the drawing image, not measured).",
+  "value_got": 34.59,
+  "route": "hybrid",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 0,
+  "secs": 0.2
+ },
+ {
+  "id": "J30",
+  "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+  "question": "How many Zimmer rooms are there and what is their total area?",
+  "type": "takeoff",
+  "value": null,
+  "must": [
+   "9",
+   "127.5"
+  ],
+  "tol": 0.03,
+  "source": "artifacts/swiss_dwellings__site1000-bldg2082-floor9385/planmap-1.json (dxf units, conf 1.0)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "partial",
+  "got": "There are **11 Zimmer rooms** with a total area of **168.14 m²**. [1][2][3][4][5][6][7][8]",
+  "value_got": null,
+  "route": "vlm",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 8,
+  "secs": 0.0
+ }
+]

@@ -1,0 +1,42 @@
+{
+ "weights": "weights/rtdetr_ep",
+ "n_calib": 156,
+ "n_heldout": 241,
+ "cut_picked_on_calib": {
+  "door": 0.1,
+  "window": 0.15,
+  "toilet": 0.1,
+  "sink": 0.1,
+  "shower": 0.1,
+  "bathtub": 0.1
+ },
+ "ms_per_image_mps": 156,
+ "baseline_default_heldout": {
+  "window": 0.32,
+  "toilet": 0.817,
+  "sink": 0.594,
+  "shower_bathtub": 0.123,
+  "door": 0.443
+ },
+ "finetuned_heldout": {
+  "window": 0.095,
+  "toilet": 0.233,
+  "sink": 0.126,
+  "shower_bathtub": 0.137,
+  "door": 0.034
+ },
+ "finetuned_calib": {
+  "window": 0.071,
+  "door": 0.115,
+  "toilet": 0.269,
+  "sink": 0.192,
+  "shower_bathtub": 0.218
+ },
+ "baseline_default_calib": {
+  "window": 0.417,
+  "door": 0.442,
+  "toilet": 0.833,
+  "sink": 0.231,
+  "shower_bathtub": 0.115
+ }
+}

@@ -1,0 +1,48 @@
+{
+  "target_build_rev": "60e89b8",
+  "ready": false,
+  "expired": false,
+  "elapsed_s": 121.4,
+  "probes": [
+    {
+      "at": "2026-11-14T12:33:26.166696+00:00",
+      "status": 200,
+      "build_rev": "effbdee",
+      "ok": true,
+      "db": true,
+      "latency_ms": 303.8
+    },
+    {
+      "at": "2026-11-14T12:33:56.472991+00:00",
+      "status": 200,
+      "build_rev": "effbdee",
+      "ok": true,
+      "db": true,
+      "latency_ms": 269.1
+    },
+    {
+      "at": "2026-11-14T12:34:26.743226+00:00",
+      "status": 200,
+      "build_rev": "effbdee",
+      "ok": true,
+      "db": true,
+      "latency_ms": 244.2
+    },
+    {
+      "at": "2026-11-14T12:34:56.992048+00:00",
+      "status": 200,
+      "build_rev": "effbdee",
+      "ok": true,
+      "db": true,
+      "latency_ms": 276.0
+    },
+    {
+      "at": "2026-11-14T12:35:27.272109+00:00",
+      "status": 200,
+      "build_rev": "effbdee",
+      "ok": true,
+      "db": true,
+      "latency_ms": 306.6
+    }
+  ]
+}

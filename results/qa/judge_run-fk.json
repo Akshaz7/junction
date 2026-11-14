@@ -1,0 +1,88 @@
+[
+ {
+  "id": "J08",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "Which storey has the largest total room area?",
+  "type": "compare",
+  "value": null,
+  "must": [
+   "Erdgeschoss"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/ifc_bench__ac20-arc/elements.json",
+  "expect_abstain": false,
+  "note": "{'Keller': 438, 'Erdgeschoss': 442, '1. Obergeschoss': 428, '2. Obergeschoss': 428, 'Dachgeschoss': 202}",
+  "grade": "correct",
+  "got": "**Erdgeschoss** has the most total room area: **442.1 m²**. Per floor: Keller 438.1 m², Erdgeschoss 442.1 m², 1. Obergeschoss 428.4 m², 2. Obergeschoss 428.4 m², Dachgeschoss 202.4 m². [1]",
+  "value_got": 442.13,
+  "route": "analytics",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 0,
+  "secs": 0.1
+ },
+ {
+  "id": "J19",
+  "doc_id": "cubicasa5k__colorful-11397",
+  "question": "How many m2 of flooring for the living room and kitchen with 10% extra?",
+  "type": "takeoff",
+  "value": 38.8,
+  "must": [],
+  "tol": 0.05,
+  "source": "artifacts/cubicasa5k__colorful-11397/planmap-1.json (scale 0.029 m/px, door-prior conf 0.3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "correct",
+  "got": "You need about **38.8 m²**: the living room and kitchen cover **35.3 m²**, plus **10%** waste (3.53 m²). [1][2]",
+  "value_got": 38.83,
+  "route": "planmap",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 2,
+  "secs": 0.1
+ },
+ {
+  "id": "J20",
+  "doc_id": "cubicasa5k__colorful-11397",
+  "question": "What is the biggest room in this plan?",
+  "type": "compare",
+  "value": null,
+  "must": [
+   "terrace"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/cubicasa5k__colorful-11397/planmap-1.json (scale 0.029 m/px, door-prior conf 0.3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "correct",
+  "got": "The largest room is **TERASSI** (terrace) at **21.6 m²**. Next: living 21.6 m²; kitchen 13.8 m²; MH 12.5 m². The scale is estimated from door sizes, so areas are approximate. [1]",
+  "value_got": 21.56,
+  "route": "analytics",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 1,
+  "secs": 0.1
+ },
+ {
+  "id": "J22",
+  "doc_id": "cubicasa5k__colorful-11397",
+  "question": "If I remove the front door, is there still an exit?",
+  "type": "edit",
+  "value": null,
+  "must": [
+   "exit"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/cubicasa5k__colorful-11397/planmap-1.json (scale 0.029 m/px, door-prior conf 0.3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "correct",
+  "got": "Door D11 is hidden. 10 of 11 doors remain visible. **Not compliant after this edit:** No entrance door left on the drawing (33 §).",
+  "value_got": null,
+  "route": "planmap",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 0,
+  "secs": 0.1
+ }
+]
