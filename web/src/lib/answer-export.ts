@@ -1,6 +1,7 @@
 import type { Answer, Bbox, Document, SavedChat } from './types'
 import { savedExchanges } from './chat-history'
 import { kindFromItemId, kindStyle } from './kind-colors'
+import { confidenceText, marginText } from './evidence-format'
 
 export interface ReportSource {
   docId: string
@@ -24,6 +25,7 @@ export interface ReportEntry {
   citations: (Answer['citations'][number] & { source: ReportSource })[]
   sources: ReportSource[]
   pages: ReportPage[]
+  reasoning?: Answer['reasoning']
 }
 export interface AnswerReport {
   title: string
@@ -76,7 +78,7 @@ function entryFor(answer: Answer, docs: readonly Document[], index: number, opti
     question: answer.question, textMd: answer.answer.text_md,
     costUsd: Number.isFinite(answer.cost.usd_total) && answer.cost.usd_total >= 0 ? answer.cost.usd_total : null,
     generatedForDemo: !!options.demo || answer.trace.some((step) => step.stub) || sources.some((source) => /generated for demo/i.test(`${source.title} ${source.credit}`)),
-    citations, sources, pages,
+    citations, sources, pages, reasoning: answer.reasoning ? structuredClone(answer.reasoning) : undefined,
   }
 }
 
@@ -155,11 +157,41 @@ export function drawReportPage(image: CanvasImageSource, width: number, height: 
 const mdEscape = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/([\\`*_[\]{}()#+.!|>~-])/g, '\\$1')
 const money = (cost: number | null) => cost === null ? 'Not recorded' : `$${cost} USD`
 
+/** Include the complete card and every arithmetic term in both export formats. */
+function evidenceLines(reasoning: Answer['reasoning']): string[] {
+  if (!reasoning) return []
+  const lines = reasoning.steps.map((step) => `${step.title}: ${step.text}${step.cite != null ? ` [${step.cite}]` : ''}${step.ok === true ? ' (matches)' : step.ok === false ? ' (differs)' : ''}`)
+  if (reasoning.based_on) lines.push(reasoning.based_on.text)
+  if (reasoning.margin) {
+    lines.push(marginText(reasoning.margin))
+    for (const [kind, margin] of Object.entries(reasoning.margin.by_kind ?? {})) {
+      lines.push(`${kind}: ${marginText(margin)}`)
+      if (margin.sources.length) lines.push(`Margin sources (${kind}): ${margin.sources.join('; ')}`)
+    }
+    if (reasoning.margin.sources.length) lines.push(`Margin sources: ${reasoning.margin.sources.join('; ')}`)
+  }
+  lines.push(confidenceText(reasoning.confidence), reasoning.confidence.reason)
+  if (reasoning.confidence.improve) lines.push(`To verify: ${reasoning.confidence.improve}`)
+  const calibration = reasoning.confidence.calibration
+  if (calibration) lines.push(`Calibration: ${calibration.correct}/${calibration.n} · ${calibration.source}${calibration.scope ? ` — ${calibration.scope}` : ''}`)
+  if (calibration?.interval_95) lines.push(`Audit 95% interval: ${calibration.interval_95.map((value) => `${(value * 100).toFixed(1)}%`).join('–')}`)
+  for (const calculation of reasoning.arithmetic ?? []) {
+    lines.push(`${calculation.formula}: result ${calculation.result} ${calculation.unit}`)
+    for (const term of calculation.terms) {
+      lines.push(`${term.value} ${term.unit}${term.cite != null ? ` [${term.cite}]` : ''} · ${term.doc_id} · ${term.item_id}`)
+      if (term.measurement) lines.push(`${term.measurement.formula}: ${term.measurement.operands.map((operand) => `${operand.value} ${operand.unit}`).join(' × ')} = ${term.value} ${term.unit}`)
+    }
+  }
+  return lines
+}
+
 export function reportToMarkdown(report: AnswerReport): string {
   const lines = [`# ${report.title}`, '', `Generated: ${report.generatedAt}`, ...(report.chatId ? [`Chat: ${mdEscape(report.chatId)}`] : [])]
   for (const entry of report.entries) {
     lines.push('', '## Question', '', mdEscape(entry.question), '', '## Answer', '', entry.textMd.replace(/</g, '&lt;').replace(/>/g, '&gt;'))
     if (entry.generatedForDemo) lines.push('', '_generated for demo_')
+    const evidence = evidenceLines(entry.reasoning)
+    if (evidence.length) lines.push('', '### How we know', '', ...evidence.map((line) => `- ${mdEscape(line)}`))
     lines.push('', `Answer cost: ${money(entry.costUsd)}`, '', '### Where it is set out', '')
     if (!entry.citations.length) lines.push('No numbered citations supplied.')
     for (const citation of entry.citations) {
@@ -186,6 +218,7 @@ export function reportToHtml(report: AnswerReport, drawings: Readonly<Record<str
     <h2>Question</h2><p>${htmlEscape(entry.question)}</p><h2>Answer</h2><p>${answerHtml(entry.textMd)}</p>
     ${entry.generatedForDemo ? '<p class="site-report-note">generated for demo</p>' : ''}
     <p class="site-report-note">Answer cost: ${money(entry.costUsd)}</p>
+    ${entry.reasoning ? `<h3>How we know</h3><ul>${evidenceLines(entry.reasoning).map((line) => `<li>${htmlEscape(line)}</li>`).join('')}</ul>` : ''}
     <h3>Where it is set out</h3>${entry.citations.length ? `<ul>${entry.citations.map((citation) => `<li><strong>[${citation.n}] ${htmlEscape(citation.source.title)} · Page ${citation.page}</strong>${citation.quote ? `<p>${htmlEscape(citation.quote)}</p>` : ''}${citation.item_ids.length ? `<p class="site-report-note">Items: ${htmlEscape(citation.item_ids.join(', '))}</p>` : ''}</li>`).join('')}</ul>` : '<p>No numbered citations supplied.</p>'}
     ${entry.sources.map((source) => `<p class="site-report-credit"><strong>${htmlEscape(source.title)}</strong><br>Licence: ${htmlEscape(source.licence)} · Credit: ${htmlEscape(source.credit)}</p>`).join('')}
     ${entry.pages.map((page) => {

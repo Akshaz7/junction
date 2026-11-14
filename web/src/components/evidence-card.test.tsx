@@ -47,3 +47,35 @@ it('renders nothing without reasoning', async () => {
   await act(async () => root.render(<EvidenceCard answer={{ ...answer, reasoning: undefined }} onOpenCitation={vi.fn()} />))
   expect(host.innerHTML).toBe('')
 })
+
+it('shows the quantified margin, source, and element counts', async () => {
+  const quantified = { ...answer, reasoning: { ...answer.reasoning!,
+    margin: { value: 1.8, unit: 'm2', pct: 2.6, why: 'Measured scale spread.', sources: ['Drawing scale'] },
+    based_on: { elements: 46, estimated: 0, unresolved: 0, text: 'Based on 46 elements from the model; 0 estimated.' },
+  } }
+  await act(async () => root.render(<EvidenceCard answer={quantified} onOpenCitation={vi.fn()} />))
+  expect(host.textContent).toContain('Margin: ± 1.8 m² (± 2.6%)')
+  expect(host.textContent).toContain('46 elements from the model; 0 estimated')
+  expect(host.textContent).toContain('Sources: Drawing scale')
+})
+
+it('explains missing margins and hides an uncalibrated percentage', async () => {
+  const unknown = { ...answer, reasoning: { ...answer.reasoning!, steps: [],
+    confidence: { label: 'Estimate' as const, pct: null, reason: 'No measured accuracy is available.' },
+    margin: { value: null, unit: 'm2', pct: null, why: 'Door-width variation is unknown.', sources: [] },
+  } }
+  await act(async () => root.render(<EvidenceCard answer={unknown} onOpenCitation={vi.fn()} />))
+  expect(host.textContent).toContain('Margin not known — Door-width variation is unknown.')
+  expect(host.querySelector('.evidence-pill')!.textContent).toBe('Estimate')
+  expect(host.textContent).not.toMatch(/null|undefined|NaN/)
+})
+
+it('preserves a zero exact-count margin and names the calibration sample', async () => {
+  const exact = { ...answer, reasoning: { ...answer.reasoning!,
+    confidence: { ...answer.reasoning!.confidence, pct: 50, calibration: { correct: 1, n: 2, source: 'results/final/QA2/calibration.json' } },
+    margin: { value: 0, unit: 'count', pct: 0, why: 'Exact source count.', sources: [] },
+  } }
+  await act(async () => root.render(<EvidenceCard answer={exact} onOpenCitation={vi.fn()} />))
+  expect(host.textContent).toContain('Margin: ± 0 elements (± 0%)')
+  expect(host.textContent).toContain('Calibration: 1/2')
+})
