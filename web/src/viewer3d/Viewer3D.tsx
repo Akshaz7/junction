@@ -17,6 +17,7 @@ import { WalkJoystick } from './WalkJoystick';
 import { EditPanel, useEditAdvisor } from './EditPanel';
 import type { EditState, ItemEdit } from './edits';
 import { FindingsPanel } from './FindingsPanel';
+import { roomTypeLabel } from './blueprint';
 import type { FindingPinState } from './findings';
 import './viewer3d.css';
 
@@ -189,7 +190,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       unsubscribeHighlight = viewer.onHighlightChange(() => {
         setHighlightState(viewer!.getLinkedHighlightState());
         const items = viewer!.scene?.manifest.items;
-        setAnswerKinds(viewer!.getHighlightState().highlighted.map((id) => items?.[id]?.kind ?? null));
+        setAnswerKinds(viewer!.getHighlightState().highlighted.map((id) => { const it = items?.[id]; return it?.kind === 'room' ? `room:${roomTypeLabel(it)}` : it?.kind ?? null; }));
       });
       unsubscribeBuild = viewer.onBuildChange(setBuild);
       unsubscribeWalk = viewer.onWalkChange((next) => setWalking(next.active));

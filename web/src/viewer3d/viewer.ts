@@ -8,7 +8,7 @@ import {
   createHighlightController, itemBounds, readHighlightColor, type HighlightOptions, type HighlightState,
 } from './highlight';
 import {
-  disposeScene, itemIdForObject, loadScene, type LoadedScene,
+  disposeScene, itemIdForObject, loadScene, storeyName, type LoadedScene,
 } from './scene';
 import { createCutawayController, type CutawayState } from './cutaway';
 import { createLinkedHighlightController } from './linkedHighlight';
@@ -370,7 +370,8 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     if (canFly) {
       // An explicit camera target wins; otherwise frame every highlighted item so all numbered tags stay in view.
       const framed = new Set(framingIds(active));
-      const flyIds = options.cameraTargetItemId && active.items.has(options.cameraTargetItemId) ? [options.cameraTargetItemId] : state.highlighted;
+      const storeysHit = new Set(state.highlighted.map((id) => storeyName(active!.manifest.items[id]?.storey)));
+      const flyIds = options.cameraTargetItemId && active.items.has(options.cameraTargetItemId) && storeysHit.size <= 1 ? [options.cameraTargetItemId] : state.highlighted;
       const fly = itemBounds(active, flyIds.filter((id) => framed.has(id)).length ? flyIds.filter((id) => framed.has(id)) : flyIds);
       const reveal = options.cinematic === true && !prefersReducedMotion() && state.highlighted.length > 0
         && !fly.isEmpty() && performance.now() - sceneShownAt > REVEAL_AFTER_LOAD_MS;
@@ -519,7 +520,8 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
         // Only the opening build-up frames the answer; scrubbing never moves the camera, and many items frame together.
         const marked = highlights?.getHighlightState().highlighted ?? [];
         if (wasIntro && previous !== 'done' && active && marked.length) {
-          const ids = marked.length > MAX_CALLOUT_TAGS || !cameraTarget ? marked : [cameraTarget];
+          const multi = new Set(marked.map((id) => storeyName(active!.manifest.items[id]?.storey))).size > 1;
+          const ids = marked.length > MAX_CALLOUT_TAGS || multi || !cameraTarget ? marked : [cameraTarget];
           const framed = new Set(framingIds(active));
           const use = ids.filter((id) => framed.has(id));
           if (use.length) flyTo(itemBounds(active, use));

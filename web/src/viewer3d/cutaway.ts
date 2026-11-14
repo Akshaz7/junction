@@ -67,9 +67,13 @@ export function createCutawayController(scene: LoadedScene) {
     setShowRoof(value: boolean) { showRoof = value; apply(); },
     followHighlight(ids: readonly string[], cameraTargetItemId?: string) {
       const candidates = cameraTargetItemId ? [cameraTargetItemId, ...ids] : ids;
-      const target = candidates.find((id) => scene.manifest.items[id]
-        && storeyName(scene.manifest.items[id].storey) !== null);
-      if (target) activeStorey = storeyName(scene.manifest.items[target].storey);
+      // An answer spanning several storeys keeps all of them (cut only above the highest one); roof stays off.
+      let top = -1;
+      for (const id of candidates) {
+        const name = scene.manifest.items[id] ? storeyName(scene.manifest.items[id].storey) : null;
+        if (name !== null) top = Math.max(top, storeys.findIndex((storey) => storey.name === name));
+      }
+      if (top >= 0) activeStorey = storeys[top].name;
       // A roof answer must remain visible too.
       if (candidates.some((id) => roofIds.has(id))) showRoof = true;
       apply();

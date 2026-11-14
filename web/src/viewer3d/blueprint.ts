@@ -33,6 +33,17 @@ export const ROOM_VOLUME_M = 0.3;
 const WET = /\b(wc|toilet|bath(room)?|shower|sauna|laundry|washroom|restroom|wash|utility)\b|bad\b|dusch|wasch|pesu|kylpy|suihku|\bph\b|\bkph\b|\bwc\b|lavat/i;
 const KITCHEN = /kitchen|küche|kueche|keitti|kök|kitch|\bkk\b|\bkt\b|pantry|teekeitti/i;
 
+/** What a room is, for tags and the legend: "WC", "Bathroom", "Kitchen", else its name or "Room". */
+export function roomTypeLabel(item: Pick<SceneItem, 'name' | 'props'>): string {
+  const type = typeof item.props?.room_type === 'string' ? item.props.room_type : '';
+  const text = `${type} ${item.name ?? ''}`.replace(/_/g, ' ');
+  if (/\b(wc|toilet|lavat\w*|restroom|washroom)\b|\bwc\b/i.test(text)) return 'WC';
+  if (/bath|bad\b|kylpy|dusch|shower|suihku/i.test(text)) return 'Bathroom';
+  if (/sauna/i.test(text)) return 'Sauna';
+  if (KITCHEN.test(text)) return 'Kitchen';
+  return 'Room';
+}
+
 /** Floor tint by room type (raster plans) or name (IFC): wet rooms bluish, kitchens warm, the rest neutral. */
 export function classifyRoom(item: Pick<SceneItem, 'name' | 'props'>): RoomClass {
   const type = typeof item.props?.room_type === 'string' ? item.props.room_type : '';

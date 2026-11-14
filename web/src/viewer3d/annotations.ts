@@ -1,3 +1,4 @@
+import { roomTypeLabel } from './blueprint';
 import { Vector3, type Camera } from 'three';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { itemBounds } from './highlight';
@@ -50,7 +51,8 @@ export function createItemAnnotation(scene: LoadedScene, id: string, text: strin
   number.setAttribute('aria-label', `Item ${text}: ${id}`);
   const kind = document.createElement('span');
   kind.className = 'viewer3d-label-kind';
-  kind.textContent = scene.manifest.items[id].kind;
+  const it = scene.manifest.items[id];
+  kind.textContent = it.kind === 'room' ? roomTypeLabel(it) : it.kind;
   pill.append(number, kind);
   const leader = document.createElement('span');
   leader.className = 'viewer3d-label-leader';

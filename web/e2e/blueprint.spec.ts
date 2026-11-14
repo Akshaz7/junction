@@ -181,3 +181,24 @@ test('storey answer: the model is cut above that storey, the build-up ends on it
   expect(r.pins).toBe(0)
   expect(r.edit).not.toBe('true')
 })
+
+test('toilets across storeys: all storeys stay, only the roof is off, every WC lit, tags and legend say WC', async ({ page }) => {
+  await open(page, 'ifc_bench__ac20-arc', 'ifc_bench__ac20-arc')
+  const r = await page.evaluate(async () => {
+    const v = (window as Win).viewer3dTest; const s = v.scene!
+    const wc = [...s.items.keys()].filter((i) => s.manifest.items[i].kind === 'room' && /^WC/.test(s.manifest.items[i].name ?? ''))
+    v.highlight(wc, { cameraTargetItemId: wc[0] })
+    await new Promise((res) => setTimeout(res, 800))
+    const visible = wc.filter((i) => { for (let n: { visible: boolean; parent: unknown } | null = s.items.get(i)!; n; n = n.parent as typeof n) if (!n.visible) return false; return true })
+    const tags = [...document.querySelectorAll('.viewer3d-label-kind')].map((e) => e.textContent)
+    const legend = [...document.querySelectorAll('[data-testid="kind-legend"] li')].map((e) => e.textContent)
+    let roofVisible = 0
+    for (const [id, o] of s.items) if (s.manifest.items[id].kind === 'roof' && o.visible) roofVisible++
+    return { total: wc.length, lit: visible.length, tags, legend, roofVisible }
+  })
+  expect(r.total).toBe(8)
+  expect(r.lit).toBe(8)
+  expect(r.roofVisible).toBe(0)
+  expect(r.tags.every((t) => t === 'WC')).toBe(true)
+  expect(r.tags.length).toBeGreaterThan(0)
+})

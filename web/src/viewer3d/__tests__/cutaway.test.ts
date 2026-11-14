@@ -65,7 +65,9 @@ describe('cutaway policy (generated for demo fixture)', () => {
     expect(cutaway.getState().activeStorey).toBe('Upper');
     expect(visible(scene, 'upper')).toBe(true);
     expect(highlight.getHighlightState().labels).toEqual({ upper: '12' });
-    cutaway.followHighlight(['upper', 'ground'], 'ground');
+    cutaway.followHighlight(['upper', 'ground'], 'ground'); // spans storeys: keep both, cut above the highest
+    expect(cutaway.getState().activeStorey).toBe('Upper');
+    cutaway.followHighlight(['ground'], 'ground');
     expect(cutaway.getState().activeStorey).toBe('Ground');
     cutaway.followHighlight(['missing', 'basement']);
     expect(cutaway.getState().activeStorey).toBe('Basement');
