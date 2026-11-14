@@ -244,6 +244,9 @@ def evaluate(operation, values):
     if operation == "ceil": return math.ceil(values[0]) if len(values) == 1 else None
     if operation == "max_zero": return max(0, values[0]) if len(values) == 1 else None
     if operation == "min": return min(values) if values else None
+    if operation == "max": return max(values) if values else None
+    if operation == 'scale_sensitivity':
+        return abs(values[0]) * ((1 + values[1]) ** values[2] - 1) if len(values) == 3 else None
     if operation == "source": return values[0] if len(values) == 1 else None
     return None
 

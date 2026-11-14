@@ -65,7 +65,8 @@ def planmap_scale(doc_id: str, page: int, root) -> dict | None:
         pm = json.loads((Path(root) / doc_id / f"planmap-{page}.json").read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return None
-    sc = pm.get("scale") or {}
+    from engine.scale_policy import choose
+    sc = choose(pm, Path(root) / doc_id)
     return sc if sc.get("m_per_px") else None
 
 

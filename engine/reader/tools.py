@@ -347,13 +347,22 @@ class Session:
         self.status("Measuring")
         mpp = float(m_per_px) if m_per_px else None
         scale_dpi = None
+        ps = geom.planmap_scale(did, pg, self.root)
+        selection = (ps or {}).get('selection') or {}
+        from engine.scale_policy import RANK
+        evidenced = bool(ps and ps.get('m_per_px') and RANK.get(selection.get('id'), 6) < RANK['door-prior']
+                          and 'Original derivation is unavailable' not in selection.get('why_chosen', ''))
+        # Prefer source-linked physical evidence over unassociated planner input.
+        if evidenced:
+            mpp, m_per_px, ratio = float(ps['m_per_px']), None, None
         if mpp is None and ratio:
             dpi = geom.page_dpi(did, pg, self.root)
             scale_dpi = dpi
             mpp = float(ratio) * 0.0254 / dpi if dpi else None
         src = "given"
+        if evidenced:
+            src = 'ranked page scale: ' + selection.get('label', str(ps.get('method')))
         if mpp is None:
-            ps = geom.planmap_scale(did, pg, self.root)
             if ps and (ps.get("confidence") or 0) >= 0.5:
                 mpp, src = float(ps["m_per_px"]), f"plan map scale ({ps.get('method')}, conf {ps.get('confidence')})"
         if mpp is None:

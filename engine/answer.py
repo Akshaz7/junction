@@ -270,6 +270,12 @@ def _guarded(question, doc_ids, on_event, scene_state, history):
 
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None) -> dict:
+    from engine.reasoning_parts.confidence import attach
+    return attach(_answer_with_evidence(question, doc_ids, on_event, scene_state=scene_state, history=history), question, _root())
+
+
+def _answer_with_evidence(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
+                          history: list[dict] | None = None) -> dict:
     # F-CHANGES: revision questions are a complete code route, including evidence.
     from engine.revision_compare import comparison_answer
     comparison = comparison_answer(question, doc_ids, _root())

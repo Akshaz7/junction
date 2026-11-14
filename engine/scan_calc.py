@@ -305,6 +305,14 @@ def _attach(res, question, root):
     existing['unavailable'] = list(dict.fromkeys([*(existing.get('unavailable') or []), *unavailable]))
     if reader:
         existing['reader'] = reader
+    from engine.scan_method import describe
+    method = describe(res, question, root, reader)
+    if method:
+        existing['method'] = method
+    from engine.scan_uncertainty import attach as uncertainty, steps as uncertainty_steps
+    if inventory or reader:
+        uncertainty(res, question, existing)
+        existing['steps'].extend(uncertainty_steps(card.get('margin') or {}, next(iter(res.get('doc_ids') or []), '')))
     confidence = card.get('confidence') or {}
     calibration = confidence.get('calibration')
     if calibration:
