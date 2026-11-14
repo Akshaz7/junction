@@ -7,13 +7,11 @@ this audits code routes, not live reader accuracy. Exit 1 means evidence failure
 from __future__ import annotations
 
 import argparse
-from collections import Counter, defaultdict
-from datetime import datetime, timezone
+import ast
 import hashlib
 import json
 import math
 import os
-from pathlib import Path
 import random
 import re
 import shutil
@@ -22,6 +20,9 @@ import subprocess
 import sys
 import tempfile
 import time
+from collections import Counter, defaultdict
+from datetime import UTC, datetime
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 NUMBER = r"[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?"
@@ -31,6 +32,10 @@ VALUE_KEYS = {"count": ("count", "quantity"), "m": ("length_m", "perimeter_m", "
               "m2": ("area_m2", "net_area_m2"), "m3": ("volume_m3",), "ft": ("length_ft",),
               "ft2": ("area_ft2",), "ft3": ("volume_ft3",)}
 OWNERS = {"scale": "F-SCALEPROOF", "check": "F-XCHECK", "card": "F-EVFIX", "confidence": "F-EVFIX"}
+
+
+class AuditTimeout(BaseException):
+    """Bypass engine fallback catches; never leave an answer thread running."""
 
 
 def number(value):
@@ -63,6 +68,7 @@ class Sources:
     def __init__(self, root):
         self.root = Path(root)
         self.cache = {}
+        self.indexes = {}
         self.fingerprints = {}
 
     def json(self, path):
@@ -79,6 +85,8 @@ class Sources:
         return path if path.is_dir() and (path / "doc.json").is_file() else None
 
     def items(self, did, page=None):
+        if (did, page) in self.indexes:
+            return self.indexes[did, page]
         path = self.doc(did)
         if path is None:
             return {}
@@ -91,6 +99,7 @@ class Sources:
         for p in pages:
             for item in self.json(p).get("items", []):
                 found[item.get("item_id")] = item
+        self.indexes[did, page] = found
         return found
 
     def dimensions(self, did, page):
@@ -117,7 +126,8 @@ class Sources:
         errors = []
         page = source.get("page")
         meta = self.json(path / "doc.json")
-        if page is not None and (type(page) is not int or page < 1 or page > (meta.get("pages") or 1)):
+        if page is not None and (type(page) is not int or page < 1 or
+                                 page > (meta.get("pages") or 1) and not (path / f"planmap-{page}.json").exists() and not (path / f"page-{page}.png").exists()):
             errors.append(f"invalid page: {page}")
         iid = source.get("item_id")
         if iid and iid not in self.items(did, page if type(page) is int else None):
@@ -145,18 +155,112 @@ class Sources:
             errors.append("source names a document but no element, region or artifact")
         return errors
 
+    def exact(self, source, default_doc=None):
+        if not isinstance(source, dict):
+            return False
+        did = source.get("doc_id") or default_doc
+        path = self.doc(did)
+        if path is None:
+            return False
+        if (path / "elements.json").exists():
+            return bool(source.get("item_id") in self.items(did))
+        page = source.get("page") or 1
+        pm = self.json(path / f"planmap-{page}.json")
+        item = self.items(did, page).get(source.get("item_id")) or {}
+        return item.get("source") == "dxf" and (pm.get("scale") or {}).get("method") in ("dxf", "dxf-units", "dxf_units_fit", "dxf-units-fit")
 
-def headline_values(text, expected_unit):
+
+def headline_line(text):
     line = re.sub(r"\[\d+\]", "", (text or "").splitlines()[0] if text else "")
-    line = line.replace("**", "")
+    return re.split(r"\.\s+(?=I checked\b|I counted\b|I found\b|That is\b|This is\b|Upload\b|Or try\b)", line, maxsplit=1)[0].replace("**", "")
+
+
+def headline_quantities(text, expected_unit):
+    line = headline_line(text)
     if expected_unit == "count":
-        nouns = r"(?:windows?|doors?|rooms?|walls?|toilets?|sinks?|showers?|bathtubs?|stairs?|staircases?|storeys?|floors?|columns?|slabs?|elements?|items?|apartments?|bedrooms?|bathrooms?|washrooms?|balcon(?:y|ies)|kitchens?|saunas?)"
-        return [float(x.replace(",", "")) for x in re.findall(rf"({NUMBER})\s+(?:external\s+|internal\s+|separate\s+)?{nouns}\b", line, re.I)]
+        nouns = r"(?:windows?|doors?|rooms?|walls?|toilets?|sinks?|showers?|bathtubs?|stairs?|staircases?|storeys?|floors?|columns?|slabs?|elements?|items?|apartments?|bedrooms?|bathrooms?|washrooms?|balcon(?:y|ies)|kitchens?|saunas?|offices?|pipes?|ducts?|beams?|fixtures?|spaces?|lights?|sockets?)"
+        tokens = re.findall(rf"({NUMBER})\s+(?:external\s+|internal\s+|separate\s+|matching\s+|indoor\s+|structural\s+)?{nouns}\b", line, re.IGNORECASE)
+        if not tokens and re.search(rf"could not find any|\bno building.services|\bno\s+{nouns}\b", line, re.IGNORECASE):
+            tokens = ["0"]
+        return [(float(x.replace(",", "")), 1e-7) for x in tokens]
     aliases = {"m": r"(?:m|metres?|meters?)", "m2": r"(?:m²|m2|sq\.?\s*m|square\s+met(?:er|re)s?)",
                "m3": r"(?:m³|m3|cubic\s+met(?:er|re)s?)", "ft": r"(?:ft|feet)",
                "ft2": r"(?:ft²|ft2|sq\.?\s*ft)", "ft3": r"(?:ft³|ft3)"}
     suffix = aliases.get(expected_unit, re.escape(expected_unit))
-    return [float(x.replace(",", "")) for x in re.findall(rf"({NUMBER})\s*{suffix}(?![\w²³])", line, re.I)] if suffix else []
+    tokens = re.findall(rf"({NUMBER})\s*{suffix}(?![\w²³])", line, re.IGNORECASE) if suffix else []
+    if not tokens and re.search(r"could not find any", line, re.IGNORECASE):
+        tokens = ["0"]
+    return [(float(x.replace(",", "")), .5 * 10 ** (-len(x.partition(".")[2])) + 1e-7) for x in tokens]
+
+
+def headline_values(text, expected_unit):
+    return [value for value, _ in headline_quantities(text, expected_unit)]
+
+
+def result_tolerance(result, expected_unit):
+    if expected_unit == "count":
+        return 1e-7
+    policy = str(result.get("rounded_as") or "")
+    match = re.search(r"(\d+)\s*decimal", policy)
+    return .5 * 10 ** -int(match[1]) + 1e-7 if match else 1e-7
+
+
+def count_pairs(text):
+    line = headline_line(text)
+    pairs = re.findall(rf"({NUMBER})\s+(?:external\s+|internal\s+|matching\s+)?(doors?|windows?|rooms?|walls?|toilets?|sinks?|showers?|bathtubs?|columns?|slabs?)\b", line, re.IGNORECASE)
+    return {kind.lower().removesuffix("s"): float(value.replace(",", "")) for value, kind in pairs}
+
+
+def expression_value(expr):
+    """Evaluate only literal arithmetic; never execute code or infer variables."""
+    try:
+        tree = ast.parse(str(expr).replace("×", "*").replace("÷", "/").replace("−", "-"), mode="eval")
+        def evaluate(node):
+            if isinstance(node, ast.Constant) and number(node.value) is not None:
+                return node.value
+            if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.UAdd, ast.USub)):
+                return evaluate(node.operand) * (-1 if isinstance(node.op, ast.USub) else 1)
+            if isinstance(node, ast.BinOp):
+                left, right = evaluate(node.left), evaluate(node.right)
+                if isinstance(node.op, ast.Add):
+                    return left + right
+                if isinstance(node.op, ast.Sub):
+                    return left - right
+                if isinstance(node.op, ast.Mult):
+                    return left * right
+                if isinstance(node.op, ast.Div):
+                    return left / right
+                if isinstance(node.op, ast.Pow) and abs(right) <= 3:
+                    return left ** right
+            raise ValueError("not literal arithmetic")
+        return number(evaluate(tree.body))
+    except (ValueError, SyntaxError, ZeroDivisionError, OverflowError, TypeError, RecursionError):
+        return None
+
+
+def rows_reconcile_via_steps(total, result, steps, expected_unit):
+    """Accept excluded rows or conversions only when the numbers reproduce them."""
+    previous = total
+    for step in steps:
+        operands = [i.get("value") for i in step.get("inputs") or []]
+        evaluated = expression_value(step.get("expr"))
+        current = number(step.get("value"))
+        if evaluated is None or current is None or not expression_uses_inputs(step) or not close(evaluated, current, result_tolerance(result, unit(step.get("unit")))):
+            continue
+        if not any(close(previous, x) for x in operands):
+            continue
+        if not step.get("note") and not step.get("label"):
+            continue
+        previous = current
+        if unit(step.get("unit")) == expected_unit and close(previous, result.get("value"), result_tolerance(result, expected_unit)):
+            return True
+    return False
+
+
+def expression_uses_inputs(step):
+    literals = [float(v) for v in re.findall(r"(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?", str(step.get("expr") or ""))]
+    inputs = [abs(v) for i in step.get("inputs") or [] if (v := number(i.get("value"))) is not None]
+    return bool(inputs and literals) and all(any(close(v, i) for i in inputs) for v in literals) and all(any(close(v, i) for v in literals) for i in inputs)
 
 
 def audit(res, sources):
@@ -179,7 +283,7 @@ def audit(res, sources):
     jargon = re.findall(r"\bIfc[A-Z]\w+\b|\bDN0\b|\b[a-z0-9_]+__[a-z0-9-]+\b|\b[0-9A-Za-z_$]{22}\b", user_text)
     if jargon:
         fail("card.jargon", f"technical names or internal identifiers in text: {jargon[:3]}")
-    if re.search(r"\bRead\s+1\s+marked region|\b1\s+marked region of", card_text, re.I):
+    if re.search(r"\bRead\s+1\s+marked region|\b1\s+marked region of", card_text, re.IGNORECASE):
         fail("card.meaningless_read", "card describes one marked region without explaining what was found")
 
     def source_check(source, label, anchor=True):
@@ -215,12 +319,31 @@ def audit(res, sources):
         fail("calc.headline_result", f"answer.value {value!r} differs from calc.result {target!r}")
     if calc and unit(result.get("unit")) != u:
         fail("calc.result_unit", f"answer unit {u!r} differs from calc.result unit {result.get('unit')!r}")
-    shown = headline_values(text, u)
+    quantities = headline_quantities(text, u)
+    shown = [n for n, _ in quantities]
     expected = list(value.values()) if isinstance(value, dict) else [value]
     if not shown:
         fail("card.headline_uncheckable", "headline numeric quantity could not be parsed", "uncheckable")
-    elif not all(any(close(v, n, 0.005 if u != "count" else 1e-7) for n in shown) for v in expected):
+    elif u == "count" and not isinstance(value, dict) and not close(value, shown[0]):
+        fail("card.headline_value", f"primary headline count {shown[0]} does not reproduce answer.value {value!r}")
+    elif (u != "count" or isinstance(value, dict)) and not (
+        all(any(close(v, n, tolerance) for n, tolerance in quantities) for v in expected)
+        and all(any(close(v, n, tolerance) for v in expected) for n, tolerance in quantities)
+    ):
         fail("card.headline_value", f"headline quantities {shown} do not reproduce answer.value {value!r}")
+    if isinstance(value, dict):
+        pairs = count_pairs(text)
+        for kind, count in value.items():
+            if kind in pairs and not close(count, pairs[kind]):
+                fail("card.headline_category", f"headline {kind} count {pairs[kind]:g} differs from result {count}")
+    if calc and u != "count":
+        other_counts = headline_values(text, "count")
+        # A secondary count (e.g. 13 rooms in an area answer) also needs a
+        # result entry. Room numbers such as 'room 205' are never matched.
+        extras = result.get("quantities") or []
+        for count in other_counts:
+            if not any(isinstance(q, dict) and unit(q.get("unit")) == "count" and close(q.get("value"), count) for q in extras):
+                fail("calc.headline_secondary", f"headline also reports {count:g} elements, absent from calc.result quantities")
 
     rows = calc.get("rows") or []
     totals = defaultdict(float)
@@ -242,10 +365,14 @@ def audit(res, sources):
             totals["scalar"] += 1
         else:
             unknown_rows = True
+        item_kind = row.get("kind")
+        if not item_kind and isinstance(source, dict):
+            item = sources.items(source.get("doc_id") or default_doc, source.get("page")).get(row.get("item_id")) or {}
+            item_kind = item.get("kind")
         for kind in value if isinstance(value, dict) else []:
             if number(vals.get(kind)) is not None:
                 totals[kind] += vals[kind]
-            elif row.get("kind") == kind:
+            elif item_kind == kind:
                 totals[kind] += vals.get("count", 1)
     if calc:
         if not rows and not calc.get("steps"):
@@ -254,20 +381,25 @@ def audit(res, sources):
             actual = {k: totals[k] for k in value} if isinstance(value, dict) else totals["scalar"]
             if unknown_rows:
                 fail("calc.rows_uncheckable", "row quantity columns cannot be mapped uniquely to result units", "uncheckable")
-            elif not equal(actual, target, 0.005 if u != "count" else 1e-7):
+            elif not equal(actual, target, result_tolerance(result, u)) and not (number(actual) is not None and rows_reconcile_via_steps(actual, result, calc.get("steps") or [], u)):
                 fail("calc.rows_sum", f"sum of rows {actual!r} differs from result {target!r}; exclusions/conversions need a reconcilable step")
         if not calc.get("formula"):
             fail("calc.formula_missing", "calculation has no formula")
         if not result.get("rounded_as"):
             fail("calc.rounding_missing", "calculation does not state display rounding")
     for step in calc.get("steps") or []:
+        evaluated = expression_value(step.get("expr"))
+        if evaluated is not None and number(step.get("value")) is not None and not close(evaluated, step["value"], result_tolerance(result, unit(step.get("unit")))):
+            fail("calc.step_arithmetic", f"step {step.get('id')!r}: {step.get('expr')} evaluates to {evaluated:g}, not {step['value']}")
+        if evaluated is not None and not expression_uses_inputs(step):
+            fail("calc.hidden_factor", f"step {step.get('id')!r}: literal expression values do not match its declared inputs")
         if number(step.get("value")) is not None and not step.get("unit"):
             fail("calc.step_unit", f"step {step.get('id')!r} has an implicit unit")
         for operand in step.get("inputs") or []:
             if not operand.get("unit"):
                 fail("calc.input_unit", f"input {operand.get('name')!r} has no explicit unit (use '1' for dimensionless)")
             source_check(operand.get("source"), f"input {operand.get('name')!r}")
-            if re.search(r"model|recount|vision", str(operand.get("name") or ""), re.I) and not re.search(r"model|recount|vision", str(step.get("label") or ""), re.I):
+            if re.search(r"model|recount|vision", str(operand.get("name") or ""), re.IGNORECASE) and not re.search(r"model|recount|vision", str(step.get("label") or ""), re.IGNORECASE):
                 fail("calc.model_input", "model output is used without labelling the model step")
 
     margins = [("reasoning.margin", reasoning.get("margin"))]
@@ -319,6 +451,9 @@ def audit(res, sources):
             fail("confidence.overclaim", "Verified label has disagreeing, estimated or unresolved evidence")
         if not reasoning.get("arithmetic") and not calc:
             fail("confidence.unproven", "Verified label has no reproducible arithmetic")
+        refs = [r.get("source") for r in rows] or [{"doc_id": c.get("doc_id"), "item_id": iid, "page": c.get("page")} for c in res.get("citations") or [] for iid in c.get("item_ids") or []]
+        if refs and not all(sources.exact(ref, default_doc) for ref in refs):
+            fail("confidence.source_rule", "Verified label includes sources other than explicit CAD quantities or IFC elements")
     pct = confidence.get("pct")
     calibration = confidence.get("calibration") or {}
     if pct is not None:
@@ -328,7 +463,7 @@ def audit(res, sources):
     if u == "count" and number(value) is not None:
         boxes = evidence.get("boxes") or []
         unique = {(b.get("doc_id") or default_doc, b.get("page"), b.get("item_id")) for b in boxes}
-        caveat = re.search(r"(?:unboxed|not boxed|not all|only\s+\d+|differs?|disagree|missing|unmarked|unresolved|not individually|source.*(?:incomplete|completeness)|not.*(?:completeness|complete)|partial)", text + " " + card_text, re.I)
+        caveat = re.search(r"(?:unboxed|not boxed|not all|only\s+\d+|differs?|disagree|missing|unmarked|unresolved|not individually|source.*(?:incomplete|completeness)|not.*(?:completeness|complete)|partial)", text + " " + card_text, re.IGNORECASE)
         if boxes and len(unique) != value and not caveat:
             fail("card.box_count", f"headline count {value:g} has {len(unique)} numbered elements without explaining the difference")
         for s in steps:
@@ -432,7 +567,7 @@ def copy_artifacts(source, target, doc_ids):
 
 def run(repo, artifacts, rows, output, timeout=20):
     sys.path.insert(0, str(repo))
-    os.environ.update(MODELS_FAKE="1", EXPLAIN="0", RECOUNT_CACHE="0")
+    os.environ.update(MODELS_FAKE="1", EXPLAIN="0", RECOUNT_CACHE="0", ANSWER_TIMEOUT_S="0")
     runtime = repo / ".evqa-runtime"
     runtime.mkdir(exist_ok=True)
     records = []
@@ -453,7 +588,7 @@ def run(repo, artifacts, rows, output, timeout=20):
                 copy_artifacts(artifacts, shadow, missing)
                 copied.update(missing)
                 def timed_out(signum, frame):
-                    raise TimeoutError(f"question exceeded {timeout:g} seconds")
+                    raise AuditTimeout(f"question exceeded {timeout:g} seconds")
                 previous = signal.signal(signal.SIGALRM, timed_out)
                 signal.setitimer(signal.ITIMER_REAL, timeout)
                 try:
@@ -466,7 +601,7 @@ def run(repo, artifacts, rows, output, timeout=20):
                           "reasoning": res.get("reasoning"), "cost_usd": (res.get("cost") or {}).get("usd_total", 0),
                           "boxes": len((res.get("evidence") or {}).get("boxes") or []),
                           "fake_model_used": any(s.get("model") for s in res.get("trace") or [])}
-            except Exception as exc:
+            except (Exception, AuditTimeout) as exc:  # noqa: BLE001 -- a failing question is audit data
                 record = {**row, "status": "error", "numeric": False, "findings": [{"code": "execution.error", "owner": "F-CALC", "severity": "error", "detail": f"{type(exc).__name__}: {exc}"[:500]}]}
             record["ms"] = round((time.perf_counter() - t0) * 1000)
             records.append(record)
@@ -485,13 +620,15 @@ def run(repo, artifacts, rows, output, timeout=20):
                "cost_usd": round(sum(r.get("cost_usd", 0) for r in records), 6),
                "failure_occurrences_by_owner": dict(Counter(f["owner"] for r in records for f in r["findings"])),
                "fake_model_answers": sum(bool(r.get("fake_model_used")) for r in records)}
-    report = {"created_at": datetime.now(timezone.utc).isoformat(), "revision": subprocess.check_output(["git", "-C", str(repo), "rev-parse", "HEAD"], text=True).strip(),
+    top_cases = sorted((r for r in records if r["findings"]), key=lambda r: (-sum(f["severity"] == "error" for f in r["findings"]), r["question"]))[:30]
+    report = {"created_at": datetime.now(UTC).isoformat(), "revision": subprocess.check_output(["git", "-C", str(repo), "rev-parse", "HEAD"], text=True).strip(),
               "mode": "MODELS_FAKE=1; code-route evidence audit; no live model accuracy claim", "summary": summary,
               "limitations": ["No PDF internals, live model verification, or correctness claim against potentially noisy dataset gold.",
                               "Unrecognized headline/row semantics are uncheckable, never counted as passing.",
                               "A finite unknown margin with an explanation is honest; no arbitrary percentage ceiling is imposed.",
                               "Only existing structured artifacts are eligible; missing-data exclusions are reported."],
-              "top_30": top, "artifact_sha256": fingerprints, "records": records}
+              "failure_groups": top, "top_30": [{"doc_ids": r["doc_ids"], "question": r["question"], "owners": sorted({f["owner"] for f in r["findings"]}),
+                                                  "failures": r["findings"]} for r in top_cases], "artifact_sha256": fingerprints, "records": records}
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, ensure_ascii=False, indent=1, allow_nan=False) + "\n")
     print(json.dumps(summary, sort_keys=True), flush=True)
@@ -507,6 +644,7 @@ def main():
     parser.add_argument("--seed", type=int, default=20261114)
     parser.add_argument("--questions", type=Path, action="append", default=[])
     parser.add_argument("--blind", type=Path, default=ROOT / "results/final/EVQA/blind.json")
+    parser.add_argument("--defer-blind", action="store_true", help="reserve the blind document for a later final validation")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--timeout", type=float, default=20)
     args = parser.parse_args()
@@ -516,6 +654,10 @@ def main():
     artifacts = (args.artifacts or repo / "artifacts").absolute()
     output = args.output or ROOT / "results/final/EVQA" / f"run-{datetime.now().strftime('%Y%m%d-%H%M%S')}.json"
     rows, selection = select_questions(repo, artifacts, args.limit, args.seed, read_json(args.blind).get("doc_id"), args.questions)
+    if args.defer_blind:
+        blind = read_json(args.blind).get("doc_id")
+        rows = [row for row in rows if blind not in row["doc_ids"]]
+        selection["blind_deferred"] = True
     if not rows:
         print("No eligible questions with structured artifacts.", file=sys.stderr)
         return 2

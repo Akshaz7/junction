@@ -17,8 +17,8 @@ def source(tmp_path):
     doc.mkdir()
     (doc / "doc.json").write_text(json.dumps({"pages": 2, "kind": "ifc"}))
     (doc / "planmap-1.json").write_text(json.dumps({"image": {"w": 100, "h": 80}, "items": [
-        {"item_id": "a", "kind": "room", "props": {"area_m2": 12}},
-        {"item_id": "b", "kind": "room", "props": {"area_m2": 8}}]}))
+        {"item_id": "a", "kind": "room", "source": "dxf", "props": {"area_m2": 12}},
+        {"item_id": "b", "kind": "room", "source": "dxf", "props": {"area_m2": 8}}], "scale": {"method": "dxf-units"}}))
     return checker.Sources(tmp_path)
 
 
@@ -124,6 +124,27 @@ def test_room_identifiers_and_citations_are_not_quantities():
     assert checker.headline_values("**5 m²**", "m") == []
 
 
+def test_extra_headline_quantity_cannot_hide_behind_matching_primary(source):
+    res = good()
+    res["answer"]["text_md"] = "**20 m²** and **999 m²**."
+    assert "card.headline_value" in codes(res, source)
+
+
+def test_display_rounding_matches_its_written_precision(source):
+    res = good()
+    res["answer"].update(value=20.04, text_md="**20.0 m²** total area.")
+    assert "card.headline_value" not in codes(res, source)
+    res["answer"]["text_md"] = "**20.00 m²** total area."
+    assert "card.headline_value" in codes(res, source)
+
+
+def test_real_page_artifact_overrides_stale_doc_page_count(source):
+    doc = source.root / "generated__audit"
+    (doc / "doc.json").write_text('{"pages": 1}')
+    (doc / "planmap-3.json").write_text('{"image": {"w": 100, "h": 80}}')
+    assert not source.resolve({"doc_id": "generated__audit", "page": 3, "bbox": [0, 0, 20, 20]})
+
+
 def test_unparseable_headline_does_not_silently_pass(source):
     res = good()
     res["answer"]["text_md"] = "The quantity is twenty."
@@ -157,3 +178,39 @@ def test_overlay_copies_json_and_never_rewrites_shared_artifacts(tmp_path):
     (dst / "generated__demo/planmap-1.json").write_text('{"scale": 2}')
     assert original.read_text() == '{"scale": 1}'
     assert (dst / "generated__demo/page-1.png").is_symlink()
+
+
+@pytest.mark.parametrize("expression,value", [("12 + 8", 20), ("0.9 / 31", .9 / 31), ("5 × 4", 20), ("3 ** 2", 9), ("20 − 8", 12)])
+def test_literal_arithmetic(expression, value):
+    assert checker.close(checker.expression_value(expression), value)
+
+
+@pytest.mark.parametrize("expression", ["__import__('os').getcwd()", "sum([1, 2])", "10 ** 100000000", "False", "1 / 0", "area / scale", "9 m / 31 px"])
+def test_expressions_are_never_executed_or_guessed(expression):
+    assert checker.expression_value(expression) is None
+
+
+def test_exclusion_is_accepted_only_when_explicit_and_reproducible(source):
+    res = good()
+    res["answer"].update(value=12, text_md="**12 m²** after excluding the second room.")
+    calc = res["reasoning"]["calc"]
+    calc["result"]["value"] = 12
+    calc["steps"] = [{"label": "Exclude outdoor area", "expr": "20 - 8", "value": 12, "unit": "m2", "inputs": [
+        {"value": 20, "unit": "m2", "source": calc["rows"][0]["source"]},
+        {"value": 8, "unit": "m2", "source": calc["rows"][1]["source"]}]}]
+    assert "calc.rows_sum" not in codes(res, source)
+    calc["steps"][0]["expr"] = "12"
+    assert "calc.rows_sum" in codes(res, source)
+    assert "calc.hidden_factor" in codes(res, source)
+
+
+def test_no_matching_kind_is_distinct_from_number_of_inspected_rooms():
+    assert checker.headline_values("There are no balconies. I checked all 14 rooms and none has that label.", "count") == [0]
+    assert checker.headline_values("**294 structural elements**: 208 columns, 86 beams.", "count") == [294, 208, 86]
+
+
+def test_swapped_multikind_counts_are_detected(source):
+    res = good()
+    res["answer"].update(value={"window": 6, "door": 4}, unit="count", text_md="**4 windows** and **6 doors**.")
+    res["reasoning"]["calc"]["result"].update(value={"window": 6, "door": 4}, unit="count")
+    assert "card.headline_category" in codes(res, source)

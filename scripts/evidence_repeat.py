@@ -2,17 +2,18 @@
 
 Only detached worktrees below this worker's .evqa-scratch are mutated. Conflicts
 are recorded, never resolved by guessing. Each run appends its factual status to
-the assigned handoff. Run this driver through scripts/heavy.sh.
+the assigned handoff. Each audit goes through scripts/heavy.sh; the driver never
+holds a heavy slot while waiting between runs.
 """
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
 import json
-from pathlib import Path
 import subprocess
 import sys
 import time
+from datetime import UTC, datetime
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 BRANCHES = ("final/calc", "final/scaleproof", "final/xcheck", "final/evfix")
@@ -23,7 +24,7 @@ def git(*args, cwd=ROOT, check=True):
     return subprocess.run(["git", "-C", str(cwd), *args], text=True, capture_output=True, check=check)
 
 
-def once(limit, handoff=HANDOFF):
+def once(limit, handoff=HANDOFF, final_blind=False):
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     print(datetime.now().astimezone().isoformat(), flush=True)
     scratch = ROOT / ".evqa-scratch" / stamp
@@ -33,7 +34,7 @@ def once(limit, handoff=HANDOFF):
     merge_path = output_dir / f"merge-{stamp}.json"
     baseline = git("rev-parse", "HEAD").stdout.strip()
     refs = {branch: git("rev-parse", branch, check=False).stdout.strip() for branch in BRANCHES}
-    metadata = {"created_at": datetime.now(timezone.utc).isoformat(), "baseline": baseline,
+    metadata = {"created_at": datetime.now(UTC).isoformat(), "baseline": baseline,
                 "branches": refs, "merges": [], "complete_merge": False, "audit_report": report_path.name}
     git("worktree", "add", "--detach", str(scratch), baseline)
     try:
@@ -56,10 +57,12 @@ def once(limit, handoff=HANDOFF):
             source = ROOT / name
             if source.exists() and not (scratch / name).exists():
                 (scratch / name).symlink_to(source.resolve(), target_is_directory=True)
-        cmd = [sys.executable, str(ROOT / "scripts/evidence_check.py"), "--repo", str(scratch),
+        cmd = [str(ROOT / "scripts/heavy.sh"), sys.executable, str(ROOT / "scripts/evidence_check.py"), "--repo", str(scratch),
                "--artifacts", str(ROOT / "artifacts"), "--limit", str(limit), "--output", str(report_path),
                "--blind", str(output_dir / "blind.json")]
-        metadata["audit_exit"] = subprocess.run(cmd, cwd=scratch).returncode
+        if not final_blind:
+            cmd.append("--defer-blind")
+        metadata["audit_exit"] = subprocess.run(cmd, cwd=scratch, check=False).returncode
         if report_path.exists():
             report = json.loads(report_path.read_text())
             report["scratch_merge"] = metadata
@@ -83,12 +86,15 @@ def main():
     parser.add_argument("--watch", action="store_true", help="keep auditing until interrupted")
     parser.add_argument("--interval", type=float, default=2700, help="seconds between start times (default 45 min)")
     parser.add_argument("--limit", type=int, default=200)
+    parser.add_argument("--final-blind", action="store_true", help="test the reserved document once, at final validation")
     args = parser.parse_args()
     if args.interval < 60 or args.limit < 1:
         parser.error("interval must be at least 60 seconds and limit positive")
+    if args.final_blind and args.watch:
+        parser.error("the blind document is tested once, not in watch mode")
     while True:
         start = time.monotonic()
-        code = once(args.limit)
+        code = once(args.limit, final_blind=args.final_blind)
         if not args.watch:
             return code
         remaining = max(0, args.interval - (time.monotonic() - start))
