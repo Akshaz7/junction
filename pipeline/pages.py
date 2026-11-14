@@ -7,6 +7,7 @@ Word boxes are in page-image pixels, origin top-left (CONTRACT 5.2).
 """
 import argparse
 import json
+import math
 import subprocess
 import sys
 from multiprocessing import Pool
@@ -180,33 +181,50 @@ def do_svg(svg: Path, out: Path):
 def dxf_lines(doc):
     """Modelspace flattened to polylines (text/hatch skipped)."""
     from ezdxf import path as ezpath
+    from pipeline.dxf_input import drawing_layout
     lines = []
+    points = 0
 
-    def add(e):
+    def add(e, depth=0):
+        nonlocal points
+        if depth > 32:
+            raise ValueError("The DXF has circular or excessively nested blocks. Export a flattened DXF and retry.")
         try:
-            if e.dxftype() == "INSERT":
+            if e.dxftype() in ("INSERT", "DIMENSION"):
                 for v in e.virtual_entities():
-                    add(v)
+                    add(v, depth + 1)
                 return
-            if e.dxftype() in ("TEXT", "MTEXT", "HATCH", "DIMENSION", "POINT", "SOLID", "IMAGE"):
+            if e.dxftype() in ("TEXT", "MTEXT", "HATCH", "POINT", "SOLID", "IMAGE", "VIEWPORT"):
                 return
             p = ezpath.make_path(e)
-            pts = [(v.x, v.y) for v in p.flattening(0.05)]
+            pts = []
+            for v in p.flattening(0.05):
+                points += 1
+                if points > 1_000_000:
+                    raise ValueError("This DXF has too much geometry for a preview. Split it into smaller drawings or export an IFC model.")
+                if not math.isfinite(v.x) or not math.isfinite(v.y):
+                    raise ValueError("The DXF contains invalid coordinates. Repair or export the drawing again.")
+                pts.append((v.x, v.y))
             if len(pts) > 1:
                 lines.append(pts)
-        except Exception:
+        except (TypeError, AttributeError, NotImplementedError):
             pass
 
-    for e in doc.modelspace():
+    for e in drawing_layout(doc):
         add(e)
     return lines
 
 
 def dxf_frame(lines, px=3000):
     """(x0, y0, scale, W, H): the exact mapping do_dxf uses (y flipped, 20 px margin)."""
-    xs = [x for l in lines for x, _ in l]; ys = [y for l in lines for _, y in l]
-    x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
-    s = (px - 40) / max(x1 - x0, y1 - y0)
+    if not lines:
+        raise ValueError("No drawable geometry was found in model space or paper space. Include linked references and export a flattened DXF or IFC.")
+    x0 = min(x for l in lines for x, _ in l); x1 = max(x for l in lines for x, _ in l)
+    y0 = min(y for l in lines for _, y in l); y1 = max(y for l in lines for _, y in l)
+    span = max(x1 - x0, y1 - y0)
+    if span <= 0:
+        raise ValueError("The DXF contains only zero-length geometry. Export a drawing with visible geometry.")
+    s = (px - 40) / span
     return x0, y0, s, int((x1 - x0) * s) + 40, int((y1 - y0) * s) + 40
 
 
@@ -214,37 +232,37 @@ def do_dxf(dxf: Path, out: Path, px=3000):
     """Plain line renderer (no matplotlib): modelspace flattened to polylines, drawn black on white."""
     import ezdxf
     from PIL import ImageDraw
-    lines = dxf_lines(ezdxf.readfile(str(dxf)))
+    from pipeline.dxf_input import drawing_layout, metres_per_unit, reference_warnings
+    try:
+        doc = ezdxf.readfile(str(dxf))
+    except (ezdxf.DXFError, OSError, ValueError, StopIteration, EOFError) as exc:
+        raise ValueError("This DXF could not be read. It may be corrupt or incomplete. Export it again as DXF or IFC.") from exc
+    lines = dxf_lines(doc)
     x0, y0, s, W, H = dxf_frame(lines, px)
     img = Image.new("RGB", (W, H), "white")
     d = ImageDraw.Draw(img)
     for l in lines:
         d.line([(20 + (x - x0) * s, H - 20 - (y - y0) * s) for x, y in l], fill="black", width=1)
     W, H = save_page(img, out, 1)
-    return [{"page": 1, "w": W, "h": H, "dpi": None, "px_per_unit": s, "words": 0}]
+    warnings = reference_warnings(doc)
+    unit = metres_per_unit(doc) if drawing_layout(doc).name == "Model" else None
+    if unit is None:
+        warnings.append("Drawing units are not declared for this view. Physical sizes cannot be verified from DXF coordinates.")
+    return [{"page": 1, "w": W, "h": H, "dpi": None, "px_per_unit": s, "words": 0,
+             "layout": drawing_layout(doc).name, "metres_per_unit": unit, "warnings": warnings}]
 
 
 def cap_raster(img: Image.Image, side: int | None = None) -> Image.Image:
     """FIX-15: shrink a huge raster in its own (often 1-byte palette/grey) mode before any RGB copy, so a
     14000x9902 PNG never needs 2 x 416 MB of RGB on a 512 MB container."""
-    side = side or MAX_SIDE
-    original_w, original_h = img.size
-    original_dpi = img.info.get("dpi")
-    if img.format == "JPEG":
-        img.draft("RGB", (side, side))  # decode at reduced size straight from the JPEG
-    if max(img.size) > side:
-        if img.mode == "P":
-            img = img.convert("L") if not img.info.get("transparency") else img.convert("LA")
-        img.thumbnail((side, side), Image.BILINEAR, reducing_gap=2.0)
-    if original_dpi:
-        img.info["dpi"] = (original_dpi[0] * img.width / original_w, original_dpi[1] * img.height / original_h)
-    return img
+    from pipeline.raster_input import cap_image
+    return cap_image(img, side or MAX_SIDE)
 
 
 def do_raster(f: Path, out: Path):
-    img = cap_raster(Image.open(f))
-    img.load()
-    W, H = save_page(img, out, 1)
+    from pipeline.raster_input import read_raster
+    with read_raster(f, MAX_SIDE) as img:
+        W, H = save_page(img, out, 1)
     return [{"page": 1, "w": W, "h": H, "dpi": (img.info.get("dpi") or [None])[0], "words": 0}]
 
 
@@ -259,17 +277,17 @@ def process(args):
             src, pages = "svg", do_svg(files["svg"], out)
         elif "dxf" in files:
             src, pages = "dxf", do_dxf(files["dxf"], out)
-        elif "png" in files or "jpg" in files:
-            k = "png" if "png" in files else "jpg"
+        elif any(k in files for k in ("png", "jpg", "jpeg")):
+            k = next(k for k in ("png", "jpg", "jpeg") if k in files)
             src, pages = k, do_raster(files[k], out)
         elif "dwg" in files:
-            return d["doc_id"], "skip: dwg (no converter)"
+            return d["doc_id"], "This DWG could not be converted: no DWG converter is installed. Export it as DXF or IFC."
         else:
             return d["doc_id"], "skip: no page source (ifc: see D-07)"
         (out / "pages.json").write_text(json.dumps({"doc_id": d["doc_id"], "source": src, "pages": pages}, indent=1))
         return d["doc_id"], f"ok {src} {len(pages)}p"
     except Exception as e:  # noqa: BLE001
-        return d["doc_id"], f"error: {e!r}"
+        return d["doc_id"], f"error: {str(e) or type(e).__name__}"
 
 
 def main():

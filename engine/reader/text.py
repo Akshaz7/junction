@@ -10,6 +10,7 @@ import ctypes
 import json
 import math
 import re
+import struct
 import unicodedata
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
@@ -23,13 +24,12 @@ _ocr_engine = None
 
 
 def png_size(p: Path) -> tuple[int, int] | None:
-    import struct
     try:
         with p.open("rb") as image:
             b = image.read(32)
         if len(b) >= 24 and b[:8] == b"\x89PNG\r\n\x1a\n":
             return struct.unpack(">II", b[16:24])
-    except OSError:
+    except (OSError, struct.error):
         pass
     return None
 
@@ -197,6 +197,12 @@ def load_page_text(doc_id: str, page: int, root, allow_ocr: bool = True) -> Page
     d = root / doc_id
     img = image_path(doc_id, page, root)
     size = png_size(img)
+    # The lightweight CAD preview omits text/hatches. OCR cannot recover omitted
+    # text, and starting an OCR model for every vector count can exhaust the API.
+    # Existing vector/PDF text layers still take precedence below.
+    preview = _read_json(d / "pages.json")
+    if isinstance(preview, dict) and preview.get("source") in {"dxf", "ifc-storeys", "ifc-overview"}:
+        allow_ocr = False
     stamps = tuple((p.stat().st_mtime_ns if p.exists() else 0) for p in (d / f"text-{page}.json", d / f"rtext-{page}.json"))
     key = (str(root), doc_id, page, stamps, allow_ocr)
     if key in _cache:

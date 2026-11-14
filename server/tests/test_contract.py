@@ -239,7 +239,7 @@ def test_upload_starts_ingestion_when_available(client, dirs, monkeypatch):
         started.append(doc_id)
     monkeypatch.setattr(files_routes, "ingestion_available", lambda: True)
     monkeypatch.setattr(files_routes, "_ingest", fake)
-    r = client.post("/api/upload", files={"file": ("p.png", b"\x89PNG")})
+    r = client.post("/api/upload", files={"file": ("p.png", b"\x89PNG\r\n\x1a\n")})
     assert r.json()["status"] == "ingesting"
 
 

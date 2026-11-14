@@ -1,0 +1,45 @@
+{
+  "row": "F-ROBUST",
+  "time": "2026-11-14T21:30:22.074307+00:00",
+  "baseline_commit": "9a08558542b6454e9f97546b3dc2ed7e1b8743d5",
+  "baseline_wip_checks": {
+    "compileall": "PASS",
+    "targeted_pytest_passed": 71
+  },
+  "final_checks": {
+    "compileall": "PASS",
+    "git_diff_check": "PASS",
+    "upload_ingest_and_input_tests_passed": 121,
+    "engine_regression_tests_passed": 96,
+    "total_pytest_passed": 217
+  },
+  "commands": [
+    "MODELS_FAKE=1 scripts/heavy.sh /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest -q tests/test_robust_inputs.py server/tests/test_robust_upload.py server/tests/test_files_upload.py server/tests/test_contract.py server/tests/test_ingest_light.py server/tests/test_piping_stage.py server/tests/test_upload_e2e.py server/tests/test_docs.py server/tests/test_fast_text.py",
+    "MODELS_FAKE=1 /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest -q engine/tests/test_readdraw.py engine/tests/test_reader.py engine/tests/test_solvers.py engine/tests/test_solvers_e19.py engine/tests/test_scale_text.py engine/tests/test_e09_ifc.py engine/tests/test_scene_cmds.py",
+    "/Users/akshatthapa/Workspace/junction/.venv/bin/python scripts/robust_check.py --live-raster"
+  ],
+  "cross_file": [
+    "engine/answer.py",
+    "engine/solvers/solve.py",
+    "engine/solvers/unclassified.py"
+  ],
+  "commit_status": "BLOCKED: git add and git commit cannot create /Users/akshatthapa/Workspace/junction/.git/worktrees/robust/index.lock (Operation not permitted). Changes remain in final/robust worktree; no new commit.",
+  "remaining_limits": [
+    "DWG, ZIP, CSV, XLSX and TXT uploads fail clearly with export/extract instructions",
+    "100 MiB upload limit; deploy IFC conversion limit defaults to 15 MB",
+    "Large colour PNGs exceeding the decode-memory budget fail clearly",
+    "Raster transform rows test preprocessing unless marked live; no vision-accuracy claim",
+    "IFC4X3 sample migrated from real IFC4; native IFC4X3 and every authoring tool are not proven",
+    "Browser rendering and deployed container memory not tested; matrix replaces database/live events with no-op adapters; separate upload tests use local PostgreSQL",
+    "HTTP matrix RSS includes in-process TestClient multipart encoding; oversized probe memory is not isolated production server memory."
+  ],
+  "reserved_evaluation_note": "First end-of-development matrix built the reserved IFC successfully but asked no question because every building element lacked classification. A general synthetic regression exposed the misleading zero-count path; fixed without any per-file rules. The final matrix repeats the same frozen reserved input last.",
+  "final_matrix": {
+    "passed": 41,
+    "total": 41,
+    "transformation_checks_passed": 6,
+    "first_answers_with_evidence": 15,
+    "live_cost_usd": 0.024408,
+    "reserved_tested_last": true
+  }
+}

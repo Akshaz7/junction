@@ -51,31 +51,41 @@ class Status:
         self.write("running")
         try:
             fn()
-            self.stages.append({"stage": name, "ok": True, "s": round(time.time() - t, 1)})
+            self.stages.append({"stage": name, "ok": True, "s": round(time.time() - t, 1),
+                                "peak_process_rss_mib": _peak_rss_mib()})
             self.write("running")
             return True
         except Exception as e:  # noqa: BLE001
-            self.stages.append({"stage": name, "ok": False, "error": repr(e)[:300]})
+            error = str(e)[:300] or type(e).__name__
+            if name == "ifc_scene":
+                error = ("This IFC could not be read or converted. Export it again as IFC, or split the model into smaller files. "
+                         + error)
+            self.stages.append({"stage": name, "ok": False, "error": error})
             self.write("running")
             return False
 
 
+def _peak_rss_mib():
+    """Single ingest process high-water RSS, for upload diagnostics."""
+    import resource
+    return round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / (1024 ** 2 if sys.platform == "darwin" else 1024), 1)
+
+
 def _normalise_raster(doc_id: str, art: Path):
     """vision.build_planmaps reads doc.json files['png']: make sure the upload is a PNG."""
-    from PIL import Image
     d = json.loads((art / doc_id / "doc.json").read_text())
-    key, rel = next(iter(d["files"].items()))
+    rel = next(iter(d["files"].values()))
     src = REPO / rel
-    from pipeline.pages import MAX_SIDE, cap_raster
-    with Image.open(src) as probe:
-        big = max(probe.size) > MAX_SIDE
-    if key == "png" and not big:
-        return
-    # FIX-15: huge rasters are shrunk before any RGB conversion; the vision read then sees the capped copy too
-    dst = src.with_name(src.stem + ("-capped" if big else "") + ".png")
-    img = cap_raster(Image.open(src))
-    (img if img.mode in ("RGB", "L", "LA", "RGBA") else img.convert("RGB")).save(dst, **({"dpi": img.info["dpi"]} if img.info.get("dpi") else {}))
-    d["files"] = {"png": str(Path(rel).with_name(dst.name))}
+    from pipeline.pages import MAX_SIDE
+    from pipeline.raster_input import read_raster
+    # Never overwrite an uploaded source (including a PNG). Readers, page images
+    # and their evidence boxes all use this single normalised coordinate system.
+    dst = art / doc_id / "normalised.png"
+    with read_raster(src, MAX_SIDE) as img:
+        img.save(dst, **({"dpi": img.info["dpi"]} if img.info.get("dpi") else {}))
+    d.setdefault("original_files", dict(d["files"]))
+    target = str(dst.relative_to(REPO)) if dst.is_relative_to(REPO) else str(dst)
+    d["files"] = {"png": target}
     (art / doc_id / "doc.json").write_text(json.dumps(d, indent=1))
 
 
@@ -168,7 +178,7 @@ def _dxf_planmap_usable(ddir: Path) -> bool:
         return False
     pm = json.loads(f.read_text())
     n = sum(1 for i in pm["items"] if i["kind"] in ("room", "wall", "door", "window"))
-    return n >= 3 and bool(pm["scale"].get("m_per_px"))
+    return n >= 3  # counts remain usable without units; physical sizes remain unknown
 
 
 def _extrude(doc_id: str, ddir: Path, page: int):
@@ -184,8 +194,11 @@ def _extrude(doc_id: str, ddir: Path, page: int):
         pm["scale"] = {"m_per_px": ASSUMED_M_PER_PX, "method": "assumed", "source": "assumed", "confidence": 0.1,
                        "evidence": f"no printed scale, dimension or door found: assumed {ASSUMED_M_PER_PX} m per pixel"}
         (ddir / f"planmap-{page}.json").write_text(json.dumps(pm))
+    # Explicit CAD walls already have geometry. Reconstructing their thin preview
+    # strokes as raster walls adds spurious surfaces and can exhaust memory.
+    cad_walls = any(i["kind"] == "wall" and i.get("source") == "dxf" for i in pm["items"])
     try:  # falls back to plan-map walls when cv2 or wall fills are missing
-        extrude.process(doc_id, ddir, page, raster_walls=True)
+        extrude.process(doc_id, ddir, page, raster_walls=not cad_walls)
     except Exception as ex:  # noqa: BLE001 - a raster-wall surprise must never cost the upload its 3D
         print("raster-wall extrude failed, using plan-map walls:", repr(ex)[:160])
         extrude.process(doc_id, ddir, page)
@@ -346,13 +359,19 @@ def _run(doc_id: str, st: Status) -> str:
         ifc_path = REPO / doc["files"]["ifc"]
         cap = float(os.environ.get("INGEST_IFC_MAX_MB", "15" if light else "400"))
         if ifc_path.stat().st_size > cap * 1e6:
-            st.write("partial", f"IFC is {ifc_path.stat().st_size / 1e6:.0f} MB; this server converts IFC files up to {cap:.0f} MB. "
-                                "The file is stored, but no 3D scene or element list was built")
-            return "partial"
+            st.write("failed", f"IFC is {ifc_path.stat().st_size / 1e6:.0f} MB; this server converts IFC files up to {cap:.0f} MB. "
+                               "The original is stored, but it cannot be viewed or questioned yet. Split the model into smaller IFC files and upload them separately.")
+            return "failed"
         from pipeline import ifc_plans, ifc_scene
         ifc = REPO / doc["files"]["ifc"]
         ok = st.stage("ifc_scene", lambda: ifc_scene.process(ifc, doc, ddir))
+        if ok:
+            st.readable = True
+            st.write("running", "The model index and 3D scene are ready. Building drawing previews.")
         ok = ok and st.stage("ifc_plans", lambda: ifc_plans.process(doc_id, art))
+        if ok and (ddir / "pages.json").is_file():
+            doc["pages"] = len(json.loads((ddir / "pages.json").read_text())["pages"])
+            (ddir / "doc.json").write_text(json.dumps(doc, indent=1))
         ok = ok and st.stage("usdz", lambda: _usdz(doc_id, ddir))
         if ok and _has_piping(ifc):
             def pip():
@@ -421,14 +440,31 @@ def _run(doc_id: str, st: Status) -> str:
         elif ok:
             ok = False
     ok = ok and all(s["ok"] for s in st.stages)
-    final = "ready" if ok else "failed"
+    # Optional geometry/reader failure must not hide a successfully rendered
+    # drawing or an IFC index. The detail still explains exactly what failed.
+    usable = st.readable or (ddir / "elements.json").is_file()
+    final = "ready" if ok else ("partial" if usable else "failed")
     st.cost = cost
     detail = "" if ok else next((s.get("error", "") for s in st.stages if not s["ok"]), "")
     if ok and plan_pages:
         detail = f"plan map on page(s) {plan_pages}"
+    warnings = []
+    if kind == "ifc" and (ddir / "scene.json").is_file():
+        warnings.extend(json.loads((ddir / "scene.json").read_text()).get("warnings") or [])
+    if (ddir / "pages.json").is_file():
+        for page in json.loads((ddir / "pages.json").read_text()).get("pages", []):
+            warnings.extend(page.get("warnings") or [])
+    if warnings:
+        detail = (detail + ". " if detail else "") + " ".join(dict.fromkeys(warnings))
     st.write(final, detail)
     return final
 
 
 if __name__ == "__main__":
+    # Priority is best-effort. A restricted host may disallow nice(); that must
+    # not prevent every upload from starting. Avoid preexec_fn in the threaded API.
+    try:
+        os.nice(10)
+    except OSError:
+        pass
     print(run(sys.argv[1]))

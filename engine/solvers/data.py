@@ -68,6 +68,20 @@ def dedupe_openings(items: list, thr: float = 0.3) -> list:
 
 @memoized_document
 def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
+    """A missing, incomplete or corrupt index is unavailable, never a zero count.
+
+    Upload workers can be interrupted during writes. Callers already handle None
+    as missing evidence; do not let a damaged sidecar crash the first question.
+    """
+    if not doc_id or Path(doc_id).name != doc_id or doc_id in {".", ".."}:
+        return None
+    try:
+        return _load_doc(doc_id, root, prefer)
+    except (OSError, ValueError, TypeError, KeyError, AttributeError, OverflowError):
+        return None
+
+
+def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
     d = Path(root) / doc_id
     if not d.is_dir():
         return None
