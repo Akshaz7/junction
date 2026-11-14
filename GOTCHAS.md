@@ -10,5 +10,4 @@
 - `questions.jsonl` has Finnish copies of many questions: filter for English.
 - Vercel cannot hold WebSockets: live sync lives on the Aiven Runtime backend.
 - AR does not run in the iOS simulator: AR tests are unit tests on the scene; real AR needs the iPhone.
-- `stoabuild-full-text.md` (scraped site text) is not on the Mac. Until it is, the voice guide (CONTRACT 5.8) uses `refs/stoa-hero/02-phase-map.md` (on-screen text per phase) and `refs/stoa-hero/source/tour-copy-strings.en.js` as a style reference only (read, never copy code).
 - No `python3.12` on PATH by default: use `uv run --python 3.12` (uv-managed 3.12.14 installed).
