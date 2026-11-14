@@ -482,6 +482,25 @@ def _inside(fp, poly=None, bbox=None) -> bool:
     return fp.contains(Point(cx, cy))
 
 
+def _clip_room(r: dict, region):
+    """Room polygon cut to the plan region (rooms that leaked into a roof outline through a wall gap)."""
+    poly = r.get("polygon")
+    if not poly or len(poly) < 3:
+        return r
+    from shapely.geometry import Polygon
+    g = Polygon(poly)
+    g = g if g.is_valid else g.buffer(0)
+    c = g.intersection(region)
+    if c.is_empty or c.area < 0.05 * max(g.area, 1e-9):
+        return None
+    if c.area >= 0.98 * g.area:
+        return r
+    c = max(getattr(c, "geoms", [c]), key=lambda q: q.area)
+    if c.geom_type != "Polygon":
+        return r
+    return {**r, "polygon": [list(p) for p in list(c.exterior.coords)[:-1]], "pts_area": c.area}
+
+
 def build(doc_id: str, n: int, W: int, H: int, page: dict, walls: list, rooms_: list, opens: list, sc: dict,
           words_pt: list | None = None, used: dict | None = None, ms: int = 0) -> dict:
     """Plan map dict from the role modules' outputs (all geometry in page pt, top-left, y down)."""
@@ -510,7 +529,25 @@ def build(doc_id: str, n: int, W: int, H: int, page: dict, walls: list, rooms_: 
     walls = [w for w in walls if _inside(fp, w["polygon"])]
     rooms_ = [r for r in rooms_ if _inside(fp, r.get("polygon"), r.get("label_bbox"))]
     opens = [o for o in opens if (o.get("bbox") or o.get("polygon")) and _inside(fp, o.get("polygon"), o.get("bbox"))]
-    for r in rooms_:
+    region, sem = None, {}
+    try:  # plan-region crop (drops neighbouring roof plans, legend, key plan) + drawing semantics; never breaks build
+        from pipeline import pdf_semantics
+        region, rst = pdf_semantics.plan_region(page, walls, rooms_, opens, mpt)
+        if region is not None:
+            keep = set(rst.pop("keep_ids", []))
+            walls = [w for w in walls if id(w) in keep]
+            rooms_ = [_clip_room(r, region) for r in rooms_ if _inside(region, r.get("polygon"), r.get("label_bbox"))
+                      or (r.get("label_bbox") and _inside(region, None, r["label_bbox"]))]
+            rooms_ = [r for r in rooms_ if r is not None]
+            opens = [o for o in opens if (o.get("bbox") or o.get("polygon")) and
+                     _inside(region.buffer(0.3 / mpt), o.get("polygon"), o.get("bbox"))]
+        rst.pop("keep_ids", None)
+        sem = pdf_semantics.analyse(page, walls, opens, rooms_, mpt, region)
+        sem["plan_region"] = rst
+    except Exception as e:  # noqa: BLE001
+        sem = {"error": f"{type(e).__name__}: {e}"[:200]}
+    wtag, dtag, rceil = sem.pop("wall_tags", {}), sem.pop("door_tags", {}), sem.pop("room_ceiling_m", {})
+    for ri, r in enumerate(rooms_):
         poly = r.get("polygon")
         printed = r.get("area_printed_m2")
         label = r.get("label") or None
@@ -532,8 +569,10 @@ def build(doc_id: str, n: int, W: int, H: int, page: dict, walls: list, rooms_: 
         props = {"room_type": room_type(label), "number": r.get("number"),
                  "area_m2": printed if printed else a,  # printed label wins (as for DXF), measured kept in area_m2_geom
                  "area_m2_label": printed, "area_m2_geom": a, "labelled": bool(label), "measure": m}
+        if ri in rceil:
+            props["ceiling_height_m"] = rceil[ri]
         add("room", label, ppx, bb, props, conf, {"area_m2": a, "area_m2_printed": printed})
-    for w in walls:
+    for wi, w in enumerate(walls):
         poly = w.get("polygon")
         if not poly or len(poly) < 3:
             continue
@@ -545,8 +584,14 @@ def build(doc_id: str, n: int, W: int, H: int, page: dict, walls: list, rooms_: 
         props = {"thickness_px": round(t * s, 2), "thickness_m": round(t * mpt, 3), "style": w.get("style"),
                  "length_m": round(length_pt * mpt, 3),
                  "measure": measure(pts_area=round(pts_area, 2), length_pt=round(length_pt, 2))}
+        if w.get("centerline"):
+            props["centerline_px"] = [px(p) for p in w["centerline"]]
+            props["thickness_pt"] = round(t, 3)
+        if w.get("height_m"):
+            props["height_m"] = w["height_m"]
+        props.update(wtag.get(wi, {}))
         add("wall", "", ppx, _bbox(ppx), props, 0.85, {"length_m": round(length_pt * mpt, 3)})
-    for o in opens:
+    for oi, o in enumerate(opens):
         k = o.get("kind")
         if k not in ("door", "window"):
             continue
@@ -559,6 +604,7 @@ def build(doc_id: str, n: int, W: int, H: int, page: dict, walls: list, rooms_: 
         props = dict(o.get("props") or {})
         props.setdefault("width_m", round(max(b[2] - b[0], b[3] - b[1]) * mpt, 3))
         props["measure"] = measure(width_pt=round(max(b[2] - b[0], b[3] - b[1]), 2))
+        props.update(dtag.get(oi, {}))
         add(k, o.get("label") or "", ppx, bb, props, o.get("conf") or 0.7, {"width_m": props["width_m"]})
     for r in rooms_:
         lb = r.get("label_bbox")
@@ -567,7 +613,13 @@ def build(doc_id: str, n: int, W: int, H: int, page: dict, walls: list, rooms_: 
     scale = {"m_per_px": mpt / s, "m_per_pt": mpt, "method": sc.get("method") or "none",
              "confidence": float(sc.get("confidence") or 0), "ratio": ratio, "source": src, "check": check,
              "evidence": f"{src}: {mpt:.6f} m per pt; page-{n}.png at {s:.4f} px per pt"}
+    if region is not None:
+        g = max(getattr(region, "geoms", [region]), key=lambda q: q.area)
+        sem.setdefault("plan_region", {})["polygon_px"] = [px(p) for p in list(g.simplify(2.0).exterior.coords)]
+    for e in sem.get("legend") or []:
+        e.pop("bbox", None)
     return {"doc_id": doc_id, "page": n, "image": {"w": int(W), "h": int(H)}, "scale": scale, "items": items,
+            "semantics": sem,
             "provenance": {"models": {}, "created": time.strftime("%Y-%m-%dT%H:%M:%S"), "ms": int(ms),
                            "from": "pdf_vector", "modules": used or {},
                            "page_pt": [page["W_pt"], page["H_pt"]], "px_per_pt": s,

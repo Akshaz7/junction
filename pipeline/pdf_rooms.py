@@ -569,8 +569,11 @@ def rooms(page: dict, walls: list) -> list:
         real = [b for b in bl if not _is_unit_tag(b)]
         if len(real) >= 2 and _RASTER.get("ids"):
             try:   # several labels in one region: split it at its narrowings, one room per label
-                parts = _split([b["xy"] for b in real], _RASTER["ids"][k])
-                if sum(1 for q in parts if q) == len(real):
+                parts = _split([b["xy"] for b in real], _RASTER["ids"][k]) if len(real) <= 3 else []
+                from shapely.geometry import Polygon as _P
+                clean = parts and all(q and _P(q).is_valid and _P(q).area * mpp * mpp >= 1.5
+                                      and _P(q).area >= 0.6 * _P(q).convex_hull.area for q in parts)
+                if clean:
                     out += [_room(q, [b]) for q, b in zip(parts, real)]
                     continue
             except Exception:  # noqa: BLE001 - keep the merged room
@@ -604,20 +607,39 @@ def _room(poly, bl):
 
 
 
-def _partitions(page, mask, x0, y0, k, mpp, reach_m=0.15, min_m=0.8, max_m=12.0):
-    """Glass partitions and light walls drawn as thin solid lines: straight 2-point strokes 0.8-12 m long whose
-    both ends touch a wall (within 15 cm) are drawn into the wall mask as room separators."""
+def _partitions(page, mask, x0, y0, k, mpp, reach_m=0.15, min_m=0.8, max_m=12.0, gap_m=0.4):
+    """Glass partitions and light walls drawn as thin lines: straight strokes (dashed runs merged when collinear
+    with gaps < 0.4 m) 0.8-12 m long whose both ends touch a wall or an accepted separator (within 15 cm, so
+    T-junctions count) and that run through free space are drawn into the wall mask as room separators."""
     import numpy as np
     import cv2
-    segs = []
+    tol = 0.5
+    hz, vt, other = {}, {}, []
     for p in page.get("paths") or []:
         pts = p.get("pts") or []
-        if len(pts) != 2 or p.get("closed") or p.get("dashed") or p.get("stroke") is None or p.get("fill") is not None:
+        if len(pts) != 2 or p.get("closed") or p.get("stroke") is None or p.get("fill") is not None:
             continue
         (ax, ay), (bx, by) = pts
-        L = math.hypot(bx - ax, by - ay) * mpp
-        if min_m <= L <= max_m:
-            segs.append((ax, ay, bx, by))
+        if abs(ay - by) <= tol:
+            hz.setdefault(round((ay + by) / 2 / tol), []).append((min(ax, bx), max(ax, bx)))
+        elif abs(ax - bx) <= tol:
+            vt.setdefault(round((ax + bx) / 2 / tol), []).append((min(ay, by), max(ay, by)))
+        elif not p.get("dashed"):
+            other.append((ax, ay, bx, by))
+    gap = gap_m / mpp
+    segs = list(other)
+    for key, runs in ((0, hz), (1, vt)):
+        for c, iv in runs.items():
+            iv.sort()
+            a0, a1 = iv[0]
+            for b0, b1 in iv[1:] + [(math.inf, math.inf)]:
+                if b0 - a1 <= gap:
+                    a1 = max(a1, b1)
+                    continue
+                cc = c * tol
+                segs.append((a0, cc, a1, cc) if key == 0 else (cc, a0, cc, a1))
+                a0, a1 = b0, b1
+    segs = [q for q in segs if min_m <= math.hypot(q[2] - q[0], q[3] - q[1]) * mpp <= max_m]
     if not segs:
         return 0
     S = np.array(segs, float)
@@ -626,21 +648,25 @@ def _partitions(page, mask, x0, y0, k, mpp, reach_m=0.15, min_m=0.8, max_m=12.0)
     Hp, Wp = mask.shape
     ok = (A[:, 0] >= 0) & (A[:, 0] < Wp) & (A[:, 1] >= 0) & (A[:, 1] < Hp) & \
          (B[:, 0] >= 0) & (B[:, 0] < Wp) & (B[:, 1] >= 0) & (B[:, 1] < Hp)
-    if not ok.any():
-        return 0
-    dist = cv2.distanceTransform((mask == 0).astype(np.uint8), cv2.DIST_L2, 3)
-    reach = reach_m / mpp * k
     A, B = A[ok], B[ok]
-    hit = (dist[A[:, 1], A[:, 0]] <= reach) & (dist[B[:, 1], B[:, 0]] <= reach)
-    # and the line itself runs through free space (not along / inside a wall)
+    if not len(A):
+        return 0
+    reach = reach_m / mpp * k
+    wall_dist = cv2.distanceTransform((mask == 0).astype(np.uint8), cv2.DIST_L2, 3)
+    free_mid = wall_dist[(A[:, 1] + B[:, 1]) // 2, (A[:, 0] + B[:, 0]) // 2] > reach   # not along a wall
+    done = np.zeros(len(A), bool)
     n = 0
-    for (ax, ay), (bx, by) in zip(A[hit], B[hit]):
-        mx, my = (ax + bx) // 2, (ay + by) // 2
-        if dist[my, mx] <= reach:
-            continue
-        cv2.line(mask, (int(ax), int(ay)), (int(bx), int(by)), 255, 2)
-        n += 1
+    for _ in range(3):   # a second/third round accepts T-junctions onto separators found before
+        dist = cv2.distanceTransform((mask == 0).astype(np.uint8), cv2.DIST_L2, 3)
+        hit = ~done & free_mid & (dist[A[:, 1], A[:, 0]] <= reach) & (dist[B[:, 1], B[:, 0]] <= reach)
+        if not hit.any():
+            break
+        for (ax, ay), (bx, by) in zip(A[hit], B[hit]):
+            cv2.line(mask, (int(ax), int(ay)), (int(bx), int(by)), 255, 2)
+            n += 1
+        done |= hit
     return n
+
 
 _RASTER: dict = {}
 

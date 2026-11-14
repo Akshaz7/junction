@@ -29,11 +29,13 @@ import ifcopenshell
 import ifcopenshell.api.aggregate
 import ifcopenshell.api.context
 import ifcopenshell.api.feature
+import ifcopenshell.api.material
 import ifcopenshell.api.project
 import ifcopenshell.api.pset
 import ifcopenshell.api.root
 import ifcopenshell.api.spatial
 import ifcopenshell.api.style
+import ifcopenshell.api.type
 import ifcopenshell.api.unit
 import ifcopenshell.guid
 from shapely.geometry import LineString, MultiPolygon, Polygon
@@ -49,7 +51,9 @@ FOOTPRINT_CLOSE_M = 0.6                            # closes door/window gaps whe
 COLOURS = {  # (rgb, transparency) roughly what authoring tools export
     "wall": ((0.93, 0.91, 0.87), 0.0), "slab": ((0.62, 0.62, 0.62), 0.0), "door": ((0.62, 0.42, 0.24), 0.0),
     "window": ((0.55, 0.75, 0.95), 0.55), "space": ((0.85, 0.80, 0.65), 0.85),
+    "glass": ((0.62, 0.80, 0.90), 0.6),
 }
+DOOR_OPERATION = {("left", 1): "SINGLE_SWING_LEFT", ("right", 1): "SINGLE_SWING_RIGHT", (None, 1): "SINGLE_SWING_LEFT"}
 NS = uuid.UUID("6f1c5f0e-3d0a-4c8e-9a51-7d1b1b0c2a10")
 
 
@@ -81,6 +85,19 @@ def _wall_poly(it: dict, mpp: float, m_per_pt: float | None):
         ln = LineString([(x * mpp, -y * mpp) for x, y in cl])
         return ln.buffer(t_pt * m_per_pt / 2, cap_style="flat", join_style="mitre")
     return None
+
+
+def _axis_m(pr: dict, mpp: float):
+    cl = pr.get("centerline_px")
+    if not cl or len(cl) < 2:
+        return None
+    ln = LineString([(x * mpp, -y * mpp) for x, y in cl])
+    return ln if ln.length > 0.05 else None
+
+
+def _storey_title(name: str) -> str:
+    s = " ".join(name.split()).title()
+    return s.replace("1St", "1st").replace("2Nd", "2nd").replace("3Rd", "3rd").replace("Th ", "th ")
 
 
 def _parts(g):
@@ -121,6 +138,7 @@ class _W:
     def __init__(self, f, body, doc_id, page, prov):
         self.f, self.body, self.doc_id, self.page, self.prov = f, body, doc_id, page, prov
         self.styles = {}
+        self.axis_ctx = None
 
     def gid(self, item_id):
         return guid_for(self.doc_id, item_id, self.page)
@@ -152,13 +170,20 @@ class _W:
         pos = f.createIfcAxis2Placement3D(f.createIfcCartesianPoint((0.0, 0.0, float(z0))), None, None)
         return f.createIfcExtrudedAreaSolid(self.profile(poly), pos, f.createIfcDirection((0.0, 0.0, 1.0)), float(h))
 
-    def shape(self, product, polys, z0, h, style=None):
+    def shape(self, product, polys, z0, h, style=None, axis=None):
         f = self.f
         items = [self.solid(p, z0, h) for p in polys if p.area > 1e-6 and len(p.exterior.coords) >= 4]
         if not items:
             return False
         rep = f.createIfcShapeRepresentation(self.body, "Body", "SweptSolid", items)
-        product.Representation = f.createIfcProductDefinitionShape(None, None, [rep])
+        reps = [rep]
+        if axis is not None:
+            if self.axis_ctx is None:
+                self.axis_ctx = ifcopenshell.api.context.add_context(f, context_type="Plan", context_identifier="Axis",
+                                                                     target_view="GRAPH_VIEW", parent=self.body.ParentContext)
+            pl = f.createIfcPolyline([f.createIfcCartesianPoint((round(x, 5), round(y, 5))) for x, y in axis.coords])
+            reps.insert(0, f.createIfcShapeRepresentation(self.axis_ctx, "Axis", "Curve2D", [pl]))
+        product.Representation = f.createIfcProductDefinitionShape(None, None, reps)
         if style:
             ifcopenshell.api.style.assign_representation_styles(self.f, shape_representation=rep, styles=[self.style(style)])
         return True
@@ -225,22 +250,48 @@ def _add_storey(f, bldg, body, planmap: dict, storey_name: str, storey_elevation
             "scale_ratio": sc.get("ratio"), "scale_confidence": sc.get("confidence"),
             "coords": "plan x = page px x * m_per_px, plan y = -page px y * m_per_px"}
     w = _W(f, body, doc_id, page, {k: v for k, v in prov.items() if v is not None})
+    sem = planmap.get("semantics") or {}
+    sst = sem.get("storey") or {}
+    if storey_name in (None, "Floor 1") and sst.get("name"):
+        storey_name = _storey_title(sst["name"])
+    storey_name = storey_name or "Floor 1"
+    if sem.get("wall_height_m"):
+        wall_height = float(sem["wall_height_m"])
+    door_head = float(sem.get("door_height_m") or DOOR_HEAD_M)
 
     st = w.entity("IfcBuildingStorey", "storey", name=storey_name)
-    st.Elevation = float(storey_elevation)
+    # Elevation carries the printed level (+13.000 in the height system); the geometry stays at z=0 so the
+    # viewer, AR and the 2D links see the floor at ground level like a single-storey export
+    st.Elevation = float(sst.get("elevation_m", storey_elevation))
     st.ObjectPlacement = f.createIfcLocalPlacement(bldg.ObjectPlacement, f.createIfcAxis2Placement3D(
         f.createIfcCartesianPoint((0.0, 0.0, float(storey_elevation))), None, None))
     ifcopenshell.api.aggregate.assign_object(f, products=[st], relating_object=bldg)
     w.provenance(st, None)
+    w.pset(st, "Hologram_StoreySource", {"HeightSystem": sst.get("height_system"),
+                                         "ElevationSource": sst.get("elevation_source"),
+                                         "StoreyNumber": sst.get("number"), "WallHeight": wall_height,
+                                         "DoorHeight": door_head})
     sp = st.ObjectPlacement
 
     items = planmap.get("items") or []
+    def _glass(it):  # interior glazing the openings reader tags as a partition: a glass wall, not a window
+        return it.get("kind") in ("door", "window") and (it.get("props") or {}).get("kind") == "glass_partition"
     walls = [(it, _wall_poly(it, mpp, m_per_pt)) for it in items if it.get("kind") == "wall"]
+    for it in items:
+        if _glass(it):
+            gp = _poly_m(it.get("polygon_px"), mpp)
+            if gp is None and it.get("bbox_px"):
+                x0, y0, x1, y1 = it["bbox_px"]
+                gp = _poly_m([[x0, y0], [x1, y0], [x1, y1], [x0, y1]], mpp)
+            if gp is not None:
+                pr = dict(it.get("props") or {}, glass=True)
+                pr.setdefault("thickness_m", round(max(0.02, min(_rect_frame(gp, None)[3], 0.12)), 3))
+                walls.append(({**it, "kind": "wall", "props": pr}, gp))
     walls = [(it, p) for it, p in walls if p is not None]
     rooms = [it for it in items if it.get("kind") == "room"]
     opens = []
     for it in items:
-        if it.get("kind") not in ("door", "window"):
+        if it.get("kind") not in ("door", "window") or _glass(it):
             continue
         p = _poly_m(it.get("polygon_px"), mpp)
         if p is None and it.get("bbox_px"):
@@ -285,25 +336,64 @@ def _add_storey(f, bldg, body, planmap: dict, storey_name: str, storey_elevation
 
     out_walls = {}
     products = []
+    wtypes, dtypes = {}, {}
+
+    glass_leg = next((e for e in sem.get("legend") or [] if e.get("kind") == "glass_partition"), None)
+
+    def wall_type(pr, ext):
+        if pr.get("glass") and not pr.get("wall_type") and glass_leg:
+            pr = {**pr, "wall_type": glass_leg["code"], "type_description": glass_leg["description"]}
+        t_mm = int(round(float(pr.get("thickness_m") or 0) * 1000 / 10) * 10)
+        if pr.get("wall_type"):
+            key = (pr["wall_type"], t_mm)
+            name = f"{pr['wall_type']} {pr.get('type_description') or ''} {t_mm} mm".replace("  ", " ")
+        else:
+            key = ("ext" if ext else "int", t_mm)
+            name = f"{'Exterior' if ext else 'Interior'} wall {t_mm} mm"
+        if key not in wtypes:
+            wt = w.entity("IfcWallType", f"type:wall:{key[0]}:{t_mm}", name=name,
+                          predefined="PARTITIONING" if pr.get("glass") else "STANDARD")
+            mat = ifcopenshell.api.material.add_material(f, name="Glass" if pr.get("glass") else
+                                                         (pr.get("material") or ("Exterior wall" if ext else "Wall")))
+            ls = ifcopenshell.api.material.add_material_set(f, name=name, set_type="IfcMaterialLayerSet")
+            lay = ifcopenshell.api.material.add_layer(f, layer_set=ls, material=mat)
+            lay.LayerThickness = max(t_mm, 10) / 1000
+            ifcopenshell.api.material.assign_material(f, products=[wt], type="IfcMaterialLayerSet", material=ls)
+            wtypes[key] = (wt, ls)
+        return wtypes[key]
     # walls (gap openings merged into their host, so the lintel and sill are wall material)
     for i, (it, p) in enumerate(walls):
         geom = unary_union([p] + [e.buffer(0.02, join_style="mitre") for e in extra[i]]) if extra[i] else p
         pr = it.get("props") or {}
         h = float(pr.get("height_m") or wall_height)
-        wall = w.entity("IfcWall", it["item_id"], name=it.get("label") or it["item_id"], predefined="STANDARD")
-        wall.ObjectPlacement = w.placement(sp)
-        w.shape(wall, _parts(geom), 0.0, h, "wall")
         ext = external(p)
-        w.pset(wall, "Pset_WallCommon", {"IsExternal": ext, "LoadBearing": None})
-        w.qto(wall, "Qto_WallBaseQuantities", {"Length": pr.get("length_m"), "Width": pr.get("thickness_m"),
-                                               "Height": h, "NetFootprintArea": p.area})
+        axis = _axis_m(pr, mpp)
+        wall = w.entity("IfcWallStandardCase" if axis else "IfcWall", it["item_id"], name=f"Wall-{i + 1:03d}",
+                        predefined="STANDARD")
+        wall.ObjectPlacement = w.placement(sp)
+        w.shape(wall, _parts(geom), 0.0, h, "glass" if pr.get("glass") else "wall", axis=axis)
+        wt, ls = wall_type(pr, ext)
+        ifcopenshell.api.type.assign_type(f, related_objects=[wall], relating_type=wt)
+        if axis:
+            ifcopenshell.api.material.assign_material(f, products=[wall], type="IfcMaterialLayerSetUsage", material=ls)
+        else:
+            ifcopenshell.api.material.assign_material(f, products=[wall], material=ls.MaterialLayers[0].Material)
+        w.pset(wall, "Pset_WallCommon", {"IsExternal": ext, "LoadBearing": None, "Reference": wt.Name,
+                                         "FireRating": pr.get("fire_rating"),
+                                         "AcousticRating": pr.get("acoustic_rating")})
+        L = float(pr.get("length_m") or 0) or (axis.length if axis else None)
+        t = float(pr.get("thickness_m") or 0) or None
+        w.qto(wall, "Qto_WallBaseQuantities", {"Length": L, "Width": t, "Height": h, "NetFootprintArea": p.area,
+                                               "GrossFootprintArea": p.area,
+                                               "GrossSideArea": L * h if L else None,
+                                               "GrossVolume": p.area * h})
         w.provenance(wall, it)
         out_walls[i] = wall
         products.append(wall)
     # openings without a wall nearby get a filler wall of their own (a door drawn in a gap the reader left empty)
     for k in orphans:
         it, p = opens[k]
-        wall = w.entity("IfcWall", it["item_id"] + "#wall", name=f"wall at {it['item_id']}", predefined="STANDARD")
+        wall = w.entity("IfcWall", it["item_id"] + "#wall", name=f"Wall-{len(walls) + k + 1:03d}", predefined="STANDARD")
         wall.ObjectPlacement = w.placement(sp)
         w.shape(wall, [p], 0.0, wall_height, "wall")
         w.pset(wall, "Pset_WallCommon", {"IsExternal": external(p)})
@@ -322,7 +412,7 @@ def _add_storey(f, bldg, body, planmap: dict, storey_name: str, storey_elevation
         c, u, wid, dep = _rect_frame(p, pr.get("width_m"))
         thick = max(dep, float((walls[host[k]][0].get("props") or {}).get("thickness_m") or 0) if isinstance(host[k], int) else dep)
         if kind == "door":
-            z0, z1 = 0.0, min(DOOR_HEAD_M, wall_height - 0.05)
+            z0, z1 = 0.0, min(door_head, wall_height - 0.05)
         else:
             z0, z1 = WINDOW_SILL_M, min(WINDOW_HEAD_M, wall_height - 0.05)
         cut = _rect(c, u, wid, thick + 0.1)
@@ -332,16 +422,41 @@ def _add_storey(f, bldg, body, planmap: dict, storey_name: str, storey_elevation
         ifcopenshell.api.feature.add_feature(f, feature=op, element=wall)
         n_void += 1
         cls = "IfcDoor" if kind == "door" else "IfcWindow"
-        el = w.entity(cls, it["item_id"], name=it.get("label") or it["item_id"], predefined=kind.upper())
+        n_kind = sum(1 for q, _ in opens[:k + 1] if q["kind"] == kind)
+        el = w.entity(cls, it["item_id"], name=f"{'Door' if kind == 'door' else 'Window'}-{n_kind:03d}",
+                      predefined=kind.upper())
+        if kind == "door":
+            op_type = "DOUBLE_DOOR_SINGLE_SWING" if pr.get("double") or (pr.get("n_leaves") or 1) >= 2 else \
+                DOOR_OPERATION.get((pr.get("swing_side"), 1), "SINGLE_SWING_LEFT") if pr.get("leaf") or pr.get("swing") \
+                else "NOTDEFINED"
+            el.OperationType = op_type
+        else:
+            op_type = "SINGLE_PANEL"
+            el.PartitioningType = op_type
+        tkey = (kind, op_type, int(round((pr.get("width_m") or wid) * 10)))
+        if tkey not in dtypes:
+            tcls = "IfcDoorType" if kind == "door" else "IfcWindowType"
+            tname = (f"Door {op_type.replace('_', ' ').lower()} {tkey[2] * 100} mm" if kind == "door"
+                     else f"Window single panel {tkey[2] * 100} mm")
+            dt = w.entity(tcls, f"type:{kind}:{op_type}:{tkey[2]}", name=tname, predefined=kind.upper())
+            if kind == "door":
+                dt.OperationType = op_type
+            else:
+                dt.PartitioningType = op_type
+            dtypes[tkey] = dt
+        ifcopenshell.api.type.assign_type(f, related_objects=[el], relating_type=dtypes[tkey])
         el.ObjectPlacement = w.placement(sp)
         el.OverallWidth = round(float(pr.get("width_m") or wid), 4)
         el.OverallHeight = round(z1 - z0, 4)
         w.shape(el, [_rect(c, u, wid, PANEL_M[kind])], z0, z1 - z0, kind)
         ifcopenshell.api.feature.add_filling(f, opening=op, element=el)
         ext = external(p) or bool(hw is not None and external(hw) and kind == "window")
-        w.pset(el, "Pset_DoorCommon" if kind == "door" else "Pset_WindowCommon", {"IsExternal": ext})
+        w.pset(el, "Pset_DoorCommon" if kind == "door" else "Pset_WindowCommon",
+               {"IsExternal": ext, "FireRating": pr.get("fire_rating"), "AcousticRating": pr.get("acoustic_rating"),
+                "Reference": dtypes[tkey].Name})
         w.qto(el, "Qto_DoorBaseQuantities" if kind == "door" else "Qto_WindowBaseQuantities",
-              {"Width": el.OverallWidth, "Height": el.OverallHeight})
+              {"Width": el.OverallWidth, "Height": el.OverallHeight, "Area": el.OverallWidth * el.OverallHeight,
+               "Perimeter": 2 * (el.OverallWidth + el.OverallHeight)})
         w.provenance(el, it)
         products.append(el)
 
@@ -358,14 +473,18 @@ def _add_storey(f, bldg, body, planmap: dict, storey_name: str, storey_elevation
         sp_el.ObjectPlacement = w.placement(sp)
         measured = q.get("area_m2") or pr.get("area_m2_geom") or (round(poly.area, 3) if poly is not None else None)
         printed = q.get("area_m2_printed") or pr.get("area_m2_label")
+        sh = float(pr.get("ceiling_height_m") or wall_height)
         if poly is not None:
-            w.shape(sp_el, [poly], 0.0, wall_height, "space")
+            w.shape(sp_el, [poly], 0.0, sh, "space")
         w.qto(sp_el, "Qto_SpaceBaseQuantities", {"NetFloorArea": printed or measured, "GrossFloorArea": measured,
-                                                 "Height": wall_height if poly is not None else None,
+                                                 "Height": sh if poly is not None else None,
+                                                 "NetVolume": (printed or measured) * sh if (printed or measured) and poly is not None else None,
                                                  "GrossPerimeter": poly.exterior.length if poly is not None else None})
         w.pset(sp_el, "Hologram_RoomArea", {"MeasuredArea": measured, "PrintedArea": printed,
                                             "AreaSource": "printed" if printed else "measured",
-                                            "RoomType": pr.get("room_type")})
+                                            "RoomType": pr.get("room_type"),
+                                            "CeilingHeight": pr.get("ceiling_height_m"),
+                                            "CeilingHeightSource": "h= mark in the room" if pr.get("ceiling_height_m") else None})
         w.provenance(sp_el, it)
         n_space += 1
         products.append(sp_el)
@@ -403,6 +522,13 @@ def build_many(pages: list[tuple[dict, str, float]], out_path, *, wall_height: f
     out.parent.mkdir(parents=True, exist_ok=True)
     f.write(str(out))
     build.last_stats = {"storeys": stats, "s": round(time.time() - t0, 2)}
+    try:  # ifc-native role's enrichment (psets, qtos, material layer sets, types, space boundaries) when present
+        from pipeline import ifc_enrich
+        ifc_enrich.enrich(out)
+    except ImportError:
+        pass
+    except Exception as e:  # noqa: BLE001
+        build.last_stats["enrich_error"] = f"{type(e).__name__}: {e}"[:200]
     return out
 
 

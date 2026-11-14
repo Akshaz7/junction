@@ -39,7 +39,7 @@ DUCT_MIN_M, DUCT_MAX_M = 0.10, 1.50          # duct widths we accept from a line
 DUCT_MIN_LEN_M = 0.8                          # shortest duct run
 TERM_MIN_M, TERM_MAX_M = 0.15, 0.9           # air terminal symbol size
 DEFAULT_DUCT_H_M = 0.3
-DASH_GAP_M = 0.3                              # exploded dash-dot linetypes: dashes this close are one line
+DASH_GAP_M = 0.5                              # exploded dash-dot linetypes: dashes this close are one line
 CEILING_GAP_M = 0.1                           # duct top sits this far under the ceiling
 COINCIDE_TOL_M = 0.04                         # a path "is in the ARK sheet" if it lies within this of ARK linework
 MEP_LAYER_RE = re.compile(r"vent|duct|hvac|mech|lvi|ilma|kanav|air|supply|exhaust|M-|IV|LVI|ventil", re.I)
@@ -488,7 +488,7 @@ def ducts(page: dict, sel: np.ndarray, m_per_pt: float, *, min_w: float = DUCT_M
     if not len(segs):
         return []
     L = np.hypot(segs[:, 2] - segs[:, 0], segs[:, 3] - segs[:, 1])
-    ok = L * m_per_pt >= 0.03
+    ok = L * m_per_pt >= 0.005     # keep the dots of dash-dot lines: they bridge the gaps between dashes
     segs, own = segs[ok], own[ok]
     skeys = {}
     sid = np.array([skeys.setdefault(style_key(page["paths"][o]), len(skeys)) for o in own])
@@ -593,8 +593,10 @@ def ducts(page: dict, sel: np.ndarray, m_per_pt: float, *, min_w: float = DUCT_M
             ix, iy = np.clip((X / cell).astype(int), 0, nx - 1), np.clip((Y / cell).astype(int), 0, ny - 1)
             return ink[iy, ix].mean()
         m0, m1 = mouth(lo), mouth(hi)
-        if max(m0, m1) < 0.5:
-            continue        # open at both ends: leader lines / dimension lines
+        broken = (S[i, 7] < 0.9 * (S[i, 3] - S[i, 2])) or (S[j, 7] < 0.9 * (S[j, 3] - S[j, 2]))
+        if max(m0, m1) < 0.5 and not broken:
+            continue        # open at both ends and solid: leader / dimension lines (pairs with a broken (dash-dot) side are
+            #                 exempt: hidden ducts above the ceiling, and leaders are never drawn broken)
         if (hi - lo) * m_per_pt < 1.5 and max(texty(lo, -1), texty(hi, 1)) > 0.25:
             continue        # short pair ending in text: a label frame or a leader into its tag
         u = S[i, 4:6]

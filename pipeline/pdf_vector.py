@@ -101,6 +101,11 @@ def _load_pdfium(pdf_path, page_index):
         M = R.FS_MATRIX()
         l_, b_, r_, t_ = ctypes.c_float(), ctypes.c_float(), ctypes.c_float(), ctypes.c_float()
         counter = [0, 0]
+        bfx, bfy = ctypes.byref(fx), ctypes.byref(fy)
+        seg_api = (R.FPDFPath_GetPathSegment, R.FPDFPathSegment_GetPoint, R.FPDFPathSegment_GetType,
+                   R.FPDFPathSegment_GetClose)
+        MOVETO, BEZIERTO = R.FPDF_SEGMENT_MOVETO, R.FPDF_SEGMENT_BEZIERTO
+        rnd = round
 
         def matrix(obj):
             if R.FPDFPageObj_GetMatrix(obj, ctypes.byref(M)):
@@ -145,16 +150,22 @@ def _load_pdfium(pdf_path, page_index):
                 if len(cur) >= 2:
                     subs.append((cur, closed, ncurv))
 
+            # hot loop (a million segments on a MEP sheet): bound locals, reused byref, displayer inlined
+            GetSeg, GetPt, GetType, GetClose = seg_api
             for k in range(n):
-                seg = R.FPDFPath_GetPathSegment(obj, k)
-                R.FPDFPathSegment_GetPoint(seg, ctypes.byref(fx), ctypes.byref(fy))
+                seg = GetSeg(obj, k)
+                GetPt(seg, bfx, bfy)
                 x, y = fx.value, fy.value
-                X, Y = disp(a * x + c * y + e, b * x + d * y + f)
-                t = R.FPDFPathSegment_GetType(seg)
-                if t == R.FPDF_SEGMENT_MOVETO:
+                u, v = a * x + c * y + e, b * x + d * y + f
+                if rot == 0:
+                    X, Y = u - cl, H0 - (v - cb)
+                else:
+                    X, Y = disp(u, v)
+                t = GetType(seg)
+                if t == MOVETO:
                     flush()
                     cur, closed, ncurv, bez = [(X, Y)], False, 0, []
-                elif t == R.FPDF_SEGMENT_BEZIERTO:
+                elif t == BEZIERTO:
                     bez.append((X, Y))
                     if len(bez) == 3:
                         p0 = cur[-1] if cur else bez[0]
@@ -163,7 +174,7 @@ def _load_pdfium(pdf_path, page_index):
                         ncurv += 1
                 else:
                     cur.append((X, Y))
-                if R.FPDFPathSegment_GetClose(seg):
+                if GetClose(seg):
                     closed = True
             flush()
             for pts, cl_, nc in subs:
@@ -171,7 +182,7 @@ def _load_pdfium(pdf_path, page_index):
                     cl_ = True
                 if cl_ and len(pts) > 2 and abs(pts[0][0] - pts[-1][0]) < 1e-6 and abs(pts[0][1] - pts[-1][1]) < 1e-6:
                     pts = pts[:-1]
-                paths.append({"pts": [[round(p[0], 3), round(p[1], 3)] for p in pts], "closed": bool(cl_),
+                paths.append({"pts": [[rnd(px, 3), rnd(py, 3)] for px, py in pts], "closed": bool(cl_),
                               "fill": fill, "stroke": stroke, "width": round(width, 4), "n_curves": nc,
                               "is_arc": nc > 0 and nc * 4 >= len(pts) - 1, "obj": oid, "dashed": bool(dashed),
                               "pattern": pattern})
@@ -344,18 +355,62 @@ def _grey(c):
     return None if c is None else 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]
 
 
+_FLAT = None  # (paths list, table) for the page walls() is working on
+
+
+def _flat(page):
+    """All path segments of the page as numpy arrays (built once per walls() call): "seg" (n,4) x0,y0,x1,y1 in
+    path order, closing edge of closed paths last; "sp" path index per segment; per path: "grey" (stroke grey,
+    nan = no stroke), "width", "dashed", "arc", "fill", "closed", "npts", "n_curves", "bbox" (x0,y0,x1,y1)."""
+    paths = page["paths"]
+    if _FLAT is not None and _FLAT[0] is paths:
+        return _FLAT[1]
+    m = len(paths)
+    npts = np.fromiter((len(p["pts"]) for p in paths), np.int64, m)
+    P = np.array([q for p in paths for q in p["pts"]], float).reshape(-1, 2)
+    closed = np.fromiter((bool(p["closed"]) for p in paths), bool, m)
+    pid = np.repeat(np.arange(m), npts)
+    start = np.cumsum(npts) - npts
+    if len(P) > 1:
+        ia = np.flatnonzero(pid[:-1] == pid[1:])
+    else:
+        ia = np.zeros(0, np.int64)
+    cl = np.flatnonzero(closed & (npts >= 2))
+    ic = start[cl] + npts[cl] - 1
+    a = np.concatenate([ia, ic])
+    bnd = np.concatenate([ia + 1, start[cl]])
+    o = np.argsort(np.concatenate([ia * 2.0, ic * 2.0 + 1.0]), kind="stable")
+    a, bnd = a[o], bnd[o]
+    seg = np.column_stack([P[a], P[bnd]]) if len(a) else np.zeros((0, 4))
+    stroke = [p["stroke"] for p in paths]
+    grey = np.array([np.nan if c is None else 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2] for c in stroke], float)
+    if m and len(P):
+        nz = npts > 0
+        st_nz = start[nz]
+        bbox = np.full((m, 4), np.nan)
+        bbox[nz, 0] = np.minimum.reduceat(P[:, 0], st_nz); bbox[nz, 1] = np.minimum.reduceat(P[:, 1], st_nz)
+        bbox[nz, 2] = np.maximum.reduceat(P[:, 0], st_nz); bbox[nz, 3] = np.maximum.reduceat(P[:, 1], st_nz)
+    else:
+        bbox = np.zeros((m, 4))
+    return {"seg": seg, "sp": pid[a] if len(a) else np.zeros(0, np.int64), "grey": grey,
+            "width": np.fromiter((p["width"] for p in paths), float, m),
+            "dashed": np.fromiter((bool(p["dashed"]) for p in paths), bool, m),
+            "arc": np.fromiter((bool(p["is_arc"]) for p in paths), bool, m),
+            "fill": np.fromiter((p["fill"] is not None for p in paths), bool, m),
+            "closed": closed, "npts": npts, "n_curves": np.fromiter((p["n_curves"] for p in paths), np.int64, m),
+            "bbox": bbox}
+
+
 def _frame_and_titleblock(page):
     """Drawing area box (x0,y0,x1,y1) inside the border frame and outside the title block."""
     W, H = page["W_pt"], page["H_pt"]
-    vx, hy = [], []  # long vertical lines (x, len), long horizontal lines (y, len)
-    for p in page["paths"]:
-        pts = p["pts"]
-        segs = list(zip(pts, pts[1:] + (pts[:1] if p["closed"] else [])))
-        for (x0, y0), (x1, y1) in segs:
-            if abs(x0 - x1) < 0.5 and abs(y1 - y0) > 0.4 * H:
-                vx.append(((x0 + x1) / 2, abs(y1 - y0)))
-            elif abs(y0 - y1) < 0.5 and abs(x1 - x0) > 0.4 * W:
-                hy.append(((y0 + y1) / 2, abs(x1 - x0)))
+    sg = _flat(page)["seg"]
+    ax, ay = np.abs(sg[:, 0] - sg[:, 2]), np.abs(sg[:, 3] - sg[:, 1])
+    kv = (ax < 0.5) & (ay > 0.4 * H)
+    kh = ~kv & (ay < 0.5) & (ax > 0.4 * W)
+    # long vertical lines (x, len), long horizontal lines (y, len)
+    vx = list(zip(((sg[kv, 0] + sg[kv, 2]) / 2).tolist(), ay[kv].tolist()))
+    hy = list(zip(((sg[kh, 1] + sg[kh, 3]) / 2).tolist(), ax[kh].tolist()))
     x0, y0, x1, y1 = 0.0, 0.0, W, H
     m = 0.08
     left = [x for x, L in vx if x < m * W and L > 0.7 * H]
@@ -400,24 +455,13 @@ def _frame_and_titleblock(page):
 def _raw_segments(page, box, max_grey=0.8):
     """All straight stroked pieces inside box: rows (x0,y0,x1,y1,width,grey)."""
     bx0, by0, bx1, by1 = box
-    rows = []
-    ap = rows.append
-    for p in page["paths"]:
-        if p["stroke"] is None or p["dashed"] or p["is_arc"]:
-            continue
-        g = _grey(p["stroke"])
-        if g is not None and g > max_grey:
-            continue
-        g = g or 0.0
-        w = p["width"]
-        pts = p["pts"]
-        if p["closed"]:
-            pts = pts + pts[:1]
-        for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
-            ap((x0, y0, x1, y1, w, g))
-    if not rows:
+    F = _flat(page)
+    okp = ~np.isnan(F["grey"]) & ~F["dashed"] & ~F["arc"] & ~(F["grey"] > max_grey)
+    sp = F["sp"]
+    ks = okp[sp]
+    if not ks.any():
         return np.zeros((0, 6))
-    r = np.array(rows, dtype=float)
+    r = np.column_stack([F["seg"][ks], F["width"][sp[ks]], F["grey"][sp[ks]]])
     k = ((r[:, [0, 2]] >= bx0) & (r[:, [0, 2]] <= bx1)).all(1) & ((r[:, [1, 3]] >= by0) & (r[:, [1, 3]] <= by1)).all(1)
     k &= np.hypot(r[:, 2] - r[:, 0], r[:, 3] - r[:, 1]) > 0.02
     return r[k]
@@ -439,34 +483,43 @@ def _merge_collinear(R, ang_q=math.radians(0.5), off_q=0.25, gap=0.6):
     ka = np.round(ang / ang_q).astype(np.int64)
     ko = np.round(off / off_q).astype(np.int64)
     order = np.lexsort((lo, ko, ka))
-    out = []
-    cur = None
-    kal, kol, lol, hil = ka.tolist(), ko.tolist(), lo.tolist(), hi.tolist()
-    wl, gl, offl, angl = R[:, 4].tolist(), R[:, 5].tolist(), off.tolist(), ang.tolist()
-    for i in order.tolist():
-        key = (kal[i], kol[i])
-        if cur is not None and key == cur[0] and lol[i] <= cur[2] + gap:
-            if hil[i] > cur[2]:
-                cur[2] = hil[i]
-            if wl[i] > cur[3]:
-                cur[3] = wl[i]
-            if gl[i] < cur[4]:
-                cur[4] = gl[i]
-            cur[5] += offl[i]; cur[8] += 1
-            continue
-        if cur is not None:
-            out.append(cur)
-        cur = [key, lol[i], hil[i], wl[i], gl[i], offl[i], angl[i], None, 1]
-    out.append(cur)
-    rows = []
-    for key, l, h, w, g, osum, a_, _, cnt in out:
-        ux_, uy_ = math.cos(a_), math.sin(a_)
-        # offset: mean of members (keeps sub-quantum precision)
-        o_ = osum / cnt
-        x0, y0 = l * ux_ - o_ * uy_, l * uy_ + o_ * ux_
-        x1, y1 = h * ux_ - o_ * uy_, h * uy_ + o_ * ux_
-        rows.append((x0, y0, x1, y1, w, g, h - l, a_ % math.pi))
-    return np.array(rows, dtype=float).reshape(-1, 8)
+    # vectorised run-length join (was a Python loop over every piece: 7 s on a 650k-piece MEP sheet). Within a
+    # (angle, offset) key, sorted by start, a new run starts where the start lies beyond the running max end + gap;
+    # the running max over the whole key prefix equals the current run's max (earlier runs end before it starts).
+    ka_s, ko_s, lo_s, hi_s = ka[order], ko[order], lo[order], hi[order]
+    m = len(order)
+    newkey = np.ones(m, bool)
+    newkey[1:] = (ka_s[1:] != ka_s[:-1]) | (ko_s[1:] != ko_s[:-1])
+    gid = np.cumsum(newkey) - 1
+    # group-wise running max of hi, exact: on integer ranks of hi, each key group shifted above all earlier ones
+    oh = np.argsort(hi_s, kind="stable")
+    rank = np.empty(m, np.int64)
+    rank[oh] = np.arange(m)
+    base = gid.astype(np.int64) * m
+    cm = hi_s[oh][np.maximum.accumulate(rank + base) - base]
+    start = newkey.copy()
+    start[1:] |= lo_s[1:] > cm[:-1] + gap
+    st = np.flatnonzero(start)
+    hi_r = np.maximum.reduceat(hi_s, st)
+    lo_r = lo_s[st]
+    w_r = np.maximum.reduceat(R[order, 4], st)
+    g_r = np.minimum.reduceat(R[order, 5], st)
+    cnt = np.diff(np.append(st, m))
+    # offset: mean of members (keeps sub-quantum precision); summed left to right like the scalar version
+    offl = off[order].tolist()
+    o_sum = [offl[k] for k in st.tolist()]
+    for r in np.flatnonzero(cnt > 1).tolist():
+        s0 = int(st[r])
+        acc = offl[s0]
+        for t in range(s0 + 1, s0 + int(cnt[r])):
+            acc += offl[t]
+        o_sum[r] = acc
+    o_ = np.asarray(o_sum) / cnt
+    a_ = ang[order][st].tolist()
+    ux_ = np.asarray([math.cos(v) for v in a_]); uy_ = np.asarray([math.sin(v) for v in a_])
+    out = np.column_stack([lo_r * ux_ - o_ * uy_, lo_r * uy_ + o_ * ux_, hi_r * ux_ - o_ * uy_, hi_r * uy_ + o_ * ux_,
+                           w_r, g_r, hi_r - lo_r, np.asarray([v % math.pi for v in a_])])
+    return out.reshape(-1, 8)
 
 
 def _segments(page, box):
@@ -474,21 +527,62 @@ def _segments(page, box):
     return _merge_collinear(_raw_segments(page, box))
 
 
+def _parallel_candidates(S, dmax, ang_tol):
+    """Directed candidate pairs (i, j), i != j, for _pairs: j within ang_tol of i's angle and near i's strip.
+    Segments are bucketed by angle; each bucket is rotated onto its own axis so the boxes are thin (an axis-aligned
+    box of a long diagonal line covers half the page, which made the plain STRtree query quadratic on busy MEP
+    sheets). The query boxes are padded generously, so this is a superset of every pair _pairs can accept.
+    Returns (qi, qj) sorted by qi."""
+    from shapely import STRtree, box as sbox
+    n = len(S)
+    nb = max(1, int(math.pi // ang_tol))
+    bw = math.pi / nb
+    b = np.minimum((np.mod(S[:, 7], math.pi) / bw).astype(np.int64), nb - 1)
+    members = [np.where(b == k)[0] for k in range(nb)]
+    L = S[:, 6]
+    out_i, out_j = [], []
+    for k in range(nb):
+        A = members[k]
+        if not len(A):
+            continue
+        B = np.concatenate([members[(k - 1) % nb], A, members[(k + 1) % nb]]) if nb > 2 else np.arange(n)
+        th = (k + 0.5) * bw
+        c, s = math.cos(th), math.sin(th)
+
+        def rot(idx):
+            u0 = S[idx, 0] * c + S[idx, 1] * s
+            u1 = S[idx, 2] * c + S[idx, 3] * s
+            v0 = -S[idx, 0] * s + S[idx, 1] * c
+            v1 = -S[idx, 2] * s + S[idx, 3] * c
+            return np.minimum(u0, u1), np.minimum(v0, v1), np.maximum(u0, u1), np.maximum(v0, v1)
+        bu0, bv0, bu1, bv1 = rot(B)
+        tree = STRtree(sbox(bu0, bv0, bu1, bv1))
+        au0, av0, au1, av1 = rot(A)
+        pa = 2.0 + 0.1 * dmax + 0.004 * L[A]          # along the axis
+        pp = 1.25 * dmax + 1.0 + 0.06 * L[A]          # across it
+        a_, t_ = tree.query(sbox(au0 - pa, av0 - pp, au1 + pa, av1 + pp))
+        gi, gj = A[a_], B[t_]
+        keep = gi != gj
+        out_i.append(gi[keep]); out_j.append(gj[keep])
+    if not out_i:
+        return np.zeros(0, np.int64), np.zeros(0, np.int64)
+    qi, qj = np.concatenate(out_i), np.concatenate(out_j)
+    o = np.lexsort((qj, qi))
+    return qi[o], qj[o]
+
+
 def _pairs(S, dmin, dmax, ang_tol=math.radians(2.0), min_ov=0.5):
     """Parallel segment pairs dmin..dmax apart that overlap in projection. For each segment and side, partners
     are taken nearest first, and a farther one only where nearer ones leave its stretch uncovered, so a tiny
     piece next to a long wall line does not hide the long partner. A pair must be accepted from both ends.
     Returns (pairs [(i, j, d, signed_d, t0, t1)] with t on i's axis from its start, neighbour count per seg)."""
-    from shapely import STRtree, box as sbox
     n = len(S)
     if n == 0:
         return [], np.zeros(0, int)
-    xmin = np.minimum(S[:, 0], S[:, 2]); xmax = np.maximum(S[:, 0], S[:, 2])
-    ymin = np.minimum(S[:, 1], S[:, 3]); ymax = np.maximum(S[:, 1], S[:, 3])
-    tree = STRtree(sbox(xmin, ymin, xmax, ymax))
-    qi, qj = tree.query(sbox(xmin - dmax, ymin - dmax, xmax + dmax, ymax + dmax))
-    keep = qi != qj
-    qi, qj = qi[keep], qj[keep]
+    # a pair needs an overlap > 2 pt, so pieces of <= 2 pt never pair (flattened curves: 90% of a MEP sheet's edges)
+    live = np.flatnonzero(S[:, 6] > 2.0)
+    qi, qj = _parallel_candidates(S[live], dmax, ang_tol)
+    qi, qj = live[qi], live[qj]
     da = np.abs(S[qi, 7] - S[qj, 7])
     da = np.minimum(da, math.pi - da)
     keep = da < ang_tol
@@ -510,7 +604,7 @@ def _pairs(S, dmin, dmax, ang_tol=math.radians(2.0), min_ov=0.5):
     shorter = np.minimum(S[qi, 6], S[qj, 6])
     keep = (ov > min_ov * shorter) & (ov > 2.0)
     qi, qj, d, lo, hi = qi[keep], qj[keep], d[keep], lo[keep], hi[keep]
-    order = np.lexsort((np.abs(d), d > 0, qi))
+    order = np.lexsort((qj, np.abs(d), d > 0, qi))
     acc = set()
     nb = np.zeros(n, int)
     cur_key, covered = None, []
@@ -569,12 +663,14 @@ def _detail_points(page, box, S_all=None):
     if len(sh):
         out.append(np.column_stack([(sh[:, 0] + sh[:, 2]) / 2, (sh[:, 1] + sh[:, 3]) / 2]))
     bx0, by0, bx1, by1 = box
-    for p in page["paths"]:
-        if p["fill"] is not None and p["stroke"] is None and len(p["pts"]) >= 3:
-            a = np.asarray(p["pts"], float)
-            x0, y0 = a.min(0); x1, y1 = a.max(0)
-            if max(x1 - x0, y1 - y0) < 3 and bx0 <= x0 <= bx1 and by0 <= y0 <= by1:
-                out.append(np.array([[(x0 + x1) / 2, (y0 + y1) / 2]]))
+    F = _flat(page)
+    bb = F["bbox"]
+    k = F["fill"] & np.isnan(F["grey"]) & (F["npts"] >= 3)
+    with np.errstate(invalid="ignore"):
+        k &= (np.maximum(bb[:, 2] - bb[:, 0], bb[:, 3] - bb[:, 1]) < 3) & (bx0 <= bb[:, 0]) & (bb[:, 0] <= bx1) \
+            & (by0 <= bb[:, 1]) & (bb[:, 1] <= by1)
+    if k.any():
+        out.append(np.column_stack([(bb[k, 0] + bb[k, 2]) / 2, (bb[k, 1] + bb[k, 3]) / 2]))
     return np.vstack(out) if out else np.zeros((0, 2))
 
 
@@ -582,14 +678,13 @@ def _grid_lines(page, S):
     """Mask of segments that are column-grid / section-cut lines: their axis runs into a grid bubble (a small
     circle with a short label inside) beyond one of their ends."""
     mask = np.zeros(len(S), bool)
-    circles = []
-    for p in page["paths"]:
-        if p["n_curves"] >= 4 and p["closed"] or (p["n_curves"] >= 4 and len(p["pts"]) >= 16):
-            a = np.asarray(p["pts"], float)
-            x0, y0 = a.min(0); x1, y1 = a.max(0)
-            dx, dy = x1 - x0, y1 - y0
-            if 6 <= dx <= 50 and abs(dx - dy) < 0.15 * dx:
-                circles.append(((x0 + x1) / 2, (y0 + y1) / 2, dx / 2))
+    F = _flat(page)
+    bb = F["bbox"]
+    k = np.flatnonzero((F["n_curves"] >= 4) & (F["closed"] | (F["npts"] >= 16)))
+    dx, dy = bb[k, 2] - bb[k, 0], bb[k, 3] - bb[k, 1]
+    ok = (6 <= dx) & (dx <= 50) & (np.abs(dx - dy) < 0.15 * dx)
+    k, dx = k[ok], dx[ok]
+    circles = list(zip(((bb[k, 0] + bb[k, 2]) / 2).tolist(), ((bb[k, 1] + bb[k, 3]) / 2).tolist(), (dx / 2).tolist()))
     if not circles or not len(S):
         return mask
     words = page["words"]
@@ -691,6 +786,28 @@ def _quad(Sx, a, sd, l, h):
     return q, (p0[0] + nx / 2, p0[1] + ny / 2), (p1[0] + nx / 2, p1[1] + ny / 2)
 
 
+def _quads(Sx, pairs):
+    """_quad for many pairs at once: (object array of polygons, list of c0, list of c1)."""
+    import shapely
+    if not len(pairs):
+        return np.empty(0, dtype=object), [], []
+    P = np.asarray([(r[0], r[3], r[4], r[5]) for r in pairs], float)
+    a = P[:, 0].astype(np.int64)
+    sd, l, h = P[:, 1], P[:, 2], P[:, 3]
+    x0, y0, x1, y1 = Sx[a, 0], Sx[a, 1], Sx[a, 2], Sx[a, 3]
+    L = Sx[a, 6]
+    ux, uy = (x1 - x0) / L, (y1 - y0) / L
+    nx, ny = -uy * sd, ux * sd
+    p0x, p0y = x0 + ux * l, y0 + uy * l
+    p1x, p1y = x0 + ux * h, y0 + uy * h
+    C = np.stack([np.column_stack([p0x, p0y]), np.column_stack([p1x, p1y]),
+                  np.column_stack([p1x + nx, p1y + ny]), np.column_stack([p0x + nx, p0y + ny])], axis=1)
+    polys = shapely.polygons(C)
+    c0 = list(zip((p0x + nx / 2).tolist(), (p0y + ny / 2).tolist()))
+    c1 = list(zip((p1x + nx / 2).tolist(), (p1y + ny / 2).tolist()))
+    return polys, c0, c1
+
+
 def _fill_shapes(page, area_box, page_area):
     """Closed filled shapes as (polygon, grey, obj), even-odd holes per draw object, white fills skipped."""
     from shapely.geometry import Polygon
@@ -722,18 +839,107 @@ def _fill_shapes(page, area_box, page_area):
     return out
 
 
+def _areas_in(Q, ok, polys, tree, deadline=None, flag=None):
+    """For each polygon Q[k] with ok[k]: its area inside the union of polys (object array); others 0. Single
+    overlaps are read directly; a union is formed only where the summed overlap could reach the threshold."""
+    import shapely
+    out = np.zeros(len(Q))
+    idx = np.flatnonzero(ok)
+    if not len(idx):
+        return out
+    qa_, pb = tree.query(Q[idx])
+    if not len(qa_):
+        return out
+    inter = shapely.area(shapely.intersection(Q[idx][qa_], polys[pb]))
+    tot = np.bincount(qa_, weights=inter, minlength=len(idx))
+    cnt = np.bincount(qa_, minlength=len(idx))
+    out[idx] = tot
+    area = shapely.area(Q[idx])
+    multi = np.flatnonzero((cnt > 1) & (tot >= 0.85 * area))
+    if len(multi):
+        starts = np.searchsorted(qa_, multi)  # tree.query output is sorted by input index
+        ends = np.searchsorted(qa_, multi, side="right")
+        for n_, (m, s0, s1) in enumerate(zip(multi.tolist(), starts.tolist(), ends.tolist())):
+            if n_ % 200 == 0 and deadline is not None and _over(deadline, flag):
+                out[idx[multi[n_:]]] = 0.0
+                break
+            q = Q[idx[m]]
+            out[idx[m]] = float(shapely.union_all(shapely.intersection(q, polys[pb[s0:s1]])).area)
+    return out
+
+
 def _segments_from_polys(polys):
-    rows = []
-    for k, poly in enumerate(polys):
-        for ring in [poly.exterior] + list(poly.interiors):
-            c = list(ring.coords)
-            for (x0, y0), (x1, y1) in zip(c, c[1:]):
-                if math.hypot(x1 - x0, y1 - y0) > 0.02:
-                    rows.append((x0, y0, x1, y1, 0.0, float(k)))
-    return np.array(rows, float).reshape(-1, 6)
+    """Edges of the polygons' rings: rows (x0,y0,x1,y1,0,k) with k the polygon index (vectorised)."""
+    import shapely
+    if not len(polys):
+        return np.zeros((0, 6))
+    arr = np.empty(len(polys), dtype=object)
+    arr[:] = list(polys)
+    nint = shapely.get_num_interior_rings(arr)
+    ext = shapely.get_exterior_ring(arr)
+    if not nint.any():
+        rings, own = ext, np.arange(len(arr))
+    else:
+        rl, ol = [], []
+        for k in range(len(arr)):
+            rl.append(ext[k]); ol.append(k)
+            for h in range(int(nint[k])):
+                rl.append(shapely.get_interior_ring(arr[k], h)); ol.append(k)
+        rings = np.empty(len(rl), dtype=object)
+        rings[:] = rl
+        own = np.asarray(ol)
+    c, ri = shapely.get_coordinates(rings, return_index=True)
+    if len(c) < 2:
+        return np.zeros((0, 6))
+    same = ri[1:] == ri[:-1]
+    x0, y0, x1, y1 = c[:-1, 0], c[:-1, 1], c[1:, 0], c[1:, 1]
+    k = same & (np.hypot(x1 - x0, y1 - y0) > 0.02)
+    return np.column_stack([x0[k], y0[k], x1[k], y1[k], np.zeros(int(k.sum())), own[ri[:-1][k]].astype(float)])
 
 
-def walls(page: dict) -> list:
+class WallList(list):
+    """walls() result: a list with .truncated (True when the time budget cut the search short)."""
+    truncated = False
+
+
+WALLS_BUDGET_S = 25.0  # default per-page budget for walls(); env PDF_WALLS_BUDGET_S overrides
+
+
+def walls(page: dict, budget_s: float | None = None) -> list:
+    """See _walls. budget_s (default env PDF_WALLS_BUDGET_S or WALLS_BUDGET_S): when the evidence stages run past
+    it, the remaining stages are skipped and the walls found so far are returned with .truncated = True (also
+    page["walls_truncated"]), instead of running for minutes on a dense MEP sheet."""
+    import os
+    import time
+    global _FLAT
+    if budget_s is None:
+        try:
+            budget_s = float(os.environ.get("PDF_WALLS_BUDGET_S", WALLS_BUDGET_S))
+        except ValueError:
+            budget_s = WALLS_BUDGET_S
+    deadline = time.monotonic() + budget_s if budget_s and budget_s > 0 else None
+    _FLAT = None
+    if page.get("paths"):
+        _FLAT = (page["paths"], _flat(page))
+    flag = [False]
+    try:
+        out = WallList(_walls(page, deadline, flag))
+    finally:
+        _FLAT = None
+    out.truncated = flag[0]
+    page["walls_truncated"] = flag[0]
+    return out
+
+
+def _over(deadline, flag):
+    import time
+    if deadline is not None and time.monotonic() > deadline:
+        flag[0] = True
+        return True
+    return flag[0]
+
+
+def _walls(page: dict, deadline=None, flag=None) -> list:
     """Walls in page points: one straight piece per wall run, from a pair of parallel edges.
     Each: {"polygon": rectangle, "centerline": [[x,y],[x,y]], "thickness_pt": edge distance, "style"}.
     Evidence, in order of trust: (a) dark/hatch filled wall shapes (pairs of opposite edges inside the fill; the
@@ -756,13 +962,14 @@ def walls(page: dict) -> list:
     # ---------- (a) fill walls
     shapes = _fill_shapes(page, area_box, page_area)
     circles = []  # fixture symbols: burners, basins, WC bowls
-    for p in page["paths"]:
-        if p["n_curves"] >= 4 and p["closed"]:
-            a_ = np.asarray(p["pts"], float)
-            x0, y0 = a_.min(0); x1, y1 = a_.max(0)
-            w_, h_ = x1 - x0, y1 - y0
-            if 1.5 <= max(w_, h_) < 30 and max(w_, h_) <= 1.8 * max(min(w_, h_), 1e-6):
-                circles.append(((x0 + x1) / 2, (y0 + y1) / 2))
+    F = _flat(page)
+    bb = F["bbox"]
+    k = np.flatnonzero((F["n_curves"] >= 4) & F["closed"])
+    if len(k):
+        w_, h_ = bb[k, 2] - bb[k, 0], bb[k, 3] - bb[k, 1]
+        mx = np.maximum(w_, h_)
+        ok = (1.5 <= mx) & (mx < 30) & (mx <= 1.8 * np.maximum(np.minimum(w_, h_), 1e-6))
+        circles = list(zip(((bb[k, 0] + bb[k, 2]) / 2)[ok].tolist(), ((bb[k, 1] + bb[k, 3]) / 2)[ok].tolist()))
     ctree = STRtree([sbox(x - 0.1, y - 0.1, x + 0.1, y + 0.1) for x, y in circles]) if circles else None
     cand = []
     for poly, g, oid in shapes:
@@ -786,21 +993,30 @@ def walls(page: dict) -> list:
         wall_g = min((k for k, v in by_g.items() if v >= 0.2 * tot), default=None)
         fill_polys = [poly for poly, g, t in cand if g <= wall_g + 0.06] if wall_g is not None else []
     pieces = []  # (polygon, c0, c1, d, style)
-    fill_u = None
     if fill_polys:
-        fill_u = unary_union(fill_polys)
+        # area of each quad inside the union of the fills, from the fills that touch it (one page-wide union of
+        # thousands of duct/hatch fills took 18 s on MEP sheets)
+        ftree = STRtree(fill_polys)
+        farr = np.empty(len(fill_polys), dtype=object)
+        farr[:] = fill_polys
         FE = _merge_collinear(_segments_from_polys(fill_polys), gap=0.3)
         pairs_f, _ = _pairs(FE, 0.5, MAX_WALL_PT, min_ov=0.3)
         fq = []
-        for a_, b_, d, sd, l, h in pairs_f:
-            q, c0, c1 = _quad(FE, a_, sd, l, h)
-            if q.is_valid and q.area > 0 and q.intersection(fill_u).area >= 0.85 * q.area:
-                fq.append((q, c0, c1, d, "fill"))
+        Q, C0, C1 = _quads(FE, pairs_f)
+        if len(Q):
+            import shapely
+            qa = shapely.area(Q)
+            ok = shapely.is_valid(Q) & (qa > 0)
+            inside = _areas_in(Q, ok, farr, ftree, deadline, flag)
+            for k in np.flatnonzero(ok & (inside >= 0.85 * qa)).tolist():
+                fq.append((Q[k], C0[k], C1[k], pairs_f[k][2], "fill"))
         fq.sort(key=lambda r: r[3])  # thinnest first: a fill rectangle's short side is its thickness
         pieces += _accept(fq, [])
 
     # ---------- (b) double outlines, (c) thick strokes
-    S = _segments(page, box)
+    if flag is None:
+        flag = [False]
+    S = _segments(page, box) if not _over(deadline, flag) else np.zeros((0, 8))
     stroke_pieces = []
     if len(S):
         widths = S[:, 4]
@@ -816,23 +1032,23 @@ def walls(page: dict) -> list:
         bad = _series(Sc, pairs)
         digit_boxes = [b_ for b_, w in zip(word_boxes, page["words"]) if DIMW.match(w["text"]) and DIGIT.search(w["text"])]
         dim_seg = set()
-        if digit_boxes:
+        if digit_boxes and len(Sc):
+            import shapely
             dtree = STRtree([sbox(*b_) for b_ in digit_boxes])
-            for k, (x0, y0, x1, y1, *_r) in enumerate(Sc):
-                hits = dtree.query(LineString([(x0, y0), (x1, y1)]).buffer(4.0))
-                horiz = abs(x1 - x0) >= abs(y1 - y0)
-                if any(((digit_boxes[h_][2] - digit_boxes[h_][0]) >= (digit_boxes[h_][3] - digit_boxes[h_][1])) == horiz
-                       for h_ in hits.tolist()):
-                    dim_seg.add(k)
+            lines = shapely.linestrings(np.stack([Sc[:, 0:2], Sc[:, 2:4]], axis=1))
+            qa, qb = dtree.query(shapely.buffer(lines, 4.0))
+            DB = np.asarray(digit_boxes, float)
+            horiz = np.abs(Sc[:, 2] - Sc[:, 0]) >= np.abs(Sc[:, 3] - Sc[:, 1])
+            dh = (DB[:, 2] - DB[:, 0]) >= (DB[:, 3] - DB[:, 1])
+            dim_seg = set(qa[horiz[qa] == dh[qb]].tolist())
         oq = []
-        for a_, b_, d, sd, l, h in pairs:
-            if a_ in bad or b_ in bad or (a_ in dim_seg and b_ in dim_seg):
-                continue
-            if h - l < 1.5 * d:
-                continue  # stub
-            q, c0, c1 = _quad(Sc, a_, sd, l, h)
-            if q.is_valid and q.area > 0:
-                oq.append((q, c0, c1, d, "double"))
+        sel = [r for r in pairs if not (r[0] in bad or r[1] in bad or (r[0] in dim_seg and r[1] in dim_seg))
+               and not (r[5] - r[4] < 1.5 * r[2])]  # stubs out
+        if sel and not _over(deadline, flag):
+            import shapely
+            Q, C0, C1 = _quads(Sc, sel)
+            ok = shapely.is_valid(Q) & (shapely.area(Q) > 0)
+            oq = [(Q[k], C0[k], C1[k], sel[k][2], "double") for k in np.flatnonzero(ok).tolist()]
         # tag boxes
         if oq and word_boxes:
             wb = [sbox(*b_) for b_ in word_boxes]
@@ -975,20 +1191,34 @@ def _accept(cands, accepted, max_overlap=0.3):
     out = list(accepted)
     if not cands:
         return out
-    allq = [r[0] for r in out] + [r[0] for r in cands]
+    import shapely
+    allq = np.empty(len(out) + len(cands), dtype=object)
+    allq[:] = [r[0] for r in out] + [r[0] for r in cands]
     tree = STRtree(allq)
     taken = np.zeros(len(allq), bool)
     taken[:len(out)] = True
+    n0 = len(accepted)
+    # all overlaps of a candidate with earlier-or-accepted shapes, computed in one vectorised pass (only pairs whose
+    # boxes meet and where the other shape comes first can ever count)
+    ci, cj = tree.query(allq[n0:])
+    gi_ = ci + n0
+    m = (cj != gi_) & ((cj < n0) | (cj < gi_))
+    ci, cj = ci[m], cj[m]
+    inter = shapely.area(shapely.intersection(allq[n0 + ci], allq[cj])) if len(ci) else np.zeros(0)
+    starts = np.searchsorted(ci, np.arange(len(cands)))
+    ends = np.searchsorted(ci, np.arange(len(cands)), side="right")
+    cjl, il = cj.tolist(), inter.tolist()
+    areas = shapely.area(allq[n0:]).tolist()
     for k, r in enumerate(cands):
-        gi = len(accepted) + k
-        q = r[0]
+        gi = n0 + k
+        lim = max_overlap * areas[k]
         ov = 0.0
-        for j in tree.query(q).tolist():
-            if taken[j] and j != gi:
-                ov += allq[j].intersection(q).area
-                if ov > max_overlap * q.area:
+        for t in range(starts[k], ends[k]):
+            if taken[cjl[t]]:
+                ov += il[t]
+                if ov > lim:
                     break
-        if ov <= max_overlap * q.area:
+        if ov <= lim:
             taken[gi] = True
             out.append(r)
     return out
@@ -1026,8 +1256,10 @@ def _merge_pieces(pieces, ang_q=math.radians(1.0), off_q=0.6, gap=1.0):
     segs = []
     for key, lo, hi, ang, _, offs, ds, st in out:
         ux, uy = math.cos(ang), math.sin(ang)
-        o = float(np.mean(offs))
-        segs.append(((lo * ux - o * uy, lo * uy + o * ux), (hi * ux - o * uy, hi * uy + o * ux), float(np.median(ds)),
+        # np.mean / np.median cost ~20 us each; one- and two-member runs (most of them) need neither
+        o = float(offs[0]) if len(offs) == 1 else float(np.mean(offs))
+        md = float(ds[0]) if len(ds) == 1 else float(np.median(ds))
+        segs.append(((lo * ux - o * uy, lo * uy + o * ux), (hi * ux - o * uy, hi * uy + o * ux), md,
                      max(st, key=st.get)))
     return segs
 
@@ -1037,12 +1269,20 @@ def _seg_rect(c0, c1, t, ext=0.0):
     return LineString([c0, c1]).buffer(t / 2 + ext, cap_style=2)
 
 
+def _seg_rects(segs, ext=0.0):
+    """_seg_rect for every (c0, c1, t, style) at once (object array)."""
+    import shapely
+    C = np.asarray([(c0[0], c0[1], c1[0], c1[1]) for c0, c1, t, _ in segs], float).reshape(-1, 2, 2)
+    T = np.asarray([t for _, _, t, _ in segs], float)
+    return shapely.buffer(shapely.linestrings(C), T / 2 + ext, cap_style="flat")
+
+
 def _drop_isolated(segs):
     """Keep the connected wall network: drop small isolated pieces (furniture, symbols, stray pairs)."""
     from shapely import STRtree
     if not segs:
         return segs
-    rects = [_seg_rect(c0, c1, t, 1.5) for c0, c1, t, _ in segs]
+    rects = _seg_rects(segs, 1.5)
     tree = STRtree(rects)
     n = len(segs)
     parent = list(range(n))
@@ -1072,26 +1312,38 @@ def _extend_ends(segs):
     from shapely.geometry import Point
     if not segs:
         return segs
-    rects = [_seg_rect(c0, c1, t, 0.3) for c0, c1, t, _ in segs]
+    import shapely
+    rects = _seg_rects(segs, 0.3)
     tree = STRtree(rects)
+    n = len(segs)
+    A = np.asarray([(c0[0], c0[1], c1[0], c1[1], t) for c0, c1, t, _ in segs], float)
+    L = np.asarray([math.hypot(c1[0] - c0[0], c1[1] - c0[1]) for c0, c1, _, _ in segs], float)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        ux, uy = (A[:, 2] - A[:, 0]) / L, (A[:, 3] - A[:, 1]) / L
+    # end e of seg i: (x, y, direction sign); every (end, other wall) pair, 8 probe points along the axis
+    EX = np.concatenate([A[:, 0], A[:, 2]]); EY = np.concatenate([A[:, 1], A[:, 3]])
+    SG = np.concatenate([-np.ones(n), np.ones(n)]); SI = np.concatenate([np.arange(n), np.arange(n)])
+    probes = shapely.buffer(shapely.points(np.column_stack([EX, EY])), A[SI, 4] / 2 + 0.5)
+    pe, pj = tree.query(probes)
+    m = pj != SI[pe]
+    pe, pj = pe[m], pj[m]
+    best = np.zeros(2 * n)
+    if len(pe):
+        i_ = SI[pe]
+        k8 = np.arange(1, 9)
+        ext = k8[None, :] * (A[i_, 4] / 2 + A[pj, 4])[:, None] / 8          # (m, 8)
+        px = EX[pe][:, None] + (SG[pe] * ux[i_])[:, None] * ext
+        py = EY[pe][:, None] + (SG[pe] * uy[i_])[:, None] * ext
+        inside = shapely.contains_xy(np.repeat(rects[pj], 8).reshape(-1, 8), px, py)
+        e_best = np.where(inside, ext, 0.0).max(1)
+        np.maximum.at(best, pe, e_best)
     out = []
     for i, (c0, c1, t, st) in enumerate(segs):
-        L = math.hypot(c1[0] - c0[0], c1[1] - c0[1])
-        ux, uy = (c1[0] - c0[0]) / L, (c1[1] - c0[1]) / L
         ends = [list(c0), list(c1)]
         for e, sgn in ((0, -1), (1, 1)):
-            best = 0.0
-            for j in tree.query(Point(ends[e]).buffer(t / 2 + 0.5)).tolist():
-                if j == i:
-                    continue
-                tj = segs[j][2]
-                for k in range(1, 9):
-                    ext = k * (t / 2 + tj) / 8
-                    p = Point(ends[e][0] + sgn * ux * ext, ends[e][1] + sgn * uy * ext)
-                    if rects[j].contains(p):
-                        best = max(best, ext)
-            if best > 0:
-                ends[e] = [ends[e][0] + sgn * ux * best, ends[e][1] + sgn * uy * best]
+            b_ = float(best[i + e * n])
+            if b_ > 0:
+                ends[e] = [ends[e][0] + sgn * float(ux[i]) * b_, ends[e][1] + sgn * float(uy[i]) * b_]
         out.append((tuple(ends[0]), tuple(ends[1]), t, st))
     return out
 

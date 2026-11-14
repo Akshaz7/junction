@@ -109,6 +109,7 @@ def test_doors_and_window_on_synthetic_pdf(plan_page):
     ext = [w for w in wins if w["props"].get("exterior")]
     assert len(ext) == 1 and ext[0]["bbox"][0] == pytest.approx(540, abs=1) and ext[0]["props"]["width_pt"] == pytest.approx(50, abs=1)
     w = next(w for w in wins if not w["props"].get("exterior"))
+    assert all(x["props"]["kind"] == "window" for x in wins)   # facade glazing, not interior partitions
     assert w["props"]["n_lines"] == 3 and w["props"]["width_pt"] == pytest.approx(70, abs=1)
     assert w["bbox"][0] == pytest.approx(350, abs=1) and w["bbox"][2] == pytest.approx(420, abs=1)
 
@@ -211,6 +212,23 @@ def test_gate_ignores_body_size_callouts():
     assert ok, why
     ok, why = po.gate(_page(["FLOOR PLAN", "DOOR SCHEDULE", "DETAILS"]), _walls(), ROOMS)  # schedules outrank plan
     assert not ok
+
+
+def test_double_door_two_arcs_one_gap():
+    import math as m
+    def arc(cx, cy, r, a0, a1):
+        pts = [[cx + r * m.cos(m.radians(a)), cy + r * m.sin(m.radians(a))] for a in range(a0, a1 + 1, 9)]
+        return {"pts": pts, "closed": False, "fill": None, "stroke": [0, 0, 0], "width": 0.2, "n_curves": 3,
+                "is_arc": True}
+    # wall y 100..110 (y-down), gap x 150..230 = 1.41 m at 1:50, leaves 40 pt each swinging down into the room
+    walls = [_box(0, 100, 150, 110), _box(230, 100, 400, 110), _box(0, 110, 10, 300), _box(390, 110, 400, 300),
+             _box(0, 290, 400, 300), _box(100, 200, 200, 210)]
+    paths = [arc(150, 110, 40, 0, 90), _seg((150, 110), (150, 150)),     # left leaf: hinge (150,110), open down
+             arc(230, 110, 40, 90, 180), _seg((230, 110), (230, 150))]   # right leaf: hinge (230,110)
+    page = {"W_pt": 600, "H_pt": 400, "paths": paths, "words": [{"text": "1:50", "bbox": [0, 0, 10, 5]}]}
+    doors = [o for o in po.openings(page, walls) if o["kind"] == "door"]
+    assert len(doors) == 1, doors
+    assert doors[0]["props"]["double"] and doors[0]["props"]["width_pt"] == pytest.approx(80, abs=1)
 
 
 def test_door_height_note_and_tags():

@@ -269,11 +269,12 @@ def _arc_door(pl, wi: _WallIndex, rmin, rmax):
     ang = [math.atan2(p[1] - cy, p[0] - cx) for p in pl]
     a = np.unwrap(np.asarray(ang))
     span = abs(math.degrees(a[-1] - a[0]))
-    if not (70 <= span <= 110):
-        return None
+    if not (25 <= span <= 110):
+        return None  # partial swings (25-70 deg, e.g. a leaf drawn at 45 deg) need their leaf line (checked later)
     if not np.all(np.diff(a) * np.sign(a[-1] - a[0]) > -1e-6):
         return None
-    return {"c": (cx, cy), "r": r, "rms": rms, "ends": (pl[0], pl[-1]), "ccw": bool(a[-1] > a[0]), "pts": pl}
+    return {"c": (cx, cy), "r": r, "rms": rms, "ends": (pl[0], pl[-1]), "ccw": bool(a[-1] > a[0]), "pts": pl,
+            "span": span}
 
 
 def _leaf_end(arc, segs):
@@ -409,6 +410,8 @@ def _doors(page, segs, arcs, wi: _WallIndex):
         if _radial_lines(arc, segs) >= 5:
             continue  # spiral stair / fan symbol: many lines radiate from the centre, a hinge has 1-2
         leaf = _leaf_end(arc, segs)
+        if arc.get("span", 90) < 70 and (leaf is None or wi.tree is None):
+            continue  # a partial swing counts only with its leaf line, at a wall
         tang = _tangent_ends(arc, segs)
         if tang >= 2 or (tang == 1 and leaf is None):
             continue  # rounded corner / fillet / curved wall
@@ -424,10 +427,20 @@ def _doors(page, segs, arcs, wi: _WallIndex):
         pair = None
         for j in range(i + 1, len(doors)):
             b = doors[j]
-            if j in used or abs(a["r"] - b["r"]) > 0.15 * a["r"]:
+            if j in used:
                 continue
-            if math.dist(a["closed"], b["closed"]) < 0.12 * a["r"]:
-                pair = j; break
+            # two leaves in one wall gap closing toward each other: hinges 0.6-2.4 m apart on the wall axis,
+            # the leaves (possibly unequal) together spanning the hinge distance
+            D = math.dist(a["hinge"], b["hinge"])
+            lo_d, hi_d = (0.6 / mpp, 2.4 / mpp) if mpp else (1.2 * min(a["r"], b["r"]), 3.2 * max(a["r"], b["r"]))
+            if not (lo_d <= D <= hi_d):
+                continue
+            hx, hy = (b["hinge"][0] - a["hinge"][0]) / D, (b["hinge"][1] - a["hinge"][1]) / D
+            if a["axis"][0] * hx + a["axis"][1] * hy < 0.97 or -(b["axis"][0] * hx + b["axis"][1] * hy) < 0.97:
+                continue
+            if abs(a["r"] + b["r"] - D) > 0.2 * D:
+                continue
+            pair = j; break
         if pair is None:
             out.append((a, False))
         else:
@@ -438,10 +451,11 @@ def _doors(page, segs, arcs, wi: _WallIndex):
             mr = MultiPoint([tuple(v) for v in a["poly"] + b["poly"]]).minimum_rotated_rectangle
             q = [list(v) for v in list(mr.exterior.coords)[:4]]
             m = dict(a); m["poly"] = q; m["r2"] = b["r"]; m["leaf"] = a["leaf"] or b["leaf"]
+            m["D"] = math.dist(a["hinge"], b["hinge"]); m["hinge2"] = b["hinge"]
             out.append((m, True))
     res = []
     for d, dbl in out:
-        width = d["r"] + (d.get("r2", 0) if dbl else 0)
+        width = d.get("D", d["r"] + d.get("r2", 0)) if dbl else d["r"]
         conf = 0.55 + 0.2 * d["leaf"] + 0.2 * d["near_wall"]
         poly = [[round(x, 2), round(y, 2)] for x, y in d["poly"]]
         ax = d["axis"]
@@ -453,6 +467,8 @@ def _doors(page, segs, arcs, wi: _WallIndex):
                  "axis_deg": round(math.degrees(math.atan2(ax[1], ax[0])) % 360, 2),
                  "wall_axis_deg": round(math.degrees(math.atan2(ax[1], ax[0])) % 180, 2),
                  "wall_index": d.get("wall"), "leaf": bool(d["leaf"]), "double": bool(dbl), "n_leaves": 2 if dbl else 1,
+                 "hinge2": [round(v, 2) for v in d["hinge2"]] if dbl and d.get("hinge2") else None,
+                 "leaf2_width_pt": round(d["r2"], 2) if dbl and d.get("r2") else None,
                  "swing_bbox": [round(v, 2) for v in _bbox([d["hinge"], d["closed"], d["opened"]])]}
         if mpp:  # same keys as the DXF plan map's doors
             props["swing_radius_m"] = round(d["r"] * mpp, 2)
@@ -973,6 +989,31 @@ def _tag_doors(doors, words):
             d["props"]["tag"] = cand[k][2]
 
 
+def _mark_partitions(wins, walls, mpp):
+    """Glazing with building on both sides (both probes inside the filled footprint) is an interior glass
+    partition: props.kind = 'glass_partition' (IFC: glazed wall), else props.kind = 'window'."""
+    if not wins:
+        return
+    foot = _filled_footprint(walls, (2.5 / mpp) if mpp else 50.0)
+    from shapely.geometry import Point
+    for w in wins:
+        pr = w["props"]
+        pr.setdefault("kind", "window")
+        if not foot:
+            continue
+        p = w["polygon"]
+        e = sorted(((math.dist(p[i], p[(i + 1) % 4]), i) for i in range(4)))
+        Ls, i = e[0]
+        a, b = p[e[-1][1]], p[(e[-1][1] + 1) % 4]
+        L = max(math.dist(a, b), 1e-9)
+        nx, ny = -(b[1] - a[1]) / L, (b[0] - a[0]) / L
+        cx = sum(q[0] for q in p) / 4; cy = sum(q[1] for q in p) / 4
+        o = Ls / 2 + ((1.5 / mpp) if mpp else 4 * max(Ls, 1.0))
+        inside = [foot.contains(Point(cx + nx * o * sg, cy + ny * o * sg)) for sg in (1, -1)]
+        if all(inside) and not pr.get("exterior"):
+            pr["kind"] = "glass_partition"
+
+
 def _near_doors(wins, doors, mpp):
     """Windows belong to the occupied building: with >= 4 doors, keep windows within ~4 m of the doors' convex
     hull (roof planes, skylight hatches and neighbouring roofs drawn around the floor carry no doors)."""
@@ -1008,6 +1049,7 @@ def openings(page: dict, walls: list) -> list:
             wins.append(w)
     wins = [w for w in (_fit_window(w, wi, mpp) for w in wins) if w]
     wins = _near_doors(wins, doors, mpp)
+    _mark_partitions(wins, walls, mpp)
     out = _footprint_filter(doors + wins, walls)
     dr = [o for o in out if o["kind"] == "door"]
     _tag_doors(dr, page.get("words"))
