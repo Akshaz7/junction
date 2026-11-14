@@ -42,9 +42,9 @@ def _pdf(path: Path, ops: list[str], texts: list[tuple[float, float, float, str]
 def _plan_ops():
     ops = ["0 g"]
     walls = [(50, 300, 150, 10), (245, 300, 105, 10), (420, 300, 130, 10),   # top wall: door gap 200-245, window 350-420
-             (50, 100, 10, 200), (540, 100, 10, 200),                        # sides
+             (50, 100, 10, 200), (540, 100, 10, 80), (540, 230, 10, 70),     # sides; right: unglazed gap 180-230
              (50, 100, 250, 10), (340, 100, 210, 10),                        # bottom wall: door gap 300-340
-             (450, 110, 10, 190)]                                            # partition
+             (450, 110, 10, 80), (450, 240, 10, 60)]                         # partition: interior gap 190-240
     ops += [f"{x} {y} {w} {h} re f" for x, y, w, h in walls]
     ops.append("0 G 0.5 w")
     # door 1: Bezier swing, hinge (200,300), closed end (245,300), open leaf to (200,255)
@@ -61,6 +61,8 @@ def _plan_ops():
     ops += [f"350 {y} m 420 {y} l S" for y in (301, 305, 309)]
     # stair-like parallel lines far from walls (spacing too wide for glazing) + a furniture circle-ish arc
     ops += [f"100 {y} m 180 {y} l S" for y in range(150, 260, 20)]
+    # a legend door symbol below the title line, far from the building (must be dropped)
+    ops.append("0.5 w 560 30 m 560 46.57 546.57 60 530 60 c S 530 30 m 530 60 l S")
     return ops
 
 
@@ -79,8 +81,8 @@ def plan_page(tmp_path_factory):
 
 
 def _walls():
-    rects = [(50, 300, 150, 10), (245, 300, 105, 10), (420, 300, 130, 10), (50, 100, 10, 200), (540, 100, 10, 200),
-             (50, 100, 250, 10), (340, 100, 210, 10), (450, 110, 10, 190)]
+    rects = [(50, 300, 150, 10), (245, 300, 105, 10), (420, 300, 130, 10), (50, 100, 10, 200), (540, 100, 10, 80),
+             (540, 230, 10, 70), (50, 100, 250, 10), (340, 100, 210, 10), (450, 110, 10, 80), (450, 240, 10, 60)]
     out = []
     for x, y, w, h in rects:  # to top-left / y-down (H = 400)
         y0 = 400 - (y + h)
@@ -103,10 +105,28 @@ def test_doors_and_window_on_synthetic_pdf(plan_page):
     assert b[0] == pytest.approx(200, abs=1) and b[2] == pytest.approx(245, abs=1)
     assert 89 <= b[1] and b[3] <= 101
     assert d1["props"]["hinge"] == pytest.approx([200, 100], abs=0.6)
-    assert len(wins) == 1, wins
-    w = wins[0]
+    assert len(wins) == 2, wins   # glazed top-wall window + unglazed exterior gap; the interior gap is a passage
+    ext = [w for w in wins if w["props"].get("exterior")]
+    assert len(ext) == 1 and ext[0]["bbox"][0] == pytest.approx(540, abs=1) and ext[0]["props"]["width_pt"] == pytest.approx(50, abs=1)
+    w = next(w for w in wins if not w["props"].get("exterior"))
     assert w["props"]["n_lines"] == 3 and w["props"]["width_pt"] == pytest.approx(70, abs=1)
     assert w["bbox"][0] == pytest.approx(350, abs=1) and w["bbox"][2] == pytest.approx(420, abs=1)
+
+
+def test_window_drawn_over_continuous_wall():
+    """Jambs spanning the wall thickness + glazing lines, over an uninterrupted wall shape (CAD hatch runs through)."""
+    seg = lambda a, b: {"pts": [list(a), list(b)], "closed": False, "fill": None, "stroke": [0, 0, 0], "width": 0.2,
+                        "n_curves": 0, "is_arc": False}
+    wall = {"polygon": [[0, 100], [400, 100], [400, 110], [0, 110]], "thickness_pt": 10.0, "style": "fill"}
+    others = [{"polygon": [[0, 110 + 40 * i], [10, 110 + 40 * i], [10, 140 + 40 * i], [0, 140 + 40 * i]],
+               "thickness_pt": 10.0, "style": "fill"} for i in range(6)]
+    paths = [seg((150, 100), (150, 110)), seg((210, 100), (210, 110)),               # jambs, 60 pt = 1.06 m at 1:50
+             seg((150, 104), (210, 104)), seg((150, 106), (210, 106)),               # glazing
+             seg((300, 130), (300, 140)), seg((340, 130), (340, 140))]               # ticks in a room: no wall
+    page = {"W_pt": 600, "H_pt": 400, "paths": paths, "words": [{"text": "1:50", "bbox": [0, 0, 10, 5]}]}
+    wins = [o for o in po.openings(page, [wall] + others) if o["kind"] == "window"]
+    assert len(wins) == 1, wins
+    assert wins[0]["props"]["width_pt"] == pytest.approx(60, abs=0.5) and wins[0]["props"]["n_lines"] == 2
 
 
 def test_gate_plan(plan_page):

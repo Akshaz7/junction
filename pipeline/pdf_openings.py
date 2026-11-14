@@ -549,6 +549,7 @@ def _gap_windows(segs, walls, wi: _WallIndex, doors, mpp=None):
     sdx = segs[:, 2] - segs[:, 0]; sdy = segs[:, 3] - segs[:, 1]
     sL = np.hypot(sdx, sdy)
     out, used = [], set()
+    foot = None
     order = np.argsort(-T)
     for i in order:
         if i in used:
@@ -592,15 +593,53 @@ def _gap_windows(segs, walls, wi: _WallIndex, doors, mpp=None):
         span = np.abs(a1 - a0)
         glz = np.nonzero(par & inside & (span >= 0.6 * g))[0]
         offs = sorted({round(float((b0[k] + b1[k]) / 2), 1) for k in glz})
+        exterior = False
         if not offs:
-            continue
+            # an unglazed gap in an EXTERIOR wall run (one side outside the building) that is no door is a window
+            # opening too (facade bays drawn as plain gaps); interior gaps without glazing are passages
+            if foot is None:
+                foot = _filled_footprint(walls, (4.0 / mpp) if mpp else 40 * t) or False
+            if not foot:
+                continue
+            from shapely.geometry import Point
+            cxm, cym = mx + ux * g / 2, my + uy * g / 2
+            o = hw + max(1.0, 0.5 * t)
+            sides = [foot.contains(Point(cxm + vx * o * sg, cym + vy * o * sg)) for sg in (1, -1)]
+            if sides[0] == sides[1]:
+                continue
+            exterior = True
         used.add(i); used.add(j)
         poly = [[round(x, 2), round(y, 2)] for x, y in poly]
         out.append({"kind": "window", "polygon": poly, "bbox": [round(v, 2) for v in _bbox(poly)],
-                    "conf": round(0.6 + 0.1 * min(len(offs), 3), 2),
+                    "conf": round(0.6 + 0.1 * min(len(offs), 3), 2) if offs else 0.5,
                     "props": {"width_pt": round(g, 2), "depth_pt": round(t, 2), "n_lines": len(offs),
+                              "exterior": exterior or None,
                               "angle_deg": int(round(math.degrees(math.atan2(uy, ux)))) % 180, "from": "wall_gap"}})
     return out
+
+
+def _filled_footprint(walls, close_pt):
+    """Building footprint: wall shapes closed over gaps up to close_pt, holes (rooms) filled. Largest part."""
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    polys = []
+    for w in walls or []:
+        try:
+            g = Polygon(w["polygon"])
+            g = g if g.is_valid else g.buffer(0)
+            if not g.is_empty:
+                polys.append(g)
+        except Exception:
+            continue
+    if len(polys) < 3:
+        return None
+    r = close_pt / 2 + 0.5
+    u = unary_union(polys).buffer(r, resolution=4).buffer(-r, resolution=4)
+    parts = [p for p in getattr(u, "geoms", [u]) if p.geom_type == "Polygon"]
+    if not parts:
+        return None
+    big = max(parts, key=lambda p: p.area)
+    return Polygon(big.exterior)
 
 
 def _footprint_filter(ops, walls):
@@ -641,6 +680,83 @@ def _footprint_filter(ops, walls):
     return out
 
 
+def _jamb_windows(segs, wi: _WallIndex, mpp=None):
+    """Windows drawn over a continuous wall shape: two thin jamb lines spanning the wall's full thickness,
+    0.4-4 m apart along the wall, with >= 1 glazing line along the wall axis between them."""
+    if wi.tree is None or not len(segs):
+        return []
+    from shapely.geometry import Point
+    tmin, tmax = (0.08 / mpp, 0.7 / mpp) if mpp else (2.0, 25.0)
+    dx = segs[:, 2] - segs[:, 0]; dy = segs[:, 3] - segs[:, 1]
+    L = np.hypot(dx, dy)
+    idx = np.nonzero((L >= tmin) & (L <= tmax))[0]
+    jambs = []
+    for k in idx:
+        a = Point(segs[k, 0], segs[k, 1]); b = Point(segs[k, 2], segs[k, 3])
+        m = Point((segs[k, 0] + segs[k, 2]) / 2, (segs[k, 1] + segs[k, 3]) / 2)
+        for q in wi.tree.query(m.buffer(0.5)):
+            g = wi.polys[int(q)][0]
+            # spans the wall: midpoint inside, both ends on the wall's outline
+            bd = g.boundary
+            if g.buffer(0.3).contains(m) and bd.distance(a) < 0.6 and bd.distance(b) < 0.6:
+                jambs.append(k)
+                break
+    if len(jambs) < 2:
+        return []
+    J = segs[jambs]
+    jl = L[jambs]
+    jx = dx[jambs] / jl; jy = dy[jambs] / jl
+    cx = (J[:, 0] + J[:, 2]) / 2; cy = (J[:, 1] + J[:, 3]) / 2
+    sL = L
+    out, used = [], set()
+    for a in range(len(jambs)):
+        if a in used:
+            continue
+        vx, vy = jx[a], jy[a]            # across the wall
+        ux, uy = -vy, vx                 # along the wall
+        gmin, gmax = (0.4 / mpp, 4.0 / mpp) if mpp else (3 * jl[a], 40 * jl[a])
+        par = np.abs(jx * vx + jy * vy) > 0.985
+        dxa = cx - cx[a]; dya = cy - cy[a]
+        along = dxa * ux + dya * uy
+        lat = np.abs(dxa * vx + dya * vy)
+        ok = par & (np.abs(along) >= gmin) & (np.abs(along) <= gmax) & (lat < 0.25 * jl[a]) & \
+            (np.abs(jl - jl[a]) < 0.2 * jl[a])
+        ok[a] = False
+        for b in sorted(np.nonzero(ok)[0], key=lambda b: abs(along[b])):
+            if b in used:
+                continue
+            g = abs(along[b]); sgn = 1 if along[b] > 0 else -1
+            ex, ey = ux * sgn, uy * sgn
+            # glazing between the jambs, along the wall
+            a0 = (segs[:, 0] - cx[a]) * ex + (segs[:, 1] - cy[a]) * ey
+            a1 = (segs[:, 2] - cx[a]) * ex + (segs[:, 3] - cy[a]) * ey
+            b0 = (segs[:, 0] - cx[a]) * vx + (segs[:, 1] - cy[a]) * vy
+            b1 = (segs[:, 2] - cx[a]) * vx + (segs[:, 3] - cy[a]) * vy
+            hw = jl[a] / 2
+            along_ok = np.abs((segs[:, 2] - segs[:, 0]) * ex + (segs[:, 3] - segs[:, 1]) * ey) > 0.985 * np.maximum(sL, 1e-9)
+            inside = (np.minimum(a0, a1) > -0.1 * g) & (np.maximum(a0, a1) < 1.1 * g) & \
+                     (np.abs(b0) < 0.9 * hw) & (np.abs(b1) < 0.9 * hw)
+            glz = np.nonzero(along_ok & inside & (np.abs(a1 - a0) >= 0.6 * g))[0]
+            if not len(glz):
+                continue
+            # the band between the jambs must be in a wall (not two parallel ticks in a room)
+            mid = Point(cx[a] + ex * g / 2, cy[a] + ey * g / 2)
+            if not wi.near(mid.x, mid.y, 0.5 * hw):
+                continue
+            used.add(a); used.add(b)
+            p0x, p0y = cx[a], cy[a]
+            poly = [[p0x + vx * hw, p0y + vy * hw], [p0x + ex * g + vx * hw, p0y + ey * g + vy * hw],
+                    [p0x + ex * g - vx * hw, p0y + ey * g - vy * hw], [p0x - vx * hw, p0y - vy * hw]]
+            poly = [[round(float(x), 2), round(float(y), 2)] for x, y in poly]
+            nl = len({round(float((b0[k] + b1[k]) / 2), 1) for k in glz})
+            out.append({"kind": "window", "polygon": poly, "bbox": [round(v, 2) for v in _bbox(poly)],
+                        "conf": round(0.6 + 0.1 * min(nl, 3), 2),
+                        "props": {"width_pt": round(float(g), 2), "depth_pt": round(float(jl[a]), 2), "n_lines": nl,
+                                  "angle_deg": int(round(math.degrees(math.atan2(ey, ex)))) % 180, "from": "jambs"}})
+            break
+    return out
+
+
 def openings(page: dict, walls: list) -> list:
     """Doors and windows on a vector page, in page points (top-left origin, y down)."""
     if not page or not page.get("paths"):
@@ -650,7 +766,11 @@ def openings(page: dict, walls: list) -> list:
     doors = _doors(page, segs, arcs, wi)
     mpp = page_m_per_pt(page)[0]
     wins = _gap_windows(segs, walls, wi, doors, mpp)
-    for w in _windows(segs, wi, doors, mpp):  # glazing packs not already covered by a wall-gap window
+    door_boxes = [d["bbox"] for d in doors]
+    for w in _jamb_windows(segs, wi, mpp) + _windows(segs, wi, doors, mpp):
+        b = w["bbox"]
+        if any(b[0] < k[2] and k[0] < b[2] and b[1] < k[3] and k[1] < b[3] for k in door_boxes):
+            continue  # glazing packs not already covered by a wall-gap window
         b = w["bbox"]
         if not any(b[0] < k["bbox"][2] and k["bbox"][0] < b[2] and b[1] < k["bbox"][3] and k["bbox"][1] < b[3]
                    for k in wins):
@@ -708,7 +828,9 @@ def gate(page: dict, walls: list, rooms: list) -> tuple[bool, str]:
         return False, f"too few room labels ({len(labels)} < 2)"
     areas = [r["area_printed_m2"] for r in rooms if r.get("area_printed_m2")]
     if areas:
-        ok = [a for a in areas if 2 <= a <= 200]
-        if len(ok) < max(2, 0.6 * len(areas)):
-            return False, f"implausible printed areas ({len(ok)}/{len(areas)} in 2-200 m²)"
+        # rooms are 2-200 m² typically; closets / halls fall outside, a misread scale or a site plan puts most out
+        ok = [a for a in areas if 1 <= a <= 300]
+        med = sorted(areas)[len(areas) // 2]
+        if not (2 <= med <= 200) or len(ok) < 0.5 * len(areas):
+            return False, f"implausible printed areas (median {med:.1f} m², {len(ok)}/{len(areas)} in 1-300 m²)"
     return True, f"plan: {len(walls)} walls, {len(labels)} labelled rooms" + (f", heading words {sorted(set(hits))[:2]} overridden" if hits else "")
