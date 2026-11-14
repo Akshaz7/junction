@@ -48,6 +48,7 @@
 
 /* W-84: phone Data upload button same height as the folder bar and centred */
 @media (max-width: 640px) {
-  .data-screen-toolbar { display: flex !important; align-items: center !important; height: 38px !important; }
-  .data-screen-toolbar > .button:last-child { width: 38px !important; height: 38px !important; min-width: 38px !important; min-height: 38px !important; margin: 0 !important; padding: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; border-radius: 10px !important; }
+  .data-screen-toolbar { display: flex !important; align-items: center !important; height: 36px !important; }
+  .data-screen-toolbar > .button:last-child { width: 36px !important; height: 36px !important; min-width: 36px !important; min-height: 36px !important; margin: 0 !important; padding: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; border-radius: 10px !important; }
 }
+@media (max-width: 640px) { .documents-breadcrumb > span > svg:last-child { margin-left: 0 !important; } .documents-breadcrumb > span { justify-content: flex-start !important; } }
