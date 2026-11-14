@@ -149,6 +149,16 @@ def _short(rule: dict) -> str:
     return f"{m.group(1) if m else rule['id']} §{str(rule['section']).replace(' §', '')}"
 
 
+def card_rule_ref(card: dict) -> str:
+    """'848/2017 §33' from a card's source title ('... 848/2017, 33 §'); never the garbled '33 §'."""
+    t = (card.get("source") or {}).get("title") or ""
+    d = re.search(r"\b(\d{2,4}/\d{4})\b", t)
+    sec = re.search(r"(\d+)\s*§", t)
+    if d and sec:
+        return f"{d.group(1)} §{sec.group(1)}"
+    return d.group(1) if d else ""
+
+
 def _checked_text(ids: list[str]) -> str:
     by = {r["id"]: r for r in load_rules()}
     seen: list[str] = []

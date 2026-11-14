@@ -322,6 +322,9 @@ def _solve_multi(question, doc_id, p: Parsed, root, page, hidden, t0) -> dict:
         offset += len(r["evidence"]["boxes"])
         parts.append(f"**{n} {_plural(k, n)}**")
     where = "on this floor plan" if subs[0][1]["route"] == "planmap" else "in this model"
+    sm = re.search(r"\bon \*\*([^*]+)\*\*\.", subs[0][1]["answer"]["text_md"])   # the single-kind answer already scoped to a storey
+    if sm:
+        where = f"on **{sm.group(1)}**" + (" (ground floor)" if sm.group(1).strip().lower() == "erdgeschoss" else "")
     text = f"There {'is' if sum(counts.values()) == 1 else 'are'} " + (", ".join(parts[:-1]) + " and " + parts[-1]) + f" {where}. " + _cite_marks(cites)
     scene = {"doc_id": doc_id, "highlight_item_ids": ids, "camera_target_item_id": ids[0] if ids else None, "item_kinds": item_kinds}
     return _answer_obj(question, [doc_id], text, counts, "count", min(confs), False, boxes, cites, scene, trace, subs[0][1]["route"], t0)

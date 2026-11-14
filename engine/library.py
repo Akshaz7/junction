@@ -39,7 +39,7 @@ def _edit1(a: str, b: str) -> bool:
     return s[i:] == l[i + 1:]
 
 
-_SHORT = {"dors": "doors", "dosr": "doors", "doro": "door", "wals": "walls", "romm": "room"}
+_SHORT = {"dors": "doors", "dosr": "doors", "doro": "door", "wals": "walls", "romm": "room", "mny": "many", "mnay": "many", "hw": "how", "hoq": "how"}
 
 
 def fix_typos(question: str) -> tuple[str, list[tuple[str, str]]]:
@@ -61,7 +61,7 @@ def fix_typos(question: str) -> tuple[str, list[tuple[str, str]]]:
             return w
         fixes.append((w, r))
         return r.capitalize() if w[0].isupper() else r
-    return re.sub(r"[A-Za-z]{4,}", sub, question), fixes
+    return re.sub(r"[A-Za-z]{3,}", sub, question), fixes
 
 
 # ------------------------------------------------------------------ library questions

@@ -12,6 +12,7 @@ def _fake(monkeypatch):
 
 AC = "ifc_bench__ac20-arc"
 C1 = "cubicasa5k__colorful-11397"
+AC20 = "ifc_bench__ac20-arc"
 
 
 @pytest.mark.parametrize("q", ["how many floors are there", "How many storeys does the building have?", "number of levels"])
@@ -96,3 +97,30 @@ def test_where_are_the_toilets_on_a_plan_map_points_not_counts():
     t = a["answer"]["text_md"]
     assert a["route"] == "planmap" and a["evidence"]["boxes"] and "[1]" in t
     assert "bottom" in t or "top" in t or "middle" in t and "Total area" not in t
+
+
+# ---- E-50 harder cases
+def test_wet_room_area_sums_bathrooms_by_storey():
+    a = answer("what is the total wet-room area", [AC20])
+    validate_answer(a)
+    t = a["answer"]["text_md"]
+    assert a["answer"]["unit"] == "m2" and a["answer"]["value"] > 0 and "wet rooms" in t and a["evidence"]["boxes"]
+
+
+def test_how_many_stairs_and_where_gives_per_storey_split():
+    a = answer("how many stairs are there and where are they", [AC20])
+    validate_answer(a)
+    t = a["answer"]["text_md"]
+    assert a["answer"]["value"] == 4 and "on Keller" in t and len(a["evidence"]["boxes"]) == 4
+
+
+def test_list_every_room_with_area_on_a_plan_map():
+    a = answer("list every room with its area", [C1])
+    validate_answer(a)
+    assert a["route"] == "planmap" and a["answer"]["text_md"].count("m²") >= 3 and a["evidence"]["boxes"]
+
+
+def test_typo_how_mny_dors():
+    a = answer("how mny dors", [C1])
+    validate_answer(a)
+    assert a["answer"]["value"] == 11

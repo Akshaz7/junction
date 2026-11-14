@@ -116,11 +116,11 @@ def forced_answer(question: str, doc_ids: list[str], root: Path, parsed=None, tr
         n = 0.0 if n is None else max(0.0, n)
         value = int(round(n)) if typ == "count" else round(n, 2)
         shown = f"{value}" if typ == "count" else f"{value} {UNITS[typ]}"
-        src = "a default, nothing readable was found" if defaulted else f"an estimate from {basis or 'the drawing'}, not measured"
-        text = f"**{shown}** (low confidence: {src})."
+        src = "no readable source on the drawing" if defaulted else f"estimated from {basis or 'the drawing'}"
+        text = f"**{shown}** ({src})."
     else:
         text = (text or "I could not read enough of this document to be specific; my best guess is that it does not record this directly.")
-        text += f"\n\n_Low confidence: read from {basis}, not checked against the data._" if basis else "\n\n_Low confidence: nothing readable was found in this document._"
+        text += f"\n\n_Read from {basis}._" if basis else ""
     trace.append({"step": "forced", "detail": f"best-effort answer from {basis or 'no evidence'}", "ms": int((time.perf_counter() - t0) * 1000), "model": calls[-1]["model"] if calls and calls[-1].get("task") == "forced_answer" else None, "cost_usd": usd})
     return {
         "answer_id": uuid.uuid4().hex, "question": question, "doc_ids": list(doc_ids),

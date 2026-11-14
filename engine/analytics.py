@@ -399,6 +399,100 @@ def where_rooms(question: str, doc: Doc, t0) -> dict | None:
     return _done(question, doc, text, len(hit), "count", hit, trace, t0=t0)
 
 
+# ------------------------------------------------------------------ E-50: wet rooms, "how many X and where", room lists
+WETRX = re.compile(r"bad\b|bath|kylpy|wc|toilet|dusch|shower|sauna|pesu|laundry|wasch|lavoir|wet", re.I)
+WETQ = re.compile(r"\bwet[ -]?(?:rooms?|areas?|spaces?)\b", re.I)
+
+
+def _by_storey(doc: Doc, items: list[Item]) -> str:
+    by: dict = {}
+    for r in items:
+        by.setdefault(r.storey, []).append(r)
+    order = {x["name"]: x.get("elevation_m", 0) for x in doc.storeys}
+    return "; ".join(f"{len(v)} on {k}" for k, v in sorted(by.items(), key=lambda kv: order.get(kv[0], 0)) if k)
+
+
+def wet_rooms(question: str, doc: Doc, t0) -> dict | None:
+    """"total wet-room area": rooms drawn/typed as bathroom, WC, shower, sauna or laundry, summed."""
+    if not WETQ.search(question):
+        return None
+    rooms = [r for r in _of_kind(doc, "room") if WETRX.search(_room_label(r))]
+    if not rooms:
+        return None
+    st = resolve_storey(question, doc.storeys) if doc.mode == "ifc" else None
+    if st:
+        rooms = [r for r in rooms if r.storey == st]
+    if not rooms:
+        return None
+    area = [v for v in (_qty(r, "room", "area") for r in rooms) if v]
+    tot = round(sum(area), 2)
+    where = f"on **{st}**" if st else ("in this model" if doc.mode == "ifc" else "on this floor plan")
+    split = f" ({_by_storey(doc, rooms)})" if doc.mode == "ifc" and not st and _by_storey(doc, rooms) else ""
+    trace = [_step("route", "area / wet rooms -> rooms named or typed bathroom, WC, shower, sauna, laundry; sum of room areas, no model"),
+             _step("filter", f"{len(rooms)} wet rooms, {len(area)} with an area")]
+    text = (f"Total wet-room area {where}: **{_fmt(tot)} m²** across **{len(rooms)} wet rooms**{split} "
+            f"(bathrooms, WCs, showers, saunas, laundry){'' if len(area) == len(rooms) else f'; {len(rooms) - len(area)} have no area on the drawing'}. {{marks}}")
+    return _done(question, doc, text, tot, "m2", rooms, trace, t0=t0)
+
+
+COUNTWHERE = re.compile(r"\bhow many\b.*\band\s+where\b|\bhow many\b.*\bwhere (?:are|is) (?:they|it|those)\b", re.I)
+
+
+def count_where(question: str, doc: Doc, t0) -> dict | None:
+    """"how many stairs and where": the count plus where they are (per storey on IFC, by room on a plan map)."""
+    if not COUNTWHERE.search(question):
+        return None
+    m = re.search(r"\bhow many\s+([a-z\- ]+?)\s+(?:are there\s+)?and\s+where", question, re.I)
+    kind = _kind((m.group(1) if m else question).lower())
+    if not kind or kind == "room":
+        return None
+    its = [i for i in _of_kind(doc, kind) if (i.bbox_m if doc.mode == "ifc" else i.bbox_px)]
+    if not its:
+        return None
+    noun = _noun(kind, len(its))
+    if doc.mode == "ifc":
+        split = _by_storey(doc, its)
+        where = f": {split}" if split else ""
+        text = f"**{len(its)} {noun}**{where}, numbered on the drawing and lit in 3D. {{marks}}"
+    else:
+        from engine.locate import _inside
+        rooms = [r for r in _of_kind(doc, "room") if r.bbox_px]
+        names = []
+        for i in its:
+            hit = next((r for r in rooms if _inside(i, r)), None)
+            names.append(_room_label(hit).strip() if hit else "")
+        named = [n for n in names if n]
+        where = f": {', '.join(sorted(set(named))[:6])}" if named else ""
+        text = f"**{len(its)} {noun}** on this floor plan{f' in rooms {where[2:]}' if named else ''}, numbered on the drawing. {{marks}}"
+    trace = [_step("route", f"count + locate / {kind} -> element list grouped by location, no model"), _step("filter", f"{len(its)} {kind}")]
+    return _done(question, doc, text, len(its), "count", its, trace, t0=t0)
+
+
+LISTROOMS = re.compile(r"\b(?:list|show|give|name)\b.*\b(?:every|each|all)(?: the| of the)?\s+rooms?\b.*\b(?:area|areas|size|sizes|m2|m²)\b|\b(?:area|size)s? of (?:every|each|all) (?:the )?rooms?\b", re.I)
+
+
+def room_list(question: str, doc: Doc, t0) -> dict | None:
+    """"list every room with its area": one line per room, numbered on the drawing."""
+    if not LISTROOMS.search(question):
+        return None
+    st = resolve_storey(question, doc.storeys) if doc.mode == "ifc" else None
+    rooms = [r for r in _of_kind(doc, "room") if (r.bbox_m if doc.mode == "ifc" else r.bbox_px) and (not st or r.storey == st)]
+    if not rooms:
+        return None
+    rows = sorted(((_room_label(r) or "room", _qty(r, "room", "area"), r) for r in rooms), key=lambda x: -(x[1] or 0))
+    boxes, _c, _s = _evidence(doc, [r for _l, _a, r in rows])
+    num = {b["item_id"]: b["label"] for b in boxes}
+    lines = []
+    for label, a, r in rows[:25]:
+        n = num.get(r.item_id)
+        lines.append(f"- {label[:40]}: {(_fmt(a) + ' m²') if a else 'area not on the drawing'}{f' [{n}]' if n else ''}")
+    more = f"\n- … and {len(rows) - 25} more (all numbered on the drawing)" if len(rows) > 25 else ""
+    tot = round(sum(a for _l, a, _r in rows if a), 2)
+    head = f"**{len(rows)} rooms**{f' on **{st}**' if st else ''}, total **{_fmt(tot)} m²**, largest first:"
+    trace = [_step("route", "list rooms with areas -> room items sorted by area, no model"), _step("filter", f"{len(rows)} rooms")]
+    return _done(question, doc, head + "\n" + "\n".join(lines) + more, tot, "m2", [r for _l, _a, r in rows], trace, t0=t0)
+
+
 # ------------------------------------------------------------------ material take-off with waste
 TAKEOFF = re.compile(r"\b(?:how (?:many|much)|calculate|work out|estimate)\b.*\b(?:m2|m²|sq\.? ?m|square met(?:er|re)s)\b|\bhow much\b.*\b(?:tiles?|flooring|floor covering|paint|carpet|laminate|parquet|screed|plaster)\b", re.I)
 WASTE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(?:%|percent)\s*(?:extra|waste|wastage|overage|spare|allowance|margin|buffer|more|on top|added)?|(?:waste|wastage|overage|allowance|margin)\s*(?:of)?\s*(\d+(?:[.,]\d+)?)\s*(?:%|percent)", re.I)
@@ -555,7 +649,7 @@ def superlative_room(question: str, doc: Doc, t0) -> dict | None:
 
 def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
     """First handler that recognises the shape wins; every handler may return None."""
-    for fn in (storey_pair, storey_compare, total_and_storey, cond_count, exact_size, kind_compare, compliance, superlative_room, where_rooms):
+    for fn in (room_list, wet_rooms, count_where, storey_pair, storey_compare, total_and_storey, cond_count, exact_size, kind_compare, compliance, superlative_room, where_rooms):
         res = fn(question, doc, t0)
         if res is not None:
             return res
@@ -576,12 +670,26 @@ def edit_advice(res: dict, doc: Doc, hidden_ids: list[str]) -> None:
     bad = [c for c in cards if c.get("severity") == "violation"]
     sug = [c for c in cards if c.get("severity") == "suggestion"]
     def line(c):
-        s = c.get("source") or {}
-        return f"{c['title']} ({(s.get('title') or '').split(',')[-1].strip() or s.get('ref', '')})"
+        return f"{c['title']} ({advisor.card_rule_ref(c)})" if advisor.card_rule_ref(c) else c["title"]
     if bad:
         verdict = "**Not compliant after this edit:** " + "; ".join(line(c) for c in bad[:3]) + "."
     elif sug:
         verdict = "**Possible problem after this edit:** " + "; ".join(line(c) for c in sug[:3]) + "."
     else:
         verdict = "**No rule broken by this edit** in the checks that can run on this model" + (f" (checked: {cards[0].get('checked') and advisor._checked_text(cards[0]['checked'])})." if cards[0].get("checked") else ".")
+    # numbered evidence: the hidden item(s) first, then what the cards point at (e.g. the remaining exit)
+    from engine.solvers.solve import _evidence
+    by = {i.item_id: i for i in doc.items}
+    ids = list(dict.fromkeys([*(h for h in hidden_ids if h in by),
+                              *(i for c in (bad + sug if (bad or sug) else cards) for i in (c.get("item_ids") or []) if i in by)]))
+    if ids:
+        boxes, cites, scene = _evidence(doc, [by[i] for i in ids])
+        ev = res.setdefault("evidence", {})
+        old = ev.get("scene") or {}
+        ev["boxes"] = boxes
+        ev["scene"] = {**old, "highlight_item_ids": scene["highlight_item_ids"],
+                       "camera_target_item_id": scene["camera_target_item_id"]}
+        res["citations"] = cites
+        if cites:
+            verdict += "".join(f"[{c['n']}]" for c in cites)
     res["answer"]["text_md"] = f"{res['answer']['text_md']} {verdict}"

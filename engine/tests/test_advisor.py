@@ -235,3 +235,14 @@ def test_demo_phrasings_hide_the_front_door_and_give_the_exit_violation(q, monke
     assert any(c.get("op") == "hide" and "D34" in (c.get("labels") or {}).values() for c in cmds), cmds
     assert "Fewer than two exits" in a["answer"]["text_md"] and "33" in a["answer"]["text_md"]
     assert a["cost"]["usd_total"] == 0
+
+
+def test_hide_compliance_answer_has_numbered_boxes_and_full_rule_ref():
+    from engine.answer import answer
+    r = answer("Remove the front door. Is it still compliant?", ["ifc_bench__ac20-arc"])
+    t = r["answer"]["text_md"]
+    assert "848/2017 §33" in t and "(33 §)" not in t
+    ids = {b["item_id"] for b in r["evidence"]["boxes"]}
+    assert "18PQUIFELEARLM4c0brquf" in ids and len(ids) >= 2          # hidden door + remaining exit
+    assert r["citations"] and f"[{r['citations'][0]['n']}]" in t
+    assert r["evidence"]["scene"]["commands"][0]["op"] == "hide"

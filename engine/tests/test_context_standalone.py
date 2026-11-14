@@ -30,3 +30,34 @@ def test_bad_rewrite_is_discarded(monkeypatch):
     assert "offices" not in r.question.lower()
     assert context.rewrite_ok("and the doors?", "How many doors are there?", _hist("How many doors?", "77"))
     assert not context.rewrite_ok("and the doors?", "How many offices are there?", _hist(*SEQS[1]))
+
+
+def test_rewrite_may_repeat_the_document_title():
+    from engine.context import rewrite_ok
+    h = [{"role": "user", "content": "How many doors and windows are on the ground floor?"}]
+    cand = "How many doors and windows are on the first floor of the AC20 Institute / Phantasy Office Building - arc model?"
+    assert not rewrite_ok("And on the first floor?", cand, h)
+    assert rewrite_ok("And on the first floor?", cand, h, ["AC20 Institute / Phantasy Office Building - arc"])
+
+
+def test_strip_titles_removes_the_repeated_title_clause():
+    from engine.context import strip_titles
+    t = ["AC20 Institute / Phantasy Office Building - arc"]
+    assert strip_titles("How many doors and windows are on the first floor of the AC20 Institute / Phantasy Office Building - arc model?", t) == "How many doors and windows are on the first floor?"
+    assert strip_titles("Where is the kitchen?", t) == "Where is the kitchen?"
+
+
+def test_scene_command_with_its_own_object_is_not_rewritten():
+    from engine.context import stands_alone
+    assert stands_alone("Remove the front door. Is it still compliant?")
+    assert stands_alone("Hide all the windows")
+    assert not stands_alone("Remove it")
+
+
+def test_two_kind_count_names_the_storey():
+    from pathlib import Path
+    from engine.answer import answer
+    if not Path("artifacts/ifc_bench__ac20-arc").is_dir():
+        return
+    a = answer("How many doors and windows are on the ground floor?", ["ifc_bench__ac20-arc"])
+    assert "on **Erdgeschoss** (ground floor)" in a["answer"]["text_md"] and "in this model" not in a["answer"]["text_md"]

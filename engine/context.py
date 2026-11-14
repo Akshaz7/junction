@@ -93,6 +93,9 @@ def needs_rewrite(question: str, doc_ids: list[str], history) -> bool:
 PRONOUN = re.compile(r"\b(it|its|them|those|these|that|same|again|instead|the other|this one|that one)\b", re.I)
 
 
+COMMAND = re.compile(r"(?i)\s*(please\s+)?(remove|hide|delete|take out|restore|isolate|highlight)\b")
+
+
 def _kinds(text: str) -> set[str]:
     """Object kinds named in a text (the parser's synonym table): doors, windows, offices -> room, ..."""
     from engine.router.parser import _KIND_RE
@@ -103,7 +106,13 @@ def _kinds(text: str) -> set[str]:
 def stands_alone(question: str) -> bool:
     """A full question the rules already understand (it names its own kind, nothing refers back): never rewritten."""
     q = (question or "").strip()
-    if not q or ELLIPSIS_START.match(q) or STRONG.search(q) or PRONOUN.search(q):
+    if not q or ELLIPSIS_START.match(q) or STRONG.search(q):
+        return False
+    # "Remove the front door. Is it still compliant?": a scene command that names its own object; the trailing "it" is
+    # the object just removed, and a rewrite would turn the command into a hypothetical question
+    if COMMAND.match(q) and _kinds(q):
+        return True
+    if PRONOUN.search(q):
         return False
     try:
         from engine.router.parser import parse
@@ -113,13 +122,23 @@ def stands_alone(question: str) -> bool:
         return False
 
 
-def rewrite_ok(question: str, candidate: str, history) -> bool:
-    """A rewrite keeps the question's kinds and adds none that neither it nor the thread mentioned."""
+def rewrite_ok(question: str, candidate: str, history, titles=()) -> bool:
+    """A rewrite keeps the question's kinds and adds none that neither it nor the thread mentioned.
+    Document titles the rewrite repeats ("... Phantasy Office Building") are not object kinds: strip them first."""
+    for t in sorted((t for t in titles if t), key=len, reverse=True):
+        candidate = re.sub(re.escape(t), " ", candidate, flags=re.I)
     qk, ck = _kinds(question), _kinds(candidate)
     seen = set(qk)
     for h in _turns(history):
         seen |= _kinds(str(h.get("content") or ""))
     return qk <= ck and ck <= seen
+
+
+def strip_titles(text: str, titles) -> str:
+    """Drop document titles a rewrite repeated (the engine already has the doc id; "Office Building" would parse as offices)."""
+    for t in sorted((t for t in titles if t and _kinds(t)), key=len, reverse=True):  # only titles that would parse as object kinds
+        text = re.sub(r"\s*(?:\b(?:of|in|for|on|from)\s+)?(?:the\s+)?" + re.escape(t) + r"(?:\s+(?:model|drawing|plan|document))?", "", text, flags=re.I)
+    return re.sub(r"\s+([?.!,])", r"\1", re.sub(r"\s{2,}", " ", text)).strip()
 
 
 def title_of(doc_id: str, root: Path | None) -> str:
@@ -163,8 +182,8 @@ def resolve(question: str, doc_ids: list[str] | None, history=None, root: Path |
                 current=_label(doc_ids, root), last=_label(last, root), turns=turns, q=question)}], schema=SCHEMA)
             j = r.json if isinstance(r.json, dict) else {}
             cand = str(j.get("question") or "").strip()
-            if cand and not cand.startswith("fake:") and len(cand) <= 1500 and rewrite_ok(question, cand, history):
-                new_q = cand
+            if cand and not cand.startswith("fake:") and len(cand) <= 1500 and rewrite_ok(question, cand, history, [title_of(d, root) for d in {*doc_ids, *last}]):
+                new_q = strip_titles(cand, [title_of(d, root) for d in {*doc_ids, *last}]) or cand
                 pick = j.get("doc")
                 new_docs = doc_ids or (last if pick in ("last", "current") else [])
                 info = {"source": "model", "original": question, "model": r.model, "cost_usd": r.cost_usd, "latency_ms": r.latency_ms,
