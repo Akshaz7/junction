@@ -377,6 +377,11 @@ def process(ifc: Path, doc: dict, out_dir: Path):
              "plan_image": None, "items": items,
              "publishable": not (lic.startswith("CC-BY-ND") or lic.startswith("GPL"))}
     (out_dir / "scene.json").write_text(json.dumps(scene, indent=1))
+    try:  # names, room areas, door widths for the info cards (pipeline/manifest_info.py)
+        from pipeline import manifest_info
+        manifest_info.enrich(out_dir, ifc)
+    except Exception as ex:  # noqa: BLE001
+        print('manifest_info skipped:', repr(ex)[:200])
     return {"doc_id": doc["doc_id"], "elements": len(elements), "nodes": len(items), "storeys": len(storey_list),
             "s": round(time.time() - t0, 1)}
 

@@ -72,7 +72,12 @@
    ],
    "storey": "Floor 1",
    "kind": "door",
-   "tag": "D1"
+   "tag": "D1",
+   "props": {
+    "width_m": 0.682,
+    "height_m": 2.1,
+    "axis": "x"
+   }
   },
   "door-002": {
    "node": "door-002",
@@ -91,7 +96,12 @@
    ],
    "storey": "Floor 1",
    "kind": "door",
-   "tag": "D2"
+   "tag": "D2",
+   "props": {
+    "width_m": 0.709,
+    "height_m": 2.1,
+    "axis": "z"
+   }
   },
   "door-003": {
    "node": "door-003",
@@ -110,7 +120,12 @@
    ],
    "storey": "Floor 1",
    "kind": "door",
-   "tag": "D3"
+   "tag": "D3",
+   "props": {
+    "width_m": 0.932,
+    "height_m": 2.1,
+    "axis": "x"
+   }
   },
   "room-001": {
    "node": "room-001",
@@ -129,7 +144,14 @@
    ],
    "storey": "Floor 1",
    "kind": "room",
-   "tag": "R2"
+   "tag": "R2",
+   "name": "OH",
+   "props": {
+    "LongName": "OH",
+    "room_type": "living",
+    "area_m2": 11.55,
+    "area_source": "planmap"
+   }
   },
   "room-002": {
    "node": "room-002",
@@ -148,7 +170,14 @@
    ],
    "storey": "Floor 1",
    "kind": "room",
-   "tag": "R1"
+   "tag": "R1",
+   "name": "KK",
+   "props": {
+    "LongName": "KK",
+    "room_type": "kitchen",
+    "area_m2": 7.55,
+    "area_source": "planmap"
+   }
   },
   "room-003": {
    "node": "room-003",
@@ -167,7 +196,14 @@
    ],
    "storey": "Floor 1",
    "kind": "room",
-   "tag": "R3"
+   "tag": "R3",
+   "name": "KH",
+   "props": {
+    "LongName": "KH",
+    "room_type": "bathroom",
+    "area_m2": 3.22,
+    "area_source": "planmap"
+   }
   },
   "room-004": {
    "node": "room-004",
@@ -186,7 +222,14 @@
    ],
    "storey": "Floor 1",
    "kind": "room",
-   "tag": "R4"
+   "tag": "R4",
+   "name": "Kitchen",
+   "props": {
+    "LongName": null,
+    "room_type": "kitchen",
+    "area_m2": 4.26,
+    "area_source": "planmap"
+   }
   },
   "room-005": {
    "node": "room-005",
@@ -205,7 +248,14 @@
    ],
    "storey": "Floor 1",
    "kind": "room",
-   "tag": "R5"
+   "tag": "R5",
+   "name": "Entry",
+   "props": {
+    "LongName": null,
+    "room_type": "entry",
+    "area_m2": 3.62,
+    "area_source": "planmap"
+   }
   },
   "room-006": {
    "node": "room-006",
@@ -224,7 +274,14 @@
    ],
    "storey": "Floor 1",
    "kind": "room",
-   "tag": "R6"
+   "tag": "R6",
+   "name": "VH",
+   "props": {
+    "LongName": "VH",
+    "room_type": "entry",
+    "area_m2": 2.31,
+    "area_source": "planmap"
+   }
   },
   "sink-001": {
    "node": "sink-001",
@@ -1098,7 +1155,12 @@
    ],
    "storey": "Floor 1",
    "kind": "window",
-   "tag": "W1"
+   "tag": "W1",
+   "props": {
+    "width_m": 1.973,
+    "height_m": 1.2,
+    "axis": "x"
+   }
   },
   "window-002": {
    "node": "window-002",
@@ -1117,7 +1179,12 @@
    ],
    "storey": "Floor 1",
    "kind": "window",
-   "tag": "W2"
+   "tag": "W2",
+   "props": {
+    "width_m": 1.982,
+    "height_m": 1.2,
+    "axis": "x"
+   }
   }
  },
  "source_planmap": "planmap-1.json",

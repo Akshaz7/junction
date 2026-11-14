@@ -352,6 +352,11 @@ def process(doc_id: str, art: Path, page: int = 1) -> dict:
                   "stairs only when the plan map has a stairs item (none from raster plans)",
           "publishable": not (lic.startswith("CC-BY-ND") or lic.startswith("GPL"))}
     (art / "scene.json").write_text(json.dumps(sc, indent=1))
+    try:  # names, room areas, door widths for the info cards (pipeline/manifest_info.py)
+        from pipeline import manifest_info
+        manifest_info.enrich(art, None)
+    except Exception as ex:  # noqa: BLE001
+        print('manifest_info skipped:', repr(ex)[:200])
     return {"counts": counts, "glb_kb": len(glb) // 1024}
 
 
