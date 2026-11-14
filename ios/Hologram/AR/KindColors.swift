@@ -11,7 +11,7 @@ struct KindStyle: Equatable {
 }
 
 enum KindColors {
-    static let keys = ["door", "window", "wall", "room", "toilet", "sink", "shower", "bathtub", "stairs", "other"]
+    static let keys = ["door", "window", "wall", "room", "toilet", "sink", "shower", "bathtub", "stairs", "pipe", "drain", "fitting", "other"]
 
     private static let table: [String: (color: UInt32, on: UInt32, label: String, plural: String)] = [
         "door": (0xD55E00, 0xFFFFFF, "Door", "Doors"),
@@ -23,10 +23,15 @@ enum KindColors {
         "shower": (0xF0E442, 0x1A1A1A, "Shower", "Showers"),
         "bathtub": (0x882255, 0xFFFFFF, "Bathtub", "Bathtubs"),
         "stairs": (0x999933, 0xFFFFFF, "Stairs", "Stairs"),
+        "pipe": (0x332288, 0xFFFFFF, "Pipe", "Pipes"),
+        "drain": (0x8C510A, 0xFFFFFF, "Drain", "Drains"),
+        "fitting": (0xB2182B, 0xFFFFFF, "Fitting", "Fittings"),
         "other": (0x7F7F7F, 0xFFFFFF, "Other", "Other"),
     ]
     private static let aliases = ["curtain_wall": "wall", "stair": "stairs", "stairflight": "stairs",
-                                  "stair_flight": "stairs", "sanitary": "toilet", "wc": "toilet"]
+                                  "stair_flight": "stairs", "sanitary": "toilet", "wc": "toilet",
+                                  "pipe_segment": "pipe", "pipesegment": "pipe", "pipe_fitting": "fitting",
+                                  "pipefitting": "fitting", "valve": "fitting", "valve_damper": "fitting"]
 
     /// Same mapping as the web `kindKey`: anything unknown is "other".
     static func key(for kind: String?) -> String {

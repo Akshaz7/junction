@@ -15,6 +15,11 @@ final class KindColorsTests: XCTestCase {
         XCTAssertEqual(KindColors.key(for: "stair"), "stairs")
         XCTAssertEqual(KindColors.key(for: "furniture"), "other")
         XCTAssertEqual(KindColors.key(for: nil), "other")
+        XCTAssertEqual(KindColors.key(for: "pipe_segment"), "pipe")
+        XCTAssertEqual(KindColors.key(for: "PipeSegment"), "pipe")
+        XCTAssertEqual(KindColors.key(for: "valve"), "fitting")
+        XCTAssertEqual(KindColors.key(for: "pipe_fitting"), "fitting")
+        XCTAssertEqual(KindColors.key(for: "drain"), "drain")
     }
 
     func testEveryKindHasADistinctColour() {
