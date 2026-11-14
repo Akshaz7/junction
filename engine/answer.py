@@ -373,6 +373,13 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             return _abstained(question, doc_ids, f"The question names **{other}**, which is not among the selected documents ({sel}). "
                               "Select that document and ask again, or ask about the selected one.", trace, t0)
 
+        from engine.schedules import answer_schedule
+        if (res := answer_schedule(question, doc_ids, root, t0)) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
+            return res
+
         try:
             from engine.titleblock import answer_text
         except ImportError:  # title-block route is optional (E-35)
@@ -414,8 +421,8 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                 _hide_ids = next((c.get("item_ids") for c in (res.get("evidence", {}).get("scene", {}).get("commands") or [])
                                   if isinstance(c, dict) and c.get("op") == "hide" and c.get("item_ids")), None)
                 if _hide_ids:
-                    from engine.analytics import wants_compliance, edit_advice
-                    if wants_compliance(question):
+                    from engine.analytics import edit_advice
+                    if True:   # FIX-4: every hide from chat runs the same rule checks as the edit panel, never a silent pass
                         edit_advice(res, doc, list(dict.fromkeys([*((scene_state or {}).get("hidden") or []), *_hide_ids])))
                 for s_ in res["trace"]:
                     add(s_)

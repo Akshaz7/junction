@@ -200,3 +200,16 @@ def test_1007_rules_are_unofficial_translation_and_note_building_act():
     from engine.rules import RULES_DIR
     assert "752/2023" in (RULES_DIR / "safety_in_use.yaml").read_text(encoding="utf-8")
     assert "752/2023" in (RULES_DIR / "fire_escape.yaml").read_text(encoding="utf-8")
+
+
+def test_plain_remove_from_chat_runs_the_rule_checks(monkeypatch):
+    """FIX-4: 'remove the front door' (no compliance wording) still names the checked rules or the violation; never a silent pass."""
+    monkeypatch.setenv("MODELS_FAKE", "1")
+    from engine.answer import answer
+    from engine.solvers import ARTIFACTS
+    for doc, want in [("ifc_bench__ac20-arc", "Fewer than two exits"), ("cubicasa5k__colorful-11397", "No entrance door left")]:
+        if not (Path(ARTIFACTS) / doc).exists():
+            continue
+        a = answer("remove the front door", [doc])
+        assert not a["answer"]["abstained"] and a["advisor_cards"], doc
+        assert want in a["answer"]["text_md"] and "33" in a["answer"]["text_md"], a["answer"]["text_md"]
