@@ -167,7 +167,7 @@ enum ARSceneLoader {
 
         var errorDescription: String? {
             switch self {
-            case .missingFixture: "The bundled demo model is unavailable."
+            case .missingFixture: "The bundled sample model is unavailable."
             case .downloadFailed: "The model could not be downloaded."
             case .wrongDocument: "The model belongs to a different document."
             case .noUsableModel(let why): "This drawing has no 3D model the app can open yet (\(why))."

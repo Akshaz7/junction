@@ -7,7 +7,7 @@ final class SceneIdentityTests: XCTestCase {
             #"{"doc_id":"fixture__ios","items":{}}"#.utf8))
         let identity = SceneIdentity(requestedDocID: "ifc_bench__ac20-arc", manifest: manifest)
         XCTAssertEqual(identity.docID, "fixture__ios")
-        XCTAssertEqual(identity.title, "Sample model · generated for demo")
+        XCTAssertEqual(identity.title, "Sample model · generated")
         XCTAssertTrue(try XCTUnwrap(identity.notice).contains("Requested scene unavailable"))
         XCTAssertTrue(try XCTUnwrap(identity.notice).contains("Showing Sample model"))
     }

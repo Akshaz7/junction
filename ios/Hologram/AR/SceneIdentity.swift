@@ -11,7 +11,7 @@ struct SceneIdentity {
         let loadedDocID = manifest?.doc_id
         docID = loadedDocID
         if loadedDocID == "fixture__ios" {
-            title = "Sample model · generated for demo"
+            title = "Sample model · generated"
         } else {
             title = documentTitle ?? manifest?.title
                 ?? DemoScenes.all.first { $0.id == loadedDocID }?.title ?? loadedDocID ?? "Scene unavailable"

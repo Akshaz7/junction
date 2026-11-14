@@ -124,6 +124,7 @@ struct ARScreen: View {
             Spacer()
             sceneMenu
         }
+        .overlay(alignment: .top) { StoaProLockup() }
     }
 
     /// Current level with step buttons, shown for multi-storey models.
@@ -278,12 +279,12 @@ struct ARScreen: View {
 
     private var sceneMenu: some View {
         Menu {
-            Picker("Demo scenes", selection: Binding(
+            Picker("Buildings", selection: Binding(
                 get: { requestedDocID ?? "" },
                 set: { voice.stop(); controller.demoDocID = $0 }
             )) {
                 if !DemoScenes.all.contains(where: { $0.id == requestedDocID }) {
-                    Text("Choose a scene").tag(requestedDocID ?? "")
+                    Text("Choose a building").tag(requestedDocID ?? "")
                 }
                 ForEach(DemoScenes.all) { demo in
                     Text(demo.title).tag(demo.id)
@@ -296,12 +297,15 @@ struct ARScreen: View {
                                                   set: { controller.setShowRoof($0) }))
                     .disabled(!controller.isLoaded)
                     .accessibilityIdentifier("show-roof-toggle")
-                Button { controller.stepStorey(1) } label: { Label("Storey up", systemImage: "chevron.up") }
-                    .disabled(!controller.canStepStoreyUp)
-                Button { controller.stepStorey(-1) } label: { Label("Storey down", systemImage: "chevron.down") }
-                    .disabled(!controller.canStepStoreyDown)
-                Text("Storey: \(controller.activeStorey ?? "Unavailable")")
-                    .accessibilityIdentifier("active-storey")
+                // Hidden until a building with storeys is loaded (never show "Unavailable").
+                if let storey = controller.activeStorey, !controller.cutawayStoreys.isEmpty {
+                    Button { controller.stepStorey(1) } label: { Label("Storey up", systemImage: "chevron.up") }
+                        .disabled(!controller.canStepStoreyUp)
+                    Button { controller.stepStorey(-1) } label: { Label("Storey down", systemImage: "chevron.down") }
+                        .disabled(!controller.canStepStoreyDown)
+                    Text("Storey: \(storey)")
+                        .accessibilityIdentifier("active-storey")
+                }
                 Toggle("Walk at 1:1", isOn: Binding(get: { controller.isWalking },
                                                     set: { controller.setWalking($0) }))
                     .disabled(!controller.isLoaded)
@@ -323,14 +327,14 @@ struct ARScreen: View {
                     if let docID = requestedDocID, docID != "fixture__ios" {
                         Text("Requested model unavailable. Showing sample.")
                     }
-                    Text("Sample model · generated for demo")
+                    Text("Sample model · generated, not your drawing")
                 }
-                if controller.isBundledDemo { Text("Bundled demo scene") }
+                if controller.isBundledDemo { Text("Bundled building") }
                 if let attribution = controller.attribution {
                     Text("\(attribution.credit) · \(attribution.licence)")
                         .accessibilityIdentifier("scene-credit")
                 }
-                if let note = controller.manifest?.note { Text(note) }
+                if let note = controller.manifest?.note { Text(note.replacingOccurrences(of: "generated for demo", with: "generated")) }
                 Text(controller.status).accessibilityIdentifier("ar-status")
             }
         } label: {
@@ -357,5 +361,28 @@ struct ARScreen: View {
             guard controller.applyLiveHighlight(request) else { return }
             Task { await liveSocket.sendHighlight(docID: request.docID, itemIDs: request.itemIDs) }
         }
+    }
+}
+
+
+/// Small top-centre "STOA / PRO" lockup on a translucent dark pill. The white STOA artwork is rendered locally
+/// (scripts/render_ar_logo.sh, gitignored); without it the lockup falls back to serif text.
+struct StoaProLockup: View {
+    var body: some View {
+        VStack(spacing: 1) {
+            if UIImage(named: "StoaLockup") != nil {
+                Image("StoaLockup").resizable().scaledToFit().frame(height: 13)
+            } else {
+                Text("STOA").font(.system(size: 14, weight: .regular, design: .serif)).tracking(1.5)
+            }
+            Text("PRO").font(.system(size: 9, weight: .regular, design: .serif)).tracking(3)
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 12).padding(.vertical, 6)
+        .background(.black.opacity(0.5), in: Capsule())
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Stoa Pro")
+        .accessibilityIdentifier("ar-stoa-pro")
     }
 }

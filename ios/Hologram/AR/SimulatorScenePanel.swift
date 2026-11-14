@@ -29,7 +29,7 @@ struct SimulatorScenePanel: View {
                         .accessibilityIdentifier("simulator-ar-fallback")
                     Text("Scene metadata is available here. Open this scene on an iPhone to place it in AR.")
                         .foregroundStyle(.secondary)
-                    Picker("Demo scenes", selection: Binding(
+                    Picker("Buildings", selection: Binding(
                         get: { requestedDocID }, set: { preview.selectedDocID = $0 }
                     )) {
                         if !DemoScenes.all.contains(where: { $0.id == requestedDocID }) {
