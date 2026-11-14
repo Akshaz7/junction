@@ -1,5 +1,4 @@
 import { expect, test } from '@playwright/test'
-import { readFileSync } from 'node:fs'
 import type { Document } from '../src/lib/types'
 
 test('source folder opens a file with credit and passes its document to Chat', async ({ page, request }) => {
@@ -11,12 +10,11 @@ test('source folder opens a file with credit and passes its document to Chat', a
   const doc = folder!.docs[0]
   await page.goto('/#/data')
   await expect(page.getByText('Connected workspace', { exact: true })).toBeVisible()
-  await page.getByRole('button', { name: 'Open cubicasa5k folder', exact: true }).click()
-  await expect(page.getByRole('heading', { name: 'cubicasa5k', exact: true })).toBeVisible()
-  const row = page.locator('.data-file-row').filter({ has: page.getByRole('button', { name: `Open ${doc.title}`, exact: true }) }).first()
+  await page.getByRole('searchbox', { name: 'Search documents' }).fill(doc.doc_id)
+  const row = page.locator(`.data-file-row[data-doc-id="${doc.doc_id}"]`)
   await expect(row).toBeVisible()
   for (const format of doc.formats) await expect(row.getByText(format.toUpperCase(), { exact: true })).toBeVisible()
-  await row.getByRole('button').click()
+  await row.getByRole('button', { name: `Open ${doc.title}`, exact: true }).click()
   const detail = page.getByRole('complementary', { name: 'Document details' })
   await expect(detail.getByRole('heading', { name: doc.title, exact: true })).toBeVisible()
   await expect(detail.locator('.data-document-credit')).toContainText(doc.credit || 'Not provided')
@@ -26,25 +24,7 @@ test('source folder opens a file with credit and passes its document to Chat', a
   await expect(page.getByLabel('Selected documents')).toContainText(doc.title)
 })
 
-test('PNG upload shows ingestion progress and appears in the uploads folder', async ({ page }) => {
-  test.setTimeout(60_000)
-  await page.goto('/#/data')
-  await expect(page.getByText('Connected workspace', { exact: true })).toBeVisible()
-  const responsePromise = page.waitForResponse((response) => response.request().method() === 'POST' && new URL(response.url()).pathname === '/api/upload')
-  const name = `upload-fixture-${Date.now()}.png`
-  await page.getByLabel('Upload drawing', { exact: true }).setInputFiles({
-    name, mimeType: 'image/png', buffer: readFileSync(new URL('./assets/upload-fixture.png', import.meta.url)),
-  })
-  const response = await responsePromise
-  expect(response.ok()).toBe(true)
-  const receipt = await response.json() as { doc_id: string; status: string }
-  const status = page.locator('.data-upload-status')
-  await expect(status).toContainText(name)
-  await expect(page.getByRole('button', { name: 'Open uploads folder', exact: true })).toHaveAttribute('aria-current', 'page')
-  await expect(page.locator(`.data-file-row[data-doc-id="${receipt.doc_id}"]`)).toBeVisible()
-  await expect(status).toContainText(receipt.status === 'stored' ? 'File stored.' : /Ready to use|Page preview ready/, { timeout: 45_000 })
-  await expect(page.locator(`.data-file-row[data-doc-id="${receipt.doc_id}"]`)).toBeVisible()
-})
+// The upload and ingest-polling flow is covered live in data-changes.spec.ts.
 
 test('a document offers its scene, handles a missing preview, and retains phone navigation on return', async ({ page }) => {
   const doc: Document = { doc_id: 'demo__scene', source: 'demo', title: 'Scene fixture, generated for demo', kind: 'ifc', formats: ['ifc'], pages: 1, licence: 'MIT', credit: 'Test fixture, generated for demo', heldout: false }
@@ -94,6 +74,10 @@ test('search spans folders and large lists use pages', async ({ page }) => {
     formats: ['pdf'], pages: 2, licence: 'MIT', credit: 'Test fixture, generated for demo', heldout: false,
   }))
   docs.push({ ...docs[0], doc_id: 'folder-b__other', source: 'folder-b', title: 'Other folder drawing' })
+  for (const doc of docs) (doc as Document & { folder?: string }).folder = doc.source
+  await page.route('**/api/folders', (route) => route.fulfill({ json: { total: docs.length, folders: [
+    { name: 'folder-a', path: 'folder-a', count: 85, children: [] }, { name: 'folder-b', path: 'folder-b', count: 1, children: [] },
+  ] } }))
   await page.route('**/api/docs', (route) => route.fulfill({ json: { total: docs.length, sources: [
     { source: 'folder-a', count: 85, docs: docs.slice(0, 85) }, { source: 'folder-b', count: 1, docs: docs.slice(85) },
   ] } }))
@@ -106,5 +90,5 @@ test('search spans folders and large lists use pages', async ({ page }) => {
   await expect(page.locator('.data-file-row')).toHaveCount(1)
   await expect(page.getByRole('heading', { name: 'Other folder drawing', exact: true })).toBeVisible()
   await page.getByRole('searchbox', { name: 'Search documents' }).fill('no matching document')
-  await expect(page.getByText('No documents found.', { exact: true })).toBeVisible()
+  await expect(page.getByText('No documents match', { exact: true })).toBeVisible()
 })

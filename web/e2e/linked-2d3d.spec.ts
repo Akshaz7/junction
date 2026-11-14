@@ -15,7 +15,7 @@ for (const phone of [false, true]) {
     await page.getByRole('option').filter({ hasText: 'colorful-11397' }).click()
     await composer.fill('How many windows are there?')
     await page.getByRole('button', { name: 'Send question', exact: true }).click()
-    await page.getByRole('button', { name: 'Open citation 1', exact: true }).click()
+    await page.getByRole('button', { name: 'Open citation 1', exact: true }).first().click()
 
     const drawing = page.getByRole(phone ? 'dialog' : 'region', { name: 'Drawing viewer', exact: true })
     const box3 = drawing.getByTestId('evidence-box-3')

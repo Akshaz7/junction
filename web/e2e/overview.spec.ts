@@ -90,20 +90,14 @@ test('overview sections match the real workspace API', async ({ page, request })
   }
 })
 
-test('overview starter links carry all four questions and fit a phone', async ({ page }) => {
+test('overview starter cards show all four construction prompts and fit a phone', async ({ page }) => {
+  // Starting a real chat from each card is covered live in data-changes.spec.ts.
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/#/overview')
   const starters = page.getByRole('region', { name: 'Start a question', exact: true })
-  const questions = ['How many windows are there?', 'What is the area of this room?', 'Where is the stair core on level 2?', 'What does this drawing say about the doors?']
-  await expect(starters.getByRole('link')).toHaveCount(4)
+  await expect(starters.locator('.overview-starter')).toHaveCount(4)
+  for (const title of ['Draft claim', 'Meeting prep', 'Plan work phase', 'Review contract']) await expect(starters.getByRole('button', { name: title, exact: true })).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
-  for (const question of questions) {
-    const link = starters.getByRole('link', { name: question, exact: true })
-    await expect(link).toHaveAttribute('href', `#/chat?question=${encodeURIComponent(question)}`)
-    await link.click()
-    await expect(page.getByRole('combobox', { name: 'Ask about your drawings' })).toHaveValue(question)
-    await page.goto('/#/overview')
-  }
 })
 
 test('chat links load directly, switch saved conversations, and keep follow-ups in the saved chat', async ({ page }) => {
