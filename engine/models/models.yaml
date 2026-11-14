@@ -179,19 +179,19 @@ tasks:
       - {provider: runware, model: "fishaudio:s2.1@pro"}
   context_rewrite:   # engine/context.py: follow-up + chat history -> standalone question and document choice; Haiku, tiny JSON
     provider: runware_claude
-    model: claude-haiku-5-5
+    model: claude-opus-5-5
     max_tokens: 400
     fallback:
       - {provider: runware_claude, model: claude-sonnet-5-5}
-      - {provider: anthropic, model: claude-haiku-5-5}
+      - {provider: anthropic, model: claude-opus-5-5}
       - {provider: runware_oai, model: gemini-4-carbon}
   app_help:   # engine/app_help.py: how-to questions about the app the keyword match missed; Haiku with only engine/app_guide.md as context
     provider: runware_claude
-    model: claude-haiku-5-5
+    model: claude-opus-5-5
     max_tokens: 300
     temperature: 0
     fallback:
-      - {provider: anthropic, model: claude-haiku-5-5}
+      - {provider: anthropic, model: claude-opus-5-5}
       - {provider: runware_oai, model: gemini-4-carbon}
   task_write:   # engine/tasks: Draft claim / Meeting prep / Plan work phase / Review contract; long cited deliverable, Opus 5.5 (Ash)
     provider: runware_claude
