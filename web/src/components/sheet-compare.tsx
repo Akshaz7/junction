@@ -2,7 +2,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import { Check, Download, GripVertical, Maximize2, Minus, Plus, Sparkles } from 'lucide-react'
 import { Button } from './ui'
 import {
-  FIT_VIEW, OPEN_SEAM_FROM, OPEN_SEAM_TO, boxRect, clampView, easeInOut, fitSheet, lerpView, nudgeSeam, panView, parseHex, regionView,
+  FIT_VIEW, contrastMatrix, OPEN_SEAM_FROM, OPEN_SEAM_TO, boxRect, clampView, easeInOut, fitSheet, lerpView, nudgeSeam, panView, parseHex, regionView,
   seamFromPointer, shortVersion, sheetTransform, stepZoom, thumbLayout, tintMatrix, usableBox, versionDate, zoomAt,
   THUMB_H, THUMB_W, type Bbox, type Size, type View,
 } from '../lib/sheet-compare'
@@ -89,7 +89,7 @@ export function SheetCompare({ prev, curr, size, changes, initialMode = 'Wipe', 
   const ready = prevState !== 'loading' && currState !== 'loading'
   const tint = useMemo(() => {
     const read = (name: string, fallback: [number, number, number]) => typeof document === 'undefined' ? fallback : parseHex(getComputedStyle(document.documentElement).getPropertyValue(name), fallback)
-    return { prev: tintMatrix(read('--change-removed', [0.792, 0.282, 0.165])), curr: tintMatrix(read('--change-added', [0.212, 0.486, 0.282])) }
+    return { contrast: contrastMatrix(), prev: tintMatrix(read('--change-removed', [0.792, 0.282, 0.165])), curr: tintMatrix(read('--change-added', [0.212, 0.486, 0.282])) }
   }, [])
 
   // Measure the canvas.
@@ -272,8 +272,8 @@ export function SheetCompare({ prev, curr, size, changes, initialMode = 'Wipe', 
       <div ref={canvas} className={`comparison-canvas sc-canvas${view.s > 1.001 ? ' zoomed' : ''}`} data-mode={mode} data-moving={moving || undefined} data-panning={panning || undefined} data-focused={focused || undefined}
         style={{ '--seam': `${seam}%` } as CSSProperties} onPointerDown={onCanvasDown} onPointerMove={onCanvasMove} onPointerUp={endPan} onPointerCancel={endPan} onDoubleClick={(event) => { if (!(event.target as HTMLElement).closest('.sc-box, .wipe-seam')) fitView() }}>
         <svg className="sc-defs" width="0" height="0" aria-hidden focusable="false"><defs>
-          <filter id={`${uid}-prev`} colorInterpolationFilters="sRGB"><feColorMatrix type="matrix" values={tint.prev} /></filter>
-          <filter id={`${uid}-curr`} colorInterpolationFilters="sRGB"><feColorMatrix type="matrix" values={tint.curr} /></filter>
+          <filter id={`${uid}-prev`} colorInterpolationFilters="sRGB"><feColorMatrix type="matrix" values={tint.contrast} /><feColorMatrix type="matrix" values={tint.prev} /></filter>
+          <filter id={`${uid}-curr`} colorInterpolationFilters="sRGB"><feColorMatrix type="matrix" values={tint.contrast} /><feColorMatrix type="matrix" values={tint.curr} /></filter>
         </defs></svg>
         {sizeOk && !bothFailed && <>
           <div className="sc-layer sc-prev" aria-hidden={mode === 'Plain'}>

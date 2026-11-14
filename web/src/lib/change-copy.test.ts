@@ -7,7 +7,7 @@ const item = (sentence: string, bbox: [number, number, number, number] = [100, 1
 
 describe('plain-language change copy', () => {
   it('names notes and sheet references', () => {
-    expect(readChange(item('Text added: "53703".'), size).text).toBe('Callout label added near the top left of the sheet')
+    expect(readChange(item('Text added: "53703".'), size).text).toBe('Label "53703" added near the top left of the sheet')
     expect(readChange(item('Text added: "Existing roof joist".'), size).text).toBe('Note added near the top left of the sheet: "Existing roof joist"')
     expect(readChange(item('Text changed from "S100 8" to "S300 4 A100 4C".'), size).small).toBe(true)
     expect(readChange(item('Content added in this region (no text change).', [900, 100, 990, 300]), size).text).toBe('Title block updated (logo, stamp or revision list)')

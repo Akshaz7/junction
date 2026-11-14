@@ -157,7 +157,14 @@ export function parseHex(value: string, fallback: [number, number, number]): [nu
   return [parseInt(full.slice(0, 2), 16) / 255, parseInt(full.slice(2, 4), 16) / 255, parseInt(full.slice(4, 6), 16) / 255]
 }
 
-/** feColorMatrix values that turn dark ink into `tint` and keep paper white: out = tint + (1 - tint) * luminance. */
+/** Contrast boost on luminance: L' = GAIN * L - (GAIN - 1), clamped by the filter. Paper stays white, thin grey linework becomes solid. */
+export const TINT_GAIN = 2.2
+export function contrastMatrix(gain = TINT_GAIN): string {
+  const row = `${(gain * 0.2126).toFixed(4)} ${(gain * 0.7152).toFixed(4)} ${(gain * 0.0722).toFixed(4)} 0 ${(-(gain - 1)).toFixed(4)}`
+  return `${row} ${row} ${row} 0 0 0 1 0`
+}
+
+/** feColorMatrix values that turn dark ink into `tint` and keep paper white: out = tint + (1 - tint) * luminance. Apply after contrastMatrix. */
 export function tintMatrix(tint: [number, number, number]): string {
   const row = (t: number) => `${((1 - t) * 0.2126).toFixed(4)} ${((1 - t) * 0.7152).toFixed(4)} ${((1 - t) * 0.0722).toFixed(4)} 0 ${t.toFixed(4)}`
   return `${row(tint[0])} ${row(tint[1])} ${row(tint[2])} 0 0 0 1 0`
