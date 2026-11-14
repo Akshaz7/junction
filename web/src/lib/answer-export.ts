@@ -1,4 +1,5 @@
 import type { Answer, Bbox, Document, SavedChat } from './types'
+import { notesHtml, notesMarkdown, type ReportNotes } from './markup-report'
 import { savedExchanges } from './chat-history'
 import { kindFromItemId, kindStyle } from './kind-colors'
 import { confidenceText, marginText } from './evidence-format'
@@ -33,6 +34,7 @@ export interface AnswerReport {
   generatedAt: string
   chatId?: string
   entries: ReportEntry[]
+  notes?: ReportNotes[]
 }
 export interface ReportOptions { generatedAt?: Date; chatId?: string; baseUrl?: string; demo?: boolean }
 export interface ReportDrawing { dataUrl?: string; notice?: string }
@@ -206,6 +208,7 @@ export function reportToMarkdown(report: AnswerReport): string {
       for (const region of page.regions) lines.push(`- Box ${mdEscape(region.label)}${region.itemId ? ` · ${mdEscape(region.itemId)}` : ''}: [${region.bbox.join(', ')}] page pixels`)
     }
   }
+  lines.push(notesMarkdown(report.notes))
   lines.push('', 'AI can make mistakes. Verify important information.', '')
   return lines.join('\n')
 }
@@ -229,5 +232,5 @@ export function reportToHtml(report: AnswerReport, drawings: Readonly<Record<str
       return `<figure>${dataUrl ? `<img src="${htmlEscape(dataUrl)}" alt="${htmlEscape(page.source.title)} · Page ${page.page}, drawing evidence">` : ''}<figcaption><strong>${htmlEscape(page.source.title)} · Page ${page.page}</strong>${drawing?.notice ? `<br>${htmlEscape(drawing.notice)}` : !dataUrl ? '<br>Drawing unavailable; no image evidence included.' : ''}<br>Licence: ${htmlEscape(page.source.licence)} · Credit: ${htmlEscape(page.source.credit)}</figcaption></figure>`
     }).join('')}
   </section>`).join('')
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${htmlEscape(report.title)}</title><style>${stylesheet.replace(/<\/style/gi, '<\\/style')}</style></head><body class="site-report"><header><p>Hologram</p><h1>${htmlEscape(report.title)}</h1><p class="site-report-note">Generated: ${htmlEscape(report.generatedAt)}${report.chatId ? `<br>Chat: ${htmlEscape(report.chatId)}` : ''}</p></header><main>${entries || '<p>No recorded answers.</p>'}</main><footer>AI can make mistakes. Verify important information.</footer></body></html>`
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${htmlEscape(report.title)}</title><style>${stylesheet.replace(/<\/style/gi, '<\\/style')}</style></head><body class="site-report"><header><p>Hologram</p><h1>${htmlEscape(report.title)}</h1><p class="site-report-note">Generated: ${htmlEscape(report.generatedAt)}${report.chatId ? `<br>Chat: ${htmlEscape(report.chatId)}` : ''}</p></header><main>${entries || '<p>No recorded answers.</p>'}${notesHtml(report.notes)}</main><footer>AI can make mistakes. Verify important information.</footer></body></html>`
 }

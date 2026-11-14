@@ -1,0 +1,235 @@
+{
+  "method": "Hand count by visual inspection, declared before running the matcher. Recall is measured only inside the declared validation windows; not whole-sheet recall. Templates use legend marks and one plan mark. No thresholds tuned.",
+  "ventilation": [
+    {
+      "name": "TULOILMA / supply arrow",
+      "template_bbox": [
+        4241,
+        1012,
+        4264,
+        1022
+      ],
+      "validation_window": [
+        1550,
+        1650,
+        2350,
+        1900
+      ],
+      "gold_centres": [
+        [
+          1580,
+          1750
+        ],
+        [
+          1623,
+          1750
+        ],
+        [
+          1750,
+          1750
+        ],
+        [
+          1793,
+          1750
+        ],
+        [
+          1920,
+          1750
+        ],
+        [
+          1963,
+          1750
+        ],
+        [
+          2090,
+          1750
+        ],
+        [
+          2133,
+          1750
+        ],
+        [
+          2260,
+          1750
+        ],
+        [
+          2303,
+          1750
+        ]
+      ],
+      "manual_count": 10
+    },
+    {
+      "name": "POISTOILMA / extract arrow",
+      "template_bbox": [
+        4241,
+        1024,
+        4264,
+        1035
+      ],
+      "validation_window": [
+        1200,
+        1600,
+        1500,
+        1920
+      ],
+      "gold_centres": [
+        [
+          1315,
+          1664
+        ],
+        [
+          1425,
+          1728
+        ],
+        [
+          1425,
+          1822
+        ],
+        [
+          1425,
+          1891
+        ],
+        [
+          1489,
+          1892
+        ]
+      ],
+      "manual_count": 5
+    },
+    {
+      "name": "Diagonal hollow triangle mark from plan",
+      "template_bbox": [
+        1274,
+        1842,
+        1291,
+        1857
+      ],
+      "validation_window": [
+        1260,
+        1825,
+        1360,
+        1915
+      ],
+      "gold_centres": [
+        [
+          1282,
+          1849
+        ],
+        [
+          1332,
+          1849
+        ],
+        [
+          1282,
+          1897
+        ],
+        [
+          1332,
+          1897
+        ]
+      ],
+      "manual_count": 4
+    }
+  ],
+  "sports": {
+    "name": "Egress asterisk from plan",
+    "template_bbox": [
+      967,
+      3092,
+      995,
+      3122
+    ],
+    "validation_window": [
+      550,
+      3000,
+      1550,
+      3900
+    ],
+    "gold_centres": [
+      [
+        980,
+        3105
+      ],
+      [
+        632,
+        3355
+      ],
+      [
+        632,
+        3765
+      ],
+      [
+        970,
+        3823
+      ],
+      [
+        1493,
+        3823
+      ]
+    ],
+    "manual_count": 5
+  },
+  "unseen_final": {
+    "name": "Ruler tick (final-only arbitrary mark test, not a material quantity)",
+    "template_bbox": [
+      50,
+      294,
+      61,
+      310
+    ],
+    "validation_window": [
+      20,
+      288,
+      240,
+      320
+    ],
+    "gold_centres": [
+      [
+        36,
+        303
+      ],
+      [
+        55,
+        303
+      ],
+      [
+        74,
+        303
+      ],
+      [
+        93,
+        303
+      ],
+      [
+        112,
+        303
+      ],
+      [
+        131,
+        303
+      ],
+      [
+        150,
+        303
+      ],
+      [
+        169,
+        303
+      ],
+      [
+        188,
+        303
+      ],
+      [
+        207,
+        303
+      ],
+      [
+        224,
+        303
+      ]
+    ],
+    "manual_count": 11
+  }
+}

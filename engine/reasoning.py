@@ -122,6 +122,8 @@ def build(res: dict, question: str, root: Path) -> dict | None:
 
 
 def attach(res: dict, question: str, root: Path) -> dict:
+    if (res.get("mistakes") is not None or res.get("route") == "symbols") and res.get("reasoning"):
+        return res
     if res.get("reasoning"):   # these routes bring their own card; the invariant still applies
         from engine.reasoning_parts.counts import enforce
         res["reasoning"] = enforce(res, res["reasoning"], question)
