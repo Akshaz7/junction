@@ -103,6 +103,8 @@ def build(res: dict, question: str, root: Path) -> dict | None:
             pass
     from engine.reasoning_parts import margin
     quantitative = margin.run(ctx)
+    from engine.reasoning_parts import scaleproof
+    quantitative.update(scaleproof.run(ctx, quantitative))
     c = _confidence.run(ctx)
     steps = c.pop("_steps", ctx["steps"])
     hint = res.get("reasoning_hint")   # F-MEP: engine/mep.py supplies its own Found / Measured / Checked lines and an optional confidence cap
@@ -124,7 +126,11 @@ def attach(res: dict, question: str, root: Path) -> dict:
         from engine.reasoning_parts.counts import enforce
         res["reasoning"] = enforce(res, res["reasoning"], question)
         res.pop("reasoning_hint", None)
-        return res
+        try:
+            from engine.reasoning_parts.scaleproof import supplement
+            return supplement(res, question, root)
+        except Exception:  # noqa: BLE001 - missing provenance must not lose an answer
+            return res
     try:
         r = build(res, question, root)
         if r:

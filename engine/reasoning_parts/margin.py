@@ -82,7 +82,7 @@ def _rows(ctx):
                     key = (did, item.page)
                     if key not in page_docs:
                         pm = _json(Path(ctx.get("root", ".")) / did / f"planmap-{item.page}.json")
-                        page_docs[key] = replace(doc, scale=pm.get("scale"))
+                        page_docs[key] = replace(doc, scale=(doc.meta.get("page_scales") or {}).get(item.page, pm.get("scale")))
                     owner = page_docs[key]
                 rows.append((owner, item, cite.get("n")))
     return rows, missing

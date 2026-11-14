@@ -53,6 +53,16 @@ async def page_image(doc_id: str, n: int):
     return FileResponse(f, media_type="image/png")
 
 
+@router.get("/docs/{doc_id}/evidence/{name}")
+async def scale_evidence(doc_id: str, name: str):
+    from .scale_evidence import crop_path
+    _doc_dir(doc_id)  # same document-id validation as other file endpoints
+    path = crop_path(config.artifacts_dir(), doc_id, name)
+    if path is None:
+        return _not_built("scale evidence")
+    return FileResponse(path, media_type="image/png")
+
+
 @router.get("/docs/{doc_id}/planmap/{n}")
 async def planmap(doc_id: str, n: int):
     f = _doc_dir(doc_id) / f"planmap-{n}.json"

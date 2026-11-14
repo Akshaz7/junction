@@ -92,12 +92,13 @@ def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
         for it in items:
             if it.item_id in placed:
                 it.page, it.bbox_px = placed[it.item_id]
-        return Doc(doc_id, "ifc", items, title, e.get("storeys") or [], meta=e.get("building") or {})
+        return Doc(doc_id, "ifc", items, title, e.get("storeys") or [], meta={**(e.get("building") or {}), "unit_provenance": e.get("unit_provenance")})
     if pms:
-        items, scale = [], None
+        items, scale, page_scales = [], None, {}
         for p in pms:
             m = _json(p)
-            scale = scale or m.get("scale")
+            page_scale = m.get("scale")
+            page_start = len(items)
             for x in m["items"]:
                 pr = x.get("props") or {}
                 q = {}
@@ -111,16 +112,20 @@ def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
                 items.append(Item(item_id=x["item_id"], kind=x["kind"], label=x.get("label"), page=m.get("page", 1),
                                   bbox_px=x.get("bbox_px"), polygon_px=x.get("polygon_px"), conf=float(x.get("conf") or 0), q=q, props=pr,
                                   source=x.get("source", "")))
+            try:   # Refine each page independently; sheets can have different scales.
+                from engine import scale_text
+                page_number = m.get("page", 1)
+                better = scale_text.refine_scale(d, page_number, page_scale)
+                if better:
+                    scale_text.rescale_items(items[page_start:], (page_scale or {}).get("m_per_px"), better["m_per_px"])
+                    page_scale = {**better, "replaced": (page_scale or {}).get("method")}
+            except Exception:  # noqa: BLE001 - never block a document on scale reading
+                pass
+            page_scales[m.get("page", 1)] = page_scale
+            if scale is None:
+                scale = page_scale
         items = dedupe_openings(items)
-        try:   # E-57: a printed scale (scale bar, or 1:200 + sheet size / dpi) beats the door-size guess
-            from engine import scale_text
-            better = scale_text.refine_scale(d, 1, scale)
-            if better:
-                scale_text.rescale_items(items, (scale or {}).get("m_per_px"), better["m_per_px"])
-                scale = {**better, "replaced": (scale or {}).get("method")}
-        except Exception:  # noqa: BLE001 - never block a document on scale reading
-            pass
-        return Doc(doc_id, "planmap", items, title, [], scale, len(pms))
+        return Doc(doc_id, "planmap", items, title, [], scale, len(pms), meta={"page_scales": page_scales})
     return None
 
 

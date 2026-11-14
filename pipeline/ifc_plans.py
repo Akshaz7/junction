@@ -45,7 +45,8 @@ def top_faces_xz(tm: trimesh.Trimesh, T, top_only=True):
 def process(doc_id: str, art: Path):
     out = art / doc_id
     scene = json.loads((out / "scene.json").read_text())
-    els = {e["item_id"]: e for e in json.loads((out / "elements.json").read_text())["elements"]}
+    element_data = json.loads((out / "elements.json").read_text())
+    els = {e["item_id"]: e for e in element_data["elements"]}
     sc = trimesh.load(str(out / "scene.glb"), force="scene")
     parts = defaultdict(list)  # item_id -> [(verts, faces)]; trimesh splits multi-material nodes into <guid>_<hash>
     for node in sc.graph.nodes_geometry:
@@ -115,7 +116,7 @@ def process(doc_id: str, art: Path):
         save_page(img, out, n)
         pm = {"doc_id": doc_id, "page": n, "storey": {"name": key[1], "elevation_m": key[0]},
               "image": {"w": W, "h": H},
-              "scale": {"m_per_px": round(1 / ppm, 6), "method": "ifc", "confidence": 1.0},
+              "scale": {"m_per_px": 1 / ppm, "method": "ifc", "confidence": 1.0, "native_units": element_data.get("unit_provenance")},
               "origin_offset_m": scene["origin_offset_m"],
               "projection": {"x_px": "(X - x0)*ppm + 40", "y_px": "(Z - z0)*ppm + 40", "x0": float(x0), "z0": float(z0), "ppm": ppm},
               "items": items,
