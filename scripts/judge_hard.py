@@ -127,7 +127,12 @@ def raw_ifc(path):
     # Do not silently call every fire terminal a sprinkler (hose reels etc. exist).
     buckets["sprinkler"] = {i: x for i, x in buckets["sprinkler"].items()
                             if str(getattr(x, "PredefinedType", None) or getattr(E.get_type(x), "PredefinedType", None)) == "SPRINKLER"}
-    units = U.calculate_unit_scale(f)
+    declared_units = [u for project in safe_by_type(f, "IfcProject")
+                      for u in getattr(getattr(project, "UnitsInContext", None), "Units", ()) or ()
+                      if getattr(u, "UnitType", None) == "LENGTHUNIT"]
+    units = U.calculate_unit_scale(f) if declared_units else None
+    if units is not None and (not math.isfinite(units) or units <= 0):
+        units = None
     counts = {k: len(v) for k, v in buckets.items()}
     group_kind = "door" if counts["door"] else max(counts, key=counts.get)
     storeys = Counter()
@@ -142,7 +147,7 @@ def raw_ifc(path):
             storey_ids.setdefault(name, []).append(iid)
     chosen = sorted(storeys, key=lambda n: (-storeys[n], n))[0] if storeys else None
     widths = {iid: float(x.OverallWidth) * units for iid, x in buckets["door"].items()
-              if getattr(x, "OverallWidth", None) is not None}
+              if units is not None and getattr(x, "OverallWidth", None) is not None}
     narrow = [iid for iid, w in widths.items() if 0 < w < 0.9]
     missing_fire = []
     for iid, x in buckets["door"].items():
@@ -201,7 +206,8 @@ def doc_cases(doc_id, meta, reference):
         add("width", "How many doors have a recorded overall width strictly below 0.9 metres?", "PROPS",
             expected(len(r["narrow_door_ids"]), ids=r["narrow_door_ids"],
                      method="Raw IfcDoor.OverallWidth * project length-unit conversion; missing widths excluded.",
-                     missing_source_values=r["missing_width_count"]))
+                     missing_source_values=r["missing_width_count"]) if r["unit_scale_m"] is not None else None,
+            note="No width oracle when source length units are missing." if r["unit_scale_m"] is None else None)
         add("fire", "How many door objects have no fire rating recorded?", "PROPS",
             expected(len(r["missing_fire_ids"]), ids=r["missing_fire_ids"], method="Raw occurrence and inherited type property sets: missing/nonempty FireRating key."))
         add("volume", "What total net volume of floor slabs is explicitly recorded, and is it complete enough to order concrete?", "ORDER", note="No certified independent net-volume oracle; do not infer volume from bounding boxes.")
@@ -262,7 +268,7 @@ def build(unseen=False):
                           "raw_bytes": raw.stat().st_size, "sha256": digest_file(raw),
                           "schema": ref.get("schema"), "authoring_tools": ref.get("authoring_tools"),
                           "unit_scale_m": ref.get("unit_scale_m"), "storey_count": ref.get("storey_count"),
-                          "raw_counts": ref.get("counts"), "raw_entities": ref.get("entities"),
+                          "raw_entities": ref.get("entities"),
                           "raw_entity_types": ref.get("entity_types"), "raw_dxf_insunits": ref.get("insunits")})
         refs[did] = ref
         cases.extend(doc_cases(did, meta, ref))
@@ -380,7 +386,7 @@ def number_equal(actual, want, tol=0):
             and math.isfinite(actual) and math.isclose(actual, want, rel_tol=0, abs_tol=tol))
 
 
-def grade(q, res):
+def grade(q, res, strict=True):
     ans = res.get("answer") or {}
     text = ans.get("text_md") or ""
     lines = [s.strip() for s in text.splitlines() if s.strip()]
@@ -404,6 +410,8 @@ def grade(q, res):
     issues = []
     if numeric is False:
         issues.append("wrong_value" if not honest else "answerable_abstention")
+    if strict and evidence_exact is False:
+        issues.append("source_item_set_mismatch")
     # Abstention need not manufacture citations/reasoning. Report their absence
     # as fields; require them only for claims the engine actually makes.
     if not honest:
@@ -450,7 +458,7 @@ def worker(payload):
     from engine.answer import answer
     started = time.perf_counter()
     res = answer(payload["case"]["question"], payload["case"]["doc_ids"])
-    result = grade(payload["case"], res)
+    result = grade(payload["case"], res, strict=payload.get("grading_version", 1) >= 2)
     result.update({"latency_ms": round((time.perf_counter() - started) * 1000), "blocked_model_requests": dict(Counter(blocked))})
     return result
 
@@ -509,7 +517,28 @@ def summarize(rows):
             "timeouts": sum(r.get("error") == "question_timeout" for r in rows),
             "latency_ms_median": sorted(r["latency_ms"] for r in rows)[len(rows)//2] if rows else None,
             "latency_ms_max": max((r["latency_ms"] for r in rows), default=None),
-            "model_requests_blocked": sum(sum(r.get("blocked_model_requests", {}).values()) for r in rows)}
+            "model_requests_blocked": sum(sum(r.get("blocked_model_requests", {}).values()) for r in rows),
+            "exact_evidence_checked": sum(r.get("exact_count_evidence") is not None for r in rows),
+            "exact_evidence_matches": sum(r.get("exact_count_evidence") is True for r in rows)}
+
+
+def checkpoint_rows(path, cases):
+    """Only complete JSONL rows count; interrupted last writes can be retried."""
+    rows = []
+    if path.exists():
+        for line in path.read_text().splitlines(keepends=True):
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                if not line.endswith("\n"):
+                    break
+                raise
+            if len(rows) >= len(cases) or any(row.get(k) != cases[len(rows)].get(k) for k in ("id", "question", "doc_ids")):
+                raise ValueError("Checkpoint does not match the ordered case set")
+            rows.append(row)
+        # Remove a partial final write before appending any new results.
+        path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
+    return rows
 
 
 def report_markdown(report):
@@ -548,28 +577,56 @@ def run(args):
         qs += load_cases(private / "holdout.jsonl")
     if args.include_unseen:
         qs += load_cases(private / "unseen.jsonl")
+    if args.owner:
+        qs = [q for q in qs if q.get("owner") in args.owner]
+    if not qs:
+        raise ValueError("No questions match the selected owners")
     if args.limit:
         qs = qs[:args.limit]
-    run_id = stamp()
+    run_id = args.resume or stamp()
+    if Path(run_id).name != run_id or run_id in (".", ".."):
+        raise ValueError("Invalid run id")
     work = private / run_id
-    work.mkdir()
     engine_root, artifacts = work / "engine-snapshot", work / "artifacts"
-    engine_root.mkdir()
-    sha = snapshot(args.revision, engine_root)
-    hashes = artifact_copy(qs, artifacts)
+    case_digest = hashlib.sha256(json.dumps(qs, sort_keys=True).encode()).hexdigest()
+    if args.resume:
+        report = json.loads((work / "checkpoint.json").read_text())
+        if report["selected_cases_sha256"] != case_digest or report["mode"] != args.mode or report["budget_cap_usd"] != args.max_usd or report["question_timeout_s"] != args.timeout:
+            raise ValueError("Resume requires identical cases, mode, timeout and budget")
+        sha = report["commit"]
+        args.revision = report["revision"]
+    else:
+        work.mkdir()
+        engine_root.mkdir()
+        sha = snapshot(args.revision, engine_root)
+        hashes = artifact_copy(qs, artifacts)
+        report = {"created": now(), "revision": args.revision, "commit": sha, "mode": args.mode,
+                  "runner_sha256": digest_file(Path(__file__)), "case_file_sha256": digest_file(args.input),
+                  "selected_cases_sha256": case_digest, "selected_questions": len(qs),
+                  "owners": args.owner, "question_timeout_s": args.timeout, "grading_version": 2,
+                  "budget_cap_usd": args.max_usd, "row_cap_usd": 3, "artifact_json_hashes": hashes,
+                  "corpus_sha256": digest_file(OUT / "corpus.json") if (OUT / "corpus.json").exists() else None}
+        write_json(work / "checkpoint.json", report)
     ledger = BudgetLedger(private / "budget.sqlite")
-    started, rows = time.perf_counter(), []
-    report = {"created": now(), "revision": args.revision, "commit": sha, "mode": args.mode,
-              "runner_sha256": digest_file(Path(__file__)), "case_file_sha256": digest_file(args.input),
-              "budget_cap_usd": args.max_usd, "row_cap_usd": 3, "artifact_json_hashes": hashes,
-              "corpus_sha256": digest_file(OUT / "corpus.json") if (OUT / "corpus.json").exists() else None}
+    # Freeze the grader per run so later runner edits cannot change an in-flight
+    # experiment. Keep ROOT tied to QA, rather than to the private script copy.
+    worker_script = work / "worker-runner.py"
+    if not worker_script.exists():
+        worker_script.write_text(Path(__file__).read_text().replace(
+            "ROOT = Path(__file__).resolve().parents[1]", f"ROOT = Path({str(ROOT)!r})", 1))
+    report["worker_runner_sha256"] = digest_file(worker_script)
     private_results = work / "all-results.jsonl"
-    for index, q in enumerate(qs, 1):
+    started, rows = time.perf_counter(), checkpoint_rows(private_results, qs)
+    report.setdefault("sessions", []).append({"resumed_at": now(), "previously_completed": len(rows), "runner_sha256": digest_file(Path(__file__))})
+    write_json(work / "checkpoint.json", report)
+    for index, q in enumerate(qs[len(rows):], len(rows) + 1):
+        before_cost = ledger.totals(run_id)
         payload = {"engine_root": str(engine_root), "artifacts": str(artifacts), "cache": str(private / "model-cache"),
                    "cost_log": str(work / "model-costs.jsonl"), "ledger": ledger.path, "run_id": run_id,
                    "max_usd": args.max_usd, "case": q, "mode": args.mode, "timeout": args.timeout}
+        payload["grading_version"] = report.get("grading_version", 1)
         t0 = time.perf_counter()
-        proc = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), "_worker"], stdin=subprocess.PIPE,
+        proc = subprocess.Popen([sys.executable, str(worker_script), "_worker"], stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
         try:
             output, errors = proc.communicate(json.dumps(payload), timeout=args.timeout)
@@ -588,18 +645,24 @@ def run(args):
         r.update({"id": q["id"], "question": q["question"], "doc_ids": q["doc_ids"], "split": q.get("split", "public"),
                   "owner": "PERF" if r.get("error") == "question_timeout" else q.get("owner", "ROBUST"),
                   "wall_latency_ms": round((time.perf_counter() - t0) * 1000)})
+        after_cost = ledger.totals(run_id)
+        r["question_reported_cost_usd"] = round(after_cost["reported_usd"] - before_cost["reported_usd"], 8)
+        r["question_accounted_cost_usd"] = round(after_cost["accounted_usd"] - before_cost["accounted_usd"], 8)
         rows.append(r)
         with private_results.open("a") as f:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
         # No holdout IDs, prompts, or answers in progress output.
         print(f"{now()} {index}/{len(qs)} {r['split']} {r['status']} {r['latency_ms']}ms", flush=True)
-    report.update({"wall_s": round(time.perf_counter() - started, 3), "budget": ledger.totals(run_id),
+    report.update({"run_id": run_id, "wall_s": round(sum(r.get("wall_latency_ms", r["latency_ms"]) for r in rows) / 1000, 3),
+                   "latest_session_wall_s": round(time.perf_counter() - started, 3), "complete": len(rows) == len(qs),
+                   "budget": ledger.totals(run_id),
                    "row_budget": ledger.totals(), "summaries": {s: summarize([r for r in rows if r["split"] == s])
                                                             for s in sorted({r["split"] for r in rows})},
                    "results": [r for r in rows if r["split"] == "public"]})
     json_path = OUT / f"run-{run_id}.json"
     write_json(json_path, report)
     json_path.with_suffix(".md").write_text(report_markdown(report))
+    write_json(work / "checkpoint.json", {k: v for k, v in report.items() if k != "results"})
     print(json.dumps({"report": str(json_path.relative_to(ROOT)), "summaries": report["summaries"], "budget": report["budget"]}), flush=True)
     with HANDOFF.open("a") as f:
         f.write(f"\nSTATUS F-QA ({now()}): {args.revision}@{sha[:12]}, mode={args.mode}, "
@@ -610,29 +673,47 @@ def run(args):
 
 
 def watch(args):
-    # Read commits only; never enter/edit another worker's checkout. Snapshots are
-    # extracted from git objects inside QA's private temporary workspace.
-    seen_path = OUT / "watch-state.json"
-    seen = json.loads(seen_path.read_text()) if seen_path.exists() else {}
+    # matrix() records branch commits and skips unchanged tips on the next cycle.
     for cycle in range(args.cycles):
         deadline = time.monotonic() + args.interval
         while time.monotonic() < deadline:
             time.sleep(min(30, deadline - time.monotonic()))
-        refs = git("for-each-ref", "--format=%(refname:short) %(objectname)", "refs/heads/final/")
-        baseline = git("rev-parse", "main")
-        for line in refs.splitlines():
-            branch, sha = line.split()
-            if branch == "final/qa" or seen.get(branch) == sha or sha == baseline:
-                continue
-            args.revision = branch
-            run(args)
-            seen[branch] = sha
-            write_json(seen_path, seen)
-            if BudgetLedger(Path(private_state()["directory"]) / "budget.sqlite").totals()["accounted_usd"] >= 3:
-                return
+        matrix(args)
+
+
+def matrix(args):
+    """One scheduled sweep, using the public subsets recorded in a data plan."""
+    plan = json.loads(args.plan.read_text())
+    public = load_cases(args.input)
+    if any(q.get("split") != "public" for q in public):
+        raise ValueError("Branch comparisons require a public-only input file")
+    if args.include_holdout or args.include_unseen or args.resume:
+        raise ValueError("Branch comparisons use public cases only and cannot resume another run")
+    path = OUT / "branch-comparisons.json"
+    state = json.loads(path.read_text()) if path.exists() else {"runs": []}
+    done = {(r["branch"], r["commit"]) for r in state["runs"]}
+    for entry in plan["branches"]:
+        sha = git("rev-parse", entry["branch"] + "^{commit}")
+        if (entry["branch"], sha) in done:
+            continue
+        selected = [q for q in public if (not entry.get("owners") or q["owner"] in entry["owners"])
+                    and (not entry.get("case_ids") or q["id"] in entry["case_ids"])]
+        if not selected:
+            raise ValueError("Branch plan selected no public questions")
+        case_path = Path(private_state()["directory"]) / ("matrix-" + entry["branch"].replace("/", "-") + ".jsonl")
+        case_path.write_text("".join(json.dumps(q, ensure_ascii=False) + "\n" for q in selected))
+        opts = argparse.Namespace(**vars(args))
+        opts.input, opts.revision, opts.owner, opts.limit = case_path, sha, None, None
+        report = run(opts)
+        state["runs"].append({"branch": entry["branch"], "commit": sha, "created": report["created"],
+                              "case_ids": [q["id"] for q in selected], "scope": entry["scope"],
+                              "report": f"run-{report['run_id']}.json",
+                              "summaries": report["summaries"], "mode": report["mode"]})
+        write_json(path, state)
 
 
 def self_test():
+    sys.path.insert(0, str(ROOT))
     import unittest
     class Checks(unittest.TestCase):
         def setUp(self):
@@ -677,6 +758,8 @@ def self_test():
             self.assertTrue(grade(self.q, self.res)["exact_count_evidence"])
             self.res["citations"][0]["item_ids"] = ["a"]
             self.assertFalse(grade(self.q, self.res)["exact_count_evidence"])
+            self.assertIn("source_item_set_mismatch", grade(self.q, self.res)["issues"])
+            self.assertNotIn("source_item_set_mismatch", grade(self.q, self.res, strict=False)["issues"])
         def test_missing_reasoning(self):
             self.res.pop("reasoning")
             self.assertIn("no_reasoning_card", grade(self.q, self.res)["issues"])
@@ -696,10 +779,96 @@ def self_test():
                 led = BudgetLedger(Path(d) / "budget.sqlite", .2)
                 led.reserve("r", .1, .2)
                 self.assertEqual(led.totals()["unsettled_reserve_usd"], .1)
+        def test_guard_blocks_unknown_price(self):
+            from unittest.mock import Mock, patch
+            from engine.models import core, providers
+            with tempfile.TemporaryDirectory() as d:
+                led = BudgetLedger(Path(d) / "budget.sqlite")
+                adapter = Mock()
+                with patch.object(providers, "ADAPTERS", {"test": adapter}), patch.object(core, "config", return_value={"prices": {}}), patch.object(core, "MAX_RETRIES"):
+                    blocked = install_guard(led, "r", 1, "live")
+                    with self.assertRaises(core.BudgetExceeded):
+                        providers.ADAPTERS["test"]({}, "unknown", [], [], None, {}, "not-a-real-key")
+                    adapter.assert_not_called()
+                    self.assertEqual(blocked, ["unpriced_request"])
+                    self.assertEqual(led.totals()["requests"], 0)
+        def test_guard_reserves_before_failed_dispatch(self):
+            from unittest.mock import patch
+            from engine.models import core, providers
+            with tempfile.TemporaryDirectory() as d:
+                led = BudgetLedger(Path(d) / "budget.sqlite")
+                def adapter(*args):
+                    self.assertEqual(led.totals()["requests"], 1)
+                    raise RuntimeError("fixture provider failure")
+                cfg = {"prices": {"test": {"priced": {"in": 1, "out": 1}}}}
+                with patch.object(providers, "ADAPTERS", {"test": adapter}), patch.object(core, "config", return_value=cfg), patch.object(core, "MAX_RETRIES"):
+                    install_guard(led, "r", 1, "live")
+                    with self.assertRaises(RuntimeError):
+                        providers.ADAPTERS["test"]({}, "priced", [], [], None, {}, "not-a-real-key")
+                    self.assertGreater(led.totals()["unsettled_reserve_usd"], 0)
         def test_private_reporting(self):
             r = {"revision": "main", "commit": "abc", "created": now(), "mode": "code", "wall_s": 1,
                  "budget": {"reported_usd": 0, "accounted_usd": 0}, "summaries": {}, "results": []}
             self.assertNotIn("secret question", report_markdown(r))
+        def test_checkpoint_partial_line(self):
+            with tempfile.TemporaryDirectory() as d:
+                p = Path(d) / "rows.jsonl"
+                case = {"id": "a", "question": "Count doors", "doc_ids": ["test"]}
+                p.write_text(json.dumps(case) + '\n{"id":')
+                self.assertEqual(checkpoint_rows(p, [case]), [case])
+                self.assertEqual(len(p.read_text().splitlines()), 1)
+        def test_checkpoint_wrong_cases(self):
+            with tempfile.TemporaryDirectory() as d:
+                p = Path(d) / "rows.jsonl"
+                p.write_text('{"id":"other"}\n')
+                with self.assertRaises(ValueError):
+                    checkpoint_rows(p, [{"id": "a", "question": "Count doors", "doc_ids": ["test"]}])
+        def test_independent_ifc_schema_and_units(self):
+            import ifcopenshell
+            import ifcopenshell.guid
+            with tempfile.TemporaryDirectory() as d:
+                for schema in ("IFC2X3", "IFC4", "IFC4X3"):
+                    for imperial in (False, True):
+                        with self.subTest(schema=schema, imperial=imperial):
+                            f = ifcopenshell.file(schema=schema)
+                            metre = f.create_entity("IfcSIUnit", UnitType="LENGTHUNIT", Name="METRE", Prefix=None if imperial else "MILLI")
+                            unit = metre
+                            if imperial:
+                                dims = f.create_entity("IfcDimensionalExponents", 1, 0, 0, 0, 0, 0, 0)
+                                factor = f.create_entity("IfcMeasureWithUnit", ValueComponent=f.create_entity("IfcLengthMeasure", .3048), UnitComponent=metre)
+                                unit = f.create_entity("IfcConversionBasedUnit", Dimensions=dims, UnitType="LENGTHUNIT", Name="foot", ConversionFactor=factor)
+                            assignment = f.create_entity("IfcUnitAssignment", Units=[unit])
+                            f.create_entity("IfcProject", GlobalId=ifcopenshell.guid.new(), UnitsInContext=assignment)
+                            door = f.create_entity("IfcDoor", GlobalId=ifcopenshell.guid.new(), OverallWidth=2.5 if imperial else 800.)
+                            f.create_entity("IfcDoor", GlobalId=ifcopenshell.guid.new())
+                            storey = f.create_entity("IfcBuildingStorey", GlobalId=ifcopenshell.guid.new(), Name="Unit fixture")
+                            f.create_entity("IfcRelContainedInSpatialStructure", GlobalId=ifcopenshell.guid.new(), RelatedElements=[door], RelatingStructure=storey)
+                            flow = f.create_entity("IfcFlowSegment", GlobalId=ifcopenshell.guid.new())
+                            typ = f.create_entity("IfcPipeSegmentType", GlobalId=ifcopenshell.guid.new(), PredefinedType="NOTDEFINED")
+                            f.create_entity("IfcRelDefinesByType", GlobalId=ifcopenshell.guid.new(), RelatedObjects=[flow], RelatingType=typ)
+                            path = Path(d) / "fixture.ifc"
+                            f.write(str(path))
+                            r = raw_ifc(path)
+                            self.assertEqual(r["counts"]["door"], 2)
+                            self.assertEqual(r["counts"]["pipe"], 1)
+                            self.assertAlmostEqual(r["unit_scale_m"], .3048 if imperial else .001)
+                            self.assertEqual(r["narrow_door_ids"], [door.GlobalId])
+                            self.assertEqual(r["missing_width_count"], 1)
+                            self.assertEqual(r["storey_ids"], [door.GlobalId])
+                            self.assertEqual(len(r["missing_fire_ids"]), 2)
+        def test_missing_source_units_have_no_width_gold(self):
+            import ifcopenshell
+            import ifcopenshell.guid
+            with tempfile.TemporaryDirectory() as d:
+                f = ifcopenshell.file(schema="IFC4")
+                f.create_entity("IfcProject", GlobalId=ifcopenshell.guid.new())
+                f.create_entity("IfcDoor", GlobalId=ifcopenshell.guid.new(), OverallWidth=.8)
+                path = Path(d) / "missing-units.ifc"
+                f.write(str(path))
+                r = raw_ifc(path)
+                self.assertIsNone(r["unit_scale_m"])
+                cases = doc_cases("fixture", {"kind": "ifc"}, r)
+                self.assertIsNone(next(q for q in cases if q["id"].endswith(":width"))["expected"])
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(Checks)
     result = unittest.TextTestRunner(verbosity=1).run(suite)
     return 0 if result.wasSuccessful() else 1
@@ -707,7 +876,7 @@ def self_test():
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("command", choices=("build", "unseen", "run", "watch", "self-test", "_reference", "_worker"))
+    p.add_argument("command", choices=("build", "unseen", "run", "watch", "matrix", "self-test", "_reference", "_worker"))
     p.add_argument("extra", nargs="*")
     p.add_argument("--input", type=Path, default=CASES)
     p.add_argument("--revision", default="main")
@@ -715,6 +884,9 @@ def main():
     p.add_argument("--max-usd", type=float, default=1)
     p.add_argument("--timeout", type=float, default=55)
     p.add_argument("--limit", type=int)
+    p.add_argument("--owner", action="append", help="Restrict to public owner areas; repeat for several areas")
+    p.add_argument("--resume", help="Continue a checkpointed run id with the same options")
+    p.add_argument("--plan", type=Path, default=OUT / "branch-plan.json")
     p.add_argument("--include-holdout", action="store_true")
     p.add_argument("--include-unseen", action="store_true")
     p.add_argument("--interval", type=float, default=3600)
@@ -733,6 +905,8 @@ def main():
         return self_test()
     elif args.command == "watch":
         watch(args)
+    elif args.command == "matrix":
+        matrix(args)
     else:
         run(args)
     return 0

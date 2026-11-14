@@ -51,16 +51,6 @@
       ],
       "unit_scale_m": 0.001,
       "storey_count": 17,
-      "raw_counts": {
-        "door": 1049,
-        "window": 850,
-        "column": 0,
-        "beam": 41,
-        "pipe": 0,
-        "duct": 0,
-        "light": 0,
-        "sprinkler": 0
-      },
       "raw_entities": null,
       "raw_entity_types": null,
       "raw_dxf_insunits": null
@@ -77,16 +67,6 @@
       ],
       "unit_scale_m": 0.001,
       "storey_count": 19,
-      "raw_counts": {
-        "door": 0,
-        "window": 0,
-        "column": 0,
-        "beam": 0,
-        "pipe": 10957,
-        "duct": 0,
-        "light": 0,
-        "sprinkler": 0
-      },
       "raw_entities": null,
       "raw_entity_types": null,
       "raw_dxf_insunits": null
@@ -103,16 +83,6 @@
       ],
       "unit_scale_m": 0.001,
       "storey_count": 17,
-      "raw_counts": {
-        "door": 0,
-        "window": 0,
-        "column": 0,
-        "beam": 0,
-        "pipe": 3045,
-        "duct": 2189,
-        "light": 0,
-        "sprinkler": 0
-      },
       "raw_entities": null,
       "raw_entity_types": null,
       "raw_dxf_insunits": null
@@ -129,16 +99,6 @@
       ],
       "unit_scale_m": 0.001,
       "storey_count": 17,
-      "raw_counts": {
-        "door": 0,
-        "window": 0,
-        "column": 0,
-        "beam": 0,
-        "pipe": 112,
-        "duct": 0,
-        "light": 1490,
-        "sprinkler": 0
-      },
       "raw_entities": null,
       "raw_entity_types": null,
       "raw_dxf_insunits": null
@@ -155,16 +115,6 @@
       ],
       "unit_scale_m": 1.0,
       "storey_count": 3,
-      "raw_counts": {
-        "door": 0,
-        "window": 0,
-        "column": 195,
-        "beam": 738,
-        "pipe": 0,
-        "duct": 0,
-        "light": 0,
-        "sprinkler": 0
-      },
       "raw_entities": null,
       "raw_entity_types": null,
       "raw_dxf_insunits": null
@@ -181,16 +131,6 @@
       ],
       "unit_scale_m": 0.001,
       "storey_count": 7,
-      "raw_counts": {
-        "door": 0,
-        "window": 315,
-        "column": 545,
-        "beam": 536,
-        "pipe": 3917,
-        "duct": 85,
-        "light": 494,
-        "sprinkler": 0
-      },
       "raw_entities": null,
       "raw_entity_types": null,
       "raw_dxf_insunits": null
@@ -205,7 +145,6 @@
       "authoring_tools": null,
       "unit_scale_m": null,
       "storey_count": null,
-      "raw_counts": null,
       "raw_entities": 1783,
       "raw_entity_types": {
         "LWPOLYLINE": 1077,
@@ -226,7 +165,6 @@
       "authoring_tools": null,
       "unit_scale_m": null,
       "storey_count": null,
-      "raw_counts": null,
       "raw_entities": 293482,
       "raw_entity_types": {
         "3DFACE": 293482
@@ -243,7 +181,6 @@
       "authoring_tools": null,
       "unit_scale_m": null,
       "storey_count": null,
-      "raw_counts": null,
       "raw_entities": null,
       "raw_entity_types": null,
       "raw_dxf_insunits": null
@@ -258,7 +195,6 @@
       "authoring_tools": null,
       "unit_scale_m": null,
       "storey_count": null,
-      "raw_counts": null,
       "raw_entities": null,
       "raw_entity_types": null,
       "raw_dxf_insunits": null
@@ -273,7 +209,6 @@
       "authoring_tools": null,
       "unit_scale_m": null,
       "storey_count": null,
-      "raw_counts": null,
       "raw_entities": null,
       "raw_entity_types": null,
       "raw_dxf_insunits": null
@@ -290,16 +225,6 @@
       ],
       "unit_scale_m": 1.0,
       "storey_count": 5,
-      "raw_counts": {
-        "door": 68,
-        "window": 70,
-        "column": 114,
-        "beam": 1,
-        "pipe": 142,
-        "duct": 0,
-        "light": 0,
-        "sprinkler": 0
-      },
       "raw_entities": null,
       "raw_entity_types": null,
       "raw_dxf_insunits": null
@@ -316,16 +241,6 @@
       ],
       "unit_scale_m": 1.0,
       "storey_count": 5,
-      "raw_counts": {
-        "door": 68,
-        "window": 70,
-        "column": 114,
-        "beam": 1,
-        "pipe": 151,
-        "duct": 0,
-        "light": 0,
-        "sprinkler": 0
-      },
       "raw_entities": null,
       "raw_entity_types": null,
       "raw_dxf_insunits": null

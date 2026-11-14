@@ -1,0 +1,104 @@
+{
+  "created": "2026-11-14T21:12:59+00:00",
+  "seed": 20261114,
+  "baseline_commit": "60efc46c0671dbd10026f2351d4720b15836d1ce",
+  "branches": [
+    {
+      "branch": "final/mep",
+      "owners": [
+        "MEP"
+      ],
+      "scope": "Services questions; existing indexed artifacts, not ingestion."
+    },
+    {
+      "branch": "final/props",
+      "owners": [
+        "PROPS"
+      ],
+      "scope": "Property and structural count questions."
+    },
+    {
+      "branch": "final/proj-engine",
+      "owners": [
+        "PROJECTS"
+      ],
+      "scope": "Per-storey and cross-model questions."
+    },
+    {
+      "branch": "final/changes",
+      "owners": [
+        "CHANGES"
+      ],
+      "scope": "Before/project raw-count differences."
+    },
+    {
+      "branch": "final/order",
+      "owners": [
+        "ORDER"
+      ],
+      "scope": "Requested allowances and ordering completeness."
+    },
+    {
+      "branch": "final/scales",
+      "owners": [
+        "SCALES"
+      ],
+      "scope": "Scale and width questions; existing artifacts, not fresh ingest."
+    },
+    {
+      "branch": "final/scansym",
+      "owners": [
+        "SCANSYM"
+      ],
+      "scope": "Scan/DXF behaviour only; no numeric oracle or fresh-ingest check."
+    },
+    {
+      "branch": "final/mistakes",
+      "owners": [
+        "MISTAKES"
+      ],
+      "scope": "Missing/conflicting data behaviour; no numeric oracle."
+    },
+    {
+      "branch": "final/perf",
+      "owners": null,
+      "scope": "One fixed-seed public control per file; latency smoke, not full performance certification.",
+      "case_ids": [
+        "cubicasa5k__high-quality-architectural-1269:doors",
+        "ifc_bench__dental-clinic-str:window",
+        "ifc_bench__sixty5-arc:window",
+        "ifc_bench__sixty5-electrical:pipe",
+        "ifc_bench__sixty5-plumbing:window",
+        "ifc_bench__sixty5-ventilation:column",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:beam",
+        "ifc_models__bimspeed-vitoria-ald26-before:column",
+        "ifc_models__bimspeed-vitoria-ald26-project:window",
+        "opening_design__crema-cafe-models-crema-cafe-6-blend:windows",
+        "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:windows",
+        "swiss_dwellings__site961-bldg2019-floor8945:windows",
+        "wikimedia__79521417:doors"
+      ]
+    },
+    {
+      "branch": "final/robust",
+      "owners": null,
+      "scope": "One fixed-seed public control per file; answer stability, not upload-ingestion validation.",
+      "case_ids": [
+        "cubicasa5k__high-quality-architectural-1269:doors",
+        "ifc_bench__dental-clinic-str:window",
+        "ifc_bench__sixty5-arc:window",
+        "ifc_bench__sixty5-electrical:pipe",
+        "ifc_bench__sixty5-plumbing:window",
+        "ifc_bench__sixty5-ventilation:column",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:beam",
+        "ifc_models__bimspeed-vitoria-ald26-before:column",
+        "ifc_models__bimspeed-vitoria-ald26-project:window",
+        "opening_design__crema-cafe-models-crema-cafe-6-blend:windows",
+        "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:windows",
+        "swiss_dwellings__site961-bldg2019-floor8945:windows",
+        "wikimedia__79521417:doors"
+      ]
+    }
+  ],
+  "excluded": "Web/3D/iOS-only branches cannot be exercised by engine.answer.answer."
+}
