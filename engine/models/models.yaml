@@ -9,6 +9,8 @@ providers:
   nvidia:    {env: NVIDIA_API_KEY,     base_url: "https://integrate.api.nvidia.com/v1"}
   anthropic: {env: ANTHROPIC_API_KEY,  base_url: "https://api.anthropic.com/v1", version: "2026-10-21"}
   runware:   {env: RUNWARE_API_KEY,    base_url: "https://api.runware.ai/v1"}
+  runware_claude: {env: RUNWARE_API_KEY, base_url: "https://api.runware.ai/v1", bearer: true, version: "2026-10-21"}   # Anthropic Messages format via Runware (Claude 5.x family)
+  verda:     {env: VERDA_INFERENCE_KEY, base_url: "https://containers.datacrunch.io/nemotron-3-5-super-vl-b300/v1"}
   featherless: {env: FEATHERLESS_API_KEY, base_url: "https://api.featherless.ai/v1"}
   # voice_id = "River - Relaxed, Neutral, Informative" (premade voice; listed by GET /v1/voices on 2026-11-14)
   elevenlabs: {env: ELEVENLABS_API_KEY, base_url: "https://api.elevenlabs.io/v1", voice_id: SAz9YHcvj6GT2YYXdXww}
@@ -23,10 +25,18 @@ prices:
     nvidia/nemotron-3.5-lightning-30b-a3b: {in: 0, out: 0}
     nvidia/nemotron-3-super-120b-a12b:     {in: 0, out: 0}
     nvidia/nemotron-3.5-super-vl-120b-a12b: {in: 0, out: 0}
+  verda:       # dedicated Verda container, billed by time: no per-token cost to us
+    nemotron-3.5-super-vl: {in: 0, out: 0}
   anthropic:
     # https://platform.claude.com/docs/en/about-claude/pricing (Haiku 5.5: $0.50/$2.50 applies over 100k prompt tokens; table uses <=100k rate)
     claude-sonnet-5-5: {in: 2.00, out: 10.00}
     claude-haiku-5-5:  {in: 0.10, out: 0.50}
+  runware_claude:   # input $/M from Runware's model listing (Ash, 2026-11-14); output = 5x input like Anthropic's own table: UNVERIFIED for opus-5.5 / fable-5.2 / opus-5
+    claude-haiku-5-5:  {in: 0.10, out: 0.50}
+    claude-sonnet-5-5: {in: 2.00, out: 10.00}
+    claude-opus-5-5:   {in: 4.00, out: 20.00}
+    claude-fable-5-2:  {in: 8.00, out: 40.00}
+    claude-opus-5:     {in: 5.00, out: 25.00}   # input price not listed: assumed, unverified
   featherless:
     # https://api.featherless.ai/v1/models (pricing field)
     Qwen/Qwen3-VL-30B-A3B-Instruct:      {in: 0.15,  out: 0.50}
@@ -57,6 +67,7 @@ tasks:
     fallback:
       - {provider: runware, model: "google:gemini@3.5-flash"}
       - {provider: gemini,  model: gemini-3.5-flash-lite}
+      - {provider: verda, model: nemotron-3.5-super-vl}   # ~90 s per call on 2026-11-14 (cold/loaded): last resort only
   read_drawing:
     provider: gemini
     model: gemini-3.8-flash
@@ -64,6 +75,23 @@ tasks:
     fallback:
       - {provider: featherless, model: Qwen/Qwen3-VL-30B-A3B-Instruct}
       - {provider: runware,     model: "google:gemini@3.5-flash"}
+      - {provider: verda, model: nemotron-3.5-super-vl}   # ~90 s per call on 2026-11-14 (cold/loaded): last resort only
+  recount:     # count one kind of object on a raster plan page (engine/recount.py); cheap vision, Runware first (no Gemini key needed)
+    provider: runware
+    model: "google:gemini@3.1-flash-lite"
+    max_tokens: 200
+    temperature: 0
+    fallback:
+      - {provider: gemini,  model: gemini-3.5-flash-lite}
+      - {provider: runware, model: "google:gemini@3.5-flash"}
+  forced_answer:   # last rung (engine/forced.py): a best-effort answer instead of an abstention; cheapest vision model first
+    provider: runware
+    model: "google:gemini@3.1-flash-lite"
+    max_tokens: 500
+    temperature: 0
+    fallback:
+      - {provider: gemini,  model: gemini-3.5-flash-lite}
+      - {provider: verda,   model: nemotron-3.5-super-vl}
   verify_item:
     provider: gemini
     model: gemini-3.5-flash-lite
@@ -71,6 +99,7 @@ tasks:
     fallback:
       - {provider: nvidia,  model: nvidia/nemotron-3.5-super-vl-120b-a12b}
       - {provider: runware, model: "google:gemini@3.1-flash-lite"}
+      - {provider: verda, model: nemotron-3.5-super-vl}   # ~90 s per call on 2026-11-14 (cold/loaded): last resort only
   write_answer:
     provider: anthropic
     model: claude-sonnet-5-5
@@ -78,6 +107,7 @@ tasks:
     fallback:
       - {provider: gemini,  model: gemini-3.8-flash}
       - {provider: runware, model: "anthropic:claude@sonnet-4.6"}
+      - {provider: verda, model: nemotron-3.5-super-vl}   # ~90 s per call on 2026-11-14 (cold/loaded): last resort only
   chat:   # free conversation with no document selected (engine/assistant.py system prompt); text only, never project numbers
     provider: anthropic
     model: claude-sonnet-5-5
@@ -86,6 +116,7 @@ tasks:
       - {provider: runware, model: "anthropic:claude@sonnet-4.6"}
       - {provider: runware, model: "google:gemini@3.1-flash-lite"}
       - {provider: nvidia,  model: nvidia/nemotron-3.5-lightning-30b-a3b }
+      - {provider: verda, model: nemotron-3.5-super-vl}   # ~90 s per call on 2026-11-14 (cold/loaded): last resort only
   scene_intent:   # odd phrasing of a viewer command (E-20); Nemotron first, tiny outputs
     provider: nvidia
     model: nvidia/nemotron-3.5-lightning-30b-a3b

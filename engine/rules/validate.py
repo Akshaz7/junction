@@ -56,6 +56,17 @@ def to_text(data: bytes) -> str:
 _cache: dict[str, tuple[int, str]] = {}
 
 
+def _curl(url: str) -> bytes | None:
+    """ym.fi serves an incomplete certificate chain that Python's CA bundle rejects; curl (verifying, with the
+    system trust store and AIA fetching) accepts it. Verification stays on; this is not a bypass."""
+    import subprocess
+    try:
+        r = subprocess.run(["curl", "-fsSL", "--max-time", "60", "-A", UA, url], capture_output=True, timeout=70)
+    except Exception:
+        return None
+    return r.stdout if r.returncode == 0 and r.stdout else None
+
+
 def fetch(url: str) -> tuple[int, str]:
     if url in _cache:
         return _cache[url]
@@ -66,8 +77,11 @@ def fetch(url: str) -> tuple[int, str]:
     except urllib.error.HTTPError as e:
         code, data = e.code, b""
     except Exception as e:  # network down, DNS, timeout
-        _cache[url] = (0, f"{type(e).__name__}: {e}")
-        return _cache[url]
+        got = _curl(url) if "CERTIFICATE_VERIFY_FAILED" in str(e) else None
+        if got is None:
+            _cache[url] = (0, f"{type(e).__name__}: {e}")
+            return _cache[url]
+        code, data = 200, got
     try:
         text = to_text(data) if code == 200 else ""
     except Exception as e:

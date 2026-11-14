@@ -187,7 +187,7 @@ def _qty(it: Item, kind: str, t: str) -> float | None:
         return None if v is None else float(v)
     if t == "volume":
         for k in ("net_volume_m3", "volume_m3", "gross_volume_m3"):
-            if q.get(k) is not None:
+            if q.get(k) is not None and float(q[k]) > 1e-6:   # an exact zero is a missing quantity, not an empty element
                 return float(q[k])
     return None
 
@@ -278,6 +278,40 @@ def ifc_fixtures(doc: Doc, kind: str):
     return [], ""
 
 
+def _solve_multi(question, doc_id, p: Parsed, root, page, hidden, t0) -> dict:
+    """'how many windows and doors': one single-kind solve per kind (same filters, still $0), merged into one answer.
+    Boxes are numbered 1..N across kinds; every box and citation carries its kind, and scene.item_kinds maps
+    item_id -> kind, so the views can colour by kind."""
+    from dataclasses import replace
+    subs = [(k, solve(question, doc_id, replace(p, kind=k, kinds=[k], reason="how-many"), root, page, hidden)) for k in p.kinds]
+    trace = [_step("route", f"count / {' + '.join(p.kinds)} / {p.scope or 'unscoped'} -> code, no model (one count per kind)")]
+    for k, r in subs:
+        if r["answer"]["abstained"]:
+            trace += [dict(t) for t in r["trace"][1:]]
+            return _answer_obj(question, [doc_id], r["answer"]["text_md"], None, None, 0.0, True, [], [],
+                               {"doc_id": doc_id, "highlight_item_ids": [], "camera_target_item_id": None}, trace, r["route"], t0)
+    boxes, cites, ids, item_kinds, counts, parts, confs = [], [], [], {}, {}, [], []
+    offset = 0
+    for k, r in subs:
+        n = int(r["answer"]["value"])
+        counts[k] = n
+        confs.append(r["answer"]["confidence"])
+        trace += [dict(t, detail=f"[{k}] {t['detail']}") for t in r["trace"][1:]]
+        for b in r["evidence"]["boxes"]:
+            boxes.append({**b, "label": str(int(b["label"]) + offset), "kind": k})
+        for c in r["citations"]:
+            cites.append({**c, "n": len(cites) + 1, "item_kind": k})
+        sc_ids = r["evidence"]["scene"]["highlight_item_ids"]
+        ids += sc_ids
+        item_kinds.update({i: k for i in sc_ids})
+        offset += len(r["evidence"]["boxes"])
+        parts.append(f"**{n} {_plural(k, n)}**")
+    where = "on this floor plan" if subs[0][1]["route"] == "planmap" else "in this model"
+    text = f"There {'is' if sum(counts.values()) == 1 else 'are'} " + (", ".join(parts[:-1]) + " and " + parts[-1]) + f" {where}. " + _cite_marks(cites)
+    scene = {"doc_id": doc_id, "highlight_item_ids": ids, "camera_target_item_id": ids[0] if ids else None, "item_kinds": item_kinds}
+    return _answer_obj(question, [doc_id], text, counts, "count", min(confs), False, boxes, cites, scene, trace, subs[0][1]["route"], t0)
+
+
 def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path | str = ARTIFACTS,
           page: int | None = None, hidden: dict[str, str] | None = None) -> dict:
     """hidden: {item_id: tag} the chat has hidden in the scene; they are left out and the answer says so."""
@@ -285,8 +319,13 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
     p = parsed or parse(question)
     if p.type not in NUMERIC:
         raise SolverUnsupported(f"type {p.type}")
+    if p.type == "count" and len(p.kinds or []) > 1:
+        return _solve_multi(question, doc_id, p, root, page, hidden, t0)
     trace = [_step("route", f"{p.type} / {p.kind} / {p.scope or 'unscoped'} -> " + "code, no model")]
     doc = load_doc(doc_id, Path(root))
+    if doc is None:
+        from .data import load_sheet_parent
+        doc = load_sheet_parent(doc_id, Path(root), whole=bool(re.search(r"\b(?:in|of|across) the (?:whole |entire )?model\b", question, re.I)))
     if doc is None:
         return _abstain(question, doc_id, "I have no structured data for this document yet, so I cannot answer that reliably.",
                         trace, "index", t0)
@@ -312,6 +351,8 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
     if kind in ("shower", "bathtub") and re.search(r"\bshowers?\b", question, re.I) and re.search(r"\bbath ?tubs?\b", question, re.I):
         kinds = {"shower", "bathtub"}   # "showers and bathtubs in total"
     items = [i for i in doc.items if i.kind in kinds]
+    if kind == "stairs" and doc.mode == "ifc" and any(i.props.get("ifc_class") == "IfcStair" for i in items):
+        items = [i for i in items if i.props.get("ifc_class") != "IfcStairFlight"]   # flights are parts of a stair
     if doc.mode == "ifc" and kind in FIXTURE_RX and not items:
         items, how = ifc_fixtures(doc, kind)
         if how:
@@ -364,6 +405,11 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
     subject = None
     sub_name = None
     quoted = _quoted(question)
+    # a quoted name that is the model's / sheet's title or a storey is the scope, not an element label
+    _scope_names = {str(x).casefold().strip() for x in [doc.title, doc.meta.get("project"), doc.meta.get("building"),
+                    *[st_["name"] for st_ in doc.storeys]] if x}
+    _scope_names |= {t.split(" - Floor plan")[0].strip().casefold() for t in [doc.title] if t}
+    quoted = [t for t in quoted if t.casefold().strip() not in _scope_names and not (doc.title and t.casefold().strip() in doc.title.casefold() and len(t) > 6)]
     if kind == "room" and doc.mode == "planmap" and re.search(r"\bnumbered\b.*\b(?:indoor|interior)\b|\b(?:indoor|interior)\b.*\bnumbered\b", question, re.I):
         out = re.compile(r"balcon|balkon|terras|loggia|veranda|garden|outdoor", re.I)
         items = [i for i in items if i.props.get("number") and not out.search(i.label or "")]
@@ -392,7 +438,12 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
                 if m:
                     pid = m.group(1).strip().casefold()
                     tail = pid.split()[-1]
-                    sel += [i for i in items if (i.name or "").casefold() in (pid, tail) or str(i.props.get("number") or "").casefold() == tail]
+                    cand = [i for i in items if (i.name or "").casefold() in (pid, tail) or str(i.props.get("number") or "").casefold() == tail]
+                    base = re.sub(r"\s*\([^)]*\)\s*$", "", t).strip().casefold()
+                    if len(cand) > 1 and base:   # the same number in several rooms: the name before the bracket tells them apart
+                        nar = [i for i in cand if base in _room_text(i).casefold() or base == (i.label or "").casefold()]
+                        cand = nar or cand
+                    sel += cand
         if not sel and quoted:
             sel = [i for i in items if any(_label_matches(i, t) for t in quoted)]
         if not sel and rid:
@@ -435,12 +486,18 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         return _answer_obj(question, [doc_id], text, n, "count", conf, False, boxes, cites, scene, trace, route, t0)
 
     vals = [(i, _qty(i, kind, p.type)) for i in items]
-    if doc.mode == "ifc" and kind == "room" and p.type == "area" and len(items) <= 50 and any(v is None for _, v in vals):
+    if doc.mode == "ifc" and kind == "room" and p.type == "area" and len(items) <= 400 and any(v is None for _, v in vals):
         from engine.solvers.glbarea import room_floor_area_m2
-        glb = Path(root) / doc_id / "scene.glb"
+        glb = Path(root) / (doc.meta.get("sheet_of") or doc_id) / "scene.glb"
         if glb.exists():
             vals = [(i, v if v is not None else room_floor_area_m2(glb, i.item_id)) for i, v in vals]
             trace.append(_step("area", "room floor area measured from the scene mesh (no area quantity in the model)"))
+    if doc.mode == "ifc" and p.type == "volume" and len(items) <= 400 and any(v is None for _, v in vals):
+        from engine.solvers.glbarea import element_volume_m3
+        glb = Path(root) / (doc.meta.get("sheet_of") or doc_id) / "scene.glb"
+        if glb.exists():
+            vals = [(i, v if v is not None else element_volume_m3(glb, i.item_id)) for i, v in vals]
+            trace.append(_step("volume", "volume measured from the scene mesh (no volume quantity in the model)"))
     have = [(i, v) for i, v in vals if v is not None]
     unit = UNIT[p.type]
     scale_note = ""

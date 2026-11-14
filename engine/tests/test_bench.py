@@ -20,6 +20,7 @@ def rows():
 def test_run_scores_and_cells(monkeypatch):
     monkeypatch.setenv("ARTIFACTS_DIR", str(FIX))
     monkeypatch.setenv("MODELS_FAKE", "1")
+    monkeypatch.setenv("FORCE_ANSWER", "0")   # this test is about scoring abstentions
     r = bench.run(rows(), answer, concurrency=3)
     assert [x["outcome"] for x in r["results"]].count("correct") == 1
     c = r["cells"]

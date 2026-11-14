@@ -118,8 +118,64 @@ def _chat_answer(question, history, trace, t0, add, emit):
     return out
 
 
+def _recount_ladder(res, question, did, parsed, root, calls, hidden):
+    """Raster plan counts of doors, windows, sinks, WCs, showers/baths are weak: recount with one cheap vision call and reconcile
+    (rules picked on calibration drawings, engine/recount.py). Plan maps from vector sources (DXF) are exact and skipped."""
+    from engine.recount import KIND_OF, recount, reconcile
+    ans = res["answer"]
+    if (os.environ.get("RECOUNT", "1") == "0" or os.environ.get("MODELS_FAKE") or hidden or parsed.type != "count" or parsed.kind not in KIND_OF
+            or ans.get("abstained") or not isinstance(ans.get("value"), (int, float))):
+        return res
+    try:
+        from engine.solvers.data import load_doc
+        doc = load_doc(did, root)
+        if doc is None or doc.mode != "planmap" or not any(i.source == "det" for i in doc.items):
+            return res
+        img = Path(root) / did / "page-1.png"
+        if not img.exists():
+            return res
+        n, usd, model = recount(question, img, KIND_OF[parsed.kind])
+    except Exception:  # noqa: BLE001
+        return res
+    if n is None:
+        return res
+    calls.append({"task": "recount", "provider": "vision", "model": model, "cost_usd": usd})
+    plan_n = int(ans["value"])
+    final = reconcile(parsed.kind, plan_n, n)
+    res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n} -> {final}", 0, model, usd))
+    if final != plan_n:
+        noun = re.sub(r"^.*?\*\*\d+ ([^*]+)\*\*.*$", r"\1", ans["text_md"], flags=re.S) if re.search(r"\*\*\d+ ", ans["text_md"]) else parsed.kind + "s"
+        ans["value"] = final
+        ans["text_md"] = f"There {'is' if final == 1 else 'are'} **{final} {noun if final != 1 else noun.rstrip('s')}** on this floor plan (re-counted from the drawing image; low-resolution detection disagreed)."
+        ans["confidence"] = round(min(ans.get("confidence", 0.5), 0.5), 3)
+    return res
+
+
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None) -> dict:
+    """Code -> vision recount -> reader -> forced best-effort answer. Never abstains on a selected document (FORCE_ANSWER=0 restores abstaining)."""
+    res = _answer_core(question, doc_ids, on_event, scene_state=scene_state, history=history)
+    if (os.environ.get("FORCE_ANSWER", "1") == "0" or not doc_ids or not (question or "").strip() or not res["answer"].get("abstained")
+            or parse_scene(question) is not None or _other_doc(question, doc_ids)):
+        return res
+    _t = res["answer"].get("text_md", "")
+    if ("does not record" in _t or _t.lstrip("*").startswith(("No beam", "No pipe or MEP"))) and parse(question).type not in ("count", "area", "length", "volume"):
+        res["answer"].update({"abstained": False, "confidence": 0.5})   # a checked statement that the model lacks this data is an answer
+        return res
+    try:
+        from engine.forced import forced_answer
+        (on_event or (lambda k, p: None))("status", {"text": "Estimating from the drawing…"})
+        trace = list(res.get("trace") or [])
+        calls = list((res.get("cost") or {}).get("calls") or [])
+        f = forced_answer(question, doc_ids, _root(), parse(question), trace, calls)
+        f["latency_ms"] = res.get("latency_ms", 0) + f["latency_ms"]
+        return f
+    except Exception:  # noqa: BLE001
+        return res
+
+
+def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
+                 history: list[dict] | None = None) -> dict:
     emit = on_event or (lambda kind, payload: None)
     t0 = time.perf_counter()
     root = _root()
@@ -263,6 +319,7 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
                 res = solve(question, did, parsed=parsed, root=root, hidden=hid)
             except SolverUnsupported:
                 continue
+            res = _recount_ladder(res, question, did, parsed, root, calls, hid)
             for s in res["trace"]:
                 if s["step"] != "route":
                     add(s)

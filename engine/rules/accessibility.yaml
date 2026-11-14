@@ -2,6 +2,13 @@
 # (a Government decree, not a Ministry decree), published by Finlex in Finnish and Swedish only.
 # No official English translation exists on Finlex, so each `quote` is the verbatim Finnish text and
 # `quote_en` / `text` are our own translation (marked "unofficial: our translation").
+#
+# Applicability under the Building Act (751/2023, in force 1 Jan 2025), checked 2026-11-14 on Finlex: Act 752/2023,
+# final provision: "Tällä lailla kumottujen säännösten nojalla annetut asetukset jäävät voimaan, kunnes niistä
+# toisin säädetään." (decrees issued under repealed provisions stay in force until changed). This decree was
+# issued under the old Land Use and Building Act, and the ym.fi National Building Code page still lists it, so
+# it still applies. The Finnish quotes below also appear in the consolidated text at
+# https://www.finlex.fi/fi/lainsaadanto/2017/241.
 rules:
   - id: fi-acc-door-clear-width
     text: "Doors and openings on an internal route in a building, and doors from a stairwell into a dwelling, must have a clear width of at least 850 mm."

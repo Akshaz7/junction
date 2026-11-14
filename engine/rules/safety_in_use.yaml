@@ -1,0 +1,108 @@
+# Safety in use of buildings, Decree of the Ministry of the Environment 1007/2017 (Ympäristöministeriön asetus
+# rakennuksen käyttöturvallisuudesta). English quotes come from the Ministry of the Environment's own English
+# translation (ym.fi). The Ministry marks it unofficial, so every rule here says so in `translation`; the
+# Finnish text on Finlex is the legal text and `finnish_url` / `finnish_quote` point to it.
+#
+# Applicability under the Building Act (751/2023, in force 1 Jan 2025), checked 2026-11-14 on Finlex:
+# Act 752/2023 (changes to the old Land Use and Building Act), final provision: "Tällä lailla kumottujen
+# säännösten nojalla annetut asetukset jäävät voimaan, kunnes niistä toisin säädetään." (decrees issued under
+# repealed provisions stay in force until changed). 1007/2017 was issued under MRL 117 d and 117 k, so it
+# still applies. The ym.fi National Building Code page still lists 1007/2017, 848/2017 and 241/2017.
+rules:
+  - id: fi-use-stair-width
+    text: "Indoor stairs in an evacuation area must be at least 0.85 m wide."
+    source_title: "Decree of the Ministry of the Environment on safety in use of buildings 1007/2017 (unofficial English translation by the Ministry of the Environment)"
+    section: "3 §"
+    url: "https://ym.fi/documents/1410903/0/YMa+k%C3%A4ytt%C3%B6turvallisuus+1007_2017+EN.pdf/ee85f7a4-0ef7-d489-a450-70a2469a2361?t=1668155648754"
+    quote: "The minimum width of indoor stairs in an evacuation area is 0.85 metres."
+    quote_en: "The minimum width of indoor stairs in an evacuation area is 0.85 metres."
+    translation: "unofficial: ministry translation (ym.fi)"
+    finnish_url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/1007"
+    finnish_quote: "Poistumisalueen sisäisen portaan vähimmäisleveys on 0,85 metriä."
+    check_id: stair_width
+    params: {min_width_m: 0.85}
+    note: "Checked only where the model has a stair flight with a measurable footprint. Exit stairs may need more (848/2017 §34)."
+
+  - id: fi-use-stair-dwelling-riser-tread
+    text: "Indoor stairs inside a dwelling: riser at most 190 mm, tread at least 250 mm."
+    source_title: "Decree of the Ministry of the Environment on safety in use of buildings 1007/2017 (unofficial English translation by the Ministry of the Environment)"
+    section: "4 §"
+    url: "https://ym.fi/documents/1410903/0/YMa+k%C3%A4ytt%C3%B6turvallisuus+1007_2017+EN.pdf/ee85f7a4-0ef7-d489-a450-70a2469a2361?t=1668155648754"
+    quote: "The riser of the indoor steps of dwelling units and living quarters may be no more than 190 millimetres, and the tread must be no less than 250 millimetres."
+    quote_en: "The riser of the indoor steps of dwelling units and living quarters may be no more than 190 millimetres, and the tread must be no less than 250 millimetres."
+    translation: "unofficial: ministry translation (ym.fi)"
+    finnish_url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/1007"
+    finnish_quote: "Asuinhuoneiston ja majoitustilan sisäisen portaan nousu voi olla enintään 190 millimetriä ja etenemän on oltava vähintään 250 millimetriä."
+    check_id: stair_riser_tread_dwelling
+    params: {max_riser_mm: 190, min_tread_mm: 250}
+    note: "Needs riser and tread values on the stair. Models without them (for example IfcStair without quantities) cannot be checked."
+
+  - id: fi-use-stair-exit-riser-tread
+    text: "Stairs in an exit: riser at most 180 mm, tread at least 270 mm."
+    source_title: "Decree of the Ministry of the Environment on safety in use of buildings 1007/2017 (unofficial English translation by the Ministry of the Environment)"
+    section: "4 §"
+    url: "https://ym.fi/documents/1410903/0/YMa+k%C3%A4ytt%C3%B6turvallisuus+1007_2017+EN.pdf/ee85f7a4-0ef7-d489-a450-70a2469a2361?t=1668155648754"
+    quote: "The riser of the steps in an exit may be no more than 180 millimetres. The tread must be no less than 270 millimetres."
+    quote_en: "The riser of the steps in an exit may be no more than 180 millimetres. The tread must be no less than 270 millimetres."
+    translation: "unofficial: ministry translation (ym.fi)"
+    finnish_url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/1007"
+    finnish_quote: "Uloskäytävässä portaan askelman nousu voi olla enintään 180 millimetriä. Etenemän on oltava vähintään 270 millimetriä."
+    check_id: stair_riser_tread_exit
+    params: {max_riser_mm: 180, min_tread_mm: 270}
+    note: "Needs riser and tread values on the stair."
+
+  - id: fi-use-door-landing
+    text: "A door on an exit route needs a level landing of at least 800 mm in front of and behind it."
+    source_title: "Decree of the Ministry of the Environment on safety in use of buildings 1007/2017 (unofficial English translation by the Ministry of the Environment)"
+    section: "6 §"
+    url: "https://ym.fi/documents/1410903/0/YMa+k%C3%A4ytt%C3%B6turvallisuus+1007_2017+EN.pdf/ee85f7a4-0ef7-d489-a450-70a2469a2361?t=1668155648754"
+    quote: "A landing measuring at least 800 millimetres in length must be reserved in front of and behind a door located in an exit route."
+    quote_en: "A landing measuring at least 800 millimetres in length must be reserved in front of and behind a door located in an exit route."
+    translation: "unofficial: ministry translation (ym.fi)"
+    finnish_url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/1007"
+    finnish_quote: "Uloskäytävän kulkureitillä olevan oven eteen ja taakse on varattava vähintään 800 millimetrin pituinen tasanne."
+    check_id: door_landing
+    params: {min_landing_mm: 800}
+    note: "Needs landing geometry that IFC models rarely carry. Reported as not checkable when absent."
+
+  - id: fi-use-barrier-height
+    text: "A barrier must be 1.0 m high when the drop is up to 6 m, and 1.2 m higher up."
+    source_title: "Decree of the Ministry of the Environment on safety in use of buildings 1007/2017 (unofficial English translation by the Ministry of the Environment)"
+    section: "7 §"
+    url: "https://ym.fi/documents/1410903/0/YMa+k%C3%A4ytt%C3%B6turvallisuus+1007_2017+EN.pdf/ee85f7a4-0ef7-d489-a450-70a2469a2361?t=1668155648754"
+    quote: "The total height of the barrier must be one metre if the drop is no more than six metres. At a height greater than this, the total height of the barrier must be 1.2 metres."
+    quote_en: "The total height of the barrier must be one metre if the drop is no more than six metres. At a height greater than this, the total height of the barrier must be 1.2 metres."
+    translation: "unofficial: ministry translation (ym.fi)"
+    finnish_url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/1007"
+    finnish_quote: "Kaiteen kokonaiskorkeuden on oltava yksi metri, kun putoamiskorkeus on enintään kuusi metriä. Tätä korkeammalla kaiteen kokonaiskorkeuden on oltava 1,2 metriä."
+    check_id: barrier_height
+    params: {min_height_m: 1.0}
+    note: "The same section allows 0.9 m for an indoor barrier in a dwelling with a drop under 3 m. The model has no drop height, so a low barrier is only a suggestion. Handrails are not barriers and are skipped."
+
+  - id: fi-use-headroom
+    text: "A passageway in a room must be at least 2 100 mm high."
+    source_title: "Decree of the Ministry of the Environment on safety in use of buildings 1007/2017 (unofficial English translation by the Ministry of the Environment)"
+    section: "14 §"
+    url: "https://ym.fi/documents/1410903/0/YMa+k%C3%A4ytt%C3%B6turvallisuus+1007_2017+EN.pdf/ee85f7a4-0ef7-d489-a450-70a2469a2361?t=1668155648754"
+    quote: "The minimum height of a passageway in a living space is 2,100 millimetres."
+    quote_en: "The minimum height of a passageway in a living space is 2,100 millimetres."
+    translation: "unofficial: ministry translation (ym.fi)"
+    finnish_url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/1007"
+    finnish_quote: "Huonetilan kulkuväylän vähimmäiskorkeus on 2 100 millimetriä"
+    check_id: headroom
+    params: {min_height_mm: 2100}
+    note: "The section lets a door opening be lower because of frames and thresholds, and a gate may be 1 950 mm. A door a little under 2 100 mm is therefore a suggestion, not a failure."
+
+  - id: fi-use-emergency-window
+    text: "An emergency-exit window or hatch must open at least 600 mm high and 500 mm wide, and the two must add up to at least 1 500 mm."
+    source_title: "Decree of the Ministry of the Environment on safety in use of buildings 1007/2017 (unofficial English translation by the Ministry of the Environment)"
+    section: "15 §"
+    url: "https://ym.fi/documents/1410903/0/YMa+k%C3%A4ytt%C3%B6turvallisuus+1007_2017+EN.pdf/ee85f7a4-0ef7-d489-a450-70a2469a2361?t=1668155648754"
+    quote: "The free opening of the vertical hatch or window of an emergency exit must be at least 600 millimetres in height and 500 millimetres in width; however, the sum of these must be at least 1,500 millimetres."
+    quote_en: "The free opening of the vertical hatch or window of an emergency exit must be at least 600 millimetres in height and 500 millimetres in width; however, the sum of these must be at least 1,500 millimetres."
+    translation: "unofficial: ministry translation (ym.fi)"
+    finnish_url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/1007"
+    finnish_quote: "Varatien pystysuuntaisen luukun tai ikkunan vapaan aukon on oltava korkeudeltaan vähintään 600 millimetriä ja leveydeltään 500 millimetriä, kuitenkin näiden summan on oltava vähintään 1500 millimetriä."
+    check_id: emergency_window
+    params: {min_height_mm: 600, min_width_mm: 500, min_sum_mm: 1500}
+    note: "Only windows the model marks as emergency / escape (name or type holds varatie, emergency, notausstieg) are checked. The frame size is the upper bound of the free opening."

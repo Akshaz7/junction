@@ -57,6 +57,7 @@ def test_unbacked_regions_are_flagged(root, monkeypatch):
 
 def test_cannot_answer_and_no_image(root, monkeypatch):
     import engine.models as M
+    monkeypatch.setenv("FORCE_ANSWER", "0")
     monkeypatch.setattr(M, "call", fake_call({"can_answer": False, "answer": "The drawing does not show that.", "regions": []}))
     a = answer(Q, [DOC])
     assert a["answer"]["abstained"] and "does not show" in a["answer"]["text_md"]

@@ -82,3 +82,25 @@ def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
                                   source=x.get("source", "")))
         return Doc(doc_id, "planmap", items, title, [], scale, len(pms))
     return None
+
+
+def load_sheet_parent(doc_id: str, root: Path, whole: bool = False) -> Doc | None:
+    """A per-floor sheet of an IFC model (`<model>-plan-NN-<slug>`, only a text layer, no plan map): answer from the parent
+    model's elements, limited to the storey named in the sheet's title ("... Floor plan: 2. Level"). None when not applicable."""
+    import re as _re
+    m = _re.match(r"^(.+?)-plan-\d+-", doc_id)
+    d = Path(root) / doc_id
+    if not m or not d.is_dir() or (d / "elements.json").exists() or list(d.glob("planmap-[0-9]*.json")):
+        return None
+    parent = load_doc(m.group(1), root)
+    if parent is None or parent.mode != "ifc" or not parent.storeys:
+        return None
+    title = (_json(d / "doc.json") if (d / "doc.json").exists() else {}).get("title") or ""
+    nm = title.rsplit(":", 1)[-1].strip().casefold()
+    st = next((s for s in parent.storeys if s["name"].strip().casefold() == nm), None)
+    if st is None:
+        return None
+    if whole:   # "... in the model 'X'": the whole building, not just this sheet's floor
+        return Doc(doc_id, "ifc", parent.items, title, parent.storeys, meta={**parent.meta, "sheet_of": parent.doc_id})
+    items = [i for i in parent.items if i.storey == st["name"]]
+    return Doc(doc_id, "ifc", items, title, [st], meta={**parent.meta, "sheet_of": parent.doc_id})

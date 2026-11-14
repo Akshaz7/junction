@@ -84,9 +84,15 @@ def clean_cards(raw, doc_id: str) -> list[dict]:
         if c.get("kind") not in KINDS or not ctitle or not body:
             continue
         ids = [i for i in (c.get("item_ids") or []) if isinstance(i, str)] if isinstance(c.get("item_ids") or [], list) else []
-        out.append({"card_id": str(c.get("card_id") or uuid.uuid4().hex), "kind": c["kind"],
-                    "title": _cut(ctitle, MAX_TITLE), "body": _cut(body, MAX_BODY), "item_ids": ids,
-                    "source": {"type": src["type"], "ref": ref, "title": title, "quote": quote}})
+        card = {"card_id": str(c.get("card_id") or uuid.uuid4().hex), "kind": c["kind"],
+                "title": _cut(ctitle, MAX_TITLE), "body": _cut(body, MAX_BODY), "item_ids": ids,
+                "source": {"type": src["type"], "ref": ref, "title": title, "quote": quote}}
+        sev = c.get("severity")
+        card["severity"] = sev if sev in ("violation", "suggestion", "info") else {"warning": "violation", "option": "suggestion"}.get(c["kind"], "info")
+        chk = c.get("checked")
+        if isinstance(chk, list):
+            card["checked"] = [str(x)[:80] for x in chk[:40]]
+        out.append(card)
         if len(out) >= MAX_CARDS:
             break
     return out

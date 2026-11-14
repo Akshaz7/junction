@@ -119,6 +119,142 @@ def check_corridor_width(doc: Doc, rule: dict, tg: dict) -> list[dict]:
     return out
 
 
+
+# ---- 1007/2017 safety in use ------------------------------------------------------------------------------
+
+EMERGENCY = re.compile(r"varatie|emergency|notausstieg|notausgang|rettung|escape", re.I)
+HEADROOM_SOFT_M = 2.0     # 1007/2017 §14 lets a door opening be a little lower than 2 100 mm (frames, thresholds)
+
+
+def _stair_flights(doc: Doc) -> list[Item]:
+    return [i for i in doc.items if i.kind == "stairs" and i.bbox_m and i.props.get("ifc_class") == "IfcStairFlight"]
+
+
+def _barriers(doc: Doc) -> list[Item]:
+    """Railings that are barriers: a handrail is not one."""
+    return [i for i in doc.items if i.kind == "railing" and i.bbox_m and str(i.props.get("predefined_type") or "").upper() != "HANDRAIL"]
+
+
+def _stair_vals(i: Item) -> tuple[float | None, float | None]:
+    r = i.q.get("riser_height_m") or i.props.get("riser_height_m")
+    t = i.q.get("tread_length_m") or i.props.get("tread_length_m")
+    return (float(r) if r else None, float(t) if t else None)
+
+
+def _emergency_windows(doc: Doc) -> list[Item]:
+    return [w for w in doc.items if w.kind == "window" and w.q.get("width_m") and w.q.get("height_m")
+            and EMERGENCY.search(f"{w.name or ''} {w.type_name or ''}")]
+
+
+def check_stair_width(doc: Doc, rule: dict, tg: dict) -> list[dict]:
+    need = rule["params"]["min_width_m"]
+    out = []
+    for st, fl in _by_storey(_stair_flights(doc)).items():
+        bad = []
+        for i in fl:
+            (x0, _, z0), (x1, _, z1) = i.bbox_m
+            if min(x1 - x0, z1 - z0) < need:
+                bad.append(i)
+        if bad:
+            w = min(min(i.bbox_m[1][0] - i.bbox_m[0][0], i.bbox_m[1][2] - i.bbox_m[0][2]) for i in bad)
+            out.append(_f(rule, "fail", f"Stair under 850 mm wide on {st}",
+                          f"{len(bad)} stair flight{'s' if len(bad) != 1 else ''} measure about {_mm(w)} mm across in the model, below the 850 mm minimum.", bad, tg, st, _mm(w)))
+    return out
+
+
+def check_stair_riser_tread(doc: Doc, rule: dict, tg: dict) -> list[dict]:
+    """The model cannot say whether a stair is inside a dwelling or in an exit. The dwelling limits (190/250) are the
+    looser ones, so missing them is a fail anywhere; missing only the exit limits (180/270) is a suggestion."""
+    mr, mt = rule["params"]["max_riser_mm"] / 1000, rule["params"]["min_tread_mm"] / 1000
+    dwelling = rule["check_id"].endswith("dwelling")
+    loose = {r["check_id"]: r for r in load_rules()}.get("stair_riser_tread_dwelling", rule)["params"]
+    out = []
+    for i in doc.items:
+        if i.kind != "stairs":
+            continue
+        r, t = _stair_vals(i)
+        if r is None and t is None:
+            continue
+        bad = (r is not None and r > mr + 1e-6) or (t is not None and t < mt - 1e-6)
+        if not bad:
+            continue
+        text = f"Riser {_mm(r) if r else '?'} mm, tread {_mm(t) if t else '?'} mm. The limit is riser {_mm(mr)} mm at most, tread {_mm(mt)} mm at least."
+        if dwelling:
+            out.append(_f(rule, "fail", f"Stair steps outside the limit on {i.storey}", text, [i], tg, i.storey, None))
+        elif not ((r is not None and r > loose["max_riser_mm"] / 1000 + 1e-6) or (t is not None and t < loose["min_tread_mm"] / 1000 - 1e-6)):
+            out.append(_f(rule, "suggestion", f"Stair may miss the exit limit on {i.storey}", text + " This applies if the stair is part of an exit.", [i], tg, i.storey, None))
+    return out
+
+
+def check_barrier_height(doc: Doc, rule: dict, tg: dict) -> list[dict]:
+    need = rule["params"]["min_height_m"]
+    out = []
+    for st, bs in _by_storey(_barriers(doc)).items():
+        low = [b for b in bs if (b.bbox_m[1][1] - b.bbox_m[0][1]) < need - 1e-6]
+        if low:
+            h = min(b.bbox_m[1][1] - b.bbox_m[0][1] for b in low)
+            out.append(_f(rule, "suggestion", f"Barrier under 1.0 m on {st}",
+                          f"{len(low)} barrier{'s' if len(low) != 1 else ''} stand {_mm(h)} mm high. One metre is needed where the drop is large; the model has no drop height, so please confirm.",
+                          low, tg, st, _mm(h)))
+    return out
+
+
+def check_headroom(doc: Doc, rule: dict, tg: dict) -> list[dict]:
+    out = []
+    doors = [d for d in doc.items if d.kind == "door" and d.q.get("height_m")]
+    for st, ds in _by_storey(doors).items():
+        low = [d for d in ds if d.q["height_m"] < HEADROOM_SOFT_M - 1e-6]
+        if low:
+            h = min(d.q["height_m"] for d in low)
+            out.append(_f(rule, "suggestion", f"Door opening under 2.0 m on {st}",
+                          f"{len(low)} door{'s' if len(low) != 1 else ''} are {_mm(h)} mm high. A passageway needs 2 100 mm; the rule lets a door opening be a little lower, but not this low.",
+                          low, tg, st, _mm(h)))
+    return out
+
+
+def check_emergency_window(doc: Doc, rule: dict, tg: dict) -> list[dict]:
+    p = rule["params"]
+    bad = [w for w in _emergency_windows(doc)
+           if w.q["height_m"] * 1000 < p["min_height_mm"] or w.q["width_m"] * 1000 < p["min_width_mm"]
+           or (w.q["height_m"] + w.q["width_m"]) * 1000 < p["min_sum_mm"]]
+    return [_f(rule, "suggestion", f"Emergency-exit window too small on {st}",
+               "The frame is smaller than 600 mm by 500 mm or the two sizes add up to under 1 500 mm, so the free opening is too.", ws, tg, st, None)
+            for st, ws in _by_storey(bad).items()]
+
+
+def coverage(doc: Doc) -> dict:
+    """Which rules the data lets us check on this doc, and which not (with the reason). Said on every advisor result."""
+    rules = {r["check_id"]: r for r in load_rules()}
+    ifc = doc.mode == "ifc"
+    ex = exits_map(doc) if ifc else {}
+    has = {
+        "door_clear_width": any(d.kind == "door" and d.q.get("width_m") for d in doc.items),
+        "exit_clear_width": bool(ex),
+        "exits_per_storey": bool(ex),
+        "entrance_level_change_ramp": bool(ex),
+        "corridor_width": any(r.kind == "room" and r.bbox_m for r in doc.items),
+        "stair_width": bool(_stair_flights(doc)),
+        "stair_riser_tread_dwelling": any(i.kind == "stairs" and any(_stair_vals(i)) for i in doc.items),
+        "stair_riser_tread_exit": any(i.kind == "stairs" and any(_stair_vals(i)) for i in doc.items),
+        "barrier_height": bool(_barriers(doc)),
+        "headroom": any(d.kind == "door" and d.q.get("height_m") for d in doc.items),
+        "emergency_window": bool(_emergency_windows(doc)),
+        "door_landing": False,
+    }
+    why = {"door_landing": "the model has no landing geometry", "stair_width": "no stair flight with a footprint in the model",
+           "stair_riser_tread_dwelling": "the stairs carry no riser or tread values", "stair_riser_tread_exit": "the stairs carry no riser or tread values",
+           "barrier_height": "no barrier (guard rail) in the model", "emergency_window": "no window marked as an emergency exit",
+           "headroom": "no door heights in the model", "door_clear_width": "no door widths in the model"}
+    checked, skipped = [], []
+    for cid, r in rules.items():
+        if has.get(cid):
+            checked.append(r["id"])
+        else:
+            reason = why.get(cid) if cid in has else "no automatic check for this rule yet"
+            skipped.append({"rule_id": r["id"], "reason": reason or ("needs an IFC model" if not ifc else "the model lacks the data")})
+    return {"checked": checked, "not_checked": skipped}
+
+
 def run(doc_id: str, root: Path | None = None) -> list[dict]:
     doc = load_doc(doc_id, Path(root or ARTIFACTS))
     if doc is None:
@@ -153,4 +289,9 @@ def run_doc(doc: Doc) -> list[dict]:
                 out += fn(doc, rules[cid], tg, exits)
     if "corridor_width" in rules:
         out += check_corridor_width(doc, rules["corridor_width"], tg)
+    for cid, fn in (("stair_width", check_stair_width), ("stair_riser_tread_dwelling", check_stair_riser_tread),
+                    ("stair_riser_tread_exit", check_stair_riser_tread), ("barrier_height", check_barrier_height),
+                    ("headroom", check_headroom), ("emergency_window", check_emergency_window)):
+        if cid in rules:
+            out += fn(doc, rules[cid], tg)
     return [f for f in out if f["item_ids"] and f.get("source", {}).get("quote")]

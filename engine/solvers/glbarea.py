@@ -31,3 +31,16 @@ def room_floor_area_m2(glb: Path, item_id: str) -> float | None:
         return v / h if h > 0.1 and v > 0.05 else None
     except Exception:  # noqa: BLE001  missing file, node or trimesh: no figure
         return None
+
+
+def element_volume_m3(glb: Path, item_id: str) -> float | None:
+    """Volume of a closed element mesh (walls, slabs) from the scene GLB; None when the mesh is not closed or missing."""
+    try:
+        sc = _scene(str(glb))
+        T, gname = sc.graph[item_id]
+        m = sc.geometry[gname].copy()
+        m.apply_transform(T)
+        v = abs(float(m.volume))
+        return v if v > 1e-4 and m.is_watertight else None
+    except Exception:  # noqa: BLE001
+        return None

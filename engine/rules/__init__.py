@@ -25,4 +25,4 @@ def load_rules(rules_dir: Path | None = None) -> list[dict]:
 
 
 def translation_valid(value: str) -> bool:
-    return value in TRANSLATION_OK or (isinstance(value, str) and value.startswith("unofficial: our translation"))
+    return value in TRANSLATION_OK or (isinstance(value, str) and value.startswith(("unofficial: our translation", "unofficial: ministry translation")))

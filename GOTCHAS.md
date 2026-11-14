@@ -55,4 +55,6 @@
 - Vercel FastAPI: a root index.py exporting app works zero-config; a vercel.json rewrite to /api/index makes every route 404 (path is rewritten).
 - Deployed e2e from one IP hits the API's 30 req/min/IP limit; wait for a 200 from /api/changes between spec batches.
 - server/config.py must never take DATABASE_URL from .env (that is prod Aiven); deploys pass it as a real env var.
-- 12:55 Aiven Runtime: `avn service get --json` returns secret env values MASKED (10 chars). Never round-trip them into `avn service update`; rebuild env from .env + `avn service get hologram-pg` service_uri. (Wiped DATABASE_URL + keys once; restored 12:56.)
+- 12:55 Aiven Runtime: `avn service get --json` returns secret env values MASKED (10 chars). Never round-trip them into `avn service update`; rebuild env with scripts/aiven_env.py from .env (avn service_uri password is NOT valid). (Wiped DATABASE_URL + keys once; restored 12:56.)
+- 14:15 Verda Nemotron VL: ~85-106 s per call even warm and invalid JSON on vision; keep it LAST in every chain (never first).
+- ym.fi serves an incomplete cert chain: Python urllib fails verification, rules validator falls back to curl (verifying). Stairs in IFC are one IfcStair assembly: no riser/tread/width, so 1007 stair checks are reported as not checkable.

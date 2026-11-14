@@ -277,3 +277,20 @@ def test_extra_body_is_sent_to_openai_compat(env, monkeypatch):
     monkeypatch.setattr(P, "_post", post)
     call("route", "q")
     assert sent.get("chat_template_kwargs") == {"enable_thinking": False}
+
+
+# ---------------------------------------------------------------- verda (hosted Nemotron VL, OpenAI-compatible)
+def test_verda_uses_its_base_url_key_and_max_tokens(env, monkeypatch):
+    monkeypatch.setenv("VERDA_INFERENCE_KEY", "vk")
+    seen = {}
+
+    def post(url, headers, body, **k):
+        seen.update(url=url, auth=headers["Authorization"], body=body)
+        return httpx.Response(200, json={"choices": [{"message": {"content": "ok", "reasoning_content": "ignored"}}],
+                                         "usage": {"prompt_tokens": 3, "completion_tokens": 1}})
+
+    monkeypatch.setattr(P, "_post", post)
+    r = call("chat", "hi", only=("verda", "nemotron-3.5-super-vl"))
+    assert r.provider == "verda" and r.text == "ok" and r.cost_usd == 0
+    assert seen["url"] == "https://containers.datacrunch.io/nemotron-3-5-super-vl-b300/v1/chat/completions"
+    assert seen["auth"] == "Bearer vk" and seen["body"]["model"] == "nemotron-3.5-super-vl" and "max_tokens" in seen["body"]

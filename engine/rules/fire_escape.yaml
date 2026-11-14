@@ -2,6 +2,13 @@
 # paloturvallisuudesta 848/2017. English quotes come from the English text Finland notified to the
 # EU (TRIS 2017/0221/FIN, final text of 2020-08-31). Section numbers 32-35 were checked to match the
 # Finnish text published on Finlex, which `finnish_url` / `finnish_quote` point to.
+#
+# Applicability under the Building Act (751/2023, in force 1 Jan 2025), checked 2026-11-14 on Finlex: Act 752/2023,
+# final provision: "Tällä lailla kumottujen säännösten nojalla annetut asetukset jäävät voimaan, kunnes niistä
+# toisin säädetään." (decrees issued under repealed provisions stay in force until changed). This decree was
+# issued under the old Land Use and Building Act, and the ym.fi National Building Code page still lists it, so
+# it still applies. The Finnish quotes below also appear in the consolidated text at
+# https://www.finlex.fi/fi/lainsaadanto/2017/848.
 rules:
   - id: fi-fire-exit-width
     text: "An exit must be at least 1 200 mm wide and at least 2 100 mm high."

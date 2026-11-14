@@ -122,3 +122,44 @@ def test_ws_without_db_broadcasts_locally(monkeypatch):
     with TestClient(app) as c, c.websocket_connect("/ws") as a, c.websocket_connect("/ws") as b:
         a.send_json({"type": "scene.highlight", "doc_id": "d", "item_ids": ["i"]})
         assert recv_type(b, "scene.highlight", 2) is not None
+
+
+def test_in_progress_events_relay_and_active_snapshot(client, monkeypatch):
+    """Status and trace steps are relayed over /ws while the engine runs; the question text rides on the
+    user notification; an in-flight chat exposes `active` for late joiners and clears when done."""
+    from server import chats_routes, db
+    from server.seed import seed_documents
+    snap = {}
+
+    def engine(question, doc_ids, on_event):
+        on_event("status", {"text": "Looking"})
+        on_event("trace", {"step": "x", "detail": "d" * 5000, "ms": 3})
+        snap["active"] = {k: v for k, v in chats_routes.ACTIVE.items()}
+        return chats_routes.stub_engine.answer(question, doc_ids, lambda *_: None)
+
+    monkeypatch.setattr(chats_routes, "ENGINE", engine)
+    monkeypatch.setattr(chats_routes, "_real_engine", object())  # ENGINE is not the real one: plain 3-arg call
+
+    async def seed():
+        pool = await db.get_pool()
+        async with pool.acquire() as conn:
+            await seed_documents(conn, [{"doc_id": DOC, "source": "cubicasa5k", "title": "t", "kind": "raster"}])
+    client.portal.call(seed)
+    chat = client.post("/api/chats", json={"doc_ids": [DOC]}).json()
+    with client.websocket_connect("/ws") as w:
+        client.post(f"/api/chats/{chat['id']}/messages", json={"content": "How many windows are there?"})
+        seen, end = [], time.monotonic() + 3
+        while time.monotonic() < end and not any(m["type"] == "chat.message" and m["role"] == "assistant" for m in seen):
+            m = recv(w, 0.5)
+            if m:
+                seen.append(m)
+    user = next(m for m in seen if m["type"] == "chat.message" and m["role"] == "user")
+    assert user["text"] == "How many windows are there?"
+    trace = next(m for m in seen if m["type"] == "chat.trace")
+    assert trace["step"]["step"] == "x" and len(trace["step"]["detail"]) == 600
+    assert len(json.dumps(trace)) < 4000
+    types = [m["type"] for m in seen]
+    assert types.index("chat.trace") < types.index("chat.message", 1 + types.index("chat.message"))
+    a = snap["active"][chat["id"]]
+    assert a["question"] == "How many windows are there?" and a["statuses"][-1] == "Looking" and len(a["traces"]) == 1
+    assert "active" not in client.get(f"/api/chats/{chat['id']}").json()

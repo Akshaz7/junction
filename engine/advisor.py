@@ -7,9 +7,10 @@ edit = {"op": "hide"|"resize"|"narrow"|..., "item_ids": [...], "detail": {"width
 from __future__ import annotations
 
 import dataclasses
+import re
 from pathlib import Path
 
-from engine import findings, scene_cmds
+from engine import entrance, findings, scene_cmds
 from engine.rules import load_rules
 from engine.solvers import ARTIFACTS
 from engine.solvers.data import Doc, load_doc
@@ -111,13 +112,14 @@ def _route_cards(doc: Doc, after_doc: Doc, edit: dict, touched: list, touched_id
         return []
     out: list[dict] = []
     ex_ids = {i.item_id for v in findings.exits_map(doc).values() for i in v}
-    after_ex = {i.item_id for v in findings.exits_map(after_doc).values() for i in v} if hide else ex_ids
+    after_map = findings.exits_map(after_doc) if hide else findings.exits_map(doc)
+    after_ex = {i.item_id for v in after_map.values() for i in v}
     r_exit, r_route = rules.get("fi-fire-exits-per-storey"), rules.get("fi-fire-route-length")
     name = lambda i: tg.get(i.item_id, i.name or i.item_id)  # noqa: E731
     if r_exit:
         for d in doors:
             if d.item_id in ex_ids and (hide or (_new_width(d, edit.get("detail") or {}) or 9) < 0.9):
-                left = len([i for i in after_ex if i != d.item_id]) if hide else None
+                left = len([i for i in after_map.get(d.storey, []) if i.item_id != d.item_id]) if hide else None
                 body = (f"{name(d)} is an outer door of {d.storey}. " + (f"Hiding it leaves {left} other exit{'s' if left != 1 else ''} counted there. " if hide else "Narrowing it may cut the usable exit. ")
                         + "Each evacuation area needs the number of separate exits in Table 11.")
                 c = _card("option", f"Exit door {name(d)} changed on {d.storey}", body, [d.item_id], findings._src(r_exit), f"exitdoor:{d.item_id}")
@@ -141,16 +143,76 @@ def advise(doc_id: str, edit: dict | None = None, chat_id: str | None = None, ro
     return advise_doc(doc, edit)
 
 
+def _short(rule: dict) -> str:
+    m = re.search(r"\b(\d{2,4}/\d{4})\b", rule["source_title"])
+    return f"{m.group(1) if m else rule['id']} §{str(rule['section']).replace(' §', '')}"
+
+
+def _checked_text(ids: list[str]) -> str:
+    by = {r["id"]: r for r in load_rules()}
+    seen: list[str] = []
+    for i in ids:
+        if i in by and _short(by[i]) not in seen:
+            seen.append(_short(by[i]))
+    return ", ".join(seen) if seen else "no rule"
+
+
+def _severity(c: dict) -> str:
+    return c.get("severity") or {"warning": "violation", "option": "suggestion"}.get(c["kind"], "info")
+
+
+def _finish(cards: list[dict], checked: list[str]) -> list[dict]:
+    for c in cards:
+        c["severity"] = _severity(c)
+        c["checked"] = list(checked)
+    return cards
+
+
+def _info(title: str, body: str, ids: list[str], rule_id: str, key: str) -> dict | None:
+    rule = {r["id"]: r for r in load_rules()}.get(rule_id)
+    return _card("info", title, body, ids, findings._src(rule), key) if rule else None
+
+
+def _planmap_cards(doc: Doc, edit: dict, touched: list) -> list[dict]:
+    """Raster / DXF plan maps have no measured exits. Detect entrance doors from the drawing; say plainly what was not checked."""
+    ids = [i.item_id for i in touched]
+    before = entrance.planmap_entrances(doc)
+    gone = [d for d in touched if d.kind == "door" and any(d.item_id == e.item_id for e in before)]
+    after_doc, _ = _apply(doc, edit)
+    left = entrance.planmap_entrances(after_doc) if edit.get("op") == "hide" else before
+    checked = ["fi-fire-exits-per-storey"] if before else []
+    if edit.get("op") == "hide" and gone and not left:
+        c = _card("warning", "No entrance door left on the drawing",
+                  "Violation of 848/2017 §33: the entrance door detected on the drawing is gone, so no exit is left. Detected from the drawing, not measured; check against an IFC model.",
+                  [d.item_id for d in gone], findings._src({r["id"]: r for r in load_rules()}["fi-fire-exits-per-storey"]), f"entrance:{gone[0].item_id}")
+        if c:
+            c["severity"] = "violation"
+            return _finish([c], checked)
+    if before and gone:
+        c = _info(f"Entrance door removed, {len(left)} left", f"{len(gone)} detected entrance door{'s' if len(gone) != 1 else ''} removed, {len(left)} left. "
+                  "Checked: 848/2017 §33 (entrance doors only). Widths, heights and stairs need an IFC model.", ids, "fi-fire-exits-per-storey", f"entrance:{ids[0]}")
+    else:
+        why = "No entrance door could be detected on this drawing." if not before else f"{len(before)} entrance door{'s' if len(before) != 1 else ''} detected and untouched."
+        c = _info("Checks need an IFC model", f"{why} Door widths, exit counts and stairs are not measured on a drawing, so no rule was checked for this edit. "
+                  "Upload the IFC model for the full check.", ids, "fi-fire-exits-per-storey", f"needifc:{ids[0]}")
+        checked = []
+    return _finish([c] if c else [], checked)
+
+
 def advise_doc(doc: Doc, edit: dict | None = None) -> list[dict]:
     base = findings.run_doc(doc)
+    cov = findings.coverage(doc)["checked"]
     if not edit:
         order = {"fail": 0, "suggestion": 1}
         cards = [_from_finding(f, []) for f in sorted(base, key=lambda f: order.get(f["severity"], 9))]
-        return [c for c in cards if c][:MAX_CARDS]
+        return _finish([c for c in cards if c][:MAX_CARDS], cov)
     after_doc, touched = _apply(doc, edit)
     if not touched:
         return []
     touched_ids = {i.item_id for i in touched}
+    editing = edit.get("op") in ("hide", *SIZE_OPS)
+    if editing and doc.mode != "ifc":
+        return _planmap_cards(doc, edit, touched)
     seen = {f["finding_id"] for f in base}
     cards: list[dict] = []
     # findings the edit caused: new, or a changed item set that includes an edited item
@@ -170,16 +232,24 @@ def advise_doc(doc: Doc, edit: dict | None = None) -> list[dict]:
             if rule and gone and len(after.get(st, [])) < 2 <= len(ex):
                 n = len(after.get(st, []))
                 tg = scene_cmds.tags(doc)
-                cards.append(_card("warning", f"Fewer than two exits left on {st}",
-                                   f"Hiding {', '.join(tg.get(i.item_id, i.name or i.item_id) for i in gone[:3])} leaves {n} exit{'s' if n != 1 else ''} on {st}. "
-                                   "Two separate exits are usual; small buildings can be an exception.",
-                                   [i.item_id for i in gone], findings._src(rule), f"exits:{st}:{n}"))
-    if edit.get("op") in ("hide", *SIZE_OPS):
+                c = _card("warning", f"Fewer than two exits left on {st}",
+                          f"Violation of 848/2017 §33: hiding {', '.join(tg.get(i.item_id, i.name or i.item_id) for i in gone[:3])} leaves {n} exit{'s' if n != 1 else ''} on {st}. "
+                          "Two separate exits are required; small buildings can be an exception.",
+                          [i.item_id for i in gone], findings._src(rule), f"exits:{st}:{n}")
+                if c:
+                    c["severity"] = "violation"
+                    cards.append(c)
+    if editing:
         cards += _route_cards(doc, after_doc, edit, touched, touched_ids)
     out, keys = [], set()
     for c in cards:
         if c and c["card_id"] not in keys:
             keys.add(c["card_id"])
             out.append(c)
-    out.sort(key=lambda c: c["kind"] != "warning")
-    return out[:MAX_CARDS]
+    out.sort(key=lambda c: (_severity(c) != "violation", c["kind"] != "warning"))
+    checked = findings.coverage(after_doc)["checked"]
+    if not out and editing:
+        c = _info("No rule broken by this edit", f"Checked: {_checked_text(checked)}. Nothing in the edited model fails them. "
+                  "Rules without data in the model were not checked.", [i.item_id for i in touched], "fi-fire-exits-per-storey", f"clear:{sorted(touched_ids)[0]}")
+        out = [c] if c else []
+    return _finish(out[:MAX_CARDS], checked)

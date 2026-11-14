@@ -281,7 +281,8 @@ def anthropic(cfg, model, messages, images, schema, params, key) -> ProviderResp
     # temperature/top_p/top_k are removed from API version 2026-10-21: never send them.
     resp = _post(
         cfg["base_url"].rstrip("/") + "/messages",
-        {"x-api-key": key, "anthropic-version": cfg.get("version", "2026-10-21"), "content-type": "application/json"},
+        {"x-api-key": key, "anthropic-version": cfg.get("version", "2026-10-21"), "content-type": "application/json",
+         **({"Authorization": f"Bearer {key}"} if cfg.get("bearer") else {})},   # Runware's Anthropic-compatible /messages wants both
         body,
     )
     if resp.status_code == 529:  # Anthropic "overloaded"
@@ -403,10 +404,12 @@ ADAPTERS: dict[str, Callable] = {
     "fake": fake,
     "gemini": gemini,
     "nvidia": openai_compat,
+    "verda": openai_compat,
     "featherless": openai_compat,
     "anthropic": anthropic,
+    "runware_claude": anthropic,
     "runware": runware,
     "elevenlabs": elevenlabs,
 }
 # providers that enforce the schema server-side; the rest get it as an instruction and are validated locally
-NATIVE_SCHEMA = {"fake", "gemini", "anthropic", "runware"}
+NATIVE_SCHEMA = {"fake", "gemini", "anthropic", "runware", "runware_claude"}

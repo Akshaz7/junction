@@ -127,3 +127,37 @@ def test_size_edits_reach_the_advisor(client, monkeypatch):
     r = client.post("/api/advise", json={"doc_id": DOC, "edit": {"op": "narrow", "item_ids": ["x"], "detail": {"width_m": 0.7}}})
     assert r.status_code == 200
     assert seen["e"]["op"] == "narrow"
+
+
+def test_clean_cards_keeps_severity_and_checked():
+    c = card(severity="violation", checked=["fi-acc-door-clear-width"])
+    out = advise_routes.clean_cards([c], DOC)
+    assert out[0]["severity"] == "violation" and out[0]["checked"] == ["fi-acc-door-clear-width"]
+    assert advise_routes.clean_cards([card()], DOC)[0]["severity"] == "violation"      # derived from kind when absent
+
+
+def test_chat_hide_attaches_advisor_cards_and_publishes(monkeypatch):
+    import asyncio
+
+    from server import chats_routes
+    sent = []
+
+    async def fake_publish(ev):
+        sent.append(ev)
+
+    seen = {}
+
+    def fake_advise(doc_id, edit, chat_id=None, root=None):
+        seen.update(doc_id=doc_id, edit=edit)
+        return [card(severity="violation", checked=[RULE])]
+
+    monkeypatch.setattr(chats_routes, "publish", fake_publish)
+    monkeypatch.setattr(advise_routes, "_engine_advise", lambda: fake_advise)
+    ans = {"evidence": {"scene": {"doc_id": DOC, "commands": [{"op": "hide", "item_ids": ["b"]}]}}}
+    asyncio.run(chats_routes._attach_advice(ans, [DOC], ["a"], "chat-1"))
+    assert seen["edit"] == {"op": "hide", "item_ids": ["a", "b"]}      # everything hidden in this chat so far plus this command
+    assert ans["advisor_cards"][0]["severity"] == "violation"
+    assert sent and sent[0]["type"] == "advisor.cards" and sent[0]["cards"] == ans["advisor_cards"]
+    plain = {"evidence": {"scene": {"doc_id": DOC, "commands": [{"op": "highlight", "item_ids": ["b"]}]}}}
+    asyncio.run(chats_routes._attach_advice(plain, [DOC], [], "chat-1"))
+    assert "advisor_cards" not in plain

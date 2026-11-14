@@ -40,19 +40,25 @@ def test_windows_with_events():
 def test_abstentions_are_plain():
     n = answer("How many windows?", [])  # no document: plain chat (or the hint), never a project number or citation
     assert n["answer"]["value"] is None and n["citations"] == [] and n["doc_ids"] == []
-    t = answer("What materials are used in the walls?", [DOC])
-    assert t["answer"]["abstained"] and "cannot read the drawing" in t["answer"]["text_md"]
+    t = answer("What materials are used in the walls?", [DOC])   # forced last rung: always an answer, low confidence, says so
+    assert not t["answer"]["abstained"] and t["answer"]["confidence"] <= 0.25 and "Low confidence" in t["answer"]["text_md"] and t["route"] == "hybrid"
     m = answer("How many windows are there?", ["missing__doc"])
-    assert m["answer"]["abstained"] and m["answer"]["value"] is None
+    assert not m["answer"]["abstained"] and m["answer"]["value"] == 0 and "low confidence" in m["answer"]["text_md"]
+    import os
+    os.environ["FORCE_ANSWER"] = "0"
+    try:
+        assert answer("How many windows are there?", ["missing__doc"])["answer"]["abstained"]
+    finally:
+        del os.environ["FORCE_ANSWER"]
 
 
 def test_unparsed_goes_to_model_fallback_and_never_raises(monkeypatch):
     a = answer("hello there", [DOC])
-    assert a["answer"]["abstained"] and any(s["step"] == "route" for s in a["trace"])
+    assert a["answer"]["abstained"] is False and a["route"] == "hybrid" and any(s["step"] == "route" for s in a["trace"])
     import engine.solvers as S
     monkeypatch.setattr(A, "solve", lambda *x, **k: (_ for _ in ()).throw(RuntimeError("boom")))
     b = answer("How many windows are shown?", [DOC])
-    assert b["answer"]["abstained"] and b["trace"][-1]["step"] == "error"
+    assert any(x["step"] == "error" for x in b["trace"]) and b["route"] == "hybrid"
 
 
 def test_answer_path_imports_no_heavy_packages():

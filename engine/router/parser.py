@@ -63,7 +63,11 @@ def clean(q: str) -> str:
 
 
 # ---------------------------------------------------------------- type rules
-RE_COMPOUND = re.compile(r"\band what\b|, and (?:what|how|which|include|provide|list)|\bas well as\b|\band could you\b|\balso (?:provide|include|give)\b|\band how many\b|\bhow many of each\b|\bcompared (?:with|to)\b|\bof each\b|^which\b.*\bhow many\b|,[^,]+, and \w+")
+_COMPOUND_HARD = (r"\band what\b|, and (?:what|how|which|include|provide|list)|\bas well as\b|\band could you\b|\balso (?:provide|include|give)\b|"
+                  r"\bhow many of each\b|\bcompared (?:with|to)\b|\bof each\b|^which\b.*\bhow many\b")
+_COMPOUND_SOFT = r"\band how many\b|,[^,]+, and \w+"   # also what a multi-kind count looks like
+RE_COMPOUND = re.compile(_COMPOUND_HARD + "|" + _COMPOUND_SOFT)
+RE_COMPOUND_HARD = re.compile(_COMPOUND_HARD)
 RE_SUPER = re.compile(r"\b(largest|smallest|biggest|narrowest|widest|highest|lowest|tallest|shortest|longest|greatest|top \d+|top (?:five|ten|three))\b")
 RE_BREAKDOWN = re.compile(
     r"\b(breakdown|broken down|grouped|distribution|percentages?|quantities|by (?:system|type|level|storey|floor|material|category|function|"
@@ -71,7 +75,7 @@ RE_BREAKDOWN = re.compile(
     r"with (?:their|its|the) (?:[a-z ]{0,20} )?(?:areas?|quantities|counts|dimensions)|\band areas\b|ratio|vs\b|versus)\b")
 RE_LISTQ = re.compile(r"^(?:what|which) (?:are|were)\b|^(?:what|which) (?:kinds?|types?|materials?|furniture|software|mep|systems?)\b|^(?:list|describe|name|which)\b|"
                       r"^what (?:\w+ ){0,3}(?:types?|materials?|systems?|furniture|equipment|components|elements|railings|coverings|pipes?|standards) ")
-RE_HOWMANY = re.compile(r"\bhow many\b|\bnumber of\b|\bcount of\b|\bhow much\b(?= (?:doors|windows|rooms|walls))")
+RE_HOWMANY = re.compile(r"\bhow many\b|^count\b|\bnumber of\b|\bcount of\b|\bhow much\b(?= (?:doors|windows|rooms|walls))")
 RE_AREA = re.compile(r"\b(?:area|areas|square met(?:er|re)s|sq\.? ?m)\b")
 RE_LENGTH = re.compile(r"\blength\b|\bhow long\b|\bperimeter\b")
 RE_VOLUME = re.compile(r"\bvolume\b|\bcubic\b|\bm³\b|\bm3\b")
@@ -89,6 +93,11 @@ class Parsed:
     matched: bool
     reason: str = ""
     scope_ref: str | None = None
+    kinds: list | None = None   # every kind asked about ("windows and doors" -> ["window", "door"]); kind stays the first
+
+    def __post_init__(self):
+        if self.kinds is None:
+            self.kinds = [self.kind] if self.kind else []
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -110,6 +119,45 @@ def _kind(qc: str, after: str | None = None) -> str | None:
         if best is None or key < best[0]:
             best = (key, kind)
     return best[1] if best else None
+
+
+_JOIN = re.compile(r"\s*(?:,\s*(?:and\s+)?|&\s*|\band\s+|\bplus\s+)(?:(?:also\s+)?(?:how many|the number of|the)\s+)?")
+
+
+def _kind_at(qc: str, pos: int) -> tuple[str, int] | None:
+    """The kind term that STARTS exactly at pos (longest wins), as (kind, end)."""
+    best = None
+    for kind, rx in _KIND_RE:
+        m = rx.match(qc, pos)
+        if m and (best is None or m.end() > best[1]):
+            best = (kind, m.end())
+    return best
+
+
+def multi_kinds(qc: str, after: str = r"how many|number of|count of|^count") -> list[str]:
+    """'how many windows and doors', 'how many X and how many Y', 'count the X, Y and Z' -> distinct kinds in order.
+    Only terms chained by and/comma/& right after each other count, so 'doors in the room with the window' stays single."""
+    m0 = re.search(after, qc)
+    start = m0.end() if m0 else 0
+    first = None
+    for kind, rx in _KIND_RE:
+        m = rx.search(qc, start)
+        if m and (first is None or (m.start(), -(m.end() - m.start())) < first[0]):
+            first = ((m.start(), -(m.end() - m.start())), kind, m.end())
+    if not first:
+        return []
+    out, end = [first[1]], first[2]
+    while True:
+        j = _JOIN.match(qc, end)
+        if not j:
+            break
+        nxt = _kind_at(qc, j.end())
+        if not nxt:
+            break
+        if nxt[0] not in out:
+            out.append(nxt[0])
+        end = nxt[1]
+    return out
 
 
 def _scope(qc: str) -> tuple[str | None, str | None]:
@@ -134,6 +182,11 @@ def parse(question: str) -> Parsed:
     def done(t, kind, reason, matched=True):
         return Parsed(t, kind, scope, matched, reason, ref)
 
+    # 0. several kinds in one count question: "how many windows and doors", "count the X and Y"
+    if RE_HOWMANY.search(body) and not RE_COMPOUND_HARD.search(body) and not RE_BREAKDOWN.search(body) and not RE_SUPER.search(body):
+        ks = multi_kinds(body)
+        if len(ks) > 1:
+            return Parsed("count", ks[0], scope, True, "how-many-multi", ref, kinds=ks)
     # 1. strong text markers
     if RE_COMPOUND.search(body):
         return done("text", _kind(body), "compound")
@@ -143,7 +196,7 @@ def parse(question: str) -> Parsed:
         return done("text", _kind(body), "breakdown")
     # 2. count
     if RE_HOWMANY.search(body):
-        k = _kind(body, after=r"how many|number of|count of")
+        k = _kind(body, after=r"how many|number of|count of|^count")
         return done("count", k, "how-many", matched=k is not None)
     # 3. quantities
     if RE_VOLUME.search(body):

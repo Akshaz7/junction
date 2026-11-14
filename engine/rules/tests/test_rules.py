@@ -15,7 +15,7 @@ RULES = load_rules()
 
 def test_library_size_and_unique_ids():
     ids = [r["id"] for r in RULES]
-    assert 6 <= len(ids) <= 14
+    assert 6 <= len(ids) <= 20
     assert len(ids) == len(set(ids))
 
 

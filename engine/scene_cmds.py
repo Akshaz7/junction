@@ -154,6 +154,16 @@ def _select(doc: Doc, intent: SceneIntent, question: str, tg: dict[str, str]) ->
         found = {i.item_id: i for i in doc.items}
         return [found[i] for i in ids]
     its = [i for i in doc.items if i.kind == intent.kind]
+    if intent.kind == "door":
+        from engine import entrance      # lazy: advisor imports this module
+        if entrance.is_entrance_phrase(question):
+            ent = entrance.entrance_doors(doc)
+            s = resolve_storey(question, doc.storeys) if doc.mode == "ifc" else None
+            if s:
+                ent = [i for i in ent if i.storey == s]
+            if ent and entrance.wants_single(question):
+                ent = ent[:1]
+            return ent
     if doc.mode == "ifc":
         s = resolve_storey(question, doc.storeys)
         if s:

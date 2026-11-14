@@ -78,3 +78,38 @@ def test_ac20_storey_scope_and_sums():
     assert wl["unit"] == "m" and wl["value"] > 0
     r = solve("What is the net floor area of room 001 in m²?", AC20)["answer"]
     assert not r["abstained"]
+
+
+# ---- FIX-1: "how many windows and doors" returns both counts ---------------------------------------------
+
+import pytest as _pytest
+
+from engine.router.parser import parse as _parse
+
+
+@_pytest.mark.parametrize("q", ["How many windows and doors are there?", "how many windows and how many doors", "Count the windows and doors",
+                                "count the doors and windows"])
+def test_multi_kind_phrasings_parse_to_kinds(q):
+    p = _parse(q)
+    assert p.type == "count" and len(p.kinds) == 2 and set(p.kinds) == {"window", "door"} and p.kind == p.kinds[0]
+
+
+@_pytest.mark.parametrize("q", ["How many doors are in the room with the window", "How many bedrooms and bathrooms", "how many windows"])
+def test_single_kind_stays_single(q):
+    assert len(_parse(q).kinds) == 1
+
+
+def test_multi_count_on_colorful_11397_has_both_counts_and_boxes():
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[2] / "artifacts"
+    if not (root / "cubicasa5k__colorful-11397").exists():
+        _pytest.skip("artifact missing")
+    from engine.solvers.solve import solve
+    a = solve("How many windows and doors are there?", "cubicasa5k__colorful-11397", root=root)
+    assert not a["answer"]["abstained"] and a["cost"]["usd_total"] == 0
+    assert a["answer"]["value"] == {"window": 11, "door": 11}
+    assert "**11 windows**" in a["answer"]["text_md"] and "**11 doors**" in a["answer"]["text_md"]
+    boxes = a["evidence"]["boxes"]
+    assert {b["kind"] for b in boxes} == {"window", "door"} and len(boxes) == 22
+    assert sorted(int(b["label"]) for b in boxes) == list(range(1, 23))
+    assert set(a["evidence"]["scene"]["item_kinds"].values()) == {"window", "door"}

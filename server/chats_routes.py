@@ -45,6 +45,21 @@ def _pick_engine():
 
 ENGINE = _pick_engine()
 
+# In-flight questions per chat (this process): lets a device that joins mid-answer catch up on the
+# status lines and trace steps so far. Events on /ws carry only small payloads (NOTIFY limit 8 KB).
+ACTIVE: dict[str, dict] = {}
+MAX_TRACE_EVENTS = 60
+
+
+def _small(v, n):
+    return v[:n] if isinstance(v, str) else v
+
+
+def _trace_event(chat_id: str, step: dict) -> dict:
+    """Trace step trimmed to fit comfortably in a NOTIFY payload."""
+    slim = {k: _small(v, 600) for k, v in step.items() if isinstance(v, (str, int, float, bool)) or v is None}
+    return {"type": "chat.trace", "chat_id": chat_id, "step": slim}
+
 
 class NewChat(BaseModel):
     doc_ids: list[str] = []
@@ -108,7 +123,8 @@ async def get_chat(chat_id: str):
         out.append({"id": str(m["id"]), "role": m["role"], "content": m["content"],
                     "created_at": m["created_at"].isoformat(),
                     "answer": json.loads(a) if isinstance(a, str) else a})
-    return {**_chat(c), "messages": out}
+    active = ACTIVE.get(str(cid))
+    return {**_chat(c), "messages": out, **({"active": active} if active else {})}
 
 
 @router.get("/chats/{chat_id}/scene-state")
@@ -120,6 +136,26 @@ async def get_scene_state(chat_id: str, doc_id: str | None = None):
         raise HTTPException(404, "chat not found")
     states = await scene_edits.scene_state(pool, cid, doc_id)
     return {"chat_id": str(cid), "states": [{k: v for k, v in s.items() if k != "type"} for s in states]}
+
+
+async def _attach_advice(ans: dict, doc_ids: list[str], hidden: list[str], cid) -> None:
+    """FIX-4: a hide/remove command in chat runs the advisor on the edited model (everything hidden in this chat so far
+    plus this command). The cards go on the answer (`advisor_cards`) and out over /ws. Never blocks the answer."""
+    try:
+        from .advise_routes import _engine_advise, clean_cards
+        fn = _engine_advise()
+        scene = ans.get("evidence", {}).get("scene") or {}
+        doc_id = scene.get("doc_id") or (doc_ids[0] if doc_ids else None)
+        cmd = next((c for c in scene.get("commands") or [] if isinstance(c, dict) and c.get("op") == "hide" and c.get("item_ids")), None)
+        if fn is None or not doc_id or cmd is None:
+            return
+        ids = list(dict.fromkeys([*hidden, *cmd["item_ids"]]))
+        cards = clean_cards(await asyncio.to_thread(fn, doc_id, {"op": "hide", "item_ids": ids}, str(cid)), doc_id)
+        if cards:
+            ans["advisor_cards"] = cards
+            await publish({"type": "advisor.cards", "doc_id": doc_id, "chat_id": str(cid), "cards": cards})
+    except Exception:  # noqa: BLE001  the advisor never takes the chat down
+        return
 
 
 @router.post("/chats/{chat_id}/messages")
@@ -137,7 +173,9 @@ async def ask(chat_id: str, body: NewMessage):
         "select role, content from messages where chat_id=$1 order by created_at desc limit 10", cid))]
     umid = await pool.fetchval(
         "insert into messages (chat_id, role, content) values ($1,'user',$2) returning id", cid, body.content)
-    await publish({"type": "chat.message", "chat_id": str(cid), "message_id": str(umid), "role": "user"})
+    ACTIVE[str(cid)] = {"question": body.content, "statuses": ["Thinking…"], "traces": []}
+    await publish({"type": "chat.message", "chat_id": str(cid), "message_id": str(umid), "role": "user",
+                   "text": body.content[:300]})
 
     hidden: list[str] = []
     try:
@@ -149,6 +187,14 @@ async def ask(chat_id: str, body: NewMessage):
     sstate = {"hidden": hidden} if hidden else None
 
     async def stream():
+        try:
+            async for ev in _stream():
+                yield ev
+        finally:
+            if ACTIVE.pop(str(cid), None) is not None:  # failed or abandoned: tell watchers to resync
+                await publish({"type": "chat.done", "chat_id": str(cid)})
+
+    async def _stream():
         loop = asyncio.get_running_loop()
         q: asyncio.Queue = asyncio.Queue()
 
@@ -158,8 +204,17 @@ async def ask(chat_id: str, body: NewMessage):
         task = asyncio.create_task(asyncio.to_thread(_run_engine, body.content, doc_ids, on_event, sstate, history))
         task.add_done_callback(lambda _: loop.call_soon_threadsafe(q.put_nowait, None))
         while (item := await q.get()) is not None:
+            act = ACTIVE.get(str(cid))
             if item[0] == "status":
-                await publish({"type": "chat.status", "chat_id": str(cid), "text": item[1].get("text", "")})
+                text = item[1].get("text", "")
+                if act is not None and act["statuses"][-1:] != [text]:
+                    act["statuses"] = (act["statuses"] + [text])[-20:]
+                await publish({"type": "chat.status", "chat_id": str(cid), "text": text})
+            elif item[0] == "trace" and isinstance(item[1], dict):
+                ev = _trace_event(str(cid), item[1])
+                if act is not None and len(act["traces"]) < MAX_TRACE_EVENTS:
+                    act["traces"].append(ev["step"])
+                    await publish(ev)
             yield {"event": item[0], "data": json.dumps(item[1])}
         try:
             ans = task.result()
@@ -167,11 +222,13 @@ async def ask(chat_id: str, body: NewMessage):
         except Exception as e:
             yield {"event": "error", "data": json.dumps({"detail": f"engine failed: {e}"})}
             return
+        await _attach_advice(ans, doc_ids, hidden, cid)
         mid = await pool.fetchval(
             "insert into messages (chat_id, role, content) values ($1,'assistant',$2) returning id",
             cid, ans["answer"]["text_md"])
         await pool.execute("insert into answers (message_id, chat_id, doc_id, answer) values ($1,$2,$3,$4::jsonb)",
                            mid, cid, doc_ids[0] if doc_ids else None, json.dumps(ans))
+        ACTIVE.pop(str(cid), None)  # before the notification, so the resync snapshot shows no live job
         await publish({"type": "chat.message", "chat_id": str(cid), "message_id": str(mid), "role": "assistant"})
         scene = ans["evidence"]["scene"]
         for n, cmd in enumerate(scene.get("commands") or []):  # answer commands become persisted, relayed edits
