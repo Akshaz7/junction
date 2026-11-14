@@ -3,6 +3,7 @@ import { ClipboardCheck, Sparkles } from 'lucide-react'
 import { findingsApi, groupFindings, openFindingEvidence, type AdvisorCard, type Finding } from '../lib/findings'
 import { onAdvisorCards, onFindingsUpdated } from '../viewer3d/liveHighlight'
 import { sourcedCards } from '../viewer3d/advisor'
+import { sourceLinkLabel, sourceLinks } from '../viewer3d/AdvisorCardView'
 import { DocumentViewer, useViewerSheet } from './document-viewer'
 import { VisualisePanel } from '../viewer3d/VisualiseIt'
 import type { Answer, Citation, Document } from '../lib/types'
@@ -16,6 +17,7 @@ export function AdvisorCardsPanel({ cards, onShowItems }: { cards: AdvisorCard[]
     {!sourced.length && <p className="tools-muted">No sourced advice for this drawing.</p>}
     {sourced.map((card) => <article key={card.card_id} className="advisor-card"><span className="tools-tag">{card.kind}</span><h4>{card.title}</h4><p>{card.body}</p>
       <p className="tools-muted">{card.source.title} · {card.source.ref}</p><blockquote>{card.source.quote}</blockquote>
+      {sourceLinks(card.source).map((url) => <a key={url} href={url} target="_blank" rel="noreferrer">{sourceLinkLabel(url)}</a>)}
       {!!card.item_ids.length && <Button variant="raised" onClick={() => onShowItems(card.item_ids, card.body)}>Show {card.item_ids.length} {card.item_ids.length === 1 ? 'item' : 'items'}</Button>}
     </article>)}
   </section>

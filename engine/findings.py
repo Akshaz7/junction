@@ -18,7 +18,8 @@ LEVEL_TOL_M = 0.025
 
 def _src(rule: dict) -> dict:
     return {"type": "rule", "ref": rule["id"], "title": f"{rule['source_title']}, {rule['section']}", "quote": rule["quote"],
-            "url": rule.get("url"), "translation": rule.get("translation")}
+            "url": rule.get("url"), "finnish_url": rule.get("finnish_url") if rule.get("finnish_url") != rule.get("url") else None,
+            "translation": rule.get("translation")}
 
 
 def _f(rule: dict, severity: str, title: str, text: str, items: list[Item], tg: dict, storey: str | None = None, measured=None) -> dict:

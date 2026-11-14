@@ -97,6 +97,9 @@ def test_removing_the_erdgeschoss_outer_door_is_a_violation_of_848_33():
     v = [c for c in cards if c["severity"] == "violation"]
     assert v and v[0]["source"]["ref"] == "fi-fire-exits-per-storey" and "33 §" in v[0]["source"]["title"]
     assert "848/2017 §33" in v[0]["body"] and "Erdgeschoss" in v[0]["title"] and v[0]["checked"]
+    # the violation links to the official texts so it can be checked outside the app
+    assert v[0]["source"]["url"].startswith("https://technical-regulation-information-system.ec.europa.eu/")
+    assert v[0]["source"]["finnish_url"] == "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/848"
     for c in cards:
         _valid(c)
 

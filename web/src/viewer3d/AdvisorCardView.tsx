@@ -1,4 +1,4 @@
-import { AlertTriangle, Info, Lightbulb } from 'lucide-react';
+import { AlertTriangle, ExternalLink, Info, Lightbulb } from 'lucide-react';
 import { cardSeverity, type AdvisorCard } from './advisor';
 import './advisor-card.css';
 
@@ -22,6 +22,19 @@ export const shortSource = (title: string) => {
   return decree ? `Decree ${decree}${sec ? ` §${sec}` : ''}` : title;
 };
 
+const httpUrl = (url?: string | null) => (url && /^https?:\/\//i.test(url) ? url : undefined);
+/** Name the publisher so the reader knows where the link goes before clicking it. */
+export const sourceLinkLabel = (url: string) => {
+  const host = (() => { try { return new URL(url).hostname; } catch { return ''; } })();
+  if (host.endsWith('finlex.fi')) return 'Finlex: legal text (Finnish)';
+  if (host.endsWith('ec.europa.eu')) return 'Official English text (EU TRIS)';
+  if (host.endsWith('ym.fi')) return 'Ministry of the Environment (English)';
+  return host || 'Official source';
+};
+/** Official links for a card's rule: the English text first, then the Finnish legal text when it differs. */
+export const sourceLinks = (source: AdvisorCard['source']) =>
+  [...new Set([httpUrl(source.url), httpUrl(source.finnish_url)].filter((u): u is string => !!u))];
+
 /** One advisor card: severity colour (red violation, amber suggestion, grey info), body, rules checked, source. */
 export function AdvisorCardView({ card, className = '', onHighlight }: {
   card: AdvisorCard; className?: string; onHighlight?: (ids: string[]) => void;
@@ -38,5 +51,8 @@ export function AdvisorCardView({ card, className = '', onHighlight }: {
       : <div className="viewer3d-advisor-select">{head}</div>}
     {!!card.checked?.length && <p className="advisor-checked" data-testid="advisor-checked">Checked: {card.checked.map(ruleName).join(' · ')}</p>}
     <details><summary title={card.source.title}>{shortSource(card.source.title)}</summary><blockquote>{card.source.quote}</blockquote></details>
+    {!!sourceLinks(card.source).length && <p className="advisor-links" data-testid="advisor-source-links">
+      {sourceLinks(card.source).map((url) => <a key={url} href={url} target="_blank" rel="noreferrer">{sourceLinkLabel(url)} <ExternalLink size={12} aria-hidden /></a>)}
+    </p>}
   </article>;
 }
