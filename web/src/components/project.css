@@ -72,20 +72,12 @@ button.pj-panel-title:hover .pj-panel-h { text-decoration: underline; text-under
 .pj-mini button:hover:not(:disabled) span { text-decoration: underline; text-underline-offset: 3px; }
 .pj-mini span:not(.pj-tag) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pj-mini .pj-more { color: var(--muted-foreground); padding-left: 0; }
+.pj-mini .pj-more-text { display: block; padding: 6px 0; color: var(--muted-foreground); font-size: var(--text-body-sm); }
 .pj-dashed { display: block; width: 100%; margin-top: 12px; padding: 20px 16px; border: 1px dashed var(--neutral-350); border-radius: var(--radius-control); background: none; color: var(--muted-foreground); text-align: center; font-size: var(--text-body-sm); line-height: var(--text-body-sm--line-height); }
 .pj-dashed:hover { background: var(--ink-hover); }
 
 /* Files tab */
 .pj-files ul { list-style: none; margin: 0; padding: 0; }
-.pj-files-head, .pj-file { display: grid; grid-template-columns: minmax(0, 1fr) 132px 132px 32px; gap: 12px; align-items: center; }
-.pj-files-head { padding: 8px 0; border-bottom: 1px solid var(--border); color: var(--muted-foreground); font-size: var(--text-caption); }
-.pj-file { padding: 12px 0; }
-.pj-file + .pj-file, .pj-file-pending + .pj-file { border-top: 1px solid var(--border); }
-.pj-file-pending { grid-template-columns: minmax(0, 1fr) auto; border-bottom: 1px solid var(--border); }
-.pj-file-name { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.pj-file-name > span:last-child { display: flex; flex-direction: column; min-width: 0; }
-.pj-file-name strong { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pj-file-name small { color: var(--muted-foreground); font-size: var(--text-caption); }
 .pj-cell-input { width: 100%; min-width: 0; height: 30px; padding: 0 8px; border: 1px solid transparent; border-radius: var(--radius-control); background: var(--field-fill); color: var(--foreground); font-size: var(--text-body-sm); }
 .pj-cell-input:hover:not(:disabled) { background: var(--field-fill-hover); }
 .pj-cell-input:focus { outline: 0; border-color: var(--input); background: var(--card); }
@@ -196,9 +188,6 @@ button.pj-panel-title:hover .pj-panel-h { text-decoration: underline; text-under
   .pj-toolbar > .button { margin-left: auto; }
   .pj-grid { grid-template-columns: minmax(0, 1fr); }
   .pj-head { margin-bottom: 20px; }
-  .pj-files-head { display: none; }
-  .pj-file { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 32px; row-gap: 8px; }
-  .pj-file .pj-file-name { grid-column: 1 / -1; }
   .pj-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pj-row { grid-template-columns: minmax(0, 1fr) 40px 40px 62px 68px; gap: 4px; font-size: var(--text-body-sm); }
   .pj-from { display: none; }
@@ -213,3 +202,21 @@ button.pj-panel-title:hover .pj-panel-h { text-decoration: underline; text-under
 
 /* The screen carries its own large title; the shell's bar keeps its heading for screen readers only. */
 .route-projects .pagebar { height: 0; min-height: 0; padding: 0; overflow: hidden; }
+
+/* Files tab: the Data screen's explorer inside the project page. */
+.pj-columns[data-tab="files"] { grid-template-columns: minmax(0, 1fr); }
+.pj-columns[data-tab="files"] .pj-side { display: none; }
+.pj-explorer { margin-top: 8px; }
+.pj-explorer .data-browser { height: min(640px, 70vh); min-height: 360px; }
+.pj-explorer .data-browser::after { display: none; }
+.pj-explorer .data-files, .pj-explorer .data-folders, .pj-explorer .data-detail { overflow: auto; }
+.pj-explorer .data-files > header { position: relative; }
+.pj-explorer-actions { position: absolute; top: 12px; right: 16px; display: flex; gap: 8px; align-items: center; }
+.pj-explorer .data-file-row { position: relative; }
+.pj-explorer .data-file-row[data-status="busy"] .data-open-file { opacity: .6; }
+.pj-explorer .data-file-row.pj-file-pending { cursor: default; }
+.pj-row-menu .pj-menu-list { z-index: 20; }
+.pj-fields { display: grid; gap: 14px; }
+.pj-fields label { display: grid; gap: 6px; font-size: var(--text-body-sm); color: var(--muted-foreground); }
+.pj-fields .pj-cell-input { width: 100%; }
+@media (max-width: 640px) { .pj-explorer .data-browser { height: auto; min-height: 0; } .pj-explorer-actions { position: static; margin-top: 8px; } }

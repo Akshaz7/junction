@@ -139,13 +139,13 @@ export function ProjectPage({ id, tab, docs }: { id: string; tab: Tab; docs: Doc
       <header className="pj-head"><h1 className="pj-title">{project.name}</h1>
         <p>{fileCount(project.docs.length + waiting)}{project.demo && ' · Demo project'}{relativeTime(project.created_at) && ` · Created ${relativeTime(project.created_at).toLowerCase()}`}</p></header>
       {viewer.error && <ErrorLine message={viewer.error} />}
-      <div className="pj-columns">
+      <div className="pj-columns" data-tab={tab}>
         <div className="pj-main">
           <AskBox project={project} />
           <div className="pj-tabs" role="tablist" aria-label="Project sections">{tabs.map((item) => <button key={item.id} type="button" role="tab" id={`pj-tab-${item.id}`} aria-selected={tab === item.id} aria-controls="pj-tabpanel" onClick={() => go(item.id)}>{item.label}</button>)}</div>
           <div id="pj-tabpanel" role="tabpanel" aria-labelledby={`pj-tab-${tab}`}>
             {tab === 'chats' && <ChatsTab project={project} />}
-            {tab === 'files' && <FilesTab project={project} pending={uploads.pending} onDismiss={uploads.dismiss} onProject={setProject} onAdd={() => setAdding(true)} />}
+            {tab === 'files' && <FilesTab project={project} docs={docs} onUpload={uploads.add} pending={uploads.pending} onDismiss={uploads.dismiss} onProject={setProject} onAdd={() => setAdding(true)} />}
             {tab === 'overview' && <OverviewTab project={project} overview={overview} onShow={viewer.open} showBusy={viewer.busy} />}
           </div>
         </div>
@@ -153,7 +153,8 @@ export function ProjectPage({ id, tab, docs }: { id: string; tab: Tab; docs: Doc
           <Panel title="Files" description={project.docs.length ? fileCount(project.docs.length) : 'Plans, models, scans and PDFs'} onClick={() => go('files')}
             action={<Button variant="ghost" size="icon-sm" aria-label="Add files" onClick={() => setAdding(true)}><Plus size={16} /></Button>}>
             {project.docs.length || uploads.pending.length ? <ul className="pj-mini">{shown.map((doc) => <li key={doc.doc_id}><button type="button" onClick={() => viewer.open(doc.doc_id)} disabled={isReading(doc)}><TypeTag doc={doc} /><span>{docTitle(doc)}</span></button></li>)}
-              {project.docs.length > shown.length && <li><button type="button" className="pj-more" onClick={() => go('files')}>and {project.docs.length - shown.length} more</button></li>}</ul>
+              {project.docs.length > shown.length && <li><span className="pj-more-text">and {project.docs.length - shown.length} more</span></li>}
+              {project.docs.length > 0 && <li><button type="button" className="pj-more" onClick={() => go('files')}>View all</button></li>}</ul>
               : <button type="button" className="pj-dashed" onClick={() => setAdding(true)}>Add plans, models, scans or PDFs for this building</button>}
           </Panel>
           <Panel title="Overview" description={overview.loading ? 'Reading the files…' : summary.totals(overview.data) || 'Totals and levels across all files'} onClick={() => go('overview')} />
