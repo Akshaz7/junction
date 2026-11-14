@@ -19,6 +19,7 @@ import { DrawingEditsContext } from '../lib/scene-edit-context'
 import { needsDocument } from '../lib/needs-document'
 import { SkillPicker } from './skills-screen'
 import { FollowBanner, useFollow } from './follow-banner'
+import { getFollow } from '../lib/chat-follow'
 import './follow-banner.css'
 
 const starters = [
@@ -220,7 +221,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       if (event.type === 'pair.chat') {
         // A paired device just started this chat: open it now, ahead of its first message event.
         void acceptPairProof(event.chat_id, event.proof).then((mine) => {
-          if (mine && followingRef.current && !submitting.current && event.chat_id !== chatId.current)
+          if (mine && (followingRef.current || getFollow()) && !submitting.current && event.chat_id !== chatId.current)
             window.location.hash = `#/chat?chat=${encodeURIComponent(event.chat_id)}`
         })
         return
