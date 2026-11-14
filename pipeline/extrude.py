@@ -587,7 +587,11 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False, *
         elif k == "room":
             if rw:
                 from shapely.geometry import box as _box
-                g = _box(*it["bbox_px"]).intersection(rw["floor"]).difference(rw["walls_u"]).difference(rw["taken"])
+                try:
+                    g = _box(*it["bbox_px"]).intersection(rw["floor"]).difference(rw["walls_u"]).difference(rw["taken"])
+                except Exception:  # GEOS overlay on a degenerate/invalid operand: repair and retry
+                    fx = lambda q: q.buffer(0)
+                    g = _box(*it["bbox_px"]).intersection(fx(rw["floor"])).difference(fx(rw["walls_u"])).difference(fx(rw["taken"]))
                 rw["taken"] = rw["taken"].union(g)
                 g = max(list(g.geoms), key=lambda q: q.area) if g.geom_type in ("MultiPolygon", "GeometryCollection") and not g.is_empty else g
                 m = prism(Polygon([to_m(q) for q in g.exterior.coords], [[to_m(q) for q in r.coords] for r in g.interiors]), 0.0, FLOOR_T) if g.geom_type == "Polygon" and g.area > 40 else None

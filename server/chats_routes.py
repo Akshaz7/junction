@@ -200,19 +200,26 @@ async def get_scene_state(chat_id: str, doc_id: str | None = None):
 
 
 async def _attach_advice(ans: dict, doc_ids: list[str], hidden: list[str], cid) -> None:
-    """FIX-4: a hide/remove command in chat runs the advisor on the edited model (everything hidden in this chat so far
-    plus this command). The cards go on the answer (`advisor_cards`) and out over /ws. Never blocks the answer."""
+    """FIX-4: a hide/remove command in chat runs the advisor on the edited model (everything hidden in this chat so far,
+    manual edits included, plus this command). The cards go on the answer (`advisor_cards`) and out over /ws.
+    A restore/reset re-checks what stays hidden and pushes those cards (or none) so the Edit panel matches. Never blocks."""
     try:
-        from .advise_routes import _engine_advise, clean_cards
+        from .advise_routes import _engine_advise, clean_cards, effective_edit
         fn = _engine_advise()
         scene = ans.get("evidence", {}).get("scene") or {}
         doc_id = scene.get("doc_id") or (doc_ids[0] if doc_ids else None)
-        cmd = next((c for c in scene.get("commands") or [] if isinstance(c, dict) and c.get("op") == "hide" and c.get("item_ids")), None)
-        if fn is None or not doc_id or cmd is None:
+        cmd = next((c for c in scene.get("commands") or [] if isinstance(c, dict) and c.get("op") in ("hide", "restore", "reset")
+                    and (c.get("item_ids") or c.get("op") != "hide")), None)
+        if fn is None or not doc_id or cmd is None or (cmd["op"] != "hide" and not hidden):
             return
-        ids = list(dict.fromkeys([*hidden, *cmd["item_ids"]]))
-        cards = clean_cards(await asyncio.to_thread(fn, doc_id, {"op": "hide", "item_ids": ids}, str(cid)), doc_id)
-        if cards:
+        edit = effective_edit(hidden, {"op": cmd["op"], "item_ids": list(cmd.get("item_ids") or [])})
+        if edit["op"] != "hide":   # nothing left hidden: no cards, and the panel clears
+            await publish({"type": "advisor.cards", "doc_id": doc_id, "chat_id": str(cid), "cards": []})
+            return
+        cards = clean_cards(await asyncio.to_thread(fn, doc_id, edit, str(cid)), doc_id)
+        if cmd["op"] != "hide":
+            await publish({"type": "advisor.cards", "doc_id": doc_id, "chat_id": str(cid), "cards": cards})
+        elif cards:
             ans["advisor_cards"] = cards
             await publish({"type": "advisor.cards", "doc_id": doc_id, "chat_id": str(cid), "cards": cards})
     except Exception:  # noqa: BLE001  the advisor never takes the chat down
@@ -271,13 +278,17 @@ async def ask(chat_id: str, body: NewMessage):
                        "text": body.content[:300]})
 
         hidden: list[str] = []
-        try:
-            for st in await scene_edits.scene_state(pool, cid):
-                if not doc_ids or st.get("doc_id") in doc_ids:
-                    hidden.extend(st.get("hidden") or [])
+        sstate = None
+        try:  # shared edit layer: chat commands and manual Edit-panel removals of this chat
+            edits = [e for e in await scene_edits.load_edits(pool, cid)
+                     if not doc_ids or e["doc_id"] in doc_ids]
+            states = scene_edits.fold(edits)
+            if edits:
+                hidden = list(dict.fromkeys(i for st in states.values() for i in st["hidden"]))
+                sstate = {"hidden": hidden, "edits": edits,
+                          "last_hidden": scene_edits.last_hidden(edits, doc_ids)}
         except Exception:  # noqa: BLE001 — scene state is optional context, never block the answer
-            hidden = []
-        sstate = {"hidden": hidden} if hidden else None
+            sstate = None
 
         catalogue = None
         if ENGINE is _real_engine:

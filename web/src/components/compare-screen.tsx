@@ -5,12 +5,13 @@ import { UploadAction } from './workspace-navigation'
 import type { Document } from '../lib/types'
 import { loadRevisionComparison, RevisionSummary, type RevisionEntry, type RevisionFeedEntry, type RevisionComparison } from './changes-screen'
 import { readChange, summariseChanges } from '../lib/change-copy'
+import { ownsId, pairId, pairOf, versionOptions } from '../lib/design-versions'
 import './compare-screen.css'
 
 type Mode = 'Side by side' | 'Wipe' | 'Overlay'
 const modes: Mode[] = ['Side by side', 'Wipe', 'Overlay']
 
-/** Compare two versions of a drawing from the real revision series. Numbered boxes match the numbered readings. */
+/** Compare any two versions of a drawing: real revision series and designs saved from 3D edits. Numbered boxes match the numbered readings. */
 export function CompareScreen({ docs, demo }: { docs: Document[]; demo: boolean }) {
   const [feed, setFeed] = useState<RevisionFeedEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -21,6 +22,7 @@ export function CompareScreen({ docs, demo }: { docs: Document[]; demo: boolean 
   const [mode, setMode] = useState<Mode>('Side by side')
   const [wipe, setWipe] = useState(50)
   const [active, setActive] = useState<string | null>(null)
+  const [page, setPage] = useState<number | null>(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -37,51 +39,62 @@ export function CompareScreen({ docs, demo }: { docs: Document[]; demo: boolean 
     for (const entry of feed) {
       if (entry.type !== 'new_version') continue
       const key = entry.summary.series_id || entry.doc_a || entry.id
-      const group = map.get(key) ?? { key, title: titleOf(entry), steps: [] }
+      const group = map.get(key) ?? { key, title: entry.summary.edited ? `${titleOf(entry)} · edited in 3D` : titleOf(entry), steps: [] }
       group.steps.push(entry); map.set(key, group)
     }
     for (const group of map.values()) group.steps.sort((a, b) => (Date.parse(a.created_at) || 0) - (Date.parse(b.created_at) || 0))
     return [...map.values()].sort((a, b) => a.title.localeCompare(b.title))
   }, [feed, docs]) // eslint-disable-line react-hooks/exhaustive-deps
-  const group = groups.find((entry) => entry.key === series) ?? groups.find((entry) => entry.steps.some((item) => item.id === step)) ?? groups.find((entry) => /A100 - DEMOLITION/i.test(entry.title)) ?? groups[0]
-  const chosen = group?.steps.find((entry) => entry.id === step) ?? group?.steps[0]
+  const group = groups.find((entry) => entry.key === series) ?? groups.find((entry) => ownsId(entry.steps, step)) ?? groups.find((entry) => /A100 - DEMOLITION/i.test(entry.title)) ?? groups[0]
+  // Any two versions of the drawing can be compared when the feed numbers them; otherwise the fixed pairs.
+  const versions = group ? versionOptions(group.steps) : []
+  const free = versions.length > 1 && !group?.steps.some((entry) => entry.id === step) ? pairOf(group!.steps, step) : null
+  const chosen = group?.steps.find((entry) => entry.id === step) ?? (free ? undefined : group?.steps[0])
+  const pair = free ?? (chosen?.summary.index_a != null && chosen.summary.index_b != null ? { a: chosen.summary.index_a, b: chosen.summary.index_b } : null)
+  const compareId = free ? step : chosen?.id
+  const pick = (a: number, b: number | undefined) => { const id = b == null ? null : pairId(group!.steps, a, b); if (id) setStep(id) }
 
+  useEffect(() => { setPage(null) }, [compareId])
   useEffect(() => {
     setComparison(null); setActive(null); setWipe(50)
-    if (!chosen) return
+    if (!compareId) return
     const controller = new AbortController(); setError('')
-    loadRevisionComparison(chosen.id, controller.signal).then((data) => { if (!controller.signal.aborted) setComparison(data) })
+    loadRevisionComparison(compareId, controller.signal, page).then((data) => { if (!controller.signal.aborted) setComparison(data) })
       .catch((err: Error) => { if (!controller.signal.aborted) setError(err.message) })
     return () => controller.abort()
-  }, [chosen?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [compareId, page]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const image = comparison?.image
   const versionLabel = (version: string | number | undefined) => typeof version === 'number' ? `Version ${version}` : version || 'Unknown version'
   const label = (entry: RevisionEntry) => `${versionLabel(entry.summary.version_a)} to ${versionLabel(entry.summary.version_b)}${entry.summary.n_changes == null ? '' : ` · ${entry.summary.n_changes} changes`}`
   const readings = (comparison?.changes ?? []).map((change) => readChange(change, image ?? { w: 1, h: 1 }))
-  const reading = ({ change, text }: { change: RevisionComparison['changes'][number]; text: string }) => <article key={change.change_id} tabIndex={0} data-change-id={change.change_id} data-active={active === change.change_id || undefined} onFocus={() => setActive(change.change_id)} onBlur={() => setActive(null)} onMouseEnter={() => setActive(change.change_id)} onMouseLeave={() => setActive(null)}><span className="cmp-number">{change.n}</span><p>{text}</p></article>
+  const reading = ({ change, text }: { change: RevisionComparison['changes'][number]; text: string }) => <article key={change.change_id} tabIndex={0} data-change-id={change.change_id} data-item-id={change.item_id} data-active={active === change.change_id || undefined} onFocus={() => setActive(change.change_id)} onBlur={() => setActive(null)} onMouseEnter={() => setActive(change.change_id)} onMouseLeave={() => setActive(null)}><span className="cmp-number">{change.n}</span><p>{text}</p></article>
   const minor = new Set(readings.filter((entry) => entry.small).map((entry) => entry.change.change_id))
   const mainCount = readings.length - minor.size
   const boxes = (side: 'v1' | 'v2') => comparison?.changes.map((change) => {
     const box = change[side]?.bbox_px
     if (!box || !image || (minor.has(change.change_id) && active !== change.change_id)) return null
     const { w, h } = image
-    return <span key={change.change_id} className={`cmp-box ${change.type}`} data-change-id={change.change_id} data-active={active === change.change_id || undefined}
+    return <span key={change.change_id} className={`cmp-box ${change.type}${change.action === 'moved' ? ' moved' : ''}`} data-change-id={change.change_id} data-item-id={change.item_id} data-active={active === change.change_id || undefined}
       onMouseEnter={() => setActive(change.change_id)} onMouseLeave={() => setActive(null)}
       style={{ left: `${box[0] / w * 100}%`, top: `${box[1] / h * 100}%`, width: `${(box[2] - box[0]) / w * 100}%`, height: `${(box[3] - box[1]) / h * 100}%` }}><b>{change.n}</b></span>
   })
 
   return <section className="compare-screen" aria-label="Compare">
-    <header className="cmp-header"><div><h2><GitCompareArrows size={19} />Compare versions</h2><p>Pick a drawing and two of its versions. Boxes show what changed: red was changed or removed, green was added. The numbers match the list on the right.</p></div></header>
+    <header className="cmp-header"><div><h2><GitCompareArrows size={19} />Compare versions</h2><p>Pick a drawing and any two of its versions, including designs saved from 3D edits. Boxes show what changed: red was changed or removed, green was added, amber was moved. The numbers match the list on the right.</p></div></header>
     <div className="cmp-controls">
       <label>Drawing<select aria-label="Drawing" value={group?.key ?? ''} disabled={!groups.length} onChange={(event) => { setSeries(event.target.value); setStep('') }}>{groups.map((entry) => <option key={entry.key} value={entry.key}>{entry.title}</option>)}</select></label>
-      <label>Versions<select aria-label="Versions" value={chosen?.id ?? ''} disabled={!group} onChange={(event) => setStep(event.target.value)}>{group?.steps.map((entry) => <option key={entry.id} value={entry.id}>{label(entry)}</option>)}</select></label>
+      {versions.length > 1 && pair ? <>
+        <label>From<select aria-label="From version" value={pair.a} onChange={(event) => { const a = Number(event.target.value); pick(a, pair.b > a ? pair.b : versions.find((v) => v.index > a)?.index) }}>{versions.slice(0, -1).map((v) => <option key={v.index} value={v.index}>{v.label}</option>)}</select></label>
+        <label>To<select aria-label="To version" value={pair.b} onChange={(event) => pick(pair.a, Number(event.target.value))}>{versions.filter((v) => v.index > pair.a || v.index === pair.b).map((v) => <option key={v.index} value={v.index}>{v.label}</option>)}</select></label>
+      </> : <label>Versions<select aria-label="Versions" value={chosen?.id ?? ''} disabled={!group} onChange={(event) => setStep(event.target.value)}>{group?.steps.map((entry) => <option key={entry.id} value={entry.id}>{label(entry)}</option>)}</select></label>}
+      {(comparison?.pages?.filter((p) => p.n_changes).length ?? 0) > 1 && <div className="cmp-modes" role="group" aria-label="Pages with changes">{comparison!.pages!.filter((p) => p.n_changes && p.page != null).map((p) => <button type="button" key={p.page} aria-pressed={comparison!.page === p.page} onClick={() => setPage(p.page)}>Page {p.page} ({p.n_changes})</button>)}</div>}
       <div className="cmp-modes" role="group" aria-label="Comparison mode">{modes.map((item) => <button type="button" key={item} aria-pressed={mode === item} onClick={() => setMode(item)}>{item}</button>)}</div>
     </div>
     {error && <p className="error-message" role="alert">{error}</p>}
     {loading && <p className="tools-muted" role="status">Loading versions…</p>}
     {!loading && !groups.length && !error && <div className="cmp-empty"><p className="tools-muted">No drawings with more than one version yet.</p><UploadAction>Upload a new version</UploadAction></div>}
-    {chosen && !comparison && !error && <p className="tools-muted" role="status">Loading comparison…</p>}
+    {compareId && !comparison && !error && <p className="tools-muted" role="status">Loading comparison…</p>}
     {comparison && !image && <RevisionSummary comparison={comparison} />}
     {comparison && image && <div className="cmp-body">
       <div className={`cmp-sheets mode-${mode.replace(/ /g, '-').toLowerCase()}`} style={{ '--wipe': `${wipe}%`, aspectRatio: mode === 'Side by side' ? undefined : `${image.w}/${image.h}` } as CSSProperties}>
@@ -95,8 +108,8 @@ export function CompareScreen({ docs, demo }: { docs: Document[]; demo: boolean 
         <p className="cmp-summary">{summariseChanges(readings)}</p>
         {readings.filter((reading) => !reading.small).map(reading)}
         {readings.some((entry) => entry.small) && <details className="cmp-small"><summary>Minor edits ({readings.filter((entry) => entry.small).length})</summary>{readings.filter((entry) => entry.small).map(reading)}</details>}
-        {!comparison.changes.length && <div className="cmp-empty"><p className="tools-muted">No differences were found between these versions.</p><a className="button button-raised button-size-default" href={`#/chat?doc=${encodeURIComponent(chosen?.summary.doc_id || chosen?.doc_b || comparison.doc_id)}`}>Ask about this drawing</a></div>}
-        <small>Found automatically by comparing the two sheets line by line. No AI was used.{comparison.generated_for_demo ? ' · generated for demo' : ''}</small>
+        {!comparison.changes.length && <div className="cmp-empty"><p className="tools-muted">No differences were found between these versions.</p><a className="button button-raised button-size-default" href={`#/chat?doc=${encodeURIComponent((chosen ?? group?.steps[0])?.summary.doc_id || (chosen ?? group?.steps[0])?.doc_b || comparison.doc_id)}`}>Ask about this drawing</a></div>}
+        <small>{comparison.edited ? 'Compared item by item from the saved 3D edits. No AI was used. Edited versions are generated from 3D edits, not issued drawings.' : 'Found automatically by comparing the two sheets line by line. No AI was used.'}{comparison.generated_for_demo ? ' · generated for demo' : ''}</small>
       </aside>
     </div>}
   </section>

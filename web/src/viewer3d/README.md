@@ -192,7 +192,11 @@ do not replay commands. Imperative hosts use `viewer.applyCommand(command)` and
 hosts to `/ws` (Viewer3D already binds during scene loading). `onSceneEvent` and
 `sendCommand` use the same shared socket as T-06. Commands retain arrival order
 while loading/offline; edit IDs suppress server echoes. Snapshots replace the edit
-layer. No source geometry or manifest is edited.
+layer. No source geometry or manifest is edited. Inside a chat (`chat_id` on
+`Viewer3D`) local Edit-panel commands are sent with that chat id, so the server
+stores them in the chat's edit layer with the chat's own commands; other chats'
+edits on the same document are ignored. Hides from outside the panel join its
+Undo/Reset history, and the panel lists removed items with a Restore button.
 
 Command highlights use explicit labels, then manifest tags, then the item ID.
 Hide removes the item's command label and fades out over 250 ms before disabling

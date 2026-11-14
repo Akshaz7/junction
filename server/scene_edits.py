@@ -29,7 +29,7 @@ def clean_edit(msg: dict) -> dict | None:
     for i in raw[:MAX_IDS]:
         if isinstance(i, str) and 0 < len(i) <= MAX_ID_LEN and i not in ids:
             ids.append(i)
-    if op in ("hide", "highlight", "isolate") and not ids:
+    if op in ("hide", "isolate") and not ids:
         return None
     labels = clean_labels(msg.get("labels"), ids) if op in ("highlight", "isolate") else {}
     eid = msg.get("edit_id")
@@ -69,6 +69,29 @@ def fold(edits: list[dict]) -> dict[str, dict]:
         s = out.get(e["doc_id"]) or empty_state(e["doc_id"])
         out[e["doc_id"]] = apply(s, e["op"], e["item_ids"], e["labels"])
     return out
+
+
+def last_hidden(edits: list[dict], doc_ids: list[str] | None = None) -> list[str]:
+    """Ids of the newest hide edit (chat or manual) that is still at least partly in effect: what "undo" brings back."""
+    edits = [e for e in edits if not doc_ids or e["doc_id"] in doc_ids]
+    hidden = {i for s in fold(edits).values() for i in s["hidden"]}
+    for e in reversed(edits):
+        if e["op"] == "reset":
+            return []
+        if e["op"] == "hide":
+            still = [i for i in e["item_ids"] if i in hidden]
+            if still:
+                return still
+    return []
+
+
+async def chat_context(pool, chat_id, doc_ids: list[str] | None = None) -> dict | None:
+    """The shared edit layer as engine scene_state: {hidden, last_hidden} over the chat's docs, or None when nothing is hidden.
+    Manual Edit-panel removals (sent over /ws with chat_id) and chat commands land in the same table, so both count."""
+    hidden = [i for st in await scene_state(pool, chat_id) if not doc_ids or st.get("doc_id") in doc_ids for i in st.get("hidden") or []]
+    if not hidden:
+        return None
+    return {"hidden": hidden, "last_hidden": last_hidden(await load_edits(pool, chat_id), doc_ids)}
 
 
 def _j(v):

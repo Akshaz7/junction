@@ -1,0 +1,43 @@
+{
+  "scratch_root": "/private/tmp/f3d-opening-rebuild",
+  "source_artifacts_modified": false,
+  "results": [
+    {
+      "doc_id": "cubicasa5k__colorful-11397",
+      "seconds": 0.185,
+      "opening_support": {
+        "openings": 22,
+        "in_gap": 0,
+        "in_gap_percent": 0.0,
+        "incomplete_width_support": 0,
+        "missing_ids": [],
+        "width_gap_ids": []
+      }
+    },
+    {
+      "doc_id": "cubicasa5k__colorful-11400",
+      "seconds": 0.266,
+      "opening_support": {
+        "openings": 24,
+        "in_gap": 0,
+        "in_gap_percent": 0.0,
+        "incomplete_width_support": 0,
+        "missing_ids": [],
+        "width_gap_ids": []
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site3468-bldg5347-floor23670",
+      "seconds": 0.144,
+      "opening_support": {
+        "openings": 12,
+        "in_gap": 0,
+        "in_gap_percent": 0.0,
+        "incomplete_width_support": 0,
+        "missing_ids": [],
+        "width_gap_ids": []
+      }
+    }
+  ],
+  "visual_validation": "Blocked at Chromium launch before screenshots"
+}

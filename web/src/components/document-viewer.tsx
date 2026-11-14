@@ -21,6 +21,7 @@ import { findSheetText, loadSheetText, type SheetText } from './viewer-tools/she
 import { RoomLabels } from './viewer-tools/room-labels'
 import { SpecPanel } from './viewer-tools/spec-panel'
 import { downloadSource } from './viewer-tools/download-source'
+import { useDrawingHighlights } from '../viewer3d/useDrawingHighlights'
 
 export function useViewerSheet() {
   const [sheet, setSheet] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 800px)').matches)
@@ -54,6 +55,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   const itemTrigger = useRef<Element | null>(null)
   const citation = useMemo(() => place ? { ...originalCitation, kind: 'element' as const, quote: null, doc_id: place.location.doc_id, page: place.location.page, item_ids: [place.item.item_id] } : { ...originalCitation, page: pageNumber }, [originalCitation, place, pageNumber])
   const { regions, sources, initial } = useMemo(() => place ? placeEvidence(place.location, place.item) : viewerEvidence(answer, citation), [answer, citation, place])
+  const highlights = useDrawingHighlights(citation.doc_id, answer.answer_id, chatId)
   const table = answerTableSelection(answer)
   const [active, setActive] = useState(initial)
   const [doc, setDoc] = useState<Document | null>(null)
@@ -347,6 +349,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
     <div className="viewer-toolbar" aria-label="Drawing controls" hidden={mode === '3d'}>
       <div className="viewer-page-position"><Button variant="ghost" size="icon-xs" aria-label="Previous page" disabled={citation.page <= 1} onClick={() => changePage(citation.page - 1)}><ChevronLeft size={14} /></Button><span className="page-number">{citation.page}</span><span>/ {totalPages ?? '…'}</span><Button variant="ghost" size="icon-xs" aria-label="Next page" disabled={!totalPages || citation.page >= totalPages} onClick={() => changePage(citation.page + 1)}><ChevronRight size={14} /></Button></div>
       <span className="toolbar-spacer" />
+      <Button variant="ghost" size="xs" onClick={highlights.clear}>Clear highlights</Button>
       <div className="viewer-markup-tools">
         <Button variant="ghost" size="icon-sm" aria-label="Search sheet" aria-expanded={searchOpen} aria-controls="viewer-sheet-search" onClick={(event) => { searchTrigger.current = event.currentTarget; if (searchOpen) closeSearch(); else setSearchOpen(true) }}><Search size={16} /></Button>
         <Button variant="ghost" size="icon-sm" aria-label="Highlight marker" aria-pressed={tool === 'marker'} disabled={!image} onClick={() => chooseTool('marker')}><Highlighter size={16} /></Button>
@@ -427,7 +430,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
           onError={() => { setImage(null); setError('This page image could not be displayed.') }} />
         {image && shownPage === citation.page && <RoomLabels docId={citation.doc_id} page={citation.page} width={image.width} height={image.height} scale={view.scale} />}
         {image && shownPage === citation.page && <svg className="drawing-evidence" width={image.width} height={image.height} viewBox={`0 0 ${image.width} ${image.height}`} aria-label="Numbered drawing evidence">
-          {regions.map((region, index) => {
+          {!highlights.cleared && regions.map((region, index) => {
             const [x, y, right, bottom] = region.bbox
             const labelSize = 22 / view.scale
             const label = region.label
@@ -451,7 +454,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
               {secondaryTag && <svg className="evidence-secondary-tag" x={x + labelSize * Math.max(1, label.length / 2)} y={y} width={labelSize * Math.max(1, secondaryTag.length / 2)} height={labelSize} viewBox={`0 0 ${22 * Math.max(1, secondaryTag.length / 2)} 22`}><text x="4" y="15">{secondaryTag}</text></svg>}
             </g>
           })}
-          {leaving.map((region) => {
+          {!highlights.cleared && leaving.map((region) => {
             const [x, y, right, bottom] = region.bbox
             const kind = region.text ? null : kindStyle(region.kind)
             return <g key={`leaving-${region.id}`} className="evidence-region is-leaving" aria-hidden="true" data-testid="evidence-box-leaving" data-kind={kind ? region.kind ?? 'other' : undefined} style={kind ? { '--kind-color': kind.color, '--kind-on': kind.on } as CSSProperties : undefined}>
@@ -465,7 +468,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
           <AnnotationLayer marks={annotations.marks} draft={draft} />
         </svg>}
       </div>}
-      {image && shownPage === citation.page && regions.some((region) => !region.text) && <KindLegend className="kind-legend-2d" kinds={regions.filter((region) => !region.text).map((region) => region.kind)} totals={totalKinds} />}
+      {!highlights.cleared && image && shownPage === citation.page && regions.some((region) => !region.text) && <KindLegend className="kind-legend-2d" kinds={regions.filter((region) => !region.text).map((region) => region.kind)} totals={totalKinds} />}
       {error ? <div className="viewer-message"><p role="alert">{error}</p><Button variant="raised" onClick={() => setRetry(retry + 1)}>Try again</Button></div>
         : !image && <p className="viewer-message" role="status">Loading drawing…</p>}
     </div>

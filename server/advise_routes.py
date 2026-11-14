@@ -23,7 +23,7 @@ SOURCE_TYPES = ("rule", "material_table", "document")
 MAX_CARDS, MAX_TITLE, MAX_BODY, MAX_QUOTE = 3, 60, 200, 200
 
 
-ADVISE_OPS = ("hide", "restore", "move", "material", "undo", "resize", "narrow", "scale", "set_width")  # move/material are local what-ifs, never persisted
+ADVISE_OPS = ("hide", "restore", "reset", "move", "material", "undo", "resize", "narrow", "scale", "set_width")  # move/material are local what-ifs, never persisted
 MAX_ITEMS, MAX_DETAIL_BYTES = 200, 4000
 
 
@@ -37,6 +37,29 @@ class AdviseBody(BaseModel):
     doc_id: str
     chat_id: str | None = None
     edit: Edit | None = None
+
+
+def effective_edit(hidden: list[str], edit: dict | None) -> dict | None:
+    """The edit as the advisor must see it on a chat's shared edit layer (chat commands + manual edits):
+    a hide checks everything hidden so far plus this edit; a restore/reset checks what is still hidden after it.
+    Order-independent, so it does not matter whether the /ws scene.edit or this call lands first."""
+    if not edit or not hidden or edit.get("op") not in ("hide", "restore", "reset"):
+        return edit
+    ids = list(edit.get("item_ids") or [])
+    if edit["op"] == "hide":
+        return {**edit, "item_ids": list(dict.fromkeys([*hidden, *ids]))}
+    drop = set(ids)
+    rest = [] if edit["op"] == "reset" or not ids else [i for i in hidden if i not in drop]
+    return {"op": "hide", "item_ids": rest} if rest else edit
+
+
+async def chat_hidden(pool, chat_id, doc_id: str) -> list[str]:
+    from . import scene_edits
+    try:
+        ctx = await scene_edits.chat_context(pool, uuid.UUID(str(chat_id)), [doc_id])
+    except Exception:  # noqa: BLE001  shared state is context; never fail the advice on it
+        return []
+    return list((ctx or {}).get("hidden") or [])
 
 
 def _engine_advise():
@@ -123,6 +146,8 @@ async def advise(body: AdviseBody):
         edit = {"op": e.op, "item_ids": list(e.item_ids)}
         if e.detail is not None:
             edit["detail"] = e.detail
+    if chat_id is not None and edit is not None:
+        edit = effective_edit(await chat_hidden(pool, chat_id, body.doc_id), edit)
     fn = _engine_advise()
     cards: list[dict] = []
     if fn is not None:
