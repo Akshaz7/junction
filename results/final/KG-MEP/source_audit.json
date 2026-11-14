@@ -1,0 +1,161 @@
+{
+  "sample_size": 10,
+  "source_agreement": 10,
+  "scope": "Topology/system-source agreement only. Ten first source records printed for hand inspection; not a random precision estimate. Spatial room assignments are unmeasured estimates.",
+  "checks": [
+    {
+      "doc_id": "ifc_models__bsc-clinic-clinic-hvac",
+      "kind": "connects",
+      "edge_id": "mep:5d54195c15581c6e9638",
+      "source_relation": "#413067=IfcRelConnectsPorts('3f4QA535P9ywjghU0CZ$Mc',#1,$,$,#78640,#81334,$)",
+      "actual_labels": [
+        "M_Rectangular Elbow - Mitered:Standard:Standard:723398",
+        "Rectangular Duct:Mitered Elbows / Taps:723106"
+      ],
+      "source_owners": [
+        "#1056=IfcFlowSegment('28YHm_uEPF$w9_7O_8K20O',#1,'Rectangular Duct:Mitered Elbows / Taps:723106',$,'Rectangular Duct:Mitered Elbows / Taps:142427',#282994,#278342,'723106')",
+        "#2459=IfcFlowFitting('28YHm_uEPF$w9_7O_8K25y',#1,'M_Rectangular Elbow - Mitered:Standard:Standard:723398',$,'Standard',#283768,#277759,'723398')"
+      ],
+      "source_agrees": true
+    },
+    {
+      "doc_id": "ifc_models__bsc-clinic-clinic-hvac",
+      "kind": "connects",
+      "edge_id": "mep:1decee38674413d74c89",
+      "source_relation": "#413068=IfcRelConnectsPorts('1OoJ5bgq1AKfSm$w0J4FgQ',#1,$,$,#78501,#78511,$)",
+      "actual_labels": [
+        "Rectangular Duct:Mitered Elbows / Taps:723106",
+        "M_Rectangular Takeoff:Standard:Standard:723225"
+      ],
+      "source_owners": [
+        "#1056=IfcFlowSegment('28YHm_uEPF$w9_7O_8K20O',#1,'Rectangular Duct:Mitered Elbows / Taps:723106',$,'Rectangular Duct:Mitered Elbows / Taps:142427',#282994,#278342,'723106')",
+        "#4198=IfcFlowFitting('28YHm_uEPF$w9_7O_8K26Z',#1,'M_Rectangular Takeoff:Standard:Standard:723225',$,'Standard',#282072,#278081,'723225')"
+      ],
+      "source_agrees": true
+    },
+    {
+      "doc_id": "ifc_models__bsc-clinic-clinic-hvac",
+      "kind": "connects",
+      "edge_id": "mep:bf26743ebe9cd68dc8e4",
+      "source_relation": "#413069=IfcRelConnectsPorts('34rSSJji56AwJLlOjoKgZQ',#1,$,$,#79777,#82620,$)",
+      "actual_labels": [
+        "M_Rectangular Elbow - Mitered:Standard:Standard:723226",
+        "Rectangular Duct:Mitered Elbows / Taps:723221"
+      ],
+      "source_owners": [
+        "#2257=IfcFlowFitting('28YHm_uEPF$w9_7O_8K26W',#1,'M_Rectangular Elbow - Mitered:Standard:Standard:723226',$,'Standard',#283263,#277756,'723226')",
+        "#3608=IfcFlowSegment('28YHm_uEPF$w9_7O_8K26l',#1,'Rectangular Duct:Mitered Elbows / Taps:723221',$,'Rectangular Duct:Mitered Elbows / Taps:142427',#282996,#276915,'723221')"
+      ],
+      "source_agrees": true
+    },
+    {
+      "doc_id": "ifc_models__bsc-clinic-clinic-hvac",
+      "kind": "recorded_system_name",
+      "edge_id": "mep:daa723797c9b567a7908",
+      "source_properties": [
+        {
+          "pset": "Mechanical",
+          "property": "System Name",
+          "value": "Hydronic Return 1,Hydronic Supply 1,Mechanical Return Air 2,Mechanical Supply Air 2"
+        }
+      ],
+      "actual_labels": [
+        "M_Air Handling Unit - Split System - Horizontal:63300000 J:63300000 J:621849",
+        "Hydronic Return 1,Hydronic Supply 1,Mechanical Return Air 2,Mechanical Supply Air 2"
+      ],
+      "source_agrees": true
+    },
+    {
+      "doc_id": "ifc_models__bsc-clinic-clinic-hvac",
+      "kind": "recorded_system_name",
+      "edge_id": "mep:a53157eaf76c15c5e7f0",
+      "source_properties": [
+        {
+          "pset": "Mechanical",
+          "property": "System Name",
+          "value": "Hydronic Return 1,Hydronic Supply 1,Mechanical Return Air 1,Mechanical Supply Air 1"
+        }
+      ],
+      "actual_labels": [
+        "M_Air Handling Unit - Split System - Horizontal:63300000 J:63300000 J:630076",
+        "Hydronic Return 1,Hydronic Supply 1,Mechanical Return Air 1,Mechanical Supply Air 1"
+      ],
+      "source_agrees": true
+    },
+    {
+      "doc_id": "ifc_bench__digital-hub-ventilation",
+      "kind": "connects",
+      "edge_id": "mep:1be976045a1bed379684",
+      "source_relation": "#301380=IfcRelConnectsPorts('2koy$2eQP0rgZQq8cM_SsZ',#42,'3DzYgM3j1DufpHC5JReFqf|1tiUvL28vDJg8RSEbHA4U7','Flow',#301368,#301378,$)",
+      "actual_labels": [
+        "Rechteck:Bogen - T-St\u00fcck:7567426",
+        "RLT-Ger\u00e4t Kammer Klappe:Kammer Klappe1.0:7270565"
+      ],
+      "source_owners": [
+        "#639=IfcDamper('2jfPwJ7fP3WfBkHCTOojNW',#42,'RLT-Ger\u00e4t Kammer Klappe:Kammer Klappe1.0:7270565',$,'RLT-Ger\u00e4t Kammer Klappe:Kammer Klappe1.0',#638,#630,'7270565',.RELIEFDAMPER.)",
+        "#296922=IfcDuctSegment('3pZtahKSHFPB_xPlmuXdP6',#42,'Rechteck:Bogen - T-St\u00fcck:7567426',$,'Rechteck:Bogen - T-St\u00fcck',#296898,#296919,'7567426',.NOTDEFINED.)"
+      ],
+      "source_agrees": true
+    },
+    {
+      "doc_id": "ifc_bench__digital-hub-ventilation",
+      "kind": "connects",
+      "edge_id": "mep:d03af5e1501372cb9221",
+      "source_relation": "#301394=IfcRelConnectsPorts('1DaJRL3qP0$fPMEAqrHTy3',#42,'0XDfc1JDrAC8Mz7QDP9bZl|2YQQxF_$v8DedAlMJYxUhH','Flow',#301387,#301392,$)",
+      "actual_labels": [
+        "RLT-Ger\u00e4t Kammer Klappe:Kammer Klappe1.0:7270565",
+        "\u00dcbergang rechteck UA:Standard:7277537"
+      ],
+      "source_owners": [
+        "#7082=IfcDuctFitting('1LkD6nM$z5mRhks0V_NByo',#42,'\u00dcbergang rechteck UA:Standard:7277537',$,'\u00dcbergang rechteck UA:Standard',#7081,#7075,'7277537',.NOTDEFINED.)",
+        "#639=IfcDamper('2jfPwJ7fP3WfBkHCTOojNW',#42,'RLT-Ger\u00e4t Kammer Klappe:Kammer Klappe1.0:7270565',$,'RLT-Ger\u00e4t Kammer Klappe:Kammer Klappe1.0',#638,#630,'7270565',.RELIEFDAMPER.)"
+      ],
+      "source_agrees": true
+    },
+    {
+      "doc_id": "ifc_bench__digital-hub-ventilation",
+      "kind": "part_of_system",
+      "edge_id": "e-c677ba78447f0ec643e550ba",
+      "source_system": "#333577=IfcSystem('2jfPwJ7fP3WfBkHCTOooRU',#42,'V_Aussenluft',$,'Au\u00dfenluft')",
+      "source_member": "#639=IfcDamper('2jfPwJ7fP3WfBkHCTOojNW',#42,'RLT-Ger\u00e4t Kammer Klappe:Kammer Klappe1.0:7270565',$,'RLT-Ger\u00e4t Kammer Klappe:Kammer Klappe1.0',#638,#630,'7270565',.RELIEFDAMPER.)",
+      "source_relation_ids": [
+        "2km_UiQo97Jhs8xbp244JE"
+      ],
+      "actual_labels": [
+        "RLT-Ger\u00e4t Kammer Klappe:Kammer Klappe1.0:7270565",
+        "V_Aussenluft"
+      ],
+      "source_agrees": true
+    },
+    {
+      "doc_id": "ifc_bench__digital-hub-ventilation",
+      "kind": "part_of_system",
+      "edge_id": "e-7492da50c87e1c39e5a3313e",
+      "source_system": "#333577=IfcSystem('2jfPwJ7fP3WfBkHCTOooRU',#42,'V_Aussenluft',$,'Au\u00dfenluft')",
+      "source_member": "#1193=IfcFilter('2jfPwJ7fP3WfBkHCTOojJJ',#42,'RLT-Ger\u00e4t Filterkammer:Filterkammer 1.0 F7:7270806',$,'RLT-Ger\u00e4t Filterkammer:Filterkammer 1.0 F7',#1192,#1186,'7270806',.AIRPARTICLEFILTER.)",
+      "source_relation_ids": [
+        "2km_UiQo97Jhs8xbp244JE"
+      ],
+      "actual_labels": [
+        "RLT-Ger\u00e4t Filterkammer:Filterkammer 1.0 F7:7270806",
+        "V_Aussenluft"
+      ],
+      "source_agrees": true
+    },
+    {
+      "doc_id": "ifc_bench__digital-hub-ventilation",
+      "kind": "part_of_system",
+      "edge_id": "e-52dece580c3365ade7035ace",
+      "source_system": "#333577=IfcSystem('2jfPwJ7fP3WfBkHCTOooRU',#42,'V_Aussenluft',$,'Au\u00dfenluft')",
+      "source_member": "#2053=IfcAirToAirHeatRecovery('2jfPwJ7fP3WfBkHCTOojVu',#42,'RLT-Ger\u00e4t W\u00e4rmer\u00fcckgewinnung:WRG Rotation 1.0:7271101',$,'RLT-Ger\u00e4t W\u00e4rmer\u00fcckgewinnung:WRG Rotation 1.0',#2052,#2046,'7271101',.ROTARYWHEEL.)",
+      "source_relation_ids": [
+        "2km_UiQo97Jhs8xbp244JE"
+      ],
+      "actual_labels": [
+        "RLT-Ger\u00e4t W\u00e4rmer\u00fcckgewinnung:WRG Rotation 1.0:7271101",
+        "V_Aussenluft"
+      ],
+      "source_agrees": true
+    }
+  ]
+}
