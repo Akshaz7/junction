@@ -55,6 +55,9 @@ The imperative API is available from `createViewer(canvas)` or `onReady(viewer)`
 `viewer.onHighlightChange(callback)` observes public highlight/clear calls and
 returns an unsubscribe function. Internal scene disposal does not publish a clear.
 Missing IDs are ignored; labels default to sequential numbers when omitted.
+Answer and legacy live highlights use supplied citation numbers even when the
+manifest has tags. Only scene commands and reconnect command snapshots resolve
+missing labels from manifest tags (then item IDs); supplied command labels win.
 An empty selection clears the highlight. State reports resolved item IDs,
 the number of other resolved items (including hidden storeys), and label strings.
 Highlighting selects the camera target's storey, otherwise the first highlighted
@@ -289,3 +292,20 @@ and detail forwarding (recorded in the handoff).
 `advisor-fixture` response is stubbed, marked generated for demo; another test
 uses the real advisor API. A third checks dragging, material requests, and reset.
 The full browser done test remains for LEAD outside the worker sandbox.
+
+T-09 adds an off-by-default Findings layer: GET loads stored findings, Run checks
+POSTs the current document, and `findings.updated` refetches on the shared socket.
+Pins use the first item's geometry bbox top centre, fixed screen size, and the
+server's violation (red), suggestion (amber), and info (blue) severities. Findings
+on one item share a count pin. Pins span all storeys so checks remain discoverable
+in a cutaway; Show items uses the tagged highlight command to reveal the storey.
+Cards quote the returned rule text and source without synthesising messages.
+`window.__viewer3d.findings()` returns each finding's id, item_id, severity, and
+viewport `screen_xy` (null outside the view). The opt-in canvas hook exposes it too.
+`e2e/viewer3d-findings.spec.ts` exercises AC20 against the real API, including live
+refresh, bbox projection, the card, tags, and toggle persistence.
+Canvas click/tap tests finding sprites before building meshes; hover only picks
+building items. Sprite picking updates world matrices and supplies the camera
+through `Raycaster.setFromCamera`. The e2e test disables only the DOM pin pointer
+targets to verify this canvas path, then restores them and opens the same card
+with the pin button's Enter key.

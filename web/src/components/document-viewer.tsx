@@ -10,6 +10,9 @@ import { setHover, setSelected, useLinkedItem } from '../viewer3d'
 import './document-viewer.css'
 import { answerTableSelection } from '../lib/ar-bridge'
 import { ShowOnTableButton } from './show-on-table'
+import { itemIsHidden, type DrawingEdits } from '../lib/scene-edits'
+import type { SceneCommand } from '../viewer3d/commands'
+import { DrawingModel } from './drawing-model'
 
 export function useViewerSheet() {
   const [sheet, setSheet] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 800px)').matches)
@@ -23,10 +26,12 @@ export function useViewerSheet() {
   return sheet
 }
 
-export function DocumentViewer({ answer, citation, sheet, onClose }: {
+export function DocumentViewer({ answer, citation, sheet, onClose, edits, commands, chatId }: {
   answer: Answer; citation: Citation; sheet: boolean; onClose: () => void
+  edits?: DrawingEdits; commands?: readonly SceneCommand[]
+  chatId?: string | null
 }) {
-  const { regions, initial } = useMemo(() => viewerEvidence(answer, citation), [answer, citation])
+  const { regions, sources, initial } = useMemo(() => viewerEvidence(answer, citation), [answer, citation])
   const table = answerTableSelection(answer)
   const [active, setActive] = useState(initial)
   const [doc, setDoc] = useState<Document | null>(null)
@@ -36,6 +41,11 @@ export function DocumentViewer({ answer, citation, sheet, onClose }: {
   const [view, setView] = useState<PageTransform>({ x: 0, y: 0, scale: 1 })
   const [error, setError] = useState('')
   const [retry, setRetry] = useState(0)
+  const [documentTags, setDocumentTags] = useState<Record<string, string>>({})
+  const tags = { ...documentTags, ...edits?.tags }
+  const visualiseAnswer = useMemo(() => commands ? {
+    ...answer, evidence: { ...answer.evidence, scene: { ...answer.evidence.scene, commands } },
+  } : answer, [answer, commands])
   const linked = useLinkedItem()
   const stage = useRef<HTMLDivElement>(null)
   const panel = useRef<HTMLElement>(null)
@@ -44,10 +54,19 @@ export function DocumentViewer({ answer, citation, sheet, onClose }: {
   const returnFocus = useRef(typeof document !== 'undefined' ? document.activeElement as HTMLElement | null : null)
 
   useEffect(() => {
+    const controller = new AbortController()
+    setDocumentTags({})
+    workspaceApi.getDocumentTags(citation.doc_id, controller.signal).then((value) => {
+      if (!controller.signal.aborted) setDocumentTags(value)
+    }).catch(() => {})
+    return () => controller.abort()
+  }, [citation.doc_id])
+
+  useEffect(() => {
     if (linked.selectedSource !== '3d') return
-    const index = regions.findIndex((region) => region.id === linked.selected)
+    const index = sources.findIndex((source) => source.itemIds.includes(linked.selected ?? ''))
     if (index >= 0) setActive(index)
-  }, [linked.selected, linked.selectedSource, regions])
+  }, [linked.selected, linked.selectedSource, sources])
   useEffect(() => {
     setHover(null, '2d'); setSelected(null, '2d')
     return () => { setHover(null, '2d'); setSelected(null, '2d') }
@@ -90,8 +109,9 @@ export function DocumentViewer({ answer, citation, sheet, onClose }: {
   useEffect(() => {
     if (!image || !viewport.width || !viewport.height) return
     const fitted = fitPage(image, viewport)
-    setView(regions[active] ? focusBox(regions[active].bbox, viewport, fitted.scale) : fitted)
-  }, [image, viewport, active, regions])
+    const bbox = sources[active]?.bbox
+    setView(bbox ? focusBox(bbox, viewport, fitted.scale) : fitted)
+  }, [image, viewport, active, sources])
 
   useEffect(() => {
     if (sheet) close.current?.focus()
@@ -129,6 +149,10 @@ export function DocumentViewer({ answer, citation, sheet, onClose }: {
     return { x: (points[0].x + points[1].x) / 2, y: (points[0].y + points[1].y) / 2 }
   }
   function distance(points: Point[]) { return Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y) }
+  function selectSource(index: number) {
+    setActive(index)
+    setSelected(sources[index]?.itemIds[0] ?? null, '2d')
+  }
 
   return <aside ref={panel} className={`document-viewer ${sheet ? 'viewer-sheet' : ''}`} role={sheet ? 'dialog' : 'region'} aria-modal={sheet || undefined} aria-label="Drawing viewer"
     onKeyDown={(event) => {
@@ -146,13 +170,13 @@ export function DocumentViewer({ answer, citation, sheet, onClose }: {
     <header className="viewer-heading"><FileText size={24} /><div><strong>{doc?.title ?? citation.doc_id}</strong><small>/{doc?.source || 'Drawings'}</small></div>
       <div className="viewer-source-nav">
         <a className="viewer-open-source" aria-label="Open source page" href={imageUrl || undefined} target="_blank" rel="noreferrer"><FileSymlink size={16} /></a>
-        <Button variant="ghost" size="icon" aria-label="Previous source" disabled={!image || active <= 0} onClick={() => setActive(active - 1)}><ChevronLeft size={16} /></Button>
-        <span aria-live="polite" data-testid="source-position">{regions.length ? active + 1 : 0} of {regions.length}</span>
+        <Button variant="ghost" size="icon" aria-label="Previous source" disabled={active <= 0} onClick={() => selectSource(active - 1)}><ChevronLeft size={16} /></Button>
+        <span aria-live="polite" data-testid="source-position">{sources.length ? active + 1 : 0} of {sources.length}</span>
         <ChevronDown className="viewer-source-chevron" size={14} aria-hidden="true" />
-        <Button variant="ghost" size="icon" aria-label="Next source" disabled={!image || active >= regions.length - 1} onClick={() => setActive(active + 1)}><ChevronRight size={16} /></Button>
+        <Button variant="ghost" size="icon" aria-label="Next source" disabled={active >= sources.length - 1} onClick={() => selectSource(active + 1)}><ChevronRight size={16} /></Button>
         <Button className="viewer-fit" variant="ghost" size="icon" aria-label="Fit drawing" disabled={!image} onClick={() => image && setView(fitPage(image, viewport))}><Maximize2 size={16} /></Button>
       </div>
-      <ShowOnTableButton docId={citation.doc_id} itemIds={table?.doc_id === citation.doc_id ? table.item_ids : citation.item_ids} />
+      <ShowOnTableButton docId={citation.doc_id} itemIds={table?.doc_id === citation.doc_id ? table.item_ids : citation.item_ids} chatId={chatId} />
       <button ref={close} type="button" className="button button-ghost button-size-icon" aria-label="Close drawing viewer" onClick={onClose}><X size={18} /></button>
     </header>
     <div className="viewer-toolbar" aria-label="Drawing controls">
@@ -209,14 +233,17 @@ export function DocumentViewer({ answer, citation, sheet, onClose }: {
           {regions.map((region, index) => {
             const [x, y, right, bottom] = region.bbox
             const labelSize = 22 / view.scale
-            return <g key={region.id} className={`evidence-region ${region.text ? 'text-highlight' : ''} ${index === active || linked.selected === region.id || linked.hovered === region.id ? 'is-active' : ''}`} data-testid={`evidence-box-${region.label}`} aria-label={`${region.text ? 'Text source' : 'Box'} ${region.label}`}
+            const tag = tags[region.id] ?? region.label
+            const hidden = itemIsHidden(edits, region.id)
+            return <g key={region.id} className={`evidence-region ${region.text ? 'text-highlight' : ''} ${index === active || linked.selected === region.id || linked.hovered === region.id ? 'is-active' : ''} ${hidden ? 'is-hidden' : ''}`} data-testid={`evidence-box-${region.label}`} aria-label={`${region.text ? 'Text source' : 'Box'} ${tag}${hidden ? ', hidden' : ''}`}
               data-item-id={region.id} data-linked={linked.selected === region.id || linked.hovered === region.id ? 'true' : undefined}
+              data-hidden={String(hidden)} data-tag={tag}
               onPointerDown={(event) => event.stopPropagation()}
               onMouseEnter={() => setHover(region.id, '2d')} onMouseLeave={() => setHover(null, '2d')}
               onClick={() => { setActive(index); setSelected(region.id, '2d') }}>
               <title>{region.text ? citation.quote ?? 'Text source' : region.id}</title>
               <rect x={x} y={y} width={Math.max(0, right - x)} height={Math.max(0, bottom - y)} vectorEffect="non-scaling-stroke" />
-              <svg x={x} y={y} width={labelSize} height={labelSize} viewBox="0 0 22 22" overflow="visible"><rect className="evidence-label-bg" width="22" height="22" rx="5" /><text x="11" y="15" textAnchor="middle">{region.label}</text></svg>
+              <svg x={x} y={y} width={labelSize * Math.max(1, tag.length / 2)} height={labelSize} viewBox={`0 0 ${22 * Math.max(1, tag.length / 2)} 22`} overflow="visible"><rect className="evidence-label-bg" width={22 * Math.max(1, tag.length / 2)} height="22" rx="5" /><text x={11 * Math.max(1, tag.length / 2)} y="15" textAnchor="middle">{tag}</text></svg>
             </g>
           })}
         </svg>}
@@ -224,8 +251,10 @@ export function DocumentViewer({ answer, citation, sheet, onClose }: {
       {error ? <div className="viewer-message"><p role="alert">{error}</p><Button variant="raised" onClick={() => setRetry(retry + 1)}>Try again</Button></div>
         : !image && <p className="viewer-message" role="status">Loading drawing…</p>}
     </div>
-    <span className="viewer-3d-slot">{(answer.evidence.scene.doc_id || answer.doc_ids[0]) === citation.doc_id
-      ? <VisualiseItButton answer={answer} /> : <VisualiseItButton docId={citation.doc_id} />}</span>
+    <div className="viewer-3d-slot">{!sheet
+      ? <DrawingModel docId={citation.doc_id} chatId={chatId} answer={(answer.evidence.scene.doc_id || answer.doc_ids[0]) === citation.doc_id ? visualiseAnswer : undefined} />
+      : (answer.evidence.scene.doc_id || answer.doc_ids[0]) === citation.doc_id
+        ? <VisualiseItButton answer={visualiseAnswer} /> : <VisualiseItButton docId={citation.doc_id} />}</div>
     <footer className="drawing-credit" data-testid="drawing-credit">{doc ? <>{doc.credit || 'Credit not supplied'} · {doc.licence || 'Licence not supplied'}</> : 'Loading source credit…'}</footer>
   </aside>
 }

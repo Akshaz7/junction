@@ -1,0 +1,8 @@
+.scene-command-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 12px 0; }
+.scene-tag, .scene-tags-more, .scene-command-undo { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); padding: 3px 7px; font-size: 12px; color: var(--muted-foreground); }
+.scene-tag { color: var(--foreground); }
+.scene-tag.is-hidden { border-style: dashed; color: var(--muted-foreground); }
+.scene-tag small { font-size: 10px; }
+.scene-tags-more, .scene-command-undo { border-color: transparent; background: transparent; }
+.scene-tag:disabled { cursor: default; }
+.scene-command-undo:disabled { opacity: .4; }

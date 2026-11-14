@@ -75,6 +75,29 @@
 }
 .viewer3d-message[role="alert"] { color: var(--destructive, #a93b22); }
 .viewer3d-label-layer { overflow: hidden; }
+.viewer3d-finding-pin {
+  width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%;
+  background: transparent; pointer-events: auto; cursor: pointer;
+}
+.viewer3d-finding-pin:focus-visible { outline: 3px solid var(--mode-accent, #166ed1); }
+.viewer3d-findings-legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; }
+.viewer3d-findings-legend > span { display: inline-flex; align-items: center; gap: 4px; }
+.viewer3d-findings-legend i { width: 9px; height: 9px; border-radius: 50%; }
+.viewer3d-findings-card {
+  position: absolute; z-index: 2; top: 12px; right: 12px;
+  width: min(340px, calc(100% - 24px)); max-height: calc(100% - 24px);
+  overflow: auto; box-sizing: border-box; padding: 16px;
+  background: var(--card, #fff); border: 1px solid var(--border, #e7e7e7);
+  border-radius: 12px; box-shadow: 0 8px 28px #0002; font-size: 13px; overflow-wrap: anywhere;
+}
+.viewer3d-findings-card h2 { margin: 0 24px 10px 0; font-size: 14px; }
+.viewer3d-findings-card article + article { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border, #e7e7e7); }
+.viewer3d-findings-card blockquote { margin: 8px 0; padding-left: 10px; border-left: 2px solid var(--border, #e7e7e7); white-space: pre-wrap; }
+.viewer3d-findings-card dl div { margin: 6px 0; }
+.viewer3d-findings-card dt, .viewer3d-finding-source { color: var(--muted-foreground, #666); }
+.viewer3d-findings-card dd { margin: 2px 0 0; }
+.viewer3d-findings-card button { padding: 6px 10px; font: inherit; border: 1px solid var(--border, #e7e7e7); border-radius: 6px; background: var(--card, #fff); color: inherit; cursor: pointer; }
+.viewer3d-findings-card .viewer3d-findings-close { position: absolute; right: 8px; top: 8px; padding: 2px 8px; }
 .viewer3d-item-label {
   display: grid;
   place-items: center;

@@ -20,6 +20,11 @@ const element: IFCElement = {
 };
 
 describe('item card model', () => {
+  it('shows the document tag in item details independently of answer citation labels', () => {
+    const tagged = { ...manifest, items: { 'door-001': { ...manifest.items['door-001'], tag: 'D3' } } };
+    expect(buildItemDetails(tagged, 'door-001', element)?.fields).toContainEqual({ label: 'Tag', value: 'D3' });
+  });
+
   it('joins scene identity with IFC names, storey, measured quantities and properties', () => {
     const details = buildItemDetails(manifest, 'door-001', element)!;
     expect(details.name).toBe('Entrance door');

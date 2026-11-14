@@ -63,6 +63,8 @@ export function createHighlightController(scene: LoadedScene) {
       clearHighlight();
       const selected = new Set(ids.filter((id) => scene.items.has(id)));
       if (!selected.size) return;
+      // Answer/live evidence keeps its citation numbers even in a tagged scene.
+      // Commands resolve their tags before entering this controller.
       const labels = Object.fromEntries([...selected].map((id, index) => [id, options.labels?.[id] ?? String(index + 1)]));
       state = { highlighted: [...selected], dimmed: scene.items.size - selected.size, labels };
       scene.root.traverse((object) => {

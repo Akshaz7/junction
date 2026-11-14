@@ -36,7 +36,7 @@ function FormatBadges({ doc }: { doc: Document }) {
   return <span className="data-formats">{doc.formats.map((format) => <Badge key={format}>{format.toUpperCase()}</Badge>)}</span>
 }
 
-function DocumentDetail({ doc, onClose, onAsk }: { doc: Document; onClose: () => void; onAsk: (doc: Document) => void }) {
+function DocumentDetail({ doc, docked, onClose, onAsk }: { doc: Document; docked: boolean; onClose: () => void; onAsk: (doc: Document) => void }) {
   const [scene, setScene] = useState<'loading' | 'available' | 'missing' | 'error'>('loading')
   const [zoom, setZoom] = useState(100)
   const [showSceneNote, setShowSceneNote] = useState(false)
@@ -71,7 +71,7 @@ function DocumentDetail({ doc, onClose, onAsk }: { doc: Document; onClose: () =>
     return () => controller.abort()
   }, [doc.doc_id])
 
-  return <aside className="data-detail" aria-label="Document details" onKeyDown={(event) => { if (event.key === 'Escape') onClose() }}>
+  return <aside className="data-detail" data-docked={docked || undefined} aria-label="Document details" onKeyDown={(event) => { if (event.key === 'Escape') onClose() }}>
     <header><FileText size={24} /><div><h2><DocumentTitle title={doc.title} /></h2><small>/{doc.source}<span className="data-header-demo">{/generated for demo$/i.test(doc.title) ? ' · generated for demo' : ''}</span></small><details className="data-credit-info"><summary aria-label="Drawing credit and licence"><Info size={12} /></summary><div className="data-credit-popover"><dl><div><dt>Credit</dt><dd>{doc.credit || 'Not provided'}</dd></div><div><dt>Licence</dt><dd>{doc.licence || 'Not provided'}</dd></div></dl><div className="data-mobile-scene">{scene === 'available' ? <VisualiseItButton docId={doc.doc_id} /> : <button type="button" disabled={scene === 'loading'} onClick={() => setShowSceneNote(true)}>Visualise it</button>}{showSceneNote && <p role="status">{scene === 'error' ? 'Could not check 3D availability. Reopen the document to retry.' : 'No 3D scene available for this document.'}</p>}</div></div></details></div><ShowOnTableButton docId={doc.doc_id} sceneAvailable={scene === 'available'} /><button type="button" className="data-header-ask" aria-label="Ask about it" onClick={() => onAsk(doc)}><MessageSquare size={16} /></button><a className="data-compare" href="#/changes" aria-label="Compare document revisions"><GitCompare size={14} /><span>Compare</span></a><Button variant="ghost" size="icon" aria-label="Fit page" onClick={() => setZoom(100)}><Maximize2 size={16} /></Button><button ref={closeButton} type="button" className="data-close-detail" aria-label="Close document details" onClick={onClose}><X size={18} /></button></header>
     <div className="data-viewer-toolbar"><ChevronLeft size={14} /><span className="page-number">1</span><span>/ {doc.pages}</span><ChevronRight size={14} /><span className="toolbar-spacer" /><span className="data-viewer-tools" aria-hidden="true"><Search size={14} /><ScanText size={14} /><PenLine size={14} /></span><a aria-label="Download page" href={`/api/docs/${encodeURIComponent(doc.doc_id)}/pages/1/image`} download><Download size={14} /></a><span className="viewer-toolbar-divider" /><span className="data-zoom-controls"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => setZoom((n) => Math.max(25, n - 25))}><Minus size={14} /></Button><span aria-label="Page zoom level">{displayedZoom}%</span><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => setZoom((n) => Math.min(400, n + 25))}><Plus size={14} /></Button></span></div>
     <div className="data-detail-body">
@@ -94,6 +94,7 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [previewDocked, setPreviewDocked] = useState(false)
   const [upload, setUpload] = useState<UploadState | null>(null)
   const [uploadError, setUploadError] = useState('')
   const [pollAttempt, setPollAttempt] = useState(0)
@@ -102,6 +103,12 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const uploading = useRef(false)
   const lastOpened = useRef<HTMLButtonElement | null>(null)
   const pending = !!upload && !terminal.has(upload.status)
+
+  // Reopening Data keeps the retained preview alongside navigation. Opening a
+  // file explicitly starts a full-screen reading session on phones.
+  useLayoutEffect(() => {
+    if (hidden && selectedId) setPreviewDocked(true)
+  }, [hidden, selectedId])
 
   useEffect(() => {
     if (!upload?.docId || terminal.has(upload.status)) return
@@ -207,13 +214,13 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
         <button className="all-files" type="button" aria-current={!activeFolder && !query ? 'page' : undefined} onClick={() => { setFolder(''); setSearch(''); setPage(1) }}><Layers size={16} /><span>All Files</span><small>{docs.length}</small></button>
         {sources.map((source) => <div key={source}><button type="button" aria-label={`Open ${source} folder`} aria-current={activeFolder === source && !query ? 'page' : undefined} onClick={() => { setFolder(source); setSearch(''); setPage(1) }}>
           <Folder size={14} /><span>{source}</span><small>{docs.filter((doc) => doc.source === source).length}</small></button>
-          {activeFolder === source && <div className="folder-file-tree">{docs.filter((doc) => doc.source === source).slice(0, 10).map((doc) => <button type="button" key={doc.doc_id} aria-label={`Preview ${doc.title}`} aria-current={selectedId === doc.doc_id ? 'page' : undefined} onClick={(event) => { lastOpened.current = event.currentTarget; setSelectedId(doc.doc_id) }}><FileText size={14} /><span className="document-title"><DocumentTitle title={doc.title} /></span></button>)}</div>}
+          {activeFolder === source && <div className="folder-file-tree">{docs.filter((doc) => doc.source === source).slice(0, 10).map((doc) => <button type="button" key={doc.doc_id} aria-label={`Preview ${doc.title}`} aria-current={selectedId === doc.doc_id ? 'page' : undefined} onClick={(event) => { lastOpened.current = event.currentTarget; setPreviewDocked(false); setSelectedId(doc.doc_id) }}><FileText size={14} /><span className="document-title"><DocumentTitle title={doc.title} /></span></button>)}</div>}
         </div>)}
       </nav>
       <label className={`data-folder-search ${search ? 'has-query' : ''}`}><Search size={16} /><Input type="search" aria-label="Search documents" placeholder="Search all documents" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} /></label>
       <div className="data-files"><header><h2>{query ? 'Search results · all folders' : activeFolder || 'All Files'}</h2><ChevronLeft className="mobile-folder-back" size={14} /><select className="mobile-folder-select" aria-label="Document folder" value={activeFolder} onChange={(event) => { setFolder(event.target.value); setSearch(''); setPage(1) }}><option value="">All Files</option>{sources.map((source) => <option key={source} value={source}>{source}</option>)}</select><SlidersHorizontal className="mobile-folder-filter" size={14} /><span>Files ({filtered.length})</span></header>
         {loading ? <p className="data-empty" role="status">Loading documents…</p> : !visible.length ? <p className="data-empty">No documents found.</p> : <div className="data-file-list">{visible.map((doc) => <article key={doc.doc_id} className="data-file-row" data-doc-id={doc.doc_id} data-selected={selectedId === doc.doc_id || undefined}>
-          <button className="data-open-file" type="button" aria-label={`Open ${doc.title}`} aria-expanded={selectedId === doc.doc_id} onClick={(event) => { lastOpened.current = event.currentTarget; setSelectedId(doc.doc_id) }}>
+          <button className="data-open-file" type="button" aria-label={`Open ${doc.title}`} aria-expanded={selectedId === doc.doc_id} onClick={(event) => { lastOpened.current = event.currentTarget; setPreviewDocked(false); setSelectedId(doc.doc_id) }}>
             <span className="file-checkbox" aria-hidden="true" /><DocumentImage key={doc.doc_id} doc={doc} /><span><h3><DocumentTitle title={doc.title} /></h3><span className="data-file-meta">{doc.source} · {doc.pages} {doc.pages === 1 ? 'page' : 'pages'}</span><small>{doc.licence || 'Licence not provided'} · {doc.credit || 'Credit not provided'}</small></span>
           </button><FormatBadges doc={doc} /><MoreHorizontal className="file-row-more" size={16} />
         </article>)}</div>}
@@ -221,7 +228,7 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
           <Button variant="ghost" size="icon" aria-label="Previous document page" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}><ChevronLeft size={17} /></Button>
           <span>Page {currentPage} of {pageCount}</span><Button variant="ghost" size="icon" aria-label="Next document page" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}><ChevronRight size={17} /></Button></div>}
       </div>
-      {selected && <DocumentDetail key={selected.doc_id} doc={selected} onClose={closeDetail} onAsk={onAsk} />}
+      {selected && <DocumentDetail key={selected.doc_id} doc={selected} docked={previewDocked} onClose={closeDetail} onAsk={onAsk} />}
     </div>
   </section>
 }

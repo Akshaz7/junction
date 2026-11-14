@@ -20,4 +20,23 @@ describe('citation to drawing evidence', () => {
     expect(result.regions).toEqual([{ id: 'citation-3', label: '3', bbox: [10, 20, 30, 40], text: true }])
     expect(viewerEvidence(answer, { ...citation, page: 2 }).regions).toEqual([])
   })
+
+  it('counts and selects IFC evidence even without page boxes', () => {
+    const answer = makeDemoAnswer('What is the narrowest door width used here?')
+    answer.evidence.boxes = []
+    answer.evidence.scene.highlight_item_ids = ['ifc-door-1', 'ifc-door-2']
+    answer.citations = [{ ...answer.citations[0], kind: 'element', bbox_px: null, item_ids: ['ifc-door-1', 'ifc-door-2'] }]
+    const result = viewerEvidence(answer, { ...answer.citations[0], item_ids: ['ifc-door-2'] })
+    expect(result.regions).toEqual([])
+    expect(result.sources.map((source) => source.itemIds)).toEqual([['ifc-door-1'], ['ifc-door-2']])
+    expect(result.sources.every((source) => source.bbox === null)).toBe(true)
+    expect(result.initial).toBe(1)
+  })
+
+  it('does not count boxed or repeatedly cited elements twice', () => {
+    const answer = makeDemoAnswer('How many windows are there?')
+    answer.citations.push({ ...answer.citations[0], n: 2 })
+    const result = viewerEvidence(answer, answer.citations[0])
+    expect(result.sources.map((source) => source.id)).toEqual(result.regions.map((region) => region.id))
+  })
 })

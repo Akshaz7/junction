@@ -1,4 +1,6 @@
-// CONTRACT.md v2, sections 5.3 and 5.7. Coordinates are page-image pixels.
+import type { SceneCommand } from '../viewer3d/commands'
+
+// CONTRACT.md v3.1. Coordinates are page-image pixels.
 export type Bbox = [number, number, number, number]
 
 export interface Document {
@@ -33,7 +35,7 @@ export interface Answer {
   citations: { n: number; doc_id: string; page: number; kind: 'region' | 'text' | 'element'; bbox_px: Bbox | null; item_ids: string[]; quote: string | null }[]
   evidence: {
     boxes: { item_id: string; page: number; bbox_px: Bbox; label: string }[]
-    scene: { doc_id: string; highlight_item_ids: string[]; camera_target_item_id: string | null }
+    scene: { doc_id: string; highlight_item_ids: string[]; camera_target_item_id: string | null; commands?: readonly SceneCommand[] }
   }
   trace: { step: string; detail: string; ms: number; model: string | null; cost_usd: number; stub?: boolean }[]
   route: 'index' | 'planmap' | 'vlm' | 'hybrid'
@@ -43,6 +45,12 @@ export interface Answer {
 
 export type Citation = Answer['citations'][number]
 export type TraceStep = Answer['trace'][number]
+
+export interface PlanMap {
+  doc_id: string
+  page: number
+  items: { item_id: string; bbox_px: Bbox | null; tag?: string; props?: { tag?: string } }[]
+}
 
 export interface SavedChat {
   id: string

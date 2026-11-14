@@ -16,6 +16,14 @@ export interface SceneSnapshot {
   isolated?: readonly string[] | null;
 }
 
+/** CONTRACT 5.11: only commands/snapshots fall back to document tags. */
+export function resolveCommandLabels(
+  ids: readonly string[], labels: Readonly<Record<string, string>> | undefined,
+  items: Readonly<Record<string, { tag?: string }>>,
+): Record<string, string> {
+  return Object.fromEntries(ids.map((id) => [id, labels?.[id] ?? items[id]?.tag ?? id]));
+}
+
 export const emptyCommandState = (): CommandState => ({ hidden: new Set(), highlighted: new Map(), isolated: null });
 
 /** Fold in arrival order. All collections are copied so earlier states remain usable. */

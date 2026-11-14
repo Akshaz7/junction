@@ -15,6 +15,11 @@
 .viewer-source-nav > span { min-width: 55px; text-align: center; }
 .viewer-zoom-controls > span { min-width: 38px; text-align: center; }
 .viewer-3d-slot:empty { display: none; }
+.viewer-3d-slot:has(.drawing-model.is-open) { display: flex; flex: 0 1 60%; min-height: 0; }
+.drawing-model.is-open { display: flex; flex: 1; flex-direction: column; min-width: 0; min-height: 0; gap: 8px; }
+.drawing-model > .viewer3d-visualise-button { align-self: flex-start; flex-shrink: 0; }
+.document-viewer .drawing-model-panel[open] { position: static; inset: auto; z-index: auto; width: 100%; height: auto; min-height: 0; flex: 1; margin: 0; padding: 12px; gap: 8px; box-shadow: none; overflow: hidden; }
+.drawing-model-panel .viewer3d-visualise-heading h2 { font-size: 14px; }
 .drawing-stage { position: relative; isolation: isolate; flex: 1; min-height: 0; overflow: hidden; background: var(--neutral-75); touch-action: none; cursor: grab; user-select: none; }
 .drawing-stage:active { cursor: grabbing; }
 .drawing-stage:focus-visible { outline-offset: -3px; }
@@ -26,6 +31,8 @@
 .evidence-region.is-active { color: var(--brand-forest); }
 .evidence-region.is-active > rect { stroke-width: 3; fill: var(--forest-500); fill-opacity: .22; }
 .evidence-region.text-highlight > rect { fill: var(--amber-400); fill-opacity: .4; }
+.evidence-region.is-hidden { opacity: .4; color: var(--muted-foreground); }
+.evidence-region.is-hidden > rect { fill: var(--muted-foreground); fill-opacity: .1; stroke-dasharray: 5 4; }
 .evidence-region .evidence-label-bg { fill: currentColor; }
 .evidence-region text { fill: white; font-family: var(--font-sans); font-size: 12px; font-weight: 600; }
 .viewer-message { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center; color: var(--muted-foreground); font-size: var(--text-body-sm); }

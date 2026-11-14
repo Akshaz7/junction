@@ -1,6 +1,6 @@
 import type { Answer } from './types'
 
-export interface TableSelection { doc_id: string; item_ids: string[] }
+export interface TableSelection { doc_id: string; item_ids: string[]; chat_id?: string }
 type NativeHost = { webkit?: { messageHandlers?: { ar?: { postMessage: (selection: TableSelection) => void } } } }
 declare global { interface Window extends NativeHost {} }
 
@@ -20,5 +20,6 @@ export function answerTableSelection(answer: Answer): TableSelection | null {
 }
 
 export function showOnTable(selection: TableSelection, host: NativeHost = window as NativeHost) {
-  arHandler(host)?.postMessage({ doc_id: selection.doc_id, item_ids: [...selection.item_ids] })
+  arHandler(host)?.postMessage({ doc_id: selection.doc_id, item_ids: [...selection.item_ids],
+    ...(selection.chat_id ? { chat_id: selection.chat_id } : {}) })
 }

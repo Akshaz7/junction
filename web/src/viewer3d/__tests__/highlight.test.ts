@@ -4,6 +4,8 @@ import { BoxGeometry, Color, Group, Mesh, MeshStandardMaterial, Texture } from '
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { createHighlightController, itemBounds } from '../highlight';
 import { createScene, setStorey, type SceneManifest } from '../scene';
+import { answerToVisualise } from '../visualise';
+import { applyCommand, applyState, emptyCommandState, resolveCommandLabels, type SceneCommand } from '../commands';
 
 function fixture() {
   const root = new Group();
@@ -35,6 +37,49 @@ function fixture() {
 }
 
 describe('highlight materials and contract item state', () => {
+  it('preserves answer citation labels and numeric defaults when scene items have tags', () => {
+    const { scene, controller } = fixture();
+    scene.manifest.items['window-a'].tag = 'W1';
+    scene.manifest.items['window-b'].tag = 'W2';
+    const evidence = answerToVisualise({
+      doc_ids: [scene.manifest.doc_id],
+      evidence: {
+        scene: { doc_id: scene.manifest.doc_id, highlight_item_ids: ['window-b', 'window-a'] },
+        boxes: [{ item_id: 'window-a', label: '7' }, { item_id: 'window-b', label: '12' }],
+      },
+    });
+    controller.highlight(evidence.highlight, { labels: evidence.labels });
+    expect(controller.getHighlightState().labels).toEqual({ 'window-b': '12', 'window-a': '7' });
+    controller.highlight(evidence.highlight);
+    expect(controller.getHighlightState().labels).toEqual({ 'window-b': '1', 'window-a': '2' });
+    controller.clearHighlight();
+  });
+
+  it.each(['highlight', 'isolate'] as const)('uses tags for %s commands, preserving explicit labels and untagged IDs', (op) => {
+    const { scene, controller } = fixture();
+    scene.manifest.items['window-a'].tag = 'W1';
+    scene.manifest.items['window-b'].tag = 'W2';
+    const command: SceneCommand = { op, item_ids: ['window-b', 'wall-c', 'window-a'], labels: { 'window-a': 'Opening W1' } };
+    const labels = resolveCommandLabels(command.item_ids, command.labels, scene.manifest.items);
+    const state = applyCommand(emptyCommandState(), { ...command, labels });
+    controller.highlight([...state.highlighted.keys()], { labels: Object.fromEntries(state.highlighted) });
+    expect(controller.getHighlightState().labels).toEqual({ 'window-b': 'W2', 'wall-c': 'wall-c', 'window-a': 'Opening W1' });
+    expect(command.labels).toEqual({ 'window-a': 'Opening W1' });
+    controller.clearHighlight();
+  });
+
+  it('resolves omitted snapshot labels from tags without replacing supplied labels', () => {
+    const { scene, controller } = fixture();
+    scene.manifest.items['window-a'].tag = 'W1';
+    scene.manifest.items['window-b'].tag = 'W2';
+    const snapshot = { hidden: [], highlighted: ['window-b', 'window-a'], labels: { 'window-a': 'Selected W1' } };
+    const state = applyState({ ...snapshot,
+      labels: resolveCommandLabels(snapshot.highlighted, snapshot.labels, scene.manifest.items) });
+    controller.highlight([...state.highlighted.keys()], { labels: Object.fromEntries(state.highlighted) });
+    expect(controller.getHighlightState().labels).toEqual({ 'window-b': 'W2', 'window-a': 'Selected W1' });
+    controller.clearHighlight();
+  });
+
   it('preserves the textured plan floor while the answer items glow', () => {
     const { scene, controller } = fixture();
     const floor = new Mesh(new BoxGeometry(), new MeshStandardMaterial());

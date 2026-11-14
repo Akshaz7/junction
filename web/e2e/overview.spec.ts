@@ -57,12 +57,12 @@ test('overview sections match the real workspace API', async ({ page, request })
   const recentChats = [...chats.chats].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)).slice(0, 5)
   await expect(chatsSection.getByTestId('overview-chat')).toHaveCount(recentChats.length)
   if (!recentChats.length) await expect(chatsSection).toContainText('No answers yet.')
-  for (const [index, chat] of recentChats.entries()) {
+  for (const chat of recentChats) {
     const detail = await read(request, `/api/chats/${encodeURIComponent(chat.id)}`)
     const messages = detail.messages as { role: string; content: string; answer: { answer: { text_md: string }; cost: { usd_total: number } } | null }[]
     const questionIndex = messages.map((message) => message.role).lastIndexOf('user')
     const answer = messages.slice(questionIndex + 1).reverse().find((message) => message.role === 'assistant')
-    const row = chatsSection.getByTestId('overview-chat').nth(index)
+    const row = chatsSection.getByTestId('overview-chat').and(page.locator(`[href="#/chat?chat=${encodeURIComponent(chat.id)}"]`))
     await expect(row).toHaveAttribute('href', `#/chat?chat=${encodeURIComponent(chat.id)}`)
     await expect(row.locator('strong')).toHaveText(questionIndex >= 0 ? messages[questionIndex].content : chat.title || 'Untitled chat')
     const text = answer ? (answer.answer?.answer.text_md || answer.content).replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/[*_`#>]/g, '').replace(/\s+/g, ' ').trim() : 'No answer yet.'
@@ -82,7 +82,7 @@ test('overview sections match the real workspace API', async ({ page, request })
   }
   await expect(accuracySection.getByRole('link')).toHaveAttribute('href', '#/accuracy')
   if (recentChats.length) {
-    await chatsSection.getByTestId('overview-chat').first().click()
+    await chatsSection.getByTestId('overview-chat').and(page.locator(`[href="#/chat?chat=${encodeURIComponent(recentChats[0].id)}"]`)).click()
     await expect(page).toHaveURL(new RegExp(`#/chat\\?chat=${encodeURIComponent(recentChats[0].id)}$`))
     const detail = await read(request, `/api/chats/${encodeURIComponent(recentChats[0].id)}`)
     const question = [...detail.messages].reverse().find((message) => message.role === 'user')

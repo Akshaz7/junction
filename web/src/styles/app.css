@@ -499,7 +499,10 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 .wipe-labels span + span { flex: 1; background: var(--foreground); color: var(--background); }
 .wipe-seam { position: absolute; top: 0; bottom: 0; left: var(--wipe); width: 2px; background: var(--foreground); transition: left 1.5s cubic-bezier(.45,.05,.55,.95); }
 .wipe-seam > span { position: absolute; top: 50%; left: 50%; translate: -50% -50%; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: white; background: var(--foreground); box-shadow: var(--shadow-card); }
-.wipe-range { position: absolute; top: 0; width: 100%; height: 100%; opacity: 0; cursor: ew-resize; }
+.wipe-range { position: absolute; top: 0; width: 100%; height: 100%; opacity: 0; cursor: ew-resize; touch-action: none; }
+.comparison-canvas[data-wiping] .comparison-sheet > img + img,
+.comparison-canvas[data-wiping] .wipe-seam,
+.comparison-canvas[data-wiping] .wipe-labels span { transition: none; }
 .comparison-canvas:has(.wipe-range:focus-visible) { outline: 2px solid var(--ring); outline-offset: -3px; }
 .comparison-readings { flex: 1; border-left: 1px solid var(--border); min-width: 0; overflow: auto; }
 .comparison-readings > header { display: flex; align-items: center; justify-content: space-between; height: 32px; font-size: 11px; padding: 0 8px; }
@@ -779,4 +782,14 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
   .comparison-toolbar .comparison-zoom { color: var(--muted-foreground); flex-shrink: 0; }
   .phone-comparison-summary p { color: var(--muted-foreground); }
   .phone-comparison-summary .version-tag { flex-shrink: 0; }
+}
+/* Retained Data previews leave navigation available when returning from Chat. */
+@media (max-width: 640px) {
+  .workspace { height: calc(100dvh - var(--app-safe-top)); padding-bottom: calc(56px + var(--app-safe-bottom)); }
+  .mobile-navigation { z-index: 31; pointer-events: auto; }
+  .data-detail[data-docked] { bottom: calc(56px + var(--app-safe-bottom)); }
+  .data-detail[data-docked] .data-zoom-controls { bottom: calc(68px + var(--app-safe-bottom)); }
+  .data-preview img { pointer-events: none; }
+  .app-shell:has(.chat-workspace:not([hidden]) .viewer-sheet) .mobile-navigation,
+  .app-shell:has(.data-screen:not([hidden]) .data-detail:not([data-docked])) .mobile-navigation { z-index: 5; }
 }

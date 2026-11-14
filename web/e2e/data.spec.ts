@@ -46,7 +46,7 @@ test('PNG upload shows ingestion progress and appears in the uploads folder', as
   await expect(page.locator(`.data-file-row[data-doc-id="${receipt.doc_id}"]`)).toBeVisible()
 })
 
-test('a document with a scene offers Visualise it and missing previews use an icon', async ({ page }) => {
+test('a document offers its scene, handles a missing preview, and retains phone navigation on return', async ({ page }) => {
   const doc: Document = { doc_id: 'demo__scene', source: 'demo', title: 'Scene fixture, generated for demo', kind: 'ifc', formats: ['ifc'], pages: 1, licence: 'MIT', credit: 'Test fixture, generated for demo', heldout: false }
   await page.route('**/api/docs', (route) => route.fulfill({ json: { total: 1, sources: [{ source: 'demo', count: 1, docs: [doc] }] } }))
   await page.route('**/api/docs/demo__scene/files/page-1.thumb.png', (route) => route.fulfill({ status: 404, json: { status: 'not_built' } }))
@@ -61,6 +61,9 @@ test('a document with a scene offers Visualise it and missing previews use an ic
   await page.route('**/api/docs/demo__scene/files/scene.json', (route) => route.fulfill({ status: 404, json: { status: 'not_built' } }))
   await page.setViewportSize({ width: 390, height: 844 })
   await page.getByRole('button', { name: `Open ${doc.title}`, exact: true }).click()
+  expect((await detail.boundingBox())?.height).toBe(844)
+  const tabs = page.getByRole('navigation', { name: 'Mobile navigation', exact: true })
+  await expect(detail.getByRole('button', { name: 'Zoom in', exact: true })).toBeInViewport()
   await expect(detail.locator('.data-scene-note')).toBeHidden()
   await detail.getByLabel('Drawing credit and licence', { exact: true }).click()
   await expect(detail.locator('.data-credit-info dl')).toContainText(doc.credit!)
@@ -72,6 +75,17 @@ test('a document with a scene offers Visualise it and missing previews use an ic
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
   await page.getByRole('button', { name: 'Close document details' }).click()
   await expect(page.getByRole('button', { name: `Open ${doc.title}`, exact: true })).toBeFocused()
+  await page.getByRole('button', { name: `Open ${doc.title}`, exact: true }).click()
+  await detail.getByRole('button', { name: 'Ask about it', exact: true }).click()
+  await tabs.getByRole('link', { name: 'Data', exact: true }).click()
+  const tabBounds = (await tabs.boundingBox())!
+  const previewBounds = (await detail.boundingBox())!
+  const zoomBounds = (await detail.locator('.data-zoom-controls').boundingBox())!
+  expect(previewBounds.y + previewBounds.height).toBeLessThanOrEqual(tabBounds.y)
+  expect(zoomBounds.y + zoomBounds.height).toBeLessThanOrEqual(tabBounds.y)
+  await tabs.getByRole('link', { name: 'Chat', exact: true }).click()
+  await expect(page.getByLabel('Selected documents')).toContainText(doc.title)
+  await expect(page.getByRole('combobox', { name: 'Ask about your drawings' })).toBeVisible()
 })
 
 test('search spans folders and large lists use pages', async ({ page }) => {

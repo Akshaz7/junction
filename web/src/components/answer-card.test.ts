@@ -36,4 +36,20 @@ describe('answer evidence', () => {
     expect(formatCost(0.0001)).toBe('$0.0001')
     expect(formatCost(0.12345)).toBe('$0.1235')
   })
+
+  it('shows compact command tags, hidden badges and Undo without changing ordinary answers', () => {
+    const answer = makeDemoAnswer('remove W3')
+    answer.answer.abstained = false
+    answer.evidence.scene.commands = [{ op: 'hide', item_ids: ['window-003'], labels: { 'window-003': 'W3' } }]
+    const html = renderToStaticMarkup(createElement(AnswerCard, { answer, docs: [], demo: false, onOpenCitation: () => {}, onUndo: () => {} }))
+    expect(html).toContain('W3')
+    expect(html).toContain('data-hidden="true"')
+    expect(html).toContain('<small>hidden</small>')
+    expect(html).toContain('Undo</button>')
+    answer.evidence.scene.commands = [{ op: 'highlight', item_ids: Array.from({ length: 20 }, (_, n) => `window-${n}`) }]
+    const compact = renderToStaticMarkup(createElement(AnswerCard, { answer, docs: [], demo: false, onOpenCitation: () => {} }))
+    expect(compact.match(/class="scene-tag"/g)).toHaveLength(12)
+    expect(compact).toContain('+8 more')
+    expect(compact).toContain('data-item-count="20"')
+  })
 })

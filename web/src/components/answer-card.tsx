@@ -4,6 +4,8 @@ import type { Answer, Citation, Document } from '../lib/types'
 import { SpeakButton } from './voice-controls'
 import { answerTableSelection } from '../lib/ar-bridge'
 import { ShowOnTableButton } from './show-on-table'
+import { SceneCommandTags } from './scene-command-tags'
+import type { DrawingEdits } from '../lib/scene-edits'
 
 export function formatCost(total: number): string {
   return total > 0 && total < 0.0001 ? '< $0.0001' : `$${total.toFixed(4)}`
@@ -23,8 +25,10 @@ function AnswerText({ answer, selected, onOpenCitation }: { answer: Answer; sele
   })
 }
 
-export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation }: {
+export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation, edits, busy, onUndo, onOpenItem, chatId }: {
   answer: Answer; docs: Document[]; demo: boolean; activeCitation?: Citation; onOpenCitation: (citation: Citation) => void
+  edits?: DrawingEdits; busy?: boolean; onUndo?: () => void; onOpenItem?: (id: string) => void
+  chatId?: string | null
 }) {
   const citations = answer.answer.abstained ? [] : answer.citations
   const table = answerTableSelection(answer)
@@ -39,6 +43,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation 
     <div className="question-bubble">{answer.question}</div>
     <details className="answer-detail thought-process"><summary>Show thought process</summary>{answer.trace.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>
     <p className="answer-text"><AnswerText answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} /></p>
+    <SceneCommandTags answer={answer} edits={edits} busy={busy} onUndo={onUndo} onOpenItem={onOpenItem} />
     {!!citations.length && <>
       <h3 className="source-heading">Where it is set out</h3>
       <ol className="source-list">{sources.map((source) => <li key={source.docId}>
@@ -51,7 +56,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation 
         <CitationChip citation={citation} selected={activeCitation} onOpenCitation={onOpenCitation} /> {citation.item_ids.join(', ')} · Page {citation.page}
       </p>)}</details>}
       <SpeakButton text={answer.answer.text_md} />
-      {table && <ShowOnTableButton docId={table.doc_id} itemIds={table.item_ids} />}
+      {table && <ShowOnTableButton docId={table.doc_id} itemIds={table.item_ids} chatId={chatId} />}
       {cost}
     </div>
     <div className="answer-footer">

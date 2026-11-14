@@ -14,6 +14,8 @@ import type { WalkState } from './walk';
 import { WalkJoystick } from './WalkJoystick';
 import { EditPanel, useEditAdvisor } from './EditPanel';
 import type { EditState, ItemEdit } from './edits';
+import { FindingsPanel } from './FindingsPanel';
+import type { FindingPinState } from './findings';
 import './viewer3d.css';
 
 interface ViewerOptions {
@@ -42,6 +44,7 @@ export interface Viewer3DTestHandle {
   state(): HighlightState;
   commandState(): CommandTestState;
   walk(): WalkState;
+  findings(): FindingPinState[];
   pick(item_id: string): boolean;
 }
 export type LinkedViewerCanvas = HTMLCanvasElement & { __viewer3d?: Viewer3DTestHandle };
@@ -54,6 +57,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     : JSON.stringify([highlightItemIds, highlightOptions ?? {}]);
   const commandRequest = commands === undefined ? undefined : JSON.stringify(commands);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [stage, setStage] = useState<HTMLDivElement | null>(null);
   const viewerRef = useRef<Viewer | null>(null);
   const onReadyRef = useRef(onReady);
   const riseStateRef = useRef(onRiseStateChange);
@@ -222,6 +226,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       state: () => viewerRef.current!.getLinkedHighlightState(),
       commandState: () => viewerRef.current!.getCommandState(),
       walk: () => viewerRef.current!.walk(),
+      findings: () => viewerRef.current!.findings(),
       pick(itemId) {
         if (!viewerRef.current?.scene?.items.has(itemId)) return false;
         selectItem(itemId);
@@ -251,6 +256,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     // An orbit drag must not select the surface under the release point.
     if (!start || start.id !== event.pointerId
       || Math.hypot(event.clientX - start.x, event.clientY - start.y) > 5) return;
+    if (viewerRef.current?.pickFinding(event.clientX, event.clientY)) return;
     const itemId = viewerRef.current?.pick(event.clientX, event.clientY) ?? null;
     selectItem(itemId);
   }
@@ -293,8 +299,9 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       <button type="button" aria-label="Edit" aria-pressed={editing} disabled={state !== 'ready'} onClick={() => {
         cancelMove(); viewerRef.current?.setWalk(false); setEditing(!editing);
       }}>Edit</button>
+      <FindingsPanel viewer={state === 'ready' ? viewerRef.current : null} stage={stage} />
     </div>
-    <div className="viewer3d-stage" aria-busy={state === 'loading'}>
+    <div ref={setStage} className="viewer3d-stage" aria-busy={state === 'loading'}>
       <canvas ref={canvasRef} tabIndex={0} aria-label="3D building model" aria-describedby={helpId}
         onPointerDownCapture={(event) => {
           if (!editing || !moveItem || event.button !== 0 || !event.isPrimary) return;

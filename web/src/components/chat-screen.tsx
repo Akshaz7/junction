@@ -9,6 +9,7 @@ import { ThinkingText } from './thinking-text'
 import { MicButton } from './voice-controls'
 import { chatLink, savedExchanges, type ChatExchange } from '../lib/chat-history'
 import { chatLive } from '../lib/chat-live'
+import { useSceneEdits } from '../lib/use-scene-edits'
 
 const starters = [
   { title: 'Count on a plan', label: 'Count something on a plan', question: 'How many windows are there?', icon: Scale },
@@ -46,6 +47,13 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const conversation = useRef<HTMLDivElement>(null)
   const picker = useRef<HTMLDivElement>(null)
   const generation = useRef(0)
+  const sceneEdits = useSceneEdits(liveChatId, answers, demo)
+  const viewerDoc = viewer?.citation.doc_id
+  const viewerCommands = answers.flatMap((exchange) => {
+    const answer = exchange.answer
+    return answer && !answer.answer.abstained && (answer.evidence.scene.doc_id || answer.doc_ids[0]) === viewerDoc
+      ? answer.evidence.scene.commands ?? [] : []
+  })
 
   useEffect(() => {
     let controller: AbortController | undefined
@@ -170,7 +178,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     requestAnimationFrame(() => textarea.current?.setSelectionRange(caret, caret))
   }
 
-  async function ask(question: string) {
+  async function ask(question: string, documentIds?: string[]) {
     if (!question.trim() || submitting.current || restoring || !docs.length) return
     const version = generation.current
     submitting.current = true
@@ -181,7 +189,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     setError('')
     setDraft('')
     setMention(null)
-    const docIds = (selected.length ? selected : docs).map((doc) => doc.doc_id)
+    const docIds = documentIds ?? (selected.length ? selected : docs).map((doc) => doc.doc_id)
     const streamedTraces: TraceStep[] = []
     try {
       if (!chatId.current) {
@@ -189,6 +197,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         if (generation.current !== version) return
         chatId.current = id
         setLiveChatId(id)
+        // Preserve the active stream: a hashchange would reload this new chat.
+        window.history.replaceState(window.history.state, '', `#/chat?chat=${encodeURIComponent(id)}`)
       }
       const answer = await workspaceApi.askQuestion(chatId.current, question.trim(), docIds, {
         onStatus: (text) => { if (generation.current === version) setStatuses((previous) => previous.at(-1) === text ? previous : [...previous, text]) },
@@ -209,6 +219,32 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     }
   }
 
+  async function openCommandItem(answer: Answer, itemId: string) {
+    const docId = answer.evidence.scene.doc_id || answer.doc_ids[0]
+    const version = generation.current
+    try {
+      const metadata = docs.find((doc) => doc.doc_id === docId) ?? await workspaceApi.getDocument(docId)
+      const pages = await Promise.allSettled(Array.from({ length: metadata.pages }, (_, page) => workspaceApi.getPlanMap(docId, page + 1)))
+      if (generation.current !== version) return
+      const plan = pages.flatMap((page) => page.status === 'fulfilled' ? [page.value] : []).find((page) => page.items.some((item) => item.item_id === itemId && item.bbox_px))
+      if (!plan) throw new Error('This item has no position on the available drawings.')
+      const tags = { ...sceneEdits[docId]?.tags }
+      for (const command of answer.evidence.scene.commands ?? []) Object.assign(tags, command.labels)
+      const ids = new Set([itemId, ...Object.keys(tags), ...(answer.evidence.scene.commands ?? []).flatMap((command) => [...command.item_ids])])
+      const boxes = plan.items.filter((item) => ids.has(item.item_id) && item.bbox_px).map((item, n) => ({
+        item_id: item.item_id, page: plan.page, bbox_px: item.bbox_px!, label: tags[item.item_id] ?? item.tag ?? String(n + 1),
+      }))
+      const box = boxes.find((item) => item.item_id === itemId)!
+      const citation: Citation = { n: 1, doc_id: docId, page: plan.page, kind: 'element', bbox_px: box.bbox_px, item_ids: [itemId], quote: null }
+      const drawingAnswer = { ...answer, citations: [citation], evidence: { ...answer.evidence, boxes } }
+      setViewer((previous) => ({ answer: drawingAnswer, citation, request: (previous?.request ?? 0) + 1 }))
+      setError('')
+      onOpenCitation(citation)
+    } catch (err) {
+      if (generation.current === version) setError(err instanceof Error ? err.message : 'The drawing could not be opened.')
+    }
+  }
+
   return <div ref={splitContainer} className={`chat-workspace ${viewer ? 'has-viewer' : ''}`} hidden={hidden} style={{ '--chat-split': `${split}%` } as CSSProperties}>
     <section className="chat-page" aria-label="Drawing questions" inert={!!viewer && sheet}>
     <div ref={conversation} className={`conversation ${answers.length || busy ? 'has-answers' : ''}`}>
@@ -220,7 +256,9 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         </button>)}</div>
         {demo && <p className="demo-note">Offline sample content generated for demo</p>}
       </div>}
-      {answers.map((exchange, index) => exchange.answer ? <AnswerCard key={`${exchange.id}-${index}`} answer={exchange.answer} docs={docs} demo={demo} activeCitation={viewer?.answer === exchange.answer ? viewer.citation : undefined} onOpenCitation={(citation) => {
+      {answers.map((exchange, index) => exchange.answer ? <AnswerCard key={`${exchange.id}-${index}`} answer={exchange.answer} docs={docs} demo={demo} chatId={liveChatId} activeCitation={viewer?.answer === exchange.answer ? viewer.citation : undefined}
+        edits={sceneEdits[exchange.answer.evidence.scene.doc_id || exchange.answer.doc_ids[0]]} busy={busy || restoring}
+        onUndo={() => void ask('undo', [exchange.answer!.evidence.scene.doc_id || exchange.answer!.doc_ids[0]])} onOpenItem={(id) => void openCommandItem(exchange.answer!, id)} onOpenCitation={(citation) => {
         setViewer((previous) => ({ answer: exchange.answer!, citation, request: (previous?.request ?? 0) + 1 }))
         onOpenCitation(citation)
       }} /> : <article className="exchange" key={`${exchange.id}-${index}`}>
@@ -285,7 +323,9 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
           setSplit(Math.max(35, Math.min(65, (event.clientX - bounds.left) / bounds.width * 100)))
         }}
         onPointerUp={(event) => event.currentTarget.releasePointerCapture(event.pointerId)} />
-      <DocumentViewer key={viewer.request} answer={viewer.answer} citation={viewer.citation} sheet={sheet} onClose={() => setViewer(null)} />
+      <DocumentViewer key={viewer.request} answer={viewer.answer} citation={viewer.citation} sheet={sheet}
+        chatId={liveChatId}
+        edits={sceneEdits[viewer.citation.doc_id]} commands={viewerCommands.length ? viewerCommands : undefined} onClose={() => setViewer(null)} />
     </>}
   </div>
 }

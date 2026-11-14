@@ -13,13 +13,14 @@ import {
 import { createCutawayController, type CutawayState } from './cutaway';
 import { createLinkedHighlightController } from './linkedHighlight';
 import { createRiseAnimation, scheduleRiseTransitions, type RisePhase, type RiseState } from './rise';
-import { applyCommand, applyState, emptyCommandState, readCommandState, type SceneCommand, type SceneSnapshot, type CommandTestState } from './commands';
+import { applyCommand, applyState, emptyCommandState, readCommandState, resolveCommandLabels, type SceneCommand, type SceneSnapshot, type CommandTestState } from './commands';
 import { createCommandVisuals } from './commandVisuals';
 import { createFrameProbe, type ViewerPerf } from './perf';
 import { createRenderBatches, PICK_LAYER } from './renderBatches';
 import { withAbort, type LoadProgress } from './loadGLTF';
 import { createWalkController, type WalkState } from './walk';
 import { createEditLayer, type ItemEdit, type EditState, type WallMaterial } from './edits';
+import { createFindingsLayer, type Finding, type FindingPinState } from './findings';
 
 export const SCENE_LOAD_BUDGET_MS = 60_000;
 
@@ -30,6 +31,10 @@ export interface Viewer {
   readonly scene: LoadedScene | null;
   perf(): ViewerPerf;
   resetPerf(): void;
+  setFindings(findings: readonly Finding[], onSelect?: (findings: Finding[]) => void): void;
+  findings(): FindingPinState[];
+  /** Select a finding sprite before testing building meshes on a click/tap. */
+  pickFinding(x: number, y: number): boolean;
   walk(): WalkState;
   setWalk(active: boolean): boolean;
   setWalkJoystick(x: number, y: number): void;
@@ -89,6 +94,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   world.add(light);
 
   let active: LoadedScene | null = null;
+  let findingPins: ReturnType<typeof createFindingsLayer> | null = null;
   // Populated on the first pointer interaction, never during model loading.
   let pickMeshes: Scene['children'] | null = null;
   let renderBatches: ReturnType<typeof createRenderBatches> | null = null;
@@ -409,6 +415,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     rise = null;
     endMove(true);
     clearHighlight();
+    findingPins?.dispose(); findingPins = null;
     commandVisuals?.dispose();
     edits?.dispose();
     renderBatches?.dispose();
@@ -467,8 +474,9 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       renderBatches?.sync();
       batchesDirty = false;
     }
+    findingPins?.update(camera, canvas.clientHeight);
     renderer.render(world, camera);
-    if (labels.length || linkedLabel) labelRenderer.render(world, camera);
+    if (labels.length || linkedLabel || findingPins) labelRenderer.render(world, camera);
     probe.frame(performance.now(), active !== null);
     frame = requestAnimationFrame(render);
   }
@@ -485,6 +493,18 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     renderer, camera, controls,
     perf: () => probe.read(renderer.info.render.calls, renderer.info.render.triangles),
     resetPerf: () => probe.reset(),
+    setFindings(findings, onSelect = () => {}) {
+      findingPins?.dispose(); findingPins = null;
+      if (!active || disposed || !findings.length) return;
+      findingPins = createFindingsLayer(active, onSelect);
+      findingPins.set(findings);
+      world.add(findingPins.root);
+      findingPins.update(camera, canvas.clientHeight);
+    },
+    findings() {
+      findingPins?.update(camera, canvas.clientHeight);
+      return findingPins?.state(camera, canvas.getBoundingClientRect()) ?? [];
+    },
     walk: () => walk.state(),
     setWalk(value) {
       if (disposed) return false;
@@ -554,16 +574,15 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     applyCommand(command) {
       if (!active || disposed) return;
       const resolved = command.op === 'highlight' || command.op === 'isolate'
-        ? { ...command, labels: Object.fromEntries(command.item_ids.map((id) =>
-          [id, command.labels?.[id] ?? active!.manifest.items[id]?.tag ?? id])) } : command;
+        ? { ...command, labels: resolveCommandLabels(command.item_ids, command.labels, active.manifest.items) } : command;
       commandState = applyCommand(commandState, resolved);
       renderCommandState();
       for (const callback of commandListeners) callback(resolved);
     },
     applyState(snapshot) {
       if (!active || disposed) return;
-      commandState = applyState({ ...snapshot, labels: Object.fromEntries(snapshot.highlighted.map((id) =>
-        [id, snapshot.labels[id] ?? active!.manifest.items[id]?.tag ?? id])) });
+      commandState = applyState({ ...snapshot,
+        labels: resolveCommandLabels(snapshot.highlighted, snapshot.labels, active.manifest.items) });
       renderCommandState();
     },
     getCommandState() { return readCommandState(commandState); },
@@ -617,6 +636,15 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       return () => { highlightListeners.delete(callback); };
     },
     visualise,
+    pickFinding(x, y) {
+      if (disposed || !findingPins) return false;
+      const rect = canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height || x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return false;
+      findingPins.update(camera, canvas.clientHeight);
+      pointer.set((x - rect.left) / rect.width * 2 - 1, -(y - rect.top) / rect.height * 2 + 1);
+      raycaster.setFromCamera(pointer, camera);
+      return findingPins.select(raycaster);
+    },
     pick(x, y) {
       if (disposed || !active) return null;
       const rect = canvas.getBoundingClientRect();
@@ -663,6 +691,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       rise = null;
       endMove(true);
       clearHighlight();
+      findingPins?.dispose(); findingPins = null;
       commandVisuals?.dispose();
       edits?.dispose(); edits = null;
       renderBatches?.dispose();

@@ -21,7 +21,8 @@ export interface SceneChannel extends HighlightChannel {
   onSceneEvent(callback: (event: SceneEvent) => void): () => void;
   sendCommand(doc_id: string, command: SceneCommand): void;
 }
-type LiveMessage = HighlightMessage | SceneEvent | AdvisorEvent | { type: 'ping' };
+export interface FindingsUpdated { type: 'findings.updated'; doc_id: string; count: number }
+type LiveMessage = HighlightMessage | SceneEvent | AdvisorEvent | FindingsUpdated | { type: 'ping' };
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -35,6 +36,8 @@ export function decodeLiveMessage(raw: unknown): LiveMessage | null {
   if (!record(value)) return null;
   if (value.type === 'ping') return { type: 'ping' };
   if (value.type === 'advisor.cards') return decodeAdvisorEvent(value);
+  if (value.type === 'findings.updated') return typeof value.doc_id === 'string' && !!value.doc_id
+    && Number.isInteger(value.count) && (value.count as number) >= 0 ? value as unknown as FindingsUpdated : null;
   const ids = (v: unknown): v is string[] => Array.isArray(v) && v.every((id) => typeof id === 'string' && id.length > 0);
   const labels = (v: unknown) => record(v) && Object.values(v).every((label) => typeof label === 'string');
   if ((value.type === 'scene.edit' || value.type === 'scene.state') && typeof value.doc_id === 'string' && value.doc_id) {
@@ -76,10 +79,14 @@ export function sameHighlight(a: HighlightMessage, b: HighlightMessage): boolean
 export function createLiveHighlightClient(options: {
   url?: string;
   connect?: (url: string) => WebSocket;
-} = {}): SceneChannel & { onAdvisorCards(callback: (event: AdvisorEvent) => void): () => void } {
+} = {}): SceneChannel & {
+  onAdvisorCards(callback: (event: AdvisorEvent) => void): () => void;
+  onFindingsUpdated(callback: (event: FindingsUpdated) => void): () => void;
+} {
   const listeners = new Set<(event: HighlightMessage) => void>();
   const sceneListeners = new Set<(event: SceneEvent) => void>();
   const advisorListeners = new Set<(event: AdvisorEvent) => void>();
+  const findingsListeners = new Set<(event: FindingsUpdated) => void>();
   const sceneStates = new Map<string, SceneEvent & { type: 'scene.state' }>();
   const editIds = new Set<string>();
   const commandQueue: SceneEvent[] = [];
@@ -99,7 +106,7 @@ export function createLiveHighlightClient(options: {
   }
 
   function reconnect() {
-    if (retry !== undefined || (!listeners.size && !sceneListeners.size && !advisorListeners.size && !pending.size && !commandQueue.length)) return;
+    if (retry !== undefined || (!listeners.size && !sceneListeners.size && !advisorListeners.size && !findingsListeners.size && !pending.size && !commandQueue.length)) return;
     retry = setTimeout(() => {
       retry = undefined;
       connect();
@@ -141,7 +148,7 @@ export function createLiveHighlightClient(options: {
   }
 
   function release() {
-    if (listeners.size || sceneListeners.size || advisorListeners.size) return;
+    if (listeners.size || sceneListeners.size || advisorListeners.size || findingsListeners.size) return;
     if (retry !== undefined) clearTimeout(retry);
     retry = undefined;
     const previous = socket;
@@ -169,6 +176,8 @@ export function createLiveHighlightClient(options: {
           if (connection.readyState === 1) connection.send(JSON.stringify({ type: 'pong' }));
         } else if (event?.type === 'advisor.cards') {
           for (const callback of advisorListeners) callback(event);
+        } else if (event?.type === 'findings.updated') {
+          for (const callback of findingsListeners) callback(event);
         } else if (event?.type === 'scene.edit' || event?.type === 'scene.state') {
           deliverScene(event);
         } else if (event) {
@@ -187,6 +196,11 @@ export function createLiveHighlightClient(options: {
   }
 
   return {
+    onFindingsUpdated(callback) {
+      findingsListeners.add(callback);
+      connect();
+      return () => { findingsListeners.delete(callback); release(); };
+    },
     onAdvisorCards(callback) {
       advisorListeners.add(callback);
       connect();
@@ -229,3 +243,4 @@ export const sendHighlight = shared.sendHighlight;
 export const onSceneEvent = shared.onSceneEvent;
 export const sendCommand = shared.sendCommand;
 export const onAdvisorCards = shared.onAdvisorCards;
+export const onFindingsUpdated = shared.onFindingsUpdated;

@@ -21,4 +21,11 @@ describe('native AR bridge', () => {
     answer.answer.abstained = true
     expect(answerTableSelection(answer)).toBeNull()
   })
+
+  it('passes the active chat to native AR so scene edits can be restored', () => {
+    const postMessage = vi.fn()
+    showOnTable({ doc_id: 'ifc_bench__ac20-arc', item_ids: ['door-001'], chat_id: 'active-chat' },
+      { webkit: { messageHandlers: { ar: { postMessage } } } })
+    expect(postMessage).toHaveBeenCalledExactlyOnceWith({ doc_id: 'ifc_bench__ac20-arc', item_ids: ['door-001'], chat_id: 'active-chat' })
+  })
 })

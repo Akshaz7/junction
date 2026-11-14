@@ -252,7 +252,7 @@ async function screenshotPhase(page: Page, phase: Phase, testInfo: TestInfo) {
   await settled(page)
   const state = phase.expected_state
   if (!state) throw new Error(`Missing settled app state for ${phase.id}`)
-  await expect(page).toHaveURL(new RegExp(`#/${state.scene}$`))
+  await expect(page).toHaveURL(new RegExp(`#/${state.scene}${state.scene === 'chat' ? '(?:\\?chat=[^&]+)?' : ''}$`))
   await expect(page.locator('.data-detail:visible')).toHaveCount(state.panel === 'document' ? 1 : 0)
   await expect(page.locator('.document-viewer:visible')).toHaveCount(state.panel === 'citation' ? 1 : 0)
   await expect(page.locator('.comparison-box:visible')).toHaveCount(state.panel === 'comparison' ? 1 : 0)

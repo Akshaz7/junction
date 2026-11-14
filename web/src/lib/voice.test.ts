@@ -235,6 +235,15 @@ describe('question microphone', () => {
     expect(callbacks.onState).toHaveBeenLastCalledWith('idle')
   })
 
+  it.each(['show me all the windows', 'remove window W3', 'undo'])('passes the scene command "%s" through device transcription', (text) => {
+    vi.stubGlobal('window', { webkitSpeechRecognition: TestRecognition })
+    const callbacks = handlers()
+    const control = recordQuestion(callbacks)
+    TestRecognition.latest.onresult!({ resultIndex: 0, results: [{ isFinal: true, 0: { transcript: text } }] })
+    expect(callbacks.onText).toHaveBeenCalledExactlyOnceWith(text)
+    control.cancel()
+  })
+
   it('falls back to browser recognition after a missing speech key and stops after 30 seconds', async () => {
     vi.stubGlobal('window', { SpeechRecognition: TestRecognition })
     vi.stubGlobal('MediaRecorder', TestRecorder)

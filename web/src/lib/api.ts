@@ -1,4 +1,4 @@
-import type { Answer, ChangeEntry, Comparison, Document, IngestStatus, SavedChat, TraceStep, UploadReceipt } from './types'
+import type { Answer, ChangeEntry, Comparison, Document, IngestStatus, PlanMap, SavedChat, TraceStep, UploadReceipt } from './types'
 
 type Mode = 'auto' | 'real' | 'demo'
 type StreamCallbacks = { onStatus: (text: string) => void; onTrace: (trace: TraceStep) => void }
@@ -115,6 +115,23 @@ export class WorkspaceApi {
   async getDocument(docId: string): Promise<Document> {
     const response = await this.request(`/api/docs/${encodeURIComponent(docId)}`)
     return response.json() as Promise<Document>
+  }
+
+  async getPlanMap(docId: string, page: number, signal?: AbortSignal): Promise<PlanMap> {
+    const response = await this.request(`/api/docs/${encodeURIComponent(docId)}/planmap/${page}`, { signal })
+    return response.json() as Promise<PlanMap>
+  }
+
+  async getDocumentTags(docId: string, signal?: AbortSignal): Promise<Record<string, string>> {
+    try {
+      const response = await this.request(`/api/docs/${encodeURIComponent(docId)}/files/scene.json`, { signal })
+      const scene = await response.json() as { items: Record<string, { tag?: string }> }
+      return Object.fromEntries(Object.entries(scene.items).flatMap(([id, item]) => item.tag ? [[id, item.tag]] : []))
+    } catch (error) {
+      if (signal?.aborted) throw error
+      // A drawing can have evidence without a 3D scene or stable tags.
+      return {}
+    }
   }
 
   async uploadDocument(file: File): Promise<UploadReceipt> {

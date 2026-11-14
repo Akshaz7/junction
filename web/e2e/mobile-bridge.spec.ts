@@ -41,7 +41,9 @@ test('phone tabs navigate and native AR receives the real answer evidence in ord
   expect(answer.answer.abstained).toBe(false)
   expect(answer.evidence.scene.doc_id).toBe(docId)
   expect(answer.evidence.scene.highlight_item_ids.length).toBeGreaterThan(0)
-  const expected: TableSelection = { doc_id: docId, item_ids: answer.evidence.scene.highlight_item_ids }
+  const chatId = new URLSearchParams(new URL(page.url()).hash.split('?')[1]).get('chat')
+  expect(chatId, 'A new chat must be addressable before opening native AR').toBeTruthy()
+  const expected: TableSelection = { doc_id: docId, item_ids: answer.evidence.scene.highlight_item_ids, chat_id: chatId! }
   const recorded = () => page.evaluate(() => (window as unknown as { arMessages: TableSelection[] }).arMessages)
   await page.locator('.answer-actions').getByRole('button', { name: 'Show on table', exact: true }).click()
   expect(await recorded()).toEqual([expected])
