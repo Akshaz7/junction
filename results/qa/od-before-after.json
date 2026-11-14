@@ -1,0 +1,367 @@
+{
+  "row": "E-41",
+  "set": "sample200 / opening_design",
+  "baseline_commit": "6ecf793b3e8c5c8e58fe735d541776e53fd50674",
+  "frozen_at": "2026-11-14T13:38:33.315473+00:00",
+  "frozen_sha256": {
+    "engine/schedules.py": "2114b4dbebaabf16f4d06ba8006efa31fe013a8d68b0e2815207af68d6e9206a",
+    "engine/titleblock.py": "10d97549b2e7f465d84665e1210eae3caa31b0861add6b884b6ddc89f75578c2",
+    "engine/answer.py": "9de188dcf478f8ae9e8df4144893756f052ee7d683fc7da6ddd45599b266c5fb",
+    "engine/tests/test_od_pdf.py": "b91dcd2dfea1adb5392c04ecc4b2d901f43f5dc127cef3cd695ea8ad071ab157"
+  },
+  "heldout_documents_evaluated": 1,
+  "development_data": "generated for demo PDFs and schedules only",
+  "method": "Single frozen deterministic PDF lookup evaluation, before/after. No model calls. Deferred code rows count as incorrect; production reader/forced fallbacks are tested with generated fixtures. Archived model-backed production results are separate, not substituted into the after results. Text answers remain unjudged in the code-only run.",
+  "archive": {
+    "n": 4,
+    "correct": 2,
+    "wrong": 1,
+    "abstained": 0,
+    "unscored": 1,
+    "error": 0,
+    "accuracy": 0.6667,
+    "answered_accuracy": 0.6667,
+    "cost_usd_total": 0.006808,
+    "cost_usd_per_answer": 0.001702,
+    "latency_ms_mean": 7375,
+    "latency_ms_p95": 10578
+  },
+  "before": {
+    "n": 4,
+    "correct": 0,
+    "wrong": 0,
+    "abstained": 3,
+    "unscored": 1,
+    "error": 0,
+    "accuracy": 0.0,
+    "answered_accuracy": null,
+    "cost_usd_total": 0.0,
+    "cost_usd_per_answer": 0.0,
+    "latency_ms_mean": 0,
+    "latency_ms_p95": 0
+  },
+  "after": {
+    "n": 4,
+    "correct": 1,
+    "wrong": 0,
+    "abstained": 2,
+    "unscored": 1,
+    "error": 0,
+    "accuracy": 0.3333,
+    "answered_accuracy": 1.0,
+    "cost_usd_total": 0.0,
+    "cost_usd_per_answer": 0.0,
+    "latency_ms_mean": 106,
+    "latency_ms_p95": 13
+  },
+  "cells": {
+    "before": {
+      "ALL x ALL": {
+        "n": 4,
+        "correct": 0,
+        "wrong": 0,
+        "abstained": 3,
+        "unscored": 1,
+        "error": 0,
+        "accuracy": 0.0,
+        "answered_accuracy": null,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 0
+      },
+      "ALL x area": {
+        "n": 1,
+        "correct": 0,
+        "wrong": 0,
+        "abstained": 1,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.0,
+        "answered_accuracy": null,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 0
+      },
+      "ALL x count": {
+        "n": 2,
+        "correct": 0,
+        "wrong": 0,
+        "abstained": 2,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.0,
+        "answered_accuracy": null,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 1,
+        "latency_ms_p95": 0
+      },
+      "ALL x text": {
+        "n": 1,
+        "correct": 0,
+        "wrong": 0,
+        "abstained": 0,
+        "unscored": 1,
+        "error": 0,
+        "accuracy": null,
+        "answered_accuracy": null,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 0
+      },
+      "opening_design x ALL": {
+        "n": 4,
+        "correct": 0,
+        "wrong": 0,
+        "abstained": 3,
+        "unscored": 1,
+        "error": 0,
+        "accuracy": 0.0,
+        "answered_accuracy": null,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 0
+      },
+      "opening_design x area": {
+        "n": 1,
+        "correct": 0,
+        "wrong": 0,
+        "abstained": 1,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.0,
+        "answered_accuracy": null,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 0
+      },
+      "opening_design x count": {
+        "n": 2,
+        "correct": 0,
+        "wrong": 0,
+        "abstained": 2,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.0,
+        "answered_accuracy": null,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 1,
+        "latency_ms_p95": 0
+      },
+      "opening_design x text": {
+        "n": 1,
+        "correct": 0,
+        "wrong": 0,
+        "abstained": 0,
+        "unscored": 1,
+        "error": 0,
+        "accuracy": null,
+        "answered_accuracy": null,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 0
+      }
+    },
+    "after": {
+      "ALL x ALL": {
+        "n": 4,
+        "correct": 1,
+        "wrong": 0,
+        "abstained": 2,
+        "unscored": 1,
+        "error": 0,
+        "accuracy": 0.3333,
+        "answered_accuracy": 1.0,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 106,
+        "latency_ms_p95": 13
+      },
+      "ALL x area": {
+        "n": 1,
+        "correct": 0,
+        "wrong": 0,
+        "abstained": 1,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.0,
+        "answered_accuracy": null,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 13,
+        "latency_ms_p95": 13
+      },
+      "ALL x count": {
+        "n": 2,
+        "correct": 1,
+        "wrong": 0,
+        "abstained": 1,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.5,
+        "answered_accuracy": 1.0,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 203,
+        "latency_ms_p95": 8
+      },
+      "ALL x text": {
+        "n": 1,
+        "correct": 0,
+        "wrong": 0,
+        "abstained": 0,
+        "unscored": 1,
+        "error": 0,
+        "accuracy": null,
+        "answered_accuracy": null,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 8,
+        "latency_ms_p95": 8
+      },
+      "opening_design x ALL": {
+        "n": 4,
+        "correct": 1,
+        "wrong": 0,
+        "abstained": 2,
+        "unscored": 1,
+        "error": 0,
+        "accuracy": 0.3333,
+        "answered_accuracy": 1.0,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 106,
+        "latency_ms_p95": 13
+      },
+      "opening_design x area": {
+        "n": 1,
+        "correct": 0,
+        "wrong": 0,
+        "abstained": 1,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.0,
+        "answered_accuracy": null,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 13,
+        "latency_ms_p95": 13
+      },
+      "opening_design x count": {
+        "n": 2,
+        "correct": 1,
+        "wrong": 0,
+        "abstained": 1,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.5,
+        "answered_accuracy": 1.0,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 203,
+        "latency_ms_p95": 8
+      },
+      "opening_design x text": {
+        "n": 1,
+        "correct": 0,
+        "wrong": 0,
+        "abstained": 0,
+        "unscored": 1,
+        "error": 0,
+        "accuracy": null,
+        "answered_accuracy": null,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 8,
+        "latency_ms_p95": 8
+      }
+    }
+  },
+  "cost_usd": 0.0,
+  "production_artifacts_modified": false,
+  "rows": [
+    {
+      "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+      "question": "On sheet A-801 of the Xcel Sports Complex drawings, how many rooms have all four walls finished with W1 (painted gypsum board)?",
+      "gold": 6,
+      "before": {
+        "outcome": "abstained",
+        "value": null,
+        "unit": null,
+        "route": "index",
+        "text": "PDF code lookup defers to the production reader/forced ladder."
+      },
+      "after": {
+        "outcome": "abstained",
+        "value": null,
+        "unit": null,
+        "route": "index",
+        "text": "PDF code lookup defers to the production reader/forced ladder."
+      }
+    },
+    {
+      "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+      "question": "On sheet A-801 of the Xcel Sports Complex drawings, how many doors does the door schedule list for room 118 (Fitness Center)?",
+      "gold": 5,
+      "before": {
+        "outcome": "abstained",
+        "value": null,
+        "unit": null,
+        "route": "index",
+        "text": "PDF code lookup defers to the production reader/forced ladder."
+      },
+      "after": {
+        "outcome": "correct",
+        "value": 5,
+        "unit": "count",
+        "route": "index",
+        "text": "**5 doors** are listed for room 118. [1]"
+      }
+    },
+    {
+      "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+      "question": "On sheet A-801 of the Xcel Sports Complex drawings, which room in the finish room schedule has the largest area?",
+      "gold": "Room 128 Fieldhouse (29690 SF)",
+      "before": {
+        "outcome": "unscored",
+        "value": null,
+        "unit": null,
+        "route": "index",
+        "text": "PDF code lookup defers to the production reader/forced ladder."
+      },
+      "after": {
+        "outcome": "unscored",
+        "value": null,
+        "unit": null,
+        "route": "index",
+        "text": "PDF code lookup defers to the production reader/forced ladder."
+      }
+    },
+    {
+      "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+      "question": "On sheet A-801 of the Xcel Sports Complex drawings, what is the area of room 118 (Fitness Center) in the finish room schedule?",
+      "gold": 5183,
+      "before": {
+        "outcome": "abstained",
+        "value": null,
+        "unit": null,
+        "route": "index",
+        "text": "PDF code lookup defers to the production reader/forced ladder."
+      },
+      "after": {
+        "outcome": "abstained",
+        "value": null,
+        "unit": null,
+        "route": "index",
+        "text": "PDF code lookup defers to the production reader/forced ladder."
+      }
+    }
+  ]
+}
