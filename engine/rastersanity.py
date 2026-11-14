@@ -48,6 +48,17 @@ def scale_problem(doc, res: dict) -> str | None:
     return None
 
 
+def _try(doc) -> str:
+    """What the user can ask on this drawing that works, from what the reader actually found."""
+    labels = [str(i.label) for i in doc.items if i.kind == "room" and i.label and len(str(i.label)) > 2]
+    ex = ["how many rooms are there"]
+    if labels:
+        ex += [f"where is the {labels[0].lower()}", f"area of the {labels[0].lower()}"]
+    else:
+        ex += ["where are the doors", "how many windows"]
+    return "Try: " + ", ".join(ex) + "."
+
+
 def sparse_note(doc, question: str, res: dict) -> str | None:
     if doc.mode != "planmap" or not doc.doc_id.startswith("uploads__") or not Q_COUNT.search(question):
         return None
@@ -56,7 +67,7 @@ def sparse_note(doc, question: str, res: dict) -> str | None:
     if rooms >= SPARSE_ROOMS and doors + wins >= 3:
         return None
     return (f"On this drawing the automatic reader found {rooms} room{'s' if rooms != 1 else ''}, {doors} door{'s' if doors != 1 else ''} "
-            f"and {wins} window{'s' if wins != 1 else ''}. It reads the image, and a sparse or unusual plan can be missed, so treat these as what was found, not a full count.")
+            f"and {wins} window{'s' if wins != 1 else ''}. It reads the image, and a sparse or unusual plan can be missed, so treat these as what was found, not a full count. {_try(doc)}")
 
 
 def guard(res: dict, question: str, doc) -> dict:

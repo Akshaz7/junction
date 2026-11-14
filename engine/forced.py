@@ -122,7 +122,7 @@ def forced_answer(question: str, doc_ids: list[str], root: Path, parsed=None, tr
             value = None
         elif value == 0:
             text = (f"**I could not find any** on this drawing. That is what a model could read from {basis or 'the drawing'}, so it is not a verified zero: "
-                    "the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure.")
+                    "the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.")
         else:
             text = f"About **{shown}**. This is an estimate, not an exact count: it was read from {basis or 'the drawing'} by a model."
     else:

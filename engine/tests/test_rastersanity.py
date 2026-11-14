@@ -43,6 +43,7 @@ def test_sparse_upload_says_what_was_found():
     d = doc([room(1, 20)], method="scalebar", conf=0.9)
     r = rs.guard(res(1, [], unit="count", text="There is **1 room**."), "how many rooms are there", d)
     assert "automatic reader found 1 room, 0 doors and 0 windows" in r["answer"]["text_md"]
+    assert "Try: how many rooms are there, where is the room, area of the room." in r["answer"]["text_md"]
 
 
 def test_non_upload_and_rich_plans_get_no_note():

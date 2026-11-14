@@ -149,6 +149,10 @@ def _vlm_pages(doc_id: str, ddir: Path, st: "Status", cost: dict):
             list(ex.map(one, cand))
         build_text_json(doc_id, ddir)  # picks up the room labels the model read on pages with no text layer
     st.stage("planmap_vlm", run_all)
+    try:
+        drop_empty_rooms(ddir)
+    except Exception as e:  # noqa: BLE001
+        print('drop_empty_rooms skipped:', repr(e)[:200], file=sys.stderr)
     return sorted(found)
 
 
@@ -165,8 +169,33 @@ def _extrude(doc_id: str, ddir: Path, page: int):
     from pipeline import extrude
     pm = json.loads((ddir / f"planmap-{page}.json").read_text())
     if not pm["scale"].get("m_per_px"):
-        raise RuntimeError("no scale on this page (no door or printed dimension found), so no 3D scene")
+        # No readable scale: build the 3D anyway on an assumed one, flagged. The engine refuses implausible areas on guessed scales (E-61).
+        pm["scale"] = {"m_per_px": ASSUMED_M_PER_PX, "method": "assumed", "source": "assumed", "confidence": 0.1,
+                       "evidence": f"no printed scale, dimension or door found: assumed {ASSUMED_M_PER_PX} m per pixel"}
+        (ddir / f"planmap-{page}.json").write_text(json.dumps(pm))
     extrude.process(doc_id, ddir, page)
+
+
+ASSUMED_M_PER_PX = 0.02
+
+
+def drop_empty_rooms(ddir: Path) -> int:
+    """Remove room boxes with no label, no room type, and no door/window/fixture inside: they are not rooms (photo, margin, title block)."""
+    n = 0
+    for f in ddir.glob("planmap-[0-9]*.json"):
+        pm = json.loads(f.read_text())
+        its = pm["items"]
+        inside = [i["bbox_px"] for i in its if i["kind"] in ("door", "window", "toilet", "sink", "shower", "bathtub", "stairs")]
+
+        def has(b):
+            return any(b[0] <= (c[0] + c[2]) / 2 <= b[2] and b[1] <= (c[1] + c[3]) / 2 <= b[3] for c in inside)
+        keep = [i for i in its if not (i["kind"] == "room" and not (i.get("label") or "").strip()
+                                       and (i.get("props", {}).get("room_type") or "other") == "other" and not has(i["bbox_px"]))]
+        if len(keep) != len(its):
+            n += len(its) - len(keep)
+            pm["items"] = keep
+            f.write_text(json.dumps(pm))
+    return n
 
 
 def _has_piping(ifc_path: Path) -> bool:
