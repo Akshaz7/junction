@@ -1,152 +1,181 @@
 import Foundation
 import simd
 
-/// Pure ordering and timing for the build-up reveal. Same step order as the web (FIX-5):
-/// foundations, then per storey (slab, columns/beams, walls, stairs, doors/windows, fixtures), then the roof.
-/// Single-storey raster or DXF plans have no foundations or structure, so they come out as floor, walls, openings.
+/// Pure ordering for the build-up. Same steps and labels as the web (`buildSteps` in web/src/viewer3d/rise.ts),
+/// so "Step 4 of 12 · Erdgeschoss walls" means the same thing on the laptop and on the table.
+/// IFC: foundations, then per storey (lowest first) slab, columns and beams, walls, stairs, doors and windows,
+/// then the roof. Plan-map and DXF scenes (ids like `wall-3`): floor, walls, doors and windows.
 enum BuildPhase: Int, CaseIterable, Comparable {
-    case foundation, slab, structure, walls, stairs, openings, fixtures, roof
+    case foundation, slab, structure, walls, stairs, openings, roof
 
     static func < (lhs: BuildPhase, rhs: BuildPhase) -> Bool { lhs.rawValue < rhs.rawValue }
 
-    /// Seconds before the whole sequence is scaled to fit its budget. Walls 1.2 s, openings 0.6 s.
-    var baseDuration: TimeInterval {
-        switch self {
-        case .walls: return 1.2
-        case .openings, .roof: return 0.6
-        default: return 0.5
-        }
-    }
-
+    /// Web `BUCKET_LABEL`; the storey name is put in front for per-storey steps.
     var label: String {
         switch self {
         case .foundation: return "Foundations"
-        case .slab: return "Floor"
-        case .structure: return "Columns and beams"
-        case .walls: return "Walls"
-        case .stairs: return "Stairs"
-        case .openings: return "Doors and windows"
-        case .fixtures: return "Fixtures"
+        case .slab: return "slab"
+        case .structure: return "columns and beams"
+        case .walls: return "walls"
+        case .stairs: return "stairs"
+        case .openings: return "doors and windows"
         case .roof: return "Roof"
         }
     }
 
-    /// nil means the item is not part of the build (site and room volumes are not physical elements).
+    static let perStorey: [BuildPhase] = [.slab, .structure, .walls, .stairs, .openings]
+
+    /// Web `ifcBucket`. nil means the item is not part of the build (the site ground stays as it is).
     static func classify(kind: String?) -> BuildPhase? {
-        guard let kind = kind?.lowercased() else { return .fixtures }
         switch kind {
-        case "site", "room", "space", "zone": return nil
-        case "footing", "pile", "foundation": return .foundation
-        case "slab", "floor", "covering": return .slab
-        case "column", "beam", "member": return .structure
-        case "wall", "curtain_wall", "curtainwall": return .walls
-        case "stairs", "stair", "railing", "ramp": return .stairs
-        case "door", "window": return .openings
+        case "footing", "pile": return .foundation
+        case "slab", "covering", "room": return .slab
+        case "column", "beam", "member", "plate": return .structure
+        case "wall", "curtain_wall": return .walls
+        case "stairs", "ramp", "railing": return .stairs
         case "roof": return .roof
-        default: return .fixtures
+        case "site": return nil
+        default: return .openings
         }
     }
 }
 
 struct BuildItem: Equatable {
+    let id: String
     let usdName: String
     let kind: String?
     let storey: String?
     /// Centre of the item on the floor plane (x, z), used to stagger items from the middle outwards.
     let center: SIMD2<Float>
+
+    init(id: String? = nil, usdName: String, kind: String?, storey: String?, center: SIMD2<Float>) {
+        self.id = id ?? usdName
+        self.usdName = usdName
+        self.kind = kind
+        self.storey = storey
+        self.center = center
+    }
 }
 
 struct BuildStep: Equatable {
+    let label: String
     let phase: BuildPhase
     let storey: String?
-    let start: TimeInterval
-    let duration: TimeInterval
     /// Items in animation order (nearest the model centre first).
     let usdNames: [String]
-
-    var title: String { storey.map { "\($0) \(phase.label.lowercased())" } ?? phase.label }
-}
-
-struct BuildSlot: Equatable {
-    let usdName: String
-    let phase: BuildPhase
-    let start: TimeInterval
-    let duration: TimeInterval
-    var end: TimeInterval { start + duration }
+    let itemIDs: [String]
+    var title: String { label }
 }
 
 struct BuildSequence: Equatable {
+    /// Seconds a whole build-up takes at most; each step gets an equal share within these limits.
     static let totalBudget: TimeInterval = 5.0
+    static let minStepSeconds: TimeInterval = 0.25
+    static let maxStepSeconds: TimeInterval = 1.2
     /// Fraction of a step used to stagger item starts; each item then rises over the rest.
     static let staggerFraction = 0.6
 
     let steps: [BuildStep]
-    /// Every scheduled item, sorted by start time.
-    let slots: [BuildSlot]
-    var totalDuration: TimeInterval { steps.last.map { $0.start + $0.duration } ?? 0 }
-    var isEmpty: Bool { slots.isEmpty }
+    let isRaster: Bool
+    var total: Int { steps.count }
+    var isEmpty: Bool { steps.allSatisfy { $0.usdNames.isEmpty } }
+    var stepSeconds: TimeInterval {
+        min(Self.maxStepSeconds, max(Self.minStepSeconds, Self.totalBudget / Double(max(1, steps.count))))
+    }
+    var totalDuration: TimeInterval { stepSeconds * Double(total) }
+
+    /// Web `PLAN_MAP_ID`: plan-map and DXF scenes use `<kind>-<n>` ids; IFC scenes use GlobalIds.
+    static func isPlanMapID(_ id: String) -> Bool {
+        guard let dash = id.lastIndex(of: "-"), dash != id.startIndex else { return false }
+        let head = id[..<dash], tail = id[id.index(after: dash)...]
+        return !tail.isEmpty && tail.allSatisfy { $0 >= "0" && $0 <= "9" }
+            && head.allSatisfy { ($0 >= "a" && $0 <= "z") || $0 == "_" }
+    }
 
     static func make(items: [BuildItem], storeys: [SceneManifest.Storey]) -> BuildSequence {
-        var elevation: [String: Float] = [:]
-        for storey in storeys {
-            if let name = storey.name { elevation[name] = storey.elevation_m ?? 0 }
-        }
         let centre = items.isEmpty ? SIMD2<Float>.zero
             : items.reduce(SIMD2<Float>.zero) { $0 + $1.center } / Float(items.count)
-
-        // Group by (storey rank, phase). Roof is global and last; foundations are global and first.
-        struct Key: Hashable { let rank: Int; let storey: String?; let phase: BuildPhase }
-        var groups: [Key: [BuildItem]] = [:]
-        for item in items {
-            guard let phase = BuildPhase.classify(kind: item.kind) else { continue }
-            let key: Key
-            switch phase {
-            case .foundation: key = Key(rank: -1, storey: nil, phase: phase)
-            case .roof: key = Key(rank: Int.max, storey: nil, phase: phase)
-            default:
-                let rank = item.storey.flatMap { elevation[$0] }.map { Int(($0 * 100).rounded()) } ?? -1
-                key = Key(rank: rank, storey: item.storey, phase: phase)
+        func ordered(_ members: [BuildItem]) -> [BuildItem] {
+            members.sorted {
+                let a = simd_distance_squared($0.center, centre), b = simd_distance_squared($1.center, centre)
+                return a != b ? a < b : $0.id < $1.id
             }
-            groups[key, default: []].append(item)
         }
-        let orderedKeys = groups.keys.sorted {
-            if $0.rank != $1.rank { return $0.rank < $1.rank }
-            if $0.phase != $1.phase { return $0.phase < $1.phase }
-            return ($0.storey ?? "") < ($1.storey ?? "")
+        func step(_ label: String, _ phase: BuildPhase, _ storey: String?, _ members: [BuildItem]) -> BuildStep {
+            let sorted = ordered(members)
+            return BuildStep(label: label, phase: phase, storey: storey, usdNames: sorted.map(\.usdName),
+                             itemIDs: sorted.map(\.id))
         }
-        let raw = orderedKeys.reduce(0) { $0 + $1.phase.baseDuration }
-        let factor = raw > totalBudget ? totalBudget / raw : 1
+
+        let isIFC = items.contains { !isPlanMapID($0.id) }
+        if !isIFC {
+            var floor: [BuildItem] = [], walls: [BuildItem] = [], openings: [BuildItem] = []
+            for item in items {
+                switch item.kind {
+                case "room": floor.append(item)
+                case "wall", "column": walls.append(item)
+                default: openings.append(item)
+                }
+            }
+            var steps = [step("Floor", .slab, nil, floor)]
+            if !walls.isEmpty { steps.append(step("Walls", .walls, nil, walls)) }
+            if !openings.isEmpty { steps.append(step("Doors and windows", .openings, nil, openings)) }
+            return BuildSequence(steps: steps, isRaster: true)
+        }
+
+        // Storeys lowest first; a storey given without elevation sorts by its position in the list.
+        let named = storeys.enumerated().compactMap { index, storey -> (name: String, elevation: Float)? in
+            storey.name.map { ($0, storey.elevation_m ?? Float(index)) }
+        }
+        var names = named.enumerated().sorted {
+            $0.element.elevation != $1.element.elevation ? $0.element.elevation < $1.element.elevation
+                : $0.offset < $1.offset
+        }.map(\.element.name)
+        let lowest = names.first
+
+        struct Cell: Hashable { let storey: String?; let phase: BuildPhase }
+        var cells: [Cell: [BuildItem]] = [:]
+        for item in items.sorted(by: { $0.id < $1.id }) {
+            guard let phase = BuildPhase.classify(kind: item.kind) else { continue }
+            if phase == .foundation || phase == .roof {
+                cells[Cell(storey: nil, phase: phase), default: []].append(item)
+                continue
+            }
+            let storey = item.storey ?? lowest
+            cells[Cell(storey: storey, phase: phase), default: []].append(item)
+            if let storey, !names.contains(storey) { names.append(storey) }
+        }
 
         var steps: [BuildStep] = []
-        var slots: [BuildSlot] = []
-        var cursor: TimeInterval = 0
-        for key in orderedKeys {
-            let duration = key.phase.baseDuration * factor
-            let members = groups[key, default: []].sorted {
-                let a = simd_distance_squared($0.center, centre), b = simd_distance_squared($1.center, centre)
-                return a != b ? a < b : $0.usdName < $1.usdName
-            }
-            let names = members.map(\.usdName)
-            steps.append(BuildStep(phase: key.phase, storey: key.storey, start: cursor, duration: duration,
-                                   usdNames: names))
-            let spread = duration * staggerFraction
-            let each = max(duration - spread, 0.05)
-            for (index, name) in names.enumerated() {
-                let offset = names.count > 1 ? spread * Double(index) / Double(names.count - 1) : 0
-                slots.append(BuildSlot(usdName: name, phase: key.phase, start: cursor + offset, duration: each))
-            }
-            cursor += duration
+        func add(_ cell: Cell) {
+            guard let members = cells[cell], !members.isEmpty else { return }
+            let label = cell.storey.map { "\($0) \(cell.phase.label)" } ?? cell.phase.label
+            steps.append(step(label, cell.phase, cell.storey, members))
         }
-        return BuildSequence(steps: steps, slots: slots.sorted { $0.start < $1.start })
+        add(Cell(storey: nil, phase: .foundation))
+        for name in names { for phase in BuildPhase.perStorey { add(Cell(storey: name, phase: phase)) } }
+        add(Cell(storey: nil, phase: .roof))
+        if steps.isEmpty { steps = [step("Model", .openings, nil, items)] }
+        return BuildSequence(steps: steps, isRaster: false)
     }
 
     static func make(manifest: SceneManifest, include: Set<String>? = nil) -> BuildSequence {
         let items = manifest.items.compactMap { id, item -> BuildItem? in
             if let include, !include.contains(id) { return nil }
             let center = item.bbox_m.map { SIMD2($0.center.x, $0.center.z) } ?? .zero
-            return BuildItem(usdName: item.usd_name, kind: item.kind, storey: item.storey, center: center)
+            return BuildItem(id: id, usdName: item.usd_name, kind: item.kind, storey: item.storey, center: center)
         }
         return make(items: items, storeys: manifest.storeys ?? [])
+    }
+
+    /// Growth 0...1 of the `index`th of `count` items in a step at slider position `position` (0...total).
+    /// Items start staggered from the model centre outwards and ease out.
+    static func growth(position: Double, step: Int, index: Int, count: Int) -> Double {
+        let local = min(max(position - Double(step), 0), 1)
+        if local >= 1 { return 1 }
+        let spread = staggerFraction
+        let offset = count > 1 ? spread * Double(index) / Double(count - 1) : 0
+        return easeOut((local - offset) / (1 - spread))
     }
 
     /// Ease-out cubic, 0...1.
@@ -154,4 +183,16 @@ struct BuildSequence: Equatable {
         let x = min(max(t, 0), 1)
         return 1 - pow(1 - x, 3)
     }
+}
+
+/// What the scrubber shows. Same fields as the web `BuildState`.
+struct BuildState: Equatable {
+    /// 1-based step on the slider (the step being built, or the last completed one).
+    let index: Int
+    let total: Int
+    let label: String
+    let playing: Bool
+    let finished: Bool
+
+    var text: String { "Step \(index) of \(total) · \(label)" }
 }

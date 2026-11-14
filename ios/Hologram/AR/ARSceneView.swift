@@ -17,6 +17,8 @@ final class ARSceneController: ObservableObject {
     @Published private(set) var isWalking = false
     @Published private(set) var manifest: SceneManifest?
     @Published private(set) var highlightedItemIDs: [String] = []
+    /// Step scrubber state; nil when no build-up exists (nothing placed, no manifest, walk mode).
+    @Published private(set) var buildState: BuildState?
     @Published private(set) var cameraInModel: simd_float4x4?
     @Published private(set) var guide: WalkGuide?
     @Published private(set) var targetItemID: String?
@@ -138,6 +140,7 @@ final class ARSceneController: ObservableObject {
             self?.updatePlacementPreview()
             self?.updateWalkGuide()
             self?.buildAnimator?.tick()
+            self?.syncBuildState()
             self?.choreographer?.tick()
             self?.updateBlueprint()
             self?.updateAnswerLabels()
@@ -257,7 +260,7 @@ final class ARSceneController: ObservableObject {
         if !advisorAnchorItemIDs.isEmpty { updateAdvisorAnchor() }
         if isPlaced, let view = arView { highlightController?.faceCamera(view.cameraTransform.rotation) }
         labelFrame = (labelFrame + 1) % 4
-        guard labelFrame == 0, isPlaced, buildAnimator == nil, let view = arView else { return }
+        guard labelFrame == 0, isPlaced, let view = arView else { return }
         highlightController?.layoutLabels(cameraTransform: view.cameraTransform.matrix,
                                          viewport: view.bounds, visibleItemIDs: visibleItemIDs,
                                          project: { view.project($0) })
@@ -416,16 +419,37 @@ final class ARSceneController: ObservableObject {
 
     private func updateBlueprint() {
         guard let blueprint, let arView else { return }
-        blueprint.update(activeStorey: activeStorey, hidden: !isPlaced || buildAnimator != nil,
+        blueprint.update(activeStorey: activeStorey, hidden: !isPlaced || isBuildActive,
                          cameraPosition: arView.cameraTransform.translation,
                          time: ProcessInfo.processInfo.systemUptime)
     }
 
     private func cancelBuild() {
-        buildAnimator?.finish()
+        buildAnimator?.dispose()
         buildAnimator = nil
+        buildState = nil
         cancelChoreography()
     }
+
+    /// True while the model is not fully built (playing, or scrubbed to an earlier step).
+    private var isBuildActive: Bool { buildAnimator.map { !$0.isComplete } ?? false }
+
+    private func syncBuildState() {
+        let state = buildAnimator?.state
+        if state != buildState { buildState = state }
+    }
+
+    /// Answer highlights stay fully grown whatever the step, as on the web.
+    private var pinnedUSDNames: Set<String> {
+        guard let manifest else { return [] }
+        return Set(highlightedItemIDs.compactMap { manifest.items[$0]?.usd_name })
+    }
+
+    func playBuild() { buildAnimator?.play(); syncBuildState() }
+    func pauseBuild() { buildAnimator?.pause(); syncBuildState() }
+    func setBuildStep(_ index: Int) { buildAnimator?.setStep(index); syncBuildState() }
+    func nextBuildStep() { buildAnimator?.next(); syncBuildState() }
+    func previousBuildStep() { buildAnimator?.previous(); syncBuildState() }
 
     /// Ends a running voice choreography at its final pose and removes the dimming.
     private func cancelChoreography() {
@@ -437,7 +461,7 @@ final class ARSceneController: ObservableObject {
 
     /// Voice answers: spin once, dim the rest, light the answer items one by one in reading order.
     private func startChoreography(itemIDs: [String]) {
-        guard !UIAccessibility.isReduceMotionEnabled, isPlaced, buildAnimator == nil,
+        guard !UIAccessibility.isReduceMotionEnabled, isPlaced, !isBuildActive,
               let model, let content, let manifest, let index = sceneIndex,
               let highlights = highlightController else { return }
         let elevation = Dictionary(uniqueKeysWithValues: (manifest.storeys ?? []).compactMap { storey in
@@ -481,22 +505,22 @@ final class ARSceneController: ObservableObject {
         animator.begin()
     }
 
-    /// Plan first, then the building rises out of it in construction order. Returns false when there is nothing
-    /// to animate (no manifest) or Reduce Motion is on, in which case the finished model is shown at once.
+    /// Plan first, then the building rises out of it step by step (same steps as the web), with a scrubber. With
+    /// Reduce Motion the finished model is shown at once and the scrubber still works. Returns false when there is
+    /// nothing to build (no manifest).
     @discardableResult
     private func startBuild(_ model: ModelEntity) -> Bool {
-        guard !UIAccessibility.isReduceMotionEnabled, let manifest, let index = sceneIndex else { return false }
-        let sequence = BuildSequence.make(manifest: manifest, include: visibleItemIDs)
+        guard let manifest, let index = sceneIndex else { return false }
+        let sequence = BuildSequence.make(manifest: manifest)
         guard !sequence.isEmpty else { return false }
-        let plan = makePlanEntity(manifest: manifest)
+        let reduceMotion = UIAccessibility.isReduceMotionEnabled
+        let plan = reduceMotion ? nil : makePlanEntity(manifest: manifest)
         if let plan { model.addChild(plan) }
-        let labels = highlightController.map { Array($0.labelsByItemID.values) } ?? []
         let animator = BuildAnimator(sequence: sequence, entities: index.entitiesByUSDName, plan: plan,
-                                     labels: labels) { [weak self] in
-            self?.buildAnimator = nil
-        }
+                                     pinned: { [weak self] in self?.pinnedUSDNames ?? [] })
         buildAnimator = animator
-        animator.begin()
+        animator.begin(reduceMotion: reduceMotion)
+        syncBuildState()
         return true
     }
 

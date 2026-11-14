@@ -2,13 +2,16 @@ import QuartzCore
 import RealityKit
 import UIKit
 
-/// Drives the build-up reveal: a flat plan appears at the footprint, holds, then every group of items rises
-/// from its base (scale-Y 0 to 1, ease-out), step by step. One per-frame update moves all active entities, so
-/// 784 items cost a loop rather than 784 animation tasks. Prim names and transforms are restored at the end.
+/// Drives the build-up and its scrubber. State is one position 0...N (N steps, same as the web `rise.ts`): steps
+/// 1...floor(p) are complete and the next one is growing (scale-Y from its own base, ease-out, staggered from the
+/// model centre). Playing advances the position with time; the scrubber sets it directly. Items in `pinned` (the
+/// answer's highlights) stay fully grown whatever the step. One per-frame update moves only entities whose growth
+/// changed, so 784 items cost a loop rather than 784 animation tasks.
 @MainActor
 final class BuildAnimator {
     static let planHold: TimeInterval = 0.8
     static let planFadeIn: TimeInterval = 0.25
+    /// Used by the answer choreography for its label pop.
     static let popDuration: TimeInterval = 0.3
     private static let minScale: Float = 0.001
 
@@ -17,84 +20,149 @@ final class BuildAnimator {
         let baseY: Float
         let position: SIMD3<Float>
         let scale: SIMD3<Float>
-        let slot: BuildSlot
+        let usdName: String
+        let step: Int
+        let index: Int
+        let count: Int
+        var applied: Double = 1
     }
 
-    private let sequence: BuildSequence
+    let sequence: BuildSequence
     private var targets: [Target] = []
-    private var nextTarget = 0
-    private var active: [Int] = []
     private let plan: Entity?
-    private let labels: [(entity: Entity, scale: SIMD3<Float>)]
-    private var startedAt: TimeInterval = 0
-    private(set) var isFinished = false
-    private let onFinish: () -> Void
+    private let pinned: () -> Set<String>
+    private var lastPinned: Set<String> = []
+    private var lastTick: TimeInterval?
+    private var elapsed: TimeInterval = 0
+    private var intro: TimeInterval = 0
+    private var dirty = true
+    private(set) var position: Double = 0
+    private(set) var isPlaying = false
 
-    var buildStart: TimeInterval { plan == nil ? 0 : Self.planHold }
-    var totalDuration: TimeInterval { buildStart + sequence.totalDuration + (labels.isEmpty ? 0 : Self.popDuration) }
+    var total: Int { sequence.total }
+    var isComplete: Bool { position >= Double(total) && !isPlaying }
 
-    init(sequence: BuildSequence, entities: [String: Entity], plan: Entity?, labels: [Entity],
-         onFinish: @escaping () -> Void) {
+    var state: BuildState {
+        let index = min(total, max(1, Int(ceil(position - 1e-9))))
+        return BuildState(index: index, total: total, label: sequence.steps[safe: index - 1]?.label ?? "",
+                          playing: isPlaying, finished: position >= Double(total))
+    }
+
+    init(sequence: BuildSequence, entities: [String: Entity], plan: Entity?, pinned: @escaping () -> Set<String>) {
         self.sequence = sequence
         self.plan = plan
-        self.labels = labels.map { ($0, $0.scale) }
-        self.onFinish = onFinish
-        for slot in sequence.slots {
-            guard let entity = entities[slot.usdName], entity.isEnabled, let parent = entity.parent else { continue }
-            let baseY = entity.visualBounds(relativeTo: parent).min.y
-            guard baseY.isFinite else { continue }
-            targets.append(Target(entity: entity, baseY: baseY, position: entity.position,
-                                  scale: entity.scale, slot: slot))
+        self.pinned = pinned
+        for (stepIndex, step) in sequence.steps.enumerated() {
+            for (index, name) in step.usdNames.enumerated() {
+                guard let entity = entities[name], entity.isEnabled, let parent = entity.parent else { continue }
+                let baseY = entity.visualBounds(relativeTo: parent).min.y
+                guard baseY.isFinite else { continue }
+                targets.append(Target(entity: entity, baseY: baseY, position: entity.position, scale: entity.scale,
+                                      usdName: name, step: stepIndex, index: index, count: step.usdNames.count))
+            }
         }
     }
 
-    func begin(now: TimeInterval = CACurrentMediaTime()) {
-        startedAt = now
-        for target in targets { apply(target, progress: 0) }
-        for label in labels { label.entity.isEnabled = false }
-        plan?.components.set(OpacityComponent(opacity: 0))
+    /// Starts at the flat plan and plays, or, with Reduce Motion, shows the finished model with the scrubber ready.
+    func begin(reduceMotion: Bool = false) {
+        lastTick = nil
+        elapsed = 0
+        if reduceMotion {
+            position = Double(total)
+            isPlaying = false
+        } else {
+            position = 0
+            isPlaying = true
+            intro = plan == nil ? 0 : Self.planHold
+        }
+        dirty = true
+        refresh(force: true)
     }
 
     func tick(now: TimeInterval = CACurrentMediaTime()) {
-        guard !isFinished else { return }
-        let t = now - startedAt
-        if let plan { plan.components.set(OpacityComponent(opacity: Float(planOpacity(at: t)))) }
-
-        let buildT = t - buildStart
-        while nextTarget < targets.count, targets[nextTarget].slot.start <= buildT {
-            active.append(nextTarget)
-            nextTarget += 1
+        let dt = lastTick.map { min(max(now - $0, 0), 0.1) } ?? 0
+        lastTick = now
+        elapsed += dt
+        if isPlaying {
+            var remaining = dt
+            if intro > 0 {
+                let used = min(intro, remaining)
+                intro -= used
+                remaining -= used
+            }
+            if remaining > 0 {
+                position = min(Double(total), position + remaining / sequence.stepSeconds)
+                dirty = true
+                if position >= Double(total) { isPlaying = false }
+            }
         }
-        active.removeAll { index in
-            let target = targets[index]
-            let progress = (buildT - target.slot.start) / target.slot.duration
-            if progress >= 1 { restore(target); return true }
-            apply(target, progress: BuildSequence.easeOut(progress))
-            return false
-        }
-
-        let popT = buildT - sequence.totalDuration
-        if popT >= 0 { popLabels(at: popT) }
-        if t >= totalDuration { finish() }
+        let current = pinned()
+        if current != lastPinned { dirty = true }
+        if dirty || elapsed < Self.planFadeIn { refresh(force: false) }
     }
+
+    func play() {
+        if position >= Double(total) { position = 0; intro = plan == nil ? 0 : Self.planHold / 2 }
+        isPlaying = true
+        dirty = true
+    }
+
+    /// Stops on the step being built (web `pause`: snap to the whole step).
+    func pause() {
+        guard isPlaying else { return }
+        position = min(Double(total), ceil(position - 1e-9))
+        isPlaying = false
+        dirty = true
+        refresh(force: false)
+    }
+
+    /// Shows steps 1...index complete. Scrubbing pauses playback.
+    func setStep(_ index: Int) {
+        position = Double(min(total, max(1, index)))
+        isPlaying = false
+        dirty = true
+        refresh(force: false)
+    }
+
+    func next() { setStep(state.index + 1) }
+    func previous() { setStep(state.index - 1) }
 
     /// Jump to the finished model.
     func finish() {
-        guard !isFinished else { return }
-        isFinished = true
-        for target in targets { restore(target) }
-        active.removeAll()
-        for label in labels { label.entity.scale = label.scale; label.entity.isEnabled = true }
-        plan?.removeFromParent()
-        onFinish()
+        position = Double(total)
+        isPlaying = false
+        dirty = true
+        refresh(force: false)
     }
 
-    /// Plan fades in, holds, then dissolves while the building rises out of it.
-    func planOpacity(at t: TimeInterval) -> Double {
-        if t < Self.planFadeIn { return t / Self.planFadeIn }
-        if t < buildStart { return 1 }
-        let fade = max(sequence.totalDuration * 0.85, 0.5)
-        return max(0, 1 - (t - buildStart) / fade)
+    /// Full geometry again and the plan removed; the animator is not used after this.
+    func dispose() {
+        position = Double(total)
+        isPlaying = false
+        for index in targets.indices { restore(targets[index]); targets[index].applied = 1 }
+        plan?.removeFromParent()
+    }
+
+    /// Plan fades in, then dissolves while the building rises out of it. Gone once everything is built.
+    func planOpacity() -> Double {
+        let fadeIn = min(1, elapsed / Self.planFadeIn)
+        let fade = max(0, 1 - position / max(Double(total) * 0.85, 0.5))
+        return fadeIn * fade
+    }
+
+    private func refresh(force: Bool) {
+        dirty = false
+        let current = pinned()
+        lastPinned = current
+        plan?.components.set(OpacityComponent(opacity: Float(planOpacity())))
+        for index in targets.indices {
+            let target = targets[index]
+            let factor = current.contains(target.usdName) ? 1
+                : BuildSequence.growth(position: position, step: target.step, index: target.index, count: target.count)
+            guard force || factor != target.applied else { continue }
+            targets[index].applied = factor
+            if factor >= 1 { restore(target) } else { apply(target, progress: factor) }
+        }
     }
 
     private func apply(_ target: Target, progress: Double) {
@@ -109,16 +177,10 @@ final class BuildAnimator {
         target.entity.scale = target.scale
         target.entity.position = target.position
     }
+}
 
-    private func popLabels(at t: TimeInterval) {
-        let p = min(t / Self.popDuration, 1)
-        // Overshoot to 1.15 at 60 percent, settle at 1.
-        let factor = Float(p < 0.6 ? 1.15 * BuildSequence.easeOut(p / 0.6) : 1.15 - 0.15 * ((p - 0.6) / 0.4))
-        for label in labels {
-            label.entity.isEnabled = true
-            label.entity.scale = label.scale * max(factor, 0.01)
-        }
-    }
+private extension Array {
+    subscript(safe index: Int) -> Element? { indices.contains(index) ? self[index] : nil }
 }
 
 /// Draws a plan-view image from item footprints so the reveal has something flat to start from. Generated for demo,

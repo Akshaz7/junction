@@ -45,6 +45,12 @@ struct ARScreen: View {
                 }
                 Spacer()
                 ARSubtitle(voice: voice)
+                if let state = controller.buildState, controller.isPlaced, !controller.isWalking {
+                    BuildScrubber(state: state, onPrevious: { controller.previousBuildStep() },
+                                  onToggle: { state.playing ? controller.pauseBuild() : controller.playBuild() },
+                                  onNext: { controller.nextBuildStep() },
+                                  onSelect: { controller.setBuildStep($0) })
+                }
                 bottomBar
             }
             .padding(.horizontal, 16).padding(.vertical, 8)
