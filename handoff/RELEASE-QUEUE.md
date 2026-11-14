@@ -15,3 +15,8 @@ Updated Sat 14 Nov 2026 ~23:50 EET.
 - final/changes (F-CHANGES) on top of awais/compare-versions when it has a RESULT
 - other final/* branches as their handoff/F-*.md get RESULT blocks
 - investigate 7 sample200 items wrong since e-s200-z3 (doors 11011/13843, toilets 2609/site303/site644, saunas 41/7041)
+
+## Batch 2 deployed (Sat 14 Nov, late)
+- Backend build_rev 6e0419f live (f76bb92 build failed on registry push; redeployed with new rev). /api/projects 200 (migration 007 applied).
+- Web prod (hologram) and staging (hologram-staging-pi) redeployed from 6e0419f.
+- Contents: shared edits, compare-versions, mistakes, 3D, MEP, projects engine+UI, changes screen, scansym.
