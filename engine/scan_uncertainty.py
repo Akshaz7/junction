@@ -64,8 +64,6 @@ def attach(res, question, calc):
         # Preserve a matched detector error model or a physical error budget.
         return
     from engine.reasoning_parts.counts import facts
-    from engine.router.parser import parse
-    parsed = parse(question)
     counted = facts(res, question)
     unit, value = ans.get('unit'), ans.get('value')
     if value is None:
@@ -91,42 +89,20 @@ def attach(res, question, calc):
                            'operands': [counted['total'], counted['boxes']],
                            'note': 'Coverage discrepancy only. Zero means the returned boxes reconcile, not that no items were missed; this is not an independent detection-error estimate.'})
         sources.append('answer.value / evidence.boxes')
-    inventory = calc.get('inventory_rows') or []
-    selected, alternate = {}, {}
-    for row in inventory:
+    # Saved alternative artifacts are rejected pipeline candidates, often masks
+    # with different class semantics or a failed detector. They are not an
+    # independent recount of the selected answer. Keep them in the audit only.
+    excluded = []
+    inventories = {}
+    for row in calc.get('inventory_rows') or []:
         vals, ref = row.get('values') or {}, row.get('source') or {}
-        kind = vals.get('kind')
-        if kind not in ('door', 'window', 'wall', 'room', 'toilet', 'sink', 'shower', 'bathtub', 'stairs', 'column'):
-            continue
-        if unit == 'count' and parsed.kind and kind != parsed.kind:
-            continue
-        key = (ref.get('doc_id'), ref.get('page'), kind)
-        target = alternate.setdefault(vals.get('inventory_artifact'), {}) if vals.get('alternative') else selected
-        target[key] = target.get(key, 0) + 1
-    discrepancies = []
-    for filename, values in sorted(alternate.items()):
-        for key, count in values.items():
-            # A class absent from an extraction may be unsupported; only compare
-            # classes actually present in both saved extraction runs.
-            if key not in selected:
-                continue
-            delta = abs(selected[key] - count)
-            discrepancies.append({'doc_id': key[0], 'page': key[1], 'kind': key[2], 'selected': selected[key], 'alternate': count,
-                                  'artifact': filename, 'difference': delta})
-    if discrepancies and unit in ('count', None, ''):
-        # Compare whole per-class inventories, not a filtered question's count.
-        filtered = parsed.scope is not None or parsed.kind in ('bedroom', 'bathroom', 'kitchen', 'wc_room', 'balcony', 'sauna')
-        if unit != 'count' or not filtered:
-            # Multiple alternate runs are correlated; take the largest total,
-            # rather than summing duplicated disagreements across algorithms.
-            per_run = {}
-            for d in discrepancies:
-                per_run[d['artifact']] = per_run.get(d['artifact'], 0) + d['difference']
-            components.append({'label': 'Saved extraction count disagreement', 'value': max(per_run.values()), 'unit': 'count',
-                               'expr': 'max per saved run of Σ abs(selected class count − alternate class count)',
-                               'source': 'calc.inventory_rows', 'comparisons': discrepancies,
-                               'note': 'Page inventory disagreement; includes shared segmentation errors and is not a ground-truth error bound.'})
-            sources.extend(f"{d['doc_id']}: {d['artifact']}" for d in discrepancies)
+        if vals.get('alternative'):
+            key = (ref.get('doc_id'), ref.get('page'), vals.get('inventory_artifact'))
+            inventories.setdefault(key, set()).add(vals.get('kind'))
+    for (did, page, artifact), kinds in sorted(inventories.items()):
+        excluded.append({'doc_id': did, 'page': page, 'artifact': artifact,
+                         'classes': sorted(k for k in kinds if k),
+                         'reason': 'Rejected alternate extraction, not an independent reading of the selected quantity; class support, completeness and equivalent filters are not established.'})
     selected_scale = (calc.get('method') or {}).get('scale') or {}
     if unit in ('m', 'm2', 'm3') and number(value) and selected_scale.get('id') == 'door-prior':
         spreads = [s for s in calc.get('steps') or [] if s.get('operation') == 'door_scale_spread' and number(s.get('value'))]
@@ -147,16 +123,30 @@ def attach(res, question, calc):
     matching = [c for c in components if c['unit'] == output_unit]
     if not matching:
         return
-    # Do not claim independent additive errors: overlapping references may
-    # describe the same failure. The maximum is a conservative comparison proxy.
-    error = max(c['value'] for c in matching)
+    # MAE and a current recount can describe the same missed item; adding or
+    # quadrature would imply independence that has not been measured. Compare
+    # only like-unit supported components, then round count variation outward.
+    raw_error = max(c['value'] for c in matching)
+    error = math.ceil(raw_error) if output_unit == 'count' else raw_error
     pct = 100 * error / abs(value) if number(value) and value else None
-    why = '; '.join(f"{c['label']}: {c['value']:.4g} {c['unit']} ({c['expr']})" for c in matching)
-    why += '. Uses the largest recorded component; components can overlap. This is observed/reference variation, not a guaranteed error bound; shared misses and physical prior bias remain unbounded.'
-    if unit in (None, ''):
-        why = 'Description inventory only; no scalar answer was requested. ' + why
+    labels = []
+    for c in matching:
+        if c['label'] == 'Reported count versus numbered-box coverage' and c['value'] == 0:
+            continue
+        labels.append({'Historical mean absolute error': 'historical MAE',
+                       'Observed independent recount difference': 'recount difference',
+                       'Reported count versus numbered-box coverage': 'box discrepancy',
+                       'Door-proxy scale sensitivity': 'scale sensitivity'}.get(c['label'], c['label']))
+    basis = ' and '.join(labels) or 'box discrepancy only'
+    why = ('Larger of ' if len(labels) > 1 else 'From ') + basis
+    if output_unit == 'count' and error != raw_error:
+        why += ', rounded up to whole items'
+    why += '. Partial variation, not a guaranteed error bound.'
     budget = {'value': error, 'unit': output_unit, 'pct': pct, 'why': why, 'sources': list(dict.fromkeys(sources)),
               'scope': 'Observed scan discrepancy and historical reference', 'components': matching,
+              'rule': 'max_supported_components_then_ceil_count', 'raw_value': raw_error,
+              'raw_pct': 100 * raw_error / abs(value) if number(value) and value else None,
+              'excluded_components': excluded,
               'complete': False, 'is_error_bound': False}
     if old.get('by_kind'):
         budget['by_kind'] = old['by_kind']
@@ -164,7 +154,7 @@ def attach(res, question, calc):
 
 
 def steps(budget, doc_id):
-    """Replay each observed component and the max rule with explicit operands."""
+    """Replay supported components, the overlap rule and outward count rounding."""
     from engine.calc import input_value, step, step_source
     out, totals = [], []
     for index, component in enumerate(budget.get('components') or []):
@@ -218,6 +208,11 @@ def steps(budget, doc_id):
                         component.get('note') or (history or {}).get('scope', ''), operation))
         totals.append(input_value(component['label'], component['value'], component['unit'], step_source(prefix)))
     if totals:
-        out.append(step('scan-margin-total', 'Observed/reference scan variation', 'max(recorded variation components)', budget['value'], budget['unit'], totals,
-                        budget['why'], 'max'))
+        raw = budget.get('raw_value', budget['value'])
+        sid = 'scan-margin-raw' if raw != budget['value'] else 'scan-margin-total'
+        out.append(step(sid, 'Supported observed/reference variation', 'max(supported comparable variation components)', raw, budget['unit'], totals,
+                        'Components may overlap, so they are not added or combined in quadrature. Rejected alternate/failed/different-class inventories are excluded. Shared misses remain unknown.', 'max'))
+        if raw != budget['value']:
+            out.append(step('scan-margin-total', 'Observed/reference scan variation', 'ceil(max supported variation) to whole items', budget['value'], budget['unit'],
+                            [input_value('unrounded variation', raw, budget['unit'], step_source(sid))], budget['why'], 'ceil'))
     return out

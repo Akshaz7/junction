@@ -158,7 +158,7 @@ def factors(card, res, question, *, source=None, allow_route_score=True):
         base, pct = origin.get('value', round(raw * 100, 6)), round(raw * 100, 6)
         kind = 'recorded_engine_score'
         label = 'Recorded answer-route score'
-        note = 'Uncalibrated route/model score, not measured answer accuracy. No accuracy calibration is available.'
+        note = 'Uncalibrated score supplied by this route; not measured answer accuracy.'
     else:
         base, pct, kind = 0, None, 'unavailable'
         label, note = 'No numeric confidence recorded', 'No measured accuracy or route score is available; percentage is unknown.'
@@ -179,15 +179,15 @@ def factors(card, res, question, *, source=None, allow_route_score=True):
                         'note': 'Source context; no unmeasured accuracy adjustment.'})
     if counted and counted.get('reread'):
         original, reread = counted['reread']
-        entries.append({'label': f"Recount {'agreed' if original == reread else 'differed'} {original}/{reread}", 'delta': 0,
+        entries.append({'label': f"Recount agreed {original}/{reread}" if original == reread else f"Recount differed by {abs(original - reread)} ({original} vs {reread})", 'delta': 0,
                         'note': 'Recorded counts; agreement is not an accuracy boost or an error bound.'})
     calc = (res.get('reasoning') or {}).get('calc') or {}
     scale = (calc.get('method') or {}).get('scale') or {}
-    if scale:
+    if scale and ans.get('unit') != 'count':
         entries.append({'label': 'Scale: ' + scale.get('label', scale.get('id', 'recorded method')), 'delta': 0,
                         'note': scale.get('why_chosen', 'Scale quality has no calibrated percentage-point effect.')})
     for s in calc.get('steps') or []:
-        if s.get('operation') == 'door_scale_spread':
+        if s.get('operation') == 'door_scale_spread' and ans.get('unit') != 'count':
             entries.append({'label': f"Door-prior proxy spread {s['value']:.3g}%", 'delta': 0,
                             'note': 'Observed icon variation; physical door-width variation remains unknown.'})
     card['factors'] = entries
@@ -245,4 +245,6 @@ def attach(res, question, root):
         if method:
             path.append({'label': method['label'], 'kind': 'calculation', 'relation': 'method used for this answer'})
         card['graph_path'] = path
+    from engine.scan_presentation import attach as prioritize
+    prioritize(res, question)
     return res

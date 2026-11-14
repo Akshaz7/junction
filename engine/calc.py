@@ -411,7 +411,33 @@ def _default(res, question, root):
 def validate(calc, root=None):
     """Return invariant failures; complete never means source completeness is known."""
     issues = list(calc.get("issues") or [])
+    # Display order follows importance, not dependency order. Resolve references
+    # by stable id and reject duplicate/cyclic graphs before replaying operands.
     known, artifact_cache = {}, {}
+    for s in calc.get("steps", []):
+        if s.get("id") in known:
+            issues.append(f"{s['id']}: duplicate calculation step id.")
+        known[s.get("id")] = s
+    remaining = {sid: {i.get("source", {}).get("step_id") for i in s.get("inputs", [])
+                       if i.get("source", {}).get("kind") == "step"}
+                 for sid, s in known.items()}
+    # Kahn's algorithm avoids recursion on large technical traces.
+    from collections import defaultdict, deque
+    dependents = defaultdict(set)
+    for sid, deps in remaining.items():
+        for dep in deps:
+            dependents[dep].add(sid)
+    ready = deque(sid for sid, deps in remaining.items() if not deps)
+    resolved = set()
+    while ready:
+        sid = ready.popleft()
+        resolved.add(sid)
+        for child in dependents[sid]:
+            remaining[child].discard(sid)
+            if not remaining[child]:
+                ready.append(child)
+    if any(deps and all(dep in known for dep in deps) for sid, deps in remaining.items() if sid not in resolved):
+        issues.append("Calculation step dependencies contain a cycle.")
     def check_source(ref, label):
         kind = ref.get("kind")
         if kind == "step":
