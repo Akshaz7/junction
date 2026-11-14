@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { readFileSync } from 'node:fs'
-import type { ChangeEntry, Comparison } from '../src/lib/types'
+import type { ChangeEntry, ChangeFeedEntry, Comparison, Document } from '../src/lib/types'
 
 const api = 'http://localhost:8000'
 test.setTimeout(60_000)
@@ -8,14 +8,33 @@ test.setTimeout(60_000)
 test('real revision series shows numbered changes and a draggable wipe, then opens a new document', async ({ page, request }) => {
   const response = await request.get(`${api}/api/changes`)
   expect(response.ok()).toBe(true)
-  const { changes: feed } = await response.json() as { changes: ChangeEntry[] }
-  const revisions = feed.filter((entry) => entry.type === 'new_version' && entry.summary.source === 'pdf-diff' && (entry.summary.n_changes ?? 0) > 0)
+  const { changes: feed } = await response.json() as { changes: ChangeFeedEntry[] }
+  expect(feed.length).toBeGreaterThan(0)
+  const docsResponse = await request.get(`${api}/api/docs`)
+  expect(docsResponse.ok()).toBe(true)
+  const { sources } = await docsResponse.json() as { sources: { docs: Document[] }[] }
+  const docIds = new Set(sources.flatMap((source) => source.docs.map((doc) => doc.doc_id)))
+  // Check the first entries as well as every revision: synthetic pairs must not
+  // return ahead of the real feed, even if a later real comparison still works.
+  for (const entry of feed) {
+    expect(entry).not.toHaveProperty('generated_for_demo')
+    expect(entry.summary ?? {}).not.toHaveProperty('generated_for_demo')
+    if (entry.type === 'rule_change') continue
+    expect(entry.doc_b).toBeTruthy()
+    for (const docId of [entry.doc_a, entry.doc_b, entry.summary.doc_id].filter((id) => id != null)) {
+      expect(docIds.has(docId), `${entry.id}: ${docId} must be a listed document`).toBe(true)
+      expect(docId).not.toContain('@')
+      expect(docId).not.toMatch(/^swiss_dwellings__.*-v\d+$/)
+    }
+  }
+  const revisions = feed.filter((entry): entry is ChangeEntry => entry.type === 'new_version')
+    .filter((entry) => entry.summary.source === 'pdf-diff' && (entry.summary.n_changes ?? 0) > 0)
   expect(revisions.length, 'The real API must serve revision series').toBeGreaterThan(0)
   const revision = revisions.reduce((best, entry) => (entry.summary.n_changes! < best.summary.n_changes! ? entry : best))
   const detail = await request.get(`${api}/api/changes/${revision!.id}`)
   expect(detail.ok()).toBe(true)
   const comparison = await detail.json() as Comparison
-  expect(comparison.generated_for_demo).toBe(false)
+  expect(comparison).not.toHaveProperty('generated_for_demo')
   expect(comparison.changes.length).toBeGreaterThan(0)
 
   await page.goto('/#/changes')

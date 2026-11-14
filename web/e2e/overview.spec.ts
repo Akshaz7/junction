@@ -38,7 +38,7 @@ test('overview sections match the real workspace API', async ({ page, request })
     await expect(row).toHaveAttribute('href', '#/changes')
     if (change.summary.title || change.summary.headline) await expect(row.locator('strong')).toHaveText(change.summary.title || change.summary.headline)
     await expect(row.locator('time')).toHaveAttribute('datetime', change.created_at)
-    if (change.summary.generated_for_demo) await expect(row).toContainText('generated for demo')
+    expect(change.summary).not.toHaveProperty('generated_for_demo')
   }
 
   const findingRows = findings?.findings || []
