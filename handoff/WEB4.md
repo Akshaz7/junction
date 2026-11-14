@@ -1,19 +1,13 @@
-# WEB4: row W-24 (Codex). Accuracy page, judge-grade
-Scope: web/src/components/accuracy-screen.tsx and accuracy-screen.css only.
-The page must show REAL numbers only, from /api/bench (list) and /api/bench/latest?tag=<tag>; see server/ and docs/API.md. Never hard-code numbers.
-Show:
-- headline accuracy
-- 0 abstentions
-- $/answer
-- per-source and per-question-type tables (n, correct, accuracy, answered accuracy, $/answer, p95 latency)
-- the text-judge section
-- the before/after comparison between two tags (a selector for tag A vs tag B)
-- a short "how we measure" note: held-out drawings are never used for training or tuning, the 2% tolerance, and how text answers are judged
-Stoa-like look, consistent with the app (tokens.css). It must work on a phone.
-Done test: `cd web && npx tsc --noEmit && npx vitest run` pass, plus a vitest unit test of the table derivation. The LEAD runs Playwright.
+# WEB4: row W-25 (Codex). Upload UX for judges' own files
+Scope: web/src/components/upload*.tsx/.css (create them if the upload UI lives elsewhere; find it with grep "Upload"), and web/src/lib/upload*.ts. Do NOT edit data-screen.tsx, document-viewer.*, chat-screen.tsx or viewer3d/; other workers own them. Expose a component they can mount.
+Build a Stoa-style upload dialog:
+- drag and drop plus a file picker; accepts pdf, png, jpg, dxf, ifc
+- client-side checks for size and type, with clear messages
+- a progress bar for the upload, then the ingest progress from GET /api/docs/{id}/ingest ({status, step, progress, reason?}, being added by the server worker; handle the endpoint missing with a graceful fallback to polling /api/docs/{id})
+- on success: "Ready — Ask about it" (opens chat with the doc selected) and "Open" (opens the viewer)
+- on failure: a readable reason and "Try again"
+Use the app tokens (tokens.css), and make it work on a phone.
+Done test: `cd web && npx tsc --noEmit && npx vitest run` with unit tests for the state machine (idle → uploading → processing → ready/failed). The LEAD runs Playwright.
 Do not commit. Append a RESULT: line.
-
-W-24: API-backed source/type marginal tables (including p95), numeric abstentions without a forced zero, separate text-judge results/costs, selectable tag A/B comparison with set/mode/completion checks, measurement note and responsive table scrolling. Only the two scoped component files were edited.
-Unit tests are in-source to honor the two-file scope. From web/: `node --input-type=module -e 'import {writeFileSync} from "node:fs"; writeFileSync("/private/tmp/web4-vitest.config.mjs", "export default " + JSON.stringify({root:process.cwd(),test:{include:[],includeSource:["src/components/accuracy-screen.tsx"],environment:"node"}}))'` then `npx vitest run --config /private/tmp/web4-vitest.config.mjs` (2 tests pass).
-NEEDS: Shared-working-tree done test is blocked outside WEB4 scope: viewer3d/rise.ts no longer exports createRiseAnimation/RISE_DURATION_MS/riseState/scheduleRiseTransitions expected by viewer/tests; linked.test.ts expects an evidence object without the new kind field (5 Vitest failures total). Owners/LEAD must reconcile these; LEAD runs Playwright.
-RESULT: W-24 scoped local HEAD snapshot (/private/tmp/web4-validation; HEAD web plus only accuracy-screen.tsx/css) passes `cd web && npx tsc --noEmit && npx vitest run` (38 files, 210 tests), plus 2 in-source table-derivation tests and production vite build; production assets exclude test code. Shared-working-tree blockers are recorded above. No commit.
+NEEDS: WEB owner mount UploadDialog from web/src/components/upload-dialog.tsx beside the upload trigger with open/onClose, onAsk(Document) to select the doc and open chat, onOpen(Document) to open the viewer, and optional onReady(Document) to refresh Data; data-screen.tsx is outside WEB4 scope. LEAD runs Playwright after mounting.
+RESULT: W-25 passed `cd web && npx tsc --noEmit && npx vitest run` (42 files, 251 tests). Added upload-dialog.tsx/.css and lib/upload-state.ts, upload-client.ts plus their .test.ts files: mobile dialog, drag/drop and picker, 100 MiB/type/empty checks, measured upload progress, ingestion polling with legacy document/artifact fallback, readable failures, retry/cancellation, and ready navigation callbacks. No commit.

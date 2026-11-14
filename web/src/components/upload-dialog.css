@@ -1,0 +1,50 @@
+.upload-dialog { width: min(var(--overlay-w-md), calc(100vw - 32px)); max-width: none; max-height: min(var(--overlay-max-h), calc(100dvh - 32px)); margin: auto; padding: var(--dialog-padding); border: 1px solid var(--border); border-radius: var(--radius-overlay); color: var(--foreground); background: var(--card); box-shadow: var(--shadow-dialog); overflow: auto; overscroll-behavior: contain; font: var(--text-body)/var(--text-body--line-height) var(--font-sans); }
+.upload-dialog::backdrop { background: var(--scrim); }
+.upload-dialog-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.upload-dialog-header > div:nth-child(2) { flex: 1; min-width: 0; }
+.upload-dialog-header h2 { margin: 0; font-size: var(--dialog-title-size); line-height: var(--dialog-title-leading); font-weight: 600; letter-spacing: var(--tracking-tight); }
+.upload-dialog-header p { margin: 4px 0 0; color: var(--muted-foreground); }
+.upload-dialog-symbol { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: var(--radius-control); background: var(--muted); color: var(--brand-forest); }
+.upload-dialog .button { min-height: 44px; height: auto; padding-block: 10px; }
+.upload-dialog-header > .button { flex-shrink: 0; min-width: 44px; }
+.upload-dialog-input { display: none; }
+.upload-dialog-drop { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 28px 16px; text-align: center; border: 1px dashed var(--input); border-radius: var(--radius-card); background: var(--background); transition: background var(--duration-quick), border-color var(--duration-quick); }
+.upload-dialog-drop[data-dragging] { background: var(--success-surface); border-color: var(--brand-forest); }
+.upload-dialog-drop > svg { color: var(--forest-600); margin-bottom: 4px; }
+.upload-dialog-drop > span, .upload-dialog small { color: var(--muted-foreground); font-size: var(--text-caption); line-height: var(--text-caption--line-height); }
+.upload-dialog-drop > .button { margin: 4px 0; }
+.upload-dialog-file { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 12px; background: var(--muted); border-radius: var(--radius-control); }
+.upload-dialog-file > svg { flex-shrink: 0; }
+.upload-dialog-file > div { flex: 1; min-width: 0; }
+.upload-dialog-file strong { display: block; overflow-wrap: anywhere; font-weight: 500; }
+.upload-dialog-file small { display: block; margin-top: 3px; }
+.upload-dialog-check, .upload-dialog-ready > p:first-child { color: var(--success-text); }
+.upload-dialog-progress { margin-top: 24px; }
+.upload-dialog-progress p { margin: 6px 0 12px; color: var(--muted-foreground); overflow-wrap: anywhere; }
+.upload-dialog-progress-line { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.upload-dialog-progress-line progress { flex: 1; width: 100%; min-width: 0; height: 8px; appearance: none; border: 0; border-radius: 99px; background: var(--muted); accent-color: var(--brand-forest); overflow: hidden; }
+.upload-dialog-progress-line progress::-webkit-progress-bar { background: var(--muted); border-radius: 99px; }
+.upload-dialog-progress-line progress::-webkit-progress-value { background: var(--brand-forest); border-radius: 99px; }
+.upload-dialog-progress-line progress::-moz-progress-bar { background: var(--brand-forest); border-radius: 99px; }
+.upload-dialog-progress-line progress:indeterminate { background: linear-gradient(90deg, var(--muted), var(--forest-400), var(--muted)); }
+.upload-dialog-progress-line progress:indeterminate::-webkit-progress-bar { background: linear-gradient(90deg, var(--muted), var(--forest-400), var(--muted)); }
+.upload-dialog-progress-line > span { flex-shrink: 0; font-size: var(--text-caption); color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+.upload-dialog-error { display: flex; align-items: flex-start; gap: 10px; padding: 14px; margin-top: 16px; background: var(--destructive-surface); color: var(--destructive-text); border-radius: var(--radius-control); }
+.upload-dialog-error > svg { flex-shrink: 0; }
+.upload-dialog-error > div { min-width: 0; }
+.upload-dialog-error p { margin: 6px 0 12px; overflow-wrap: anywhere; }
+.upload-dialog-ready { margin-top: 20px; }
+.upload-dialog-ready > p:first-child { display: flex; align-items: center; gap: 8px; }
+.upload-dialog-note { color: var(--muted-foreground); overflow-wrap: anywhere; }
+.upload-dialog-actions { display: flex; gap: 8px; margin-top: 20px; }
+.upload-dialog-footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted-foreground); font-size: var(--text-caption); }
+.upload-dialog :focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+@media (max-width: 480px) {
+  .upload-dialog { padding: 16px; width: calc(100vw - 24px); max-height: calc(100dvh - 24px); }
+  .upload-dialog-header { gap: 8px; }
+  .upload-dialog-header h2 { font-size: var(--text-h3); }
+  .upload-dialog-symbol { width: 32px; height: 32px; }
+  .upload-dialog-drop { padding: 24px 12px; }
+  .upload-dialog-actions { flex-direction: column; }
+  .upload-dialog-actions .button { width: 100%; white-space: normal; }
+}
