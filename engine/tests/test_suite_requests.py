@@ -102,3 +102,13 @@ def test_schedule_retains_inside_outside_filter_and_missing_flags():
 def test_exact_dimension_handler_does_not_discard_comparator():
     d=Doc('generated-for-demo','ifc',[])
     assert dimension_request('How many windows are at least 0.8 m wide and 1.2 m high?',d,[],None,time.perf_counter()) is None
+
+
+def test_cost_equation_displays_the_actual_quantity_and_rate():
+    from engine.units import convert
+    res={'answer':{'text_md':'Measured coverage.','value':108.92,'unit':'m²','abstained':False}}
+    out=convert(res,'What is the cost at 35 EUR per m2?')
+    assert '**3,812.20 EUR** at 35 EUR/m² × 108.92 m²' in out['answer']['text_md']
+    res['answer']['value']=2
+    out=convert(res,'What is the cost at 0.0035 EUR per m2?')
+    assert 'at 0.0035 EUR/m² × 2 m²' in out['answer']['text_md']
