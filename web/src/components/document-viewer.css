@@ -21,7 +21,7 @@
 .drawing-plane { position: absolute; top: 0; left: 0; transform-origin: 0 0; background: white; box-shadow: var(--shadow-card); pointer-events: none; }
 .drawing-plane > img { display: block; width: 100%; height: 100%; max-width: none; }
 .drawing-evidence { position: absolute; inset: 0; overflow: visible; }
-.evidence-region { color: var(--info-text); }
+.evidence-region { color: var(--info-text); pointer-events: all; cursor: pointer; }
 .evidence-region > rect { fill: var(--blue-500); fill-opacity: .1; stroke: currentColor; stroke-width: 2; }
 .evidence-region.is-active { color: var(--brand-forest); }
 .evidence-region.is-active > rect { stroke-width: 3; fill: var(--forest-500); fill-opacity: .22; }

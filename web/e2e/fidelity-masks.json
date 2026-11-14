@@ -1352,6 +1352,11 @@
           "selector": ".cost-chip",
           "reason": "Our credit, pagination or extra-feature control is absent from the reference tour.",
           "text_only": false
+        },
+        {
+          "selector": ".answer-actions > .voice-control",
+          "reason": "Spoken-answer playback is an extra feature absent from the reference tour.",
+          "text_only": false
         }
       ],
       "expected_state": {
@@ -1434,6 +1439,11 @@
         {
           "selector": ".cost-chip",
           "reason": "Our credit, pagination or extra-feature control is absent from the reference tour.",
+          "text_only": false
+        },
+        {
+          "selector": ".answer-actions > .voice-control",
+          "reason": "Spoken-answer playback is an extra feature absent from the reference tour.",
           "text_only": false
         }
       ],
@@ -1559,6 +1569,11 @@
           "selector": ".viewer-zoom-controls > span",
           "text_only": true,
           "reason": "The zoom percentage is calculated from our dataset page and viewport; the pill and zoom buttons remain compared."
+        },
+        {
+          "selector": ".answer-actions > .voice-control",
+          "reason": "Spoken-answer playback is an extra feature absent from the reference tour.",
+          "text_only": false
         }
       ],
       "expected_state": {
@@ -1683,6 +1698,11 @@
           "selector": ".viewer-zoom-controls > span",
           "text_only": true,
           "reason": "The zoom percentage is calculated from our dataset page and viewport; the pill and zoom buttons remain compared."
+        },
+        {
+          "selector": ".answer-actions > .voice-control",
+          "reason": "Spoken-answer playback is an extra feature absent from the reference tour.",
+          "text_only": false
         }
       ],
       "expected_state": {
@@ -2880,6 +2900,11 @@
           "selector": ".data-zoom-controls > span",
           "text_only": true,
           "reason": "Our page zoom is calculated from the dataset image; the zoom pill and buttons remain compared."
+        },
+        {
+          "selector": ".data-header-ask, .data-credit-info > summary",
+          "reason": "The header holds our drawing-question action and required credit information without adding a phone footer.",
+          "text_only": false
         }
       ],
       "expected_state": {
@@ -2962,6 +2987,11 @@
           "selector": ".data-zoom-controls > span",
           "text_only": true,
           "reason": "Our page zoom is calculated from the dataset image; the zoom pill and buttons remain compared."
+        },
+        {
+          "selector": ".data-header-ask, .data-credit-info > summary",
+          "reason": "The header holds our drawing-question action and required credit information without adding a phone footer.",
+          "text_only": false
         }
       ],
       "expected_state": {
@@ -3044,6 +3074,11 @@
           "selector": ".data-zoom-controls > span",
           "text_only": true,
           "reason": "Our page zoom is calculated from the dataset image; the zoom pill and buttons remain compared."
+        },
+        {
+          "selector": ".data-header-ask, .data-credit-info > summary",
+          "reason": "The header holds our drawing-question action and required credit information without adding a phone footer.",
+          "text_only": false
         }
       ],
       "expected_state": {
@@ -3502,6 +3537,11 @@
           "selector": ".cost-chip",
           "reason": "Our credit, pagination or extra-feature control is absent from the reference tour.",
           "text_only": false
+        },
+        {
+          "selector": ".answer-actions > .voice-control",
+          "reason": "Spoken-answer playback is an extra feature absent from the reference tour.",
+          "text_only": false
         }
       ],
       "expected_state": {
@@ -3591,6 +3631,11 @@
         {
           "selector": ".cost-chip",
           "reason": "Our credit, pagination or extra-feature control is absent from the reference tour.",
+          "text_only": false
+        },
+        {
+          "selector": ".answer-actions > .voice-control",
+          "reason": "Spoken-answer playback is an extra feature absent from the reference tour.",
           "text_only": false
         }
       ],
@@ -3695,6 +3740,11 @@
           "selector": ".viewer-zoom-controls > span",
           "text_only": true,
           "reason": "The zoom percentage is calculated from our dataset page and viewport; the pill and zoom buttons remain compared."
+        },
+        {
+          "selector": ".answer-actions > .voice-control",
+          "reason": "Spoken-answer playback is an extra feature absent from the reference tour.",
+          "text_only": false
         }
       ],
       "expected_state": {
@@ -3798,6 +3848,11 @@
           "selector": ".viewer-zoom-controls > span",
           "text_only": true,
           "reason": "The zoom percentage is calculated from our dataset page and viewport; the pill and zoom buttons remain compared."
+        },
+        {
+          "selector": ".answer-actions > .voice-control",
+          "reason": "Spoken-answer playback is an extra feature absent from the reference tour.",
+          "text_only": false
         }
       ],
       "expected_state": {
@@ -3887,6 +3942,11 @@
         {
           "selector": ".cost-chip",
           "reason": "Our credit, pagination or extra-feature control is absent from the reference tour.",
+          "text_only": false
+        },
+        {
+          "selector": ".answer-actions > .voice-control",
+          "reason": "Spoken-answer playback is an extra feature absent from the reference tour.",
           "text_only": false
         }
       ],
@@ -4141,6 +4201,13 @@
           "width": 358,
           "height": 22,
           "reason": "Change count is measured from generated test revisions."
+        },
+        {
+          "x": 110,
+          "y": 690,
+          "width": 153,
+          "height": 19,
+          "reason": "Dataset revision labels replace the reference Version 5 and Version 6 labels; the New version badge remains compared."
         }
       ],
       "selectors": [
@@ -4183,6 +4250,11 @@
           "selector": ".comparison-zoom",
           "text_only": true,
           "reason": "The comparison zoom is calculated for our dataset drawing; the controls remain compared."
+        },
+        {
+          "selector": ".phone-comparison-summary p",
+          "reason": "Revision labels come from the dataset comparison rather than the reference revision numbers.",
+          "text_only": true
         }
       ],
       "expected_state": {
@@ -4246,6 +4318,13 @@
           "width": 358,
           "height": 22,
           "reason": "Change count is measured from generated test revisions."
+        },
+        {
+          "x": 110,
+          "y": 690,
+          "width": 153,
+          "height": 19,
+          "reason": "Dataset revision labels replace the reference Version 5 and Version 6 labels; the New version badge remains compared."
         }
       ],
       "selectors": [
@@ -4288,6 +4367,11 @@
           "selector": ".comparison-zoom",
           "text_only": true,
           "reason": "The comparison zoom is calculated for our dataset drawing; the controls remain compared."
+        },
+        {
+          "selector": ".phone-comparison-summary p",
+          "reason": "Revision labels come from the dataset comparison rather than the reference revision numbers.",
+          "text_only": true
         }
       ],
       "expected_state": {
@@ -4351,6 +4435,13 @@
           "width": 358,
           "height": 22,
           "reason": "Change count is measured from generated test revisions."
+        },
+        {
+          "x": 110,
+          "y": 690,
+          "width": 153,
+          "height": 19,
+          "reason": "Dataset revision labels replace the reference Version 5 and Version 6 labels; the New version badge remains compared."
         }
       ],
       "selectors": [
@@ -4393,6 +4484,11 @@
           "selector": ".comparison-zoom",
           "text_only": true,
           "reason": "The comparison zoom is calculated for our dataset drawing; the controls remain compared."
+        },
+        {
+          "selector": ".phone-comparison-summary p",
+          "reason": "Revision labels come from the dataset comparison rather than the reference revision numbers.",
+          "text_only": true
         }
       ],
       "expected_state": {
@@ -4456,6 +4552,13 @@
           "width": 358,
           "height": 22,
           "reason": "Change count is measured from generated test revisions."
+        },
+        {
+          "x": 110,
+          "y": 690,
+          "width": 153,
+          "height": 19,
+          "reason": "Dataset revision labels replace the reference Version 5 and Version 6 labels; the New version badge remains compared."
         }
       ],
       "selectors": [
@@ -4498,6 +4601,11 @@
           "selector": ".comparison-zoom",
           "text_only": true,
           "reason": "The comparison zoom is calculated for our dataset drawing; the controls remain compared."
+        },
+        {
+          "selector": ".phone-comparison-summary p",
+          "reason": "Revision labels come from the dataset comparison rather than the reference revision numbers.",
+          "text_only": true
         }
       ],
       "expected_state": {
@@ -4561,6 +4669,13 @@
           "width": 358,
           "height": 22,
           "reason": "Change count is measured from generated test revisions."
+        },
+        {
+          "x": 110,
+          "y": 690,
+          "width": 153,
+          "height": 19,
+          "reason": "Dataset revision labels replace the reference Version 5 and Version 6 labels; the New version badge remains compared."
         }
       ],
       "selectors": [
@@ -4603,6 +4718,11 @@
           "selector": ".comparison-zoom",
           "text_only": true,
           "reason": "The comparison zoom is calculated for our dataset drawing; the controls remain compared."
+        },
+        {
+          "selector": ".phone-comparison-summary p",
+          "reason": "Revision labels come from the dataset comparison rather than the reference revision numbers.",
+          "text_only": true
         }
       ],
       "expected_state": {

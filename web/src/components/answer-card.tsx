@@ -1,6 +1,7 @@
 import { FileText, Layers3 } from 'lucide-react'
 import { Tooltip } from './ui'
 import type { Answer, Citation, Document } from '../lib/types'
+import { SpeakButton } from './voice-controls'
 
 export function formatCost(total: number): string {
   return total > 0 && total < 0.0001 ? '< $0.0001' : `$${total.toFixed(4)}`
@@ -46,6 +47,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation 
       {!!citations.length && <details className="answer-detail sources-detail"><summary className="sources-summary" aria-label={`Sources ${citations.length}`}><FileText size={14} /><span>Sources</span><span className="source-count">{citations.length}</span></summary>{citations.map((citation) => <p key={citation.n}>
         <CitationChip citation={citation} selected={activeCitation} onOpenCitation={onOpenCitation} /> {citation.item_ids.join(', ')} · Page {citation.page}
       </p>)}</details>}
+      <SpeakButton text={answer.answer.text_md} />
       {cost}
     </div>
     <div className="answer-footer">

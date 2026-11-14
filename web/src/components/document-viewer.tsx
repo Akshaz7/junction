@@ -6,6 +6,7 @@ import { fitPage, focusBox, zoomAt, type PageTransform, type Point, type Size } 
 import { viewerEvidence } from '../lib/viewer-evidence'
 import { Button } from './ui'
 import { VisualiseItButton } from '../viewer3d/VisualiseIt'
+import { setHover, setSelected, useLinkedItem } from '../viewer3d'
 import './document-viewer.css'
 
 export function useViewerSheet() {
@@ -32,11 +33,22 @@ export function DocumentViewer({ answer, citation, sheet, onClose }: {
   const [view, setView] = useState<PageTransform>({ x: 0, y: 0, scale: 1 })
   const [error, setError] = useState('')
   const [retry, setRetry] = useState(0)
+  const linked = useLinkedItem()
   const stage = useRef<HTMLDivElement>(null)
   const panel = useRef<HTMLElement>(null)
   const close = useRef<HTMLButtonElement>(null)
   const pointers = useRef(new Map<number, Point>())
   const returnFocus = useRef(typeof document !== 'undefined' ? document.activeElement as HTMLElement | null : null)
+
+  useEffect(() => {
+    if (linked.selectedSource !== '3d') return
+    const index = regions.findIndex((region) => region.id === linked.selected)
+    if (index >= 0) setActive(index)
+  }, [linked.selected, linked.selectedSource, regions])
+  useEffect(() => {
+    setHover(null, '2d'); setSelected(null, '2d')
+    return () => { setHover(null, '2d'); setSelected(null, '2d') }
+  }, [citation.doc_id, citation.page])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -193,7 +205,11 @@ export function DocumentViewer({ answer, citation, sheet, onClose }: {
           {regions.map((region, index) => {
             const [x, y, right, bottom] = region.bbox
             const labelSize = 22 / view.scale
-            return <g key={region.id} className={`evidence-region ${region.text ? 'text-highlight' : ''} ${index === active ? 'is-active' : ''}`} data-testid={`evidence-box-${region.label}`} aria-label={`${region.text ? 'Text source' : 'Box'} ${region.label}`}>
+            return <g key={region.id} className={`evidence-region ${region.text ? 'text-highlight' : ''} ${index === active || linked.selected === region.id || linked.hovered === region.id ? 'is-active' : ''}`} data-testid={`evidence-box-${region.label}`} aria-label={`${region.text ? 'Text source' : 'Box'} ${region.label}`}
+              data-item-id={region.id} data-linked={linked.selected === region.id || linked.hovered === region.id ? 'true' : undefined}
+              onPointerDown={(event) => event.stopPropagation()}
+              onMouseEnter={() => setHover(region.id, '2d')} onMouseLeave={() => setHover(null, '2d')}
+              onClick={() => { setActive(index); setSelected(region.id, '2d') }}>
               <title>{region.text ? citation.quote ?? 'Text source' : region.id}</title>
               <rect x={x} y={y} width={Math.max(0, right - x)} height={Math.max(0, bottom - y)} vectorEffect="non-scaling-stroke" />
               <svg x={x} y={y} width={labelSize} height={labelSize} viewBox="0 0 22 22" overflow="visible"><rect className="evidence-label-bg" width="22" height="22" rx="5" /><text x="11" y="15" textAnchor="middle">{region.label}</text></svg>

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type DragEvent } from 'react'
-import { ArrowRight, Box, ChevronDown, ChevronLeft, ChevronRight, Download, File, FileImage, FileText, Folder, FolderPlus, GitCompare, Layers, LoaderCircle, Maximize2, Minus, MoreHorizontal, PenLine, Plus, ScanText, Search, SlidersHorizontal, Upload, X } from 'lucide-react'
+import { ArrowRight, Box, ChevronDown, ChevronLeft, ChevronRight, Download, File, FileImage, FileText, Folder, FolderPlus, GitCompare, Info, Layers, LoaderCircle, Maximize2, MessageSquare, Minus, MoreHorizontal, PenLine, Plus, ScanText, Search, SlidersHorizontal, Upload, X } from 'lucide-react'
 import { Badge, Button, Input } from './ui'
 import { workspaceApi } from '../lib/api'
 import type { Document, IngestStatus } from '../lib/types'
@@ -36,6 +36,7 @@ function FormatBadges({ doc }: { doc: Document }) {
 function DocumentDetail({ doc, onClose, onAsk }: { doc: Document; onClose: () => void; onAsk: (doc: Document) => void }) {
   const [scene, setScene] = useState<'loading' | 'available' | 'missing' | 'error'>('loading')
   const [zoom, setZoom] = useState(100)
+  const [showSceneNote, setShowSceneNote] = useState(false)
   const closeButton = useRef<HTMLButtonElement>(null)
   useEffect(() => {
     const controller = new AbortController()
@@ -47,10 +48,10 @@ function DocumentDetail({ doc, onClose, onAsk }: { doc: Document; onClose: () =>
   }, [doc.doc_id])
 
   return <aside className="data-detail" aria-label="Document details" onKeyDown={(event) => { if (event.key === 'Escape') onClose() }}>
-    <header><FileText size={24} /><div><h2><DocumentTitle title={doc.title} /></h2><small>/{doc.source}</small></div><a className="data-compare" href="#/changes" aria-label="Compare document revisions"><GitCompare size={14} /><span>Compare</span></a><Button variant="ghost" size="icon" aria-label="Fit page" onClick={() => setZoom(100)}><Maximize2 size={16} /></Button><button ref={closeButton} type="button" className="data-close-detail" aria-label="Close document details" onClick={onClose}><X size={18} /></button></header>
+    <header><FileText size={24} /><div><h2><DocumentTitle title={doc.title} /></h2><small>/{doc.source}<span className="data-header-demo">{/generated for demo$/i.test(doc.title) ? ' · generated for demo' : ''}</span></small><details className="data-credit-info"><summary aria-label="Drawing credit and licence"><Info size={12} /></summary><div className="data-credit-popover"><dl><div><dt>Credit</dt><dd>{doc.credit || 'Not provided'}</dd></div><div><dt>Licence</dt><dd>{doc.licence || 'Not provided'}</dd></div></dl><div className="data-mobile-scene">{scene === 'available' ? <VisualiseItButton docId={doc.doc_id} /> : <button type="button" disabled={scene === 'loading'} onClick={() => setShowSceneNote(true)}>Visualise it</button>}{showSceneNote && <p role="status">{scene === 'error' ? 'Could not check 3D availability. Reopen the document to retry.' : 'No 3D scene available for this document.'}</p>}</div></div></details></div><button type="button" className="data-header-ask" aria-label="Ask about it" onClick={() => onAsk(doc)}><MessageSquare size={16} /></button><a className="data-compare" href="#/changes" aria-label="Compare document revisions"><GitCompare size={14} /><span>Compare</span></a><Button variant="ghost" size="icon" aria-label="Fit page" onClick={() => setZoom(100)}><Maximize2 size={16} /></Button><button ref={closeButton} type="button" className="data-close-detail" aria-label="Close document details" onClick={onClose}><X size={18} /></button></header>
     <div className="data-viewer-toolbar"><ChevronLeft size={14} /><span className="page-number">1</span><span>/ {doc.pages}</span><ChevronRight size={14} /><span className="toolbar-spacer" /><span className="data-viewer-tools" aria-hidden="true"><Search size={14} /><ScanText size={14} /><PenLine size={14} /></span><a aria-label="Download page" href={`/api/docs/${encodeURIComponent(doc.doc_id)}/pages/1/image`} download><Download size={14} /></a><span className="viewer-toolbar-divider" /><span className="data-zoom-controls"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => setZoom((n) => Math.max(25, n - 25))}><Minus size={14} /></Button><span aria-label="Page zoom level">{zoom}%</span><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => setZoom((n) => Math.min(400, n + 25))}><Plus size={14} /></Button></span></div>
     <div className="data-detail-body">
-      <div className="data-page-canvas"><div style={{ width: `${zoom}%`, height: `${zoom}%`, minWidth: '100%', minHeight: '100%' }}><DocumentImage key={doc.doc_id} doc={doc} preview /></div></div>
+      <div className="data-page-canvas"><div className="data-page-plane" style={{ transform: `scale(${zoom / 100})` }}><DocumentImage key={doc.doc_id} doc={doc} preview /></div></div>
       <dl className="data-document-credit"><div><dt>Credit</dt><dd>{doc.credit || 'Not provided'}</dd></div><div><dt>Licence</dt><dd>{doc.licence || 'Not provided'}</dd></div></dl>
       <div className="data-detail-actions"><Button variant="raised" onClick={() => onAsk(doc)}>Ask about it<ArrowRight size={15} /></Button>
         {scene === 'available' && <VisualiseItButton docId={doc.doc_id} />}</div>

@@ -151,10 +151,25 @@ async function preparePhase(page: Page, phase: Phase, answerGate: Promise<void>)
     if (n >= 3) {
       await file().click()
       await expect(page.getByRole('complementary', { name: 'Document details' })).toBeVisible()
+      const preview = page.locator('.data-detail .data-preview img')
+      await expect.poll(() => preview.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true)
+      await expect(page.getByLabel('Page zoom level', { exact: true })).toHaveText('100%')
+      await expect(page.locator('.data-page-plane')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
     }
     if (device === 'desktop' && n === 4) target = navigation().getByRole('link', { name: 'Chat', exact: true })
     if (device === 'phone') {
       if (n >= 4) for (let i = 0; i < 11; i++) await page.getByRole('button', { name: 'Zoom in', exact: true }).click()
+      if (n >= 3) {
+        // A drawing mask must never conceal a blank or off-canvas preview.
+        await expect.poll(() => page.locator('.data-detail .data-preview img').evaluate((image) => {
+          const drawing = image.getBoundingClientRect()
+          const canvas = image.closest('.data-page-canvas')!.getBoundingClientRect()
+          return Math.min(drawing.right, canvas.right) - Math.max(drawing.left, canvas.left) > 64
+            && Math.min(drawing.bottom, canvas.bottom) - Math.max(drawing.top, canvas.top) > 64
+        })).toBe(true)
+        await expect(page.locator('.data-detail')).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+        expect((await page.locator('.data-detail').boundingBox())?.y).toBe(0)
+      }
       if (n === 5) target = page.getByRole('button', { name: 'Close document details', exact: true })
       if (n === 6) {
         await page.getByRole('button', { name: 'Close document details', exact: true }).click()

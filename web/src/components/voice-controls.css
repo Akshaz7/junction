@@ -6,4 +6,6 @@
 .voice-button:disabled { opacity: .45; cursor: default; }
 .voice-hint { max-width: 15rem; font-size: var(--text-micro, .6875rem); line-height: 1.3; color: var(--muted-foreground, #666); }
 .voice-hint:empty { display: none; }
+.composer-actions > .voice-control { position: absolute; right: 42px; top: 0; }
+.answer-actions > .voice-control .voice-button { height: 30px; width: 24px; }
 .composer-actions .voice-hint:not(:empty) { position: absolute; z-index: 2; bottom: calc(100% + .375rem); right: 0; width: max-content; padding: .375rem .5rem; border-radius: var(--radius-control, .5rem); background: var(--popover, #fff); box-shadow: var(--shadow-float); }

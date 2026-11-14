@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { ArrowUp, AtSign, CalendarClock, FileSearch, FileText, FolderOpen, HardHat, Mic, Plus, Scale, X } from 'lucide-react'
+import { ArrowUp, AtSign, CalendarClock, FileSearch, FileText, FolderOpen, HardHat, Plus, Scale, X } from 'lucide-react'
 import { Button } from './ui'
 import { AnswerCard } from './answer-card'
 import { DocumentViewer, useViewerSheet } from './document-viewer'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document, TraceStep } from '../lib/types'
 import { ThinkingText } from './thinking-text'
+import { MicButton } from './voice-controls'
 
 const starters = [
   { title: 'Count on a plan', label: 'Count something on a plan', question: 'How many windows are there?', icon: Scale },
@@ -160,7 +161,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         <div className="composer-actions"><button className="document-context" aria-label={selected.length ? `Document context: ${selected.length} selected` : `Include a document (${docs.length} available)`} title={selected.length ? `${selected.length} selected` : `All documents (${docs.length})`} type="button" disabled={busy || loadingDocs || !docs.length} onClick={() => {
           const next = draft + (draft && !/\s$/.test(draft) ? ' @' : '@')
           setDraft(next); updateMention(next, next.length); textarea.current?.focus()
-        }}><Plus size={16} /><span className="sr-only"><FolderOpen size={15} />{loadingDocs ? 'Loading documents…' : selected.length ? `${selected.length} selected` : `All documents (${docs.length})`}<AtSign size={13} /></span></button><Mic className="composer-mic" size={16} aria-label="Voice input unavailable" />
+        }}><Plus size={16} /><span className="sr-only"><FolderOpen size={15} />{loadingDocs ? 'Loading documents…' : selected.length ? `${selected.length} selected` : `All documents (${docs.length})`}<AtSign size={13} /></span></button><MicButton disabled={busy || hidden} onText={(text) => { setDraft(text); setMention(null); textarea.current?.focus() }} />
           <Button type="submit" variant="primary" className="send-button" aria-label="Send question" disabled={!draft.trim() || busy || !docs.length || !!mention}><ArrowUp size={18} /></Button>
         </div>
       </form>
