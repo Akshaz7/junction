@@ -1,6 +1,6 @@
 """Geometry fixtures generated for demo; real-sheet evidence is in the report."""
-from copy import deepcopy
 import json
+from copy import deepcopy
 from pathlib import Path
 
 import jsonschema
@@ -76,9 +76,49 @@ def test_imperial_area_and_flow_units_and_ceiling_units():
     b, _, _ = pair()
     b["rooms"][0].pop("ceiling_height_m")
     b["words"] = [{"text": "Type B h=2450", "bbox_px": [10, 20, 30, 24]}]
+    b["ceiling_types"] = {"Type B": {"source": {"quote": "Type B: suspended ceiling"}}}
     assert xdisc.room_table(b)[0].get("ceiling_height_m") is None
     b["height_unit"] = "mm"
     assert xdisc.room_table(b)[0]["ceiling_height_m"] == 2.45
+
+
+def test_room_height_tag_is_not_automatically_a_ceiling():
+    b, _, _ = pair()
+    b["rooms"][0].pop("ceiling_height_m")
+    b["words"] = [{"text": "DOOR h=2100 mm", "bbox_px": [10, 20, 30, 24]}]
+    r = xdisc.room_table(b)[0]
+    assert r.get("ceiling_height_m") is None
+    assert r["unclassified_height_labels"][0]["height_m"] == 2.1
+
+
+def test_pdf_adapter_scales_points_and_registration_and_preserves_unknown_role():
+    raw = {"W_pt": 100, "H_pt": 100, "words": [{"text": "16.5", "bbox": [10, 10, 20, 15]}, {"text": "m²", "bbox": [21, 10, 25, 15]}]}
+    s = xdisc.adapt_pdf_page(raw, doc_id="doc", image_size=(200, 200),
+                            rooms=[{"number": "101", "label_bbox": [10, 10, 25, 15], "polygon": [[0, 0], [100, 0], [100, 100]], "area_printed_m2": 16.5}],
+                            terminals=[{"bbox": [10, 10, 12, 12], "ls": 25}])
+    assert s["rooms"][0]["bbox_px"] == [20, 20, 50, 30]
+    assert s["rooms"][0]["polygon_px"][-1] == [200, 200]
+    assert s["terminals"][0]["role"] == "unknown" and s["terminals"][0]["flow_ls"] == 25
+    assert xdisc.room_table({"words": s["words"]})[0]["area_m2"] == 16.5
+    target = {"point_to_pixel": [3, 3]}
+    reg = xdisc.adapt_alignment({"T": [[1, 0, 10], [0, 1, 20], [0, 0, 1]], "residual": 1, "matches": 4}, target, s)
+    assert xdisc.transform([[20, 20]], reg)[0] == pytest.approx([60, 90])
+    assert reg["residual_px"] == 3
+    assert xdisc.adapt_alignment({"T": [[1, 0, 0], [0, 1, 0], [0, 0, 1]]}, target, s)["status"] == "needs_manual"
+
+
+def test_adapter_missing_or_incompatible_provider_is_explicit():
+    class Missing:
+        pass
+    result = xdisc.prepare_mep_pair({}, {}, provider=Missing())
+    assert result["ducts"] == [] and result["limitations"] and result["complete"]["terminals"] is False
+
+
+def test_corrupt_cache_is_handled_as_missing_evidence(tmp_path):
+    d = tmp_path / "bad"; d.mkdir()
+    (d / "xdisc-1.json").write_text("{invalid")
+    r = xdisc.answer("Airflow per room", ["bad", "missing"], tmp_path)
+    assert r["answer"]["value"] is None and "cannot be established" in r["answer"]["text_md"]
 
 
 def test_no_implicit_rule_and_no_unverified_fire_rating():

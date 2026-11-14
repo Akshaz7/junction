@@ -8,21 +8,21 @@ Optional Awais and F-OVERLAY adapters are imported lazily after integration.
 """
 from __future__ import annotations
 
-from collections import defaultdict
-from functools import lru_cache
 import hashlib
 import json
 import math
-from pathlib import Path
 import re
 import time
 import uuid
+from collections import defaultdict
+from functools import lru_cache
+from pathlib import Path
 
 VERSION = 1
 NUM = r"\d+(?:[.,]\d+)?"
-AREA = re.compile(rf"^\s*({NUM})\s*(m[²2]|sq\.?\s*ft|ft[²2]|SF)\s*$", re.I)
-FLOW = re.compile(rf"^\s*([+−-]?{NUM})\s*(l\s*/\s*s|m[³3]\s*/\s*h|cfm)\s*$", re.I)
-HEIGHT = re.compile(rf"^\s*(.*?)\s*\bh\s*=\s*({NUM})\s*(mm|cm|m|ft|in)?\s*$", re.I)
+AREA = re.compile(rf"^\s*({NUM})\s*(m[²2]|sq\.?\s*ft|ft[²2]|SF)\s*$", re.IGNORECASE)
+FLOW = re.compile(rf"^\s*([+−-]?{NUM})\s*(l\s*/\s*s|m[³3]\s*/\s*h|cfm)\s*$", re.IGNORECASE)
+HEIGHT = re.compile(rf"^\s*(.*?)\s*\bh\s*=\s*({NUM})\s*(mm|cm|m|ft|in)?\s*$", re.IGNORECASE)
 
 
 def _number(x):
@@ -61,7 +61,26 @@ def _words(sheet):
         text = str(w.get("text", "")).strip()
         if b and text and (text, tuple(b)) not in seen:
             out.append({"text": text, "bbox_px": b}); seen.add((text, tuple(b)))
-    return out
+    # Ingest may deliver tokens ("16.5", "m²") rather than full lines.
+    # Join only a number and its immediately adjacent, aligned unit token.
+    units = [w for w in out if re.fullmatch(r"m[²2]|sq\.?\s*ft|ft[²2]|SF|l/s|m[³3]/h|cfm", w["text"], re.IGNORECASE)]
+    joined = []
+    for w in out:
+        if not re.fullmatch(rf"[+−-]?{NUM}", w["text"]):
+            continue
+        a = w["bbox_px"]; ac = _centre(a)
+        candidates = []
+        for u in units:
+            b = u["bbox_px"]; bc = _centre(b)
+            em = max(min(a[2]-a[0], a[3]-a[1]), min(b[2]-b[0], b[3]-b[1]))
+            horizontal = abs(ac[1]-bc[1]) < em*.6 and 0 <= b[0]-a[2] < em*2
+            vertical = abs(ac[0]-bc[0]) < em*.6 and (0 <= b[1]-a[3] < em*2 or 0 <= a[1]-b[3] < em*2)
+            if horizontal or vertical:
+                candidates.append(u)
+        if candidates:
+            u = min(candidates, key=lambda v: math.dist(ac, _centre(v["bbox_px"])))
+            joined.append({"text": w["text"] + " " + u["text"], "bbox_px": _union([a, u["bbox_px"]])})
+    return out + joined
 
 
 def _near(a, b, factor=5):
@@ -88,6 +107,9 @@ def room_table(sheet):
         r.setdefault("area_m2", r.get("area_printed_m2"))
         r.setdefault("label", r.get("name") or r.get("number") or "Room")
         r.setdefault("association", "supplied")
+        if r.get("merged") or r.get("split"):
+            r["polygon_px"] = None
+            r["association"] = "unresolved source region"
         out.append(r)
     if not out:
         for w in words:
@@ -98,9 +120,10 @@ def room_table(sheet):
             nearby = [v for v in words if v is not w and _near(w["bbox_px"], v["bbox_px"], 4)
                       and len(v["text"]) <= 80 and not AREA.fullmatch(v["text"])]
             # Prefer full-word text. A nearby reference is never silently a room id.
-            ids = [v for v in nearby if re.fullmatch(r"(?:[A-ZÅÄÖ]{0,3}\d{1,5}[A-Z]?|\d{1,4}[./-]\d{1,3})", v["text"], re.I)]
+            ids = [v for v in nearby if re.fullmatch(r"(?:[A-ZÅÄÖ]{0,3}\d{1,5}[A-Z]?|\d{1,4}[./-]\d{1,3})", v["text"], re.IGNORECASE)]
             names = [v for v in nearby if re.fullmatch(r"[^\W\d_][^\d=]{1,60}", v["text"], re.UNICODE)]
-            order = lambda v: math.dist(_centre(w["bbox_px"]), _centre(v["bbox_px"]))
+            origin = _centre(w["bbox_px"])
+            order = lambda v, origin=origin: math.dist(origin, _centre(v["bbox_px"]))
             num = min(ids, key=order) if ids else None
             name = min(names, key=order) if names else None
             parts = [w, *([num] if num else []), *([name] if name else [])]
@@ -111,25 +134,31 @@ def room_table(sheet):
                         "association": "nearby text candidate"})
     for r in out:
         # Only polygon containment can associate detached ceiling tags to a room.
-        ceilings = []
+        ceilings, height_candidates = [], []
         for w in words:
             m = HEIGHT.fullmatch(w["text"])
             if not m or not r.get("polygon_px") or not _inside(_centre(w["bbox_px"]), r["polygon_px"]):
                 continue
-            unit = m[3] or sheet.get("height_unit")
+            unit = str(m[3] or sheet.get("height_unit") or "").lower()
             h = _number(m[2])
-            metres = h * {"mm": .001, "cm": .01, "m": 1, "ft": .3048, "in": .0254}[unit] if unit else None
-            ceilings.append({"type": m[1] or None, "height_m": metres, "printed": w["text"], "bbox_px": w["bbox_px"]})
+            factor = {"mm": .001, "cm": .01, "m": 1, "ft": .3048, "in": .0254}.get(unit)
+            metres = h * factor if factor is not None else None
+            label = {"type": m[1] or None, "height_m": metres, "printed": w["text"], "bbox_px": w["bbox_px"]}
+            definition = (sheet.get("ceiling_types") or {}).get(m[1]) or {}
+            if definition.get("source") or re.search(r"\b(?:ceiling|alakatto|undertak|decke)\b", m[1], re.IGNORECASE):
+                ceilings.append(label)
+            else:
+                height_candidates.append(label)
+        if height_candidates:
+            r["unclassified_height_labels"] = height_candidates
         if ceilings:
             r["ceiling_labels"] = ceilings
             values = {c["height_m"] for c in ceilings}
             types = {c["type"] for c in ceilings}
-            if len(values) == 1 and None not in values:
-                if r.get("ceiling_height_m") is None:
-                    r["ceiling_height_m"] = next(iter(values))
-            if len(types) == 1:
-                if r.get("ceiling_type") is None:
-                    r["ceiling_type"] = next(iter(types))
+            if len(values) == 1 and None not in values and r.get("ceiling_height_m") is None:
+                r["ceiling_height_m"] = next(iter(values))
+            if len(types) == 1 and r.get("ceiling_type") is None:
+                r["ceiling_type"] = next(iter(types))
     return out
 
 
@@ -236,7 +265,8 @@ def align(base, services):
         return fail
     mat = fit(best)
     spread = np.ptp(dst[best], axis=0)
-    if min(spread) < tol*4 or np.linalg.svd(dst[best]-dst[best].mean(0), compute_uv=False)[-1] < tol:
+    if (min(spread) < tol*4 or min(spread / [size.get("w", 1000), size.get("h", 1000)]) < .08
+            or np.linalg.svd(dst[best]-dst[best].mean(0), compute_uv=False)[-1] < tol):
         return fail
     err = np.linalg.norm(np.column_stack((src[best], np.ones(len(best)))) @ mat.T[:, :2] - dst[best], axis=1)
     return {"status": "aligned", "matrix": mat.tolist(), "method": "shared-label similarity",
@@ -265,7 +295,8 @@ def analyse(base, services, *, alignment=None, threshold_ls_m2=None, ceiling_bel
     Classified duct/pipe centrelines and wall/beam/opening polygons are accepted.
     Intersections are 2D coordination candidates, never certified 3D clashes.
     """
-    from shapely.geometry import LineString, Point, box as rect
+    from shapely.geometry import LineString, Point
+    from shapely.geometry import box as rect
     from shapely.ops import transform as geom_transform
     reg = alignment if alignment is not None else align(base, services)
     rooms = room_table(base)
@@ -273,6 +304,7 @@ def analyse(base, services, *, alignment=None, threshold_ls_m2=None, ceiling_bel
     out = {"version": VERSION, "base_doc_id": base.get("doc_id"), "services_doc_id": services.get("doc_id"),
            "alignment": reg, "rooms": rooms, "airflow_labels": labels, "airflow": [], "missing_air": [],
            "crossings": [], "low_ceilings": [], "unassigned_terminals": [], "limitations": []}
+    out["limitations"].extend(base.get("limitations", []) + services.get("limitations", []))
     if _matrix(reg) is None or reg.get("status") not in ("aligned", "manual"):
         out["limitations"].append("Sheets are not reliably aligned; room-level checks were not run.")
         return out
@@ -405,36 +437,60 @@ def analyse(base, services, *, alignment=None, threshold_ls_m2=None, ceiling_bel
     return out
 
 
-def change_impact(before, after, services, *, alignment=None):
+def change_impact(before, after, services, *, alignment=None, revision_alignment=None):
     """Stable-id revision changes and affected services; no guessed plasterboard."""
     analysis = analyse(after, services, alignment=alignment)
-    old = {r.get("stable_id"): r for r in room_table(before) if r.get("stable_id")}
+    previous_rooms = room_table(before)
+    old_groups = defaultdict(list)
+    for r in previous_rooms:
+        if r.get("stable_id"): old_groups[r["stable_id"]].append(r)
+    old = {k: v[0] for k, v in old_groups.items() if len(v) == 1}
+    rev = revision_alignment if revision_alignment is not None else align(after, before)
+    same_frame = before.get("coordinate_frame") and before.get("coordinate_frame") == after.get("coordinate_frame")
+    revision_geometry_known = same_frame or _matrix(rev) is not None
     impacts = []
     for r in analysis["rooms"]:
         prev = old.get(r.get("stable_id"))
         if not prev:
             continue
-        fields = [k for k in ("area_m2", "ceiling_height_m", "ceiling_type", "polygon_px") if prev.get(k) != r.get(k)]
+        fields = [k for k in ("area_m2", "ceiling_height_m", "ceiling_type") if prev.get(k) != r.get(k)]
+        previous_poly = _poly(prev)
+        if previous_poly is not None and not same_frame and _matrix(rev) is not None:
+            previous_poly = _poly({"polygon_px": transform(prev["polygon_px"], rev)})
+        current_poly = _poly(r)
+        if revision_geometry_known and previous_poly is not None and current_poly is not None:
+            # Ignore polygon vertex order; account for registration residual.
+            tolerance = _number(rev.get("residual_px")) or 0
+            if previous_poly.hausdorff_distance(current_poly) > max(tolerance*2, 1e-6):
+                fields.append("polygon_px")
         if not fields:
             continue
         aid = r["item_id"]
         flow = next((f for f in analysis["airflow"] if f["room_id"] == aid), {})
-        affected = []
-        if _matrix(analysis["alignment"]) is not None and _poly(r) is not None:
-            from shapely.geometry import LineString
+        affected, affected_terminals = [], set(flow.get("terminal_ids", []))
+        if _matrix(analysis["alignment"]) is not None and current_poly is not None:
+            from shapely.geometry import LineString, Point
+            region = current_poly.union(previous_poly) if revision_geometry_known and previous_poly is not None else current_poly
             for d in services.get("ducts", []) + services.get("pipes", []):
                 points = d.get("centreline_px", d.get("centerline_px"))
-                if points and d.get("classification") != "candidate" and _poly(r).intersects(LineString(transform(points, analysis["alignment"]))):
+                if points and d.get("classification") != "candidate" and region.intersects(LineString(transform(points, analysis["alignment"]))):
                     affected.append(d.get("item_id"))
+            for t in services.get("terminals", []):
+                b = _box(t.get("bbox_px"))
+                if b and region.contains(Point(transform([t.get("point_px") or _centre(b)], analysis["alignment"])[0])):
+                    affected_terminals.add(t.get("item_id"))
         impacts.append({"room_id": aid, "stable_id": r["stable_id"], "changed": {k: {"before": prev.get(k), "after": r.get(k)} for k in fields},
-                        "terminal_ids": flow.get("terminal_ids", []), "service_ids": affected,
+                        "terminal_ids": sorted(affected_terminals), "service_ids": affected,
                         "ceiling_height_m": r.get("ceiling_height_m"), "ceiling_type": r.get("ceiling_type"),
                         "wall_area_m2": r.get("wall_area_m2"), "plasterboard_area_m2": r.get("plasterboard_area_m2"),
                         "evidence": [{"doc_id": before.get("doc_id", ""), "page": before.get("page", 1),
                                       "bbox_px": prev["bbox_px"], "item_ids": [prev["item_id"]], "quote": prev.get("label"), "projected": False}]
                                     + flow.get("evidence", [])})
-    return {"impacts": impacts, "analysis": analysis, "limitations": ["Change impact requires stable room ids from ingestion.",
-            "Wall and plasterboard areas are reported only when explicitly supplied; room floor area is never substituted."]}
+    limitations = ["Change impact requires unique stable room ids from ingestion.",
+                  "Wall and plasterboard areas are reported only when explicitly supplied; room floor area is never substituted."]
+    if not revision_geometry_known:
+        limitations.append("Revisions could not be aligned; shape changes and services in the old footprint are unknown.")
+    return {"impacts": impacts, "analysis": analysis, "revision_alignment": rev, "limitations": limitations}
 
 
 def load_sheet(doc_id, root, page=1):
@@ -453,7 +509,13 @@ def load_sheet(doc_id, root, page=1):
         p = folder / f"{prefix}-{page}.json"
         if not p.exists():
             continue
-        data = json.loads(p.read_text())
+        try:
+            data = json.loads(p.read_text())
+            if not isinstance(data, dict):
+                raise ValueError("Expected a sheet object")
+        except (OSError, ValueError):
+            s.setdefault("limitations", []).append(f"The cached {prefix} page data could not be read.")
+            continue
         if prefix == "planmap":
             s.setdefault("image", data.get("image", {}))
             for it in data.get("items", []):
@@ -469,6 +531,109 @@ def load_sheet(doc_id, root, page=1):
             s.update(data)
     s["doc_id"], s["page"] = doc_id, page
     return s
+
+
+def adapt_pdf_page(raw, *, doc_id, image_size, rooms=None, walls=None, ducts=None, terminals=None, complete_terminals=False):
+    """Awais pdf_vector/pdf_rooms/pdf_mep -> normalised page-image pixels.
+
+    Current pdf_vector.load_page returns top-left PAGE POINTS, not pixels.
+    W_pt/H_pt therefore require an explicit conversion. Future pixel output
+    must declare coordinate_space='px'. Never infer this from coordinate sizes.
+    Provider room/duct/wall ids are not assumed stable across revisions.
+    """
+    width, height = image_size
+    space = raw.get("coordinate_space", "pt")
+    if space == "pt":
+        wp, hp = _number(raw.get("W_pt")), _number(raw.get("H_pt"))
+        if not wp or not hp:
+            raise ValueError("Point-space PDF output needs W_pt and H_pt")
+        sx, sy = width/wp, height/hp
+    elif space == "px":
+        original = raw.get("image") or {}
+        if not original.get("w") or not original.get("h"):
+            raise ValueError("Pixel-space output needs source image dimensions")
+        sx, sy = width/original["w"], height/original["h"]
+    else:
+        raise ValueError("Unknown PDF coordinate space")
+    def point(p): return [float(p[0])*sx, float(p[1])*sy]
+    def converted(rec, i, kind):
+        r = dict(rec)
+        r.setdefault("item_id", str(r.get("id") or f"{kind}-{i+1:03}"))
+        box = _box(r.get("bbox_px", r.get("bbox", r.get("label_bbox"))))
+        if box: r["bbox_px"] = [box[0]*sx, box[1]*sy, box[2]*sx, box[3]*sy]
+        poly = r.get("polygon_px", r.get("polygon"))
+        if poly: r["polygon_px"] = [point(p) for p in poly]
+        line = r.get("centreline_px", r.get("centerline_px", r.get("centreline", r.get("centerline"))))
+        if line:
+            r["centreline_px"] = [point(p) for p in line]
+            if not box:
+                b = _bounds(r["centreline_px"])
+                # A zero-width line still needs a drawable evidence region.
+                r["bbox_px"] = [b[0]-.5, b[1]-.5, b[2]+.5, b[3]+.5]
+        if r.get("point_px", r.get("point")):
+            r["point_px"] = point(r.get("point_px", r.get("point")))
+        if r.get("width_pt") is not None: r["width_px"] = float(r["width_pt"])*math.sqrt(sx*sy)
+        elif r.get("width_px") is not None: r["width_px"] *= math.sqrt(sx*sy)
+        if kind == "room":
+            r.setdefault("area_m2", r.get("area_printed_m2"))
+            r.setdefault("label", r.get("name") or r.get("number") or "Room")
+        if kind == "terminal":
+            # No role inference from symbol code, colour or airflow sign.
+            r.setdefault("role", r.get("air_type", "unknown"))
+            r.setdefault("flow_ls", r.get("ls"))
+        return r
+    result = {"doc_id": doc_id, "page": raw.get("page", 1), "image": {"w": width, "h": height},
+              "words": [{"text": w["text"], "bbox_px": [w["bbox"][0]*sx, w["bbox"][1]*sy, w["bbox"][2]*sx, w["bbox"][3]*sy]}
+                        for w in raw.get("words", []) if _box(w.get("bbox"))],
+              "complete": {"terminals": complete_terminals}, "provider": raw.get("reader", "pdf_mep"),
+              "coordinate_space": "px", "point_to_pixel": [sx, sy]}
+    for key, values, kind in [("rooms", rooms, "room"), ("walls", walls, "wall"), ("ducts", ducts, "duct"), ("terminals", terminals, "terminal")]:
+        result[key] = [converted(r, i, kind) for i, r in enumerate(values or [])]
+    return result
+
+
+def prepare_mep_pair(base_page, service_page, *, provider=None):
+    """Offline adapter for the agreed pdf_mep API; original page space in/out.
+
+    load(path,page_index), align(src,dst), split_mep(vent,underlay), ducts(split),
+    terminals(split) belong to Awais. This adapter accepts already loaded pages
+    so no request ever traverses 94k PDF paths. After normalising page geometry
+    with adapt_pdf_page, conjugate the returned T with point_to_pixel scales.
+    A differing provider argument convention requires a change only here.
+    """
+    if provider is None:
+        try:
+            from pipeline import pdf_mep as provider
+        except ImportError:
+            return {"ducts": [], "terminals": [], "alignment": None, "complete": {"terminals": False},
+                    "limitations": ["PDF duct/terminal provider is not installed."]}
+    try:
+        split = provider.split_mep(service_page, base_page)
+        return {"ducts": provider.ducts(split), "terminals": provider.terminals(split),
+                "alignment": provider.align(service_page, base_page), "complete": {"terminals": False},
+                "limitations": ["Provider extraction completeness must be established separately before absence/total checks."]}
+    except (AttributeError, TypeError, ValueError) as exc:
+        return {"ducts": [], "terminals": [], "alignment": None, "complete": {"terminals": False},
+                "limitations": [f"PDF duct/terminal adapter unavailable ({type(exc).__name__}); no geometry guessed."]}
+
+
+def adapt_alignment(raw, base, services):
+    """Conjugate a point-space src->dst transform into the two PNG spaces."""
+    import numpy as np
+    mat = _matrix(raw)
+    if mat is None:
+        return {"status": "needs_manual", "matrix": None, "detail": "Provider registration is invalid."}
+    b = base.get("point_to_pixel", [1, 1]); s = services.get("point_to_pixel", [1, 1])
+    mat = np.diag([*b, 1]) @ mat @ np.diag([1/s[0], 1/s[1], 1])
+    residual = _number(raw.get("residual_px", raw.get("residual")))
+    matches = raw.get("matches", [])
+    count = matches if isinstance(matches, int) else len(matches or [])
+    if count < 3 or residual is None or residual < 0:
+        return {"status": "needs_manual", "matrix": None, "detail": "Provider alignment needs at least three matches and a measured residual."}
+    return {"status": "aligned", "matrix": mat.tolist(), "method": "pdf_mep.align",
+            "residual_px": residual*max(b) if residual is not None else None,
+            "anchor_count": count,
+            "detail": "Provider similarity fit in page-image pixels; inspect a third grid crossing."}
 
 
 @lru_cache(maxsize=8)
@@ -517,12 +682,12 @@ def prepare_pdf(path, *, page=1, image_size=None, cache_dir=None):
 
 
 def _intent(q):
-    if re.search(r"\bchange impact\b|\b(?:changed?|revis\w+).*(?:affect|touch|impact)\b", q, re.I): return "impact"
-    if re.search(r"\b(?:ducts?|pipes?).*\b(?:cross|penetrat|intersect)|\bpenetrations?\b", q, re.I): return "crossings"
-    if re.search(r"\b(?:ducts?|pipes?).*\bceiling|\bceiling.*\b(?:ducts?|pipes?)", q, re.I): return "low_ceilings"
-    if re.search(r"\b(?:no|without|missing)\s+(?:supply|extract)(?:\s+air)?\b", q, re.I): return "missing_air"
-    if re.search(r"\bairflow\b.*\b(?:rooms?|m²|m2)|\b(?:supply|extract)\s+air.*\brooms?", q, re.I): return "airflow"
-    if re.search(r"\broom table\b", q, re.I): return "rooms"
+    if re.search(r"\bchange impact\b|\b(?:changed?|revis\w+).*(?:affect|touch|impact)\b", q, re.IGNORECASE): return "impact"
+    if re.search(r"\b(?:ducts?|pipes?).*\b(?:cross|penetrat|intersect)|\bpenetrations?\b", q, re.IGNORECASE): return "crossings"
+    if re.search(r"\b(?:ducts?|pipes?).*\bceiling|\bceiling.*\b(?:ducts?|pipes?)", q, re.IGNORECASE): return "low_ceilings"
+    if re.search(r"\b(?:no|without|missing)\s+(?:supply|extract)(?:\s+air)?\b", q, re.IGNORECASE): return "missing_air"
+    if re.search(r"\bairflow\b.*\b(?:rooms?|m²|m2)|\b(?:supply|extract)\s+air.*\brooms?", q, re.IGNORECASE): return "airflow"
+    if re.search(r"\broom table\b", q, re.IGNORECASE): return "rooms"
     return None
 
 
@@ -534,8 +699,8 @@ def answer(question, doc_ids, root, t0=None):
     t0 = t0 or time.perf_counter()
     sheets = [load_sheet(d, root) for d in doc_ids]
     # Selected order is explicit: base, services; revisions: before, after, services.
-    threshold = re.search(rf"(?:below|under|threshold(?: of)?)\s*({NUM})\s*l/s\s*(?:/|per)\s*m[²2]", question, re.I)
-    height = re.search(rf"(?:below|under|less than)\s*({NUM})\s*(mm|cm|m|ft|feet)\b", question, re.I)
+    threshold = re.search(rf"(?:below|under|threshold(?: of)?)\s*({NUM})\s*l/s\s*(?:/|per)\s*m[²2]", question, re.IGNORECASE)
+    height = re.search(rf"(?:below|under|less than)\s*({NUM})\s*(mm|cm|m|ft|feet)\b", question, re.IGNORECASE)
     limit = _number(height[1])*{"mm": .001, "cm": .01, "m": 1, "ft": .3048, "feet": .3048}[height[2].lower()] if height else None
     impact = change_impact(*sheets[:3]) if intent == "impact" and len(sheets) >= 3 else None
     result = impact["analysis"] if impact else analyse(sheets[0], sheets[1], threshold_ls_m2=_number(threshold[1]) if threshold else None, ceiling_below_m=limit)
