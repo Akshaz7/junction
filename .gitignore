@@ -31,4 +31,4 @@ web/test-results/
 web/playwright-report/
 *.whl
 results/bench/full_1.rows.jsonl
-deploy/demo_artifacts/**/*.usdz
+deploy/demo_artifacts/ifc_bench__digital-hub-arc/scene.usdz
