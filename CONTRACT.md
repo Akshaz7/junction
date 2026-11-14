@@ -1,4 +1,4 @@
-# CONTRACT — version 3.4
+# CONTRACT — version 3.5
 
 Only the LEAD edits this file. Each change bumps the version and adds one line to DECISIONS.md.
 
@@ -148,4 +148,5 @@ Live sync: `/ws` also carries `chat.trace`, `chat.delta` (cumulative answer text
 - Advisor card `source` gains optional `url` and `finnish_url` (links to the rule text); clients show them when present.
 - Design versions (migration 006): `GET/POST /api/docs/{doc_id}/versions` (POST stores the current edit snapshot as version n, parent-linked, "generated from edits"), `GET /api/docs/{doc_id}/versions/{n}/pages/{page}/image`. `/api/changes` ids may be `dv:<doc>:<a>-<b>` (design versions) or `ser:<...>` (series); comparison objects gain optional fields (shapes in `server/design_versions.py`, `engine/design_versions.py`).
 - Shared edit layer: manual 3D edits carry `chat_id` and land in the chat's `scene_edits`; `scene_state` gains `last_hidden` (ids of the most recent hide, for "restore them"); `POST /api/advise` edit ops add `reset`. Pending move/material ops are stored in the chat edit layer (migration 008_scene_edit_moves).
+- Scene commands (5.11) gain two ops: `move` {offset_m:[dx,dz]} (metres from the original spot, world X/Z; [0,0] = back in place) and `material` {material: name|null}. `scene.state` gains optional `moved` {item_id:[dx,dz]} and `materials` {item_id:name}, sent only when non-empty; `reset` clears them.
 - Projects (migration 007): `GET/POST /api/projects`, `GET/PATCH/DELETE /api/projects/{id}`, `POST /api/projects/{id}/docs`, `POST /api/projects/{id}/upload`, `PATCH/DELETE /api/projects/{id}/docs/{doc_id}`, `GET /api/projects/{id}/overview`. Demo projects (AC20 Institute, FZK-Haus) are seeded from library docs and flagged `demo: true`.
