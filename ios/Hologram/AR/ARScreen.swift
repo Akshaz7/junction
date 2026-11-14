@@ -1,11 +1,13 @@
 import SwiftUI
 
 struct ARScreen: View {
+    var docID: String? = nil
     var sceneURL: URL? = nil
     var manifestURL: URL? = nil
     var highlightedItemIDs: [String] = []
     var cameraTargetItemID: String? = nil
     @StateObject private var controller = ARSceneController()
+    @StateObject private var liveSocket = LiveSocket()
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -34,10 +36,14 @@ struct ARScreen: View {
                 }
                 Spacer()
                 if let item = controller.selectedItem {
-                    ItemDetailsCard(item: item, onDismiss: controller.dismissSelectedItem)
+                    ItemDetailsCard(item: item, onDismiss: controller.dismissSelectedItem,
+                                    onHighlight: { highlightItem(item.id) })
                 }
                 VStack(alignment: .leading, spacing: 12) {
                     if controller.isFixture {
+                        if let docID, docID != "fixture__ios" {
+                            Text("Requested model unavailable. Showing sample.").font(.caption)
+                        }
                         Text("Sample model · generated for demo")
                             .font(.caption).foregroundStyle(.secondary)
                     }
@@ -71,14 +77,32 @@ struct ARScreen: View {
             }.padding()
         }
         .task {
-            await controller.load(url: sceneURL, manifestURL: manifestURL,
+            liveSocket.onHighlight = { request in
+                controller.applyLiveHighlight(request)
+            }
+            liveSocket.start()
+            await controller.load(docID: docID, url: sceneURL, manifestURL: manifestURL,
                                   itemIDs: highlightedItemIDs, cameraTargetItemID: cameraTargetItemID)
         }
+        .onDisappear {
+            liveSocket.stop()
+            liveSocket.onHighlight = nil
+        }
         .onChange(of: highlightedItemIDs) { _, items in
-            controller.setHighlights(items, cameraTargetItemID: cameraTargetItemID)
+            if docID == nil || docID == controller.activeDocID {
+                controller.setHighlights(items, cameraTargetItemID: cameraTargetItemID)
+            }
         }
         .onChange(of: cameraTargetItemID) { _, target in
-            controller.setHighlights(highlightedItemIDs, cameraTargetItemID: target)
+            if docID == nil || docID == controller.activeDocID {
+                controller.setHighlights(highlightedItemIDs, cameraTargetItemID: target)
+            }
         }
+    }
+
+    private func highlightItem(_ itemID: String) {
+        guard let activeDocID = controller.activeDocID else { return }
+        controller.setHighlights([itemID])
+        Task { await liveSocket.sendHighlight(docID: activeDocID, itemIDs: [itemID]) }
     }
 }

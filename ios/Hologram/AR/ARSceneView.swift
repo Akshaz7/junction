@@ -17,6 +17,9 @@ final class ARSceneController: ObservableObject {
     @Published private(set) var guide: WalkGuide?
     @Published private(set) var targetItemID: String?
     @Published private(set) var selectedItem: ItemCardModel?
+    private(set) var activeDocID: String?
+    private var requestedDocID: String?
+    private var pendingLiveHighlight: ARRequest?
 
     private(set) var sceneIndex: SceneIndex?
     private(set) var highlightController: HighlightController?
@@ -51,16 +54,18 @@ final class ARSceneController: ObservableObject {
         }
     }
 
-    func load(url: URL?, manifestURL: URL? = nil, itemIDs: [String] = [],
+    func load(docID: String? = nil, url: URL?, manifestURL: URL? = nil, itemIDs: [String] = [],
               cameraTargetItemID: String? = nil) async {
-        guard isSupported else { return }
+        requestedDocID = docID
+        pendingLiveHighlight = nil
         do {
-            let loaded = try await ARSceneLoader.load(url: url, manifestURL: manifestURL)
+            let loaded = try await ARSceneLoader.load(docID: docID, url: url, manifestURL: manifestURL)
             try Task.checkCancellation()
             let content = loaded.entity
             self.content = content
             originalContentTransform = content.transform
             manifest = loaded.manifest
+            activeDocID = loaded.manifest?.doc_id ?? (loaded.isFixture ? "fixture__ios" : docID)
             sceneIndex = SceneIndex(root: content)
             highlightController = HighlightController(root: content)
             itemPicker = loaded.manifest.map { ItemPicker(manifest: $0) }
@@ -81,8 +86,13 @@ final class ARSceneController: ObservableObject {
             model = container
             isFixture = loaded.isFixture
             isLoaded = true
-            setHighlights(itemIDs, cameraTargetItemID: cameraTargetItemID)
-            status = "Move your device to find a flat surface, then tap to place."
+            // Never put evidence for an unavailable document on unrelated fixture items.
+            setHighlights(docID == nil || docID == activeDocID ? itemIDs : [],
+                          cameraTargetItemID: docID == nil || docID == activeDocID ? cameraTargetItemID : nil)
+            if let pendingLiveHighlight { applyLiveHighlight(pendingLiveHighlight) }
+            pendingLiveHighlight = nil
+            status = isSupported ? "Move your device to find a flat surface, then tap to place."
+                : "Augmented reality requires a supported iPhone or iPad."
         } catch is CancellationError {
             return
         } catch {
@@ -174,6 +184,17 @@ final class ARSceneController: ObservableObject {
 
     func selectTarget(_ itemID: String) {
         setHighlights([itemID], cameraTargetItemID: itemID)
+    }
+
+    @discardableResult
+    func applyLiveHighlight(_ request: ARRequest) -> Bool {
+        if !isLoaded, request.docID == requestedDocID {
+            pendingLiveHighlight = request
+            return true
+        }
+        guard request.docID == activeDocID else { return false }
+        setHighlights(request.itemIDs)
+        return true
     }
 
     private func updateWalkGuide() {

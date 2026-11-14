@@ -2,9 +2,15 @@ import OSLog
 import SwiftUI
 import WebKit
 
-struct ARRequest {
+struct ARRequest: Equatable, Identifiable {
     let docID: String
     let itemIDs: [String]
+    var id: String { docID }
+
+    init(docID: String, itemIDs: [String]) {
+        self.docID = docID
+        self.itemIDs = itemIDs
+    }
 
     init?(body: Any) {
         guard let payload = body as? [String: Any],
@@ -19,9 +25,10 @@ struct ARRequest {
 
 struct WebShell: UIViewRepresentable {
     let url: URL
+    var onARRequest: (ARRequest) -> Void = { _ in }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator()
+        Coordinator(onARRequest: onARRequest)
     }
 
     func makeUIView(context: Context) -> WKWebView {
@@ -33,24 +40,36 @@ struct WebShell: UIViewRepresentable {
         return webView
     }
 
-    func updateUIView(_ webView: WKWebView, context: Context) {}
+    func updateUIView(_ webView: WKWebView, context: Context) {
+        context.coordinator.onARRequest = onARRequest
+    }
 
     static func dismantleUIView(_ webView: WKWebView, coordinator: Coordinator) {
         webView.stopLoading()
         webView.configuration.userContentController.removeScriptMessageHandler(forName: "ar")
     }
 
+    @MainActor
     final class Coordinator: NSObject, WKScriptMessageHandler {
         private let logger = Logger(subsystem: "com.teamrs3.hologram", category: "ARBridge")
+        var onARRequest: (ARRequest) -> Void
+
+        init(onARRequest: @escaping (ARRequest) -> Void = { _ in }) {
+            self.onARRequest = onARRequest
+        }
 
         func userContentController(_ userContentController: WKUserContentController,
                                    didReceive message: WKScriptMessage) {
-            guard message.name == "ar", let request = ARRequest(body: message.body) else {
+            handleMessage(name: message.name, body: message.body)
+        }
+
+        // The WKScriptMessage entry point and unit tests share the same parsing path.
+        func handleMessage(name: String, body: Any) {
+            guard name == "ar", let request = ARRequest(body: body) else {
                 logger.debug("Ignored an invalid AR bridge message.")
                 return
             }
-            // I-02 will present the native AR screen using this request.
-            logger.debug("Received AR bridge request with \(request.itemIDs.count) selected items.")
+            onARRequest(request)
         }
     }
 }

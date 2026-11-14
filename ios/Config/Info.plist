@@ -24,6 +24,8 @@
     <true/>
     <key>WEB_URL</key>
     <string>http://localhost:5173</string>
+    <key>API_URL</key>
+    <string></string>
     <key>NSAppTransportSecurity</key>
     <dict>
         <key>NSAllowsLocalNetworking</key>

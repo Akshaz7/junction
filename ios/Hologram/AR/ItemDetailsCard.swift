@@ -26,6 +26,7 @@ struct ItemCardModel: Identifiable {
 struct ItemDetailsCard: View {
     let item: ItemCardModel
     let onDismiss: () -> Void
+    var onHighlight: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -55,6 +56,10 @@ struct ItemDetailsCard: View {
             }
             .frame(maxHeight: 160)
             .fixedSize(horizontal: false, vertical: true)
+            if let onHighlight {
+                Button("Highlight this", systemImage: "highlighter", action: onHighlight)
+                    .accessibilityIdentifier("ar-highlight-item")
+            }
         }
         .padding()
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))

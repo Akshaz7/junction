@@ -9,7 +9,18 @@ enum ARSceneLoader {
         let manifest: SceneManifest?
     }
 
-    static func load(url: URL?, manifestURL: URL? = nil) async throws -> LoadedScene {
+    static func load(docID: String? = nil, apiURL: URL = AppConfiguration.apiURL,
+                     url: URL?, manifestURL: URL? = nil,
+                     repository: SceneRepository? = nil) async throws -> LoadedScene {
+        if let docID {
+            do {
+                let files = try await (repository ?? SceneRepository(apiURL: apiURL)).fetch(docID: docID)
+                return try await load(url: files.modelURL, manifestURL: files.manifestURL)
+            } catch {
+                try Task.checkCancellation()
+                return try await load(url: nil)
+            }
+        }
         if let url {
             do {
                 let entity = try await loadEntity(from: url)
