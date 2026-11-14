@@ -79,7 +79,7 @@ def impact(graph: dict, node_id: str, change: dict) -> list[dict]:
     (movement), or removed (bool). No missing dimension or uncertainty is filled
     with a guessed value. Affected does not mean a clash or a rule violation.
     """
-    nodes, _, _ = index(graph)
+    nodes, graph_edges, _ = index(graph)
     origin = nodes.get(node_id)
     if origin is None:
         return []
@@ -113,7 +113,7 @@ def impact(graph: dict, node_id: str, change: dict) -> list[dict]:
         if origin.get("kind") == "wall":
             return ((kind == "hosted_by" and edge.get("to") == current["id"])
                     or (kind == "bounds" and edge.get("from") == current["id"]))
-        return ((kind in ("in_room", "hosted_by", "part_of_system") and edge.get("from") == current["id"])
+        return ((kind in ("in_room", "hosted_by", "part_of_system", "bounds") and edge.get("from") == current["id"])
                 or (kind == "serves" and edge.get("from") == current["id"])
                 or kind == "connects")
 
@@ -162,8 +162,13 @@ def impact(graph: dict, node_id: str, change: dict) -> list[dict]:
                 entry["effect"] = "Door height exceeds the proposed ceiling" if height > target else "Door height fits below the proposed ceiling"
         if ceiling and n.get("kind") in ("duct", "pipe", "terminal", "fixture"):
             entry["effect"] = "Check clearance and service connections at the proposed ceiling"
-            if number(p.get("length_m")) is not None:
-                entry["affected_quantity"] = {"value": number(p["length_m"]), "unit": "m"}
+            inside = next((number((graph_edges[eid].get("evidence") or {}).get("length_in_room_m"))
+                           for eid in entry["why_path"] if number((graph_edges[eid].get("evidence") or {}).get("length_in_room_m")) is not None), None)
+            if inside is not None:
+                entry["affected_quantity"] = {"value": inside, "unit": "m", "scope": "inside_room"}
+            elif number(p.get("length_m")) is not None:
+                entry["affected_quantity"] = {"value": number(p["length_m"]), "unit": "m", "scope": "whole_run",
+                                               "note": "Length inside the room is not recorded."}
             elif n.get("kind") in ("terminal", "fixture"):
                 entry["affected_quantity"] = {"value": 1, "unit": "count"}
         result.append(entry)

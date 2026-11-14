@@ -2,6 +2,8 @@
 from pathlib import Path
 
 from server import chats_routes
+from server.tests.test_projects import client  # isolated local schema + real source indexes
+from server.tests.test_contract import _sse
 
 
 def test_project_graph_response_keeps_confidence_and_skips_model_routes(monkeypatch):
@@ -48,3 +50,37 @@ def test_non_graph_project_question_falls_through(monkeypatch):
     monkeypatch.setattr(library, "sheet_count_answer", lambda *a: None)
     monkeypatch.setattr(chats_routes, "_selected_engine", lambda *a: {"normal": True})
     assert chats_routes._run_engine("How many doors?", ["one"], lambda *ev: None, project=project) == {"normal": True}
+
+
+def test_project_chat_streams_real_source_paths_and_explicit_selection_wins(client, monkeypatch):
+    from engine import kg, kg_answer
+    from engine.kg.build import build_uncached
+    from server import stub_engine
+
+    # Never populate the shared artifacts cache from a worker's tests.
+    monkeypatch.setattr(kg, "build", build_uncached)
+    monkeypatch.setattr(chats_routes, "ENGINE", chats_routes._real_engine)
+    docs = ["ifc_bench__fzk-house-arc", "ifc_models__kit-fzk-haus-ac20-fzk-haus"]
+    project = client.post("/api/projects", json={"name": "Graph source proof", "doc_ids": docs}).json()
+    chat = client.post("/api/chats", json={"project_id": project["id"]}).json()
+    for selection in ({}, {"doc_ids": []}):
+        r = client.post(f"/api/chats/{chat['id']}/messages", json={"content": "Where else does door Innentuer-1 appear?", **selection})
+        assert r.status_code == 200
+        result = next(data for event, data in _sse(r.text) if event == "answer")
+        assert result["graph_answer"]["shape"] == "appearances"
+        assert {c["doc_id"] for c in result["citations"]} == set(docs)
+        assert result["answer"]["confidence"] == min(e["confidence"] for e in result["reasoning"]["graph_path"])
+        assert result["cost"] == {"usd_total": 0, "calls": []}
+
+    def forbidden(*a, **kw):
+        raise AssertionError("Explicit file selection must bypass project graph routing")
+
+    def selected(q, ids, on_event, **kw):
+        return stub_engine.answer(q, ids, on_event)
+
+    monkeypatch.setattr(kg_answer, "answer", forbidden)
+    monkeypatch.setattr(chats_routes, "ENGINE", selected)
+    monkeypatch.setattr(chats_routes, "_real_engine", selected)
+    r = client.post(f"/api/chats/{chat['id']}/messages", json={"content": "Where else does door Innentuer-1 appear?", "doc_ids": docs[:1]})
+    result = next(data for event, data in _sse(r.text) if event == "answer")
+    assert result["doc_ids"] == docs[:1]

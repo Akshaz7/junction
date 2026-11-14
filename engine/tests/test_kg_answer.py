@@ -217,3 +217,44 @@ def test_path_depth_budget_keeps_a_shorter_lower_confidence_route():
     hits = paths(g, "A", lambda *a: True, max_depth=3)
     assert hits["E"]["confidence"] == .7
     assert hits["E"]["why_path"] == ["AC", "CD", "DE"]
+
+
+def test_partial_wall_height_does_not_invent_a_larger_lining_reduction(graph):
+    wall = next(n for n in graph["nodes"] if n["label"] == "Wall W4")
+    wall["props"]["height_m"] = 2.5
+    result = answer("If the ceiling in room A101 drops to 2.4 m, what is affected?", PROJECT, ROOT, graph=graph)
+    qty = next(e["quantity_delta"] for e in result["graph_answer"]["items"] if e["node"]["id"] == wall["id"])
+    assert qty["value"] == -1
+    assert qty["conditional"] is True
+    assert "if its full face" in result["answer"]["text_md"]
+
+
+def test_equivalent_appearances_do_not_double_impact_quantities(graph):
+    wall = copy.deepcopy(next(n for n in graph["nodes"] if n["label"] == "Wall W4"))
+    wall.update(id="wall:plan:wp4", doc_ids=["plan"], source={"doc_id": "plan", "item_id": "wp4", "page": 1})
+    graph["nodes"].append(wall)
+    graph["edges"].append({"id": "wall-equivalent", "kind": "same_as", "from": "wall:architecture:w1", "to": wall["id"],
+                           "confidence": .88, "method": "tag_text", "evidence": {"tag": "W4"}})
+    result = answer("If the ceiling in room A101 drops to 2.4 m, what is affected?", PROJECT, ROOT, graph=graph)
+    data = result["graph_answer"]
+    assert len(data["items"]) > len(data["distinct_items"])
+    assert len([nid for nid in data["distinct_items"] if nid.startswith("wall:")]) == 1
+    assert "plan" in {c["doc_id"] for c in result["citations"]}
+
+
+def test_calibrated_confidence_is_never_rounded_to_certainty(graph):
+    for edge in graph["edges"]:
+        edge["confidence"] = .9997386304234187
+    result = answer("Where else does door D12 appear?", PROJECT, ROOT, graph=graph)
+    assert result["answer"]["confidence"] == .9997386304234187
+    assert result["reasoning"]["confidence"]["pct"] == 99
+
+
+def test_graph_builder_failure_stays_honest_and_zero_cost(monkeypatch):
+    from engine import kg
+    def broken(*a):
+        raise RuntimeError("Optional reader cannot open this source")
+    monkeypatch.setattr(kg, "build", broken)
+    result = answer("Where else does door D12 appear?", PROJECT, ROOT)
+    assert result["graph_answer"]["shape"] == "missing"
+    assert result["cost"] == {"usd_total": 0, "calls": []}

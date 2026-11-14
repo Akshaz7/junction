@@ -19,7 +19,9 @@ APPEARANCE = re.compile(r"\bwhere else\b|\b(?:other|which) (?:files|sheets|drawi
 CONNECTION = re.compile(r"\b(?:what|which|how)\b.*\b(?:connected|connections?|linked)\b", re.I)
 IMPACT = re.compile(r"\bif\b.*\b(?:ceiling|wall|door|window|duct|pipe)\b.*\b(?:drop\w*|lower\w*|rais\w*|mov\w*|remov\w*|delet\w*)\b", re.I)
 KIND_WORDS = {"door": r"doors?", "window": r"windows?", "room": r"rooms?|spaces?",
-              "wall": r"walls?", "duct": r"ducts?", "pipe": r"pipes?", "terminal": r"terminals?"}
+              "wall": r"walls?", "duct": r"ducts?", "pipe": r"pipes?", "terminal": r"terminals?",
+              "column": r"columns?", "slab": r"slabs?", "stair": r"stairs?|staircases?",
+              "fixture": r"fixtures?", "system": r"systems?", "material": r"materials?", "type": r"types?"}
 
 
 def fold(text):
@@ -155,6 +157,7 @@ def _result(q, project, graph, t0, headline, bullets, nodes=(), chains=(), data=
     trace = [{"step": "knowledge_graph", "detail": "Code-only graph lookup; confidence is the minimum edge confidence in the cited paths.",
               "ms": 0, "model": None, "cost_usd": 0.0}]
     res = _answer_obj(q, docs, text, value, unit, conf, False, boxes, cites, scene, trace, "index", t0)
+    res["answer"]["confidence"] = conf  # Do not round a calibrated link upwards to 100%.
     reason = (f"Weakest link in the evidence paths: {conf:.1%}. Link confidence is not a measured probability of correctness."
               if graph_path and supported else "No supporting graph path is recorded; this is a statement of missing evidence.")
     res["reasoning"] = {
@@ -295,7 +298,8 @@ def _agree(q, project, graph, t0):
 
 
 def _related(q, project, graph, t0, appearances):
-    origin, why = _resolve(q, graph)
+    named_kinds = [(m.start(), k) for k, rx in KIND_WORDS.items() if (m := re.search(rf"\b(?:{rx})\b", q, re.I))]
+    origin, why = _resolve(q, graph, min(named_kinds)[1] if named_kinds else None)
     if origin is None:
         return _missing(q, project, graph, t0, why)
     kinds = {"same_as"} if appearances else {"connects", "in_room", "hosted_by", "bounds", "serves", "part_of_system",
@@ -319,7 +323,7 @@ def _related(q, project, graph, t0, appearances):
                          for kind, count in sorted(Counter(h["node"]["kind"] for h in entries).items())) + ".",
                "; ".join(_label(h["node"]) for h in entries[:6]) + ("; more in the evidence." if len(entries) > 6 else "."),
                "Confidence follows the weakest link along each path; missing links may hide other items."]
-    verb = "linked appearances in other files" if appearances else "recorded connections"
+    verb = ("linked appearance in another file" if len(entries) == 1 else "linked appearances in other files") if appearances else ("recorded connection" if len(entries) == 1 else "recorded connections")
     return _result(q, project, graph, t0, f"{_label(origin)} has {len(entries)} {verb}.", bullets,
                    [origin, *(h["node"] for h in entries)], [h["why_path"] for h in entries],
                    {"shape": shape, "origin": origin["id"], "items": entries}, len(entries), "count")
@@ -394,7 +398,14 @@ def _impact(q, project, graph, t0):
     services = [e for e in distinct if e["node"].get("kind") in ("duct", "pipe", "terminal")]
     if services:
         counts = Counter(e["node"]["kind"] for e in services)
-        bullets.append("Check " + ", ".join(f"{v} {k}" + ("s" if v != 1 else "") for k, v in sorted(counts.items())) + " for clearance and service changes.")
+        length_rows = [e for e in services if (e.get("affected_quantity") or {}).get("unit") == "m"]
+        length_note = ""
+        if length_rows:
+            e = length_rows[0]
+            qty = e["affected_quantity"]
+            scope = "inside this room" if qty.get("scope") == "inside_room" else "whole run; in-room length unknown"
+            length_note = f" {_label(e['node'])}: {qty['value']:g} m ({scope})."
+        bullets.append("Check " + ", ".join(f"{v} {k}" + ("s" if v != 1 else "") for k, v in sorted(counts.items())) + " for clearance and service changes." + length_note)
     if not quantities:
         bullets.append("The graph lacks the dimensions needed to calculate a material quantity change.")
     bullets.append("Potential effects only. Missing links, openings, lining layers and waste need checking.")
@@ -416,7 +427,7 @@ def answer(question: str, project: dict, root: Path, t0=None, *, graph=None):
         try:
             from engine.kg import build
             graph = build(project, root)
-        except (ImportError, OSError, ValueError, TypeError):
+        except Exception:  # an unreadable source or optional adapter cannot break project chat
             return _missing(q, project, {}, t0, "The project links are unavailable. Check the source documents directly.")
     if not isinstance(graph, dict):
         return _missing(q, project, {}, t0, "The project graph is still being built. Try again once its links are ready.")
