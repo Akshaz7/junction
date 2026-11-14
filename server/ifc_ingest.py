@@ -149,11 +149,17 @@ def run(source, doc, out, status):
                               "The original is stored. Split the model into smaller IFC files and upload them separately.")
         return "failed"
 
+    # Leave 30 seconds for persistence and the enclosing five-minute watchdog.
+    deadline = time.monotonic() + max(0, 270 - (time.time() - status.started_at))
+
     def stage(name, timeout):
         metrics = {}
         def execute():
             try:
-                metrics.update(index(source, doc, out, timeout) if name == "ifc_index" else phase(name, source, out, timeout))
+                remaining = min(timeout, deadline - time.monotonic())
+                if remaining <= 0:
+                    raise RuntimeError("This phase exceeded the upload processing time budget.")
+                metrics.update(index(source, doc, out, remaining) if name == "ifc_index" else phase(name, source, out, remaining))
             except PhaseFailure as exc:
                 metrics.update(exc.metrics)
                 raise
@@ -161,7 +167,7 @@ def run(source, doc, out, status):
         status.stages[-1].update(metrics)
         return ok
 
-    if not stage("ifc_index", 90):
+    if not stage("ifc_index", float(os.environ.get("IFC_INDEX_TIMEOUT_S", "180"))):
         status.write("failed", "The IFC properties could not be indexed. Export the model again as IFC. " + status.stages[-1]["error"])
         return "failed"
     status.readable = True
