@@ -3,13 +3,29 @@ import math
 
 import pytest
 
-from engine.kg.evaluation import Case, Item, align, evaluate, fit_table, metrics, plan_items, svg_items
 from engine.kg import confidence as confidence_module
+from engine.kg.evaluation import (
+    Case,
+    Item,
+    align,
+    evaluate,
+    fit_table,
+    metrics,
+    plan_items,
+    svg_items,
+)
 
 
 def test_metrics_deduplicate_and_empty_denominators():
     assert metrics(set(), set())["precision"] is None
     assert metrics({("a", "b")}, set())["fp"] == 1
+
+
+def test_guids_are_case_sensitive():
+    items = [Item("a", "A", "door"), Item("b", "a", "door")]
+    report, _ = evaluate(Case("case-sensitive", items, items))
+    assert report["methods"]["guid"]["tp"] == 2
+    assert report["methods"]["guid"]["fp"] == 0
 
 
 def test_plan_ids_are_not_truth_and_unknown_is_not_correct():

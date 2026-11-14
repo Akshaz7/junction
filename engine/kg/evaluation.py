@@ -6,16 +6,15 @@ No cache writes, model calls, or PDF ingestion happen here.
 """
 from __future__ import annotations
 
-from collections import defaultdict
-from dataclasses import dataclass
 import hashlib
 import json
 import math
-from pathlib import Path
 import re
 import unicodedata
 import xml.etree.ElementTree as ET
-
+from collections import defaultdict
+from dataclasses import dataclass
+from pathlib import Path
 
 RESIDUAL_BINS = (0.01, 0.05, 0.2, 0.5, 1.0, math.inf)
 METHODS = ("guid", "tag_text", "position", "label_text")
@@ -163,7 +162,8 @@ def proposals(case, method):
         def groups(items):
             groups = defaultdict(list)
             for item in items:
-                label = norm(getattr(item, attr))
+                # IFC GlobalIds are case-sensitive base64 identifiers.
+                label = str(getattr(item, attr) or "") if method == "guid" else norm(getattr(item, attr))
                 if label:
                     key = label if method == "guid" else (item.kind, norm(item.level), label)
                     groups[key].append(item)

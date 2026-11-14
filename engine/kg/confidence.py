@@ -9,7 +9,24 @@ from __future__ import annotations
 import math
 
 # BEGIN MEASURED TABLE (updated by scripts/kg_eval.py --write-calibration)
-CALIBRATION = {}
+CALIBRATION = {'guid': [{'max_residual_m': None, 'n': 3824, 'correct': 3824, 'probability': 0.9997386304234187}],
+ 'tag_text': [{'max_residual_m': None,
+               'n': 2663,
+               'correct': 2663,
+               'probability': 0.999624765478424}],
+ 'position': [{'max_residual_m': 0.01,
+               'n': 3382,
+               'correct': 3349,
+               'probability': 0.9899527186761229},
+              {'max_residual_m': 0.05, 'n': 9, 'correct': 6, 'probability': 0.6363636363636364},
+              {'max_residual_m': 0.2, 'n': 4, 'correct': 0, 'probability': 0.3333333333333333},
+              {'max_residual_m': 0.5, 'n': 1, 'correct': 1, 'probability': 0.3333333333333333},
+              {'max_residual_m': 1.0, 'n': 0, 'correct': 0, 'probability': None},
+              {'max_residual_m': None, 'n': 0, 'correct': 0, 'probability': None}],
+ 'label_text': [{'max_residual_m': None,
+                 'n': 3376,
+                 'correct': 3376,
+                 'probability': 0.9997039668442865}]}
 # END MEASURED TABLE
 
 
@@ -34,6 +51,7 @@ def confidence(method: str, residual_m=None, evidence=None, **kwargs) -> float:
             error = alignment.get("residual_m", alignment.get("residual"))
             if not _finite(matches) or matches < 3 or not _finite(error) or error < 0:
                 return 0.0
+            residual_m = max(residual_m, error)
         for entry in entries:
             limit = entry["max_residual_m"]
             if limit is None or residual_m <= limit:
