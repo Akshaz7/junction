@@ -113,7 +113,7 @@ def grade(case, r):
         # the requested display unit qualify. Citation numbers can never match gold.
         unit = m[2]
         patterns = {'ft2': r'ft²|ft2', 'ft': r'ft', 'acre': r'acres?',
-                    'm2': r'm²|m2', 'm3': r'm³|m3', 'EUR': r'EUR', '%': '%'}
+                    'm2': r'm²|m2', 'm3': r'm³|m3', 'm': r'm\b', 'EUR': r'EUR', '%': '%'}
         if unit in patterns:
             nums = re.findall(r'(\d[\d,]*(?:\.\d+)?)\s*(?:' + patterns[unit] + r')', text)
             if any(abs(float(x.replace(',', ''))-want) <= max(.05, abs(want)*.02) for x in nums):

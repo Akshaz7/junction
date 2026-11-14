@@ -1,0 +1,182 @@
+heavy.sh: waiting for a slot (2 busy)
+heavy.sh: waiting for a slot (2 busy)
+heavy.sh: waiting for a slot (2 busy)
+heavy.sh: waiting for a slot (2 busy)
+/Users/akshatthapa/Workspace/junction/.venv/lib/python3.12/site-packages/pytest_asyncio/plugin.py:306: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to "function" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session". Set it to "fixture-scope" to keep the current behavior.
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+........................................................................ [  9%]
+.....s.................................................................. [ 18%]
+.....................................................................FFF [ 28%]
+.FF...............................ss.................................... [ 37%]
+...........F.....................F...................................... [ 46%]
+........................................................................ [ 56%]
+..................FFF................................................... [ 65%]
+........................................................................ [ 75%]
+........................................................................ [ 84%]
+........................................................................ [ 93%]
+................................................                         [100%]
+=================================== FAILURES ===================================
+_______________ test_baseboard_ifc_total_and_per_room_arithmetic _______________
+
+    def test_baseboard_ifc_total_and_per_room_arithmetic():
+        a = answer("how many linear metres of baseboard in total", [AC20])
+        validate_answer(a)
+>       assert a["answer"]["unit"] == "m" and a["answer"]["value"] > 500 and a["route"] == "index" and len(a["evidence"]["boxes"]) == 82
+E       AssertionError: assert ('m' == 'm'
+E         
+E           m and 1564.2 > 500 and 'index' == 'index'
+E         
+E           index and 159 == 82)
+E        +  where 159 = len([{'item_id': '3Gz7u_d1P7IA35Wmtg48Rc', 'page': 1, 'bbox_px': [1050.9, 56.6, 1349.1, 537.1], 'label': '1', ...}, {'item.....}, {'item_id': '2NO$Il8fr1n8x3zsU1IoYc', 'page': 1, 'bbox_px': [708.4, 167.0, 863.0, 410.1], 'label': '6', ...}, ...])
+
+engine/tests/test_fix6.py:140: AssertionError
+______________ test_baseboard_scaled_raster_uses_the_drawn_scale _______________
+
+    def test_baseboard_scaled_raster_uses_the_drawn_scale():
+        a = answer("how many linear metres of baseboard per room", ["cubicasa5k__colorful-10711"])
+        validate_answer(a)
+>       assert a["route"] == "planmap" and not a["answer"]["abstained"] and a["answer"]["value"] > 20 and "dimension" in a["answer"]["text_md"] and a["evidence"]["boxes"]
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: '>' not supported between instances of 'NoneType' and 'int'
+
+engine/tests/test_fix6.py:151: TypeError
+_______ test_baseboard_on_a_guessed_scale_says_so_and_is_low_confidence ________
+
+    def test_baseboard_on_a_guessed_scale_says_so_and_is_low_confidence():
+        a = answer("how many linear metres of skirting in total", ["cubicasa5k__colorful-10052"])
+        validate_answer(a)
+>       assert a["answer"]["value"] and "estimated from door sizes" in a["answer"]["text_md"] and a["answer"]["confidence"] <= 0.4
+E       assert (None)
+
+engine/tests/test_fix6.py:157: AssertionError
+__________________ test_piping_sizes_dn_length_systems_drains __________________
+
+    def test_piping_sizes_dn_length_systems_drains():
+>       assert "DN100" in answer("what pipe sizes are used", [DH])["answer"]["text_md"]
+E       AssertionError: assert 'DN100' in '**11 sizes of pipes**: nominal diameter 12: 255 (49.5 m), nominal diameter 15: 8 (10.6 m), nominal diameter 20: 6 (2....minal diameter 150: 11 (49.9 m), nominal diameter 200: 1 (2.80 m) [1] Shown in 3D: the same items glow in the 3D view.'
+
+engine/tests/test_fix6.py:175: AssertionError
+__ test_piping_sixty5_no_waste_terminals_falls_back_honestly_and_missing_size __
+
+    def test_piping_sixty5_no_waste_terminals_falls_back_honestly_and_missing_size():
+        dr = answer("where are the drains", [S65])
+        validate_answer(dr)
+        assert "No drain fittings are modelled" in dr["answer"]["text_md"] and dr["answer"]["value"] > 1000
+        none = answer("DN100 length", [S65])
+>       assert none["answer"]["value"] == 0 and "Sizes present" in none["answer"]["text_md"]
+E       assert (690.0 == 0)
+
+engine/tests/test_fix6.py:188: AssertionError
+_____ test_pdfminer_grid_lookup_runs_before_models_and_has_valid_evidence ______
+
+tmp_path = PosixPath('/private/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/pytest-of-akshatthapa/pytest-1128/test_pdfminer_grid_lookup_runs0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x128e12390>
+
+    def test_pdfminer_grid_lookup_runs_before_models_and_has_valid_evidence(tmp_path, monkeypatch):
+        import engine.models
+        from engine.answer import answer
+        import jsonschema
+        d = write_doc(tmp_path)
+        monkeypatch.setenv('ARTIFACTS_DIR', str(tmp_path))
+        monkeypatch.setattr(engine.models, 'call', lambda *a, **k: pytest.fail('schedule called model'))
+        a = answer('On sheet A-909, how many rooms have all four walls finished with W7?', [DOC])
+>       assert a['answer']['value'] == 2 and a['route'] == 'index'
+E       assert (None == 2)
+
+engine/tests/test_od_pdf.py:173: AssertionError
+_ test_rotated_pdf_headers_and_mirrored_identity_have_grounded_zero_cost_answers _
+
+tmp_path = PosixPath('/private/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/pytest-of-akshatthapa/pytest-1128/test_rotated_pdf_headers_and_m0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x129cecc50>
+
+    def test_rotated_pdf_headers_and_mirrored_identity_have_grounded_zero_cost_answers(tmp_path, monkeypatch):
+        import pypdfium2 as pdfium
+        import engine.models
+        from engine.answer import answer
+        d = tmp_path / DOC
+        d.mkdir()
+        headers = ['ROOM NO.', 'NAME', 'SQ.FT.', 'NORTH', 'EAST', 'SOUTH', 'WEST', 'ROOM NO.']
+        make_pdf(d / 'generated.pdf', headers, [[*r, r[0]] for r in ROWS], rotated_headers=range(2, 7))
+        with pdfium.PdfDocument(d / 'generated.pdf') as pdf:
+            pdf[0].render(scale=1).to_pil().save(d / 'page-1.png')
+        (d / 'doc.json').write_text(json.dumps({'doc_id': DOC, 'kind': 'pdf', 'pages': 1,
+                                             'title': 'generated for demo: rotated schedule'}))
+        monkeypatch.setenv('ARTIFACTS_DIR', str(tmp_path))
+        monkeypatch.setattr(engine.models, 'call', lambda *a, **k: pytest.fail('schedule called model'))
+        questions = [
+            ('On sheet A-909, how many rooms have all four walls finished with W7?', 2, 'count'),
+            ('On sheet A-909, what is the area of room 302 in the room finish schedule?', 1240, 'ft²'),
+            ('On sheet A-909, which room in the room finish schedule has the largest area?', None, 'ft²'),
+        ]
+        for question, value, unit in questions:
+            a = answer(question, [DOC])
+            assert a['route'] == 'index' and not a['answer']['abstained']
+>           assert (a['answer']['value'], a['answer']['unit']) == (value, unit)
+E           AssertionError: assert (None, None) == (2, 'count')
+E             
+E             At index 0 diff: None != 2
+E             Use -v to get more diff
+
+engine/tests/test_od_pdf.py:298: AssertionError
+_____________________ test_checked_region_becomes_citation _____________________
+
+root = PosixPath('/private/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/pytest-of-akshatthapa/pytest-1128/test_checked_region_becomes_ci0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1232e7aa0>
+
+    def test_checked_region_becomes_citation(root, monkeypatch):
+        import engine.models as M
+        # window-001 sits at [116,155,192,170] px of 475x650 -> box_2d [ymin,xmin,ymax,xmax] on 0-1000
+        box = [155 / 650 * 1000 - 5, 116 / 475 * 1000 - 5, 170 / 650 * 1000 + 5, 192 / 475 * 1000 + 5]
+        monkeypatch.setattr(M, "call", fake_call({"can_answer": True, "answer": "**It is the window row.**", "regions": [
+            {"box_2d": box, "what": "window"}, {"box_2d": [0, 0, 20, 20], "what": "nothing here"}]}))
+        a = answer(Q, [DOC])
+>       assert not a["answer"]["abstained"] and a["route"] == "vlm"
+E       AssertionError: assert (not False and 'hybrid' == 'vlm'
+E         
+E         - vlm
+E         + hybrid)
+
+engine/tests/test_readdraw.py:45: AssertionError
+______________________ test_unbacked_regions_are_flagged _______________________
+
+root = PosixPath('/private/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/pytest-of-akshatthapa/pytest-1128/test_unbacked_regions_are_flag0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1232e4260>
+
+    def test_unbacked_regions_are_flagged(root, monkeypatch):
+        import engine.models as M
+        monkeypatch.setattr(M, "call", fake_call({"can_answer": True, "answer": "**Something.**", "regions": [{"box_2d": [0, 0, 20, 20], "what": "x"}]}))
+        a = answer(Q, [DOC])
+>       assert a["citations"] == [] and "unchecked" in a["answer"]["text_md"] and a["answer"]["confidence"] < 0.5
+E       AssertionError: assert ([] == []
+E         
+E         Use -v to get more diff and 'unchecked' in '**Something.**\n\n_Based on the objects found on the drawing and the drawing image._')
+
+engine/tests/test_readdraw.py:55: AssertionError
+_______________________ test_cannot_answer_and_no_image ________________________
+
+root = PosixPath('/private/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/pytest-of-akshatthapa/pytest-1128/test_cannot_answer_and_no_imag0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1232e4440>
+
+    def test_cannot_answer_and_no_image(root, monkeypatch):
+        import engine.models as M
+        monkeypatch.setenv("FORCE_ANSWER", "0")
+        monkeypatch.setattr(M, "call", fake_call({"can_answer": False, "answer": "The drawing does not show that.", "regions": []}))
+        a = answer(Q, [DOC])
+>       assert a["answer"]["abstained"] and "does not show" in a["answer"]["text_md"]
+E       AssertionError: assert (True and 'does not show' in 'I could not tell which elements the question is about, so I would rather not guess.')
+
+engine/tests/test_readdraw.py:63: AssertionError
+=========================== short test summary info ============================
+FAILED engine/tests/test_fix6.py::test_baseboard_ifc_total_and_per_room_arithmetic
+FAILED engine/tests/test_fix6.py::test_baseboard_scaled_raster_uses_the_drawn_scale
+FAILED engine/tests/test_fix6.py::test_baseboard_on_a_guessed_scale_says_so_and_is_low_confidence
+FAILED engine/tests/test_fix6.py::test_piping_sizes_dn_length_systems_drains
+FAILED engine/tests/test_fix6.py::test_piping_sixty5_no_waste_terminals_falls_back_honestly_and_missing_size
+FAILED engine/tests/test_od_pdf.py::test_pdfminer_grid_lookup_runs_before_models_and_has_valid_evidence
+FAILED engine/tests/test_od_pdf.py::test_rotated_pdf_headers_and_mirrored_identity_have_grounded_zero_cost_answers
+FAILED engine/tests/test_readdraw.py::test_checked_region_becomes_citation - ...
+FAILED engine/tests/test_readdraw.py::test_unbacked_regions_are_flagged - Ass...
+FAILED engine/tests/test_readdraw.py::test_cannot_answer_and_no_image - Asser...
+10 failed, 755 passed, 3 skipped in 30.88s
