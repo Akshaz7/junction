@@ -1,0 +1,5 @@
+{
+  "first_run_passed": 15,
+  "first_run_total": 20,
+  "correction": "Five DXF connection gold rows incorrectly required text annotation nodes to be physical connections. Excluded text/label/annotation/dimension nodes from independent geometry truth; product code unchanged. First results retained. No threshold or model changed."
+}

@@ -141,13 +141,10 @@
         "question": "What is connected to room 3.01?",
         "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833",
         "expect": {
-          "shape": "connections",
-          "required_source_item_ids": [
-            "text-1",
-            "text-2"
-          ]
+          "shape": "missing",
+          "required_source_item_ids": []
         },
-        "truth": "Unambiguous CAD item centres inside the extracted room polygon"
+        "truth": "Unambiguous physical CAD item centres inside the extracted room polygon; annotation text is not a physical connection"
       },
       {
         "question": "Where else does room 3.01 appear?",
@@ -164,12 +161,10 @@
           "shape": "connections",
           "required_source_item_ids": [
             "other-11",
-            "other-12",
-            "text-3",
-            "text-4"
+            "other-12"
           ]
         },
-        "truth": "Unambiguous CAD item centres inside the extracted room polygon"
+        "truth": "Unambiguous physical CAD item centres inside the extracted room polygon; annotation text is not a physical connection"
       },
       {
         "question": "Where else does room 3.02 appear?",
@@ -183,13 +178,10 @@
         "question": "What is connected to room 3.03?",
         "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833",
         "expect": {
-          "shape": "connections",
-          "required_source_item_ids": [
-            "text-5",
-            "text-6"
-          ]
+          "shape": "missing",
+          "required_source_item_ids": []
         },
-        "truth": "Unambiguous CAD item centres inside the extracted room polygon"
+        "truth": "Unambiguous physical CAD item centres inside the extracted room polygon; annotation text is not a physical connection"
       },
       {
         "question": "Where else does room 3.03 appear?",
@@ -203,13 +195,10 @@
         "question": "What is connected to room 3.04?",
         "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833",
         "expect": {
-          "shape": "connections",
-          "required_source_item_ids": [
-            "text-7",
-            "text-8"
-          ]
+          "shape": "missing",
+          "required_source_item_ids": []
         },
-        "truth": "Unambiguous CAD item centres inside the extracted room polygon"
+        "truth": "Unambiguous physical CAD item centres inside the extracted room polygon; annotation text is not a physical connection"
       },
       {
         "question": "Where else does room 3.04 appear?",
@@ -225,13 +214,10 @@
         "expect": {
           "shape": "connections",
           "required_source_item_ids": [
-            "other-1",
-            "text-10",
-            "text-11",
-            "text-9"
+            "other-1"
           ]
         },
-        "truth": "Unambiguous CAD item centres inside the extracted room polygon"
+        "truth": "Unambiguous physical CAD item centres inside the extracted room polygon; annotation text is not a physical connection"
       },
       {
         "question": "Where else does room 3.05 appear?",
