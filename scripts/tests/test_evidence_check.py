@@ -315,3 +315,24 @@ def test_element_comparison_does_not_compare_a_room_to_the_floor_total(source):
     res["reasoning"]["calc"]["checks"] = [{"method": "printed / outline", "value": 12, "diff_pct": 0,
                                                "agrees": True, "source": {"doc_id": "generated__audit", "page": 1, "item_id": "a"}}]
     assert "check.diff_pct" not in codes(res, source)
+
+
+def test_selection_uses_all_available_sets_and_reserves_blind_file_last(tmp_path):
+    repo, artifacts = tmp_path, tmp_path / "artifacts"
+    for suffix, kind in (("a", "raster"), ("b", "dxf"), ("c", "ifc"), ("pdf", "pdf")):
+        folder = artifacts / f"generated__{suffix}"
+        folder.mkdir(parents=True)
+        (folder / "doc.json").write_text(json.dumps({"kind": kind, "source": suffix}))
+        (folder / "planmap-1.json").write_text('{"items": []}')
+    paths = [repo / "data/sets/sample200.jsonl", repo / "data/junction-dataset-preview/questions.jsonl", repo / "results/final/QA/questions.jsonl"]
+    for path, suffix in zip(paths, ("a", "b", "c"), strict=True):
+        path.parent.mkdir(parents=True)
+        path.write_text(json.dumps({"doc_id": f"generated__{suffix}", "question": "How many doors are shown on this drawing?", "type": "count"}) + "\n")
+    with paths[0].open("a") as stream:
+        stream.write(json.dumps({"doc_id": "generated__pdf", "question": "How many doors are shown on this drawing?"}) + "\n")
+        stream.write(json.dumps({"doc_id": "generated__a", "question": "Kuinka monta ovea on?"}) + "\n")
+    rows, info = checker.select_questions(repo, artifacts, limit=3, blind="generated__b")
+    assert len(rows) == 3
+    assert rows[-1]["doc_ids"] == ["generated__b"]
+    assert len({r["origin"] for r in rows}) == 3
+    assert info["excluded"] == {"pdf_out_of_scope": 1, "non_english": 1}
