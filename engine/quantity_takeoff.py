@@ -150,9 +150,14 @@ def quantity_takeoff(question, doc, t0):
         pd = None
     if pd:
         by_id = {i.item_id: i for i in doc.items}
-        for name, v in sorted(((pd.get("rollups") or {}).get("by_system") or {}).items(), key=lambda kv: -kv[1]["length_m"])[:25]:
+        sysl = sorted(((pd.get("rollups") or {}).get("by_system") or {}).items(), key=lambda kv: -kv[1]["length_m"])
+        for name, v in sysl[:8]:
             its = [by_id[i] for i in v.get("item_ids", []) if i in by_id]
-            prow.append((f"Piping - {name}", f"{v['length_m']:.1f}", "m", cite(its[:200]) if its else ""))
+            prow.append((f"Piping - {A.friendly_system(name)}", f"{v['length_m']:.1f}", "m", cite(its[:200]) if its else ""))
+        if len(sysl) > 8:
+            rest = sysl[8:]
+            its = [by_id[i] for _n, v in rest for i in v.get("item_ids", []) if i in by_id]
+            prow.append((f"Piping - +{len(rest)} smaller system{'s' if len(rest) != 1 else ''}", f"{sum(v['length_m'] for _n, v in rest):.1f}", "m", cite(its[:200]) if its else ""))
     for r_ in prow:
         row(*r_)
     if not prow:

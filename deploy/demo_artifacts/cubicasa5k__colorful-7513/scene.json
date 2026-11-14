@@ -17,6 +17,150 @@
  ],
  "plan_image": "page-1.png",
  "items": {
+  "floor-slab": {
+   "node": "floor-slab",
+   "usd_name": "i_9ac3273f4152a641",
+   "bbox_m": [
+    [
+     -3.2914,
+     0.0,
+     -6.1971
+    ],
+    [
+     9.9,
+     0.02,
+     7.2514
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "floor"
+  },
+  "wall-r001": {
+   "node": "wall-r001",
+   "usd_name": "i_781234f8310d5c94",
+   "bbox_m": [
+    [
+     6.9429,
+     0.0,
+     6.6857
+    ],
+    [
+     9.9,
+     2.7,
+     7.2514
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-r002": {
+   "node": "wall-r002",
+   "usd_name": "i_51523e44c41f02bd",
+   "bbox_m": [
+    [
+     -1.9029,
+     0.0,
+     3.6
+    ],
+    [
+     -1.1571,
+     2.7,
+     5.0914
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-r003": {
+   "node": "wall-r003",
+   "usd_name": "i_c491571aafc113a7",
+   "bbox_m": [
+    [
+     -0.1286,
+     0.0,
+     2.2886
+    ],
+    [
+     0.7714,
+     2.7,
+     5.0914
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-r004": {
+   "node": "wall-r004",
+   "usd_name": "i_0e5073b36c395913",
+   "bbox_m": [
+    [
+     -3.0343,
+     0.0,
+     2.0314
+    ],
+    [
+     -2.4943,
+     2.7,
+     2.34
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-r005": {
+   "node": "wall-r005",
+   "usd_name": "i_9b797dd61b19c26d",
+   "bbox_m": [
+    [
+     -1.4657,
+     0.0,
+     -3.6257
+    ],
+    [
+     -0.5914,
+     2.7,
+     -0.8743
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-r006": {
+   "node": "wall-r006",
+   "usd_name": "i_ab0fe4b001042c85",
+   "bbox_m": [
+    [
+     0.4371,
+     0.0,
+     -6.1971
+    ],
+    [
+     3.4971,
+     2.7,
+     5.0914
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-r007": {
+   "node": "wall-r007",
+   "usd_name": "i_33986dc22db6259b",
+   "bbox_m": [
+    [
+     -3.2914,
+     0.0,
+     -6.1971
+    ],
+    [
+     -1.3371,
+     2.7,
+     5.0914
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
   "door-001": {
    "node": "door-001",
    "usd_name": "i_7eea4caad788ba9b",
@@ -34,7 +178,6 @@
    ],
    "storey": "Floor 1",
    "kind": "door",
-   "tag": "D1",
    "props": {
     "width_m": 0.9,
     "height_m": 2.1,
@@ -58,7 +201,6 @@
    ],
    "storey": "Floor 1",
    "kind": "door",
-   "tag": "D3",
    "props": {
     "width_m": 0.951,
     "height_m": 2.1,
@@ -82,7 +224,6 @@
    ],
    "storey": "Floor 1",
    "kind": "door",
-   "tag": "D2",
    "props": {
     "width_m": 0.9,
     "height_m": 2.1,
@@ -106,7 +247,6 @@
    ],
    "storey": "Floor 1",
    "kind": "door",
-   "tag": "D4",
    "props": {
     "width_m": 0.771,
     "height_m": 2.1,
@@ -130,7 +270,6 @@
    ],
    "storey": "Floor 1",
    "kind": "door",
-   "tag": "D5",
    "props": {
     "width_m": 0.669,
     "height_m": 2.1,
@@ -154,7 +293,6 @@
    ],
    "storey": "Floor 1",
    "kind": "door",
-   "tag": "D6",
    "props": {
     "width_m": 0.9,
     "height_m": 2.1,
@@ -178,7 +316,6 @@
    ],
    "storey": "Floor 1",
    "kind": "door",
-   "tag": "D7",
    "props": {
     "width_m": 0.694,
     "height_m": 2.1,
@@ -202,7 +339,6 @@
    ],
    "storey": "Floor 1",
    "kind": "door",
-   "tag": "D8",
    "props": {
     "width_m": 0.797,
     "height_m": 2.1,
@@ -226,7 +362,6 @@
    ],
    "storey": "Floor 1",
    "kind": "door",
-   "tag": "D9",
    "props": {
     "width_m": 0.977,
     "height_m": 2.1,
@@ -250,37 +385,10 @@
    ],
    "storey": "Floor 1",
    "kind": "door",
-   "tag": "D10",
    "props": {
     "width_m": 0.977,
     "height_m": 2.1,
     "axis": "x"
-   }
-  },
-  "room-001": {
-   "node": "room-001",
-   "usd_name": "i_7e8e42c56462cef7",
-   "bbox_m": [
-    [
-     -3.2143,
-     0.0,
-     -7.38
-    ],
-    [
-     3.3429,
-     0.02,
-     -6.2229
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "room",
-   "tag": "R1",
-   "name": "Outdoor",
-   "props": {
-    "LongName": null,
-    "room_type": "outdoor",
-    "area_m2": 7.43,
-    "area_source": "planmap"
    }
   },
   "room-002": {
@@ -288,19 +396,18 @@
    "usd_name": "i_5fed845bb43f6965",
    "bbox_m": [
     [
-     -3.1371,
+     -3.1565,
      0.0,
      -6.0943
     ],
     [
-     3.3429,
+     3.3686,
      0.02,
-     -1.1057
+     -1.08
     ]
    ],
    "storey": "Floor 1",
    "kind": "room",
-   "tag": "R2",
    "name": "Living",
    "props": {
     "LongName": null,
@@ -316,17 +423,16 @@
     [
      -3.1629,
      0.0,
-     -3.6771
+     -1.08
     ],
     [
-     -0.8486,
+     -0.8229,
      0.02,
-     0.5143
+     0.54
     ]
    ],
    "storey": "Floor 1",
    "kind": "room",
-   "tag": "R3",
    "name": "Kitchen",
    "props": {
     "LongName": null,
@@ -340,19 +446,18 @@
    "usd_name": "i_6ee7933e568ca852",
    "bbox_m": [
     [
-     0.5657,
+     0.54,
      0.0,
      -0.9514
     ],
     [
-     1.8257,
+     1.8514,
      0.02,
-     0.4371
+     0.4629
     ]
    ],
    "storey": "Floor 1",
    "kind": "room",
-   "tag": "R5",
    "name": "Bathroom",
    "props": {
     "LongName": null,
@@ -371,14 +476,13 @@
      -0.9514
     ],
     [
-     0.4114,
+     0.4371,
      0.02,
-     3.7029
+     3.7286
     ]
    ],
    "storey": "Floor 1",
    "kind": "room",
-   "tag": "R4",
    "name": "Entry",
    "props": {
     "LongName": null,
@@ -397,14 +501,13 @@
      -0.9514
     ],
     [
-     3.3429,
+     3.3686,
      0.02,
-     0.4371
+     0.4886
     ]
    ],
    "storey": "Floor 1",
    "kind": "room",
-   "tag": "R6",
    "name": "Garage",
    "props": {
     "LongName": null,
@@ -423,14 +526,13 @@
      0.5914
     ],
     [
-     3.3429,
+     3.3686,
      0.02,
-     4.9371
+     4.9629
     ]
    ],
    "storey": "Floor 1",
    "kind": "room",
-   "tag": "R7",
    "name": "Bedroom",
    "props": {
     "LongName": null,
@@ -444,19 +546,18 @@
    "usd_name": "i_2f29e582d7451370",
    "bbox_m": [
     [
-     -3.1629,
+     -3.1371,
      0.0,
      2.52
     ],
     [
-     -1.5171,
+     -1.4914,
      0.02,
-     4.9371
+     4.9629
     ]
    ],
    "storey": "Floor 1",
    "kind": "room",
-   "tag": "R8",
    "name": "Bathroom",
    "props": {
     "LongName": null,
@@ -470,19 +571,18 @@
    "usd_name": "i_505e050352005772",
    "bbox_m": [
     [
-     -1.3114,
+     -1.3371,
      0.0,
      3.8314
     ],
     [
-     0.3857,
+     0.4114,
      0.02,
-     4.9371
+     4.9886
     ]
    ],
    "storey": "Floor 1",
    "kind": "room",
-   "tag": "R9",
    "name": "Entry",
    "props": {
     "LongName": null,
@@ -507,8 +607,7 @@
     ]
    ],
    "storey": "Floor 1",
-   "kind": "sink",
-   "tag": "S1"
+   "kind": "sink"
   },
   "sink-002": {
    "node": "sink-002",
@@ -526,8 +625,7 @@
     ]
    ],
    "storey": "Floor 1",
-   "kind": "sink",
-   "tag": "S2"
+   "kind": "sink"
   },
   "sink-003": {
    "node": "sink-003",
@@ -545,8 +643,7 @@
     ]
    ],
    "storey": "Floor 1",
-   "kind": "sink",
-   "tag": "S3"
+   "kind": "sink"
   },
   "toilet-001": {
    "node": "toilet-001",
@@ -564,464 +661,7 @@
     ]
    ],
    "storey": "Floor 1",
-   "kind": "toilet",
-   "tag": "WC1"
-  },
-  "wall-001": {
-   "node": "wall-001",
-   "usd_name": "i_7b48a86d5f6d4471",
-   "bbox_m": [
-    [
-     3.3429,
-     0.0,
-     -6.2743
-    ],
-    [
-     3.5229,
-     2.7,
-     5.1429
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL3"
-  },
-  "wall-002": {
-   "node": "wall-002",
-   "usd_name": "i_df1b6aaadb3c980f",
-   "bbox_m": [
-    [
-     -3.3171,
-     0.0,
-     -6.2486
-    ],
-    [
-     -3.1371,
-     2.7,
-     5.1686
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL1"
-  },
-  "wall-003": {
-   "node": "wall-003",
-   "usd_name": "i_1e083ec9a4ac5f18",
-   "bbox_m": [
-    [
-     -3.2914,
-     0.0,
-     -6.2486
-    ],
-    [
-     3.5486,
-     2.7,
-     -6.0429
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL2"
-  },
-  "wall-004": {
-   "node": "wall-004",
-   "usd_name": "i_ff5a4a78c01e745c",
-   "bbox_m": [
-    [
-     -0.8229,
-     0.0,
-     -3.6
-    ],
-    [
-     -0.6943,
-     2.7,
-     -0.9
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL4"
-  },
-  "wall-005": {
-   "node": "wall-005",
-   "usd_name": "i_d1c53381af522c77",
-   "bbox_m": [
-    [
-     -1.4914,
-     0.0,
-     -1.08
-    ],
-    [
-     3.5486,
-     2.7,
-     -0.9257
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL5"
-  },
-  "wall-006": {
-   "node": "wall-006",
-   "usd_name": "i_c2a3da2607d028d0",
-   "bbox_m": [
-    [
-     -1.4914,
-     0.0,
-     -1.08
-    ],
-    [
-     -1.3114,
-     2.7,
-     5.1686
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL6"
-  },
-  "wall-007": {
-   "node": "wall-007",
-   "usd_name": "i_cbe44877228146ba",
-   "bbox_m": [
-    [
-     0.4114,
-     0.0,
-     -1.08
-    ],
-    [
-     0.5657,
-     2.7,
-     5.1686
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL7"
-  },
-  "wall-008": {
-   "node": "wall-008",
-   "usd_name": "i_649a78a0baad4c0e",
-   "bbox_m": [
-    [
-     1.8514,
-     0.0,
-     -1.08
-    ],
-    [
-     1.9543,
-     2.7,
-     0.6171
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL8"
-  },
-  "wall-009": {
-   "node": "wall-009",
-   "usd_name": "i_67555aaf7db08295",
-   "bbox_m": [
-    [
-     0.4114,
-     0.0,
-     0.4629
-    ],
-    [
-     3.5486,
-     2.7,
-     0.5914
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL9"
-  },
-  "wall-010": {
-   "node": "wall-010",
-   "usd_name": "i_94fcae6a71dfa720",
-   "bbox_m": [
-    [
-     -3.2914,
-     0.0,
-     0.54
-    ],
-    [
-     -1.3114,
-     2.7,
-     0.6943
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL10"
-  },
-  "wall-011": {
-   "node": "wall-011",
-   "usd_name": "i_a1cc6f76cf35d485",
-   "bbox_m": [
-    [
-     -3.2914,
-     0.0,
-     2.3914
-    ],
-    [
-     -1.2857,
-     2.7,
-     2.52
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL11"
-  },
-  "wall-012": {
-   "node": "wall-012",
-   "usd_name": "i_050b616b18136db3",
-   "bbox_m": [
-    [
-     -1.4914,
-     0.0,
-     3.6514
-    ],
-    [
-     0.5914,
-     2.7,
-     3.8314
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL12"
-  },
-  "wall-013": {
-   "node": "wall-013",
-   "usd_name": "i_d0768c014977c320",
-   "bbox_m": [
-    [
-     -3.2657,
-     0.0,
-     4.9371
-    ],
-    [
-     3.5486,
-     2.7,
-     5.1429
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL13"
-  },
-  "wall-014": {
-   "node": "wall-014",
-   "usd_name": "i_80b091a1611765e3",
-   "bbox_m": [
-    [
-     7.02,
-     0.0,
-     6.6343
-    ],
-    [
-     7.38,
-     2.7,
-     7.3029
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL16"
-  },
-  "wall-015": {
-   "node": "wall-015",
-   "usd_name": "i_ba5743d7a4d3f04b",
-   "bbox_m": [
-    [
-     6.8914,
-     0.0,
-     6.66
-    ],
-    [
-     10.0029,
-     2.7,
-     7.2514
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL14"
-  },
-  "wall-016": {
-   "node": "wall-016",
-   "usd_name": "i_8eb7eb3d7026b90f",
-   "bbox_m": [
-    [
-     6.9429,
-     0.0,
-     6.66
-    ],
-    [
-     6.9943,
-     2.7,
-     7.3029
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL15"
-  },
-  "wall-017": {
-   "node": "wall-017",
-   "usd_name": "i_6c71890eaa4cb143",
-   "bbox_m": [
-    [
-     9.7971,
-     0.0,
-     6.66
-    ],
-    [
-     9.8743,
-     2.7,
-     7.3029
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL17"
-  },
-  "wall-018": {
-   "node": "wall-018",
-   "usd_name": "i_79457959453a5db0",
-   "bbox_m": [
-    [
-     9.0771,
-     0.0,
-     6.6857
-    ],
-    [
-     9.1029,
-     2.7,
-     7.3029
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL18"
-  },
-  "wall-019": {
-   "node": "wall-019",
-   "usd_name": "i_b4733e06edff89e2",
-   "bbox_m": [
-    [
-     9.1543,
-     0.0,
-     6.6857
-    ],
-    [
-     9.2057,
-     2.7,
-     7.3029
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL19"
-  },
-  "wall-020": {
-   "node": "wall-020",
-   "usd_name": "i_c79e904e5ce1928f",
-   "bbox_m": [
-    [
-     9.2314,
-     0.0,
-     6.6857
-    ],
-    [
-     9.2829,
-     2.7,
-     7.3029
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL20"
-  },
-  "wall-021": {
-   "node": "wall-021",
-   "usd_name": "i_e607df99f956ec0b",
-   "bbox_m": [
-    [
-     9.3086,
-     0.0,
-     6.6857
-    ],
-    [
-     9.36,
-     2.7,
-     7.3029
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL21"
-  },
-  "wall-022": {
-   "node": "wall-022",
-   "usd_name": "i_600db79dac40a3da",
-   "bbox_m": [
-    [
-     9.4114,
-     0.0,
-     6.6857
-    ],
-    [
-     9.5143,
-     2.7,
-     7.3029
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL22"
-  },
-  "wall-023": {
-   "node": "wall-023",
-   "usd_name": "i_85b8d84e03d12cf9",
-   "bbox_m": [
-    [
-     9.6429,
-     0.0,
-     6.6857
-    ],
-    [
-     9.6943,
-     2.7,
-     7.3029
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL23"
-  },
-  "wall-024": {
-   "node": "wall-024",
-   "usd_name": "i_89a883d5be750b55",
-   "bbox_m": [
-    [
-     9.72,
-     0.0,
-     6.6857
-    ],
-    [
-     9.7457,
-     2.7,
-     7.3029
-    ]
-   ],
-   "storey": "Floor 1",
-   "kind": "wall",
-   "tag": "WL24"
+   "kind": "toilet"
   },
   "window-001": {
    "node": "window-001",
@@ -1040,7 +680,6 @@
    ],
    "storey": "Floor 1",
    "kind": "window",
-   "tag": "W1",
    "props": {
     "width_m": 1.62,
     "height_m": 1.2,
@@ -1064,7 +703,6 @@
    ],
    "storey": "Floor 1",
    "kind": "window",
-   "tag": "W2",
    "props": {
     "width_m": 1.209,
     "height_m": 1.2,
@@ -1088,7 +726,6 @@
    ],
    "storey": "Floor 1",
    "kind": "window",
-   "tag": "W3",
    "props": {
     "width_m": 1.234,
     "height_m": 1.2,
@@ -1112,7 +749,6 @@
    ],
    "storey": "Floor 1",
    "kind": "window",
-   "tag": "W5",
    "props": {
     "width_m": 1.954,
     "height_m": 1.2,
@@ -1136,7 +772,6 @@
    ],
    "storey": "Floor 1",
    "kind": "window",
-   "tag": "W4",
    "props": {
     "width_m": 0.926,
     "height_m": 1.2,
@@ -1151,6 +786,9 @@
   "window_sill_m": 0.9,
   "window_head_m": 2.1
  },
- "note": "generated for demo: extruded from plan map with default heights; stairs only when the plan map has a stairs item (none from raster plans)",
- "publishable": true
+ "note": "3D approximated from the drawing",
+ "publishable": true,
+ "props": {
+  "approx": true
+ }
 }

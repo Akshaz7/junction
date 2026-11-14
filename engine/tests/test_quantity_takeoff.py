@@ -41,3 +41,23 @@ def test_ifc_takeoff_rooms_slabs_and_missing_piping(monkeypatch):
     for m in re.finditer(r"\| [\d.]+ \| (?:m2|m|count) \| ((?:\[\d+\])+) \|", t):
         assert all(int(n) in ns for n in re.findall(r"\d+", m.group(1)))
     assert a["cost"]["usd_total"] == 0 and len(a["citations"]) >= 3 and len(a["evidence"]["boxes"]) >= 7
+
+
+def test_friendly_system_names_and_rollup():
+    from engine.analytics import friendly_system, system_rows
+    assert friendly_system("S_Schmutzwasser") == "Waste water (S_Schmutzwasser)"
+    assert friendly_system("S_PWC") == "Potable cold (S_PWC)"
+    assert friendly_system("S_PWH_11") == "Potable hot (S_PWH_11)"
+    assert friendly_system("S_Regenwasser") == "Rainwater (S_Regenwasser)"
+    assert friendly_system("Unit A Domestic Cold Water") == "Potable cold (Unit A Domestic Cold Water)"
+    assert friendly_system("M531 126") == "M531 126"
+    assert friendly_system("unknown") == "Unnamed system"
+    rows, rest = system_rows([(str(i), 1, 1.0) for i in range(11)])
+    assert len(rows) == 8 and rest == 3
+
+
+def test_piping_systems_answer_is_friendly_and_capped():
+    from engine.answer import answer
+    a = answer("List the piping systems by length", ["ifc_bench__digital-hub-plumbing"])
+    t = a["answer"]["text_md"]
+    assert "Waste water (S_Schmutzwasser)" in t and "smaller system" in t
