@@ -1,0 +1,66 @@
+{
+  "unseen_random_validation_file": "data/full/junction-dataset/data/ifc_models/resbim-297_model.ifc",
+  "size_bytes": 353992,
+  "largest": [
+    {
+      "path": "data/full/junction-dataset/data/ifc_bench/sixty5_arc.ifc",
+      "size_bytes": 342657851
+    },
+    {
+      "path": "data/full/junction-dataset/data/ifc_bench/sixty5_plumbing.ifc",
+      "size_bytes": 222099255
+    },
+    {
+      "path": "data/full/junction-dataset/data/ifc_bench/dental_clinic_mep.ifc",
+      "size_bytes": 125780663
+    },
+    {
+      "path": "data/full/junction-dataset/data/ifc_bench/sixty5_ventilation.ifc",
+      "size_bytes": 114891068
+    },
+    {
+      "path": "data/full/junction-dataset/data/ifc_bench/sixty5_electrical.ifc",
+      "size_bytes": 97058912
+    },
+    {
+      "path": "data/full/junction-dataset/data/ifc_models/bimspeed-barlad_ro-arc-m3-e-pth-0000.ifc",
+      "size_bytes": 85116839
+    },
+    {
+      "path": "data/full/junction-dataset/data/opening_design/CTR/Models & CAD/IFC - CTR/CTR-CTR - 1st Phase - Shell.ifc",
+      "size_bytes": 83942969
+    },
+    {
+      "path": "data/full/junction-dataset/data/opening_design/CTR/Models & CAD/IFC - CTR/CTR-CTR - 1st Phase -Stairs & Elevators.ifc",
+      "size_bytes": 79537190
+    },
+    {
+      "path": "data/full/junction-dataset/data/opening_design/CTR/Models & CAD/IFC - CTR/CTR-CTR - 1st Phase - Structure.ifc",
+      "size_bytes": 77427373
+    },
+    {
+      "path": "data/full/junction-dataset/data/ifc_models/bsc-molio_molio-with-uris.ifc",
+      "size_bytes": 73945142
+    },
+    {
+      "path": "data/full/junction-dataset/data/ifc_bench/molio_arc.ifc",
+      "size_bytes": 73945142
+    },
+    {
+      "path": "data/junction-dataset-preview/data/ifc_models/bsc-molio_molio-with-uris.ifc",
+      "size_bytes": 73945142
+    },
+    {
+      "path": "data/full/junction-dataset/data/ifc_bench/hitos_arc.ifc",
+      "size_bytes": 64095402
+    },
+    {
+      "path": "data/junction-dataset-preview/data/ifc_bench/hitos_arc.ifc",
+      "size_bytes": 64095402
+    },
+    {
+      "path": "data/full/junction-dataset/data/ifc_models/bsc-clinic_clinic-plumbing.ifc",
+      "size_bytes": 55834520
+    }
+  ]
+}
