@@ -6,14 +6,19 @@ import asyncpg
 from . import config
 
 _pool: asyncpg.Pool | None = None
+_pool_loop = None  # serverless hosts may run each request on a new event loop; a pool is bound to its loop
 
 
 async def get_pool() -> asyncpg.Pool | None:
-    global _pool
+    global _pool, _pool_loop
+    loop = asyncio.get_running_loop()
+    if _pool is not None and _pool_loop is not loop:
+        _pool = None  # stale pool from another loop; drop it (its connections close with that loop)
     if _pool is None:
         try:
             _pool = await asyncio.wait_for(
-                asyncpg.create_pool(config.database_url(), min_size=1, max_size=5), timeout=2)
+                asyncpg.create_pool(config.database_url(), min_size=1, max_size=5), timeout=5)
+            _pool_loop = loop
         except Exception:
             return None
     return _pool

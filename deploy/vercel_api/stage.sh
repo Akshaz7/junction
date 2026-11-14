@@ -7,4 +7,4 @@ mkdir -p "$OUT"
 git -C "$ROOT" archive HEAD server engine | tar -x -C "$OUT"
 cp -R "$ROOT/deploy/demo_artifacts" "$OUT/artifacts"; rm -f "$OUT"/artifacts/*/scene.usdz
 rm -rf "$OUT/server/tests" "$OUT/engine/tests"
-cp "$ROOT/deploy/vercel_api/index.py" "$ROOT/deploy/vercel_api/requirements.txt" "$OUT/"
+cp "$ROOT/deploy/vercel_api/index.py" "$ROOT/deploy/vercel_api/requirements.txt" "$ROOT/deploy/vercel_api/vercel.json" "$OUT/"
