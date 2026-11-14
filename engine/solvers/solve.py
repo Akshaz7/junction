@@ -384,6 +384,15 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
     kind_note = ""
     if kind in ("shower", "bathtub") and re.search(r"\bshowers?\b", question, re.I) and re.search(r"\bbath ?tubs?\b", question, re.I):
         kinds = {"shower", "bathtub"}   # "showers and bathtubs in total"
+    if doc.mode == "planmap" and kind in FIXTURE_RX and p.type == "count":
+        unknown = [i for i in doc.items if i.source == "dxf" and i.kind == "other"
+                   and i.props.get("role") == "fixture" and i.conf >= MIN_CONF
+                   and (not page or i.page == page) and i.item_id not in (hidden or {})]
+        if unknown:
+            trace.append(_step("load", f"{len(unknown)} DXF fixture symbols have no fixture type"))
+            return _abstain(question, doc_id,
+                            f"The DXF contains unclassified fixture symbols, so I cannot give a reliable {_plural(kind, 1)} count.",
+                            trace, route, t0)
     items = [i for i in doc.items if i.kind in kinds]
     if kind == "stairs" and doc.mode == "ifc" and any(i.props.get("ifc_class") == "IfcStair" for i in items):
         items = [i for i in items if i.props.get("ifc_class") != "IfcStairFlight"]   # flights are parts of a stair
@@ -483,6 +492,16 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         if not sel and rid:
             sel = [i for i in items if (i.name or "").casefold() == rid.casefold() or (i.label or "").casefold() == rid.casefold()
                    or i.item_id == rid or str(i.props.get("number") or "").casefold() == rid.casefold()]
+        if (doc.mode == "planmap" and p.type == "count" and quoted and not rid and not hidden
+                and re.search(r"\brooms?\s+label(?:led|ed)\b", question, re.I)):
+            # ROOM_TEXT is an explicit source label, independent of whether its insertion point falls
+            # inside the room outline. Do not silently lose labels when polygon attribution fails.
+            labels = [i for i in doc.items if i.kind == "text" and i.source == "dxf" and i.conf >= MIN_CONF
+                      and i.props.get("dxf_layer", "ROOM_TEXT") == "ROOM_TEXT" and (not page or i.page == page)
+                      and any(_label_matches(i, t) for t in quoted)]
+            if len(labels) > len(sel):
+                sel = labels
+                trace.append(_step("filter", "counted explicit DXF ROOM_TEXT labels; room polygon attribution is incomplete"))
         if not sel and (quoted or rid) and doc.mode == "planmap" and not any(i.label for i in items):
             return _abstain(question, doc_id, "The room names on this plan have not been read, so I cannot pick out that room.",
                             trace, route, t0)
@@ -513,6 +532,11 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
             noun = sub_name[:-1] + "ies" if (n != 1 and sub_name.endswith("y")) else noun
             text = (f"I found **no {sub_name}s** {where}." if n == 0 else
                     f"There {'is' if n == 1 else 'are'} **{n} {noun}** {where}. {marks}")
+            if n == 0:
+                types = sorted({str(i.props.get("room_type")) for i in doc.items if i.kind == "room" and i.props.get("room_type")})
+                text += (f" I looked at {len([i for i in doc.items if i.kind == 'room'])} rooms (types: {', '.join(types[:10]) or 'none named'}); "
+                         "none is labelled that way, which is not proof the plan has none.")
+                conf = min(conf, 0.5)
         elif kind_note and n:
             text = f"There {'is' if n == 1 else 'are'} **{n} {kind_note[:-1] if n == 1 else kind_note}** (spaces named as a WC or toilet) {where}. {marks}"
         elif n == 0:

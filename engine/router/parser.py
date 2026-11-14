@@ -186,6 +186,8 @@ def parse(question: str) -> Parsed:
     # 0. several kinds in one count question: "how many windows and doors", "count the X and Y"
     if RE_HOWMANY.search(body) and not RE_COMPOUND_HARD.search(body) and not RE_BREAKDOWN.search(body) and not RE_SUPER.search(body):
         ks = multi_kinds(body)
+        if len(ks) > 1 and set(ks) == {"shower", "bathtub"} and re.search(r"\b(?:in total|total|combined|altogether|together|in all)\b", body):
+            ks = ks[:1]   # "showers and bathtubs in total" is one summed count (the dataset's question), not a per-kind pair
         if len(ks) > 1:
             return Parsed("count", ks[0], scope, True, "how-many-multi", ref, kinds=ks)
     # 1. strong text markers

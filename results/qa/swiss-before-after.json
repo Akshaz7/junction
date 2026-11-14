@@ -1,0 +1,401 @@
+{
+  "row": "E-39",
+  "set": "sample200 / swiss_dwellings",
+  "baseline_commit": "54f0cb545e0a07054a3e8b0ac44010b1cc2d43a9",
+  "heldout_documents_evaluated": 39,
+  "development_data": "generated for demo DXFs only",
+  "method": "Frozen reader+code solver; rebuild both sides in temporary directories. No model layer imported or called. Archived model-backed results shown separately; abstentions count as incorrect.",
+  "archive": {
+    "n": 57,
+    "correct": 39,
+    "wrong": 18,
+    "abstained": 0,
+    "unscored": 0,
+    "error": 0,
+    "accuracy": 0.6842,
+    "answered_accuracy": 0.6842,
+    "cost_usd_total": 0.000935,
+    "cost_usd_per_answer": 1.64e-05,
+    "latency_ms_mean": 89,
+    "latency_ms_p95": 14
+  },
+  "before": {
+    "n": 57,
+    "correct": 39,
+    "wrong": 16,
+    "abstained": 2,
+    "unscored": 0,
+    "error": 0,
+    "accuracy": 0.6842,
+    "answered_accuracy": 0.7091,
+    "cost_usd_total": 0.0,
+    "cost_usd_per_answer": 0.0,
+    "latency_ms_mean": 0,
+    "latency_ms_p95": 1
+  },
+  "after": {
+    "n": 57,
+    "correct": 42,
+    "wrong": 3,
+    "abstained": 12,
+    "unscored": 0,
+    "error": 0,
+    "accuracy": 0.7368,
+    "answered_accuracy": 0.9333,
+    "cost_usd_total": 0.0,
+    "cost_usd_per_answer": 0.0,
+    "latency_ms_mean": 0,
+    "latency_ms_p95": 2
+  },
+  "conversion_errors": {
+    "before": {},
+    "after": {}
+  },
+  "cells": {
+    "before": {
+      "ALL x ALL": {
+        "n": 57,
+        "correct": 39,
+        "wrong": 16,
+        "abstained": 2,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.6842,
+        "answered_accuracy": 0.7091,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 1
+      },
+      "ALL x area": {
+        "n": 18,
+        "correct": 14,
+        "wrong": 2,
+        "abstained": 2,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.7778,
+        "answered_accuracy": 0.875,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 1
+      },
+      "ALL x count": {
+        "n": 39,
+        "correct": 25,
+        "wrong": 14,
+        "abstained": 0,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.641,
+        "answered_accuracy": 0.641,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 1
+      },
+      "swiss_dwellings x ALL": {
+        "n": 57,
+        "correct": 39,
+        "wrong": 16,
+        "abstained": 2,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.6842,
+        "answered_accuracy": 0.7091,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 1
+      },
+      "swiss_dwellings x area": {
+        "n": 18,
+        "correct": 14,
+        "wrong": 2,
+        "abstained": 2,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.7778,
+        "answered_accuracy": 0.875,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 1
+      },
+      "swiss_dwellings x count": {
+        "n": 39,
+        "correct": 25,
+        "wrong": 14,
+        "abstained": 0,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.641,
+        "answered_accuracy": 0.641,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 1
+      }
+    },
+    "after": {
+      "ALL x ALL": {
+        "n": 57,
+        "correct": 42,
+        "wrong": 3,
+        "abstained": 12,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.7368,
+        "answered_accuracy": 0.9333,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 2
+      },
+      "ALL x area": {
+        "n": 18,
+        "correct": 14,
+        "wrong": 2,
+        "abstained": 2,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.7778,
+        "answered_accuracy": 0.875,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 2
+      },
+      "ALL x count": {
+        "n": 39,
+        "correct": 28,
+        "wrong": 1,
+        "abstained": 10,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.7179,
+        "answered_accuracy": 0.9655,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 1
+      },
+      "swiss_dwellings x ALL": {
+        "n": 57,
+        "correct": 42,
+        "wrong": 3,
+        "abstained": 12,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.7368,
+        "answered_accuracy": 0.9333,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 2
+      },
+      "swiss_dwellings x area": {
+        "n": 18,
+        "correct": 14,
+        "wrong": 2,
+        "abstained": 2,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.7778,
+        "answered_accuracy": 0.875,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 2
+      },
+      "swiss_dwellings x count": {
+        "n": 39,
+        "correct": 28,
+        "wrong": 1,
+        "abstained": 10,
+        "unscored": 0,
+        "error": 0,
+        "accuracy": 0.7179,
+        "answered_accuracy": 0.9655,
+        "cost_usd_total": 0.0,
+        "cost_usd_per_answer": 0.0,
+        "latency_ms_mean": 0,
+        "latency_ms_p95": 1
+      }
+    }
+  },
+  "cost_usd": 0.0,
+  "production_artifacts_modified": false,
+  "changed_rows": [
+    {
+      "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+      "question": "How many rooms labelled 'Zimmer' are there on this floor?",
+      "gold": 12,
+      "before": {
+        "outcome": "wrong",
+        "value": 9
+      },
+      "after": {
+        "outcome": "correct",
+        "value": 12
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site1040-bldg2136-floor9659",
+      "question": "How many toilets (WC) are drawn on this floor plan?",
+      "gold": 4,
+      "before": {
+        "outcome": "wrong",
+        "value": 0
+      },
+      "after": {
+        "outcome": "abstained",
+        "value": null
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+      "question": "How many washbasins are drawn on this floor plan?",
+      "gold": 17,
+      "before": {
+        "outcome": "wrong",
+        "value": 0
+      },
+      "after": {
+        "outcome": "abstained",
+        "value": null
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site248-bldg456-floor1800",
+      "question": "How many rooms labelled 'Wohnen' are there on this floor?",
+      "gold": 3,
+      "before": {
+        "outcome": "wrong",
+        "value": 1
+      },
+      "after": {
+        "outcome": "correct",
+        "value": 3
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site289-bldg536-floor2149",
+      "question": "How many washbasins are drawn on this floor plan?",
+      "gold": 8,
+      "before": {
+        "outcome": "wrong",
+        "value": 0
+      },
+      "after": {
+        "outcome": "abstained",
+        "value": null
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site285-bldg527-floor51568",
+      "question": "How many bathtubs are drawn on this floor plan?",
+      "gold": 4,
+      "before": {
+        "outcome": "wrong",
+        "value": 0
+      },
+      "after": {
+        "outcome": "abstained",
+        "value": null
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site303-bldg598-floor2434",
+      "question": "How many toilets (WC) are drawn on this floor plan?",
+      "gold": 3,
+      "before": {
+        "outcome": "wrong",
+        "value": 0
+      },
+      "after": {
+        "outcome": "abstained",
+        "value": null
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site3764-bldg5789-floor24598",
+      "question": "How many showers are drawn on this floor plan?",
+      "gold": 3,
+      "before": {
+        "outcome": "wrong",
+        "value": 0
+      },
+      "after": {
+        "outcome": "abstained",
+        "value": null
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site383-bldg846-floor3730",
+      "question": "How many rooms labelled 'Schlafzimmer' are there on this floor?",
+      "gold": 5,
+      "before": {
+        "outcome": "wrong",
+        "value": 4
+      },
+      "after": {
+        "outcome": "correct",
+        "value": 5
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site629-bldg1355-floor5906",
+      "question": "How many bathtubs are drawn on this floor plan?",
+      "gold": 2,
+      "before": {
+        "outcome": "wrong",
+        "value": 0
+      },
+      "after": {
+        "outcome": "abstained",
+        "value": null
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site604-bldg1319-floor5779",
+      "question": "How many bathtubs are drawn on this floor plan?",
+      "gold": 1,
+      "before": {
+        "outcome": "wrong",
+        "value": 0
+      },
+      "after": {
+        "outcome": "abstained",
+        "value": null
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site644-bldg1390-floor6077",
+      "question": "How many toilets (WC) are drawn on this floor plan?",
+      "gold": 5,
+      "before": {
+        "outcome": "wrong",
+        "value": 0
+      },
+      "after": {
+        "outcome": "abstained",
+        "value": null
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site926-bldg1958-floor8576",
+      "question": "How many bathtubs are drawn on this floor plan?",
+      "gold": 2,
+      "before": {
+        "outcome": "wrong",
+        "value": 0
+      },
+      "after": {
+        "outcome": "abstained",
+        "value": null
+      }
+    }
+  ]
+}

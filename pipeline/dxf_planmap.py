@@ -20,6 +20,51 @@ REPO = Path(__file__).resolve().parent.parent
 UNIT_M = {0: 1.0, 1: 0.0254, 2: 0.3048, 4: 0.001, 5: 0.01, 6: 1.0, 7: 1000.0}  # $INSUNITS -> metres
 NUM = re.compile(r"^\d+\.\d+$")
 AREA = re.compile(r"^[\d.]+\s*m²$")
+FIXTURE_KINDS = {
+    "toilet": re.compile(r"\b(?:toilet\w*|wc|water closet|toilette)\b", re.I),
+    "sink": re.compile(r"\b(?:sink\w*|wash ?basin\w*|basin\w*|lavabo\w*|waschbecken|waschtisch)\b", re.I),
+    "shower": re.compile(r"\b(?:shower\w*|dusche\w*|douche\w*|doccia)\b", re.I),
+    "bathtub": re.compile(r"\b(?:bath ?tub\w*|badewanne\w*|wanne|baignoire\w*|vasca)\b", re.I),
+}
+
+
+def fixture_kind(*names):
+    """Use explicit CAD semantics only; the size of an unnamed symbol is not its type."""
+    text = " ".join(str(n or "") for n in names).replace("_", " ").replace("-", " ")
+    matches = [kind for kind, rx in FIXTURE_KINDS.items() if rx.search(text)]
+    return matches[0] if len(matches) == 1 else None
+
+
+def room_texts(ms):
+    """Left/baseline TEXT uses insert even when a default align_point is present."""
+    texts = []
+    for e in ms.query("TEXT MTEXT"):
+        if e.dxf.layer != "ROOM_TEXT":
+            continue
+        if e.dxftype() == "MTEXT":
+            v = e.dxf.insert
+            text = e.plain_text().strip()
+        else:
+            aligned = e.dxf.halign != 0 or e.dxf.valign != 0
+            v = e.dxf.align_point if aligned and e.dxf.hasattr("align_point") else e.dxf.insert
+            text = e.dxf.text.strip()
+        texts.append((text, float(v.x), float(v.y)))
+    return texts
+
+
+def assign_room_texts(rooms, texts):
+    """Boundary labels belong to rooms too; nested outlines prefer the smallest room."""
+    from shapely.geometry import Point, Polygon
+    polygons = [Polygon(r) for r in rooms]
+    assigned = {i: [] for i in range(len(rooms))}
+    for t, x, y in texts:
+        if t.startswith("App."):
+            continue
+        owners = [i for i, poly in enumerate(polygons) if poly.covers(Point(x, y))]
+        if owners:
+            owner = min(owners, key=lambda i: polygons[i].area)
+            assigned[owner].append((t, x, y))
+    return assigned
 
 
 def _pts(e):
@@ -79,9 +124,7 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
     page = json.loads((art / "pages.json").read_text())
     p1 = page["pages"][0]
     W, H = p1["w"], p1["h"]
-    texts = [(e.dxf.text.strip(), float(v.x), float(v.y))
-             for e in ms.query("TEXT") if e.dxf.layer == "ROOM_TEXT"
-             for v in [e.dxf.align_point if e.dxf.hasattr("align_point") else e.dxf.insert]]
+    texts = room_texts(ms)
     if page["source"] == "dxf":
         lines = pg.dxf_lines(doc)
         x0, y0, s, _, Hh = pg.dxf_frame(lines)
@@ -112,11 +155,7 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
 
     # rooms
     rooms = [p for e in ms.query('LWPOLYLINE[layer=="ROOM_OUTLINE"]') if e.closed for p in [_pts(e)]]
-    assign = {i: [] for i in range(len(rooms))}
-    for t, x, y in texts:
-        for i, r in enumerate(rooms):
-            if _inside((x, y), r):
-                assign[i].append((t, x, y)); break
+    assign = assign_room_texts(rooms, texts)
     for i, r in enumerate(rooms):
         ts = [t for t, _, _ in assign[i]]
         name = next((t for t in ts if not NUM.match(t) and not AREA.match(t) and not t.startswith("App.")), "")
@@ -144,16 +183,34 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
             w = max(box(p)[2] - box(p)[0], box(p)[3] - box(p)[1])
             add("door", "", p, {"swing_radius_m": round(sw[2] * unit_m, 2) if sw else None,
                                 "leaf_len_m": round(w * unit_m, 2)}, "dxf")
-    for e in ms.query('LWPOLYLINE[layer=="FIXTURE"]'):
-        if e.closed:
-            add("other", "", _pts(e), {"role": "fixture"}, "dxf")
+    # Blocks represent one fixture, even when several nested curves draw its symbol.
+    # Semantic layers/block names can identify a fixture; anonymous FIXTURE geometry stays unknown.
+    from ezdxf import bbox as dxf_bbox
+    for e in ms.query("LWPOLYLINE INSERT ELLIPSE CIRCLE"):
+        name = e.dxf.name if e.dxftype() == "INSERT" else ""
+        kind = fixture_kind(e.dxf.layer, name)
+        if kind is None and e.dxf.layer != "FIXTURE":
+            continue
+        if e.dxftype() == "LWPOLYLINE":
+            if not e.closed:
+                continue
+            poly = _pts(e)
+        else:
+            bounds = dxf_bbox.extents([e])
+            if not bounds.has_data:
+                continue
+            lo, hi = bounds.extmin, bounds.extmax
+            poly = [(lo.x, lo.y), (hi.x, lo.y), (hi.x, hi.y), (lo.x, hi.y)]
+        add(kind or "other", name, poly,
+            {"role": "fixture", "dxf_layer": e.dxf.layer, "dxf_block": name,
+             "classification": "explicit" if kind else "unknown"}, "dxf")
     # text items
     for t, x, y in texts:
         c = px((x, y)); h = 8
         cnt["text"] += 1
         items.append({"item_id": f"text-{cnt['text']}", "kind": "text", "label": t,
                       "bbox_px": [c[0] - 4 * len(t), c[1] - h, c[0] + 4 * len(t), c[1] + h],
-                      "polygon_px": None, "props": {}, "conf": 1.0, "source": "dxf"})
+                      "polygon_px": None, "props": {"dxf_layer": "ROOM_TEXT"}, "conf": 1.0, "source": "dxf"})
     m_per_px = unit_m / a
     pm = {"doc_id": doc_id, "page": 1, "image": {"w": W, "h": H},
           "scale": {"m_per_px": round(m_per_px, 6), "method": method, "confidence": 1.0 if tf["rms_px"] < 6 else 0.6},

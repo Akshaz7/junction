@@ -1,12 +1,14 @@
 """FIX-6 (Awais, issue #1): storey counts, zero-count honesty, library questions, app-feature requests, typo tolerance. All $0, no model."""
-import os
-
 import pytest
 
-os.environ.setdefault("MODELS_FAKE", "1")
 from engine.answer import answer
 from engine.library import fix_typos, app_feature, wants_library
 from server.schema import validate_answer
+
+@pytest.fixture(autouse=True)
+def _fake(monkeypatch):
+    monkeypatch.setenv("MODELS_FAKE", "1")
+
 
 AC = "ifc_bench__ac20-arc"
 C1 = "cubicasa5k__colorful-11397"
@@ -72,3 +74,17 @@ def test_typo_question_answers():
     a = answer("How many windos are there?", [C1])
     validate_answer(a)
     assert a["answer"]["value"] == 11 and a["question"] == "How many windos are there?"
+
+
+def test_showers_and_bathtubs_in_total_is_one_sum():
+    from engine.router.parser import parse
+    p = parse("How many showers and bathtubs are drawn on this floor plan in total?")
+    assert p.kinds == ["shower"]
+    assert len(parse("How many showers and bathtubs are there?").kinds) == 2   # without a total cue FIX-1's per-kind pair stays
+
+
+def test_named_room_zero_is_not_certain():
+    a = answer("How many separate WC rooms are on this floor plan?", [C1])
+    validate_answer(a)
+    if a["answer"]["value"] == 0:
+        assert a["answer"]["confidence"] <= 0.5 and "not proof" in a["answer"]["text_md"]
