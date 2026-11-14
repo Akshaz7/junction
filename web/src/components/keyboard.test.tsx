@@ -84,6 +84,20 @@ it('pairing closes on Escape or its close button and restores the trigger', asyn
   expect(document.querySelector('[inert]')).toBeNull()
 })
 
+it('pairing QR encodes the native app link; the https link stays as text under it', async () => {
+  const { default: qrcode } = await import('qrcode-generator')
+  await act(async () => root.render(<PairPhoneButton />))
+  await click(host.querySelector<HTMLButtonElement>('[aria-label="Pair a phone"]')!)
+  const link = document.querySelector<HTMLInputElement>('input[aria-label="Pairing link"]')!.value
+  const code = new URL(link).hash.match(/code=(\w+)/)![1]
+  const expected = qrcode(0, 'M'); expected.addData(`hologram://pair?code=${code}`); expected.make()
+  const reference = document.createElement('div'); reference.innerHTML = expected.createSvgTag({ cellSize: 4, margin: 2, scalable: true })
+  expect(document.querySelector('.pair-qr')!.innerHTML).toBe(reference.innerHTML)
+  expect(link).toMatch(/^https?:\/\/.*#\/pair\?code=/)
+  expect(document.querySelector('.pair-popover')!.textContent).toContain('Scan with your iPhone camera to open Hologram')
+  expect(document.querySelector('.pair-popover')!.textContent).toContain('No app? Open in browser')
+})
+
 it('upload handles the native Escape cancel event and returns focus to Upload', async () => {
   // jsdom has no native dialog behavior: model the browser's Escape -> cancel default action.
   const nativeEscape = (event: KeyboardEvent) => {

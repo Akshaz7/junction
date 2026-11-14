@@ -56,6 +56,11 @@ export function pairLink(code: string, origin = window.location.origin): string 
   return `${origin}/#/pair?code=${code}`
 }
 
+/** What the pairing QR encodes: opens the native Hologram app, which loads the web pairing link in its web shell. */
+export function pairAppLink(code: string): string {
+  return `hologram://pair?code=${encodeURIComponent(code)}`
+}
+
 export function pairCodeFromHash(hash: string): string | null {
   const match = hash.match(/^#\/pair\?(.*)$/)
   return match ? new URLSearchParams(match[1]).get('code') : null
@@ -85,6 +90,21 @@ export async function isPairedChat(chatId: string, options: { failOpen?: boolean
     // The server could not answer in time: for a chat that just arrived over this browser's pairing socket, follow it anyway.
     if (!response && options.failOpen) return true
     if (response?.ok && (await response.json() as { paired?: boolean }).paired) { rememberChat(chatId); return true }
+  }
+  return false
+}
+
+async function proofFor(code: string, chatId: string): Promise<string | null> {
+  try {
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${code}:${chatId}`))
+    return Array.from(new Uint8Array(digest).slice(0, 8), (b) => b.toString(16).padStart(2, '0')).join('')
+  } catch { return null }
+}
+
+/** A live "pair.chat" event carries a hash of (code, chat id): if one of our codes matches, the chat is ours with no server call. */
+export async function acceptPairProof(chatId: string, proof: string): Promise<boolean> {
+  for (const code of read()) {
+    if ((await proofFor(code, chatId)) === proof) { rememberChat(chatId); return true }
   }
   return false
 }

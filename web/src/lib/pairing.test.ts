@@ -37,6 +37,12 @@ describe('pairing', () => {
     expect(p.pairLink('abc12345', 'https://x.test')).toBe('https://x.test/#/pair?code=abc12345')
   })
 
+  it('the QR payload opens the native app, the visible link stays https', async () => {
+    const p = await import('./pairing')
+    expect(p.pairAppLink('abc12345')).toBe('hologram://pair?code=abc12345')
+    expect(p.pairLink('abc12345', 'https://x.test')).toMatch(/^https:/)
+  })
+
   it('filter: known chat passes, paired chat passes via server, stranger fails', async () => {
     const p = await import('./pairing')
     const known = await import('./known-chats')
@@ -59,6 +65,22 @@ describe('pairing', () => {
     expect(await p.isPairedChat('late', { failOpen: true })).toBe(true)
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => ({ paired: false }) })))
     expect(await p.isPairedChat('stranger', { failOpen: true })).toBe(false)
+  })
+
+  it('a live proof for one of our codes marks the chat as known without a server call', async () => {
+    const p = await import('./pairing')
+    const known = await import('./known-chats')
+    p.addPairing('abc12345')
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+    const { createHash } = await import('node:crypto')
+    const good = createHash('sha256').update('abc12345:chat-z').digest('hex').slice(0, 16)
+    expect(await p.acceptPairProof('chat-z', 'deadbeefdeadbeef')).toBe(false)
+    expect(known.isKnownChat('chat-z')).toBe(false)
+    expect(await p.acceptPairProof('chat-z', good)).toBe(true)
+    expect(known.isKnownChat('chat-z')).toBe(true)
+    expect(await p.isPairedChat('chat-z')).toBe(true)
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 
   it('unpaired device never asks the server', async () => {

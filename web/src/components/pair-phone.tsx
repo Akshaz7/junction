@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { Smartphone, X } from 'lucide-react'
 import qrcode from 'qrcode-generator'
 import { Button } from './ui'
-import { ensurePairCode, getPairings, onPairingChange, pairCodeFromHash, addPairing, pairLink, unpair } from '../lib/pairing'
+import { ensurePairCode, getPairings, onPairingChange, pairCodeFromHash, addPairing, pairLink, pairAppLink, unpair } from '../lib/pairing'
 import { useDialogFocus } from '../lib/use-dialog-focus'
 
 function qrSvg(text: string): string {
@@ -59,9 +59,10 @@ export function PairPhoneButton() {
     <Button variant="raised" aria-label="Pair a phone" title="Pair a phone" aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? dialogId : undefined} onClick={(event) => { trigger.current = event.currentTarget; setOpen((value) => !value) }}><Smartphone size={16} /><span>{paired ? 'Paired' : 'Pair a phone'}</span></Button>
     {open && code && <section ref={dialog} id={dialogId} className="pair-popover" role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
       <header><strong id={titleId}>Pair a phone</strong><button type="button" aria-label="Close pairing" onClick={() => setOpen(false)}><X size={16} /></button></header>
-      <div className="pair-qr" role="img" aria-label="QR code to pair a phone" dangerouslySetInnerHTML={{ __html: qrSvg(link) }} />
-      <p>Scan with the phone camera. Chats you start here then open and stream on the phone, with no other step.</p>
-      <input readOnly className="pair-link" aria-label="Pairing link" value={link} onFocus={(event) => event.currentTarget.select()} />
+      <div className="pair-qr" role="img" aria-label="QR code to pair a phone" dangerouslySetInnerHTML={{ __html: qrSvg(pairAppLink(code)) }} />
+      <p>Scan with your iPhone camera to open Hologram. Chats you start here then open and stream on the phone, with no other step.</p>
+      <label className="pair-link-label" htmlFor={`${dialogId}-link`}>No app? Open in browser</label>
+      <input readOnly id={`${dialogId}-link`} className="pair-link" aria-label="Pairing link" value={link} onFocus={(event) => event.currentTarget.select()} />
       <Button variant="raised" onClick={() => { unpair(); setOpen(false) }}>Unpair</Button>
     </section>}
   </span>
