@@ -123,6 +123,30 @@ def _reading_order(items: list[Item]) -> list[Item]:
     return sorted(items, key=lambda i: (i.page, (i.bbox_px or [0, 0])[1] // 40, (i.bbox_px or [0, 0])[0], i.item_id))
 
 
+_SING = {"stairs": "staircase", "furniture": "furniture item"}
+_PL = {"stairs": "stairs", "furniture": "furniture items", "space": "rooms", "room": "rooms"}
+
+
+def _cite_label(doc: Doc, its: list[Item], page: int) -> str:
+    """'Erdgeschoss · 16 doors, 44 windows' (IFC) or 'Page 2 · 11 doors' (plan map): what a citation points at, in words."""
+    counts: dict[str, int] = {}
+    for i in its:
+        counts[i.kind] = counts.get(i.kind, 0) + 1
+    parts = []
+    for k, n in sorted(counts.items(), key=lambda kv: -kv[1])[:3]:
+        w = _PL.get(k) or (k if n == 1 else k[:-1] + "ies" if k.endswith("y") and k[-2:-1] not in "aeiou" else k + ("es" if k.endswith(("s", "sh", "ch")) else "s"))
+        parts.append(f"{n} {w if n != 1 else _SING.get(k, k)}")
+    if len(counts) > 3:
+        parts.append(f"{sum(counts.values()) - sum(n for _k, n in sorted(counts.items(), key=lambda kv: -kv[1])[:3])} more")
+    what = ", ".join(parts)
+    if doc.mode == "planmap":
+        head = f"Page {page}" if (doc.pages or 1) > 1 else "Floor plan"
+    else:
+        st = sorted({i.storey for i in its if i.storey})
+        head = " / ".join(st[:2]) + (" +" + str(len(st) - 2) if len(st) > 2 else "") if st else f"Page {page}"
+    return f"{head} · {what}" if what else head
+
+
 def _evidence(doc: Doc, items: list[Item]):
     items = _reading_order(items)
     boxes, cites = [], []
@@ -136,7 +160,7 @@ def _evidence(doc: Doc, items: list[Item]):
             xs = [i.bbox_px for i in its if i.bbox_px]
             union = [min(b[0] for b in xs), min(b[1] for b in xs), max(b[2] for b in xs), max(b[3] for b in xs)] if xs else None
             cites.append({"n": n, "doc_id": doc.doc_id, "page": pg, "kind": "region", "bbox_px": union,
-                          "item_ids": [i.item_id for i in its], "quote": None})
+                          "item_ids": [i.item_id for i in its], "quote": None, "label": _cite_label(doc, its, pg)})
         for k, i in enumerate(items[:MAX_BOXES], 1):
             if i.bbox_px:
                 boxes.append({"item_id": i.item_id, "page": i.page, "bbox_px": i.bbox_px, "label": str(k)})
@@ -151,10 +175,10 @@ def _evidence(doc: Doc, items: list[Item]):
             cites.append({"n": len(cites) + 1, "doc_id": doc.doc_id, "page": pg, "kind": "element",
                           "bbox_px": [min(i.bbox_px[0] for i in its), min(i.bbox_px[1] for i in its),
                                       max(i.bbox_px[2] for i in its), max(i.bbox_px[3] for i in its)],
-                          "item_ids": [i.item_id for i in its], "quote": None})
+                          "item_ids": [i.item_id for i in its], "quote": None, "label": _cite_label(doc, its, pg)})
         if rest or not cites:
             cites.append({"n": len(cites) + 1, "doc_id": doc.doc_id, "page": 1, "kind": "element", "bbox_px": None,
-                          "item_ids": [i.item_id for i in rest], "quote": None})
+                          "item_ids": [i.item_id for i in rest], "quote": None, "label": _cite_label(doc, rest, 1)})
         for k, i in enumerate(items[:MAX_BOXES], 1):
             if i.bbox_px:
                 boxes.append({"item_id": i.item_id, "page": i.page, "bbox_px": i.bbox_px, "label": str(k), "kind": i.kind})

@@ -191,3 +191,13 @@ def test_piping_sixty5_no_waste_terminals_falls_back_honestly_and_missing_size()
 def test_ground_floor_slightly_below_datum_is_still_ground():
     a = answer("how many metres of pipe on the ground floor", [DH])
     assert "E00_OKRD" in a["answer"]["text_md"]
+
+
+def test_citations_carry_a_readable_label():
+    a = answer("how many doors and windows", [AC20])
+    labels = [c["label"] for c in a["citations"]]
+    assert "Erdgeschoss · 18 doors" in labels and "Erdgeschoss · 54 windows" in labels
+    assert all("Page" not in lb for lb in labels)
+    b = answer("how many windows and doors", [C1])
+    assert [c["label"] for c in b["citations"]] == ["Floor plan · 11 windows", "Floor plan · 11 doors"]
+    validate_answer(a)

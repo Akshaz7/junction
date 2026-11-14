@@ -68,3 +68,14 @@ Keep these column names: `scripts/demo_reset.py` parses them. Questions warm on 
 Use the judge's question and actual citations; retain scale/confidence qualifications. Show **Visualise it** and AR only if that upload has a usable scene. If processing is still running, explicitly switch to prepared AC20; never imply its answer came from their file. Prepared raster proof retains dataset credits/noncommercial terms. Generated sources must say **“generated for demo”**.
 
 For accuracy/cost use linked snapshots in [JUDGE_QA.md](JUDGE_QA.md) and [REPORT.md](REPORT.md). This script establishes no universal accuracy, free voice, live-sync latency or fine-tuning gain.
+
+## Phone
+
+1. **Install:** unlock the phone, plug it in, run `WEB_URL=https://hologram-khaki.vercel.app API_URL=https://hologram-khaki.vercel.app bash ios/scripts/install_on_device.sh` (not inside `heavy.sh`). Open **Stoa Pro**; allow camera, microphone and speech.
+2. **Pair:** on the laptop chat tap the phone icon to show the pairing QR. Scan it with the phone camera; it opens `hologram://pair?code=...` in the app.
+3. **Follow the chat:** ask on the laptop, for example "Where are the toilets?". The same question and answer should appear on the phone. If not, open **History** and pick the same chat.
+4. **Show on table:** on the answer tap **Show on table**, scan the table, **Place model**. The plan appears and the building rises. The same numbered items glow in their kind colours, and rooms show as floor tints.
+5. **Walk 1:1:** step around the model, tap an item for its tag, and hide an item to show the rule card. If AR fails, say so and use the recorded clip.
+6. **Say:** "The same numbered items go from the drawing to the 3D model to your table. Every answer shows its proof." Name any fallback out loud.
+
+Not yet seen on a physical phone screen: steps 2 to 5. Rehearse them once before judges arrive.
