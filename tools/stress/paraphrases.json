@@ -1,0 +1,131 @@
+{
+  "label": "generated for demo",
+  "entries": {
+    "67028600567b1abd97351df3e38342e4d05c0e81995406aa8bc3a565f0a624ad": {
+      "id": "C01",
+      "doc_id": "cubicasa5k__high-quality-108",
+      "question": "How many windows are shown on this floor plan?",
+      "label": "generated for demo",
+      "paraphrases": [
+        "How many windows appear on this floor?",
+        "Count windows shown on this level.",
+        "How many windows are on this plan?",
+        "Count windows on this floor plan.",
+        "How many windows shown here?",
+        "Count windows on this drawing.",
+        "How many windows on this floor?",
+        "Count windows on this level.",
+        "How many windows in this plan?",
+        "Count windows shown on this floor."
+      ],
+      "provider": "nvidia",
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "generation_cost_usd": 0.0
+    },
+    "2f79d8f1b6ce275617f08e0bc710df9bb7317a685d6bfe1f11d76a9c89f5a24d": {
+      "id": "C19",
+      "doc_id": "ifc_bench__ac20-arc",
+      "question": "show me all the windows",
+      "label": "generated for demo",
+      "paraphrases": [
+        "show all windows in the drawing",
+        "display every window present",
+        "list all window instances",
+        "show each window in plan",
+        "reveal all window symbols",
+        "display window locations",
+        "show window marks in drawing",
+        "list all window references",
+        "show all window annotations",
+        "display every window mark"
+      ],
+      "provider": "nvidia",
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "generation_cost_usd": 0.0
+    },
+    "7346ecc9d8cca2c202f98cc2d3bd890c3d52e2e9aa059cd2db3b52c9f15c741d": {
+      "id": "C20",
+      "doc_id": "ifc_bench__ac20-arc",
+      "question": "remove W3",
+      "label": "generated for demo",
+      "paraphrases": [
+        "Remove tag W3 from drawing",
+        "Delete W3 tag in plan",
+        "Erase W3 label from view",
+        "Remove W3 marker from sheet",
+        "Delete W3 tag from drawing",
+        "Remove W3 tag from plan",
+        "Erase W3 tag from view",
+        "Remove W3 tag from sheet",
+        "Delete W3 tag from view",
+        "Remove W3 tag from drawing"
+      ],
+      "provider": "nvidia",
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "generation_cost_usd": 0.0
+    },
+    "4bd7248b5a242481a7daff94084099b1976bfd8b0f9e1c665f53366ecbd0bf64": {
+      "id": "C21",
+      "doc_id": "ifc_bench__ac20-arc",
+      "question": "restore W3",
+      "label": "generated for demo",
+      "paraphrases": [
+        "Restore W3 floor drawing",
+        "Revert W3 to previous state",
+        "Restore W3 view",
+        "Set W3 current drawing",
+        "Restore W3 layer",
+        "Reapply W3 configuration",
+        "Reset W3 to default",
+        "Restore W3 status",
+        "Refresh W3 drawing",
+        "Reestablish W3 view"
+      ],
+      "provider": "nvidia",
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "generation_cost_usd": 0.0
+    },
+    "5a6ed944a78ee31b37f29972e7d0bb88555166a2764cb89220482bcf376ce447": {
+      "id": "C22",
+      "doc_id": "ifc_bench__ac20-arc",
+      "question": "reset",
+      "label": "generated for demo",
+      "paraphrases": [
+        "Reset the current view.",
+        "Perform a view reset.",
+        "Execute a reset command.",
+        "Reset the display now.",
+        "Please reset the view.",
+        "Trigger a view reset.",
+        "Reset the drawing view.",
+        "Apply a reset operation.",
+        "Reset the visual state.",
+        "Initiate a view reset."
+      ],
+      "provider": "runware",
+      "model": "google:gemini@3.1-flash-lite",
+      "generation_cost_usd": 0.00019
+    },
+    "3851c406e8cda85fe39090055051ce983d3022d63aad039f245a607cc4d2bc4b": {
+      "id": "C16",
+      "doc_id": "ifc_bench__ac20-arc",
+      "question": "Where is the fire exit on level 2?",
+      "label": "generated for demo",
+      "paraphrases": [
+        "Locate the fire exit on the second floor.",
+        "Show me the level 2 fire exit position.",
+        "Identify the fire exit on floor 2.",
+        "Point out the fire exit on the second level.",
+        "Where can I find the level 2 fire exit?",
+        "Display the fire exit location for level 2.",
+        "Find the fire exit on the second story.",
+        "Mark the fire exit on the level 2 plan.",
+        "Indicate the fire exit on the second floor map.",
+        "Highlight the fire exit on level 2."
+      ],
+      "provider": "runware",
+      "model": "google:gemini@3.1-flash-lite",
+      "generation_cost_usd": 0.000269
+    }
+  }
+}

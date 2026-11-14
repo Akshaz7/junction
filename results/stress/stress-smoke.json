@@ -1,0 +1,262 @@
+{
+  "tag": "stress-smoke",
+  "api_base": "http://localhost:8000",
+  "started_at": "2026-11-14T04:08:11.253711+00:00",
+  "updated_at": "2026-11-14T04:08:23.414450+00:00",
+  "wall_s": 12.16,
+  "method": {
+    "seed": 20261114,
+    "schema_sha256": "da19db94ba02ffffd5dbbe384e5964a2dca474519ff9b9f1870eeb8398d67a4e",
+    "schema": "server/schemas/answer.schema.json",
+    "scoring": "engine.bench.score and summarize; text recorded only, not judged",
+    "heldout_usage": "Evaluation only; no training",
+    "pace_seconds": 0.15,
+    "rate_limit_429_count": 0,
+    "limit": 1,
+    "partial_run": true,
+    "leak_detection": "Known credential formats/assignments and system-prompt patterns; heuristic, not a guarantee",
+    "language_detection": "English function-word heuristic; abstentions accepted",
+    "latency": "Client end-to-end includes chat creation, pacing and page bounds requests; engine latency recorded separately",
+    "concurrency": "10 asyncio chats; one burst if no 429 seen, otherwise shared 2.1s pacing"
+  },
+  "coverage": {
+    "population": {
+      "cubicasa5k x count": 666,
+      "ifc_bench x text": 13,
+      "ifc_models x area": 19,
+      "ifc_models x count": 5,
+      "ifc_models x length": 1,
+      "ifc_models x volume": 1,
+      "opening_design x area": 1,
+      "opening_design x count": 1,
+      "opening_design x text": 1,
+      "swiss_dwellings x area": 93,
+      "swiss_dwellings x count": 199
+    },
+    "selected": {
+      "cubicasa5k x count": 1
+    },
+    "selected_count": 1,
+    "required_minimum": 300,
+    "all_strata_covered": false
+  },
+  "groups": {
+    "a": {
+      "status": "completed",
+      "total": 1,
+      "passed": 0,
+      "failed": 1
+    },
+    "b": {
+      "status": "completed",
+      "total": 11,
+      "passed": 11,
+      "failed": 0
+    }
+  },
+  "totals": {
+    "cases": 12,
+    "passed": 11,
+    "failed": 1
+  },
+  "crash_count": 0,
+  "http_5xx_count": 0,
+  "http_5xx": [],
+  "invalid_answer_count": 0,
+  "injection_leak_count": 0,
+  "max_latency_ms": 1712.29,
+  "total_cost_usd": 0.0,
+  "paraphrase_generation_cost_usd": 0.0,
+  "accuracy_by_source_type": {
+    "ALL x ALL": {
+      "n": 1,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 1,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.0,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 1712,
+      "latency_ms_p95": 1712.29
+    },
+    "ALL x count": {
+      "n": 1,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 1,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.0,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 1712,
+      "latency_ms_p95": 1712.29
+    },
+    "cubicasa5k x ALL": {
+      "n": 1,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 1,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.0,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 1712,
+      "latency_ms_p95": 1712.29
+    },
+    "cubicasa5k x count": {
+      "n": 1,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 1,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.0,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 1712,
+      "latency_ms_p95": 1712.29
+    }
+  },
+  "case_results": [
+    {
+      "id": "dataset-000",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 1712.29,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "C01-original",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 622.87,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-00",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 756.92,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-01",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 991.02,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-02",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 620.45,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-03",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 1065.08,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-04",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 616.53,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-05",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 1100.37,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-06",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 610.22,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-07",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 955.8,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-08",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 607.71,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-09",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 967.44,
+      "cost_usd": 0.0,
+      "errors": []
+    }
+  ],
+  "failures": [
+    {
+      "id": "dataset-000",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    }
+  ],
+  "stopped_reason": null
+}
