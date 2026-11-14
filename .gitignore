@@ -33,3 +33,4 @@ web/playwright-report/
 results/bench/full_1.rows.jsonl
 deploy/demo_artifacts/ifc_bench__digital-hub-arc/scene.usdz
 web/public/brand/stoa-logo.svg
+web/public/brand/favicon-180.png

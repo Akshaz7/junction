@@ -917,3 +917,5 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
   .starter-grid .starter-card > svg { top: 12px; left: 12px; width: 20px; height: 20px; }
   .starter-grid .starter-card > strong { top: auto; bottom: 10px; left: 12px; right: 8px; font-size: 13px; line-height: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
+/* W-66f: stacked PRO set like the STOA letters (same serif, size and tracking), centred under them. */
+.rail .brand-mark .brand-pro { font-size: 1.02em; letter-spacing: .04em; margin-right: 0; translate: .78em 0; }
