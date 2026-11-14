@@ -940,3 +940,14 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 .composer-actions > .composer-upload { margin-left: 6px; margin-right: auto; }
 
 .changes-plain-summary { margin: 8px 12px 4px; font-size: 13px; color: var(--muted-foreground); }
+
+.answer-rich .answer-list { margin: 4px 0 6px; padding-left: 18px; list-style: disc; }
+.answer-rich .answer-list li { margin: 2px 0; }
+.answer-rich .answer-list li::marker { color: var(--muted-foreground, #6b7280); }
+
+/* Skeleton while an answer is being worked out: same rhythm as the answer text and the "How we know" card */
+.answer-skeleton { display: grid; gap: 10px; margin-top: 12px; }
+.answer-skeleton .skeleton-card { display: grid; gap: 10px; margin-top: 6px; padding: 14px; border: 1px solid var(--border); border-radius: 10px; }
+.skeleton-line { display: block; height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--muted) 0%, color-mix(in oklab, var(--muted) 55%, var(--background)) 50%, var(--muted) 100%); background-size: 200% 100%; animation: skeleton-shimmer 1.4s ease-in-out infinite; }
+@keyframes skeleton-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .skeleton-line { animation: none; } }

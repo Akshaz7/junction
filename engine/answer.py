@@ -233,9 +233,9 @@ def ensure_markers(res: dict) -> dict:
 
 
 def _guarded(question, doc_ids, on_event, scene_state, history):
-    """No question may end without an answer: past ANSWER_TIMEOUT_S (default 40, 0 = off) a hung model call is abandoned and a
+    """No question may end without an answer: past ANSWER_TIMEOUT_S (default 300, 0 = off) a hung model call is abandoned and a
     plain 'took too long' answer is returned, so the stream always ends with an answer event."""
-    limit = float(os.environ.get("ANSWER_TIMEOUT_S", "40") or 0)
+    limit = float(os.environ.get("ANSWER_TIMEOUT_S", "300") or 0)   # Ash: take as long as it needs; only a truly hung call is cut
     if limit <= 0:
         return _answer_forced(question, doc_ids, on_event, scene_state=scene_state, history=history)
     import concurrent.futures as cf
@@ -309,6 +309,16 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
     try:   # X20-X23/D01: feet, acres, unit prices on top of the metric answer (engine/units.py; value unchanged)
         from engine import units
         res = units.convert(res, question)
+    except Exception:  # noqa: BLE001
+        pass
+    try:   # E-79: "How we know" steps + confidence label, built by code from the cited elements
+        from engine import reasoning
+        res = reasoning.attach(res, question, _root())
+    except Exception:  # noqa: BLE001
+        pass
+    try:   # bullets need a blank line before them to render as a list
+        _t = res["answer"].get("text_md") or ""
+        res["answer"]["text_md"] = re.sub(r"(?m)^(?!- |\* |\||#)(\S[^\n]*)\n(- )", r"\1\n\n\2", _t)
     except Exception:  # noqa: BLE001
         pass
     res["question"] = original   # the user's own words are what is stored and shown; the resolved question stays in the trace
@@ -507,6 +517,18 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                 return res
         except Exception:  # never break the answer path
             pass
+
+        # X11: explicit totals across several selected documents are summed from one solver result per document
+        if len(doc_ids) >= 2:
+            try:
+                from engine import analytics as _an
+                if (res := _an.multi_doc_total(question, doc_ids, root, t0)) is not None:
+                    for s_ in res.get("trace", []):
+                        add(s_)
+                    res["trace"] = trace
+                    return res
+            except Exception:  # never break the answer path
+                pass
 
         # FIX-14: engineering sheets (M-/S-/P- ids, tag or SF tables) are answered from their own text, never from a plan map
         try:

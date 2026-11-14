@@ -156,3 +156,10 @@ Status values: `todo`, `doing`, `done`, `blocked`, `waiting-key`, `blocked-human
 | X-05 | - | every hour | - | Update `MORNING.md` (section 13). | The file is current at 08:30. | done | 08:28 LEAD: MORNING.md current (updated hourly through the run) |
 
 ---
+| W-48 | WEB4 keyboard pass part 2: data-screen + document-viewer | WEB4 | running | |
+| I-29 | AR hide runs /api/advise rule checks (FIX-4) | IOS-HOLO | running | |
+| E-79 | Evidence steps + confidence on every answer (reasoning object) | LEAD | done | committed with CX-ENGINE board fixes E-80 (B03..X31, X11) |
+| W-98 | Evidence card, bullet list rendering, skeleton loader | LEAD | done | |
+| S-40 | Rate limit burst cap, library catalogue, no early partial | CX-SERVER | done | |
+| W-99 | 3D undo / clear highlights / shift-click kind, smooth slider | CX-WEB | done | |
+| P-21 | Opening infill for floating windows, layout storey stacking | CX-PIPE | done | |

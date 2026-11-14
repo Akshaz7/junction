@@ -1,0 +1,39 @@
+{
+ "n_docs": 4787,
+ "cuts": {
+  "door": 0.1,
+  "window": 0.15,
+  "toilet": 0.1,
+  "sink": 0.2,
+  "shower": 0.1,
+  "bathtub": 0.1
+ },
+ "baseline": {
+  "door": 0.448,
+  "window": 0.356,
+  "toilet": 0.815,
+  "sink": 0.565,
+  "shower_bathtub": 0.115
+ },
+ "finetuned": {
+  "door": 0.041,
+  "window": 0.067,
+  "toilet": 0.129,
+  "sink": 0.135,
+  "shower_bathtub": 0.085
+ },
+ "hybrid": {
+  "door": 0.448,
+  "window": 0.356,
+  "toilet": 0.815,
+  "sink": 0.565,
+  "shower_bathtub": 0.085
+ },
+ "n_questions": {
+  "door": 3519,
+  "window": 4787,
+  "toilet": 4782,
+  "sink": 4725,
+  "shower_bathtub": 4442
+ }
+}

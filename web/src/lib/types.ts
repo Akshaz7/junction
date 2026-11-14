@@ -28,6 +28,12 @@ export interface UploadReceipt {
   detail: string
 }
 
+export interface ReasoningStep { kind: 'found' | 'measured' | 'checked' | 'calculated' | 'read'; title: string; text: string; cite?: number | null; ok?: boolean | null }
+export interface Reasoning {
+  steps: ReasoningStep[]
+  confidence: { label: 'Verified' | 'Cross-checked' | 'Estimate'; pct: number; reason: string; improve?: string | null }
+}
+
 export interface Answer {
   answer_id: string
   question: string
@@ -44,6 +50,8 @@ export interface Answer {
   latency_ms: number
   /** Edit checks for a hide/remove command in chat (severity, checked rules). */
   advisor_cards?: AdvisorCard[]
+  /** How the answer was found and how sure we are (backend, optional). */
+  reasoning?: Reasoning
 }
 
 export type Citation = Answer['citations'][number]

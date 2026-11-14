@@ -8,4 +8,7 @@
 .viewer3d-advisor-card summary { color: var(--color-muted-foreground, #5f5e5a); font-size: .8125rem; }
 .viewer3d-advisor-card .advisor-checked { margin: .25rem 0 0; font-size: .75rem; color: var(--color-muted-foreground, #5f5e5a); }
 .viewer3d-advisor-card .viewer3d-advisor-select { text-align: left; width: 100%; }
+.viewer3d-advisor-card .advisor-links { display: flex; flex-wrap: wrap; gap: .25rem .75rem; margin: .375rem 0 0; font-size: .75rem; }
+.viewer3d-advisor-card .advisor-links a { display: inline-flex; align-items: center; gap: .25rem; color: var(--advisor-color); text-decoration: underline; text-underline-offset: 2px; }
+.viewer3d-advisor-card .advisor-links svg { color: inherit; }
 .advisor-card-list { display: grid; gap: .5rem; margin: .75rem 0; }

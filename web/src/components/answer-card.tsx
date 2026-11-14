@@ -16,6 +16,7 @@ import { sceneOpen } from '../lib/scene-open'
 import { isPaired, onPairingChange } from '../lib/pairing'
 import { PairPhoneButton } from './pair-phone'
 import type { DrawingEdits } from '../lib/scene-edits'
+import { EvidenceCard } from './evidence-card'
 
 export function formatCost(total: number): string {
   return total > 0 && total < 0.0001 ? '< $0.0001' : `$${total.toFixed(4)}`
@@ -43,7 +44,23 @@ function AnswerBody({ answer, selected, onOpenCitation }: { answer: Answer; sele
   if (answer.answer.abstained) return <p className="answer-text">{humanizeIds(answer.answer.text_md, labels).replace(/\*\*/g, '').replace(/\s*\[\d+\]/g, '')}</p>
   const blocks = parseBlocks(humanizeIds(answer.answer.text_md, labels))
   const inline = (text: string) => <InlineText text={text} answer={answer} selected={selected} onOpenCitation={onOpenCitation} />
-  if (!blocks.some((block) => block.type === 'table')) return <p className="answer-text">{inline(humanizeIds(answer.answer.text_md, labels))}</p>
+  if (!blocks.some((block) => block.type === 'table')) {
+    // bite-sized layout: paragraphs and "- " bullet lists render as real paragraphs and lists
+    const text = humanizeIds(answer.answer.text_md, labels)
+    if (!/^\s*[-*•] /m.test(text)) return <p className="answer-text">{inline(text)}</p>
+    const parts: { list: boolean; lines: string[] }[] = []
+    for (const raw of text.split('\n')) {
+      const line = raw.trim()
+      if (!line) continue
+      const bullet = /^[-*•] /.test(line)
+      const last = parts[parts.length - 1]
+      if (last && last.list === bullet && bullet) last.lines.push(line.replace(/^[-*•] /, ''))
+      else parts.push({ list: bullet, lines: [bullet ? line.replace(/^[-*•] /, '') : line] })
+    }
+    return <div className="answer-text answer-rich">{parts.map((part, index) => part.list
+      ? <ul className="answer-list" key={index}>{part.lines.map((line, i) => <li key={i}>{inline(line)}</li>)}</ul>
+      : <p key={index}>{inline(part.lines.join(' '))}</p>)}</div>
+  }
   return <div className="answer-text answer-rich">{blocks.map((block, index) => block.type === 'table'
     ? <div className="answer-table-wrap" key={index}><table className="answer-table"><thead><tr>{block.header.map((cell, c) => <th key={c} scope="col">{inline(cell)}</th>)}</tr></thead>
       <tbody>{block.rows.map((row, r) => <tr key={r}>{row.map((cell, c) => <td key={c}>{inline(cell)}</td>)}</tr>)}</tbody></table></div>
@@ -117,6 +134,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
     <div className="question-bubble">{answer.question}</div>
     <details className="answer-detail thought-process"><summary>Show thought process</summary>{answer.trace.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>
     <AnswerBody answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} />
+    {!!answer.reasoning?.steps?.length && <EvidenceCard answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} />}
     {!!docChips.length && <div className="answer-docs" aria-label="Documents used" data-testid="answer-docs">{docChips.map(({ docId, title, first }) => first
       ? <button type="button" key={docId} className="source-file-chip answer-doc-chip" aria-label={`Open document ${title}`} onClick={() => onOpenCitation(first)}><FileText size={14} /><span>{title}</span></button>
       : <span key={docId} className="source-file-chip answer-doc-chip"><FileText size={14} /><span>{title}</span></span>)}</div>}
@@ -125,7 +143,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
     {!!advice.length && <div className="advisor-card-list" aria-label="Advice for this change" data-testid="answer-advisor-cards">
       {advice.map((card) => <AdvisorCardView key={card.card_id} card={card} />)}
     </div>}
-    {!!citations.length && <>
+    {!!citations.length && !answer.reasoning?.steps?.length && <>
       <details className="answer-detail source-setout"><summary className="source-heading">Where it is set out</summary>
       <ol className="source-list">{sources.map((source) => <li key={source.docId}>
         <div className="source-document"><strong>{source.title.replace(/\.[a-z0-9]+(?:\s*[—–-]?\s*generated for demo)?$/i, '')}</strong> (<button type="button" className="source-file-chip" aria-label={`Open source document ${source.title}`} onClick={() => onOpenCitation(source.citations[0])}><FileText size={14} /><span>{source.title}</span></button>)</div>

@@ -9,6 +9,27 @@ struct AdvisorCard: Codable, Equatable, Identifiable {
         let ref: String
         let title: String
         let quote: String
+        /// Official page for the rule (government / EU text); absent on older servers.
+        var url: String? = nil
+        /// Finnish legal text on Finlex when it differs from `url`.
+        var finnish_url: String? = nil
+
+        /// http(s) links only, English text first, duplicates dropped.
+        var links: [URL] {
+            var out: [URL] = []
+            for s in [url, finnish_url].compactMap({ $0 }) {
+                if let u = URL(string: s), ["http", "https"].contains(u.scheme?.lowercased() ?? ""), !out.contains(u) { out.append(u) }
+            }
+            return out
+        }
+
+        static func linkLabel(_ url: URL) -> String {
+            let host = url.host ?? ""
+            if host.hasSuffix("finlex.fi") { return "Finlex: legal text (Finnish)" }
+            if host.hasSuffix("ec.europa.eu") { return "Official English text (EU TRIS)" }
+            if host.hasSuffix("ym.fi") { return "Ministry of the Environment (English)" }
+            return host.isEmpty ? "Official source" : host
+        }
     }
 
     let card_id: String

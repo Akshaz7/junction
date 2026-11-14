@@ -1,0 +1,7561 @@
+{
+ "summary": {
+  "door": {
+   "n": 156,
+   "exact": 71,
+   "over": 31,
+   "under": 54,
+   "abs_err": 157,
+   "acc": 0.455
+  },
+  "window": {
+   "n": 156,
+   "exact": 68,
+   "over": 14,
+   "under": 74,
+   "abs_err": 259,
+   "acc": 0.436
+  },
+  "toilet": {
+   "n": 156,
+   "exact": 130,
+   "over": 6,
+   "under": 20,
+   "abs_err": 29,
+   "acc": 0.833
+  },
+  "sink": {
+   "n": 156,
+   "exact": 46,
+   "over": 106,
+   "under": 4,
+   "abs_err": 177,
+   "acc": 0.295
+  },
+  "shower_bathtub": {
+   "n": 156,
+   "exact": 18,
+   "over": 2,
+   "under": 136,
+   "abs_err": 164,
+   "acc": 0.115
+  },
+  "room:bedroom": {
+   "n": 156,
+   "exact": 119,
+   "over": 16,
+   "under": 21,
+   "abs_err": 46,
+   "none": 1,
+   "acc": 0.763
+  },
+  "room:kitchen": {
+   "n": 156,
+   "exact": 119,
+   "over": 25,
+   "under": 12,
+   "abs_err": 38,
+   "none": 1,
+   "acc": 0.763
+  },
+  "room:bathroom": {
+   "n": 156,
+   "exact": 104,
+   "over": 15,
+   "under": 37,
+   "abs_err": 60,
+   "none": 1,
+   "acc": 0.667
+  }
+ },
+ "rows": [
+  {
+   "doc": "colorful_10481",
+   "kind": "door",
+   "gold": 7,
+   "got": 6
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "window",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_10481",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "door",
+   "gold": 4,
+   "got": 5
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "sink",
+   "gold": 0,
+   "got": 2
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_14036",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "door",
+   "gold": 9,
+   "got": 9
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "window",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_14565",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "door",
+   "gold": 6,
+   "got": 6
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "window",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "sink",
+   "gold": 1,
+   "got": 4
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_14887",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "door",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "window",
+   "gold": 4,
+   "got": 3
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_3598",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "window",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "sink",
+   "gold": 1,
+   "got": 3
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "colorful_3821",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "door",
+   "gold": 13,
+   "got": 11
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "window",
+   "gold": 9,
+   "got": 9
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "room:bedroom",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "colorful_6343",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "door",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "window",
+   "gold": 4,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "toilet",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "sink",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_10297",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "door",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "window",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "sink",
+   "gold": 0,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_10395",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "door",
+   "gold": 6,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "window",
+   "gold": 4,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_10423",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "door",
+   "gold": 6,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "window",
+   "gold": 6,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_10538",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "door",
+   "gold": 6,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "window",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "sink",
+   "gold": 0,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_11132",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "door",
+   "gold": 11,
+   "got": 11
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "window",
+   "gold": 8,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_12853",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "door",
+   "gold": 17,
+   "got": 14
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "window",
+   "gold": 12,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "sink",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_1295",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "door",
+   "gold": 7,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "window",
+   "gold": 5,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "sink",
+   "gold": 1,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_13406",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "door",
+   "gold": 6,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "window",
+   "gold": 4,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_13486",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "door",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "window",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_13708",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "door",
+   "gold": 6,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "window",
+   "gold": 6,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "sink",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_1401",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "door",
+   "gold": 7,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "window",
+   "gold": 6,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_14026",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "door",
+   "gold": 6,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "window",
+   "gold": 9,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_14556",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "door",
+   "gold": 5,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "window",
+   "gold": 3,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "sink",
+   "gold": 0,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_14665",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "door",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "window",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_14840",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "door",
+   "gold": 7,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "window",
+   "gold": 4,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "sink",
+   "gold": 1,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_20005",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "window",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_20076",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "door",
+   "gold": 1,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "window",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "toilet",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "sink",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_20101",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "door",
+   "gold": 5,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "window",
+   "gold": 4,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_20125",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "door",
+   "gold": 11,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "window",
+   "gold": 11,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "sink",
+   "gold": 1,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_20228",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "door",
+   "gold": 7,
+   "got": 11
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "window",
+   "gold": 5,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "toilet",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "sink",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_3147",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "door",
+   "gold": 12,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "window",
+   "gold": 13,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "sink",
+   "gold": 4,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_3529",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_3574",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "door",
+   "gold": 7,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "window",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_4617",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "window",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "sink",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_5094",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "door",
+   "gold": 6,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_5514",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "door",
+   "gold": 11,
+   "got": 11
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "sink",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_5687",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "window",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_5985",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "window",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "sink",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_6091",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "door",
+   "gold": 12,
+   "got": 12
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "window",
+   "gold": 7,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "toilet",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_6133",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "door",
+   "gold": 9,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "window",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "sink",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_6684",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "door",
+   "gold": 19,
+   "got": 16
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "window",
+   "gold": 23,
+   "got": 14
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "sink",
+   "gold": 4,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_7620",
+   "kind": "room:bathroom",
+   "gold": 3,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "window",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_8079",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_8528",
+   "kind": "door",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_8528",
+   "kind": "window",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_8528",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_8528",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_8528",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_8528",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_8528",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_8528",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_9002",
+   "kind": "door",
+   "gold": 7,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_9002",
+   "kind": "window",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_9002",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_9002",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_9002",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_9002",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_9002",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_9002",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_9134",
+   "kind": "door",
+   "gold": 6,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_9134",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_9134",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_9134",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_9134",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_9134",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_9134",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_9134",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_991",
+   "kind": "door",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_991",
+   "kind": "window",
+   "gold": 3,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_991",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_991",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_991",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_991",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_991",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_991",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10127",
+   "kind": "door",
+   "gold": 3,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_10127",
+   "kind": "window",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10127",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10127",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_10127",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10127",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10127",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_10127",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10236",
+   "kind": "door",
+   "gold": 13,
+   "got": 12
+  },
+  {
+   "doc": "high_quality_architectural_10236",
+   "kind": "window",
+   "gold": 19,
+   "got": 13
+  },
+  {
+   "doc": "high_quality_architectural_10236",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_10236",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_10236",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10236",
+   "kind": "room:bedroom",
+   "gold": 4,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_10236",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10236",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10348",
+   "kind": "door",
+   "gold": 4,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_10348",
+   "kind": "window",
+   "gold": 6,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10348",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10348",
+   "kind": "sink",
+   "gold": 0,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_10348",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10348",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10348",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10348",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10440",
+   "kind": "door",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_10440",
+   "kind": "window",
+   "gold": 5,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_10440",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10440",
+   "kind": "sink",
+   "gold": 1,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_10440",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10440",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10440",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10440",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10533",
+   "kind": "door",
+   "gold": 13,
+   "got": 10
+  },
+  {
+   "doc": "high_quality_architectural_10533",
+   "kind": "window",
+   "gold": 21,
+   "got": 16
+  },
+  {
+   "doc": "high_quality_architectural_10533",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_10533",
+   "kind": "sink",
+   "gold": 1,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_10533",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10533",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_10533",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10533",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10548",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_10548",
+   "kind": "window",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_10548",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10548",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_10548",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10548",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10548",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_10548",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10619",
+   "kind": "door",
+   "gold": 9,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_architectural_10619",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_10619",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10619",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_10619",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10619",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_10619",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10619",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_10634",
+   "kind": "door",
+   "gold": 10,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_architectural_10634",
+   "kind": "window",
+   "gold": 9,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_10634",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10634",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_10634",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10634",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_10634",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10634",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_10646",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_10646",
+   "kind": "window",
+   "gold": 5,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_10646",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10646",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_10646",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10646",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10646",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10646",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10662",
+   "kind": "door",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10662",
+   "kind": "window",
+   "gold": 4,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_10662",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10662",
+   "kind": "sink",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_10662",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10662",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10662",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_10662",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_1089",
+   "kind": "door",
+   "gold": 7,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_1089",
+   "kind": "window",
+   "gold": 5,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_1089",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1089",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_1089",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_1089",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1089",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1089",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11025",
+   "kind": "door",
+   "gold": 3,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11025",
+   "kind": "window",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_11025",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11025",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11025",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11025",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11025",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11025",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11027",
+   "kind": "door",
+   "gold": 4,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_11027",
+   "kind": "window",
+   "gold": 3,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11027",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11027",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11027",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11027",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11027",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11027",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11046",
+   "kind": "door",
+   "gold": 6,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_architectural_11046",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_11046",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11046",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11046",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11046",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11046",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11046",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11141",
+   "kind": "door",
+   "gold": 11,
+   "got": 11
+  },
+  {
+   "doc": "high_quality_architectural_11141",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_11141",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11141",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_11141",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11141",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11141",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11141",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11224",
+   "kind": "door",
+   "gold": 5,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11224",
+   "kind": "window",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11224",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11224",
+   "kind": "sink",
+   "gold": 0,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_11224",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11224",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11224",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11224",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11331",
+   "kind": "door",
+   "gold": 13,
+   "got": 11
+  },
+  {
+   "doc": "high_quality_architectural_11331",
+   "kind": "window",
+   "gold": 9,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_11331",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11331",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11331",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11331",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11331",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11331",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11340",
+   "kind": "door",
+   "gold": 10,
+   "got": 10
+  },
+  {
+   "doc": "high_quality_architectural_11340",
+   "kind": "window",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_11340",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11340",
+   "kind": "sink",
+   "gold": 2,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_11340",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11340",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11340",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11340",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1171",
+   "kind": "door",
+   "gold": 15,
+   "got": 15
+  },
+  {
+   "doc": "high_quality_architectural_1171",
+   "kind": "window",
+   "gold": 15,
+   "got": 13
+  },
+  {
+   "doc": "high_quality_architectural_1171",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_1171",
+   "kind": "sink",
+   "gold": 2,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_1171",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_1171",
+   "kind": "room:bedroom",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_1171",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1171",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11723",
+   "kind": "door",
+   "gold": 13,
+   "got": 11
+  },
+  {
+   "doc": "high_quality_architectural_11723",
+   "kind": "window",
+   "gold": 18,
+   "got": 17
+  },
+  {
+   "doc": "high_quality_architectural_11723",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11723",
+   "kind": "sink",
+   "gold": 2,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_11723",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11723",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_11723",
+   "kind": "room:kitchen",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11723",
+   "kind": "room:bathroom",
+   "gold": 3,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11766",
+   "kind": "door",
+   "gold": 8,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_11766",
+   "kind": "window",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_11766",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11766",
+   "kind": "sink",
+   "gold": 0,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11766",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11766",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11766",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11766",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11815",
+   "kind": "door",
+   "gold": 5,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_11815",
+   "kind": "window",
+   "gold": 6,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_11815",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11815",
+   "kind": "sink",
+   "gold": 1,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_11815",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_11815",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11815",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11815",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11950",
+   "kind": "door",
+   "gold": 16,
+   "got": 14
+  },
+  {
+   "doc": "high_quality_architectural_11950",
+   "kind": "window",
+   "gold": 12,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_11950",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11950",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_11950",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11950",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_11950",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11950",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11957",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_11957",
+   "kind": "window",
+   "gold": 9,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_11957",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11957",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_11957",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11957",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_11957",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_11957",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12127",
+   "kind": "door",
+   "gold": 20,
+   "got": 17
+  },
+  {
+   "doc": "high_quality_architectural_12127",
+   "kind": "window",
+   "gold": 22,
+   "got": 10
+  },
+  {
+   "doc": "high_quality_architectural_12127",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_12127",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_12127",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12127",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_12127",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12127",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12152",
+   "kind": "door",
+   "gold": 6,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_12152",
+   "kind": "window",
+   "gold": 12,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_12152",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12152",
+   "kind": "sink",
+   "gold": 0,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_12152",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12152",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12152",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12152",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12157",
+   "kind": "door",
+   "gold": 8,
+   "got": 16
+  },
+  {
+   "doc": "high_quality_architectural_12157",
+   "kind": "window",
+   "gold": 10,
+   "got": 12
+  },
+  {
+   "doc": "high_quality_architectural_12157",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_12157",
+   "kind": "sink",
+   "gold": 2,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_architectural_12157",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12157",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_12157",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_12157",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12158",
+   "kind": "door",
+   "gold": 8,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_12158",
+   "kind": "window",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_12158",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12158",
+   "kind": "sink",
+   "gold": 0,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_12158",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12158",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12158",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12158",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12162",
+   "kind": "door",
+   "gold": 5,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_12162",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_12162",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12162",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_12162",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12162",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12162",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12162",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12480",
+   "kind": "door",
+   "gold": 7,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_12480",
+   "kind": "window",
+   "gold": 7,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_12480",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12480",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_12480",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12480",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12480",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12480",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12563",
+   "kind": "door",
+   "gold": 6,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_architectural_12563",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_12563",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12563",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_12563",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12563",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12563",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12563",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12569",
+   "kind": "door",
+   "gold": 6,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_12569",
+   "kind": "window",
+   "gold": 6,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_12569",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12569",
+   "kind": "sink",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12569",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12569",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12569",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12569",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12677",
+   "kind": "door",
+   "gold": 3,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_12677",
+   "kind": "window",
+   "gold": 4,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_12677",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12677",
+   "kind": "sink",
+   "gold": 1,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_12677",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12677",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12677",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12677",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1270",
+   "kind": "door",
+   "gold": 10,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_architectural_1270",
+   "kind": "window",
+   "gold": 8,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_1270",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1270",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_1270",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_1270",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1270",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1270",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12845",
+   "kind": "door",
+   "gold": 3,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_12845",
+   "kind": "window",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_12845",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12845",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_12845",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12845",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12845",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12845",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12891",
+   "kind": "door",
+   "gold": 9,
+   "got": 10
+  },
+  {
+   "doc": "high_quality_architectural_12891",
+   "kind": "window",
+   "gold": 12,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_12891",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_12891",
+   "kind": "sink",
+   "gold": 0,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_12891",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12891",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_12891",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12891",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12918",
+   "kind": "door",
+   "gold": 10,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_architectural_12918",
+   "kind": "window",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_12918",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12918",
+   "kind": "sink",
+   "gold": 0,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_12918",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_12918",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12918",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_12918",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_13168",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_13168",
+   "kind": "window",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_13168",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13168",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_13168",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_13168",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13168",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13168",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13216",
+   "kind": "door",
+   "gold": 7,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_13216",
+   "kind": "window",
+   "gold": 8,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_architectural_13216",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_13216",
+   "kind": "sink",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_13216",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_13216",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_13216",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13216",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13362",
+   "kind": "door",
+   "gold": 3,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_13362",
+   "kind": "window",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_13362",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13362",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_13362",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_13362",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_13362",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_13362",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1339",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_1339",
+   "kind": "window",
+   "gold": 3,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_1339",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1339",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_1339",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1339",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_1339",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1339",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13527",
+   "kind": "door",
+   "gold": 7,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_13527",
+   "kind": "window",
+   "gold": 5,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_13527",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13527",
+   "kind": "sink",
+   "gold": 1,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_13527",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13527",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_13527",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13527",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13622",
+   "kind": "door",
+   "gold": 6,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_13622",
+   "kind": "window",
+   "gold": 3,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_13622",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13622",
+   "kind": "sink",
+   "gold": 1,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_13622",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_13622",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13622",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13622",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13706",
+   "kind": "door",
+   "gold": 8,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_13706",
+   "kind": "window",
+   "gold": 7,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_13706",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_13706",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_13706",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_13706",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_13706",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13706",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_13730",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_13730",
+   "kind": "window",
+   "gold": 8,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_13730",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13730",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_13730",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_13730",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13730",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_13730",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14006",
+   "kind": "door",
+   "gold": 16,
+   "got": 15
+  },
+  {
+   "doc": "high_quality_architectural_14006",
+   "kind": "window",
+   "gold": 11,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_architectural_14006",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_14006",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_14006",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14006",
+   "kind": "room:bedroom",
+   "gold": 4,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_14006",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14006",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14008",
+   "kind": "door",
+   "gold": 8,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_14008",
+   "kind": "window",
+   "gold": 5,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_14008",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14008",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_14008",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14008",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14008",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14008",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14021",
+   "kind": "door",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_14021",
+   "kind": "window",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_14021",
+   "kind": "toilet",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14021",
+   "kind": "sink",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14021",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14021",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14021",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14021",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14247",
+   "kind": "door",
+   "gold": 9,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_14247",
+   "kind": "window",
+   "gold": 6,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_architectural_14247",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_14247",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_14247",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14247",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_14247",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14247",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14410",
+   "kind": "door",
+   "gold": 8,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_14410",
+   "kind": "window",
+   "gold": 6,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_14410",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14410",
+   "kind": "sink",
+   "gold": 2,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_14410",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14410",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_14410",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14410",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14474",
+   "kind": "door",
+   "gold": 9,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_architectural_14474",
+   "kind": "window",
+   "gold": 6,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_14474",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14474",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_14474",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14474",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14474",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14474",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14504",
+   "kind": "door",
+   "gold": 10,
+   "got": 10
+  },
+  {
+   "doc": "high_quality_architectural_14504",
+   "kind": "window",
+   "gold": 7,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_14504",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14504",
+   "kind": "sink",
+   "gold": 1,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_14504",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14504",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_14504",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14504",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14595",
+   "kind": "door",
+   "gold": 7,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_14595",
+   "kind": "window",
+   "gold": 7,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_14595",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14595",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_14595",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14595",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14595",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14595",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14605",
+   "kind": "door",
+   "gold": 6,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_14605",
+   "kind": "window",
+   "gold": 7,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_architectural_14605",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14605",
+   "kind": "sink",
+   "gold": 0,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_14605",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14605",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14605",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14605",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14627",
+   "kind": "door",
+   "gold": 8,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_14627",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_14627",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14627",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_14627",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14627",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_14627",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14627",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14644",
+   "kind": "door",
+   "gold": 10,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_14644",
+   "kind": "window",
+   "gold": 10,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_14644",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14644",
+   "kind": "sink",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_14644",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14644",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_14644",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14644",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14656",
+   "kind": "door",
+   "gold": 13,
+   "got": 14
+  },
+  {
+   "doc": "high_quality_architectural_14656",
+   "kind": "window",
+   "gold": 12,
+   "got": 12
+  },
+  {
+   "doc": "high_quality_architectural_14656",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14656",
+   "kind": "sink",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14656",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_14656",
+   "kind": "room:bedroom",
+   "gold": 4,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_14656",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_14656",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1525",
+   "kind": "door",
+   "gold": 7,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_1525",
+   "kind": "window",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1525",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1525",
+   "kind": "sink",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1525",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_1525",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_1525",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1525",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1579",
+   "kind": "door",
+   "gold": 11,
+   "got": 10
+  },
+  {
+   "doc": "high_quality_architectural_1579",
+   "kind": "window",
+   "gold": 11,
+   "got": 10
+  },
+  {
+   "doc": "high_quality_architectural_1579",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_1579",
+   "kind": "sink",
+   "gold": 1,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_1579",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_1579",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_1579",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_1579",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_1854",
+   "kind": "door",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_1854",
+   "kind": "window",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_1854",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1854",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_1854",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_1854",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_1854",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1854",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1856",
+   "kind": "door",
+   "gold": 3,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_1856",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_1856",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1856",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_1856",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_1856",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1856",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_1856",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1924",
+   "kind": "door",
+   "gold": 17,
+   "got": 15
+  },
+  {
+   "doc": "high_quality_architectural_1924",
+   "kind": "window",
+   "gold": 14,
+   "got": 12
+  },
+  {
+   "doc": "high_quality_architectural_1924",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_1924",
+   "kind": "sink",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_1924",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_1924",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_1924",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1924",
+   "kind": "room:bathroom",
+   "gold": 3,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1944",
+   "kind": "door",
+   "gold": 9,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_architectural_1944",
+   "kind": "window",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_1944",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_1944",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_1944",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_1944",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_1944",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_1944",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_20014",
+   "kind": "door",
+   "gold": 11,
+   "got": 12
+  },
+  {
+   "doc": "high_quality_architectural_20014",
+   "kind": "window",
+   "gold": 9,
+   "got": 11
+  },
+  {
+   "doc": "high_quality_architectural_20014",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_20014",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_20014",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_20014",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_20014",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_20014",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_20017",
+   "kind": "door",
+   "gold": 14,
+   "got": 12
+  },
+  {
+   "doc": "high_quality_architectural_20017",
+   "kind": "window",
+   "gold": 19,
+   "got": 16
+  },
+  {
+   "doc": "high_quality_architectural_20017",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_20017",
+   "kind": "sink",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_20017",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_20017",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_20017",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_20017",
+   "kind": "room:bathroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_2045",
+   "kind": "door",
+   "gold": 8,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_architectural_2045",
+   "kind": "window",
+   "gold": 7,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_2045",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_2045",
+   "kind": "sink",
+   "gold": 0,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_2045",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_2045",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_2045",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_2045",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_232",
+   "kind": "door",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_232",
+   "kind": "window",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_232",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_232",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_232",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_232",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_232",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_232",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_343",
+   "kind": "door",
+   "gold": 8,
+   "got": 11
+  },
+  {
+   "doc": "high_quality_architectural_343",
+   "kind": "window",
+   "gold": 6,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_architectural_343",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_343",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_343",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_343",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_343",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_343",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_3523",
+   "kind": "door",
+   "gold": 16,
+   "got": 14
+  },
+  {
+   "doc": "high_quality_architectural_3523",
+   "kind": "window",
+   "gold": 16,
+   "got": 15
+  },
+  {
+   "doc": "high_quality_architectural_3523",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_3523",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_3523",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_3523",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_3523",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_3523",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_3701",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_3701",
+   "kind": "window",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_3701",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_3701",
+   "kind": "sink",
+   "gold": 2,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_3701",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_3701",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_3701",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_3701",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_3942",
+   "kind": "door",
+   "gold": 9,
+   "got": 11
+  },
+  {
+   "doc": "high_quality_architectural_3942",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_3942",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_3942",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_3942",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_3942",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_3942",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_3942",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_4010",
+   "kind": "door",
+   "gold": 6,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_4010",
+   "kind": "window",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_4010",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_4010",
+   "kind": "sink",
+   "gold": 1,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_4010",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_4010",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_4010",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_4010",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_4608",
+   "kind": "door",
+   "gold": 7,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_4608",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_4608",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_4608",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_4608",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_4608",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_4608",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_4608",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_4635",
+   "kind": "door",
+   "gold": 8,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_4635",
+   "kind": "window",
+   "gold": 5,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_architectural_4635",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_4635",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_4635",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_4635",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_4635",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_4635",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_4709",
+   "kind": "door",
+   "gold": 14,
+   "got": 14
+  },
+  {
+   "doc": "high_quality_architectural_4709",
+   "kind": "window",
+   "gold": 17,
+   "got": 13
+  },
+  {
+   "doc": "high_quality_architectural_4709",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_4709",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_4709",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_4709",
+   "kind": "room:bedroom",
+   "gold": 4,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_4709",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_4709",
+   "kind": "room:bathroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_479",
+   "kind": "door",
+   "gold": 7,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_479",
+   "kind": "window",
+   "gold": 6,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_architectural_479",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_479",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_479",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_479",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_479",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_479",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_4849",
+   "kind": "door",
+   "gold": 5,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_4849",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_4849",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_4849",
+   "kind": "sink",
+   "gold": 1,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_4849",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_4849",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_4849",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_4849",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_5016",
+   "kind": "door",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_5016",
+   "kind": "window",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_5016",
+   "kind": "toilet",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_5016",
+   "kind": "sink",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_5016",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_5016",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_5016",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_5016",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_5533",
+   "kind": "door",
+   "gold": 7,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_5533",
+   "kind": "window",
+   "gold": 9,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_5533",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_5533",
+   "kind": "sink",
+   "gold": 1,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_5533",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_5533",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_5533",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_5533",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_5685",
+   "kind": "door",
+   "gold": 18,
+   "got": 17
+  },
+  {
+   "doc": "high_quality_architectural_5685",
+   "kind": "window",
+   "gold": 11,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_5685",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_5685",
+   "kind": "sink",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_5685",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_5685",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_5685",
+   "kind": "room:kitchen",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_5685",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_5791",
+   "kind": "door",
+   "gold": 21,
+   "got": 18
+  },
+  {
+   "doc": "high_quality_architectural_5791",
+   "kind": "window",
+   "gold": 11,
+   "got": 11
+  },
+  {
+   "doc": "high_quality_architectural_5791",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_5791",
+   "kind": "sink",
+   "gold": 1,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_5791",
+   "kind": "shower_bathtub",
+   "gold": 3,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_5791",
+   "kind": "room:bedroom",
+   "gold": 4,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_5791",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_5791",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_6036",
+   "kind": "door",
+   "gold": 10,
+   "got": 10
+  },
+  {
+   "doc": "high_quality_architectural_6036",
+   "kind": "window",
+   "gold": 14,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_6036",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_6036",
+   "kind": "sink",
+   "gold": 3,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_6036",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_6036",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_6036",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6036",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_6042",
+   "kind": "door",
+   "gold": 11,
+   "got": 10
+  },
+  {
+   "doc": "high_quality_architectural_6042",
+   "kind": "window",
+   "gold": 6,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_architectural_6042",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_6042",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_6042",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_6042",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_6042",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6042",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_6121",
+   "kind": "door",
+   "gold": 4,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_6121",
+   "kind": "window",
+   "gold": 9,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_architectural_6121",
+   "kind": "toilet",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_6121",
+   "kind": "sink",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_6121",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_6121",
+   "kind": "room:bedroom",
+   "gold": 4,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_6121",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6121",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6244",
+   "kind": "door",
+   "gold": 9,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_architectural_6244",
+   "kind": "window",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_6244",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6244",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_6244",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_6244",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6244",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6244",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6445",
+   "kind": "door",
+   "gold": 7,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_6445",
+   "kind": "window",
+   "gold": 12,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_6445",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_6445",
+   "kind": "sink",
+   "gold": 2,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_6445",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_6445",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6445",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6445",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_6463",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_6463",
+   "kind": "window",
+   "gold": 3,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_6463",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6463",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_6463",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_6463",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6463",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6463",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6553",
+   "kind": "door",
+   "gold": 15,
+   "got": 10
+  },
+  {
+   "doc": "high_quality_architectural_6553",
+   "kind": "window",
+   "gold": 25,
+   "got": 18
+  },
+  {
+   "doc": "high_quality_architectural_6553",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_6553",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_6553",
+   "kind": "shower_bathtub",
+   "gold": 3,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_6553",
+   "kind": "room:bedroom",
+   "gold": 4,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_6553",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6553",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6634",
+   "kind": "door",
+   "gold": 10,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_6634",
+   "kind": "window",
+   "gold": 4,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_6634",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_6634",
+   "kind": "sink",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_6634",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_6634",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_6634",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_6634",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_7095",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_7095",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_7095",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7095",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_7095",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7095",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7095",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7095",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7103",
+   "kind": "door",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7103",
+   "kind": "window",
+   "gold": 3,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_7103",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_7103",
+   "kind": "sink",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7103",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_7103",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_7103",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7103",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_7529",
+   "kind": "door",
+   "gold": 15,
+   "got": 11
+  },
+  {
+   "doc": "high_quality_architectural_7529",
+   "kind": "window",
+   "gold": 16,
+   "got": 11
+  },
+  {
+   "doc": "high_quality_architectural_7529",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_7529",
+   "kind": "sink",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_7529",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_7529",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7529",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7529",
+   "kind": "room:bathroom",
+   "gold": 3,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7710",
+   "kind": "door",
+   "gold": 8,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_7710",
+   "kind": "window",
+   "gold": 6,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7710",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7710",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_7710",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7710",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_7710",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7710",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_7754",
+   "kind": "door",
+   "gold": 4,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_7754",
+   "kind": "window",
+   "gold": 3,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_7754",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7754",
+   "kind": "sink",
+   "gold": 1,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_7754",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_7754",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_7754",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_7754",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_7893",
+   "kind": "door",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_7893",
+   "kind": "window",
+   "gold": 8,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_7893",
+   "kind": "toilet",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_7893",
+   "kind": "sink",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_7893",
+   "kind": "shower_bathtub",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_7893",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_7893",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_7893",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_790",
+   "kind": "door",
+   "gold": 7,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_architectural_790",
+   "kind": "window",
+   "gold": 16,
+   "got": 10
+  },
+  {
+   "doc": "high_quality_architectural_790",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_790",
+   "kind": "sink",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_790",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_790",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_790",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_790",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8039",
+   "kind": "door",
+   "gold": 14,
+   "got": 14
+  },
+  {
+   "doc": "high_quality_architectural_8039",
+   "kind": "window",
+   "gold": 10,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_8039",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8039",
+   "kind": "sink",
+   "gold": 0,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_8039",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8039",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_8039",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8039",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_8121",
+   "kind": "door",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_8121",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_8121",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8121",
+   "kind": "sink",
+   "gold": 1,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_8121",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_8121",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8121",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8121",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8159",
+   "kind": "door",
+   "gold": 14,
+   "got": 15
+  },
+  {
+   "doc": "high_quality_architectural_8159",
+   "kind": "window",
+   "gold": 26,
+   "got": 21
+  },
+  {
+   "doc": "high_quality_architectural_8159",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_8159",
+   "kind": "sink",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_8159",
+   "kind": "shower_bathtub",
+   "gold": 3,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_8159",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_8159",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8159",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_8224",
+   "kind": "door",
+   "gold": 5,
+   "got": 6
+  },
+  {
+   "doc": "high_quality_architectural_8224",
+   "kind": "window",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_8224",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8224",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_8224",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_8224",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8224",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8224",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8263",
+   "kind": "door",
+   "gold": 6,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_8263",
+   "kind": "window",
+   "gold": 4,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_8263",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8263",
+   "kind": "sink",
+   "gold": 1,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_8263",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_8263",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_8263",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8263",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_848",
+   "kind": "door",
+   "gold": 9,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_architectural_848",
+   "kind": "window",
+   "gold": 9,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_architectural_848",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_848",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_848",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_848",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_848",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_848",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8717",
+   "kind": "door",
+   "gold": 16,
+   "got": 14
+  },
+  {
+   "doc": "high_quality_architectural_8717",
+   "kind": "window",
+   "gold": 20,
+   "got": 14
+  },
+  {
+   "doc": "high_quality_architectural_8717",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_8717",
+   "kind": "sink",
+   "gold": 0,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_8717",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_8717",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_8717",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_8717",
+   "kind": "room:bathroom",
+   "gold": 3,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_9038",
+   "kind": "door",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_9038",
+   "kind": "window",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_9038",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_9038",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_9038",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_9038",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_9038",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_9038",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_9072",
+   "kind": "door",
+   "gold": 8,
+   "got": 10
+  },
+  {
+   "doc": "high_quality_architectural_9072",
+   "kind": "window",
+   "gold": 4,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_9072",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_9072",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_9072",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_9072",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_9072",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_9072",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_914",
+   "kind": "door",
+   "gold": 20,
+   "got": 17
+  },
+  {
+   "doc": "high_quality_architectural_914",
+   "kind": "window",
+   "gold": 27,
+   "got": 16
+  },
+  {
+   "doc": "high_quality_architectural_914",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_914",
+   "kind": "sink",
+   "gold": 2,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_914",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_914",
+   "kind": "room:bedroom",
+   "gold": 0,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_914",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_914",
+   "kind": "room:bathroom",
+   "gold": 3,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_9237",
+   "kind": "door",
+   "gold": 8,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_9237",
+   "kind": "window",
+   "gold": 6,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_9237",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_9237",
+   "kind": "sink",
+   "gold": 1,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_9237",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_9237",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_9237",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_9237",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_9327",
+   "kind": "door",
+   "gold": 12,
+   "got": 12
+  },
+  {
+   "doc": "high_quality_architectural_9327",
+   "kind": "window",
+   "gold": 9,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_architectural_9327",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_9327",
+   "kind": "sink",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_9327",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_9327",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_9327",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_9327",
+   "kind": "room:bathroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_9341",
+   "kind": "door",
+   "gold": 8,
+   "got": 7
+  },
+  {
+   "doc": "high_quality_architectural_9341",
+   "kind": "window",
+   "gold": 3,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_9341",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_9341",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_9341",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_9341",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_9341",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_9341",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_9453",
+   "kind": "door",
+   "gold": 7,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_9453",
+   "kind": "window",
+   "gold": 8,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_9453",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_9453",
+   "kind": "sink",
+   "gold": 1,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_9453",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_9453",
+   "kind": "room:bedroom",
+   "gold": 2,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_9453",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_9453",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_956",
+   "kind": "door",
+   "gold": 8,
+   "got": 8
+  },
+  {
+   "doc": "high_quality_architectural_956",
+   "kind": "window",
+   "gold": 5,
+   "got": 5
+  },
+  {
+   "doc": "high_quality_architectural_956",
+   "kind": "toilet",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_956",
+   "kind": "sink",
+   "gold": 1,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_956",
+   "kind": "shower_bathtub",
+   "gold": 1,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_956",
+   "kind": "room:bedroom",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_956",
+   "kind": "room:kitchen",
+   "gold": 1,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_956",
+   "kind": "room:bathroom",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_9618",
+   "kind": "door",
+   "gold": 9,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_architectural_9618",
+   "kind": "window",
+   "gold": 10,
+   "got": 9
+  },
+  {
+   "doc": "high_quality_architectural_9618",
+   "kind": "toilet",
+   "gold": 2,
+   "got": 2
+  },
+  {
+   "doc": "high_quality_architectural_9618",
+   "kind": "sink",
+   "gold": 3,
+   "got": 4
+  },
+  {
+   "doc": "high_quality_architectural_9618",
+   "kind": "shower_bathtub",
+   "gold": 2,
+   "got": 0
+  },
+  {
+   "doc": "high_quality_architectural_9618",
+   "kind": "room:bedroom",
+   "gold": 3,
+   "got": 3
+  },
+  {
+   "doc": "high_quality_architectural_9618",
+   "kind": "room:kitchen",
+   "gold": 0,
+   "got": 1
+  },
+  {
+   "doc": "high_quality_architectural_9618",
+   "kind": "room:bathroom",
+   "gold": 1,
+   "got": 2
+  }
+ ]
+}

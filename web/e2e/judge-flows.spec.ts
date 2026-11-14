@@ -2,7 +2,8 @@ import { expect, test, type Page } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 
 test.use({ viewport: { width: 1440, height: 900 } })
-test.setTimeout(900_000)
+test.setTimeout(600_000)
+test.use({ actionTimeout: 20_000 })
 const shots = process.env.SHOTS_DIR ?? 'test-results'
 const AC = 'ifc_bench__ac20-arc'
 const CC = 'cubicasa5k__colorful-11397'
@@ -19,9 +20,9 @@ const cases: [string, string, string][] = [
 ]
 
 async function openChatFor(page: Page, docId: string) {
-  await page.goto('/?viewer3dTest=1#/data')
-  await page.getByRole('searchbox', { name: 'Search documents' }).fill(docId)
-  await page.locator(`[data-doc-id="${docId}"] .data-open-file`).click()
+  await page.goto('about:blank'); await page.goto('/?viewer3dTest=1#/data')
+  await page.getByRole('searchbox', { name: 'Search documents' }).fill(docId.split('__')[1])
+  await page.locator(`[data-doc-id="${docId}"] .data-open-file`).click({ timeout: 20_000 })
   await page.getByRole('complementary', { name: 'Document details' }).getByRole('button', { name: 'Ask about it', exact: true }).first().click()
 }
 
@@ -44,7 +45,8 @@ async function checks(page: Page, card: NonNullable<Awaited<ReturnType<typeof as
     const drawing = page.getByRole('region', { name: 'Drawing viewer', exact: true })
     if (!await drawing.isVisible({ timeout: 8000 }).catch(() => false)) problems.push(`${tag}: citation did not open the drawing`)
     else {
-      const boxes = await drawing.locator('.evidence-region').count()
+      await page.waitForTimeout(1200)
+      const boxes = await drawing.locator('svg.drawing-evidence g[data-item-id]').count()
       if (!boxes) problems.push(`${tag}: no 2D boxes on the drawing`)
       await page.screenshot({ path: `${shots}/${tag}-2d.png` })
       // Visualise it

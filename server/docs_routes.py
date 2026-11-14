@@ -51,11 +51,19 @@ def _hide_empty() -> bool:
 
 async def _visible(pool, rows):
     """HIDE_EMPTY_DOCS=1 (deploy image): list only documents this server can show (preview + data). Nothing fake."""
+    from engine.library import excluded_doc
+    rows = [r for r in rows if not excluded_doc(dict(r))]
     if not _hide_empty():
         return rows
     from . import artifact_store
     ok = await artifact_store.servable_ids(pool)
     return [r for r in rows if r["doc_id"] in ok or r["doc_id"].startswith("uploads__")]
+
+
+async def library_catalogue(pool):
+    """Exactly the records counted by Data, including uploads not yet in the search index."""
+    rows = await _visible(pool, await pool.fetch(f"select {COLS} from documents order by source, title, doc_id"))
+    return [dict(r) for r in rows]
 
 
 @router.get("/docs")

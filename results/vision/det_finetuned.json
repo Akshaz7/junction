@@ -1,19 +1,42 @@
 {
- "status": "blocked",
- "reason": "Modal workspace awaisraf20 (ac-u3BjhIGK1pvC0EC98zNqG0) is paused: every Modal call (volume create, volume put, modal run of a trivial function) fails with 'Error: Workspace ac-u3BjhIGK1pvC0EC98zNqG0 is paused' (14 Nov 07:30 EET). No GPU minutes used. Training on the Mac is forbidden, so no fine-tune was run.",
- "gpu_minutes": 0,
- "cost_usd": 0,
- "ready_to_run": "modal volume create junction-v05; modal volume put junction-v05 data/train/v05 /v05 --force; modal volume put junction-v05 weights/yytsi_unet/best.safetensors /yytsi_best.safetensors --force; modal run train/modal_seg.py (or modal_det.py). Scripts exist, assert zero overlap against data/sets/heldout_docs.txt before the first step. Needs the workspace un-paused (billing) by Ash.",
- "row": "V-07",
- "before": {
-  "note": "baseline = free pass, 241 held-out drawings (results/vision/v09_final.json)",
-  "default_free_pass": {
-   "window": 0.32,
-   "toilet": 0.817,
-   "sink": 0.594,
-   "shower_bathtub": 0.123,
-   "door": 0.443
-  }
+ "weights": "weights/rtdetr_ft",
+ "n_calib": 156,
+ "n_heldout": 241,
+ "cut_picked_on_calib": {
+  "door": 0.1,
+  "window": 0.15,
+  "toilet": 0.1,
+  "sink": 0.2,
+  "shower": 0.1,
+  "bathtub": 0.1
  },
- "after": null
+ "ms_per_image_mps": 184,
+ "baseline_default_heldout": {
+  "window": 0.32,
+  "toilet": 0.817,
+  "sink": 0.594,
+  "shower_bathtub": 0.123,
+  "door": 0.443
+ },
+ "finetuned_heldout": {
+  "window": 0.087,
+  "toilet": 0.246,
+  "sink": 0.159,
+  "shower_bathtub": 0.278,
+  "door": 0.068
+ },
+ "finetuned_calib": {
+  "window": 0.115,
+  "door": 0.135,
+  "toilet": 0.314,
+  "sink": 0.244,
+  "shower_bathtub": 0.301
+ },
+ "baseline_default_calib": {
+  "window": 0.417,
+  "door": 0.442,
+  "toilet": 0.833,
+  "sink": 0.231,
+  "shower_bathtub": 0.115
+ }
 }

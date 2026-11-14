@@ -19,10 +19,53 @@ function fixture() {
   const scene = createScene(manifest, { scene: root, parser: { associations: new Map(), json: {} } } as Parameters<typeof createScene>[1]);
   let commands = emptyCommandState();
   const layer = createEditLayer(scene, { apply: (cmd) => { commands = applyCommand(commands, cmd); }, hidden: () => [...commands.hidden] });
-  return { layer, wall, door, manifest, scene, surface, commands: () => commands };
+  return { layer, wall, door, manifest, scene, surface, commands: () => commands,
+    external(command: Parameters<typeof applyCommand>[1]) {
+      layer.recordCommand(command, commands);
+      commands = applyCommand(commands, command);
+    },
+  };
 }
 
 describe('local edit layer', () => {
+  it('Undo reverts only the last panel removal and retains an earlier one', () => {
+    const { layer, scene, commands } = fixture();
+    layer.remove('wall'); layer.remove('door');
+    expect(commands().hidden.size).toBe(2);
+    expect(layer.undo()).toMatchObject({ op: 'restore', item_ids: ['door'] });
+    expect([...commands().hidden]).toEqual(['wall']);
+    layer.undo();
+    expect([...commands().hidden]).toEqual([]);
+    layer.dispose(); disposeScene(scene);
+  });
+
+  it('records a typed removal for the same Undo button', () => {
+    const { layer, scene, commands, external } = fixture();
+    layer.remove('wall');
+    external({ op: 'hide', item_ids: ['door'] });
+    expect([...commands().hidden]).toEqual(['wall', 'door']);
+    expect(layer.state().undoCount).toBe(2);
+    expect(layer.undo()).toMatchObject({ op: 'restore', item_ids: ['door'] });
+    expect([...commands().hidden]).toEqual(['wall']);
+    layer.dispose(); disposeScene(scene);
+  });
+
+  it('retains Undo when the chat snapshot arrives before the matching command socket event', () => {
+    const { layer, scene, commands } = fixture();
+    layer.remove('wall');
+    const before = commands();
+    const command = { op: 'hide' as const, item_ids: ['door'] };
+    const snapshot = applyCommand(before, command);
+    layer.recordState(before, snapshot);
+    // The socket command is a no-op after the snapshot and must not consume another Undo.
+    layer.recordCommand(command, snapshot);
+    expect(layer.state().undoCount).toBe(2);
+    layer.undo();
+    expect([...commands().hidden]).toEqual(['wall']);
+    layer.undo();
+    expect([...commands().hidden]).toEqual([]);
+    layer.dispose(); disposeScene(scene);
+  });
   it('snaps world floor movement through a rotated parent and undoes multiple moves without altering the manifest', () => {
     const { layer, wall, manifest, scene } = fixture();
     const source = JSON.stringify(manifest);

@@ -1,0 +1,162 @@
+[
+ {
+  "doc": "uploads__v13-bolduc",
+  "q": "how many rooms are there",
+  "text": "There are **11 rooms** on this floor plan. [1]",
+  "abstained": false,
+  "route": "planmap",
+  "boxes": 11
+ },
+ {
+  "doc": "uploads__v13-bolduc",
+  "q": "how many doors",
+  "text": "There are **13 doors** on this floor plan. [1]",
+  "abstained": false,
+  "route": "planmap",
+  "boxes": 13
+ },
+ {
+  "doc": "uploads__v13-bolduc",
+  "q": "what is the area of the largest room",
+  "text": "The largest room is **KITCHEN** (kitchen) at **28.4 m\u00b2**. Next: DINING ROOM 27.9 m\u00b2; BED ROOM 26.5 m\u00b2; KITCHEN 26.1 m\u00b2. [1]",
+  "abstained": false,
+  "route": "planmap",
+  "boxes": 1
+ },
+ {
+  "doc": "uploads__v13-bolduc",
+  "q": "where is the kitchen",
+  "text": "**3 kitchens** on this floor plan (drawn as KITCHEN), numbered on the drawing. Total area **76.1 m\u00b2**. [1]",
+  "abstained": false,
+  "route": "planmap",
+  "boxes": 3
+ },
+ {
+  "doc": "uploads__v13-canada-cement",
+  "q": "how many rooms are there",
+  "text": "I found **no rooms** on this floor plan. I searched 13 modelled elements (column, stairs); a zero here means none of those is a room, not that the building has none, since it may not be modelled or drawn.\n\nOn this drawing the automatic reader found 0 rooms, 0 doors and 0 windows. It reads the image, and a sparse or unusual plan can be missed, so treat these as what was found, not a full count. Try: how many rooms are there, where are the doors, how many windows.",
+  "abstained": false,
+  "route": "planmap",
+  "boxes": 0
+ },
+ {
+  "doc": "uploads__v13-canada-cement",
+  "q": "how many doors",
+  "text": "I found **no doors** on this floor plan. I searched 13 modelled elements (column, stairs); a zero here means none of those is a door, not that the building has none, since it may not be modelled or drawn.\n\nOn this drawing the automatic reader found 0 rooms, 0 doors and 0 windows. It reads the image, and a sparse or unusual plan can be missed, so treat these as what was found, not a full count. Try: how many rooms are there, where are the doors, how many windows.",
+  "abstained": false,
+  "route": "planmap",
+  "boxes": 0
+ },
+ {
+  "doc": "uploads__v13-canada-cement",
+  "q": "what is the area of the largest room",
+  "text": "**The drawing does not show a room area I can verify.** The plan map found no rooms, only 10 columns and 3 staircases. The text has no area annotations. The visual reading names two spaces, \"COURT\" and \"VAULT\", with no areas or dimensions, so the largest room cannot be identified. The scale is unconfirmed (confidence 0.1), so I could not measure them. [1][2][3][4]\n\nOn this drawing the automatic reader found 0 rooms, 0 doors and 0 windows. It reads the image, and a sparse or unusual plan can be missed, so treat these as what was found, not a full count. Try: how many rooms are there, where are the doors, how many windows.",
+  "abstained": false,
+  "route": "hybrid",
+  "boxes": 4
+ },
+ {
+  "doc": "uploads__v13-canada-cement",
+  "q": "where is the kitchen",
+  "text": "**The drawings do not show a kitchen.** I could not find the word \"kitchen\" in the text layer of d1 (canada_cement, a single-sheet typical floor plan and ground floor plan for the Canada Cement Company building, Montreal, Barott and Blackader, September 1921). The plan map detected only 9 columns and 3 stairs, with no rooms, and a visual check of the full sheet found no kitchen label or kitchen fixtures. The sheet's labels are only the title block, \"TYPICAL FLOOR PLAN\", \"GROUND FLOOR PLAN\" and \"BASEMENT\". The kitchen location cannot be determined from this document. [1][2][3][4][5][6]",
+  "abstained": false,
+  "route": "hybrid",
+  "boxes": 6
+ },
+ {
+  "doc": "uploads__v13-home-plan-1921",
+  "q": "how many rooms are there",
+  "text": "There are **11 rooms** on this floor plan. [1]",
+  "abstained": false,
+  "route": "planmap",
+  "boxes": 11
+ },
+ {
+  "doc": "uploads__v13-home-plan-1921",
+  "q": "how many doors",
+  "text": "There are **9 doors** on this floor plan. [1]",
+  "abstained": false,
+  "route": "planmap",
+  "boxes": 9
+ },
+ {
+  "doc": "uploads__v13-home-plan-1921",
+  "q": "what is the area of the largest room",
+  "text": "The largest room is the **BED RM** on the second floor with an area of 273 sq ft (approx. 25.4 m\u00b2). This is calculated from its dimensions of 21' x 13'. [1]",
+  "abstained": false,
+  "route": "vlm",
+  "boxes": 1
+ },
+ {
+  "doc": "uploads__v13-home-plan-1921",
+  "q": "where is the kitchen",
+  "text": "**1 kitchen** on this floor plan (drawn as KITCHEN), numbered on the drawing. [1]",
+  "abstained": false,
+  "route": "planmap",
+  "boxes": 1
+ },
+ {
+  "doc": "uploads__v13-simon-house",
+  "q": "how many rooms are there",
+  "text": "There are **8 rooms** on this floor plan. [1]\n\nOn this drawing the automatic reader found 8 rooms, 0 doors and 0 windows. It reads the image, and a sparse or unusual plan can be missed, so treat these as what was found, not a full count. Try: how many rooms are there, where is the b r.4., area of the b r.4..",
+  "abstained": false,
+  "route": "planmap",
+  "boxes": 8
+ },
+ {
+  "doc": "uploads__v13-simon-house",
+  "q": "how many doors",
+  "text": "I found **no doors** on this floor plan. I searched 48 modelled elements (bathtub, room, shower, toilet, wall); a zero here means none of those is a door, not that the building has none, since it may not be modelled or drawn.\n\nOn this drawing the automatic reader found 8 rooms, 0 doors and 0 windows. It reads the image, and a sparse or unusual plan can be missed, so treat these as what was found, not a full count. Try: how many rooms are there, where is the b r.4., area of the b r.4..",
+  "abstained": false,
+  "route": "planmap",
+  "boxes": 0
+ },
+ {
+  "doc": "uploads__v13-simon-house",
+  "q": "what is the area of the largest room",
+  "text": "I could not determine the area of the largest room. The plan map detected 8 rooms (B R.4, B R.5, B R.3, BR.2, BR.1, LIVING, DINING, K), but the planmap calls returned no measured area for any of them, and the drawing scale is only assumed (0.02 m per pixel, confidence 0.1), so any area I computed would be unreliable. The text layer has no printed room areas either. To answer, the sheet needs a verified scale (for example a dimensioned wall or a printed scale bar) or the room areas need to be read from a schedule on the drawing. [1][2][3][4][5][6][7][8]\n\nOn this drawing the automatic reader found 8 rooms, 0 doors and 0 windows. It reads the image, and a sparse or unusual plan can be missed, so treat these as what was found, not a full count. Try: how many rooms are there, where is the b r.4., area of the b r.4..",
+  "abstained": false,
+  "route": "hybrid",
+  "boxes": 8
+ },
+ {
+  "doc": "uploads__v13-simon-house",
+  "q": "where is the kitchen",
+  "text": "**1 kitchen** on this floor plan (drawn as K), numbered on the drawing. [1]",
+  "abstained": false,
+  "route": "planmap",
+  "boxes": 1
+ },
+ {
+  "doc": "uploads__v13-toorak-residence",
+  "q": "how many rooms are there",
+  "text": "There are **27 rooms** on this floor plan. [1]\n\nOn this drawing the automatic reader found 27 rooms, 0 doors and 0 windows. It reads the image, and a sparse or unusual plan can be missed, so treat these as what was found, not a full count. Try: how many rooms are there, where is the bed a, area of the bed a.",
+  "abstained": false,
+  "route": "planmap",
+  "boxes": 27
+ },
+ {
+  "doc": "uploads__v13-toorak-residence",
+  "q": "how many doors",
+  "text": "I found **no doors** on this floor plan. I searched 128 modelled elements (room, wall); a zero here means none of those is a door, not that the building has none, since it may not be modelled or drawn.\n\nOn this drawing the automatic reader found 27 rooms, 0 doors and 0 windows. It reads the image, and a sparse or unusual plan can be missed, so treat these as what was found, not a full count. Try: how many rooms are there, where is the bed a, area of the bed a.",
+  "abstained": false,
+  "route": "planmap",
+  "boxes": 0
+ },
+ {
+  "doc": "uploads__v13-toorak-residence",
+  "q": "what is the area of the largest room",
+  "text": "**The largest room's area could not be determined from d1.** The plan map lists 27 rooms (e.g. DRAWING, STUDY, BED A, BEST BED, DINING, KITCHEN, SERVANTS HALL), but returned no area quantities for any of them. The only scale available is 0.039636 m per pixel from a dimension, with confidence 0.45, so any area derived from pixel measurements would be unreliable. Which room is largest, and its area, are therefore unknown. [1][2][3][4][5][6]\n\nOn this drawing the automatic reader found 27 rooms, 0 doors and 0 windows. It reads the image, and a sparse or unusual plan can be missed, so treat these as what was found, not a full count. Try: how many rooms are there, where is the bed a, area of the bed a.",
+  "abstained": false,
+  "route": "hybrid",
+  "boxes": 6
+ },
+ {
+  "doc": "uploads__v13-toorak-residence",
+  "q": "where is the kitchen",
+  "text": "**1 kitchen** on this floor plan (drawn as KITCHEN), numbered on the drawing. [1]",
+  "abstained": false,
+  "route": "planmap",
+  "boxes": 1
+ }
+]

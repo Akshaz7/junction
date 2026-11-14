@@ -206,6 +206,12 @@ export function createBuildAnimation(scene: LoadedScene, startedAt: number, opti
       position = Math.min(total, Math.max(1, Math.round(index)));
       playing = false;
     },
+    /** Continuous scrubbing uses the existing nodes and their saved base transforms. */
+    setPosition(value: number): void {
+      if (!Number.isFinite(value)) return;
+      position = Math.min(total, Math.max(0, value));
+      playing = false;
+    },
     /** Milliseconds until the flat intro ends and until the build finishes, for timer scheduling. */
     timeline(now: number): { introMs: number; finishMs: number } | null {
       if (!playing) return null;

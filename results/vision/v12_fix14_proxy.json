@@ -1,0 +1,137 @@
+[
+ {
+  "doc": "1-02-second-floor-and-roof-pluming-plans",
+  "q": "How many water closets are there?",
+  "expected": "3 (WC-1 x3)",
+  "answer": "There are **3** (tag **WC-1** appears 3 times on the sheet; one tag, several locations), counted from the unique tags on the sheet. [1][2][3]",
+  "meta": {
+   "route": "index",
+   "abstained": false,
+   "conf": 0.9,
+   "step": "unique tags WC-n in the text layer: 1 unique, 3 marks"
+  },
+  "cost": 0.0,
+  "evidence": 3,
+  "s": 0.1
+ },
+ {
+  "doc": "1-02-second-floor-and-roof-pluming-plans",
+  "q": "What size is the vent from the kitchen sink?",
+  "expected": "1-1/2\"",
+  "answer": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+  "meta": {
+   "route": "hybrid",
+   "abstained": false,
+   "conf": 0.2,
+   "step": "model fallback unavailable (ValidationError); using rules' best guess"
+  },
+  "cost": 0.0,
+  "evidence": 0,
+  "s": 0.6
+ },
+ {
+  "doc": "1-02-second-floor-and-roof-pluming-plans",
+  "q": "What scale is the drawing?",
+  "expected": "1/4\" = 1'-0\"",
+  "answer": "The scale is **1/4\" = 1'-0\"**. That is 1:48, so 1 m on the ground is 20.8 mm on the sheet. [1]",
+  "meta": {
+   "route": "index",
+   "abstained": false,
+   "conf": 0.9,
+   "step": "scale printed on the sheet, converted to a ratio"
+  },
+  "cost": 0.0,
+  "evidence": 1,
+  "s": 0.0
+ },
+ {
+  "doc": "1-02-second-floor-and-roof-pluming-plans",
+  "q": "How many showers are there?",
+  "expected": "3 (SH-1 x3)",
+  "answer": "About **0**. This is an estimate, not an exact count: it was read from the printed text and the drawing image by a model.",
+  "meta": {
+   "route": "hybrid",
+   "abstained": false,
+   "conf": 0.2,
+   "step": "count / shower / unscoped (rules)"
+  },
+  "cost": 0.0,
+  "evidence": 0,
+  "s": 0.2
+ },
+ {
+  "doc": "1-02-second-floor-and-roof-pluming-plans",
+  "q": "How many 3 inch roof vents (VTR) are there?",
+  "expected": "3",
+  "answer": "About **0**. This is an estimate, not an exact count: it was read from the printed text and the drawing image by a model.",
+  "meta": {
+   "route": "hybrid",
+   "abstained": false,
+   "conf": 0.2,
+   "step": "count / roof / unscoped (rules)"
+  },
+  "cost": 0.0,
+  "evidence": 0,
+  "s": 0.2
+ },
+ {
+  "doc": "01-schedules-base-plate-and-pier-details",
+  "q": "What scale is the drawing?",
+  "expected": "1/2\" = 1'-0\" (text layer, 21 hits)",
+  "answer": "**As indicated** [1]  > As indicated [1]",
+  "meta": {
+   "route": "index",
+   "abstained": false,
+   "conf": 0.9,
+   "step": "scale: exact PDF text with page and pixel boxes"
+  },
+  "cost": 0.0,
+  "evidence": 1,
+  "s": 0.0
+ },
+ {
+  "doc": "01-schedules-base-plate-and-pier-details",
+  "q": "What is the sheet number and title?",
+  "expected": "S-101 SCHEDULES, BASE PLATE AND PIER DETAILS",
+  "answer": "**S-101** [1]  > S-101 [1]",
+  "meta": {
+   "route": "index",
+   "abstained": false,
+   "conf": 0.9,
+   "step": "sheet_number: exact PDF text with page and pixel boxes"
+  },
+  "cost": 0.0,
+  "evidence": 1,
+  "s": 0.0
+ },
+ {
+  "doc": "-20190309-organic-grocery-store-drawings",
+  "q": "What is the area of the dining room in square metres?",
+  "expected": "164 SF = 15.2 m2",
+  "answer": "The area is **4,174 SF = 387.8 m²** (1 SF = 0.0929 m²). Check: the 15 figures above add to 8,146 SF; the total is -3,972 SF different (rows not shown in this column, e.g. exterior stairs). [1][2]",
+  "meta": {
+   "route": "index",
+   "abstained": false,
+   "conf": 0.9,
+   "step": "table total 4,174 SF -> m2; column sum 8,146"
+  },
+  "cost": 0.0,
+  "evidence": 2,
+  "s": 0.0
+ },
+ {
+  "doc": "-20190309-organic-grocery-store-drawings",
+  "q": "How many rooms are in the first floor room schedule?",
+  "expected": "count of rows in ROOM SCHEDULE - SIMPLIFIED",
+  "answer": "About **0**. This is an estimate, not an exact count: it was read from the printed text and the drawing image by a model.",
+  "meta": {
+   "route": "hybrid",
+   "abstained": false,
+   "conf": 0.2,
+   "step": "count / room / storey (rules)"
+  },
+  "cost": 0.0,
+  "evidence": 0,
+  "s": 0.1
+ }
+]

@@ -49,6 +49,207 @@ def _done(question, doc, text, value, unit, items, trace, route="analytics", t0=
                        boxes, cites, scene, trace, route, t0 or time.perf_counter())
 
 
+def filtered_question(question: str, doc: Doc, t0) -> dict | None:
+    """Apply named rooms, area bounds, thickness and misspelled floor counts before broad totals."""
+    if doc.mode != "ifc":
+        return None
+    from engine.solvers.filters import room_filter, room_name, missing_room_text, storey_requested
+    from engine.solvers.solve import _abstain
+    st = resolve_storey(question, doc.storeys)
+    trace = [_step("route", "explicit filters -> code over IFC quantities, no model")]
+    if storey_requested(question) and st is None:
+        return _done(question, doc, "No matching floor was found. Storeys present: "
+                     + ", ".join(s["name"] for s in doc.storeys) + ".", None, None, [], trace, t0=t0)
+    q = question.lower()
+    # These handlers measure materials/perimeters, rather than counting the room noun in their scope.
+    if re.search(r"\b(?:baseboards?|base boards?|skirting|tiles?|flooring|paint|waste|cost|price|order|take[- ]?off)\b", q):
+        return None
+    # Bounded typo correction is only for these common count words, never a guessed item name.
+    corrected = re.sub(r"\b(?:doros|dors|doorrs)\b", "doors", q)
+    corrected = re.sub(r"\bmnay\b", "many", corrected)
+    if corrected != q and re.search(r"\bhow many\b", corrected) and _kind(corrected):
+        kind = _kind(corrected)
+        items = [i for i in _of_kind(doc, kind) if not st or i.storey == st]
+        text = f"There are **{len(items)} {_noun(kind, len(items))}** " + (f"on **{st}**" if st else "in this model") + ". {marks}"
+        return _done(question, doc, text, len(items), "count", items, trace, t0=t0)
+    thickness = re.search(r"\b(\d+(?:\.\d+)?)\s*(mm|cm|m)\s+thick\b", q)
+    if thickness and re.search(r"\bwalls?\b", q):
+        val, u = float(thickness[1]), thickness[2]
+        metres = val / {"mm": 1000, "cm": 100, "m": 1}[u]
+        walls = [i for i in _of_kind(doc, "wall") if not st or i.storey == st]
+        known = [i for i in walls if i.q.get("width_m") is not None or i.q.get("thickness_m") is not None]
+        if not known:
+            return _abstain(question, doc.doc_id, "The model has no wall thickness quantities, so this filter cannot be applied.", trace, "index", t0)
+        hit = [i for i in known if abs(float(i.q.get("thickness_m", i.q.get("width_m"))) - metres) < 0.0005]
+        text = f"**{len(hit)} walls** are **{val:g} {u} thick**" + (f" on **{st}**" if st else "") + ". {marks}"
+        if len(known) < len(walls):
+            text += f" {len(walls) - len(known)} walls have no thickness recorded and are excluded."
+        return _done(question, doc, text, len(hit), "count", hit, trace, t0=t0)
+    if _kind(q) not in (None, "room", "storey"):
+        return None
+    rooms = _of_kind(doc, "room")
+    selected = room_filter(question, rooms)
+    bounds = re.search(r"\bbetween\s+(\d+(?:\.\d+)?)\s+and\s+(\d+(?:\.\d+)?)\s*(?:m2|m²|square met(?:er|re)s)\b", q)
+    limit = re.search(r"\b(larger|bigger|smaller|greater|less|more|at least|at most|over|under|above|below)\s*(?:than\s+)?(\d+(?:\.\d+)?)\s*(?:m2|m²|square met(?:er|re)s)\b", q)
+    area_q = bool(AREAQ.search(q) or re.search(r"\bhow (?:big|large)\b", q))
+    count_q = bool(re.search(r"\bhow many\b|\bnumber of\b|^\s*list\b", q))
+    if not (area_q or count_q) or not (selected or bounds or limit):
+        return None
+    # Width filters for doors/windows are handled by the dimension handlers, not rooms.
+    if not selected and not re.search(r"\b(?:rooms?|spaces?)\b", q):
+        return None
+    target, hit = selected if selected else ("room", rooms)
+    if st:
+        hit = [r for r in hit if r.storey == st]
+    if not hit:
+        return _done(question, doc, missing_room_text(target, rooms)
+                     + (f" Storey filter: {st}." if st else ""), None, None, [], trace, t0=t0)
+    vals = [(r, _qty(r, "room", "area")) for r in hit]
+    if bounds or limit:
+        known = [(r, v) for r, v in vals if v is not None]
+        if not known:
+            return _abstain(question, doc.doc_id, "The matching rooms have no area quantities, so the area filter cannot be applied.", trace, "index", t0)
+        if bounds:
+            lo, hi = float(bounds[1]), float(bounds[2])
+            vals = [(r, v) for r, v in known if lo <= v <= hi]
+            condition = f"between {lo:g} and {hi:g} m²"
+        else:
+            op, value = limit[1], float(limit[2])
+            def keep(v):
+                if op == "at least": return v >= value
+                if op == "at most": return v <= value
+                return v < value if op in ("smaller", "less", "under", "below") else v > value
+            vals = [(r, v) for r, v in known if keep(v)]
+            condition = f"{op} {value:g} m²"
+        hit = [r for r, _ in vals]
+    else:
+        condition = ""
+    where = f"on **{st}**" if st else "in this model"
+    noun = target if len(hit) == 1 else (target + "s" if not target.endswith("s") else target)
+    trace.append(_step("filter", f"{target}; {st or 'all storeys'}; {condition or 'no area bound'}: {len(hit)} matches"))
+    if not hit:
+        return _done(question, doc, f"**No {noun} match** {condition} {where}. No unfiltered total is substituted.", 0, "count", [], trace, t0=t0)
+    have = [(r, v) for r, v in vals if v is not None]
+    total = sum(v for _, v in have)
+    # Keep the model's useful precision for individually named rooms.
+    per = "; ".join(f"{room_name(r)} ({r.name}, {r.storey}): {v:.2f} m²" for r, v in have[:10])
+    combined = bool(re.search(r"\b(?:total|combined|sum|together|all)\b", q))
+    if count_q:
+        text = f"**{len(hit)} {noun}** {where}" + (f" {condition}" if condition else "") + "."
+        if area_q:
+            text += f" Combined area: **{total:.1f} m²**." if len(have) == len(hit) else " Some matching rooms have no area recorded."
+        text += (f" {per}." if have and (bounds or limit or area_q) else "") + " {marks}"
+        return _done(question, doc, text, len(hit), "count", hit, trace, t0=t0)
+    if not have:
+        return _abstain(question, doc.doc_id, f"The matching {noun} have no area recorded.", trace, "index", t0)
+    if len(hit) > 1 and not combined:
+        areas = [v for _, v in have]
+        text = (f"There are **{len(hit)} {noun}** {where}, with areas from **{min(areas):.2f} to {max(areas):.2f} m²**. "
+                + (f"{per}. " if len(hit) <= 10 else "") + "Which one do you mean? {marks}")
+        return _done(question, doc, text, None, "m²", hit, trace, t0=t0)
+    if len(have) != len(hit):
+        return _abstain(question, doc.doc_id, "Some matching rooms have no area recorded, so I cannot give their combined area.", trace, "index", t0)
+    text = (f"The {'combined area' if len(hit) > 1 else 'area'} of **{target}** {where} is **{total:.2f} m²**. {per}. {{marks}}")
+    return _done(question, doc, text, round(total, 4), "m²", hit, trace, t0=t0)
+
+
+def arithmetic_question(question: str, doc: Doc, t0, solve_fn) -> dict | None:
+    """Comparisons, percentages and ratios combine independent solver results."""
+    if solve_fn is None:
+        return None
+    q = question.lower()
+    st = resolve_storey(question, doc.storeys) if doc.mode == "ifc" else None
+    suffix = f" on {st}" if st else ""
+    def sub(kind, area=False, scoped=True):
+        return solve_fn((f"What is the total area of all {kind}s" if area else f"How many {kind}s are there") + (suffix if scoped else ""))
+    def value(res):
+        a = res.get("answer") or {}
+        return a.get("value") if not a.get("abstained") and isinstance(a.get("value"), (int, float)) else None
+    def result(text, val, unit, parts):
+        ids = {i for r in parts for c in r.get("citations", []) for i in c.get("item_ids", [])}
+        trace = [_step("route", "arithmetic -> independent solver results, no model"),
+                 _step("calculate", "; ".join(f"{p['question']}: {value(p)}" for p in parts))]
+        return _done(question, doc, text + " {marks}", val, unit, [i for i in doc.items if i.item_id in ids], trace, t0=t0)
+    def unavailable(parts):
+        res = result("I cannot compute this comparison or ratio because an operand is missing, incomplete or the denominator is zero. No unfiltered count is substituted.", None, None, parts)
+        res["answer"]["confidence"] = 0.5
+        return res
+    kind = _kind(q)
+    premise = re.search(r"\bsince there are\s+(\d+)\s+(doors?|windows?|walls?|rooms?)\b", q)
+    if premise:
+        kind = premise[2].rstrip("s")
+        total = sub(kind, scoped=False)
+        n = value(total)
+        if n is None:
+            return total
+        correction = f"The model has **{n:g} {_noun(kind, n)}, not {premise[1]}**." if n != int(premise[1]) else f"The model has **{n:g} {_noun(kind, n)}**."
+        if re.search(r"\baverage\b", q) and doc.storeys:
+            avg = n / len(doc.storeys)
+            return result(f"{correction} Across the **{len(doc.storeys)} declared storeys**, the average is **{avg:.1f} per storey**, including storeys with zero.", round(avg, 4), "count", [total])
+        return result(correction, n, "count", [total])
+    if re.search(r"\b(?:percentage|percent)\b", q) and kind and st:
+        numerator, denominator = sub(kind), sub(kind, scoped=False)
+        n, d = value(numerator), value(denominator)
+        if n is None or d is None or d == 0:
+            return unavailable([numerator, denominator])
+        pct = n / d * 100
+        return result(f"**{pct:.1f}%** of the {_noun(kind)} are on **{st}**: **{n:g} of {d:g}**.", round(pct, 1), "%", [numerator, denominator])
+    if re.search(r"window[ -]to[ -]floor\s+area\s+ratio", q):
+        numerator, denominator = sub("window", area=True), sub("room", area=True)
+        n, d = value(numerator), value(denominator)
+        if n is None or d is None or d == 0:
+            return unavailable([numerator, denominator])
+        pct = n / d * 100
+        return result(f"The window-to-floor area ratio{suffix} is **{pct:.1f}%**: **{n:.2f} m²** of windows ÷ **{d:.2f} m²** of net room floor area × 100.", round(pct, 1), "%", [numerator, denominator])
+    pair = re.search(r"\b(more|fewer|less)\s+(windows?|doors?|walls?|rooms?)\s+than\s+(windows?|doors?|walls?|rooms?)\b", q)
+    if pair:
+        a, b = pair[2].rstrip("s"), pair[3].rstrip("s")
+        left, right = sub(a), sub(b)
+        n, d = value(left), value(right)
+        if n is None or d is None:
+            return unavailable([left, right])
+        yes = n > d if pair[1] == "more" else n < d
+        return result(f"**{'Yes' if yes else 'No'}**{suffix}: **{n:g} {_noun(a, n)}** vs **{d:g} {_noun(b, d)}**.", abs(n - d), "count", [left, right])
+    threshold = re.search(r"\b(?:are|is) there\s+(more than|fewer than|less than|at least|at most|over|under)\s+(\d+)\s+(doors?|windows?|walls?|rooms?)\b", q)
+    if threshold:
+        op, bound, kind = threshold[1], int(threshold[2]), threshold[3].rstrip("s")
+        total = sub(kind)
+        n = value(total)
+        if n is None:
+            return unavailable([total])
+        yes = n >= bound if op == "at least" else n <= bound if op == "at most" else n < bound if op in ("fewer than", "less than", "under") else n > bound
+        return result(f"**{'Yes' if yes else 'No'}.** There are **{n:g} {_noun(kind, n)}**{suffix} ({op} {bound}: {'yes' if yes else 'no'}).", n, "count", [total])
+    return None
+
+
+def multi_doc_total(question, doc_ids, root, t0=None):
+    """Explicit selected-document totals; the answer dispatcher supplies all selected ids."""
+    from engine.solvers.solve import solve, _abstain
+    from engine.router.parser import parse
+    p = parse(question)
+    if len(doc_ids) < 2 or p.type != "count" or not re.search(r"\b(?:across|both|combined|altogether|in total)\b", question, re.I):
+        return None
+    parts = [solve(question, did, parsed=p, root=root) for did in dict.fromkeys(doc_ids)]
+    if any(r["answer"]["abstained"] or not isinstance(r["answer"]["value"], (int, float)) for r in parts):
+        res = _abstain(question, doc_ids[0], "I cannot compute the total across all selected models because one has no matching count data.", [_step("route", "selected-document total: missing operand")], "index", t0 or time.perf_counter())
+        res["doc_ids"] = list(doc_ids)
+        return res
+    total = sum(r["answer"]["value"] for r in parts)
+    cites = []
+    lines = []
+    for part in parts:
+        for c in part["citations"]:
+            cites.append({**c, "n": len(cites) + 1})
+        marks = "".join(f"[{c['n']}]" for c in cites if c["doc_id"] == part["doc_ids"][0])
+        lines.append(f"{part['doc_ids'][0]}: {part['answer']['value']} {marks}")
+    text = f"**{total} {_noun(p.kind, total)} in total** across the {len(parts)} selected models. " + "; ".join(lines) + "."
+    # Scene highlights are scoped to the first document; citations retain all document ids.
+    scene = parts[0]["evidence"]["scene"]
+    boxes = parts[0]["evidence"]["boxes"]
+    return _answer_obj(question, list(doc_ids), text, total, "count", min(r["answer"]["confidence"] for r in parts), False, boxes, cites, scene,
+                       [_step("route", "selected-document total -> sum one solver result per document, no model")], "index", t0 or time.perf_counter())
+
+
 # ------------------------------------------------------------------ storey comparisons
 def storey_compare(question: str, doc: Doc, t0) -> dict | None:
     if doc.mode != "ifc" or len(doc.storeys) < 2:
@@ -965,7 +1166,7 @@ def wants_compliance(question: str) -> bool:
 
 
 def compliance(question: str, doc: Doc, t0) -> dict | None:
-    if not COMPLY.search(question):
+    if not COMPLY.search(question) and not (re.search(r"\b(?:exits?|escape)\b", question, re.I) and re.search(r"\b(?:regulations?|at least|under|every storey)\b", question, re.I)):
         return None
     pick = [(p, label) for p, rx, label in TOPIC if rx.search(question)]
     if not pick:
@@ -1222,6 +1423,9 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
 
 def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
     """First handler that recognises the shape wins; every handler may return None."""
+    res = filtered_question(question, doc, t0) or arithmetic_question(question, doc, t0, solve_fn)
+    if res is not None:
+        return res
     from engine.quantity_takeoff import quantity_takeoff
     res = quantity_takeoff(question, doc, t0)
     if res is not None:
@@ -1243,15 +1447,23 @@ def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
 def edit_advice(res: dict, doc: Doc, hidden_ids: list[str]) -> None:
     """"remove the front door, is it still compliant": run the advisor on the edited model and put the verdict in the answer text."""
     from engine import advisor
+    from engine.findings import structural_edit_warning
+    structural = structural_edit_warning(doc, hidden_ids)
     cards = advisor.advise_doc(doc, {"op": "hide", "item_ids": hidden_ids})
-    if not cards:
+    if not cards and not structural:
         return
+    if structural:
+        cards = [c for c in cards if c.get("severity") in ("violation", "suggestion")]
     res["advisor_cards"] = cards
     bad = [c for c in cards if c.get("severity") == "violation"]
     sug = [c for c in cards if c.get("severity") == "suggestion"]
     def line(c):
         return f"{c['title']} ({advisor.card_rule_ref(c)})" if advisor.card_rule_ref(c) else c["title"]
-    if bad:
+    if structural:
+        verdict = structural
+        if bad:
+            verdict += " Other checks: " + "; ".join(line(c) for c in bad[:3]) + "."
+    elif bad:
         verdict = "**Not compliant after this edit:** " + "; ".join(line(c) for c in bad[:3]) + "."
     elif sug:
         verdict = "**Possible problem after this edit:** " + "; ".join(line(c) for c in sug[:3]) + "."

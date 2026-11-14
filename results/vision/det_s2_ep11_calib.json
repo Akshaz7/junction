@@ -1,0 +1,1 @@
+{"weights": "weights/rtdetr_s2/ep11", "cut_picked_on_calib": {"door": 0.1, "window": 0.1, "toilet": 0.05, "sink": 0.15, "shower": 0.05, "bathtub": 0.05}, "finetuned_calib": {"window": 0.128, "door": 0.135, "toilet": 0.308, "sink": 0.179, "shower_bathtub": 0.231}, "mean_calib": 0.196}

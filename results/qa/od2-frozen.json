@@ -1,0 +1,17 @@
+{
+  "row": "E-48",
+  "frozen_at": "2026-11-14T13:46:09.794343+00:00",
+  "frozen_sha256": {
+    "engine/schedules.py": "3bb3e53250d3d124a39f4b4531d9c948d904bc2287d682f67eee18631f0fde2f",
+    "engine/titleblock.py": "198eb2c8cc2341d7f500f15c7b421495537d238b3514af8bff41c8175b2fdc84",
+    "engine/reader/text.py": "83cc23009481d37dc5bc2148c4aae5905265580eb87e6a14116aed74e7e4d9de",
+    "engine/reader/tables.py": "97edb5dc669ea618f6adf48ece88d218a0afc687ac082b08898e832b77c6dce2",
+    "engine/tests/test_od_pdf.py": "e7164ff8f927bac57fc6295a107ca2a25f76780fd70a0dc8cab57b9907bb23b5"
+  },
+  "baseline_commit": "b155e6b878c4d9d2c0a190e33c9f007112c1d19c",
+  "baseline_sha256": {
+    "engine/schedules.py": "2114b4dbebaabf16f4d06ba8006efa31fe013a8d68b0e2815207af68d6e9206a",
+    "engine/titleblock.py": "10d97549b2e7f465d84665e1210eae3caa31b0861add6b884b6ddc89f75578c2"
+  },
+  "development_data": "generated for demo PDFs and tables only; no held-out source inspection"
+}

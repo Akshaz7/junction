@@ -19,10 +19,10 @@ class Socket {
   close() { this.readyState = 3; this.emit('close'); }
 }
 
-function transport() {
+function transport(chat_id?: string) {
   const socket = new Socket();
   const connect = vi.fn(() => socket as unknown as WebSocket);
-  const channel = createLiveHighlightClient({ url: 'ws://demo/ws', connect });
+  const channel = createLiveHighlightClient({ url: 'ws://demo/ws', connect, chat_id });
   return { socket, channel, connect };
 }
 
@@ -51,6 +51,26 @@ function viewerStub(loaded = true) {
 const edit = (op: SceneCommand['op'], item_ids: string[], edit_id: string): SceneEvent => ({ type: 'scene.edit', doc_id: 'demo', op, item_ids, edit_id });
 
 describe('scene commands over the shared highlight WebSocket', () => {
+  it('persists panel Remove and Undo in their chat and rejects other chats on the same drawing', () => {
+    const { socket, channel } = transport('chat-a');
+    const viewer = viewerStub();
+    const live = bindLiveCommands(viewer, 'demo', channel);
+    socket.open();
+    viewer.applyCommand({ op: 'hide', item_ids: ['door-a'] });
+    viewer.applyCommand({ op: 'restore', item_ids: ['door-a'] });
+    const events = socket.sent.map((raw) => JSON.parse(raw));
+    expect(events.map(({ chat_id, op, item_ids }) => ({ chat_id, op, item_ids }))).toEqual([
+      { chat_id: 'chat-a', op: 'hide', item_ids: ['door-a'] },
+      { chat_id: 'chat-a', op: 'restore', item_ids: ['door-a'] },
+    ]);
+    socket.receive({ ...edit('hide', ['door-b'], 'other-chat'), chat_id: 'chat-b' });
+    expect(viewer.getCommandState().hidden).toEqual([]);
+    socket.receive({ type: 'scene.state', doc_id: 'demo', chat_id: 'chat-b', hidden: ['door-b'], highlighted: [], labels: {} });
+    expect(viewer.getCommandState().hidden).toEqual([]);
+    socket.receive({ type: 'scene.state', doc_id: 'demo', chat_id: 'chat-a', hidden: ['door-a'], highlighted: [], labels: {} });
+    expect(viewer.getCommandState().hidden).toEqual(['door-a']);
+    live.dispose();
+  });
   it('validates scene.edit and scene.state; ignores malformed events', () => {
     const event = edit('hide', ['W3'], 'edit1');
     expect(decodeLiveMessage(JSON.stringify(event))).toEqual(event);

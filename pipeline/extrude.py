@@ -3,7 +3,7 @@
 One GLB node per wall, door, window and room floor, node name = item_id (CONTRACT 5.1).
 Plan coordinates (px, top-left origin) -> metres: X = (px - W/2)*m_per_px, Z = (py - H/2)*m_per_px,
 Y up. So the scene is recentred on the image centre and the textured floor quad "plan_floor"
-spans exactly image size * scale. Defaults (override with item props height_m): wall 2.7 m,
+spans exactly image size * scale. Wall height is shared per storey (median height_m, default 2.7 m),
 door opening 2.1 m, window sill 0.9 m / head 2.1 m. Generated for demo.
 
 CLI: python -m pipeline.extrude [--only DOC_ID...] [--page N] [--force]
@@ -14,6 +14,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import trimesh
@@ -167,6 +168,64 @@ def _wb(ax, u0, u1, y0, y1, v0, v1):
     return (u0, u1, y0, y1, v0, v1) if ax == "x" else (v0, v1, y0, y1, u0, u1)
 
 
+def _fit_opening(o, walls):
+    """Find the neighbouring wall axis/thickness, including diagonal DXF walls.
+
+    Returns a local opening, its world transform, footprint and host wall id.
+    The fallback keeps the detected box when there is no neighbouring wall.
+    """
+    x0, x1, z0, z1, ax = o
+    corners = np.array([(x0, z0), (x1, z0), (x1, z1), (x0, z1)])
+    center = corners.mean(axis=0)
+    width = max(x1 - x0, z1 - z0, 0.1)
+    hint = np.array([1., 0.]) if ax == "x" else np.array([0., 1.])
+    choices = []
+    for iid, wall in walls:
+        if wall.is_empty or wall.geom_type != "Polygon":
+            continue
+        candidates = [wall]
+        # Raster contours often contain a whole connected wall network. Its
+        # bounding rectangle says nothing about local wall thickness; inspect
+        # nearby pieces at several radii instead of treating the network as a bar.
+        for radius in (width * .65, width + .35):
+            nearby = wall.intersection(Point(center).buffer(radius).envelope)
+            candidates.extend(list(nearby.geoms) if hasattr(nearby, "geoms") else [nearby])
+        for candidate in candidates:
+            if candidate.is_empty or candidate.geom_type != "Polygon":
+                continue
+            rect = np.asarray(candidate.minimum_rotated_rectangle.exterior.coords)[:4]
+            edges = np.roll(rect, -1, axis=0) - rect
+            lengths = np.linalg.norm(edges, axis=1)
+            longest = int(np.argmax(lengths))
+            if lengths[longest] < 1e-6 or max(lengths) < 1.5 * min(lengths):
+                continue
+            u = edges[longest] / lengths[longest]
+            v = np.array([-u[1], u[0]])
+            vs = rect @ v
+            c = float((vs.min() + vs.max()) / 2)
+            across = abs(center @ v - c)
+            distance = candidate.distance(Point(center))
+            if distance > width + 0.5 or across > max(width * 0.6, 0.35):
+                continue
+            penalty = (1 - abs(u @ hint)) * width if max(x1 - x0, z1 - z0) > 1.7 * min(x1 - x0, z1 - z0) else 0
+            choices.append((distance + across + penalty, iid, u, v, c, float(vs.max() - vs.min())))
+    host = None
+    u, v = hint, np.array([-hint[1], hint[0]])
+    c = float(center @ v)
+    thickness = max(0.12, min(x1 - x0, z1 - z0))
+    if choices:
+        _, host, u, v, c, thickness = min(choices, key=lambda q: q[0])
+    us = corners @ u
+    a, b = float(us.min()), float(us.max())
+    # Coordinates in this frame are still metres; the rotation also aligns frames/glass.
+    local = (a, b, c - thickness / 2, c + thickness / 2, "x")
+    matrix = np.eye(4)
+    matrix[0, 0], matrix[2, 0] = u
+    matrix[0, 2], matrix[2, 2] = v
+    footprint = Polygon([u * s + v * t for s, t in ((a, local[2]), (b, local[2]), (b, local[3]), (a, local[3]))])
+    return local, matrix, footprint, host
+
+
 def window_parts(o):
     x0, x1, z0, z1, ax = o
     u0, u1 = (x0, x1) if ax == "x" else (z0, z1)
@@ -262,8 +321,124 @@ def _shell(pm, img_gray, mpp):
     return {"walls": [outer.difference(inner)], "floor": outer, "wall_frac": 0.0}
 
 
-def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False) -> dict:
+def _stack_storeys(doc_id, art, page, raster_walls, pm, blocks):
+    """Build each detected layout block independently, preserving source item ids.
+
+    Heights/stacking are generated for demo, not measured floor elevations.
+    Temporary sub-scenes never overwrite the input document's derived assets.
+    """
+    import copy
+    import tempfile
+    from engine.storeys import label_levels
+    from shapely.geometry import box
+
+    regions = [box(*b["bbox_px"]) for b in blocks]
+    groups = [[] for _ in blocks]
+    for it in pm["items"]:
+        if not it.get("bbox_px"):
+            continue
+        bb = box(*it["bbox_px"])
+        group = min(range(len(regions)), key=lambda i: (regions[i].distance(bb.centroid), regions[i].centroid.distance(bb.centroid)))
+        groups[group].append(it)
+
+    def level(index):
+        levels = label_levels(it.get("label") for it in groups[index] if it["kind"] == "text")
+        return min(levels) if len(levels) == 1 else 99
+
+    order = sorted(range(len(blocks)), key=lambda i: (level(i), blocks[i]["bbox_px"][1], blocks[i]["bbox_px"][0]))
+    merged = trimesh.Scene()
+    items, counts, storeys = {}, {}, []
+    anchor = None
+    original_ids = {it["item_id"] for it in pm["items"]}
+    image_path = art / f"page-{page}.png"
+    with Image.open(image_path) as page_image, tempfile.TemporaryDirectory(prefix="cx-pipe-storeys-") as tmp:
+        for floor_index, group_index in enumerate(order):
+            source_items = groups[group_index]
+            bbs = [it["bbox_px"] for it in source_items]
+            x0 = max(0, int(np.floor(min(b[0] for b in bbs))) - 3)
+            y0 = max(0, int(np.floor(min(b[1] for b in bbs))) - 3)
+            x1 = min(page_image.width, int(np.ceil(max(b[2] for b in bbs))) + 3)
+            y1 = min(page_image.height, int(np.ceil(max(b[3] for b in bbs))) + 3)
+            crop = (x0, y0, x1, y1)
+            local = copy.deepcopy(pm)
+            local["image"] = {"w": x1 - x0, "h": y1 - y0}
+            local["items"] = copy.deepcopy(source_items)
+            for it in local["items"]:
+                a, b, c, d = it["bbox_px"]
+                it["bbox_px"] = [a - x0, b - y0, c - x0, d - y0]
+                if it.get("polygon_px"):
+                    it["polygon_px"] = [[x - x0, y - y0] for x, y in it["polygon_px"]]
+            scratch = Path(tmp) / str(floor_index)
+            scratch.mkdir()
+            (scratch / f"planmap-{page}.json").write_text(json.dumps(local))
+            page_image.crop(crop).save(scratch / f"page-{page}.png")
+            if (art / "doc.json").exists():
+                (scratch / "doc.json").write_bytes((art / "doc.json").read_bytes())
+            result = process(doc_id, scratch, page, raster_walls, _split_storeys=False)
+            manifest = json.loads((scratch / "scene.json").read_text())
+            child = trimesh.load_scene(scratch / "scene.glb")
+            # The textured underlay must participate in storey visibility too.
+            transform, geometry = child.graph["plan_floor"]
+            underlay = child.geometry[geometry].bounds
+            manifest["items"]["plan_floor"] = {"node": "plan_floor", "kind": "floor", "bbox_m": underlay.tolist()}
+            wall_boxes = np.array([it["bbox_m"] for it in manifest["items"].values() if it["kind"] == "wall"])
+            bounds = np.array([wall_boxes[:, 0].min(axis=0), wall_boxes[:, 1].max(axis=0)]) if len(wall_boxes) else child.bounds
+            center = (bounds[0] + bounds[1]) / 2
+            if anchor is None:
+                anchor = center
+            offset = np.array([anchor[0] - center[0], 3.0 * floor_index, anchor[2] - center[2]])
+            name = f"Floor {floor_index + 1}"
+            storeys.append({"name": name, "elevation_m": float(offset[1]), "source_bbox_px": blocks[group_index]["bbox_px"],
+                            "wall_height_m": manifest["defaults"]["wall_m"]})
+            # Generated raster wall ids and slabs repeat in independent sub-scenes.
+            rename = {iid: iid if iid in original_ids else f"{iid}-floor-{floor_index + 1}" for iid in manifest["items"]}
+            node_names = {}
+            for node in child.graph.nodes:
+                if node in rename:
+                    node_names[node] = rename[node]
+                elif node.startswith("wall-infill:"):
+                    node_names[node] = node
+                elif ":" in node and node.split(":")[0] in rename:
+                    root, part = node.split(":", 1)
+                    node_names[node] = rename[root] + ":" + part
+                else:
+                    node_names[node] = f"{node}-floor-{floor_index + 1}"
+            root = f"storey-{floor_index + 1}"
+            transform = trimesh.transformations.translation_matrix(offset)
+            merged.graph.update(frame_to=root, matrix=transform)
+            for key, geometry in child.geometry.items():
+                merged.geometry[f"floor-{floor_index + 1}:{key}"] = geometry
+            for parent, node, data in child.graph.to_edgelist():
+                attrs = dict(data)
+                if attrs.get("geometry"):
+                    attrs["geometry"] = f"floor-{floor_index + 1}:{attrs['geometry']}"
+                merged.graph.update(frame_from=root if parent == child.graph.base_frame else node_names[parent], frame_to=node_names[node], **attrs)
+            for iid, it in manifest["items"].items():
+                it["node"] = rename[iid]
+                it["usd_name"] = usd_name(rename[iid])
+                it["bbox_m"] = np.round(np.asarray(it["bbox_m"]) + offset, 4).tolist()
+                it["storey"] = name
+                items[rename[iid]] = it
+            counts["floor"] = counts.get("floor", 0) + 1
+            for kind, count in result["counts"].items():
+                counts[kind] = counts.get(kind, 0) + count
+    glb = merged.export(file_type="glb")
+    (art / "scene.glb").write_bytes(glb)
+    mpp = pm["scale"]["m_per_px"]
+    manifest.update({"items": items, "storeys": storeys, "plan_image": f"page-{page}.png",
+                     "origin_offset_m": [pm["image"]["w"] * mpp / 2, 0., pm["image"]["h"] * mpp / 2],
+                     "note": "generated for demo: separate layout blocks aligned on wall bounds and stacked at 3 m; elevations are assumed"})
+    (art / "scene.json").write_text(json.dumps(manifest, indent=1))
+    return {"counts": counts, "glb_kb": len(glb) // 1024, "storeys": len(storeys)}
+
+
+def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False, *, _split_storeys: bool = True) -> dict:
     pm = json.loads((art / f"planmap-{page}.json").read_text())
+    if _split_storeys:
+        from engine.storeys import count_storeys
+        layout = count_storeys([SimpleNamespace(**it) for it in pm["items"]])
+        if layout["basis"] == "layout" and layout["n"] >= 2:
+            return _stack_storeys(doc_id, art, page, raster_walls, pm, layout["blocks"])
     W, H = pm["image"]["w"], pm["image"]["h"]
     mpp = pm["scale"]["m_per_px"]
     to_m = lambda p: ((p[0] - W / 2) * mpp, (p[1] - H / 2) * mpp)
@@ -282,28 +457,35 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False) -
     floor.visual = trimesh.visual.TextureVisuals(uv=uv, material=_mat((255, 255, 255), 90, rough=1.0, blend=True, tex=img))
     scene.add_geometry(floor, node_name="plan_floor", geom_name="plan_floor")
 
-    def height_of(it, default):
-        return float(it["props"].get("height_m") or default)
+    heights = [float(it.get("props", {}).get("height_m") or WALL_H) for it in pm["items"] if it["kind"] == "wall"]
+    heights = [h for h in heights if np.isfinite(h) and h > HEAD]
+    wall_h = float(np.median(heights)) if heights else WALL_H
 
     rw = None
     if raster_walls and (art / f"page-{page}.png").is_file():
         try:
             from pipeline import raster_walls as _rw
-            rw = _rw.read(np.asarray(Image.open(art / f"page-{page}.png").convert("L"), dtype=float), mpp)
+            rw = _rw.read(np.asarray(Image.open(art / f"page-{page}.png").convert("L"), dtype=np.uint8), mpp)
         except Exception as ex:  # noqa: BLE001
             print("raster walls skipped:", repr(ex)[:200])
     approx = False
     if raster_walls and rw is None and mpp <= 1 and sum(1 for it in pm["items"] if it["kind"] == "wall") < 3:
         # ladder step 3: no wall pixels and no usable plan-map walls -> clean shell around the drawing's outline
         try:
-            rw = _shell(pm, img_gray=np.asarray(Image.open(art / f"page-{page}.png").convert("L"), dtype=float), mpp=mpp)
+            rw = _shell(pm, img_gray=np.asarray(Image.open(art / f"page-{page}.png").convert("L"), dtype=np.uint8), mpp=mpp)
             approx = rw is not None
             if approx:
                 floor.visual = trimesh.visual.TextureVisuals(uv=uv, material=_mat((255, 255, 255), 255, rough=1.0, tex=img))
         except Exception as ex:  # noqa: BLE001
             print("shell fallback skipped:", repr(ex)[:200])
-    win_o = [_opening(it, to_m) for it in pm["items"] if it["kind"] == "window"]
-    door_o = [_opening(it, to_m) for it in pm["items"] if it["kind"] == "door"]
+    tm = lambda g: Polygon([to_m(q) for q in g.exterior.coords], [[to_m(q) for q in r.coords] for r in g.interiors])
+    wall_polys = [(f"wall-r{i:03d}", tm(g)) for i, g in enumerate(rw["walls"], 1)] if rw else [
+        (it["item_id"], unary_union(_polys([to_m(p) for p in (it.get("polygon_px") or _bbox_poly(it))])))
+        for it in pm["items"] if it["kind"] == "wall"]
+    openings = {it["item_id"]: _fit_opening(_opening(it, to_m), wall_polys)
+                for it in pm["items"] if it["kind"] in ("window", "door")}
+    win_o = [openings[it["item_id"]][2] for it in pm["items"] if it["kind"] == "window"]
+    door_o = [openings[it["item_id"]][2] for it in pm["items"] if it["kind"] == "door"]
 
     def register(iid, k, parts):
         parts = [(n, m) for n, m in parts if m is not None]
@@ -336,20 +518,14 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False) -
         for wi, wp in enumerate(rw["walls"], 1):
             g = Polygon([to_m(q) for q in wp.exterior.coords], [[to_m(q) for q in r.coords] for r in wp.interiors])
             g = g if g.is_valid else g.buffer(0)
-            PAD = 0.08
-
             def cut(opens):
-                shp = []
-                for x0, x1, z0, z1, ax in opens:
-                    sh = Polygon([(x0 - PAD, z0 - PAD), (x1 + PAD, z0 - PAD), (x1 + PAD, z1 + PAD), (x0 - PAD, z1 + PAD)])
-                    if sh.intersects(g):
-                        shp.append(sh)
+                shp = [o.buffer(0.01, join_style="mitre") for o in opens if o.intersects(g)]
                 return unary_union(shp) if shp else None
             dc, wc = cut(do_all), cut(wo_all)
             low = g if dc is None else g.difference(dc)
             mid = low if wc is None else low.difference(wc)
             ms = []
-            for sh, y0, y1 in ((low, 0.0, SILL), (mid, SILL, HEAD), (g, HEAD, WALL_H)):
+            for sh, y0, y1 in ((low, 0.0, SILL), (mid, SILL, HEAD), (g, HEAD, wall_h)):
                 if sh.is_empty:
                     continue
                 for q in (list(sh.geoms) if sh.geom_type in ("MultiPolygon", "GeometryCollection") else [sh]):
@@ -374,27 +550,16 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False) -
         poly = it.get("polygon_px") or _bbox_poly(it)
         pts = [to_m(p) for p in poly]
         if k == "wall":
-            hh = height_of(it, WALL_H)
+            hh = wall_h
             g = Polygon(pts)
             g = g if g.is_valid else g.buffer(0)
-            hit = lambda opens: [o for o in opens if g.bounds[0] - 0.5 < o[1] and o[0] < g.bounds[2] + 0.5
-                                 and g.bounds[1] - 0.5 < o[3] and o[2] < g.bounds[3] + 0.5]
+            hit = lambda opens: [o for o in opens if o.intersects(g)]
             wo, do = hit(win_o), hit(door_o)
             if not wo and not do:
                 m = prism(pts, 0.0, hh)
             else:
-                from shapely.geometry import Polygon as P
-
-                half = max(0.15, float(it["props"].get("thickness_px") or 0) * mpp / 2 + 0.05)
-
                 def cutter(opens):
-                    shapes = []
-                    for x0, x1, z0, z1, ax in opens:
-                        e = max(0.0, half - ((z1 - z0) if ax == "x" else (x1 - x0)) / 2) + 0.01
-                        sh = P([(x0, z0 - e), (x1, z0 - e), (x1, z1 + e), (x0, z1 + e)]) if ax == "x" \
-                            else P([(x0 - e, z0), (x1 + e, z0), (x1 + e, z1), (x0 - e, z1)])
-                        if sh.intersection(g).area > 1e-4:
-                            shapes.append(sh)
+                    shapes = [o.buffer(0.01, join_style="mitre") for o in opens if o.intersects(g)]
                     return unary_union(shapes) if shapes else None
                 dc, wc = cutter(do), cutter(wo)
                 low = g if dc is None else g.difference(dc)           # below sill: doors only
@@ -414,9 +579,11 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False) -
                 m.visual = trimesh.visual.TextureVisuals(material=MATS["wall"]())
             register(iid, k, [("wall", m)])
         elif k == "door":
-            register(iid, k, door_parts(_opening(it, to_m)))
+            o, matrix, _, _ = openings[iid]
+            register(iid, k, [(n, m.apply_transform(matrix)) for n, m in door_parts(o) if m is not None])
         elif k == "window":
-            register(iid, k, window_parts(_opening(it, to_m)))
+            o, matrix, _, _ = openings[iid]
+            register(iid, k, [(n, m.apply_transform(matrix)) for n, m in window_parts(o) if m is not None])
         elif k == "room":
             if rw:
                 from shapely.geometry import box as _box
@@ -436,6 +603,23 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False) -
             x0, y0, x1, y1 = it["bbox_px"]
             (ax_, az_), (bx_, bz_) = to_m((x0, y0)), to_m((x1, y1))
             register(iid, k, fixture_parts(k, (min(ax_, bx_), max(ax_, bx_), min(az_, bz_), max(az_, bz_))))
+    # Segmented walls stop at openings: add masonry to the host wall without
+    # creating extra answer items or changing the window/door item identity.
+    kinds = {it["item_id"]: it["kind"] for it in pm["items"]}
+    for iid, (_, _, footprint, host) in openings.items():
+        specs = [(footprint, HEAD, wall_h)]
+        if kinds[iid] == "window":
+            specs.append((footprint, 0.0, SILL))
+        meshes = [prism(g, lo, hi) for g, lo, hi in specs if hi > lo]
+        meshes = [m for m in meshes if m is not None]
+        if not meshes:
+            continue
+        infill = _flat(trimesh.util.concatenate(meshes), "wall")
+        parent = host if host in items else iid
+        scene.add_geometry(infill, node_name=f"wall-infill:{iid}", geom_name=f"wall-infill:{iid}", parent_node_name=parent)
+        if parent == host:
+            bounds = np.array([items[host]["bbox_m"], infill.bounds])
+            items[host]["bbox_m"] = np.round([bounds[:, 0].min(axis=0), bounds[:, 1].max(axis=0)], 4).tolist()
     glb = scene.export(file_type="glb")
     (art / "scene.glb").write_bytes(glb)
     doc = json.loads((art / "doc.json").read_text()) if (art / "doc.json").exists() else {}
@@ -444,13 +628,13 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False) -
           "origin_offset_m": [round(W * mpp / 2, 4), 0.0, round(H * mpp / 2, 4)],
           "storeys": [{"name": "Floor 1", "elevation_m": 0.0}], "plan_image": f"page-{page}.png",
           "items": items, "source_planmap": f"planmap-{page}.json",
-          "defaults": {"wall_m": WALL_H, "door_m": DOOR_H, "window_sill_m": SILL, "window_head_m": HEAD},
+          "defaults": {"wall_m": wall_h, "door_m": DOOR_H, "window_sill_m": SILL, "window_head_m": HEAD},
           "note": "generated for demo: extruded from plan map with default heights; "
                   "stairs only when the plan map has a stairs item (none from raster plans)",
           "publishable": not (lic.startswith("CC-BY-ND") or lic.startswith("GPL"))}
     if approx or rw is not None:  # walls read from pixels or a shell: 3D is approximated from the drawing
         sc["props"] = {"approx": True}
-        sc["note"] = "3D approximated from the drawing"
+        sc["note"] = "generated for demo: 3D approximated from the drawing"
     (art / "scene.json").write_text(json.dumps(sc, indent=1))
     try:  # names, room areas, door widths for the info cards (pipeline/manifest_info.py)
         from pipeline import manifest_info

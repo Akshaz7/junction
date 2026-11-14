@@ -75,6 +75,23 @@ describe('staged build-up animation', () => {
     'door-001': { kind: 'door', bbox: [[0, 0, 0], [1, 2, 1]] as [[number, number, number], [number, number, number]] },
   };
 
+  it('scrubs continuously within a step, reusing the same nodes and exact base transforms', () => {
+    const { scene, nodes } = sceneOf(plan);
+    const wall = nodes.get('wall-001')!;
+    const animation = createBuildAnimation(scene, 0);
+    animation.setPosition(1.25); animation.sample(100);
+    const quarter = wall.scale.y;
+    expect(quarter).toBeGreaterThan(0); expect(quarter).toBeLessThan(3);
+    animation.setPosition(1.75); animation.sample(100);
+    expect(nodes.get('wall-001')).toBe(wall);
+    expect(wall.scale.y).toBeGreaterThan(quarter); expect(wall.scale.y).toBeLessThan(3);
+    animation.setPosition(1.25); animation.sample(100);
+    expect(wall.scale.y).toBe(quarter);
+    animation.setPosition(0); expect(animation.sample(100).progress).toBe(0);
+    animation.setPosition(3); expect(animation.sample(100).phase).toBe('done');
+    expect(wall.scale.y).toBe(3); expect(wall.position.y).toBe(1);
+  });
+
   it('holds the flat plan, then grows step by step and restores exact transforms when done', () => {
     const { scene, nodes } = sceneOf(plan);
     const start = 100;

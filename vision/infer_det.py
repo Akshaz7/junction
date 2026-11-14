@@ -70,9 +70,10 @@ class DetOnnx:
         return res
 
 
-def recount(pm, img, det, cuts=None):
-    """Planmap copy: walls/rooms/text kept, the six detector kinds replaced by the fine-tuned detections; item_ids renumbered per kind (same scheme as planmap.assemble)."""
-    items = [i for i in pm["items"] if i["kind"] not in KINDS] + det.detect(img, cuts)
+def recount(pm, img, det, cuts=None, only=None):
+    """Planmap copy: walls/rooms/text kept, the six detector kinds replaced by the fine-tuned detections (only=("shower","bathtub") swaps just those kinds); item_ids renumbered per kind (same scheme as planmap.assemble)."""
+    only = set(only or KINDS)   # kinds taken from the detector; every other kind (incl. the remaining detector kinds) stays as in the plan map
+    items = [i for i in pm["items"] if i["kind"] not in only] + [i for i in det.detect(img, cuts) if i["kind"] in only]
     counters, out = {}, []
     for it in sorted(items, key=lambda i: (i["kind"], i["bbox_px"][1], i["bbox_px"][0])):
         counters[it["kind"]] = counters.get(it["kind"], 0) + 1
