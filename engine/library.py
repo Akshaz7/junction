@@ -7,6 +7,7 @@ The app-feature answer carries `evidence.scene.open` = "3d" | "ar" (CONTRACT 5.1
 """
 from __future__ import annotations
 
+import json
 import re
 import time
 import uuid
@@ -137,7 +138,22 @@ def app_feature(question: str) -> str | None:
     return None
 
 
-def app_feature_answer(question: str, doc_ids: list[str]) -> dict | None:
+APPROX_3D = "The 3D view is approximated from the drawing."
+
+
+def approx_3d(doc_id: str, root=None) -> bool:
+    """True when the doc's scene.json says its 3D was approximated from a raster drawing (props.approx)."""
+    try:
+        import os
+        from pathlib import Path
+        r = Path(root or os.environ.get("ARTIFACTS_DIR") or "artifacts")
+        sc = json.loads((r / doc_id / "scene.json").read_text())
+        return bool((sc.get("props") or {}).get("approx") or sc.get("approx"))
+    except (OSError, ValueError, AttributeError):
+        return False
+
+
+def app_feature_answer(question: str, doc_ids: list[str], root=None) -> dict | None:
     which = app_feature(question)
     if not which:
         return None
@@ -151,6 +167,8 @@ def app_feature_answer(question: str, doc_ids: list[str]) -> dict | None:
         text = ("Use **Show on table** in the iOS app: it places this model on your table in AR, with the same items glowing, "
                 "and you can scale it up to 1:1 to walk through." if doc else
                 "Select a drawing first, then open it in the iOS app and tap **Show on table** to see it in AR with the same items glowing.")
+    if doc and approx_3d(doc, root):
+        text += " " + APPROX_3D
     scene = {"doc_id": doc, "highlight_item_ids": [], "camera_target_item_id": None, "open": which} if doc else \
             {"doc_id": "", "highlight_item_ids": [], "camera_target_item_id": None}
     return {

@@ -351,7 +351,7 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
         if (question or "").strip() and not os.environ.get("LIBRARY_OFF"):
             from engine.library import library_answer, app_feature_answer   # FIX-6: $0 library and app-feature questions
             from engine.app_help import app_help_answer                    # E-55: how-to questions answered only from engine/app_guide.md
-            _lib = library_answer(question, root) or app_help_answer(question, doc_ids) or app_feature_answer(question, doc_ids)
+            _lib = library_answer(question, root) or app_help_answer(question, doc_ids) or app_feature_answer(question, doc_ids, root)
             if _lib is not None:
                 for s_ in _lib["trace"]:
                     add(s_)
