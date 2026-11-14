@@ -124,6 +124,31 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
 
       {!!calc?.rows.length && <Section id="rows" title="Per-element figures" hint={`${calc.rows.length}`}><RowsTable calc={calc} onFocus={focus} docTitle={docTitle} /></Section>}
 
+      {!!calc?.scale_proof?.length && <Section id="scale" title="Scale proof" hint={`${calc.scale_proof.length}`} open={false}>
+        {calc.scale_proof.map((proof, i) => <div key={i} className="calc-proof">
+          <p className="calc-note"><b>{proof.method ?? 'scale'}</b>{proof.m_per_px != null && <> {fmt(proof.m_per_px, 6)} m/px</>}{proof.page != null && <>, page {proof.page}</>}{proof.spread_pct != null && <>, readings differ by up to {fmt(proof.spread_pct, 2)}%</>}</p>
+          {proof.proof_warning && <p className="calc-warning" role="status">{proof.proof_warning}</p>}
+          {!!proof.available_candidates?.length && <table aria-label="Scale readings"><thead><tr><th scope="col">Reading</th><th scope="col" className="num">m/px</th><th scope="col">Formula</th></tr></thead>
+            <tbody>{proof.available_candidates.map((c, k) => <tr key={k}><th scope="row">{c.method}{c.note && <small>{c.note}</small>}</th><td className="num">{c.m_per_px != null ? fmt(c.m_per_px, 6) : '-'}</td><td><code>{c.formula}</code></td></tr>)}</tbody></table>}
+        </div>)}
+      </Section>}
+
+      {!!calc?.inventory_rows?.length && <Section id="inventory" title="Everything saved on the sheet" hint={`${calc.inventory_rows.length}`} open={false}>
+        <table aria-label="Saved inventory"><thead><tr><th scope="col">Item</th><th scope="col">Origin</th><th scope="col" className="num">Score</th></tr></thead>
+          <tbody>{calc.inventory_rows.map((r, i) => <tr key={r.item_id ?? i} className={r.values?.alternative ? 'is-alt' : undefined}>
+            <th scope="row">{r.label ?? r.values?.kind as string}{!!r.values?.alternative && <small>alternative extraction, not counted</small>}</th>
+            <td>{String(r.values?.origin ?? '-')}</td><td className="num">{typeof r.values?.score === 'number' ? fmt(r.values.score, 2) : '-'}</td></tr>)}</tbody></table>
+      </Section>}
+
+      {calc?.reader && <Section id="reader" title="Second reader" open={false}>
+        <p className="calc-note">{calc.reader.calculations?.length ?? 0} calculations, {calc.reader.tool_calls?.length ?? 0} tool calls{calc.reader.model_confidence != null && <>, self-reported confidence {fmt(calc.reader.model_confidence, 2)}</>}.</p>
+        {calc.reader.note && <p className="calc-note">{calc.reader.note}</p>}
+      </Section>}
+
+      {!!calc?.unavailable?.length && <Section id="unavailable" title="Not available" hint={`${calc.unavailable.length}`}>
+        <ul className="calc-unavailable">{calc.unavailable.map((u, i) => <li key={i} className="calc-note">{u}</li>)}</ul>
+      </Section>}
+
       {!!calc?.checks.length && <Section id="checks" title="Checks" hint="second methods">
         <table className="calc-checks" aria-label="Checks"><thead><tr><th scope="col">Method</th><th scope="col" className="num">Value</th><th scope="col">Agrees</th><th scope="col" className="num">Diff</th></tr></thead>
           <tbody>{calc.checks.map((check, i) => <tr key={i}>

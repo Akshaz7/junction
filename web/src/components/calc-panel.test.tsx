@@ -87,3 +87,15 @@ it('survives a calculation with only a formula and a result', async () => {
   expect(host.querySelector('[data-testid="calc-method"]')).toBeNull()
   expect(host.querySelector('.calc-table, .calc-checks, .calc-steps')).toBeNull()
 })
+
+it('renders the additive scan fields when present and nothing when absent', async () => {
+  const calc = { ...scanReasoning.calc!,
+    scale_proof: [{ page: 1, method: 'printed-ratio', m_per_px: 0.0123, spread_pct: 2.5, available_candidates: [{ method: 'door-prior', m_per_px: 0.012, formula: '0.9 / px' }] }],
+    inventory_rows: [{ item_id: 'a', label: 'door', values: { origin: 'det', score: 0.91 } }, { item_id: 'b', label: 'door', values: { alternative: true } }],
+    reader: { model_confidence: 0.7, calculations: [{}], tool_calls: [{}, {}], note: 'self-reported' }, unavailable: ['No second-look count.'] }
+  await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc }} onClose={() => {}} />))
+  for (const id of ['scale', 'inventory', 'reader', 'unavailable']) expect(host.querySelector(`[data-section="${id}"]`), id).toBeTruthy()
+  expect(host.querySelector('[data-section="inventory"]')?.textContent).toContain('not counted')
+  await act(async () => root.render(<CalculationPanel reasoning={scanReasoning} onClose={() => {}} />))
+  expect(host.querySelector('[data-section="scale"], [data-section="reader"]')).toBeNull()
+})

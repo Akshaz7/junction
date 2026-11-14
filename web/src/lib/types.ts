@@ -53,6 +53,12 @@ export interface Calculation {
   checks: { method: string; value?: number; agrees?: boolean; diff_pct?: number | null; source?: CalculationSource }[]
   margin: EvidenceMargin
   status?: 'complete' | 'incomplete'; issues?: string[]
+  /** Additive scan context (all optional, rendered only when present). */
+  inventory_rows?: { item_id?: string | null; label?: string; values?: Record<string, unknown>; source?: CalculationSource }[]
+  scale_proof?: { doc_id?: string; page?: number; method?: string; m_per_px?: number; spread_pct?: number; proof_warning?: string
+    available_candidates?: { method?: string; m_per_px?: number; formula?: string; note?: string; inputs?: { name: string; value: unknown; unit: string }[] }[] }[]
+  reader?: { doc_ids?: string[]; model_confidence?: number; note?: string; tool_calls?: unknown[]; calculations?: unknown[] }
+  unavailable?: string[]
 }
 /** One thing that moved the confidence figure, with its size in percentage points (negative lowers it). */
 export interface ConfidenceFactor { label: string; delta: number; note?: string; base?: boolean }
