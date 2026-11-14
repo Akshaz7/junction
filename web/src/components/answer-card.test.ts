@@ -93,6 +93,11 @@ describe('answer rendering (QA-LIVE #7)', () => {
     expect(html).toContain('Garden room')
     expect(html).toContain('other__doc')
   })
+
+  it('never lists every project file on an uncited answer like a greeting', () => {
+    const html = render((a) => { a.doc_ids = Array.from({ length: 50 }, (_, i) => `doc__${i}`); a.citations = [] })
+    expect(html).not.toContain('doc__10')
+  })
 })
 
 describe('scene.open (CONTRACT 3.3)', () => {

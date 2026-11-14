@@ -89,7 +89,10 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
   const citations = hidden ? allCitations.slice(0, CITATION_CAP) : allCitations
   const labels = labelsOf(answer)
   const oneLine = isOneLine(answer.answer.text_md)
-  const docChips = answer.doc_ids.map((docId) => ({ docId, title: docs.find((doc) => doc.doc_id === docId)?.title ?? docId, first: allCitations.find((citation) => citation.doc_id === docId) }))
+  const allChips = answer.doc_ids.map((docId) => ({ docId, title: docs.find((doc) => doc.doc_id === docId)?.title ?? docId, first: allCitations.find((citation) => citation.doc_id === docId) }))
+  // Only show the documents the answer actually used: cited ones, or the picked few. Never a wall of every file in the project.
+  const citedChips = allChips.filter((chip) => chip.first)
+  const docChips = allChips.length <= 3 ? allChips : citedChips.slice(0, 6)
   const takeoff = parseTakeoff(answer, docs)
   const advice = useAnswerAdvice(answer, chatId)
   const table = answerTableSelection(answer)
