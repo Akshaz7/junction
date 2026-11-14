@@ -30,6 +30,27 @@
   cursor: pointer;
 }
 .viewer3d-toolbar button:disabled { opacity: .4; cursor: default; }
+.viewer3d-toolbar button[aria-pressed="true"] { background: var(--mode-accent, #166ed1); color: white; }
+.viewer3d[data-walking="true"] canvas { cursor: grab; }
+.viewer3d[data-walking="true"] canvas:active { cursor: grabbing; }
+.viewer3d-stage canvas:focus-visible { outline: 2px solid var(--mode-accent, #166ed1); outline-offset: -2px; }
+.viewer3d-walk-touch { display: none; }
+@media (any-pointer: coarse) {
+  .viewer3d-walk-touch { display: block; position: absolute; inset: 0; pointer-events: none; }
+  .viewer3d-walk-joystick {
+    position: absolute; bottom: 20px; left: 20px; width: 112px; height: 112px;
+    display: grid; place-items: center; border-radius: 50%; border: 1px solid #3335;
+    background: #fffc; pointer-events: auto; touch-action: none; user-select: none;
+  }
+  .viewer3d-walk-joystick span {
+    width: 40px; height: 40px; border-radius: 50%; background: var(--mode-accent, #166ed1);
+    pointer-events: none;
+  }
+  .viewer3d-walk-look-help {
+    position: absolute; right: 20px; bottom: 64px; padding: 6px 10px;
+    border-radius: 8px; background: #fffc; color: #333; font-size: 12px;
+  }
+}
 .viewer3d-roof-toggle { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
 
 .viewer3d-toolbar select {

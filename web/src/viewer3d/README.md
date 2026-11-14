@@ -237,3 +237,31 @@ times. If the largest exceeds the 60-second load budget, it measures the next
 largest candidate that loads within budget. Both the largest artifact and the
 selected model remain in the report; unfinished loads have null `load_ms` rather
 than an invented timing. Browser launch failures produce no benchmark result.
+
+T-10 adds **Walk** to the viewer toolbar. It instantly places the camera 1.6 m
+above the selected storey's floor: at `cameraTargetItemId` when supplied, otherwise
+at the largest room's centroid (ground storey by default). Unsafe centroids fall
+back to a clear nearby room position. WASD/arrows move at 2 m/s; dragging looks;
+Q/PageDown and E/PageUp move between storeys. The existing storey controls and
+incoming highlight storey changes also move the walker to the new floor. Escape
+or toggling Walk off restores the saved orbit position, orientation, target and
+near plane. Escape exits walking before dismissing an enclosing Visualise panel.
+
+On touch screens the left joystick moves while a second finger drags the canvas
+to look. Pointer cancellation, focus loss and backgrounding stop movement. There
+is no head bob or camera transition, including with reduced motion enabled.
+Collision sweeps a 0.3 m body against the original wall surfaces (both faces,
+including meshes on the batch picking layer). Doors remain passable. Short
+substeps prevent tunnelling, blocked movement slides along walls, and hidden
+walls cease colliding until restored. Cutaway, labels and scene edits keep their
+existing rendering paths; walking never modifies source geometry or materials.
+
+`viewer.setWalk(boolean)` enters/exits; `viewer.walk()` returns
+`{active, eye_height_m, storey, position}`. `onWalkChange(cb)` observes entry,
+exit and floor changes; `setWalkJoystick(x, y)` supplies normalized touch input.
+The dedicated test page exposes `window.__viewer3d.walk()`; opt-in canvas hooks
+also expose `canvas.__viewer3d.walk()`. `e2e/viewer3d-walk.spec.ts` exercises real
+AC20 desktop navigation, answer-target starts, edit retention and two-touch
+phone controls. LEAD runs it and the full `viewer3d-*.spec.ts` set through
+`scripts/heavy.sh` outside the sandbox (Chromium's macOS Mach port is blocked
+inside it).

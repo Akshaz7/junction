@@ -18,6 +18,7 @@ import { createCommandVisuals } from './commandVisuals';
 import { createFrameProbe, type ViewerPerf } from './perf';
 import { createRenderBatches, PICK_LAYER } from './renderBatches';
 import { withAbort, type LoadProgress } from './loadGLTF';
+import { createWalkController, type WalkState } from './walk';
 
 export const SCENE_LOAD_BUDGET_MS = 60_000;
 
@@ -28,6 +29,10 @@ export interface Viewer {
   readonly scene: LoadedScene | null;
   perf(): ViewerPerf;
   resetPerf(): void;
+  walk(): WalkState;
+  setWalk(active: boolean): boolean;
+  setWalkJoystick(x: number, y: number): void;
+  onWalkChange(callback: (state: WalkState) => void): () => void;
   loadScene(url: string | URL, options?: { onProgress?: (progress: LoadProgress) => void }): Promise<LoadedScene>;
   /** Transfers ownership; replaced scenes and the active scene are disposed by the viewer. */
   setScene(scene: LoadedScene): void;
@@ -83,6 +88,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   const cutawayListeners = new Set<(state: CutawayState) => void>();
   function notifyCutaway(): void {
     batchesDirty = true;
+    walk.syncStorey();
     if (cutaway) for (const listener of cutawayListeners) listener(cutaway.getState());
   }
   let disposed = false;
@@ -99,6 +105,15 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   const highlightListeners = new Set<(state: HighlightState) => void>();
   const labels: CSS2DObject[] = [];
   let flight: { start: number; from: Vector3; to: Vector3; targetFrom: Vector3; targetTo: Vector3 } | null = null;
+  let cameraTarget: string | null = null;
+  const walkListeners = new Set<(state: WalkState) => void>();
+  const walk = createWalkController(canvas, camera, controls, {
+    getScene: () => active,
+    getStorey: () => cutaway?.getState().activeStorey ?? null,
+    getTarget: () => cameraTarget,
+    setStorey,
+    onChange(state) { for (const callback of walkListeners) callback(state); },
+  });
   let rise: {
     animation: ReturnType<typeof createRiseAnimation>; from: Vector3; to: Vector3;
     phase: RisePhase; onStateChange?: (state: RiseState) => void; cancelTransitions: () => void;
@@ -123,6 +138,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     batchesDirty = true;
     commandVisuals?.clearMaterials();
     flight = null;
+    cameraTarget = null;
     clearLinkedVisuals();
     highlights?.clearHighlight();
     for (const label of labels) {
@@ -214,6 +230,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     if (ids.length) ensureInteractionMaterials();
     clearHighlight();
     if (disposed || !active || !highlights) return;
+    cameraTarget = options.cameraTargetItemId ?? null;
     cutaway?.followHighlight(ids, options.cameraTargetItemId);
     commandVisuals?.captureVisibility();
     notifyCutaway();
@@ -242,7 +259,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     const target = options.cameraTargetItemId;
     applyLinkedVisuals();
     if (rise) rise.animation.sample(performance.now());
-    else flyTo(itemBounds(active, target && active.items.has(target) ? [target] : state.highlighted));
+    else if (!walk.state().active) flyTo(itemBounds(active, target && active.items.has(target) ? [target] : state.highlighted));
     notifyHighlight();
   }
 
@@ -265,6 +282,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
 
   function visualise(onStateChange?: (state: RiseState) => void): void {
     if (disposed || !active) return;
+    walk.exit();
     batchesDirty = true;
     rise?.cancelTransitions();
     rise?.animation.restore();
@@ -339,6 +357,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
 
   function attach(scene: LoadedScene): void {
     if (active === scene) return;
+    walk.exit();
     rise?.cancelTransitions();
     rise?.animation.restore();
     rise = null;
@@ -376,9 +395,14 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   window.addEventListener('resize', resize);
   resize();
   let frame = 0;
+  let previousFrame = performance.now();
   function render(): void {
     if (disposed) return;
-    controls.update();
+    const now = performance.now();
+    const dt = (now - previousFrame) / 1000;
+    previousFrame = now;
+    if (walk.state().active) walk.update(dt);
+    else controls.update();
     const wasRising = rise !== null;
     sampleRise();
     const fading = commandVisuals?.sample(performance.now());
@@ -401,10 +425,34 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   }
   render();
 
+  function setStorey(name: string | null): void {
+    cutaway?.setStorey(name);
+    commandVisuals?.captureVisibility();
+    commandVisuals?.sample(performance.now());
+    notifyCutaway();
+  }
+
   return {
     renderer, camera, controls,
     perf: () => probe.read(renderer.info.render.calls, renderer.info.render.triangles),
     resetPerf: () => probe.reset(),
+    walk: () => walk.state(),
+    setWalk(value) {
+      if (disposed) return false;
+      if (!value) { walk.exit(); return false; }
+      if (walk.state().active) return true;
+      flight = null;
+      if (rise) {
+        const previous = rise;
+        rise = null;
+        previous.cancelTransitions(); previous.animation.restore();
+        previous.onStateChange?.({ phase: 'done', progress: 1 });
+        batchesDirty = true;
+      }
+      return walk.enter();
+    },
+    setWalkJoystick: (x, y) => walk.joystick(x, y),
+    onWalkChange(callback) { walkListeners.add(callback); return () => { walkListeners.delete(callback); }; },
     get scene() { return active; },
     async loadScene(url, options) {
       if (disposed) throw new Error('Viewer has been disposed');
@@ -440,12 +488,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       probe.reset();
       attach(scene);
     },
-    setStorey(name) {
-      cutaway?.setStorey(name);
-      commandVisuals?.captureVisibility();
-      commandVisuals?.sample(performance.now());
-      notifyCutaway();
-    },
+    setStorey,
     setShowRoof(show) {
       cutaway?.setShowRoof(show);
       commandVisuals?.captureVisibility();
@@ -527,6 +570,8 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       highlightListeners.clear();
       commandListeners.clear();
       cutawayListeners.clear();
+      walkListeners.clear();
+      walk.dispose();
       loadVersion++;
       pendingLoad?.abort(new Error('Viewer disposed'));
       pendingLoad = null;

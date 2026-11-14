@@ -10,6 +10,8 @@ import type { CommandTestState, SceneCommand } from './commands';
 import { cutawayStoreys, isRoof, type CutawayState } from './cutaway';
 import { setHover, setSelected, useLinkedItem } from './link';
 import type { LoadProgress } from './loadGLTF';
+import type { WalkState } from './walk';
+import { WalkJoystick } from './WalkJoystick';
 import './viewer3d.css';
 
 interface ViewerOptions {
@@ -36,6 +38,7 @@ export type Viewer3DProps = ViewerOptions & (
 export interface Viewer3DTestHandle {
   state(): HighlightState;
   commandState(): CommandTestState;
+  walk(): WalkState;
   pick(item_id: string): boolean;
 }
 export type LinkedViewerCanvas = HTMLCanvasElement & { __viewer3d?: Viewer3DTestHandle };
@@ -58,6 +61,8 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
   const pointerStart = useRef<{ id: number; x: number; y: number } | null>(null);
   const [cutaway, setCutaway] = useState<CutawayState>({ activeStorey: null, showRoof: false, hiddenCount: 0 });
   const [hasRoof, setHasRoof] = useState(false);
+  const [walking, setWalking] = useState(false);
+  const [walkMessage, setWalkMessage] = useState('');
   const [storeys, setStoreys] = useState<string[]>([]);
   const [picked, setPicked] = useState<string | null>(null);
   const [manifest, setManifest] = useState<SceneManifest | null>(null);
@@ -94,6 +99,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
     let liveCommands: ReturnType<typeof bindLiveCommands> | undefined;
     let unsubscribeCutaway: (() => void) | undefined;
     let unsubscribeHighlight: (() => void) | undefined;
+    let unsubscribeWalk: (() => void) | undefined;
     setState('loading');
     setProgress({ phase: 'manifest' });
     setError('');
@@ -102,6 +108,8 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
     setManifest(null);
     setElements(new Map());
     setHasRoof(false);
+    setWalking(false);
+    setWalkMessage('');
     setHighlightState({ highlighted: [], dimmed: 0, labels: {} });
     pointerStart.current = null;
 
@@ -120,6 +128,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
       viewerRef.current = viewer;
       unsubscribeCutaway = viewer.onCutawayChange(setCutaway);
       unsubscribeHighlight = viewer.onHighlightChange(() => setHighlightState(viewer!.getLinkedHighlightState()));
+      unsubscribeWalk = viewer.onWalkChange((next) => setWalking(next.active));
       live = bindLiveHighlight(viewer, doc_id);
       liveCommands = bindLiveCommands(viewer, doc_id);
       void viewer.loadScene(sceneUrl, { onProgress: (next) => { if (active) setProgress(next); } }).then((scene) => {
@@ -143,6 +152,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
       active = false;
       unsubscribeCutaway?.();
       unsubscribeHighlight?.();
+      unsubscribeWalk?.();
       setHover(null, '3d');
       live?.dispose();
       liveCommands?.dispose();
@@ -177,6 +187,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
     canvas.__viewer3d = {
       state: () => viewerRef.current!.getLinkedHighlightState(),
       commandState: () => viewerRef.current!.getCommandState(),
+      walk: () => viewerRef.current!.walk(),
       pick(itemId) {
         if (!viewerRef.current?.scene?.items.has(itemId)) return false;
         selectItem(itemId);
@@ -195,6 +206,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
   function pick(event: PointerEvent<HTMLCanvasElement>) {
     const start = pointerStart.current;
     pointerStart.current = null;
+    if (viewerRef.current?.walk().active) return;
     // An orbit drag must not select the surface under the release point.
     if (!start || start.id !== event.pointerId
       || Math.hypot(event.clientX - start.x, event.clientY - start.y) > 5) return;
@@ -212,7 +224,8 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
     data-highlighted-item-ids={JSON.stringify(highlightState.highlighted)}
     data-linked-selected={highlightState.highlighted.includes(linked.selected ?? '') ? linked.selected : ''}
     data-linked-hover={highlightState.highlighted.includes(linked.hovered ?? '') ? linked.hovered : ''}
-    data-active-storey={cutaway.activeStorey ?? ''} data-show-roof={cutaway.showRoof} data-hidden-count={cutaway.hiddenCount}>
+    data-active-storey={cutaway.activeStorey ?? ''} data-show-roof={cutaway.showRoof} data-hidden-count={cutaway.hiddenCount}
+    data-walking={walking}>
     <div className="viewer3d-toolbar">
       <label htmlFor={selectId}>Storey</label>
       <button type="button" aria-label="Previous storey" disabled={state !== 'ready' || storeyIndex <= 0}
@@ -228,15 +241,21 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
         <input type="checkbox" checked={cutaway.showRoof}
           onChange={(event) => viewerRef.current?.setShowRoof(event.target.checked)} /> Show roof
       </label>}
+      <button type="button" aria-label="Walk" aria-pressed={walking} disabled={state !== 'ready'}
+        onClick={() => {
+          setPicked(null); setHover(null, '3d');
+          const entered = viewerRef.current?.setWalk(!walking);
+          setWalkMessage(!walking && !entered ? 'No clear starting position is available on this storey.' : '');
+        }}>Walk</button>
     </div>
     <div className="viewer3d-stage" aria-busy={state === 'loading'}>
-      <canvas ref={canvasRef} aria-label="3D building model" aria-describedby={helpId}
+      <canvas ref={canvasRef} tabIndex={0} aria-label="3D building model" aria-describedby={helpId}
         onPointerDown={(event) => {
-          pointerStart.current = event.isPrimary && event.button === 0
+          pointerStart.current = !viewerRef.current?.walk().active && event.isPrimary && event.button === 0
             ? { id: event.pointerId, x: event.clientX, y: event.clientY } : null;
         }}
         onPointerMove={(event) => {
-          if (event.pointerType !== 'mouse' || event.buttons !== 0 || state !== 'ready') return;
+          if (viewerRef.current?.walk().active || event.pointerType !== 'mouse' || event.buttons !== 0 || state !== 'ready') return;
           setHover(viewerRef.current?.pick(event.clientX, event.clientY) ?? null, '3d');
         }}
         onPointerLeave={() => setHover(null, '3d')}
@@ -249,12 +268,16 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
           : 'Loading 3D scene…'}
       </p>}
       {state === 'error' && <p className="viewer3d-message" role="alert">{error}</p>}
+      {walking && <WalkJoystick onMove={(x, y) => viewerRef.current?.setWalkJoystick(x, y)} />}
       {state === 'ready' && details && <ItemDetailsCard key={details.item_id} details={details}
         loading={false} onClose={closeDetails}
         onHighlight={() => viewerRef.current?.highlight([details.item_id])} />}
     </div>
     <div className="viewer3d-footer">
-      <p id={helpId}>Drag to orbit · Scroll to zoom · Click an item to identify it</p>
+      <p id={helpId}>{walking
+        ? 'WASD / arrow keys to move · Drag to look · Q/E or PageUp/Down for storeys · Esc to return to orbit'
+        : 'Drag to orbit · Scroll to zoom · Click an item to identify it'}</p>
+      {walkMessage && <p role="status">{walkMessage}</p>}
       <output aria-label="Picked item" aria-live="polite">{picked ?? 'No item selected'}</output>
     </div>
   </section>;
