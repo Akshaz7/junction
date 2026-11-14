@@ -14,6 +14,13 @@ anything else returns a valid abstained answer.
 
 ### GET /api/docs/{doc_id}
 `curl localhost:8000/api/docs/cubicasa5k__colorful-11397` -> one doc object (as above). 404 if unknown.
+Both doc endpoints carry additive metadata (derived by `engine/docmeta.py`, overlaid with `artifacts/docmeta.json`): `size` (bytes of the original, null if not on this server), `updated_at` (issue date from the folder/file name, else file mtime / upload time), `project`, `folder` ("Project/Discipline[/Sub]") and `folder_path` (list), `discipline` (Architecture|Structural|MEP|Civil|General|Floor plans|Drawings|Reference drawings), `subdiscipline` (MEP only: Plumbing|Ventilation|Heating|Electrical|Fire protection), `sheet`, `date`, `series_id`, `version_index`, `version_count`, `versions`: `[{"doc_id", "index", "date", "size", "label", "pages"}]` (empty when the doc is in no series).
+
+### GET /api/folders
+-> `{"total": 14545, "folders": [{"name": "Sports Complex", "path": "Sports Complex", "count": 120, "children": [{"name": "MEP", "path": "Sports Complex/MEP", "count": 9, "children": [{"name": "Plumbing", ...}]}]}]}` (Project > Discipline > MEP sub-discipline, sorted by name, counts of documents).
+
+### GET /api/docs/{doc_id}/source
+Downloads the original file (pdf, ifc, dxf, image) as an attachment. 404 `{"status": "not_built"}` when the container does not hold it (the deployed image ships only the demo docs).
 
 ### GET /api/docs/{doc_id}/pages/{n}/image
 `curl -o p.png localhost:8000/api/docs/cubicasa5k__colorful-11397/pages/1/image` -> `image/png`
@@ -68,25 +75,25 @@ data: {"answer_id": "...", "question": "How many windows are there?", "doc_ids":
 ```
 `status` and `trace` events repeat; `answer` is always last. If the engine fails an `error` event `{"detail": ...}` ends the stream. The user message and the answer are stored.
 
-### GET /api/changes, GET /api/changes/{id} (S-07)
-Feed, newest first: `{"changes": [{"id", "type": "new_version"|"new_document", "doc_a", "doc_b", "summary", "created_at"}]}`.
-`new_version`: `doc_a`/`doc_b` are `<doc_id>@v1` / `<doc_id>@v2`, `summary` = `{"doc_id", "source", "generated_for_demo", "n_changes", "headline"}`. `new_document`: an upload (`id` is `doc:<doc_id>`, no detail view). Rows are seeded at server start from the revisions on disk, and `changes.new` fires on each insert.
-One comparison (`new_version` ids only; 404 otherwise):
+### GET /api/changes, GET /api/changes/{id}, POST /api/changes/refresh
+Everything is computed from REAL files: version series (`artifacts/series/*.json`, built by `python -m pipeline.series`) and their cached PDF revision diffs (`artifacts/series/diffs/`, `python -m pipeline.series --diff`, engine `engine/pdf_changes.py`, no model call). No synthetic revisions are served; old `doc@v1 -> doc@v2` rows are purged at startup and `/api/docs/{id}/revisions/...` is gone.
+Feed, newest first: `{"changes": [...], "checked_at": "<ISO utc>", "groups": [{"key": "today|yesterday|earlier", "label", "ids": [...]}]}`; each entry also has `"group"`. Entry: `{"id", "type": "new_version"|"new_document"|"rule_change", "doc_a", "doc_b", "summary", "created_at", "group"}`.
+- `new_version` from a series: `id` `ser:<series_id>:<n>` (version n -> n+1), `doc_a`/`doc_b` are real doc ids, `created_at` is the later version's date, `summary` = `{"doc_id", "series_id", "title", "n_changes" (null if the diff is not computed on this server), "headline", "source": "pdf-diff", "generated_for_demo": false, "version_a", "version_b", "date_a", "date_b", "pages_changed"}`.
+- `new_version` from an upload that matches a series (same sheet code or same normalised title): `id` `upl:<doc_id>`, `doc_a` = latest series version, `doc_b` = the upload; diffed on `POST /api/changes/refresh` (needs numpy; otherwise `n_changes` null).
+- `new_document`: any other upload (`id` `doc:<doc_id>`). `rule_change`: Context.dev watch events (see Watch).
+- `checked_at` is the time of the last scan (startup or refresh). `POST /api/changes/refresh` reloads series, diffs matching uploads, restamps `checked_at` and returns the same body as the feed.
+`GET /api/changes/{id}[?page=N]` for `ser:` / `upl:` ids (N is a page of the newer version; default: first page with changes):
 ```
-{"id": "<uuid>", "type": "new_version", "doc_id": "swiss_dwellings__site289-bldg536-floor2149",
- "source": "truth", "generated_for_demo": true, "image": {"w": 1583, "h": 3000},
- "v1": {"label": "v1", "page_image": "/api/docs/<doc_id>/revisions/v1/page-1.png", "thumb": ".../page-1.thumb.png", "planmap": ".../planmap-1.json"},
+{"id": "ser:<sid>:1", "type": "new_version", "series_id", "source": "pdf-diff", "generated_for_demo": false, "note", "created_at",
+ "image": {"w": 5100, "h": 3301}, "image_v1": {...}, "page": 1,
+ "pages": [{"page": 1, "page_v1": 5, "page_v2": 1, "n_changes": 3}],
+ "v1": {"label": "Version 1 · 2017-05-03", "doc_id", "date", "page_image": "/api/docs/<doc>/pages/5/image", "thumb": "/api/docs/<doc>/files/page-5.thumb.png"},
  "v2": {...},
- "changes": [{"n": 1, "change_id": "c1", "type": "removed|added|modified", "kind": "wall|door|room|...",
-              "sentence": "Wall 14 (3.1 m long) reads absent where it read present.",
-              "v1": {"item_id": "wall-14", "bbox_px": [798, 1228, 819, 1498]}, "v2": null,
-              "field": null, "old": null, "new": null}]}
+ "changes": [{"n": 1, "change_id": "c1", "type": "added|removed|modified", "kind": "region|page", "sentence": "Text changed from 'A' to 'B'.",
+              "v1": {"item_id": null, "bbox_px": [x0,y0,x1,y1]} | null, "v2": {...} | null, "old": "A", "new": "B", "page": 1}]}
 ```
-`n` numbers the boxes on both pages; `bbox_px` is in the shared page-image pixel frame (same frame in v1 and v2). A side is `null` when the item does not exist in that version. Sentences follow CONTRACT 5.8: `The area of room 205 reads 47.0 m2 where it read 23.5 m2.`
-`source` is `"truth"` (DATA's synthetic revisions, generated for demo) until E-11's `engine.changes.compare(doc_id, revision_dir)` exists; then `engine` (override with env `CHANGE_SOURCE=truth|engine`).
+`bbox_px` of v1 is in the v1 page-image frame, of v2 in the v2 frame (frames differ when the sheets were re-plotted at another size; shifts under 3% are corrected). If the diff cache is absent: `{"status": "not_built", "changes": []}`. 404 for unknown ids. Rule-change ids (uuid) return the stored row.
 
-### GET /api/docs/{doc_id}/revisions/{vN}/{name}
-`name` is `page-<n>.png`, `page-<n>.thumb.png` or `planmap-<n>.json`; `vN` matches `v<digits>`. Other names 404; a missing file 404 `{"status":"not_built"}`.
 
 ### GET /api/bench/latest
 -> `{"file": "fake200.json", "tag": "fake200", "data": {set, tag, fake, totals, cells}}`: the newest summary `results/bench/<tag>.json`. The `<tag>.rows.jsonl` row dumps are ignored. `?tag=<tag>` picks one (matches the file name or the `tag` field). 404 `{"status": "no_bench"}` if none or the tag is unknown.

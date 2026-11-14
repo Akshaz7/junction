@@ -68,6 +68,40 @@ def _abstained(question, doc_ids, text, trace, t0, route="index", calls=None):
     }
 
 
+def _reader(question, doc_ids, root, trace, calls, t0, emit):
+    """Tool-using reader (engine/reader). None when disabled or it fails; the caller keeps its own abstain."""
+    if os.environ.get("READER", "1") == "0":
+        return None
+    try:
+        from engine.reader import read_answer
+        emit("status", {"text": "Reading the drawing closely…"})
+        return read_answer(question, doc_ids, root, on_event=emit, trace=trace, calls=calls, t0=t0)
+    except Exception as e:  # noqa: BLE001
+        trace.append(_step("error", f"reader failed ({type(e).__name__}: {str(e)[:80]})"))
+        return None
+
+
+def _use_reader(res, question, doc_ids, root, trace, calls, t0, emit):
+    """Run the reader when `res` is an abstention; return the reader's answer if it found one, else `res`."""
+    if res is not None and not res["answer"].get("abstained"):
+        return res
+    rr = _reader(question, doc_ids, root, trace, calls, t0, emit)
+    if rr is not None and not rr["answer"].get("abstained"):
+        rr["trace"] = trace
+        return rr
+    return res if res is not None else rr
+
+
+def _top_docs(question, root, n=3):
+    try:
+        from engine.project_index import load_index
+        ix = load_index(root)
+        hits = ix.search(question, n) if ix else []
+        return [h["doc_id"] for h in hits if h.get("coverage", 0) >= 0.4][:n]
+    except Exception:  # noqa: BLE001
+        return []
+
+
 def _chat_answer(question, history, trace, t0, add, emit):
     """No document selected: talk normally with Hologram's system prompt (engine/assistant.py)."""
     from engine.assistant import chat
@@ -103,6 +137,12 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
                 from engine.project_answer import project_answer
                 res = project_answer(question, history, on_event, trace, t0, root, calls)
                 if res is not None:
+                    if res["answer"].get("abstained") and res.get("route") == "index" and os.environ.get("READER", "1") != "0":
+                        top = _top_docs(question, root)
+                        if top:
+                            rr = _reader(question, top, root, trace, calls, t0, emit)
+                            if rr is not None and not rr["answer"].get("abstained"):
+                                return rr
                     return res
                 return _chat_answer(question, history, trace, t0, add, emit)
             add(_step("abstain", "no document selected"))
@@ -183,7 +223,12 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
                 res["cost"]["usd_total"] = round(res["cost"]["usd_total"] + sum(c["cost_usd"] for c in calls), 6)
                 res["cost"]["calls"] = calls + res["cost"]["calls"]
                 res["latency_ms"] = int((time.perf_counter() - t0) * 1000)
-                return res
+                return _use_reader(res, question, doc_ids, root, trace, calls, t0, emit)
+            # sheets without a plan map: the reader (text layer, tables, scale, crops)
+            if tdoc is None or tdoc.mode != "planmap":
+                rr = _reader(question, doc_ids, root, trace, calls, t0, emit)
+                if rr is not None and not rr["answer"].get("abstained"):
+                    return rr
             if tdoc is not None and tdoc.mode == "planmap" and os.environ.get("READ_DRAWING", "1") != "0":
                 from engine.readdraw import read_drawing
                 emit("status", {"text": f"Exploring document: {_title(doc_ids[0], root)}"})
@@ -194,6 +239,10 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
                 res["cost"]["usd_total"] = round(res["cost"]["usd_total"] + sum(c["cost_usd"] for c in calls), 6)
                 res["cost"]["calls"] = calls + res["cost"]["calls"]
                 res["latency_ms"] = int((time.perf_counter() - t0) * 1000)
+                if res["answer"].get("abstained") or res["answer"].get("confidence", 1) < 0.5:   # one-shot read unsure: use the tools
+                    rr = _reader(question, doc_ids, root, trace, calls, t0, emit)
+                    if rr is not None and not rr["answer"].get("abstained"):
+                        return rr
                 return res
             add(_step("abstain", f"type {parsed.type} is not answered by code"))
             return _abstained(question, doc_ids, NOT_YET, trace, t0, "index", calls)
@@ -236,8 +285,8 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
             last["question"] = question
             last["cost"] = {"usd_total": round(sum(c["cost_usd"] for c in calls), 6), "calls": calls}
             last["latency_ms"] = int((time.perf_counter() - t0) * 1000)
-            return last
-        return _abstained(question, doc_ids, NOT_YET, trace, t0, "index", calls)
+            return _use_reader(last, question, doc_ids, root, trace, calls, t0, emit)
+        return _use_reader(_abstained(question, doc_ids, NOT_YET, trace, t0, "index", calls), question, doc_ids, root, trace, calls, t0, emit)
     except Exception as e:  # the server must always get an answer object back
         add(_step("error", f"{type(e).__name__}: {e}"[:200]))
         return _abstained(question, doc_ids, "Something went wrong while reading the document, so I cannot answer that right now.",

@@ -1,0 +1,178 @@
+{
+ "generated": "2026-11-14",
+ "env": "hologram-api:test container, 256 MB limit, real Aiven PG (throwaway schema), Runware VLM; no OOM",
+ "image_bytes": 205034348,
+ "image_note": "compressed content size reported by docker; ~800 MB uncompressed",
+ "uploads": [
+  {
+   "file": "colorful-11400.png",
+   "doc_id": "uploads__colorful-11400-ee3647",
+   "upload_s": 1.3,
+   "ready_s": 17.4,
+   "ingest": {
+    "status": "ready",
+    "stages": [
+     {
+      "stage": "normalise",
+      "ok": true,
+      "s": 0.0
+     },
+     {
+      "stage": "pages",
+      "ok": true,
+      "s": 0.2
+     },
+     {
+      "stage": "text",
+      "ok": true,
+      "s": 0.0
+     },
+     {
+      "stage": "planmap_vlm",
+      "ok": true,
+      "s": 15.0
+     },
+     {
+      "stage": "extrude",
+      "ok": true,
+      "s": 0.3
+     },
+     {
+      "stage": "usdz",
+      "ok": true,
+      "s": 0.0
+     }
+    ],
+    "detail": "plan map on page(s) [1]",
+    "mode": "vlm",
+    "cost_usd": 0.04335,
+    "updated": "2026-11-14T10:13:15+0000"
+   },
+   "doc": {
+    "pages": 1,
+    "kind": "raster",
+    "title": "colorful-11400"
+   },
+   "planmap_items": {
+    "door": 11,
+    "room": 12,
+    "sink": 3,
+    "stairs": 2,
+    "toilet": 2,
+    "wall": 34,
+    "window": 9
+   },
+   "scale": {
+    "m_per_px": 0.011905,
+    "method": "door-prior",
+    "confidence": 0.3,
+    "evidence": "median door 76px = 0.9 m"
+   },
+   "scene": 200,
+   "text_json": 200,
+   "answers": [
+    {
+     "q": "How many doors are there?",
+     "s": 1.1,
+     "text": "There are **11 doors** on this floor plan. [1]",
+     "route": "planmap",
+     "cost_usd": 0,
+     "citations": 1,
+     "boxes": 11
+    },
+    {
+     "q": "How many windows are there?",
+     "s": 0.8,
+     "text": "There are **9 windows** on this floor plan. [1]",
+     "route": "planmap",
+     "cost_usd": 0,
+     "citations": 1,
+     "boxes": 9
+    }
+   ]
+  },
+  {
+   "file": "A-701 - Restrooms.pdf",
+   "doc_id": "uploads__a-701-restrooms-d68a26",
+   "upload_s": 0.4,
+   "ready_s": 29.7,
+   "ingest": {
+    "status": "ready",
+    "stages": [
+     {
+      "stage": "pages",
+      "ok": true,
+      "s": 1.3
+     },
+     {
+      "stage": "text",
+      "ok": true,
+      "s": 0.0
+     },
+     {
+      "stage": "planmap_vlm",
+      "ok": true,
+      "s": 26.5
+     },
+     {
+      "stage": "extrude",
+      "ok": true,
+      "s": 0.4
+     },
+     {
+      "stage": "usdz",
+      "ok": true,
+      "s": 0.0
+     }
+    ],
+    "detail": "plan map on page(s) [1]",
+    "mode": "vlm",
+    "cost_usd": 0.09635,
+    "updated": "2026-11-14T10:13:46+0000"
+   },
+   "doc": {
+    "pages": 1,
+    "kind": "pdf",
+    "title": "A-701 - Restrooms"
+   },
+   "planmap_items": {
+    "door": 4,
+    "room": 4,
+    "shower": 1,
+    "sink": 3,
+    "toilet": 5,
+    "wall": 9
+   },
+   "scale": {
+    "m_per_px": 0.007915,
+    "method": "dimension",
+    "confidence": 0.7,
+    "evidence": "2 printed dimension(s) read by the model"
+   },
+   "scene": 200,
+   "text_json": 200,
+   "answers": [
+    {
+     "q": "How many toilets are there?",
+     "s": 1.8,
+     "text": "There are **5 toilets** on this floor plan. [1]",
+     "route": "planmap",
+     "cost_usd": 0,
+     "citations": 1,
+     "boxes": 5
+    },
+    {
+     "q": "How many doors are there?",
+     "s": 1.2,
+     "text": "There are **4 doors** on this floor plan. [1]",
+     "route": "planmap",
+     "cost_usd": 0,
+     "citations": 1,
+     "boxes": 4
+    }
+   ]
+  }
+ ],
+ "persistence": "fresh container restored 8 earlier uploads from doc_artifacts (planmap 200, scene 200, files restored); project index re-upserted 9 uploads at startup",
+ "index": "project_index.pkl baked at build (21 docs), upsert after each ingest verified"
+}

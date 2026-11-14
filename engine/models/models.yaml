@@ -49,6 +49,14 @@ tasks:
     extra_body: {chat_template_kwargs: {enable_thinking: false}}   # Nemotron is a reasoning model; thinking off = 10 tokens instead of ~340
     fallback:
       - {provider: runware, model: "google:gemini@3.1-flash-lite"}
+  reader_plan:     # tool-using drawing reader planner (engine/reader): JSON actions, text-only after the first step
+    provider: runware
+    model: "anthropic:claude@sonnet-4.6"
+    max_tokens: 1200
+    temperature: 0
+    fallback:
+      - {provider: runware, model: "google:gemini@3.5-flash"}
+      - {provider: gemini,  model: gemini-3.5-flash-lite}
   read_drawing:
     provider: gemini
     model: gemini-3.8-flash

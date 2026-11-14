@@ -150,7 +150,8 @@ def test_real_engine_answer_through_api(client, monkeypatch):
 
 
 def test_changes_empty(client):
-    assert client.get("/api/changes").json() == {"changes": []}
+    body = client.get("/api/changes").json()
+    assert body["changes"] == [] and body["groups"] == [] and body["checked_at"]
     assert client.get("/api/changes/00000000-0000-0000-0000-000000000000").status_code == 404
 
 

@@ -130,6 +130,9 @@ async def ask(chat_id: str, body: NewMessage):
     if c is None:
         raise HTTPException(404, "chat not found")
     doc_ids = body.doc_ids or ([c["doc_id"]] if c["doc_id"] else [])
+    from . import artifact_store
+    for _d in doc_ids:  # uploaded docs: files may only be in PostgreSQL after a container restart
+        await artifact_store.ensure_doc(_d)
     history = [{"role": r["role"], "content": r["content"]} for r in reversed(await pool.fetch(
         "select role, content from messages where chat_id=$1 order by created_at desc limit 10", cid))]
     umid = await pool.fetchval(

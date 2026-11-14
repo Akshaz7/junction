@@ -1,0 +1,37 @@
+{
+ "series_id": "vacation-rental--s401-9b69ee",
+ "title": "The Downtowner_ARCH_Exterior Details - Sheet - S401 - BRACING DETAILS",
+ "project": "Vacation Rental",
+ "discipline": "Structural",
+ "sheet": "S401",
+ "versions": [
+  {
+   "doc_id": "opening_design__vacation-rental-transfer-20170503-issue-for-permit-s401-bracing-details",
+   "date": "2017-05-03",
+   "size_bytes": 1455293,
+   "label": "Version 1 \u00b7 2017-05-03",
+   "pages": 1
+  },
+  {
+   "doc_id": "opening_design__vacation-rental-transfer-20170517-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s401",
+   "date": "2017-05-17",
+   "size_bytes": 1675330,
+   "label": "Version 2 \u00b7 2017-05-17",
+   "pages": 1
+  },
+  {
+   "doc_id": "opening_design__vacation-rental-transfer-20170518-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s401",
+   "date": "2017-05-18",
+   "size_bytes": 1615032,
+   "label": "Version 3 \u00b7 2017-05-18",
+   "pages": 1
+  },
+  {
+   "doc_id": "opening_design__vacation-rental-transfer-20170519-issue-for-bid-permit-the-downtowner-arch-exterior-details-sheet-s401-bracing-details",
+   "date": "2017-05-19",
+   "size_bytes": 1258320,
+   "label": "Version 4 \u00b7 2017-05-19",
+   "pages": 1
+  }
+ ]
+}

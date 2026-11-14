@@ -36,7 +36,7 @@ def test_migrations_seed_and_docs(schema_url, tmp_path):
         await c.close()
         return first, second, tables, n, n2
     first, second, tables, n, n2 = asyncio.run(prep())
-    assert first == ["001_init.sql", "002_notify.sql", "003_scene_edits.sql", "004_skills_automations.sql"] and second == []
+    assert first == ["001_init.sql", "002_notify.sql", "003_scene_edits.sql", "004_skills_automations.sql", "005_doc_artifacts.sql"] and second == []
     assert TABLES <= tables
     assert n == n2 == 3
 
@@ -52,3 +52,44 @@ def test_migrations_seed_and_docs(schema_url, tmp_path):
         d = c.get("/api/docs/src_a__two").json()
         assert d["pages"] == 3 and d["heldout"] is True
         assert c.get("/api/docs/nope").status_code == 404
+
+
+def test_docs_metadata_folders_and_source(schema_url, tmp_path, monkeypatch):
+    art = tmp_path / "artifacts"
+    (art / "series").mkdir(parents=True)
+    pdf = tmp_path / "data" / "opening_design" / "Proj" / "20190102 Issue" / "A501 Sections.pdf"
+    pdf.parent.mkdir(parents=True)
+    pdf.write_bytes(b"%PDF-1.4 x")
+    monkeypatch.setenv("ARTIFACTS_DIR", str(art))
+    monkeypatch.setattr("server.config.REPO", tmp_path)
+    rec = {"doc_id": "opening_design__proj-a501", "source": "opening_design", "title": "A501 Sections", "kind": "pdf",
+           "formats": ["pdf"], "pages": 1, "licence": None, "credit": None, "heldout": False,
+           "files": {"pdf": "data/opening_design/Proj/20190102 Issue/A501 Sections.pdf"}}
+    other = dict(rec, doc_id="opening_design__proj-a501-v1", files={"pdf": "data/opening_design/Proj/20190101 Issue/A501 Sections.pdf"})
+    (art / "series" / "s1.json").write_text(json.dumps({"series_id": "s1", "title": "A501", "versions": [
+        {"doc_id": "opening_design__proj-a501-v1", "date": "2019-01-01", "size_bytes": 5, "label": "Version 1 · 2019-01-01"},
+        {"doc_id": "opening_design__proj-a501", "date": "2019-01-02", "size_bytes": 10, "label": "Version 2 · 2019-01-02"}]}))
+    (art / "docmeta.json").write_text(json.dumps({"opening_design__proj-a501": {"size_bytes": 10, "updated_at": "2019-01-02"}}))
+    reg = tmp_path / "registry.jsonl"
+    reg.write_text("\n".join(json.dumps(d) for d in (rec, other)) + "\n")
+
+    async def prep():
+        c = await asyncpg.connect(config.database_url())
+        await apply_migrations(c)
+        await seed_documents(c, read_registry(reg))
+        await c.close()
+    asyncio.run(prep())
+    from server.app import app
+    with TestClient(app) as c:
+        d = c.get("/api/docs/opening_design__proj-a501").json()
+        assert d["size"] == 10 and d["updated_at"] == "2019-01-02" and d["discipline"] == "Architecture"
+        assert d["folder"] == "Proj/Architecture" and d["series_id"] == "s1" and d["version_index"] == 2 and d["version_count"] == 2
+        assert [v["doc_id"] for v in d["versions"]] == ["opening_design__proj-a501-v1", "opening_design__proj-a501"]
+        listed = c.get("/api/docs").json()["sources"][0]["docs"]
+        assert all("folder" in x and "versions" in x for x in listed)
+        tree = c.get("/api/folders").json()
+        assert tree["total"] == 2 and tree["folders"][0]["name"] == "Proj" and tree["folders"][0]["children"][0]["name"] == "Architecture"
+        assert tree["folders"][0]["children"][0]["count"] == 2
+        r = c.get("/api/docs/opening_design__proj-a501/source")
+        assert r.status_code == 200 and r.content == b"%PDF-1.4 x"
+        assert c.get("/api/docs/nope/source").status_code == 404

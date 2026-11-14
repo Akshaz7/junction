@@ -62,3 +62,17 @@ Web (Vercel) needs the API origin as its API/WS base URL; CORS is already open (
 `hologram-api` (aws-eu-central-1, startup-10-256) was created with only `repository_url` (public repo). Aiven accepted it but the build ended `FAILURE` / deployment `ABORTED` with no logs, and `-c application.source.commit_sha=…` is refused: "commit_sha requires a VCS integration: set vcs_integration_id and remote_repository_id". The same Dockerfile builds from a fresh public clone and runs healthy locally against hologram-pg. After installing the GitHub App: `avn service update hologram-api -c application.source.vcs_integration_id=… -c application.source.remote_repository_id=…`, then power it on (`avn service update hologram-api --power-on`).
 
 - 09:40: Aiven API has no create endpoint for VCS integrations (OpenAPI lists only GET .../application/vcs-integrations, which returns an empty list), so this step is console-only.
+
+## Uploads: live ingestion in the deploy image
+`POST /api/upload` runs real ingestion in a subprocess (`server/ingest_job.py`), so an OOM kills only the job. `INGEST_MODE=vlm` (set in the image) uses `server/vlm_planmap.py`: the page is rendered (pypdfium2 / Pillow), read once through `call("read_drawing")` (Runware gemini fallback today), geometry-checked with `vision/verify.py` (`tiny`, `dup`), validated against `vision/planmap_schema.json`, then extruded to `scene.json`/`scene.glb`. Pages over 3000 px also get 2x2 tile passes for small items. Scale: printed dimensions read by the model, else the 0.9 m door prior (confidence 0.3). Walls are derived from room outlines (flagged `props.derived`, `DERIVE_WALLS=1`). PDF text with pixel boxes goes to `text.json`/`text-N.json` (pdfminer.six).
+Why VLM and not local models: the service has 256 MB RAM (`startup-10-256`) and no weights are committed (torch/onnx weights are git-ignored). Peak container memory measured at about 195 MB during an upload, no OOM, but this is borderline: move to `startup-20-512` for headroom.
+Measured (results/upload_live.json): 1-page cubicasa PNG ready in 17 s for $0.04; opening_design PDF sheet ready in 30 s for $0.10.
+
+Deps added to the image: pillow, numpy, pypdfium2, pdfminer.six, ezdxf, trimesh, shapely (no torch, no scipy). Image about 800 MB uncompressed.
+
+Persistence: container disk is ephemeral. Every derived file plus the original (`__original__/<file>`) is mirrored to table `doc_artifacts` (migration 005, `bytea`, 60 MB per-doc cap, `MAX_DOC_BYTES`) after ingestion and restored lazily on first access and in a startup background task. Verified: a fresh container restored earlier uploads from PostgreSQL.
+
+Project search: `python -m engine.project_index build` runs at image build over baked artifacts (`/app/artifacts/index/project_index.pkl`, app-owned and writable). The index is loaded at startup, each finished upload is upserted, and uploads restored from PG are re-indexed at startup.
+
+Switches: `INGEST_MODE` (vlm|full), `DERIVE_WALLS`, `MAX_VLM_PAGES` (4), `PAGES_MAX_SIDE` (4096), `TEXT_PAGE_WORDS`, `TEXT_PAGE_COVER`, `MAX_DOC_BYTES`.
+Not available in the deploy image: IFC conversion (stored only, status partial), SVG, DWG, USDZ/AR for uploads (needs usd-core).

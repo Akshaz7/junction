@@ -7,17 +7,25 @@ import re
 import sys
 import uuid
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 
-from . import config, db
+from . import artifact_store, config, db
 from .live import publish
 
-router = APIRouter(prefix="/api")
+
+async def _restore(request: Request):
+    """Uploaded docs live in PostgreSQL too: bring their files back to disk after a container restart."""
+    d = request.path_params.get("doc_id")
+    if d and SAFE_ID.match(d):
+        await artifact_store.ensure_doc(d)
+
+
+router = APIRouter(prefix="/api", dependencies=[Depends(_restore)])
 
 SAFE_ID = re.compile(r"^[A-Za-z0-9_.\-]+$")
-FILE_NAMES = {"scene.glb", "scene.usdz", "scene.json", "elements.json"}
-THUMB = re.compile(r"^(page-\d+\.thumb\.png|page-\d+\.png|planmap-\d+\.json)$")
+FILE_NAMES = {"scene.glb", "scene.usdz", "scene.json", "elements.json", "text.json", "ingest.json"}
+THUMB = re.compile(r"^(page-\d+\.thumb\.png|page-\d+\.png|planmap-\d+\.json|text-\d+\.json)$")
 UPLOAD_EXT = {".ifc": "ifc", ".dxf": "dxf", ".dwg": "dwg", ".pdf": "pdf", ".svg": "svg",
               ".png": "raster", ".jpg": "raster", ".jpeg": "raster", ".tif": "raster", ".tiff": "raster"}
 MAX_UPLOAD = 100 * 1024 * 1024
@@ -104,6 +112,10 @@ async def upload(file: UploadFile = File(...)):
         "values ($1,'uploads',$2,$3,$4,1,$5,$6::jsonb)",
         doc_id, doc["title"], kind, [fmt], doc["credit"], json.dumps(doc["files"]))
     await publish({"type": "doc.new", "doc_id": doc_id})
+    try:  # keep the original now: the container disk is ephemeral
+        await artifact_store.save_doc(pool, doc_id)
+    except Exception as e:  # noqa: BLE001
+        print("artifact save failed:", repr(e)[:200])
     if ingestion_available():
         (d / "ingest.json").write_text(json.dumps({"status": "running", "stages": [], "detail": "queued"}))
         asyncio.create_task(_ingest(doc_id))
@@ -127,9 +139,31 @@ async def _ingest(doc_id: str):
             stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
         await proc.wait()
     f = config.artifacts_dir() / doc_id / "ingest.json"
-    if not f.is_file() and proc.returncode:
-        f.write_text(json.dumps({"status": "failed", "stages": [], "detail": f"job exited {proc.returncode}"}))
+    if not f.is_file() or (proc.returncode and json.loads(f.read_text()).get("status") == "running"):
+        detail = f"job exited {proc.returncode}" + (" (killed: out of memory?)" if proc.returncode in (-9, 137) else "")
+        f.write_text(json.dumps({"status": "failed", "stages": [], "detail": detail}))
+    await _persist(doc_id)
+    try:  # searchable project-wide at once (never raises; returns bool)
+        from engine.project_index import upsert_doc
+        await asyncio.to_thread(upsert_doc, doc_id)
+    except Exception as e:  # noqa: BLE001
+        print("index upsert failed:", doc_id, repr(e)[:200])
     await publish({"type": "doc.new", "doc_id": doc_id})
+
+
+async def _persist(doc_id: str):
+    """After ingestion: update the documents row (pages, kind) and mirror every derived file to PostgreSQL."""
+    pool = await db.get_pool()
+    if pool is None:
+        return
+    try:
+        d = config.artifacts_dir() / doc_id
+        meta = json.loads((d / "doc.json").read_text())
+        await pool.execute("update documents set pages=$2, files=$3::jsonb where doc_id=$1",
+                           doc_id, int(meta.get("pages") or 1), json.dumps(meta["files"]))
+        await artifact_store.save_doc(pool, doc_id)
+    except Exception as e:  # noqa: BLE001
+        print("persist failed:", doc_id, repr(e)[:200])
 
 
 @router.get("/docs/{doc_id}/ingest")
@@ -140,22 +174,8 @@ async def ingest_status(doc_id: str):
     return json.loads(f.read_text())
 
 
-REV_VERSION = re.compile(r"^v\d+$")
-REV_FILE = re.compile(r"^(page-\d+(\.thumb)?\.png|planmap-\d+\.json)$")
-
-
-@router.get("/docs/{doc_id}/revisions/{version}/{name}")
-async def revision_file(doc_id: str, version: str, name: str):
-    """Page images and plan maps of a revision (artifacts/revisions/<doc_id>/<vN>/)."""
-    if not SAFE_ID.match(doc_id) or not REV_VERSION.match(version) or not REV_FILE.match(name):
-        raise HTTPException(404, "unknown file")
-    f = config.artifacts_dir() / "revisions" / doc_id / version / name
-    if not f.is_file():
-        return _not_built(f"{version}/{name}")
-    return FileResponse(f)
-
-
 def _change(r) -> dict:
+    """A `changes` table row (rule changes from the watch webhook)."""
     d = dict(r)
     d["id"] = str(d["id"])
     d["created_at"] = d["created_at"].isoformat()
@@ -163,34 +183,82 @@ def _change(r) -> dict:
         d["summary"] = json.loads(d["summary"])
     s = d.get("summary") if isinstance(d.get("summary"), dict) else {}
     d["type"] = "rule_change" if s.get("kind") == "rule_change" else "new_version"
-    if d["type"] == "new_version" and s.get("doc_id") and s.get("source") in ("truth", "engine"):
-        from . import changes_source  # the stored summary can predate the current CHANGE_SOURCE
-        s["source"] = changes_source.source_name()
     return d
+
+
+async def _upload_rows(pool) -> list[dict]:
+    rows = await pool.fetch("select doc_id, title, kind, files, created_at from documents where source='uploads'")
+    out = []
+    for r in rows:
+        d = dict(r)
+        if isinstance(d.get("files"), str):
+            d["files"] = json.loads(d["files"])
+        out.append(d)
+    return out
+
+
+async def _feed(pool) -> dict:
+    from . import changes_source as cs
+    rows = await pool.fetch("select id, doc_a, doc_b, summary, created_at from changes where doc_a is null or doc_a not like '%@v%'")
+    ups = await _upload_rows(pool)
+    feed = [_change(r) for r in rows]
+    feed += cs.series_entries()
+    matched = cs.upload_entries(ups)
+    feed += matched
+    done = {e["doc_b"] for e in matched}
+    feed += [{"id": f"doc:{r['doc_id']}", "type": "new_document", "doc_a": None, "doc_b": r["doc_id"],
+              "summary": {"doc_id": r["doc_id"], "title": r["title"], "kind": r["kind"],
+                          "headline": f"New document: {r['title']}"},
+              "created_at": r["created_at"].isoformat()} for r in ups if r["doc_id"] not in done]
+    feed.sort(key=lambda e: e["created_at"], reverse=True)
+    groups = cs.grouped(feed)
+    return {"changes": feed, "checked_at": cs.checked_at(), "groups": groups}
 
 
 @router.get("/changes")
 async def changes():
-    """Feed, newest first: new versions (`changes` rows) and new documents (uploads)."""
+    """Feed, newest first: real new versions (version series + matching uploads), rule changes, new documents."""
     pool = await db.get_pool()
     if pool is None:
         raise HTTPException(503, "database unavailable")
-    rows = await pool.fetch("select id, doc_a, doc_b, summary, created_at from changes")
-    docs = await pool.fetch("select doc_id, title, kind, created_at from documents where source='uploads'")
-    feed = [_change(r) for r in rows]
-    feed += [{"id": f"doc:{r['doc_id']}", "type": "new_document", "doc_a": None, "doc_b": r["doc_id"],
-              "summary": {"doc_id": r["doc_id"], "title": r["title"], "kind": r["kind"],
-                          "headline": f"New document: {r['title']}"},
-              "created_at": r["created_at"].isoformat()} for r in docs]
-    feed.sort(key=lambda e: e["created_at"], reverse=True)
-    return {"changes": feed}
+    return await _feed(pool)
+
+
+@router.post("/changes/refresh")
+async def changes_refresh():
+    """Rescan: reload series, diff uploads that match a series, stamp checked_at, return the feed."""
+    import asyncio
+    from . import changes_source as cs, docmeta_store
+    pool = await db.get_pool()
+    if pool is None:
+        raise HTTPException(503, "database unavailable")
+    docmeta_store._cache.clear()
+    for r in await _upload_rows(pool):
+        if cs.match_series(r):
+            await asyncio.to_thread(cs.compute_for_row, r)
+    cs.mark_checked()
+    return await _feed(pool)
 
 
 @router.get("/changes/{change_id}")
-async def change(change_id: str):
+async def change(change_id: str, page: int | None = None):
+    from . import changes_source as cs
     pool = await db.get_pool()
     if pool is None:
         raise HTTPException(503, "database unavailable")
+    if change_id.startswith("upl:"):
+        doc_id = change_id[4:]
+        for r in await _upload_rows(pool):
+            s = cs.match_series(r) if r["doc_id"] == doc_id else None
+            if s:
+                diff = cs.compute_for_row(r)
+                return cs.comparison(change_id, page, diff, s, len(s["versions"]) - 1, doc_id) | {"type": "new_version"}
+        raise HTTPException(404, "change not found")
+    if change_id.startswith("ser:"):
+        out = cs.comparison(change_id, page)
+        if out is None:
+            raise HTTPException(404, "change not found")
+        return out | {"type": "new_version", "created_at": next((e["created_at"] for e in cs.series_entries() if e["id"] == change_id), None)}
     try:
         cid = uuid.UUID(change_id)
     except ValueError:
@@ -198,16 +266,7 @@ async def change(change_id: str):
     r = await pool.fetchrow("select id, doc_a, doc_b, summary, created_at from changes where id=$1", cid)
     if r is None:
         raise HTTPException(404, "change not found")
-    out = _change(r)
-    from . import changes_source
-    doc_id = (out["doc_a"] or "").split("@")[0]
-    if doc_id and SAFE_ID.match(doc_id) and doc_id in changes_source.revision_docs():
-        try:
-            out.update(changes_source.comparison(doc_id))
-        except Exception as e:  # noqa: BLE001
-            raise HTTPException(500, f"comparison failed: {type(e).__name__}")
-        out["id"] = str(r["id"])
-    return out
+    return _change(r)
 
 
 def _bench_summaries() -> list[dict]:

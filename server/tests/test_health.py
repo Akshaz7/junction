@@ -29,6 +29,18 @@ def test_rate_limit_429_on_31st():
     assert codes[30] == 429
 
 
+def test_ingest_status_polling_is_not_rate_limited():
+    app = FastAPI()
+    app.add_middleware(RateLimitMiddleware, limit=30, window=60.0)
+
+    @app.get("/api/docs/{d}/ingest")
+    def ing(d: str):
+        return {"status": "running"}
+
+    c = TestClient(app)
+    assert all(c.get("/api/docs/a/ingest").status_code == 200 for _ in range(100))
+
+
 def test_rate_limit_enabled_by_env(monkeypatch):
     monkeypatch.setenv("RATE_LIMIT", "1")
     import importlib

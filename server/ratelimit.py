@@ -19,7 +19,14 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return fwd.split(",")[0].strip()
         return request.client.host if request.client else "unknown"
 
+    @staticmethod
+    def _exempt(request) -> bool:
+        """Ingestion status polling (a small local file read) must not eat the quota while an upload is processed."""
+        return request.method == "GET" and request.url.path.startswith("/api/docs/") and request.url.path.endswith("/ingest")
+
     async def dispatch(self, request, call_next):
+        if self._exempt(request):
+            return await call_next(request)
         now = time.monotonic()
         q = self.hits[self._ip(request)]
         while q and now - q[0] > self.window:

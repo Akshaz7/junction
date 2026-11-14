@@ -1,4 +1,4 @@
-"""D-12: synthetic revisions for the Changes demo ("generated for demo").
+"""D-12 (NOT served by the API any more; real series: pipeline/series.py): synthetic revisions for the Changes demo ("generated for demo").
 
 For 3 swiss DXF plans we apply three edits to make version 2: remove one interior wall, add one door
 (splitting a wall to open a 0.9 m gap), and rename one room label. Both versions are rendered from the

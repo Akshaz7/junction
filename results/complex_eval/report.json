@@ -1,0 +1,582 @@
+{
+ "questions": 25,
+ "date": "2026-11-14 12:28",
+ "old": {
+  "summary": {
+   "n": 25,
+   "correct": 3,
+   "accuracy": 0.12,
+   "cited_when_answered": 0,
+   "usd_total": 0.0001,
+   "usd_per_q": 0.0,
+   "latency_s_median": 0.0,
+   "latency_s_max": 13.1
+  },
+  "results": [
+   {
+    "id": "C-01",
+    "q": "Who is the general contractor on this project?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0.0,
+    "s": 0.9,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-02",
+    "q": "Which building code and edition are the structural design criteria based on?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-03",
+    "q": "What floor live load is required for public areas?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I have no structured data for this document yet, so I cannot answer that reliably."
+   },
+   {
+    "id": "C-04",
+    "q": "What is the floor live load for offices?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0.000144,
+    "s": 2.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-05",
+    "q": "What weld metal must the welds conform to?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0.0,
+    "s": 0.9,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-06",
+    "q": "What percentage of intended compressive strength must supporting concrete reach before steel erection starts?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-07",
+    "q": "What does the special inspector have to submit at the end of the work?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0.0,
+    "s": 0.9,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-08",
+    "q": "Who is the architect and what is their email?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-09",
+    "q": "What fire rating do the stair core doors need?",
+    "correct": true,
+    "cited": true,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-10",
+    "q": "What anchor bolts are specified for pier P1?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-11",
+    "q": "What is the elevation at top of pier P3?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-12",
+    "q": "What vertical reinforcement does pier P2 have?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0.0,
+    "s": 13.1,
+    "answer": "I have no structured data for this document yet, so I cannot answer that reliably."
+   },
+   {
+    "id": "C-13",
+    "q": "What are the pier ties for the piers?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-14",
+    "q": "What is the width of door 121.A?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-15",
+    "q": "Which room is door 121.A in?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-16",
+    "q": "List the finishes in room 113 from the finish schedule",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-17",
+    "q": "What is the area of room 104?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I have no structured data for this document yet, so I cannot answer that reliably."
+   },
+   {
+    "id": "C-18",
+    "q": "What does base finish B2 stand for?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-19",
+    "q": "Which doors use GL-2 glazing?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-20",
+    "q": "What is the frame type AL-2?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-21",
+    "q": "What is the floor finish of the lounge, room 101?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-22",
+    "q": "What is the total fire resistance rating of the wall type W2?",
+    "correct": true,
+    "cited": true,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-23",
+    "q": "What is the mounting height of the toilet paper dispenser in the ADA water closet?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-24",
+    "q": "Who is the civil engineer?",
+    "correct": false,
+    "cited": false,
+    "abstained": true,
+    "route": "index",
+    "usd": 0.0,
+    "s": 0.6,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-25",
+    "q": "What is the colour of the exterior paint on the east elevation?",
+    "correct": true,
+    "cited": true,
+    "abstained": true,
+    "route": "index",
+    "usd": 0,
+    "s": 0.0,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   }
+  ]
+ },
+ "new": {
+  "summary": {
+   "n": 25,
+   "correct": 24,
+   "accuracy": 0.96,
+   "cited_when_answered": 22,
+   "usd_total": 0.8991,
+   "usd_per_q": 0.036,
+   "latency_s_median": 20.7,
+   "latency_s_max": 58.9
+  },
+  "results": [
+   {
+    "id": "C-01",
+    "q": "Who is the general contractor on this project?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.037151,
+    "s": 29.9,
+    "answer": "**The general contractor on this project is Krause Custom Builders**, as identified in the title block of the General Notes sheet. [1][2]"
+   },
+   {
+    "id": "C-02",
+    "q": "Which building code and edition are the structural design criteria based on?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.025842,
+    "s": 20.9,
+    "answer": "**International Building Code (IBC) 2009 with Wisconsin Amendments, supplemented by ASCE 7-05**, forms the basis of the structural design criteria. This is explicitly stated in the Design Criteria section of sheet S-100. [1]"
+   },
+   {
+    "id": "C-03",
+    "q": "What floor live load is required for public areas?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.021813,
+    "s": 19.5,
+    "answer": "**Public areas require a floor live load of 100 PSF.**\n\nThe general notes on sheet S-100 list the following floor live loads (reduced as allowed by the building code):\n- Offices: 50 PSF* (includes 15 PSF partition load)\n- **Public Areas: 100 PSF**\n- Storage (Light): 125 PSF\n- Retail at First Floor: "
+   },
+   {
+    "id": "C-04",
+    "q": "What is the floor live load for offices?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.049923,
+    "s": 33.3,
+    "answer": "**The floor live load for offices is 50 PSF** (which includes a 15 PSF partition load in addition to the base load), as listed in the Design Criteria section under Floor Live Loads. [1][2]"
+   },
+   {
+    "id": "C-05",
+    "q": "What weld metal must the welds conform to?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.01782,
+    "s": 20.7,
+    "answer": "**All welds must use weld metal conforming to E70XX** (and additional requirements follow that statement). [1]"
+   },
+   {
+    "id": "C-06",
+    "q": "What percentage of intended compressive strength must supporting concrete reach before steel erection starts?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.063927,
+    "s": 25.2,
+    "answer": "**75%** of the intended minimum compressive strength must be reached by supporting concrete before steel erection begins. The note (e101) states that the erection of any structural steel members shall not commence until the supporting concrete has reached at least 75% of their intended minimum compr"
+   },
+   {
+    "id": "C-07",
+    "q": "What does the special inspector have to submit at the end of the work?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.025239,
+    "s": 19.2,
+    "answer": "**The special inspector must submit a final report stating that the structural work was, to the best of the special inspector's knowledge, performed in accordance with the contract documents.**\n\nAdditionally, special inspection reports shall be furnished to the Building Official, Owner, Architect, S"
+   },
+   {
+    "id": "C-08",
+    "q": "Who is the architect and what is their email?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.060044,
+    "s": 35.4,
+    "answer": "**The architect is Ryan Schultz of OpeningDesign, and their email is ryan@openingdesign.com.** [1]"
+   },
+   {
+    "id": "C-09",
+    "q": "What fire rating do the stair core doors need?",
+    "correct": true,
+    "cited": true,
+    "abstained": true,
+    "route": "index",
+    "usd": 0.055032,
+    "s": 23.8,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-10",
+    "q": "What anchor bolts are specified for pier P1?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.026529,
+    "s": 14.0,
+    "answer": "**Pier P1 is specified with (4) 3/4\" \u00d8 anchor bolts with 9\" embedment.** The Pier Schedule lists the anchor bolt for P1 as: **(4) 3/4\" \u00d8 x 9\" EMBED**. [1]"
+   },
+   {
+    "id": "C-11",
+    "q": "What is the elevation at top of pier P3?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.047448,
+    "s": 20.5,
+    "answer": "**The elevation at the top of pier P3 is 99'-0\".** [1]"
+   },
+   {
+    "id": "C-12",
+    "q": "What vertical reinforcement does pier P2 have?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.01845,
+    "s": 13.8,
+    "answer": "**Pier P2 has (4) #6 vertical reinforcement bars.** [1]"
+   },
+   {
+    "id": "C-13",
+    "q": "What are the pier ties for the piers?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.044058,
+    "s": 35.1,
+    "answer": "**All active piers use the same pier tie specification: (3) #3 @ 2\" REST #3 @12\".**\n\nThis means 3 sets of #3 ties spaced at 2\" (close spacing, typically at the top/bottom of the pier), with the remaining #3 ties spaced at 12\" throughout the rest of the pier height. This applies uniformly to every pi"
+   },
+   {
+    "id": "C-14",
+    "q": "What is the width of door 121.A?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.0,
+    "s": 0.5,
+    "answer": "**Door 121.A has a width of 5' 10 3/8\"** (five feet, ten and three-eighths inches). It serves the Clinic (Room 121) and has a height of 8' 0\". [1][2]"
+   },
+   {
+    "id": "C-15",
+    "q": "Which room is door 121.A in?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.024669,
+    "s": 21.1,
+    "answer": "**Door 121.A is in the Clinic (Room 121).** The Door Schedule lists it with Room Name 'CLINIC' and Room Number '121.' [1][2]"
+   },
+   {
+    "id": "C-16",
+    "q": "List the finishes in room 113 from the finish schedule",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.035949,
+    "s": 11.1,
+    "answer": "**Room 113 \u2013 Aerobics & Yoga (955 SF)** has the following finishes from the Finish Room Schedule:\n\n| Category | Code | Description |\n|---|---|---|\n| Floor | **F4** | Resilient Flooring (T.B.D.) |\n| Base | **B1** | No Base |\n| Wall (N) | **W2** | 3/4\" Prefinished Stained/Sealed Plywood (Finish: Grade"
+   },
+   {
+    "id": "C-17",
+    "q": "What is the area of room 104?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.021525,
+    "s": 18.3,
+    "answer": "**Room 104 (Women's Locker) has an area of 611 SF.** [1][2][3]"
+   },
+   {
+    "id": "C-18",
+    "q": "What does base finish B2 stand for?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.013728,
+    "s": 10.3,
+    "answer": "**Base finish B2 stands for Ceramic Tile.** [1][2]"
+   },
+   {
+    "id": "C-19",
+    "q": "Which doors use GL-2 glazing?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.036843,
+    "s": 27.4,
+    "answer": "**Five doors use GL-2 (Tempered & Insulated) glazing**, all with door type AL-2/GL-2 and frame AL-1:\n\n| Door Number | Room Name | Room No. |\n|-------------|-----------|----------|\n| 100.A1 | X. Vest. | 100 |\n| 100.A2 | X. Vest. | 100 |\n| 115.A | F. Vest | 115 |\n| 121.A | Clinic | 121 |\n| 122.A | Wre"
+   },
+   {
+    "id": "C-20",
+    "q": "What is the frame type AL-2?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.016656,
+    "s": 13.2,
+    "answer": "**AL-2 is an aluminum storefront frame with thermal break (Tubelite 14000).** It is listed in the frame legend on sheet A-801 as \"ALUM. STOREFRONT WITH THERMAL BRAKE (TUBELITE 14000)\"\u2014meaning an aluminum storefront system incorporating a thermal break, using the Tubelite 14000 product series. [1][2]"
+   },
+   {
+    "id": "C-21",
+    "q": "What is the floor finish of the lounge, room 101?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.019881,
+    "s": 15.1,
+    "answer": "**The floor finish of the Lounge (Room 101) is F1.**\n\nAccording to the Finish Room Schedule, Room 101 (Lounge, 741 SF) has:\n- **Floor Finish:** F1\n- Base Finish: B1\n- Ceiling: C1 [1][2][3]"
+   },
+   {
+    "id": "C-22",
+    "q": "What is the total fire resistance rating of the wall type W2?",
+    "correct": true,
+    "cited": true,
+    "abstained": true,
+    "route": "index",
+    "usd": 0.119097,
+    "s": 58.9,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   },
+   {
+    "id": "C-23",
+    "q": "What is the mounting height of the toilet paper dispenser in the ADA water closet?",
+    "correct": false,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.039047,
+    "s": 32.2,
+    "answer": "**The toilet paper dispenser in the ADA water closet is mounted at 41\" height.** The drawings also show it positioned 6\" minimum from the side wall, referenced in the ADA water closet elevation details (views 3E, 4E, 5E, 6E). The dimension '41\"' appears repeatedly alongside 'TOILET PAPER DISPENSER' "
+   },
+   {
+    "id": "C-24",
+    "q": "Who is the civil engineer?",
+    "correct": true,
+    "cited": true,
+    "abstained": false,
+    "route": "hybrid",
+    "usd": 0.014904,
+    "s": 11.7,
+    "answer": "**Lake Country Engineering** is the civil engineer. The contact is Rob Davy (robd@lce.biz, (262) 569-933), located at 970 S. Silver Lake Street, Suite 105, Oconomowoc, WI 53066. [1][2][3][4][5][6]"
+   },
+   {
+    "id": "C-25",
+    "q": "What is the colour of the exterior paint on the east elevation?",
+    "correct": true,
+    "cited": true,
+    "abstained": true,
+    "route": "index",
+    "usd": 0.063528,
+    "s": 21.1,
+    "answer": "I can answer counts, areas, lengths and volumes from the drawing data. This question needs written reasoning over the documents, which I cannot verify yet."
+   }
+  ]
+ }
+}

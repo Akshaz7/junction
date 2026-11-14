@@ -1,0 +1,23 @@
+{
+ "series_id": "vacation-rental--a100-8f1f68",
+ "title": "A100 - DEMOLITION PLANS",
+ "project": "Vacation Rental",
+ "discipline": "Architecture",
+ "sheet": "A100",
+ "versions": [
+  {
+   "doc_id": "opening_design__vacation-rental-transfer-20170410-submitted-to-state-for-early-start-and-footing-and-foundation-the-downtowner-sheet-a100-demolition-plans",
+   "date": "2017-04-10",
+   "size_bytes": 1812204,
+   "label": "Version 1 \u00b7 2017-04-10",
+   "pages": 1
+  },
+  {
+   "doc_id": "opening_design__vacation-rental-transfer-20170503-issue-for-permit-a100-demolition-plans",
+   "date": "2017-05-03",
+   "size_bytes": 1956429,
+   "label": "Version 2 \u00b7 2017-05-03",
+   "pages": 1
+  }
+ ]
+}

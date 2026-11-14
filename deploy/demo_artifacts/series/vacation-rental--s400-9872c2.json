@@ -1,0 +1,37 @@
+{
+ "series_id": "vacation-rental--s400-9872c2",
+ "title": "The Downtowner_ARCH_Exterior Details - Sheet - S400 - BRACING ELEVATION",
+ "project": "Vacation Rental",
+ "discipline": "Structural",
+ "sheet": "S400",
+ "versions": [
+  {
+   "doc_id": "opening_design__vacation-rental-transfer-20170503-issue-for-permit-s400-bracing-elevation",
+   "date": "2017-05-03",
+   "size_bytes": 1235684,
+   "label": "Version 1 \u00b7 2017-05-03",
+   "pages": 1
+  },
+  {
+   "doc_id": "opening_design__vacation-rental-transfer-20170517-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s400",
+   "date": "2017-05-17",
+   "size_bytes": 2224177,
+   "label": "Version 2 \u00b7 2017-05-17",
+   "pages": 1
+  },
+  {
+   "doc_id": "opening_design__vacation-rental-transfer-20170518-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s400",
+   "date": "2017-05-18",
+   "size_bytes": 2162413,
+   "label": "Version 3 \u00b7 2017-05-18",
+   "pages": 1
+  },
+  {
+   "doc_id": "opening_design__vacation-rental-transfer-20170519-issue-for-bid-permit-the-downtowner-arch-exterior-details-sheet-s400-bracing-elevation",
+   "date": "2017-05-19",
+   "size_bytes": 1498781,
+   "label": "Version 4 \u00b7 2017-05-19",
+   "pages": 1
+  }
+ ]
+}

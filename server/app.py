@@ -19,6 +19,20 @@ from .skills_routes import router as skills_router, scheduler, scheduler_enabled
 from .ratelimit import RateLimitMiddleware
 
 
+async def _restore_uploads():
+    from . import artifact_store
+    try:
+        await artifact_store.restore_all()
+        from engine.project_index import doc_ids_in, load_index, upsert_doc  # re-index uploads restored from PG
+        ix = await asyncio.to_thread(load_index)
+        have = set(ix.docs) if ix else set()
+        for d in await asyncio.to_thread(doc_ids_in, config.artifacts_dir()):
+            if d.startswith("uploads__") and d not in have:
+                await asyncio.to_thread(upsert_doc, d)
+    except Exception as e:  # noqa: BLE001
+        print("upload restore failed:", repr(e)[:200])
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     pool = await db.get_pool()  # apply migrations on startup when a DB is reachable
@@ -26,11 +40,18 @@ async def lifespan(app: FastAPI):
         try:
             async with pool.acquire() as conn:
                 await apply_migrations(conn)
-                from .changes_source import seed_changes
-                await seed_changes(conn)
+                from .changes_source import mark_checked, purge_synthetic
+                await purge_synthetic(conn)
+                mark_checked()
                 await seed_skills(conn)
         except Exception as e:  # never block startup
             print("migrations failed:", e)
+    restore = asyncio.create_task(_restore_uploads())
+    try:  # project-wide search index (built at image build time); absent -> chat fallback
+        from engine.project_index import load_index
+        await asyncio.to_thread(load_index)
+    except Exception as e:  # noqa: BLE001
+        print("project index load failed:", repr(e)[:200])
     hub.start()
     sched = asyncio.create_task(scheduler()) if scheduler_enabled() else None
     yield
