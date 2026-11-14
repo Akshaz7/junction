@@ -12,12 +12,12 @@ export function UploadAction({ children = 'Upload' }: { children?: string }) {
 
 export const navigation = [
   { route: 'overview', label: 'Overview', icon: House },
-  { route: 'projects', label: 'Projects', icon: FolderKanban },
   { route: 'chat', label: 'Chat', icon: BotMessageSquare },
-  { route: 'changes', label: 'Changes', icon: Inbox },
-  { route: 'data', label: 'Data', icon: Database },
+  { route: 'projects', label: 'Projects', icon: FolderKanban },
   { route: 'compare', label: 'Compare', icon: GitCompare },
+  { route: 'changes', label: 'Changes', icon: Inbox },
   { route: 'library', label: 'Library', icon: Library },
+  { route: 'data', label: 'Data', icon: Database },
   { route: 'tools', label: 'Tools', icon: Wrench },
 ] as const
 
@@ -51,7 +51,7 @@ export function WorkspaceNavigation({ route }: { route: Route }) {
       <a href="#/overview" className="brand-mark" aria-label="Stoa Pro home"><span className="brand-glyph" role="img" aria-label="Stoa" /><span className="brand-pro">Pro</span></a>
       <ProjectSwitcher />
       <nav aria-label="Workspace navigation">
-        {[navigation[0], navigation[1], navigation[2], navigation[5], navigation[3], navigation[6], navigation[4], navigation[7]].map(({ route: destination, label, icon: Icon }) => <Tooltip content={label} key={destination}>
+        {navigation.map(({ route: destination, label, icon: Icon }) => <Tooltip content={label} key={destination}>
           <a href={`#/${destination}`} className={`rail-item ${route === destination ? 'active' : ''}`} aria-label={label} aria-current={route === destination ? 'page' : undefined}>
             <Icon size={20} /><span>{label}</span>
           </a>
