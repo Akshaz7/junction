@@ -1,0 +1,6 @@
+.sheet-view-regions { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.sheet-view-regions g { color: var(--muted-foreground); }
+.sheet-view-regions g[data-view-type="plan"] { color: var(--brand-forest); }
+.sheet-view-regions rect { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-dasharray: 6 4; }
+.sheet-view-regions text { fill: currentColor; font-family: var(--font-sans); paint-order: stroke; stroke: var(--card); stroke-width: .25em; stroke-linejoin: round; }
+.view-region-status { position: absolute; top: 8px; left: 8px; padding: 6px 8px; background: var(--card); color: var(--muted-foreground); font-size: var(--text-caption); pointer-events: none; }

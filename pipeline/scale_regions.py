@@ -169,7 +169,7 @@ def annotate_cached(pm, directory, allow_ocr=False):
     if any(i.get("source") in ("dxf", "ifc") for i in pm.get("items", [])):
         return copy.deepcopy(pm)
     page = pm.get("page", 1)
-    words, dpi = [], None
+    words, dpi, model_text = [], None, False
     for name in (f"text-{page}.json", f"rtext-{page}.json", f"scale-ocr-{page}.json"):
         try:
             data = json.loads((d / name).read_text())
@@ -177,6 +177,7 @@ def annotate_cached(pm, directory, allow_ocr=False):
                 continue
             words.extend(data if isinstance(data, list) else data.get("words", []))
             dpi = dpi or (data.get("dpi") if isinstance(data, dict) else None)
+            model_text = model_text or isinstance(data, dict) and data.get("source") == "vlm"
         except (OSError, ValueError, TypeError):
             pass
     try:
@@ -188,11 +189,15 @@ def annotate_cached(pm, directory, allow_ocr=False):
                 dpi = dpi or positive(dd[0])
             # VLM room labels are not an OCR pass. They used to prevent OCR,
             # hiding printed scales on precisely the scanned upload path.
-            if allow_ocr and not scale_anchors(words) and not (d / f"scale-ocr-{page}.json").exists():
-                from engine.reader.text import ocr_words
-                extra = ocr_words(d / f"page-{page}.png")
-                words.extend(extra)
-                (d / f"scale-ocr-{page}.json").write_text(json.dumps({"image": pm["image"], "words": extra}))
+            if allow_ocr and (model_text or not scale_anchors(words)) and not (d / f"scale-ocr-{page}.json").exists():
+                try:
+                    from engine.reader.text import ocr_words
+                    extra = ocr_words(d / f"page-{page}.png")
+                except (ImportError, OSError):
+                    extra = None
+                if extra is not None:
+                    words.extend(extra)
+                    (d / f"scale-ocr-{page}.json").write_text(json.dumps({"image": pm["image"], "words": extra}))
             from pipeline.sheet_views import annotate_views
             annotated = annotate_planmap(pm, words, im, dpi)
             # Revisit model view boxes with real OCR/DPI rather than letting a

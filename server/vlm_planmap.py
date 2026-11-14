@@ -30,8 +30,11 @@ SCHEMA = {
     "type": "object", "required": ["is_plan", "items", "dimensions"], "additionalProperties": False,
     "properties": {
         "is_plan": {"type": "boolean"},
+        "scale_labels": {"type": "array", "items": {
+            "type": "object", "required": ["text", "box_2d"], "additionalProperties": False,
+            "properties": {"text": {"type": "string"}, "box_2d": _BOX}}},
         "views": {"type": "array", "items": {
-            "type": "object", "required": ["title", "view_type", "box_2d", "printed_scale"], "additionalProperties": False,
+            "type": "object", "required": ["view_type", "box_2d"], "additionalProperties": False,
             "properties": {"title": {"type": "string"}, "box_2d": _BOX,
                            "view_type": {"type": "string", "enum": ["plan", "elevation", "section", "detail", "site", "unknown"]},
                            "printed_scale": {"type": "string"}}}},
@@ -56,6 +59,9 @@ PROMPT = (
     "Plan, Pohjapiirros, Grundriss and Våningsplan indicate plans; Julkisivu/Ansicht/Fasad indicate elevations; Leikkaus/Schnitt/Sektion indicate sections. "
     "A site plan, roof profile, detail or section does not provide floor-plan door/window/room counts. "
     "If view boundaries are unclear mark unknown. Never infer a printed scale from door size.\n"
+    "scale_labels: every printed ratio label as exact text and a TIGHT box_2d around the label itself. "
+    "Include shared or alternative scales here. Do not assign a shared/alternative label to individual views without evidence. "
+    "A ratio is not a physical pixel scale unless image DPI, paper size or a local measured dimension is known.\n"
     "items: one entry per element you can SEE, box_2d=[ymin,xmin,ymax,xmax] on a 0-1000 scale of the full image, tight boxes.\n"
     "- room: the whole room area. label = the printed room name/number exactly as printed (else omit). room_type from the enum. "
     "printed_area_m2 only if an area is printed in m2 on the page.\n"
@@ -188,7 +194,10 @@ def build(doc_id: str, page: int, W: int, H: int, raw: dict, model: str, ms: flo
         if px:
             views.append({"bbox": px, "title": view.get("title") or None, "view_type": view.get("view_type", "unknown"),
                           "printed_scale": view.get("printed_scale") or "", "classification_source": "vlm"})
-    return annotate_views(pm, [], views=views) if views else pm
+    labels = [{"text": label.get("text") or "", "bbox_px": _px(label.get("box_2d"), W, H)} for label in raw.get("scale_labels") or []]
+    labels = [label for label in labels if label["bbox_px"]]
+    pm["printed_scale_labels"] = labels
+    return annotate_views(pm, labels, views=views) if views else pm
 
 
 def validate(pm: dict) -> list[str]:
@@ -273,5 +282,5 @@ def read_page(doc_id: str, page: int, image_path: Path, out_dir: Path) -> dict:
     if problems:
         raise RuntimeError("plan map invalid: " + "; ".join(problems))
     (Path(out_dir) / f"planmap-{page}.json").write_text(json.dumps(pm))
-    words = [{"text": i["label"], "bbox_px": i["bbox_px"]} for i in pm["items"] if i["label"] and i["kind"] == "room"]
+    words = [{"text": i["label"], "bbox_px": i["bbox_px"]} for i in pm["items"] if i["label"] and i["kind"] == "room"] + pm.get("printed_scale_labels", [])
     return {"planmap": pm, "is_plan": True, "cost_usd": cost, "model": r.model, "ms": int(ms), "words": words}

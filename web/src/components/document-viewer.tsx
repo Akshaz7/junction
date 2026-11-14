@@ -19,6 +19,7 @@ import { placeEvidence, type ItemPlace, type LinkedItem } from '../lib/linked'
 import { AnnotationLayer, useAnnotations, type Annotation, type MarkupTool } from './viewer-tools/annotations'
 import { findSheetText, loadSheetText, type SheetText } from './viewer-tools/sheet-text'
 import { RoomLabels } from './viewer-tools/room-labels'
+import { ViewRegions } from './viewer-tools/view-regions'
 import { SpecPanel } from './viewer-tools/spec-panel'
 import { downloadSource } from './viewer-tools/download-source'
 import { useDrawingHighlights } from '../viewer3d/useDrawingHighlights'
@@ -71,6 +72,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   const draftRef = useRef<Annotation | null>(null)
   const annotations = useAnnotations(citation.doc_id, citation.page)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [showViews, setShowViews] = useState(false)
   const searchTrigger = useRef<HTMLButtonElement>(null)
   const titleId = useId()
   function closeSearch() { setSearchOpen(false); searchTrigger.current?.focus() }
@@ -351,6 +353,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       <span className="toolbar-spacer" />
       <Button variant="ghost" size="xs" onClick={highlights.clear}>Clear highlights</Button>
       <div className="viewer-markup-tools">
+        <Button variant="ghost" size="xs" aria-label="Show drawing view regions" aria-pressed={showViews} onClick={() => setShowViews((shown) => !shown)}>Views</Button>
         <Button variant="ghost" size="icon-sm" aria-label="Search sheet" aria-expanded={searchOpen} aria-controls="viewer-sheet-search" onClick={(event) => { searchTrigger.current = event.currentTarget; if (searchOpen) closeSearch(); else setSearchOpen(true) }}><Search size={16} /></Button>
         <Button variant="ghost" size="icon-sm" aria-label="Highlight marker" aria-pressed={tool === 'marker'} disabled={!image} onClick={() => chooseTool('marker')}><Highlighter size={16} /></Button>
         <Button variant="ghost" size="icon-sm" aria-label="Pen annotations" aria-pressed={tool === 'pen'} disabled={!image} onClick={() => chooseTool('pen')}><PenLine size={16} /></Button>
@@ -428,6 +431,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
         <img src={imageUrl} alt={`Drawing: ${doc?.title ?? citation.doc_id}, page ${shownPage}`} draggable={false}
           onLoad={(event) => { setImage({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight }); setShownPage(loadingPage.current) }}
           onError={() => { setImage(null); setError('This page image could not be displayed.') }} />
+        {showViews && image && shownPage === citation.page && <ViewRegions docId={citation.doc_id} page={citation.page} width={image.width} height={image.height} scale={view.scale} />}
         {image && shownPage === citation.page && <RoomLabels docId={citation.doc_id} page={citation.page} width={image.width} height={image.height} scale={view.scale} />}
         {image && shownPage === citation.page && <svg className="drawing-evidence" width={image.width} height={image.height} viewBox={`0 0 ${image.width} ${image.height}`} aria-label="Numbered drawing evidence">
           {!highlights.cleared && regions.map((region, index) => {

@@ -196,3 +196,66 @@ def test_view_scale_uses_only_its_local_dimensions():
     assert pm['regions'][0]['scale']['m_per_px'] == .01
     assert pm['regions'][1]['scale']['m_per_px'] == .1
     assert pm['regions'][2]['scale']['m_per_px'] is None
+
+
+def test_scale_label_below_frame_uses_uniquely_nearest_view():
+    vv = views()[:2]
+    for v in vv:
+        v['printed_scale'] = ''
+    pm = annotate_views(mixed_map(), [word('1:100', 30, 400)], views=vv, dpi=254)
+    assert pm['regions'][0]['scale']['ratio'] == 100
+    assert 'ratio' not in pm['regions'][1]['scale']
+
+
+def test_scale_label_between_views_is_not_assigned_arbitrarily():
+    vv = views()[:2]
+    vv[0]['bbox'] = [0, 0, 400, 390]
+    vv[1]['bbox'] = [600, 0, 1000, 390]
+    for v in vv:
+        v['printed_scale'] = ''
+    pm = annotate_views(mixed_map(), [word('1:100', 450, 300, w=100)], views=vv, dpi=254)
+    assert all('ratio' not in r['scale'] for r in pm['regions'])
+
+
+def test_tight_printed_labels_take_precedence_over_model_view_scale_guesses():
+    from server.vlm_planmap import build
+    raw = {'items': [], 'dimensions': [], 'views': [
+        {'view_type': 'plan', 'box_2d': [0, 0, 1000, 490], 'printed_scale': '1:200'},
+        {'view_type': 'elevation', 'box_2d': [0, 500, 1000, 1000], 'printed_scale': '1:100'}],
+        'scale_labels': [{'text': '1:100', 'box_2d': [800, 100, 830, 200]},
+                         {'text': '1:200', 'box_2d': [800, 600, 830, 700]}]}
+    pm = build('generated__labels', 1, 1000, 800, raw, 'fake', 0)
+    assert [r['scale']['ratio'] for r in pm['regions']] == [100, 200]
+    assert pm['regions'][0]['scale']['boxes'] == [[100, 640, 200, 664]]
+
+
+def test_nonplan_model_read_preserves_boundaries_for_later_count(tmp_path, monkeypatch):
+    from server.vlm_planmap import read_page
+    from types import SimpleNamespace
+    image = tmp_path/'in.png'
+    Image.new('RGB', (1000, 800), 'white').save(image)
+    raw = {'is_plan': False, 'items': [], 'dimensions': [], 'views': [
+        {'view_type': 'elevation', 'box_2d': [0, 0, 1000, 1000]}]}
+    monkeypatch.setattr('engine.models.call', lambda *a, **kw: SimpleNamespace(json=raw, cost_usd=0, model='fake'))
+    result = read_page('generated__elevation', 1, image, tmp_path)
+    assert result['is_plan'] is False
+    assert result['planmap']['regions'][0]['view_type'] == 'elevation'
+    assert (tmp_path/'planmap-1.json').exists()
+
+
+def test_model_text_with_some_scales_still_gets_real_ocr(tmp_path, monkeypatch):
+    pm = {'image': {'w': 1000, 'h': 800}, 'items': [], 'scale': {'m_per_px': None}}
+    Image.new('RGB', (1000, 800), 'white').save(tmp_path/'page-1.png')
+    (tmp_path/'text-1.json').write_text(json.dumps({'source': 'vlm', 'words': [word('1:100')]}))
+    calls = []
+    monkeypatch.setattr('engine.reader.text.ocr_words', lambda p: calls.append(p) or [word('1:200', 700, 700)])
+    result = annotate_cached(pm, tmp_path, allow_ocr=True)
+    assert len(calls) == 1
+    assert result['scale']['m_per_px'] is None
+
+
+def test_multikind_counts_name_views_with_counts(tmp_path):
+    d = store(tmp_path, annotate_views(mixed_map(), [], views=views()))
+    result = solve('How many doors and windows?', d.name, root=tmp_path)
+    assert result['answer']['value'] == {'door': 2, 'window': 2}
+    assert 'Pohjapiirros (page 1): 1 door, 1 window' in result['answer']['text_md']

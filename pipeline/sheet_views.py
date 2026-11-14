@@ -50,10 +50,14 @@ def title_anchors(words):
 
 def _scale_for(region, anchors, words, pm, dpi, only_view=False):
     from engine.scale_text import from_ratio, ratio_and_sheet, scalebar
-    local = [a for a in anchors if contains(region['bbox'], a['bbox'])]
+    local = [a for a in anchors if contains(region['bbox'], a['bbox']) or a.get('view_id') == region.get('view_id')]
     # Scales printed below a view title can be outside a tightly framed view.
     # Callers supply a frame including the title and scale, never global proximity.
     explicit = region.get('printed_scale')
+    if region.get('classification_source') == 'vlm' and pm.get('printed_scale_labels'):
+        # The tight label boxes, rather than a model's view-wide scale guess,
+        # determine ownership when spatial source labels are available.
+        explicit = None
     if explicit:
         local += scale_anchors([{'text': explicit, 'bbox_px': region['bbox']}])
     ratios = {a['ratio'] for a in local}
@@ -130,9 +134,28 @@ def annotate_views(pm, words, image=None, dpi=None, frames=None, views=None):
     regions = [r for r in regions if valid_box(r.get('bbox')) and r.get('view_type') in VIEW_TYPES]
     if not regions:
         return out
-    anchors = scale_anchors(words)
+    label_words = [*words, *pm.get('printed_scale_labels', [])]
+    anchors = scale_anchors(label_words)
     for n, region in enumerate(regions, 1):
         region.setdefault('view_id', f'view-{n:03d}')
+    # A scale printed just below a frame still belongs to that view. Associate
+    # only a uniquely nearest boundary within four text heights; remote labels
+    # and labels equidistant between views remain unassigned.
+    for anchor in anchors:
+        if any(contains(r['bbox'], anchor['bbox']) for r in regions):
+            continue
+        a = anchor['bbox']
+        distances = []
+        for region in regions:
+            b = region['bbox']
+            dx = max(b[0]-a[2], a[0]-b[2], 0)
+            dy = max(b[1]-a[3], a[1]-b[3], 0)
+            distances.append(((dx*dx+dy*dy)**.5, region))
+        distances.sort(key=lambda row: row[0])
+        distance, nearest = distances[0]
+        if distance <= 4*(a[3]-a[1]) and (len(distances) == 1 or distance + 1e-6 < distances[1][0]):
+            anchor['view_id'] = nearest['view_id']
+    for region in regions:
         region['scale'] = _scale_for(region, anchors, words, pm, dpi, only_view=len(regions) == 1)
     out.setdefault('source_scale', copy.deepcopy(pm.get('scale') or {}))
     out['regions'] = regions
