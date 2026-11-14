@@ -117,7 +117,6 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
     <div className="question-bubble">{answer.question}</div>
     <details className="answer-detail thought-process"><summary>Show thought process</summary>{answer.trace.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>
     <AnswerBody answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} />
-    {!generated && <p className="answer-how" data-testid="answer-how">{howAnswered(answer)}</p>}
     {!!docChips.length && <div className="answer-docs" aria-label="Documents used" data-testid="answer-docs">{docChips.map(({ docId, title, first }) => first
       ? <button type="button" key={docId} className="source-file-chip answer-doc-chip" aria-label={`Open document ${title}`} onClick={() => onOpenCitation(first)}><FileText size={14} /><span>{title}</span></button>
       : <span key={docId} className="source-file-chip answer-doc-chip"><FileText size={14} /><span>{title}</span></span>)}</div>}
