@@ -162,6 +162,10 @@ def _vlm_pages(doc_id: str, ddir: Path, st: "Status", cost: dict):
     return sorted(found)
 
 
+def _pdf_vector_on() -> bool:
+    return os.environ.get("PDF_VECTOR", "1") != "0"
+
+
 def _dxf_planmap_usable(ddir: Path) -> bool:
     f = ddir / "planmap-1.json"
     if not f.is_file():
@@ -171,7 +175,45 @@ def _dxf_planmap_usable(ddir: Path) -> bool:
     return n >= 3 and bool(pm["scale"].get("m_per_px"))
 
 
-def _extrude(doc_id: str, ddir: Path, page: int):
+MAX_PDF_PLAN_PAGES = 4
+
+
+def _pdf_vector_pages(doc_id: str, ddir: Path, st: "Status", pdf: Path) -> list[int]:
+    """Vector CAD PDF: exact plan maps from the page's drawing operators (pipeline.pdf_planmap), gated per page, at most
+    MAX_PDF_PLAN_PAGES plan pages. Returns the plan pages; [] (and no plan-map files left behind) means use the VLM path."""
+    from pipeline import pdf_planmap
+    meta = json.loads((ddir / "pages.json").read_text())
+    cap = int(os.environ.get("MAX_PDF_PLAN_PAGES", str(MAX_PDF_PLAN_PAGES)))
+    budget = float(os.environ.get("PDF_VECTOR_BUDGET_S", "90"))
+    found, notes = [], []
+
+    def run_all():
+        t0 = time.time()
+        for p in meta["pages"]:
+            n = p["page"]
+            if len(found) >= cap or time.time() - t0 > budget:
+                break
+            try:
+                if pdf_planmap.process(doc_id, ddir, pdf, n - 1) is not None:
+                    found.append(n)
+            except Exception as e:  # noqa: BLE001  one odd page never costs the others
+                notes.append(f"p{n}: {e!r}"[:120])
+                (ddir / f"planmap-{n}.json").unlink(missing_ok=True)
+    ok = st.stage("planmap_pdf_vector", run_all)
+    if not ok:  # never fail the upload over the vector reader: the VLM path runs next
+        notes.append(st.stages[-1].pop("error", ""))
+        st.stages[-1]["ok"] = True
+    if notes:
+        st.stages[-1]["note"] = "; ".join(notes)[:300]
+    if not ok or not found:
+        for n in found:
+            (ddir / f"planmap-{n}.json").unlink(missing_ok=True)
+        return []
+    st.stages[-1]["note"] = (st.stages[-1].get("note", "") + f" vector plan pages {found}").strip()
+    return found
+
+
+def _extrude(doc_id: str, ddir: Path, page: int, raster_walls: bool = True):
     from pipeline import extrude
     pm = json.loads((ddir / f"planmap-{page}.json").read_text())
     if not pm["scale"].get("m_per_px"):
@@ -180,7 +222,7 @@ def _extrude(doc_id: str, ddir: Path, page: int):
                        "evidence": f"no printed scale, dimension or door found: assumed {ASSUMED_M_PER_PX} m per pixel"}
         (ddir / f"planmap-{page}.json").write_text(json.dumps(pm))
     try:  # falls back to plan-map walls when cv2 or wall fills are missing
-        extrude.process(doc_id, ddir, page, raster_walls=True)
+        extrude.process(doc_id, ddir, page, raster_walls=raster_walls)
     except Exception as ex:  # noqa: BLE001 - a raster-wall surprise must never cost the upload its 3D
         print("raster-wall extrude failed, using plan-map walls:", repr(ex)[:160])
         extrude.process(doc_id, ddir, page)
@@ -337,6 +379,7 @@ def _run(doc_id: str, st: Status) -> str:
     st.cost = cost
     ok = True
     plan_pages: list[int] = []
+    vector = False
     if kind == "ifc":
         ifc_path = REPO / doc["files"]["ifc"]
         cap = float(os.environ.get("INGEST_IFC_MAX_MB", "15" if light else "400"))
@@ -401,20 +444,42 @@ def _run(doc_id: str, st: Status) -> str:
                     raise RuntimeError((r.stdout + r.stderr)[-300:])
             ok = st.stage("planmap", vision)
             plan_pages = [1] if ok else []
+        elif ok and kind == "pdf" and _pdf_vector_on():
+            try:
+                plan_pages = _pdf_vector_pages(doc_id, ddir, st, REPO / doc["files"]["pdf"])
+            except Exception as e:  # noqa: BLE001  anything odd: today's path
+                print("pdf vector plan map skipped:", repr(e)[:200], file=sys.stderr)
+                plan_pages = []
+            vector = bool(plan_pages)
+            if not plan_pages:
+                plan_pages = _vlm_pages(doc_id, ddir, st, cost)
         elif ok and kind in ("raster", "pdf", "svg"):
             plan_pages = _vlm_pages(doc_id, ddir, st, cost)
         elif ok:
             st.write("partial", f"{kind}: page image only, no plan map for this format")
             return "partial"
         if plan_pages:
-            ok = st.stage("extrude", lambda: _extrude(doc_id, ddir, plan_pages[0]))
-            ok = ok and st.stage("usdz", lambda: _usdz(doc_id, ddir))
-        elif ok and all(s["ok"] for s in st.stages):
-            st.cost = cost
-            st.write("ready", "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene")
-            return "ready"
-        elif ok:
-            ok = False
+            if vector:  # walls come from the PDF's own geometry: no raster wall read
+                ok = st.stage("extrude", lambda: _extrude(doc_id, ddir, plan_pages[0], raster_walls=False))
+                if not ok:  # vector plan map would not extrude: today's path (VLM plan map, raster walls)
+                    st.stages[-1].update(stage="extrude_pdf_vector", ok=True, note=st.stages[-1].pop("error", "")[:200])
+                    for f in ddir.glob("planmap-[0-9]*.json"):
+                        f.unlink()
+                    plan_pages = _vlm_pages(doc_id, ddir, st, cost)
+                    ok = True
+                    if plan_pages:
+                        ok = st.stage("extrude", lambda: _extrude(doc_id, ddir, plan_pages[0]))
+            else:
+                ok = st.stage("extrude", lambda: _extrude(doc_id, ddir, plan_pages[0]))
+            if plan_pages:
+                ok = ok and st.stage("usdz", lambda: _usdz(doc_id, ddir))
+        if not plan_pages:
+            if ok and all(s["ok"] for s in st.stages):
+                st.cost = cost
+                st.write("ready", "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene")
+                return "ready"
+            elif ok:
+                ok = False
     ok = ok and all(s["ok"] for s in st.stages)
     final = "ready" if ok else "failed"
     st.cost = cost

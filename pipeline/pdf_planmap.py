@@ -1,11 +1,14 @@
-"""Vector (CAD-exported) PDF floor plan -> plan map, no model calls.
+"""Vector (CAD-exported) PDF floor plan -> plan map (CONTRACT 5.4), no model calls.
 
-Reads the page's drawing operators with pdfminer.six (points, exact: 1 pt = 25.4/72 mm), takes the wall shapes
-(dark or hatch filled closed paths), turns the free space between them into rooms (door gaps closed, regions
-that carry a text-layer label), and fits the scale from the printed 1:N, checked against printed room areas.
-`process` returns None when the page is not a plan this reader understands, so the caller falls back to the VLM.
-
-Pixel space = the rendered page-<n>.png: px = x_pt * s, (H_pt - y_pt) * s with s = W_px / W_pt.
+`process` runs the role modules on one page, all in page points (top-left origin, y down, after /Rotate and CropBox):
+pipeline.pdf_vector (load_page, is_scanned, walls), pipeline.pdf_rooms (rooms, scale), pipeline.pdf_openings (gate,
+openings). `build` turns their output into plan-map items with the PDF-3D addendum's provenance: q.area_m2 (shoelace on
+the pt polygon x m_per_pt^2), q.area_m2_printed, q.length_m (walls), props.measure {from, pts_area, m_per_pt,
+scale_source, scale_check}, top-level scale {m_per_px = m_per_pt / s, m_per_pt, method, confidence, ratio}.
+Pixels = page-<n>.png: px = pdf_vector.to_px(pt, s), s = W_px / W_pt. Returns None (caller falls back to the VLM) for
+scanned pages, gate rejects, no scale, or a page size that does not match the render.
+The older draft reader below (extract_shapes, label_blocks, _wall_polys, _rooms_from_walls) is only a fallback for a
+role module that still returns its stub result, and only with PDF_PLANMAP_DRAFT=1 (off by default: pdfminer is slow).
 CLI: python -m pipeline.pdf_planmap <pdf> <artifact_dir> [page]
 """
 from __future__ import annotations
@@ -229,93 +232,339 @@ def _rooms_from_walls(walls, thin, labels, W, H, mpp_guess):
     return out
 
 
-def process(doc_id: str, ddir: Path, pdf_path: Path, page_index: int = 0, write: bool = True):
-    """Plan map dict for a vector plan page, or None. Writes planmap-<n>.json when `write`."""
-    from engine import scale_text
-    n = page_index + 1
-    meta = json.loads((ddir / "pages.json").read_text())
-    pinfo = next(p for p in meta["pages"] if p["page"] == n)
-    W, H = pinfo["w"], pinfo["h"]
-    tf = ddir / f"text-{n}.json"
-    if not tf.is_file():
-        return None
-    tj = json.loads(tf.read_text())
-    words = tj["words"]
-    if NOT_PLAN.search(" ".join(w["text"] for w in words[:400])) and sum(
-            1 for w in words if UNIT.match(w["text"])) < 3:
-        return None
-    W_pt, H_pt, shapes = extract_shapes(pdf_path, page_index)
-    if len(shapes) < 20:
-        return None
-    s = W / W_pt
-    labels = label_blocks(words)
+# ---------------------------------------------------------------------------------------------------------------
+# Draft fallback in the shared interface (page points, top-left origin, y down). Used only where a role module
+# still returns its stub result (no walls / no rooms / no scale / gate "stub"), so the path runs end to end.
+# Off by default; PDF_PLANMAP_DRAFT=1 turns it on.
+# ---------------------------------------------------------------------------------------------------------------
+M_PER_PT_1 = 25.4 / 72 / 1000  # metres per pt at 1:1
+
+
+def _draft_page(pdf_path: Path, page_index: int) -> dict:
+    """Minimal load_page: size and words in pt (y down). Shapes are read lazily by _draft_walls."""
+    import pypdfium2 as pdfium
+    d = pdfium.PdfDocument(str(pdf_path))
+    try:
+        W_pt, H_pt = d[page_index].get_size()
+    finally:
+        d.close()
+    return {"W_pt": float(W_pt), "H_pt": float(H_pt), "rotate": 0, "paths": [], "words": [], "image_cover": 0.0,
+            "_draft": {"pdf": str(pdf_path), "index": page_index}}
+
+
+def _draft_shapes(page: dict):
+    dr = page.setdefault("_draft", {})
+    if "shapes" not in dr:
+        _, H_pt, shapes = extract_shapes(Path(dr["pdf"]), dr["index"])
+        dr["shapes"], dr["H_mb"] = shapes, H_pt
+    return dr["shapes"], dr["H_mb"]
+
+
+def _draft_walls(page: dict) -> list:
+    shapes, H_mb = _draft_shapes(page)
+    walls, thin = _wall_polys(shapes, 1.0, H_mb)  # s = 1: page points, y down
+    page["_draft"]["thin"] = thin
+    out = []
+    for p in walls:
+        a = _poly_area(list(p))
+        per = sum(math.dist(p[i], p[(i + 1) % len(p)]) for i in range(len(p)))
+        t = 2 * a / per if per else 0.0  # thickness of a long thin shape
+        out.append({"polygon": [[x, y] for x, y in p], "thickness_pt": t, "style": "fill"})
+    return out
+
+
+def _draft_rooms(page: dict, walls: list, words_pt: list, s: float, W: int, H: int) -> list:
+    """Draft room finder (raster flood fill between walls) run in page pixels, returned in pt."""
+    labels = label_blocks([{"text": w["text"], "bbox_px": [v * s for v in w["bbox"]]} for w in words_pt])
     if len(labels) < MIN_ROOMS:
-        return None
-    walls, thin = _wall_polys(shapes, s, H_pt)
-    if len(walls) < MIN_WALL_SHAPES:
-        return None
-    # keep wall shapes in the neighbourhood of the labelled rooms (drops title blocks, scale bars, legends)
-    xs = [b["cx"] for b in labels]; ys = [b["cy"] for b in labels]
-    pad = 0.06 * max(W, H)
-    box = (min(xs) - pad, min(ys) - pad, max(xs) + pad, max(ys) + pad)
-    walls = [p for p in walls if box[0] <= sum(q[0] for q in p) / len(p) <= box[2]
-             and box[1] <= sum(q[1] for q in p) / len(p) <= box[3]]
-    if len(walls) < MIN_WALL_SHAPES:
-        return None
-    # scale: printed ratio (exact in points), then the printed room areas as a check/fallback
-    ratio, sheet = scale_text.ratio_and_sheet(words)
-    dpi = 72 * s
-    sc = None
+        return []
+    from engine import scale_text
+    ratio, _ = scale_text.ratio_and_sheet([{"text": w["text"]} for w in words_pt])
+    guess = (M_PER_PT_1 * ratio / s) if ratio else 0.034
+    wpx = [[(x * s, y * s) for x, y in w["polygon"]] for w in walls]
+    thin = [[(x * s, y * s) for x, y in p] for p in page.get("_draft", {}).get("thin", [])]
+    got = dict(_rooms_from_walls(wpx, thin, labels, W, H, guess))
+    out = []
+    for i, b in enumerate(labels):
+        poly = [[x / s, y / s] for x, y in got[i]] if i in got else None
+        out.append({"polygon": poly, "label": b["name"] or None, "number": b["number"] or None,
+                    "area_printed_m2": b["area_m2"], "label_bbox": [v / s for v in b["bbox"]],
+                    "pts_area": _poly_area([tuple(q) for q in poly]) if poly else None})
+    return out
+
+
+def _draft_scale(page: dict, rooms_: list, words_pt: list) -> dict:
+    """Ladder rungs 1 and 3: printed 1:N, checked against (or replaced by) a fit to the printed room areas."""
+    from engine import scale_text
+    ratio, _ = scale_text.ratio_and_sheet([{"text": w["text"]} for w in words_pt])
+    pairs = [(r["pts_area"], r["area_printed_m2"]) for r in rooms_ if r.get("pts_area") and r.get("area_printed_m2")]
+    fit = None
+    if len(pairs) >= 2:  # least squares of printed m² = k² * pt²  ->  k² = sum(a*m)/sum(a*a)
+        k2 = sum(a * m for a, m in pairs) / sum(a * a for a, _ in pairs)
+        fit = math.sqrt(k2) if k2 > 0 else None
+    check = {}
     if ratio:
-        mpp = 25.4 / dpi * ratio / 1000
-        sc = {"m_per_px": mpp, "method": "pdf-points-ratio", "confidence": 0.95,
-              "evidence": f"printed scale 1:{ratio}; PDF points are exact (1 pt = 25.4/72 mm) at {dpi:.0f} dpi"}
-    guess = sc["m_per_px"] if sc else 0.034
-    rooms = _rooms_from_walls(walls, thin, labels, W, H, guess)
-    if len(rooms) < MIN_ROOMS:
+        mpt = M_PER_PT_1 * ratio
+        if fit:
+            check["printed_areas_rel_err"] = round(abs(fit ** 2 / mpt ** 2 - 1), 4)
+        if fit and check["printed_areas_rel_err"] > 0.25:  # the printed ratio is for another view on the sheet
+            return {"m_per_pt": fit, "method": "printed_areas_fit", "confidence": 0.6, "ratio": f"1:{ratio}", "check": check}
+        return {"m_per_pt": mpt, "method": "printed_ratio", "confidence": 0.95 if not fit or check["printed_areas_rel_err"] < 0.05 else 0.8,
+                "ratio": f"1:{ratio}", "check": check}
+    if fit:
+        return {"m_per_pt": fit, "method": "printed_areas_fit", "confidence": 0.6, "ratio": None, "check": check}
+    return {"m_per_pt": None, "method": None, "confidence": 0.0, "ratio": None, "check": {}}
+
+
+def _draft_gate(page: dict, walls: list, rooms_: list, words_pt: list) -> tuple[bool, str]:
+    txt = " ".join(w["text"] for w in words_pt[:400])
+    if NOT_PLAN.search(txt) and sum(1 for w in words_pt if UNIT.match(w["text"]) or UNIT_FUSED.match(w["text"])) < 3:
+        return False, "heading says elevation/section/schedule/detail"
+    if len(walls) < MIN_WALL_SHAPES:
+        return False, f"{len(walls)} wall shapes < {MIN_WALL_SHAPES}"
+    if sum(1 for r in rooms_ if r.get("polygon") or r.get("area_printed_m2")) < MIN_ROOMS:
+        return False, "fewer than 2 rooms"
+    return True, "draft gate"
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Assembly: role modules -> plan map (CONTRACT 5.4 + the PDF-3D addendum's provenance keys)
+# ---------------------------------------------------------------------------------------------------------------
+ROOM_TYPE_WORDS = [  # keyword (lowercase, substring) -> props.room_type (extrude tints by it)
+    (("bagno", "bad", "bath", "salle de bain", "douche", "dusche", "shower"), "bathroom"),
+    (("wc", "toilet", "toilette", "abort", "restroom", "lavatory"), "wc"),
+    (("cucina", "küche", "kueche", "kitchen", "cuisine", "kochen"), "kitchen"),
+    (("camera", "schlaf", "bed", "chambre", "zimmer", "kinder"), "bedroom"),
+    (("soggiorno", "wohn", "living", "salon", "séjour", "sejour", "lounge", "family"), "living"),
+    (("corridoio", "disimpegno", "ingresso", "flur", "gang", "korridor", "hall", "corridor", "entr", "foyer", "diele"), "hall"),
+    (("balcon", "balkon", "terrazz", "terrasse", "terrace", "loggia", "deck", "patio"), "balcony"),
+    (("ripostiglio", "abstell", "keller", "storage", "réduit", "reduit", "closet", "cellar", "pantry"), "storage"),
+    (("lavanderia", "wasch", "laundry", "buanderie"), "laundry"),
+    (("scala", "treppe", "stair", "escalier"), "stairs"),
+    (("ufficio", "büro", "buero", "office", "bureau", "study"), "office"),
+    (("pranzo", "dining", "essen", "repas"), "dining"),
+]
+
+
+MIN_WALL_LEN_M = 0.3     # wall pieces shorter than this (at the page scale) are dropped before extrusion
+MIN_WALL_THICK_M = 0.05  # ... and thinner than 50 mm
+
+
+def room_type(label: str | None) -> str:
+    s = (label or "").lower()
+    for keys, t in ROOM_TYPE_WORDS:
+        if any(k in s for k in keys):
+            return t
+    return "other"
+
+
+SCALE_SOURCE = (("ratio", "printed 1:{n}"), ("printed 1:", "printed 1:{n}"), ("bar", "scale bar"),
+                ("area", "printed areas fit"), ("dim", "dimensions"), ("door", "door guess"))
+
+
+def scale_source(method: str | None, ratio) -> str:
+    m = (method or "").lower()
+    n = str(ratio or "").split(":")[-1]
+    for key, text in SCALE_SOURCE:
+        if key in m:
+            return text.format(n=n)
+    return m or "unknown"
+
+
+def _ratio_str(r):
+    if r in (None, ""):
         return None
-    ratios = []
-    for i, poly in rooms:
-        a_px = _poly_area([tuple(q) for q in poly])
-        if a_px > 0 and labels[i]["area_m2"] > 0:
-            ratios.append((labels[i]["area_m2"] / a_px) ** 0.5)
-    fit = float(np.median(ratios)) if len(ratios) >= 2 else None
-    if sc is None:
-        if fit is None:
-            return None
-        sc = {"m_per_px": fit, "method": "printed-areas-fit", "confidence": 0.6,
-              "evidence": f"fitted to {len(ratios)} printed room areas (no printed scale ratio)"}
-    elif fit and abs(fit / sc["m_per_px"] - 1) > 0.25:
-        sc = {"m_per_px": fit, "method": "printed-areas-fit", "confidence": 0.5,
-              "evidence": f"printed 1:{ratio} disagrees with the printed room areas by {abs(fit / sc['m_per_px'] - 1) * 100:.0f}%: areas used"}
-    mpp = sc["m_per_px"]
+    r = str(r)
+    return r if ":" in r else f"1:{r}"
 
-    def box_of(poly):
-        a = [q[0] for q in poly]; b = [q[1] for q in poly]
-        return [min(a), min(b), max(a), max(b)]
 
+def shoelace(poly) -> float:
+    return _poly_area([tuple(q[:2]) for q in poly]) if poly and len(poly) >= 3 else 0.0
+
+
+def _perimeter(poly) -> float:
+    return sum(math.dist(poly[i][:2], poly[(i + 1) % len(poly)][:2]) for i in range(len(poly))) if poly else 0.0
+
+
+def rect_equivalent(area: float, perimeter: float) -> tuple[float, float]:
+    """(long side, short side) of the rectangle with this area and perimeter: wall length and thickness from the exact
+    pt polygon (L + t = P/2, L*t = A). Shapes that no rectangle matches give (P/4, A/(P/4))."""
+    h = perimeter / 2
+    d = h * h - 4 * area
+    L = (h + math.sqrt(d)) / 2 if d >= 0 else h / 2
+    return L, (area / L if L > 0 else 0.0)
+
+
+def _bbox(poly):
+    xs = [q[0] for q in poly]; ys = [q[1] for q in poly]
+    return [min(xs), min(ys), max(xs), max(ys)]
+
+
+def _rect(b):
+    return [[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]]]
+
+
+def _image_size(ddir: Path, n: int) -> tuple[int, int]:
+    f = ddir / "pages.json"
+    if f.is_file():
+        for p in json.loads(f.read_text()).get("pages", []):
+            if p["page"] == n:
+                return int(p["w"]), int(p["h"])
+    from PIL import Image
+    Image.MAX_IMAGE_PIXELS = None
+    with Image.open(ddir / f"page-{n}.png") as im:
+        return im.size
+
+
+def _words_pt(ddir: Path, n: int, s: float, page: dict) -> list:
+    """Words in pt (y down): the vector reader's own text if it gave any, else text-<n>.json (page pixels / s)."""
+    if page.get("words"):
+        return page["words"]
+    f = ddir / f"text-{n}.json"
+    if not f.is_file():
+        return []
+    return [{"text": w["text"], "bbox": [v / s for v in w["bbox_px"]]} for w in json.loads(f.read_text())["words"]]
+
+
+def _draft_on() -> bool:
+    import os
+    return os.environ.get("PDF_PLANMAP_DRAFT", "0") == "1"
+
+
+def build(doc_id: str, n: int, W: int, H: int, page: dict, walls: list, rooms_: list, opens: list, sc: dict,
+          words_pt: list | None = None, used: dict | None = None, ms: int = 0) -> dict:
+    """Plan map dict from the role modules' outputs (all geometry in page pt, top-left, y down)."""
+    from pipeline import pdf_vector
+    s = W / page["W_pt"]
+    px = lambda p: [round(float(v), 1) for v in pdf_vector.to_px(p, s)]
+    mpt = float(sc["m_per_pt"])
+    ratio = _ratio_str(sc.get("ratio"))
+    src = scale_source(sc.get("method"), ratio)
+    check = dict(sc.get("check") or {})
+    measure = lambda **kw: {"from": "pdf_vector", "m_per_pt": mpt, "scale_source": src, "scale_check": check, **kw}
     items, cnt = [], Counter()
 
-    def add(kind, label, poly, props, conf=0.9):
+    def add(kind, label, poly_px, bbox_px, props, conf, q=None):
         cnt[kind] += 1
-        items.append({"item_id": f"{kind}-{cnt[kind]}", "kind": kind, "label": label, "bbox_px": box_of(poly),
-                      "polygon_px": poly, "props": props, "conf": conf, "source": "pdf-vector"})
+        it = {"item_id": f"{kind}-{cnt[kind]:03d}", "kind": kind, "label": label,
+              "bbox_px": [round(float(v), 1) for v in bbox_px], "polygon_px": poly_px, "props": props,
+              "conf": round(float(conf), 3), "source": "pdf_vector"}
+        if q is not None:
+            it["q"] = q
+        items.append(it)
+        return it
 
-    for i, poly in rooms:
-        b = labels[i]
-        a_geom = round(_poly_area([tuple(q) for q in poly]) * mpp ** 2, 2)
-        add("room", b["name"], poly, {"number": b["number"], "area_m2_label": b["area_m2"],
-                                       "area_m2_geom": a_geom, "labelled": bool(b["name"])}, 0.85)
-    for p in walls:
-        add("wall", "", [[round(x, 1), round(y, 1)] for x, y in p], {}, 0.85)
-    for b in labels:
-        cnt["text"] += 1
-        bb = b["bbox"]
-        items.append({"item_id": f"text-{cnt['text']}", "kind": "text", "label": b["name"] or b["number"],
-                      "bbox_px": bb, "polygon_px": None, "props": {}, "conf": 0.9, "source": "pdf-vector"})
-    pm = {"doc_id": doc_id, "page": n, "image": {"w": W, "h": H}, "scale": sc, "items": items,
-          "provenance": {"models": {}, "created": time.strftime("%Y-%m-%dT%H:%M:%S"), "ms": 0,
-                         "note": "from PDF vector geometry (pdfminer.six); generated for demo"}}
+    for r in rooms_:
+        poly = r.get("polygon")
+        printed = r.get("area_printed_m2")
+        label = r.get("label") or None
+        if poly and len(poly) >= 3:
+            pts_area = float(r.get("pts_area") or shoelace(poly))
+            a = round(pts_area * mpt ** 2, 2)
+            ppx = [px(p) for p in poly]
+            bb = _bbox(ppx)
+            frm, conf = "polygon", 0.85
+        elif r.get("label_bbox") and printed:  # no polygon: a room at its label, printed area only
+            pts_area, a = None, None
+            bb = [px(r["label_bbox"][:2])[0], px(r["label_bbox"][:2])[1], *px(r["label_bbox"][2:4])]
+            ppx, frm, conf = None, "label", 0.5
+        else:
+            continue
+        m = measure(pts_area=round(pts_area, 2) if pts_area else None, geometry=frm)
+        if a and printed:
+            m["printed_rel_err"] = round(abs(a / printed - 1), 4)
+        props = {"room_type": room_type(label), "number": r.get("number"),
+                 "area_m2": printed if printed else a,  # printed label wins (as for DXF), measured kept in area_m2_geom
+                 "area_m2_label": printed, "area_m2_geom": a, "labelled": bool(label), "measure": m}
+        add("room", label, ppx, bb, props, conf, {"area_m2": a, "area_m2_printed": printed})
+    for w in walls:
+        poly = w.get("polygon")
+        if not poly or len(poly) < 3:
+            continue
+        pts_area = shoelace(poly)
+        t = float(w.get("thickness_pt") or 0)
+        length_pt, t_eq = rect_equivalent(pts_area, _perimeter(poly))
+        t = t or t_eq
+        if length_pt * mpt < MIN_WALL_LEN_M or (t_eq or t) * mpt < MIN_WALL_THICK_M:
+            continue  # casework, fixture outlines, dimension ticks: not walls at full height
+        ppx = [px(p) for p in poly]
+        props = {"thickness_px": round(t * s, 2), "thickness_m": round(t * mpt, 3), "style": w.get("style"),
+                 "length_m": round(length_pt * mpt, 3),
+                 "measure": measure(pts_area=round(pts_area, 2), length_pt=round(length_pt, 2))}
+        add("wall", "", ppx, _bbox(ppx), props, 0.85, {"length_m": round(length_pt * mpt, 3)})
+    for o in opens:
+        k = o.get("kind")
+        if k not in ("door", "window"):
+            continue
+        poly = o.get("polygon")
+        b = o.get("bbox") or (_bbox(poly) if poly else None)
+        if not b:
+            continue
+        bb = [*px(b[:2]), *px(b[2:4])]
+        ppx = [px(p) for p in poly] if poly and len(poly) >= 3 else [list(q) for q in _rect(bb)]
+        props = dict(o.get("props") or {})
+        props.setdefault("width_m", round(max(b[2] - b[0], b[3] - b[1]) * mpt, 3))
+        props["measure"] = measure(width_pt=round(max(b[2] - b[0], b[3] - b[1]), 2))
+        add(k, o.get("label") or "", ppx, bb, props, o.get("conf") or 0.7, {"width_m": props["width_m"]})
+    for r in rooms_:
+        lb = r.get("label_bbox")
+        if lb and (r.get("label") or r.get("number")):
+            add("text", r.get("label") or r.get("number"), None, [*px(lb[:2]), *px(lb[2:4])], {"role": "room_label"}, 0.9)
+    scale = {"m_per_px": mpt / s, "m_per_pt": mpt, "method": sc.get("method") or "none",
+             "confidence": float(sc.get("confidence") or 0), "ratio": ratio, "source": src, "check": check,
+             "evidence": f"{src}: {mpt:.6f} m per pt; page-{n}.png at {s:.4f} px per pt"}
+    return {"doc_id": doc_id, "page": n, "image": {"w": int(W), "h": int(H)}, "scale": scale, "items": items,
+            "provenance": {"models": {}, "created": time.strftime("%Y-%m-%dT%H:%M:%S"), "ms": int(ms),
+                           "from": "pdf_vector", "modules": used or {},
+                           "page_pt": [page["W_pt"], page["H_pt"]], "px_per_pt": s,
+                           "note": "from PDF vector geometry; measurements in exact page points"}}
+
+
+def process(doc_id: str, ddir: Path, pdf_path: Path, page_index: int = 0, write: bool = True):
+    """Plan map dict for a vector plan page, or None (scanned / not a plan / no scale), so the caller falls back.
+    Writes planmap-<n>.json when `write`."""
+    from pipeline import pdf_openings, pdf_rooms, pdf_vector
+    t0 = time.time()
+    n = page_index + 1
+    ddir, pdf_path = Path(ddir), Path(pdf_path)
+    W, H = _image_size(ddir, n)
+    draft = _draft_on()
+    used = {}
+    page = pdf_vector.load_page(pdf_path, page_index)
+    if not page.get("W_pt"):
+        if not draft:
+            return None
+        page, used["page"] = _draft_page(pdf_path, page_index), "draft"
+    if pdf_vector.is_scanned(page):
+        return None
+    s = W / page["W_pt"]
+    if abs(page["H_pt"] * s - H) > max(2.0, 0.01 * H):  # rotation/crop mismatch: pixel mapping would be wrong
+        return None
+    words_pt = _words_pt(ddir, n, s, page)
+    walls = pdf_vector.walls(page)
+    if not walls and draft:
+        walls, used["walls"] = _draft_walls(page), "draft"
+    rooms_ = pdf_rooms.rooms(page, walls)
+    if not rooms_ and draft:
+        rooms_, used["rooms"] = _draft_rooms(page, walls, words_pt, s, W, H), "draft"
+    ok, reason = pdf_openings.gate(page, walls, rooms_)
+    if reason == "stub" and draft:
+        (ok, reason), used["gate"] = _draft_gate(page, walls, rooms_, words_pt), "draft"
+    if not ok:
+        return None
+    sc = pdf_rooms.scale(page, rooms_)
+    if not sc or not sc.get("m_per_pt"):
+        if not draft:
+            return None
+        sc, used["scale"] = _draft_scale(page, rooms_, words_pt), "draft"
+        if not sc.get("m_per_pt"):
+            return None
+    opens = pdf_openings.openings(page, walls)
+    page.pop("_draft", None)
+    pm = build(doc_id, n, W, H, page, walls, rooms_, opens, sc, words_pt, used, ms=(time.time() - t0) * 1000)
+    if sum(1 for i in pm["items"] if i["kind"] in ("room", "wall")) < 3:
+        return None
+    pm["provenance"]["gate"] = reason
     if write:
         (ddir / f"planmap-{n}.json").write_text(json.dumps(pm))
     return pm
