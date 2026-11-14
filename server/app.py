@@ -93,10 +93,22 @@ app.include_router(pair_router)
 @app.get("/api/health")
 async def health():
     from engine.models.core import api_key, config as models_config
+    from . import artifact_store
+    from .image_info import file_counts, image_info
 
     models_ok = any((api_key(provider) or "").strip()
                     for provider in models_config()["providers"] if provider != "fake")
-    return {"ok": True, "db": await db.db_ok(),
+    database_ok = await db.db_ok()
+    servable_docs = None
+    if database_ok:
+        try:
+            pool = await db.get_pool()
+            if pool is not None:
+                servable_docs = len(await asyncio.wait_for(artifact_store.servable_ids(pool), timeout=2))
+        except Exception:  # Diagnostics remain available if the servable list cannot be read.
+            pass
+    return {"ok": True, "db": database_ok,
             "build_rev": os.environ.get("BUILD_REV", ""),
+            "image": image_info(), **file_counts(), "servable_docs": servable_docs,
             "uptime_s": max(0.0, time.monotonic() - app.state.started_at),
             "models_ok": models_ok}

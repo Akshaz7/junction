@@ -15,6 +15,7 @@ RUN uv pip install --system --no-cache ifcopenshell==0.9.0.post1 pygltflib==1.16
 COPY server ./server
 COPY engine ./engine
 COPY pipeline ./pipeline
+RUN python -c 'import json; from pathlib import Path; from datetime import datetime, timezone; from server.image_info import code_hash; Path("IMAGE_INFO.json").write_text(json.dumps({"code_hash": code_hash(Path.cwd()), "built_at": datetime.now(timezone.utc).isoformat()}))'
 COPY vision/verify.py vision/planmap_schema.json ./vision/
 COPY results/bench/*.json /app/results/bench/
 # Baked-in demo artifacts (deploy/build_demo_artifacts.py); empty unless built before the image build.

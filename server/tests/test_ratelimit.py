@@ -125,7 +125,8 @@ def test_health_without_db_or_keys(health_client):
     r = c.get("/api/health")
     assert r.status_code == 200
     body = r.json()
-    assert set(body) == {"ok", "db", "build_rev", "uptime_s", "models_ok"}
+    assert set(body) == {"ok", "db", "build_rev", "uptime_s", "models_ok",
+                         "image", "bench_files", "artifacts_docs", "servable_docs"}
     assert body["ok"] is True and body["db"] is False
     assert body["models_ok"] is False and body["build_rev"] == ""
     assert isinstance(body["uptime_s"], (int, float)) and body["uptime_s"] >= 0
