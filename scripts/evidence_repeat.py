@@ -25,7 +25,7 @@ def git(*args, cwd=ROOT, check=True):
 
 
 def once(limit, handoff=HANDOFF, final_blind=False, branches=BRANCHES):
-    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
     print(datetime.now().astimezone().isoformat(), flush=True)
     scratch = ROOT / ".evqa-scratch" / stamp
     output_dir = ROOT / "results/final/EVQA"
@@ -70,7 +70,8 @@ def once(limit, handoff=HANDOFF, final_blind=False, branches=BRANCHES):
             report["scratch_merge"] = metadata
             report_path.write_text(json.dumps(report, ensure_ascii=False, indent=1, allow_nan=False) + "\n")
             summary = report["summary"]
-            message = f"STATUS F-EVQA {stamp}: scratch merge {'complete' if metadata['complete_merge'] else 'INCOMPLETE'}; {summary['questions']} questions; {summary['statuses']}; ${summary['cost_usd']:.2f}; results/final/EVQA/{report_path.name}."
+            scope = "all four evidence branches" if set(refs) == set(BRANCHES) else ", ".join(refs)
+            message = f"STATUS F-EVQA {stamp}: scratch merge {'complete' if metadata['complete_merge'] else 'INCOMPLETE'} ({scope}); {summary['questions']} questions; {summary['statuses']}; ${summary['cost_usd']:.2f}; results/final/EVQA/{report_path.name}."
         else:
             message = f"STATUS F-EVQA {stamp}: audit could not produce a report (exit {metadata['audit_exit']}); merge details {merge_path.name}."
         merge_path.write_text(json.dumps(metadata, indent=1) + "\n")
