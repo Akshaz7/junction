@@ -11,3 +11,5 @@
 - Vercel cannot hold WebSockets: live sync lives on the Aiven Runtime backend.
 - AR does not run in the iOS simulator: AR tests are unit tests on the scene; real AR needs the iPhone.
 - No `python3.12` on PATH by default: use `uv run --python 3.12` (uv-managed 3.12.14 installed).
+- Simulator: no devices existed; LEAD created "Hologram iPhone" (iPhone 16 Pro, iOS 26.1). Codex's sandbox cannot reach CoreSimulator, so IOS runs build-for-testing and the LEAD runs `xcodebuild test`.
+- Playwright/Chrome cannot launch inside the Codex sandbox (SIGABRT/EPERM). Codex workers write e2e tests; the LEAD runs them outside the sandbox.
