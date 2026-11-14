@@ -18,5 +18,5 @@
       "first_render_ms": null
     }
   ],
-  "reason": "Error: browserType.launch: Target page, context or browser has been closed\n[pid=9825] <process did exit: exitCode=null, signal=SIGABRT>\n\u001b[2m  - [pid=9825] <process did exit: exitCode=null, signal=SIGABRT>\u001b[22m"
+  "reason": "Error: browserType.launch: Target page, context or browser has been closed\n[pid=47262] <process did exit: exitCode=null, signal=SIGABRT>\n\u001b[2m  - [pid=47262] <process did exit: exitCode=null, signal=SIGABRT>\u001b[22m"
 }

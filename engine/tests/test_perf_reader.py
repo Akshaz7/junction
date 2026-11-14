@@ -96,6 +96,55 @@ def test_png_dimensions_read_only_the_header(tmp_path, monkeypatch):
     assert png_size(image) == (12000, 8000)
 
 
+def test_incomplete_png_header_has_no_dimensions(tmp_path):
+    from engine.reader.text import png_size
+    image = tmp_path / "incomplete.png"
+    image.write_bytes(b"\x89PNG\r\n\x1a\n")
+    assert png_size(image) is None
+
+
+def test_large_filtered_ifc_findings_cite_every_match(model):
+    import time
+    from engine.reader.agent import _build
+    from engine.reader.tools import Session
+    did, root = model
+    elements = [{"item_id": str(i), "kind": "door", "name": "Door", "ifc_class": "IfcDoor",
+                 "storey": {"name": "Level A" if i < 500 else "Level B"}} for i in range(600)]
+    (root / did / "doc.json").write_text(json.dumps({"kind": "ifc", "title": "Uploaded building"}))
+    (root / did / "elements.json").write_text(json.dumps({"elements": elements}))
+    session = Session([did], root)
+    observation = session.run("ifc", {"kind": "door", "storey": "Level A", "limit": 2})
+    evidence = session.ev["e1"]
+    assert len(evidence.item_ids) == 500
+    assert "all 500 matching elements" in observation
+    assert "500 matching doors on Level A in Uploaded building" == evidence.quote
+    assert "498 more" in observation
+    answer = _build("Count the doors", [did], session,
+                    {"action": "final", "answer": "**500 doors**", "value": 500,
+                     "confidence": .9, "evidence": ["e1"]}, [], [], time.perf_counter())
+    assert len(answer["citations"][0]["item_ids"]) == 500
+    assert len(answer["evidence"]["scene"]["highlight_item_ids"]) == 500
+
+
+def test_partial_scene_only_highlights_its_document(model):
+    import time
+    from engine.library import reader_partial
+    from engine.reader.tools import Session
+    did, root = model
+    session = Session([did, "second-model"], root)
+    session.reg("element", did, 1, None, "3 matching doors in the first building", item_ids=["0", "1", "2"])
+    session.reg("element", "second-model", 1, None, "2 matching doors in the second building", item_ids=["0", "other"])
+    partial = reader_partial("Count doors", session.doc_ids, session, [], [], time.perf_counter())
+    assert len(partial["citations"]) == 2
+    assert partial["evidence"]["scene"]["doc_id"] == did
+    assert partial["evidence"]["scene"]["highlight_item_ids"] == ["0", "1", "2"]
+    from engine.reader.agent import _build
+    final = _build("Count doors", session.doc_ids, session,
+                   {"action": "final", "answer": "**3 and 2 doors**", "confidence": .9,
+                    "evidence": ["e1", "e2"]}, [], [], time.perf_counter())
+    assert final["evidence"]["scene"]["highlight_item_ids"] == ["0", "1", "2"]
+
+
 def test_explanation_number_guard_compares_values_not_substrings_or_citations():
     from engine.explain import _ok
     assert _ok("There are 3 doors. [1]", "**3 doors** are in the model. [1]")

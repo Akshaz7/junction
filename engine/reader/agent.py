@@ -177,6 +177,8 @@ def _build(question, doc_ids, sess: Session, fin: dict, trace, calls, t0, forced
             value, conf = None, min(conf, 0.3)
     abstained = bool(forced_abstain) or not refs or str(fin.get("action")) == "abstain" or conf <= 0.0
     cites, boxes, ids, n = [], [], [], 0
+    seen_ids = set()
+    main = sess.ev[refs[0].partition("#c")[0]].doc_id if refs else (doc_ids[0] if doc_ids else "")
     for r in refs:
         base, _, cell = r.partition("#c")
         e = sess.ev[base]
@@ -186,13 +188,14 @@ def _build(question, doc_ids, sess: Session, fin: dict, trace, calls, t0, forced
         kind = "text" if e.kind in ("text", "row") else ("element" if e.kind == "element" else "region")
         if e.kind == "region" and not e.item_ids:
             kind = "region"
-        cites.append({"n": n, "doc_id": e.doc_id, "page": e.page, "kind": kind, "bbox_px": bb, "item_ids": e.item_ids[:50],
+        cites.append({"n": n, "doc_id": e.doc_id, "page": e.page, "kind": kind, "bbox_px": bb, "item_ids": list(e.item_ids),
                       "quote": e.quote})
         if bb:
             boxes.append({"item_id": e.item_ids[0] if e.item_ids else f"{base}", "page": e.page, "bbox_px": bb, "label": str(n)})
         for i in e.item_ids:
-            if i not in ids:
+            if e.doc_id == main and i not in seen_ids:
                 ids.append(i)
+                seen_ids.add(i)
     if abstained:
         why = forced_abstain or "no verifiable evidence" if not refs else (forced_abstain or "the drawings do not settle it")
         text = (text or "I could not find this in the selected drawings.")

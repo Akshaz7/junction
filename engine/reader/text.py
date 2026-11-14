@@ -27,7 +27,7 @@ def png_size(p: Path) -> tuple[int, int] | None:
     try:
         with p.open("rb") as image:
             b = image.read(32)
-        if b[:8] == b"\x89PNG\r\n\x1a\n":
+        if len(b) >= 24 and b[:8] == b"\x89PNG\r\n\x1a\n":
             return struct.unpack(">II", b[16:24])
     except OSError:
         pass
