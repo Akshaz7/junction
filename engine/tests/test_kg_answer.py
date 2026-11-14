@@ -258,3 +258,14 @@ def test_graph_builder_failure_stays_honest_and_zero_cost(monkeypatch):
     result = answer("Where else does door D12 appear?", PROJECT, ROOT)
     assert result["graph_answer"]["shape"] == "missing"
     assert result["cost"] == {"usd_total": 0, "calls": []}
+
+
+def test_conflicting_ceiling_notes_are_cited_without_taking_off_a_guess(graph):
+    room = next(n for n in graph["nodes"] if n["id"] == "room:architecture:r1")
+    room["props"].update(ceiling_height_note="Recorded ceiling heights differ", ceiling_height_notes=[
+        {"ceiling_height_m": 2.8, "source": {"doc_id": "notes", "page": 2, "bbox": [10, 10, 20, 20], "quote": "A101 ceiling 2.8 m"}}
+    ])
+    r = answer("If the ceiling in room A101 drops to 2.4 m, what is affected?", PROJECT, ROOT, graph=graph)
+    assert not any(e.get("quantity_delta") for e in r["graph_answer"]["items"])
+    assert any(c["doc_id"] == "notes" and c["quote"] == "A101 ceiling 2.8 m" for c in r["citations"])
+    assert "heights disagree" in r["answer"]["text_md"]
