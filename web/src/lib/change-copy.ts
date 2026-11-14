@@ -10,6 +10,15 @@ const asRef = (value: string) => value.trim().replace(/^([A-Z]{1,2})\s?-?(\d{2,3
 /** True when the text has a real word, not just callout codes like "S300 4 A100 4C" or "9". */
 const wordy = (value: string) => /[A-Za-z]{2,}[a-z]|[a-z]{3,}/.test(value.replace(/\b[A-Z]{1,2}\d[\w.]*\b/g, ''))
 
+/** Short single labels can be quoted; long or code-heavy text is described by kind instead. */
+const SHORT_LABEL = 16
+export function labelKind(text: string) {
+  const tokens = text.replace(/[…"]/g, ' ').split(/\s+/).filter(Boolean)
+  const codes = tokens.filter((t) => /\d/.test(t) && /^[A-Za-z]{0,3}[-./]?\d[\w./-]*$/.test(t)).length
+  return codes >= 2 ? 'Sheet reference text' : 'Label text'
+}
+const quotable = (...texts: string[]) => texts.every((t) => t.length > 0 && t.length <= SHORT_LABEL && !t.includes('…') && labelKind(t) === 'Label text')
+
 /** Where on the sheet a box sits, in words. */
 export function whereOnSheet(box: [number, number, number, number] | null | undefined, size: { w: number; h: number }) {
   if (!box || !size.w || !size.h) return ''
@@ -44,14 +53,14 @@ export function readChange(change: Item, size: { w: number; h: number }): Change
   // Title block (logos, stamps, revision list) is housekeeping, not design: one plain minor line.
   if (where === 'in the title block' && !/^Text changed from/.test(s)) return { change, kind: 'graphic-edited', small: true, text: 'Title block updated (logo, stamp or revision list)' }
   let m = s.match(/^Text added: "([\s\S]*)"\.?$/)
-  if (m) return wordy(m[1]) ? { change, kind: 'note-added', small: false, text: `Note added${at}: "${short(m[1])}"` } : { change, kind: 'note-added', small: true, text: `Label "${short(m[1], 18)}" added${at}` }
+  if (m) return wordy(m[1]) ? { change, kind: 'note-added', small: false, text: `Note added${at}: "${short(m[1])}"` } : { change, kind: 'note-added', small: true, text: quotable(m[1]) ? `Label "${m[1].trim()}" added${at}` : `${labelKind(m[1])} added${at}` }
   m = s.match(/^Text removed: "([\s\S]*)"\.?$/)
-  if (m) return wordy(m[1]) ? { change, kind: 'note-removed', small: false, text: `Note removed${at}: "${short(m[1])}"` } : { change, kind: 'note-removed', small: true, text: `Label "${short(m[1], 18)}" removed${at}` }
+  if (m) return wordy(m[1]) ? { change, kind: 'note-removed', small: false, text: `Note removed${at}: "${short(m[1])}"` } : { change, kind: 'note-removed', small: true, text: quotable(m[1]) ? `Label "${m[1].trim()}" removed${at}` : `${labelKind(m[1])} removed${at}` }
   m = s.match(/^Text changed from "([\s\S]*?)(?:…)?" to "([\s\S]*?)(?:…)?"\.?$/)
   if (m) {
     const [from, to] = [m[1].trim(), m[2].trim()]
     if (ref.test(from) && ref.test(to)) return { change, kind: 'reference', small: false, text: `Sheet reference changed: ${asRef(from)} → ${asRef(to)}` }
-    if (!wordy(from) && !wordy(to)) return { change, kind: 'note-edited', small: true, text: from && to ? `Label "${short(from, 18)}" changed to "${short(to, 18)}"${at}` : `Label changed${at}` }
+    if (!wordy(from) && !wordy(to)) return { change, kind: 'note-edited', small: true, text: quotable(from, to) ? `Label "${from}" changed to "${to}"${at}` : `${labelKind(`${from} ${to}`)} changed${at}` }
     if (from.length <= 24 && to.length <= 24 && !s.includes('…')) return { change, kind: 'note-edited', small: false, text: `Note edited${at}: "${from}" → "${to}"` }
     return { change, kind: 'rewritten', small: false, text: `Text rewritten${at}` }
   }

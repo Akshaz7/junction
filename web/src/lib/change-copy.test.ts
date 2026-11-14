@@ -34,3 +34,11 @@ describe('plain-language change copy', () => {
     expect(summariseChanges(mixed)).toBe('1 note added. Plus 1 minor edit (callout labels, linework, title block).')
   })
 })
+
+it('long or code-heavy label text is described by kind, not quoted', () => {
+  const size = { w: 1000, h: 800 }
+  const at = (sentence: string) => readChange({ n: 1, change_id: 'x', type: 'modified', kind: 'region', sentence, v1: null, v2: { item_id: 'i', bbox_px: [800, 700, 830, 710] } }, size).text
+  expect(at('Text changed from "S100 9 S100 8 CONCRETE STAIR" to "ES5 - 5 4 - 1 6 - 3 S300 A360 …".')).toMatch(/^Sheet reference text changed near the bottom right/)
+  expect(at('Text changed from "7" to "9".')).toMatch(/^Label "7" changed to "9" near the bottom right/)
+  expect(at('Text added: "S100 9 A100 4C".')).toMatch(/^Sheet reference text added/)
+})
