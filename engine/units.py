@@ -86,6 +86,22 @@ def convert(res: dict, question: str) -> dict:
             return res
         out = copy.deepcopy(res)
         out["answer"]["text_md"] = text.rstrip() + "\n\n" + "; ".join(clauses) + "."
+        from engine.calc import converted_step, input_value, question_source, step
+        ref = {"kind": "model" if res.get("route") in ("hybrid", "vlm") else "document",
+               "doc_id": next(iter(res.get("doc_ids") or []), ""), "artifact": "doc.json", "field": "answer.value"}
+        extras = out.setdefault("_calc_extras", [])
+        if tgt and tgt[2] == unit:
+            label, factor, _ = tgt
+            s = converted_step("unit-conversion", val, unit, label, factor, ref)
+            shown = _fmt(val * factor)
+            extras.append({"steps": [s], "result": {"label": "Converted quantity", "value": float(shown.replace(",", "")),
+                                                    "unit": label, "rounded_as": f"{len(shown.partition('.')[2])} decimal places", "step_id": s["id"]}})
+        if pr:
+            rate, cur = pr
+            s = step("unit-price", "Cost at supplied price", "quantity × unit price", val * rate, cur,
+                     [input_value("quantity", val, unit, ref), input_value("unit price", rate, f"{cur}/{unit}", question_source(question))], operation="multiply")
+            extras.append({"steps": [s], "result": {"label": "Cost at supplied price", "value": round(val * rate, 2), "unit": cur,
+                                                    "rounded_as": "2 decimal places", "step_id": s["id"]}})
         return out
     except Exception:  # noqa: BLE001 - never break an answer over a convenience clause
         return res

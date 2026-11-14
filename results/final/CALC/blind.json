@@ -1,0 +1,5 @@
+{
+  "doc_id": "swiss_dwellings__site4237-bldg7396-floor29509",
+  "selection": "random from data/sets/heldout_docs.txt with an existing CAD artifact; artifact contents not read during development",
+  "selected_at": "2026-11-14T23:58:00+02:00"
+}

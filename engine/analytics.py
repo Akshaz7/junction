@@ -876,6 +876,7 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
     doors = [d for d in _of_kind(doc, "door") if _foot(d, ifc)]
     band = DOOR_BAND if ifc else DOOR_BAND / scale
     rows = []
+    calc_openings = {}
     for r in rooms:
         x0, y0, x1, y1 = _foot(r, ifc)
         k = 1.0 if ifc else scale
@@ -892,6 +893,7 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
                 w = d.q.get("width_m") if ifc else None
                 w = float(w) if w else max(f[2] - f[0], f[3] - f[1]) * k
                 opening += min(w, 3.0)
+                calc_openings.setdefault(r.item_id, []).append((d, min(w, 3.0)))
                 n += 1
         rows.append((r, per, opening, n, max(per - opening, 0.0)))
     total = round(sum(x[4] for x in rows), 1)
@@ -914,8 +916,10 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
             "Rooms are treated as rectangles and wall openings other than doors are not deducted, so L-shaped rooms are approximate.")
     trace = [_step("route", "baseboard -> room outline minus door openings, code, no model"), _step("filter", f"{len(rows)} rooms, {len(doors)} doors considered")]
     cav = ("\n\nLengths are estimated from door sizes because no printed scale was found, so treat them as approximate." if guessed else "")
-    return _answer_obj(question, [doc.doc_id], head + "\n" + "\n".join(lines) + more + cav, total, "m", 0.4 if guessed else 0.8, False, boxes, cites, scene, trace,
-                       "index" if ifc else "planmap", t0 or time.perf_counter())
+    res = _answer_obj(question, [doc.doc_id], head + "\n" + "\n".join(lines) + more + cav, total, "m", 0.4 if guessed else 0.8, False, boxes, cites, scene, trace,
+                      "index" if ifc else "planmap", t0 or time.perf_counter())
+    from engine.calc_routes import baseboard as calc_baseboard
+    return calc_baseboard(res, doc, rows, calc_openings, scale)
 
 
 # ------------------------------------------------------------------ E-56: piping from the V-08 extract (plumbing IFCs), $0
@@ -1095,6 +1099,11 @@ def wet_room_takeoff(question: str, doc: Doc, t0) -> dict | None:
            f"Assumptions, not from the drawing: {TILE_BOX_M2} m² per box (four 60 x 60 cm tiles) and about €{TILE_EUR_M2:.0f} per m², "
            f"so roughly **€{cost:,.0f}**. This is a rough guide, not a quote.")
     base["answer"].update({"text_md": txt, "value": round(need, 1), "unit": "m2", "confidence": min(base["answer"].get("confidence") or 0.85, 0.85)})
+    from engine.calc import assumption_source, question_source, row
+    from engine.calc_routes import allowance, tile_order
+    allowance(base, [row(doc, it, a, "m2") for it, a in _tk.rooms_of(doc, tk) if a], pct,
+              question_source(question) if wm else assumption_source("Assumed 10% waste; not from the drawing"))
+    tile_order(base, need, boxes, TILE_BOX_M2, TILE_EUR_M2, cost)
     return base
 
 
@@ -1137,6 +1146,10 @@ def takeoff(question: str, doc: Doc, t0, solve_fn) -> dict | None:
     marks = "".join(f"[{c['n']}]" for c in base.get("citations") or [])
     base["answer"].update({"text_md": f"{txt} {marks}", "value": round(need, 2), "unit": "m2"})
     base["trace"] = trace
+    from engine.calc import question_source, row
+    from engine.calc_routes import allowance
+    cited_ids = {iid for c in base.get("citations", []) for iid in c.get("item_ids", [])}
+    allowance(base, [row(doc, it, _qty(it, "room", "area"), "m2") for it in doc.items if it.item_id in cited_ids], pct, question_source(question))
     return base
 
 
@@ -1418,7 +1431,10 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
     text = "\n\n".join([head, "\n".join(lines), foot, bars])
     trace = [_step("route", "slab area by type -> IfcSlab grouped by type name and thickness, area summed per group, no model"),
              _step("filter", f"{len(slabs)} slabs, {len(items_all)} with thickness and area; thickness from {thick_src}")]
-    return _done(question, doc, text, tot, "m2", items_all, trace, t0=t0)
+    res = _done(question, doc, text, tot, "m2", items_all, trace, t0=t0)
+    from engine.calc import record_items
+    return record_items(res, doc, [(it, a) for v in groups.values() for it, a in v],
+                        note="Grouped by recorded type and thickness; bounding rectangle areas are approximate where stated.")
 
 
 def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
