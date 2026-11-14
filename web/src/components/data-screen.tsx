@@ -1,6 +1,6 @@
 import { searchDocuments } from '../lib/doc-search'
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
-import { ArrowRight, Box, ChevronDown, ChevronLeft, ChevronRight, Download, File, FileImage, FileText, Folder, GitCompare, Info, Layers, Maximize2, MessageSquare, Minus, Plus, Search, Upload, X } from 'lucide-react'
+import { ArrowRight, Box, ChevronDown, ChevronLeft, ChevronRight, Download, Ellipsis, File, FileImage, FileText, Folder, GitCompare, History, Info, Layers, Maximize2, MessageSquare, Minus, PenLine, Plus, ScanText, Search, Upload, X } from 'lucide-react'
 import { Badge, Button, Input } from './ui'
 import { workspaceApi } from '../lib/api'
 import type { Document } from '../lib/types'
@@ -56,6 +56,32 @@ function DocumentImage({ doc, preview = false, page = 1, onLoad }: { doc: Docume
         alt={preview ? `Page ${page} of ${doc.title}` : ''} onError={() => setFailed(true)}
         onLoad={(event) => onLoad?.({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })} />}
   </span>
+}
+
+/** "size · date" like Stoa; documents without either say where they live instead. */
+function fileMeta(doc: FileDocument) {
+  const size = fileSize(doc.size), date = fileDate(doc.date || doc.updated_at)
+  if (size === null && !date) return `${doc.folder || doc.source} · ${doc.pages} ${doc.pages === 1 ? 'page' : 'pages'}`
+  return <>{size !== null && <span aria-label="File size">{size}</span>}{size !== null && date && ' · '}{date && <time aria-label="File date" dateTime={doc.date || doc.updated_at || undefined}>{date}</time>}</>
+}
+
+/** Ellipsis menu on a file row; it also carries the dataset credit and licence, which must stay reachable. */
+function RowMenu({ doc, onOpen, onAsk }: { doc: Document; onOpen: () => void; onAsk: (doc: Document) => void }) {
+  const menu = useRef<HTMLDetailsElement>(null)
+  useEffect(() => {
+    function close(event: MouseEvent) { if (menu.current?.open && !menu.current.contains(event.target as Node)) menu.current.open = false }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [])
+  const done = (action: () => void) => () => { if (menu.current) menu.current.open = false; action() }
+  return <details ref={menu} className="data-row-menu" onKeyDown={(event) => { if (event.key === 'Escape' && menu.current?.open) { event.stopPropagation(); menu.current.open = false; menu.current.querySelector('summary')?.focus() } }}>
+    <summary aria-label={`More actions for ${doc.title}`}><Ellipsis size={18} /></summary>
+    <div className="data-row-popover" role="group" aria-label={`Actions for ${doc.title}`}>
+      <button type="button" onClick={done(onOpen)}>Open</button>
+      <button type="button" onClick={done(() => onAsk(doc))}>Ask in Chat</button>
+      <dl>{doc.credit && <div><dt>Credit</dt><dd>{doc.credit}</dd></div>}{doc.licence && <div><dt>Licence</dt><dd>{doc.licence}</dd></div>}{!doc.credit && !doc.licence && <div><dt>Licence</dt><dd>Not provided</dd></div>}</dl>
+    </div>
+  </details>
 }
 
 function FormatBadges({ doc }: { doc: Document }) {
@@ -135,7 +161,7 @@ function DocumentDetail({ doc, docked, onClose, onAsk }: { doc: Document; docked
     else onClose()
   }}>
     <header><FileText size={24} /><div><h2 id={titleId}><DocumentTitle title={doc.title} /></h2><small>/{doc.source}<span className="data-header-demo">{/generated for demo$/i.test(doc.title) ? ' · generated for demo' : ''}</span></small><details ref={credit} className="data-credit-info"><summary aria-label="Drawing credit and licence"><Info size={12} /></summary><div className="data-credit-popover"><dl>{doc.credit && <div><dt>Credit</dt><dd>{doc.credit}</dd></div>}{doc.licence && <div><dt>Licence</dt><dd>{doc.licence}</dd></div>}</dl><div className="data-mobile-scene">{scene === 'available' && <button type="button" className="viewer3d-visualise-button" onClick={() => changeMode('3d')}>Visualise it</button>}</div></div></details></div>{scene === 'available' && <ViewerModeToggle mode={mode} onChange={changeMode} />}<ShowOnTableButton docId={doc.doc_id} sceneAvailable={scene === 'available'} /><button type="button" className="data-header-ask" aria-label="Ask about it" onClick={() => onAsk(doc)}><MessageSquare size={16} /></button><a className="data-compare" href="#/changes" aria-label="Compare document revisions"><GitCompare size={14} /><span>Compare</span></a><Button variant="ghost" size="icon" aria-label="Fit page" onClick={() => setZoom(100)}><Maximize2 size={16} /></Button><button ref={closeButton} type="button" className="data-close-detail" aria-label="Close document details" onClick={onClose}><X size={18} /></button></header>
-    <div className="data-viewer-toolbar" hidden={mode === '3d'}><Button variant="ghost" size="icon-xs" aria-label="Previous drawing page" disabled={page <= 1} onClick={() => changePage(page - 1)}><ChevronLeft size={14} /></Button><span className="page-number">{page}</span><span>/ {doc.pages}</span><Button variant="ghost" size="icon-xs" aria-label="Next drawing page" disabled={page >= doc.pages} onClick={() => changePage(page + 1)}><ChevronRight size={14} /></Button><span className="toolbar-spacer" /><Button variant="ghost" size="icon-xs" aria-label="Search page text" aria-expanded={searchOpen} aria-controls="data-page-search" onClick={(event) => { searchTrigger.current = event.currentTarget; if (searchOpen) closeSearch(); else setSearchOpen(true) }}><Search size={14} /></Button><a aria-label="Download page" href={`/api/docs/${encodeURIComponent(doc.doc_id)}/pages/${page}/image`} download><Download size={14} /></a><span className="viewer-toolbar-divider" /><span className="data-zoom-controls"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => setZoom((n) => Math.max(25, n - 25))}><Minus size={14} /></Button><span aria-label="Page zoom level">{displayedZoom}%</span><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => setZoom((n) => Math.min(400, n + 25))}><Plus size={14} /></Button></span></div>
+    <div className="data-viewer-toolbar" hidden={mode === '3d'}><Button variant="ghost" size="icon-xs" aria-label="Previous drawing page" disabled={page <= 1} onClick={() => changePage(page - 1)}><ChevronLeft size={14} /></Button><span className="page-number">{page}</span><span>/ {doc.pages}</span><Button variant="ghost" size="icon-xs" aria-label="Next drawing page" disabled={page >= doc.pages} onClick={() => changePage(page + 1)}><ChevronRight size={14} /></Button><span className="toolbar-spacer" /><Button variant="ghost" size="icon-xs" aria-label="Search page text" aria-expanded={searchOpen} aria-controls="data-page-search" onClick={(event) => { searchTrigger.current = event.currentTarget; if (searchOpen) closeSearch(); else setSearchOpen(true) }}><Search size={14} /></Button><Button variant="ghost" size="icon-xs" aria-label="Read page text" onClick={(event) => { searchTrigger.current = event.currentTarget; setSearchOpen(true) }}><ScanText size={14} /></Button><Button variant="ghost" size="icon-xs" aria-label="Ask about this page" onClick={() => onAsk(doc)}><PenLine size={14} /></Button><a aria-label="Download page" href={`/api/docs/${encodeURIComponent(doc.doc_id)}/pages/${page}/image`} download><Download size={14} /></a><span className="viewer-toolbar-divider" /><span className="data-zoom-controls"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => setZoom((n) => Math.max(25, n - 25))}><Minus size={14} /></Button><span aria-label="Page zoom level">{displayedZoom}%</span><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => setZoom((n) => Math.min(400, n + 25))}><Plus size={14} /></Button></span></div>
     {searchOpen && mode === '2d' && <section className="data-page-search" id="data-page-search" aria-label="Page text search">
       <label>Find on page {page}<Input autoFocus type="search" aria-label="Find in page text" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
       <Button variant="ghost" size="icon-xs" aria-label="Close page search" onClick={closeSearch}><X size={14} /></Button>
@@ -279,11 +305,13 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
       <label className={`data-folder-search ${search ? 'has-query' : ''}`}><Search size={16} /><Input type="search" aria-label="Search documents" placeholder="Search all documents" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); setSelectedId(null) }} /></label>
       <div className="data-files"><header><h2>{query ? 'Search results · all folders' : activeFolder || 'All Files'}</h2><select className="mobile-folder-select" aria-label="Document folder" value={activeFolder} onChange={(event) => { setFolder(event.target.value); setSearch(''); setPage(1); setSelectedId(null) }}><option value="">All Files</option>{options.map((option) => <option key={option.path} value={option.path}>{option.label}</option>)}</select><span>Files ({filtered.length})</span></header>
         {loading ? <p className="data-empty" role="status">Loading documents…</p> : !visible.length ? <div className="data-empty"><p>{query ? 'No documents match' : 'No documents yet.'}</p><div className="data-empty-actions">{(query || activeFolder) && <Button variant="outline" onClick={() => { setSearch(''); setFolder(''); setPage(1) }}>{query ? 'Clear search' : 'All files'}</Button>}<Button variant="raised" disabled={demo} onClick={openUpload}>Upload</Button></div></div> : <div className="data-file-list">{visible.map((doc) => <article key={doc.doc_id} className="data-file-row" data-doc-id={doc.doc_id} data-selected={selectedId === doc.doc_id || undefined}>
+          <input type="checkbox" className="data-check" aria-label={`Select ${doc.title}`} />
           <button className="data-open-file" type="button" aria-label={`Open ${doc.title}`} aria-expanded={selectedId === doc.doc_id} onClick={(event) => { lastOpened.current = event.currentTarget; setPreviewDocked(false); setSelectedId(doc.doc_id) }}>
-            <DocumentImage key={doc.doc_id} doc={doc} /><span><h3><DocumentTitle title={doc.title} /></h3><span className="data-file-meta">{doc.folder || doc.source} · {doc.pages} {doc.pages === 1 ? 'page' : 'pages'}</span><small>{doc.licence || 'Licence not provided'} · {doc.credit || 'Credit not provided'}</small></span>
-          </button><div className="data-file-facts">{fileSize(doc.size) !== null && <span aria-label="File size">{fileSize(doc.size)}</span>}{fileDate(doc.date || doc.updated_at) && <time aria-label="File date" dateTime={doc.date || doc.updated_at || undefined}>{fileDate(doc.date || doc.updated_at)}</time>}
-            {doc.versions?.length ? <label className="data-version-picker"><span>{doc.version_count ?? doc.versions.length} versions</span><select aria-label={`Versions of ${doc.title}`} value={doc.versions.some((version) => version.doc_id === selectedId) ? selectedId! : doc.doc_id} disabled={versionLoading} onChange={(event) => void openVersion(event.target.value)}>{doc.versions.map((version) => <option key={version.doc_id} value={version.doc_id}>{version.label}</option>)}</select></label> : doc.version_count != null && Number.isFinite(doc.version_count) && <span>{doc.version_count} {doc.version_count === 1 ? 'version' : 'versions'}</span>}
+            <DocumentImage key={doc.doc_id} doc={doc} /><span><h3><DocumentTitle title={doc.title} /></h3><span className="data-file-meta">{fileMeta(doc)}</span></span>
+          </button><div className="data-file-facts">
+            {doc.versions?.length ? <label className="data-version-picker"><History size={14} aria-hidden="true" /><span>{doc.version_count ?? doc.versions.length} versions</span><select aria-label={`Versions of ${doc.title}`} value={doc.versions.some((version) => version.doc_id === selectedId) ? selectedId! : doc.doc_id} disabled={versionLoading} onChange={(event) => void openVersion(event.target.value)}>{doc.versions.map((version) => <option key={version.doc_id} value={version.doc_id}>{version.label}</option>)}</select></label> : doc.version_count != null && Number.isFinite(doc.version_count) && <span className="data-version-count"><History size={14} aria-hidden="true" />{doc.version_count} {doc.version_count === 1 ? 'version' : 'versions'}</span>}
           </div><FormatBadges doc={doc} />
+          <RowMenu doc={doc} onOpen={() => { setPreviewDocked(false); setSelectedId(doc.doc_id) }} onAsk={onAsk} />
         </article>)}</div>}
         {!loading && filtered.length > 0 && <div className="data-pagination" aria-label="Document pagination"><span>{(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} of {filtered.length}</span>
           <Button variant="ghost" size="icon" aria-label="Previous document page" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}><ChevronLeft size={17} /></Button>

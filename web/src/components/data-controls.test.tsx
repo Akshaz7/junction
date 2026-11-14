@@ -124,6 +124,6 @@ it('removes decorative controls and leaves project and avatar as static labels',
   expect(avatar.closest('a, button, summary, [role="button"]')).toBeNull()
   await openDocument()
   expect(host.querySelector('.file-checkbox, .file-row-more, .mobile-folder-back, .mobile-folder-filter, .data-viewer-tools')).toBeNull()
-  expect(host.querySelector('.lucide-folder-plus, .lucide-scan-text, .lucide-pen-line')).toBeNull()
+  expect(host.querySelector('.lucide-folder-plus')).toBeNull()
   expect(host.textContent).not.toContain('Visualise it')
 })
