@@ -39,6 +39,6 @@
 .taught-mark > rect { stroke: currentColor; stroke-width: 1.5; fill: currentColor; fill-opacity: .14; }
 .taught-mark.is-active > rect { stroke-width: 3; }
 .taught-mark svg rect { fill: currentColor; }
-.taught-mark text { fill: white; font: 600 10px var(--font-sans); }
+.taught-mark text { fill: white; font: 600 13px var(--font-sans); }
 .taught-mark:focus-visible { outline: none; }
 .taught-mark:focus-visible > rect { stroke-width: 3; stroke-dasharray: 5 3; }

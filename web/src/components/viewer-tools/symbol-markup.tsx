@@ -29,13 +29,13 @@ export function useSymbolMarkup(docId: string, page: number) {
     return () => abort.abort()
   }, [docId, page])
   useEffect(() => {
-    if (!open || loaded) return
+    if (loaded) return
     const abort = new AbortController()
     markupRequest<MarkupData>(docId, `?page=${page}`, { signal: abort.signal }).then((value) => {
-      if (!abort.signal.aborted) { setData(value); setLoaded(true); setError('') }
+      if (!abort.signal.aborted) { setData({ symbols: [], pins: [], suggestions: [], ...(value && typeof value === 'object' ? value : {}) }); setLoaded(true); setError('') }
     }).catch((err: unknown) => { if (!abort.signal.aborted) setError(err instanceof Error ? err.message : 'Labels could not be loaded.') })
     return () => abort.abort()
-  }, [open, loaded, docId, page])
+  }, [loaded, docId, page])
   useEffect(() => () => controller.current?.abort(), [])
   async function mutate(action: (signal: AbortSignal) => Promise<void>) {
     if (busy) return
@@ -134,11 +134,11 @@ export function SymbolMarkupLayer({ markup, image, scale }: { markup: Markup; im
       if (markup.mode === 'pin') markup.select({ point: point(event) })
       else { const box = rect(start, point(event)); if (box[2] - box[0] >= 4 && box[3] - box[1] >= 4) markup.select({ box }) }
     }} onPointerCancel={() => { drag.current = null; setDraft(null) }} onLostPointerCapture={() => { drag.current = null; setDraft(null) }}>
-    {markup.symbols.map((m) => { const b = markBox(m), label = m.canonical_kind ? kindLabel(m.canonical_kind, m.name) : m.name, w = Math.max(24, label.length * 6.6 + 12)
+    {markup.symbols.map((m) => { const b = markBox(m), label = m.canonical_kind ? kindLabel(m.canonical_kind, m.name) : m.name, w = Math.max(32, label.length * 8 + 16)
       return <g key={m.id} className={`taught-mark ${markup.editing === m.id ? 'is-active' : ''}`} role="button" tabIndex={0} aria-label={`Marked as ${label}. Press Enter to rename or delete.`}
         onPointerDown={(e) => { if (!markup.mode) e.stopPropagation() }} onClick={() => markup.edit(m.id)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); markup.edit(m.id) } }}>
         <rect x={b[0]} y={b[1]} width={b[2] - b[0]} height={b[3] - b[1]} vectorEffect="non-scaling-stroke" />
-        <svg x={b[0]} y={b[1] - 17 / scale} width={w / scale} height={16 / scale} viewBox={`0 0 ${w} 16`} overflow="visible"><rect width={w} height="16" rx="8" /><text x={w / 2} y="12" textAnchor="middle">{label}</text></svg>
+        <svg x={b[0]} y={b[1] - 23 / scale} width={w / scale} height={22 / scale} viewBox={`0 0 ${w} 22`} overflow="visible"><rect width={w} height="22" rx="11" /><text x={w / 2} y="15.5" textAnchor="middle">{label}</text></svg>
       </g> })}
     {markup.data.pins.filter((p) => p.page === markup.page).map((pin) => <g key={pin.id} className="markup-note-pin" role="button" tabIndex={0} aria-label={`Pin ${pin.n}: ${pin.note}`} onPointerDown={(e) => { if (!markup.mode) e.stopPropagation() }} onClick={markup.showNotes} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); markup.showNotes() } }} transform={`translate(${pin.x},${pin.y}) scale(${1 / scale})`}><title>{pin.note}</title><circle r="10" /><text y="4" textAnchor="middle">{pin.n}</text></g>)}
     {box && <rect className="symbol-selection" x={box[0]} y={box[1]} width={box[2] - box[0]} height={box[3] - box[1]} vectorEffect="non-scaling-stroke" />}

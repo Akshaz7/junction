@@ -63,6 +63,12 @@ test('mark single items on a dense sheet, edit one, delete one, keep a pin', asy
   await expect(tags).toHaveCount(2)
   await page.screenshot({ path: `${output}/tell-stoa-marked.png` })
   await expect(page.locator('.markup-count')).toContainText('1 Door · 1 Air terminal')
+  // Saved marks show on a plain page load, without opening the Marks panel.
+  await page.reload()
+  await expect(page.locator('.drawing-plane > img')).toBeVisible()
+  await expect(tags).toHaveCount(2)
+  await page.getByRole('button', { name: 'Fit drawing', exact: true }).click().catch(() => {})
+  await page.screenshot({ path: `${output}/tell-stoa-marks-on-load.png` })
   // Click a saved mark: rename it, then delete the other.
   await tags.first().click()
   await expect(bubble).toBeVisible()
@@ -91,7 +97,7 @@ test('the Tell Stoa bubble fits a phone screen and Escape closes it', async ({ p
   await expect(page.locator('.drawing-plane > img')).toBeVisible()
   await page.getByRole('button', { name: 'Mark an item', exact: true }).click()
   await expect.poll(() => page.locator('.drawing-stage').evaluate((n) => n.clientHeight)).toBeGreaterThan(100)
-  await drag(page, 0.5, 0.5, 0.53, 0.54)
+  await drag(page, 0.2, 0.2, 0.23, 0.24)
   const bubble = page.getByTestId('tell-stoa')
   await expect(bubble).toBeVisible()
   await page.waitForTimeout(300)
