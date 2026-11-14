@@ -1,0 +1,12 @@
+{
+  "unseen_doc_id": "ifc_bench__sixty5-str",
+  "files": {
+    "ifc": "data/ifc_bench/sixty5_str.ifc"
+  },
+  "selection": "Random secrets.choice from real IFC artifacts whose metadata points to data/. Only metadata read; contents reserved for final evaluation.",
+  "development_origins": [
+    "ifc_bench__fzk-house-arc",
+    "swiss_dwellings__site1060-bldg2175-floor9833"
+  ],
+  "generated_fixtures": "generated for demo; contract regression truth only, not real accuracy"
+}
