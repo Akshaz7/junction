@@ -1,12 +1,16 @@
 # DOCS (Codex) — current row
 
-ROW: X-18 demo reset check + licences
-1. Read scripts/demo_reset.py. Make sure it removes test junk visible to judges (QA-LIVE results/qa/live-1439.md item 9: upload-fixture docs, "generated for demo" rows that aren't meant to be shown, chats titled "Cross-device ..." and other e2e chats), and never deletes real dataset docs. Add a --dry-run that lists what it would delete. You may edit scripts/demo_reset.py and add scripts/tests/test_demo_reset.py (sqlite or a mocked DB layer, no network).
-2. docs/MODELS.md and README: licences table for every model and dataset we use (Claude via Runware, Gemini 4/3.x via Runware, Nemotron, ElevenLabs, RT-DETR detector + weights NC-SA due to CubiCasa, IfcOpenShell LGPL, three.js MIT, etc.). Check package.json and requirements for any GPL/AGPL dependency and list them (should be none).
-Done test: .venv/bin/python -m pytest -q scripts/tests/test_demo_reset.py ; plus `.venv/bin/python scripts/demo_reset.py --dry-run` runs without a DB (prints "no DATABASE_URL" or lists).
-Never commit. Write one line at the end: RESULT: ...
+ROW: X-19 final report draft to submission quality
+docs/REPORT.md is due Sun 08:30 (Finland). Make it the submission version now (it will be refreshed with final numbers later):
+- Structure for the 4 judging criteria (25% each): accuracy, visual verifiability, creativity, low inference cost. One section each, with the strongest honest evidence and links into results/.
+- Accuracy: sample200 e-s200-z1 (76.47%, 0 abstentions), the judge set (results/qa/judge_run-r4.json: 47/48 locally; say clearly it's our own 48-question set with code-computed gold), recount calibration tables (results/rc_*.json, results/recount_calib.json). Say what's NOT measured.
+- Visual verifiability: numbered boxes = headline count (E-25), same numbers in 2D/3D/AR, citations; screenshots from results/e2e and results/qa/shots (pick 4, link them).
+- Low cost: the code-first ladder; the cost per answer from results (check the bench JSON for cost fields); "$0 answers" share.
+- Creativity: AR on the table with build-up, voice, live laptop→phone sync, Finnish rule checks after edits.
+- Limits section, honest.
+- ≤ 1,500 words. Keep every number linked; rerun your number checker.
+Done test: python3 docs/scratch/check_report_numbers.py PASS (update it if needed).
+Edit only: docs/REPORT.md, docs/scratch/, this file. Never commit.
+Write one line at the end: RESULT: ...
 
-ADDED by LEAD (same row): docs/JUDGES.md (served in-app at #/help): replace the upload timing claim (QA measured 84 s for an A-801 PDF; give measured ranges only, with a link to the results file, or no number), and add deep links: "#/chat" plus 3 example questions written as #/chat?doc=ifc_bench__ac20-arc links, and #/data. Check that the help-markdown renderer allows hash links.
-
-NEEDS: LEAD apply reset with DATABASE_URL explicitly exported, then recreate the deployed ephemeral API container to discard old upload files/persisted search index; DB cleanup deliberately leaves source/artifact files untouched. Use --keep-id for intentional generated rows. Unmarked titles such as Draft claim remain because they also identify real user chats.
-RESULT: X-18 complete: transactional test-upload/generated-change/e2e-chat cleanup with dataset guards and --keep-id; 30 offline tests pass; DB-free --dry-run prints no DATABASE_URL; README/MODELS inventories cover hosted/local models and all dataset sources, no direct GPL/AGPL packages, with LGPL and SciPy GCC-runtime-exception notices recorded; no live deletions or commits.
+RESULT: X-19 PASS — docs/REPORT.md submission version (1,019 visible words): four judging criteria, linked sample200 and internal local/deployed judge scores, recount tables, four inspected screenshots, cost and 69% zero-incremental-cost share, explicit limits; python3 docs/scratch/check_report_numbers.py PASS (64 quantitative literals). Checker recomputes allowlisted raw-result summaries and uses existing repo PyYAML when system python lacks it. Edited only REPORT.md, docs/scratch/check_report_numbers.py and this handoff; no commit.
