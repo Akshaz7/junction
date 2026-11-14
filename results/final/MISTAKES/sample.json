@@ -1,0 +1,960 @@
+{
+ "ifc_bench__ac20-arc": [],
+ "ifc_models__bsc-clinic-clinic-plumbing": [],
+ "ifc_bench__sixty5-arc": [
+  {
+   "id": "mk-duplicate-593921156b",
+   "severity": "high",
+   "title": "Duplicate floor slabs",
+   "text": "2 floor slabs on 10 tiende verdieping sit exactly on top of each other with the same type and size, so one of them is counted twice.",
+   "doc_ids": [
+    "ifc_bench__sixty5-arc"
+   ],
+   "item_ids": [
+    "1YbMP4iHdJABHPOkBL136M",
+    "2wyudZNZFu0gXZCWD9BkPa"
+   ],
+   "evidence": {
+    "kind": "duplicate",
+    "values": {
+     "places": 1,
+     "extra_copies": 1,
+     "element": "slab"
+    }
+   },
+   "check": "Open the spot in 3D; delete the extra copy. Quantity take-offs count every copy.",
+   "basis": "exact",
+   "storey": "10 tiende verdieping"
+  },
+  {
+   "id": "mk-missing_property-883b022197",
+   "severity": "low",
+   "title": "Missing fire rating on a few walls",
+   "text": "391 of 420 walls of type \"DD Steen - Kalkzandsteen 100\" have a fire rating setting or value; 29 do not, for example wall \"22_Wall_DD-kalkzandsteen\" on 14 veertiende verdieping.",
+   "doc_ids": [
+    "ifc_bench__sixty5-arc"
+   ],
+   "item_ids": [
+    "2sN1b$xHbYkOWV__2X86oC",
+    "1w3SQbnICLq9CMjFSkebvq",
+    "3D$C7MBvjAvvk6R0mz6nkI",
+    "23haZj_D51NBzXJ0$NRZ2n",
+    "1eDmpQo7H01genVOQoY6uL",
+    "1UQhpT_dHDduYkqwcg9i_5",
+    "2J0xlQb4PACBhkQ5j2TZon",
+    "0LHfNZ4y905eeqPVfwSp3g",
+    "0EbU3kEBrF9ud5_81_QzsV",
+    "1CbHkJaczBgOBD3bt_7q$d",
+    "3VqtRyBgfFhhPz6b$n8UOU",
+    "3ogQvRmhL7NBStGcGz3o$Q",
+    "2oAg$Fqar4SwZstXoV3KNn",
+    "12vifjxi52YgArkwuElpIW",
+    "2BcJyiokn7LvODnAbGLxhf",
+    "0VvNMvbVP89PIzJppJ9MnG",
+    "37AoOGPW982OhWGxhC3YZ5",
+    "0Cgsgo_jrAYOrBfmuC2x89",
+    "0LoDfOjXf1$AGS5JkBFzzO",
+    "3sgSLm66f6wO9BekQzzpUA",
+    "1bkix5B4LFgPiQPzufMuJW",
+    "0KpbDakUDAPPeJSMeylV30",
+    "0c8pR9kqDB6P5oM_gmc9zR",
+    "32FSLWVmv6aRBk0EbtKHXt",
+    "17S3$t8zn8pPgMfD0YRolZ",
+    "3OL55YNsH19uXVoWypgZvH",
+    "0btnbtRH1FZOxooZysPzIQ",
+    "0_rXDZRQX5$AR$2aXHU4gi",
+    "3$u79e$pjAgvU1yCGRU$61"
+   ],
+   "evidence": {
+    "kind": "missing_property",
+    "values": {
+     "property": "fire_rating",
+     "have": 391,
+     "of": 420,
+     "element": "wall"
+    }
+   },
+   "check": "Add the fire rating to the 29 elements that lack it; schedules and take-offs skip them.",
+   "basis": "exact",
+   "storey": "14 veertiende verdieping"
+  },
+  {
+   "id": "mk-missing_property-d75f906e95",
+   "severity": "low",
+   "title": "Missing width on a few coverings",
+   "text": "1737 of 1751 coverings of type \"DD Gipsplaat 10\" have a width setting or value; 14 do not, for example covering \"42_ceiling_DD-gipsplaat\" on 00 begane grond.",
+   "doc_ids": [
+    "ifc_bench__sixty5-arc"
+   ],
+   "item_ids": [
+    "17vowPCmXFeQi8nMU2imuz",
+    "1L1n_gHzXAlRscu96gUYSb",
+    "3pnuab4$PEew3WmZ_7ieOM",
+    "37nZvKLETA0Ors7qcbw$Jv",
+    "1O1EEbPErBJwzCG0V6wPdB",
+    "29Tg69nFzAuB$0V_1lUfvz",
+    "0BsLLLHRb74ebClTCb35Eb",
+    "0whA5i9KbA2PzbZ65ztN1I",
+    "2uCBWprmPDxQWBJhCnENsD",
+    "2TIunAk616jAjOBsPoe8xO",
+    "3P7rH4l1H5ghxDWS_Yx7pF",
+    "0YxiSOzvn9meBcpZB9hkoG",
+    "3cFomcc55DR8GKZxFQA1YY",
+    "2B085Oj4z1m92WK$deL$fR"
+   ],
+   "evidence": {
+    "kind": "missing_property",
+    "values": {
+     "property": "width_m",
+     "have": 1737,
+     "of": 1751,
+     "element": "covering"
+    }
+   },
+   "check": "Add the width to the 14 elements that lack it; schedules and take-offs skip them.",
+   "basis": "exact",
+   "storey": "00 begane grond"
+  },
+  {
+   "id": "mk-missing_property-c1fb3adbf2",
+   "severity": "low",
+   "title": "Missing external on a few coverings",
+   "text": "97 of 99 coverings of type \"DD Gipsplaat 13\" have a external setting or value; 2 do not, for example covering \"22_covering_DD-gang koof afwerking\" on 00 begane grond.",
+   "doc_ids": [
+    "ifc_bench__sixty5-arc"
+   ],
+   "item_ids": [
+    "0wKiKzaMHBzhQ58O6kB6$Z",
+    "07g61MqEzBw9Uw2Q42T_YS"
+   ],
+   "evidence": {
+    "kind": "missing_property",
+    "values": {
+     "property": "is_external",
+     "have": 97,
+     "of": 99,
+     "element": "covering"
+    }
+   },
+   "check": "Add the external to the 2 elements that lack it; schedules and take-offs skip them.",
+   "basis": "exact",
+   "storey": "00 begane grond"
+  },
+  {
+   "id": "mk-missing_property-fd81f9384c",
+   "severity": "low",
+   "title": "Missing perimeter on a few stairs",
+   "text": "70 of 71 stairs have a perimeter setting or value; this one does not, for example stair \"DD-KOOILADDER\" on 16 zestiende verdieping.",
+   "doc_ids": [
+    "ifc_bench__sixty5-arc"
+   ],
+   "item_ids": [
+    "20Hx8xr3v2PPTsnlLmDIzH"
+   ],
+   "evidence": {
+    "kind": "missing_property",
+    "values": {
+     "property": "perimeter_m",
+     "have": 70,
+     "of": 71,
+     "element": "stairs"
+    }
+   },
+   "check": "Add the perimeter to the 1 element that lack it; schedules and take-offs skip them.",
+   "basis": "exact",
+   "storey": "16 zestiende verdieping"
+  },
+  {
+   "id": "mk-missing_property-b214baa5c6",
+   "severity": "low",
+   "title": "Missing depth on a few doors",
+   "text": "16 of 17 doors of type \"D1 zl2 21\" have a depth setting or value; this one does not, for example door \"merk-bi-al-06\" on 00 begane grond.",
+   "doc_ids": [
+    "ifc_bench__sixty5-arc"
+   ],
+   "item_ids": [
+    "2CHKOPiEPFjv$nOcK1gzgb"
+   ],
+   "evidence": {
+    "kind": "missing_property",
+    "values": {
+     "property": "depth_m",
+     "have": 16,
+     "of": 17,
+     "element": "door"
+    }
+   },
+   "check": "Add the depth to the 1 element that lack it; schedules and take-offs skip them.",
+   "basis": "exact",
+   "storey": "00 begane grond"
+  }
+ ],
+ "ifc_bench__hitos-arc": [
+  {
+   "id": "mk-duplicate-f12fe5aa99",
+   "severity": "high",
+   "title": "Duplicate floor slabs",
+   "text": "2 floor slabs on fundamentetasje sit exactly on top of each other with the same type and size, so one of them is counted twice.",
+   "doc_ids": [
+    "ifc_bench__hitos-arc"
+   ],
+   "item_ids": [
+    "0PMjCqAyTFoecIci5JPVp6",
+    "14wkscqJX8LP9Q5PdpuhVF"
+   ],
+   "evidence": {
+    "kind": "duplicate",
+    "values": {
+     "places": 1,
+     "extra_copies": 1,
+     "element": "slab"
+    }
+   },
+   "check": "Open the spot in 3D; delete the extra copy. Quantity take-offs count every copy.",
+   "basis": "exact",
+   "storey": "fundamentetasje"
+  },
+  {
+   "id": "mk-missing_property-5d1ddf0f54",
+   "severity": "low",
+   "title": "Missing net volume on a few walls",
+   "text": "842 of 849 walls have a net volume setting or value; 7 do not, for example wall \"AV57T\" on u.etg.",
+   "doc_ids": [
+    "ifc_bench__hitos-arc"
+   ],
+   "item_ids": [
+    "263tN3w9v3yRixYyVLst6t",
+    "085acd3GzA$hFV5_8tJ6ov",
+    "2VjC4ygf9AkRrJGijh8Qx2",
+    "1w0h8coeTFVhIAITJN7AOl",
+    "2PSoPQNqfBNBw9sj__mYGq",
+    "2$LtjohmT77wdcaTns9frF",
+    "2DTQmeDYzFywZ5hYox3HiI"
+   ],
+   "evidence": {
+    "kind": "missing_property",
+    "values": {
+     "property": "net_volume_m3",
+     "have": 842,
+     "of": 849,
+     "element": "wall"
+    }
+   },
+   "check": "Add the net volume to the 7 elements that lack it; schedules and take-offs skip them.",
+   "basis": "exact",
+   "storey": "u.etg"
+  },
+  {
+   "id": "mk-missing_property-14c34f1fe0",
+   "severity": "low",
+   "title": "Missing length on a few walls",
+   "text": "846 of 849 walls have a length setting or value; 3 do not, for example wall \"AV57T\" on 1.etg.",
+   "doc_ids": [
+    "ifc_bench__hitos-arc"
+   ],
+   "item_ids": [
+    "2VjC4ygf9AkRrJGijh8Qx2",
+    "2$LtjohmT77wdcaTns9frF",
+    "2DTQmeDYzFywZ5hYox3HiI"
+   ],
+   "evidence": {
+    "kind": "missing_property",
+    "values": {
+     "property": "length_m",
+     "have": 846,
+     "of": 849,
+     "element": "wall"
+    }
+   },
+   "check": "Add the length to the 3 elements that lack it; schedules and take-offs skip them.",
+   "basis": "exact",
+   "storey": "1.etg"
+  },
+  {
+   "id": "mk-missing_property-83ecec14bc",
+   "severity": "low",
+   "title": "Missing material on a few walls",
+   "text": "846 of 849 walls have a material setting or value; 3 do not, for example wall \"Foldevegg\" on u.etg.",
+   "doc_ids": [
+    "ifc_bench__hitos-arc"
+   ],
+   "item_ids": [
+    "11pCh5YR58KANIHgATIy1J",
+    "1STk5rx6HEoghpWkU43y_R",
+    "0KIrS1_hbEhgHfQ1pnhinx"
+   ],
+   "evidence": {
+    "kind": "missing_property",
+    "values": {
+     "property": "material",
+     "have": 846,
+     "of": 849,
+     "element": "wall"
+    }
+   },
+   "check": "Add the material to the 3 elements that lack it; schedules and take-offs skip them.",
+   "basis": "exact",
+   "storey": "u.etg"
+  }
+ ],
+ "ifc_bench__fantasy-office-building-2-arc": [
+  {
+   "id": "mk-missing_property-1391597e72",
+   "severity": "medium",
+   "title": "Elements not assigned to a storey",
+   "text": "66 of 1521 elements belong to no storey (36 furniture items, 22 rooms, 8 terminals), so they drop out of every per-floor count and plan.",
+   "doc_ids": [
+    "ifc_bench__fantasy-office-building-2-arc"
+   ],
+   "item_ids": [
+    "354F$ys6nC9uPf6ISRivk6",
+    "354F$ys6nC9uPf6ISRivl1",
+    "354F$ys6nC9uPf6ISRi_y5",
+    "354F$ys6nC9uPf6ISRi_n8",
+    "354F$ys6nC9uPf6ISRi_pt",
+    "354F$ys6nC9uPf6ISRi_pq",
+    "354F$ys6nC9uPf6ISRi_pr",
+    "354F$ys6nC9uPf6ISRi_pw",
+    "3huwo$A1DDawqzKsrq0pwx",
+    "24ZVa6yfP3igr_WeupggMw",
+    "24ZVa6yfP3igr_Weupgher",
+    "24ZVa6yfP3igr_Weupghg3",
+    "24ZVa6yfP3igr_Weupghjl",
+    "24ZVa6yfP3igr_WeupghlG",
+    "24ZVa6yfP3igr_WeupghXH",
+    "24ZVa6yfP3igr_WeupghW9",
+    "24ZVa6yfP3igr_WeupghZ_",
+    "24ZVa6yfP3igr_Weupgham",
+    "354F$ys6nC9uPf6ISRi$wf",
+    "3IUIR8A5v9Ge7poU5yyk0c",
+    "34TC9wANr0tv7keb_5tF43",
+    "34TC9wANr0tv7keb_5tF2z",
+    "34TC9wANr0tv7keb_5tF2u",
+    "34TC9wANr0tv7keb_5tFDr",
+    "34TC9wANr0tv7keb_5tFDm",
+    "34TC9wANr0tv7keb_5tFFZ",
+    "3zLgZj6qn7ZfXBVD2gvfbO",
+    "3zLgZj6qn7ZfXBVD2gvfbP",
+    "3zLgZj6qn7ZfXBVD2gvfbQ",
+    "3zLgZj6qn7ZfXBVD2gvfbR",
+    "3zLgZj6qn7ZfXBVD2gvfbK",
+    "3zLgZj6qn7ZfXBVD2gvfbM",
+    "3zLgZj6qn7ZfXBVD2gvfbe",
+    "3zLgZj6qn7ZfXBVD2gvfbf",
+    "3zLgZj6qn7ZfXBVD2gvfbg",
+    "3zLgZj6qn7ZfXBVD2gvfbh",
+    "3zLgZj6qn7ZfXBVD2gvfba",
+    "3zLgZj6qn7ZfXBVD2gvfbc",
+    "3zLgZj6qn7ZfXBVD2gvfcN",
+    "3zLgZj6qn7ZfXBVD2gvfx9",
+    "3zLgZj6qn7ZfXBVD2gvfwN",
+    "3zLgZj6qn7ZfXBVD2gvfwG",
+    "3zLgZj6qn7ZfXBVD2gvfwI",
+    "3zLgZj6qn7ZfXBVD2gvfwJ",
+    "1QIaKYlmj5M8nldkqeS3Wz",
+    "1QIaKYlmj5M8nldkqeS3Ww",
+    "1QIaKYlmj5M8nldkqeS3Wt",
+    "1QIaKYlmj5M8nldkqeS3Wq",
+    "1QIaKYlmj5M8nldkqeS3Wn",
+    "1QIaKYlmj5M8nldkqeS3WE",
+    "1QIaKYlmj5M8nldkqeS3WB",
+    "1QIaKYlmj5M8nldkqeS3W8",
+    "1QIaKYlmj5M8nldkqeS3Z_",
+    "3zLgZj6qn7ZfXBVD2gvfY_",
+    "3zLgZj6qn7ZfXBVD2gvf_f",
+    "3zLgZj6qn7ZfXBVD2gvf_a",
+    "3zLgZj6qn7ZfXBVD2gvf_d",
+    "3zLgZj6qn7ZfXBVD2gvf_Y",
+    "3zLgZj6qn7ZfXBVD2gvf_z",
+    "3zLgZj6qn7ZfXBVD2gvf9Y"
+   ],
+   "evidence": {
+    "kind": "missing_property",
+    "values": {
+     "missing": 66,
+     "total": 1521,
+     "property": "storey"
+    }
+   },
+   "check": "Assign them to a storey in the authoring tool, or remove them if they are leftovers.",
+   "basis": "exact"
+  },
+  {
+   "id": "mk-quantity_mismatch-d48a7c422f",
+   "severity": "medium",
+   "title": "Stored volume does not fit the wall's size",
+   "text": "8 walls are stored with a volume larger than the box that contains them, for example 12.09 m³ in a 0.5 m³ box.",
+   "doc_ids": [
+    "ifc_bench__fantasy-office-building-2-arc"
+   ],
+   "item_ids": [
+    "0MHrdAmTX4nBC1yXhquepY",
+    "1ShjT4WB13Uw9AUixZ2PRH",
+    "1ShjT4WB13Uw9AUixZ2PRG",
+    "0MHrdAmTX4nBC1yXhquepX",
+    "34TC9wANr0tv7kgbs5tFFS",
+    "34TC9wANr0tv7kgbs5tFCg",
+    "1ShjT4WB13Uw9AUixZ2PRc",
+    "3a$5BMVQv4e9TNtjJqPBua"
+   ],
+   "evidence": {
+    "kind": "quantity_mismatch",
+    "values": {
+     "stored_m3": 12.09,
+     "box_m3": 0.503,
+     "elements": 8
+    }
+   },
+   "check": "Check the quantity data of these elements (unit or export problem); material take-offs depend on it.",
+   "basis": "exact",
+   "storey": "5th Floor"
+  }
+ ],
+ "ifc_bench__digital-hub-arc": [],
+ "ifc_bench__dental-clinic-arc": [
+  {
+   "id": "mk-duplicate-9aeb1e27d8",
+   "severity": "high",
+   "title": "Duplicate doors",
+   "text": "3 doors duplicate another one placed in exactly the same spot (3 places), so they are counted twice.",
+   "doc_ids": [
+    "ifc_bench__dental-clinic-arc"
+   ],
+   "item_ids": [
+    "3o5ntlA212uQCF0q6eQsZI",
+    "0otfaO0qPDAhynjJ6DnLXx",
+    "0bpfxAz3XBrAx$RjFuHv4q",
+    "3LjuaIy0TB9BYwqsSadrQS",
+    "0bpfxAz3XBrAx$RjFuHvgA",
+    "1oCmeD_UH0NAQ13DTKAKXn"
+   ],
+   "evidence": {
+    "kind": "duplicate",
+    "values": {
+     "places": 3,
+     "extra_copies": 3,
+     "element": "door"
+    }
+   },
+   "check": "Open the spot in 3D; delete the extra copy. Quantity take-offs count every copy.",
+   "basis": "exact",
+   "storey": "First Floor"
+  }
+ ],
+ "swiss_dwellings__site1000-bldg2082-floor9385": [],
+ "cubicasa5k__high-quality-architectural-10035": [],
+ "cubicasa5k__colorful-11192": [],
+ "_cross_clinic": [
+  {
+   "id": "mk-duplicate-7df7845d08",
+   "severity": "high",
+   "title": "Duplicate beams",
+   "text": "2 beams duplicate another one placed in exactly the same spot (2 places), so they are counted twice.",
+   "doc_ids": [
+    "ifc_models__bsc-clinic-clinic-structural"
+   ],
+   "item_ids": [
+    "1H7etdQHD0EvT_T4m6zTNn",
+    "1H7etdQHD0EvT_T4m6zTM0",
+    "2t9idiDlv0ZBWxqSNhKYK9",
+    "2t9idiDlv0ZBWxqSNhKYl$"
+   ],
+   "evidence": {
+    "kind": "duplicate",
+    "values": {
+     "places": 2,
+     "extra_copies": 2,
+     "element": "beam"
+    }
+   },
+   "check": "Open the spot in 3D; delete the extra copy. Quantity take-offs count every copy.",
+   "basis": "exact",
+   "storey": "First Floor"
+  },
+  {
+   "id": "mk-clash-cb20cc0ef4",
+   "severity": "high",
+   "title": "Pipe clashes with a beam",
+   "text": "Pipe passes through beam on Level 2. No opening or sleeve for it is recorded.",
+   "doc_ids": [
+    "ifc_models__bsc-clinic-clinic-plumbing",
+    "ifc_models__bsc-clinic-clinic-structural"
+   ],
+   "item_ids": [
+    "1nIBBLCbr0ZhFM0xyCAk55",
+    "2t9idiDlv0ZBWxqSNhKb3c"
+   ],
+   "evidence": {
+    "kind": "clash",
+    "values": {
+     "overlap_m": [
+      0.082,
+      0.455,
+      0.114
+     ],
+     "location_m": [
+      -7.24,
+      4.24,
+      -41.48
+     ],
+     "through": true,
+     "service": "pipe",
+     "structure": "beam"
+    }
+   },
+   "check": "Open both in 3D and look at the crossing. A planned sleeve or cut-out may exist that the model does not show.",
+   "basis": "boxes",
+   "storey": "Level 2"
+  },
+  {
+   "id": "mk-clash-a3955b6b95",
+   "severity": "high",
+   "title": "Pipe clashes with a beam",
+   "text": "Pipe passes through beam on Level 2. No opening or sleeve for it is recorded.",
+   "doc_ids": [
+    "ifc_models__bsc-clinic-clinic-plumbing",
+    "ifc_models__bsc-clinic-clinic-structural"
+   ],
+   "item_ids": [
+    "3U22F4GIzAHupuHiTVFqrX",
+    "2t9idiDlv0ZBWxqSNhKYo7"
+   ],
+   "evidence": {
+    "kind": "clash",
+    "values": {
+     "overlap_m": [
+      0.089,
+      0.088,
+      0.153
+     ],
+     "location_m": [
+      -5.5,
+      4.02,
+      -35.01
+     ],
+     "through": true,
+     "service": "pipe",
+     "structure": "beam"
+    }
+   },
+   "check": "Open both in 3D and look at the crossing. A planned sleeve or cut-out may exist that the model does not show.",
+   "basis": "boxes",
+   "storey": "Level 2"
+  },
+  {
+   "id": "mk-clash-0c4036e6fd",
+   "severity": "high",
+   "title": "Pipe clashes with a beam",
+   "text": "Pipe passes through beam on Level 2. No opening or sleeve for it is recorded.",
+   "doc_ids": [
+    "ifc_models__bsc-clinic-clinic-plumbing",
+    "ifc_models__bsc-clinic-clinic-structural"
+   ],
+   "item_ids": [
+    "3U22F4GIzAHupuHiTVFqqi",
+    "2t9idiDlv0ZBWxqSNhKYo7"
+   ],
+   "evidence": {
+    "kind": "clash",
+    "values": {
+     "overlap_m": [
+      0.089,
+      0.088,
+      0.153
+     ],
+     "location_m": [
+      -4.4,
+      4.13,
+      -35.01
+     ],
+     "through": true,
+     "service": "pipe",
+     "structure": "beam"
+    }
+   },
+   "check": "Open both in 3D and look at the crossing. A planned sleeve or cut-out may exist that the model does not show.",
+   "basis": "boxes",
+   "storey": "Level 2"
+  },
+  {
+   "id": "mk-clash-d220e5c484",
+   "severity": "high",
+   "title": "Pipe clashes with a beam",
+   "text": "Pipe passes through beam on Level 2. No opening or sleeve for it is recorded.",
+   "doc_ids": [
+    "ifc_models__bsc-clinic-clinic-plumbing",
+    "ifc_models__bsc-clinic-clinic-structural"
+   ],
+   "item_ids": [
+    "3U22F4GIzAHupuHiTVFqqV",
+    "0NwXg6Ayr9z88KpqSjw_fn"
+   ],
+   "evidence": {
+    "kind": "clash",
+    "values": {
+     "overlap_m": [
+      0.153,
+      0.088,
+      0.089
+     ],
+     "location_m": [
+      -8.84,
+      4.13,
+      -35.45
+     ],
+     "through": true,
+     "service": "pipe",
+     "structure": "beam"
+    }
+   },
+   "check": "Open both in 3D and look at the crossing. A planned sleeve or cut-out may exist that the model does not show.",
+   "basis": "boxes",
+   "storey": "Level 2"
+  },
+  {
+   "id": "mk-clash-4822713413",
+   "severity": "high",
+   "title": "Pipe clashes with a beam",
+   "text": "Pipe passes through beam on Level 2. No opening or sleeve for it is recorded.",
+   "doc_ids": [
+    "ifc_models__bsc-clinic-clinic-plumbing",
+    "ifc_models__bsc-clinic-clinic-structural"
+   ],
+   "item_ids": [
+    "0T65s9RFLFHQSm50dnA7oq",
+    "2t9idiDlv0ZBWxqSNhKYfV"
+   ],
+   "evidence": {
+    "kind": "clash",
+    "values": {
+     "overlap_m": [
+      0.168,
+      0.168,
+      0.153
+     ],
+     "location_m": [
+      -6.96,
+      4.13,
+      -10.04
+     ],
+     "through": true,
+     "service": "pipe",
+     "structure": "beam"
+    }
+   },
+   "check": "Open both in 3D and look at the crossing. A planned sleeve or cut-out may exist that the model does not show.",
+   "basis": "boxes",
+   "storey": "Level 2"
+  },
+  {
+   "id": "mk-clash-b97e843079",
+   "severity": "high",
+   "title": "Duct clashes with a beam",
+   "text": "Duct passes through beam on First Floor. No opening or sleeve for it is recorded.",
+   "doc_ids": [
+    "ifc_models__bsc-clinic-clinic-hvac",
+    "ifc_models__bsc-clinic-clinic-structural"
+   ],
+   "item_ids": [
+    "1o9xg7659EAwIy114fX_Xc",
+    "0NwXg6Ayr9z88KpqSjw_lY"
+   ],
+   "evidence": {
+    "kind": "clash",
+    "values": {
+     "overlap_m": [
+      0.3,
+      0.295,
+      0.153
+     ],
+     "location_m": [
+      -18.63,
+      4.26,
+      -42.41
+     ],
+     "through": true,
+     "service": "duct",
+     "structure": "beam"
+    }
+   },
+   "check": "Open both in 3D and look at the crossing. A planned sleeve or cut-out may exist that the model does not show.",
+   "basis": "boxes",
+   "storey": "First Floor"
+  },
+  {
+   "id": "mk-clash-b557ce6ac3",
+   "severity": "high",
+   "title": "Duct clashes with a beam",
+   "text": "Duct passes through beam on First Floor. No opening or sleeve for it is recorded.",
+   "doc_ids": [
+    "ifc_models__bsc-clinic-clinic-hvac",
+    "ifc_models__bsc-clinic-clinic-structural"
+   ],
+   "item_ids": [
+    "1o9xg7659EAwIy114fX_sC",
+    "2t9idiDlv0ZBWxqSNhKYmB"
+   ],
+   "evidence": {
+    "kind": "clash",
+    "values": {
+     "overlap_m": [
+      0.75,
+      0.35,
+      0.153
+     ],
+     "location_m": [
+      -49.21,
+      4.17,
+      -35.01
+     ],
+     "through": true,
+     "service": "duct",
+     "structure": "beam"
+    }
+   },
+   "check": "Open both in 3D and look at the crossing. A planned sleeve or cut-out may exist that the model does not show.",
+   "basis": "boxes",
+   "storey": "First Floor"
+  },
+  {
+   "id": "mk-clash-1d1e42852c",
+   "severity": "high",
+   "title": "Duct clashes with a beam",
+   "text": "Duct passes through beam on First Floor. No opening or sleeve for it is recorded.",
+   "doc_ids": [
+    "ifc_models__bsc-clinic-clinic-hvac",
+    "ifc_models__bsc-clinic-clinic-structural"
+   ],
+   "item_ids": [
+    "1o9xg7659EAwIy114fX_ow",
+    "2t9idiDlv0ZBWxqSNhKb5x"
+   ],
+   "evidence": {
+    "kind": "clash",
+    "values": {
+     "overlap_m": [
+      0.153,
+      0.35,
+      0.5
+     ],
+     "location_m": [
+      -20.06,
+      4.26,
+      -47.21
+     ],
+     "through": true,
+     "service": "duct",
+     "structure": "beam"
+    }
+   },
+   "check": "Open both in 3D and look at the crossing. A planned sleeve or cut-out may exist that the model does not show.",
+   "basis": "boxes",
+   "storey": "First Floor"
+  },
+  {
+   "id": "mk-clash-1a980a7c3d",
+   "severity": "high",
+   "title": "Duct clashes with a beam",
+   "text": "Duct passes through beam on First Floor. No opening or sleeve for it is recorded.",
+   "doc_ids": [
+    "ifc_models__bsc-clinic-clinic-hvac",
+    "ifc_models__bsc-clinic-clinic-structural"
+   ],
+   "item_ids": [
+    "3KfLR2xmTAA97Sm$xS1aZy",
+    "2t9idiDlv0ZBWxqSNhKYj7"
+   ],
+   "evidence": {
+    "kind": "clash",
+    "values": {
+     "overlap_m": [
+      0.3,
+      0.201,
+      0.153
+     ],
+     "location_m": [
+      -27.67,
+      4.05,
+      -10.04
+     ],
+     "through": true,
+     "service": "duct",
+     "structure": "beam"
+    }
+   },
+   "check": "Open both in 3D and look at the crossing. A planned sleeve or cut-out may exist that the model does not show.",
+   "basis": "boxes",
+   "storey": "First Floor"
+  },
+  {
+   "id": "mk-clash-114d245c67",
+   "severity": "high",
+   "title": "Duct clashes with a beam",
+   "text": "Duct passes through beam on First Floor. No opening or sleeve for it is recorded.",
+   "doc_ids": [
+    "ifc_models__bsc-clinic-clinic-hvac",
+    "ifc_models__bsc-clinic-clinic-structural"
+   ],
+   "item_ids": [
+    "0Y7ffgm51ChP1MHnHpBZC6",
+    "2t9idiDlv0ZBWxqSNhKYKm"
+   ],
+   "evidence": {
+    "kind": "clash",
+    "values": {
+     "overlap_m": [
+      0.3,
+      0.201,
+      0.153
+     ],
+     "location_m": [
+      -36.26,
+      4.05,
+      -10.04
+     ],
+     "through": true,
+     "service": "duct",
+     "structure": "beam"
+    }
+   },
+   "check": "Open both in 3D and look at the crossing. A planned sleeve or cut-out may exist that the model does not show.",
+   "basis": "boxes",
+   "storey": "First Floor"
+  },
+  {
+   "id": "mk-clash-277ff54006",
+   "severity": "medium",
+   "title": "More services clash with the structure",
+   "text": "184 further clashes of the same kind: 180 ducts with beams, 4 pipes with beams.",
+   "doc_ids": [
+    "ifc_models__bsc-clinic-clinic-hvac",
+    "ifc_models__bsc-clinic-clinic-structural"
+   ],
+   "item_ids": [
+    "3KfLR2xmTAA97Sm$xS1ZTS",
+    "2t9idiDlv0ZBWxqSNhKYkl",
+    "3KfLR2xmTAA97Sm$xS1ZPE",
+    "2t9idiDlv0ZBWxqSNhKYJk",
+    "3KfLR2xmTAA97Sm$xS1ZQz",
+    "106Rkf8yT8nhDn8quV40o5",
+    "2t9idiDlv0ZBWxqSNhKb4i",
+    "2t9idiDlv0ZBWxqSNhKb3R",
+    "06gLECDe51gfJB1pC0GhvY",
+    "2t9idiDlv0ZBWxqSNhKbdb",
+    "2t9idiDlv0ZBWxqSNhKbaJ",
+    "06gLECDe51gfJB1pC0Gho7",
+    "2t9idiDlv0ZBWxqSNhKbdm",
+    "2t9idiDlv0ZBWxqSNhKba0",
+    "1o9xg7659EAwIy114fX_ow",
+    "2t9idiDlv0ZBWxqSNhKbCx",
+    "2t9idiDlv0ZBWxqSNhKb7D",
+    "1LjmpuUJ9En9lEdvTLiRMY",
+    "2t9idiDlv0ZBWxqSNhKYG$",
+    "327Nxi0Ef7nOVNqV7vBRtX",
+    "2t9idiDlv0ZBWxqSNhKb1z",
+    "0uBb5eWpXENhgCHv_vTMMc",
+    "2LX158HAHA$f07Y9Ra1FPJ",
+    "2Y3VevX_X0qh8KQkL229Nk",
+    "2t9idiDlv0ZBWxqSNhKYG6",
+    "2K9v5OXDb8k8DU0QJkagbM",
+    "2t9idiDlv0ZBWxqSNhKYHk",
+    "0U5Ew4sirE$O2S1s$sie9J",
+    "2t9idiDlv0ZBWxqSNhKYZS",
+    "2W0XEqd_PDsPFiSACxmBBe",
+    "2t9idiDlv0ZBWxqSNhKYZq",
+    "327Nxi0Ef7nOVNqV7vBRZG",
+    "2t9idiDlv0ZBWxqSNhKbBQ",
+    "0IGipjjlvDxvBIBwCEG5SG",
+    "2t9idiDlv0ZBWxqSNhKYZl",
+    "32K4MmAXfD$9t1_ByHsQAm",
+    "2t9idiDlv0ZBWxqSNhKbB0",
+    "2t9idiDlv0ZBWxqSNhKb6R",
+    "1o9xg7659EAwIy114fX_Xc",
+    "2t9idiDlv0ZBWxqSNhKYtK",
+    "0sRgNlVwn0AvLCBk95r$Xa",
+    "2Uhw1he2z3UO$DBmBugLyy",
+    "055y9VW_9CCQ1HSDb$ztwA",
+    "2t9idiDlv0ZBWxqSNhKbEl",
+    "33M4KP4XT5PA3MgKq$trGk",
+    "33M4KP4XT5PA3MgKq$trG6",
+    "2t9idiDlv0ZBWxqSNhKYun",
+    "2PY_k_9jPADhoS4eYctZFp",
+    "2t9idiDlv0ZBWxqSNhKYH_",
+    "28xeChsZH65xL8RpHsRPHV",
+    "2t9idiDlv0ZBWxqSNhKbpS",
+    "1o9xg7659EAwIy114fX_iC",
+    "2LX158HAHA$f07Y9Ra1FSi"
+   ],
+   "evidence": {
+    "kind": "clash",
+    "values": {
+     "count": 184,
+     "total": 189
+    }
+   },
+   "check": "Run a full clash check in your coordination tool for the complete list.",
+   "basis": "boxes"
+  },
+  {
+   "id": "mk-clash-8f10fb7004",
+   "severity": "medium",
+   "title": "More services clash with the structure",
+   "text": "55 further clashes of the same kind: 51 pipes with beams, 4 pipes with columns.",
+   "doc_ids": [
+    "ifc_models__bsc-clinic-clinic-plumbing",
+    "ifc_models__bsc-clinic-clinic-structural"
+   ],
+   "item_ids": [
+    "2AJsZH81fDT8_aKlrMvQJR",
+    "2t9idiDlv0ZBWxqSNhKYqY",
+    "0GfOrRB8P5Gvq$xSds0Cvw",
+    "3gHpFwr6bC$O7soa3RzGtE",
+    "2t9idiDlv0ZBWxqSNhKYKb",
+    "0T65s9RFLFHQSm50dnA7oc",
+    "2t9idiDlv0ZBWxqSNhKYGS",
+    "3MeVU6L_XFouOdBEdoh0g0",
+    "3MeVU6L_XFouOdBEdoh1Le",
+    "2t9idiDlv0ZBWxqSNhKbFb",
+    "3MeVU6L_XFouOdBEdoh1MJ",
+    "3U22F4GIzAHupuHiTVFqqV",
+    "2t9idiDlv0ZBWxqSNhKb3c",
+    "0T65s9RFLFHQSm50dnA7wa",
+    "2t9idiDlv0ZBWxqSNhKbAr",
+    "2C42OP30r1iBgkkQRa8myu",
+    "1wermYtwH0JBhDXFVIdJa1",
+    "0NwXg6Ayr9z88KpqSjw_BT",
+    "0NwXg6Ayr9z88KpqSjw_5u",
+    "0NwXg6Ayr9z88KpqSjw_56",
+    "0Rj85J29L55uI7dAt1JRXi",
+    "2LX158HAHA$f07Y9Ra1FQV",
+    "0Rj85J29L55uI7dAt1JRac",
+    "2LX158HAHA$f07Y9Ra1FQR",
+    "2LX158HAHA$f07Y9Ra1FQQ",
+    "2LX158HAHA$f07Y9Ra1FQP",
+    "2LX158HAHA$f07Y9Ra1FQO",
+    "2LX158HAHA$f07Y9Ra1FRb",
+    "2LX158HAHA$f07Y9Ra1FRa",
+    "0GfOrRB8P5Gvq$xSds0CwQ",
+    "0NwXg6Ayr9z88KpqSjw_8y",
+    "0NwXg6Ayr9z88KpqSjw_8z",
+    "0T65s9RFLFHQSm50dnA7x4",
+    "0NwXg6Ayr9z88KpqSjw_3_",
+    "0NwXg6Ayr9z88KpqSjw_3y",
+    "0NwXg6Ayr9z88KpqSjw_3$",
+    "0NwXg6Ayr9z88KpqSjw_3z",
+    "3MeVU6L_XFouOdBEdoh1J1",
+    "0NwXg6Ayr9z88KpqSjw_8w",
+    "0NwXg6Ayr9z88KpqSjw_8x"
+   ],
+   "evidence": {
+    "kind": "clash",
+    "values": {
+     "count": 55,
+     "total": 60
+    }
+   },
+   "check": "Run a full clash check in your coordination tool for the complete list.",
+   "basis": "boxes"
+  }
+ ]
+}
