@@ -88,9 +88,15 @@ export function OverviewScreen({ docs = [] }: { docs?: Document[] }) {
   const chatRows = visibleChats(chats.data || [])
 
   return <section className="overview-screen" aria-label="Workspace overview" data-live={chats.live}>
-    <header className="overview-greeting"><h2>Your workspace at a glance</h2><p>Pick up a question or see what has changed.</p></header>
+    <header className="overview-greeting"><h2>Project overview</h2><p>What is in the project, what changed, and what needs checking.</p></header>
+    <div className="overview-stats" aria-label="Project at a glance">
+      <a className="overview-stat" href="#/data"><strong>{docs.length}</strong><span>Drawings and models</span></a>
+      <a className="overview-stat" href="#/changes"><strong>{week.length}</strong><span>New this week</span></a>
+      <a className="overview-stat" href="#/chat"><strong>{chatRows.length}</strong><span>Recent answers</span></a>
+      <div className="overview-stat"><strong>{groups.length}</strong><span>Checks to review</span></div>
+    </div>
     <div className="overview-grid">
-      <OverviewCard title="This week's changes" href="#/changes" loading={changes.loading} error={changes.error} onRetry={changes.retry}>
+      <OverviewCard title="Recent uploads and revisions" href="#/changes" loading={changes.loading} error={changes.error} onRetry={changes.retry}>
         {week.length ? <ul className="overview-list">{week.map((change) => {
           const doc = change.summary.doc_id || change.doc_b
           return <li key={change.id}><a href="#/changes" data-testid="overview-change"><strong>{cleanTitle(String(change.summary.title || change.summary.headline || docTitle(doc)))}</strong><span>{changeSubtitle(change)}</span><time dateTime={change.created_at} hidden /></a></li>
