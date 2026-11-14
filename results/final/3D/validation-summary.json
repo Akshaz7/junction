@@ -1,0 +1,40 @@
+{
+  "row": "F-3D",
+  "status": "PARTIAL",
+  "created": "2026-11-14T20:11:49.550240+00:00",
+  "completed": [
+    "Server supplies ordered scene_state.edits even with an empty hidden list",
+    "Reloaded chat group undo for hide/restore/reset/isolate",
+    "Scene controls bypass history rewrite",
+    "2D Clear highlights persists an empty highlight list and preserves visibility edits",
+    "Camera z float comparison already uses toBeCloseTo"
+  ],
+  "random_end_only_document": "swiss_dwellings__site1101-bldg2241-floor10275",
+  "random_document_selected_before_development": true,
+  "validation_scope": "Edit arithmetic checked against the ingested document; this does not verify detection accuracy against source drawings.",
+  "browser": {
+    "executed_tests": 0,
+    "reason": "Chromium browserType.launch aborted with SIGABRT; kill EPERM",
+    "screenshots_created": 0,
+    "required_command": "scripts/heavy.sh web/node_modules/.bin/playwright test --config web/src/viewer3d/playwright.config.ts web/e2e/scene-controls.spec.ts web/src/viewer3d/__e2e__/opening-infill.spec.ts",
+    "temporary_rebuilt_assets": "/private/tmp/f3d-opening-rebuild"
+  },
+  "asset_refresh_required": "Current shared exports predate P-21. Rebuilding scratch copies gives 0 unsupported openings out of 58; refresh and persist exports before visual validation.",
+  "live_model_calls": 0,
+  "shared_artifacts_modified": false,
+  "tests": {
+    "typescript": "passed",
+    "vitest_passed": 456,
+    "vitest_skipped": 9,
+    "python_scene_context_live_passed": 80,
+    "opening_infill_passed": 10,
+    "real_files_passed": 5,
+    "real_file_origins": 3
+  },
+  "git": {
+    "branch": "final/3d",
+    "new_commit_created": false,
+    "head": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+    "reason": "git add failed: cannot create /Users/akshatthapa/Workspace/junction/.git/worktrees/3d/index.lock (Operation not permitted)"
+  }
+}

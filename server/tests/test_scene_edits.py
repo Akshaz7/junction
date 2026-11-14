@@ -37,6 +37,7 @@ def test_clean_edit_validation():
     assert r["item_ids"] == ["a", "b"] and r["labels"] == {"a": "W1"} and r["edit_id"]
     assert se.clean_edit({"doc_id": "d", "op": "reset"})["item_ids"] == []
     assert se.clean_edit({"doc_id": "d", "op": "hide", "item_ids": ["a"], "labels": {"a": "x"}})["labels"] == {}
+    assert se.clean_edit({"doc_id": "d", "op": "highlight", "item_ids": [], "labels": {"a": "W1"}})["labels"] == {}
 
 
 @pytest.fixture
@@ -143,3 +144,18 @@ def test_run_engine_passes_hidden_items_to_real_engine(monkeypatch):
     monkeypatch.setattr(chats_routes, "ENGINE", fake_real)
     chats_routes._run_engine("How many windows?", ["d"], None, {"hidden": ["w7"]})
     assert seen["s"] == {"hidden": ["w7"]}
+
+
+def test_clear_highlights_persists_without_restoring_or_exiting_isolation(client, chat):
+    cid = chat["id"]
+    with client.websocket_connect(f"/ws?chat_id={cid}") as socket:
+        for op, ids in (("hide", ["removed"]), ("isolate", ["selected"]), ("highlight", [])):
+            socket.send_json({"type": "scene.edit", "chat_id": cid, "doc_id": DOC,
+                              "op": op, "item_ids": ids})
+            event = recv_type(socket, "scene.edit")
+            assert event and event["op"] == op
+    with client.websocket_connect(f"/ws?chat_id={cid}") as reloaded:
+        state = recv_type(reloaded, "scene.state")
+        assert state["hidden"] == ["removed"]
+        assert state["isolated"] == ["selected"]
+        assert state["highlighted"] == [] and state["labels"] == {}

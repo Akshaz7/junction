@@ -29,7 +29,7 @@ def clean_edit(msg: dict) -> dict | None:
     for i in raw[:MAX_IDS]:
         if isinstance(i, str) and 0 < len(i) <= MAX_ID_LEN and i not in ids:
             ids.append(i)
-    if op in ("hide", "highlight", "isolate") and not ids:
+    if op in ("hide", "isolate") and not ids:
         return None
     labels = clean_labels(msg.get("labels"), ids) if op in ("highlight", "isolate") else {}
     eid = msg.get("edit_id")

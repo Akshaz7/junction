@@ -271,13 +271,16 @@ async def ask(chat_id: str, body: NewMessage):
                        "text": body.content[:300]})
 
         hidden: list[str] = []
+        sstate = None
         try:
-            for st in await scene_edits.scene_state(pool, cid):
-                if not doc_ids or st.get("doc_id") in doc_ids:
-                    hidden.extend(st.get("hidden") or [])
+            edits = [e for e in await scene_edits.load_edits(pool, cid)
+                     if not doc_ids or e["doc_id"] in doc_ids]
+            states = scene_edits.fold(edits)
+            if edits:
+                hidden = list(dict.fromkeys(i for st in states.values() for i in st["hidden"]))
+                sstate = {"hidden": hidden, "edits": edits}
         except Exception:  # noqa: BLE001 — scene state is optional context, never block the answer
-            hidden = []
-        sstate = {"hidden": hidden} if hidden else None
+            sstate = None
 
         catalogue = None
         if ENGINE is _real_engine:
