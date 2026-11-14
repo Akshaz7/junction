@@ -1,0 +1,14 @@
+/* Loaded after screen styles so input resets cannot remove keyboard focus. */
+.composer textarea:focus-visible,
+.search-field input:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Inset rings remain visible inside clipped comparison controls. */
+.cmp-modes button:focus-visible,
+.library-tabs button:focus-visible,
+.compare-segments button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}

@@ -2,6 +2,7 @@ import { ChartNoAxesCombined, Check, Database, GitCompare, House, BotMessageSqua
 import { Tooltip } from './ui/tooltip'
 import { Button } from './ui'
 import type { Route } from '../lib/router'
+import type { KeyboardEvent } from 'react'
 import './help-navigation.css'
 
 /** Data owns the upload session, including refresh and the ready-document actions. */
@@ -34,6 +35,15 @@ export function ProjectSwitcher() {
   </div>
 }
 
+function closeMore(event: KeyboardEvent<HTMLDetailsElement>) {
+  if (event.key === 'Escape' && event.currentTarget.open) {
+    event.preventDefault()
+    event.stopPropagation()
+    event.currentTarget.open = false
+    event.currentTarget.querySelector('summary')?.focus()
+  }
+}
+
 export function WorkspaceNavigation({ route }: { route: Route }) {
   return <>
     <aside className="rail" aria-label="Workspace sidebar">
@@ -45,7 +55,7 @@ export function WorkspaceNavigation({ route }: { route: Route }) {
             <Icon size={20} /><span>{label}</span>
           </a>
         </Tooltip>)}
-        <details className="help-more" key={route} onKeyDown={(event) => { if (event.key === 'Escape') { event.currentTarget.open = false; event.currentTarget.querySelector('summary')?.focus() } }}>
+        <details className="help-more" key={route} onKeyDown={closeMore}>
           <summary className={`rail-item ${morePages.some((item) => item.route === route) ? 'active' : ''}`} aria-label="More"><MoreHorizontal size={20} /></summary>
           <div className="help-more-menu">{morePages.map(({ route: destination, label, icon: Icon }) => <a key={destination} href={`#/${destination}`} aria-current={route === destination ? 'page' : undefined}><Icon size={18} /><span>{label}</span>{route === destination && <Check size={15} />}</a>)}</div>
         </details>
@@ -54,7 +64,7 @@ export function WorkspaceNavigation({ route }: { route: Route }) {
     </aside>
     <nav className="mobile-navigation" aria-label="Mobile navigation">
       {navigation.slice(0, 4).map(({ route: destination, label, icon: Icon }) => <a key={destination} href={`#/${destination}`} aria-current={route === destination ? 'page' : undefined}><Icon size={19} /><span>{label}</span></a>)}
-      <details className="mobile-more" key={route}>
+      <details className="mobile-more" key={route} onKeyDown={closeMore}>
         <summary aria-label="More pages" className={morePages.some((item) => item.route === route) ? 'active' : ''}><MoreHorizontal size={19} /><span>More</span></summary>
         <div className="more-menu">{morePages.map(({ route: destination, label, icon: Icon }) => <a key={destination} href={`#/${destination}`} aria-current={route === destination ? 'page' : undefined}><Icon size={18} /><span>{label}</span>{route === destination && <Check size={15} />}</a>)}</div>
       </details>

@@ -23,6 +23,7 @@ export function HelpScreen() {
   return <section className="help-screen" aria-label="Judges’ guide">
     {markdown === null ? <div className="help-loading">
       <p role="status">The guide is loading.</p>
+      {unavailable && <span className="sr-only" role="alert">The guide could not be loaded. Retry loading guide.</span>}
       {unavailable && <button type="button" className="button button-outline button-size-default" onClick={() => setAttempt((value) => value + 1)}>Retry loading guide</button>}
     </div> : <article className="help-guide"><HelpMarkdown markdown={markdown} /></article>}
   </section>

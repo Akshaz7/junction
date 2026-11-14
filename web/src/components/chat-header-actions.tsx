@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { Clock, MessageSquareShare, Plus, X } from 'lucide-react'
 import { Button } from './ui'
 import { overviewDate } from '../lib/overview'
 import { FollowToggle } from './follow-banner'
 import './follow-banner.css'
 import { PairPhoneButton } from './pair-phone'
+import { useDialogFocus } from '../lib/use-dialog-focus'
 
 interface HistoryChat { id: string; title: string | null; created_at: string }
 
@@ -16,6 +17,9 @@ export function ChatHeaderActions({ chatId, onNew }: { chatId: string | null; on
   const [toast, setToast] = useState('')
   const host = useRef<HTMLDivElement>(null)
   const historyButton = useRef<HTMLButtonElement>(null)
+  const dialog = useRef<HTMLElement>(null)
+  const titleId = useId()
+  useDialogFocus(open, dialog, historyButton, () => setOpen(false))
 
   useEffect(() => {
     if (!toast) return
@@ -35,17 +39,12 @@ export function ChatHeaderActions({ chatId, onNew }: { chatId: string | null; on
       if (!controller.signal.aborted) setError(err instanceof Error ? err.message : 'Saved chats could not be loaded.')
     }).finally(() => { if (!controller.signal.aborted) setLoading(false) })
     function outside(event: PointerEvent) { if (!host.current?.contains(event.target as Node)) setOpen(false) }
-    function escape(event: KeyboardEvent) {
-      if (event.key === 'Escape') { event.preventDefault(); setOpen(false); historyButton.current?.focus() }
-    }
     const close = () => setOpen(false)
     document.addEventListener('pointerdown', outside)
-    document.addEventListener('keydown', escape)
     window.addEventListener('hashchange', close)
     return () => {
       controller.abort()
       document.removeEventListener('pointerdown', outside)
-      document.removeEventListener('keydown', escape)
       window.removeEventListener('hashchange', close)
     }
   }, [open])
@@ -71,8 +70,8 @@ export function ChatHeaderActions({ chatId, onNew }: { chatId: string | null; on
     <button type="button" className="button button-raised button-size-default" ref={historyButton} aria-label="History" aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? 'chat-history' : undefined} onClick={() => setOpen((value) => !value)}><Clock size={16} /><span>History</span></button>
     <Button variant="raised" aria-label="Share" onClick={() => void share()}><MessageSquareShare size={16} /><span>Share</span></Button>
     <PairPhoneButton />
-    {open && <section id="chat-history" className="chat-history-popover" role="dialog" aria-label="Chat history">
-      <header><strong>History</strong><FollowToggle /><button type="button" aria-label="Close chat history" onClick={() => { setOpen(false); historyButton.current?.focus() }}><X size={16} /></button></header>
+    {open && <section ref={dialog} id="chat-history" className="chat-history-popover" role="dialog" aria-modal="true" aria-label="Chat history" aria-labelledby={titleId} tabIndex={-1}>
+      <header><strong><span id={titleId} className="sr-only">Chat history</span><span aria-hidden="true">History</span></strong><FollowToggle /><button type="button" aria-label="Close chat history" onClick={() => setOpen(false)}><X size={16} /></button></header>
       {loading ? <p role="status">Loading chats…</p> : error ? <p role="alert">{error}</p> : chats.length ? <ul>{chats.map((chat) => <li key={chat.id}>
         <a href={`#/chat/${encodeURIComponent(chat.id)}`} aria-current={chat.id === chatId ? 'page' : undefined} onClick={() => setOpen(false)}><span>{chat.title || 'Untitled chat'}</span><time dateTime={chat.created_at}>{overviewDate(chat.created_at)}</time></a>
       </li>)}</ul> : <p>No saved chats yet. <Button variant="raised" onClick={() => { setOpen(false); setToast(''); onNew() }}>New chat</Button></p>}

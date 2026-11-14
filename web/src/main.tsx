@@ -5,6 +5,7 @@ import ViewerTestPage from './viewer3d/ViewerTestPage'
 import { MicButton, SpeakButton } from './components/voice-controls'
 import './styles/app.css'
 import './styles/touch.css'
+import './styles/accessibility.css'
 
 // Dev routes for component tests (3D viewer T-01/T-02, voice W-14); wired by the LEAD.
 const testRoute = () => window.location.hash.replace(/^#\/?/, '')

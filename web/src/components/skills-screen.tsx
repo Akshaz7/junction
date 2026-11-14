@@ -42,7 +42,7 @@ export function SkillPicker({ onPick, disabled = false }: { onPick: (prompt: str
   }, [refresh])
   return <span className="skill-picker"><label htmlFor={id} className="sr-only">Use a skill</label><Library size={14} aria-hidden="true" /><select id={id} aria-label="Use a skill" value="" disabled={disabled || loading || !!error || !skills.length} onChange={(event) => { const skill = skills.find((row) => row.id === event.target.value); if (skill) onPick(skill.prompt) }}>
     <option value="">{loading ? 'Loading skills…' : error ? 'Skills unavailable' : skills.length ? 'Skills' : 'No skills saved'}</option>{skills.map((skill) => <option key={skill.id} value={skill.id}>{skill.name}</option>)}
-  </select>{error && <button type="button" disabled={disabled} title={error} onClick={() => setRefresh((value) => value + 1)}>Retry skills</button>}</span>
+  </select>{error && <><span className="sr-only" role="alert">{error}</span><button type="button" disabled={disabled} title={error} onClick={() => setRefresh((value) => value + 1)}>Retry skills</button></>}</span>
 }
 
 export function SkillsScreen({ docs }: { docs: Document[] }) {
@@ -90,6 +90,7 @@ export function SkillsScreen({ docs }: { docs: Document[] }) {
       <div className="tools-row-actions"><Button variant="raised" disabled={!!busy || !docId} onClick={() => void act(`run:${skill.id}`, async (signal) => { setAnswer(null); setCitation(null); const result = await skillsApi.runSkill(skill.id, docId, signal); if (!signal.aborted) setAnswer(result) })}><Play size={14} />Run skill</Button>
         {!skill.builtin && <Button variant="ghost" aria-label={`Delete skill ${skill.name}`} disabled={!!busy} onClick={() => void act(`delete:${skill.id}`, async (signal) => { await skillsApi.deleteSkill(skill.id, signal); if (!signal.aborted) setSkills((rows) => rows.filter((row) => row.id !== skill.id)) })}><Trash2 size={14} />Delete</Button>}
       </div></article>)}</div>}
+    <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">{answer ? 'Answer ready' : ''}</span>
     {answer && <section className="tools-card skill-answer" aria-label="Skill answer"><h3>Answer</h3><AnswerCard answer={answer} docs={docs} demo={false} onOpenCitation={setCitation} /></section>}
   </section>{answer && citation && <DocumentViewer key={`${answer.answer_id}-${citation.n}`} answer={answer} citation={citation} sheet={sheet} onClose={() => setCitation(null)} />}</div>
 }
