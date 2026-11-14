@@ -1,0 +1,11 @@
+{
+  "run": "local-final",
+  "base_url": "http://127.0.0.1:5174",
+  "status": "failed",
+  "startTime": "2026-11-14T21:13:28.514Z",
+  "duration": 177028.11299999998,
+  "counts": {
+    "passed": 11,
+    "failed": 1
+  }
+}

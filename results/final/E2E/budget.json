@@ -1,0 +1,141 @@
+{
+  "scope": "Conservative upper bound: all local chats created since F-E2E began at 2026-11-14T20:07:00Z, plus E2E upload ingestion. Includes any other workers active in that interval.",
+  "answers": {
+    "2a3dd16c641a4d08a761e5333891a01f": {
+      "chat_id": "66ccdbdd-4cfd-4897-ad81-2ec3a00631b6",
+      "usd": 0
+    },
+    "00ff75bdfd024254a4f466f494bb8d64": {
+      "chat_id": "c180702f-f83a-4314-b8ed-9177d6da6739",
+      "usd": 0.00274
+    },
+    "6ecf03ae7b934dfca90f31c6af8bc06d": {
+      "chat_id": "5b51faae-c9b3-49b1-8574-4b851f2df286",
+      "usd": 0.002622
+    },
+    "856cec1be2c848ab9a859eb517be837a": {
+      "chat_id": "0f4bbaf7-6b2a-4c94-a0c4-9339dc0d76c2",
+      "usd": 0.002742
+    },
+    "0be2a754c0374f90aa72b50962ded764": {
+      "chat_id": "0fc767d8-316c-40b0-b704-80f85112f103",
+      "usd": 0
+    },
+    "5df1cebd448d4190befe9258c3b2b4ec": {
+      "chat_id": "0fc767d8-316c-40b0-b704-80f85112f103",
+      "usd": 0
+    },
+    "3fc858edbffc463e86938064daa6826d": {
+      "chat_id": "28555a7d-05d4-4fdd-be34-bb0c03a479cf",
+      "usd": 0
+    },
+    "07180ff906ec4ba8b01ee6a2c37693b7": {
+      "chat_id": "c64a34ae-aee4-4f45-a422-fc96e8334422",
+      "usd": 0
+    },
+    "43a19095ce5b48dd869536f3911b9324": {
+      "chat_id": "1a50533d-7712-4f18-bb31-6909f19fbbe4",
+      "usd": 0
+    },
+    "13dbb393e4664ceb8725a2ea711d66b3": {
+      "chat_id": "24440424-5770-4f67-a388-a0b590ed6438",
+      "usd": 0.002606
+    },
+    "794d0761d21045399e8e3dda6d1be8b7": {
+      "chat_id": "97e0b994-eabc-48cc-bb76-cc2c0a0f5fee",
+      "usd": 0
+    },
+    "a24571d9f90d4109b37e4e90af8d307c": {
+      "chat_id": "75a93f01-30d9-4f7e-8cf5-d665a4c593c7",
+      "usd": 0.002984
+    },
+    "6e90640c105e4c76a943af76659e7d14": {
+      "chat_id": "f214fb21-1456-4580-91e9-07b0be750e49",
+      "usd": 0.00537
+    },
+    "31f10e81e1664627b6a1e1e887ee1516": {
+      "chat_id": "6ff60765-bd5d-43d8-99c0-21e9ad7d926b",
+      "usd": 0.00536
+    },
+    "5192457bd85847d6ab391402ded83946": {
+      "chat_id": "7417e576-068b-4b7c-9a5d-ee46ee7b1f8e",
+      "usd": 0
+    },
+    "7ce069705d534429b0c52b1d0d4af69e": {
+      "chat_id": "eab4cc60-ba67-4b0b-b6a9-ad639d20558a",
+      "usd": 0.00272
+    },
+    "de5005fb5b8c48a7bcc18b45b8530402": {
+      "usd": 0
+    },
+    "c3cb8a8499104de8bb484dc1cc2027b3": {
+      "usd": 0.004226
+    },
+    "b38d07fb362f4eb1ab0e7d6e0a6c635d": {
+      "usd": 0.00328
+    },
+    "f7000c9743054471b8ed0a41d7a3134f": {
+      "usd": 0.002742
+    },
+    "73d3870123f14bfead490514deafc277": {
+      "usd": 0
+    },
+    "cf1cc66f557a4c66a2349c1421490727": {
+      "usd": 0.00274
+    },
+    "095ad23b558f4b6c9ed94cdb318b7fb5": {
+      "usd": 0.003124
+    },
+    "79b54a26f672417facd422d6a06bf950": {
+      "usd": 0
+    },
+    "b079c5b82b1743f38878a225755fe1b4": {
+      "usd": 0
+    },
+    "5d2200c4a9074fb18666a8b04c6460d2": {
+      "usd": 0.014393
+    },
+    "caf28ffdee9448978b359c9336e79091": {
+      "usd": 0
+    },
+    "0a9d8edb3644439d9da27475b13006a0": {
+      "usd": 0.002774
+    }
+  },
+  "ingests": {
+    "uploads__e2e-1794687311384-high-quality-architectural-7607-3a80e2": {
+      "usd": 0
+    },
+    "uploads__e2e-1794687325514-53751789-761e82": {
+      "usd": 0
+    },
+    "uploads__e2e-1794690526509-high-quality-architectural-7607-d2634d": {
+      "usd": 0
+    },
+    "uploads__e2e-1794690554747-53751789-3e6afc": {
+      "usd": 0
+    },
+    "uploads__e2e-1794690590842-site1142-bldg2293-floor10589-2f0335": {
+      "usd": 0
+    },
+    "uploads__e2e-project-1794690653656-site1142-bldg2293-floor10589-04fb08": {
+      "usd": 0
+    },
+    "uploads__e2e-1794690891442-high-quality-architectural-7607-971de6": {
+      "usd": 0
+    },
+    "uploads__e2e-1794690920610-53751789-3f089b": {
+      "usd": 0
+    },
+    "uploads__e2e-1794690955116-site1142-bldg2293-floor10589-c2c5a0": {
+      "usd": 0
+    },
+    "uploads__e2e-1794690973986-resbim-409-model-0cf983": {
+      "usd": 0
+    },
+    "uploads__e2e-project-1794691067273-site1142-bldg2293-floor10589-e5c541": {
+      "usd": 0
+    }
+  },
+  "recorded_usd": 0.060423
+}

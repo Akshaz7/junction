@@ -1,0 +1,190 @@
+[
+  {
+    "title": " > chromium > final-judge.spec.ts > [WEB] Library browses, searches and opens a real drawing; selection stays reachable",
+    "owner": "WEB",
+    "status": "failed",
+    "duration_ms": 18024,
+    "errors": [
+      "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-doc-id=\"swiss_dwellings__site1000-bldg2082-floor9385\"]').locator('.data-open-file')\n    - locator resolved to <button type=\"button\" aria-expanded=\"true\" class=\"data-open-file\" aria-label=\"Open site1000_bldg2082_floor9385\">…</button>\n  - attempting click action (trial run)\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action (trial run)\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action (trial run)\n      - waiting 100ms\n    29 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action (trial run)\n       - waiting 500ms\n"
+    ],
+    "annotations": [
+      {
+        "type": "document",
+        "description": "swiss_dwellings__site1000-bldg2082-floor9385 (swiss_dwellings)"
+      }
+    ],
+    "attachments": [
+      {
+        "name": "screenshot",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/prod-read-only-1/artifacts/final-judge--WEB-Library-b-41252-g-selection-stays-reachable-chromium/test-failed-1.png",
+        "contentType": "image/png"
+      },
+      {
+        "name": "network-and-browser.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "error-context",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/prod-read-only-1/artifacts/final-judge--WEB-Library-b-41252-g-selection-stays-reachable-chromium/error-context.md",
+        "contentType": "text/markdown"
+      },
+      {
+        "name": "trace",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/prod-read-only-1/artifacts/final-judge--WEB-Library-b-41252-g-selection-stays-reachable-chromium/trace.zip",
+        "contentType": "application/zip"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [WEB] Library browses, searches and opens a real model; selection stays reachable",
+    "owner": "WEB",
+    "status": "failed",
+    "duration_ms": 17357,
+    "errors": [
+      "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-doc-id=\"ifc_bench__ac20-arc\"]').locator('.data-open-file')\n    - locator resolved to <button type=\"button\" aria-expanded=\"true\" class=\"data-open-file\" aria-label=\"Open AC20 Institute / Phantasy Office Building - arc\">…</button>\n  - attempting click action (trial run)\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action (trial run)\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action (trial run)\n      - waiting 100ms\n    29 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action (trial run)\n       - waiting 500ms\n"
+    ],
+    "annotations": [
+      {
+        "type": "document",
+        "description": "ifc_bench__ac20-arc (ifc_bench)"
+      }
+    ],
+    "attachments": [
+      {
+        "name": "screenshot",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/prod-read-only-1/artifacts/final-judge--WEB-Library-b-ccbc4-l-selection-stays-reachable-chromium/test-failed-1.png",
+        "contentType": "image/png"
+      },
+      {
+        "name": "network-and-browser.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "error-context",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/prod-read-only-1/artifacts/final-judge--WEB-Library-b-ccbc4-l-selection-stays-reachable-chromium/error-context.md",
+        "contentType": "text/markdown"
+      },
+      {
+        "name": "trace",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/prod-read-only-1/artifacts/final-judge--WEB-Library-b-ccbc4-l-selection-stays-reachable-chromium/trace.zip",
+        "contentType": "application/zip"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [WEB] Library browses, searches and opens a real scan; selection stays reachable",
+    "owner": "WEB",
+    "status": "failed",
+    "duration_ms": 17385,
+    "errors": [
+      "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-doc-id=\"cubicasa5k__colorful-11397\"]').locator('.data-open-file')\n    - locator resolved to <button type=\"button\" aria-expanded=\"true\" class=\"data-open-file\" aria-label=\"Open colorful-11397\">…</button>\n  - attempting click action (trial run)\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action (trial run)\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action (trial run)\n      - waiting 100ms\n    29 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action (trial run)\n       - waiting 500ms\n"
+    ],
+    "annotations": [
+      {
+        "type": "document",
+        "description": "cubicasa5k__colorful-11397 (cubicasa5k)"
+      }
+    ],
+    "attachments": [
+      {
+        "name": "screenshot",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/prod-read-only-1/artifacts/final-judge--WEB-Library-b-c19d4-n-selection-stays-reachable-chromium/test-failed-1.png",
+        "contentType": "image/png"
+      },
+      {
+        "name": "network-and-browser.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "error-context",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/prod-read-only-1/artifacts/final-judge--WEB-Library-b-c19d4-n-selection-stays-reachable-chromium/error-context.md",
+        "contentType": "text/markdown"
+      },
+      {
+        "name": "trace",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/prod-read-only-1/artifacts/final-judge--WEB-Library-b-c19d4-n-selection-stays-reachable-chromium/trace.zip",
+        "contentType": "application/zip"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [ENGINE] Chat shows live status, bold answer, citations, evidence steps and confidence",
+    "owner": "ENGINE",
+    "status": "passed",
+    "duration_ms": 3664,
+    "errors": [],
+    "annotations": [],
+    "attachments": [
+      {
+        "name": "network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [WEB] Export report prepares source evidence; Take-off sheet downloads a cited CSV",
+    "owner": "WEB",
+    "status": "passed",
+    "duration_ms": 2839,
+    "errors": [],
+    "annotations": [
+      {
+        "type": "read-only",
+        "description": "Take-off submission not clicked on production: it creates a new message; zero production questions used."
+      }
+    ],
+    "attachments": [
+      {
+        "name": "network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [3D] Visualise keeps cited item identities; rise, storeys, camera, clear, hide and undo work",
+    "owner": "3D",
+    "status": "passed",
+    "duration_ms": 4671,
+    "errors": [],
+    "annotations": [
+      {
+        "type": "read-only",
+        "description": "Hide/undo skipped on production: edits forbidden."
+      }
+    ],
+    "attachments": [
+      {
+        "name": "network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [WEB] Overview, Changes and Findings show live data or explicit empty states",
+    "owner": "WEB",
+    "status": "passed",
+    "duration_ms": 3026,
+    "errors": [],
+    "annotations": [],
+    "attachments": [
+      {
+        "name": "network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [WEB] Phone 390x844 keeps every screen within the viewport and the composer usable",
+    "owner": "WEB",
+    "status": "passed",
+    "duration_ms": 1000,
+    "errors": [],
+    "annotations": [],
+    "attachments": [
+      {
+        "name": "network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  }
+]

@@ -1,0 +1,206 @@
+{
+  "answer_id": "0a9d8edb3644439d9da27475b13006a0",
+  "question": "How many doors are there?",
+  "doc_ids": [
+    "cubicasa5k__colorful-10052"
+  ],
+  "answer": {
+    "text_md": "**There are 6 doors on this floor plan.** [1]",
+    "value": 6,
+    "unit": "count",
+    "confidence": 0.5,
+    "abstained": false
+  },
+  "citations": [
+    {
+      "n": 1,
+      "doc_id": "cubicasa5k__colorful-10052",
+      "page": 1,
+      "kind": "region",
+      "bbox_px": [
+        248,
+        561,
+        1900,
+        1507
+      ],
+      "item_ids": [
+        "vision-door-01",
+        "vision-door-02",
+        "vision-door-03",
+        "vision-door-04",
+        "vision-door-05",
+        "vision-door-06"
+      ],
+      "quote": null,
+      "label": "Floor plan · 4 doors"
+    }
+  ],
+  "evidence": {
+    "boxes": [
+      {
+        "item_id": "vision-door-01",
+        "page": 1,
+        "bbox_px": [
+          248,
+          897,
+          395,
+          1050
+        ],
+        "label": "1"
+      },
+      {
+        "item_id": "vision-door-02",
+        "page": 1,
+        "bbox_px": [
+          409,
+          897,
+          556,
+          1052
+        ],
+        "label": "2"
+      },
+      {
+        "item_id": "vision-door-03",
+        "page": 1,
+        "bbox_px": [
+          1422,
+          827,
+          1580,
+          970
+        ],
+        "label": "3"
+      },
+      {
+        "item_id": "vision-door-04",
+        "page": 1,
+        "bbox_px": [
+          1763,
+          561,
+          1886,
+          688
+        ],
+        "label": "4"
+      },
+      {
+        "item_id": "vision-door-05",
+        "page": 1,
+        "bbox_px": [
+          1741,
+          1146,
+          1900,
+          1292
+        ],
+        "label": "5"
+      },
+      {
+        "item_id": "vision-door-06",
+        "page": 1,
+        "bbox_px": [
+          1698,
+          1341,
+          1864,
+          1507
+        ],
+        "label": "6"
+      }
+    ],
+    "scene": {
+      "doc_id": "cubicasa5k__colorful-10052",
+      "highlight_item_ids": [
+        "vision-door-01",
+        "vision-door-02",
+        "vision-door-03",
+        "vision-door-04",
+        "vision-door-05",
+        "vision-door-06"
+      ],
+      "camera_target_item_id": "vision-door-01"
+    }
+  },
+  "trace": [
+    {
+      "step": "route",
+      "detail": "count / door / unscoped (rules)",
+      "ms": 0,
+      "model": null,
+      "cost_usd": 0
+    },
+    {
+      "step": "load",
+      "detail": "plan map: 4 door items (conf >= 0.5; 0 below ignored)",
+      "ms": 0,
+      "model": null,
+      "cost_usd": 0
+    },
+    {
+      "step": "count",
+      "detail": "4 door",
+      "ms": 0,
+      "model": null,
+      "cost_usd": 0
+    },
+    {
+      "step": "recount",
+      "detail": "plan map 4, drawing re-read 6: replaced by 6 vision-drawn box(es) (cache:google:gemini@3.5-flash)",
+      "ms": 0,
+      "model": null,
+      "cost_usd": 0
+    },
+    {
+      "step": "explain",
+      "detail": "explained in plain words from the cited elements (numbers unchanged)",
+      "ms": 1699,
+      "model": "claude-sonnet-5-5",
+      "cost_usd": 0.002774
+    }
+  ],
+  "route": "planmap",
+  "cost": {
+    "usd_total": 0.002774,
+    "calls": [
+      {
+        "task": "recount",
+        "provider": "vision",
+        "model": "cache:gemini-4-carbon",
+        "cost_usd": 0
+      },
+      {
+        "task": "recount_boxes",
+        "provider": "vision",
+        "model": "cache:google:gemini@3.5-flash",
+        "cost_usd": 0
+      },
+      {
+        "task": "write_answer",
+        "provider": "runware_claude",
+        "model": "claude-sonnet-5-5",
+        "cost_usd": 0.002774
+      }
+    ]
+  },
+  "latency_ms": 4,
+  "reasoning": {
+    "steps": [
+      {
+        "kind": "read",
+        "title": "Read",
+        "text": "1 marked region of the scanned drawing",
+        "cite": 1,
+        "ok": null
+      },
+      {
+        "kind": "checked",
+        "title": "Checked",
+        "ok": false,
+        "cite": null,
+        "text": "A second, independent look counted 6; kept the 4 boxed"
+      }
+    ],
+    "confidence": {
+      "label": "Estimate",
+      "pct": 70,
+      "reason": "Detected on a scanned image; lowered because the second look disagreed.",
+      "improve": "Check box 1, or upload a CAD file or vector PDF to make the count exact."
+    }
+  }
+}
