@@ -38,6 +38,7 @@ struct SceneManifest: Decodable {
     }
 
     struct Storey: Decodable {
+        let name: String?
         let elevation_m: Float?
     }
 

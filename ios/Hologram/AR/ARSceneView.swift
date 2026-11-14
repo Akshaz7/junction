@@ -17,6 +17,8 @@ final class ARSceneController: ObservableObject {
     @Published private(set) var guide: WalkGuide?
     @Published private(set) var targetItemID: String?
     @Published private(set) var selectedItem: ItemCardModel?
+    @Published private(set) var activeStorey: String?
+    @Published private(set) var showRoof = false
     private(set) var activeDocID: String?
     private var requestedDocID: String?
     private var pendingLiveHighlight: ARRequest?
@@ -35,9 +37,14 @@ final class ARSceneController: ObservableObject {
     private var gestureRecognizers: [UIGestureRecognizer] = []
     private var itemPicker: ItemPicker?
     private let selectionOutline = ItemSelectionOutline()
+    private var originalVisibility: [String: Bool] = [:]
 
     var scaleLabel: String { "1:\(Int((1 / scale).rounded()))" }
     var isSupported: Bool { ARWorldTrackingConfiguration.isSupported }
+    var cutawayStoreys: [SceneManifest.Storey] { manifest.map { CutawayPolicy(manifest: $0).storeys } ?? [] }
+    var canStepStoreyDown: Bool { storeyIndex.map { $0 > 0 } ?? false }
+    var canStepStoreyUp: Bool { storeyIndex.map { $0 + 1 < cutawayStoreys.count } ?? false }
+    private var storeyIndex: Int? { cutawayStoreys.firstIndex { $0.name == activeStorey } }
 
     func attach(to view: ARView) {
         arView = view
@@ -67,6 +74,8 @@ final class ARSceneController: ObservableObject {
             manifest = loaded.manifest
             activeDocID = loaded.manifest?.doc_id ?? (loaded.isFixture ? "fixture__ios" : docID)
             sceneIndex = SceneIndex(root: content)
+            originalVisibility = sceneIndex?.entitiesByUSDName.mapValues(\.isEnabled) ?? [:]
+            showRoof = false
             highlightController = HighlightController(root: content)
             itemPicker = loaded.manifest.map { ItemPicker(manifest: $0) }
             // Generate mesh hit targets before answer labels or selection outlines exist.
@@ -133,7 +142,7 @@ final class ARSceneController: ObservableObject {
         // The placement container also has a collision box for gestures. Skip it
         // and resolve the nearest real mesh hit through its USD prim parents.
         let itemID = view.hitTest(point, query: .all).sorted { $0.distance < $1.distance }
-            .lazy.compactMap { itemPicker.itemID(for: $0.entity) }.first
+            .lazy.filter { $0.entity.isActive }.compactMap { itemPicker.itemID(for: $0.entity) }.first
         guard let itemID, let item = manifest?.items[itemID],
               let entity = sceneIndex?.entitiesByUSDName[item.usd_name] else {
             dismissSelectedItem()
@@ -175,12 +184,51 @@ final class ARSceneController: ObservableObject {
     func setHighlights(_ itemIDs: [String], cameraTargetItemID: String? = nil,
                        labels: [String: String] = [:]) {
         highlightedItemIDs = itemIDs
+        // Measure label positions against the full model before hiding the new cutaway.
+        for item in manifest?.items.values ?? Dictionary<String, SceneManifest.Item>().values {
+            sceneIndex?.entitiesByUSDName[item.usd_name]?.isEnabled = originalVisibility[item.usd_name] ?? true
+        }
         highlightController?.highlight(itemIDs: itemIDs, labels: labels)
         targetItemID = ([cameraTargetItemID].compactMap { $0 } + itemIDs)
             .first { manifest?.items[$0]?.bbox_m != nil }
+        activeStorey = manifest.map {
+            CutawayPolicy(manifest: $0).activeStorey(cameraTargetItemID: cameraTargetItemID,
+                                                   highlightedItemIDs: itemIDs)
+        } ?? nil
+        applyCutaway()
         guide = nil
         lastGuideUpdate = 0
         updateWalkGuide()
+    }
+
+    func setShowRoof(_ show: Bool) {
+        showRoof = show
+        applyCutaway()
+    }
+
+    func stepStorey(_ direction: Int) {
+        guard let index = storeyIndex else { return }
+        let next = index + direction
+        guard cutawayStoreys.indices.contains(next) else { return }
+        activeStorey = cutawayStoreys[next].name
+        applyCutaway()
+    }
+
+    private func applyCutaway() {
+        guard let manifest else { return }
+        let hidden = CutawayPolicy(manifest: manifest).hiddenUSDNames(activeStorey: activeStorey,
+                                                                     showRoof: showRoof)
+        for item in manifest.items.values {
+            sceneIndex?.entitiesByUSDName[item.usd_name]?.isEnabled =
+                (originalVisibility[item.usd_name] ?? true) && !hidden.contains(item.usd_name)
+        }
+        // Answer labels are siblings of item prims, so hide them explicitly as well.
+        for (id, label) in highlightController?.labelsByItemID ?? [:] {
+            label.isEnabled = manifest.items[id].map { !hidden.contains($0.usd_name) } ?? true
+        }
+        if let selectedItem, let item = manifest.items[selectedItem.id], hidden.contains(item.usd_name) {
+            dismissSelectedItem()
+        }
     }
 
     @discardableResult

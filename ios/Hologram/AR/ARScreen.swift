@@ -54,6 +54,26 @@ struct ARScreen: View {
                     }
                     Text(controller.status).font(.callout)
                         .accessibilityIdentifier("ar-status")
+                    Toggle("Show roof", isOn: Binding(get: { controller.showRoof },
+                                                      set: { controller.setShowRoof($0) }))
+                        .disabled(!controller.isLoaded)
+                        .accessibilityIdentifier("show-roof-toggle")
+                    HStack {
+                        Text("Storey")
+                        Spacer()
+                        Button { controller.stepStorey(-1) } label: {
+                            Image(systemName: "chevron.down")
+                        }
+                        .accessibilityLabel("Lower storey")
+                        .disabled(!controller.canStepStoreyDown)
+                        Text(controller.activeStorey ?? "Unavailable").font(.callout)
+                            .accessibilityIdentifier("active-storey")
+                        Button { controller.stepStorey(1) } label: {
+                            Image(systemName: "chevron.up")
+                        }
+                        .accessibilityLabel("Higher storey")
+                        .disabled(!controller.canStepStoreyUp)
+                    }
                     Toggle("Walk", isOn: Binding(get: { controller.isWalking },
                                                  set: { controller.setWalking($0) }))
                         .disabled(!controller.isLoaded)
