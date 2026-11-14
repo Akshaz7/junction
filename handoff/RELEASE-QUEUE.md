@@ -26,3 +26,8 @@ Updated Sat 14 Nov 2026 ~23:50 EET.
 - Web unchanged (no web files in this batch).
 - Prod note: wall surface area on ifc_bench__ac20-arc answers "cannot be verified" because wallarea needs the original IFC body geometry, which the container does not hold. Needs the IFC (or its geometry cache) shipped to prod; lead to decide.
 - Next: [perf + scales] -> [robust + mirror-shell/changes] -> [e2e + qa + qa2].
+
+## Batch 4 deployed (Sun 15 Nov ~01:10)
+- Backend a28925b live: perf (committed from worktree), scales (committed), robust. sample200 156/200 (model-live run, cache keys changed by perf: one sauna item correct->abstained, one toilet wrong->correct; no correct->wrong).
+- robust merge: dpi preserved through pipeline/raster_input (scales needs it); unitless DXF now ingests unmeasured (test updated); upload tests use a real PNG.
+- Remaining: mirror-shell + mirror-changes (UI), e2e, qa, qa2. Web not redeployed since 6e0419f.
