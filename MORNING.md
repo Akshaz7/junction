@@ -46,7 +46,7 @@ None now. OK: NVIDIA, Runware, HF, ElevenLabs, Modal, Aiven. Missing: GEMINI_API
 
 
 ## 7. Proposed plan for the next run
-Run 1 status: every row is done (98) or blocked with a reason. Blocked on Ash: S-05 deploy (Aiven GitHub App), I-05 iPhone install, V-06/V-07/V-08 (Modal workspace paused), D-13/D-14/V-11/E-19 (missing keys: Gemini, Anthropic, Cloudinary, Google Drive). Next run: deploy as soon as the GitHub App is in, then fine-tunes on Modal, then the improve loop on the weakest cells (length/volume abstain on all questions; ifc_models abstains on 80 %).
+Run 1 status: every row is done (98) or blocked with a reason. Blocked on Ash: S-05 deploy (Aiven GitHub App — tried without it at 08:50: Aiven builds fail without the integration; the image itself runs healthy against hologram-pg; service hologram-api exists, powered off), I-05 iPhone install, V-06/V-07/V-08 (Modal workspace paused), D-13/D-14/V-11/E-19 (missing keys: Gemini, Anthropic, Cloudinary, Google Drive). Next run: deploy as soon as the GitHub App is in, then fine-tunes on Modal, then the improve loop on the weakest cells (length/volume abstain on all questions; ifc_models abstains on 80 %).
 
 ## 8. Known weak spots to avoid in the live demo
 - Bathtub/shower counts on raster plans (0/3 on colorful-11397).

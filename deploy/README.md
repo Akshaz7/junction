@@ -56,3 +56,7 @@ Web (Vercel) needs the API origin as its API/WS base URL; CORS is already open (
 ## Local image check (done)
 `scripts/heavy.sh docker build -f deploy/Dockerfile -t hologram-api .` (424 MB) then
 `docker run -d -m 512m -p 8001:8000 -e DATABASE_URL hologram-api` against the Aiven DB: `/api/health` returned `{"ok":true,"db":true}`, `/api/docs` returned 773 docs, process runs as non-root `app`, memory about 45 MB. Container stopped and removed.
+
+
+## 2026-11-14 08:55 attempt (LEAD)
+`hologram-api` (aws-eu-central-1, startup-10-256) was created with only `repository_url` (public repo). Aiven accepted it but the build ended `FAILURE` / deployment `ABORTED` with no logs, and `-c application.source.commit_sha=…` is refused: "commit_sha requires a VCS integration: set vcs_integration_id and remote_repository_id". The same Dockerfile builds from a fresh public clone and runs healthy locally against hologram-pg. After installing the GitHub App: `avn service update hologram-api -c application.source.vcs_integration_id=… -c application.source.remote_repository_id=…`, then power it on (`avn service update hologram-api --power-on`).
