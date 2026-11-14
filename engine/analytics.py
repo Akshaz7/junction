@@ -55,8 +55,9 @@ def storey_compare(question: str, doc: Doc, t0) -> dict | None:
         return None
     m = re.search(r"\b(?:which|what)\s+(?:floor|storey|story|level)\b", question, re.I)
     per = re.search(r"\b(?:per|on each|for each|by|every)\s+(?:floor|storey|story|level)\b|\beach (?:floor|storey|level)\b", question, re.I)
-    if not (m or per) or not re.search(r"\bhow many\b|\bnumber of\b|" + MORE.pattern + "|" + LESS.pattern, question, re.I):
+    if not (m or per) or not re.search(r"\bhow many\b|\bnumber of\b|\bcompar\w*|\bcounts?\b|\btable\b|\bbreak ?down\b|" + MORE.pattern + "|" + LESS.pattern, question, re.I):
         return None
+    as_table = bool(re.search(r"\btable\b|\bcompar\w*|\bbreak ?down\b", question, re.I)) and not m
     area = bool(AREAQ.search(question))
     kind = _kind(re.sub(r"\b(?:floors?|storeys?|stories|levels?)\b", " ", question.lower())) or ("room" if area else None)
     if kind is None or kind == "storey":
@@ -89,6 +90,12 @@ def storey_compare(question: str, doc: Doc, t0) -> dict | None:
                 if len(ties) == 1 else f"**{' and '.join(ties)}** tie for the {word} {what}: **{_fmt(best) + ' m²' if area else best}** each.")
         text = f"{lead} Per floor: {parts}. {{marks}}"
         return _done(question, doc, text, best, "m2" if area else "count", by[pick] if len(ties) == 1 else [i for k in ties for i in by[k]], trace, t0=t0)
+    if as_table:  # "compare door counts per storey in a table": one markdown row per storey, total last
+        col = f"{_noun(kind).capitalize()} (area m²)" if area else f"{_noun(kind).capitalize()}"
+        rows = [f"| {k} | {_fmt(score[k]) if area else score[k]} |" for k in order if k in score]
+        tot = sum(score.values())
+        text = (f"| Storey | {col} |\n|---|---|\n" + "\n".join(rows) + f"\n| **Total** | {_fmt(tot) if area else tot} |\n\n{{marks}}")
+        return _done(question, doc, text, tot, "m2" if area else "count", items, trace, t0=t0)
     text = f"{_noun(kind).capitalize()} per floor{' (area)' if area else ''}: {parts}. {{marks}}"
     return _done(question, doc, text, sum(score.values()), "m2" if area else "count", items, trace, t0=t0)
 
@@ -163,6 +170,63 @@ def storey_pair(question: str, doc: Doc, t0) -> dict | None:
     trace = [_step("route", f"storey pair / {kind} / {'area' if area else 'count'} -> code, no model"), _step("count", parts)]
     text = f"{verdict} By floor: {parts}. {{marks}}"
     return _done(question, doc, text, score[hi] - score[lo], "m2" if area else "count", items, trace, t0=t0)
+
+
+def storey_table(question: str, doc: Doc, t0) -> dict | None:
+    """"compare the ground floor and the first floor" (no kind named): rooms, area, doors and windows per floor in one table."""
+    if doc.mode != "ifc" or len(doc.storeys) < 2 or not re.search(r"\b(compare|comparison|versus|vs\.?|difference|differ|against)\b", question, re.I):
+        return None
+    names = _storeys_named(question, doc)
+    if len(names) < 2:
+        return None
+    if _kind(re.sub(r"\b(?:floors?|storeys?|stories|levels?)\b", " ", question.lower())) not in (None, "storey"):
+        return None
+    rows, items = [], []
+    for n in names:
+        rooms = [i for i in _of_kind(doc, "room") if i.storey == n]
+        doors = [i for i in _of_kind(doc, "door") if i.storey == n]
+        wins = [i for i in _of_kind(doc, "window") if i.storey == n]
+        area = round(sum(v for v in (_qty(i, "room", "area") for i in rooms) if v), 1)
+        rows.append((n, len(rooms), area, len(doors), len(wins)))
+        items += rooms
+    table = ["| Floor | Rooms | Area (m²) | Doors | Windows |", "|---|---|---|---|---|"]
+    table += [f"| {n} | {r} | {_fmt(a)} | {d} | {w} |" for n, r, a, d, w in rows]
+    big = max(rows, key=lambda r: r[2])
+    text = f"Comparison of {' and '.join(names)}:\n\n" + "\n".join(table) + f"\n\n**{big[0]}** has the larger room area ({_fmt(big[2])} m²). {{marks}}"
+    trace = [_step("route", "storey table / rooms, area, doors, windows -> code, no model")]
+    return _done(question, doc, text, None, None, items, trace, t0=t0)
+
+
+SAFE_Q = re.compile(r"\b(?:is|are|how)\b[^.?]*\b(?:safe|safety|fire[- ]safe|unsafe|dangerous)\b|\bsafe (?:to|for)\b|\bsafety (?:check|review|status)\b", re.I)
+
+
+def building_safety(question: str, doc: Doc, t0) -> dict | None:
+    """"is this building safe?": the app's own checks (exits per storey, 848/2017 and the other decrees), a check, not a certificate."""
+    if doc.mode != "ifc" or not SAFE_Q.search(question) or any(rx.search(question) for _, rx, _ in TOPIC) or re.search(r"\b(?:rules?|requirements?|according|regulations?|decree|code)\b", question, re.I) or re.search(r"\b(?:to remove|remov\w+|delete|demolish|drill|cut)\b", question, re.I):
+        return None
+    from engine import findings
+    fs = findings.run_doc(doc)
+    exits = findings.exits_map(doc)
+    order = [s["name"] for s in doc.storeys]
+    per = "; ".join(f"{n}: {len(exits.get(n, []))}" for n in order if n in exits)
+    sev = {k: sum(1 for f in fs if f["severity"] == k) for k in ("violation", "suggestion", "info")}
+    ids = {i for f in fs if f["severity"] != "info" for i in f["item_ids"]}
+    items = [i for i in doc.items if i.item_id in ids][:40]
+    cov = findings.coverage(doc)
+    rooms = len(_of_kind(doc, "room"))
+    head = ((f"**No violations found, but {sev['suggestion']} point{'s' if sev['suggestion'] != 1 else ''} worth checking. This is a check, not a safety certificate.**" if sev["suggestion"] else "**No violations found, but this is a check, not a safety certificate.**") if not sev["violation"]
+            else f"**{sev['violation']} possible violation{'s' if sev['violation'] != 1 else ''} found. This is a check, not a safety certificate.**")
+    top = "; ".join(dict.fromkeys(f["title"] for f in fs if f["severity"] != "info"))[:400]
+    text = (f"{head} I ran the model checks that this IFC supports ({len(cov['checked'])} rules, including fire safety 848/2017 for exits, accessibility 241/2017 and safety in use 1007/2017) "
+            f"on {rooms} rooms over {len(order)} storeys. Findings: {sev['violation']} violation(s), {sev['suggestion']} to check, {sev['info']} note(s)."
+            + (f" Main points: {top}." if top else "")
+            + (f" Exits found per storey (outer doors and stairs, inferred from geometry): {per}." if per else "")
+            + (f" {len(cov['not_checked'])} rules cannot be checked from this model (for example fire ratings and travel distances), so a design review is still needed." if cov["not_checked"] else "")
+            + " See the Findings screen for each item. {marks}")
+    trace = [_step("route", "building safety -> findings over the model, no model"), _step("findings", f"{len(fs)} findings")]
+    res = _done(question, doc, text, len(fs), "count", items, trace, t0=t0)
+    res["answer"]["confidence"] = 0.7
+    return res
 
 
 KIND_SPLIT = re.compile(r"\s+(?:or|than|vs\.?|versus|and)\s+", re.I)
@@ -793,7 +857,7 @@ def wet_room_takeoff(question: str, doc: Doc, t0) -> dict | None:
     n = len(base.get("citations") or [])
     marks = "".join(f"[{c['n']}]" for c in (base.get("citations") or [])[:8])
     txt = (f"Order about **{_fmt(need)} m²** of floor tiles, which is **{boxes} boxes**. "
-           f"That is {_fmt(area)} m² of floor in the {n} bathrooms and WCs, plus {pct:g}% for cuts and breakage. {marks}\n\n"
+           f"That is {_fmt(area)} m² of floor in the {n} {"bathroom or WC" if n == 1 else "bathrooms and WCs"}, plus {pct:g}% for cuts and breakage. {marks}\n\n"
            f"Assumptions, not from the drawing: {TILE_BOX_M2} m² per box (four 60 x 60 cm tiles) and about €{TILE_EUR_M2:.0f} per m², "
            f"so roughly **€{cost:,.0f}**. This is a rough guide, not a quote.")
     base["answer"].update({"text_md": txt, "value": round(need, 1), "unit": "m2", "confidence": min(base["answer"].get("confidence") or 0.85, 0.85)})
@@ -1128,7 +1192,7 @@ def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
     res = quantity_takeoff(question, doc, t0)
     if res is not None:
         return res
-    for fn in (piping, slab_by_type, baseboard, room_list, wet_rooms, count_where, storey_pair, storey_compare, total_and_storey, cond_count, exact_size, kind_compare, compliance, plan_total, plain_limits, plan_slab_pipe, superlative_room, where_rooms):
+    for fn in (piping, slab_by_type, baseboard, room_list, wet_rooms, count_where, storey_table, building_safety, storey_pair, storey_compare, total_and_storey, cond_count, exact_size, kind_compare, compliance, plan_total, plain_limits, plan_slab_pipe, superlative_room, where_rooms):
         res = fn(question, doc, t0)
         if res is not None:
             return res

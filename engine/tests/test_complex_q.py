@@ -106,3 +106,24 @@ def test_file_info_and_incomplete_questions_cost_nothing(monkeypatch, q, must):
     from engine.answer import answer
     a = answer(q, ["ifc_bench__ac20-arc"])
     assert must in a["answer"]["text_md"] and a["cost"]["usd_total"] == 0
+
+
+def test_file_info_reads_scale_from_plan_map():
+    from engine.answer import answer
+    assert "m per pixel" in answer("what file is this", ["ifc_bench__ac20-arc"])["answer"]["text_md"]
+
+
+def test_qa_live_ac20_failures():
+    from engine.answer import answer
+    D = ["ifc_bench__ac20-arc"]
+    t = answer("how many wndows are ther in the basment", D)["answer"]["text_md"]
+    assert "44" in t and "Keller" in t
+    for q in ("what is the total floor area of each storey?", "total floor area per storey"):
+        a = answer(q, D)
+        assert a["cost"]["usd_total"] == 0 and "Keller 438.1" in a["answer"]["text_md"]
+    a = answer("what if we remove the main staircase?", D)
+    cmd = a["evidence"]["scene"]["commands"][0]
+    assert len(cmd["item_ids"]) == 1 and "stairses" not in a["answer"]["text_md"] and "3 of 4 stairs" in a["answer"]["text_md"]
+    t = answer("where is the biggest meeting room?", D)["answer"]["text_md"]
+    assert "Besprechungsraum II" in t and "24.8 m²" in t
+    assert "No room named" in answer("biggest meeting room on the first floor", D)["answer"]["text_md"]

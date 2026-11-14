@@ -318,6 +318,8 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
     setSelected(sources[index]?.itemIds[0] ?? null, '2d')
   }
 
+  // IFC docs report pages=1 though each storey has a plan page; never show "2 / 1".
+  const totalPages = doc ? Math.max(doc.pages, citation.page) : undefined
   return <aside ref={panel} className={`document-viewer ${sheet ? 'viewer-sheet' : ''}`} role={sheet ? 'dialog' : 'region'} aria-modal={sheet || undefined} aria-label={sheet ? undefined : "Drawing viewer"} aria-labelledby={sheet ? titleId : undefined}
     onKeyDown={(event) => {
       if (mode === '3d' && event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); changeMode('2d'); return }
@@ -343,7 +345,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       <button ref={close} type="button" className="button button-ghost button-size-icon" aria-label="Close drawing viewer" onClick={onClose}><X size={18} /></button>
     </header>
     <div className="viewer-toolbar" aria-label="Drawing controls" hidden={mode === '3d'}>
-      <div className="viewer-page-position"><Button variant="ghost" size="icon-xs" aria-label="Previous page" disabled={citation.page <= 1} onClick={() => changePage(citation.page - 1)}><ChevronLeft size={14} /></Button><span className="page-number">{citation.page}</span><span>/ {doc?.pages ?? '…'}</span><Button variant="ghost" size="icon-xs" aria-label="Next page" disabled={!doc || citation.page >= doc.pages} onClick={() => changePage(citation.page + 1)}><ChevronRight size={14} /></Button></div>
+      <div className="viewer-page-position"><Button variant="ghost" size="icon-xs" aria-label="Previous page" disabled={citation.page <= 1} onClick={() => changePage(citation.page - 1)}><ChevronLeft size={14} /></Button><span className="page-number">{citation.page}</span><span>/ {totalPages ?? '…'}</span><Button variant="ghost" size="icon-xs" aria-label="Next page" disabled={!totalPages || citation.page >= totalPages} onClick={() => changePage(citation.page + 1)}><ChevronRight size={14} /></Button></div>
       <span className="toolbar-spacer" />
       <div className="viewer-markup-tools">
         <Button variant="ghost" size="icon-sm" aria-label="Search sheet" aria-expanded={searchOpen} aria-controls="viewer-sheet-search" onClick={(event) => { searchTrigger.current = event.currentTarget; if (searchOpen) closeSearch(); else setSearchOpen(true) }}><Search size={16} /></Button>

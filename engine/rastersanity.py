@@ -89,7 +89,7 @@ def guard(res: dict, question: str, doc) -> dict:
                     "value": None, "confidence": 0.3, "abstained": False})
         res["trace"] = list(res.get("trace") or []) + [{"step": "sanity", "detail": f"area withheld: {why}", "ms": 0, "model": None, "cost_usd": 0}]
         return res
-    if doc.mode == "planmap" and _guessed_scale(doc) and not ans.get("abstained") and "m²" in ans.get("text_md", ""):
+    if doc.mode == "planmap" and _guessed_scale(doc) and not ans.get("abstained") and ("m²" in ans.get("text_md", "") or " m2 |" in ans.get("text_md", "")):
         t = ans["text_md"].rstrip()
         for old in (" This is approximate: the drawing has no printed scale, so the size is estimated from the doors.",
                     " The drawing has no printed scale, so areas are estimated from door sizes and are approximate."):

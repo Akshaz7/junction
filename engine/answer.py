@@ -259,6 +259,13 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
            history: list[dict] | None = None) -> dict:
     # thread memory (engine/context.py): every route below sees the resolved, standalone question and document selection
     original, step = question, None
+    try:  # keyboard mash or nonsense: say so, never reuse the previous answer
+        from engine.gibberish import MESSAGE, is_gibberish
+        if is_gibberish(question):
+            return _abstained(question, doc_ids, MESSAGE, [{"step": "gibberish", "detail": "no recognisable words", "ms": 0, "model": None, "cost_usd": 0}],
+                              time.perf_counter(), "index")
+    except Exception:  # noqa: BLE001
+        pass
     try:
         from engine.context import resolve
         rs = resolve(question, doc_ids, history, _root())
@@ -330,7 +337,8 @@ def _answer_forced(question: str, doc_ids: list[str], on_event: Callable | None 
 
 _TYPOS = [(r"\bflor\b", "floor"), (r"\bflors\b", "floors"), (r"\bmny\b", "many"), (r"\bpeple\b|\bpeopel\b|\bpepole\b", "people"),
           (r"\bwindws\b|\bwindoes\b|\bwindos\b", "windows"), (r"\bdors\b|\bdoores\b", "doors"), (r"\brooom\b", "room"), (r"\broomss\b", "rooms"),
-          (r"\bwich\b", "which"), (r"\bwher\b|\bwhere's\b(?=\s+the\s+lift)", "where"), (r"\bbiggets\b|\bbigest\b", "biggest"), (r"\bstares\b|\bstiars\b", "stairs"), (r"\btoilests\b|\btoliets\b", "toilets")]
+          (r"\bwich\b", "which"), (r"\bwher\b|\bwhere's\b(?=\s+the\s+lift)", "where"), (r"\bbiggets\b|\bbigest\b", "biggest"), (r"\bstares\b|\bstiars\b", "stairs"), (r"\btoilests\b|\btoliets\b", "toilets"),
+          (r"\bbasment\b|\bbasemnt\b|\bbasemet\b", "basement"), (r"\bther\b", "there"), (r"\bstorys\b|\bstoreis\b", "storeys")]
 
 
 def _fix_typos(q: str) -> str:
@@ -378,8 +386,18 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             if _src:
                 _lines.append(f"- File: {', '.join(_src)}")
             _lines.append(f"- Pages: {_meta.get('pages') or 1}")
-            if _meta.get("scale"):
-                _lines.append(f"- Scale: {_meta['scale']}")
+            _sc = _meta.get("scale")
+            if not _sc:
+                try:
+                    _pm = json.loads(sorted((root / doc_ids[0]).glob("planmap-*.json"))[0].read_text()).get("scale") or {}
+                except (OSError, ValueError, IndexError):
+                    _pm = {}
+                if _pm.get("m_per_px") and _pm.get("method") != "none":
+                    _how = {"ifc": "from the IFC model", "dimension": "from a dimension on the drawing", "scalebar": "from the scale bar",
+                            "dxf-units": "from the DXF units", "door-prior": "estimated from door widths"}.get(_pm["method"], _pm["method"])
+                    _sc = f"{_pm['m_per_px']:g} m per pixel, {_how}"
+            if _sc:
+                _lines.append(f"- Scale: {_sc}")
             if _meta.get("source"):
                 _lines.append(f"- Source: {_meta['source']}")
             return _answer_obj(question, doc_ids, "\n".join(_lines), None, None, 0.95, False, [], [], {"doc_id": doc_ids[0], "highlight_item_ids": [], "camera_target_item_id": None}, trace, "index", t0)
@@ -453,6 +471,19 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             res["trace"] = trace
             return res
 
+        # text-layer upload with no plan map: answer from the file's printed text (notes, schedule rows), "not shown" only when absent
+        try:
+            from engine import textfile
+            from engine.solvers.data import load_doc as _ldt
+            if len(doc_ids) == 1 and _ldt(doc_ids[0], root) is None \
+                    and (res := textfile.answer(question, doc_ids, root, t0)) is not None:
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                return res
+        except Exception:  # never break the answer path
+            pass
+
         # FIX-14: engineering sheets (M-/S-/P- ids, tag or SF tables) are answered from their own text, never from a plan map
         try:
             from engine import sheetqa
@@ -466,19 +497,6 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                 # a count nobody could find on an engineering sheet is "not found", never "About 0"
                 return _abstained(question, doc_ids, "I couldn't find that on this sheet: no matching tags or table rows. "
                                   "Check the legend or ask with the tag (for example FP-1).", trace, t0, "index", calls=None)
-        except Exception:  # never break the answer path
-            pass
-
-        # text-layer upload with no plan map: answer from the file's printed text (notes, schedule rows), "not shown" only when absent
-        try:
-            from engine import textfile
-            from engine.solvers.data import load_doc as _ldt
-            if len(doc_ids) == 1 and _ldt(doc_ids[0], root) is None \
-                    and (res := textfile.answer(question, doc_ids, root, t0)) is not None:
-                for s_ in res["trace"]:
-                    add(s_)
-                res["trace"] = trace
-                return res
         except Exception:  # never break the answer path
             pass
 
