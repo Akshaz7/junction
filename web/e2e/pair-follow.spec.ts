@@ -33,6 +33,8 @@ test('paired phone auto-opens the laptop new chat; stranger does not; pairing pe
 
     // Laptop asks in a brand-new chat; the phone shows it streaming within 2 s.
     await d.keyboard.press('Escape')
+    await d.getByRole('combobox', { name: box }).fill('@') // a drawing question needs a document attached
+    await d.getByRole('option').first().click()
     await d.getByRole('combobox', { name: box }).fill(QUESTION)
     await d.getByRole('combobox', { name: box }).press('Enter')
     await expect(p).toHaveURL(/#\/chat\?chat=/, { timeout: 2000 })

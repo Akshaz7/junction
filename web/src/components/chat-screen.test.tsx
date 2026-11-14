@@ -118,3 +118,22 @@ it('a known chat opens with Follow on, and nothing happens with Follow off', asy
   await act(async () => emitQuestion('laptop-chat'))
   expect(window.location.hash).toBe('#/chat?chat=laptop-chat')
 })
+
+it('a pair.chat proof for this device\'s code opens the chat before its first message; a wrong proof or Follow off does not', async () => {
+  const { addPairing } = await import('../lib/pairing')
+  const { createHash } = await import('node:crypto')
+  await mount()
+  addPairing('abc12345')
+  const proof = createHash('sha256').update('abc12345:proof-chat').digest('hex').slice(0, 16)
+  const emitProof = (chatId: string, value: string) => { for (const fn of live.listeners) fn({ type: 'pair.chat', chat_id: chatId, proof: value }) }
+  await act(async () => setFollow(true))
+  window.location.hash = '#/chat'
+  await act(async () => emitProof('proof-chat', 'deadbeefdeadbeef'))
+  expect(window.location.hash).toBe('#/chat')
+  await act(async () => setFollow(false))
+  await act(async () => emitProof('proof-chat', proof))
+  expect(window.location.hash).toBe('#/chat')
+  await act(async () => setFollow(true))
+  await act(async () => emitProof('proof-chat', proof))
+  expect(window.location.hash).toBe('#/chat?chat=proof-chat')
+})

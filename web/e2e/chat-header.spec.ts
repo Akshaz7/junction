@@ -108,7 +108,10 @@ test('a saved snapshot keeps the streamed answer citation focused and its detail
     ] } })
   })
   await page.goto('/#/chat')
-  await page.getByRole('combobox', { name: 'Ask about your drawings' }).fill(answer.question)
+  const composer = page.getByRole('combobox', { name: 'Ask about your drawings' })
+  await composer.fill('@') // a drawing question needs a document attached
+  await page.getByRole('option').first().click()
+  await composer.fill(answer.question)
   await page.getByRole('button', { name: 'Send question', exact: true }).click()
   const card = page.locator('.exchange').filter({ has: page.locator('.answer-text') })
   await expect(card).toHaveCount(1)

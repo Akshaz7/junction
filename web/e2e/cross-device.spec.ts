@@ -134,6 +134,8 @@ test('a new chat from another device shows a banner; Open follows its live strea
       await d.keyboard.press('Escape')
     }
     const q1 = "How many doors are there?"
+    await d.getByRole('combobox', { name: 'Ask about your drawings' }).fill('@') // a drawing question needs a document attached
+    await d.getByRole('option').first().click()
     await d.getByRole('combobox', { name: 'Ask about your drawings' }).fill(q1)
     const t0 = Date.now()
     await d.getByRole('button', { name: 'Send question', exact: true }).click()

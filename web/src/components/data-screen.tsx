@@ -189,6 +189,14 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const lastOpened = useRef<HTMLButtonElement | null>(null)
 
   function openUpload() { setUploadError(''); setUploadOpen(true) }
+  useEffect(() => { // chat's "Upload" note lands here with the dialog already open (the screen may stay mounted)
+    function check() {
+      try { if (window.location.hash.startsWith('#/data') && sessionStorage.getItem('hologram.open-upload')) { sessionStorage.removeItem('hologram.open-upload'); setUploadError(''); setUploadOpen(true) } } catch { /* optional */ }
+    }
+    check()
+    window.addEventListener('hashchange', check)
+    return () => window.removeEventListener('hashchange', check)
+  }, [])
 
   useEffect(() => {
     function followUploadLink() {

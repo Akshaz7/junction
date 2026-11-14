@@ -15,6 +15,7 @@ import { chatLink, savedExchanges, type ChatExchange } from '../lib/chat-history
 import { chatLive } from '../lib/chat-live'
 import { useSceneEdits } from '../lib/use-scene-edits'
 import { DrawingEditsContext } from '../lib/scene-edit-context'
+import { needsDocument } from '../lib/needs-document'
 import { SkillPicker } from './skills-screen'
 import { FollowBanner, useFollow } from './follow-banner'
 import './follow-banner.css'
@@ -49,6 +50,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   // A question whose stream ended without an answer: kept on screen with Retry.
   const [failed, setFailed] = useState<{ question: string; docIds: string[] } | null>(null)
   const [mention, setMention] = useState<Mention | null>(null)
+  const [needDoc, setNeedDoc] = useState(false)
+  const blocked = useRef('')
   const [toolsOpen, setToolsOpen] = useState(false)
   const [activeOption, setActiveOption] = useState(0)
   const [viewer, setViewer] = useState<{ answer: Answer; citation: Citation; request: number; mode?: '2d' | '3d' } | null>(null)
@@ -213,7 +216,14 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   useEffect(() => {
     if (demo) return
     return chatLive.subscribe((event) => {
-      if (event.type === 'pair.chat') { void acceptPairProof(event.chat_id, event.proof); return }
+      if (event.type === 'pair.chat') {
+        // A paired device just started this chat: open it now, ahead of its first message event.
+        void acceptPairProof(event.chat_id, event.proof).then((mine) => {
+          if (mine && followingRef.current && !submitting.current && event.chat_id !== chatId.current)
+            window.location.hash = `#/chat?chat=${encodeURIComponent(event.chat_id)}`
+        })
+        return
+      }
       if (event.type !== 'chat.message' || event.role !== 'user' || submitting.current) return
       if (event.chat_id === chatId.current) return
       // Strangers' chats never raise the notice: only with Follow on, and only for chats this browser knows.
@@ -298,6 +308,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   function chooseDocument(doc: Document) {
     if (!mention) return
     setSelected((previous) => [...previous, doc])
+    setNeedDoc(false)
+    if (blocked.current) { const held = blocked.current; blocked.current = ''; setMention(null); void ask(held, [doc.doc_id]); return }
     const value = draft.slice(0, mention.start) + draft.slice(mention.end)
     const caret = mention.start
     setDraft(value)
@@ -318,6 +330,9 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
 
   async function ask(question: string, documentIds?: string[]) {
     if (!question.trim() || submitting.current || restoring || !docs.length) return
+    // A drawing question with nothing attached would hang on "Thinking…": ask for a document and keep the text.
+    if (!documentIds && !selected.length && !chatId.current && needsDocument(question)) { blocked.current = question; setNeedDoc(true); return }
+    setNeedDoc(false)
     const version = generation.current
     submitting.current = true
     setBusy(true)
@@ -424,13 +439,21 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       {busy && <div className="exchange pending-exchange" aria-busy="true">
         <div className="question-bubble">{pendingQuestion}</div>
         {statuses.length > 1 && <ul className="status-trail" aria-label="Steps so far">{statuses.slice(0, -1).map((text, index) => <li key={`${index}-${text}`}>{text}</li>)}</ul>}
-        <div className="status-lines" role="status" aria-live="polite"><span className="thinking-mark" aria-hidden="true">H</span><ThinkingText text={statuses.at(-1) || 'Thinking…'} /></div>
+        <div className="status-lines" role="status" aria-live="polite"><span className="thinking-mark" aria-hidden="true">S</span><ThinkingText text={statuses.at(-1) || 'Thinking…'} /></div>
         {!!streamText && <p className="answer-text streaming-text" data-testid="streaming-answer">{streamText.replace(/\*\*/g, '')}</p>}
         {!!traces.length && <details className="answer-detail"><summary>Show thought process</summary>{traces.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>}
       </div>}
     </div>
     <div className="composer-area">
       {error && !failed && <p className="error-message" role="alert">{error}</p>}
+      {needDoc && !selected.length && <div className="need-document" role="alert" data-testid="need-document">
+        <strong>Add a drawing first</strong>
+        <span>This question needs a drawing or model to read. Your text is kept.</span>
+        <div className="need-document-actions">
+          <Button variant="raised" onClick={() => { setNeedDoc(false); const at = draft.endsWith(' ') || !draft ? '@' : ' @'; const next = draft + at; setDraft(next); textarea.current?.focus(); updateMention(next, next.length) }}>Choose a document</Button>
+          <Button variant="raised" onClick={() => { try { sessionStorage.setItem('hologram.open-upload', '1') } catch { /* optional */ } window.location.hash = '/data' }}>Upload</Button>
+        </div>
+      </div>}
       <form className="composer" onSubmit={(event) => { event.preventDefault(); if (!mention) void ask(draft) }}>
         {!!selected.length && <div className="selected-documents" aria-label="Selected documents">{selected.map((doc) => <span className="chip document-chip" key={doc.doc_id}><FileText size={13} /><span>{doc.title}</span><button type="button" disabled={busy} aria-label={`Remove ${doc.title}`} onClick={() => setSelected((previous) => previous.filter((item) => item.doc_id !== doc.doc_id))}><X size={13} /></button></span>)}</div>}
         <div className="composer-input"><label className="sr-only" htmlFor="question">Ask about your drawings</label>
