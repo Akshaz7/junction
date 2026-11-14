@@ -73,8 +73,9 @@ test('desktop asks; phone sees in-progress states before the final answer with c
     const firstEventMs = Date.now() - t0
     console.log(JSON.stringify({ firstEventMs }))
     await expect(p.locator('.pending-exchange .status-lines')).toBeVisible()
-    await expect(p.locator('.pending-exchange .answer-detail')).toBeVisible({ timeout: 5000 }) // trace steps streamed in
     const slowCard = p.locator('.exchange:not(.pending-exchange)').filter({ hasText: SLOW_QUESTION }).last()
+    // Trace steps streamed in (a local engine can answer this one instantly, in which case the answer is already there).
+    await expect(p.locator('.pending-exchange .answer-detail').or(slowCard.locator('.answer-text'))).toBeVisible({ timeout: 5000 })
     await expect(slowCard.locator('.answer-text')).toBeVisible({ timeout: 40_000 })
     const answerMs = Date.now() - t0
     const seen = await p.evaluate(() => (window as unknown as { __seen: Record<string, number> }).__seen)

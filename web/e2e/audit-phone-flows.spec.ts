@@ -22,7 +22,7 @@ async function openDocInChat(page: Page, doc: Document) {
   await openRoute(page, 'data')
   await page.getByRole('searchbox', { name: 'Search documents' }).fill(doc.doc_id)
   await page.locator(`[data-doc-id="${doc.doc_id}"] .data-open-file`).click()
-  const details = page.getByRole('complementary', { name: 'Document details' })
+  const details = page.locator('aside.data-detail[role=dialog]') // phone: a modal sheet named by the document title (W-48)
   await expect(details).toBeVisible()
   await details.getByRole('button', { name: 'Ask about it', exact: true }).first().click()
   await expect(page).toHaveURL(/#\/chat/)
@@ -59,10 +59,10 @@ for (const config of configs) {
       const openCitation = async () => {
         await reopen()
         await page.getByRole('button', { name: `Open citation ${answer.citations[0].n}`, exact: true }).first().click()
-        await expect(page.getByRole('dialog', { name: 'Drawing viewer', exact: true })).toBeVisible()
+        await expect(page.locator('aside.document-viewer[role=dialog]')).toBeVisible()
       }
       await openCitation()
-      const viewer = page.getByRole('dialog', { name: 'Drawing viewer', exact: true })
+      const viewer = page.locator('aside.document-viewer[role=dialog]')
       const box = await viewer.boundingBox()
       expect(box && box.width >= 389 && box.height >= 800, 'evidence sheet is full screen').toBe(true)
       await page.waitForTimeout(900)
@@ -79,7 +79,7 @@ for (const config of configs) {
       const visualise = card.getByRole('button', { name: 'Visualise it', exact: true }).or(page.getByRole('button', { name: 'Visualise it', exact: true })).first()
       if (await visualise.count()) {
         await visualise.click()
-        const panel = page.getByRole('dialog', { name: /Visualise it|Drawing viewer|3D/ }).first()
+        const panel = page.locator('aside.document-viewer[role=dialog]').first()
         await expect(panel).toBeVisible()
         await expect(page.getByRole('region', { name: '3D viewer', exact: true })).toBeVisible({ timeout: 20_000 })
         await layoutChecks(page, audit, '3D view')
@@ -163,7 +163,8 @@ for (const config of configs) {
       const open = findings.getByRole('button', { name: /Open finding/ }).first()
       if (await open.count()) {
         await open.click()
-        await expect(page.getByRole('dialog', { name: /Drawing viewer|Visualise/ }).first()).toBeVisible({ timeout: 20_000 })
+        // findings open the 3D panel (native dialog) or the drawing sheet
+        await expect(page.locator('aside.document-viewer[role=dialog], dialog.viewer3d-visualise-panel[open]').first()).toBeVisible({ timeout: 20_000 })
         await closeLayers(page, audit, 'tools finding evidence')
       }
 

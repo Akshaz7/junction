@@ -27,7 +27,7 @@ for (const config of configs) {
       const nav = page.getByRole('navigation', { name: 'Mobile navigation', exact: true })
       await expect(nav).toBeVisible()
       const tabs: Record<string, string> = { Overview: 'overview', Chat: 'chat', Changes: 'changes', Data: 'data' }
-      const more: Record<string, string> = { Compare: 'compare', Library: 'library', Tools: 'tools', Accuracy: 'accuracy' }
+      const more: Record<string, string> = { Compare: 'compare', Library: 'library', Tools: 'tools' } // Accuracy left the navigation in W-55; its route is still crawled by URL below
       for (const [name, route] of Object.entries(tabs)) {
         await nav.getByRole('link', { name, exact: true }).click()
         await expect(page).toHaveURL(new RegExp(`#/${route}`))
