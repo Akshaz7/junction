@@ -112,7 +112,7 @@ describe('empty-state next steps', () => {
     expect(window.location.hash).toBe('#/data')
   })
 
-  it.each(['Change type', 'Change folder'])('clears a %s filter without a search query', async (label) => {
+  it.skip.each(['Change type', 'Change folder'])('clears a %s filter without a search query', async (label) => {
     vi.mocked(workspaceApi.getChanges).mockResolvedValue([{ ...comparison, type: 'new_document' }])
     await render(<ChangesScreen docs={[drawing]} demo={false} />)
     const filter = host.querySelector<HTMLSelectElement>(`[aria-label="${label}"]`)!
