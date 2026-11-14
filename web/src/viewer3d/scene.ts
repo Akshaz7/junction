@@ -31,6 +31,8 @@ export interface SceneManifest {
   origin_offset_m: Vec3;
   storeys: Storey[];
   plan_image?: SceneAsset | null;
+  /** Written by the PDF-to-3D pipeline; `summary` is a plain-words accuracy note. */
+  quality?: { summary?: string | null } | null;
   items: Record<string, SceneItem>;
 }
 

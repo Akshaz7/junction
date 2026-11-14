@@ -1,4 +1,5 @@
 import type { Answer, Citation } from '../lib/types'
+import { qualitySummary } from '../lib/scene-quality'
 import './evidence-card.css'
 
 /** "How we know": the steps behind an answer and how sure we are. Steps with a citation open it. */
@@ -6,6 +7,7 @@ export function EvidenceCard({ answer, selected, onOpenCitation }: { answer: Ans
   const reasoning = answer.reasoning
   if (!reasoning?.steps?.length) return null
   const { confidence } = reasoning
+  const quality = qualitySummary(reasoning.quality)
   const tone = confidence.label === 'Estimate' ? 'is-estimate' : 'is-verified'
   return <section className="evidence-card" aria-label="How we know" data-testid="evidence-card">
     <h3 className="evidence-heading">How we know</h3>
@@ -31,6 +33,7 @@ export function EvidenceCard({ answer, selected, onOpenCitation }: { answer: Ans
       <span className={`evidence-pill ${tone}`} aria-label={`Confidence: ${confidence.label}, ${confidence.pct} percent`}>{confidence.label} · {confidence.pct}%</span>
       <span className="evidence-reason">{confidence.reason}</span>
     </div>
+    {quality && <p className="evidence-quality" data-testid="evidence-quality">3D accuracy: {quality}</p>}
     {confidence.improve && <p className="evidence-improve">To make it exact: {confidence.improve}</p>}
   </section>
 }

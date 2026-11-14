@@ -47,3 +47,14 @@ it('renders nothing without reasoning', async () => {
   await act(async () => root.render(<EvidenceCard answer={{ ...answer, reasoning: undefined }} onOpenCitation={vi.fn()} />))
   expect(host.innerHTML).toBe('')
 })
+
+it('shows one 3D accuracy line only when the scene has a quality summary', async () => {
+  const withQuality = { ...answer, reasoning: { ...answer.reasoning!, quality: { summary: 'Walls match the drawing within 2%' } } } as Answer
+  await act(async () => root.render(<EvidenceCard answer={withQuality} onOpenCitation={vi.fn()} />))
+  expect(host.querySelector('[data-testid="evidence-quality"]')?.textContent).toBe('3D accuracy: Walls match the drawing within 2%')
+  await act(async () => root.render(<EvidenceCard answer={answer} onOpenCitation={vi.fn()} />))
+  expect(host.querySelector('[data-testid="evidence-quality"]')).toBeNull()
+  const blank = { ...answer, reasoning: { ...answer.reasoning!, quality: { summary: '  ' } } } as Answer
+  await act(async () => root.render(<EvidenceCard answer={blank} onOpenCitation={vi.fn()} />))
+  expect(host.querySelector('[data-testid="evidence-quality"]')).toBeNull()
+})

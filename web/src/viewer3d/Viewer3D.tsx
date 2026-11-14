@@ -24,6 +24,7 @@ import { FindingsPanel } from './FindingsPanel';
 import { roomTypeLabel } from './blueprint';
 import { itemKindKey, pipeSizeLabel } from '../lib/kind-colors';
 import type { FindingPinState } from './findings';
+import { qualitySummary } from '../lib/scene-quality';
 import './viewer3d.css';
 
 interface ViewerOptions {
@@ -351,6 +352,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
   const approximated = manifest !== null && (Boolean(manifest.plan_image)
     || (manifest as { approx?: boolean }).approx === true
     || Object.values(manifest.items).some((item) => (item.props as { approx?: unknown } | null | undefined)?.approx === true));
+  const quality = qualitySummary(manifest?.quality)
   function selectStorey(name: string | null) {
     cancelMove();
     viewerRef.current?.setStorey(name);
@@ -434,7 +436,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
           : 'Loading 3D scene…'}
       </p>}
       {state === 'error' && <p className="viewer3d-message" role="alert">{error}</p>}
-      {state === 'ready' && approximated && <p className="viewer3d-approx" data-testid="approx-note">3D approximated from the drawing</p>}
+      {state === 'ready' && approximated && <p className="viewer3d-approx" data-testid="approx-note">3D approximated from the drawing{quality && <span className="viewer3d-quality" data-testid="quality-badge" title={quality}>{quality}</span>}</p>}
       {state === 'ready' && answerKinds.length > 0 && <KindLegend className="kind-legend-3d" kinds={answerKinds} />}
       {picked && <output className="viewer3d-picked-overlay" aria-label="Picked item" aria-live="polite">{picked}</output>}
       {walking && <WalkJoystick onMove={(x, y) => viewerRef.current?.setWalkJoystick(x, y)} />}

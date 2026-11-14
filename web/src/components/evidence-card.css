@@ -16,3 +16,4 @@
 .evidence-pill.is-estimate { color: var(--warning); }
 .evidence-reason, .evidence-improve { font-size: var(--text-body-sm); color: var(--muted-foreground); }
 .evidence-improve { margin: 6px 0 0; }
+.evidence-quality { margin: 6px 0 0; font-size: var(--text-body-sm); color: var(--muted-foreground); }
