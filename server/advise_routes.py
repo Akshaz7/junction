@@ -23,7 +23,7 @@ SOURCE_TYPES = ("rule", "material_table", "document")
 MAX_CARDS, MAX_TITLE, MAX_BODY, MAX_QUOTE = 3, 60, 200, 200
 
 
-ADVISE_OPS = ("hide", "restore", "move", "material", "undo")  # move/material are local what-ifs, never persisted
+ADVISE_OPS = ("hide", "restore", "move", "material", "undo", "resize", "narrow", "scale", "set_width")  # move/material are local what-ifs, never persisted
 MAX_ITEMS, MAX_DETAIL_BYTES = 200, 4000
 
 

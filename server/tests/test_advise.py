@@ -117,3 +117,13 @@ def test_advise_rejects_unknown_ops_and_bad_detail(client):
            {"op": "move", "item_ids": ["a"], "detail": {"k": "x" * 5000}}]
     for e in bad:
         assert client.post("/api/advise", json={"doc_id": DOC, "edit": e}).status_code == 422
+
+
+def test_size_edits_reach_the_advisor(client, monkeypatch):
+    """E-16: a 'narrow' edit is a valid advise request (the engine's door-width rule needs it)."""
+    from server import advise_routes
+    seen = {}
+    monkeypatch.setattr(advise_routes, "_engine_advise", lambda: (lambda d, e, c=None: seen.setdefault("e", e) and []))
+    r = client.post("/api/advise", json={"doc_id": DOC, "edit": {"op": "narrow", "item_ids": ["x"], "detail": {"width_m": 0.7}}})
+    assert r.status_code == 200
+    assert seen["e"]["op"] == "narrow"
