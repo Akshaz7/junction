@@ -313,11 +313,23 @@ def run(ctx, rows, missing, arithmetic):
         label = i.label or i.name or i.kind.replace("_", " ").capitalize()
         calc_rows.append({"item_id": i.item_id, "label": label, "values": {unit: t["value"]}, "source": src})
         inputs.append({"name": label, "value": t["value"], "unit": unit, "source": src})
+    sanity = []
+    if terms and rows and all(d.mode == "ifc" for d, _, _ in rows):
+        totals = {}
+        for t in terms:
+            d, i = resolved[(t["doc_id"], t["item_id"])]
+            key = (d.doc_id, i.storey or "Unassigned")
+            totals[key] = totals.get(key, 0) + t["value"]
+        c = compare("element sum / storey regrouping", sum(t["value"] for t in terms), sum(totals.values()), unit,
+                    [source(d, i) for d, i, _ in rows], independent=False,
+                    note="Arithmetic check only: both sums reuse the same elements and cannot verify missing elements or quantities.")
+        c["groups"] = [{"doc_id": d, "label": s, "value": v, "unit": unit} for (d, s), v in totals.items()]
+        sanity.append(c)
     result = {"formula": (arithmetic or {}).get("formula", "Full source arithmetic unavailable"),
             "steps": [{"id": "sum", "label": "Add cited quantities", "expr": "Σ source quantities", "value": value,
                        "unit": unit, "inputs": inputs}] if terms else [], "rows": calc_rows,
             "result": {"value": value, "unit": unit, "rounded_as": "as reported in the answer"},
-            "checks": checks, "item_checks": per_item,
+            "checks": checks, "item_checks": per_item, "sanity_checks": sanity,
             "unavailable": [] if checks else ["No independent second reading covers the complete answer."],
             "reconciled": bool(arithmetic)}
     if recovered:

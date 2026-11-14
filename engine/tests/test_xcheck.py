@@ -215,3 +215,13 @@ def test_duplicate_checks_for_one_item_cannot_cover_missing_second_item(tmp_path
     ctx = context(doc, value=10, unit="m", root=tmp_path)
     calc = xcheck.run(ctx, [(doc, a, 1), (doc, b, 1)], 0, None)
     assert not calc["reconciled"] and not calc["checks"]
+
+
+def test_storey_regrouping_is_not_an_independent_verification():
+    a = Item("a", "room", source="ifc", storey="A", q={"area_m2": 3})
+    b = Item("b", "room", source="ifc", storey="B", q={"area_m2": 7})
+    doc = Doc("d", "ifc", [a, b])
+    ctx = context(doc, value=10)
+    calc = margin.run(ctx)["calc"]
+    assert not calc["checks"] and calc["sanity_checks"][0]["independent"] is False
+    assert calc["sanity_checks"][0]["value"] == 10 and ctx["checked"] is None

@@ -160,6 +160,23 @@ def audit(sets, root, output, recount_cache, ifc_checks=()):
                           "unavailable": sum("unavailable" in c for c in cases), "live_cost_usd": 0},
               "cases": cases, "observations": observations}
     report["native_validation"] = validation
+    available = {o["method"] for o in observations}
+    methods = {
+        "printed area / room outline": "Requires a separately read area label and an outline with scale not derived from that label.",
+        "room sum / outer outline minus walls": "Requires separately drawn outer boundaries and wall solids covering exactly the selected rooms.",
+        "vector segments / raster skeleton": "Requires an independently extracted, source-linked raster skeleton; none is fabricated from vectors.",
+        "detector / drawing recount": "Requires a real independent recount for the exact image and question.",
+        "IFC Qto / geometry footprint": "Requires a net area quantity with known units and independently measured room geometry.",
+        "IFC Qto / closed geometry volume": "Requires a net volume quantity and a closed, consistently wound mesh.",
+        "IFC Qto / model axis": "Requires a quantity-set length and a supported explicit geometric centreline or straight sweep.",
+        "IFC typed length / model axis": "Requires a unit-bearing model length property and a supported geometric centreline; this is not labelled Qto.",
+    }
+    report["method_availability"] = [{"method": m, "observed": m in available, "requirement": why,
+                                      "n": sum(o["method"] == m for o in observations)} for m, why in methods.items()]
+    report["limitations"] = ["Agreement is descriptive, not an accuracy estimate or construction tolerance.",
+                             "Repeated measurements from one file can share scale, modelling or detection errors.",
+                             "No comparison is inferred for questions with missing independent source data.",
+                             "Filled pixels versus their own contour and storey regroupings are correlated checks and excluded from calibration."]
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2, ensure_ascii=False, allow_nan=False) + "\n")
     return report
