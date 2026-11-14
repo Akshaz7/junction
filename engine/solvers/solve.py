@@ -194,6 +194,12 @@ def _cite_label(doc: Doc, its: list[Item], page: int) -> str:
 def _evidence(doc: Doc, items: list[Item]):
     items = _reading_order(items)
     boxes, cites = [], []
+    if not items:
+        cites.append({"n": 1, "doc_id": doc.doc_id, "page": 1,
+                      "kind": "element" if doc.mode == "ifc" else "region", "bbox_px": None,
+                      "item_ids": [], "quote": "Checked the stored model inventory; no items match the requested scope."
+                      if doc.mode == "ifc" else "Checked the stored drawing detections; no items match the requested scope. Undetected objects may still be present.",
+                      "inventory_check": True})
     if doc.mode == "planmap":
         by_page: dict[int, list[Item]] = {}
         for i in items:

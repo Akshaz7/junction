@@ -116,6 +116,8 @@ def _selection(question, doc):
                 if st:
                     target = re.sub(re.escape(st), "", target, flags=re.I)
                 target = re.sub(r"\b(?:on|in|of|the)\b", "", target, flags=re.I).strip()
+                if re.fullmatch(r"(?:recorded\s+)?(?:door|window)s?\s+count", target, re.I):
+                    target = ""  # The source quantity is the basis, not a room name.
                 if target and not re.fullmatch(r"(?:all |whole |entire )*(?:rooms?|building|model|plan|floor)", target, re.I):
                     return [], [], "The requested rooms cannot be identified in this file; no other rooms were substituted."
     excluded = re.split(r"\b(?:excluding|except|not counting|without)\b", question, maxsplit=1, flags=re.I)
@@ -263,7 +265,7 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
         if not error and typ == "count":
             kind = "door" if label == "Doors" else "window"
             used = [i for i in items if i.kind == kind]
-            if used:
+            if used or doc.mode == "ifc":
                 measured, how = len(used), "Counted the cited elements."
         elif not error and typ == "floor":
             areas = [_floor_area(r, doc, root) for r in rooms]
@@ -294,7 +296,7 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
         if measured is not None and not math.isfinite(measured * (1 + pct / 100) * 100):
             measured, used, how = None, [], "The recorded quantity or allowance is too large to calculate reliably."
         src = ""
-        if used and measured is not None:
+        if measured is not None and (used or measured == 0):
             bx, cs, _ = _evidence(doc, used)
             offset = len(cites)
             for c in cs:

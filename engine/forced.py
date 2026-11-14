@@ -1,8 +1,9 @@
 """Last rung of the ladder: a best-effort answer when code, vision recount and the reader all abstained (Ash: zero abstentions).
 
-forced_answer(question, doc_ids, root, parsed) -> answer object, never abstained. One cheap call("forced_answer") with the page image
+forced_answer(question, doc_ids, root, parsed) -> answer object. One cheap call("forced_answer") with the page image
 (when there is one) plus whatever text the document has (text layer words, IFC facts). Confidence is low and the text says what it rests on.
-Without any evidence at all: counts default to 0 and the answer says it is a default.
+Without a usable model result, the numeric value stays unknown. Fake-provider
+responses are test fixtures, never source measurements.
 """
 from __future__ import annotations
 
@@ -85,7 +86,7 @@ def forced_answer(question: str, doc_ids: list[str], root: Path, parsed=None, tr
     if typ == "count" and img is not None:   # the calibrated vision recount beats the generic prompt for counts
         from engine.recount import recount
         c, usd, model = recount(question, img, getattr(parsed, "kind", None))
-        if c is not None:
+        if c is not None and model not in ("fake-1", "cache:fake-1"):
             calls.append({"task": "recount", "provider": "vision", "model": model, "cost_usd": usd})
             n = float(c)
     try:
@@ -103,6 +104,8 @@ def forced_answer(question: str, doc_ids: list[str], root: Path, parsed=None, tr
             j = r.json if isinstance(r.json, dict) else {}
             if NO_IMAGE.search(str(j.get("answer") or "")):
                 j = {}
+        if r.provider == "fake":
+            j = {}  # A schema-shaped fixture is not a count from the drawing.
         if numeric and isinstance(j.get("value"), (int, float)):
             n = float(j["value"])
         elif not numeric and (j.get("answer") or "").strip():
@@ -129,10 +132,21 @@ def forced_answer(question: str, doc_ids: list[str], root: Path, parsed=None, tr
         text = (text or "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.")
         text += f"\n\n_Based on {basis}._" if (basis and text.strip().startswith("I couldn't") is False) else ""
     trace.append({"step": "forced", "detail": f"best-effort answer from {basis or 'no evidence'}", "ms": int((time.perf_counter() - t0) * 1000), "model": calls[-1]["model"] if calls and calls[-1].get("task") == "forced_answer" else None, "cost_usd": usd})
+    citations = []
+    if img is not None and (value is not None or text and not text.startswith("I couldn't")):
+        try:
+            from PIL import Image
+            with Image.open(img) as image:
+                width, height = image.size
+            citations = [{"n": 1, "doc_id": did, "page": int(re.search(r"page-(\d+)", img.name)[1]),
+                          "kind": "region", "bbox_px": [0, 0, width, height], "item_ids": [], "quote": None}]
+            text += " [1]"
+        except (OSError, ValueError, TypeError):
+            pass
     return {
         "answer_id": uuid.uuid4().hex, "question": question, "doc_ids": list(doc_ids),
         "answer": {"text_md": text, "value": value, "unit": UNITS.get(typ) if numeric else None, "confidence": 0.2, "abstained": False},
-        "citations": [], "evidence": {"boxes": [], "scene": {"doc_id": did, "highlight_item_ids": [], "camera_target_item_id": None}},
+        "citations": citations, "evidence": {"boxes": [], "scene": {"doc_id": did, "highlight_item_ids": [], "camera_target_item_id": None}},
         "trace": trace, "route": "hybrid",
         "cost": {"usd_total": round(sum(c.get("cost_usd", 0) for c in calls), 6), "calls": calls},
         "latency_ms": int((time.perf_counter() - t0) * 1000),
