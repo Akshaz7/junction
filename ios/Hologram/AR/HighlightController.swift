@@ -72,7 +72,7 @@ final class HighlightController {
     /// `kinds` maps item IDs to their kind; items with a kind get that kind's colour on the item, badge and dot,
     /// the rest keep the accent colour.
     func highlight(itemIDs: [String], labels: [String: String] = [:], captions: [String: String] = [:],
-                   kinds: [String: String] = [:]) {
+                   kinds: [String: String] = [:], details: [String: String] = [:]) {
         clear()
         guard !itemIDs.isEmpty else { return }
 
@@ -113,7 +113,10 @@ final class HighlightController {
         litGroups = groups
         for item in resolved {
             let style = kinds[item.id].flatMap { $0.isEmpty ? nil : KindColors.style(for: $0) }
-            addLabel(item.label, caption: style.flatMap { $0.key == "other" ? nil : $0.label } ?? captions[item.id],
+            let base = style.flatMap { $0.key == "other" ? nil : $0.label } ?? captions[item.id]
+            // "Door \u{00B7} 0.90 m": the detail keeps its own case (capitalising would turn "m" into "M").
+            let caption = base.map { $0.capitalized(with: nil) + (details[item.id].map { " \u{00B7} " + $0 } ?? "") }
+            addLabel(item.label, caption: caption,
                      for: item.id, above: item.entity, style: style)
         }
     }
@@ -236,8 +239,8 @@ final class HighlightController {
         var captionEntity: ModelEntity?
         var cb = BoundingBox(min: .zero, max: .zero)
         if let caption, !caption.isEmpty {
-            let short = caption.count > 22 ? String(caption.prefix(21)) + "…" : caption
-            let captionMesh = MeshResource.generateText(short.capitalized(with: nil), extrusionDepth: unit * 0.01,
+            let short = caption.count > 26 ? String(caption.prefix(25)) + "…" : caption
+            let captionMesh = MeshResource.generateText(short, extrusionDepth: unit * 0.01,
                                                         font: .systemFont(ofSize: CGFloat(unit * 0.55), weight: .medium))
             let entity = ModelEntity(mesh: captionMesh, materials: [ink])
             entity.name = "caption"

@@ -81,6 +81,13 @@ enum BlueprintStyle {
     /// Rooms smaller than this get no label: it would be unreadable on a table-sized model.
     static let minLabelledArea: Float = 3.0
 
+    /// Door width for callouts ("0.90 m") from props.width_m; nil for anything else or when absent.
+    static func detail(for item: SceneManifest.Item) -> String? {
+        guard item.kind?.lowercased() == "door", let text = item.props?["width_m"].flatMap(propertyText),
+              let width = Float(text), width.isFinite, width > 0 else { return nil }
+        return dimensionText(width)
+    }
+
     static func dimensionText(_ metres: Float) -> String { String(format: "%.2f m", metres) }
 
     /// "Erdgeschoss · ±0.00", "Keller · -3.00", "1. Obergeschoss · +3.00".

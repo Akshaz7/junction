@@ -553,14 +553,16 @@ final class ARSceneController: ObservableObject {
         resolvedLabels.merge(labels) { _, explicit in explicit }
         var captions: [String: String] = [:]
         var kinds: [String: String] = [:]
+        var details: [String: String] = [:]
         for id in itemIDs {
             if let item = manifest?.items[id] {
+                if let detail = BlueprintStyle.detail(for: item) { details[id] = detail }
                 if let kind = item.kind, !kind.isEmpty { kinds[id] = kind }
                 let text = item.kind.flatMap { $0.isEmpty ? nil : $0 } ?? item.name
                 if let text { captions[id] = text }
             }
         }
-        highlightController?.highlight(itemIDs: itemIDs, labels: resolvedLabels, captions: captions, kinds: kinds)
+        highlightController?.highlight(itemIDs: itemIDs, labels: resolvedLabels, captions: captions, kinds: kinds, details: details)
         for (name, enabled) in visibility { sceneIndex?.entitiesByUSDName[name]?.isEnabled = enabled }
         targetItemID = ([cameraTargetItemID].compactMap { $0 } + itemIDs)
             .first { manifest?.items[$0]?.bbox_m != nil }

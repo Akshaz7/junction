@@ -30,6 +30,13 @@ final class BlueprintStyleTests: XCTestCase {
         XCTAssertEqual(BlueprintStyle.roomLabel(name: nil, area: 8), "8.0 m\u{00B2}")
     }
 
+    func testDoorDetailShowsWidth() {
+        let door = SceneManifest.Item(usd_name: "i_d", bbox_m: nil, name: nil, kind: "door", storey: nil, tag: "D3",
+                                      props: ["width_m": .number(0.9)])
+        XCTAssertEqual(BlueprintStyle.detail(for: door), "0.90 m")
+        XCTAssertNil(BlueprintStyle.detail(for: item(name: "Kitchen")))
+    }
+
     func testDimensionAndStoreyText() {
         XCTAssertEqual(BlueprintStyle.dimensionText(12.4), "12.40 m")
         XCTAssertEqual(BlueprintStyle.storeyLabel(name: "Erdgeschoss", elevation: 0), "Erdgeschoss \u{00B7} \u{00B1}0.00")
