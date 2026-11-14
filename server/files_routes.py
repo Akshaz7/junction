@@ -150,7 +150,8 @@ async def _ingest(doc_id: str):
                 proc = await asyncio.create_subprocess_exec(
                     sys.executable, "-m", "server.ingest_job", doc_id, cwd=str(config.REPO),
                     stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL,
-                    start_new_session=True)
+                    start_new_session=True,
+                    preexec_fn=lambda: os.nice(10))  # background worker: the API loop keeps priority
                 await proc.wait()
         state = _read_ingest(f)
         if proc.returncode or state.get("status") not in {"ready", "partial", "failed"}:

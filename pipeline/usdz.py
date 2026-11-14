@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import tempfile
 from pathlib import Path
 
@@ -19,6 +20,38 @@ REPO = Path(__file__).resolve().parent.parent
 KIND_RGB = {"wall": (0.69, 0.69, 0.71), "door": (0.78, 0.51, 0.24), "window": (0.35, 0.59, 0.84),
             "room": (0.63, 0.75, 0.88), "column": (0.2, 0.2, 0.2), "slab": (0.75, 0.75, 0.75),
             "stairs": (0.6, 0.55, 0.5)}
+
+
+# Lean mode (default): AR load time matters on the phone. Vertices are welded at 1 mm, degenerate triangles dropped, colours
+# quantised to 1/32 (fewer materials), normals left out (RealityKit derives them), and clutter kinds are decimated. Walls,
+# doors, windows, rooms, slabs, stairs, columns, beams and roofs stay exact. USDZ_LEAN=0 restores the old output.
+LEAN = os.environ.get("USDZ_LEAN", "1") != "0"
+EXACT_KINDS = {"wall", "door", "window", "room", "slab", "stairs", "column", "beam", "roof", "floor", "covering", "plate"}
+DECIMATE_MIN_TRIS = 120   # meshes with fewer triangles are left alone
+DECIMATE_KEEP = 0.25      # clutter keeps this share of triangles (floor of 60)
+
+
+def _lean_mesh(verts, faces, kind):
+    v = np.round(np.asarray(verts, np.float64), 3)
+    f = np.asarray(faces, np.int64)
+    uniq, inv = np.unique(v, axis=0, return_inverse=True)
+    f = inv.reshape(-1)[f.reshape(-1)].reshape(-1, 3)
+    ok = (f[:, 0] != f[:, 1]) & (f[:, 1] != f[:, 2]) & (f[:, 0] != f[:, 2])
+    f = f[ok]
+    if kind not in EXACT_KINDS and len(f) >= DECIMATE_MIN_TRIS:
+        try:
+            import fast_simplification
+            keep = max(60, int(len(f) * DECIMATE_KEEP))
+            pts, tri = fast_simplification.simplify(uniq.astype(np.float32), f.astype(np.int32),
+                                                    target_reduction=1 - keep / len(f))
+            if len(tri):
+                uniq, f = pts.astype(np.float64), tri.astype(np.int64)
+        except Exception:  # noqa: BLE001  library missing or a non-manifold mesh: keep it exact
+            pass
+    used = np.unique(f)
+    remap = np.zeros(len(uniq), np.int64)
+    remap[used] = np.arange(len(used))
+    return uniq[used], remap[f]
 
 
 def _base_rgb(geom, kind):
@@ -78,11 +111,12 @@ class Builder:
         mp.CreatePointsAttr(Vt.Vec3fArray.FromNumpy(v.astype(np.float32)))
         mp.CreateFaceVertexCountsAttr(Vt.IntArray.FromNumpy(np.full(len(tri), 3, np.int32)))
         mp.CreateFaceVertexIndicesAttr(Vt.IntArray.FromNumpy(tri.reshape(-1).astype(np.int32)))
-        a, b, c = v[tri[:, 0]], v[tri[:, 1]], v[tri[:, 2]]
-        n = np.cross(b - a, c - a)
-        n /= np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-12)
-        mp.CreateNormalsAttr(Vt.Vec3fArray.FromNumpy(np.repeat(n, 3, axis=0).astype(np.float32)))
-        mp.SetNormalsInterpolation(UsdGeom.Tokens.faceVarying)
+        if not LEAN:
+            a, b, c = v[tri[:, 0]], v[tri[:, 1]], v[tri[:, 2]]
+            n = np.cross(b - a, c - a)
+            n /= np.maximum(np.linalg.norm(n, axis=1, keepdims=True), 1e-12)
+            mp.CreateNormalsAttr(Vt.Vec3fArray.FromNumpy(np.repeat(n, 3, axis=0).astype(np.float32)))
+            mp.SetNormalsInterpolation(UsdGeom.Tokens.faceVarying)
         mp.CreateSubdivisionSchemeAttr(UsdGeom.Tokens.none)
         mp.CreateDoubleSidedAttr(True)
         ext = UsdGeom.Boundable.ComputeExtentFromPlugins(mp, 0)
@@ -141,7 +175,13 @@ def process(doc_id: str, art: Path) -> dict:
                     tex = "plan.png"
                     uv = np.asarray(g.visual.uv)
                     rgb, alpha = (1.0, 1.0, 1.0), 1.0
-            b.mesh(parent, f"p{parts_n}", verts, g.faces, rgb, alpha, uv, tex)
+            faces = g.faces
+            if LEAN and uv is None:
+                verts, faces = _lean_mesh(verts, faces, kind)
+                if len(faces) == 0:
+                    continue
+                rgb = tuple(round(round(c * 31) / 31, 3) for c in rgb)
+            b.mesh(parent, f"p{parts_n}", verts, faces, rgb, alpha, uv, tex)
             parts_n += 1
         stage.GetRootLayer().Save()
         out = art / "scene.usdz"

@@ -9,7 +9,7 @@ RUN useradd --create-home --uid 1000 app
 RUN uv pip install --system fastapi "uvicorn[standard]" asyncpg httpx pydantic \
     sse-starlette python-multipart python-dotenv pyyaml jsonschema
 # Upload ingestion (VLM plan map, no torch/weights): PDF render + text layer, DXF, 3D extrusion (see deploy/README.md).
-RUN uv pip install --system --no-cache pillow numpy pypdfium2 pdfminer.six ezdxf trimesh shapely scipy
+RUN uv pip install --system --no-cache pillow numpy pypdfium2 pdfminer.six ezdxf trimesh shapely scipy fast-simplification
 # IFC uploads: ifcopenshell (LGPL) geometry -> GLB (pipeline/ifc_scene.convert_py), pygltflib for node boxes, usd-core for the AR USDZ.
 RUN uv pip install --system --no-cache ifcopenshell==0.9.0.post1 pygltflib==1.16.5 usd-core
 COPY server ./server
