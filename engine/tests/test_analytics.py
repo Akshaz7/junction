@@ -66,3 +66,19 @@ def test_rules_name_what_was_checked_never_silent():
     assert "848/2017 §33" in e
     r = A("Does this plan meet the accessibility requirements?", C1)["answer"]["text_md"]
     assert "Checks need an IFC model" in r
+
+
+@pytest.mark.parametrize("q,d", [
+    ("Which floor has the most doors?", AC),
+    ("Do the stairs meet the riser and tread requirements?", AC),
+    ("What is the biggest room in this plan?", C1),
+    ("Does this plan meet the accessibility requirements?", C1),
+])
+def test_analytics_answers_validate_against_server_schema(q, d):
+    """The deployed API validates every answer against answer.schema.json (route enum); a local run does not."""
+    import json
+    from pathlib import Path
+    jsonschema = pytest.importorskip("jsonschema")
+    need(d)
+    schema = json.loads((Path(__file__).resolve().parents[2] / "server/schemas/answer.schema.json").read_text())
+    jsonschema.validate(A(q, d), schema)

@@ -42,6 +42,7 @@ def _fmt(v: float) -> str:
 
 def _done(question, doc, text, value, unit, items, trace, route="analytics", t0=None):
     boxes, cites, scene = _evidence(doc, items)
+    route = "index" if doc.mode == "ifc" else "planmap"  # answer.schema.json route enum has no "analytics"
     marks = "".join(f"[{c['n']}]" for c in cites)
     return _answer_obj(question, [doc.doc_id], text.replace("{marks}", marks), value, unit, 1.0 if doc.mode == "ifc" else 0.85, False,
                        boxes, cites, scene, trace, route, t0 or time.perf_counter())
