@@ -164,6 +164,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
     const index = sources.findIndex((source) => source.itemIds.includes(target.item_id))
     if (index >= 0) setActive(index)
     setSelected(target.item_id, '2d')
+    if (window.matchMedia?.('(max-width: 800px)').matches) setCalcOpen(false)
   }
   function openItem(index: number, id: string, trigger: Element) {
     setActive(index); setSelected(id, '2d')

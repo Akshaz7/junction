@@ -56,3 +56,11 @@ it('evidence card shows key numbers and a Show calculation link', async () => {
   await act(async () => host.querySelector<HTMLButtonElement>('.evidence-calc-link')!.click())
   expect(onShow).toHaveBeenCalled()
 })
+
+it('expands to full width and has a resize separator', async () => {
+  await act(async () => root.render(<CalculationPanel reasoning={scanReasoning} onClose={() => {}} />))
+  expect(host.querySelector('[role="separator"]')).toBeTruthy()
+  await act(async () => host.querySelector<HTMLButtonElement>('[aria-label="Expand calculation to full width"]')!.click())
+  expect(host.querySelector('.viewer-calc-panel.is-expanded')).toBeTruthy()
+  expect(host.querySelector('[role="separator"]')).toBeNull()
+})

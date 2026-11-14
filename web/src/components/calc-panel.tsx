@@ -1,5 +1,5 @@
-import { useMemo, useState, type ReactNode } from 'react'
-import { ArrowDown, ArrowUp, ChevronRight, X } from 'lucide-react'
+import { useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
+import { ArrowDown, ArrowLeft, ArrowUp, ChevronRight, Maximize2, Minimize2, X } from 'lucide-react'
 import { Button } from './ui'
 import type { Calculation, Reasoning } from '../lib/types'
 import { columnKeys, columnLabel, fmt, focusOf, pageRows, signed, sortRows, sourceText, totalsOf, withUnit, type FocusTarget, type RowSort } from '../lib/calc-view'
@@ -62,12 +62,27 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
   reasoning: Reasoning; title?: string; onClose: () => void; onFocus?: (target: FocusTarget) => void; docTitle?: (id: string) => string
 }) {
   const calc = reasoning.calc
+  const [width, setWidth] = useState(440)
+  const [expanded, setExpanded] = useState(false)
+  const drag = useRef<{ x: number; w: number } | null>(null)
+  const clamp = (w: number) => Math.min(900, Math.max(300, w))
+  const startDrag = (e: PointerEvent<HTMLDivElement>) => { drag.current = { x: e.clientX, w: width }; e.currentTarget.setPointerCapture(e.pointerId) }
+  const moveDrag = (e: PointerEvent<HTMLDivElement>) => { if (drag.current) setWidth(clamp(drag.current.w + drag.current.x - e.clientX)) }
+  const keyResize = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); setWidth((w) => clamp(w + 24)) }
+    if (e.key === 'ArrowRight') { e.preventDefault(); setWidth((w) => clamp(w - 24)) }
+  }
+  const focus = onFocus && ((target: FocusTarget) => { setExpanded(false); onFocus(target) })
   const { confidence } = reasoning
   const margin = calc?.margin ?? reasoning.margin
   const result = calc?.result
-  return <aside className="viewer-calc-panel" aria-label="Calculation" data-testid="calc-panel">
+  return <aside className={`viewer-calc-panel${expanded ? ' is-expanded' : ''}`} aria-label="Calculation" data-testid="calc-panel" style={expanded ? undefined : { width }}>
+    {!expanded && <div className="calc-resize" role="separator" aria-orientation="vertical" aria-label="Resize calculation panel" aria-valuemin={300} aria-valuemax={900} aria-valuenow={width} tabIndex={0}
+      onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={(e) => { drag.current = null; e.currentTarget.releasePointerCapture(e.pointerId) }} onKeyDown={keyResize} />}
     <header>
+      <Button className="calc-back" variant="ghost" size="sm" onClick={onClose}><ArrowLeft size={14} aria-hidden="true" />Drawing</Button>
       <div><strong>Calculation</strong>{title && <small>{title}</small>}</div>
+      <Button className="calc-expand" variant="ghost" size="icon" aria-label={expanded ? 'Show the drawing beside it' : 'Expand calculation to full width'} aria-pressed={expanded} onClick={() => setExpanded(!expanded)}>{expanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}</Button>
       <Button variant="ghost" size="icon" aria-label="Close calculation" onClick={onClose}><X size={16} /></Button>
     </header>
     <div className="calc-content">
@@ -82,7 +97,7 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
       {!!reasoning.graph_path?.length && <Section id="path" title="Chain of evidence">
         <ol className="calc-path" aria-label="Chain of evidence">{reasoning.graph_path.map((node, i) => <li key={i}>
           {i > 0 && <span className="calc-edge" aria-hidden="true">→{node.relation ? ` ${node.relation}` : ''}</span>}
-          {node.item_id && onFocus ? <button type="button" className="calc-node" onClick={() => onFocus({ item_id: node.item_id!, ...(node.doc_id ? { doc_id: node.doc_id } : {}), ...(node.page != null ? { page: node.page } : {}) })}>{node.label}</button> : <span className="calc-node">{node.label}</span>}
+          {node.item_id && focus ? <button type="button" className="calc-node" onClick={() => focus({ item_id: node.item_id!, ...(node.doc_id ? { doc_id: node.doc_id } : {}), ...(node.page != null ? { page: node.page } : {}) })}>{node.label}</button> : <span className="calc-node">{node.label}</span>}
           {node.kind && <small>{node.kind}</small>}
         </li>)}</ol>
       </Section>}
@@ -90,16 +105,16 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
       {!!calc?.steps.length && <Section id="steps" title="Steps" hint={`${calc.steps.length}`}>
         <ol className="calc-steps">{calc.steps.map((step, i) => <li key={step.id} data-step={step.id}>
           <div className="calc-step-head"><span className="calc-index">{i + 1}</span><strong>{step.label}</strong></div>
-          <p className="calc-expr"><code>{step.expr}</code>{step.value != null && <> <span className="calc-eq">=</span> <b className="calc-value">{withUnit(step.value, step.unit)}</b></>}</p>
+          <p className="calc-expr"><code>{step.expr}</code>{step.value != null && <span className="calc-eqline"><span className="calc-eq">=</span> <b className="calc-value">{withUnit(step.value, step.unit)}</b></span>}</p>
           {step.note && <p className="calc-note">{step.note}</p>}
           {!!step.inputs.length && <details className="calc-inputs"><summary>Inputs ({step.inputs.length})</summary>
             <table aria-label={`Inputs of ${step.label}`}><thead><tr><th scope="col">Input</th><th scope="col" className="num">Value</th><th scope="col">Source</th></tr></thead>
-              <tbody>{step.inputs.map((input, k) => <tr key={k}><th scope="row">{input.name}</th><td className="num">{withUnit(input.value, input.unit)}</td><td><SourceLink source={input.source} docTitle={docTitle} onFocus={onFocus} /></td></tr>)}</tbody></table>
+              <tbody>{step.inputs.map((input, k) => <tr key={k}><th scope="row">{input.name}</th><td className="num">{withUnit(input.value, input.unit)}</td><td><SourceLink source={input.source} docTitle={docTitle} onFocus={focus} /></td></tr>)}</tbody></table>
           </details>}
         </li>)}</ol>
       </Section>}
 
-      {!!calc?.rows.length && <Section id="rows" title="Per-element figures" hint={`${calc.rows.length}`}><RowsTable calc={calc} onFocus={onFocus} docTitle={docTitle} /></Section>}
+      {!!calc?.rows.length && <Section id="rows" title="Per-element figures" hint={`${calc.rows.length}`}><RowsTable calc={calc} onFocus={focus} docTitle={docTitle} /></Section>}
 
       {!!calc?.checks.length && <Section id="checks" title="Checks" hint="second methods">
         <table className="calc-checks" aria-label="Checks"><thead><tr><th scope="col">Method</th><th scope="col" className="num">Value</th><th scope="col">Agrees</th><th scope="col" className="num">Diff</th></tr></thead>
