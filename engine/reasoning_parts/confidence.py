@@ -81,6 +81,6 @@ def run(ctx: dict) -> dict:
         if ctx.get('unit') in ('m', 'm2', 'm3') and not ctx.get('is_ifc') and not ctx.get('from_cad'):
             improve = "Supply a known dimension and check the measured outlines."
     if not steps and ctx.get('cites'):
-        steps.append({"kind": "read", "title": "Read", "text": f"{len(ctx['cites'])} cited source regions.", "cite": ctx['cites'][0].get('n'), "ok": None})
+        steps.append({"kind": "read", "title": "Read", "text": "Used the cited drawing as the source; individual items were not identified", "cite": ctx['cites'][0].get('n'), "ok": None})
     return {"label": label, "pct": calibration['pct'] if calibration else None, "reason": reason,
             "improve": improve, "calibration": calibration, "_steps": steps}
