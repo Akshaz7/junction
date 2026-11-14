@@ -153,6 +153,6 @@ Status values: `todo`, `doing`, `done`, `blocked`, `waiting-key`, `blocked-human
 | X-02 | 3 | features done | - | ◆ `docs/sponsors/`: one page per tech challenge (Gemini, Nemotron, ElevenLabs, Modal, Cloudinary, Context.dev, Aiven, Codex). What the tool does in the app, where in the code, one screenshot path. Write a page only for a tool that really runs in the app. | One file per integrated tool. | done | LEAD 05:33: 5 evidenced pages (Nemotron, Runware, ElevenLabs, Aiven, Codex); Cloudinary/Context.dev/Modal/Gemini listed as not integrated or unproven; recheck before submission |
 | X-03 | 2 | S-05 | - | `docs/DEMO.md`: the demo script (section 12) with the exact questions and documents that work best by test results, and a 2-minute video shot list. | The file names real doc IDs and questions that pass in the app. | done | LEAD 05:52: DEMO.md with tested picks; LEAD re-asked C01, C20, C28, C13, C23 → identical answers, gold-correct where gold exists. Refresh after deploy + I-04 |
 | X-04 | 3 | X-01 | - | ◆ Draft the submission fields: project name, punchline, description, tech used, challenge list. | `docs/SUBMISSION.md` exists. | done | LEAD 05:33: docs/SUBMISSION.md draft; numbers filled at the end from results/ |
-| X-05 | - | every hour | - | Update `MORNING.md` (section 13). | The file is current at 08:30. | todo | |
+| X-05 | - | every hour | - | Update `MORNING.md` (section 13). | The file is current at 08:30. | done | 08:28 LEAD: MORNING.md current (updated hourly through the run) |
 
 ---

@@ -1,6 +1,6 @@
 # MORNING: report for Ash
 
-_Last updated: Sat 14 Nov 08:12 EET (run 1). See TASKS.md for every row._
+_Last updated: Sat 14 Nov 08:28 EET (run 1). See TASKS.md for every row._
 
 ## 1. What works
 | Demo step (MASTER_PROMPT §12) | Status |
@@ -15,6 +15,7 @@ _Last updated: Sat 14 Nov 08:12 EET (run 1). See TASKS.md for every row._
 | 8. Edit in 3D → sourced advisor card | partly: 3D edit mode (remove/move/material) sends advisor requests and renders sourced cards (T-08); engine advisor rules in progress (E-16). Building-rule sources are watched live: 2 Context.dev monitors (results/watch/monitors.json) feed a 'rule source changed' entry and rerun the checks (E-17; the webhook attaches once the backend is deployed) |
 
 ## 2. Numbers (each from a results/ file)
+- First full bench (results/bench/full_1.json): all 63,307 numeric questions, 56.7 % (answered 62.7 %; area answered 91.0 %), total cost $0.05; text questions subsample 42.1 % (model-judged). Model comparison in results/model_compare.json: Runware gemini-3.1-flash-lite is the cheapest model within reach of the best for routing and text judging; Gemini/Claude direct not run (keys missing).
 - Answer accuracy (results/bench/sample200-r10.json, docs/ACCURACY.md): 66.3 % on sample200 (counts 63.0 %, areas 79.5 %), from 25.7 % at the start of the night; numeric answers cost $0. IFC text questions went from 37.5 % to 72.7 % judged after E-09 (results/bench/e09_text.json).
 - Stress (results/stress/stress-r2.json, after the overnight CubiCasa plan-map batch): 421 cases, 0 crashes, 0 server errors, 0 invalid answers, 0 prompt-injection leaks, p95 0.85 s, $0. Dataset group 153/300 (r1: 60/300), accuracy 50.2 % (r1: 18.6 %); edge cases 55/55, paraphrases 60/66.
 - 3D performance (results/viewer3d_perf.json): largest model 99.6 MB / 5.4 M triangles loads in 1.2 s, 60 fps on the Mac.
@@ -45,7 +46,7 @@ None now. OK: NVIDIA, Runware, HF, ElevenLabs, Modal, Aiven. Missing: GEMINI_API
 
 
 ## 7. Proposed plan for the next run
-All tier-1 done tests except S-05 (deploy) pass. Open: full bench + model comparison (E-10, running), advisor (E-16), vision fine-tunes (V-05..V-08), Deploy (S-05) as soon as the Aiven GitHub App is installed.
+Run 1 status: every row is done (98) or blocked with a reason. Blocked on Ash: S-05 deploy (Aiven GitHub App), I-05 iPhone install, V-06/V-07/V-08 (Modal workspace paused), D-13/D-14/V-11/E-19 (missing keys: Gemini, Anthropic, Cloudinary, Google Drive). Next run: deploy as soon as the GitHub App is in, then fine-tunes on Modal, then the improve loop on the weakest cells (length/volume abstain on all questions; ifc_models abstains on 80 %).
 
 ## 8. Known weak spots to avoid in the live demo
 - Bathtub/shower counts on raster plans (0/3 on colorful-11397).
