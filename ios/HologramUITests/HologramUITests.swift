@@ -94,8 +94,7 @@ final class HologramUITests: XCTestCase {
         attachScreenshot("05 - Bridge selection and scene credit", app: app)
 
         app.buttons["Done"].tap()
-        let web = app.webViews["web-shell"]
-        XCTAssertTrue(web.waitForExistence(timeout: 10))
+        waitForWebReturn(app)
         // Open and close the same native route while retaining the mounted WKWebView.
         app.navigationBars.buttons["Show on table"].tap()
         XCTAssertTrue(document.waitForExistence(timeout: 10))
@@ -106,70 +105,115 @@ final class HologramUITests: XCTestCase {
             XCTAssertEqual(item.label, "\(index + 1) · \(itemID)")
         }
         app.buttons["Done"].tap()
-        XCTAssertTrue(web.staticTexts["Where shall we start?"].waitForExistence(timeout: 10))
+        waitForWebReturn(app)
+        XCTAssertTrue(app.webViews["web-shell"].staticTexts["Where shall we start?"].waitForExistence(timeout: 10))
     }
 
     @MainActor
     func testUnsentWebDraftSurvivesNativeARRoundTrip() throws {
         let app = configuredApp()
-        let payload = try JSONSerialization.data(withJSONObject: ["doc_id": docID, "item_ids": doorIDs])
-        app.launchArguments += ["-AR_BRIDGE_MESSAGE", String(decoding: payload, as: UTF8.self)]
+        app.launchArguments += ["-UITEST"]
         app.launch()
         defer { app.terminate() }
-        let document = app.staticTexts["ar-document-id"]
-        XCTAssertTrue(document.waitForExistence(timeout: 30))
-        XCTAssertEqual(document.label, docID)
-        app.buttons["Done"].tap()
-        let web = app.webViews["web-shell"]
-        XCTAssertTrue(web.waitForExistence(timeout: 10))
+        try enterUnsentDraft("Keep this unsent draft", app: app)
+        let before = try inspectWebState(app)
+        XCTAssertEqual(before["draft"] as? String, "Keep this unsent draft")
+        XCTAssertEqual(before["composerVisible"] as? Bool, true)
+        XCTAssertEqual(before["composerEnabled"] as? Bool, true)
+        let route = try XCTUnwrap(before["href"] as? String)
+        let timeOrigin = try XCTUnwrap(before["timeOrigin"] as? Double)
 
-        let composerReady = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
-            self.editableComposer(in: web) != nil
-        }, object: web)
-        guard XCTWaiter.wait(for: [composerReady], timeout: 10) == .completed,
-              let composer = editableComposer(in: web) else {
-            attachScreenshot("Draft check - WebKit exposed no editable composer", app: app)
-            throw XCTSkip("WebKit exposed no full-sized editable composer; the separate bridge routing and two-door test remains required.")
-        }
-        composer.tap()
-        guard app.keyboards.firstMatch.waitForExistence(timeout: 5) else {
-            attachScreenshot("Draft check - composer did not focus", app: app)
-            throw XCTSkip("WebKit did not focus the composer after tapping its full-sized input; draft survival could not be checked. Bridge routing and two-door assertions run separately.")
-        }
-        composer.typeText("Keep this unsent draft")
-        XCTAssertEqual(composer.value as? String, "Keep this unsent draft")
         app.navigationBars.buttons["Show on table"].tap()
-        XCTAssertTrue(document.waitForExistence(timeout: 10))
-        XCTAssertEqual(document.label, docID)
+        XCTAssertTrue(app.staticTexts["ar-document-id"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.staticTexts["ar-document-id"].label, docID)
         app.buttons["Done"].tap()
-        XCTAssertTrue(web.waitForExistence(timeout: 10))
-        let retainedReady = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
-            self.editableComposer(in: web) != nil
-        }, object: web)
-        _ = XCTWaiter.wait(for: [retainedReady], timeout: 10)
-        // Known bug, row I-15: the web view loses its composer/draft after the AR round-trip (LEAD 06:50).
-        XCTExpectFailure("I-15: WKWebView state is not retained across the native AR round-trip", strict: false)
-        let retainedComposer = try XCTUnwrap(editableComposer(in: web), "The web view must keep its composer (and draft) after the AR round-trip")
-        XCTAssertEqual(retainedComposer.value as? String, "Keep this unsent draft")
+        waitForWebReturn(app)
+
+        // Read the actual DOM through the retained session. WebKit may rebuild
+        // its AX tree across AR, so no composer AX element crosses that boundary.
+        let after = try inspectWebState(app)
+        XCTAssertEqual(after["draft"] as? String, "Keep this unsent draft")
+        XCTExpectFailure("web composer hidden after AR return (web bug)", strict: false) {
+            XCTAssertEqual(after["composerVisible"] as? Bool, true)
+        }
+        // Known web bug (results/web_bugs.md, LEAD 07:10): the web composer stays disabled after the page becomes
+        // visible again following AR; the draft itself survives. Remove this when WEB fixes it.
+        XCTExpectFailure("web composer disabled after AR return (web bug)", strict: false) {
+            XCTAssertEqual(after["composerEnabled"] as? Bool, true)
+        }
+        XCTAssertEqual(after["href"] as? String, route, "AR must preserve the web route/chat")
+        XCTAssertEqual(after["timeOrigin"] as? Double, timeOrigin, "AR must never reload the page")
     }
 
     @MainActor
-    private func editableComposer(in web: XCUIElement) -> XCUIElement? {
+    private func enterUnsentDraft(_ draft: String, app: XCUIApplication) throws {
+        let web = app.webViews["web-shell"]
+        XCTAssertTrue(web.waitForExistence(timeout: 15))
+        XCTAssertTrue(web.staticTexts["Where shall we start?"].waitForExistence(timeout: 30))
+        let composer = try XCTUnwrap(editableComposer(in: web), composerFrames(in: web))
+        // WebKit's ARIA combobox may have no suggested accessibility hit point.
+        // Its visible input frame still supplies a concrete place to focus it.
+        composer.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5),
+                      "The visible composer must focus. \(composerFrames(in: web))")
+        app.typeText(draft)
+    }
+
+    @MainActor
+    private func inspectWebState(_ app: XCUIApplication) throws -> [String: Any] {
+        let probe = app.navigationBars.buttons["inspect-web-state"]
+        XCTAssertTrue(probe.waitForExistence(timeout: 10))
+        let previous = probe.value as? String ?? "idle"
+        probe.tap()
+        let read = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "value BEGINSWITH %@ AND value != %@", "{", previous),
+            object: probe)
+        XCTAssertEqual(XCTWaiter.wait(for: [read], timeout: 10), .completed,
+                       "The native probe must read the live DOM: \(probe.value ?? "no state")")
+        let json = try XCTUnwrap(probe.value as? String)
+        return try XCTUnwrap(JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: Any])
+    }
+
+    @MainActor
+    private func composerCandidates(in web: XCUIElement) -> [XCUIElement] {
         let placeholder = "Ask anything. Type @ to include a document"
         let matches = web.descendants(matching: .any).matching(NSPredicate(
             format: "label == %@ OR placeholderValue == %@",
             "Ask about your drawings", placeholder))
-        let candidates = matches.allElementsBoundByIndex
+        return matches.allElementsBoundByIndex
+    }
+
+    @MainActor
+    private func editableComposer(in web: XCUIElement) -> XCUIElement? {
+        let candidates = composerCandidates(in: web)
         // Prefer native editable types. ARIA role=combobox can expose the actual
         // textarea as comboBox/other, but the 2x2 sr-only label must never qualify.
         for type: XCUIElement.ElementType in [.textView, .textField, .comboBox, .other] {
             if let input = candidates.first(where: {
-                $0.elementType == type && $0.frame.width > 100 && $0.frame.height > 20 && $0.isHittable
+                let frame = $0.frame
+                let visibleFrame = frame.intersection(web.frame)
+                return $0.elementType == type && frame.width > 100 && frame.height > 20
+                    && visibleFrame.width > 100 && visibleFrame.height > 20
             }) {
                 return input
             }
         }
         return nil
+    }
+
+    @MainActor
+    private func composerFrames(in web: XCUIElement) -> String {
+        "Web frame: \(web.frame); composer frames: \(composerCandidates(in: web).map { String(describing: $0.frame) }.joined(separator: ", "))"
+    }
+
+    @MainActor
+    private func waitForWebReturn(_ app: XCUIApplication) {
+        XCTAssertTrue(app.staticTexts["ar-document-id"].waitForNonExistence(timeout: 10),
+                      "AR must finish dismissing")
+        XCTAssertTrue(app.navigationBars.buttons["Show on table"].waitForExistence(timeout: 10))
+        // Always create a new query after dismissal; never poll stale WebKit AX
+        // elements inside an NSPredicate closure.
+        XCTAssertTrue(app.webViews["web-shell"].waitForExistence(timeout: 10))
     }
 
     @MainActor

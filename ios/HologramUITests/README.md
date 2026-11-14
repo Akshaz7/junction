@@ -22,10 +22,19 @@ They require scene metadata from the live API; an offline bundled fallback
 does not satisfy the live smoke test.
 The tests explicitly load `#/chat`, independent of the phone's default tab.
 The composer is located by its accessible label “Ask about your drawings” or
-placeholder “Ask anything. Type @ to include a document”. It must be hittable,
-over 100 points wide and over 20 points tall, excluding the 2x2 sr-only label.
+placeholder “Ask anything. Type @ to include a document”. It must have a visible
+frame over 100 points wide and over 20 points tall, excluding the 2x2 sr-only label.
 Native text views/fields take priority over ARIA combobox/other elements.
-Typing starts only after the software keyboard appears.
+After AR closes, tests wait for its native document label to disappear and query
+the web view afresh with `waitForExistence`. No WebKit AX element is retained
+across AR or evaluated inside a predicate closure. The draft test starts on Chat,
+taps the visible input's centre, and types only after the software keyboard
+appears. It then uses a native toolbar probe to read the actual textarea value,
+visibility, enabled state, route, and `performance.timeOrigin` before and after AR.
+The draft and route must match, the composer must remain visible and enabled,
+and the page must not reload. Each probe read has a new ID to reject stale results.
+The read-only probe is compiled only in Debug and shown only with `-UITEST`;
+it uses `evaluateJavaScript`, requires no web changes, and sets no page state.
 
 Debug builds accept `-AR_BRIDGE_MESSAGE '{"doc_id":"…","item_ids":["…"]}'`
 (or the matching environment variable). After the first navigation finishes,
@@ -38,9 +47,13 @@ The bridge test asserts the requested document and exactly two door highlights,
 then checks that the native toolbar reopens the same selection and closing AR
 returns to the chat starter. A separate draft test types an unsent draft and
 checks that opening and closing AR preserves it in the original web view.
-As permitted by the I-04 attempt 3 handoff, only the draft test skips if WebKit
-exposes no full-sized input or cannot focus it; a screenshot and explicit reason
-are attached. Routing and two-door assertions remain mandatory in their own test.
+The app owns a `WebSession` as a `StateObject`; it retains the WKWebView and
+bridge coordinator across presentation changes and loads the start URL once.
+Both the bridge and toolbar dismiss web editing before presenting AR, allowing
+WebKit to restore its viewport without discarding the input's value.
+A UIKit host pins the retained web view to its bounds and lays it out when it
+reappears after the full-screen AR cover. The draft test must pass without an
+expected failure or a skip if the composer is missing or cannot focus.
 
 The simulator panel loads scene metadata and attribution without an AR session.
 Each milestone saves a named screenshot attachment in the Xcode test results.

@@ -34,33 +34,80 @@ struct ARRequest: Equatable, Identifiable {
     }
 }
 
-struct WebShell: UIViewRepresentable {
-    let url: URL
+@MainActor
+final class WebSession: ObservableObject {
+    let webView: WKWebView
+    let coordinator: WebShell.Coordinator
+    #if DEBUG
+    let allowsUITestInspection = ProcessInfo.processInfo.arguments.contains("-UITEST")
+    @Published private(set) var uiTestWebState = "idle"
+    private var uiTestReadID = 0
+
+    // Read the live DOM without relying on WebKit's regenerated accessibility
+    // nodes after a full-screen presentation. This never changes the page.
+    func inspectWebStateForUITest() {
+        guard allowsUITestInspection else { return }
+        uiTestReadID += 1
+        uiTestWebState = "reading"
+        webView.evaluateJavaScript("""
+            (() => {
+                const composer = document.querySelector('textarea#question');
+                const rect = composer?.getBoundingClientRect();
+                return JSON.stringify({
+                    readID: \(uiTestReadID),
+                    draft: composer?.value ?? null,
+                    href: location.href,
+                    timeOrigin: performance.timeOrigin,
+                    composerVisible: !!rect && rect.width > 100 && rect.height > 20
+                        && rect.bottom > 0 && rect.top < innerHeight
+                        && rect.right > 0 && rect.left < innerWidth
+                        && getComputedStyle(composer).visibility !== 'hidden'
+                        && getComputedStyle(composer).display !== 'none',
+                    composerEnabled: !!composer && !composer.disabled
+                });
+            })()
+            """) { [weak self] result, error in
+                if let error {
+                    self?.uiTestWebState = "error: \(error.localizedDescription)"
+                } else {
+                    self?.uiTestWebState = result as? String ?? "error: no web state"
+                }
+            }
+    }
+    #endif
+
+    init(url: URL) {
+        coordinator = WebShell.Coordinator()
+        let configuration = WKWebViewConfiguration()
+        configuration.userContentController.add(coordinator, name: "ar")
+        webView = WKWebView(frame: .zero, configuration: configuration)
+        webView.navigationDelegate = coordinator
+        webView.accessibilityIdentifier = "web-shell"
+        webView.allowsBackForwardNavigationGestures = true
+        // Load once for this session, independent of SwiftUI mounting the view.
+        webView.load(URLRequest(url: url))
+    }
+
+    func prepareForAR() {
+        webView.endEditing(true)
+    }
+}
+
+struct WebShell: UIViewControllerRepresentable {
+    let session: WebSession
     var onARRequest: (ARRequest) -> Void = { _ in }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(onARRequest: onARRequest)
+        session.coordinator.onARRequest = onARRequest
+        return session.coordinator
     }
 
-    func makeUIView(context: Context) -> WKWebView {
-        let configuration = WKWebViewConfiguration()
-        configuration.userContentController.add(context.coordinator, name: "ar")
-        let webView = WKWebView(frame: .zero, configuration: configuration)
-        webView.navigationDelegate = context.coordinator
-        webView.accessibilityIdentifier = "web-shell"
-        webView.allowsBackForwardNavigationGestures = true
-        webView.load(URLRequest(url: url))
-        return webView
+    func makeUIViewController(context: Context) -> WebShellController {
+        WebShellController(webView: session.webView)
     }
 
-    func updateUIView(_ webView: WKWebView, context: Context) {
+    func updateUIViewController(_ controller: WebShellController, context: Context) {
         context.coordinator.onARRequest = onARRequest
-    }
-
-    static func dismantleUIView(_ webView: WKWebView, coordinator: Coordinator) {
-        webView.stopLoading()
-        webView.navigationDelegate = nil
-        webView.configuration.userContentController.removeScriptMessageHandler(forName: "ar")
     }
 
     @MainActor
@@ -78,6 +125,7 @@ struct WebShell: UIViewRepresentable {
         func userContentController(_ userContentController: WKUserContentController,
                                    didReceive message: WKScriptMessage) {
             guard message.frameInfo.isMainFrame else { return }
+            message.webView?.endEditing(true)
             handleMessage(name: message.name, body: message.body, pageURL: message.webView?.url)
         }
 
@@ -98,5 +146,43 @@ struct WebShell: UIViewRepresentable {
             }
             onARRequest(request)
         }
+    }
+}
+
+@MainActor
+final class WebShellController: UIViewController {
+    let webView: WKWebView
+
+    init(webView: WKWebView) {
+        self.webView = webView
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("Use init(webView:)")
+    }
+
+    override func loadView() {
+        view = UIView()
+        // Reattach the session's existing web view if SwiftUI remounts the host.
+        webView.removeFromSuperview()
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(webView)
+        NSLayoutConstraint.activate([
+            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            webView.topAnchor.constraint(equalTo: view.topAnchor),
+            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // A full-screen cover detaches the presenting hierarchy. Lay out its
+        // restored bounds after dismissal without loading the page again.
+        view.setNeedsLayout()
+        view.layoutIfNeeded()
+        webView.setNeedsLayout()
+        webView.layoutIfNeeded()
     }
 }

@@ -18,14 +18,28 @@ final class ShellPresentation: ObservableObject {
 @main
 struct HologramApp: App {
     @StateObject private var presentation = ShellPresentation()
+    @StateObject private var webSession = WebSession(url: AppConfiguration.webURL)
 
     var body: some Scene {
         WindowGroup {
             NavigationStack {
-                WebShell(url: AppConfiguration.webURL, onARRequest: presentation.showAR)
+                WebShell(session: webSession, onARRequest: presentation.showAR)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .toolbar {
+                        #if DEBUG
+                        if webSession.allowsUITestInspection {
+                            ToolbarItem(placement: .topBarLeading) {
+                                Button("Inspect web state", systemImage: "stethoscope") {
+                                    webSession.inspectWebStateForUITest()
+                                }
+                                .accessibilityIdentifier("inspect-web-state")
+                                .accessibilityValue(webSession.uiTestWebState)
+                            }
+                        }
+                        #endif
                         ToolbarItem(placement: .topBarTrailing) {
                             Button("Show on table", systemImage: "arkit") {
+                                webSession.prepareForAR()
                                 presentation.showFromToolbar()
                             }
                         }
