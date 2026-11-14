@@ -204,6 +204,9 @@ struct ARScreen: View {
                         .disabled(!controller.isLoaded || controller.isWalking)
                 }
             }
+            Button("Replay build", systemImage: "play.circle") { controller.replayBuild() }
+                .disabled(!controller.canReplayBuild)
+                .accessibilityIdentifier("replay-build")
             Button("Reset placement", systemImage: "arrow.counterclockwise") { controller.reset() }
                 .disabled(!controller.isPlaced)
             Section {

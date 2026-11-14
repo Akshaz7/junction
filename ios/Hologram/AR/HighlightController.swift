@@ -55,34 +55,42 @@ final class HighlightController {
     /// Labels are keyed by item ID so a filtered selection can retain its 2D numbers.
     /// Without explicit labels, numbers follow the original request order, including missing IDs.
     /// Captions are short item names shown under each number.
-    func highlight(itemIDs: [String], labels: [String: String] = [:], captions: [String: String] = [:]) {
+    /// `kinds` maps item IDs to their kind; items with a kind get that kind's colour on the item, badge and dot,
+    /// the rest keep the accent colour.
+    func highlight(itemIDs: [String], labels: [String: String] = [:], captions: [String: String] = [:],
+                   kinds: [String: String] = [:]) {
         clear()
         guard !itemIDs.isEmpty else { return }
 
         var selected: Set<ObjectIdentifier> = []
+        var colorFor: [ObjectIdentifier: UIColor] = [:]
         var resolved: [(id: String, entity: Entity, label: String)] = []
         var seen: Set<String> = []
-        func select(_ entity: Entity) {
+        func select(_ entity: Entity, color: UIColor) {
             selected.insert(ObjectIdentifier(entity))
-            for child in entity.children { select(child) }
+            colorFor[ObjectIdentifier(entity)] = color
+            for child in entity.children { select(child, color: color) }
         }
         for (offset, id) in itemIDs.enumerated() where seen.insert(id).inserted {
             guard let entity = index.entity(for: id) else { continue }
-            select(entity)
+            select(entity, color: kinds[id].flatMap { $0.isEmpty ? nil : KindColors.style(for: $0).color }
+                   ?? Self.accentColor)
             resolved.append((id, entity, labels[id] ?? String(offset + 1)))
         }
         // Unknown evidence should leave the drawing readable rather than dim everything.
         guard !resolved.isEmpty else { return }
         
-        let highlight = UnlitMaterial(color: Self.accentColor)
         for original in originals {
             guard var model = original.entity.components[ModelComponent.self],
                   selected.contains(ObjectIdentifier(original.entity)) else { continue }
+            let highlight = UnlitMaterial(color: colorFor[ObjectIdentifier(original.entity)] ?? Self.accentColor)
             model.materials = Array(repeating: highlight, count: max(original.materials.count, 1))
             original.entity.components.set(model)
         }
         for item in resolved {
-            addLabel(item.label, caption: captions[item.id], for: item.id, above: item.entity)
+            let style = kinds[item.id].flatMap { $0.isEmpty ? nil : KindColors.style(for: $0) }
+            addLabel(item.label, caption: style.flatMap { $0.key == "other" ? nil : $0.label } ?? captions[item.id],
+                     for: item.id, above: item.entity, style: style)
         }
     }
 
@@ -158,17 +166,19 @@ final class HighlightController {
 
     /// Floating billboard tag: a dark capsule with a bold number and a small kind label,
     /// joined to the item by a thin grey leader. Placement is resolved in screen space.
-    private func addLabel(_ text: String, caption: String?, for itemID: String, above entity: Entity) {
+    private func addLabel(_ text: String, caption: String?, for itemID: String, above entity: Entity,
+                          style: KindStyle?) {
         let bounds = entity.visualBounds(relativeTo: root)
         let offset = unit * 1.6
         let white = UnlitMaterial(color: .white)
         let ink = UnlitMaterial(color: HologramStyle.ink)
-        let red = UnlitMaterial(color: HologramStyle.brandRed)
+        let red = UnlitMaterial(color: style?.color ?? HologramStyle.brandRed)
+        let onBadge = UnlitMaterial(color: style?.on ?? .white)
 
         // White card, brand-red numbered badge, dark kind label: the same look as the web's citation chips.
         let mesh = MeshResource.generateText(text, extrusionDepth: unit * 0.02,
                                              font: .systemFont(ofSize: CGFloat(unit * 0.7), weight: .semibold))
-        let number = ModelEntity(mesh: mesh, materials: [white])
+        let number = ModelEntity(mesh: mesh, materials: [onBadge])
         number.name = text
         let nb = number.visualBounds(relativeTo: number)
 

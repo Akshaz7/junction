@@ -58,6 +58,15 @@ final class ARSceneController: ObservableObject {
     private var footprintExtents = SIMD3<Float>(repeating: 0.001)
     private var cutawayCache: (key: String, hidden: Set<String>)?
     private var previewPosition: SIMD3<Float>?
+    private var footprintCenter = SIMD3<Float>.zero
+    private var buildAnimator: BuildAnimator?
+
+    /// Colour legend rows for the current highlights ("Doors 11 . Windows 11"); empty unless kinds are known.
+    var highlightLegend: [(style: KindStyle, count: Int)] {
+        guard let manifest else { return [] }
+        let kinds = highlightedItemIDs.compactMap { manifest.items[$0]?.kind }.filter { !$0.isEmpty }
+        return KindColors.counts(of: kinds)
+    }
 
     var scaleLabel: String { "1:\(Int((1 / scale).rounded()))" }
     var isSupported: Bool { ARWorldTrackingConfiguration.isSupported }
@@ -109,12 +118,14 @@ final class ARSceneController: ObservableObject {
             self?.syncGestureScale()
             self?.updatePlacementPreview()
             self?.updateWalkGuide()
+            self?.buildAnimator?.tick()
             self?.updateAnswerLabels()
         }
     }
 
     func load(docID: String? = nil, url: URL?, manifestURL: URL? = nil, itemIDs: [String] = [],
               cameraTargetItemID: String? = nil) async {
+        cancelBuild()
         resetPlacement()
         cancelVisibilityTransitions()
         highlightController?.clear()
@@ -168,6 +179,7 @@ final class ARSceneController: ObservableObject {
             let localBounds = container.visualBounds(relativeTo: container)
             let size = simd_max(localBounds.extents, SIMD3<Float>(repeating: 0.001))
             footprintExtents = size
+            footprintCenter = localBounds.center
             let shape = ShapeResource.generateBox(size: size).offsetBy(translation: localBounds.center)
             container.components.set(CollisionComponent(shapes: [shape]))
             container.scale = SIMD3(repeating: scale)
@@ -191,7 +203,7 @@ final class ARSceneController: ObservableObject {
 
     private func updateAnswerLabels() {
         labelFrame = (labelFrame + 1) % 4
-        guard labelFrame == 0, isPlaced, let view = arView else { return }
+        guard labelFrame == 0, isPlaced, buildAnimator == nil, let view = arView else { return }
         highlightController?.layoutLabels(cameraTransform: view.cameraTransform.matrix,
                                          viewport: view.bounds, visibleItemIDs: visibleItemIDs,
                                          project: { view.project($0) })
@@ -226,7 +238,7 @@ final class ARSceneController: ObservableObject {
         self.anchor = anchor
         if !isWalking { installTableGestures(on: view, model: model) }
         highlightController?.setLabelScale(isWalking ? 0.3 : 1)
-        if !isWalking { playScanReveal(model) }
+        if !isWalking && !startBuild(model) && !UIAccessibility.isReduceMotionEnabled { playScanReveal(model) }
         isPlaced = true
         status = isWalking ? "Walk at 1:1. Select an item on the map to guide you."
             : "Tap an item for details. Pinch to scale, rotate with two fingers, or drag to move."
@@ -338,6 +350,62 @@ final class ARSceneController: ObservableObject {
         previewPosition = nil
     }
 
+    /// Scene-menu "Replay build": rebuilds the placed model step by step.
+    func replayBuild() {
+        guard isPlaced, !isWalking, let model else { return }
+        cancelBuild()
+        _ = startBuild(model)
+    }
+
+    var canReplayBuild: Bool { isLoaded && isPlaced && !isWalking }
+
+    private func cancelBuild() {
+        buildAnimator?.finish()
+        buildAnimator = nil
+    }
+
+    /// Plan first, then the building rises out of it in construction order. Returns false when there is nothing
+    /// to animate (no manifest) or Reduce Motion is on, in which case the finished model is shown at once.
+    @discardableResult
+    private func startBuild(_ model: ModelEntity) -> Bool {
+        guard !UIAccessibility.isReduceMotionEnabled, let manifest, let index = sceneIndex else { return false }
+        let sequence = BuildSequence.make(manifest: manifest, include: visibleItemIDs)
+        guard !sequence.isEmpty else { return false }
+        let plan = makePlanEntity(manifest: manifest)
+        if let plan { model.addChild(plan) }
+        let labels = highlightController.map { Array($0.labelsByItemID.values) } ?? []
+        let animator = BuildAnimator(sequence: sequence, entities: index.entitiesByUSDName, plan: plan,
+                                     labels: labels) { [weak self] in
+            self?.buildAnimator = nil
+        }
+        buildAnimator = animator
+        animator.begin()
+        return true
+    }
+
+    /// Flat plan drawn from the lowest storey's footprints, laid on the model's base at the model's scale.
+    private func makePlanEntity(manifest: SceneManifest) -> Entity? {
+        let lowest = CutawayPolicy(manifest: manifest).storeys.first?.name
+        let kinds: Set<String> = ["wall", "door", "window", "slab", "floor", "column"]
+        let rects = manifest.items.values.compactMap { item -> BuildPlanImage.Rect? in
+            guard let kind = item.kind, kinds.contains(kind), let box = item.bbox_m,
+                  lowest == nil || item.storey == lowest else { return nil }
+            return .init(kind: kind, minX: box.minimum.x, maxX: box.maximum.x,
+                         minZ: box.minimum.z, maxZ: box.maximum.z)
+        }
+        guard let image = BuildPlanImage.render(rects: rects),
+              let mesh = BuildPlanImage.mesh(width: footprintExtents.x, depth: footprintExtents.z),
+              let texture = try? TextureResource.generate(from: image, withName: nil,
+                                                          options: .init(semantic: .color)) else { return nil }
+        var material = UnlitMaterial()
+        material.color = .init(tint: .white, texture: .init(texture))
+        material.faceCulling = .none
+        let entity = ModelEntity(mesh: mesh, materials: [material])
+        entity.name = "build-plan"
+        entity.position = [footprintCenter.x, 0.01, footprintCenter.z]
+        return entity
+    }
+
     /// Vertical sweep over about 0.8 s when the hologram appears.
     private func playScanReveal(_ model: Entity) {
         let target = model.transform
@@ -382,13 +450,15 @@ final class ARSceneController: ObservableObject {
         var resolvedLabels = manifest?.items.compactMapValues(\.tag) ?? [:]
         resolvedLabels.merge(labels) { _, explicit in explicit }
         var captions: [String: String] = [:]
+        var kinds: [String: String] = [:]
         for id in itemIDs {
             if let item = manifest?.items[id] {
+                if let kind = item.kind, !kind.isEmpty { kinds[id] = kind }
                 let text = item.kind.flatMap { $0.isEmpty ? nil : $0 } ?? item.name
                 if let text { captions[id] = text }
             }
         }
-        highlightController?.highlight(itemIDs: itemIDs, labels: resolvedLabels, captions: captions)
+        highlightController?.highlight(itemIDs: itemIDs, labels: resolvedLabels, captions: captions, kinds: kinds)
         for (name, enabled) in visibility { sceneIndex?.entitiesByUSDName[name]?.isEnabled = enabled }
         targetItemID = ([cameraTargetItemID].compactMap { $0 } + itemIDs)
             .first { manifest?.items[$0]?.bbox_m != nil }
@@ -565,6 +635,7 @@ final class ARSceneController: ObservableObject {
     }
 
     private func resetPlacement() {
+        cancelBuild()
         dismissSelectedItem()
         removeGestures()
         model?.removeFromParent()
@@ -578,6 +649,7 @@ final class ARSceneController: ObservableObject {
     }
 
     func detach() {
+        cancelBuild()
         removeGhost()
         canPlace = false
         cancelVisibilityTransitions()
