@@ -24,15 +24,25 @@ struct CutawayPolicy {
         return (storeys.first { $0.elevation_m! >= 0 } ?? storeys.first)?.name
     }
 
-    func hiddenUSDNames(activeStorey: String?, showRoof: Bool) -> Set<String> {
-        let activeElevation = storeys.first { $0.name == activeStorey }?.elevation_m
+    /// Site terrain and room volumes (IfcSite / IfcSpace) are hidden on the table: they bury the model
+    /// under a slab and coloured boxes. A room stays visible only when an answer highlights it (`keep`).
+    func hiddenUSDNames(activeStorey: String?, showRoof: Bool, keep: Set<String> = []) -> Set<String> {
+        let sortedStoreys = storeys
+        let activeElevation = sortedStoreys.first { $0.name == activeStorey }?.elevation_m
+        var elevations: [String: Float] = [:]
+        for storey in sortedStoreys { if let name = storey.name, let e = storey.elevation_m, elevations[name] == nil { elevations[name] = e } }
         var hidden: Set<String> = []
-        for item in manifest.items.values {
+        for (id, item) in manifest.items {
+            let kind = item.kind?.lowercased() ?? ""
+            if kind == "site" || kind == "ifcsite" || ((kind == "room" || kind == "space" || kind == "ifcspace") && !keep.contains(id)) {
+                hidden.insert(item.usd_name)
+                continue
+            }
             // The explicit roof toggle also reveals roofs assigned to a higher storey.
             if isRoof(item) {
                 if !showRoof { hidden.insert(item.usd_name) }
             } else if let activeElevation,
-                      let elevation = storeys.first(where: { $0.name == item.storey })?.elevation_m,
+                      let elevation = item.storey.flatMap({ elevations[$0] }),
                       elevation > activeElevation {
                 hidden.insert(item.usd_name)
             }

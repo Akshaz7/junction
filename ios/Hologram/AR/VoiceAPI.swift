@@ -176,9 +176,15 @@ final class VoiceClient {
         return try JSONDecoder().decode(Transcript.self, from: data).text
     }
 
-    func ask(_ text: String, docID: String, onEvent: (VoiceEvent) -> Void) async throws -> VoiceAnswer {
+    /// `chatID`: the web chat AR was opened from. Voice questions and answers are posted there, so the
+    /// whole AR conversation shows up in that chat afterwards. Without one, a "Voice in AR" chat is created
+    /// (listed in History) and reused for the rest of the session.
+    func ask(_ text: String, docID: String, chatID existingChat: String? = nil,
+             onEvent: (VoiceEvent) -> Void) async throws -> VoiceAnswer {
         let chatID: String
-        if let existing = chatIDs[docID] {
+        if let existingChat, !existingChat.isEmpty {
+            chatID = existingChat
+        } else if let existing = chatIDs[docID] {
             chatID = existing
         } else {
             let request = try VoiceRequests.json(baseURL: baseURL, path: "api/chats",

@@ -42,13 +42,15 @@ struct SimulatorScenePanel: View {
                     .pickerStyle(.menu)
                     .accessibilityIdentifier("demo-scenes-picker")
 
-                    Text(requestedDocID).font(.caption.monospaced())
+                    Text(preview.manifest?.doc_id ?? requestedDocID).font(.caption.monospaced())
                         .accessibilityIdentifier("ar-document-id")
                     if let manifest = preview.manifest {
-                        Text(DemoScenes.all.first { $0.id == manifest.doc_id }?.title
-                             ?? (manifest.doc_id == "fixture__ios" ? "Sample model · generated for demo" : "Scene"))
+                        Text(preview.identity.title)
                             .font(.headline)
                             .accessibilityIdentifier("scene-name")
+                        if let notice = preview.identity.notice {
+                            Text(notice).accessibilityIdentifier("ar-fallback-notice")
+                        }
                         Text("\(manifest.items.count) items")
                             .accessibilityIdentifier("scene-item-count")
                         Text("\(preview.hiddenItemIDs.count) hidden items")
@@ -100,7 +102,9 @@ struct SimulatorScenePanel: View {
                                manifestURL: requestedDocID == docID ? manifestURL : nil,
                                itemIDs: requestedDocID == docID ? highlightedItemIDs : [])
             guard !Task.isCancelled else { return }
-            liveSocket.start(docID: requestedDocID, chatID: requestedDocID == docID ? chatID : nil)
+            guard preview.manifest?.doc_id == requestedDocID else { return }
+            liveSocket.start(docID: requestedDocID, chatID: requestedDocID == docID ? chatID : nil,
+                             entryItemIDs: requestedDocID == docID ? highlightedItemIDs : [])
             await advisor.load(docID: requestedDocID, fixtureURL: AppConfiguration.advisorFixtureURL)
         }
         .onDisappear {
@@ -127,9 +131,11 @@ final class SimulatorSceneMetadata: ObservableObject {
     @Published var labels: [String: String] = [:]
     private var appliedEditIDs: Set<String> = []
     @Published var status = "Loading scene metadata…"
+    @Published private(set) var identity = SceneIdentity(requestedDocID: nil, manifest: nil)
 
     func load(docID: String, manifestURL: URL?, itemIDs: [String]) async {
         manifest = nil
+        identity = SceneIdentity(requestedDocID: docID, manifest: nil)
         attribution = nil
         self.itemIDs = itemIDs
         hiddenItemIDs = []
@@ -168,7 +174,10 @@ final class SimulatorSceneMetadata: ObservableObject {
             try Task.checkCancellation()
             let loaded = try JSONDecoder().decode(SceneManifest.self, from: data)
             guard loaded.doc_id == docID else { throw URLError(.cannotParseResponse) }
+            let title = bundled ? nil : await SceneRepository(apiURL: AppConfiguration.apiURL).documentTitle(docID: docID)
+            try Task.checkCancellation()
             manifest = loaded
+            identity = SceneIdentity(requestedDocID: docID, manifest: loaded, documentTitle: title, isBundled: bundled)
             if let credit = loaded.credit, let licence = loaded.licence {
                 attribution = SceneAttribution(credit: credit, licence: licence)
             } else {

@@ -17,14 +17,17 @@ final class HighlightController {
 
     private let root: Entity
     private let index: SceneIndex
+    private let unit: Float
     private var originals: [Original] = []
     private(set) var labelsByItemID: [String: Entity] = [:]
     private var labelScale: Float = 1
     private var labelAnchors: [String: (base: SIMD3<Float>, offset: Float)] = [:]
+    private var labelSizes: [String: SIMD2<Float>] = [:]
 
     init(root: Entity) {
         self.root = root
         index = SceneIndex(root: root)
+        unit = Self.labelUnit(for: root)
         func capture(_ entity: Entity) {
             if let model = entity.components[ModelComponent.self] {
                 originals.append(Original(entity: entity, materials: model.materials))
@@ -78,15 +81,62 @@ final class HighlightController {
             model.materials = Array(repeating: highlight, count: max(original.materials.count, 1))
             original.entity.components.set(model)
         }
-        // Stagger leader heights along the model so neighbouring tags never overlap.
-        let sorted = resolved.sorted {
-            let a = $0.entity.visualBounds(relativeTo: root).center
-            let b = $1.entity.visualBounds(relativeTo: root).center
-            return a.x == b.x ? a.z < b.z : a.x < b.x
+        for item in resolved {
+            addLabel(item.label, caption: captions[item.id], for: item.id, above: item.entity)
         }
-        for (rank, item) in sorted.enumerated() {
-            addLabel(item.label, caption: captions[item.id], for: item.id, above: item.entity,
-                     tier: rank % Self.tierCount)
+    }
+
+    /// Reproject every few frames so rotating the phone also restaggers collinear items.
+    func layoutLabels(cameraTransform: simd_float4x4, viewport: CGRect, visibleItemIDs: Set<String>,
+                      project: (SIMD3<Float>) -> CGPoint?) {
+        let camera = SIMD3<Float>(cameraTransform.columns.3.x, cameraTransform.columns.3.y,
+                                 cameraTransform.columns.3.z)
+        let right = SIMD3<Float>(cameraTransform.columns.0.x, cameraTransform.columns.0.y,
+                                cameraTransform.columns.0.z)
+        let up = SIMD3<Float>(cameraTransform.columns.1.x, cameraTransform.columns.1.y,
+                             cameraTransform.columns.1.z)
+        let back = SIMD3<Float>(cameraTransform.columns.2.x, cameraTransform.columns.2.y,
+                               cameraTransform.columns.2.z)
+        let transform = root.transformMatrix(relativeTo: nil)
+        let worldScale = simd_length(SIMD3<Float>(transform.columns.0.x, transform.columns.0.y,
+                                                transform.columns.0.z)) * labelScale
+        var positions: [String: [SIMD3<Float>]] = [:]
+        var candidates: [ProjectedLabelLayout.Candidate] = []
+        for (id, label) in labelsByItemID {
+            label.isEnabled = false
+            guard visibleItemIDs.contains(id), let anchor = labelAnchors[id],
+                  let size = labelSizes[id] else { continue }
+            let base = root.convert(position: anchor.base + [0, anchor.offset * labelScale, 0], to: nil)
+            guard simd_dot(base - camera, back) < 0 else { continue }
+            let width = size.x * worldScale
+            let height = size.y * worldScale
+            let tiers = (0..<Self.tierCount).map { base + up * (Float($0) * height * 1.3) }
+            positions[id] = tiers
+            let rectangles: [CGRect?] = tiers.map { position in
+                let corners = [-right * width / 2, right * width / 2].flatMap { x in
+                    [position + x, position + x + up * height]
+                }
+                let points = corners.compactMap(project)
+                guard points.count == 4 else { return nil }
+                let xs = points.map(\.x), ys = points.map(\.y)
+                return CGRect(x: xs.min()!, y: ys.min()!, width: xs.max()! - xs.min()!,
+                              height: ys.max()! - ys.min()!)
+            }
+            candidates.append(.init(id: id, distance: simd_length(base - camera), rectangles: rectangles))
+        }
+        for (id, tier) in ProjectedLabelLayout.tiers(for: candidates, viewport: viewport) {
+            guard let label = labelsByItemID[id], let position = positions[id]?[tier],
+                  let anchor = labelAnchors[id] else { continue }
+            label.setPosition(position, relativeTo: nil)
+            label.isEnabled = true
+            // Keep the leader attached to its item when the card moves in screen space.
+            let tip = label.convert(position: anchor.base, from: root)
+            if let leader = label.findEntity(named: "answer-leader") {
+                leader.position = tip / 2
+                leader.scale.y = simd_length(tip) / anchor.offset
+                leader.orientation = simd_quatf(from: [0, -1, 0], to: simd_normalize(tip))
+            }
+            label.findEntity(named: "answer-dot")?.position = tip
         }
     }
 
@@ -94,6 +144,7 @@ final class HighlightController {
         for label in labelsByItemID.values { label.removeFromParent() }
         labelsByItemID.removeAll()
         labelAnchors.removeAll()
+        labelSizes.removeAll()
         restoreOriginals()
     }
 
@@ -106,12 +157,10 @@ final class HighlightController {
     }
 
     /// Floating billboard tag: a dark capsule with a bold number and a small kind label,
-    /// joined to the item by a thin grey leader. `tier` raises the tag to avoid overlaps.
-    private func addLabel(_ text: String, caption: String?, for itemID: String, above entity: Entity,
-                          tier: Int) {
-        let unit = Self.labelUnit(for: root)
+    /// joined to the item by a thin grey leader. Placement is resolved in screen space.
+    private func addLabel(_ text: String, caption: String?, for itemID: String, above entity: Entity) {
         let bounds = entity.visualBounds(relativeTo: root)
-        let offset = unit * (1.6 + Float(tier) * 2.0)
+        let offset = unit * 1.6
         let white = UnlitMaterial(color: .white)
         let grey = UnlitMaterial(color: UIColor(white: 0.78, alpha: 1))
 
@@ -174,14 +223,17 @@ final class HighlightController {
         label.position = base + [0, offset * labelScale, 0]
         label.scale = SIMD3(repeating: labelScale)
         labelAnchors[itemID] = (base, offset)
+        labelSizes[itemID] = [width + border * 2, height + border * 2]
         label.addChild(card)
 
         // Thin grey leader and a small white dot where it meets the item.
         let width2 = max(unit * 0.02, 0.0015)
         let leader = ModelEntity(mesh: .generateBox(size: [width2, offset, width2]), materials: [grey])
+        leader.name = "answer-leader"
         leader.position = [0, -offset / 2, 0]
         label.addChild(leader)
         let dot = ModelEntity(mesh: .generateSphere(radius: unit * 0.07), materials: [white])
+        dot.name = "answer-dot"
         dot.position = [0, -offset, 0]
         label.addChild(dot)
 

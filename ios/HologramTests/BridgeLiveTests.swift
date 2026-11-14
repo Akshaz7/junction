@@ -5,6 +5,29 @@ import XCTest
 
 final class BridgeLiveTests: XCTestCase {
     @MainActor
+    func testInitialChatStateKeepsBridgeAnswerThenLaterLiveSelectionWins() async throws {
+        let connection = FakeLiveConnection()
+        connection.messages = [
+            .string(#"{"type":"scene.state","doc_id":"fixture__ios","chat_id":"chat-a","hidden":["wall-001"],"highlighted":[],"labels":{}}"#),
+            .string(#"{"type":"scene.highlight","doc_id":"fixture__ios","chat_id":"chat-a","item_ids":["window-002"]}"#),
+            .string(#"{"type":"scene.state","doc_id":"fixture__ios","chat_id":"chat-a","hidden":[],"highlighted":["door-001"],"labels":{}}"#)
+        ]
+        let received = expectation(description: "Initial restore and later updates")
+        received.expectedFulfillmentCount = 3
+        var selections: [[String]] = []
+        let socket = LiveSocket(makeConnection: { _ in connection })
+        defer { socket.stop() }
+        socket.onState = { state in
+            if selections.isEmpty { XCTAssertEqual(state.hidden, ["wall-001"]) }
+            selections.append(state.highlighted); received.fulfill()
+        }
+        socket.onHighlight = { request in selections.append(request.itemIDs); received.fulfill() }
+        socket.start(docID: "fixture__ios", chatID: "chat-a", entryItemIDs: ["window-001", "door-001"])
+        await fulfillment(of: [received], timeout: 2)
+        XCTAssertEqual(selections, [["window-001", "door-001"], ["window-002"], ["door-001"]])
+    }
+
+    @MainActor
     func testBridgeHandlerPresentsRequestedDocumentAndPreservesItemOrder() throws {
         let router = ShellPresentation()
         let handler = WebShell.Coordinator(onARRequest: router.showAR)

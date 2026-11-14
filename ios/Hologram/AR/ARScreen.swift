@@ -57,7 +57,10 @@ struct ARScreen: View {
                                   itemIDs: requestedDocID == docID ? highlightedItemIDs : [],
                                   cameraTargetItemID: requestedDocID == docID ? cameraTargetItemID : nil)
             guard !Task.isCancelled else { return }
-            liveSocket.start(docID: requestedDocID, chatID: requestedDocID == docID ? chatID : nil)
+            guard controller.activeDocID == requestedDocID else { return }
+            voice.chatID = requestedDocID == docID ? chatID : nil
+            liveSocket.start(docID: controller.activeDocID, chatID: requestedDocID == docID ? chatID : nil,
+                             entryItemIDs: requestedDocID == docID ? highlightedItemIDs : [])
             if let activeDocID = controller.activeDocID {
                 await advisor.load(docID: activeDocID, fixtureURL: AppConfiguration.advisorFixtureURL)
             }
@@ -87,7 +90,7 @@ struct ARScreen: View {
     }
 
     private var sceneName: String {
-        DemoScenes.all.first { $0.id == requestedDocID }?.title ?? (controller.isFixture ? "Sample" : "Scene")
+        controller.sceneIdentity.title
     }
 
     private var isPlacing: Bool { controller.isLoaded && !controller.isPlaced }
@@ -104,6 +107,10 @@ struct ARScreen: View {
     }
 
     @ViewBuilder private var placementPill: some View {
+        if controller.isLoaded, let notice = controller.sceneIdentity.notice {
+            HologramCapsule { Text(notice).lineLimit(3) }
+                .accessibilityIdentifier("ar-fallback-notice")
+        }
         if !controller.isLoaded || controller.status.hasPrefix("Unable") || controller.status.hasPrefix("Augmented") {
             if !(controller.status.hasPrefix("Move your device") && controller.isLoaded) {
                 HologramCapsule { Text(controller.status).lineLimit(2) }
@@ -223,6 +230,7 @@ struct ARScreen: View {
             HologramCapsule {
                 HStack(spacing: 6) {
                     Text(controller.isWalking ? "Walk · \(sceneName)" : sceneName).lineLimit(1)
+                        .accessibilityIdentifier("scene-name")
                     Image(systemName: "chevron.down").font(.caption2.weight(.bold))
                 }
                 .frame(maxWidth: 220)

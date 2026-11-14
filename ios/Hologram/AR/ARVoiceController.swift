@@ -11,6 +11,8 @@ final class ARVoiceController: NSObject, ObservableObject, AVSpeechSynthesizerDe
     @Published private(set) var status = "Ask about this drawing"
     @Published private(set) var transcript = ""
     @Published private(set) var answerText = ""
+    /// The web chat AR was opened from; voice turns are logged there.
+    var chatID: String?
 
     private let client = VoiceClient()
     private var recorder: AVAudioRecorder?
@@ -117,7 +119,7 @@ final class ARVoiceController: NSObject, ObservableObject, AVSpeechSynthesizerDe
                 transcript = text.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !transcript.isEmpty else { throw VoiceError.message("No speech detected. Try again.") }
                 status = "Thinking…"
-                let answer = try await client.ask(transcript, docID: docID) { [weak self] event in
+                let answer = try await client.ask(transcript, docID: docID, chatID: chatID) { [weak self] event in
                     switch event {
                     case .status(let text), .trace(let text): self?.status = text
                     case .answer: break

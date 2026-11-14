@@ -61,7 +61,7 @@ struct HologramApp: App {
             }
             .fullScreenCover(item: $presentation.arRequest, onDismiss: webSession.resumeAfterAR) { request in
                 ARScreen(docID: request.docID, chatID: request.chatID, highlightedItemIDs: request.itemIDs)
-                    .id(request.docID)
+                    .id(request.id)
             }
             .task {
                 // Test build (AR_DEMO=1 install): open the bundled AC20 hologram straight away, six doors lit.

@@ -48,6 +48,29 @@ final class HologramUITests: XCTestCase {
     }
 
     @MainActor
+    func testBridgeOpensFloorPlanAndKeepsAnswerAfterEmptyChatRestore() throws {
+        let app = configuredApp()
+        let floorPlanID = "cubicasa5k__colorful-11397"
+        let payload = try JSONSerialization.data(withJSONObject: [
+            "doc_id": floorPlanID, "item_ids": ["window-001", "window-002"],
+            "chat_id": UUID().uuidString
+        ])
+        app.launchArguments += ["-AR_BRIDGE_MESSAGE", String(decoding: payload, as: UTF8.self)]
+        app.launch()
+        defer { app.terminate() }
+        let document = app.staticTexts["ar-document-id"]
+        XCTAssertTrue(document.waitForExistence(timeout: 30))
+        XCTAssertEqual(document.label, floorPlanID)
+        XCTAssertTrue(app.staticTexts["scene-credit"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.staticTexts["scene-credit"].label.contains("CubiCasa5K"))
+        XCTAssertFalse(app.staticTexts["scene-name"].label.contains("AC20"))
+        XCTAssertEqual(app.staticTexts["ar-status"].label, "Scene metadata loaded from the API.")
+        XCTAssertEqual(app.staticTexts["highlighted-item-1"].label, "1 · window-001")
+        XCTAssertEqual(app.staticTexts["highlighted-item-2"].label, "2 · window-002")
+        attachScreenshot("06 - Requested floor plan and answer highlights", app: app)
+    }
+
+    @MainActor
     func testLocalWebShellAndNativeDemoScene() throws {
         let app = configuredApp()
         app.launch()
@@ -253,7 +276,7 @@ final class HologramUITests: XCTestCase {
         XCTAssertTrue(credit.label.contains("Karlsruhe Institute of Technology (KIT)"))
         XCTAssertTrue(credit.label.contains("LicenseRef-KIT-unrestricted"))
         XCTAssertEqual(app.staticTexts["ar-document-id"].label, docID)
-        XCTAssertEqual(app.staticTexts["scene-name"].label, "AC20 · IFC building")
+        XCTAssertEqual(app.staticTexts["scene-name"].label, "AC20 Institute / Phantasy Office Building - arc")
         XCTAssertEqual(app.staticTexts["ar-status"].label, "Scene metadata loaded from the API.",
                        "This live smoke test requires the local API on port 8000")
         // Count is read from the AC20 manifest, never from a UI fixture.

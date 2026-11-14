@@ -8,6 +8,7 @@ enum ARSceneLoader {
         let isFixture: Bool
         let manifest: SceneManifest?
         var isBundledDemo = false
+        var documentTitle: String? = nil
 
         var attribution: SceneAttribution? {
             if let credit = manifest?.credit, let licence = manifest?.licence {
@@ -69,8 +70,14 @@ enum ARSceneLoader {
         guard manifest.doc_id == docID else { throw LoaderError.wrongDocument }
         let entity = try await loadEntity(from: files.modelURL)
         try Task.checkCancellation()
+        // A correct JSON response can still accompany a stale or wrong USDZ.
+        let names = Set(SceneIndex(root: entity).entitiesByUSDName.keys.filter { $0.hasPrefix("i_") })
+        let expected = Set(manifest.items.values.map(\.usd_name))
+        guard !names.isDisjoint(with: expected), names.isSubset(of: expected) else {
+            throw LoaderError.wrongDocument
+        }
         return LoadedScene(entity: entity, isFixture: false, manifest: manifest,
-                           isBundledDemo: isBundledDemo)
+                           isBundledDemo: isBundledDemo, documentTitle: files.documentTitle)
     }
 
     private static func loadManifest(from url: URL) async throws -> SceneManifest {

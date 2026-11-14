@@ -101,7 +101,7 @@ final class HighlightControllerTests: XCTestCase {
             group.name = SceneIndex.usdName(for: id)
             let item = ModelEntity(mesh: .generateBox(size: 1), materials: [original])
             group.addChild(item)
-            group.position.x = Float(n) * 0.5
+            group.position.z = Float(n) * 0.5
             root.addChild(group)
             items.append(item)
         }
@@ -114,8 +114,24 @@ final class HighlightControllerTests: XCTestCase {
         assertSameMaterials(try XCTUnwrap(other.model).materials, [original])
         XCTAssertTrue(try XCTUnwrap(items[0].model).materials.first is UnlitMaterial)
         XCTAssertNotNil(controller.labelsByItemID["door-001"]?.findEntity(named: "caption"))
-        let heights = ["door-001", "door-002", "door-003"].compactMap { controller.labelsByItemID[$0]?.position.y }
-        XCTAssertEqual(Set(heights).count, 3, "Neighbouring tags need different heights")
+        var camera = matrix_identity_float4x4
+        camera.columns.3 = [0, 0, 10, 1]
+        let ids: Set<String> = ["door-001", "door-002", "door-003"]
+        controller.layoutLabels(cameraTransform: camera, viewport: CGRect(x: 0, y: 0, width: 400, height: 400),
+                                visibleItemIDs: ids) { point in
+            CGPoint(x: 200 + CGFloat(point.x / (10 - point.z)) * 300,
+                    y: 200 - CGFloat(point.y / (10 - point.z)) * 300)
+        }
+        let visible = controller.labelsByItemID.values.filter(\.isEnabled)
+        XCTAssertEqual(visible.count, 3)
+        XCTAssertEqual(Set(visible.map { $0.position.y }).count, 3,
+                       "Items aligned along the camera direction must stagger in screen space")
+        controller.layoutLabels(cameraTransform: camera, viewport: CGRect(x: 0, y: 0, width: 400, height: 400),
+                                visibleItemIDs: ["door-001"]) { point in
+            CGPoint(x: 200 + CGFloat(point.x) * 30, y: 200 - CGFloat(point.y) * 30)
+        }
+        XCTAssertFalse(try XCTUnwrap(controller.labelsByItemID["door-002"]).isEnabled,
+                       "Projection updates must not unhide cutaway or edited items")
         controller.clear()
         assertSameMaterials(try XCTUnwrap(items[0].model).materials, [original])
     }

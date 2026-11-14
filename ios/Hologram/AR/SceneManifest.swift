@@ -44,6 +44,7 @@ struct SceneManifest: Decodable {
     }
 
     let doc_id: String?
+    let title: String?
     let items: [String: Item]
     let storeys: [Storey]?
     let credit: String?

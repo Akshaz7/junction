@@ -6,7 +6,7 @@ struct ARRequest: Equatable, Identifiable {
     let docID: String
     let itemIDs: [String]
     let chatID: String?
-    var id: String { docID }
+    var id: String { docID + "\n" + (chatID ?? "") }
 
     init(docID: String, itemIDs: [String], chatID: String? = nil) {
         self.docID = docID

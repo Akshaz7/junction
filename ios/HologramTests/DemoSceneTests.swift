@@ -4,6 +4,20 @@ import XCTest
 
 final class DemoSceneTests: XCTestCase {
     @MainActor
+    func testCorrectManifestWithWrongUSDZCannotLoadAsRequestedDocument() async throws {
+        let docID = "ifc_bench__ac20-arc"
+        let files = try XCTUnwrap(DemoScenes.files(for: docID))
+        let wrong = try XCTUnwrap(DemoScenes.files(for: "cubicasa5k__colorful-11397"))
+        let loaded = try await ARSceneLoader.load(docID: docID, url: nil, fetcher: { _ in
+            SceneRepository.Files(modelURL: wrong.modelURL, manifestURL: files.manifestURL)
+        })
+        XCTAssertTrue(loaded.isBundledDemo, "Reject mismatched USDZ and use only the matching offline copy")
+        XCTAssertEqual(loaded.manifest?.doc_id, docID)
+        let index = SceneIndex(root: loaded.entity)
+        XCTAssertNotNil(index.entity(for: "00RjztLorCQgcGEHv7fY3g"))
+    }
+
+    @MainActor
     func testBundledAC20DoorCanBeFoundByManifestUSDName() async throws {
         let files = try XCTUnwrap(DemoScenes.files(for: "ifc_bench__ac20-arc"))
         let manifest = try JSONDecoder().decode(SceneManifest.self, from: Data(contentsOf: files.manifestURL))
@@ -59,6 +73,46 @@ final class DemoSceneTests: XCTestCase {
         })
         XCTAssertEqual(loaded.manifest?.doc_id, docID)
         XCTAssertTrue(loaded.isBundledDemo)
+        XCTAssertFalse(loaded.isFixture)
+    }
+}
+
+final class BundledAC20LoadTests: XCTestCase {
+    @MainActor
+    func testBundledAC20LoadsThroughLoaderWithoutFixtureFallback() async throws {
+        let docID = "ifc_bench__ac20-arc"
+        let files = try XCTUnwrap(DemoScenes.files(for: docID))
+        let loaded = try await ARSceneLoader.load(docID: docID, url: nil, fetcher: { _ in files })
+        XCTAssertFalse(loaded.isFixture)
+        XCTAssertEqual(loaded.manifest?.doc_id, docID)
+        XCTAssertGreaterThan(loaded.manifest?.items.count ?? 0, 100)
+        XCTAssertFalse(SceneIndex(root: loaded.entity).entitiesByUSDName.isEmpty)
+    }
+
+    @MainActor
+    func testControllerLoadsAC20FromBundleQuickly() async throws {
+        let docID = "ifc_bench__ac20-arc"
+        let files = try XCTUnwrap(DemoScenes.files(for: docID))
+        let controller = ARSceneController()
+        let start = Date()
+        await controller.load(docID: docID, url: files.modelURL, manifestURL: files.manifestURL)
+        print("AC20-LOAD-SECONDS \(Date().timeIntervalSince(start)) status=\(controller.status) loaded=\(controller.isLoaded) active=\(String(describing: controller.activeDocID)) title=\(controller.sceneIdentity.title)")
+        XCTAssertTrue(controller.isLoaded)
+        // Tags re-read visibility every few frames on device; it must stay far below a frame.
+        let tick = Date()
+        for _ in 0..<50 { _ = controller.visibleItemIDs }
+        let perCall = Date().timeIntervalSince(tick) / 50
+        print("AC20-VISIBLE-PER-CALL-MS \(perCall * 1000)")
+        XCTAssertLessThan(perCall, 0.008)
+    }
+
+    @MainActor
+    func testLiveAPILoadsAC20() async throws {
+        let docID = "ifc_bench__ac20-arc"
+        let url = try XCTUnwrap(URL(string: "https://hologram-khaki.vercel.app"))
+        let start = Date()
+        let loaded = try await ARSceneLoader.load(docID: docID, apiURL: url, url: nil)
+        print("AC20-API-SECONDS \(Date().timeIntervalSince(start)) bundled=\(loaded.isBundledDemo) fixture=\(loaded.isFixture) title=\(loaded.documentTitle ?? "nil")")
         XCTAssertFalse(loaded.isFixture)
     }
 }

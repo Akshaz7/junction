@@ -43,6 +43,7 @@ final class LiveSocket: ObservableObject {
     private let apiURL: URL
     private var docID: String?
     private var chatID: String?
+    private var entryItemIDs: [String]?
     private let makeConnection: (URL) -> any LiveSocketConnection
     private var connection: (any LiveSocketConnection)?
     private var receiveTask: Task<Void, Never>?
@@ -75,11 +76,12 @@ final class LiveSocket: ObservableObject {
         }
     }
 
-    func start(docID: String? = nil, chatID: String? = nil) {
+    func start(docID: String? = nil, chatID: String? = nil, entryItemIDs: [String] = []) {
         if self.docID != docID || self.chatID != chatID { stop() }
         self.docID = docID
         self.chatID = chatID
         guard receiveTask == nil else { return }
+        self.entryItemIDs = entryItemIDs.isEmpty ? nil : entryItemIDs
         receiveTask = Task { [weak self] in
             var failures = 0
             while !Task.isCancelled {
@@ -100,9 +102,19 @@ final class LiveSocket: ObservableObject {
                               let command = try? Self.decode(data) else { continue }
                         failures = 0
                         switch command {
-                        case .highlight(let request): self?.onHighlight?(request)
-                        case .edit(let edit): self?.onEdit?(edit)
-                        case .state(let state): self?.onState?(state)
+                        case .highlight(let request):
+                            self?.entryItemIDs = nil
+                            self?.onHighlight?(request)
+                        case .edit(let edit):
+                            self?.entryItemIDs = nil
+                            self?.onEdit?(edit)
+                        case .state(let state):
+                            // The bridge opens a particular answer. A chat's initial edit
+                            // snapshot (often empty) must not erase that answer's evidence.
+                            let restored = SceneStateEvent(doc_id: state.doc_id, hidden: state.hidden,
+                                highlighted: self?.entryItemIDs ?? state.highlighted, labels: state.labels)
+                            self?.entryItemIDs = nil
+                            self?.onState?(restored)
                         case .advisorCards(let event): self?.onAdvisorCards?(event)
                         case .ping: try await socket.send(.string("{\"type\":\"pong\"}"))
                         case .ignored: break
@@ -126,6 +138,7 @@ final class LiveSocket: ObservableObject {
         receiveTask = nil
         connection?.close()
         connection = nil
+        entryItemIDs = nil
     }
 
     func sendHighlight(docID: String, itemIDs: [String]) async {

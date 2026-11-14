@@ -9,6 +9,7 @@ final class ARSceneController: ObservableObject {
     @Published private(set) var isFixture = false
     @Published private(set) var isBundledDemo = false
     @Published private(set) var attribution: SceneAttribution?
+    @Published private(set) var sceneIdentity = SceneIdentity(requestedDocID: nil, manifest: nil)
     @Published var demoDocID: String? = nil
     @Published private(set) var isLoaded = false
     @Published private(set) var isPlaced = false
@@ -44,6 +45,7 @@ final class ARSceneController: ObservableObject {
     private var tableFloor: Float = 0
     private var tableScale: Float = 0.01
     private var lastGuideUpdate: TimeInterval = 0
+    private var labelFrame = 0
     private var anchor: AnchorEntity?
     private var updateSubscription: (any Cancellable)?
     private var gestureRecognizers: [UIGestureRecognizer] = []
@@ -53,6 +55,8 @@ final class ARSceneController: ObservableObject {
     private var calloutEntity: Entity?
     private var ghost: AnchorEntity?
     private var ghostSize = SIMD2<Float>(0, 0)
+    private var footprintExtents = SIMD3<Float>(repeating: 0.001)
+    private var cutawayCache: (key: String, hidden: Set<String>)?
     private var previewPosition: SIMD3<Float>?
 
     var scaleLabel: String { "1:\(Int((1 / scale).rounded()))" }
@@ -65,13 +69,22 @@ final class ARSceneController: ObservableObject {
     /// Logical visibility updates immediately; the rendered entity may still be fading out.
     var visibleItemIDs: Set<String> {
         guard let manifest else { return [] }
-        let cutaway = CutawayPolicy(manifest: manifest).hiddenUSDNames(activeStorey: activeStorey,
-                                                                      showRoof: showRoof)
+        let cutaway = hiddenUSDNames(manifest: manifest)
         return Set(manifest.items.compactMap { id, item in
             !hiddenItemIDs.contains(id) && !cutaway.contains(item.usd_name)
                 && (originalVisibility[item.usd_name] ?? true)
                 && sceneIndex?.entitiesByUSDName[item.usd_name] != nil ? id : nil
         })
+    }
+
+    /// The cutaway is recomputed only when its inputs change; it is read every few frames for tags.
+    private func hiddenUSDNames(manifest: SceneManifest) -> Set<String> {
+        let key = "\(manifest.doc_id ?? "")|\(activeStorey ?? "")|\(showRoof)|\(highlightedItemIDs.joined(separator: ","))"
+        if let cutawayCache, cutawayCache.key == key { return cutawayCache.hidden }
+        let hidden = CutawayPolicy(manifest: manifest).hiddenUSDNames(activeStorey: activeStorey, showRoof: showRoof,
+                                                                      keep: Set(highlightedItemIDs))
+        cutawayCache = (key, hidden)
+        return hidden
     }
 
     func attach(to view: ARView) {
@@ -96,6 +109,7 @@ final class ARSceneController: ObservableObject {
             self?.syncGestureScale()
             self?.updatePlacementPreview()
             self?.updateWalkGuide()
+            self?.updateAnswerLabels()
         }
     }
 
@@ -109,6 +123,8 @@ final class ARSceneController: ObservableObject {
         isBundledDemo = false
         attribution = nil
         manifest = nil
+        cutawayCache = nil
+        sceneIdentity = SceneIdentity(requestedDocID: docID, manifest: nil)
         activeDocID = nil
         isWalking = false
         scale = 0.01
@@ -127,6 +143,8 @@ final class ARSceneController: ObservableObject {
             self.content = content
             originalContentTransform = content.transform
             manifest = loaded.manifest
+            sceneIdentity = SceneIdentity(requestedDocID: docID, manifest: loaded.manifest,
+                                          documentTitle: loaded.documentTitle, isBundled: loaded.isBundledDemo)
             attribution = loaded.attribution
             isBundledDemo = loaded.isBundledDemo
             activeDocID = loaded.manifest?.doc_id ?? (loaded.isFixture ? "fixture__ios" : docID)
@@ -149,6 +167,7 @@ final class ARSceneController: ObservableObject {
             container.addChild(content)
             let localBounds = container.visualBounds(relativeTo: container)
             let size = simd_max(localBounds.extents, SIMD3<Float>(repeating: 0.001))
+            footprintExtents = size
             let shape = ShapeResource.generateBox(size: size).offsetBy(translation: localBounds.center)
             container.components.set(CollisionComponent(shapes: [shape]))
             container.scale = SIMD3(repeating: scale)
@@ -168,6 +187,14 @@ final class ARSceneController: ObservableObject {
         } catch {
             status = "Unable to load model. \(error.localizedDescription)"
         }
+    }
+
+    private func updateAnswerLabels() {
+        labelFrame = (labelFrame + 1) % 4
+        guard labelFrame == 0, isPlaced, let view = arView else { return }
+        highlightController?.layoutLabels(cameraTransform: view.cameraTransform.matrix,
+                                         viewport: view.bounds, visibleItemIDs: visibleItemIDs,
+                                         project: { view.project($0) })
     }
 
     func place(at point: CGPoint) {
@@ -257,7 +284,7 @@ final class ARSceneController: ObservableObject {
 
     /// A subtle translucent white footprint outline follows the screen-centre raycast until the model is placed.
     private func updatePlacementPreview() {
-        guard !isPlaced, isLoaded, let view = arView, let model, view.bounds.width > 0 else {
+        guard !isPlaced, isLoaded, let view = arView, model != nil, view.bounds.width > 0 else {
             if canPlace { canPlace = false }
             removeGhost()
             return
@@ -275,7 +302,7 @@ final class ARSceneController: ObservableObject {
         let position = hit.worldTransform.columns.3.xyz
         previewPosition = position
         if !canPlace { canPlace = true }
-        let extents = model.visualBounds(relativeTo: model).extents
+        let extents = footprintExtents
         let size = SIMD2<Float>(max(extents.x * scale, 0.05), max(extents.z * scale, 0.05))
         if ghost == nil || simd_distance(size, ghostSize) > 0.001 { buildGhost(size: size) }
         ghost?.isEnabled = true
@@ -390,8 +417,7 @@ final class ARSceneController: ObservableObject {
 
     private func applyCutaway(animated: Bool = false) {
         guard let manifest else { return }
-        let hidden = CutawayPolicy(manifest: manifest).hiddenUSDNames(activeStorey: activeStorey,
-                                                                     showRoof: showRoof)
+        let hidden = hiddenUSDNames(manifest: manifest)
         let visible = visibleItemIDs
         for (id, item) in manifest.items {
             guard let entity = sceneIndex?.entitiesByUSDName[item.usd_name] else { continue }

@@ -6,6 +6,7 @@ struct SceneRepository {
     struct Files {
         let modelURL: URL
         let manifestURL: URL
+        var documentTitle: String? = nil
     }
 
     let apiURL: URL
@@ -41,7 +42,20 @@ struct SceneRepository {
             try FileManager.default.moveItem(at: download, to: modelURL)
         }
         try metadata.write(to: manifestURL, options: .atomic)
-        return Files(modelURL: modelURL, manifestURL: manifestURL)
+        let title = await documentTitle(docID: docID)
+        try Task.checkCancellation()
+        return Files(modelURL: modelURL, manifestURL: manifestURL, documentTitle: title)
+    }
+
+    func documentTitle(docID: String) async -> String? {
+        struct Document: Decodable { let doc_id: String; let title: String? }
+        var request = URLRequest(url: apiURL.appendingPathComponent("api/docs").appending(component: docID))
+        request.timeoutInterval = 5
+        guard let (data, response) = try? await session.data(for: request),
+              (response as? HTTPURLResponse).map({ (200..<300).contains($0.statusCode) }) == true,
+              let document = try? JSONDecoder().decode(Document.self, from: data),
+              document.doc_id == docID else { return nil }
+        return document.title.flatMap { $0.isEmpty ? nil : $0 }
     }
 
     private func validate(_ response: URLResponse) throws {

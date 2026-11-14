@@ -97,5 +97,16 @@ AR uses manifest tags for highlighted items and follows `scene.highlight`,
 in the bridge payload, or the page URL contains `#/chat?chat=<id>`, the socket joins
 `/ws?doc_id=…&chat_id=…` to restore that chat's saved scene state, including after
 reconnection. Events naming another document or chat are ignored. Without a chat
-ID it follows document events; the current web payload does not expose the chat
-ID of a newly created chat whose URL has not been updated.
+ID it follows document events. The web can pass `chat_id` directly; the native
+bridge also accepts the chat ID from the page URL.
+
+I-17: The AR scene title comes from the loaded manifest and matching document
+metadata. A sample fallback has a visible notice; the matching bundled copy is
+marked offline. Downloaded USDZ prim names must match the manifest before use.
+The first chat-state restore retains the bridge's answer selection and restores
+hidden items; later live events update the selection normally. Answer tags are
+reprojected every fourth frame and staggered in screen space. Nearer tags keep
+priority; farther tags are hidden when all tiers collide. AR_DEMO, occlusion and materials are
+unchanged. Simulator test targets and the unsigned generic iOS build compile;
+the simulator suite requires the LEAD's normal terminal because CoreSimulator
+is inaccessible from the worker sandbox. Logs: `ios/build/I-17-*.log`.
