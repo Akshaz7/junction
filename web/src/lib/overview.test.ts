@@ -112,3 +112,20 @@ describe('overview plain-language helpers', () => {
     expect(visibleChats([empty, answered('1', 'How many doors?'), answered('2', 'how many doors?')]).map((c) => c.id)).toEqual(['1'])
   })
 })
+
+describe('overview junk filtering', () => {
+  it('flags stress, corrupt and untitled uploads as test uploads', async () => {
+    const { isTestUpload } = await import('./overview')
+    expect(isTestUpload('Stress 3 big plan.pdf')).toBe(true)
+    expect(isTestUpload('uploads__corrupt-file.pdf')).toBe(true)
+    expect(isTestUpload('uploads__1234567890123.png')).toBe(true)
+    expect(isTestUpload('Villa ground floor.pdf')).toBe(false)
+  })
+  it('drops timed-out answers from the latest list', async () => {
+    const { hasAnswer } = await import('./overview')
+    const chat = (content: string) => ({ id: 'c', title: null, created_at: '2026-11-14T10:00:00Z', messages: [
+      { id: 'm1', role: 'user', content: 'q', created_at: '', answer: null }, { id: 'm2', role: 'assistant', content, created_at: '', answer: null }] })
+    expect(hasAnswer(chat('This took longer than 40 s, so I stopped. Nothing was guessed.'))).toBe(false)
+    expect(hasAnswer(chat('There are 11 doors.'))).toBe(true)
+  })
+})

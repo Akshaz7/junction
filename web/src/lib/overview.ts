@@ -36,7 +36,7 @@ export function latestChats(chats: OverviewChat[], limit = 5) {
 }
 
 /** Calendar week starts on Monday in the user's local timezone. */
-const testUpload = /^(smoke|qa|audit|w\d+|web\d*)[-_]/i
+const testUpload = /^(smoke|qa|audit|w\d+|web\d*)[-_]|^stress|corrupt/i
 
 /** A readable title from a file-style name: no extension, sheet codes, timestamps or "generated for demo" suffix. */
 export function cleanTitle(raw: string) {
@@ -47,7 +47,10 @@ export function cleanTitle(raw: string) {
   return words ? words.charAt(0).toUpperCase() + words.slice(1) : 'Untitled drawing'
 }
 
-export function isTestUpload(raw: string) { return testUpload.test(raw.replace(/^uploads__/, '')) }
+export function isTestUpload(raw: string) {
+  const name = raw.replace(/^uploads__/, '')
+  return testUpload.test(name) || cleanTitle(name) === 'Untitled drawing'
+}
 
 /** This week's changes, test uploads and repeats of the same file removed. */
 export function weeklyChanges(changes: ChangeEntry[], now = new Date()) {
@@ -124,7 +127,15 @@ export function chatPreview(chat: OverviewChat) {
   }
 }
 
-export function hasAnswer(chat: OverviewChat) { return !chat.detailUnavailable && chatPreview(chat).answer !== 'No answer yet.' }
+const failedAnswer = /took longer than \d+ ?s|could not tell which|nothing was guessed|answer unavailable/i
+
+export function hasAnswer(chat: OverviewChat) {
+  if (chat.detailUnavailable || chatPreview(chat).answer === 'No answer yet.') return false
+  const messages = chat.messages || []
+  const response = [...messages].reverse().find((message) => message.role === 'assistant')
+  if (response?.answer?.answer.abstained) return false
+  return !failedAnswer.test(chatPreview(chat).answer)
+}
 
 /** Chats that have an answer, with repeats of the same question dropped. */
 export function visibleChats(chats: OverviewChat[], limit = 5) {

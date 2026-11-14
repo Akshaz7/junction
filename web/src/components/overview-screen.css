@@ -15,7 +15,7 @@
 .overview-list a { display: flex; flex-direction: column; gap: 4px; padding: 12px 6px; border-radius: var(--radius-control); overflow-wrap: anywhere; }
 .overview-list strong { font-size: var(--text-body); font-weight: 500; }
 .overview-list span, .overview-list small { color: var(--muted-foreground); font-size: var(--text-caption); }
-.overview-list .overview-answer { font-size: var(--text-body-sm); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.overview-list .overview-answer { font-size: var(--text-body-sm); display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
 .overview-severities, .overview-metrics { display: flex; flex-wrap: wrap; gap: 12px 28px; margin: 16px 0; }
 .overview-severities dt, .overview-metrics dt { font-size: var(--text-caption); color: var(--muted-foreground); }
 .overview-severities dt { text-transform: capitalize; }
