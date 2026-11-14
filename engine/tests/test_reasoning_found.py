@@ -64,3 +64,23 @@ def test_multiple_sources():
                res={"doc_ids": ["a", "b"]})
     found.run(ctx)
     assert "across 2 sources" in ctx["steps"][0]["text"]
+
+
+def test_machine_names_are_not_used_as_single_element_names():
+    for name in ("door-003", "18PQUIFELEARLM4c0brquf0", "[L]AD"):
+        it = Item("r", "room", name=name)
+        ctx = _ctx([it], [{"n": 1, "item_ids": ["r"]}], _doc("ifc", [it]))
+        found.run(ctx)
+        assert name not in ctx["steps"][0]["text"]
+
+
+def test_unloaded_source_is_not_called_a_scan():
+    ctx = _ctx([], [{"n": 1, "item_ids": ["unloaded"]}], None)
+    found.run(ctx)
+    assert "cited source" in ctx["steps"][0]["text"]
+
+
+def test_empty_placeholder_citation_is_not_called_a_marked_region():
+    ctx = _ctx([], [{"n": 1, "item_ids": [], "bbox_px": None}], _doc())
+    found.run(ctx)
+    assert "no matching measurement" in ctx["steps"][0]["text"]
