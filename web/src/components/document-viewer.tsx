@@ -14,7 +14,7 @@ import type { SceneCommand } from '../viewer3d/commands'
 import { DrawingModel, ViewerModeToggle, type ViewerMode } from './drawing-model'
 import { ItemPanel } from './item-panel'
 import { KindLegend } from '../viewer3d/KindLegend'
-import { kindStyle } from '../lib/kind-colors'
+import { kindFromItemId, kindStyle } from '../lib/kind-colors'
 import { placeEvidence, type ItemPlace, type LinkedItem } from '../lib/linked'
 import { AnnotationLayer, useAnnotations, type Annotation, type MarkupTool } from './viewer-tools/annotations'
 import { findSheetText, loadSheetText, type SheetText } from './viewer-tools/sheet-text'
@@ -94,6 +94,26 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   } : answer, [answer, commands])
   const linked = useLinkedItem()
   const stage = useRef<HTMLDivElement>(null)
+  // Kinds of every item the answer names (all pages): the legend leads with these totals.
+  const totalKinds = useMemo(() => {
+    const kinds = new Map<string, string>()
+    for (const id of answer.evidence.scene.highlight_item_ids) { const kind = kindFromItemId(id); if (kind) kinds.set(id, kind) }
+    for (const source of answer.citations) for (const id of source.item_ids) { const kind = source.item_kind ?? kindFromItemId(id); if (kind) kinds.set(id, kind) }
+    return [...kinds.values()]
+  }, [answer])
+  // Number tags are 22 px on screen. Keep the first tag in any overlapping group; the rest show on hover or zoom.
+  const shownTags = useMemo(() => {
+    const shown = new Set<string>()
+    const placed: { x: number; y: number; w: number }[] = []
+    const order = regions.map((region, index) => ({ region, index }))
+      .sort((a, b) => Number(b.index === active) - Number(a.index === active))
+    for (const { region } of order) {
+      const x = region.bbox[0] * view.scale, y = region.bbox[1] * view.scale, w = 22 * Math.max(1, region.label.length / 2)
+      if (placed.some((tag) => x < tag.x + tag.w + 2 && x + w + 2 > tag.x && Math.abs(y - tag.y) < 24)) continue
+      placed.push({ x, y, w }); shown.add(region.id)
+    }
+    return shown
+  }, [regions, view.scale, active])
   const panel = useRef<HTMLElement>(null)
   const close = useRef<HTMLButtonElement>(null)
   const pointers = useRef(new Map<number, Point>())
@@ -398,7 +418,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
             const secondaryTag = answer.evidence.scene.commands?.length && tag !== label ? tag : undefined
             const hidden = itemIsHidden(edits, region.id)
             const kind = region.text ? null : kindStyle(region.kind)
-            return <g key={region.id} data-kind={kind ? region.kind ?? 'other' : undefined} style={kind ? { '--kind-color': kind.color, '--kind-on': kind.on } as CSSProperties : undefined} className={`evidence-region ${region.text ? 'text-highlight' : ''} ${index === active || linked.selected === region.id || linked.hovered === region.id ? 'is-active' : ''} ${hidden ? 'is-hidden' : ''}`} data-testid={`evidence-box-${region.label}`} aria-label={`${region.text ? 'Text source' : 'Box'} ${label}${secondaryTag ? `, ${secondaryTag}` : ''}${hidden ? ', hidden' : ''}`}
+            return <g key={region.id} data-kind={kind ? region.kind ?? 'other' : undefined} style={kind ? { '--kind-color': kind.color, '--kind-on': kind.on } as CSSProperties : undefined} className={`evidence-region ${region.text ? 'text-highlight' : ''} ${shownTags.has(region.id) ? '' : 'tag-collapsed'} ${index === active || linked.selected === region.id || linked.hovered === region.id ? 'is-active' : ''} ${hidden ? 'is-hidden' : ''}`} data-testid={`evidence-box-${region.label}`} aria-label={`${region.text ? 'Text source' : 'Box'} ${label}${secondaryTag ? `, ${secondaryTag}` : ''}${hidden ? ', hidden' : ''}`}
               data-item-id={region.id} data-linked={linked.selected === region.id || linked.hovered === region.id ? 'true' : undefined}
               data-hidden={String(hidden)} data-tag={tag}
               role="button" tabIndex={0} aria-haspopup={sheet ? 'dialog' : undefined}
@@ -428,7 +448,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
           <AnnotationLayer marks={annotations.marks} draft={draft} />
         </svg>}
       </div>}
-      {image && regions.some((region) => !region.text) && <KindLegend className="kind-legend-2d" kinds={regions.filter((region) => !region.text).map((region) => region.kind)} />}
+      {image && regions.some((region) => !region.text) && <KindLegend className="kind-legend-2d" kinds={regions.filter((region) => !region.text).map((region) => region.kind)} totals={totalKinds} />}
       {error ? <div className="viewer-message"><p role="alert">{error}</p><Button variant="raised" onClick={() => setRetry(retry + 1)}>Try again</Button></div>
         : !image && <p className="viewer-message" role="status">Loading drawing…</p>}
     </div>

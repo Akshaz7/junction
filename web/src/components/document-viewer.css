@@ -88,3 +88,7 @@
 @media (prefers-reduced-motion: reduce) {
   .viewer-spec-panel, .viewer-spec-content mark, .document-viewer.viewer-sheet { animation: none; }
 }
+/* Dense tags: only the first of an overlapping group shows; the others appear on hover, focus or when active. */
+.evidence-region.tag-collapsed > svg { display: none; }
+.evidence-region.tag-collapsed:hover > svg, .evidence-region.tag-collapsed:focus-visible > svg, .evidence-region.tag-collapsed.is-active > svg { display: inline; }
+.evidence-region.tag-collapsed:hover { z-index: 2; }

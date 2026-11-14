@@ -112,7 +112,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
       {!oneLine && <h3 className="source-heading">Where it is set out</h3>}
       <ol className="source-list">{sources.map((source) => <li key={source.docId}>
         <div className="source-document"><strong>{source.title.replace(/\.[a-z0-9]+(?:\s*[—–-]?\s*generated for demo)?$/i, '')}</strong> (<button type="button" className="source-file-chip" aria-label={`Open source document ${source.title}`} onClick={() => onOpenCitation(source.citations[0])}><FileText size={14} /><span>{source.title}</span></button>)</div>
-        <ul>{source.citations.map((citation) => <li key={citation.n}>{(citation.quote && humanizeIds(plainQuote(citation.quote), labels)) || `Page ${citation.page}${citation.item_ids.length ? ` · ${citation.item_ids.length} cited ${citation.item_ids.length === 1 ? 'item' : 'items'}` : ''}`} <CitationChip citation={citation} selected={activeCitation} onOpenCitation={onOpenCitation} /></li>)}</ul>
+        <ul>{source.citations.map((citation) => <li key={citation.n}>{(citation.quote && humanizeIds(plainQuote(citation.quote), labels)) || (citation as { label?: string }).label || `Page ${citation.page}${citation.item_ids.length ? ` · ${citation.item_ids.length} cited ${citation.item_ids.length === 1 ? 'item' : 'items'}` : ''}`} <CitationChip citation={citation} selected={activeCitation} onOpenCitation={onOpenCitation} /></li>)}</ul>
       </li>)}</ol>
       {(hidden > 0 || showAll) && allCitations.length > CITATION_CAP && <button type="button" className="citation-more" aria-expanded={showAll} onClick={() => setShowAll((value) => !value)}>{showAll ? 'Show fewer' : `+${hidden} more`}</button>}
     </>}

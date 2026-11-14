@@ -9,3 +9,4 @@
 .kind-legend li { display: inline-flex; align-items: center; gap: 6px; }
 .kind-legend li + li::before { content: '·'; margin-right: 6px; margin-left: -6px; opacity: .5; }
 .kind-legend-swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; box-shadow: 0 0 0 1px color-mix(in srgb, #000 35%, transparent); }
+.kind-legend-page { opacity: .7; font-weight: 400; }
