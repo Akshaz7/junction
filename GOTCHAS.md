@@ -23,3 +23,6 @@
 - IfcConvert: `--exclude entities IfcOpeningElement` (before `-j`) overrides the default that drops IfcSpace, so rooms are kept.
 - scene.json `publishable: false` marks duplex, clinic and hitos: never upload or deploy those scenes.
 - Nemotron 3.5 is a reasoning model: send chat_template_kwargs {enable_thinking:false} via the task's extra_body or it burns ~340 tokens and truncates.
+- DWG has no converter on the Mac: the 20 opening_design DWG docs have no page images.
+- trimesh splits multi-primitive GLB nodes into `<guid>_<hash>`: map back to the GUID before matching item_ids.
+- Raster scale: most cubicasa plans have no dimension text: scale falls back to the door-width prior (conf 0.3), so area answers there must be low-confidence or abstain.

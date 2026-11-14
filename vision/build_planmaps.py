@@ -17,6 +17,7 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import infer  # noqa: E402
 import planmap as P  # noqa: E402
+import rooms_scale as RS  # noqa: E402
 
 ROOT = infer.ROOT
 
@@ -55,8 +56,14 @@ def run(doc_ids, stages=("seg", "merged"), out_root=None):
             rooms, icons = off.maps(img)
             items = P.det_items(rooms, icons, off.icon_conf, *img.size, P.PARAMS["det_size"])
             items += P.det_walls(rooms, off.room_conf, *img.size)  # kept only when the seg model finds no walls
-            det_res[d] = (items, (time.perf_counter() - t) * 1000, rooms)
+            det_res[d] = (items, (time.perf_counter() - t) * 1000, rooms, off.room_conf.copy())
         off.release()
+        from rapidocr_onnxruntime import RapidOCR
+        ocr = RapidOCR()
+        ocr_res = {}
+        for d, img in imgs.items():
+            t = time.perf_counter()
+            ocr_res[d] = (RS.run_ocr(ocr, np.asarray(img)), (time.perf_counter() - t) * 1000)
     problems = {}
     for d, img in imgs.items():
         W, H = img.size
@@ -69,15 +76,26 @@ def run(doc_ids, stages=("seg", "merged"), out_root=None):
         timing[d] = {"image": [W, H], "seg_ms": round(s_ms, 1)}
         problems[d] = P.validate(pm_seg)
         if "merged" in stages:
-            d_items, d_ms, _ = det_res[d]
+            d_items, d_ms, rooms_map, room_conf = det_res[d]
+            texts, ocr_ms = ocr_res[d]
+            t = time.perf_counter()
+            room_list, _ = RS.room_items(rooms_map, room_conf, W, H, P.PARAMS["det_size"])
+            RS.label_rooms(room_list, texts)
+            scale = RS.estimate_scale(room_list, texts, [i for i in d_items if i["kind"] == "door"])
+            RS.apply_scale(room_list, scale)
+            text_items = [dict(kind="text", label=x["text"], bbox_px=x["bbox"], polygon_px=None, props={}, conf=round(x["conf"], 3), source="ocr") for x in texts]
+            rooms_ms = (time.perf_counter() - t) * 1000
             seg_walls = [i for i in s_items if i["kind"] == "wall"]
             wall_frac = sum((i["bbox_px"][2] - i["bbox_px"][0]) * (i["bbox_px"][3] - i["bbox_px"][1]) for i in seg_walls) / (W * H)
             use_det_walls = wall_frac < P.PARAMS["seg_wall_min_frac"]  # UNet fails on scans/hand-drawn plans
             keep = ([] if use_det_walls else seg_walls) + [i for i in d_items if i["kind"] != "wall" or use_det_walls]
             timing[d]["walls_from"] = "det" if use_det_walls else "seg"
-            pm = P.assemble(d, W, H, keep, {**models, "det": infer.OfficialModel.NAME}, s_ms + d_ms)
+            pm = P.assemble(d, W, H, keep + room_list + text_items, {**models, "det": infer.OfficialModel.NAME, "ocr": "rapidocr-onnxruntime"},
+                            s_ms + d_ms + ocr_ms + rooms_ms, scale=scale)
             (dd / "planmap-1.json").write_text(json.dumps(pm))
             timing[d]["det_ms"] = round(d_ms, 1)
+            timing[d]["ocr_ms"] = round(ocr_ms, 1)
+            timing[d]["scale"] = {k: (round(v, 5) if isinstance(v, float) else v) for k, v in scale.items()}
             problems[d] += P.validate(pm)
         else:
             (dd / "planmap-1.json").write_text(json.dumps(pm_seg))
@@ -99,7 +117,7 @@ if __name__ == "__main__":
     tp = ROOT / "results/vision/timing.json"
     if a.fixtures:
         tp.write_text(json.dumps({"device": str(infer.device()), "params": P.PARAMS, "per_doc": timing,
-                                  "mean_ms": {k: round(float(np.mean([v[k] for v in timing.values() if k in v])), 1) for k in ("seg_ms", "det_ms")}}, indent=1))
+                                  "mean_ms": {k: round(float(np.mean([v[k] for v in timing.values() if k in v])), 1) for k in ("seg_ms", "det_ms", "ocr_ms")}}, indent=1))
     for d in docs:
         print(d, timing[d], "VALID" if not problems[d] else problems[d])
     sys.exit(1 if any(problems.values()) else 0)
