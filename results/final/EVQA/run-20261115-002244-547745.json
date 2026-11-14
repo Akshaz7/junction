@@ -54279,5 +54279,6 @@
   "all_four_evidence_branches": false,
   "scratch_revision": "9250d9fcc6426374b0ffb8ac27182509378f21b9",
   "audit_exit": 1
- }
+ },
+ "interpretation": "Comparison findings superseded by run-20261115-003400-rechecked.json, which recomputed outline areas against unchanged artifact hashes. Other findings retained."
 }
