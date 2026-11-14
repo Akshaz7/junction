@@ -197,6 +197,10 @@ layer. No source geometry or manifest is edited. Inside a chat (`chat_id` on
 stores them in the chat's edit layer with the chat's own commands; other chats'
 edits on the same document are ignored. Hides from outside the panel join its
 Undo/Reset history, and the panel lists removed items with a Restore button.
+Committed moves and wall-material changes go out as `move` (`offset_m`: X/Z metres
+from the original spot) and `material` (`material`, null = original) commands;
+remote ones and snapshot `moved`/`materials` are applied through the edit layer
+and join Undo. Reset puts every item back to its original spot and material.
 
 Command highlights use explicit labels, then manifest tags, then the item ID.
 Hide removes the item's command label and fades out over 250 ms before disabling

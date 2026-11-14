@@ -212,7 +212,7 @@ async def get_scene_state(chat_id: str, doc_id: str | None = None):
     if await pool.fetchval("select 1 from chats where id=$1", cid) is None:
         raise HTTPException(404, "chat not found")
     states = await scene_edits.scene_state(pool, cid, doc_id)
-    return {"chat_id": str(cid), "states": [{k: v for k, v in s.items() if k != "type"} for s in states]}
+    return {"chat_id": str(cid), "states": [{k: v for k, v in scene_edits.public_state(s).items() if k != "type"} for s in states]}
 
 
 async def _attach_advice(ans: dict, doc_ids: list[str], hidden: list[str], cid) -> None:
@@ -308,6 +308,11 @@ async def ask(chat_id: str, body: NewMessage):
                 hidden = list(dict.fromkeys(i for st in states.values() for i in st["hidden"]))
                 sstate = {"hidden": hidden, "edits": edits,
                           "last_hidden": scene_edits.last_hidden(edits, doc_ids)}
+                # shared layer: Edit-panel moves / wall materials ("move the window back", "put it back where it was")
+                moved = {i: v for st in states.values() for i, v in (st.get("moved") or {}).items()}
+                mats = {i: v for st in states.values() for i, v in (st.get("materials") or {}).items()}
+                last = scene_edits.last_edit(edits, doc_ids)
+                sstate.update({k: v for k, v in (("moved", moved), ("materials", mats), ("last_edit", last)) if v})
         except Exception:  # noqa: BLE001 — scene state is optional context, never block the answer
             sstate = None
 

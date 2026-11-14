@@ -1,8 +1,13 @@
-export type SceneOperation = 'highlight' | 'hide' | 'restore' | 'reset' | 'isolate';
+/** move/material: the shared chat edit layer's Edit-panel what-ifs. They never change visibility state. */
+export type SceneOperation = 'highlight' | 'hide' | 'restore' | 'reset' | 'isolate' | 'move' | 'material';
 export interface SceneCommand {
   op: SceneOperation;
   item_ids: readonly string[];
   labels?: Readonly<Record<string, string>>;
+  /** move: metres from the original spot (X, Z); [0, 0] puts the item back. */
+  offset_m?: readonly [number, number];
+  /** material: wall material name; null restores the original. */
+  material?: string | null;
 }
 export interface CommandState {
   hidden: Set<string>;
@@ -14,6 +19,9 @@ export interface SceneSnapshot {
   highlighted: readonly string[];
   labels: Readonly<Record<string, string>>;
   isolated?: readonly string[] | null;
+  /** Shared layer: when present, the moves/materials the viewer should show (absent = leave local ones alone). */
+  moved?: Readonly<Record<string, readonly [number, number]>>;
+  materials?: Readonly<Record<string, string>>;
 }
 
 /** CONTRACT 5.11: only commands/snapshots fall back to document tags. */

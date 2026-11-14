@@ -196,11 +196,13 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   raycaster.layers.enable(PICK_LAYER);
   const pointer = new Vector2();
 
-  function mutateEdit(action: () => ItemEdit | null): ItemEdit | null {
+  /** `publish`: a local Edit-panel action, so its move/material changes go out as shared-layer commands. */
+  function mutateEdit(action: () => ItemEdit | null, publish = true): ItemEdit | null {
     if (!active || disposed) return null;
     // Unwind interaction layers before replacing any base material. Recreate the
     // lazy selection index so future hover/highlight uses the edited surface.
     const previous = highlights?.getHighlightState();
+    const before = publish ? edits?.state() : undefined;
     clearHighlight();
     linkedHighlights = null;
     let result: ItemEdit | null;
@@ -210,7 +212,30 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     if (previous?.highlighted.length) highlight(previous.highlighted, { labels: previous.labels, dimOthers: commandState.isolated === null });
     else { applyLinkedVisuals(); notifyHighlight(); }
     batchesDirty = true;
+    if (before && edits) publishShared(before, edits.state());
     return result;
+  }
+
+  /** Moves/materials that changed in a local edit become `move` / `material` commands (offset from the original
+   * spot; [0, 0] or null = back to the original), so the chat's shared edit layer records them. */
+  function publishShared(before: EditState, after: EditState) {
+    const out: SceneCommand[] = [];
+    const a = before.moveDelta ?? {}, b = after.moveDelta ?? {};
+    for (const id of new Set([...Object.keys(a), ...Object.keys(b)])) {
+      const [x0, z0] = a[id] ?? [0, 0], [x1, z1] = b[id] ?? [0, 0];
+      if (Math.abs(x1 - x0) + Math.abs(z1 - z0) > 1e-6) {
+        out.push({ op: 'move', item_ids: [id], offset_m: [Math.round(x1 * 1000) / 1000, Math.round(z1 * 1000) / 1000] });
+      }
+    }
+    for (const id of new Set([...Object.keys(before.materials), ...Object.keys(after.materials)])) {
+      if (before.materials[id] !== after.materials[id]) out.push({ op: 'material', item_ids: [id], material: after.materials[id] ?? null });
+    }
+    for (const command of out) for (const callback of commandListeners) callback(command);
+  }
+
+  /** Shared-layer moves/materials from outside the Edit panel (chat, other client, saved chat state). */
+  function applyShared(shared: Parameters<NonNullable<typeof edits>['applyShared']>[0]) {
+    if (edits && (shared.moved || shared.materials)) mutateEdit(() => { edits?.applyShared(shared); return null; }, false);
   }
 
   function floorPoint(x: number, y: number, plane: Plane): Vector3 | null {
@@ -794,7 +819,22 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       const resolved = command.op === 'highlight' || command.op === 'isolate'
         ? { ...command, labels: resolveCommandLabels(command.item_ids, command.labels, active.manifest.items) } : command;
       const before = commandState.hidden;
+      if (command.op === 'move' || command.op === 'material') {
+        // Shared layer: apply on top of the current moves/materials (never published back: not a local edit).
+        const now = edits?.state();
+        if (now && !localEdit && command.op === 'move' && command.offset_m) {
+          applyShared({ moved: { ...now.moveDelta, ...Object.fromEntries(command.item_ids.map((id) => [id, command.offset_m!])) } });
+        } else if (now && !localEdit && command.op === 'material' && command.material !== undefined) {
+          const materials: Record<string, string> = { ...now.materials };
+          for (const id of command.item_ids) { if (command.material) materials[id] = command.material; else delete materials[id]; }
+          applyShared({ materials });
+        }
+        for (const callback of commandListeners) callback(command);
+        afterCommandState(before);
+        return;
+      }
       if (!mutatingEdit && command.op !== 'hide' && command.op !== 'restore') edits?.recordCommand(resolved, commandState);
+      if (command.op === 'reset' && !localEdit) applyShared({ moved: {}, materials: {} });
       commandState = applyCommand(commandState, resolved);
       cinematicNext = command.op === 'highlight' || command.op === 'isolate';
       renderCommandState();
@@ -804,6 +844,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     },
     applyState(snapshot) {
       if (!active || disposed) return;
+      applyShared({ moved: snapshot.moved, materials: snapshot.materials });
       const before = commandState.hidden;
       const next = applyState({ ...snapshot,
         labels: resolveCommandLabels(snapshot.highlighted, snapshot.labels, active.manifest.items) });

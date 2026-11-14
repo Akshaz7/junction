@@ -67,9 +67,11 @@
                 "type": "object",
                 "required": ["op"],
                 "properties": {
-                  "op": {"enum": ["highlight", "hide", "restore", "reset", "isolate"]},
+                  "op": {"enum": ["highlight", "hide", "restore", "reset", "isolate", "move", "material"]},
                   "item_ids": {"type": "array", "items": {"type": "string"}},
-                  "labels": {"type": "object", "additionalProperties": {"type": "string"}}
+                  "labels": {"type": "object", "additionalProperties": {"type": "string"}},
+                  "offset_m": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+                  "material": {"type": ["string", "null"]}
                 }
               }
             }
