@@ -48,3 +48,12 @@ def test_quoted_label_is_not_typo_fixed():
 def test_point_in_polygon():
     sq = [(0, 0), (10, 0), (10, 10), (0, 10)]
     assert _pt_in_poly((5, 5), sq) and not _pt_in_poly((15, 5), sq)
+
+
+def test_door_window_same_opening_keeps_higher_confidence():
+    from engine.solvers.data import Item, dedupe_openings
+    d = Item(item_id="door-003", kind="door", page=1, bbox_px=[185, 666, 263, 680], conf=0.69)
+    w = Item(item_id="window-002", kind="window", page=1, bbox_px=[186, 670, 259, 684], conf=0.63)
+    far = Item(item_id="window-001", kind="window", page=1, bbox_px=[400, 100, 480, 120], conf=0.9)
+    out = dedupe_openings([d, w, far])
+    assert [i.item_id for i in out] == ["door-003", "window-001"]

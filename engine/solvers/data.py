@@ -44,6 +44,27 @@ def _json(p: Path):
         return json.load(f)
 
 
+def _iou(a, b) -> float:
+    iw = min(a[2], b[2]) - max(a[0], b[0])
+    ih = min(a[3], b[3]) - max(a[1], b[1])
+    if iw <= 0 or ih <= 0:
+        return 0.0
+    inter = iw * ih
+    return inter / ((a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - inter)
+
+
+def dedupe_openings(items: list, thr: float = 0.3) -> list:
+    """FIX-21: one opening read as both a door and a window (overlapping boxes on the same page): keep the more confident label."""
+    ds = [i for i in items if i.kind == "door" and i.bbox_px]
+    ws = [i for i in items if i.kind == "window" and i.bbox_px]
+    drop = set()
+    for d in ds:
+        for w in ws:
+            if d.page == w.page and id(d) not in drop and id(w) not in drop and _iou(d.bbox_px, w.bbox_px) > thr:
+                drop.add(id(w if d.conf >= w.conf else d))
+    return [i for i in items if id(i) not in drop] if drop else items
+
+
 def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
     d = Path(root) / doc_id
     if not d.is_dir():
@@ -90,6 +111,7 @@ def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
                 items.append(Item(item_id=x["item_id"], kind=x["kind"], label=x.get("label"), page=m.get("page", 1),
                                   bbox_px=x.get("bbox_px"), polygon_px=x.get("polygon_px"), conf=float(x.get("conf") or 0), q=q, props=pr,
                                   source=x.get("source", "")))
+        items = dedupe_openings(items)
         try:   # E-57: a printed scale (scale bar, or 1:200 + sheet size / dpi) beats the door-size guess
             from engine import scale_text
             better = scale_text.refine_scale(d, 1, scale)

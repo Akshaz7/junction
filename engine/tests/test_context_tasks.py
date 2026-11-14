@@ -49,7 +49,7 @@ def root(tmp_path, monkeypatch):
     d.mkdir()
     (d / "doc.json").write_text(json.dumps({"doc_id": DOC, "source": "cubicasa5k", "title": "colorful-11960", "kind": "raster", "pages": 1}))
     _png(d / "page-1.png")
-    items = [{"item_id": f"{k}-{i}", "kind": k, "label": None, "bbox_px": [i * 10, 5, i * 10 + 8, 9], "polygon_px": None, "props": {}, "conf": 0.9, "source": "rule"}
+    items = [{"item_id": f"{k}-{i}", "kind": k, "label": None, "bbox_px": [i * 10, 5 if k == "door" else 50, i * 10 + 8, 9 if k == "door" else 54], "polygon_px": None, "props": {}, "conf": 0.9, "source": "rule"}
              for k, n in (("window", 3), ("door", 5)) for i in range(1, n + 1)]
     (d / "planmap-1.json").write_text(json.dumps({"doc_id": DOC, "page": 1, "image": {"w": 800, "h": 600},
                                                   "scale": {"m_per_px": 0.02, "method": "x", "confidence": 1.0}, "items": items}))
