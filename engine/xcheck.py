@@ -335,3 +335,29 @@ def run(ctx, rows, missing, arithmetic):
     if recovered:
         result["_arithmetic"] = recovered
     return result
+
+
+def augment_existing(res, question, root):
+    """Bring legacy custom numeric cards through the same evidence policy.
+
+    Routes already supplying a structured calc retain it. A legacy hard-coded
+    percentage is not carried into the new quantified quantity card.
+    """
+    current = res.get("reasoning") or {}
+    ans = res.get("answer") or {}
+    unit = str(ans.get("unit") or "").replace("²", "2").replace("³", "3")
+    if current.get("calc") or finite(ans.get("value")) is None or unit not in ("count", "m", "m2", "m3"):
+        return res
+    try:
+        from engine.reasoning import build
+        quantified = build(res, question, root)
+        if quantified and quantified.get("calc"):
+            for key in ("calc", "margin", "based_on", "arithmetic", "confidence"):
+                if key in quantified:
+                    current[key] = quantified[key]
+            res["reasoning"] = current
+    except Exception:  # noqa: BLE001 — missing evidence cannot retain an unsupported percentage
+        current["confidence"] = {"label": "Estimate", "pct": None,
+                                 "reason": "The independent quantity check is unavailable for these sources.",
+                                 "improve": "Check the cited quantities and highlighted evidence."}
+    return res

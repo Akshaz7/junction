@@ -121,7 +121,8 @@ def build(res: dict, question: str, root: Path) -> dict | None:
 
 def attach(res: dict, question: str, root: Path) -> dict:
     if res.get("reasoning"):   # these routes bring their own card
-        return res
+        from engine.xcheck import augment_existing
+        return augment_existing(res, question, root)
     try:
         r = build(res, question, root)
         if r:

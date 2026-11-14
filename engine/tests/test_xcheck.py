@@ -226,3 +226,22 @@ def test_storey_regrouping_is_not_an_independent_verification():
     assert not calc["checks"] and calc["sanity_checks"][0]["independent"] is False
     assert calc["sanity_checks"][0]["value"] == 10 and ctx["checked"] is None
     assert confidence.run(ctx)["label"] == "Estimate"
+
+
+def test_legacy_numeric_card_does_not_bypass_measured_confidence(tmp_path, monkeypatch):
+    from engine.reasoning import attach
+    monkeypatch.setattr(confidence, "CALIBRATION_PATH", tmp_path / "missing.json")
+    res = {"doc_ids": ["d"], "answer": {"value": 2, "unit": "count", "text_md": "**2 items**"},
+           "reasoning": {"steps": [{"kind": "found", "text": "Two symbols"}], "confidence": {"label": "Verified", "pct": 99}},
+           "citations": [], "trace": []}
+    attach(res, "How many?", tmp_path)
+    assert res["reasoning"]["calc"]["result"]["value"] == 2
+    assert res["reasoning"]["confidence"]["pct"] is None
+    assert res["reasoning"]["confidence"]["label"] == "Estimate"
+    assert res["reasoning"]["steps"][0]["text"] == "Two symbols"
+
+
+def test_existing_structured_calc_is_preserved(tmp_path):
+    card = {"calc": {"result": {"value": 2}}, "confidence": {"label": "Estimate"}}
+    res = {"answer": {"value": 2, "unit": "count"}, "reasoning": card}
+    assert xcheck.augment_existing(res, "Count", tmp_path)["reasoning"] is card
