@@ -115,7 +115,7 @@ def build(res: dict, question: str, root: Path) -> dict | None:
 
 
 def attach(res: dict, question: str, root: Path) -> dict:
-    if (res.get("mistakes") is not None or res.get("route") == "symbols") and res.get("reasoning"):   # F-MISTAKES / F-SCANSYM: these routes bring their own card
+    if res.get("reasoning"):   # these routes bring their own card
         return res
     try:
         r = build(res, question, root)
