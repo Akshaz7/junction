@@ -21,7 +21,7 @@ export const navigation = [
 ] as const
 
 /** Pages that stay reachable by URL (Library and Tools now hold them) but have no nav entry. */
-const hiddenPages = { skills: 'Skills', automations: 'Automations', findings: 'Findings', help: 'Help' } as const
+const hiddenPages = { skills: 'Skills', findings: 'Findings', help: 'Help' } as const
 const morePages = [...navigation.slice(4), { route: 'help', label: 'Help', icon: CircleHelp }] as const
 export function pageLabel(route: Route): string {
   return navigation.find((item) => item.route === route)?.label ?? hiddenPages[route as keyof typeof hiddenPages]
