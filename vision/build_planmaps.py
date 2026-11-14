@@ -18,14 +18,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import infer  # noqa: E402
 import planmap as P  # noqa: E402
 import rooms_scale as RS  # noqa: E402
+import verify as VF  # noqa: E402
 
 ROOT = infer.ROOT
 
 
 def image_path(doc_id):
+    if doc_id.startswith("calib__"):  # calibration drawings (CubiCasa5K, not question-referenced)
+        return ROOT / "data/cubicasa5k/calib" / (doc_id[7:] + ".png")
     doc = json.loads((ROOT / f"artifacts/{doc_id}/doc.json").read_text())
-    rel = doc["files"]["png"]
-    for base in (ROOT / "data/junction-dataset-preview", ROOT):
+    rel = doc["files"].get("png") or doc["files"]["jpg"]
+    for base in (ROOT / "data/junction-dataset-preview", ROOT, ROOT / "data/full/junction-dataset"):
         p = base / rel
         if p.exists():
             return p
@@ -89,6 +92,7 @@ def run(doc_ids, stages=("seg", "merged"), out_root=None):
             wall_frac = sum((i["bbox_px"][2] - i["bbox_px"][0]) * (i["bbox_px"][3] - i["bbox_px"][1]) for i in seg_walls) / (W * H)
             use_det_walls = wall_frac < P.PARAMS["seg_wall_min_frac"]  # UNet fails on scans/hand-drawn plans
             keep = ([] if use_det_walls else seg_walls) + [i for i in d_items if i["kind"] != "wall" or use_det_walls]
+            keep = VF.free_pass(keep, W, H)  # V-09 free pass: duplicate merge + confidence cut
             timing[d]["walls_from"] = "det" if use_det_walls else "seg"
             pm = P.assemble(d, W, H, keep + room_list + text_items, {**models, "det": infer.OfficialModel.NAME, "ocr": "rapidocr-onnxruntime"},
                             s_ms + d_ms + ocr_ms + rooms_ms, scale=scale)
@@ -108,8 +112,9 @@ if __name__ == "__main__":
     ap.add_argument("--fixtures", action="store_true")
     ap.add_argument("--stage", default="merged", choices=["seg", "merged"])
     ap.add_argument("--out")
+    ap.add_argument("--list", help="file with one doc id per line")
     a = ap.parse_args()
-    docs = a.docs
+    docs = a.docs + ([l.strip() for l in open(a.list) if l.strip()] if a.list else [])
     if a.fixtures:
         docs = [f for f in json.loads((ROOT / "tests/fixtures.json").read_text()) if f.startswith("cubicasa5k__")]
     timing, problems = run(docs, ("seg",) if a.stage == "seg" else ("seg", "merged"), a.out)

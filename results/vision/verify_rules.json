@@ -1,0 +1,94 @@
+{
+ "params": {
+  "dup_gap_frac": 0.006,
+  "dup_iou": 0.3,
+  "conf_cut": 0.7
+ },
+ "n_heldout": {
+  "window": 241,
+  "toilet": 240,
+  "sink": 239,
+  "shower_bathtub": 227,
+  "door": 176
+ },
+ "before": {
+  "calib": {
+   "window": 0.314,
+   "door": 0.333,
+   "toilet": 0.776,
+   "sink": 0.231,
+   "shower_bathtub": 0.115
+  },
+  "heldout": {
+   "window": 0.299,
+   "toilet": 0.725,
+   "sink": 0.594,
+   "shower_bathtub": 0.115,
+   "door": 0.369
+  }
+ },
+ "after": {
+  "calib": {
+   "window": 0.417,
+   "door": 0.442,
+   "toilet": 0.833,
+   "sink": 0.231,
+   "shower_bathtub": 0.115
+  },
+  "heldout": {
+   "window": 0.32,
+   "toilet": 0.817,
+   "sink": 0.594,
+   "shower_bathtub": 0.123,
+   "door": 0.443
+  }
+ },
+ "rules_alone_heldout": {
+  "tiny": {
+   "window": 0.299,
+   "toilet": 0.725,
+   "sink": 0.594,
+   "shower_bathtub": 0.115,
+   "door": 0.369
+  },
+  "dup": {
+   "window": 0.299,
+   "toilet": 0.733,
+   "sink": 0.586,
+   "shower_bathtub": 0.123,
+   "door": 0.392
+  },
+  "on_wall": {
+   "window": 0.245,
+   "toilet": 0.725,
+   "sink": 0.594,
+   "shower_bathtub": 0.115,
+   "door": 0.233
+  },
+  "split": {
+   "window": 0.278,
+   "toilet": 0.725,
+   "sink": 0.594,
+   "shower_bathtub": 0.115,
+   "door": 0.369
+  }
+ },
+ "default": {
+  "dup": {
+   "dup_gap_frac": 0.006,
+   "dup_iou": 0.3
+  },
+  "dup_kinds": [
+   "door",
+   "window",
+   "toilet",
+   "bathtub",
+   "shower"
+  ],
+  "cut": {
+   "door": 0.7,
+   "window": 0.7,
+   "toilet": 0.7
+  }
+ }
+}

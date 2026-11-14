@@ -38,3 +38,4 @@
 - Finlex statute pages carry the text inside Next.js script data: don't strip <script> when validating quotes. "1500" and "1 500" (thin space) both occur.
 - IFC door type names in ac20 are German (e.g. "IFC Tür - Eine Öffnunsgrichtung", typo as in the model): keep verbatim.
 - Held-out (full): 5,953 docs; CubiCasa5K: 4,787 held out, 213 clean (data/sets/cubicasa_clean_ids.txt).
+- Rebuilding derived files: `uv run` wrapped in heavy.sh silently did nothing twice (stale 03:35 GLB/USDZ). Always check output mtimes after a rebuild; `PYTHONPATH=. .venv/bin/python -m pipeline.<x>` works.

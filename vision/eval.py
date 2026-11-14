@@ -23,6 +23,27 @@ RULES = [  # (question regex, label, counter(planmap) -> int)
 ]
 
 
+def official_split(doc_id):
+    """Which official CubiCasa5K split (train/val/test) a cubicasa doc_id is in; None if unknown. The official model was trained on 'train'."""
+    global _SPLITS
+    if _SPLITS is None:
+        import zipfile
+        _SPLITS = {}
+        z = ROOT / "data/cubicasa5k/cubicasa5k.zip"
+        if z.exists():
+            with zipfile.ZipFile(z) as zf:
+                for n in ("train", "val", "test"):
+                    for line in zf.read(f"cubicasa5k/{n}.txt").decode().split():
+                        _SPLITS[line.strip("/")] = n
+    m = re.match(r"cubicasa5k__(colorful|high-quality-architectural|high-quality)-(\d+)$", doc_id)
+    if not m:
+        return None
+    return _SPLITS.get(f"{m.group(1).replace('-', '_')}/{m.group(2)}")
+
+
+_SPLITS = None
+
+
 def counts(pm):
     c = Counter()
     for i in pm["items"]:
@@ -44,6 +65,7 @@ def main():
         only = set(json.load(open(a.only))) if a.only.endswith(".json") else {l.split()[0] for l in open(a.only)}
     per = defaultdict(lambda: {"n": 0, "exact": 0, "abs_err": 0.0, "over": 0, "under": 0, "within1": 0})
     rows = []
+    by_split = defaultdict(lambda: defaultdict(lambda: [0, 0]))  # split -> kind -> [n, exact]
     for l in open(ROOT / "data/sets/questions_en.jsonl"):
         q = json.loads(l)
         if q["source"] != a.source or (only is not None and q["doc_id"] not in only):
@@ -57,12 +79,19 @@ def main():
         s = per[rule[1]]
         s["n"] += 1; s["exact"] += pred == truth; s["abs_err"] += abs(pred - truth)
         s["over"] += pred > truth; s["under"] += pred < truth; s["within1"] += abs(pred - truth) <= 1
+        sp = official_split(q["doc_id"]) or "unknown"
+        by_split["official_train" if sp == "train" else "official_unseen_val_test" if sp in ("val", "test") else sp][rule[1]][0] += 1
+        by_split["official_train" if sp == "train" else "official_unseen_val_test" if sp in ("val", "test") else sp][rule[1]][1] += pred == truth
         rows.append({"doc_id": q["doc_id"], "kind": rule[1], "truth": truth, "pred": pred})
     out = {k: {"n": v["n"], "exact_acc": round(v["exact"] / v["n"], 3), "within1_acc": round(v["within1"] / v["n"], 3),
                "mae": round(v["abs_err"] / v["n"], 2), "over": v["over"], "under": v["under"]} for k, v in sorted(per.items())}
     tot = sum(v["n"] for v in per.values())
     out_all = {"overall_exact_acc": round(sum(v["exact"] for v in per.values()) / max(tot, 1), 3), "n_questions": tot,
-               "per_kind": out, "planmap": a.planmap, "note": "all questions are on held-out drawings; no thresholds tuned on them except coarse det_size choice (4 fixtures)"}
+               "per_kind": out,
+               "by_official_split": {sp: {"overall_exact_acc": round(sum(v[1] for v in kd.values()) / max(sum(v[0] for v in kd.values()), 1), 3),
+                                          "n_questions": sum(v[0] for v in kd.values()),
+                                          "per_kind": {k: {"n": v[0], "exact_acc": round(v[1] / v[0], 3)} for k, v in sorted(kd.items())}} for sp, kd in by_split.items()},
+               "planmap": a.planmap, "note": "all questions are on held-out drawings; no thresholds tuned on them except coarse det_size choice (4 fixtures)"}
     p = ROOT / a.out
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps({**out_all, "rows": rows}, indent=1))
