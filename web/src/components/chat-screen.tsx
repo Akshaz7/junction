@@ -1,3 +1,4 @@
+import { overlayActionAnswer, overlayAlignedAnswer, overlayRequest } from '../lib/sheet-overlay'
 import { askUntilReadable, STILL_READING_STATUS } from '../lib/still-reading'
 import { sceneOpen, sceneOpenCitation } from '../lib/scene-open'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
@@ -63,7 +64,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const [fileOver, setFileOver] = useState(false)
   const dragDepth = useRef(0)
   const [activeOption, setActiveOption] = useState(0)
-  const [viewer, setViewer] = useState<{ answer: Answer; citation: Citation; request: number; mode?: '2d' | '3d' } | null>(null)
+  const [viewer, setViewer] = useState<{ answer: Answer; citation: Citation; request: number; mode?: '2d' | '3d'; overlayDocId?: string | null } | null>(null)
   const [split, setSplit] = useState(48)
   const splitContainer = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -385,6 +386,15 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   }, [viewer, sheet])
   async function ask(question: string, documentIds?: string[]) {
     if (!question.trim() || submitting.current || restoring || !docs.length) return
+    const overlay = overlayRequest(question, docs, selected)
+    if (overlay) {
+      const answer = overlayActionAnswer(question, overlay.base, overlay.overlay)
+      lastAnswerId.current = answer.answer_id
+      setAnswers((previous) => [...previous, { id: answer.answer_id, question, content: '', answer }])
+      setViewer((previous) => ({ answer, citation: answer.citations[0], request: (previous?.request ?? 0)+1, mode: '2d', overlayDocId: overlay.overlay?.doc_id ?? null }))
+      setDraft(''); setNeedDoc(false); onOpenCitation(answer.citations[0])
+      return
+    }
     // A drawing question with nothing attached would hang on "Thinking…": ask for a document and keep the text.
     if (!documentIds && !selected.length && !chatId.current && needsDocument(question)) { blocked.current = question; setNeedDoc(true); return }
     setNeedDoc(false)
@@ -576,7 +586,13 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         }}
         onPointerUp={(event) => event.currentTarget.releasePointerCapture(event.pointerId)} />
       <DrawingEditsContext value={sceneEdits}>
-        <DocumentViewer key={viewer.citation.doc_id} answer={viewer.answer} citation={viewer.citation} sheet={sheet} initialMode={viewer.mode} openRequest={viewer.request}
+        <DocumentViewer key={viewer.citation.doc_id} answer={viewer.answer} citation={viewer.citation} sheet={sheet} initialMode={viewer.mode} openRequest={viewer.request} initialOverlayDocId={viewer.overlayDocId}
+          onOverlayAlignment={(result, base, overlay, basePage, overlayPage) => {
+            if (!viewer.answer.answer_id.startsWith('overlay-')) return
+            const updated = overlayAlignedAnswer(viewer.answer, result, base, overlay, basePage, overlayPage)
+            setAnswers((previous) => previous.map((entry) => entry.answer?.answer_id === updated.answer_id ? { ...entry, answer: updated } : entry))
+            setViewer((previous) => previous?.answer.answer_id === updated.answer_id ? { ...previous, answer: updated } : previous)
+          }}
           chatId={liveChatId}
           edits={sceneEdits[viewer.citation.doc_id]} commands={viewerCommands.length ? viewerCommands : undefined} onClose={() => setViewer(null)} />
       </DrawingEditsContext>
