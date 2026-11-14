@@ -7,6 +7,9 @@ import SwiftUI
 final class ARSceneController: ObservableObject {
     @Published private(set) var status = "Loading model…"
     @Published private(set) var isFixture = false
+    @Published private(set) var isBundledDemo = false
+    @Published private(set) var attribution: SceneAttribution?
+    @Published var demoDocID: String? = nil
     @Published private(set) var isLoaded = false
     @Published private(set) var isPlaced = false
     @Published private(set) var scale: Float = 0.01
@@ -63,6 +66,18 @@ final class ARSceneController: ObservableObject {
 
     func load(docID: String? = nil, url: URL?, manifestURL: URL? = nil, itemIDs: [String] = [],
               cameraTargetItemID: String? = nil) async {
+        resetPlacement()
+        highlightController?.clear()
+        isLoaded = false
+        isFixture = false
+        isBundledDemo = false
+        attribution = nil
+        manifest = nil
+        activeDocID = nil
+        isWalking = false
+        scale = 0.01
+        tableScale = 0.01
+        status = "Loading model…"
         requestedDocID = docID
         pendingLiveHighlight = nil
         do {
@@ -72,6 +87,8 @@ final class ARSceneController: ObservableObject {
             self.content = content
             originalContentTransform = content.transform
             manifest = loaded.manifest
+            attribution = loaded.attribution
+            isBundledDemo = loaded.isBundledDemo
             activeDocID = loaded.manifest?.doc_id ?? (loaded.isFixture ? "fixture__ios" : docID)
             sceneIndex = SceneIndex(root: content)
             originalVisibility = sceneIndex?.entitiesByUSDName.mapValues(\.isEnabled) ?? [:]

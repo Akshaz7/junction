@@ -12,6 +12,8 @@ struct ARScreen: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
 
+    private var requestedDocID: String? { controller.demoDocID ?? docID }
+
     var body: some View {
         ZStack {
             ARSceneView(controller: controller).ignoresSafeArea()
@@ -41,16 +43,42 @@ struct ARScreen: View {
                     ItemDetailsCard(item: item, onDismiss: controller.dismissSelectedItem,
                                     onHighlight: { highlightItem(item.id) })
                 }
-                ARVoicePanel(voice: voice, docID: docID ?? controller.activeDocID) { answer in
+                ARVoicePanel(voice: voice, docID: controller.activeDocID) { answer in
                     controller.applyVoiceAnswer(answer)
                 }
+                ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
+                    Picker("Demo scenes", selection: Binding(
+                        get: { requestedDocID ?? "" },
+                        set: { voice.stop(); controller.demoDocID = $0 }
+                    )) {
+                        if !DemoScenes.all.contains(where: { $0.id == requestedDocID }) {
+                            Text("Choose a scene").tag(requestedDocID ?? "")
+                        }
+                        ForEach(DemoScenes.all) { demo in
+                            Text(demo.title).tag(demo.id)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .accessibilityIdentifier("demo-scenes-picker")
                     if controller.isFixture {
-                        if let docID, docID != "fixture__ios" {
+                        if let docID = requestedDocID, docID != "fixture__ios" {
                             Text("Requested model unavailable. Showing sample.").font(.caption)
                         }
                         Text("Sample model · generated for demo")
                             .font(.caption).foregroundStyle(.secondary)
+                    }
+                    if controller.isBundledDemo {
+                        Text("Bundled demo scene").font(.caption).foregroundStyle(.secondary)
+                    }
+                    if let attribution = controller.attribution {
+                        Text("\(attribution.credit) · \(attribution.licence)")
+                            .font(.caption2).foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityIdentifier("scene-credit")
+                    }
+                    if let note = controller.manifest?.note {
+                        Text(note).font(.caption2).foregroundStyle(.secondary)
                     }
                     Text(controller.status).font(.callout)
                         .accessibilityIdentifier("ar-status")
@@ -98,7 +126,10 @@ struct ARScreen: View {
                     Button("Reset placement", systemImage: "arrow.counterclockwise") { controller.reset() }
                         .disabled(!controller.isPlaced)
                 }
-                .padding().background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+                .padding()
+                }
+                .frame(maxHeight: 420)
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
             }.padding()
         }
         .task {
@@ -106,8 +137,11 @@ struct ARScreen: View {
                 controller.applyLiveHighlight(request)
             }
             liveSocket.start()
-            await controller.load(docID: docID, url: sceneURL, manifestURL: manifestURL,
-                                  itemIDs: highlightedItemIDs, cameraTargetItemID: cameraTargetItemID)
+        }
+        .task(id: requestedDocID) {
+            await controller.load(docID: requestedDocID, url: sceneURL, manifestURL: manifestURL,
+                                  itemIDs: requestedDocID == docID ? highlightedItemIDs : [],
+                                  cameraTargetItemID: requestedDocID == docID ? cameraTargetItemID : nil)
         }
         .onDisappear {
             voice.stop()
@@ -118,12 +152,12 @@ struct ARScreen: View {
             if phase == .background { voice.stop() }
         }
         .onChange(of: highlightedItemIDs) { _, items in
-            if docID == nil || docID == controller.activeDocID {
+            if requestedDocID == controller.activeDocID {
                 controller.setHighlights(items, cameraTargetItemID: cameraTargetItemID)
             }
         }
         .onChange(of: cameraTargetItemID) { _, target in
-            if docID == nil || docID == controller.activeDocID {
+            if requestedDocID == controller.activeDocID {
                 controller.setHighlights(highlightedItemIDs, cameraTargetItemID: target)
             }
         }

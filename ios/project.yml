@@ -18,6 +18,10 @@ targets:
       - path: Hologram
         excludes: [Resources]
       - path: Hologram/Resources
+        excludes: [DemoScenes]
+        buildPhase: resources
+      - path: Hologram/Resources/DemoScenes
+        type: folder
         buildPhase: resources
     settings:
       base:
@@ -32,6 +36,10 @@ targets:
     sources:
       - HologramTests
       - path: Hologram/Resources
+        excludes: [DemoScenes]
+        buildPhase: resources
+      - path: Hologram/Resources/DemoScenes
+        type: folder
         buildPhase: resources
     dependencies:
       - target: Hologram

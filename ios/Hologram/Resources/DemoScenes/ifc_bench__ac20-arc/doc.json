@@ -1,0 +1,16 @@
+{
+ "doc_id": "ifc_bench__ac20-arc",
+ "source": "ifc_bench",
+ "formats": [
+  "ifc"
+ ],
+ "kind": "ifc",
+ "title": "AC20 Institute / Phantasy Office Building - arc",
+ "pages": 1,
+ "licence": "LicenseRef-KIT-unrestricted",
+ "credit": "Institute for Automation and Applied Informatics (IAI) / Karlsruhe Institute of Technology (KIT) - KIT IFC Examples, https://www.ifcwiki.org/index.php?title=KIT_IFC_Examples",
+ "heldout": true,
+ "files": {
+  "ifc": "data/ifc_bench/ac20_arc.ifc"
+ }
+}

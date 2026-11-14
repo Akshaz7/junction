@@ -45,6 +45,9 @@ struct SceneManifest: Decodable {
     let doc_id: String?
     let items: [String: Item]
     let storeys: [Storey]?
+    let credit: String?
+    let licence: String?
+    let note: String?
 
     var floorElevation: Float { storeys?.compactMap(\.elevation_m).filter(\.isFinite).min() ?? 0 }
 
