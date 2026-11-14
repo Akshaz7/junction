@@ -1,0 +1,17 @@
+{
+ "status": "blocked",
+ "reason": "Modal workspace awaisraf20 (ac-u3BjhIGK1pvC0EC98zNqG0) is paused: every Modal call (volume create, volume put, modal run of a trivial function) fails with 'Error: Workspace ac-u3BjhIGK1pvC0EC98zNqG0 is paused' (14 Nov 07:30 EET). No GPU minutes used. Training on the Mac is forbidden, so no fine-tune was run.",
+ "gpu_minutes": 0,
+ "cost_usd": 0,
+ "ready_to_run": "modal volume create junction-v05; modal volume put junction-v05 data/train/v05 /v05 --force; modal volume put junction-v05 weights/yytsi_unet/best.safetensors /yytsi_best.safetensors --force; modal run train/modal_seg.py (or modal_det.py). Scripts exist, assert zero overlap against data/sets/heldout_docs.txt before the first step. Needs the workspace un-paused (billing) by Ash.",
+ "row": "V-06",
+ "before": {
+  "note": "baseline numbers only; no after",
+  "heldout_planmap_counts_overall_exact": 0.52,
+  "n_questions": 1894,
+  "door": 0.369,
+  "window": 0.299
+ },
+ "after": null,
+ "note": "train/modal_seg.py has only 62 seg-labelled records (56 clean CubiCasa + 6 synthetic): expect small gains; in planmap-1 the merged doors/windows come from the official model, the UNet supplies walls only"
+}

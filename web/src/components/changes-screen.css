@@ -1,0 +1,6 @@
+.rule-change-card { margin: 8px 12px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--ink-well); font-size: 12px; line-height: 18px; overflow-wrap: anywhere; }
+.rule-change-card > strong { display: block; color: var(--change-edited-text); }
+.rule-change-card h4 { font-size: 13px; font-weight: 600; margin-top: 4px; }
+.rule-change-card p { margin-top: 4px; }
+.rule-change-card a { display: inline-block; margin-top: 6px; text-decoration: underline; text-underline-offset: 2px; }
+.rule-change-card small { display: block; margin-top: 6px; color: var(--muted-foreground); }

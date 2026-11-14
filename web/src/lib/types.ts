@@ -67,6 +67,21 @@ export interface ChangeEntry {
   summary: { doc_id?: string; title?: string; n_changes?: number; headline?: string; generated_for_demo?: boolean }
 }
 
+export interface RuleChangeEntry {
+  id: string
+  type: 'rule_change'
+  doc_a: null
+  doc_b: null
+  created_at?: string | null
+  summary?: {
+    kind?: 'rule_change'; source?: string; url?: string | null; rule_ids?: string[]
+    title?: string | null; summary?: string | null; headline?: string | null
+    detected_at?: string | null; importance?: string | null
+  } | null
+}
+
+export type ChangeFeedEntry = ChangeEntry | RuleChangeEntry
+
 export interface Comparison extends ChangeEntry {
   doc_id: string
   generated_for_demo: boolean

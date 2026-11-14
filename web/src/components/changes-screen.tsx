@@ -2,10 +2,12 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Download, FilePlus, FileText, GripVertical, History, Inbox, Maximize2, Minus, Plus, RotateCw, Search, SlidersHorizontal } from 'lucide-react'
 import { Button } from './ui'
 import { workspaceApi } from '../lib/api'
-import type { ChangeEntry, Comparison, Document } from '../lib/types'
+import type { ChangeEntry, ChangeFeedEntry, Comparison, Document } from '../lib/types'
+import { ruleChangeCard } from '../lib/rule-change'
+import './changes-screen.css'
 
 export function ChangesScreen({ docs, demo }: { docs: Document[]; demo: boolean }) {
-  const [feed, setFeed] = useState<ChangeEntry[]>([])
+  const [feed, setFeed] = useState<ChangeFeedEntry[]>([])
   const [selected, setSelected] = useState<ChangeEntry | null>(null)
   const [comparison, setComparison] = useState<Comparison | null>(null)
   const [error, setError] = useState('')
@@ -19,6 +21,8 @@ export function ChangesScreen({ docs, demo }: { docs: Document[]; demo: boolean 
   const [wiping, setWiping] = useState(false)
   const canvas = useRef<HTMLDivElement>(null)
   const title = (entry: ChangeEntry) => entry.summary.title || docs.find((doc) => doc.doc_id === entry.summary.doc_id)?.title || entry.summary.doc_id || entry.doc_b
+  const drawings = feed.filter((entry): entry is ChangeEntry => entry.type !== 'rule_change')
+  const rules = feed.flatMap((entry) => { const card = ruleChangeCard(entry); return card ? [card] : [] })
   useEffect(() => {
     const controller = new AbortController()
     setLoading(true)
@@ -56,8 +60,17 @@ export function ChangesScreen({ docs, demo }: { docs: Document[]; demo: boolean 
     <div className="changes-list">
       <div className="changes-search"><label className="search-field"><Search size={14} /><input type="search" aria-label="Search changes" placeholder="Search changes..." value={search} onChange={(event) => setSearch(event.target.value)} /></label><Button variant="outline" size="icon" aria-label="Clear change filters" onClick={() => setSearch('')}><SlidersHorizontal size={16} /></Button></div>
       <h2 className="changes-today">Today<ChevronDown size={14} /></h2>
+      {rules.length > 0 && <div className="change-group"><h3>Rule sources<span>{rules.length}</span></h3>
+        {rules.filter((card) => `Rule source changed ${card.title} ${card.detail} ${card.url || ''}`.toLowerCase().includes(search.toLowerCase())).map((card) => <article className="rule-change-card" key={card.id} data-change-id={card.id} aria-label={`Rule source changed: ${card.title}`}>
+          <strong>Rule source changed</strong><h4>{card.title}</h4>
+          {card.detail && <p>{card.detail}</p>}
+          {card.url ? <a href={card.url} target="_blank" rel="noopener noreferrer">View rule source</a> : <p>Source link unavailable.</p>}
+          <small>Detected: {card.detectedAt ? <time dateTime={card.detectedAt}>{new Date(card.detectedAt).toLocaleString('en-GB')}</time> : 'Time unavailable'}</small>
+          <small>Findings rerun</small>
+        </article>)}
+      </div>}
       {(['new_version', 'new_document'] as const).map((type) => <div key={type} className="change-group"><h3>{type === 'new_version' ? 'New versions' : 'New documents'}<span>{feed.filter((entry) => entry.type === type).length}</span></h3>
-        {feed.filter((entry) => entry.type === type && `${title(entry)} ${entry.summary.headline}`.toLowerCase().includes(search.toLowerCase())).map((entry) => <button className="change-row" type="button" key={entry.id} data-change-id={entry.id} aria-pressed={entry.id === selected?.id} onClick={() => setSelected(entry)}>
+        {drawings.filter((entry) => entry.type === type && `${title(entry)} ${entry.summary.headline}`.toLowerCase().includes(search.toLowerCase())).map((entry) => <button className="change-row" type="button" key={entry.id} data-change-id={entry.id} aria-pressed={entry.id === selected?.id} onClick={() => setSelected(entry)}>
           <span className={`change-tile ${type}`}>{type === 'new_version' ? <History size={16} /> : <FilePlus size={16} />}</span><span><strong>{title(entry)}</strong><small>{entry.summary.n_changes === undefined ? entry.summary.headline : `${entry.summary.n_changes} changes`}</small><small>{entry.summary.generated_for_demo ? 'generated for demo' : docs.find((doc) => doc.doc_id === entry.summary.doc_id)?.source || 'Project documents'}</small></span>
         </button>)}
       </div>)}
