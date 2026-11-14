@@ -99,3 +99,15 @@ it('renders the additive scan fields when present and nothing when absent', asyn
   await act(async () => root.render(<CalculationPanel reasoning={scanReasoning} onClose={() => {}} />))
   expect(host.querySelector('[data-section="scale"], [data-section="reader"]')).toBeNull()
 })
+
+it('folds supporting steps behind "Show all N steps", by level or by count', async () => {
+  const base = scanReasoning.calc!
+  const mk = (n: number, level?: (i: number) => 'main' | 'detail') => Array.from({ length: n }, (_, i) => ({ id: `s${i}`, label: `Step ${i}`, expr: 'x', value: i, unit: 'count', inputs: [], ...(level ? { level: level(i) } : {}) }))
+  await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc: { ...base, steps: mk(30) } }} onClose={() => {}} />))
+  expect(host.querySelectorAll('.calc-steps')[0].children.length).toBe(12)
+  expect(host.querySelector('[data-testid="calc-more-steps"] summary')?.textContent).toContain('Show all 30 steps')
+  await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc: { ...base, steps: mk(30, (i) => i < 3 ? 'main' : 'detail') } }} onClose={() => {}} />))
+  expect(host.querySelectorAll('.calc-steps')[0].children.length).toBe(3)
+  await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc: { ...base, steps: mk(5) } }} onClose={() => {}} />))
+  expect(host.querySelector('[data-testid="calc-more-steps"]')).toBeNull()
+})

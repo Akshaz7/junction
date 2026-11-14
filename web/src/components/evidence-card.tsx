@@ -1,7 +1,15 @@
+import { useState } from 'react'
 import type { Answer, Citation } from '../lib/types'
 import { keyNumbers } from '../lib/calc-view'
 import { confidenceText, marginText } from '../lib/evidence-format'
 import './evidence-card.css'
+
+/** Long figures stay on two lines with a toggle; the full text is always in the Calculation panel. */
+function Clamped({ text, className }: { text: string; className?: string }) {
+  const [open, setOpen] = useState(false)
+  const long = text.length > 150
+  return <p className={className}><span className={long && !open ? 'evidence-clamp' : undefined}>{text}</span>{long && <> <button type="button" className="evidence-more" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? 'less' : 'more'}</button></>}</p>
+}
 
 /** "How we know": the steps behind an answer and how sure we are. Steps with a citation open it. */
 export function EvidenceCard({ answer, selected, onOpenCitation, onShowCalculation }: { answer: Answer; selected?: Citation; onOpenCitation: (citation: Citation) => void; onShowCalculation?: () => void }) {
@@ -33,9 +41,9 @@ export function EvidenceCard({ answer, selected, onOpenCitation, onShowCalculati
     </ol>
     {reasoning.based_on && <p className="evidence-quantity">{reasoning.based_on.text}</p>}
     {reasoning.margin && <div className="evidence-quantity">
-      <p>{marginText(reasoning.margin)}</p>
-      {Object.entries(reasoning.margin.by_kind ?? {}).map(([kind, margin]) => <p key={kind}>{kind}: {marginText(margin)}{margin.sources.length > 0 && <span className="evidence-reason"> Sources: {margin.sources.join('; ')}</span>}</p>)}
-      {reasoning.margin.sources.length > 0 && <p className="evidence-reason">Sources: {reasoning.margin.sources.join('; ')}</p>}
+      <Clamped text={marginText(reasoning.margin)} />
+      {Object.entries(reasoning.margin.by_kind ?? {}).map(([kind, margin]) => <Clamped key={kind} text={`${kind}: ${marginText(margin)}${margin.sources.length > 0 ? ` Sources: ${margin.sources.join('; ')}` : ''}`} />)}
+      {reasoning.margin.sources.length > 0 && <Clamped className="evidence-reason" text={`Sources: ${reasoning.margin.sources.join('; ')}`} />}
     </div>}
     <div className="evidence-confidence">
       <span className={`evidence-pill ${tone}`} aria-label={`Confidence: ${confidenceText(confidence)}`}>{confidenceText(confidence)}</span>

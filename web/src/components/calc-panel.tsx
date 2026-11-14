@@ -57,6 +57,8 @@ function RowsTable({ calc, onFocus, docTitle }: { calc: Calculation; onFocus?: (
   </>
 }
 
+const MAIN_STEPS = 12
+
 /** The technical view of "How we know": every step with its numbers, inputs and sources, the per-element table, checks, margin and confidence. */
 export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle }: {
   reasoning: Reasoning; title?: string; onClose: () => void; onFocus?: (target: FocusTarget) => void; docTitle?: (id: string) => string
@@ -111,15 +113,29 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
       </Section>}
 
       {!!calc?.steps.length && <Section id="steps" title="Steps" hint={`${calc.steps.length}`}>
-        <ol className="calc-steps">{calc.steps.map((step, i) => <li key={step.id} data-step={step.id}>
-          <div className="calc-step-head"><span className="calc-index">{i + 1}</span><strong>{step.label}</strong></div>
-          <p className="calc-expr"><code>{step.expr}</code>{step.value != null && <span className="calc-eqline"><span className="calc-eq">=</span> <b className="calc-value">{withUnit(step.value, step.unit)}</b></span>}</p>
-          {step.note && <p className="calc-note">{step.note}</p>}
-          {!!step.inputs.length && <details className="calc-inputs"><summary>Inputs ({step.inputs.length})</summary>
-            <table aria-label={`Inputs of ${step.label}`}><thead><tr><th scope="col">Input</th><th scope="col" className="num">Value</th><th scope="col">Source</th></tr></thead>
-              <tbody>{step.inputs.map((input, k) => <tr key={k}><th scope="row">{input.name}</th><td className="num">{withUnit(input.value, input.unit)}</td><td><SourceLink source={input.source} docTitle={docTitle} onFocus={focus} /></td></tr>)}</tbody></table>
-          </details>}
-        </li>)}</ol>
+        {(() => {
+          const all = calc.steps
+          // Engine marks supporting figures level="detail"; until it does, the first few steps lead and the rest fold away.
+          const leveled = all.some((x) => x.level)
+          const isMain = (x: (typeof all)[number], i: number) => leveled ? x.level !== 'detail' : i < MAIN_STEPS
+          const main = all.map((x, i) => ({ x, i })).filter(({ x, i }) => isMain(x, i))
+          const rest = all.map((x, i) => ({ x, i })).filter(({ x, i }) => !isMain(x, i))
+          const item = ({ x: step, i }: { x: (typeof all)[number]; i: number }) => <li key={step.id} data-step={step.id} value={i + 1}>
+            <div className="calc-step-head"><span className="calc-index">{i + 1}</span><strong>{step.label}</strong></div>
+            <p className="calc-expr"><code>{step.expr}</code>{step.value != null && <span className="calc-eqline"><span className="calc-eq">=</span> <b className="calc-value">{withUnit(step.value, step.unit)}</b></span>}</p>
+            {step.note && <p className="calc-note">{step.note}</p>}
+            {!!step.inputs.length && <details className="calc-inputs"><summary>Inputs ({step.inputs.length})</summary>
+              <table aria-label={`Inputs of ${step.label}`}><thead><tr><th scope="col">Input</th><th scope="col" className="num">Value</th><th scope="col">Source</th></tr></thead>
+                <tbody>{step.inputs.map((input, k) => <tr key={k}><th scope="row">{input.name}</th><td className="num">{withUnit(input.value, input.unit)}</td><td><SourceLink source={input.source} docTitle={docTitle} onFocus={focus} /></td></tr>)}</tbody></table>
+            </details>}
+          </li>
+          return <>
+            <ol className="calc-steps">{main.map(item)}</ol>
+            {!!rest.length && <details className="calc-more-steps" data-testid="calc-more-steps"><summary>Show all {all.length} steps ({rest.length} more)</summary>
+              <ol className="calc-steps">{rest.map(item)}</ol>
+            </details>}
+          </>
+        })()}
       </Section>}
 
       {!!calc?.rows.length && <Section id="rows" title="Per-element figures" hint={`${calc.rows.length}`}><RowsTable calc={calc} onFocus={focus} docTitle={docTitle} /></Section>}

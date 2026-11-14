@@ -79,3 +79,13 @@ it('preserves a zero exact-count margin and names the calibration sample', async
   expect(host.textContent).toContain('Margin: ± 0 elements (± 0%)')
   expect(host.textContent).toContain('Calibration: 1/2')
 })
+
+it('clamps a long margin and sources line to two lines with a more toggle', async () => {
+  const long = 'Historical mean absolute error and observed recount differences, ' + 'x'.repeat(200)
+  const withMargin = { ...answer, reasoning: { ...answer.reasoning!, margin: { value: 1, unit: 'count', pct: 5, why: long, sources: [long], by_kind: {} } } } as unknown as Answer
+  await act(async () => root.render(<EvidenceCard answer={withMargin} onOpenCitation={vi.fn()} />))
+  expect(host.querySelectorAll('.evidence-clamp').length).toBeGreaterThan(0)
+  const more = host.querySelector<HTMLButtonElement>('.evidence-more')!
+  await act(async () => more.click())
+  expect(more.textContent).toBe('less')
+})

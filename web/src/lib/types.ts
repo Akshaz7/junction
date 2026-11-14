@@ -45,7 +45,7 @@ export interface CalculationMethod { id: string; label: string; why_chosen: stri
 export interface Calculation {
   formula: string
   method?: CalculationMethod
-  steps: { id: string; label: string; expr: string; value: number | null; unit: string; note?: string; operation?: string;
+  steps: { id: string; label: string; expr: string; value: number | null; unit: string; note?: string; operation?: string; level?: 'main' | 'detail';
     inputs: { name: string; value: unknown; unit: string; source: CalculationSource }[] }[]
   rows: { item_id: string; label: string; values: Record<string, unknown>; source: CalculationSource }[]
   result: { value: number | Record<string, number>; unit: string; rounded_as: string;
