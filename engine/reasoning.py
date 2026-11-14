@@ -103,6 +103,8 @@ def build(res: dict, question: str, root: Path) -> dict | None:
             pass
     from engine.reasoning_parts import margin
     quantitative = margin.run(ctx)
+    from engine.reasoning_parts import scaleproof
+    quantitative.update(scaleproof.run(ctx, quantitative))
     c = _confidence.run(ctx)
     steps = c.pop("_steps", ctx["steps"])
     hint = res.get("reasoning_hint")   # F-MEP: engine/mep.py supplies its own Found / Measured / Checked lines and an optional confidence cap

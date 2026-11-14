@@ -35,7 +35,6 @@ def _cy(b):
 def scalebar(words: list[dict]) -> dict | None:
     """Row of numeric labels (0, 5, 10 ...) with a regular step, at least 3 labels or 2 with an 'm' unit. Linear fit must hold within 6%."""
     nums = []
-    ftmarks = False
     for w in words:
         t = str(w.get("text") or "").strip()
         if t in ("O", "o"):
@@ -43,7 +42,6 @@ def scalebar(words: list[dict]) -> dict | None:
         elif t in ("S", "s"):   # a handwritten 5 on a scale bar; only kept when the whole row fits a line
             t = "5"
         if re.fullmatch(r"\d{1,3}['’′]", t):
-            ftmarks = True
             t = t[:-1]
         if NUM_RE.match(t) and w.get("bbox_px"):
             nums.append((float(t.replace(",", ".")), w["bbox_px"]))
@@ -57,7 +55,7 @@ def scalebar(words: list[dict]) -> dict | None:
                 continue
             row.append((v, b))
         vals = [v for v, _ in row]
-        if len(row) < 3 or vals != sorted(vals) or len(set(vals)) != len(vals) or (vals[0] != 0 and len(row) < 4 and False):
+        if len(row) < 2 or vals[0] != 0 or vals != sorted(vals) or len(set(vals)) != len(vals):
             continue
         steps = [vals[i + 1] - vals[i] for i in range(len(vals) - 1)]
         if max(steps) - min(steps) > 1e-6:
@@ -71,14 +69,27 @@ def scalebar(words: list[dict]) -> dict | None:
             continue
         near = [str(w.get("text") or "").strip() for w in words if w.get("bbox_px") and abs(_cy(w["bbox_px"]) - _cy(b0)) <= 1.2 * h
                 and -0.2 * (x1 - x0) <= _cx(w["bbox_px"]) - x1 <= 1.0 * (x1 - x0) + 80]
-        feet = any(FT_UNIT_RE.match(t) or re.fullmatch(r"\d+['’′]", t) for t in near) or ftmarks
+        feet = any(FT_UNIT_RE.match(t) or re.fullmatch(r"\d+['’′]", t) for t in near)
         near_unit = feet or any(UNIT_RE.match(t) for t in near)
-        if near_unit or len(row) >= 4:
+        if near_unit:
             if feet:
                 mpp *= FT_M
             unit = "ft" if feet else "m"
             cand = {"m_per_px": mpp, "method": "scalebar", "confidence": 0.85 if near_unit else 0.7,
                     "evidence": f"scale bar read from the drawing: labels {', '.join(f'{v:g}' for v in vals)} {unit} span {x1 - x0:.0f} px"}
+            cand["derivation"] = {
+                "formula": "scale = (last label − first label) × metres per printed unit / (last label centre − first label centre)",
+                "inputs": [
+                    {"name": f"scale bar label {k + 1}", "value": v, "unit": unit,
+                     "source": {"bbox": b, "text": str(v), "anchor_px": [_cx(b), _cy(b)]}}
+                    for k, (v, b) in enumerate(row)
+                ] + [{"name": "label centre span", "value": x1 - x0, "unit": "px",
+                      "source": {"bbox": [min(b[0] for _, b in row), min(b[1] for _, b in row), max(b[2] for _, b in row), max(b[3] for _, b in row)],
+                                 "endpoints_px": [[x0, _cy(row[0][1])], [x1, _cy(row[-1][1])]]}},
+                     {"name": "metres per printed unit", "value": FT_M if feet else 1.0, "unit": "m/" + unit,
+                      "source": {"definition": "1 international foot = 0.3048 m" if feet else "metres printed on the bar"}}],
+                "note": "Bar endpoints inferred from the centres of its numeric labels; tick/label alignment and OCR error are not bounded.",
+            }
             if best is None or len(row) > best[0]:
                 best = (len(row), cand)
     return best[1] if best else None
@@ -127,9 +138,10 @@ def ratio_and_sheet(words: list[dict]) -> tuple[int | None, str | None]:
 
 
 def from_ratio(ratio: int | None, sheet: str | None, W: int, H: int, dpi: float | None) -> dict | None:
-    if not ratio:
+    if not ratio or W <= 0 or H <= 0:
         return None
-    if dpi:
+    from engine.scale_proof import positive
+    if positive(dpi):
         mpp = 25.4 / dpi * ratio / 1000
         return {"m_per_px": mpp, "method": "ratio-dpi", "confidence": 0.8,
                 "evidence": f"title block scale 1:{ratio} at {dpi:.0f} dpi"}
@@ -145,7 +157,16 @@ def from_ratio(ratio: int | None, sheet: str | None, W: int, H: int, dpi: float 
 def detect(words: list[dict], W: int, H: int, dpi: float | None = None, prior: float | None = None) -> dict | None:
     ratio, sheet = ratio_and_sheet(words)
     bar = scalebar(words)
-    cand = from_ratio(ratio, sheet, W, H, dpi)
+    readings = evidenced_candidates(words, W, H, dpi)
+    printed = [r for r in readings if r['method'].startswith('ratio-')]
+    # Detail drawings can carry different scales on the same sheet. Without a
+    # region association there is no single safe ratio to apply to the page.
+    ratio_values = {round(r['m_per_px'], 12) for r in printed}
+    cand = from_ratio(ratio, sheet, W, H, dpi) if len(ratio_values) <= 1 else None
+    if printed and cand is None and len(ratio_values) == 1:
+        r = printed[0]
+        cand = {'m_per_px': r['m_per_px'], 'method': r['method'], 'confidence': .8,
+                'evidence': f"printed scale {r['inputs'][0]['source'].get('text', '')}"}
     pick = bar or cand
     if pick is None:
         return None
@@ -158,6 +179,9 @@ def detect(words: list[dict], W: int, H: int, dpi: float | None = None, prior: f
         pass
     if prior and not (0.3 < pick["m_per_px"] / prior < 3.5):
         return None     # nowhere near the size of the doors on the drawing: a misread, not a scale
+    pick = {**pick, "candidates": evidenced_candidates(words, W, H, dpi),
+            "selection_rule": ("Use the printed bar when it differs from the ratio by more than 25%; otherwise use the printed ratio with known DPI or sheet size. "
+                               "This is a selection policy, not an accuracy threshold. Reject readings outside 0.3–3.5 times the door-size prior.")}
     return pick
 
 
@@ -302,6 +326,19 @@ def _rotated_bar(doc_dir: Path, page: int, W: int, H: int, prior: float | None) 
         bar = scalebar(ws)
         if bar and not (prior and not (0.3 < bar["m_per_px"] / prior < 3.5)):
             bar["evidence"] += f" (bar printed sideways, read with the page turned {tag} degrees)"
+            # Map every evidence coordinate back to the original page frame.
+            def unrotate(x, y, tag=tag):
+                return [y, H - x] if tag == "90" else [W - y, x]
+            for inp in bar.get("derivation", {}).get("inputs", []):
+                src = inp.get("source", {})
+                if src.get("bbox"):
+                    x0, y0, x1, y1 = src["bbox"]
+                    points = [unrotate(x, y) for x in (x0, x1) for y in (y0, y1)]
+                    src["bbox"] = [min(p[0] for p in points), min(p[1] for p in points), max(p[0] for p in points), max(p[1] for p in points)]
+                if src.get("endpoints_px"):
+                    src["endpoints_px"] = [unrotate(*p) for p in src["endpoints_px"]]
+                if src.get("anchor_px"):
+                    src["anchor_px"] = unrotate(*src["anchor_px"])
             return bar
     return None
 
@@ -335,3 +372,61 @@ def rescale_items(items, old_mpp: float | None, new_mpp: float) -> None:
             if a:
                 q["area_m2"] = round(a * new_mpp * new_mpp, 2)
                 it.props["area_basis"] = basis
+
+
+def evidenced_candidates(words, W, H, dpi=None, dpi_source=None):
+    """All usable printed-scale readings with their exact boxes and unit conversions."""
+    from engine.scale_proof import candidate, operand, positive, valid_box
+    words = [w for w in words if valid_box(w.get("bbox_px"))]
+    out = []
+    b = scalebar(words)
+    if b:
+        out.append({"method": b["method"], "m_per_px": b["m_per_px"], **b["derivation"]})
+    # Join adjacent words only on the same printed line. Never join separate
+    # detail drawings into a fictitious title-block ratio.
+    seen = set()
+    for i, w in enumerate(words):
+        group = [w]
+        for other in words[i + 1:i + 5]:
+            prev, bb = group[-1]["bbox_px"], other["bbox_px"]
+            h = max(prev[3] - prev[1], bb[3] - bb[1])
+            if abs(_cy(prev) - _cy(bb)) > h * .6 or bb[0] < prev[0] or bb[0] - prev[2] > 3 * h:
+                break
+            group.append(other)
+        for n in range(1, len(group) + 1):
+            ws = group[:n]
+            text = " ".join(str(x.get("text") or "") for x in ws)
+            m = RATIO_RE.search(text)
+            ratio = int(m[1]) if m and positive(m[1]) else imperial_ratio(ws)
+            if not ratio:
+                continue
+            box = [min(x["bbox_px"][0] for x in ws), min(x["bbox_px"][1] for x in ws),
+                   max(x["bbox_px"][2] for x in ws), max(x["bbox_px"][3] for x in ws)]
+            key = (ratio, tuple(w["bbox_px"]))
+            if key in seen:
+                break
+            seen.add(key)
+            src = {**ws[0].get("_source", {}), "bbox": box, "text": text}
+            inputs = [operand("printed ratio denominator", ratio, "ratio", src)]
+            if positive(dpi):
+                inputs += [operand("page resolution", float(dpi), "px/in", dpi_source or {"metadata": "page render DPI"}),
+                           operand("metres per inch", .0254, "m/in", {"definition": "1 international inch = 0.0254 m"})]
+                out.append(candidate("ratio-dpi", ratio * .0254 / float(dpi), "scale = printed ratio × 0.0254 m/in / page DPI", inputs,
+                                     "Assumes the raster retains the recorded resolution and has not been resized or distorted."))
+            else:
+                for sw in words:
+                    sm = SHEET_RE.match(str(sw.get("text", "")).strip())
+                    if not sm:
+                        continue
+                    sheet = sm[1].upper()
+                    c = from_ratio(ratio, sheet, W, H, None) if W and H else None
+                    if not c:
+                        continue
+                    short, long_ = SHEETS[sheet]
+                    out.append(candidate("ratio-sheet", c["m_per_px"], "scale = printed ratio × long paper side in mm × 0.001 m/mm / long image side in pixels",
+                                         inputs + [operand("paper long side", long_, "mm", {**sw.get("_source", {}), "bbox": sw["bbox_px"], "text": str(sw.get("text")), "definition": f"ISO 216 {sheet}: {short} × {long_} mm"}),
+                                                   operand("metres per millimetre", .001, "m/mm", {"definition": "1 mm = 0.001 m"}),
+                                                   operand("long image side", max(W, H), "px", {"file": "planmap-page.json", "pointer": "/image"})],
+                                         "Assumes an uncropped full sheet; aspect ratio alone does not establish this. No physical error bound is available."))
+            break
+    return out
