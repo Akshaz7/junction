@@ -352,8 +352,11 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             return _abstained(question, doc_ids, f"The question names **{other}**, which is not among the selected documents ({sel}). "
                               "Select that document and ask again, or ask about the selected one.", trace, t0)
 
-        from engine.titleblock import answer_text
-        if (res := answer_text(question, doc_ids, root, t0)) is not None:
+        try:
+            from engine.titleblock import answer_text
+        except ImportError:  # title-block route is optional (E-35)
+            answer_text = None
+        if answer_text and (res := answer_text(question, doc_ids, root, t0)) is not None:
             for s_ in res["trace"]:
                 add(s_)
             res["trace"] = trace
