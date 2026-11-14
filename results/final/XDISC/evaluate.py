@@ -8,6 +8,7 @@ it neither vendors their code nor modifies pipeline/ or any other worktree.
 import argparse
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 import time
@@ -168,11 +169,42 @@ def heldout():
     assert report["heldout_end_only"]["passed"]
 
 
+def chat_checks():
+    import jsonschema
+
+    from engine.answer import answer
+    sheets = json.loads((LOCAL / "enriched-sheets.json").read_text())
+    root = LOCAL / "chat-artifacts"
+    for s in sheets:
+        folder = root / s["doc_id"]; folder.mkdir(parents=True, exist_ok=True)
+        (folder / "xdisc-1.json").write_text(json.dumps(s))
+    os.environ["ARTIFACTS_DIR"] = str(root)
+    os.environ["MODELS_FAKE"] = "1"
+    os.environ["EXPLAIN"] = "0"
+    schema = json.loads((ROOT / "server/schemas/answer.schema.json").read_text())
+    questions = ["Show the room table", "Airflow per room", "Which rooms have no supply air?",
+                 "Where do ducts cross walls?", "Ducts in rooms with ceiling height below 2.5 m"]
+    results = []
+    for q in questions:
+        r = answer(q, [s["doc_id"] for s in sheets])
+        jsonschema.validate(r, schema)
+        assert r.get("xdisc") is not None and r["reasoning"]["steps"]
+        assert r["cost"]["usd_total"] == 0
+        results.append({"question": q, "answer": r["answer"], "citations": len(r["citations"]),
+                        "docs_with_boxes": sorted({b["doc_id"] for b in r["evidence"]["boxes"]}),
+                        "reasoning": r["reasoning"], "schema_valid": True})
+    report = json.loads((OUT / "report.json").read_text())
+    report["real_chat_checks"] = results
+    (OUT / "report.json").write_text(json.dumps(report, indent=2) + "\n")
+    print(json.dumps(results, indent=2))
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--awais-ref")
     parser.add_argument("--alignment-module")
     parser.add_argument("--heldout", action="store_true")
+    parser.add_argument("--chat", action="store_true")
     args = parser.parse_args()
     LOCAL.mkdir(parents=True, exist_ok=True)
-    heldout() if args.heldout else develop(args)
+    heldout() if args.heldout else chat_checks() if args.chat else develop(args)

@@ -488,6 +488,8 @@ def analyse(base, services, *, alignment=None, threshold_ls_m2=None, ceiling_bel
                                                 "status": "Duct in room with low ceiling; duct elevation not checked", "evidence": evidence(r, d)})
     if not lines:
         out["limitations"].append("No classified duct or pipe centrelines are available; crossings and ceiling checks need geometry.")
+    if ceiling_below_m is not None and any(_number(r.get("ceiling_height_m")) is None for r in rooms):
+        out["limitations"].append("Some rooms have no verified ceiling height; they were excluded from the height check.")
     return out
 
 
@@ -864,13 +866,21 @@ def answer(question, doc_ids, root, t0=None):
         return None
     t0 = t0 or time.perf_counter()
     sheets = [load_sheet(d, root) for d in doc_ids]
-    # Selected order is explicit: base, services; revisions: before, after, services.
+    # Explicit geometry can identify the service sheet even if attachment order
+    # differs. Otherwise retain base/services order; never guess from filenames.
+    if intent != "impact" and len(sheets) == 2 and (sheets[0].get("ducts") or sheets[0].get("terminals")) and not (sheets[1].get("ducts") or sheets[1].get("terminals")):
+        sheets.reverse()
+    # Revisions are selected before, after, services.
     threshold = re.search(rf"(?:below|under|threshold(?: of)?)\s*({NUM})\s*l/s\s*(?:/|per)\s*m[²2]", question, re.IGNORECASE)
     height = re.search(rf"(?:below|under|less than)\s*({NUM})\s*(mm|cm|m|ft|feet)\b", question, re.IGNORECASE)
     limit = _number(height[1])*{"mm": .001, "cm": .01, "m": 1, "ft": .3048, "feet": .3048}[height[2].lower()] if height else None
     impact = change_impact(*sheets[:3]) if intent == "impact" and len(sheets) >= 3 else None
     result = impact["analysis"] if impact else analyse(sheets[0], sheets[1], threshold_ls_m2=_number(threshold[1]) if threshold else None, ceiling_below_m=limit)
     records = impact["impacts"] if impact else result.get(intent, [])
+    if intent == "missing_air":
+        requested_roles = set(re.findall(r"\b(?:no|without|missing)\s+(supply|extract)\b", question.lower()))
+        if requested_roles:
+            records = [r for r in records if r["role"] in requested_roles]
     limitations = list(result["limitations"])
     if intent == "impact":
         limitations += impact["limitations"] if impact else ["Select the old revision, new revision and services sheet, in that order."]
@@ -880,7 +890,11 @@ def answer(question, doc_ids, root, t0=None):
     def cite(ev):
         b = _box(ev.get("bbox_px"))
         if not b: return None
-        n = len(cites)+1; ids = ev.get("item_ids") or [f"xdisc-region-{n}"]
+        n = len(cites)+1
+        # A long run can cross several walls; each evidence region needs its
+        # own identity while the original source element ids remain cited.
+        region_id = f"xdisc-region-{n}"
+        ids = [region_id, *(i for i in ev.get("item_ids", []) if i != region_id)]
         quote = ev.get("quote")
         if ev.get("projected"):
             quote = "Projected location from sheet alignment; check the source sheet."
@@ -896,14 +910,14 @@ def answer(question, doc_ids, root, t0=None):
                 ev.append({"doc_id": sheets[1]["doc_id"], "page": sheets[1].get("page", 1), "bbox_px": _mapped_box(rec["bbox_px"], result["alignment"], True), "projected": True})
         marks = " ".join(f"[{n}]" for e in ev if (n := cite(e)))
         if intent == "airflow":
-            arithmetic = rec["arithmetic"] or ["Airflow total unknown; complete classified terminals and room polygons are required."]
+            arithmetic = rec["arithmetic"] or ["airflow unknown; the air terminals and room boundary need checking"]
             text = f"{rec.get('number') or rec['label']}: " + "; ".join(arithmetic)
             if "below_user_threshold" in rec:
                 text += f"; {'below' if rec['below_user_threshold'] else 'meets'} the {rec['threshold_source']} threshold of {rec['threshold_ls_m2']:g} l/s/m²"
             calculations.extend(rec["arithmetic"])
         elif intent == "rooms":
             text = f"{rec.get('number') or rec['label']}: {rec.get('area_m2')} m²; ceiling " + (f"{rec.get('ceiling_type') or 'type unknown'}, {rec['ceiling_height_m']:g} m" if rec.get("ceiling_height_m") is not None else "unknown")
-            if rec["association"] != "supplied": text += "; name/number association needs checking"
+            if rec["association"] != "supplied": text += "; check the room name and number"
         elif intent == "crossings":
             unknown = "unverified" in (rec.get("service_classification"), rec.get("barrier_classification"))
             text = ("Unverified line intersection" if unknown else f"{rec['barrier_kind'].capitalize()} crossing candidate") + f"; {rec.get('fire_rating') or 'fire rating unknown'}; confirm service/wall type, elevation and fire seal"
@@ -913,7 +927,7 @@ def answer(question, doc_ids, root, t0=None):
             text = f"Changed room: {len(rec['terminal_ids'])} recorded terminals and {len(rec['service_ids'])} service runs; wall/plasterboard area " + (f"{rec['wall_area_m2']} / {rec['plasterboard_area_m2']} m²" if rec['wall_area_m2'] is not None and rec['plasterboard_area_m2'] is not None else "unknown")
         else:
             text = f"Room has no recorded {rec['role']} terminal; this does not establish compliance"
-        if len(bullets) < 3: bullets.append(f"- {text}. {marks}")
+        if len(bullets) < 3: bullets.append(f"- {text.rstrip('.')}. {marks}")
     if intent == "airflow" and not records:
         # Text facts remain useful without pretending they are terminals.
         for label in result["airflow_labels"]:
@@ -922,11 +936,33 @@ def answer(question, doc_ids, root, t0=None):
                 bullets.append(f"- Printed airflow label: {label['quote']}; room and terminal not established. [{n}]")
     title = {"rooms": "printed room records", "airflow": "room geometry records", "missing_air": "missing-air findings",
              "crossings": "2D crossing candidates", "low_ceilings": "service runs in rooms below your ceiling limit", "impact": "changed rooms with stable ids"}[intent]
-    if not records:
+    verified_airflow = any(r.get("supply_ls") is not None or r.get("extract_ls") is not None for r in records) if intent == "airflow" else True
+    if intent == "airflow" and not verified_airflow:
+        headline = "**Room airflow totals cannot be verified yet.**"
+    elif not records:
         headline = "**This check cannot be established from the available sheet data.**"
+    elif intent == "crossings" and any("unverified" in (r.get("service_classification"), r.get("barrier_classification")) for r in records):
+        headline = f"**{len(records)} possible line intersections need checking.**"
     else:
         headline = f"**{len(records)} {title}.**"
-    if limitations: bullets.append("- " + " ".join(dict.fromkeys(limitations)))
+    if not cites and result["rooms"] and _matrix(result["alignment"]) is not None:
+        room = result["rooms"][0]; b = room.get("bbox_px")
+        if b:
+            n = cite({"doc_id": sheets[0]["doc_id"], "page": sheets[0].get("page", 1), "bbox_px": b, "quote": room.get("area_quote") or room.get("label")})
+            m = cite({"doc_id": sheets[1]["doc_id"], "page": sheets[1].get("page", 1), "bbox_px": _mapped_box(b, result["alignment"], True), "projected": True})
+            bullets.append(f"- Room labels can be checked on the sheets; this does not establish the missing values. [{n}] [{m}]")
+    if limitations:
+        note = {"rooms": "Some names, room boundaries and ceiling details still need checking.",
+                "airflow": "The air terminals are not fully confirmed, so missing terminals and room totals remain unknown.",
+                "missing_air": "The air terminals are not fully confirmed; I cannot say which rooms have none.",
+                "crossings": "Some lines may be drawing notes. Confirm each duct, wall, height and fire rating before planning seals.",
+                "low_ceilings": "Ceiling heights or service types are unconfirmed; these are not clearance checks.",
+                "impact": "Room matching and wall/plasterboard quantities need source data before the impact can be confirmed."}[intent]
+        if intent == "low_ceilings" and limit is None:
+            note = "Give a ceiling height limit with its unit, and confirm the room heights on the sheet."
+        if _matrix(result["alignment"]) is None:
+            note = "The sheets could not be aligned reliably. Match the same two grid crossings on both sheets."
+        bullets.append("- " + note)
     reg = result["alignment"]
     confidence = .75 if records and reg.get("status") == "aligned" else .35
     if any("unverified" in (r.get("service_classification"), r.get("barrier_classification")) for r in records):
@@ -935,14 +971,14 @@ def answer(question, doc_ids, root, t0=None):
         confidence = .35
     if intent == "airflow" and any(r.get("supply_ls") is None or r.get("extract_ls") is None for r in records):
         confidence = .35
-    steps = [{"kind": "read", "title": "Read both sheets", "text": "Printed values and classified geometry only; projected boxes are labelled.", "cite": 1 if cites else None, "ok": bool(cites)},
+    steps = [{"kind": "read", "title": "Read both sheets", "text": "Printed values and source linework; projected boxes and unverified detections are labelled.", "cite": 1 if cites else None, "ok": bool(cites)},
              {"kind": "checked", "title": "Check registration", "text": f"{reg.get('anchor_count', 0)} shared labels; residual {reg.get('residual_px')} px. " + reg.get("detail", ""), "cite": None, "ok": reg.get("status") == "aligned"},
              {"kind": "calculated", "title": "Arithmetic and limits", "text": "; ".join(calculations) or "No unsupported quantity was calculated.", "cite": None, "ok": bool(calculations)},
              {"kind": "checked", "title": "Missing evidence", "text": " ".join(limitations) or "Crossings are 2D candidates; inspect source geometry and elevations.", "cite": None, "ok": not limitations}]
     return {"answer_id": uuid.uuid4().hex, "question": question, "doc_ids": list(doc_ids),
-            "answer": {"text_md": headline + "\n\n" + "\n".join(bullets), "value": len(records) if records else None,
+            "answer": {"text_md": headline + "\n\n" + "\n".join(bullets), "value": len(records) if records and verified_airflow else None,
                        "unit": "count", "confidence": confidence, "abstained": False},
             "citations": cites, "evidence": {"boxes": boxes, "scene": {"doc_id": doc_ids[0], "highlight_item_ids": [], "camera_target_item_id": None}},
             "trace": [{"step": "xdisc", "detail": f"Cross-sheet {intent}; cached artifacts; no model call", "ms": 0, "model": None, "cost_usd": 0}],
             "route": "index", "cost": {"usd_total": 0, "calls": []}, "latency_ms": int((time.perf_counter()-t0)*1000),
-            "xdisc": impact or result, "reasoning": {"steps": steps, "confidence": {"label": "Cross-checked" if confidence > .5 else "Estimate", "pct": round(confidence*100), "reason": "Based on sheet registration and explicit source facts.", "improve": "Check projected boxes and supply missing classified geometry."}}}
+            "xdisc": impact or result, "reasoning": {"steps": steps, "confidence": {"label": "Cross-checked" if confidence > .5 else "Estimate", "pct": round(confidence*100), "reason": "Evidence-completeness estimate, not measured extraction accuracy.", "improve": "Check projected boxes and supply missing classified geometry."}}}

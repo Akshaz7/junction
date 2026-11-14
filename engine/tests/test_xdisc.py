@@ -186,7 +186,7 @@ def test_corrupt_cache_is_handled_as_missing_evidence(tmp_path):
     d = tmp_path / "bad"; d.mkdir()
     (d / "xdisc-1.json").write_text("{invalid")
     r = xdisc.answer("Airflow per room", ["bad", "missing"], tmp_path)
-    assert r["answer"]["value"] is None and "cannot be established" in r["answer"]["text_md"]
+    assert r["answer"]["value"] is None and "cannot" in r["answer"]["text_md"]
 
 
 def test_no_implicit_rule_and_no_unverified_fire_rating():
@@ -246,6 +246,8 @@ def test_chat_hook_schema_reasoning_and_no_models(tmp_path, monkeypatch):
     assert r["cost"] == {"usd_total": 0, "calls": []}
     assert all(c["doc_id"] in ("architect", "services") for c in r["citations"])
     assert all(box["doc_id"] for box in r["evidence"]["boxes"])
+    missing = xdisc.answer("Which rooms have no supply air?", [b["doc_id"], s["doc_id"]], tmp_path)
+    assert missing["answer"]["value"] == 1 and "no recorded supply terminal" in missing["answer"]["text_md"]
     old_card = deepcopy(r["reasoning"])
     reasoning.attach(r, "Airflow per room", tmp_path)
     assert r["reasoning"] == old_card
