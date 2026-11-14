@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Callable
 
 from engine.router.parser import Parsed, parse
+from engine.scene_cmds import parse_scene, scene_answer
 from engine.solvers import ARTIFACTS, SolverUnsupported, solve
 
 MIN_CONF = 0.25
@@ -53,7 +54,7 @@ def _abstained(question, doc_ids, text, trace, t0, route="index", calls=None):
     }
 
 
-def answer(question: str, doc_ids: list[str], on_event: Callable | None = None) -> dict:
+def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None) -> dict:
     emit = on_event or (lambda kind, payload: None)
     t0 = time.perf_counter()
     root = _root()
@@ -69,6 +70,40 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None) 
         if not doc_ids:
             add(_step("abstain", "no document selected"))
             return _abstained(question, doc_ids, NO_DOC, trace, t0)
+
+        # 0. scene commands (hide / isolate / highlight / reset): code only, edits never touch data
+        intent = parse_scene(question)
+        scene_cost, scene_prov = 0.0, None
+        if intent is None and not os.environ.get("MODELS_FAKE"):
+            from engine.scene_cmds import parse_scene_model
+            intent, scene_cost, scene_prov = parse_scene_model(question)
+            if scene_prov:
+                calls.append({"task": "scene_intent", "provider": scene_prov, "cost_usd": scene_cost})
+        if intent is not None:
+            from engine.solvers.data import load_doc
+            doc = load_doc(doc_ids[0], root)
+            if doc is not None:
+                emit("status", {"text": f"Exploring document: {_title(doc_ids[0], root)}"})
+                res = scene_answer(question, doc, intent, scene_state, t0)
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                if scene_prov:
+                    res["cost"] = {"usd_total": round(scene_cost, 6), "calls": list(calls)}
+                return res
+
+        # 0b. exit finder (IFC): code only
+        from engine.exits import exit_answer, is_exit_question
+        if is_exit_question(question):
+            from engine.solvers.data import load_doc as _load
+            xdoc = _load(doc_ids[0], root)
+            if xdoc is not None and xdoc.mode == "ifc":
+                emit("status", {"text": f"Exploring document: {_title(doc_ids[0], root)}"})
+                res = exit_answer(question, xdoc, t0)
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                return res
 
         # 1. route: rules, then the model fallback only when the rules are unsure
         ts = time.perf_counter()
@@ -89,6 +124,30 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None) 
                 add(_step("route", f"model fallback unavailable ({type(e).__name__}); using rules' best guess"))
 
         if parsed.type not in ("count", "area", "length", "volume"):
+            from engine.solvers.data import load_doc
+            from engine.textqa import text_answer
+            tdoc = load_doc(doc_ids[0], root)
+            if tdoc is not None and tdoc.mode == "ifc":
+                emit("status", {"text": f"Exploring document: {_title(doc_ids[0], root)}"})
+                res = text_answer(question, tdoc)
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                res["cost"]["usd_total"] = round(res["cost"]["usd_total"] + sum(c["cost_usd"] for c in calls), 6)
+                res["cost"]["calls"] = calls + res["cost"]["calls"]
+                res["latency_ms"] = int((time.perf_counter() - t0) * 1000)
+                return res
+            if tdoc is not None and tdoc.mode == "planmap" and os.environ.get("READ_DRAWING", "1") != "0":
+                from engine.readdraw import read_drawing
+                emit("status", {"text": f"Exploring document: {_title(doc_ids[0], root)}"})
+                res = read_drawing(question, tdoc, root)
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                res["cost"]["usd_total"] = round(res["cost"]["usd_total"] + sum(c["cost_usd"] for c in calls), 6)
+                res["cost"]["calls"] = calls + res["cost"]["calls"]
+                res["latency_ms"] = int((time.perf_counter() - t0) * 1000)
+                return res
             add(_step("abstain", f"type {parsed.type} is not answered by code"))
             return _abstained(question, doc_ids, NOT_YET, trace, t0, "index", calls)
 
@@ -97,7 +156,15 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None) 
         for did in doc_ids:
             emit("status", {"text": f"Exploring document: {_title(did, root)}"})
             try:
-                res = solve(question, did, parsed=parsed, root=root)
+                hid = None
+                if scene_state and scene_state.get("hidden"):
+                    from engine.scene_cmds import tags as _tags
+                    from engine.solvers.data import load_doc as _ld
+                    d_ = _ld(did, root)
+                    if d_ is not None:
+                        tg_ = _tags(d_)
+                        hid = {i: tg_.get(i, i) for i in scene_state["hidden"]}
+                res = solve(question, did, parsed=parsed, root=root, hidden=hid)
             except SolverUnsupported:
                 continue
             for s in res["trace"]:

@@ -20,6 +20,8 @@ class Item:
     name: str | None = None
     type_name: str | None = None
     source: str = ""
+    bbox_m: list | None = None                  # IFC only: [[minx,miny,minz],[maxx,maxy,maxz]], y up
+    polygon_px: list | None = None              # plan map only
 
 
 @dataclass
@@ -54,7 +56,7 @@ def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
         items = [
             Item(item_id=x["item_id"], kind=x.get("kind") or "other", page=1,
                  storey=(x.get("storey") or {}).get("name"), q=x.get("quantities") or {},
-                 props=x.get("props") or {}, name=x.get("name"), type_name=x.get("type_name"), source="ifc")
+                 props=x.get("props") or {}, name=x.get("name"), type_name=x.get("type_name"), source="ifc", bbox_m=x.get("bbox_m"))
             for x in e["elements"]
         ]
         return Doc(doc_id, "ifc", items, title, e.get("storeys") or [])
@@ -66,13 +68,15 @@ def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
             for x in m["items"]:
                 pr = x.get("props") or {}
                 q = {}
-                if pr.get("area_m2") is not None:
-                    q["area_m2"] = pr["area_m2"]
+                for ak in ("area_m2", "area_m2_label", "area_m2_geom"):   # printed label area wins over polygon area
+                    if pr.get(ak) is not None:
+                        q["area_m2"] = pr[ak]
+                        break
                 for k in ("width_m", "height_m", "length_m"):
                     if pr.get(k) is not None:
                         q[k] = pr[k]
                 items.append(Item(item_id=x["item_id"], kind=x["kind"], label=x.get("label"), page=m.get("page", 1),
-                                  bbox_px=x.get("bbox_px"), conf=float(x.get("conf") or 0), q=q, props=pr,
+                                  bbox_px=x.get("bbox_px"), polygon_px=x.get("polygon_px"), conf=float(x.get("conf") or 0), q=q, props=pr,
                                   source=x.get("source", "")))
         return Doc(doc_id, "planmap", items, title, [], scale, len(pms))
     return None

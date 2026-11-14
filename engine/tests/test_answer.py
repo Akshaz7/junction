@@ -22,7 +22,9 @@ def test_signature_matches_stub():
     sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "server"))
     import stub_engine
     a, b = inspect.signature(answer).parameters, inspect.signature(stub_engine.answer).parameters
-    assert [(n, p.default, p.kind) for n, p in a.items()] == [(n, p.default, p.kind) for n, p in b.items()]
+    base = [(n, p.default, p.kind) for n, p in a.items() if p.kind is not inspect.Parameter.KEYWORD_ONLY]
+    assert base == [(n, p.default, p.kind) for n, p in b.items()]
+    assert all(p.default is None for p in a.values() if p.kind is inspect.Parameter.KEYWORD_ONLY)  # extras are optional
 
 
 def test_windows_with_events():
@@ -38,7 +40,7 @@ def test_windows_with_events():
 def test_abstentions_are_plain():
     assert answer("How many windows?", [])["answer"]["abstained"]
     t = answer("What materials are used in the walls?", [DOC])
-    assert t["answer"]["abstained"] and "cannot verify" in t["answer"]["text_md"]
+    assert t["answer"]["abstained"] and "cannot read the drawing" in t["answer"]["text_md"]
     m = answer("How many windows are there?", ["missing__doc"])
     assert m["answer"]["abstained"] and m["answer"]["value"] is None
 

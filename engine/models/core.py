@@ -298,7 +298,9 @@ def call(
     schema: dict | None = None,
     *,
     request_id: str | None = None,
+    only: tuple[str, str] | None = None,
 ) -> Result:
+    """`only=(provider, model)` pins one model and disables the fallback chain (model comparison, E-10)."""
     cfg = config()
     msgs = _norm_messages(messages)
     imgs = [_norm_image(i) for i in (images or [])]
@@ -307,7 +309,8 @@ def call(
     if task == "tts":
         params["kind"] = "audio"
 
-    steps = [{"provider": "fake", "model": "fake-1"}] if _forced_fake() else chain_for(task)
+    steps = [{"provider": "fake", "model": "fake-1"}] if _forced_fake() else \
+        ([{"provider": only[0], "model": only[1]}] if only else chain_for(task))
     last: Exception | None = None
     tried = 0
     for step in steps:

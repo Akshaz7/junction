@@ -29,6 +29,28 @@ NOUN = {"door": "door", "window": "window", "wall": "wall", "room": "room", "toi
 UNIT = {"area": "m²", "length": "m", "volume": "m³"}
 
 
+# Plan-map room subtypes: the question's room noun -> model room_type values (props.room_type). Parentheses are ignored.
+ROOM_SUBTYPES = [
+    ("bedroom", r"\bbed ?rooms?\b", {"bedroom"}),
+    ("kitchen", r"\bkitchen(?:ette)?s?\b", {"kitchen"}),
+    ("WC room", r"\b(?:separate )?wc rooms?\b|\btoilet rooms?\b", {"wc"}),
+    ("bathroom", r"\bbath ?rooms?\b|\bwash ?rooms?\b", {"bathroom"}),
+    ("living room", r"\bliving rooms?\b", {"living"}),
+    ("balcony", r"\bbalcon(?:y|ies)\b|\bterraces?\b", {"balcony", "terrace"}),
+    ("garage", r"\bgarages?\b", {"garage"}),
+    ("sauna", r"\bsaunas?\b", {"sauna"}),
+]
+
+
+def room_subtype(question: str):
+    q = re.sub(r"\([^)]*\)", " ", question)
+    q = re.sub(r",?\s*\b(?:not counting|excluding|without|except|other than|apart from)\b.*$", " ", q, flags=re.I)
+    for name, rx, types in ROOM_SUBTYPES:
+        if re.search(rx, q, re.I):
+            return name, types
+    return None
+
+
 class SolverUnsupported(Exception):
     pass
 
@@ -70,14 +92,15 @@ def resolve_storey(q: str, storeys: list[dict]) -> str | None:
 
 
 def _quoted(q: str) -> list[str]:
-    return [m.group(1).strip() for m in re.finditer(r"(?<![\w])'([^']+)'(?!\w)|\"([^\"]+)\"", q) for m in [re.match(r"(.*)", m.group(1) or m.group(2))]]
+    return [m.group(1).strip() for m in re.finditer(r"(?<![\w])'(.+?)'(?!\w)|\"([^\"]+)\"", q) for m in [re.match(r"(.*)", m.group(1) or m.group(2))]]
 
 
 def _label_matches(it: Item, text: str) -> bool:
-    t = text.casefold()
-    t = re.sub(r"\s*\([^)]*\)\s*$", "", t).strip()
+    def norm(x):
+        return x.casefold().replace("\u2019", "'").replace("\u2018", "'").strip()
+    t = norm(re.sub(r"\s*\([^)]*\)\s*$", "", text))
     cands = [it.label, it.name, it.type_name, it.props.get("room_type")]
-    return any(c and c.casefold() == t for c in cands)
+    return any(c and norm(c) == t for c in cands)
 
 
 def _room_id(q: str) -> str | None:
@@ -153,6 +176,8 @@ def _qty(it: Item, kind: str, t: str) -> float | None:
                ("area_m2", "net_area_m2", "gross_area_m2", "net_side_area_m2")
         for k in keys:
             if q.get(k) is not None:
+                if kind == "room" and float(q[k]) < 0.05:
+                    return None     # an IfcSpace with a near-zero area is a broken quantity, not a tiny room
                 return float(q[k])
         if q.get("width_m") is not None and q.get("height_m") is not None:
             return float(q["width_m"]) * float(q["height_m"])
@@ -167,8 +192,62 @@ def _qty(it: Item, kind: str, t: str) -> float | None:
     return None
 
 
+OUTDOOR_RE = re.compile(r"balcon|balkon|terras|loggia|veranda|garden|outdoor|garten|sitzplatz", re.I)
+
+
+def _pip(pt, poly) -> bool:
+    x, y = pt
+    inside = False
+    for (x1, y1), (x2, y2) in zip(poly, poly[1:] + poly[:1]):
+        if (y1 > y) != (y2 > y) and x < (x2 - x1) * (y - y1) / (y2 - y1) + x1:
+            inside = not inside
+    return inside
+
+
+def _apartments(question, doc, p, trace, route, t0):
+    """Swiss-dwellings DXF plan maps carry apartment outlines as items with props.role == 'unit' (label 'App. A').
+    count = number of units; area of apartment X = sum of rooms whose centre lies in the unit, outdoor rooms left out."""
+    units = [i for i in doc.items if i.props.get("role") == "unit" and i.conf >= MIN_CONF]
+    if not units:
+        return None
+    trace.append(_step("load", f"{len(units)} apartment outlines (role=unit)"))
+    doc_id = doc.doc_id
+    if p.type == "count":
+        n = len(units)
+        boxes, cites, scene = _evidence(doc, units)
+        text = f"There {'is' if n == 1 else 'are'} **{n} {'apartment' if n == 1 else 'apartments'}** on this floor plan. {_cite_marks(cites)}"
+        return _answer_obj(question, [doc_id], text, n, "count", 0.9, False, boxes, cites, scene, trace, route, t0)
+    m = re.search(r"\bapartment\s+([A-Za-z0-9]{1,3})\b", question)
+    if not m:
+        return None
+    key = m.group(1).casefold()
+    unit = next((u for u in units if (u.label or "").casefold().replace(".", " ").split()[-1:] == [key]), None)
+    if unit is None:
+        return _abstain(question, doc_id, f"I could not find apartment {m.group(1)} on this plan.", trace, route, t0)
+    poly = [tuple(pt) for pt in (unit.polygon_px or [])]
+    return None if not poly else _apt_area(question, doc, unit, poly, trace, route, t0)
+
+
+def _apt_area(question, doc, unit, poly, trace, route, t0):
+    rooms = []
+    for r in doc.items:
+        if r.kind != "room" or not r.bbox_px or r.conf < MIN_CONF:
+            continue
+        c = ((r.bbox_px[0] + r.bbox_px[2]) / 2, (r.bbox_px[1] + r.bbox_px[3]) / 2)
+        if _pip(c, poly) and not OUTDOOR_RE.search(r.label or "") and r.q.get("area_m2") is not None:
+            rooms.append(r)
+    if not rooms:
+        return _abstain(question, doc.doc_id, "I could not match rooms to that apartment.", trace, "planmap", t0)
+    total = sum(r.q["area_m2"] for r in rooms)
+    trace.append(_step("area", f"{len(rooms)} indoor rooms inside {unit.label} = {total:.2f} m2"))
+    boxes, cites, scene = _evidence(doc, rooms)
+    text = f"The net floor area of **{unit.label}** is **{_fmt(total, 'area')} m²** across {len(rooms)} indoor rooms. {_cite_marks(cites)}"
+    return _answer_obj(question, [doc.doc_id], text, round(total, 4), "m²", 0.9, False, boxes, cites, scene, trace, "planmap", t0)
+
+
 def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path | str = ARTIFACTS,
-          page: int | None = None) -> dict:
+          page: int | None = None, hidden: dict[str, str] | None = None) -> dict:
+    """hidden: {item_id: tag} the chat has hidden in the scene; they are left out and the answer says so."""
     t0 = time.perf_counter()
     p = parsed or parse(question)
     if p.type not in NUMERIC:
@@ -180,11 +259,25 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
                         trace, "index", t0)
     route = "index" if doc.mode == "ifc" else "planmap"
     kind = p.kind
+    if kind == "apartment" and doc.mode == "planmap" and p.type in ("count", "area"):
+        res = _apartments(question, doc, p, trace, route, t0)
+        if res is not None:
+            return res
     if kind is None or kind in UNSUPPORTED_KINDS:
         return _abstain(question, doc_id, "I could not tell which elements the question is about, so I would rather not guess.",
                         trace, route, t0)
 
-    items = [i for i in doc.items if i.kind == kind]
+    if doc.mode == "planmap" and kind == "storey" and p.type == "count" and not page:
+        n = max(1, doc.pages)   # a plan-map page is one level; this is the number of pages read
+        trace.append(_step("count", f"{n} storey(s) = {doc.pages} plan page(s)"))
+        text = f"This drawing shows **{n} {'floor' if n == 1 else 'floors'}** (one per plan page)."
+        return _answer_obj(question, [doc_id], text, n, "count", 0.6, False, [], [], {"doc_id": doc_id, "highlight_item_ids": [],
+                           "camera_target_item_id": None}, trace, route, t0)
+
+    kinds = {kind}
+    if kind in ("shower", "bathtub") and re.search(r"\bshowers?\b", question, re.I) and re.search(r"\bbath ?tubs?\b", question, re.I):
+        kinds = {"shower", "bathtub"}   # "showers and bathtubs in total"
+    items = [i for i in doc.items if i.kind in kinds]
     if doc.mode == "planmap":
         if page:
             items = [i for i in items if i.page == page]
@@ -194,7 +287,15 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
     else:
         trace.append(_step("load", f"{len(items)} {kind} elements of {len(doc.items)} in the model"))
 
-    where = "on this floor plan" if doc.mode == "planmap" else "in this model"
+    hid_note = ""
+    if hidden:
+        gone = [i for i in items if i.item_id in hidden]
+        if gone:
+            items = [i for i in items if i.item_id not in hidden]
+            names = [hidden[i.item_id] for i in gone]
+            hid_note = " (with " + (", ".join(names) if len(names) <= 5 else f"{len(names)} items") + " hidden)"
+            trace.append(_step("scene", f"{len(gone)} hidden item(s) left out"))
+    where = ("on this floor plan" if doc.mode == "planmap" else "in this model") + hid_note
     # --- storey scope (IFC only; a plan map page is one level)
     if doc.mode == "ifc":
         st = resolve_storey(question, doc.storeys)
@@ -208,15 +309,42 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
 
     # --- room / label filters
     subject = None
+    sub_name = None
     quoted = _quoted(question)
+    if kind == "room" and doc.mode == "planmap" and re.search(r"\bnumbered\b.*\b(?:indoor|interior)\b|\b(?:indoor|interior)\b.*\bnumbered\b", question, re.I):
+        out = re.compile(r"balcon|balkon|terras|loggia|veranda|garden|outdoor", re.I)
+        items = [i for i in items if i.props.get("number") and not out.search(i.label or "")]
+        subject = "numbered indoor rooms"
+        trace.append(_step("filter", f"numbered indoor rooms: {len(items)}"))
+    if kind == "room" and doc.mode == "planmap" and not quoted and not _room_id(question) and p.type in ("count", "area"):
+        sub = room_subtype(question)
+        if sub:
+            name, types = sub
+            if not any(i.props.get("room_type") for i in items):
+                return _abstain(question, doc_id, f"The room types on this plan have not been read, so I cannot pick out the {name}s.", trace, route, t0)
+            if name == "sauna":  # no room type for it in the model: only count rooms whose OCR label says so
+                return _abstain(question, doc_id, "This plan reader has no sauna room type and the label is not reliably read, so I would rather not guess.", trace, route, t0)
+            items = [i for i in items if i.props.get("room_type") in types]
+            subject = f"{name}s"
+            sub_name = name
+            trace.append(_step("filter", f"room type {sorted(types)}: {len(items)} matched"))
     if kind == "room" and (p.scope == "room" or quoted or _room_id(question)):
         rid = _room_id(question)
         sel = []
-        if quoted:
+        if rid:   # a room number is unique: it beats the (shared) room name
+            sel = [i for i in items if str(i.props.get("number") or "").casefold() == rid.casefold()]
+        if not sel and quoted:   # "'Kontor (Rum nr. 204)'": the bracket is the room's id; it beats the shared type name
+            for t in quoted:
+                m = re.search(r"\(([^)]+)\)\s*$", t)
+                if m:
+                    pid = m.group(1).strip().casefold()
+                    tail = pid.split()[-1]
+                    sel += [i for i in items if (i.name or "").casefold() in (pid, tail) or str(i.props.get("number") or "").casefold() == tail]
+        if not sel and quoted:
             sel = [i for i in items if any(_label_matches(i, t) for t in quoted)]
         if not sel and rid:
             sel = [i for i in items if (i.name or "").casefold() == rid.casefold() or (i.label or "").casefold() == rid.casefold()
-                   or i.item_id == rid]
+                   or i.item_id == rid or str(i.props.get("number") or "").casefold() == rid.casefold()]
         if not sel and (quoted or rid) and doc.mode == "planmap" and not any(i.label for i in items):
             return _abstain(question, doc_id, "The room names on this plan have not been read, so I cannot pick out that room.",
                             trace, route, t0)
@@ -239,7 +367,12 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         trace.append(_step("count", f"{n} {kind}"))
         boxes, cites, scene = _evidence(doc, items)
         marks = _cite_marks(cites)
-        if n == 0:
+        if sub_name:
+            noun = sub_name + ("" if n == 1 else "es" if sub_name.endswith("s") else "ies" if sub_name.endswith("y") else "s")
+            noun = sub_name[:-1] + "ies" if (n != 1 and sub_name.endswith("y")) else noun
+            text = (f"I found **no {sub_name}s** {where}." if n == 0 else
+                    f"There {'is' if n == 1 else 'are'} **{n} {noun}** {where}. {marks}")
+        elif n == 0:
             text = f"I found **no {_plural(kind, 2)}** {where}." if not subject else f"I found **no {_plural(kind, 2)}** matching {subject} {where}."
         else:
             verb = "is" if n == 1 else "are"

@@ -70,13 +70,21 @@ tasks:
     fallback:
       - {provider: gemini,  model: gemini-3.8-flash}
       - {provider: runware, model: "anthropic:claude@sonnet-4.6"}
-  judge_text:
-    provider: anthropic
-    model: claude-haiku-5-5
+  scene_intent:   # odd phrasing of a viewer command (E-20); Nemotron first, tiny outputs
+    provider: nvidia
+    model: nvidia/nemotron-3.5-lightning-30b-a3b
+    max_tokens: 128
+    temperature: 0
+    extra_body: {chat_template_kwargs: {enable_thinking: false}}
+    fallback:
+      - {provider: runware, model: "google:gemini@3.1-flash-lite"}
+  judge_text:   # grades free-text answers against gold (bench only); cheap, cached
+    provider: gemini
+    model: gemini-3.5-flash-lite
     max_tokens: 512
     fallback:
-      - {provider: nvidia,  model: nvidia/nemotron-3.5-lightning-30b-a3b}
-      - {provider: runware, model: "anthropic:claude@haiku-4.5"}
+      - {provider: nvidia,  model: nvidia/nemotron-3.5-lightning-30b-a3b }
+      - {provider: runware, model: "google:gemini@3.1-flash-lite"}
   advise:
     provider: nvidia
     model: nvidia/nemotron-3-super-120b-a12b
