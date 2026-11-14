@@ -261,7 +261,7 @@ async def ask(chat_id: str, body: NewMessage):
         raise HTTPException(404, "chat not found")
     doc_ids = body.doc_ids if body.doc_ids is not None else ([c["doc_id"]] if c["doc_id"] else [])
     project = None
-    if not doc_ids:   # a project chat with no explicit selection asks all the project's documents
+    if (body.doc_ids is None or body.doc_ids == []) and not doc_ids:   # a project chat with no explicit selection asks all the project's documents
         pid = await pool.fetchval("select project_id from chats where id=$1", cid)
         if isinstance(pid, uuid.UUID):
             from .projects_routes import _project
