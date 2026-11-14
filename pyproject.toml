@@ -33,6 +33,7 @@ dependencies = [
   "python-dotenv",
   "rapidocr-onnxruntime>=1.4.4",
   "onnx>=1.23.2",
+  "scipy>=1.18.1",
 ]
 
 [dependency-groups]

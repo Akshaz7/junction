@@ -10,6 +10,8 @@ providers:
   anthropic: {env: ANTHROPIC_API_KEY,  base_url: "https://api.anthropic.com/v1", version: "2026-10-21"}
   runware:   {env: RUNWARE_API_KEY,    base_url: "https://api.runware.ai/v1"}
   featherless: {env: FEATHERLESS_API_KEY, base_url: "https://api.featherless.ai/v1"}
+  # voice_id = "River - Relaxed, Neutral, Informative" (premade voice; listed by GET /v1/voices on 2026-11-14)
+  elevenlabs: {env: ELEVENLABS_API_KEY, base_url: "https://api.elevenlabs.io/v1", voice_id: SAz9YHcvj6GT2YYXdXww}
 
 prices:
   gemini:
@@ -29,6 +31,8 @@ prices:
     # https://api.featherless.ai/v1/models (pricing field)
     Qwen/Qwen3-VL-30B-A3B-Instruct:      {in: 0.15,  out: 0.50}
     Qwen/Qwen3-Next-80B-A3B-Instruct:    {in: 0.125, out: 1.15}
+  elevenlabs:  # one "token" = one character. Creator plan: $22 / 131,000 characters = $0.00017/char (ignores the flash half-price: conservative)
+    eleven_flash_v2_5: {in: 170, out: 0}
   runware:     # https://runware.ai/docs/models/<id>/schema.json -> info["x-pricing"]; real cost comes back per request
     "google:gemini@3.5-flash":        {in: 1.50, out: 9.00}
     "google:gemini@3.1-flash-lite":   {in: 0.25, out: 1.50}
@@ -87,7 +91,8 @@ tasks:
     fallback:
       - {provider: nvidia,  model: nvidia/nemotron-3.5-lightning-30b-a3b}
       - {provider: runware, model: "google:gemini@3.1-flash-lite"}
-  tts:
-    provider: runware
-    model: "fishaudio:s2.1@pro"
-    fallback: []
+  tts:      # ElevenLabs flash v2.5: fast, 32 languages, 40k chars per request (GET /v1/models, 2026-11-14)
+    provider: elevenlabs
+    model: eleven_flash_v2_5
+    fallback:
+      - {provider: runware, model: "fishaudio:s2.1@pro"}

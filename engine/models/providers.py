@@ -177,6 +177,8 @@ def fake(cfg, model, messages, images, schema, params, key) -> ProviderResponse:
 
 # --------------------------------------------------------------------------- openai-compatible (nvidia, featherless)
 def openai_compat(cfg, model, messages, images, schema, params, key) -> ProviderResponse:
+    if any(im.mime.startswith("audio/") for im in images):  # audio rides in `images` (Image with an audio mime); only Gemini takes it
+        raise ProviderError("audio input not supported by this provider")
     system, conv = split_messages(messages)
     if schema is not None:
         system = (system + "\n\n" if system else "") + schema_instruction(schema)
@@ -257,6 +259,8 @@ def cand_finish(d: dict) -> str:
 
 # --------------------------------------------------------------------------- anthropic
 def anthropic(cfg, model, messages, images, schema, params, key) -> ProviderResponse:
+    if any(im.mime.startswith("audio/") for im in images):  # audio rides in `images` (Image with an audio mime); only Gemini takes it
+        raise ProviderError("audio input not supported by this provider")
     system, conv = split_messages(messages)
     last_user = max((i for i, m in enumerate(conv) if m["role"] == "user"), default=None)
     out: list[dict] = []
@@ -324,6 +328,8 @@ def runware(cfg, model, messages, images, schema, params, key) -> ProviderRespon
         return ProviderResponse(
             text="", input_tokens=len(text.encode()), cost_usd=r.get("cost"), extra={"audio_url": r.get("audioURL")}
         )
+    if any(im.mime.startswith("audio/") for im in images):
+        raise ProviderError("audio input not supported by this provider")
     system, conv = split_messages(messages)
     if not conv or conv[-1]["role"] != "user":
         raise ProviderError("runware: final message must be a user message")
@@ -354,6 +360,45 @@ def runware(cfg, model, messages, images, schema, params, key) -> ProviderRespon
     )
 
 
+# --------------------------------------------------------------------------- elevenlabs (text to speech only)
+_VOICE_RE = re.compile(r"^[A-Za-z0-9]{10,40}$")
+
+
+def elevenlabs(cfg, model, messages, images, schema, params, key) -> ProviderResponse:
+    """POST /v1/text-to-speech/{voice_id} -> mp3 bytes, returned base64 in extra["audio_b64"].
+
+    Voice: a system message "voice=<voice_id>", else cfg["voice_id"]. Cost: one "token" = one character,
+    priced per character through the `prices` table (see models.yaml).
+    """
+    if params.get("kind") != "audio":
+        raise ProviderError("elevenlabs: text to speech only")
+    text = "\n".join(m["content"] for m in messages if m["role"] == "user" and isinstance(m["content"], str)).strip()
+    if not text:
+        raise ProviderError("elevenlabs: empty text")
+    voice = cfg.get("voice_id")
+    for m in messages:
+        if m["role"] == "system" and isinstance(m["content"], str) and m["content"].startswith("voice="):
+            voice = m["content"][6:].strip()
+    if not voice or not _VOICE_RE.match(voice):
+        raise ProviderError("elevenlabs: bad voice id")
+    resp = _post(
+        f"{cfg['base_url'].rstrip('/')}/text-to-speech/{voice}?output_format=mp3_44100_64",
+        {"xi-api-key": key, "Content-Type": "application/json", "Accept": "audio/mpeg"},
+        {"text": text, "model_id": model},
+    )
+    if resp.status_code in (429, 503):
+        ra = resp.headers.get("retry-after")
+        raise RateLimited(f"elevenlabs HTTP {resp.status_code}", float(ra) if ra and ra.replace(".", "", 1).isdigit() else None)
+    if resp.status_code >= 400:
+        raise ProviderError(f"elevenlabs HTTP {resp.status_code}: {resp.text[:200]}")
+    if not resp.content:
+        raise ProviderError("elevenlabs: empty audio")
+    return ProviderResponse(
+        text="", input_tokens=len(text),
+        extra={"audio_b64": base64.b64encode(resp.content).decode(), "mime": "audio/mpeg", "chars": len(text)},
+    )
+
+
 ADAPTERS: dict[str, Callable] = {
     "fake": fake,
     "gemini": gemini,
@@ -361,6 +406,7 @@ ADAPTERS: dict[str, Callable] = {
     "featherless": openai_compat,
     "anthropic": anthropic,
     "runware": runware,
+    "elevenlabs": elevenlabs,
 }
 # providers that enforce the schema server-side; the rest get it as an instruction and are validated locally
 NATIVE_SCHEMA = {"fake", "gemini", "anthropic", "runware"}

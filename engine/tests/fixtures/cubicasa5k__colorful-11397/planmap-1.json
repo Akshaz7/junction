@@ -1,0 +1,260 @@
+{
+ "doc_id": "cubicasa5k__colorful-11397",
+ "page": 1,
+ "image": {
+  "w": 475,
+  "h": 650
+ },
+ "scale": {
+  "m_per_px": 0.029,
+  "method": "door-prior",
+  "confidence": 0.3
+ },
+ "items": [
+  {
+   "item_id": "window-001",
+   "kind": "window",
+   "label": null,
+   "bbox_px": [
+    116,
+    155,
+    192,
+    170
+   ],
+   "polygon_px": null,
+   "props": {},
+   "conf": 0.95,
+   "source": "rule"
+  },
+  {
+   "item_id": "window-002",
+   "kind": "window",
+   "label": null,
+   "bbox_px": [
+    79,
+    156,
+    114,
+    169
+   ],
+   "polygon_px": null,
+   "props": {},
+   "conf": 0.95,
+   "source": "rule"
+  },
+  {
+   "item_id": "window-003",
+   "kind": "window",
+   "label": null,
+   "bbox_px": [
+    304,
+    159,
+    417,
+    171
+   ],
+   "polygon_px": null,
+   "props": {},
+   "conf": 0.95,
+   "source": "rule"
+  },
+  {
+   "item_id": "window-004",
+   "kind": "window",
+   "label": null,
+   "bbox_px": [
+    425,
+    190,
+    439,
+    278
+   ],
+   "polygon_px": null,
+   "props": {},
+   "conf": 0.95,
+   "source": "rule"
+  },
+  {
+   "item_id": "window-005",
+   "kind": "window",
+   "label": null,
+   "bbox_px": [
+    198,
+    329,
+    212,
+    353
+   ],
+   "polygon_px": null,
+   "props": {},
+   "conf": 0.95,
+   "source": "rule"
+  },
+  {
+   "item_id": "window-006",
+   "kind": "window",
+   "label": null,
+   "bbox_px": [
+    424,
+    332,
+    439,
+    356
+   ],
+   "polygon_px": null,
+   "props": {},
+   "conf": 0.95,
+   "source": "rule"
+  },
+  {
+   "item_id": "window-007",
+   "kind": "window",
+   "label": null,
+   "bbox_px": [
+    198,
+    507,
+    212,
+    538
+   ],
+   "polygon_px": null,
+   "props": {},
+   "conf": 0.95,
+   "source": "rule"
+  },
+  {
+   "item_id": "window-008",
+   "kind": "window",
+   "label": null,
+   "bbox_px": [
+    198,
+    552,
+    212,
+    591
+   ],
+   "polygon_px": null,
+   "props": {},
+   "conf": 0.95,
+   "source": "rule"
+  },
+  {
+   "item_id": "window-009",
+   "kind": "window",
+   "label": null,
+   "bbox_px": [
+    425,
+    510,
+    438,
+    594
+   ],
+   "polygon_px": null,
+   "props": {},
+   "conf": 0.95,
+   "source": "rule"
+  },
+  {
+   "item_id": "window-010",
+   "kind": "window",
+   "label": null,
+   "bbox_px": [
+    50,
+    596,
+    90,
+    612
+   ],
+   "polygon_px": null,
+   "props": {},
+   "conf": 0.95,
+   "source": "rule"
+  },
+  {
+   "item_id": "window-011",
+   "kind": "window",
+   "label": null,
+   "bbox_px": [
+    162,
+    599,
+    192,
+    612
+   ],
+   "polygon_px": null,
+   "props": {},
+   "conf": 0.95,
+   "source": "rule"
+  },
+  {
+   "item_id": "window-012",
+   "kind": "window",
+   "label": null,
+   "bbox_px": [
+    276,
+    601,
+    361,
+    615
+   ],
+   "polygon_px": null,
+   "props": {},
+   "conf": 0.95,
+   "source": "rule"
+  },
+  {
+   "item_id": "window-013",
+   "kind": "window",
+   "label": null,
+   "bbox_px": [
+    390,
+    601,
+    418,
+    615
+   ],
+   "polygon_px": null,
+   "props": {},
+   "conf": 0.95,
+   "source": "rule"
+  },
+  {
+   "item_id": "toilet-001",
+   "kind": "toilet",
+   "label": null,
+   "bbox_px": [
+    290,
+    436,
+    306,
+    461
+   ],
+   "polygon_px": null,
+   "props": {},
+   "conf": 0.95,
+   "source": "rule"
+  },
+  {
+   "item_id": "toilet-002",
+   "kind": "toilet",
+   "label": null,
+   "bbox_px": [
+    88,
+    477,
+    114,
+    491
+   ],
+   "polygon_px": null,
+   "props": {},
+   "conf": 0.95,
+   "source": "rule"
+  },
+  {
+   "item_id": "sink-001",
+   "kind": "sink",
+   "label": null,
+   "bbox_px": [
+    255,
+    338,
+    276,
+    360
+   ],
+   "polygon_px": null,
+   "props": {},
+   "conf": 0.95,
+   "source": "rule"
+  }
+ ],
+ "provenance": {
+  "models": {},
+  "created": "hand-made fixture (annotated by eye from page-1.png; VISION window-007 split into two)",
+  "ms": 0
+ }
+}

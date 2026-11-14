@@ -129,7 +129,7 @@ def chain_for(task: str) -> list[dict]:
 
 
 # --------------------------------------------------------------------------- budget
-_NAME_TO_PROVIDER = {"runware": "runware", "anthropic": "anthropic", "gemini": "gemini"}
+_NAME_TO_PROVIDER = {"runware": "runware", "anthropic": "anthropic", "gemini": "gemini", "elevenlabs": "elevenlabs"}
 
 
 def caps() -> dict[str, float]:
