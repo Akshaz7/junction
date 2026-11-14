@@ -45,3 +45,9 @@
   .route-chat .pagebar .chat-header-actions { margin-left: auto; }
   .chat-page .conversation, .has-viewer .conversation { padding-top: 64px; }
 }
+
+/* W-84: phone Data upload button same height as the folder bar and centred */
+@media (max-width: 640px) {
+  .data-screen-toolbar { display: flex !important; align-items: center !important; height: 38px !important; }
+  .data-screen-toolbar > .button:last-child { width: 38px !important; height: 38px !important; min-width: 38px !important; min-height: 38px !important; margin: 0 !important; padding: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; border-radius: 10px !important; }
+}
