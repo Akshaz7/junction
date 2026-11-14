@@ -48,6 +48,13 @@ def _load_sheet(record, page):
         # Door priors are estimates and cannot justify an accuracy in millimetres.
         if scale.get("method") in {"dimension", "scalebar", "dxf-units", "ifc"} and scale.get("m_per_px"):
             sheet["m_per_px"] = scale["m_per_px"]
+    files = record.get("files") or {}
+    if isinstance(files, str):
+        try:
+            files = json.loads(files)
+        except ValueError:
+            files = {}
+    record = {**record, "files": files if isinstance(files, dict) else {}}
     source = docmeta_store.source_file(record)
     if not sheet["words"] and source and Path(source).suffix.lower() == ".pdf":
         # Cache extraction in the adapter; never parse the 94k vector paths.

@@ -35,7 +35,7 @@ function PointSheet({ src, size, label, points, onPick, view: externalView, onVi
     onPointerUp={(e) => { const d = drag.current; drag.current = null; if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId)
       if (d && !d.moved && onPick) { const p = pagePoint(e.clientX, e.clientY); if (p[0]>=0 && p[1]>=0 && p[0]<=size.w && p[1]<=size.h) onPick(p) } }}
     onPointerCancel={() => { drag.current = null }}>
-    <image href={src} width={size.w} height={size.h} />
+    {src && <image href={src} width={size.w} height={size.h} />}
     {points?.map(([x,y], i) => <g key={i} transform={`translate(${x} ${y})`}><circle r={size.w/(80*view.zoom)} fill="var(--blue-600)" stroke="#fff" strokeWidth={size.w/(700*view.zoom)} /><text textAnchor="middle" dominantBaseline="central" fill="#fff" fontSize={size.w/(80*view.zoom)}>{i+1}</text></g>)}
   </svg></div>
 }
@@ -96,8 +96,7 @@ export function SheetOverlay({ baseDocId, page = 1, initialOverlayDocId, onClose
     finally { if (!controller.signal.aborted) setBusy(false) }
   }
   // Manual registrations are session state only; page/pair changes always reset them.
-  const registeredRef = useRef(registered); registeredRef.current = registered
-  useEffect(() => () => { if (registeredRef.current) URL.revokeObjectURL(registeredRef.current) }, [])
+  useEffect(() => () => { if (registered) URL.revokeObjectURL(registered) }, [registered])
   return <section className="sheet-overlay" aria-labelledby={`${id}-title`} onKeyDown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); onClose() } }}>
     <header className="overlay-heading"><Layers2 size={18} /><h3 ref={heading} tabIndex={-1} id={`${id}-title`}>Overlay sheets</h3><Button variant="ghost" size="icon" aria-label="Close overlay" onClick={onClose}><X size={18} /></Button></header>
     <div className="overlay-pickers"><label>Base sheet<strong>{base?.title || 'Current sheet'}</strong></label>

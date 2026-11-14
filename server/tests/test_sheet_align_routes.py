@@ -47,3 +47,15 @@ def test_missing_image_is_actionable(sources, monkeypatch):
     with pytest.raises(HTTPException) as error:
         asyncio.run(routes.sheet_align(routes.AlignmentRequest(base_doc_id='base', overlay_doc_id='other')))
     assert error.value.status_code == 422
+
+
+def test_page_adapter_handles_database_json_string_files(tmp_path, monkeypatch):
+    import json
+    from PIL import Image
+    monkeypatch.setattr(routes.config, 'artifacts_dir', lambda: tmp_path)
+    doc=tmp_path/'source'; doc.mkdir()
+    Image.new('RGB',(100,80),'white').save(doc/'page-1.png')
+    (doc/'text-1.json').write_text(json.dumps({'words':[{'text':'Room A','bbox':[10,10,30,20]}]}))
+    monkeypatch.setattr(routes.docmeta_store, 'source_file', lambda record: None if isinstance(record['files'], dict) else (_ for _ in ()).throw(TypeError()))
+    page=routes._load_sheet({'doc_id':'source','files':'{"pdf":"source.pdf"}'},1)
+    assert page['words'][0]['bbox_px']==[10,10,30,20]
