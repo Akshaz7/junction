@@ -39,3 +39,6 @@ Format for new lines: `YYYY-MM-DD HH:MM — decision — reason`.
 - 2026-11-14 03:21 — Vision: Yytsi ResNet34-UNet (MIT) is the segmenter; CubiCasa official (CC BY-NC) is an internal fixtures baseline only; final detector = permissive RT-DETR fine-tuned on CubiCasa5K SVG boxes (V-07) — licence + coverage.
 - 2026-11-14 03:26 — OCR = rapidocr-onnxruntime (Apache-2.0, runs in the Linux deploy image) over macOS Vision; added onnx for V-08.
 - 2026-11-14 03:28 — Shared dev servers started by LEAD with `make dev` (logs/dev.log): API :8000, web :5173. Workers must not start their own copies.
+- 2026-11-14 03:31 — Deployed API serves a baked-in demo subset of artifacts (demo docs only, publishable only, target < 150 MB) copied into the image at build time; Cloudinary replaces it if CLOUDINARY_URL arrives — Aiven Runtime builds from git and artifacts/ is not in git; no object storage key yet.
+- 2026-11-14 03:31 — Aiven Runtime app goes in aws-eu-central-1 (do-fra has no Runtime plans), plan startup-10-256; DB stays hologram-pg in do-fra over TLS. /ws on Runtime is untested: test right after first deploy; fallback is client polling.
+- 2026-11-14 03:31 — SERVER may edit engine/models/providers.py and the tts section of models.yaml to add an ElevenLabs adapter for S-08 (ENGINE is busy on solvers; LEAD-authorised cross-folder change).

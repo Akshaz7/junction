@@ -26,3 +26,5 @@
 - DWG has no converter on the Mac: the 20 opening_design DWG docs have no page images.
 - trimesh splits multi-primitive GLB nodes into `<guid>_<hash>`: map back to the GUID before matching item_ids.
 - Raster scale: most cubicasa plans have no dimension text: scale falls back to the door-width prior (conf 0.3), so area answers there must be low-confidence or abstain.
+- `uv run` can block for minutes on the uv lock while another process syncs: use `uv run --no-sync` (or `.venv/bin/python`) in workers.
+- Aiven Runtime builds from a GitHub repo via the Aiven GitHub App (no registry images), deploys are manual ("Deploy latest commit"), HTTP on 443 only; WebSocket support undocumented.
