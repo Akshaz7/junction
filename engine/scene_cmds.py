@@ -85,11 +85,18 @@ def tags(doc: Doc) -> dict[str, str]:
 _WHATIF = re.compile(r"^\W*(?:what(?:'s| is| would| will)? (?:happen(?:s)? )?if|suppose|imagine|if)\s+(?:we|i|you|they|someone)?\s*(?:were to\s+|was to\s+|would\s+|will\s+)?(?=(?:remove|delete|hide|take out|get rid of|drop)\b)", re.I)
 
 
+_QUESTIONY = re.compile(r"\s*(?:can we|could we|can i|could i|should we|should i|would it|would we|is it possible|prepare|produce|build|create|draft|generate|compile|give me a|provide|do we|will it|trace)\b", re.I)
+
+
 def parse_scene(question: str) -> SceneIntent | None:
     q = question.strip()
     # "what if we remove the main entrance?" / "what happens if I delete the front door" is the edit itself, asked as a what-if
     q = _WHATIF.sub("", q, count=1) if _WHATIF.match(q) else q
     if re.match(r"\s*(how many|what|which|where|why|how (?:much|long|big|large)|count|list|is |are |does |do |can you tell)", q, re.I):
+        return None
+    # E-59: a question or a document request is never a scene edit ("Can we remove...?", "Prepare a schedule...", "..., which doors...?")
+    if _QUESTIONY.match(q) or (q.rstrip().endswith("?") and re.search(r"\b(?:which|what|how many|how much|why)\b", q, re.I)
+                               and not re.match(r"\s*(?:please\s+|can you\s+|could you\s+)?(?:show|hide|remove|reset|highlight|isolate|restore)\b", q, re.I)):
         return None
     if _UNDO.match(q):
         return SceneIntent("undo")
