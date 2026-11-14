@@ -1449,6 +1449,10 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
 
 def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
     """First handler that recognises the shape wins; every handler may return None."""
+    from engine.ifc_quantities import answer as ifc_quantity_answer
+    res = ifc_quantity_answer(question, doc, t0)
+    if res is not None:
+        return res
     res = filtered_question(question, doc, t0) or arithmetic_question(question, doc, t0, solve_fn)
     if res is not None:
         return res

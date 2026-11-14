@@ -358,6 +358,7 @@ def _answer_forced(question: str, doc_ids: list[str], on_event: Callable | None 
     finally:
         _P.DELTA_SINK.reset(_tok)
     if (os.environ.get("FORCE_ANSWER", "1") == "0" or not doc_ids or not (question or "").strip() or not res["answer"].get("abstained")
+            or "quantity_rows" in res  # Missing IFC quantities must remain unavailable, never a forced zero.
             or any(s.get("step") == "unclassified" for s in res.get("trace", []))
             or parse_scene(question) is not None or _other_doc(question, doc_ids)):
         return res

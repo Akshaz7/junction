@@ -31,6 +31,7 @@ KINDS = [
     ("IfcRamp", "ramp"), ("IfcRampFlight", "ramp"), ("IfcRailing", "railing"), ("IfcColumn", "column"),
     ("IfcBeam", "beam"), ("IfcMember", "member"), ("IfcPlate", "plate"), ("IfcCovering", "covering"),
     ("IfcFooting", "footing"), ("IfcPile", "pile"), ("IfcFurnishingElement", "furniture"),
+    ("IfcReinforcingBar", "rebar"), ("IfcReinforcingMesh", "reinforcing_mesh"), ("IfcTendon", "tendon"),
     ("IfcPipeSegment", "pipe"), ("IfcPipeFitting", "pipe_fitting"), ("IfcDuctSegment", "duct"),
     ("IfcDuctFitting", "duct_fitting"), ("IfcFlowTerminal", "terminal"), ("IfcFlowController", "valve_damper"),
     ("IfcFlowMovingDevice", "pump_fan"), ("IfcEnergyConversionDevice", "equipment"),
@@ -432,6 +433,8 @@ def process(ifc: Path, doc: dict, out_dir: Path):
 
     from pipeline.ifc_props import building_meta, enrich_elements
     enrich_elements(f, elements)
+    from pipeline.ifc_quantities import build as build_quantity_index
+    (out_dir / "ifc-quantities.json").write_text(json.dumps(build_quantity_index(f, space_geometry=True)))
     (out_dir / "elements.json").write_text(json.dumps(
         {"doc_id": doc["doc_id"], "version": 2, "schema": f.schema, "units": "m", "building": building_meta(f),
          "coords": "recentred in X/Z by origin_offset_m, Y-up (glTF), Y keeps real elevation",
