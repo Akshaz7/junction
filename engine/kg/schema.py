@@ -47,7 +47,7 @@ class Records:
         if nid not in self.nodes:
             self.nodes[nid] = {'id': nid, 'kind': kind, 'label': readable(label, kind.title()),
                                    'doc_ids': doc_ids if doc_ids is not None else [doc], 'level': level,
-                                   'props': finite(props or {}), 'source': source, 'canonical': None, 'degree': 0}
+                                   'props': finite(props or {}), 'source': finite(source), 'canonical': None, 'degree': 0}
         return nid
 
     def edge(self, kind, a, b, method, confidence, evidence, doc_ids=None):

@@ -1,12 +1,12 @@
 """IFC semantic relationships, across schemas (no geometry evaluation; optional dependency)."""
 from pathlib import Path
 
-from .build import read_json
+from .build import read_dict
 from .schema import norm
 
 
 def source_path(doc_id, root):
-    meta = read_json(Path(root) / doc_id / 'doc.json', {}) or {}
+    meta = read_dict(Path(root) / doc_id / 'doc.json')
     rel = (meta.get('files') or {}).get('ifc')
     if rel:
         for base in (Path(root).resolve().parent / 'data' / 'full' / 'junction-dataset',
