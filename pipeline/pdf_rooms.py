@@ -151,7 +151,9 @@ def label_blocks(words):
         t = p["text"]
         plain = len(t) <= 28 and len(t.split()) <= 3 and sum(ch.isalpha() for ch in t) >= 2 \
             and sum(ch.isdigit() for ch in t) <= 4 and not SKIP_LABEL.search(t.replace("/", " "))
-        tagged = plain and any(ROOM_NO_RE.match(q["text"].replace(" ", "")) and 0.3 * p["h"] < _cy(q["bbox"]) - _cy(p["bbox"])
+        letters = sum(ch.isalpha() for ch in t)
+        tagged = plain and letters >= 0.8 * len(t.replace(" ", "")) and "=" not in t and any(
+            _room_no(q["text"]) and 0.3 * p["h"] < _cy(q["bbox"]) - _cy(p["bbox"])
                                < 1.8 * p["h"] and abs(_cx(q["bbox"]) - _cx(p["bbox"])) < 1.5 * p["h"] + (p["bbox"][2] - p["bbox"][0]) / 2
                                for q in ph)   # a name line with a room number directly below it ("Stanza" / "1.02")
         if plain and (ROOM_WORDS.search(t) or tagged):
@@ -182,7 +184,7 @@ def label_blocks(words):
             if -2.6 * h <= dy <= 3.6 * h and abs(dy) > 0.3 * h:
                 t = p["text"]
                 d = abs(dy) / h + dx / (4 * h)
-                if ROOM_NO_RE.match(t.replace(" ", "")):
+                if _room_no(t):
                     nums.append((d, t.replace(" ", ""), pb))
                 elif dy > 0 and sum(ch.isalpha() for ch in t) >= 2 and not AREA_RE.search(t) and len(t) <= 40 \
                         and not SKIP_LABEL.search(t.replace("/", " ")):
@@ -215,6 +217,12 @@ def label_blocks(words):
 
 
 UNIT_TAG = re.compile(r"\b(type|unit|apt|apartment|whg|wohnung|logement|appartement|suite)\b|^U\d", re.I)
+
+
+def _room_no(t):
+    """A room number ('1.02', 'B324', '201', 'U208'), not a dimension in mm ('2040', '6000')."""
+    t = t.replace(" ", "")
+    return bool(ROOM_NO_RE.match(t)) and not re.fullmatch(r"\d{4,}", t)
 
 
 def _is_unit_tag(b):
@@ -549,10 +557,24 @@ def rooms(page: dict, walls: list) -> list:
         else:
             lone.append(i)
     out = []
+    # the main plan region: hull of the labelled regions; unlabelled regions outside it (neighbouring roofs,
+    # site context) are not rooms
+    from shapely.ops import unary_union
+    lab_g = [polys[k] for k in owner]
+    main = unary_union(lab_g).convex_hull.buffer(0.5 / mpp) if lab_g else None
     for k, g in enumerate(polys):
         bl = [blocks[i] for i in owner.get(k, [])]
-        if not bl and g.area * mpp * mpp < 2.0:
-            continue   # unlabelled scraps (shafts, wall cavities)
+        if not bl and (g.area * mpp * mpp < 2.0 or main is None or not main.contains(g.representative_point())):
+            continue   # unlabelled scraps (shafts, wall cavities) or outside the plan
+        real = [b for b in bl if not _is_unit_tag(b)]
+        if len(real) >= 2 and _RASTER.get("ids"):
+            try:   # several labels in one region: split it at its narrowings, one room per label
+                parts = _split([b["xy"] for b in real], _RASTER["ids"][k])
+                if sum(1 for q in parts if q) == len(real):
+                    out += [_room(q, [b]) for q, b in zip(parts, real)]
+                    continue
+            except Exception:  # noqa: BLE001 - keep the merged room
+                pass
         out.append(_room(_coords(g), bl))
     out += [_room(None, [blocks[i]]) for i in lone]
     return out
@@ -581,7 +603,90 @@ def _room(poly, bl):
             "pts_area": round(shoelace(poly), 3) if poly else None, "split": False, "merged": len(bl) > 1}
 
 
-def _components(page, walls, res_m=0.025, close_m=0.6):
+
+def _partitions(page, mask, x0, y0, k, mpp, reach_m=0.15, min_m=0.8, max_m=12.0):
+    """Glass partitions and light walls drawn as thin solid lines: straight 2-point strokes 0.8-12 m long whose
+    both ends touch a wall (within 15 cm) are drawn into the wall mask as room separators."""
+    import numpy as np
+    import cv2
+    segs = []
+    for p in page.get("paths") or []:
+        pts = p.get("pts") or []
+        if len(pts) != 2 or p.get("closed") or p.get("dashed") or p.get("stroke") is None or p.get("fill") is not None:
+            continue
+        (ax, ay), (bx, by) = pts
+        L = math.hypot(bx - ax, by - ay) * mpp
+        if min_m <= L <= max_m:
+            segs.append((ax, ay, bx, by))
+    if not segs:
+        return 0
+    S = np.array(segs, float)
+    A = np.round((S[:, :2] - [x0, y0]) * k).astype(int)
+    B = np.round((S[:, 2:] - [x0, y0]) * k).astype(int)
+    Hp, Wp = mask.shape
+    ok = (A[:, 0] >= 0) & (A[:, 0] < Wp) & (A[:, 1] >= 0) & (A[:, 1] < Hp) & \
+         (B[:, 0] >= 0) & (B[:, 0] < Wp) & (B[:, 1] >= 0) & (B[:, 1] < Hp)
+    if not ok.any():
+        return 0
+    dist = cv2.distanceTransform((mask == 0).astype(np.uint8), cv2.DIST_L2, 3)
+    reach = reach_m / mpp * k
+    A, B = A[ok], B[ok]
+    hit = (dist[A[:, 1], A[:, 0]] <= reach) & (dist[B[:, 1], B[:, 0]] <= reach)
+    # and the line itself runs through free space (not along / inside a wall)
+    n = 0
+    for (ax, ay), (bx, by) in zip(A[hit], B[hit]):
+        mx, my = (ax + bx) // 2, (ay + by) // 2
+        if dist[my, mx] <= reach:
+            continue
+        cv2.line(mask, (int(ax), int(ay)), (int(bx), int(by)), 255, 2)
+        n += 1
+    return n
+
+_RASTER: dict = {}
+
+
+def _split(bl_pts, cid):
+    """Split one raster region between several labels at its narrowings (door gaps, corridor necks):
+    watershed of the distance-to-wall map seeded at the label points. Returns [polygon pt list | None]."""
+    import numpy as np
+    import cv2
+    from scipy import ndimage
+    from shapely.geometry import Polygon
+    R_ = _RASTER
+    grow, x0, y0, k = R_["grow"], R_["x0"], R_["y0"], R_["k"]
+    sl = ndimage.find_objects((grow == cid).astype(np.int32))[0]
+    reg = grow[sl] == cid
+    pad = 2
+    reg = np.pad(reg, pad)
+    oy, ox = sl[0].start - pad, sl[1].start - pad
+    dist = cv2.distanceTransform(reg.astype(np.uint8), cv2.DIST_L2, 5)
+    img = (255 - np.clip(dist / max(1e-6, dist.max()) * 255, 0, 255)).astype(np.uint8)
+    img = cv2.merge([img, img, img])
+    mk = np.zeros(reg.shape, np.int32)
+    mk[~reg] = len(bl_pts) + 1
+    for i, (x, y) in enumerate(bl_pts):
+        px, py = int(round((x - x0) * k)) - ox, int(round((y - y0) * k)) - oy
+        if 0 <= py < reg.shape[0] and 0 <= px < reg.shape[1] and reg[py, px]:
+            mk[max(0, py - 1):py + 2, max(0, px - 1):px + 2] = i + 1
+    cv2.watershed(img, mk)
+    out = []
+    for i in range(len(bl_pts)):
+        m = ((mk == i + 1) & reg).astype(np.uint8)
+        cs, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if not cs or m.sum() < 4:
+            out.append(None)
+            continue
+        cnt = cv2.approxPolyDP(max(cs, key=cv2.contourArea), 1.0, True)[:, 0, :]
+        if len(cnt) < 3:
+            out.append(None)
+            continue
+        g = Polygon([((x + ox) / k + x0, (y + oy) / k + y0) for x, y in cnt]).buffer(0)
+        g = max(_poly_list(g.buffer(0.5 / k, join_style=2)), key=lambda q: q.area, default=None)
+        out.append(_coords(g) if g is not None else None)
+    return out
+
+
+def _components(page, walls, res_m=0.025, close_m=0.6, ext_m=1.5):
     """Free space between the walls as polygons (pt): rasterise walls at `res_m` per px, close gaps up to
     2*close_m (doors, windows), flood the exterior from the border, label the interior components, grow each back
     over the closing (not into the exterior or another room), vectorise. Returns ([shapely Polygon], m_per_pt)."""
@@ -601,8 +706,8 @@ def _components(page, walls, res_m=0.025, close_m=0.6):
     pad = 2.0 / mpp
     x0, y0 = min(xs) - pad, min(ys) - pad
     Wp, Hp = int((max(xs) + pad - x0) * k) + 1, int((max(ys) + pad - y0) * k) + 1
-    if Wp * Hp > 36e6:                                # keep memory bounded on huge sheets
-        f = (36e6 / (Wp * Hp)) ** 0.5
+    if Wp * Hp > 8e6:                                 # keep memory and time bounded on huge sheets
+        f = (8e6 / (Wp * Hp)) ** 0.5
         k *= f
         Wp, Hp = int(Wp * f) + 1, int(Hp * f) + 1
     mask = np.zeros((Hp, Wp), np.uint8)
@@ -615,28 +720,27 @@ def _components(page, walls, res_m=0.025, close_m=0.6):
         for hole in w.get("holes") or []:
             if len(hole) >= 3:
                 cv2.fillPoly(mask, [P(hole)], 0)
+    _partitions(page, mask, x0, y0, k, mpp)
     # (a morphological closing does not bridge a door in a thin wall: disks poke in from both sides; so separate
     # the rooms by dilating the walls, then grow each room back over the dilation)
-    r = max(1, int(round(close_m * 0.8 / mpp * k)))          # doors up to ~1 m
-    r_ext = max(r, int(round(close_m * 1.4 / mpp * k)))      # exterior: windows/openings up to ~1.7 m
+    r = max(1, int(round(close_m / mpp * k)))                # doors up to ~1.2 m
+    r_ext = max(r, int(round(ext_m / mpp * k)))              # exterior: glazing runs up to ~3 m along the outline
     disk = lambda rr: cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * rr + 1, 2 * rr + 1))  # noqa: E731
-    big = cv2.dilate(mask, disk(r_ext))
-    ne, labe = cv2.connectedComponents((big == 0).astype(np.uint8), connectivity=4)
+
+    def near(m, rr):  # dilation of mask m by a disk of radius rr, via a distance transform (fast for big radii)
+        return cv2.distanceTransform((~m).astype(np.uint8), cv2.DIST_L2, 5) <= rr
+    wall = mask > 0
+    big = near(wall, r_ext)
+    ne, labe = cv2.connectedComponents((~big).astype(np.uint8), connectivity=4)
     eb = set(np.unique(np.concatenate([labe[0], labe[-1], labe[:, 0], labe[:, -1]]).tolist())) - {0}
     ext = np.isin(labe, list(eb))
-    # the exterior grows back to the walls (through the dilation) but never through a door-sized gap
-    ext_g = ext.copy()
+    # exterior = the outside disks (a morphological opening from the border): reaches the wall faces but only
+    # pokes a little into a glazing gap narrower than 2*ext_m, so rooms behind glazed facades do not leak out
+    ext = near(ext, r_ext) & ~wall
     k3 = np.ones((3, 3), np.uint8)
-    for _ in range(r_ext + 1):
-        d = cv2.dilate(ext_g.astype(np.uint8), k3) > 0
-        upd = d & ~ext_g & (mask == 0)
-        if not upd.any():
-            break
-        ext_g |= upd
-    ext = ext_g
     free_o = (mask == 0) & ~ext
-    dil = cv2.dilate(mask, disk(r))
-    n, lab = cv2.connectedComponents(((dil == 0) & free_o).astype(np.uint8), connectivity=4)
+    dil = near(wall, r)
+    n, lab = cv2.connectedComponents((~dil & free_o).astype(np.uint8), connectivity=4)
     cnt = np.bincount(lab.ravel(), minlength=n)
     speck = np.where(cnt < (0.4 / mpp * k) ** 2)[0]     # seeds smaller than 0.4 m x 0.4 m: slivers in door gaps
     speck = speck[speck > 0]
@@ -645,19 +749,24 @@ def _components(page, walls, res_m=0.025, close_m=0.6):
     # narrow rooms (closets, WCs) vanish under the dilation: seed them from what a small erosion keeps outside the
     # zone the big rooms will grow into, then grow all seeds together (a closet fills before a neighbour gets in)
     r2 = max(1, r // 3)
-    zone = cv2.dilate((lab > 0).astype(np.uint8), disk(r + r2)) > 0
-    s2 = (cv2.erode(free_o.astype(np.uint8), disk(r2)) > 0) & ~zone
+    zone = near(lab > 0, r + r2)
+    s2 = ~near(~free_o, r2) & ~zone
     n2, lab2 = cv2.connectedComponents(s2.astype(np.uint8), connectivity=4)
     grow = lab.astype(np.int32)
     if n2 > 1:
         grow[lab2 > 0] = lab2[lab2 > 0] + n - 1
         n = n + n2 - 1
+    dt = np.uint16 if n < 65000 else np.float32   # cv2.dilate works on uint16 without per-step conversions
+    grow = grow.astype(dt)
+    open_ = free_o.copy()
     for _ in range(r + r2 + 2):
-        d = cv2.dilate(grow.astype(np.float32), k3).astype(np.int32)
-        upd = (grow == 0) & free_o & (d > 0)
+        d = cv2.dilate(grow, k3)
+        upd = open_ & (grow == 0) & (d > 0)
         if not upd.any():
             break
         grow[upd] = d[upd]
+        open_ &= ~upd
+    grow = grow.astype(np.int32)
     if n2 > 1:  # narrow-room pieces cut apart by a neighbour's door zone belong together
         base = n - n2 + 1
         par = {}
@@ -672,14 +781,26 @@ def _components(page, walls, res_m=0.025, close_m=0.6):
                 ra, rb = fnd(a), fnd(b)
                 if ra != rb:
                     par[max(ra, rb)] = min(ra, rb)
-        for a in list(par):
-            grow[grow == a] = fnd(a)
+        if par:
+            lut = np.arange(n + 1, dtype=np.int32)
+            for a in list(par):
+                lut[a] = fnd(a)
+            grow = lut[grow]
     min_px = (0.3 / mpp * k) ** 2
     polys = []
-    for c in range(1, n):
-        m = (grow == c).astype(np.uint8)
-        if m.sum() < min_px:
+    _RASTER.clear()
+    _RASTER["ids"] = []
+    from scipy import ndimage
+    for c0, sl in enumerate(ndimage.find_objects(grow)):
+        c = c0 + 1
+        if sl is None:
             continue
+        sub = grow[sl] == c
+        if sub.sum() < min_px:
+            continue
+        m = np.zeros((sub.shape[0] + 2, sub.shape[1] + 2), np.uint8)
+        m[1:-1, 1:-1] = sub
+        oy, ox = sl[0].start - 1, sl[1].start - 1
         cs, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if not cs:
             continue
@@ -687,13 +808,15 @@ def _components(page, walls, res_m=0.025, close_m=0.6):
         cnt = cv2.approxPolyDP(cnt, 1.0, True)[:, 0, :]
         if len(cnt) < 3:
             continue
-        g = Polygon([(x / k + x0, y / k + y0) for x, y in cnt])
+        g = Polygon([((x + ox) / k + x0, (y + oy) / k + y0) for x, y in cnt])
         if not g.is_valid:
             g = g.buffer(0)
         g = g.buffer(0.5 / k, join_style=2)   # contour runs through pixel centres: push out half a pixel
         g = max(_poly_list(g), key=lambda q: q.area, default=None)
         if g is not None and g.area > 0:
             polys.append(g)
+            _RASTER["ids"].append(c)
+    _RASTER.update({"grow": grow, "x0": x0, "y0": y0, "k": k, "wall": mask > 0})
     return polys, mpp
 
 
