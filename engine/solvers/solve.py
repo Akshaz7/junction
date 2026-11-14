@@ -143,7 +143,7 @@ def _cite_label(doc: Doc, its: list[Item], page: int) -> str:
         head = f"Page {page}" if (doc.pages or 1) > 1 else "Floor plan"
     else:
         st = sorted({i.storey for i in its if i.storey})
-        head = " / ".join(st[:2]) + (" +" + str(len(st) - 2) if len(st) > 2 else "") if st else f"Page {page}"
+        head = ("All floors" if len(st) > 2 else " / ".join(st)) if st else f"Page {page}"
     return f"{head} · {what}" if what else head
 
 

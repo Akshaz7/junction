@@ -107,3 +107,22 @@ def test_no_printed_scale_keeps_guess_and_says_so(tmp_path):
     from engine import analytics
     import time
     assert analytics.scale_note(doc).startswith(" The drawing has no printed scale")
+
+
+def _w(texts, y=100, x0=100, dx=60):
+    return [{"text": t, "bbox_px": [x0 + i * dx, y, x0 + i * dx + 40, y + 20]} for i, t in enumerate(texts)]
+
+
+import pytest as _pytest
+
+
+@_pytest.mark.parametrize("txt,n", [(['3/16"=1\'-0"'], 64), (['1/8"', "=", "1'-0\""], 96), (['1"=20\''], 240), (["1/4\"=1'-0\""], 48)])
+def test_imperial_ratio(txt, n):
+    assert st.imperial_ratio(_w(txt)) == n
+
+
+def test_scale_bar_in_feet_with_handwritten_labels():
+    # labels O, S (a handwritten 5), 10, 15, then the word "feel" (OCR of feet): 5 ft = 160 px
+    ws = _w(["O", "S", "10", "15"], dx=160) + [{"text": "feel", "bbox_px": [800, 100, 860, 120]}]
+    bar = st.scalebar(ws)
+    assert bar and abs(bar["m_per_px"] - 5 * 0.3048 / 160) < 1e-6 and "ft" in bar["evidence"]

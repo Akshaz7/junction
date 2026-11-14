@@ -331,13 +331,23 @@ def _phrase(question: str, f: Facts) -> tuple[str | None, dict | None]:
     return (t if ok else None), meta
 
 
+def _label(doc: Doc, ids: list[str]) -> str:
+    from engine.solvers.solve import _cite_label
+    want = set(ids)
+    its = [i for i in doc.items if i.item_id in want]
+    lb = _cite_label(doc, its, 1)
+    if its and all(i.kind == "room" for i in its) and len({i.storey for i in its}) > 1:
+        lb = "Room schedule · " + lb.split(" · ", 1)[-1]
+    return lb
+
+
 def text_answer(question: str, doc: Doc, use_model: bool | None = None) -> dict:
     t0 = time.perf_counter()
     f = facts_for(question, doc)
     trace = [{"step": "facts", "detail": f"{f.topic}: {len(f.lines)} lines from elements.json", "ms": 0, "model": None, "cost_usd": 0}]
     calls: list[dict] = []
     cites = [] if not f.item_ids else [{"n": 1, "doc_id": doc.doc_id, "page": 1, "kind": "element", "bbox_px": None,
-                                       "item_ids": f.item_ids, "quote": None}]
+                                       "item_ids": f.item_ids, "quote": None, "label": _label(doc, f.item_ids)}]
     marks = "[1]" if cites else ""
     text = None
     if use_model is None:

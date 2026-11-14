@@ -201,3 +201,11 @@ def test_citations_carry_a_readable_label():
     b = answer("how many windows and doors", [C1])
     assert [c["label"] for c in b["citations"]] == ["Floor plan · 11 windows", "Floor plan · 11 doors"]
     validate_answer(a)
+
+
+def test_exit_and_text_answers_have_readable_citation_labels(monkeypatch):
+    monkeypatch.setenv("TEXT_WITH_MODEL", "0")
+    a = answer("which doors are the exits on the ground floor", [AC20])
+    assert a["citations"][0]["label"] == "Erdgeschoss · 1 exit door, 1 staircase"
+    b = answer("which wall types are present and how many of each", [AC20])
+    assert b["citations"][0]["label"] == "All floors · 121 walls"

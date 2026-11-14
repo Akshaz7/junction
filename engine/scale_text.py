@@ -17,6 +17,10 @@ RATIOS = {20, 25, 50, 75, 100, 125, 150, 200, 250, 300, 400, 500, 1000, 1250, 20
 RATIO_RE = re.compile(r"(?<!\d)1\s*[:/]\s*(\d{2,4})(?!\d)")
 NUM_RE = re.compile(r"^\d{1,3}(?:[.,]\d)?$")
 UNIT_RE = re.compile(r"^(?:m|meters?|metres?|mtr)$", re.I)
+FT_UNIT_RE = re.compile(r"^(?:f(?:ee|oo|ec|ea)?[tl]\.?|feat|'|’|′)$", re.I)
+ANCHOR_RE = re.compile(r"^(?:f(?:ee|ec|ea)[tl]|feet|foot|meters?|metres?|metric|scale|graphic)$", re.I)
+FT_M = 0.3048
+IMP_RE = re.compile(r"(\d+(?:\s?\d)?(?:\s?/\s?\d+)?)\s*(?:\"|”|″|IN\.?)?\s*=\s*(\d+)\s*(?:'|’|′|FT\.?|FEET)\s*-?\s*(\d+)?", re.I)
 SHEET_RE = re.compile(r"^(?:sheet|format|size|iso|paper)?[:=]?(A[0-4])$", re.I)
 
 
@@ -31,16 +35,29 @@ def _cy(b):
 def scalebar(words: list[dict]) -> dict | None:
     """Row of numeric labels (0, 5, 10 ...) with a regular step, at least 3 labels or 2 with an 'm' unit. Linear fit must hold within 6%."""
     nums = []
+    ftmarks = False
     for w in words:
         t = str(w.get("text") or "").strip()
+        if t in ("O", "o"):
+            t = "0"
+        elif t in ("S", "s"):   # a handwritten 5 on a scale bar; only kept when the whole row fits a line
+            t = "5"
+        if re.fullmatch(r"\d{1,3}['’′]", t):
+            ftmarks = True
+            t = t[:-1]
         if NUM_RE.match(t) and w.get("bbox_px"):
             nums.append((float(t.replace(",", ".")), w["bbox_px"]))
     best = None
     for v0, b0 in nums:
         h = max(b0[3] - b0[1], 1.0)
-        row = sorted({(v, round(_cx(b), 1)): (v, b) for v, b in nums if abs(_cy(b) - _cy(b0)) <= 0.6 * h and b[3] - b[1] <= 2.2 * h}.values(), key=lambda t: _cx(t[1]))
+        cand_row = sorted(((v, b) for v, b in nums if abs(_cy(b) - _cy(b0)) <= 0.6 * h and b[3] - b[1] <= 2.2 * h), key=lambda t: _cx(t[1]))
+        row = []
+        for v, b in cand_row:   # the same label read twice (tiled pass plus crop) counts once
+            if row and row[-1][0] == v and abs(_cx(b) - _cx(row[-1][1])) < 3 * h:
+                continue
+            row.append((v, b))
         vals = [v for v, _ in row]
-        if len(row) < 3 or vals != sorted(vals) or len(set(vals)) != len(vals) or vals[0] != 0:
+        if len(row) < 3 or vals != sorted(vals) or len(set(vals)) != len(vals) or (vals[0] != 0 and len(row) < 4 and False):
             continue
         steps = [vals[i + 1] - vals[i] for i in range(len(vals) - 1)]
         if max(steps) - min(steps) > 1e-6:
@@ -52,14 +69,39 @@ def scalebar(words: list[dict]) -> dict | None:
         # every label must sit on the line through the first and last
         if any(abs(_cx(b) - (x0 + (v - vals[0]) / mpp)) > 0.06 * (x1 - x0) for v, b in row):
             continue
-        near_unit = any(UNIT_RE.match(str(w.get("text") or "").strip()) and abs(_cy(w["bbox_px"]) - _cy(b0)) <= 1.2 * h
-                        and 0 <= _cx(w["bbox_px"]) - x1 <= 0.5 * (x1 - x0) + 60 for w in words if w.get("bbox_px"))
+        near = [str(w.get("text") or "").strip() for w in words if w.get("bbox_px") and abs(_cy(w["bbox_px"]) - _cy(b0)) <= 1.2 * h
+                and -0.2 * (x1 - x0) <= _cx(w["bbox_px"]) - x1 <= 1.0 * (x1 - x0) + 80]
+        feet = any(FT_UNIT_RE.match(t) or re.fullmatch(r"\d+['’′]", t) for t in near) or ftmarks
+        near_unit = feet or any(UNIT_RE.match(t) for t in near)
         if near_unit or len(row) >= 4:
+            if feet:
+                mpp *= FT_M
+            unit = "ft" if feet else "m"
             cand = {"m_per_px": mpp, "method": "scalebar", "confidence": 0.85 if near_unit else 0.7,
-                    "evidence": f"scale bar read from the drawing: labels {', '.join(f'{v:g}' for v in vals)} m span {x1 - x0:.0f} px"}
+                    "evidence": f"scale bar read from the drawing: labels {', '.join(f'{v:g}' for v in vals)} {unit} span {x1 - x0:.0f} px"}
             if best is None or len(row) > best[0]:
                 best = (len(row), cand)
     return best[1] if best else None
+
+
+def imperial_ratio(words: list[dict]) -> int | None:
+    """3/16"=1'-0", 1/8"=1'-0", 1"=20' -> N of 1:N (rounded)."""
+    texts = [str(w.get("text") or "") for w in words]
+    for i in range(len(texts)):
+        for n in (1, 2, 3, 4, 5):
+            m = IMP_RE.search(" ".join(texts[i:i + n]))
+            if m:
+                try:
+                    a = m.group(1).replace(" ", "")
+                    inch = (int(a.split("/")[0]) / int(a.split("/")[1])) if "/" in a else float(a)
+                except (ValueError, ZeroDivisionError):
+                    continue
+                feet = int(m.group(2)) + int(m.group(3) or 0) / 12
+                if inch > 0 and 0 < feet <= 500:
+                    r = round(feet * 12 / inch)
+                    if 4 <= r <= 5000:
+                        return r
+    return None
 
 
 def ratio_and_sheet(words: list[dict]) -> tuple[int | None, str | None]:
@@ -73,6 +115,8 @@ def ratio_and_sheet(words: list[dict]) -> tuple[int | None, str | None]:
                 break
         if ratio:
             break
+    if ratio is None:
+        ratio = imperial_ratio(words)
     sheet = None
     for t in texts:
         m = SHEET_RE.match(t.strip())
@@ -146,6 +190,49 @@ def _page_words(doc_dir: Path, page: int) -> tuple[list[dict], int, int, float |
     return words, pt.w, pt.h, dpi
 
 
+def _anchor_crops(doc_dir: Path, page: int, words: list[dict]) -> list[dict]:
+    """Handwritten or small scale bars are missed by the tiled pass. Re-read a strip left of each 'feet / metres / scale' word at 1x."""
+    try:
+        import cv2
+    except ImportError:
+        return []
+    from engine.reader.text import ocr_words
+    png = doc_dir / f"page-{page}.png"
+    im = cv2.imread(str(png))
+    if im is None:
+        return []
+    H, W = im.shape[:2]
+    out, seen = [], set()
+    for w in words:
+        t = str(w.get("text") or "").strip().strip(".:")
+        if not (ANCHOR_RE.match(t) and w.get("bbox_px")):
+            continue
+        b = w["bbox_px"]
+        h = max(b[3] - b[1], 10)
+        x0, x1 = max(0, int(b[0] - 40 * h)), min(W, int(b[2] + 3 * h))
+        y0, y1 = max(0, int(_cy(b) - 4 * h)), min(H, int(_cy(b) + 4 * h))
+        key = (x0 // 200, y0 // 200)
+        if key in seen or x1 - x0 < 50:
+            continue
+        seen.add(key)
+        tmp = doc_dir / f"_anchor-{page}-{len(seen)}.png"
+        try:
+            cv2.imwrite(str(tmp), im[y0:y1, x0:x1])
+            for o in ocr_words(tmp):
+                bb = o["bbox_px"]
+                out.append({"text": o["text"], "bbox_px": [bb[0] + x0, bb[1] + y0, bb[2] + x0, bb[3] + y0]})
+        except Exception:  # noqa: BLE001
+            pass
+        finally:
+            try:
+                tmp.unlink()
+            except OSError:
+                pass
+        if len(seen) >= 4:
+            break
+    return out
+
+
 def refine_scale(doc_dir: Path, page: int, scale: dict | None) -> dict | None:
     """The better scale for this page, or None when the printed text gives nothing usable (keep `scale`)."""
     if scale and scale.get("method") not in (None, "none", "door-prior"):
@@ -169,7 +256,54 @@ def _refine(doc_dir: Path, page: int, scale: dict | None) -> dict | None:
     words, W, H, dpi = _page_words(doc_dir, page)
     if not W:
         return None
-    return detect(words, W, H, dpi, (scale or {}).get("m_per_px"))
+    prior = (scale or {}).get("m_per_px")
+    res = detect(words, W, H, dpi, prior)
+    if res is None or res["method"] not in ("scalebar",) and "agrees" not in res["evidence"]:
+        extra = _anchor_crops(doc_dir, page, words)
+        if extra:
+            have = {(str(w.get("text")), round(_cx(w["bbox_px"]) / 8)) for w in words if w.get("bbox_px")}
+            words = words + [e for e in extra if (str(e["text"]), round(_cx(e["bbox_px"]) / 8)) not in have]
+            res = detect(words, W, H, dpi, prior) or res
+    if res is None:
+        res = _rotated_bar(doc_dir, page, W, H, prior)
+    return res
+
+
+def _rotated_bar(doc_dir: Path, page: int, W: int, H: int, prior: float | None) -> dict | None:
+    """A bar drawn up a page margin (labels read sideways): OCR the page turned 90 degrees both ways. Only the bar geometry is used, so the rotated frame is fine."""
+    try:
+        import cv2
+        from engine.reader.text import ocr_words
+    except ImportError:
+        return None
+    im = cv2.imread(str(doc_dir / f"page-{page}.png"))
+    if im is None:
+        return None
+    for tag, code in (("90", cv2.ROTATE_90_CLOCKWISE), ("270", cv2.ROTATE_90_COUNTERCLOCKWISE)):
+        cache = doc_dir / f"scale-ocr-rot{tag}-{page}.json"
+        try:
+            ws = json.loads(cache.read_text())
+        except (OSError, ValueError):
+            tmp = doc_dir / f"_rot{tag}-{page}.png"
+            try:
+                cv2.imwrite(str(tmp), cv2.rotate(im, code))
+                ws = ocr_words(tmp)
+            except Exception:  # noqa: BLE001
+                ws = []
+            finally:
+                try:
+                    tmp.unlink()
+                except OSError:
+                    pass
+            try:
+                cache.write_text(json.dumps(ws))
+            except OSError:
+                pass
+        bar = scalebar(ws)
+        if bar and not (prior and not (0.3 < bar["m_per_px"] / prior < 3.5)):
+            bar["evidence"] += f" (bar printed sideways, read with the page turned {tag} degrees)"
+            return bar
+    return None
 
 
 def _px_area(it) -> tuple[float | None, str]:

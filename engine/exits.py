@@ -112,6 +112,19 @@ def exit_answer(question: str, doc: Doc, t0: float | None = None) -> dict:
     return _out(question, doc, text, ids, [(labels, st)], t0, trace_detail=f"{st}: {len(ex)} exit doors, {len(r['stairs'])} stairs from {r['doors']} doors / {r['rooms']} rooms")
 
 
+def _label(doc, ids) -> str:
+    from engine.solvers.solve import _cite_label
+    its = [i for i in doc.items if i.item_id in set(ids)]
+    base = _cite_label(doc, its, 1)
+    doors = sum(1 for i in its if i.kind == "door")
+    stairs = sum(1 for i in its if i.kind == "stairs")
+    if doors or stairs:
+        head = base.split(" · ", 1)[0]
+        bits = ([f"{doors} exit door{'s' if doors != 1 else ''}"] if doors else []) + ([f"{stairs} staircase{'s' if stairs != 1 else ''}"] if stairs else [])
+        return f"{head} · " + ", ".join(bits)
+    return base
+
+
 def _out(question, doc, text, ids, extra, t0, abstained=False, trace_detail=""):
     cmd = {"op": "highlight", "item_ids": ids}
     if extra:
@@ -120,7 +133,7 @@ def _out(question, doc, text, ids, extra, t0, abstained=False, trace_detail=""):
     return {
         "answer_id": uuid.uuid4().hex, "question": question, "doc_ids": [doc.doc_id],
         "answer": {"text_md": text, "value": len(ids) if ids else None, "unit": None, "confidence": 0.0 if abstained else 0.7, "abstained": abstained},
-        "citations": [{"n": 1, "doc_id": doc.doc_id, "page": 1, "kind": "element", "bbox_px": None, "item_ids": ids, "quote": None}] if ids else [],
+        "citations": [{"n": 1, "doc_id": doc.doc_id, "page": 1, "kind": "element", "bbox_px": None, "item_ids": ids, "quote": None, "label": _label(doc, ids)}] if ids else [],
         "evidence": {"boxes": [], "scene": scene},
         "trace": [{"step": "exits", "detail": trace_detail, "ms": 0, "model": None, "cost_usd": 0}],
         "route": "index", "cost": {"usd_total": 0.0, "calls": []}, "latency_ms": int((time.perf_counter() - t0) * 1000),

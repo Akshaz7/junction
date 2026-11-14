@@ -123,8 +123,38 @@ def process(doc_id: str, art: Path):
                              "note": "plan image generated from IFC geometry (generated for demo)"}}
         (out / f"planmap-{n}.json").write_text(json.dumps(pm))
         pages.append({"page": n, "w": W, "h": H, "dpi": None, "words": 0, "storey": key[1], "elevation_m": key[0]})
+    if not pages:  # no walls/rooms (plumbing, HVAC): one overview page instead of none
+        return overview_page(doc_id, art)
     (out / "pages.json").write_text(json.dumps({"doc_id": doc_id, "source": "ifc-storeys", "pages": pages}, indent=1))
     return len(pages)
+
+
+def overview_page(doc_id: str, art: Path) -> int:
+    """Models with no walls/rooms (plumbing, HVAC): one top-down overview from element bounding boxes, so the
+    document has a page-1 preview. Pipes blue, fittings orange, fixtures green, the rest grey."""
+    out = art / doc_id
+    els = json.loads((out / "elements.json").read_text())["elements"]
+    boxes = [(e["kind"], e["bbox_m"]) for e in els if e.get("bbox_m") and e["kind"] != "site"]
+    if not boxes:
+        return 0
+    x0 = min(b[0][0] for _, b in boxes); x1 = max(b[1][0] for _, b in boxes)
+    z0 = min(b[0][2] for _, b in boxes); z1 = max(b[1][2] for _, b in boxes)
+    ppm = max(2.0, min(80.0, (LONG_SIDE - 2 * MARGIN) / max(x1 - x0, z1 - z0, 1e-6)))
+    W = int((x1 - x0) * ppm) + 2 * MARGIN
+    H = int((z1 - z0) * ppm) + 2 * MARGIN
+    img = Image.new("RGB", (W, H), "white")
+    dr = ImageDraw.Draw(img)
+    col = {"pipe": (30, 110, 200), "pipe_fitting": (230, 140, 40), "sanitary": (40, 160, 90)}
+    for kind in ("equipment", "pipe_fitting", "sanitary", "pipe"):
+        for k, b in boxes:
+            if k == kind or (kind == "equipment" and k not in col):
+                a = ((b[0][0] - x0) * ppm + MARGIN, (b[0][2] - z0) * ppm + MARGIN)
+                c = ((b[1][0] - x0) * ppm + MARGIN, (b[1][2] - z0) * ppm + MARGIN)
+                dr.rectangle([a, (max(c[0], a[0] + 2), max(c[1], a[1] + 2))], fill=col.get(k, (150, 150, 150)))
+    save_page(img, out, 1)
+    (out / "pages.json").write_text(json.dumps({"doc_id": doc_id, "source": "ifc-overview",
+        "pages": [{"page": 1, "w": W, "h": H, "dpi": None, "words": 0, "storey": None, "elevation_m": None}]}, indent=1))
+    return 1
 
 
 def main():

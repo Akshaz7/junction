@@ -72,7 +72,7 @@ For accuracy/cost use linked snapshots in [JUDGE_QA.md](JUDGE_QA.md) and [REPORT
 ## Phone
 
 1. **Install:** unlock the phone, plug it in, run `WEB_URL=https://hologram-khaki.vercel.app API_URL=https://hologram-khaki.vercel.app bash ios/scripts/install_on_device.sh` (not inside `heavy.sh`). Open **Stoa Pro**; allow camera, microphone and speech.
-2. **Pair:** on the laptop chat tap the phone icon to show the pairing QR. Scan it with the phone camera; it opens `hologram://pair?code=...` in the app.
+2. **Pair:** on the laptop chat tap **Pair a phone** (phone icon, chat header) to show the QR. Scan it with the phone camera; it opens `hologram://pair?code=...` in the app.
 3. **Follow the chat:** ask on the laptop, for example "Where are the toilets?". The same question and answer should appear on the phone. If not, open **History** and pick the same chat.
 4. **Show on table:** on the answer tap **Show on table**, scan the table, **Place model**. The plan appears and the building rises. The same numbered items glow in their kind colours, and rooms show as floor tints.
 5. **Walk 1:1:** step around the model, tap an item for its tag, and hide an item to show the rule card. If AR fails, say so and use the recorded clip.
