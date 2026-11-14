@@ -97,6 +97,8 @@ def impact(graph: dict, node_id: str, change: dict) -> list[dict]:
         kind = edge.get("kind")
         if kind == "same_as":
             return True
+        if kind == "references" and edge.get("to") == current["id"] and other.get("kind") == "sheet_ref":
+            return True
         # The anchor may appear in other files before its dependencies are met.
         anchor = current.get("kind") == origin.get("kind")
         if ceiling:
@@ -122,6 +124,8 @@ def impact(graph: dict, node_id: str, change: dict) -> list[dict]:
         entry = hits[nid]
         n, p = entry["node"], entry["node"].get("props") or {}
         entry["effect"] = "Also appears in another document" if n.get("kind") == origin.get("kind") else "Check this linked item"
+        if n.get("kind") == "sheet_ref":
+            entry["effect"] = "Another sheet references this item"
         if ceiling and n.get("kind") == "wall":
             length = number(p.get("length_m"))
             area, height = number(p.get("area_m2")), number(p.get("height_m"))
@@ -129,8 +133,10 @@ def impact(graph: dict, node_id: str, change: dict) -> list[dict]:
             # material quantity unless that material is actually specified.
             if length is None and area is not None and height is not None and height > 0:
                 length = area / height
-            if old is not None and length is not None and length >= 0:
-                delta = target - old
+            if old is not None and old > 0 and length is not None and length >= 0:
+                exposed_old = min(old, height) if height is not None and height > 0 else old
+                exposed_new = min(target, height) if height is not None and height > 0 else target
+                delta = exposed_new - exposed_old
                 material = str(p.get("material") or "").casefold()
                 plaster = any(w in material for w in ("plasterboard", "gypsum", "kipsi", "gips"))
                 uncertainty = _margin(p, "length")
@@ -145,7 +151,8 @@ def impact(graph: dict, node_id: str, change: dict) -> list[dict]:
                     "prop": "plasterboard_area_m2" if plaster else "wall_finish_area_m2",
                     "value": round(length * delta, 6), "unit": "m2", "margin": margin,
                     "basis": {"length_m": length, "old_ceiling_height_m": old, "new_ceiling_height_m": target},
-                    "note": "One wall face, before openings; lining layers and waste are not included.",
+                    "conditional": True,
+                    "note": "If the full wall face follows this ceiling: one face, before openings. The room may cover only part of the wall; lining layers and waste are not included.",
                 }
         if ceiling and n.get("kind") == "door":
             height = number(p.get("height_m"))

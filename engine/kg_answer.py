@@ -188,8 +188,28 @@ def _comparison_kind(e, a, b):
     return a.get("kind") if a.get("kind") == b.get("kind") else None
 
 
-def _comparison_sources(graph, endpoints, kind):
+def _comparison_sources(graph, endpoints, kind, evidence=None):
     found = list(endpoints)
+    explicit = (evidence or {}).get("sources")
+    if isinstance(explicit, list) and explicit:
+        for s in explicit:
+            if not isinstance(s, dict) or not s.get("doc_id"):
+                continue
+            ids = s.get("item_ids")
+            if ids is None:
+                ids = [s["item_id"]] if s.get("item_id") else []
+            members = [n for n in graph.get("nodes", []) if (ns := _source(n))
+                       and ns["doc_id"] == s["doc_id"] and ns.get("item_id") in ids]
+            found.extend(members)
+            if not members:
+                # Zero is a valid indexed count. Preserve that document as a
+                # citation without inventing an element or drawing box.
+                endpoint = next((n for n in endpoints if s["doc_id"] in n.get("doc_ids", [])), {})
+                found.append({"id": f"comparison-source:{s['doc_id']}:{endpoint.get('id', '')}",
+                              "kind": endpoint.get("kind", "doc"), "label": _label(endpoint),
+                              "source": {"doc_id": s["doc_id"], "page": s.get("page") or 1,
+                                         "item_id": None, "bbox": s.get("bbox")}})
+        return found
     # Aggregate count comparisons may point at level nodes. Cite the actual
     # member items, rather than fabricating a one-to-one element match.
     for n in endpoints:
@@ -243,7 +263,7 @@ def _agree(q, project, graph, t0):
     mismatches, sources = [], []
     for e in matches:
         ends = [nodes[e["from"]], nodes[e["to"]]]
-        evidence_nodes = _comparison_sources(graph, ends, kind or _comparison_kind(e, *ends))
+        evidence_nodes = _comparison_sources(graph, ends, kind or _comparison_kind(e, *ends), e.get("evidence"))
         sources.extend(evidence_nodes)
         if e["kind"] == "differs":
             mismatches.append({"edge_id": e["id"], "from_label": _label(ends[0]), "to_label": _label(ends[1]),
@@ -278,9 +298,13 @@ def _related(q, project, graph, t0, appearances):
     origin, why = _resolve(q, graph)
     if origin is None:
         return _missing(q, project, graph, t0, why)
-    kinds = {"same_as"} if appearances else {"connects", "in_room", "hosted_by", "bounds", "serves", "part_of_system"}
+    kinds = {"same_as"} if appearances else {"connects", "in_room", "hosted_by", "bounds", "serves", "part_of_system",
+                                           "same_as", "references", "flags", "changed", "has_type", "made_of"}
     if appearances:
-        hits = paths(graph, origin["id"], lambda a, e, b, d: e.get("kind") in kinds, max_depth=None)
+        def appears(a, e, b, depth):
+            return (e.get("kind") == "same_as" or
+                    (e.get("kind") == "references" and e.get("to") == a["id"] and b.get("kind") == "sheet_ref"))
+        hits = paths(graph, origin["id"], appears, max_depth=None)
         origin_docs = set(origin.get("doc_ids") or [])
         hits = {nid: h for nid, h in hits.items() if set(h["node"].get("doc_ids") or []) - origin_docs}
     else:
@@ -317,6 +341,34 @@ def _change(q):
     return {"prop": "position_m", "value": None}, None
 
 
+def _distinct(entries, graph, origin):
+    """Group equivalent source records for summaries, retaining every citation."""
+    parent = {n["id"]: n["id"] for n in graph.get("nodes", [])}
+
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    for e in graph.get("edges", []):
+        if e.get("kind") == "same_as" and e.get("from") in parent and e.get("to") in parent:
+            a, b = find(e["from"]), find(e["to"])
+            parent[max(a, b)] = min(a, b)
+    groups = defaultdict(list)
+    for entry in entries:
+        key = find(entry["node"]["id"])
+        if key != find(origin["id"]):
+            groups[key].append(entry)
+    selected = []
+    for group in groups.values():
+        # A supported quantity in the anchor document is easiest to verify.
+        pick = max(group, key=lambda e: (bool(e.get("quantity_delta")),
+                   bool(set(e["node"].get("doc_ids") or []) & set(origin.get("doc_ids") or [])), e["confidence"]))
+        selected.append(pick)
+    return selected
+
+
 def _impact(q, project, graph, t0):
     kind = "room" if re.search(r"\bceiling\b", q, re.I) else next((k for k in ("wall", "door", "window", "duct", "pipe") if re.search(rf"\b{k}\b", q, re.I)), None)
     origin, why = _resolve(q, graph, kind)
@@ -329,25 +381,27 @@ def _impact(q, project, graph, t0):
     if not entries:
         return _missing(q, project, graph, t0, f"No affected dependencies for {_label(origin)} are recorded. This does not prove the change is safe.", [origin])
     bullets = []
-    quantities = [e for e in entries if e.get("quantity_delta")]
+    distinct = _distinct(entries, graph, origin)
+    quantities = [e for e in distinct if e.get("quantity_delta")]
     if quantities:
         for e in quantities[:2]:
             qty = e["quantity_delta"]
             margin = f" ± {qty['margin']:g} m²" if qty.get("margin") is not None else "; uncertainty is not recorded"
-            bullets.append(f"{_label(e['node'])}: {qty['value']:+g} m² of {qty['prop'].replace('_m2', '').replace('_', ' ')}{margin} (one face, before openings).")
-    tall = [e for e in entries if e.get("exceeds_ceiling")]
+            bullets.append(f"{_label(e['node'])}: {qty['value']:+g} m² of {qty['prop'].replace('_m2', '').replace('_', ' ')}{margin}, if its full face follows this ceiling (before openings).")
+    tall = [e for e in distinct if e.get("exceeds_ceiling")]
     if tall:
         bullets.append(f"{len(tall)} linked doors exceed the proposed ceiling height; verify their positions.")
-    services = [e for e in entries if e["node"].get("kind") in ("duct", "pipe", "terminal")]
+    services = [e for e in distinct if e["node"].get("kind") in ("duct", "pipe", "terminal")]
     if services:
         counts = Counter(e["node"]["kind"] for e in services)
         bullets.append("Check " + ", ".join(f"{v} {k}" + ("s" if v != 1 else "") for k, v in sorted(counts.items())) + " for clearance and service changes.")
     if not quantities:
         bullets.append("The graph lacks the dimensions needed to calculate a material quantity change.")
     bullets.append("Potential effects only. Missing links, openings, lining layers and waste need checking.")
-    return _result(q, project, graph, t0, f"Changing {_label(origin)} has {len(entries)} linked items to check.", bullets,
+    return _result(q, project, graph, t0, f"Changing {_label(origin)} has {len(distinct)} distinct linked items to check.", bullets,
                    [origin, *(h["node"] for h in entries)], [h["why_path"] for h in entries],
-                   {"shape": "impact", "origin": origin["id"], "change": change, "items": entries}, len(entries), "count")
+                   {"shape": "impact", "origin": origin["id"], "change": change, "items": entries,
+                    "distinct_items": [e["node"]["id"] for e in distinct]}, len(distinct), "count")
 
 
 def answer(question: str, project: dict, root: Path, t0=None, *, graph=None):

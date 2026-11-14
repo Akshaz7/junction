@@ -153,3 +153,67 @@ def test_widest_path_and_weakest_link(graph):
     assert found["door:plan:dp1"]["confidence"] == .85
     result = answer("If the ceiling in room A101 drops to 2.4 m, what is affected?", PROJECT, ROOT, graph=graph)
     assert result["answer"]["confidence"] == .8
+
+
+def test_zero_count_comparison_cites_both_sources_without_inventing_items(graph):
+    graph["nodes"].extend([
+        {"id": "level:architecture:8", "kind": "level", "label": "Level 8", "level": "Level 8", "doc_ids": ["architecture"], "props": {}},
+        {"id": "level:plan:8", "kind": "level", "label": "Level 8", "level": "Level 8", "doc_ids": ["plan"], "props": {}},
+    ])
+    graph["edges"].append({"id": "zero-doors", "kind": "differs", "from": "level:architecture:8", "to": "level:plan:8",
+                           "method": "rule", "confidence": .7, "evidence": {"property": "door_count", "values": [0, 2],
+                           "sources": [{"doc_id": "architecture", "item_ids": []}, {"doc_id": "plan", "item_ids": []}]}})
+    r = answer("Do the drawings agree on doors on level 8?", PROJECT, ROOT, graph=graph)
+    assert r["answer"]["value"] == 0
+    assert {c["doc_id"] for c in r["citations"]} == {"architecture", "plan"}
+    assert all(c["item_ids"] == [] and c["bbox_px"] is None for c in r["citations"])
+    assert "0 versus 2" in r["answer"]["text_md"]
+
+
+def test_text_reference_counts_as_an_appearance_without_claiming_identity(graph):
+    sheet = {"id": "sheet_ref:notes:ref", "kind": "sheet_ref", "label": "Door D12 schedule reference", "doc_ids": ["notes"],
+             "props": {}, "source": {"doc_id": "notes", "page": 3, "bbox": [10, 10, 50, 60]}}
+    graph["nodes"].append(sheet)
+    graph["edges"].append({"id": "reference", "kind": "references", "from": sheet["id"], "to": "door:architecture:d1",
+                           "confidence": .7, "method": "label_text", "evidence": {"quote": "D12"}})
+    r = answer("Where else does door D12 appear?", PROJECT, ROOT, graph=graph)
+    assert r["answer"]["value"] == 2 and r["answer"]["confidence"] == .7
+    assert any(s["edge_kind"] == "references" for s in r["reasoning"]["graph_path"])
+    assert any(c["doc_id"] == "notes" and c["page"] == 3 for c in r["citations"])
+    affected = impact(graph, "door:architecture:d1", {"prop": "removed", "value": True})
+    assert any(e["node"]["id"] == sheet["id"] for e in affected)
+
+
+def test_all_mismatches_are_rendered_with_both_citations(graph):
+    mismatch = copy.deepcopy(next(e for e in graph["edges"] if e["kind"] == "differs" and e["evidence"]["item_kind"] == "door"))
+    for i in range(5):
+        graph["edges"].append({**mismatch, "id": "extra-" + str(i)})
+    r = answer("Do the drawings agree on doors?", PROJECT, ROOT, graph=graph)
+    rows = [ln for ln in r["answer"]["text_md"].splitlines() if ln.startswith("| Door D13")]
+    assert len(rows) == 6
+    assert all("[" in ln and ln.count("[") >= 2 for ln in rows)
+
+
+@pytest.mark.parametrize("level", ["2. Obergeschoss", "3. kerros", "Våning 2"])
+def test_multilingual_level_labels_remain_resolvable(graph, level):
+    for n in graph["nodes"]:
+        n["level"] = level
+    r = answer(f"Do the drawings agree on doors on {level}?", PROJECT, ROOT, graph=graph)
+    assert r["answer"]["value"] == 50
+
+
+def test_room_number_and_name_are_used_together(graph):
+    graph["nodes"].append({"id": "room:architecture:other", "kind": "room", "label": "Office A101", "level": "Level 2",
+                           "doc_ids": ["architecture"], "props": {"number": "A199"}})
+    # The tagged room has more specific evidence than another room sharing its label.
+    r = answer("What is connected to room A101?", PROJECT, ROOT, graph=graph)
+    assert r["graph_answer"]["shape"] == "connections"
+
+
+def test_path_depth_budget_keeps_a_shorter_lower_confidence_route():
+    g = {"nodes": [{"id": s} for s in "ABCDE"], "edges": []}
+    for a, b, c in [("A", "B", .9), ("B", "C", .9), ("A", "C", .7), ("C", "D", 1), ("D", "E", 1)]:
+        g["edges"].append({"id": a+b, "from": a, "to": b, "confidence": c})
+    hits = paths(g, "A", lambda *a: True, max_depth=3)
+    assert hits["E"]["confidence"] == .7
+    assert hits["E"]["why_path"] == ["AC", "CD", "DE"]
