@@ -29,6 +29,27 @@ final class DemoSceneTests: XCTestCase {
         XCTAssertTrue(index.entity(for: door.key) === entity)
     }
 
+    /// Blueprint detail places floor text from manifest boxes, so they must share the USD content frame.
+    @MainActor
+    func testManifestBoxesMatchLoadedGeometryInContentFrame() async throws {
+        for id in ["ifc_bench__ac20-arc", "cubicasa5k__colorful-11397"] {
+            let files = try XCTUnwrap(DemoScenes.files(for: id))
+            let manifest = try JSONDecoder().decode(SceneManifest.self, from: Data(contentsOf: files.manifestURL))
+            let root = try await Entity(contentsOf: files.modelURL)
+            let index = SceneIndex(root: root)
+            let walls = manifest.items.sorted { $0.key < $1.key }.filter { $0.value.kind == "wall" }.prefix(8)
+            XCTAssertFalse(walls.isEmpty)
+            for (_, item) in walls {
+                let box = try XCTUnwrap(item.bbox_m)
+                let entity = try XCTUnwrap(index.entitiesByUSDName[item.usd_name])
+                let measured = entity.visualBounds(relativeTo: root)
+                XCTAssertEqual(measured.center.x, box.center.x, accuracy: 0.3, id)
+                XCTAssertEqual(measured.center.y, box.center.y, accuracy: 0.3, id)
+                XCTAssertEqual(measured.center.z, box.center.z, accuracy: 0.3, id)
+            }
+        }
+    }
+
     @MainActor
     func testFailedFetchLoadsRequestedBundledSceneAndCredit() async throws {
         for demo in DemoScenes.all {

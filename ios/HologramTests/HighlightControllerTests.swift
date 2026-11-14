@@ -33,7 +33,7 @@ final class HighlightControllerTests: XCTestCase {
             let label = try XCTUnwrap(controller.labelsByItemID[id])
             let item = try XCTUnwrap(index.entity(for: id))
             XCTAssertTrue(label.parent === root)
-            XCTAssertNotNil(label.components[BillboardComponent.self])
+            XCTAssertNil(label.components[BillboardComponent.self], "tags face the camera through faceCamera")
             XCTAssertNotNil(label.findEntity(named: text)?.components[ModelComponent.self])
             XCTAssertGreaterThan(label.position.y, item.visualBounds(relativeTo: root).max.y)
         }

@@ -228,6 +228,7 @@ final class ARSceneController: ObservableObject {
     }
 
     private func updateAnswerLabels() {
+        if isPlaced, let view = arView { highlightController?.faceCamera(view.cameraTransform.rotation) }
         labelFrame = (labelFrame + 1) % 4
         guard labelFrame == 0, isPlaced, buildAnimator == nil, let view = arView else { return }
         highlightController?.layoutLabels(cameraTransform: view.cameraTransform.matrix,

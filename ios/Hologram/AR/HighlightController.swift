@@ -46,7 +46,15 @@ final class HighlightController {
     /// Tag and callout size follows the model so a 1:100 table model still reads clearly.
     static func labelUnit(for root: Entity) -> Float {
         let extent = root.visualBounds(relativeTo: root).extents.max()
-        return max(0.25, extent.isFinite ? extent * 0.035 : 0)
+        return max(0.15, extent.isFinite ? extent * 0.021 : 0)
+    }
+
+    /// Tags stay parallel to the screen (upright, never rolled) by copying the camera rotation. A full billboard
+    /// rolls arbitrarily when the phone looks straight down at the table.
+    func faceCamera(_ orientation: simd_quatf) {
+        for label in labelsByItemID.values where label.isEnabled {
+            label.setOrientation(orientation, relativeTo: nil)
+        }
     }
 
     /// Walk mode is 1:1, where table-sized tags would be huge.
@@ -275,7 +283,6 @@ final class HighlightController {
 
         let label = Entity()
         label.name = "answer-label-" + itemID
-        label.components.set(BillboardComponent())
         let base = SIMD3<Float>(bounds.center.x, bounds.max.y, bounds.center.z)
         label.position = base + [0, offset * labelScale, 0]
         label.scale = SIMD3(repeating: labelScale)
