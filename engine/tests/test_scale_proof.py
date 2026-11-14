@@ -161,13 +161,15 @@ def test_method_spread_propagates_quadratically_as_sensitivity_only(tmp_path):
     pm['items'] = [{'item_id': 'r', 'kind': 'room', 'props': {'area_m2': 100}, 'source': 'seg', 'conf': 1}]
     (folder / 'planmap-1.json').write_text(json.dumps(pm))
     (folder / 'text-1.json').write_text(json.dumps({'dpi': 254, 'words': [word('1:110', 10)]}))
-    res = {'doc_ids': ['test'], 'route': 'planmap', 'answer': {'value': 100, 'unit': 'm2', 'text_md': '**100.0 m²**'},
+    # The shared policy now upgrades an unsubstantiated stored scale to the
+    # evidenced ratio/DPI before solving: 100 × (.011/.01)^2 = 121 m2.
+    res = {'doc_ids': ['test'], 'route': 'planmap', 'answer': {'value': 121, 'unit': 'm2', 'text_md': '**121.0 m²**'},
            'citations': [{'n': 1, 'doc_id': 'test', 'item_ids': ['r']}], 'trace': []}
     r = build(res, 'area', tmp_path)
     assert r['margin']['value'] is None  # physical scale error still unknown
     sensitivity = r['margin']['method_spread'][0]
-    assert sensitivity['scale_pct'] == pytest.approx(10)
-    assert sensitivity['value'] == pytest.approx(21)
+    assert sensitivity['scale_pct'] == pytest.approx(100 * (1 - .01 / .011))
+    assert sensitivity['value'] == pytest.approx(23)
     assert 'not a physical error bound' in sensitivity['why']
 
 

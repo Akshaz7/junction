@@ -2,7 +2,7 @@
 from engine.calc import input_value, question_source, record, row, step, step_source, summed
 
 
-def quantity(doc, label, typ, used, measured, need, pct, question, root):
+def quantity(doc, label, typ, used, measured, need, pct, question, root, *, measurements=()):
     from engine.order import _floor_area, _number
     unit = 'count' if typ == 'count' else 'm' if typ == 'length' else 'm2'
     pairs = []
@@ -14,8 +14,11 @@ def quantity(doc, label, typ, used, measured, need, pct, question, root):
             pairs.append((item, value))
     stub = {'answer': {'value': need, 'unit': unit}}
     calc = summed(stub, [row(doc, i, v, unit) for i, v in pairs], unit)
+    if typ == 'length' and measurements:
+        from engine.method_lengths import skirting
+        calc = skirting(doc, measurements, stub)
     calc['steps'] = [s for s in calc['steps'] if s['id'] != 'result']
-    if typ == 'length' or abs(sum(v for _, v in pairs) - measured) > 1e-8:
+    if abs(next(s['value'] for s in calc['steps'] if s['id'] == 'sum') - measured) > 1e-8:
         calc['issues'] = ['Order measurement operands are unavailable; the recorded total cannot yet be replayed.']
     calc['steps'].extend([
         step('waste-fraction', 'Convert waste percentage', 'waste percent / 100', pct / 100, 'fraction',

@@ -57,7 +57,8 @@ def to_markdown(res):
     lines.extend(["", "## Result", "", _md(calc.get("result")), "", "## Checks", ""])
     lines.extend(["- " + _md(c) for c in calc.get("checks", [])] or ["No independent check recorded."])
     lines.extend(["", "## Margin", "", _md(calc.get("margin") or "No measured error budget recorded.")])
-    if calc.get("issues"): lines.extend(["", "## Unresolved evidence", "", *["- " + _md(i) for i in calc["issues"]]])
+    missing = list(dict.fromkeys([*(calc.get('issues') or []), *(calc.get('unavailable') or [])]))
+    if missing: lines.extend(["", "## Unresolved evidence", "", *["- " + _md(i) for i in missing]])
     return "\n".join(lines) + "\n"
 
 
@@ -77,5 +78,6 @@ def to_html(res):
     parts.extend("<tr>" + "".join("<td>" + esc(r.get(k)) + "</td>" for k in ("item_id", "label", "values", "source")) + "</tr>" for r in calc.get("rows", []))
     parts.extend(["</tbody></table><h2>Result</h2><pre>" + esc(calc.get("result")) + "</pre><h2>Checks</h2><pre>" + esc(calc.get("checks") or "No independent check recorded.") + "</pre>",
                   "<h2>Margin</h2><pre>" + esc(calc.get("margin") or "No measured error budget recorded.") + "</pre>"])
-    if calc.get("issues"): parts.append("<h2>Unresolved evidence</h2><pre>" + esc(calc["issues"]) + "</pre>")
+    missing = list(dict.fromkeys([*(calc.get('issues') or []), *(calc.get('unavailable') or [])]))
+    if missing: parts.append("<h2>Unresolved evidence</h2><pre>" + esc(missing) + "</pre>")
     return "".join(parts) + "</body></html>"

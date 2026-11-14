@@ -92,6 +92,14 @@ def row(doc, item, value, unit, **values):
                      {KEYS.get(unit_name(unit), unit_name(unit)): value, **values}, source(doc, item)))
 
 
+def polygon_area_step(id, polygon, source_ref):
+    inputs = [input_value(f"vertex {i + 1} {axis}", point[j], "px", {**source_ref, "field": f"polygon_px[{i}][{j}]"})
+              for i, point in enumerate(polygon) for j, axis in enumerate(("x", "y"))]
+    value = evaluate("shoelace", [i["value"] for i in inputs])
+    return step(id, "Polygon area by shoelace", "0.5 × abs(Σ(x[i] × y[i+1] − x[i+1] × y[i])); last vertex joins first",
+                value, "px2", inputs, "Uses every recorded outline vertex; no bounding rectangle is substituted.", "shoelace")
+
+
 def places(value):
     return max(0, -Decimal(str(value)).as_tuple().exponent)
 
@@ -163,12 +171,14 @@ def record_items(res, doc, pairs, unit=None, formula="total = Σ(source quantiti
         if doc.mode == "planmap" and unit == "m2" and item.polygon_px:
             from engine.reasoning import _shoelace
             # Use the page's own scale. Refined quantities are checked against it.
-            scale = (doc.scale or {}).get("m_per_px")
+            scale = ((doc.meta.get("page_scales") or {}).get(item.page) or doc.scale or {}).get("m_per_px")
             area_px = _shoelace(item.polygon_px)
             if number(scale) and close(area_px * scale * scale, value, .005):
                 sid = f"measure-{idx}"
+                steps.append(polygon_area_step(sid + "-shoelace", item.polygon_px, sref))
+                area_px = steps[-1]["value"]
                 steps.append(step(sid, "Scale room outline", "outline area in px² × scale × scale", area_px * scale * scale, unit,
-                                  [input_value("outline area (shoelace)", area_px, "px2", {**sref, "field": "polygon_px"}),
+                                  [input_value("outline area (shoelace)", area_px, "px2", step_source(sid + "-shoelace")),
                                    input_value("metres per pixel", scale, "m/px", {**sref, "kind": "scale", "item_id": None, "field": "scale.m_per_px"}),
                                    input_value("metres per pixel", scale, "m/px", {**sref, "kind": "scale", "item_id": None, "field": "scale.m_per_px"})],
                                   note="Stored area may already be rounded; the row retains that stored value.", operation="multiply"))
@@ -208,9 +218,33 @@ def transform(res, calc, label, operation, operands, expr, value=None, unit=None
 
 
 def evaluate(operation, values):
+    if operation == 'reader_compute':
+        from engine.reader.tools import safe_eval
+        return safe_eval(values[0]) if len(values) == 1 and isinstance(values[0], str) else None
     if not all(number(v) for v in values):
         return None
+    if operation in ('polyline', 'polyline_closed', 'polygon_area'):
+        if len(values) < 4 or len(values) % 2: return None
+        from engine.reader.geom import polygon_area, polyline_length
+        points = list(zip(values[::2], values[1::2]))
+        return polygon_area(points) if operation == 'polygon_area' else polyline_length(points, operation == 'polyline_closed')
     if operation == "sum": return math.fsum(values)
+    if operation == "median":
+        from statistics import median
+        return median(values) if values else None
+    if operation == "component_area": return values[0] * (values[1] / values[2]) ** 2 if len(values) == 3 and values[2] else None
+    if operation in ("door_scale", "door_scale_spread"):
+        from statistics import median
+        if len(values) < 3 or any(v <= 0 for v in values): return None
+        scale = values[0] / median(values[1:])
+        return scale if operation == "door_scale" else max(abs((values[0] / v) / scale - 1) for v in values[1:]) * 100
+    if operation == "accuracy_pct": return round(values[0] / values[1] * 100) if len(values) == 2 and values[1] else None
+    if operation == 'ratio_dpi': return values[0] * values[2] / (values[1] * (values[3] if len(values) == 4 else 1)) if len(values) in (3, 4) and values[1] and (len(values) == 3 or values[3]) else None
+    if operation == 'ratio_sheet': return math.prod(values[:3]) / values[3] if len(values) == 4 and values[3] else None
+    if operation == 'dimension_scale': return values[0] * values[1] / values[2] if len(values) == 3 and values[2] else None
+    if operation == 'bar_scale': return (values[-3] - values[0]) * values[-1] / values[-2] if len(values) >= 4 and values[-2] else None
+    if operation == 'inverse': return 1 / values[0] if len(values) == 1 and values[0] else None
+    if operation == 'dxf_scale': return values[0] / abs(values[1]) if len(values) == 2 and values[1] else None
     if operation in ("multiply", "convert"): return math.prod(values)
     if operation == "divide": return values[0] / values[1] if len(values) == 2 and values[1] else None
     if operation == "subtract": return values[0] - math.fsum(values[1:]) if values else None
@@ -220,6 +254,19 @@ def evaluate(operation, values):
     if operation == "ceil": return math.ceil(values[0]) if len(values) == 1 else None
     if operation == "max_zero": return max(0, values[0]) if len(values) == 1 else None
     if operation == "min": return min(values) if values else None
+    if operation == "max": return max(values) if values else None
+    if operation == 'scale_sensitivity':
+        return abs(values[0]) * ((1 + values[1]) ** values[2] - 1) if len(values) == 3 else None
+    if operation == "abs": return abs(values[0]) if len(values) == 1 else None
+    if operation == "median":
+        from statistics import median
+        return median(values) if values else None
+    if operation in ("polygon_perimeter", "shoelace"):
+        if len(values) < 6 or len(values) % 2: return None
+        points = list(zip(values[::2], values[1::2]))
+        edges = list(zip(points, points[1:] + points[:1]))
+        return (math.fsum(math.dist(a, b) for a, b in edges) if operation == "polygon_perimeter" else
+                abs(math.fsum(a[0] * b[1] - b[0] * a[1] for a, b in edges)) / 2)
     if operation == "source": return values[0] if len(values) == 1 else None
     return None
 
@@ -272,8 +319,14 @@ def _measurement_steps(calc, root):
                                                     "source": ref})
         if not close(measured, value, .005): continue
         sid = f"outline-{index}"
+        area_ref = {**ref, "field": "props.area_px / polygon_px"}
+        if poly:
+            outline = polygon_area_step(sid + "-shoelace", poly, ref)
+            if close(outline["value"], px):
+                extra.append(outline)
+                area_ref = step_source(outline["id"])
         extra.append(step(sid, "Outline area and scale", "outline area × metres per pixel × metres per pixel", measured, "m2",
-                          [input_value("outline area (shoelace)", px, "px2", {**ref, "field": "props.area_px / polygon_px"}),
+                          [input_value("outline area (shoelace)", px, "px2", area_ref),
                            input_value("page scale", scale, "m/px", {**ref, "kind": "scale", "item_id": None, "field": "scale.m_per_px"}),
                            input_value("page scale", scale, "m/px", {**ref, "kind": "scale", "item_id": None, "field": "scale.m_per_px"})],
                           f"Page scale method: {(pm.get('scale') or {}).get('method')}; cached area may already be rounded. Scale confidence is not an error bound.", "multiply"))
@@ -441,6 +494,14 @@ def _attach(res, question, root):
     calc = res.pop("_calc", None)
     if not calc or calc.get("result", {}).get("value") != value:
         calc = _default(res, question, root)
+    if value is None and calc.get('rows'):
+        # Sanity guards can intentionally withdraw a scalar after a route has
+        # measured individual regions. Keep that arithmetic as context without
+        # presenting the source sum as an answer the guard rejected.
+        reason = next((t.get('detail') for t in res.get('trace', []) if t.get('step') == 'sanity'),
+                      'The answer reports source rows without a scalar total.')
+        calc['result'].update(mode='per-element', rounded_as='No scalar total reported', reason=reason)
+        calc['row_note'] = 'These source measurements are context only. ' + reason
     _measurement_steps(calc, root)
     if number(value) and res.get("route") in ("hybrid", "vlm") and any(s.get("model") and s.get("step") not in ("explain", "context", "typos") for s in res.get("trace", [])):
         cited = (res.get("citations") or [{}])[0]
@@ -450,6 +511,14 @@ def _attach(res, question, root):
                                   "The source rows above show what can be checked independently; unresolved differences stay marked incomplete.", "source"))
     reasoning = res.setdefault("reasoning", {"steps": [], "confidence": {"label": "Estimate", "pct": None,
                                                                             "reason": "Calculation sources have not been independently verified."}})
+    # The independent-check and scale builders run before final arithmetic.
+    # Keep their provenance when the route's exact seed replaces their sum.
+    prior = reasoning.get("calc") or {}
+    for key in ("checks", "item_checks", "sanity_checks", "unavailable"):
+        for entry in prior.get(key) or []:
+            if entry not in calc.setdefault(key, []): calc[key].append(copy.deepcopy(entry))
+    if prior.get("scale_proof"):
+        calc["scale_proof"] = copy.deepcopy(prior["scale_proof"])
     calc["margin"] = copy.deepcopy(reasoning.get("margin") or {"value": None, "unit": unit_name(ans.get("unit")), "pct": None,
                                                                  "why": "No measured error budget was recorded.", "sources": []})
     extras = res.pop("_calc_extras", [])
@@ -489,7 +558,9 @@ def _attach(res, question, root):
 def attach(res, question, root):
     """Malformed/missing source data must never turn an answer into a crash."""
     try:
-        return _attach(res, question, root)
+        res = _attach(res, question, root)
+        from engine.method_trace import attach as attach_method
+        return attach_method(res, question, root)
     except (ArithmeticError, ValueError, TypeError, KeyError, OSError) as exc:
         for key in ("_calc", "_calc_models", "_calc_extras"):
             res.pop(key, None)

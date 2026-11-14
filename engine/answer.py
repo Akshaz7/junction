@@ -270,6 +270,12 @@ def _guarded(question, doc_ids, on_event, scene_state, history):
 
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None) -> dict:
+    from engine.reasoning_parts.confidence import attach
+    return attach(_answer_with_evidence(question, doc_ids, on_event, scene_state=scene_state, history=history), question, _root())
+
+
+def _answer_with_evidence(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
+                          history: list[dict] | None = None) -> dict:
     # F-CHANGES: revision questions are a complete code route, including evidence.
     from engine.revision_compare import comparison_answer
     comparison = comparison_answer(question, doc_ids, _root())
@@ -340,6 +346,8 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
     # F-CALC: final operands must follow recounts, conversions and evidence margins.
     from engine import calc
     res = calc.attach(res, question, _root())
+    from engine import scan_calc
+    res = scan_calc.attach(res, question, _root())
     try:   # bullets need a blank line before them to render as a list
         _t = res["answer"].get("text_md") or ""
         res["answer"]["text_md"] = re.sub(r"(?m)^(?!- |\* |\||#)(\S[^\n]*)\n(- )", r"\1\n\n\2", _t)
