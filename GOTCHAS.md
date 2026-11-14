@@ -58,3 +58,4 @@
 - 12:55 Aiven Runtime: `avn service get --json` returns secret env values MASKED (10 chars). Never round-trip them into `avn service update`; rebuild env with scripts/aiven_env.py from .env (avn service_uri password is NOT valid). (Wiped DATABASE_URL + keys once; restored 12:56.)
 - 14:15 Verda Nemotron VL: ~85-106 s per call even warm and invalid JSON on vision; keep it LAST in every chain (never first).
 - ym.fi serves an incomplete cert chain: Python urllib fails verification, rules validator falls back to curl (verifying). Stairs in IFC are one IfcStair assembly: no riser/tread/width, so 1007 stair checks are reported as not checkable.
+- Plan-map counts ignore items with conf < 0.5 (MIN_CONF), and ENGINE-ACC's recount can drop one more; compute gold the same way or counts differ by 1.

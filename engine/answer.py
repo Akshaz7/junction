@@ -111,30 +111,65 @@ def _chat_answer(question, history, trace, t0, add, emit):
     except Exception as e:  # noqa: BLE001 — every provider failed: fall back to the plain hint
         add(_step("chat", f"no model reachable ({type(e).__name__})"))
         return _abstained(question, [], NO_DOC, trace, t0)
-    call_meta = {"task": "chat", "provider": r.provider, "model": r.model, "cost_usd": r.cost_usd}
+    call_meta = {"task": getattr(r, "task", "") or "chat", "provider": r.provider, "model": r.model, "cost_usd": r.cost_usd}
     add(_step("chat", "general conversation, no document selected", r.latency_ms, r.model, r.cost_usd))
     out = _abstained(question, [], (r.text or "").strip() or NO_DOC, trace, t0, calls=[call_meta])
     out["answer"].update({"abstained": False, "confidence": 0.5})
     return out
 
 
+_PM_KINDS = {"window": ("window",), "door": ("door",), "toilet": ("toilet",), "sink": ("sink",), "shower_bathtub": ("shower", "bathtub")}
+
+
+def _set_boxes(res, parsed, entries, note):
+    """entries: [(item_id, bbox_px)]. Headline, boxes (labelled 1..N), 3D highlight ids and citation item ids all follow N."""
+    ans = res["answer"]
+    n = len(entries)
+    ids = [e[0] for e in entries]
+    page = ((res.get("evidence") or {}).get("boxes") or [{"page": 1}])[0].get("page", 1)
+    res["evidence"]["boxes"] = [{"item_id": it, "page": page, "bbox_px": [int(v) for v in bb], "label": str(k)} for k, (it, bb) in enumerate(entries, 1)]
+    sc = res["evidence"]["scene"]
+    sc["highlight_item_ids"] = ids
+    sc["camera_target_item_id"] = ids[0] if ids else None
+    for c in res.get("citations") or []:
+        if "item_ids" in c:
+            c["item_ids"] = list(ids)
+            if entries:
+                c["bbox_px"] = [min(e[1][0] for e in entries), min(e[1][1] for e in entries), max(e[1][2] for e in entries), max(e[1][3] for e in entries)]
+    noun = re.sub(r"^.*?\*\*\d+ ([^*]+)\*\*.*$", r"\1", ans["text_md"], flags=re.S) if re.search(r"\*\*\d+ ", ans["text_md"]) else parsed.kind + "s"
+    marks = " ".join(dict.fromkeys(re.findall(r"\[\d+\]", ans["text_md"])))
+    ans["value"] = n
+    ans["text_md"] = f"There {'is' if n == 1 else 'are'} **{n} {noun if n != 1 else noun.rstrip('s')}** on this floor plan." + (f" {marks}" if marks else "")
+    ans["confidence"] = round(min(ans.get("confidence", 0.5), 0.5), 3)
+    res["trace"].append(_step("recount", note, 0, None, 0))
+
+
 def _recount_ladder(res, question, did, parsed, root, calls, hidden):
-    """Raster plan counts of doors, windows, sinks, WCs, showers/baths are weak: recount with one cheap vision call and reconcile
-    (rules picked on calibration drawings, engine/recount.py). Plan maps from vector sources (DXF) are exact and skipped."""
-    from engine.recount import KIND_OF, recount, reconcile
+    """Raster plan counts of doors, windows, sinks, WCs, showers/baths are weak. Boxes come from the fine-tuned detector when its
+    planmap-det.json exists, else from the plan map plus a vision recount: a lower recount drops the least confident boxes, a higher
+    one adds vision-drawn boxes. The headline number always equals the numbered boxes. Vector (DXF) plan maps are exact and skipped."""
+    from engine.recount import KIND_OF, detect, merge_boxes, recount, reconcile
     ans = res["answer"]
     if (os.environ.get("RECOUNT", "1") == "0" or os.environ.get("MODELS_FAKE") or hidden or parsed.type != "count" or parsed.kind not in KIND_OF
             or ans.get("abstained") or not isinstance(ans.get("value"), (int, float))):
         return res
+    kk = KIND_OF[parsed.kind]
     try:
         from engine.solvers.data import load_doc
         doc = load_doc(did, root)
         if doc is None or doc.mode != "planmap" or not any(i.source == "det" for i in doc.items):
             return res
+        det = Path(root) / did / "planmap-det.json"
+        if det.exists():   # the fine-tuned RT-DETR detector is the preferred box source
+            alld = json.loads(det.read_text()).get("items", [])
+            if any(i.get("kind") in ("door", "window", "toilet", "sink", "shower", "bathtub") for i in alld):   # a detector run, not a segmentation-only file
+                its = [i for i in alld if i.get("kind") in _PM_KINDS[kk] and (i.get("conf") or 1) >= 0.25]
+                _set_boxes(res, parsed, [(i["item_id"], i["bbox_px"]) for i in its], f"fine-tuned detector: {len(its)} {parsed.kind}(s)")
+                return res
         img = Path(root) / did / "page-1.png"
         if not img.exists():
             return res
-        n, usd, model = recount(question, img, KIND_OF[parsed.kind])
+        n, usd, model = recount(question, img, kk)
     except Exception:  # noqa: BLE001
         return res
     if n is None:
@@ -143,28 +178,27 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
     plan_n = int(ans["value"])
     final = reconcile(parsed.kind, plan_n, n)
     boxes = (res.get("evidence") or {}).get("boxes") or []
-    if final < plan_n and len(boxes) == plan_n:
-        # the headline number must equal the numbered boxes: drop the least confident detections the recount rejects, renumber 1..N
-        conf = {i.item_id: (i.conf if i.conf is not None else 1.0) for i in doc.items}
+    if len(boxes) != plan_n:
+        res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n}: boxes do not match the count, kept the plan map", 0, model, usd))
+        return res
+    conf = {i.item_id: (i.conf if i.conf is not None else 1.0) for i in doc.items}
+    if final < plan_n:
         keep = sorted(sorted(boxes, key=lambda b: -conf.get(b["item_id"], 1.0))[:final], key=lambda b: boxes.index(b))
-        for k, b in enumerate(keep, 1):
-            b["label"] = str(k)
-        ids = [b["item_id"] for b in keep]
-        res["evidence"]["boxes"] = keep
-        res["evidence"]["scene"]["highlight_item_ids"] = ids
-        res["evidence"]["scene"]["camera_target_item_id"] = ids[0] if ids else None
-        for c in res.get("citations") or []:
-            if c.get("item_ids"):
-                c["item_ids"] = [x for x in c["item_ids"] if x in ids]
-        noun = re.sub(r"^.*?\*\*\d+ ([^*]+)\*\*.*$", r"\1", ans["text_md"], flags=re.S) if re.search(r"\*\*\d+ ", ans["text_md"]) else parsed.kind + "s"
-        marks = " ".join(dict.fromkeys(re.findall(r"\[\d+\]", ans["text_md"])))
-        ans["value"] = final
-        ans["text_md"] = f"There {'is' if final == 1 else 'are'} **{final} {noun if final != 1 else noun.rstrip('s')}** on this floor plan." + (f" {marks}" if marks else "")
-        ans["confidence"] = round(min(ans.get("confidence", 0.5), 0.5), 3)
-        res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n}: dropped the {plan_n - final} least confident detection(s)", 0, model, usd))
-    else:
-        # recount found more (or the boxes cannot be matched): numbers without boxes would break verifiability, so keep the plan map
-        res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n}: kept the plan-map count (no boxes for the difference)", 0, model, usd))
+        _set_boxes(res, parsed, [(b["item_id"], b["bbox_px"]) for b in keep],
+                   f"plan map {plan_n}, drawing re-read {n}: dropped the {plan_n - final} least confident detection(s)")
+    elif final > plan_n:
+        try:
+            new, usd2, m2 = detect(img, kk)
+        except Exception:  # noqa: BLE001
+            new, usd2, m2 = None, 0.0, ""
+        calls.append({"task": "recount_boxes", "provider": "vision", "model": m2, "cost_usd": usd2})
+        if new is None:
+            res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n}: no boxes from vision, kept the plan map", 0, model, usd))
+            return res
+        merged = merge_boxes([b["bbox_px"] for b in boxes], new)
+        added = merged[len(boxes):][: max(0, final - plan_n)]
+        entries = [(b["item_id"], b["bbox_px"]) for b in boxes] + [(f"vision-{kk}-{k:02d}", bb) for k, bb in enumerate(added, 1)]
+        _set_boxes(res, parsed, entries, f"plan map {plan_n}, drawing re-read {n}: added {len(added)} vision-drawn box(es) ({m2})")
     return res
 
 
@@ -180,7 +214,26 @@ def ensure_markers(res: dict) -> dict:
 
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None) -> dict:
-    return ensure_markers(_answer_forced(question, doc_ids, on_event, scene_state=scene_state, history=history))
+    # thread memory (engine/context.py): every route below sees the resolved, standalone question and document selection
+    original, step = question, None
+    try:
+        from engine.context import resolve
+        rs = resolve(question, doc_ids, history, _root())
+        if rs.rewritten:
+            question, doc_ids = rs.question, rs.doc_ids
+            step = _step("context", f"question resolved with the chat history ({rs.info.get('source')}): {question[:300]}"
+                         + (f" [documents: {', '.join(doc_ids)}]" if doc_ids else ""), rs.info.get("latency_ms", 0), rs.info.get("model"), rs.info.get("cost_usd", 0.0))
+            if on_event:
+                on_event("trace", step)
+    except Exception:  # noqa: BLE001 — memory is a convenience, never block the answer
+        question, step = original, None
+    res = ensure_markers(_answer_forced(question, doc_ids, on_event, scene_state=scene_state, history=history))
+    if step is not None:
+        res["trace"] = [step, *(res.get("trace") or [])]
+        if step.get("cost_usd"):
+            res["cost"]["calls"] = [{"task": "context_rewrite", "provider": "", "model": step["model"], "cost_usd": step["cost_usd"]}, *res["cost"].get("calls", [])]
+            res["cost"]["usd_total"] = round(res["cost"].get("usd_total", 0) + step["cost_usd"], 6)
+    return res
 
 
 def _answer_forced(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
@@ -225,6 +278,12 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
 
     emit("status", {"text": "Thinking…"})
     try:
+        if (question or "").strip() and not os.environ.get("TASKS_OFF"):
+            from engine.tasks import detect, run_task   # Stoa starters: Draft claim, Meeting prep, Plan work phase, Review contract
+            _task = detect(question)
+            if _task:
+                add(_step("route", f"document task: {_task}"))
+                return run_task(_task, question, doc_ids, history, on_event, trace, t0, root, calls)
         if not doc_ids:
             if (question or "").strip():
                 from engine.project_answer import project_answer
@@ -279,12 +338,39 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             if doc is not None:
                 emit("status", {"text": f"Exploring document: {_title(doc_ids[0], root)}"})
                 res = scene_answer(question, doc, intent, scene_state, t0)
+                _hide_ids = next((c.get("item_ids") for c in (res.get("evidence", {}).get("scene", {}).get("commands") or [])
+                                  if isinstance(c, dict) and c.get("op") == "hide" and c.get("item_ids")), None)
+                if _hide_ids:
+                    from engine.analytics import wants_compliance, edit_advice
+                    if wants_compliance(question):
+                        edit_advice(res, doc, list(dict.fromkeys([*((scene_state or {}).get("hidden") or []), *_hide_ids])))
                 for s_ in res["trace"]:
                     add(s_)
                 res["trace"] = trace
                 if scene_prov:
                     res["cost"] = {"usd_total": round(scene_cost, 6), "calls": list(calls)}
                 return res
+
+        # 0a. harder shapes that are still code: floor comparisons, conditional counts, take-offs with waste, named rooms, rule checks
+        if parse_scene(question) is None:
+            from engine import analytics
+            from engine.solvers.data import load_doc as _lda
+            from engine.solvers.solve import solve as _solve
+            adoc = _lda(doc_ids[0], root)
+            if adoc is not None and os.environ.get("ANALYTICS", "1") != "0":
+                def _sub(sub_q, _d=doc_ids[0]):
+                    return _solve(sub_q, _d, parsed=parse(sub_q), root=root)
+                try:
+                    res = analytics.run(question, adoc, t0, _sub)
+                except Exception as e:  # noqa: BLE001  a handler must never take the answer down
+                    res = None
+                    add(_step("analytics", f"skipped: {type(e).__name__}"))
+                if res is not None:
+                    emit("status", {"text": f"Exploring document: {_title(doc_ids[0], root)}"})
+                    for s_ in res["trace"]:
+                        add(s_)
+                    res["trace"] = trace
+                    return res
 
         # 0b. exit finder (IFC): code only
         from engine.exits import exit_answer, is_exit_question

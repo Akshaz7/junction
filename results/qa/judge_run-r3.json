@@ -1,0 +1,50 @@
+[
+ {
+  "id": "J23",
+  "doc_id": "cubicasa5k__colorful-11398",
+  "question": "How many toilets and sinks does the plan have?",
+  "type": "count_multi",
+  "value": null,
+  "must": [
+   "2 toilets",
+   "3 sinks"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/cubicasa5k__colorful-11398/planmap-1.json (scale 0.0143 m/px, door-prior conf 0.3)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "correct",
+  "got": "There are **2 toilets** and **3 sinks** on this floor plan. [1][2]",
+  "value_got": {
+   "toilet": 2,
+   "sink": 3
+  },
+  "route": "planmap",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 5,
+  "secs": 0.1
+ },
+ {
+  "id": "J37",
+  "doc_id": "opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules",
+  "question": "What is the area of the basement boat house?",
+  "type": "text",
+  "value": null,
+  "must": [
+   "371|34.4"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules/text-1.json (Room/Window/Door schedules)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "correct",
+  "got": "**34.47 m²** (low confidence: an estimate from the printed text and the drawing image, not measured).",
+  "value_got": 34.47,
+  "route": "hybrid",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 0,
+  "secs": 3.6
+ }
+]
