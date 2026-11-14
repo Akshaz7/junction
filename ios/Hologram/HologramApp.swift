@@ -3,9 +3,15 @@ import SwiftUI
 @MainActor
 final class ShellPresentation: ObservableObject {
     @Published var arRequest: ARRequest?
+    private(set) var lastBridgeRequest: ARRequest?
 
     func showAR(_ request: ARRequest) {
+        lastBridgeRequest = request
         arRequest = request
+    }
+
+    func showFromToolbar() {
+        arRequest = lastBridgeRequest ?? ARRequest(docID: DemoScenes.all[0].id, itemIDs: [])
     }
 }
 
@@ -20,13 +26,13 @@ struct HologramApp: App {
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
                             Button("Show on table", systemImage: "arkit") {
-                                presentation.showAR(ARRequest(docID: "fixture__ios", itemIDs: []))
+                                presentation.showFromToolbar()
                             }
                         }
                     }
             }
             .fullScreenCover(item: $presentation.arRequest) { request in
-                ARScreen(docID: request.docID, highlightedItemIDs: request.itemIDs)
+                ARScreen(docID: request.docID, chatID: request.chatID, highlightedItemIDs: request.itemIDs)
                     .id(request.docID)
             }
             .task {

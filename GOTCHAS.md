@@ -46,3 +46,5 @@
 - Never edit a file a Codex worker is editing with a regex over JSX: a loose pattern matched an earlier prop and broke App.tsx (05:05, fixed). Use exact-string Edit.
 - git -C <repo> hash-object <relative path> resolves against the REPO, not your cwd: always pass absolute paths when staging a file from a temp copy (broke HEAD build once, fixed 05:20).
 - Playwright default headless = SwiftShader software WebGL (slow, not the Mac GPU). For GPU perf tests use channel:'chromium' + --use-angle=metal --ignore-gpu-blocklist --enable-gpu → Apple M4 Pro Metal (T-07).
+- IFC scene-command answers may have no citations/boxes; the web resolves their item_ids to plan-map page coordinates. Socket hide/restore events carry no labels: the matching SSE answer enriches tags without reapplying a deduplicated edit (W-19).
+- uvicorn --reload watched the whole repo: every worker edit (tools/, web/, …) restarted the API and dropped /ws + in-flight answers, making live e2e flaky. Now --reload-dir server --reload-dir engine (06:42).

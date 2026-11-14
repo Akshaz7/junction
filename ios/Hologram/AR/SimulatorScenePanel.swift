@@ -5,6 +5,7 @@ import SwiftUI
 /// The simulator loads real scene metadata without starting a camera or AR session.
 struct SimulatorScenePanel: View {
     let docID: String
+    var chatID: String?
     var manifestURL: URL?
     var highlightedItemIDs: [String] = []
     @StateObject private var preview = SimulatorSceneMetadata()
@@ -50,6 +51,8 @@ struct SimulatorScenePanel: View {
                             .accessibilityIdentifier("scene-name")
                         Text("\(manifest.items.count) items")
                             .accessibilityIdentifier("scene-item-count")
+                        Text("\(preview.hiddenItemIDs.count) hidden items")
+                            .accessibilityIdentifier("hidden-item-count")
                         if let attribution = preview.attribution {
                             Text("\(attribution.credit) · \(attribution.licence)")
                                 .font(.caption)
@@ -62,6 +65,10 @@ struct SimulatorScenePanel: View {
                                 Text("\(index + 1) · \(itemID)")
                                     .font(.caption.monospaced())
                                     .accessibilityIdentifier("highlighted-item-\(index + 1)")
+                                if let tag = preview.labels[itemID] ?? manifest.items[itemID]?.tag {
+                                    Text(tag).font(.caption)
+                                        .accessibilityIdentifier("highlighted-tag-\(index + 1)")
+                                }
                             }
                         }
                     }
@@ -83,42 +90,51 @@ struct SimulatorScenePanel: View {
         }
         .padding()
         .task(id: requestedDocID) {
+            liveSocket.stop()
+            liveSocket.onHighlight = applyHighlight
+            liveSocket.onEdit = { preview.apply(.edit($0), docID: requestedDocID) }
+            liveSocket.onState = { preview.apply(.state($0), docID: requestedDocID) }
+            liveSocket.onAdvisorCards = { advisor.receive($0) }
             advisor.clear()
             await preview.load(docID: requestedDocID,
                                manifestURL: requestedDocID == docID ? manifestURL : nil,
                                itemIDs: requestedDocID == docID ? highlightedItemIDs : [])
+            guard !Task.isCancelled else { return }
+            liveSocket.start(docID: requestedDocID, chatID: requestedDocID == docID ? chatID : nil)
             await advisor.load(docID: requestedDocID, fixtureURL: AppConfiguration.advisorFixtureURL)
-        }
-        .task {
-            liveSocket.onHighlight = applyHighlight
-            liveSocket.onAdvisorCards = { advisor.receive($0) }
-            liveSocket.start()
         }
         .onDisappear {
             liveSocket.stop()
             liveSocket.onHighlight = nil
+            liveSocket.onEdit = nil
+            liveSocket.onState = nil
             liveSocket.onAdvisorCards = nil
         }
     }
 
     private func applyHighlight(_ request: ARRequest) {
-        guard request.docID == requestedDocID else { return }
-        preview.itemIDs = request.itemIDs
+        preview.apply(.highlight(request), docID: requestedDocID)
     }
 }
 
 @MainActor
-private final class SimulatorSceneMetadata: ObservableObject {
+final class SimulatorSceneMetadata: ObservableObject {
     @Published var selectedDocID: String?
     @Published var manifest: SceneManifest?
     @Published var attribution: SceneAttribution?
     @Published var itemIDs: [String] = []
+    @Published var hiddenItemIDs: Set<String> = []
+    @Published var labels: [String: String] = [:]
+    private var appliedEditIDs: Set<String> = []
     @Published var status = "Loading scene metadata…"
 
     func load(docID: String, manifestURL: URL?, itemIDs: [String]) async {
         manifest = nil
         attribution = nil
         self.itemIDs = itemIDs
+        hiddenItemIDs = []
+        labels = [:]
+        appliedEditIDs = []
         status = "Loading scene metadata…"
         do {
             let data: Data
@@ -163,6 +179,30 @@ private final class SimulatorSceneMetadata: ObservableObject {
             return
         } catch {
             status = "Unable to load scene metadata. \(error.localizedDescription)"
+        }
+    }
+
+    func apply(_ command: LiveSocket.Command, docID: String) {
+        switch command {
+        case .highlight(let request) where request.docID == docID:
+            itemIDs = request.itemIDs
+            labels = [:]
+        case .state(let state) where state.doc_id == docID:
+            hiddenItemIDs = Set(state.hidden)
+            itemIDs = state.highlighted
+            labels = state.labels
+        case .edit(let event) where event.doc_id == docID:
+            if let id = event.edit_id, !appliedEditIDs.insert(id).inserted { return }
+            let edit = event.command
+            switch edit.op {
+            case .highlight: itemIDs = edit.item_ids; labels = edit.labels ?? [:]
+            case .hide: hiddenItemIDs.formUnion(edit.item_ids)
+            case .restore: hiddenItemIDs.subtract(edit.item_ids)
+            case .isolate:
+                hiddenItemIDs = Set(manifest?.items.keys.map { $0 } ?? []).subtracting(edit.item_ids)
+            case .reset: hiddenItemIDs = []; itemIDs = []; labels = [:]
+            }
+        default: break
         }
     }
 }

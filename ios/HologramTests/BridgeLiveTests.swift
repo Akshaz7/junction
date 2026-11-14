@@ -25,6 +25,104 @@ final class BridgeLiveTests: XCTestCase {
         XCTAssertEqual(router.arRequest?.itemIDs, [])
     }
 
+    @MainActor
+    func testToolbarUsesDemoUntilBridgeSelectionThenRemembersItAfterDismissal() throws {
+        let router = ShellPresentation()
+        router.showFromToolbar()
+        XCTAssertEqual(router.arRequest?.docID, DemoScenes.all[0].id)
+        XCTAssertNil(router.lastBridgeRequest)
+        let handler = WebShell.Coordinator(onARRequest: router.showAR)
+        handler.handleMessage(name: "ar", body: ["doc_id": "ifc_bench__ac20-arc", "item_ids": ["door-001", "door-002"]],
+                              pageURL: URL(string: "http://localhost:4173/#/chat?chat=saved%2Fchat%26more"))
+        let selection = try XCTUnwrap(router.arRequest)
+        XCTAssertEqual(selection.chatID, "saved/chat&more")
+        router.arRequest = nil
+        router.showFromToolbar()
+        XCTAssertEqual(router.arRequest, selection)
+        XCTAssertEqual(router.lastBridgeRequest, selection)
+    }
+
+    @MainActor
+    func testBridgeRejectsMalformedIDsAndUsesExplicitChatBeforePageContext() {
+        let handler = WebShell.Coordinator { _ in XCTFail("Invalid payload routed") }
+        let invalid: [Any] = [
+            [:], ["doc_id": 1, "item_ids": []], ["doc_id": " \n", "item_ids": []],
+            ["doc_id": "doc", "item_ids": ["valid", 1]], ["doc_id": "doc", "item_ids": [" "]],
+            ["doc_id": "doc", "item_ids": [] as [String], "chat_id": 1],
+            ["doc_id": "doc", "item_ids": NSNull()]
+        ]
+        for body in invalid { handler.handleMessage(name: "ar", body: body) }
+        let request = ARRequest(body: ["doc_id": "doc", "item_ids": [], "chat_id": "explicit"],
+                                pageURL: URL(string: "https://example.test/#/chat?chat=page"))
+        XCTAssertEqual(request?.chatID, "explicit")
+        XCTAssertNil(ARRequest(body: ["doc_id": "doc", "item_ids": []])?.chatID)
+    }
+
+    @MainActor
+    func testScopedSocketJoinsDocumentAndChatAndRejectsOtherChatEvents() async throws {
+        let connection = FakeLiveConnection()
+        connection.messages = [
+            .string(#"{"type":"scene.highlight","doc_id":"other","chat_id":"chat-a","item_ids":["wrong-doc"]}"#),
+            .string(#"{"type":"scene.edit","doc_id":"fixture__ios","chat_id":"chat-b","op":"hide","item_ids":["door-001"]}"#),
+            .string(#"{"type":"scene.state","doc_id":"fixture__ios","chat_id":"chat-a","hidden":["door-001"],"highlighted":["window-001"],"labels":{"window-001":"W1"}}"#),
+            .string(#"{"type":"scene.edit","doc_id":"fixture__ios","chat_id":"chat-a","op":"restore","item_ids":["door-001"]}"#),
+            .string(#"{"type":"scene.highlight","doc_id":"fixture__ios","item_ids":["window-002"]}"#)
+        ]
+        let received = expectation(description: "Scoped state, edit, highlight received")
+        received.expectedFulfillmentCount = 3
+        var order: [String] = []
+        let socket = LiveSocket(apiURL: URL(string: "https://example.test")!, makeConnection: { url in
+            let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+            XCTAssertEqual(components?.path, "/ws")
+            XCTAssertEqual(components?.queryItems?.first { $0.name == "doc_id" }?.value, "fixture__ios")
+            XCTAssertEqual(components?.queryItems?.first { $0.name == "chat_id" }?.value, "chat-a")
+            return connection
+        })
+        defer { socket.stop() }
+        socket.onState = { state in
+            XCTAssertEqual(state.labels["window-001"], "W1")
+            order.append("state"); received.fulfill()
+        }
+        socket.onEdit = { edit in
+            XCTAssertEqual(edit.command.op, .restore)
+            order.append("restore"); received.fulfill()
+        }
+        socket.onHighlight = { request in
+            XCTAssertEqual(request.itemIDs, ["window-002"])
+            order.append("highlight"); received.fulfill()
+        }
+        socket.start(docID: "fixture__ios", chatID: "chat-a")
+        await fulfillment(of: [received], timeout: 2)
+        XCTAssertEqual(order, ["state", "restore", "highlight"])
+        await socket.sendHighlight(docID: "fixture__ios", itemIDs: ["door-001"])
+        guard case .string(let text) = try XCTUnwrap(connection.sent.last) else {
+            return XCTFail("Expected a JSON highlight")
+        }
+        let payload = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(text.utf8)) as? [String: Any])
+        XCTAssertEqual(payload["chat_id"] as? String, "chat-a")
+    }
+
+    #if targetEnvironment(simulator)
+    @MainActor
+    func testSimulatorAppliesStateEditsAndHighlightForBridgeDocument() throws {
+        let preview = SimulatorSceneMetadata()
+        func apply(_ json: String) throws {
+            preview.apply(try LiveSocket.decode(Data(json.utf8)), docID: "fixture__ios")
+        }
+        try apply(#"{"type":"scene.state","doc_id":"fixture__ios","hidden":["door-001"],"highlighted":["window-001"],"labels":{"window-001":"W1"}}"#)
+        XCTAssertEqual(preview.hiddenItemIDs, ["door-001"])
+        XCTAssertEqual(preview.itemIDs, ["window-001"])
+        XCTAssertEqual(preview.labels, ["window-001": "W1"])
+        try apply(#"{"type":"scene.edit","doc_id":"other","op":"reset","item_ids":[]}"#)
+        XCTAssertEqual(preview.hiddenItemIDs, ["door-001"])
+        try apply(#"{"type":"scene.edit","doc_id":"fixture__ios","op":"restore","item_ids":["door-001"]}"#)
+        XCTAssertTrue(preview.hiddenItemIDs.isEmpty)
+        try apply(#"{"type":"scene.highlight","doc_id":"fixture__ios","item_ids":["window-002"]}"#)
+        XCTAssertEqual(preview.itemIDs, ["window-002"])
+        XCTAssertTrue(preview.labels.isEmpty)
+    }
+    #endif
+
     func testLiveDecoderReadsHighlightsPingAndIgnoresOtherEvents() throws {
         let data = Data(#"{"type":"scene.highlight","doc_id":"fixture__ios","item_ids":["window-001","door-001"]}"#.utf8)
         XCTAssertEqual(try LiveSocket.decode(data), .highlight(ARRequest(

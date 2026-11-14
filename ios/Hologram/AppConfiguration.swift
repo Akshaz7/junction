@@ -42,10 +42,9 @@ enum AppConfiguration {
     static var debugBridgeScript: String? {
         guard let payload = value(for: "AR_BRIDGE_MESSAGE"),
               let body = try? JSONSerialization.jsonObject(with: Data(payload.utf8)),
-              let request = ARRequest(body: body),
-              let data = try? JSONSerialization.data(withJSONObject: [
-                "doc_id": request.docID, "item_ids": request.itemIDs
-              ]), let json = String(data: data, encoding: .utf8) else { return nil }
+              ARRequest(body: body) != nil,
+              let data = try? JSONSerialization.data(withJSONObject: body),
+              let json = String(data: data, encoding: .utf8) else { return nil }
         return "window.webkit.messageHandlers.ar.postMessage(\(json));"
     }
     #endif

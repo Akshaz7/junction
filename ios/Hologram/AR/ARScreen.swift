@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ARScreen: View {
     var docID: String? = nil
+    var chatID: String? = nil
     var sceneURL: URL? = nil
     var manifestURL: URL? = nil
     var highlightedItemIDs: [String] = []
@@ -17,7 +18,7 @@ struct ARScreen: View {
 
     var body: some View {
         #if targetEnvironment(simulator)
-        SimulatorScenePanel(docID: docID ?? "fixture__ios", manifestURL: manifestURL,
+        SimulatorScenePanel(docID: docID ?? "fixture__ios", chatID: chatID, manifestURL: manifestURL,
                             highlightedItemIDs: highlightedItemIDs)
         #else
         ZStack {
@@ -143,20 +144,20 @@ struct ARScreen: View {
                 }
             }.padding()
         }
-        .task {
+        .task(id: requestedDocID) {
+            liveSocket.stop()
             liveSocket.onHighlight = { request in
                 controller.applyLiveHighlight(request)
             }
             liveSocket.onEdit = { controller.applyLiveCommand(.edit($0)) }
             liveSocket.onState = { controller.applyLiveCommand(.state($0)) }
             liveSocket.onAdvisorCards = { advisor.receive($0) }
-            liveSocket.start()
-        }
-        .task(id: requestedDocID) {
             advisor.clear()
             await controller.load(docID: requestedDocID, url: sceneURL, manifestURL: manifestURL,
                                   itemIDs: requestedDocID == docID ? highlightedItemIDs : [],
                                   cameraTargetItemID: requestedDocID == docID ? cameraTargetItemID : nil)
+            guard !Task.isCancelled else { return }
+            liveSocket.start(docID: requestedDocID, chatID: requestedDocID == docID ? chatID : nil)
             if let activeDocID = controller.activeDocID {
                 await advisor.load(docID: activeDocID, fixtureURL: AppConfiguration.advisorFixtureURL)
             }

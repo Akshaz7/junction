@@ -33,20 +33,23 @@ final class LiveSocket: ObservableObject {
         let type: String
         var doc_id: String? = nil
         var item_ids: [String]? = nil
+        var chat_id: String? = nil
     }
 
     var onHighlight: ((ARRequest) -> Void)?
     var onEdit: ((SceneEditEvent) -> Void)?
     var onState: ((SceneStateEvent) -> Void)?
     var onAdvisorCards: ((AdvisorCardsEvent) -> Void)?
-    private let url: URL
+    private let apiURL: URL
+    private var docID: String?
+    private var chatID: String?
     private let makeConnection: (URL) -> any LiveSocketConnection
     private var connection: (any LiveSocketConnection)?
     private var receiveTask: Task<Void, Never>?
 
     init(apiURL: URL = AppConfiguration.apiURL,
          makeConnection: ((URL) -> any LiveSocketConnection)? = nil) {
-        url = AppConfiguration.socketURL(apiURL: apiURL)
+        self.apiURL = apiURL
         self.makeConnection = makeConnection ?? { SessionLiveConnection(url: $0) }
     }
 
@@ -67,12 +70,15 @@ final class LiveSocket: ObservableObject {
             guard let docID = event.doc_id, !docID.isEmpty, let itemIDs = event.item_ids else {
                 return .ignored
             }
-            return .highlight(ARRequest(docID: docID, itemIDs: itemIDs))
+            return .highlight(ARRequest(docID: docID, itemIDs: itemIDs, chatID: event.chat_id))
         default: return .ignored
         }
     }
 
-    func start() {
+    func start(docID: String? = nil, chatID: String? = nil) {
+        if self.docID != docID || self.chatID != chatID { stop() }
+        self.docID = docID
+        self.chatID = chatID
         guard receiveTask == nil else { return }
         receiveTask = Task { [weak self] in
             var failures = 0
@@ -89,7 +95,9 @@ final class LiveSocket: ObservableObject {
                         @unknown default: continue
                         }
                         // Other app events and malformed messages must not break live AR.
-                        guard let command = try? Self.decode(data) else { continue }
+                        guard let event = try? JSONDecoder().decode(Event.self, from: data),
+                              self?.accepts(event) == true,
+                              let command = try? Self.decode(data) else { continue }
                         failures = 0
                         switch command {
                         case .highlight(let request): self?.onHighlight?(request)
@@ -123,7 +131,7 @@ final class LiveSocket: ObservableObject {
     func sendHighlight(docID: String, itemIDs: [String]) async {
         guard let connection,
               let data = try? JSONEncoder().encode(Event(type: "scene.highlight", doc_id: docID,
-                                                        item_ids: itemIDs)),
+                                                        item_ids: itemIDs, chat_id: chatID)),
               let text = String(data: data, encoding: .utf8) else { return }
         do { try await connection.send(.string(text)) }
         catch { connection.close() } // Wakes the receive loop and uses the same reconnect path.
@@ -134,8 +142,20 @@ final class LiveSocket: ObservableObject {
     }
 
     private func openConnection() -> any LiveSocketConnection {
-        let socket = makeConnection(url)
+        var components = URLComponents(url: AppConfiguration.socketURL(apiURL: apiURL),
+                                       resolvingAgainstBaseURL: false)!
+        var query: [URLQueryItem] = []
+        if let docID { query.append(URLQueryItem(name: "doc_id", value: docID)) }
+        if let chatID { query.append(URLQueryItem(name: "chat_id", value: chatID)) }
+        if !query.isEmpty { components.queryItems = query }
+        let socket = makeConnection(components.url!)
         connection = socket
         return socket
+    }
+
+    private func accepts(_ event: Event) -> Bool {
+        if let docID, let eventDoc = event.doc_id, eventDoc != docID { return false }
+        if let chatID, let eventChat = event.chat_id, eventChat != chatID { return false }
+        return true
     }
 }
