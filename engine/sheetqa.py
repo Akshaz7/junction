@@ -218,6 +218,33 @@ def _pipe_label_count(question, noun, explicit, pts):
     return (f"There are **{n}** {sz.group(1)}\" {key} labels on the sheet. {{marks}}", n, hits, f"pipe labels {sz.group(1)}\" {key}: {n}")
 
 
+def _tag_gap_note(uniq) -> str:
+    """Tags FP-1..FP-n with one number missing in between: say which, instead of a silent undercount (text reads can drop a tag)."""
+    nums = sorted(int(t.split("-")[1]) for t in uniq)
+    if len(nums) < 3 or len({t.split("-")[0] for t in uniq}) != 1:
+        return ""
+    miss = [n for n in range(nums[0], nums[-1] + 1) if n not in nums]
+    if not miss or len(miss) > 3:
+        return ""
+    pre = uniq[0].split("-")[0]
+    return (f"The numbering runs {pre}-{nums[0]} to {pre}-{nums[-1]}, but {', '.join(f'{pre}-{n}' for n in miss)} "
+            f"{'was' if len(miss) == 1 else 'were'} not found in the sheet text, so it may be hidden or unreadable: check the drawing.")
+
+
+def _other_mentions(noun, uniq, pts):
+    """'JOCKEY PUMP', 'DRAIN PUMP' next to the tagged ones: equipment named in words, shown so the count is not read as the whole story."""
+    base = noun.split()[-1] if noun.split() else ""
+    if base not in ("pump", "valve", "separator", "fan", "tank") or noun not in ("pump", "fuel pump"):
+        return []
+    out = []
+    for pt in pts:
+        for sg in pt.segs:
+            m = re.fullmatch(r"\s*((?:JOCKEY|DRAIN|SUMP|BOOSTER|TRANSFER)\s*PUMP)\s*", sg["text"], re.I)
+            if m:
+                out.append((pt.page, sg["bbox_px"], re.sub(r"(?i)(JOCKEY|DRAIN|SUMP|BOOSTER|TRANSFER)\s*PUMP", lambda x: x.group(1).lower() + " pump", m.group(1))))
+    return out
+
+
 def tag_count(question, doc_id, pts, t0):
     m = re.search(r"\bhow many\s+(.+?)(?:\s+(?:are|is|do|does|on|in|does|can)\b.*)?[?.!]*$", question.strip(), re.I)
     if not m:
@@ -260,6 +287,13 @@ def tag_count(question, doc_id, pts, t0):
         value, how = len(uniq), f"**{len(uniq)}** ({', '.join(uniq)})"
     text = f"There are {how}, counted from the unique tags on the sheet. {{marks}}"
     hits = [(first[t][0], first[t][1], t) for t in uniq] if value == len(uniq) else [(p, b, t) for t, p, b in mine]
+    gap = _tag_gap_note(uniq)
+    if gap:
+        text += " " + gap
+    other = _other_mentions(noun, uniq, pts)
+    if other:
+        text += f" Also named on the sheet without a tag: {', '.join(sorted({o[2].upper() for o in other}))}."
+        hits += other
     return _obj(question, doc_id, text, value, "count", hits, f"unique tags {'/'.join(prefixes)}-n in the text layer: {len(uniq)} unique, {n_inst} marks", t0)
 
 
@@ -360,6 +394,49 @@ def area_by_type(question, doc_id, pts, t0):
     return _obj(question, doc_id, text, len(rows), "rows", [(p, b, t) for _n, _v, p, b, t in rows], "table rows with an SF figure", t0, 0.8)
 
 
+PIPING_TAGS = [("FP", "Fuel pumps (FP-n)"), ("CV", "Check valves (CV-n)"), ("FSCV", "Filter separator control valves (FSCV-n)"),
+               ("FSR", "Filter separators, receipt (FSR-n)"), ("FSI", "Filter separators, issue (FSI-n)"), ("PS", "Pipe supports (PS-n)"),
+               ("DPT", "Differential pressure transmitters (DPT-n)"), ("PIT", "Pressure indicating transmitters (PIT-n)")]
+
+
+def _piping_takeoff(question, doc_id, pts, t0):
+    """Quantity take-off of a piping sheet: pipe size callouts, tagged equipment, supports; lengths are not in the text."""
+    from engine.quantity_takeoff import NIF
+    tags = _tag_words(pts)
+    sizes = _pipe_size_labels(pts)
+    if len({t.split("-")[0] for t, _p, _b in tags} & {p for p, _ in PIPING_TAGS}) < 2 or not sizes:
+        return None
+    hits, rows = [], []
+    n = 0
+
+    def cite(items):
+        nonlocal n
+        marks = []
+        for pg, bb, q in items[:3]:
+            n += 1
+            hits.append((pg, bb, q))
+            marks.append(f"[{n}]")
+        return "".join(marks)
+
+    for k, v in sorted(sizes.items(), key=lambda kv: _size_in(kv[0])):
+        rows.append(f"| Pipe callout {k} | {v['count']} | labels | {cite([(1, b, k) for b in v['boxes']])} |")
+    for pre, name in PIPING_TAGS:
+        mine = [(t, p, b) for t, p, b in tags if t.split("-")[0] == pre]
+        uniq = sorted({t for t, _p, _b in mine}, key=lambda t: int(t.split("-")[1]))
+        if uniq:
+            first = {}
+            for t, p, b in mine:
+                first.setdefault(t, (p, b, t))
+            rows.append(f"| {name} | {len(uniq)} | count | {cite([first[t] for t in uniq])} |")
+    for item in ("Pipe length by size", "Valve count beyond tagged valves", "Pipe weight / material"):
+        rows.append(f"| {item} | {NIF} |  |  |")
+    text = ("**Quantity take-off** from the sheet's own text, no model call. Sizes are printed callouts (a label count, not a pipe count); "
+            "tagged equipment is counted by unique tag. Lengths are not printed on this sheet.\n\n"
+            "| Item | Quantity | Unit | Source |\n|---|---|---|---|\n" + "\n".join(rows))
+    r = _obj(question, doc_id, text, len(rows), "rows", hits, "piping take-off from text layer", t0, 0.8)
+    return r
+
+
 def takeoff_sheet(question, doc_id, pts, t0):
     """quantity take-off on a PDF sheet: the table's room areas; everything a PDF cannot give is 'not in this file'."""
     from engine.quantity_takeoff import TAKEOFF_Q, NIF
@@ -367,7 +444,7 @@ def takeoff_sheet(question, doc_id, pts, t0):
         return None
     r = area_by_type("area of each room", doc_id, pts, t0)
     if r is None:
-        return None
+        return _piping_takeoff(question, doc_id, pts, t0)
     rows = [f"| Floor area - {m.group(1)} | {m.group(2)} | m2 | [{m.group(3)}] |"
             for m in re.finditer(r"^- (.+?): [\d,]+ SF = ([\d,.]+) m² \[(\d+)\]", r["answer"]["text_md"], re.M)]
     miss = [f"| {k} | {NIF} |  |  |" for k in ("Baseboard", "Doors", "Windows", "Slab area by type", "Piping by system")]
@@ -464,6 +541,28 @@ def note_sum(question, doc_id, pts, t0):
 SIZE = re.compile(r"\d{2,4}\s*[xX×]\s*\d{2,4}(?:\s*[xX×]\s*\d{2,4})?(?:\s*(?:mm|DEEP))?|\b\d{1,3}(?:[-\s]\d/\d)?\s*(?:\"|”|″|IN\b|INCH)", re.I)
 
 
+def _stacked_size_label(pts, keys):
+    """A label printed over 2-3 lines ('12"PUMP' / 'DISCHARGE' / 'HEADER'): join a segment with the lines stacked under it."""
+    for pt in pts:
+        segs = [sg for sg in pt.segs if sg.get("bbox_px")]
+        for sg in segs:
+            if not SIZE.search(sg["text"]):
+                continue
+            text, box, cur = sg["text"], list(sg["bbox_px"]), sg["bbox_px"]
+            for _ in range(2):
+                h = max(8, cur[3] - cur[1])
+                below = [o for o in segs if o is not sg and o["bbox_px"][1] > cur[1] + h * 0.3 and o["bbox_px"][1] - cur[3] <= h * 0.8 and abs(o["bbox_px"][0] - cur[0]) <= h * 3]
+                if not below:
+                    break
+                o = min(below, key=lambda o: o["bbox_px"][1])
+                text += " " + o["text"]
+                cur = o["bbox_px"]
+                box = [min(box[0], cur[0]), min(box[1], cur[1]), max(box[2], cur[2]), max(box[3], cur[3])]
+                if all(re.search(re.escape(k.rstrip("s")), text, re.I) for k in keys):
+                    return pt, {"text": text, "bbox_px": box}
+    return None
+
+
 def size_of(question, doc_id, pts, t0):
     """'suction header size', 'sump size': the dimension printed in the segment that names the thing."""
     if not re.search(r"\b(size|diameter|dimension|dimensions|how (?:big|large|wide|deep))\b", question, re.I):
@@ -489,6 +588,8 @@ def size_of(question, doc_id, pts, t0):
                 break
         if best:
             break
+    if not best:
+        best = _stacked_size_label(pts, keys)
     if not best:
         return None
     pt, sg = best
@@ -612,6 +713,41 @@ def sheet_identity(question, doc_id, pts, t0, root=None):
     return _obj(question, doc_id, f"This is sheet **{sid}**, **{title.title()}**. {{marks}}", sid, None, hits, "title block", t0, 0.9)
 
 
+PIPE_SZ = re.compile(r"(?<![\d/-])(\d{1,2}(?:-\d/\d)?)\s*(?:\"|\u201d|\u2033)")
+
+
+def _size_in(k: str) -> float:
+    try:
+        return -float(k.rstrip('"').split("-")[0])
+    except ValueError:
+        return 0.0
+
+
+def _pipe_size_labels(pts) -> dict:
+    """{'8"': {count, boxes}} from size callouts (8", 16"SUCTIONHEADER, 10"X12"REDUCER) in the text layer.
+    Skips lettering heights ('4" TALL') and implausible sizes."""
+    out: dict = {}
+    for pt in pts:
+        ws = [w for w in pt.words if w.get("bbox_px")]
+        for i, w in enumerate(ws):
+            t = str(w.get("text") or "")
+            nxt = str(ws[i + 1]["text"]).upper() if i + 1 < len(ws) else ""
+            if re.search(r"\bTALL\b", t.upper()) or nxt.startswith("TALL"):
+                continue
+            for m in PIPE_SZ.finditer(t):
+                v = m.group(1)
+                try:
+                    n = float(v.split("-")[0])
+                except ValueError:
+                    continue
+                if not 0.5 <= n <= 48:
+                    continue
+                e = out.setdefault(v + '"', {"count": 0, "boxes": []})
+                e["count"] += 1
+                e["boxes"].append(w["bbox_px"])
+    return out
+
+
 def pipe_sizes(question, doc_id, pts, t0, root=None):
     """'what are the pipe sizes': the labelled sizes on the sheet with counts."""
     if not re.search(r"\bpipe\s+sizes?\b|\bsizes? of (?:the )?pipes?\b|\bwhat (?:size|sizes) .*\bpipes?\b", question, re.I):
@@ -619,11 +755,15 @@ def pipe_sizes(question, doc_id, pts, t0, root=None):
     r = _read(doc_id, root) if root is not None else None
     ps = ((r or {}).get("tags") or {}).get("pipe_size") or {}
     if not ps:
+        ps = _pipe_size_labels(pts)
+    if not ps:
         return None
-    items = sorted(ps.items(), key=lambda kv: -kv[1]["count"])[:8]
+    items = sorted(ps.items(), key=lambda kv: (-kv[1]["count"], _size_in(kv[0])))[:12]
     hits = [(1, kv[1]["boxes"][0], kv[0]) for kv in items if kv[1].get("boxes")]
     lst = "; ".join(f"{k} x{v['count']}" for k, v in items)
-    return _obj(question, doc_id, f"Pipe sizes labelled on this sheet: {lst}. {{marks}}", len(items), "sizes", hits, "pipe size labels", t0, 0.85)
+    hits = [(1, b, k) for k, v in items for b in v["boxes"]][:60] or hits
+    note = " Each printed size callout is counted once, so a size repeated along one pipe run counts more than once; this is a count of labels, not of pipes."
+    return _obj(question, doc_id, f"Pipe sizes labelled on this sheet: {lst}.{note} {{marks}}", len(items), "sizes", hits, "pipe size labels", t0, 0.8)
 
 
 def answer(question: str, doc_ids: list[str], root, t0=None, other_docs=()):

@@ -131,3 +131,35 @@ def test_area_by_type_lists_table_rows(tmp_path):
     t = r["answer"]["text_md"]
     assert r["answer"]["value"] == 4 and "DINING: 164 SF = 15.2 m²" in t and "OFFICE 1" in t and "1541" not in t and len(r["citations"]) == 4
     assert sheetqa.answer("What is the slab area by type?", [d], tmp_path) is None
+
+
+def _piping(tmp_path):
+    ln = ([(f"FP-{i}", 100 + i * 200, 100) for i in range(1, 6)] + [(f"CV-{i}", 100 + i * 200, 300) for i in range(1, 4)]
+          + [(f"PS-{i}", 100 + i * 100, 500) for i in (1, 3, 4, 5)] + [("JOCKEYPUMP", 100, 700), ("PIPING PLAN M-101A", 50, 50)]
+          + [('8"', 100, 900), ('8"', 100, 1000), ('6"', 400, 900), ('4" TALL', 700, 900), ('16"SUCTIONHEADER', 100, 1100)]
+          + [('12"PUMP', 1500, 1500), ("DISCHARGE", 1500, 1518), ("HEADER", 1500, 1536)])
+    return _mk(tmp_path, "pip", ln, "us_aw_078-24-28 p096")
+
+
+def test_piping_sheet_pipe_sizes_from_text(tmp_path):
+    d = _piping(tmp_path)
+    r = sheetqa.answer("What pipe sizes are on this sheet and how many of each?", [d], tmp_path)
+    t = r["answer"]["text_md"]
+    assert '8" x2' in t and '6" x1' in t and '16" x1' in t and '4"' not in t.split("Each")[0]  # lettering height is not a pipe
+    assert r["citations"] and r["cost"]["usd_total"] == 0
+
+
+def test_stacked_label_size_and_gap_and_other_pumps(tmp_path):
+    d = _piping(tmp_path)
+    assert '12"' in sheetqa.answer("What is the size of the pump discharge header?", [d], tmp_path)["answer"]["text_md"]
+    t = sheetqa.answer("How many pipe supports are there?", [d], tmp_path)["answer"]["text_md"]
+    assert "PS-2 was not found" in t
+    t = sheetqa.answer("How many pumps are there?", [d], tmp_path)["answer"]["text_md"]
+    assert "**5**" in t and "jockey pump" in t.lower()
+
+
+def test_piping_takeoff_rows(tmp_path):
+    d = _piping(tmp_path)
+    r = sheetqa.answer("Give me a quantity take-off", [d], tmp_path)
+    t = r["answer"]["text_md"]
+    assert "| Fuel pumps (FP-n) | 5 |" in t and 'Pipe callout 8"' in t and "not in this file" in t and r["citations"]
