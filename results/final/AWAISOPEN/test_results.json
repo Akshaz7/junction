@@ -1,0 +1,55 @@
+{
+  "branch": "final/awaisopen",
+  "implementation_commit": "2c245ae",
+  "model_calls": 0,
+  "live_model_spend_usd": 0,
+  "tests": {
+    "engine": {
+      "tests": 125,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.264
+    },
+    "server": {
+      "tests": 47,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.484
+    },
+    "pipeline": {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.959
+    }
+  },
+  "total_passed": 182,
+  "real_room_filter_checks": {
+    "before": 3,
+    "after": 27,
+    "total": 27,
+    "files": 4
+  },
+  "source_origins": [
+    "CubiCasa5K raster",
+    "Swiss Dwellings DXF",
+    "AC20 IFC"
+  ],
+  "reserved_final_only": "swiss_dwellings__site1287-bldg2507-floor11732",
+  "notes": [
+    "Before room results execute filters.py from e721ac8 (before the room fix).",
+    "USDZ before counts evaluate the original node mapper on rebuilt GLBs; after counts inspect packaged USD prims and their mesh bounds.",
+    "An empty room number initially tripped the final-only validation harness; only the harness was corrected to skip absent identifiers. Production code was unchanged during final-only testing.",
+    "No shared artifacts were modified. Rebuilt scenes are ignored under scenes/; only JSON is committed."
+  ],
+  "commands": [
+    "MODELS_FAKE=1 .venv/bin/python -m pytest -q engine/tests/test_room_identifiers.py engine/tests/test_fix13.py engine/tests/test_analytics.py engine/tests/test_solvers.py engine/tests/test_solvers_e19.py engine/tests/test_swiss_dxf.py engine/tests/test_where_rooms.py",
+    "MODELS_FAKE=1 .venv/bin/python -m pytest -q server/tests/test_persist_formats.py server/tests/test_files_upload.py",
+    "MODELS_FAKE=1 .venv/bin/python -m pytest -q pipeline/tests/test_usdz_openings.py",
+    "MODELS_FAKE=1 scripts/heavy.sh .venv/bin/python -m pipeline.tests.validate_usdz_openings --artifacts artifacts --output results/final/AWAISOPEN --docs cubicasa5k__colorful-11397 swiss_dwellings__site289-bldg536-floor2149",
+    "MODELS_FAKE=1 .venv/bin/python -m engine.tests.validate_room_identifiers --artifacts artifacts --output results/final/AWAISOPEN/room_validation_final_only.json --baseline e721ac8 --docs swiss_dwellings__site1287-bldg2507-floor11732"
+  ]
+}

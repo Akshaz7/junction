@@ -1,0 +1,251 @@
+{
+  "baseline": "e721ac8",
+  "documents": [
+    {
+      "doc_id": "cubicasa5k__colorful-11397",
+      "mode": "planmap",
+      "questions": [
+        {
+          "question": "What is the area of TERASSI?",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of PARVEKE?",
+          "expected": [
+            "room-003"
+          ],
+          "before": [
+            "room-003"
+          ],
+          "after": [
+            "room-003"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of MH?",
+          "expected": [
+            "room-010"
+          ],
+          "before": [
+            "room-010"
+          ],
+          "after": [
+            "room-010"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        }
+      ],
+      "before_pass": 3,
+      "after_pass": 3
+    },
+    {
+      "doc_id": "swiss_dwellings__site289-bldg536-floor2149",
+      "mode": "planmap",
+      "questions": [
+        {
+          "question": "What is the area of room 2.01?",
+          "expected": [
+            "room-1"
+          ],
+          "before": [],
+          "after": [
+            "room-1"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.01?",
+          "expected": [
+            "room-1"
+          ],
+          "before": [],
+          "after": [
+            "room-1"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 201?",
+          "expected": [
+            "room-1"
+          ],
+          "before": [],
+          "after": [
+            "room-1"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.02?",
+          "expected": [
+            "room-2"
+          ],
+          "before": [],
+          "after": [
+            "room-2"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.02?",
+          "expected": [
+            "room-2"
+          ],
+          "before": [],
+          "after": [
+            "room-2"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 202?",
+          "expected": [
+            "room-2"
+          ],
+          "before": [],
+          "after": [
+            "room-2"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.03?",
+          "expected": [
+            "room-3"
+          ],
+          "before": [],
+          "after": [
+            "room-3"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.03?",
+          "expected": [
+            "room-3"
+          ],
+          "before": [],
+          "after": [
+            "room-3"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 203?",
+          "expected": [
+            "room-3"
+          ],
+          "before": [],
+          "after": [
+            "room-3"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        }
+      ],
+      "before_pass": 0,
+      "after_pass": 9
+    },
+    {
+      "doc_id": "ifc_bench__ac20-arc",
+      "mode": "ifc",
+      "questions": [
+        {
+          "question": "What is the area of room 001?",
+          "expected": [
+            "3UEb2iq7D2tOgbX6Mufs$X"
+          ],
+          "before": null,
+          "after": [
+            "3UEb2iq7D2tOgbX6Mufs$X"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Besprechungsraum I 001?",
+          "expected": [
+            "3UEb2iq7D2tOgbX6Mufs$X"
+          ],
+          "before": [],
+          "after": [
+            "3UEb2iq7D2tOgbX6Mufs$X"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 002?",
+          "expected": [
+            "2xcLNHPon6VO6wB_n0EQLF"
+          ],
+          "before": null,
+          "after": [
+            "2xcLNHPon6VO6wB_n0EQLF"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Besprechungsraum II 002?",
+          "expected": [
+            "2xcLNHPon6VO6wB_n0EQLF"
+          ],
+          "before": [],
+          "after": [
+            "2xcLNHPon6VO6wB_n0EQLF"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 003?",
+          "expected": [
+            "2Hh$tXimL1_Aogi9jn1cZ4"
+          ],
+          "before": null,
+          "after": [
+            "2Hh$tXimL1_Aogi9jn1cZ4"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Technikraum I 003?",
+          "expected": [
+            "2Hh$tXimL1_Aogi9jn1cZ4"
+          ],
+          "before": [],
+          "after": [
+            "2Hh$tXimL1_Aogi9jn1cZ4"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        }
+      ],
+      "before_pass": 0,
+      "after_pass": 6
+    }
+  ]
+}
