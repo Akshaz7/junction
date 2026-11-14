@@ -115,12 +115,15 @@ def build(res: dict, question: str, root: Path) -> dict | None:
 
 
 def attach(res: dict, question: str, root: Path) -> dict:
+    from engine.reasoning_parts import quality as _quality
     if res.get("reasoning"):   # these routes bring their own card
+        _quality.attach(res, root)
         return res
     try:
         r = build(res, question, root)
         if r:
             res["reasoning"] = r
+            _quality.attach(res, root)
         res.pop("reasoning_hint", None)
     except Exception:  # noqa: BLE001 — evidence is a convenience, never break the answer
         pass

@@ -33,7 +33,7 @@ export interface Reasoning {
   steps: ReasoningStep[]
   confidence: { label: 'Verified' | 'Cross-checked' | 'Estimate'; pct: number; reason: string; improve?: string | null }
   /** Accuracy note of the 3D scene built from a PDF, when the pipeline wrote one. */
-  quality?: { summary?: string | null } | null
+  quality?: { summary?: string | null; score?: number | null; error?: unknown } | null
 }
 
 export interface Answer {
