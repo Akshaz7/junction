@@ -37,12 +37,13 @@ prices:
     "fishaudio:s2.1@pro":             {in: 0, out: 0}   # billed per UTF-8 byte ($0.000015); cost from response
 
 tasks:
-  route:
-    provider: gemini
-    model: gemini-3.5-flash-lite
+  route:   # Nemotron first (NVIDIA challenge: fallback after the rules parser), then Runware. No Gemini.
+    provider: nvidia
+    model: nvidia/nemotron-3.5-lightning-30b-a3b
     max_tokens: 512
+    temperature: 0
+    extra_body: {chat_template_kwargs: {enable_thinking: false}}   # Nemotron is a reasoning model; thinking off = 10 tokens instead of ~340
     fallback:
-      - {provider: nvidia,  model: nvidia/nemotron-3.5-lightning-30b-a3b}
       - {provider: runware, model: "google:gemini@3.1-flash-lite"}
   read_drawing:
     provider: gemini

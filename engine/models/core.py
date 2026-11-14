@@ -303,7 +303,7 @@ def call(
     msgs = _norm_messages(messages)
     imgs = [_norm_image(i) for i in (images or [])]
     task_cfg = cfg["tasks"][task] if task in cfg["tasks"] else {}
-    params = {k: task_cfg[k] for k in ("max_tokens", "temperature") if task_cfg.get(k) is not None}
+    params = {k: task_cfg[k] for k in ("max_tokens", "temperature", "extra_body") if task_cfg.get(k) is not None}
     if task == "tts":
         params["kind"] = "audio"
 

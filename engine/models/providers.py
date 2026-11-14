@@ -194,6 +194,8 @@ def openai_compat(cfg, model, messages, images, schema, params, key) -> Provider
     body: dict[str, Any] = {"model": model, "messages": out, "max_tokens": params.get("max_tokens", 1024), "stream": False}
     if params.get("temperature") is not None:
         body["temperature"] = params["temperature"]
+    if params.get("extra_body"):  # e.g. Nemotron chat_template_kwargs
+        body.update(params["extra_body"])
     resp = _post(
         cfg["base_url"].rstrip("/") + "/chat/completions",
         {"Authorization": f"Bearer {key}", "Content-Type": "application/json"},

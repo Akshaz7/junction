@@ -22,3 +22,4 @@
 - IfcConvert waits on stdin if the output file already exists: delete it first and pass stdin=DEVNULL.
 - IfcConvert: `--exclude entities IfcOpeningElement` (before `-j`) overrides the default that drops IfcSpace, so rooms are kept.
 - scene.json `publishable: false` marks duplex, clinic and hitos: never upload or deploy those scenes.
+- Nemotron 3.5 is a reasoning model: send chat_template_kwargs {enable_thinking:false} via the task's extra_body or it burns ~340 tokens and truncates.

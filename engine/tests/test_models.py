@@ -194,21 +194,21 @@ def test_backoff_retries_429_then_succeeds(env, monkeypatch):
 
 
 def test_backoff_gives_up_after_5_retries_then_falls_through(env, monkeypatch):
-    monkeypatch.setenv("GEMINI_API_KEY", "g")
+    monkeypatch.setenv("NVIDIA_API_KEY", "g")
     monkeypatch.setenv("RUNWARE_API_KEY", "k")
-    calls = {"gemini": 0}
+    calls = {"nv": 0}
     sleeps = []
     monkeypatch.setattr(core, "_sleep", sleeps.append)
 
     def post(url, *a, **k):
-        if "googleapis" in url:
-            calls["gemini"] += 1
+        if "nvidia" in url:
+            calls["nv"] += 1
             return httpx.Response(503)
         return rw()
 
     monkeypatch.setattr(P, "_post", post)
     r = call("route", "q")
-    assert r.provider == "runware" and calls["gemini"] == 6 and len(sleeps) == 5
+    assert r.provider == "runware" and calls["nv"] == 6 and len(sleeps) == 5
 
 
 def test_runware_overload_error_code_is_retried(env, monkeypatch):
@@ -264,3 +264,16 @@ def test_runware_request_shape_with_image_and_schema(env, monkeypatch):
 def test_tts_fake_returns_audio_url(env):
     r = call("tts", "hello there")
     assert r.audio_url and r.audio_url.startswith("fake://")
+
+
+def test_extra_body_is_sent_to_openai_compat(env, monkeypatch):
+    monkeypatch.setenv("NVIDIA_API_KEY", "n")
+    sent = {}
+
+    def post(url, headers, payload, *a, **k):
+        sent.update(payload)
+        return oai("ok")
+
+    monkeypatch.setattr(P, "_post", post)
+    call("route", "q")
+    assert sent.get("chat_template_kwargs") == {"enable_thinking": False}

@@ -38,3 +38,4 @@ Format for new lines: `YYYY-MM-DD HH:MM — decision — reason`.
 - 2026-11-14 03:08 — doc_id keeps the source folder name verbatim and slugs only the stem (`ifc_bench__ac20-arc`, `cubicasa5k__colorful-11397`); matches the CONTRACT 5.1 example. CONTRACT v2: doc.json gains `files` {format: path relative to dataset root}.
 - 2026-11-14 03:21 — Vision: Yytsi ResNet34-UNet (MIT) is the segmenter; CubiCasa official (CC BY-NC) is an internal fixtures baseline only; final detector = permissive RT-DETR fine-tuned on CubiCasa5K SVG boxes (V-07) — licence + coverage.
 - 2026-11-14 03:26 — OCR = rapidocr-onnxruntime (Apache-2.0, runs in the Linux deploy image) over macOS Vision; added onnx for V-08.
+- 2026-11-14 03:28 — Shared dev servers started by LEAD with `make dev` (logs/dev.log): API :8000, web :5173. Workers must not start their own copies.

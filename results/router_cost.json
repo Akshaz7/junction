@@ -1,0 +1,18 @@
+{
+  "set": "data/sets/router_test.jsonl",
+  "unique_questions": 420,
+  "force_model": false,
+  "accuracy_type_and_kind": 0.9786,
+  "by_source": {
+    "rules": {
+      "correct": 411,
+      "n": 420
+    }
+  },
+  "model_calls": 0,
+  "providers": {},
+  "total_cost_usd": 0.0,
+  "mean_cost_per_question_usd": 0.0,
+  "mean_cost_per_model_call_usd": 0.0,
+  "max_usd_guard": 0.5
+}
