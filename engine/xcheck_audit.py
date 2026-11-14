@@ -180,6 +180,11 @@ def audit(sets, root, output, recount_cache, ifc_checks=()):
                              "No comparison is inferred for questions with missing independent source data.",
                              "Filled pixels versus their own contour and storey regroupings are correlated checks and excluded from calibration."]
     output.parent.mkdir(parents=True, exist_ok=True)
+    # The API reads only the cohort rates. Keep individual proofs in a linked
+    # JSONL file so calibration does not load thousands of source records.
+    observations_path = output.with_suffix(".observations.jsonl")
+    observations_path.write_text("".join(json.dumps(o, ensure_ascii=False, separators=(",", ":"), allow_nan=False) + "\n" for o in report.pop("observations")))
+    report["observation_file"] = {"path": str(observations_path), "rows": len(observations), "sha256": digest(observations_path)}
     output.write_text(json.dumps(report, indent=2, ensure_ascii=False, allow_nan=False) + "\n")
     return report
 
