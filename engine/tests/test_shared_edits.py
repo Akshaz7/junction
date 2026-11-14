@@ -50,8 +50,8 @@ def test_undo_restores_the_latest_removal_only(doc):
     a = scene_answer("undo my edit", doc, parse_scene("undo my edit"), st)
     assert _cmd(a) == {**_cmd(a), "op": "restore", "item_ids": [DOOR]}
     assert tags(doc)[DOOR] in a["answer"]["text_md"] and "1 other hidden item(s) stay hidden" in a["answer"]["text_md"]
-    # no last_hidden (older server): everything hidden comes back, as before
-    assert _cmd(scene_answer("undo", doc, parse_scene("undo"), {"hidden": [other, DOOR]}))["item_ids"] == [other, DOOR]
+    # no last_hidden (older server): only the last hidden item comes back (main's undo rule)
+    assert _cmd(scene_answer("undo", doc, parse_scene("undo"), {"hidden": [other, DOOR]}))["item_ids"] == [DOOR]
 
 
 def test_restore_everything_resets_manual_edits_too():

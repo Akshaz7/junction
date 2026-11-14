@@ -288,7 +288,7 @@ def scene_answer(question: str, doc: Doc, intent: SceneIntent, state: dict | Non
     op = intent.op
     hidden_now = list(state.get("hidden") or [])
     undo_ids: list[str] = []
-    if op in ("undo", "check") and (op == "check" or isinstance(state.get("edits"), list)):
+    if op in ("undo", "check") and (op == "check" or "last_hidden" not in state):
         res = scene_answer(question, doc, SceneIntent("reset"), state, t0)
         commands = undo_commands(doc, state) if op == "undo" else []
         res["evidence"]["scene"]["commands"] = commands

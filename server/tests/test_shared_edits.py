@@ -110,7 +110,7 @@ def test_chat_remove_then_manual_restore_clears_chat_state(client, chat):
     _manual(client, chat, "restore", gone)          # Edit panel: Undo / Restore by hand
     assert _hidden(client, chat) == []
     # and the chat sees it: nothing left to undo
-    assert _ask(client, chat, "undo")["evidence"]["scene"]["commands"][0]["op"] == "reset"
+    assert _ask(client, chat, "undo")["evidence"]["scene"]["commands"] == []
 
 
 @pytestmark_demo
