@@ -8,6 +8,7 @@ Cost goes through engine.models.call("read_drawing"). Page 1 only for now.
 """
 from __future__ import annotations
 
+from engine.assistant import with_system
 import struct
 import time
 import uuid
@@ -101,7 +102,7 @@ def read_drawing(question: str, doc: Doc, root: Path, page: int = 1) -> dict:
         trace.append({"step": "abstain", "detail": "no page image", "ms": 0, "model": None, "cost_usd": 0})
         return _abstain(question, doc, "I have no page image for this document, so I cannot read the drawing.", trace, t0)
     ts = time.perf_counter()
-    r = call("read_drawing", PROMPT + question, images=[img], schema=SCHEMA)
+    r = call("read_drawing", with_system(PROMPT + question), images=[img], schema=SCHEMA)
     calls = [{"task": "read_drawing", "provider": r.provider, "model": r.model, "cost_usd": r.cost_usd}]
     trace.append({"step": "read", "detail": f"page {page} read by {r.model}", "ms": int((time.perf_counter() - ts) * 1000),
                   "model": r.model, "cost_usd": r.cost_usd})

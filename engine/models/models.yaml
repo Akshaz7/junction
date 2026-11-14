@@ -70,6 +70,14 @@ tasks:
     fallback:
       - {provider: gemini,  model: gemini-3.8-flash}
       - {provider: runware, model: "anthropic:claude@sonnet-4.6"}
+  chat:   # free conversation with no document selected (engine/assistant.py system prompt); text only, never project numbers
+    provider: anthropic
+    model: claude-sonnet-5-5
+    max_tokens: 700
+    fallback:
+      - {provider: runware, model: "anthropic:claude@sonnet-4.6"}
+      - {provider: runware, model: "google:gemini@3.1-flash-lite"}
+      - {provider: nvidia,  model: nvidia/nemotron-3.5-lightning-30b-a3b }
   scene_intent:   # odd phrasing of a viewer command (E-20); Nemotron first, tiny outputs
     provider: nvidia
     model: nvidia/nemotron-3.5-lightning-30b-a3b

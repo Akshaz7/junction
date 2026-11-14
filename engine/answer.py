@@ -68,7 +68,24 @@ def _abstained(question, doc_ids, text, trace, t0, route="index", calls=None):
     }
 
 
-def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None) -> dict:
+def _chat_answer(question, history, trace, t0, add, emit):
+    """No document selected: talk normally with Hologram's system prompt (engine/assistant.py)."""
+    from engine.assistant import chat
+    emit("status", {"text": "Writing an answer…"})
+    try:
+        r = chat(question, history)
+    except Exception as e:  # noqa: BLE001 — every provider failed: fall back to the plain hint
+        add(_step("chat", f"no model reachable ({type(e).__name__})"))
+        return _abstained(question, [], NO_DOC, trace, t0)
+    call_meta = {"task": "chat", "provider": r.provider, "model": r.model, "cost_usd": r.cost_usd}
+    add(_step("chat", "general conversation, no document selected", r.latency_ms, r.model, r.cost_usd))
+    out = _abstained(question, [], (r.text or "").strip() or NO_DOC, trace, t0, calls=[call_meta])
+    out["answer"].update({"abstained": False, "confidence": 0.5})
+    return out
+
+
+def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
+           history: list[dict] | None = None) -> dict:
     emit = on_event or (lambda kind, payload: None)
     t0 = time.perf_counter()
     root = _root()
@@ -82,6 +99,8 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
     emit("status", {"text": "Thinking…"})
     try:
         if not doc_ids:
+            if (question or "").strip():
+                return _chat_answer(question, history, trace, t0, add, emit)
             add(_step("abstain", "no document selected"))
             return _abstained(question, doc_ids, NO_DOC, trace, t0)
 

@@ -38,7 +38,8 @@ def test_windows_with_events():
 
 
 def test_abstentions_are_plain():
-    assert answer("How many windows?", [])["answer"]["abstained"]
+    n = answer("How many windows?", [])  # no document: plain chat (or the hint), never a project number or citation
+    assert n["answer"]["value"] is None and n["citations"] == [] and n["doc_ids"] == []
     t = answer("What materials are used in the walls?", [DOC])
     assert t["answer"]["abstained"] and "cannot read the drawing" in t["answer"]["text_md"]
     m = answer("How many windows are there?", ["missing__doc"])
@@ -75,3 +76,19 @@ def test_question_naming_unselected_doc_abstains():
     assert a["answer"]["abstained"] and "ifc_bench__ac20-arc" in a["answer"]["text_md"]
     b = answer("How many windows in ifc_bench__ac20-arc?", ["ifc_bench__ac20-arc"])
     assert not b["answer"]["abstained"] or "not among the selected" not in b["answer"]["text_md"]
+
+
+def test_no_document_chat_uses_system_prompt_and_history(monkeypatch):
+    """Plain conversation without a document: Hologram's system prompt + earlier turns, no project facts."""
+    import engine.assistant as AS
+    from engine.models.core import Result
+    seen = {}
+
+    def fake_call(task, messages, *a, **k):
+        seen["task"], seen["messages"] = task, messages
+        return Result(text="Hi! Select a drawing with @ and I'll count it.", provider="fake", model="fake", task=task)
+    monkeypatch.setattr("engine.models.call", fake_call)
+    out = answer("Hello", [], history=[{"role": "user", "content": "earlier"}, {"role": "assistant", "content": "ok"}])
+    assert seen["task"] == "chat" and seen["messages"][0]["role"] == "system"
+    assert "Hologram" in seen["messages"][0]["content"] and seen["messages"][1]["content"] == "earlier"
+    assert out["answer"]["abstained"] is False and out["answer"]["text_md"].startswith("Hi!") and out["citations"] == []

@@ -9,6 +9,7 @@ No data -> a plain sentence saying so, abstained=True. Never invents values.
 """
 from __future__ import annotations
 
+from engine.assistant import with_system
 import os
 import re
 import time
@@ -321,7 +322,7 @@ PROMPT = ("You answer a question about a building model using ONLY the facts bel
 
 def _phrase(question: str, f: Facts) -> tuple[str | None, dict | None]:
     from engine.models import call
-    r = call("write_answer", PROMPT.format(q=question, facts="\n".join(f.lines)))
+    r = call("write_answer", with_system(PROMPT.format(q=question, facts="\n".join(f.lines))))
     t = (r.text or "").strip()
     ok = bool(t) and _numbers(t) <= _numbers("\n".join(f.lines)) and len(t) < 900
     meta = {"task": "write_answer", "provider": r.provider, "model": r.model, "cost_usd": r.cost_usd}

@@ -15,15 +15,16 @@ from .schema import validate_answer
 
 router = APIRouter(prefix="/api")
 
-def _real_engine(question, doc_ids, on_event, scene_state=None):
+def _real_engine(question, doc_ids, on_event, scene_state=None, history=None):
     from engine.answer import answer  # the function, not the engine.answer module
-    return answer(question, doc_ids, on_event, scene_state=scene_state)
+    return answer(question, doc_ids, on_event, scene_state=scene_state, history=history)
 
 
-def _run_engine(question, doc_ids, on_event, scene_state=None):
+def _run_engine(question, doc_ids, on_event, scene_state=None, history=None):
     # E-20: hidden items from this chat's scene edits shape later answers ("how many windows" after "remove W7").
-    if scene_state and ENGINE is _real_engine:
-        return ENGINE(question, doc_ids, on_event, scene_state=scene_state)
+    # history: earlier turns of this chat, for plain conversation without a document.
+    if ENGINE is _real_engine:
+        return ENGINE(question, doc_ids, on_event, scene_state=scene_state, history=history)
     return ENGINE(question, doc_ids, on_event)
 
 
@@ -129,6 +130,8 @@ async def ask(chat_id: str, body: NewMessage):
     if c is None:
         raise HTTPException(404, "chat not found")
     doc_ids = body.doc_ids or ([c["doc_id"]] if c["doc_id"] else [])
+    history = [{"role": r["role"], "content": r["content"]} for r in reversed(await pool.fetch(
+        "select role, content from messages where chat_id=$1 order by created_at desc limit 10", cid))]
     umid = await pool.fetchval(
         "insert into messages (chat_id, role, content) values ($1,'user',$2) returning id", cid, body.content)
     await publish({"type": "chat.message", "chat_id": str(cid), "message_id": str(umid), "role": "user"})
@@ -149,7 +152,7 @@ async def ask(chat_id: str, body: NewMessage):
         def on_event(kind, payload):
             loop.call_soon_threadsafe(q.put_nowait, (kind, payload))
 
-        task = asyncio.create_task(asyncio.to_thread(_run_engine, body.content, doc_ids, on_event, sstate))
+        task = asyncio.create_task(asyncio.to_thread(_run_engine, body.content, doc_ids, on_event, sstate, history))
         task.add_done_callback(lambda _: loop.call_soon_threadsafe(q.put_nowait, None))
         while (item := await q.get()) is not None:
             if item[0] == "status":

@@ -136,7 +136,7 @@ def test_run_engine_passes_hidden_items_to_real_engine(monkeypatch):
     from server import chats_routes
     seen = {}
 
-    def fake_real(q, d, cb, scene_state=None):
+    def fake_real(q, d, cb, scene_state=None, history=None):
         seen["s"] = scene_state
         return {}
     monkeypatch.setattr(chats_routes, "_real_engine", fake_real)
