@@ -120,6 +120,28 @@ final class WebSession: ObservableObject {
     }
     #endif
 
+    /// App-like page: no pinch zoom, and the viewport is the device width.
+    static let viewportScript = """
+        (() => {
+            let meta = document.querySelector('meta[name=viewport]');
+            if (!meta) { meta = document.createElement('meta'); meta.name = 'viewport'; document.head.appendChild(meta); }
+            meta.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';
+        })();
+        """
+
+    /// Vertical scrolling only, like a native screen: no sideways rubber band, no axis drift, no content shift.
+    static func lockScrolling(_ scrollView: UIScrollView) {
+        scrollView.alwaysBounceHorizontal = false
+        scrollView.bounces = true
+        scrollView.alwaysBounceVertical = true
+        scrollView.showsHorizontalScrollIndicator = false
+        scrollView.isDirectionalLockEnabled = true
+        scrollView.contentInsetAdjustmentBehavior = .never
+        if scrollView.contentOffset.x != 0 {
+            scrollView.contentOffset.x = 0
+        }
+    }
+
     /// Load the web app's pair page; it pairs this phone and shows the laptop's chat.
     func openPair(_ link: PairLink) {
         guard let url = link.webURL(base: webView.url ?? AppConfiguration.webURL) else { return }
@@ -130,6 +152,8 @@ final class WebSession: ObservableObject {
         coordinator = WebShell.Coordinator()
         let configuration = WKWebViewConfiguration()
         configuration.userContentController.add(coordinator, name: "ar")
+        configuration.userContentController.addUserScript(WKUserScript(source: Self.viewportScript,
+            injectionTime: .atDocumentEnd, forMainFrameOnly: true))
         webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = coordinator
         webView.scrollView.delegate = coordinator
@@ -140,7 +164,8 @@ final class WebSession: ObservableObject {
         webView.isOpaque = false
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
-        webView.allowsBackForwardNavigationGestures = true
+        webView.allowsBackForwardNavigationGestures = false
+        Self.lockScrolling(webView.scrollView)
         // Load once for this session, independent of SwiftUI mounting the view.
         webView.load(URLRequest(url: url))
     }
@@ -231,12 +256,20 @@ struct WebShell: UIViewControllerRepresentable {
             scrollView.minimumZoomScale = 1
             scrollView.maximumZoomScale = 1
             scrollView.bouncesZoom = false
+            WebSession.lockScrolling(scrollView)
             if abs(scrollView.zoomScale - 1) > 0.001 {
                 scrollView.setZoomScale(1, animated: false)
             }
         }
 
         func viewForZooming(in scrollView: UIScrollView) -> UIView? { nil }
+
+        /// Whatever the page does (overflowing content), the screen never follows a sideways drag.
+        func scrollViewDidScroll(_ scrollView: UIScrollView) {
+            if scrollView.contentOffset.x != 0 {
+                scrollView.contentOffset.x = 0
+            }
+        }
 
         func scrollViewDidZoom(_ scrollView: UIScrollView) {
             pinZoom(in: scrollView)
