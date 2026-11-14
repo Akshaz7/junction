@@ -278,3 +278,128 @@ def test_conflicting_ceiling_notes_are_cited_without_taking_off_a_guess(graph):
     assert not any(e.get("quantity_delta") for e in r["graph_answer"]["items"])
     assert any(c["doc_id"] == "notes" and c["quote"] == "A101 ceiling 2.8 m" for c in r["citations"])
     assert "heights disagree" in r["answer"]["text_md"]
+
+
+@pytest.fixture
+def count_graph(graph):
+    """Generated contract case: independent model/plan, one unlinked extra door."""
+    graph["edges"] = [e for e in graph["edges"] if e["kind"] not in ("agrees", "differs")]
+    for d, role, label in [("architecture", "model", "Building model"), ("plan", "plan", "Ground floor plan")]:
+        graph["nodes"].extend([
+            {"id": f"doc:{d}:root", "kind": "doc", "label": label, "doc_ids": [d], "props": {"role": role}},
+            {"id": f"level:{d}:2", "kind": "level", "label": "Second floor", "level": "Second floor", "doc_ids": [d], "props": {}},
+        ])
+    extra = copy.deepcopy(next(n for n in graph["nodes"] if n["id"] == "door:plan:dp2"))
+    extra.update(id="door:plan:extra", label="Extra door", source={"doc_id": "plan", "page": 3, "item_id": "extra"})
+    graph["nodes"].append(extra)
+    return graph
+
+
+@pytest.mark.parametrize("q", [
+    "Do the plan and model agree on doors on level 2?",
+    "Does the plan match the model on doors on the second floor?",
+    "Compare doors per floor across files.",
+    "Which files disagree on doors?",
+])
+def test_missing_checks_are_computed_from_all_source_items(count_graph, q):
+    before = copy.deepcopy(count_graph)
+    r = answer(q, PROJECT, ROOT, graph=count_graph)
+    assert r["graph_answer"]["computed_checks"] == 1
+    assert r["answer"]["value"] == 0
+    m = r["graph_answer"]["mismatches"][0]
+    assert m["evidence"]["values"] == [2, 3]  # includes unlinked extra, not just matched pairs
+    assert set(m["doc_ids"]) == {"architecture", "plan"}
+    assert {e["edge_kind"] for e in r["reasoning"]["graph_path"]} == {"same_as", "differs"}
+    assert r["answer"]["confidence"] == min(e["confidence"] for e in r["reasoning"]["graph_path"])
+    assert count_graph == before
+
+
+def test_comparison_does_not_invent_zero_for_missing_extraction(count_graph):
+    count_graph["nodes"] = [n for n in count_graph["nodes"] if n.get("kind") != "door" or "plan" not in n.get("doc_ids", [])]
+    r = answer("Do the plan and model agree on doors?", PROJECT, ROOT, graph=count_graph)
+    assert r["graph_answer"]["shape"] == "missing"
+
+
+def test_derived_count_comparisons_disclose_dependency(count_graph):
+    next(n for n in count_graph["nodes"] if n["id"] == "doc:plan:root")["props"]["derived"] = True
+    r = answer("Does the plan match the model on doors?", PROJECT, ROOT, graph=count_graph)
+    assert "not an independent drawing check" in r["answer"]["text_md"]
+    assert r["graph_answer"]["comparisons"][0]["evidence"]["derived"] is True
+
+
+def test_no_identity_link_does_not_compare_unrelated_files(count_graph):
+    count_graph["edges"] = [e for e in count_graph["edges"] if e["kind"] != "same_as"]
+    r = answer("Compare doors across files.", PROJECT, ROOT, graph=count_graph)
+    assert r["graph_answer"]["shape"] == "missing"
+
+
+def test_zero_on_known_level_is_valid_but_not_missing_kind_coverage(count_graph):
+    for n in count_graph["nodes"]:
+        if n["kind"] == "door" and "architecture" in n["doc_ids"]:
+            n["level"] = "Third floor"
+    # Rooms still establish this floor's cross-file identity; doors are extracted
+    # elsewhere in the model, so the known second-floor absence is countable.
+    r = answer("Compare doors across files on level 2.", PROJECT, ROOT, graph=count_graph)
+    m = r["graph_answer"]["mismatches"][0]
+    assert m["evidence"]["values"] == [0, 3]
+    assert {c["doc_id"] for c in r["citations"]} == {"architecture", "plan"}
+
+
+def test_ambiguous_appearances_list_identity_groups_and_pages(graph):
+    for did, iid in [("architecture", "upper"), ("plan", "upper-plan")]:
+        graph["nodes"].append({"id": f"door:{did}:{iid}", "kind": "door", "label": "Door D12", "doc_ids": [did],
+                               "level": "Level 9", "props": {}, "source": {"doc_id": did, "page": 9, "item_id": iid}})
+    graph["edges"].append({"id": "upper-same", "kind": "same_as", "from": "door:architecture:upper", "to": "door:plan:upper-plan",
+                           "method": "guid", "confidence": .93})
+    r = answer("Where else does door D12 appear?", PROJECT, ROOT, graph=graph)
+    assert r["graph_answer"]["shape"] == "appearances"
+    assert len(r["graph_answer"]["groups"]) == 2
+    assert r["answer"]["value"] == 2
+    assert {c["page"] for c in r["citations"]} == {1, 9}
+    assert "page 9" in r["answer"]["text_md"]
+    assert "2 distinct items" in r["answer"]["text_md"]
+    scoped = answer("Where else does door D12 appear on level 9?", PROJECT, ROOT, graph=graph)
+    assert len(scoped["graph_answer"]["groups"]) == 1
+
+
+def test_unlinked_ambiguous_appearances_are_listed_without_identity_claim(graph):
+    graph["edges"] = [e for e in graph["edges"] if e["kind"] != "same_as"]
+    r = answer("Where else does door D12 appear?", PROJECT, ROOT, graph=graph)
+    assert len(r["graph_answer"]["groups"]) == 2
+    assert len(r["citations"]) == 2
+    assert r["answer"]["confidence"] == 0
+    assert r["graph_answer"]["items"] == []
+
+
+@pytest.mark.parametrize("label", ["Flur EG Eingang", "Entré hall", "Sisäänkäynti käytävä"])
+def test_general_room_vocabulary_supports_ceiling_dependencies(graph, label):
+    for n in graph["nodes"]:
+        if n["kind"] == "room" and "A101" in n["label"]:
+            n["label"] = label
+            n["props"].pop("number", None)
+    r = answer("If the ceiling in the entrance hall drops to 2.4 m what is affected?", PROJECT, ROOT, graph=graph)
+    assert r["graph_answer"]["shape"] == "impact"
+    assert r["reasoning"]["graph_path"]
+
+
+def test_proposed_dimension_cannot_resolve_a_room_number(graph):
+    for n in graph["nodes"]:
+        if n["kind"] == "room":
+            n["props"]["number"] = "4"
+    r = answer("If the ceiling in the unknown hall drops to 2.4 m what is affected?", PROJECT, ROOT, graph=graph)
+    assert r["graph_answer"]["shape"] == "missing"
+
+
+def test_same_ifc_element_on_two_pages_does_not_create_room_ambiguity(graph):
+    origin = next(n for n in graph["nodes"] if n["id"] == "room:architecture:r1")
+    origin["props"]["ifc_class"] = "IfcSpace"
+    extra = copy.deepcopy(origin)
+    extra.update(id=origin["id"] + ":p9", level=None)
+    extra["source"]["page"] = 9
+    extra["props"] = {"ifc_class": "IfcSpace"}
+    graph["nodes"].append(extra)
+    assert answer("If the ceiling in Office A101 drops to 2.4 m what is affected?", PROJECT, ROOT, graph=graph)["graph_answer"]["shape"] == "impact"
+    # Removing the IFC identity proof leaves independent page-local records.
+    origin["props"].pop("ifc_class")
+    extra["props"].clear()
+    assert answer("If the ceiling in Office A101 drops to 2.4 m what is affected?", PROJECT, ROOT, graph=graph)["graph_answer"]["shape"] == "missing"

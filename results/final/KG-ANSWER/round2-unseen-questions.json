@@ -1,0 +1,112 @@
+{
+  "project": {
+    "id": "kg-answer-ifc_models__resbim-146-model",
+    "docs": [
+      {
+        "doc_id": "ifc_models__resbim-146-model"
+      }
+    ]
+  },
+  "questions": [
+    {
+      "question": "What is connected to door Doors_ExtSgl_11:900x2110mm:440293?",
+      "doc_id": "ifc_models__resbim-146-model",
+      "expect": {
+        "shape": "connections",
+        "required_source_item_ids": [
+          "1q$chfrHX9w82Wy0jFZNAn"
+        ]
+      },
+      "truth": "IFC fills/voids and space-boundary relationships; type/material associations are additional connections"
+    },
+    {
+      "question": "If door Doors_ExtSgl_11:900x2110mm:440293 is removed, what is affected?",
+      "doc_id": "ifc_models__resbim-146-model",
+      "expect": {
+        "shape": "impact",
+        "required_source_item_ids": [
+          "1q$chfrHX9w82Wy0jFZNAn"
+        ]
+      },
+      "truth": "IFC host wall and adjoining spaces"
+    },
+    {
+      "question": "Where else does door Doors_ExtSgl_11:900x2110mm:440293 appear?",
+      "doc_id": "ifc_models__resbim-146-model",
+      "expect": {
+        "shape": "missing"
+      },
+      "truth": "IFC GlobalId in the counterpart index"
+    },
+    {
+      "question": "What is connected to door Doors_IntSgl:810x2110mm:440328?",
+      "doc_id": "ifc_models__resbim-146-model",
+      "expect": {
+        "shape": "connections",
+        "required_source_item_ids": [
+          "1q$chfrHX9w82Wy0jFZNrI"
+        ]
+      },
+      "truth": "IFC fills/voids and space-boundary relationships; type/material associations are additional connections"
+    },
+    {
+      "question": "If door Doors_IntSgl:810x2110mm:440328 is removed, what is affected?",
+      "doc_id": "ifc_models__resbim-146-model",
+      "expect": {
+        "shape": "impact",
+        "required_source_item_ids": [
+          "1q$chfrHX9w82Wy0jFZNrI"
+        ]
+      },
+      "truth": "IFC host wall and adjoining spaces"
+    },
+    {
+      "question": "Where else does door Doors_IntSgl:810x2110mm:440328 appear?",
+      "doc_id": "ifc_models__resbim-146-model",
+      "expect": {
+        "shape": "missing"
+      },
+      "truth": "IFC GlobalId in the counterpart index"
+    },
+    {
+      "question": "What is connected to door 双扇推拉门2:1800 x 2000mm:440331?",
+      "doc_id": "ifc_models__resbim-146-model",
+      "expect": {
+        "shape": "connections",
+        "required_source_item_ids": [
+          "1q$chfrHX9w82Wy0jFZNrV"
+        ]
+      },
+      "truth": "IFC fills/voids and space-boundary relationships; type/material associations are additional connections"
+    },
+    {
+      "question": "If door 双扇推拉门2:1800 x 2000mm:440331 is removed, what is affected?",
+      "doc_id": "ifc_models__resbim-146-model",
+      "expect": {
+        "shape": "impact",
+        "required_source_item_ids": [
+          "1q$chfrHX9w82Wy0jFZNrV"
+        ]
+      },
+      "truth": "IFC host wall and adjoining spaces"
+    },
+    {
+      "question": "Where else does door 双扇推拉门2:1800 x 2000mm:440331 appear?",
+      "doc_id": "ifc_models__resbim-146-model",
+      "expect": {
+        "shape": "missing"
+      },
+      "truth": "IFC GlobalId in the counterpart index"
+    },
+    {
+      "question": "Do the drawings agree on doors on the ground floor?",
+      "doc_id": "ifc_models__resbim-146-model",
+      "expect": {
+        "shape": "missing"
+      },
+      "truth": "One source document has no cross-file comparison"
+    }
+  ],
+  "source_schema": "IFC4",
+  "source_file": "ifc_models/resbim-146_model.ifc"
+}
