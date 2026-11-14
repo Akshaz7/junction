@@ -47,12 +47,25 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.teamrs3.hologram.tests
         GENERATE_INFOPLIST_FILE: YES
+  HologramUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - HologramUITests
+    dependencies:
+      - target: Hologram
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.teamrs3.hologram.uitests
+        GENERATE_INFOPLIST_FILE: YES
 schemes:
   Hologram:
     build:
       targets:
         Hologram: all
         HologramTests: [test]
+        HologramUITests: [test]
     test:
       targets:
         - HologramTests
+        - HologramUITests

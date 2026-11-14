@@ -2,7 +2,7 @@ import Foundation
 
 enum AppConfiguration {
     static var webURL: URL {
-        let configured = Bundle.main.object(forInfoDictionaryKey: "WEB_URL") as? String
+        let configured = value(for: "WEB_URL")
         if let configured, let url = URL(string: configured),
            let scheme = url.scheme, ["http", "https"].contains(scheme),
            url.host != nil {
@@ -12,8 +12,34 @@ enum AppConfiguration {
     }
 
     static var apiURL: URL {
-        apiURL(webURL: webURL, configured: Bundle.main.object(forInfoDictionaryKey: "API_URL") as? String)
+        apiURL(webURL: webURL, configured: value(for: "API_URL"))
     }
+
+    static func value(for key: String, arguments: [String] = ProcessInfo.processInfo.arguments,
+                      environment: [String: String] = ProcessInfo.processInfo.environment,
+                      configured: String? = nil) -> String? {
+        if let index = arguments.firstIndex(of: "-\(key)"), arguments.indices.contains(index + 1) {
+            let value = arguments[index + 1].trimmingCharacters(in: .whitespacesAndNewlines)
+            if !value.isEmpty, !value.hasPrefix("-") { return value }
+        }
+        if let value = environment[key]?.trimmingCharacters(in: .whitespacesAndNewlines), !value.isEmpty {
+            return value
+        }
+        return configured ?? Bundle.main.object(forInfoDictionaryKey: key) as? String
+    }
+
+    #if DEBUG
+    // Exercise the actual JavaScript -> WKScriptMessageHandler path in XCUITest.
+    static var debugBridgeScript: String? {
+        guard let payload = value(for: "AR_BRIDGE_MESSAGE"),
+              let body = try? JSONSerialization.jsonObject(with: Data(payload.utf8)),
+              let request = ARRequest(body: body),
+              let data = try? JSONSerialization.data(withJSONObject: [
+                "doc_id": request.docID, "item_ids": request.itemIDs
+              ]), let json = String(data: data, encoding: .utf8) else { return nil }
+        return "window.webkit.messageHandlers.ar.postMessage(\(json));"
+    }
+    #endif
 
     static func apiURL(webURL: URL, configured: String?) -> URL {
         if let configured, let url = URL(string: configured),

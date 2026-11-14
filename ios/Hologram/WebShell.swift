@@ -34,7 +34,14 @@ struct WebShell: UIViewRepresentable {
     func makeUIView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
         configuration.userContentController.add(context.coordinator, name: "ar")
+        #if DEBUG
+        if let script = AppConfiguration.debugBridgeScript {
+            configuration.userContentController.addUserScript(WKUserScript(
+                source: script, injectionTime: .atDocumentEnd, forMainFrameOnly: true))
+        }
+        #endif
         let webView = WKWebView(frame: .zero, configuration: configuration)
+        webView.accessibilityIdentifier = "web-shell"
         webView.allowsBackForwardNavigationGestures = true
         webView.load(URLRequest(url: url))
         return webView

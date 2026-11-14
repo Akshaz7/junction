@@ -15,6 +15,10 @@ struct ARScreen: View {
     private var requestedDocID: String? { controller.demoDocID ?? docID }
 
     var body: some View {
+        #if targetEnvironment(simulator)
+        SimulatorScenePanel(docID: docID ?? "fixture__ios", manifestURL: manifestURL,
+                            highlightedItemIDs: highlightedItemIDs)
+        #else
         ZStack {
             ARSceneView(controller: controller).ignoresSafeArea()
             VStack(spacing: 16) {
@@ -161,6 +165,7 @@ struct ARScreen: View {
                 controller.setHighlights(highlightedItemIDs, cameraTargetItemID: target)
             }
         }
+        #endif
     }
 
     private func highlightItem(_ itemID: String) {

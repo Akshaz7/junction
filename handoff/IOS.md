@@ -1,15 +1,16 @@
 # Handoff: IOS (Codex worker)
 
-Row ID: I-11 (attempt 1)
-Task: Offline demo scenes. Copy the real scenes into the app bundle and add a "Demo scenes" picker on the AR screen:
-- `artifacts/ifc_bench__ac20-arc/scene.usdz` + `scene.json` (IFC building, KIT licence: publishable) and `artifacts/cubicasa5k__colorful-11397/scene.usdz` + `scene.json` (extruded plan; CC BY-NC-SA: OK for this non-commercial demo; show its credit). Put them under `ios/Hologram/Resources/DemoScenes/<doc_id>/`. Add a small script `ios/scripts/sync_demo_scenes.sh` that copies them from artifacts/ (so they can be refreshed later), and run it once. Check `publishable` in scene.json and refuse false.
-- Loading order for a doc_id: network (API) first; if unreachable or not built, the bundled copy; then the old 5-box fixture.
-- Show the licence credit for the scene in the AR overlay (from scene.json/doc: ac20 "KIT", colorful-11397 the CubiCasa5K credit; read them from `artifacts/<doc_id>/doc.json` `credit` when syncing and store them next to the scene).
-Unit test: load the bundled ac20 USDZ, build SceneIndex, find a door prim by `usd_name` from its scene.json; the loader picks the bundled copy when the network fetch fails (inject a failing fetcher).
-Rules: only edit `ios/`. Keep total added resources under 30 MB (report the size). `-derivedDataPath ios/build/DerivedData`; heavy commands via scripts/heavy.sh; simulator unavailable in your sandbox: build-for-testing must pass; the LEAD runs the tests.
-Done test (LEAD runs): `scripts/heavy.sh xcodebuild test -project ios/Hologram.xcodeproj -scheme Hologram -destination 'platform=iOS Simulator,name=Hologram iPhone' -derivedDataPath ios/build/DerivedData CODE_SIGNING_ALLOWED=NO` → `** TEST SUCCEEDED **`
+Row ID: I-12 (attempt 1)
+Task: Add a UI test target `HologramUITests` (XCUITest) via project.yml with a smoke flow against the LOCAL stack (web on http://localhost:5173 or the stable build http://localhost:4173, API on http://localhost:8000; the simulator reaches the Mac's localhost directly):
+1. Launch the app with a launch argument `-WEB_URL http://localhost:4173` (support overriding Info.plist WEB_URL via launch arguments/environment).
+2. Wait for the web shell: the WKWebView shows the chat start screen (query the web view's static text, e.g. "Where shall we start?", or an accessibility identifier you expose).
+3. Open the native Demo scenes picker, choose ac20. AR doesn't run in the simulator: make the AR screen show a clear non-AR fallback in the simulator (`#if targetEnvironment(simulator)`: a SceneKit/RealityKit non-AR preview of the scene, or at minimum a "AR needs an iPhone" panel listing the loaded scene name, item count and credit); assert the credit text is visible.
+4. Simulate a bridge message (a debug-only launch argument that injects `{doc_id:"ifc_bench__ac20-arc", item_ids:[…two door GUIDs from its scene.json…]}`) and assert the AR route opened with that doc_id.
+Attach screenshots with XCTAttachment at each step.
+Rules: only edit `ios/`. Simulator unavailable in your sandbox: `build-for-testing` must pass; the LEAD runs the UI tests with the stack up.
+Done test (LEAD runs): `scripts/heavy.sh xcodebuild test -project ios/Hologram.xcodeproj -scheme Hologram -destination 'platform=iOS Simulator,name=Hologram iPhone' -derivedDataPath ios/build/DerivedData CODE_SIGNING_ALLOWED=NO` → `** TEST SUCCEEDED **` including HologramUITests
 Last failed attempt (if any): none
 
 ---
 <!-- Worker appends RESULT: or NEEDS: lines below. -->
-RESULT: I-11 implemented offline scene picker, API → bundled scene → labelled fixture fallback, source credits/licences and publishable-only sync; added resources total 1,715,251 bytes (under 30 MB); build-for-testing passed with ios/build/DerivedData, sync refusal and built bundle checks passed; real AC20 door SceneIndex and injected-fetch fallback tests compiled; LEAD must run simulator done test (CoreSimulator unavailable in sandbox). Xcode's State macro requires sandboxed plugin execution, so picker selection uses the existing ObservableObject.
+RESULT: I-12 worker validation passed: xcodegen + scripts/heavy.sh xcodebuild build-for-testing (generic iOS Simulator, ios/build/DerivedData, CODE_SIGNING_ALLOWED=NO) -> ** TEST BUILD SUCCEEDED ** with HologramTests and HologramUITests; added launch argument/environment WEB_URL/API_URL overrides, simulator metadata/credit panel, and two screenshot-attaching live smoke tests including actual WebKit bridge injection with AC20 door GUIDs. LEAD must run the assigned simulator done test with web :4173 and API :8000 up; UI execution remains unverified in this sandbox. Details: ios/HologramUITests/README.md; build log: ios/build/I-12-build.log.
