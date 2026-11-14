@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from .schema import Records, finalise, kind_of, norm, readable
@@ -130,7 +130,7 @@ class Builder(Records):
         for nid, it in self.items.items():
             if it.source != 'ifc' and it.bbox_px:
                 pages[(self.nodes[nid]['source']['doc_id'], it.page)].append(nid)
-        for (_, _), ids in pages.items():
+        for ids in pages.values():
             rooms = [n for n in ids if self.nodes[n]['kind'] == 'room']
             shapes, valid = [], []
             for n in rooms:
@@ -161,20 +161,20 @@ class Builder(Records):
                     polygon = bool(self.items[room].polygon_px)
                     self.edge('in_room', nid, room, 'containment_geom', .7 if polygon else .55,
                               {'rule': 'centre_inside_room_polygon' if polygon else 'centre_inside_room_bbox',
-                               'point_px': list(p.coords)[0], 'page': it.page,
+                               'point_px': next(iter(p.coords)), 'page': it.page,
                                'item_source': n['source'], 'room_source': self.nodes[room]['source']})
 
     def graph(self):
-        return {'project_id': self.pid, 'version': 1, 'built_at': datetime.now(timezone.utc).isoformat(),
+        return {'project_id': self.pid, 'version': 1, 'built_at': datetime.now(UTC).isoformat(),
                 'nodes': list(self.nodes.values()), 'edges': list(self.edges.values()), 'warnings': self.warnings}
 
 
 def build_uncached(project, root):
     b = Builder(project, root).populate()
     # Additional modules are deliberately small: workers can merge independently without editing this builder.
+    from .evidence import comparisons, references, revisions_and_issues
     from .ifc import enrich_ifc
     from .matching import match_documents
-    from .evidence import comparisons, references, revisions_and_issues
     enrich_ifc(b)
     match_documents(b)
     comparisons(b)
