@@ -88,3 +88,11 @@ def test_named_room_zero_is_not_certain():
     validate_answer(a)
     if a["answer"]["value"] == 0:
         assert a["answer"]["confidence"] <= 0.5 and "not proof" in a["answer"]["text_md"]
+
+
+def test_where_are_the_toilets_on_a_plan_map_points_not_counts():
+    a = answer("where are the toilets", [C1])
+    validate_answer(a)
+    t = a["answer"]["text_md"]
+    assert a["route"] == "planmap" and a["evidence"]["boxes"] and "[1]" in t
+    assert "bottom" in t or "top" in t or "middle" in t and "Total area" not in t

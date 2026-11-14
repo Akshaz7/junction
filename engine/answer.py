@@ -407,6 +407,19 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                 res["trace"] = trace
                 return res
 
+        # 0-b. "where are the toilets / sinks / showers" on a plan map: positions from detected elements, no model
+        from engine.locate import fixture_thing, fixture_locate
+        _fx = fixture_thing(question)
+        if _fx and parse_scene(question) is None:
+            from engine.solvers.data import load_doc as _ldf
+            fdoc = _ldf(doc_ids[0], root)
+            if fdoc is not None and fdoc.mode == "planmap":
+                res = fixture_locate(question, fdoc, _fx, t0)
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                return res
+
         # 0. scene commands (hide / isolate / highlight / reset): code only, edits never touch data
         intent = parse_scene(question)
         scene_cost, scene_prov = 0.0, None
