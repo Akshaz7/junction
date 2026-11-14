@@ -180,6 +180,8 @@ def _notes(question, doc_id, pts, t0):
             sub = [h for h in hits if any(w in h[1]["text"].lower() for w in extra)]
             hits = sub or hits
         if not hits:
+            if re.search(r"(?<![\w])'[^']{2,}'(?!\w)|\"[^\"]{2,}\"", question):
+                return None   # a named room or element ('ESIK (58-2)'): its own record may carry the value, so let the element path answer
             if noun in ("area", "perimeter"):
                 what = "areas" if noun == "area" else "perimeters"
                 text = (f"**This file does not show {what}.** Its printed text has no room table or note with {what}. "

@@ -389,6 +389,8 @@ def named_rooms(question: str, doc: Doc, t0) -> dict | None:
     wants_area = AREAQ.search(ql)
     if not howmany and not wants_area:
         return None
+    if re.search(r"\broom\s+[a-z]?\d", ql) or re.search(r"\blabell?ed\s+['\"]", ql):   # numbered room, or "labelled 'Zimmer'": the room solver reads printed labels too   # "room 1.51 ('Pièce')": one numbered room, which the room solver picks by its number
+        return None
     word = None
     rx = None
     for a, base in list(SYN_ALIAS.items()) + [(k, k) for k in SYN]:
@@ -1052,7 +1054,8 @@ _OUTDOOR = re.compile(r"terrace|terrassi|balcon|parveke|outdoor|patio|garden|yar
 
 def plan_total(question: str, doc: Doc, t0) -> dict | None:
     """"how big is this flat": the indoor rooms added up (plan maps only; IFC has its own model totals)."""
-    if doc.mode != "planmap" or not PLANTOTAL.search(question) or re.search(r"\bhow many\b", question, re.I):
+    if doc.mode != "planmap" or not PLANTOTAL.search(question) or re.search(r"\bhow many\b", question, re.I) \
+            or re.search(r"\b(?:apartment|unit|flat|dwelling)\s+[A-Z0-9]\b", question):   # one named apartment: the room solver sums its rooms
         return None
     rooms = [(r, _qty(r, "room", "area")) for r in _of_kind(doc, "room") if not _OUTDOOR.search(f"{r.label or ''} {r.props.get('room_type') or ''}")]
     rooms = [(r, v) for r, v in rooms if v]
