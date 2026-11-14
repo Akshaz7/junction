@@ -58,6 +58,7 @@ test('desktop asks; phone sees in-progress states before the final answer with c
     await d.getByRole('button', { name: 'Send question', exact: true }).click()
     await expect(p.locator('.pending-exchange .question-bubble')).toHaveText(SLOW_QUESTION, { timeout: 5000 })
     const firstEventMs = Date.now() - t0
+    console.log(JSON.stringify({ firstEventMs }))
     await expect(p.locator('.pending-exchange .status-lines')).toBeVisible()
     await expect(p.locator('.pending-exchange .answer-detail')).toBeVisible({ timeout: 5000 }) // trace steps streamed in
     const slowCard = p.locator('.exchange:not(.pending-exchange)').filter({ hasText: SLOW_QUESTION }).last()
@@ -70,7 +71,13 @@ test('desktop asks; phone sees in-progress states before the final answer with c
     await expect(d.locator('.question-bubble').filter({ hasText: SLOW_QUESTION })).toHaveCount(1)
     await expect(p.locator('.question-bubble').filter({ hasText: SLOW_QUESTION })).toHaveCount(1)
 
-    // 2) A cited count answer reaches the phone with citations.
+    // 2) A cited count answer reaches the phone with citations (fresh chat: a follow-up question in a threaded chat
+    //    is rewritten by the thread-memory step, so this check would not match the typed text).
+    const id1 = id
+    const id2c = await newChat(desktop.request, `Cross-device cited ${Date.now()}`)
+    await ready(d, `/chat?chat=${id2c}`)
+    await ready(p, `/chat?chat=${id2c}`)
+    void id1
     await d.getByRole('combobox', { name: 'Ask about your drawings' }).fill(QUESTION)
     await d.getByRole('button', { name: 'Send question', exact: true }).click()
     const answerCard = p.locator('.exchange:not(.pending-exchange)').filter({ hasText: QUESTION }).last()
@@ -80,7 +87,7 @@ test('desktop asks; phone sees in-progress states before the final answer with c
     // One tap: Show on table sends this chat and the answer's items to native AR.
     await answerCard.getByRole('button', { name: 'Show on table' }).click()
     const message = await p.evaluate(() => (window as unknown as { arMessages: { chat_id?: string; item_ids?: string[] }[] }).arMessages.at(-1))
-    expect(JSON.stringify(message)).toContain(id)
+    expect(JSON.stringify(message)).toContain(id2c)
     // Visible in the card: Visualise it opens the drawing, whose own Visualise it is one more tap.
     await expect(answerCard.getByRole('button', { name: 'Visualise it' })).toBeVisible()
     await answerCard.getByRole('button', { name: 'Visualise it' }).click()
@@ -89,7 +96,7 @@ test('desktop asks; phone sees in-progress states before the final answer with c
     // Phone posts (as AR voice does through the API); the desktop sees it live.
     const voice = 'How many windows are there?'
     const t1 = Date.now()
-    const posted = phone.request.post(`${API}/api/chats/${id}/messages`, { data: { content: voice, doc_ids: [docId] } })
+    const posted = phone.request.post(`${API}/api/chats/${id2c}/messages`, { data: { content: voice, doc_ids: [docId] } })
     await expect(d.locator('.question-bubble').filter({ hasText: voice })).toBeVisible({ timeout: 3000 })
     const voiceMs = Date.now() - t1
     expect((await posted).ok()).toBe(true)
@@ -105,15 +112,28 @@ test('a new chat from another device shows a banner; Open follows its live strea
     const p = await phone.newPage(), d = await desktop.newPage()
     await ready(p, '/chat')
     await ready(d, '/chat')
+    // Pair the phone with the laptop first (W-39) where the build has it; older builds show the banner to everyone.
+    const pairBtn = d.getByRole('button', { name: 'Pair a phone' })
+    if (await pairBtn.count()) {
+      await pairBtn.click()
+      const link = await d.getByLabel('Pairing link').inputValue()
+      await p.goto(link)
+      await expect(p.getByRole('combobox', { name: 'Ask about your drawings' })).toBeEnabled({ timeout: 20_000 })
+      await p.waitForTimeout(1500)
+      await d.keyboard.press('Escape')
+    }
     const q1 = `How many doors are there? ${Date.now() % 1000}`
     await d.getByRole('combobox', { name: 'Ask about your drawings' }).fill(q1)
     const t0 = Date.now()
     await d.getByRole('button', { name: 'Send question', exact: true }).click()
     const banner = p.getByTestId('follow-banner')
-    await expect(banner).toContainText('New question from another device', { timeout: 5000 })
-    await expect(banner).toContainText(q1)
+    // Paired: the chat opens by itself. Unpaired (older build): a banner offers it.
+    await expect(banner.or(p.locator('.question-bubble').filter({ hasText: q1 }).first())).toBeVisible({ timeout: 5000 })
     const bannerMs = Date.now() - t0
-    await banner.getByRole('button', { name: 'Open' }).click()
+    if (await banner.count()) {
+      await expect(banner).toContainText(q1)
+      await banner.getByRole('button', { name: 'Open' }).click()
+    }
     await expect(p.locator('.question-bubble').filter({ hasText: q1 }).first()).toBeVisible({ timeout: 10_000 })
     await expect(p.locator('.exchange:not(.pending-exchange) .answer-text').first()).toBeVisible({ timeout: 20_000 })
     await expect(banner).toHaveCount(0)
