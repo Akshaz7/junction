@@ -74,7 +74,7 @@ async function audit(page: Page, route: string, problems: string[], seen: string
     if (tag === 'a' && (!href || href === '#')) { problems.push(`${who} has no real href`); continue }
     const before = await domHash(page)
     let reqs = 0, bad = ''
-    const onRes = (r: import('@playwright/test').Response) => { if (r.url().includes('/api/')) { reqs++; if (r.status() >= 400 && r.status() !== 404) bad = `${r.status()} ${r.url()}` } }
+    const onRes = (r: import('@playwright/test').Response) => { if (r.url().includes('/api/')) { reqs++; if (r.status() >= 400 && !(process.env.AUDIT_ALLOW_OPTIONAL_404 && /\/files\/(elements|text-\d+)\.json/.test(r.url()))) bad = `${r.status()} ${r.url()}` } }
     page.on('response', onRes)
     let outcome = false
     const popup = page.waitForEvent('popup', { timeout: 1200 }).then(async (p) => { outcome = true; await p.close() }).catch(() => {})

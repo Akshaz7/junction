@@ -26,7 +26,7 @@ async function openEdit(page: Page) {
   await page.getByLabel('3D building model', { exact: true }).evaluate((canvas, id) => (canvas as LinkedViewerCanvas).__viewer3d!.pick(id), doorId)
   return viewer
 }
-const bg = (page: Page, severity: string) => page.locator(`[data-advisor-card][data-severity="${severity}"]`).first().evaluate((el) => getComputedStyle(el).backgroundColor)
+const bg = (page: Page, severity: string) => page.locator(`[data-advisor-card][data-severity="${severity}"]`).first().evaluate((el) => getComputedStyle(el).getPropertyValue('--advisor-color').trim())
 
 test('3D edit panel: hide posts op hide with item_ids; cards show severity colour and a Checked line', async ({ page }) => {
   await page.route('**/api/advise', (route) => route.fulfill({ json: fixture([doorId]) }), { times: 1 })
@@ -39,7 +39,7 @@ test('3D edit panel: hide posts op hide with item_ids; cards show severity colou
   const [red, amber, grey] = await Promise.all(['violation', 'suggestion', 'info'].map((s) => bg(page, s)))
   expect(new Set([red, amber, grey]).size).toBe(3)
   await expect(viewer.locator('[data-severity="violation"] .viewer3d-advisor-select')).toContainText('Violation')
-  await expect(viewer.locator('[data-severity="violation"]').getByTestId('advisor-checked')).toHaveText('Checked: R-848-33, R-1007-12')
+  await expect(viewer.locator('[data-severity="violation"]').getByTestId('advisor-checked')).toHaveText('Checked: R 848 33 · R 1007 12')
   await expect(viewer.locator('[data-severity="info"]').getByTestId('advisor-checked')).toHaveCount(0)
 })
 

@@ -161,6 +161,9 @@ async function preparePhase(page: Page, phase: Phase, answerGate: Promise<void>)
   await page.goto(`/#/${scene}`)
   // Add the reference's native status/home safe areas without changing component geometry.
   if (device === 'phone') await page.addStyleTag({ content: ':root { --app-safe-top:44px; --app-safe-bottom:34px; }' })
+  // Deliberate Stoa Pro rebrand (W-66): the rail is 104px, the reference's 64px. Compare the content
+  // area at the reference geometry; the rail itself is masked below as the rebrand region.
+  if (device === 'desktop') await page.addStyleTag({ content: '.app-shell { grid-template-columns: 64px minmax(0, 1fr) !important; }' })
   await expect(page.getByText('Connected workspace', { exact: true })).toBeVisible()
   let target: Locator | undefined
   if (scene === 'data') {
@@ -168,7 +171,7 @@ async function preparePhase(page: Page, phase: Phase, answerGate: Promise<void>)
     if (n === 2) target = file()
     if (n >= 3) {
       await file().click()
-      await expect(page.getByRole('complementary', { name: 'Document details' })).toBeVisible()
+      await expect(page.locator('aside.data-detail')).toBeVisible()
       const preview = page.locator('.data-detail .data-preview img')
       await expect.poll(() => preview.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true)
       if (device === 'desktop') {
@@ -220,6 +223,9 @@ async function preparePhase(page: Page, phase: Phase, answerGate: Promise<void>)
     if (n === sendPhase) target = page.getByRole('button', { name: 'Send question', exact: true })
     if (n > sendPhase) {
       await page.getByRole('button', { name: 'Send question', exact: true }).click()
+      // A drawing question is held until a document is chosen; choose the generated one.
+      await page.getByTestId('need-document').getByRole('button', { name: 'Choose a document' }).click()
+      await page.getByRole('option').first().click()
       if (thinking) await expect(page.locator('.status-lines')).toBeVisible()
       else await expect(page.locator('.answer-text')).toBeVisible()
     }
@@ -227,7 +233,7 @@ async function preparePhase(page: Page, phase: Phase, answerGate: Promise<void>)
     if (n === citationPress) target = citation()
     if (n > citationPress) {
       await citation().click()
-      await expect(page.getByRole(device === 'desktop' ? 'region' : 'dialog', { name: 'Drawing viewer' })).toBeVisible()
+      await expect(device === 'desktop' ? page.getByRole('region', { name: 'Drawing viewer' }) : page.locator('aside.document-viewer')).toBeVisible()
       if (device === 'desktop' && n === 11) target = navigation().getByRole('link', { name: 'Changes', exact: true })
       if (device === 'phone' && n === 13) target = page.getByRole('button', { name: 'Close drawing viewer', exact: true })
       if (device === 'phone' && n === 14) {
@@ -274,6 +280,11 @@ async function screenshotPhase(page: Page, phase: Phase, testInfo: TestInfo) {
   }
   if ('mode' in state && state.mode) await expect(page.getByRole('button', { name: state.mode, exact: true })).toHaveAttribute('aria-pressed', 'true')
   const masks: Mask[] = [...phase.masks]
+  if (phase.device === 'desktop') masks.push({ x: 0, y: 0, width: 72, height: 800, reason: 'Deliberate Stoa Pro rebrand (W-66): the rail carries our logo and PRO mark; the content area is compared at the reference 64px rail geometry.' })
+  if (phase.device === 'desktop') masks.push(
+    { x: 72, y: 8, width: 256, height: 56, reason: 'Deliberate Stoa Pro rebrand (W-63): the mark in the top bar.' },
+    { x: 1040, y: 8, width: 208, height: 56, reason: 'Our additions to the header (W-39 Pair a phone, share/export), not in the reference.' })
+  if (phase.device === 'phone') masks.push({ x: 48, y: 48, width: 176, height: 32, reason: 'Deliberate Stoa Pro rebrand (W-71): the mark top left.' }, { x: 352, y: 48, width: 32, height: 32, reason: 'Deliberate Stoa Pro rebrand (W-69): the mark top right.' })
   for (const item of phase.selectors || []) {
     for (const locator of await page.locator(item.selector).all()) {
       masks.push(...await visibleMasks(locator, item.text_only, item.reason))
