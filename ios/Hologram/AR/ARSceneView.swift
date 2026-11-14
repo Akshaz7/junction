@@ -23,6 +23,11 @@ final class ARSceneController: ObservableObject {
     @Published private(set) var selectedItem: ItemCardModel?
     @Published private(set) var activeStorey: String?
     @Published private(set) var showRoof = false
+    /// True while any item is hidden by an edit; the advisor card goes away when the last one returns.
+    @Published private(set) var hasHiddenItems = false
+    /// Screen point above the item the advisor card is about; nil when off screen or not tracking.
+    @Published private(set) var advisorAnchor: CGPoint?
+    private var advisorAnchorItemIDs: [String] = []
     /// True while a horizontal surface is under the screen centre and placement can be confirmed.
     @Published private(set) var canPlace = false
     /// Called when the already-selected item is tapped again (highlights it everywhere).
@@ -228,7 +233,28 @@ final class ARSceneController: ObservableObject {
         }
     }
 
+    func trackAdvisorAnchor(itemIDs: [String]) {
+        advisorAnchorItemIDs = itemIDs
+        if itemIDs.isEmpty { advisorAnchor = nil } else { updateAdvisorAnchor() }
+    }
+
+    /// Projects the top centre of the card's items (the hidden door keeps its manifest box) to the screen.
+    private func updateAdvisorAnchor() {
+        guard isPlaced, let view = arView, let content, let manifest else { advisorAnchor = nil; return }
+        let boxes = advisorAnchorItemIDs.compactMap { manifest.items[$0]?.bbox_m }
+        guard let first = boxes.first else { advisorAnchor = nil; return }
+        let local = SIMD3<Float>(first.center.x, first.maximum.y, first.center.z)
+        let point = view.project(content.convert(position: local, to: nil))
+        if let point, view.bounds.insetBy(dx: -40, dy: -40).contains(point) {
+            if let old = advisorAnchor, abs(old.x - point.x) < 1.5, abs(old.y - point.y) < 1.5 { return }
+            advisorAnchor = point
+        } else {
+            advisorAnchor = nil
+        }
+    }
+
     private func updateAnswerLabels() {
+        if !advisorAnchorItemIDs.isEmpty { updateAdvisorAnchor() }
         if isPlaced, let view = arView { highlightController?.faceCamera(view.cameraTransform.rotation) }
         labelFrame = (labelFrame + 1) % 4
         guard labelFrame == 0, isPlaced, buildAnimator == nil, let view = arView else { return }
@@ -591,6 +617,7 @@ final class ARSceneController: ObservableObject {
 
     private func applyCutaway(animated: Bool = false) {
         guard let manifest else { return }
+        if hasHiddenItems != !hiddenItemIDs.isEmpty { hasHiddenItems = !hiddenItemIDs.isEmpty }
         let hidden = hiddenUSDNames(manifest: manifest)
         let visible = visibleItemIDs
         for (id, item) in manifest.items {

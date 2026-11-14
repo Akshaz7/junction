@@ -23,6 +23,9 @@ struct ARScreen: View {
         #else
         ZStack {
             ARSceneView(controller: controller).ignoresSafeArea()
+            AdvisorCallout(card: advisor.spotlight, anchor: controller.advisorAnchor,
+                           onDismiss: { advisor.dismissSpotlight() },
+                           onShow: { card in selectAdvisorCard(card) })
             VStack(spacing: 10) {
                 topBar
                 placementPill
@@ -75,6 +78,13 @@ struct ARScreen: View {
             liveSocket.onEdit = nil
             liveSocket.onState = nil
             liveSocket.onAdvisorCards = nil
+        }
+        .onChange(of: advisor.spotlight) { _, card in
+            controller.trackAdvisorAnchor(itemIDs: card?.item_ids ?? [])
+        }
+        .onChange(of: controller.hasHiddenItems) { _, hidden in
+            // "Put it back" / "reset the model": the violation no longer applies.
+            if !hidden { advisor.clearEditCards() }
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .background { voice.stop() }
@@ -178,6 +188,9 @@ struct ARScreen: View {
             HStack(alignment: .bottom) {
                 ARMicButton(voice: voice, docID: controller.activeDocID) { answer in
                     controller.applyVoiceAnswer(answer)
+                    if let cards = answer.advisor_cards, !cards.isEmpty {
+                        advisor.setEditCards(cards, docID: answer.evidence.scene.doc_id)
+                    }
                 }
                 Spacer()
                 if !advisor.cards.isEmpty { advisorPill }

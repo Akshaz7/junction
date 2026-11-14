@@ -17,7 +17,28 @@ struct AdvisorCard: Codable, Equatable, Identifiable {
     let body: String
     let item_ids: [String]
     let source: Source
+    /// "violation" | "suggestion" | "info"; absent on older servers.
+    var severity: String? = nil
+    /// Rule ids that were checked for this edit ("Checked: ..." line).
+    var checked: [String]? = nil
     var id: String { card_id }
+
+    enum Level: String { case violation, suggestion, info }
+
+    /// Severity as the web card shows it; falls back to the kind when the server sent none.
+    var level: Level {
+        if let severity, let level = Level(rawValue: severity) { return level }
+        switch kind {
+        case .warning: return .violation
+        case .option: return .suggestion
+        case .info: return .info
+        }
+    }
+
+    static func mostSevere(_ cards: [AdvisorCard]) -> AdvisorCard? {
+        let order: [Level: Int] = [.violation: 0, .suggestion: 1, .info: 2]
+        return cards.min { (order[$0.level] ?? 3) < (order[$1.level] ?? 3) }
+    }
 }
 
 /// Shared by the POST response and WebSocket event. An unsupported claim never

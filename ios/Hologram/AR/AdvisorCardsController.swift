@@ -23,6 +23,8 @@ struct AdvisorClient {
 @MainActor
 final class AdvisorCardsController: ObservableObject {
     @Published private(set) var cards: [AdvisorCard] = []
+    /// The most severe card from the latest edit: shown anchored on the model until dismissed or undone.
+    @Published private(set) var spotlight: AdvisorCard?
     private(set) var docID: String?
     private var revision = 0
     private let client: AdvisorClient
@@ -33,13 +35,32 @@ final class AdvisorCardsController: ObservableObject {
         revision += 1
         docID = nil
         cards = []
+        spotlight = nil
     }
+
+    /// Cards that came with a voice answer (an edit such as "remove the front door").
+    func setEditCards(_ newCards: [AdvisorCard], docID: String) {
+        revision += 1
+        self.docID = docID
+        cards = Array(newCards.prefix(3))
+        spotlight = AdvisorCard.mostSevere(cards)
+    }
+
+    /// Edit undone or reset: the checks no longer describe the model.
+    func clearEditCards() {
+        revision += 1
+        cards = []
+        spotlight = nil
+    }
+
+    func dismissSpotlight() { spotlight = nil }
 
     func load(docID: String, fixtureURL: URL? = nil) async {
         revision += 1
         let loadingRevision = revision
         self.docID = docID
         cards = []
+        spotlight = nil
         do {
             let response: AdvisorCardsResponse
             if let fixtureURL {
@@ -63,6 +84,7 @@ final class AdvisorCardsController: ObservableObject {
         guard event.doc_id == docID else { return }
         revision += 1
         cards = event.cards
+        spotlight = AdvisorCard.mostSevere(event.cards)
     }
 
     @discardableResult

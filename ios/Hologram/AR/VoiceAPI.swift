@@ -23,6 +23,8 @@ struct VoiceAnswer: Decodable, Equatable {
     }
     let answer: Answer
     let evidence: Evidence
+    /// Checks the server ran on the edited model after a hide ("remove the front door").
+    var advisor_cards: [AdvisorCard]? = nil
 
     var highlightLabels: [String: String] {
         var labels: [String: String] = [:]
