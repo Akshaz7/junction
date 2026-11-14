@@ -20,3 +20,9 @@ Updated Sat 14 Nov 2026 ~23:50 EET.
 - Backend build_rev 6e0419f live (f76bb92 build failed on registry push; redeployed with new rev). /api/projects 200 (migration 007 applied).
 - Web prod (hologram) and staging (hologram-staging-pi) redeployed from 6e0419f.
 - Contents: shared edits, compare-versions, mistakes, 3D, MEP, projects engine+UI, changes screen, scansym.
+
+## Batch 3 deployed (Sun 15 Nov 00:25)
+- Backend 691c47a live: wallarea, order, props (finished work committed from worktrees), CONTRACT 3.4 + DECISIONS line. sample200 156/200, no correct->wrong (two guard fixes: props leaves area questions to solvers; order leaves plain length questions; wallarea no longer matches "sheet A-909").
+- Web unchanged (no web files in this batch).
+- Prod note: wall surface area on ifc_bench__ac20-arc answers "cannot be verified" because wallarea needs the original IFC body geometry, which the container does not hold. Needs the IFC (or its geometry cache) shipped to prod; lead to decide.
+- Next: [perf + scales] -> [robust + mirror-shell/changes] -> [e2e + qa + qa2].
