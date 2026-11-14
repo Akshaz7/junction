@@ -100,6 +100,17 @@ def build(res: dict, question: str, root: Path) -> dict | None:
             pass
     c = _confidence.run(ctx)
     steps = c.pop("_steps", ctx["steps"])
+    from engine.taught_items import evidence_step
+    manual = evidence_step(cited)
+    if manual:
+        steps.insert(0, manual)
+        res.setdefault('trace', []).append({'step': 'user_label', 'detail': manual['text'], 'ms': 0, 'model': None, 'cost_usd': 0})
+        if unit == 'count' and all(it.props.get('confirmed_by_user') for it in cited):
+            c = {'label': 'Cross-checked', 'pct': 100,
+                 'reason': 'Every cited item was marked by you. This is review coverage, not proof that every item on the sheet was found.',
+                 'improve': 'Check for items that have not been marked.'}
+        else:
+            c['reason'] += ' Includes items marked by you; their labels are user-verified, not their dimensions or sheet completeness.'
     if not steps:
         return None
     return {"steps": steps[:4], "confidence": c}

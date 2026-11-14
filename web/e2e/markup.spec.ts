@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test'
 import { mkdir } from 'node:fs/promises'
 const api = process.env.MARKUP_API_ORIGIN || 'http://127.0.0.1:8387'
-const output = '../results/final/MARKUP'
-test('teach a symbol, review with keyboard, persist a pin and export it', async ({ page }) => {
+const output = '../results/final/TAUGHT'
+test('manually mark one item, repeat its name, remove and restore, persist and export notes', async ({ page }) => {
   await mkdir(output, { recursive: true })
   await page.request.post(`${api}/test-reset`)
   await page.route('**/api/**', async (route) => {
@@ -24,16 +24,33 @@ test('teach a symbol, review with keyboard, persist a pin and export it', async 
   await page.mouse.move(bounds!.x + 4241 * sx, bounds!.y + 1012 * sy)
   await page.mouse.down(); await page.mouse.move(bounds!.x + 4264 * sx, bounds!.y + 1022 * sy, { steps: 5 }); await page.mouse.up()
   await page.getByLabel('Symbol name', { exact: true }).fill('Supply air terminals')
-  await page.getByRole('textbox', { name: 'Note (optional)' }).fill('Candidate matches need a site check.')
-  await page.getByRole('button', { name: 'Find all like this' }).click()
-  await expect(page.getByRole('button', { name: 'Confirm (Y)' })).toBeVisible({ timeout: 45_000 })
-  await page.keyboard.press('y')
-  await expect(page.locator('.markup-count')).toContainText('1 confirmed')
-  await page.keyboard.press('n')
-  await expect(page.locator('.markup-count')).toContainText('1 rejected')
-  await page.keyboard.press('ArrowLeft')
-  await expect(page.getByLabel('Zoom level')).not.toHaveText('100%')
-  await page.screenshot({ path: `${output}/symbol-review.png` })
+  await page.getByRole('textbox', { name: 'Note (optional)' }).fill('One item marked manually.')
+  await page.getByRole('button', { name: 'Save item' }).click()
+  await expect(page.getByRole('button', { name: 'Remove item' })).toBeVisible()
+  await expect(page.locator('.markup-count')).toContainText('Marked by you')
+  await expect(page.locator('.symbol-match')).toHaveCount(1)
+  await expect(page.locator('.symbol-match text')).toHaveCount(0)
+  const saved = await page.request.get(`${api}/api/docs/sheet-under-test/markup`)
+  expect((await saved.json()).symbols[0].matches).toHaveLength(1)
+  await page.getByRole('button', { name: 'Remove item' }).click()
+  await expect(page.locator('.markup-count')).toContainText('Removed')
+  await page.getByRole('button', { name: 'Restore item' }).click()
+  await expect(page.locator('.markup-count')).toContainText('Marked by you')
+  await page.screenshot({ path: `${output}/manual-item.png` })
+  await page.getByRole('button', { name: 'Fit drawing', exact: true }).click()
+  await page.getByRole('button', { name: 'Label a symbol', exact: true }).click()
+  const second = await image.boundingBox()
+  const scale = second!.width / 4762
+  await page.mouse.move(second!.x + 4290 * scale, second!.y + 1012 * scale)
+  await page.mouse.down(); await page.mouse.move(second!.x + 4313 * scale, second!.y + 1022 * scale, { steps: 5 }); await page.mouse.up()
+  await page.getByLabel('Symbol name', { exact: true }).fill('Supply air terminals')
+  await page.getByRole('button', { name: 'Save item', exact: true }).click()
+  await expect(page.getByLabel('Saved item')).toHaveValue(/.+/)
+  await expect(page.getByLabel('Saved item').locator('option')).toHaveCount(3)
+  const planResponse = await page.request.get(`${api}/api/docs/sheet-under-test/planmap/1`)
+  const plan = await planResponse.json()
+  expect(plan.items).toHaveLength(2)
+  expect(plan.items.every((item: { kind: string; source: string }) => item.kind === 'terminal' && item.source === 'taught')).toBe(true)
   await page.getByRole('button', { name: 'Fit drawing', exact: true }).click()
   await page.getByRole('button', { name: 'Place a note pin' }).click()
   const b = await image.boundingBox()
@@ -45,7 +62,7 @@ test('teach a symbol, review with keyboard, persist a pin and export it', async 
   await expect(page.locator('.drawing-plane > img')).toBeVisible()
   await page.getByRole('button', { name: 'Labels & notes', exact: true }).click()
   await expect(page.locator('.markup-pin-list')).toContainText('Check ceiling clearance before ordering.')
-  await expect(page.locator('.markup-count')).toContainText('1 confirmed')
+  await expect(page.locator('.markup-count')).toContainText('Marked by you')
   await page.locator('.markup-pin-list').getByRole('button', { name: 'Pin 1: Check ceiling clearance before ordering.' }).click()
   await page.screenshot({ path: `${output}/saved-pin.png` })
   await page.getByRole('button', { name: 'Next page', exact: true }).click()

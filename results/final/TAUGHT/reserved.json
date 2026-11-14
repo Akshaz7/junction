@@ -1,0 +1,4 @@
+{
+  "held_back_until_final": "data/vision_gen/finna__hka-139878174949000-149562251259600/planmap-1.json",
+  "method": "random.SystemRandom choice from real plan maps, excluding heldout ids"
+}
