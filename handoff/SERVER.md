@@ -1,13 +1,8 @@
-# SERVER (Codex): row S-15. Demo reset + cache warm script
-Scope: scripts/demo_reset.py (new) only.
-`python3 scripts/demo_reset.py <base_url> [--dry-run]` prepares the live site for judging:
-1. List chats via the API and delete those whose title starts with "smoke-", "e2e-", "test" or "Voice in AR" from automated runs. Never delete other chats. With --dry-run, only list them.
-2. Warm the answer cache: ask the demo questions from docs/DEMO.md (parse its question list) on their docs in a throwaway chat titled "warmup-<time>", then delete that chat. Answers repeat fast because the model cache is keyed on inputs.
-3. Fetch every demo doc's scene, glb, usdz and page images once, to warm the CDN and disk.
-4. Print a summary table with timings.
-Pace calls to stay under the rate limit (≤25 writes/min). It needs no keys; never print secrets.
-Done test: --dry-run against http://localhost:8000 (if up) or the deployed site works and lists the actions.
+# SERVER (Codex): row S-16. Older-version doc 404
+Scope: server/docs_routes.py (or wherever GET /api/docs/{id} lives), server/docmeta_store.py, server/tests/.
+WEB-INTEG found that older revisions in a series often 404 on GET /api/docs/{id}, although their page image still serves. Every version listed in a series (engine.docmeta / pipeline/series.py; doc.versions[]) must resolve on /api/docs/{id} with its own metadata (title, version_index, version_count, series_id, size, date), plus /pages/{n}.png and /source. Find why they 404 (missing from the docs table or index, artifacts dir naming, etc.) and fix it.
+Add a test that iterates over every version of 3 real series and asserts 200 on each.
+Done test: `.venv/bin/python -m pytest -q -p no:cacheprovider server/tests/<your test>`. If DB tests can't run in the sandbox, say so.
 Do not commit. Append a RESULT: line.
-
-NEEDS: S-15 requires DELETE /api/chats/{chat_id} (including related messages/answers/scene edits); absent in server/chats_routes.py and local OpenAPI. Script scope excludes server changes; real reset stops before writes until this endpoint exists.
-RESULT: S-15 scripts/demo_reset.py implemented; python3 scripts/demo_reset.py http://localhost:8000 --dry-run passed (exit 0, 10.017 s): 1 deletion target, 7 parsed questions on 3 docs, 12 asset fetches planned; stdlib-only, 2.5 s request pacing, title recheck and finally cleanup. Mock checks passed for deletion scope/renames, missing-route no-write guard, failure cleanup, page enumeration and SSE errors. Real reset needs the missing chat-delete API above; no chats changed, no commit.
+NEEDS: LEAD/deploy owner: deploy/build_demo_artifacts.py excludes original PDFs; ship publishable series originals as artifacts/<doc_id>/source.pdf so /source also works in containers without the dataset. Packaging is outside this row's named scope.
+RESULT: S-16 fixed DB-only detail/source lookups with per-doc manifest/registry fallback, preserved each revision's metadata, and added /pages/{n}.png. Done test `.venv/bin/python -m pytest -q -p no:cacheprovider server/tests/test_doc_versions.py`: 5 passed in 0.93s, including real PostgreSQL and all 10 versions of 3 real series (detail/images/source; manifest and registry paths). Existing server/tests/test_docs.py also passed (7 combined). Changed only server/docs_routes.py, server/docmeta_store.py, server/tests/test_doc_versions.py and this handoff; no commit.

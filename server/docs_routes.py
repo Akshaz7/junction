@@ -28,6 +28,22 @@ def _row(r, stored=None, by_doc=None) -> dict:
     return d
 
 
+async def _document(doc_id: str) -> dict:
+    if not re.fullmatch(r"[A-Za-z0-9_.\-]+", doc_id) or doc_id in {".", ".."}:
+        raise HTTPException(400, "bad doc_id")
+    pool = await db.get_pool()
+    r = await pool.fetchrow(f"select {COLS} from documents where doc_id=$1", doc_id) if pool is not None else None
+    if r is None:
+        # Images are served from artifacts independently of the documents table.
+        # A partial DB seed must not make those revisions' detail/source URLs 404.
+        r = docmeta_store.document_record(doc_id)
+    if r is None:
+        if pool is None:
+            raise HTTPException(503, "database unavailable")
+        raise HTTPException(404, "document not found")
+    return dict(r)
+
+
 @router.get("/docs")
 async def list_docs():
     pool = await _pool_or_503()
@@ -57,23 +73,25 @@ async def folders():
 
 @router.get("/docs/{doc_id}")
 async def get_doc(doc_id: str):
-    pool = await _pool_or_503()
-    r = await pool.fetchrow(f"select {COLS} from documents where doc_id=$1", doc_id)
-    if r is None:
-        raise HTTPException(404, "document not found")
-    return _row(r)
+    return _row(await _document(doc_id))
+
+
+@router.get("/docs/{doc_id}/pages/{n}.png")
+async def page_png(doc_id: str, n: int):
+    """PNG alias for the contract's /pages/{n}/image URL, including old issues."""
+    from . import artifact_store
+    from .files_routes import page_image
+
+    if not re.fullmatch(r"[A-Za-z0-9_.\-]+", doc_id) or doc_id in {".", ".."}:
+        raise HTTPException(400, "bad doc_id")
+    await artifact_store.ensure_doc(doc_id)
+    return await page_image(doc_id, n)
 
 
 @router.get("/docs/{doc_id}/source")
 async def doc_source(doc_id: str):
     """Download the original file (pdf, ifc, dxf, ...). 404 not_built when the container does not hold it."""
-    if not re.match(r"^[A-Za-z0-9_.\-]+$", doc_id):
-        raise HTTPException(400, "bad doc_id")
-    pool = await _pool_or_503()
-    r = await pool.fetchrow("select doc_id, files from documents where doc_id=$1", doc_id)
-    if r is None:
-        raise HTTPException(404, "document not found")
-    rec = dict(r)
+    rec = await _document(doc_id)
     if isinstance(rec.get("files"), str):
         rec["files"] = json.loads(rec["files"])
     p = docmeta_store.source_file(rec)

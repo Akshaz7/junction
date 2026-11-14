@@ -21,7 +21,12 @@ def _load(path: Path):
     key = (str(path), st.st_mtime_ns, st.st_size)
     if _cache.get("k:" + str(path)) != key:
         try:
-            _cache["v:" + str(path)] = json.loads(path.read_text())
+            raw = path.read_text()
+            if path.suffix == ".jsonl":
+                records = [json.loads(line) for line in raw.splitlines() if line.strip()]
+                _cache["v:" + str(path)] = {r["doc_id"]: r for r in records}
+            else:
+                _cache["v:" + str(path)] = json.loads(raw)
         except (OSError, ValueError):
             return None
         _cache["k:" + str(path)] = key
@@ -30,6 +35,20 @@ def _load(path: Path):
 
 def docmeta_file() -> dict:
     return _load(config.artifacts_dir() / "docmeta.json") or {}
+
+
+def document_record(doc_id: str) -> dict | None:
+    """Resolve unseeded revisions from their own manifest, then the dataset registry.
+
+    Callers validate doc_id before using it as an artifact directory name. The
+    series title belongs to the latest issue, so never use it for an older one.
+    """
+    rec = _load(config.artifacts_dir() / doc_id / "doc.json")
+    if isinstance(rec, dict) and rec.get("doc_id") == doc_id:
+        return rec.copy()
+    registry = _load(config.artifacts_dir() / "registry.jsonl") or {}
+    rec = registry.get(doc_id)
+    return rec.copy() if rec else None
 
 
 def series_all() -> list[dict]:
@@ -69,8 +88,12 @@ def enrich(rec: dict, created_at=None, by_doc=None, stored=None) -> dict:
     size = s.get("size_bytes")
     if size is None and rec.get("source") == "uploads":
         size = upload_size(rec)
-    updated = s.get("updated_at") or (created_at.isoformat() if created_at else None)
     ser = by_doc.get(rec["doc_id"]) or []
+    version = ser[0][0]["versions"][ser[0][1]] if ser else {}
+    if size is None:
+        size = version.get("size_bytes")
+    date = s.get("date") or m["date"] or version.get("date")
+    updated = s.get("updated_at") or date or (created_at.isoformat() if created_at else None)
     versions = []
     series_id = vindex = vcount = None
     if ser:
@@ -79,7 +102,7 @@ def enrich(rec: dict, created_at=None, by_doc=None, stored=None) -> dict:
         versions = [{"doc_id": v["doc_id"], "index": n, "date": v["date"], "size": v.get("size_bytes"), "label": v["label"],
                      "pages": v.get("pages")} for n, v in enumerate(sr["versions"], 1)]
     return {"size": size, "updated_at": updated, "project": m["project"], "folder": m["folder"], "folder_path": m["folder_path"],
-            "discipline": m["discipline"], "subdiscipline": m["subdiscipline"], "sheet": m["sheet"], "date": m["date"],
+            "discipline": m["discipline"], "subdiscipline": m["subdiscipline"], "sheet": m["sheet"], "date": date,
             "series_id": series_id, "version_index": vindex, "version_count": vcount, "versions": versions}
 
 
