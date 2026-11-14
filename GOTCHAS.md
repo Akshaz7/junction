@@ -35,3 +35,6 @@
 - Running server/tests and engine/tests in ONE pytest process fails 5 engine tests: server tests load .env into os.environ and real keys leak into fake-provider defaults. Being fixed; until then run them separately.
 - Revisions renumber positional item ids (removing a wall renumbers later walls): the changes engine must match by geometry, not id.
 - e2e/viewer.spec.ts is timing-sensitive under heavy load (failed once in a 12-test batch at load average ~20, passes alone 2/2). WEB should harden waits during W-18.
+- Finlex statute pages carry the text inside Next.js script data: don't strip <script> when validating quotes. "1500" and "1 500" (thin space) both occur.
+- IFC door type names in ac20 are German (e.g. "IFC Tür - Eine Öffnunsgrichtung", typo as in the model): keep verbatim.
+- Held-out (full): 5,953 docs; CubiCasa5K: 4,787 held out, 213 clean (data/sets/cubicasa_clean_ids.txt).

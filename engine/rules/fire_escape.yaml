@@ -1,0 +1,65 @@
+# Finnish fire-safety rules on escape routes. Source: Ympäristöministeriön asetus rakennusten
+# paloturvallisuudesta 848/2017. English quotes come from the English text Finland notified to the
+# EU (TRIS 2017/0221/FIN, final text of 2020-08-31). Section numbers 32-35 were checked to match the
+# Finnish text published on Finlex, which `finnish_url` / `finnish_quote` point to.
+rules:
+  - id: fi-fire-exit-width
+    text: "An exit must be at least 1 200 mm wide and at least 2 100 mm high."
+    source_title: "Decree of the Ministry of the Environment on fire safety of buildings 848/2017 (English text notified via EU TRIS 2017/0221/FIN)"
+    section: "34 §"
+    url: "https://technical-regulation-information-system.ec.europa.eu/en/notification/18529/text/F/EN"
+    quote: "The width of an exit must be at least 1 200 millimetres and its height must be at least 2 100 millimetres."
+    translation: "source is English"
+    finnish_url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/848"
+    finnish_quote: "Uloskäytävän leveyden on oltava vähintään 1 200 millimetriä ja uloskäytävän korkeuden on oltava vähintään 2 100 millimetriä."
+    check_id: exit_clear_width
+    params: {min_width_mm: 1200, min_height_mm: 2100}
+    note: "The same section allows 900 mm in some cases (e.g. a residential building of up to two storeys, or an evacuation area of up to 60 people for the second exit)."
+
+  - id: fi-fire-exit-corridor-width
+    text: "The width of an internal corridor leading to an exit is set like the width of the exit, from the number of people passing along the corridor."
+    source_title: "Decree of the Ministry of the Environment on fire safety of buildings 848/2017 (English text notified via EU TRIS 2017/0221/FIN)"
+    section: "34 §"
+    url: "https://technical-regulation-information-system.ec.europa.eu/en/notification/18529/text/F/EN"
+    quote: "The width of an internal corridor leading to an exit is calculated in the same way as the width of the exit according to the number of occupants passing along the corridor."
+    translation: "source is English"
+    finnish_url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/848"
+    finnish_quote: "Uloskäytävään johtavan sisäisen käytävän leveys määrätään kuten uloskäytävän leveys käytävää kulkevan henkilömäärän mukaan."
+    check_id: exit_corridor_width
+    note: "Needs an occupant count per corridor; without one the check must report that it cannot be decided."
+
+  - id: fi-fire-exits-per-storey
+    text: "Each evacuation area where people stay or work other than temporarily must have at least the number of independent, separate exits given in Table 11 (two in most cases)."
+    source_title: "Decree of the Ministry of the Environment on fire safety of buildings 848/2017 (English text notified via EU TRIS 2017/0221/FIN)"
+    section: "33 §"
+    url: "https://technical-regulation-information-system.ec.europa.eu/en/notification/18529/text/F/EN"
+    quote: "Each evacuation area of a building where people are staying or working besides temporarily shall be provided with a number of independent, separate and appropriately located exits that are at least in accordance with Table 11."
+    translation: "source is English"
+    finnish_url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/848"
+    finnish_quote: "Rakennuksen jokaiselta poistumisalueelta, jossa muutoin kuin tilapäisesti oleskelee tai työskentelee henkilöitä, on oltava vähintään taulukon 11 mukainen lukumäärä toisistaan riippumattomia, erillisiä ja tarkoitukseen sopivia uloskäytäviä."
+    check_id: exits_per_storey
+    note: "Table 11 has exceptions (one exit can be enough, for example in a small single-storey building). A check must say when an exception may apply instead of failing."
+
+  - id: fi-fire-route-length
+    text: "The route from any point of an evacuation area to the nearest exit must not be hazardously long; Table 10 gives the maximum by use of the area, measured along the shortest passable route."
+    source_title: "Decree of the Ministry of the Environment on fire safety of buildings 848/2017 (English text notified via EU TRIS 2017/0221/FIN)"
+    section: "32 §"
+    url: "https://technical-regulation-information-system.ec.europa.eu/en/notification/18529/text/F/EN"
+    quote: "The distance from each point of the evacuation area to an exit can be determined along the shortest passable route."
+    translation: "source is English"
+    finnish_url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/848"
+    finnish_quote: "Etäisyys poistumisalueen kustakin kohdasta uloskäytävään voidaan määrittää lyhintä kulkukelpoista reittiä pitkin."
+    check_id: route_length_to_exit
+    note: "The limit itself is in Table 10 and depends on use and ceiling height. Not encoded here until the table is transcribed and verified."
+
+  - id: fi-fire-door-opening-direction
+    text: "Doors open in the direction of escape if they are a dwelling's storey-level door or if more than 60 people leave through the door."
+    source_title: "Decree of the Ministry of the Environment on fire safety of buildings 848/2017 (English text notified via EU TRIS 2017/0221/FIN)"
+    section: "35 §"
+    url: "https://technical-regulation-information-system.ec.europa.eu/en/notification/18529/text/F/EN"
+    quote: "if the number of people evacuating through the door exceeds 60, doors must open in the direction of the exit."
+    translation: "source is English"
+    finnish_url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/848"
+    finnish_quote: "Ovien on avauduttava poistumissuuntaan jos kyseessä on asunnon kerrostaso-ovi tai oven kautta poistuvien henkilöiden määrä on yli 60."
+    check_id: door_opens_in_exit_direction
+    params: {occupants_over: 60}

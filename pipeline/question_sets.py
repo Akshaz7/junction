@@ -91,10 +91,82 @@ def build(root: Path, out: Path, artifacts: Path):
     return len(qs), len(en), len(held)
 
 
+def _load(root: Path):
+    qs = [json.loads(l) for l in open(root / "questions.jsonl")]
+    for q in qs:
+        q["doc_id"] = doc_id_for_question_path(q["path"])
+        q["source"] = q["path"].split("/")[1]
+    return qs
+
+
+def heldout_from(qs) -> set:
+    held = {q["doc_id"] for q in qs}
+    for q in qs:
+        if q["source"] == "ifc_models" and q["path"].endswith((".pdf", ".svg")):
+            stem = Path(q["path"]).stem
+            for m in re.finditer(r"_plan-", stem):
+                held.add(f"ifc_models__{slug(stem[:m.start()])}")
+    return held
+
+
+def cubicasa_all_ids(zip_path: Path) -> set:
+    """Official sample ids (colorful/11397) from the directory entries of cubicasa5k.zip."""
+    import zipfile
+    ids = set()
+    with zipfile.ZipFile(zip_path) as z:
+        for n in z.namelist():
+            m = re.fullmatch(r"cubicasa5k/(colorful|high_quality|high_quality_architectural)/(\d+)/", n)
+            if m:
+                ids.add(f"{m.group(1)}/{m.group(2)}")
+    return ids
+
+
+def build_full(preview: Path, full: Path, out: Path, artifacts: Path, cub_zip: Path):
+    """Held-out lists from the UNION of preview and full questions + full-set English files.
+    Does NOT touch sample200 / router_* / questions_en.jsonl (preview-based, kept byte-identical)."""
+    qp, qf = _load(preview), _load(full)
+    allq = qp + qf
+    held = heldout_from(allq)
+    (out / "heldout_docs.txt").write_text("\n".join(sorted(held)) + "\n")
+    cub = sorted({cubicasa_sample_id(q["path"]) for q in allq if q["source"] == "cubicasa5k"})
+    (out / "cubicasa_heldout_ids.txt").write_text("\n".join(cub) + "\n")
+    clean = sorted(cubicasa_all_ids(cub_zip) - set(cub)) if cub_zip.exists() else []
+    (out / "cubicasa_clean_ids.txt").write_text("\n".join(clean) + "\n")
+    en = [q for q in qf if is_english(q["question"])]
+    with open(out / "questions_en.full.jsonl", "w") as f:
+        for q in en:
+            f.write(json.dumps(q, ensure_ascii=False) + "\n")
+    rng = random.Random(SEED)
+    strata = defaultdict(list)
+    for q in en:
+        strata[(q["source"], q["type"])].append(q)
+    a = alloc({k: len(v) for k, v in strata.items()}, 1000)
+    sample = []
+    for k in sorted(strata):
+        pool = sorted(strata[k], key=lambda q: (q["path"], q["question"]))
+        sample += rng.sample(pool, a[k])
+    sample.sort(key=lambda q: (q["path"], q["question"]))
+    with open(out / "sample1000.full.jsonl", "w") as f:
+        for q in sample:
+            f.write(json.dumps(q, ensure_ascii=False) + "\n")
+    if (artifacts / "registry.jsonl").exists():
+        set_heldout(artifacts, held)
+    return {"questions_preview": len(qp), "questions_full": len(qf), "english_full": len(en),
+            "heldout_docs": len(held), "cubicasa_heldout": len(cub), "cubicasa_clean": len(clean),
+            "sample1000": len(sample)}
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
+    ap.add_argument("--full", action="store_true", help="extend held-out lists to preview + full (D-03b)")
+    ap.add_argument("--full-root", default=str(REPO / "data" / "full" / "junction-dataset"))
+    ap.add_argument("--cubicasa-zip", default=str(REPO / "data" / "cubicasa5k" / "cubicasa5k.zip"))
     ap.add_argument("--root", default=str(REPO / "data" / "junction-dataset-preview"))
     ap.add_argument("--out", default=str(REPO / "data" / "sets"))
     ap.add_argument("--artifacts", default=str(REPO / "artifacts"))
     a = ap.parse_args()
-    print(build(Path(a.root), Path(a.out), Path(a.artifacts)))
+    if a.full:
+        print(json.dumps(build_full(Path(a.root), Path(a.full_root), Path(a.out), Path(a.artifacts),
+                                    Path(a.cubicasa_zip))))
+    else:
+        print(build(Path(a.root), Path(a.out), Path(a.artifacts)))

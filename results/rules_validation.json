@@ -1,0 +1,259 @@
+{
+  "checked_at": "2026-11-14T04:05:28+0200",
+  "rules": 12,
+  "passed": true,
+  "duplicate_ids": [],
+  "results": [
+    {
+      "id": "fi-acc-door-clear-width",
+      "file": "accessibility.yaml",
+      "section": "4 §",
+      "check_id": "door_clear_width",
+      "translation": "unofficial: our translation",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/241",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-acc-entrance-landing",
+      "file": "accessibility.yaml",
+      "section": "3 §",
+      "check_id": "entrance_landing_size",
+      "translation": "unofficial: our translation",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/241",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-acc-entrance-path-width",
+      "file": "accessibility.yaml",
+      "section": "2 §",
+      "check_id": "entrance_path_width",
+      "translation": "unofficial: our translation",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/241",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-acc-entrance-level-change-ramp",
+      "file": "accessibility.yaml",
+      "section": "2 §",
+      "check_id": "entrance_level_change_ramp",
+      "translation": "unofficial: our translation",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/241",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-acc-corridor-turning-space",
+      "file": "accessibility.yaml",
+      "section": "5 §",
+      "check_id": "corridor_width",
+      "translation": "unofficial: our translation",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/241",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-acc-level-change-connection",
+      "file": "accessibility.yaml",
+      "section": "8 §",
+      "check_id": "level_change_connection",
+      "translation": "unofficial: our translation",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/241",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-acc-lift-third-floor",
+      "file": "accessibility.yaml",
+      "section": "7 §",
+      "check_id": "lift_required_storeys",
+      "translation": "unofficial: our translation",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/241",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-fire-exit-width",
+      "file": "fire_escape.yaml",
+      "section": "34 §",
+      "check_id": "exit_clear_width",
+      "translation": "source is English",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://technical-regulation-information-system.ec.europa.eu/en/notification/18529/text/F/EN",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        },
+        {
+          "role": "finnish_quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/848",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-fire-exit-corridor-width",
+      "file": "fire_escape.yaml",
+      "section": "34 §",
+      "check_id": "exit_corridor_width",
+      "translation": "source is English",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://technical-regulation-information-system.ec.europa.eu/en/notification/18529/text/F/EN",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        },
+        {
+          "role": "finnish_quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/848",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-fire-exits-per-storey",
+      "file": "fire_escape.yaml",
+      "section": "33 §",
+      "check_id": "exits_per_storey",
+      "translation": "source is English",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://technical-regulation-information-system.ec.europa.eu/en/notification/18529/text/F/EN",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        },
+        {
+          "role": "finnish_quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/848",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-fire-route-length",
+      "file": "fire_escape.yaml",
+      "section": "32 §",
+      "check_id": "route_length_to_exit",
+      "translation": "source is English",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://technical-regulation-information-system.ec.europa.eu/en/notification/18529/text/F/EN",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        },
+        {
+          "role": "finnish_quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/848",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-fire-door-opening-direction",
+      "file": "fire_escape.yaml",
+      "section": "35 §",
+      "check_id": "door_opens_in_exit_direction",
+      "translation": "source is English",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://technical-regulation-information-system.ec.europa.eu/en/notification/18529/text/F/EN",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        },
+        {
+          "role": "finnish_quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/848",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    }
+  ]
+}

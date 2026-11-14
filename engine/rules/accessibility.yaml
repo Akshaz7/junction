@@ -1,0 +1,81 @@
+# Finnish accessibility rules. Source: Valtioneuvoston asetus rakennuksen esteettömyydestä 241/2017
+# (a Government decree, not a Ministry decree), published by Finlex in Finnish and Swedish only.
+# No official English translation exists on Finlex, so each `quote` is the verbatim Finnish text and
+# `quote_en` / `text` are our own translation (marked "unofficial: our translation").
+rules:
+  - id: fi-acc-door-clear-width
+    text: "Doors and openings on an internal route in a building, and doors from a stairwell into a dwelling, must have a clear width of at least 850 mm."
+    source_title: "Valtioneuvoston asetus rakennuksen esteettömyydestä 241/2017"
+    section: "4 §"
+    url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/241"
+    quote: "Rakennuksen sisäisellä kulkuväylällä olevan oven ja aukon, porraskäytävästä asuntoon johtavan oven sekä 9 §:n 2 momentissa ja 10 §:ssä tarkoitetun tilan oven vapaan leveyden on oltava vähintään 850 millimetriä."
+    quote_en: "The clear width of a door and opening on a building's internal route, of a door leading from a stairwell to a dwelling, and of the door of a space referred to in section 9(2) and section 10, must be at least 850 millimetres."
+    translation: "unofficial: our translation"
+    check_id: door_clear_width
+    params: {min_mm: 850}
+    note: "Exterior doors and other exit doors are sized by the fire decree (see fi-fire-exit-width). Non-residential room doors have a separate 800 mm rule in the same section."
+
+  - id: fi-acc-entrance-landing
+    text: "The landing in front of a building's exterior door must be at least 1500 mm wide and at least 1500 mm long."
+    source_title: "Valtioneuvoston asetus rakennuksen esteettömyydestä 241/2017"
+    section: "3 §"
+    url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/241"
+    quote: "Ulko-oven edessä olevan tasanteen on oltava vähintään 1500 millimetriä leveä ja vähintään 1500 millimetriä pitkä."
+    quote_en: "The landing in front of the exterior door must be at least 1500 millimetres wide and at least 1500 millimetres long."
+    translation: "unofficial: our translation"
+    check_id: entrance_landing_size
+    params: {min_width_mm: 1500, min_length_mm: 1500}
+
+  - id: fi-acc-entrance-path-width
+    text: "The route leading to a building must be at least 1200 mm wide."
+    source_title: "Valtioneuvoston asetus rakennuksen esteettömyydestä 241/2017"
+    section: "2 §"
+    url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/241"
+    quote: "Rakennukseen on oltava vähintään 1 200 millimetriä leveä"
+    quote_en: "There must be a route to the building that is at least 1200 millimetres wide"
+    translation: "unofficial: our translation"
+    check_id: entrance_path_width
+    params: {min_mm: 1200}
+
+  - id: fi-acc-entrance-level-change-ramp
+    text: "If the route to a building has a step, a ramp or a fixed lifting device for wheelchair users must be provided next to it."
+    source_title: "Valtioneuvoston asetus rakennuksen esteettömyydestä 241/2017"
+    section: "2 §"
+    url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/241"
+    quote: "Jos kulkuväylällä on porras, sen yhteydessä on oltava luiska tai kiinteästi asennettu pyörätuolin ja pyörillä varustetun kävelytelineen käyttäjälle soveltuva henkilöiden nostoon tarkoitettu laite."
+    quote_en: "If the route has a step, there must be, next to it, a ramp or a fixed device for lifting people that suits a wheelchair user and a user of a wheeled walker."
+    translation: "unofficial: our translation"
+    check_id: entrance_level_change_ramp
+
+  - id: fi-acc-corridor-turning-space
+    text: "In a non-residential building (and in the common areas of a residential building), an internal route narrower than 1500 mm must have a turning space of at least 1500 mm diameter at least every 15 m."
+    source_title: "Valtioneuvoston asetus rakennuksen esteettömyydestä 241/2017"
+    section: "5 §"
+    url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/241"
+    quote: "Jos 1 momentissa tarkoitettu kulkuväylä on leveydeltään alle 1500 millimetriä, kulkuväylällä on oltava vähintään 15 metrin välein kääntymistila, jonka halkaisija on vähintään 1 500 millimetriä."
+    quote_en: "If the route referred to in paragraph 1 is less than 1500 millimetres wide, the route must have, at intervals of at most 15 metres, a turning space with a diameter of at least 1500 millimetres."
+    translation: "unofficial: our translation"
+    check_id: corridor_width
+    params: {width_below_mm: 1500, turning_diameter_mm: 1500, max_interval_m: 15}
+    note: "The decree sets no fixed minimum corridor width; it sets the turning-space duty for corridors narrower than 1500 mm."
+
+  - id: fi-acc-level-change-connection
+    text: "In a non-residential building, where a level difference is smaller than the storey height, a ramp or lift must be provided in addition to the stairs."
+    source_title: "Valtioneuvoston asetus rakennuksen esteettömyydestä 241/2017"
+    section: "8 §"
+    url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/241"
+    quote: "Jos muussa rakennuksessa kuin asuinrakennuksessa oleva tasoero on pienempi kuin rakennuksen kerroskorkeus, tasojen välillä on oltava portaiden lisäksi yhteys joko 2 §:n 2 momentissa säädetyn mukaisella luiskalla"
+    quote_en: "If a level difference in a building other than a residential building is smaller than the storey height, there must, in addition to stairs, be a connection between the levels either by a ramp as provided in section 2(2)"
+    translation: "unofficial: our translation"
+    check_id: level_change_connection
+
+  - id: fi-acc-lift-third-floor
+    text: "A residential building must have a lift in addition to stairs if a dwelling is on the third floor or higher, counting the entrance floor."
+    source_title: "Valtioneuvoston asetus rakennuksen esteettömyydestä 241/2017"
+    section: "7 §"
+    url: "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/241"
+    quote: "Asuinrakennuksessa on oltava portaiden lisäksi hissi, jos käynti rakennuksessa sijaitsevaan asuntoon on sisääntulon kerrostaso mukaan lukien kolmannessa tai sitä ylemmässä kerroksessa."
+    quote_en: "A residential building must have a lift in addition to stairs if access to a dwelling in the building is on the third or a higher floor, including the entrance floor."
+    translation: "unofficial: our translation"
+    check_id: lift_required_storeys
+    params: {from_storey_counting_entrance: 3}
