@@ -182,6 +182,8 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
         return res
     if n is None:
         return res
+    res.setdefault("_calc_models", []).append({"label": "Model count, second look", "value": n, "doc_id": did,
+                                               "policy": "Final count follows the recorded recount decision and its supported boxes; this model output alone is not a verified count."})
     calls.append({"task": "recount", "provider": "vision", "model": model, "cost_usd": usd})
     plan_n = int(ans["value"])
     final = reconcile(parsed.kind, plan_n, n)
@@ -275,7 +277,8 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
         if on_event:
             for entry in comparison["trace"]:
                 on_event("trace", entry)
-        return comparison
+        from engine import calc
+        return calc.attach(comparison, question, _root())
     # thread memory (engine/context.py): every route below sees the resolved, standalone question and document selection
     original, step = question, None
     try:  # keyboard mash or nonsense: say so, never reuse the previous answer
@@ -334,6 +337,9 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
             res = reasoning.attach(res, question, _root())
     except Exception:  # noqa: BLE001
         pass
+    # F-CALC: final operands must follow recounts, conversions and evidence margins.
+    from engine import calc
+    res = calc.attach(res, question, _root())
     try:   # bullets need a blank line before them to render as a list
         _t = res["answer"].get("text_md") or ""
         res["answer"]["text_md"] = re.sub(r"(?m)^(?!- |\* |\||#)(\S[^\n]*)\n(- )", r"\1\n\n\2", _t)

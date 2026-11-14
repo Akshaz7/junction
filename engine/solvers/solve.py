@@ -443,8 +443,10 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         extra = n > max(1, doc.pages)
         text = (f"This drawing shows **{n} {'floor' if n == 1 else 'floors'}** "
                 + ("(separate floor plans drawn on the sheet)." if extra else "(one per plan page)."))
-        return _answer_obj(question, [doc_id], text, n, "count", 0.6, False, [], [], {"doc_id": doc_id, "highlight_item_ids": [],
+        res = _answer_obj(question, [doc_id], text, n, "count", 0.6, False, [], [], {"doc_id": doc_id, "highlight_item_ids": [],
                            "camera_target_item_id": None}, trace, route, t0)
+        from engine.calc_routes import storeys
+        return storeys(res, doc, detected=found)
 
     if doc.mode == "ifc" and kind == "storey" and p.type == "count" and not page:
         sts = sorted(doc.storeys, key=lambda s: s.get("elevation_m", 0))
@@ -463,7 +465,9 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         listing = ", ".join(f"{s_['name']} ({s_.get('elevation_m', 0):+.1f} m)" for s_ in sts)
         _, cites, scene = _evidence(doc, rep)
         text = f"The model has **{n} {'storey' if n == 1 else 'storeys'}**, from lowest to highest: {listing}. {_cite_marks(cites)}"
-        return _answer_obj(question, [doc_id], text, n, "count", 1.0, False, [], cites, scene, trace, route, t0)
+        res = _answer_obj(question, [doc_id], text, n, "count", 1.0, False, [], cites, scene, trace, route, t0)
+        from engine.calc_routes import storeys
+        return storeys(res, doc, declared=sts)
 
     kinds = {kind}
     kind_note = ""
@@ -708,4 +712,6 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         text += " Per room: " + "; ".join(f"{(i.label or i.name or i.item_id)}{' (' + i.storey + ')' if i.storey else ''} {_fmt(v, 'area')} m²" for i, v in top) \
             + (f"; and {len(have) - len(top)} more" if len(have) > len(top) else "") + "."
     text += scale_note
-    return _answer_obj(question, [doc_id], text, round(total, 4), unit, conf, False, boxes, cites, scene, trace, route, t0)
+    res = _answer_obj(question, [doc_id], text, round(total, 4), unit, conf, False, boxes, cites, scene, trace, route, t0)
+    from engine.calc import record_items
+    return record_items(res, doc, have, note="Missing quantities are excluded as stated in the answer; mesh-derived quantities use scene.glb when no stored quantity exists.")

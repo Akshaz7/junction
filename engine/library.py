@@ -197,8 +197,10 @@ def sheet_count_answer(question, doc_ids=(), root=None, records=None):
         return _result(question, "The document metadata does not state a sheet count. Select the drawing set PDF to count its pages.", abstained=True)
     c = {"n": 1, "doc_id": d["doc_id"], "page": 1, "kind": "text", "bbox_px": None, "item_ids": [],
          "quote": f"Document metadata: {n} pages"}
-    return _result(question, f"**{d.get('title') or d['doc_id']} has {n} {'page' if n == 1 else 'pages'}** in this file. [1]",
-                   docs=[d["doc_id"]], value=n, unit="pages", cites=[c])
+    res = _result(question, f"**{d.get('title') or d['doc_id']} has {n} {'page' if n == 1 else 'pages'}** in this file. [1]",
+                  docs=[d["doc_id"]], value=n, unit="pages", cites=[c])
+    from engine.calc_inventory import metadata
+    return metadata(res, [d], pages=True)
 
 
 def library_answer(question: str, root=None, records=None) -> dict | None:
@@ -215,7 +217,9 @@ def library_answer(question: str, root=None, records=None) -> dict | None:
             text += f"\n- {d.get('project') or d.get('title') or d['doc_id']} (`{d['doc_id']}`). [{n}]"
             cites.append({"n": n, "doc_id": d["doc_id"], "page": 1, "kind": "text", "bbox_px": None,
                           "item_ids": [], "quote": f"{d.get('title') or d['doc_id']} — IFC file in document metadata"})
-        return _result(question, text, docs=[d["doc_id"] for d in found], value=len(found), unit="documents", cites=cites)
+        res = _result(question, text, docs=[d["doc_id"] for d in found], value=len(found), unit="documents", cites=cites)
+        from engine.calc_inventory import metadata
+        return metadata(res, found)
     n = len(docs)
     proc = [d for d in docs if d.get("mode")]
     by_src = Counter(d.get("source") or "other" for d in docs)
@@ -230,7 +234,9 @@ def library_answer(question: str, root=None, records=None) -> dict | None:
         text += (f" Structured data is indexed for **{len(proc):,}** ({by_mode.get('planmap', 0):,} plan maps, "
                  f"{by_mode.get('ifc', 0):,} IFC models). Other documents may still be processing or awaiting indexing.")
     text += f"\n\nBy source: {src}.\n\nBy type: {kinds}."
-    return _result(question, text, value=len(proc) if asks_processed else n, unit="documents")
+    res = _result(question, text, value=len(proc) if asks_processed else n, unit="documents")
+    from engine.calc_inventory import metadata
+    return metadata(res, proc if asks_processed else docs)
 
 
 def library_search_answer(question, root=None, records=None):

@@ -171,4 +171,6 @@ def quantity_takeoff(question, doc, t0):
             + (("\n\n_" + " ".join(notes) + "_") if notes else ""))
     trace += [_step("rooms", f"{len(rows)} rooms"), _step("slab", f"{len(srows)} rows" if srows else NIF), _step("piping", f"{len(prow)} systems" if prow else NIF)]
     scene2 = {"doc_id": doc.doc_id, "highlight_item_ids": ids, "camera_target_item_id": ids[0] if ids else None}
-    return _answer_obj(question, [doc.doc_id], text, len(rows), "rooms", 0.8, False, box_all, cit_all, scene2, trace, "index" if ifc else "planmap", t0)
+    res = _answer_obj(question, [doc.doc_id], text, len(rows), "rooms", 0.8, False, box_all, cit_all, scene2, trace, "index" if ifc else "planmap", t0)
+    from engine.calc_routes import quantity_table
+    return quantity_table(res, doc, rows, doors, wins, bb, slab, pd)
