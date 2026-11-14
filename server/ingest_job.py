@@ -268,11 +268,35 @@ def _pdf_via_ifc(doc_id: str, ddir: Path, doc: dict, page: int):
         ifc_scene.process(Path(ifc), doc, ddir)
         pdf_to_ifc.link_planmap(f, doc_id)
         _copy_quality(ddir, page)
+        mark_ifc_from_pdf(ddir, True)
     except Exception:
         f.write_text(keep)
         for name in ("model.ifc", "elements.json", "scene.glb", "scene.json"):
             (ddir / name).unlink(missing_ok=True)
+        mark_ifc_from_pdf(ddir, False)
         raise
+
+
+def mark_ifc_from_pdf(ddir: Path, on: bool):
+    """doc.json metadata for a PDF converted through pdf_to_ifc, so it is listed and treated like an IFC upload
+    (Data page formats, engine.library IFC listing, mistakes/mep IFC property readers via files['ifc'], the 'file type'
+    answer) while kind stays "pdf": the web viewer keeps the 2D PDF page and its planmap-<n>.json for citations.
+    Engine IFC mode itself comes from elements.json (engine.solvers.data.load_doc). on=False removes the marks."""
+    dj = ddir / "doc.json"
+    d = json.loads(dj.read_text())
+    formats = [f for f in (d.get("formats") or [d.get("kind") or "pdf"]) if f != "ifc"]
+    files = {k: v for k, v in (d.get("files") or {}).items() if k != "ifc"}
+    d.pop("ifc_from", None)
+    if on and (ddir / "model.ifc").is_file():
+        formats.append("ifc")   # after "pdf": the type tag (formats[0]) and kind stay PDF
+        m = Path(os.path.abspath(ddir / "model.ifc"))
+        try:   # same style as files['pdf']: "artifacts/<doc_id>/model.ifc", relative to the repo
+            files["ifc"] = str(m.relative_to(os.path.abspath(REPO)))
+        except ValueError:      # artifacts outside the repo (ARTIFACTS_DIR): the readers also try absolute paths
+            files["ifc"] = str(m)
+        d["ifc_from"] = "pdf"   # derived model (pipeline.pdf_to_ifc), not an uploaded IFC
+    d["formats"], d["files"] = formats, files
+    dj.write_text(json.dumps(d, indent=1))
 
 
 ASSUMED_M_PER_PX = 0.02
