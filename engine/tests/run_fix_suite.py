@@ -14,7 +14,7 @@ import shutil
 import subprocess
 import time
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(os.environ.get('FIX_SUITE_WORKTREE') or Path(__file__).resolve().parents[2])
 OUT = ROOT / 'results/final/FIX-SUITE'
 RUNTIME = ROOT / '.fix-suite-runtime'
 
@@ -154,7 +154,7 @@ def run(output, live=False, budget=0.0, only=None):
         spent[0] += res.cost_usd
         return res
     models.call = bounded
-    cases = json.loads((ROOT / 'engine/tests/data/awais_suite.json').read_text())
+    cases = json.loads((ROOT / 'engine/tests/fixtures/awais_suite.json').read_text())
     results = []
     for case in cases:
         if only and case['id'] not in only:
@@ -190,7 +190,7 @@ def write_report(name, rows, live, spent):
     categories = defaultdict(Counter)
     for r in rows:
         categories[r['category']][r['verdict']] += 1
-    report = {'mode': 'live' if live else 'MODELS_FAKE=1', 'commit': subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip(),
+    report = {'mode': 'live' if live else 'MODELS_FAKE=1', 'commit': os.environ.get('FIX_SUITE_CODE_REVISION') or subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip(),
               'cases': len(rows), 'verdicts': dict(Counter(r['verdict'] for r in rows)),
               'categories': {k:dict(v) for k,v in categories.items()}, 'cost_usd': round(spent,6),
               'limitations': ['14 published inputs truncate questions or omit history; these use explicitly marked reconstructions.',

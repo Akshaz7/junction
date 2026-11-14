@@ -28,7 +28,7 @@ def storey_requested(question: str) -> bool:
 
 
 def room_name(item: Item) -> str:
-    return str(item.props.get("long_name") or item.label or item.name or item.type_name or item.item_id)
+    return str(item.props.get("long_name") or item.label or item.name or item.type_name or item.props.get("room_type") or "unnamed room")
 
 
 ROOM_TYPES = {
@@ -41,10 +41,22 @@ ROOM_TYPES = {
     "corridor": r"\b(?:flur|corridor|korridor|hallway|kaytav)\w*",
     "classroom": r"\b(?:classroom|klassen|seminar|luokka)\w*",
     "storage": r"\b(?:storage|lager|abstell|varasto)\w*",
+    "living room": r"\b(?:living|lounge|wohn|olohuone|vardagsrum)\w*",
 }
 ROOM_ALIASES = {"offices": "office", "meeting rooms": "meeting room", "laboratories": "lab", "laboratory": "lab", "labs": "lab",
                 "kitchens": "kitchen", "bathrooms": "bathroom", "toilets": "bathroom", "wc": "bathroom", "bedrooms": "bedroom",
-                "corridors": "corridor", "hallways": "corridor", "classrooms": "classroom", "storerooms": "storage"}
+                "living rooms": "living room", "corridors": "corridor", "hallways": "corridor", "classrooms": "classroom", "storerooms": "storage",
+                "makuuhuone": "bedroom", "schlafzimmer": "bedroom", "sovrum": "bedroom",
+                "keittio": "kitchen", "kok": "kitchen", "kuche": "kitchen", "kokoushuone": "meeting room",
+                "toimisto": "office", "kontor": "office", "luokkahuone": "classroom"}
+
+
+def room_type_matches(room: Item, base: str) -> bool:
+    label = fold(room_name(room))
+    typed = fold(room.props.get("room_type") or "")
+    types = {"bedroom": {"bedroom"}, "kitchen": {"kitchen"}, "bathroom": {"bathroom", "wc"},
+             "corridor": {"corridor", "entry"}, "storage": {"storage"}, "living room": {"living"}}
+    return bool(re.search(ROOM_TYPES[base], label) or typed in types.get(base, {base}))
 
 
 def room_filter(question: str, rooms: list[Item]) -> tuple[str, list[Item]] | None:
@@ -63,9 +75,11 @@ def room_filter(question: str, rooms: list[Item]) -> tuple[str, list[Item]] | No
         target = re.sub(r"^(?:(?:all|every|each|of|the)\s+)+", "", target)
         if not target or target in ("it", "this", "that") or re.fullmatch(r"(?:(?:whole|entire|total|combined|net|gross|floor)\s+)*(?:rooms?|spaces?|building|model|floor|storey|plan|house|flat|apartment)(?:\s+\d+)?", target):
             return None
+        if STOREY_REQUEST.fullmatch(target):
+            return None  # "area of the ground floor" scopes rooms by storey, not by room name.
         if target in aliases:
             base = aliases[target]
-            return base, [r for r in rooms if re.search(ROOM_TYPES[base], fold(room_name(r)))]
+            return base, [r for r in rooms if room_type_matches(r, base)]
         # Never shorten an unknown full name ('Buero Mueller XI') to a known prefix ('Buero').
         return target, [r for r in rooms if re.search(rf"(?<!\w){re.escape(target)}(?!\w)", fold(room_name(r)))]
     # A full name beats a type (and 'II' beats 'I'). Whole tokens prevent Roman-prefix matches.
@@ -76,7 +90,7 @@ def room_filter(question: str, rooms: list[Item]) -> tuple[str, list[Item]] | No
             return name, [r for r in rooms if fold(room_name(r)) == n]
     for alias, base in sorted(aliases.items(), key=lambda x: -len(x[0])):
         if re.search(rf"\b{re.escape(alias)}\b", q):
-            return base, [r for r in rooms if re.search(ROOM_TYPES[base], fold(room_name(r)))]
+            return base, [r for r in rooms if room_type_matches(r, base)]
     return None
 
 

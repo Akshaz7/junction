@@ -187,6 +187,14 @@ def sheet_count_answer(question, doc_ids=(), root=None, records=None):
     pdfs = [d for d in docs if str(d.get("kind", "")).lower() == "pdf" or "pdf" in (d.get("formats") or [])]
     if pdfs:
         docs = pdfs
+    if len(docs) > 1 and not doc_ids:
+        # Preserve issue qualifiers such as "pricing" or "permit" when several
+        # sets share a project name. A tie remains ambiguous.
+        from engine.project_index import tokenize
+        terms = set(tokenize(question)) - {"sheet", "page", "set"}
+        scores = [len(terms & set(tokenize(d.get("title") or ""))) for d in docs]
+        top = max(scores, default=0)
+        docs = [d for d, score in zip(docs, scores) if score == top]
     if len(docs) != 1:
         return None
     d = docs[0]
