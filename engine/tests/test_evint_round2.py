@@ -56,6 +56,28 @@ def test_observed_calibration_and_actual_cap_are_separate_signed_factors():
     assert sum(f['delta'] for f in c['factors']) == c['pct'] == 60
 
 
+def test_runtime_coverage_cap_keeps_original_score_and_signed_adjustment(tmp_path):
+    r = {'answer': {'confidence': .9, 'unit': 'count', 'value': 2}, 'citations': [], 'evidence': {'boxes': []}}
+    card = confidence.factors({'pct': None, 'label': 'Estimate'}, r, 'How many doors?')
+    r['answer']['confidence'] = .69
+    card['pct'] = None
+    r['reasoning'] = {'confidence': card}
+    confidence.attach(r, 'How many doors?', tmp_path)
+    c = r['reasoning']['confidence']
+    assert [f['delta'] for f in c['factors']] == [90, -21]
+    assert c['pct'] == sum(f['delta'] for f in c['factors']) == 69
+
+
+@pytest.mark.parametrize('question,docs', [('asdasdxxyyzzqq', []), ('How many windows?', [])])
+def test_public_early_answers_are_finalized(question, docs, monkeypatch):
+    from engine.answer import answer
+    monkeypatch.setenv('MODELS_FAKE', '1')
+    monkeypatch.setenv('READER', '0')
+    r = answer(question, docs)
+    c = r['reasoning']['confidence']
+    assert sum(f['delta'] for f in c['factors']) == c['pct']
+
+
 def test_missing_numeric_score_stays_unknown():
     c = confidence.factors({'pct': None}, {'answer': {}}, '')
     assert c['pct'] is None and c['pct_kind'] == 'unavailable'

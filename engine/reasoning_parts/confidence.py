@@ -98,14 +98,17 @@ def run(ctx: dict) -> dict:
             reason += f" These comparisons cover {observed['documents']} source documents; measurements in one document can share errors."
     result = {"label": label, "pct": calibration['pct'] if calibration else None, "reason": reason,
               "improve": improve, "calibration": calibration, "agreement": agreement, "_steps": steps}
-    return factors(result, ctx.get('res') or {'answer': ctx.get('ans', {})}, ctx.get('question', ''), source=source)
+    return factors(result, ctx.get('res') or {'answer': ctx.get('ans', {})}, ctx.get('question', ''), source=source, allow_route_score=False)
 
 
 def _finite(value):
-    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+    try:
+        return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+    except OverflowError:
+        return False
 
 
-def factors(card, res, question, *, source=None):
+def factors(card, res, question, *, source=None, allow_route_score=True):
     """Decompose an existing score; never invent an accuracy boost or penalty.
 
     With calibration, pct remains observed cohort accuracy. Otherwise a supplied
@@ -117,19 +120,42 @@ def factors(card, res, question, *, source=None):
     raw = ans.get('confidence')
     calibration = card.get('calibration')
     current = card.get('pct')
+    from engine.reasoning_parts.counts import facts
+    counted = facts(res, question)
+    if calibration and counted and counted.get('problems'):
+        calibration = None
+        card['calibration_status'] = 'Not applied: the returned count/evidence is not reconciled with the calibrated answer cohort.'
+    origin = card.get('score_origin') or {}
+    if not origin and _finite(raw) and 0 <= raw <= 1:
+        origin = card['score_origin'] = {'value': round(raw * 100, 6), 'unit': '% points', 'source': 'answer.confidence before evidence caps'}
+    reference = None
+    if allow_route_score and not calibration:
+        from engine.scan_uncertainty import historical
+        reference = historical(res, question)
     if calibration and _finite(calibration.get('pct')):
         base = calibration['pct']
         pct = current if _finite(current) else base
         kind = 'observed_audit_accuracy'
         label = f"Observed audit: {calibration['correct']}/{calibration['n']} comparable answers"
         note = calibration.get('scope', 'Observed cohort accuracy; not an individual-answer guarantee.')
+    elif reference:
+        base = pct = reference['pct']
+        if counted and counted.get('problems') and _finite(raw):
+            pct = min(pct, round(raw * 100, 6))
+        kind = 'historical_reference_accuracy'
+        label = f"Historical reference: {reference['correct']}/{reference['n']} comparable answers"
+        note = reference['scope']
+        card['reference_calibration'] = reference
+        reason = f"Historical reference accuracy: {reference['correct']} of {reference['n']} same-source, operation, class and route answers; model/version equivalence and per-answer accuracy are not established."
+        if reason not in card.get('reason', ''):
+            card['reason'] = (card.get('reason', '') + ' ' + reason).strip()
     elif _finite(current):
-        base = pct = current
+        base, pct = origin.get('value', current), current
         kind = 'recorded_engine_score'
-        label = 'Recorded evidence-card score'
+        label = 'Recorded answer-route score' if origin else 'Recorded evidence-card score'
         note = 'Uncalibrated score supplied by this route; not measured answer accuracy.'
-    elif _finite(raw) and 0 <= raw <= 1:
-        base = pct = round(raw * 100, 6)
+    elif allow_route_score and _finite(raw) and 0 <= raw <= 1:
+        base, pct = origin.get('value', round(raw * 100, 6)), round(raw * 100, 6)
         kind = 'recorded_engine_score'
         label = 'Recorded answer-route score'
         note = 'Uncalibrated route/model score, not measured answer accuracy. No accuracy calibration is available.'
@@ -139,7 +165,7 @@ def factors(card, res, question, *, source=None):
     card.update(pct=pct, pct_kind=kind)
     entries = [{'label': label, 'delta': base, 'base': True, 'note': note}]
     if pct is not None and pct != base:
-        entries.append({'label': 'Applied evidence confidence cap', 'delta': pct - base,
+        entries.append({'label': 'Applied evidence confidence cap' if pct < base else 'Recorded evidence-card adjustment', 'delta': pct - base,
                         'note': card.get('reason', 'Existing evidence cap; no additional heuristic deduction.')})
     if kind == 'recorded_engine_score':
         score_note = 'The percentage is an uncalibrated route/model score, not measured answer accuracy.'
@@ -151,8 +177,6 @@ def factors(card, res, question, *, source=None):
                  'ifc': 'building-model quantities', 'cad': 'vector CAD geometry', 'unknown': 'cited source data'}
         entries.append({'label': 'Source: ' + words.get(source, source), 'delta': 0,
                         'note': 'Source context; no unmeasured accuracy adjustment.'})
-    from engine.reasoning_parts.counts import facts
-    counted = facts(res, question)
     if counted and counted.get('reread'):
         original, reread = counted['reread']
         entries.append({'label': f"Recount {'agreed' if original == reread else 'differed'} {original}/{reread}", 'delta': 0,
@@ -172,22 +196,41 @@ def factors(card, res, question, *, source=None):
 
 def attach(res, question, root):
     """Final hook for every public answer, including cards owned by other routes."""
-    card = res.setdefault('reasoning', {'steps': []})
-    confidence = card.setdefault('confidence', {'label': 'Estimate', 'pct': None,
-                                               'reason': 'No independent verification was recorded.'})
+    card = res.get('reasoning')
+    if not isinstance(card, dict):
+        card = res['reasoning'] = {'steps': []}
+    confidence = card.get('confidence')
+    if not isinstance(confidence, dict):
+        confidence = card['confidence'] = {'label': 'Estimate', 'pct': None, 'reason': 'No independent verification was recorded.'}
     source = None
     kinds = set()
     for did in res.get('doc_ids') or []:
         try:
             meta = json.loads((Path(root) / did / 'doc.json').read_text())
-            kinds.add(meta.get('kind'))
+            if meta.get('kind'):
+                kinds.add(meta['kind'])
         except (OSError, ValueError, AttributeError):
             pass
     if kinds:
-        source = 'ifc' if kinds == {'ifc'} else 'cad' if kinds <= {'dxf', 'dwg'} else 'scan'
+        source = ('ifc' if kinds == {'ifc'} else 'cad' if kinds <= {'dxf', 'dwg'} else
+                  'scan' if kinds <= {'raster', 'pdf', 'png', 'jpg', 'jpeg', 'image'} else 'unknown')
     if (card.get('calc') or {}).get('reader'):
         source = 'vision'
     factors(confidence, res, question, source=source)
+    calc = card.get('calc')
+    if calc and confidence.get('reference_calibration'):
+        from engine.calc import input_value, step, validate
+        reference = confidence['reference_calibration']
+        ref = {'kind': 'measurement', 'doc_id': next(iter(res.get('doc_ids') or []), ''),
+               'record': reference, 'artifact': reference['source'], 'text': reference['scope']}
+        calc['steps'] = [s for s in calc.get('steps') or [] if s.get('id') != 'confidence-reference-accuracy']
+        calc['steps'].append(step('confidence-reference-accuracy', 'Historical reference accuracy', 'round(correct historical answers / comparable historical answers × 100)',
+                                  reference['pct'], '%', [input_value('historical correct answers', reference['correct'], 'count', ref),
+                                                        input_value('historical comparable answers', reference['n'], 'count', ref)], reference['scope'], 'accuracy_pct'))
+        issues = validate(calc, Path(root))
+        calc['issues'] = issues
+        if issues:
+            calc['status'] = 'incomplete'
     if not card.get('graph_path'):
         path, seen = [], set()
         for cite in res.get('citations') or []:

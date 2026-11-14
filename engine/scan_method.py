@@ -67,4 +67,14 @@ def describe(res, question, root, reader=None):
                           ('A planner-supplied scale/ratio was used; it is not established as a printed dimension or verified physical scale.' if supplied else 'The highest ranked available page scale was used; scale selection is recorded with the measurement.'))
             method['measurements'] = [{'doc_id': e['doc_id'], 'page': e['page'], 'value': e['m_per_px'], 'unit': 'm/px',
                                        'scale_origin': e['scale_origin']} for e in measurements]
+            if len(measurements) == 1:
+                e = measurements[0]
+                if e.get('supplied_scale') or e.get('ratio'):
+                    old_scale = method.get('scale')
+                    if old_scale:
+                        alternatives.append({'id': old_scale['id'], 'label': old_scale['label'], 'value': old_scale.get('value'), 'unit': 'm/px',
+                                             'rejected_because': 'The recorded reader measurement used the supplied planner scale/ratio; this is available page context, not the scale used for that result.'})
+                    method['scale'] = {'id': 'reader-supplied-ratio' if e.get('ratio') else 'reader-supplied-scale',
+                                       'label': 'Planner-supplied ratio and image DPI' if e.get('ratio') else 'Planner-supplied numeric scale',
+                                       'value': e['m_per_px'], 'unit': 'm/px', 'why_chosen': method['why_chosen'], 'alternatives': []}
     return method

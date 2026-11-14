@@ -49,7 +49,9 @@ def historical(res, question):
     if not rows:
         return None
     errors = [abs(r['value'] - r['gold']) for r in rows]
+    correct = sum(r.get('outcome') == 'correct' if 'outcome' in r else r['value'] == r['gold'] for r in rows)
     return {'n': len(rows), 'mae': math.fsum(errors) / len(errors), 'absolute_error_sum': math.fsum(errors),
+            'correct': correct, 'pct': round(100 * correct / len(rows)),
             'comparisons': [{'doc_id': r['doc_id'], 'predicted': r['value'], 'gold': r['gold']} for r in rows],
             'unit': unit, 'source': str(HISTORY.relative_to(REPO)), 'kind': parsed.kind,
             'scope': 'Historical same-source/operation/kind/route reference; model/version equivalence is not established. Not an individual-answer error bound.'}
@@ -66,6 +68,10 @@ def attach(res, question, calc):
     parsed = parse(question)
     counted = facts(res, question)
     unit, value = ans.get('unit'), ans.get('value')
+    if value is None:
+        # A sanity guard may intentionally withhold an area/length total. Its
+        # inventory comparisons remain counts; do not attach a fictitious m² margin.
+        unit = None
     components, sources = [], []
     cohort = historical(res, question)
     if cohort:
@@ -152,6 +158,8 @@ def attach(res, question, calc):
     budget = {'value': error, 'unit': output_unit, 'pct': pct, 'why': why, 'sources': list(dict.fromkeys(sources)),
               'scope': 'Observed scan discrepancy and historical reference', 'components': matching,
               'complete': False, 'is_error_bound': False}
+    if old.get('by_kind'):
+        budget['by_kind'] = old['by_kind']
     card['margin'] = calc['margin'] = budget
 
 

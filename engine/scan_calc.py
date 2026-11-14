@@ -41,6 +41,9 @@ def _scale_steps(proof, prefix, did, page):
             else:
                 src.update(kind='measurement', record={'doc_id': did, 'input': copy.deepcopy(inp)},
                            text='Recorded scale operand: ' + inp['name'])
+            if src.get('crop') and not src['crop'].startswith(('/', 'https://', 'http://')):
+                relative = src['crop'].removeprefix(did + '/')
+                src['crop'] = f'/api/docs/{did}/files/{relative}'
         if original.get('median_width_px') is not None:
             s['operation'] = 'door_scale'
             out.append(s)
@@ -309,6 +312,15 @@ def _attach(res, question, root):
     method = describe(res, question, root, reader)
     if method:
         existing['method'] = method
+        ans = res.get('answer') or {}
+        scales = method.get('pages') or []
+        if (ans.get('unit') in ('m', 'm2', 'm3') and ans.get('value') == 0 and scales
+                and all(p.get('id') in ('unknown', 'ambiguous', 'unavailable') for p in scales)):
+            why = 'No supported physical scale is available; a zero sum of missing measurements is not a measured quantity.'
+            ans.update(value=None, text_md='**The drawing does not establish this measurement.** Supply a known dimension or a drawing with a supported scale.')
+            existing['result'].update(value=None, mode='per-element', rounded_as='No scalar total reported', reason=why)
+            existing['row_note'] = why
+            card.setdefault('confidence', {}).update(label='Estimate', reason=why)
     from engine.scan_uncertainty import attach as uncertainty, steps as uncertainty_steps
     if inventory or reader:
         uncertainty(res, question, existing)
