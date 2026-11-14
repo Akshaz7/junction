@@ -61,7 +61,7 @@ def test_rules_name_what_was_checked_never_silent():
     s = A("Are the stairs wide enough according to the Finnish safety rules?", AC)["answer"]
     assert "Cannot be checked" in s["text_md"] and "1007/2017 §3" in s["text_md"]
     h = A("Is the headroom in the doorways sufficient?", AC)["answer"]["text_md"]
-    assert "checked: 1007/2017 §14" in h
+    assert "1007/2017 §14" in h
     e = A("Does every storey have two exits as required?", AC)["answer"]["text_md"]
     assert "848/2017 §33" in e
     r = A("Does this plan meet the accessibility requirements?", C1)["answer"]["text_md"]

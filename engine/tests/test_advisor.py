@@ -43,7 +43,7 @@ def test_clean_edit_is_never_silent():
     """FIX-4: an edit that breaks nothing still gets an info card that says which rules were checked."""
     cards = advisor.advise(DOC, {"op": "narrow", "item_ids": [DOOR], "detail": {"width_mm": 1100}})
     assert len(cards) == 1 and cards[0]["severity"] == "info" and cards[0]["kind"] == "info"
-    assert "Checked:" in cards[0]["body"] and cards[0]["checked"]
+    assert "Checked against:" in cards[0]["body"] and cards[0]["checked"]
     _valid(cards[0])
 
 

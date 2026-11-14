@@ -49,7 +49,7 @@ def _context(doc_id: str, root: Path, question: str) -> tuple[str, Path | None, 
             c = Counter(i.kind for i in doc.items)
             labels = [i.label for i in doc.items if i.label][:60]
             bits.append("Detected on the plan: " + ", ".join(f"{k} {v}" for k, v in c.items()) + ("; labels: " + ", ".join(labels) if labels else ""))
-            basis.append("detected plan elements")
+            basis.append("the objects found on the drawing")
     except Exception:  # noqa: BLE001
         pass
     try:

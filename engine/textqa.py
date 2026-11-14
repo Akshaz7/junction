@@ -9,6 +9,8 @@ No data -> a plain sentence saying so, abstained=True. Never invents values.
 """
 from __future__ import annotations
 
+from engine.wording import clean_type_name
+
 from engine.assistant import with_system
 import os
 import re
@@ -258,17 +260,17 @@ def facts_for(question: str, doc: Doc) -> Facts:
             small = "smallest" in ql
             r = (min if small else max)(rooms, key=lambda t: t[1])
             i = r[0]
-            return Facts([f"{'Smallest' if small else 'Largest'} room: {i.name} ({i.type_name}), {_f(r[1])} m2, on {i.storey}."], [i.item_id], "room-extreme")
+            return Facts([f"{'Smallest' if small else 'Largest'} room: {i.name} ({i.type_name}), {_f(r[1])} m², on {i.storey}."], [i.item_id], "room-extreme")
         by = _group(items, lambda i: i.storey)
         if re.search(r"by (level|floor|storey)|each (level|floor|storey)|per (level|floor|storey)|distribution|breakdown|total", ql) and not st:
-            lines = [f"{len(items)} rooms in total, {_f(sum(a for _, a in rooms))} m2 net."]
+            lines = [f"{len(items)} rooms in total, {_f(sum(a for _, a in rooms))} m² net."]
             for name, its in sorted(by, key=lambda kv: next((s['elevation_m'] for s in doc.storeys if s['name'] == kv[0]), 0)):
-                lines.append(f"{name}: {len(its)} rooms, {_f(sum(_area(i) or 0 for i in its))} m2")
+                lines.append(f"{name}: {len(its)} rooms, {_f(sum(_area(i) or 0 for i in its))} m²")
             return Facts(lines, _ids(items), "room-levels")
         if st or re.search(r"breakdown|grouped|function", ql):
-            lines = [f"{st or 'The building'}: {len(items)} rooms, {_f(sum(_area(i) or 0 for i in items))} m2 net."]
+            lines = [f"{st or 'The building'}: {len(items)} rooms, {_f(sum(_area(i) or 0 for i in items))} m² net."]
             for name, its in _group(items, lambda i: i.type_name):
-                lines.append(f"{name}: " + ", ".join(f"{i.name} {_f(_area(i))} m2" for i in sorted(its, key=lambda i: i.name or "") if _area(i) is not None))
+                lines.append(f"{name}: " + ", ".join(f"{i.name} {_f(_area(i))} m²" for i in sorted(its, key=lambda i: i.name or "") if _area(i) is not None))
             return Facts(lines, _ids(items), "room-function")
 
     if re.search(r"widest|narrowest|greatest|largest|smallest|biggest", ql) and kind in ("door", "window", "column"):
@@ -296,7 +298,7 @@ def facts_for(question: str, doc: Doc) -> Facts:
         return Facts(lines, _ids(items), "materials")
 
     # default: counts per type
-    by = _group(items, lambda i: i.type_name or i.name)
+    by = _group(items, lambda i: clean_type_name(str(i.type_name or i.name or "")))
     lines = [f"Total {_pl(kind)}{where}: {len(items)}."] + [f"{n}: {len(its)} ({len(its) / len(items) * 100:.1f}%)" for n, its in by[:25]]
     if len(by) > 25:
         lines.append(f"... and {len(by) - 25} more types")

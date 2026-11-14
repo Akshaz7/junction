@@ -2,6 +2,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
+from engine.wording import clean_type_name
 import pytest
 
 from engine import textqa
@@ -28,18 +29,18 @@ def test_ten_ifc_bench_questions_match_elements():
     els = json.loads((REAL / "elements.json").read_text())["elements"]
     by = lambda k: [e for e in els if e["kind"] == k]
     cases = {
-        "Which door types are installed in this building with quantities?": [str(len(by("door")))] + [f"{n}: {c}" for n, c in Counter(e["type_name"] for e in by("door")).items()],
+        "Which door types are installed in this building with quantities?": [str(len(by("door")))] + [f"{n}: {c}" for n, c in Counter(clean_type_name(e["type_name"]) for e in by("door")).items()],
         "Which window types are present in the building and how many of each?": [str(len(by("window")))],
-        "What wall types are present in the building and how many of each?": [str(len(by("wall")))] + [f"{n}: {c}" for n, c in Counter(e["type_name"] for e in by("wall")).items()],
+        "What wall types are present in the building and how many of each?": [str(len(by("wall")))] + [f"{n}: {c}" for n, c in Counter(clean_type_name(e["type_name"]) for e in by("wall")).items()],
         "Which column types are present here and how many of each?": [str(len(by("column")))],
         "Which stair types are used here with quantities?": [str(len(by("stairs")))],
         "Which railing types are installed in the building?": [str(len(by("railing")))],
         "What are the thicknesses of the various wall types?": ["200 mm", "300 mm"],
         "What are the heights of each level?": ["5 levels", "Keller"],
-        "Which room in the building is the largest?": ["128.3 m2", "Keller"],
+        "Which room in the building is the largest?": ["128.3 m²", "Keller"],
         "Which two doors have the greatest widths in the building?": ["Tür-019", "Tür-018"],
         "What is the narrowest door width used here?": ["Tür-014"],
-        "What is the space breakdown of the attic floor with areas?": ["3 rooms", "202.4 m2"],
+        "What is the space breakdown of the attic floor with areas?": ["3 rooms", "202.4 m²"],
     }
     assert len(cases) >= 10
     for q, needles in cases.items():

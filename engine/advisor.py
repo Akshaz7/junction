@@ -159,12 +159,23 @@ def card_rule_ref(card: dict) -> str:
     return d.group(1) if d else ""
 
 
+TOPIC = {"848/2017": "Fire safety", "241/2017": "Accessibility", "1007/2017": "Safety in use", "1008/2017": "Residential premises"}
+
+
+def _plain(rule: dict) -> str:
+    """'Fire safety 848/2017 §34 (exit width)': the rule in words a client can read."""
+    ref = _short(rule)
+    topic = TOPIC.get(ref.split(" ")[0], "")
+    what = str(rule.get("check_id") or "").replace("_", " ").replace("clear ", "").strip()
+    return " ".join(x for x in (topic, ref) if x) + (f" ({what})" if what else "")
+
+
 def _checked_text(ids: list[str]) -> str:
     by = {r["id"]: r for r in load_rules()}
     seen: list[str] = []
     for i in ids:
-        if i in by and _short(by[i]) not in seen:
-            seen.append(_short(by[i]))
+        if i in by and _plain(by[i]) not in seen:
+            seen.append(_plain(by[i]))
     return ", ".join(seen) if seen else "no rule"
 
 
@@ -201,7 +212,7 @@ def _planmap_cards(doc: Doc, edit: dict, touched: list) -> list[dict]:
             return _finish([c], checked)
     if before and gone:
         c = _info(f"Entrance door removed, {len(left)} left", f"{len(gone)} detected entrance door{'s' if len(gone) != 1 else ''} removed, {len(left)} left. "
-                  "Checked: 848/2017 §33 (entrance doors only). Widths, heights and stairs need an IFC model.", ids, "fi-fire-exits-per-storey", f"entrance:{ids[0]}")
+                  "Checked against: Fire safety 848/2017 §33 (entrance doors only). Widths, heights and stairs need an IFC model.", ids, "fi-fire-exits-per-storey", f"entrance:{ids[0]}")
     else:
         why = "No entrance door could be detected on this drawing." if not before else f"{len(before)} entrance door{'s' if len(before) != 1 else ''} detected and untouched."
         c = _info("Checks need an IFC model", f"{why} Door widths, exit counts and stairs are not measured on a drawing, so no rule was checked for this edit. "
@@ -260,7 +271,7 @@ def advise_doc(doc: Doc, edit: dict | None = None) -> list[dict]:
     out.sort(key=lambda c: (_severity(c) != "violation", c["kind"] != "warning"))
     checked = findings.coverage(after_doc)["checked"]
     if not out and editing:
-        c = _info("No rule broken by this edit", f"Checked: {_checked_text(checked)}. Nothing in the edited model fails them. "
+        c = _info("No rule broken by this edit", f"Checked against: {_checked_text(checked)}. Nothing in the edited model fails them. "
                   "Rules without data in the model were not checked.", [i.item_id for i in touched], "fi-fire-exits-per-storey", f"clear:{sorted(touched_ids)[0]}")
         out = [c] if c else []
     return _finish(out[:MAX_CARDS], checked)

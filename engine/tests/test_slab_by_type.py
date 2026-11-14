@@ -61,7 +61,7 @@ def test_ac20():
     doc = load_doc("ifc_bench__ac20-arc", ROOT)
     r = _run("slab area by type", doc)
     assert r["answer"]["value"] == pytest.approx(3255.4, abs=0.1)
-    assert "| Stahlbeton 2747937872 300 | 300 mm | 5 |" in r["answer"]["text_md"]
+    assert "| Stahlbeton (reinforced concrete) | 300 mm | 5 |" in r["answer"]["text_md"]
     assert len(r["evidence"]["scene"]["highlight_item_ids"]) == 26
 
 

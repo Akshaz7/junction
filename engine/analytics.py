@@ -15,6 +15,7 @@ import time
 
 from engine.router.parser import _kind
 from engine.solvers.data import Doc, Item
+from engine.wording import clean_type_name, scrub
 from engine.solvers.solve import MIN_CONF, _answer_obj, _evidence, _qty, _step, resolve_storey
 
 MORE = re.compile(r"\b(most|greatest|largest|biggest|highest|maximum|max)\b", re.I)
@@ -44,7 +45,7 @@ def _done(question, doc, text, value, unit, items, trace, route="analytics", t0=
     boxes, cites, scene = _evidence(doc, items)
     route = "index" if doc.mode == "ifc" else "planmap"  # answer.schema.json route enum has no "analytics"
     marks = "".join(f"[{c['n']}]" for c in cites)
-    return _answer_obj(question, [doc.doc_id], text.replace("{marks}", marks), value, unit, 1.0 if doc.mode == "ifc" else 0.85, False,
+    return _answer_obj(question, [doc.doc_id], scrub(text.replace("{marks}", marks)), value, unit, 1.0 if doc.mode == "ifc" else 0.85, False,
                        boxes, cites, scene, trace, route, t0 or time.perf_counter())
 
 
@@ -841,11 +842,11 @@ def compliance(question: str, doc: Doc, t0) -> dict | None:
     if fs:
         top = fs[:4]
         lines = "; ".join(f"{f['title']} ({advisor._short(by[f['rule_id']]) if f['rule_id'] in by else f['rule_id']}, {f['severity']})" for f in top)
-        text = (f"**Not clearly compliant on {labels}.** I found {len(fs)} issue{'s' if len(fs) != 1 else ''}: {lines}. Rules checked: {ck}. "
+        text = (f"**Not clearly compliant on {labels}.** I found {len(fs)} issue{'s' if len(fs) != 1 else ''}: {lines}. Checked against: {ck}. "
                 + (f"{len(skipped)} more rule{'s' if len(skipped) != 1 else ''} cannot be checked with this model. " if skipped else "") + "{marks}")
         val = len(fs)
     else:
-        text = (f"**No problems found** for {labels} in the rules I can check on this model ({ck}). "
+        text = (f"**No problems found** for {labels} in the rules I can check on this model. Checked against: {ck}. "
                 + (f"{len(skipped)} other rule{'s' if len(skipped) != 1 else ''} cannot be checked automatically, so this is not a full compliance sign-off. " if skipped else "")
                 + "{marks}")
         val = 0
@@ -962,7 +963,7 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
     for (tn, mm), v in rows:
         ns = sorted(order[i.item_id] for i, _a in v if order[i.item_id] <= MAX_BOXES)
         marks = ", ".join(f"[{n}]" for n in ns[:6]) + (f" +{len(ns) - 6}" if len(ns) > 6 else "")
-        lines.append(f"| {tn} | {mm} mm | {len(v)} | {_fmt(sum(a for _i, a in v))} m² | {marks} |")
+        lines.append(f"| {clean_type_name(tn, False)} | {mm} mm | {len(v)} | {_fmt(sum(a for _i, a in v))} m² | {marks} |")
     tot = round(sum(a for v in groups.values() for _i, a in v), 2)
     srcname = {"quantity": "the model's thickness quantity", "property": "a thickness property", "bbox": "the box height (no thickness in the model)"}
     thick_src = " and ".join(srcname[s] for s in sorted(src_used))
@@ -1008,7 +1009,7 @@ def edit_advice(res: dict, doc: Doc, hidden_ids: list[str]) -> None:
     elif sug:
         verdict = "**Possible problem after this edit:** " + "; ".join(line(c) for c in sug[:3]) + "."
     else:
-        verdict = "**No rule broken by this edit** in the checks that can run on this model" + (f" (checked: {cards[0].get('checked') and advisor._checked_text(cards[0]['checked'])})." if cards[0].get("checked") else ".")
+        verdict = "**No rule broken by this edit** in the checks that can run on this model" + (f" (checked against: {cards[0].get('checked') and advisor._checked_text(cards[0]['checked'])})." if cards[0].get("checked") else ".")
     # numbered evidence: the hidden item(s) first, then what the cards point at (e.g. the remaining exit)
     from engine.solvers.solve import _evidence
     by = {i.item_id: i for i in doc.items}

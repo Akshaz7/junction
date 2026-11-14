@@ -144,7 +144,7 @@ def compare(doc_id: str, revision_dir) -> dict:
             add("modified", "room", x, y, f"Room label changed from '{la}' to '{lb}'.", field="label", old=la, new=lb)
         aa, ab = _area(x), _area(y)
         if aa and ab and abs(ab - aa) / aa > AREA_TOL:
-            add("modified", "room", x, y, f"Room area changed from {aa:.1f} m2 to {ab:.1f} m2.", field="area", old=round(aa, 2), new=round(ab, 2))
+            add("modified", "room", x, y, f"Room area changed from {aa:.1f} m² to {ab:.1f} m².", field="area", old=round(aa, 2), new=round(ab, 2))
     for x in gone:
         add("removed", "room", x, None, f"Room {_label(x) or x['item_id']} was removed.")
     for y in new:
