@@ -120,6 +120,7 @@ def _trace_event(chat_id: str, step: dict) -> dict:
 class NewChat(BaseModel):
     doc_ids: list[str] = []
     title: str | None = None
+    project_id: str | None = None
 
 
 class NewMessage(BaseModel):
@@ -142,14 +143,21 @@ def _uuid(s: str) -> uuid.UUID:
 
 
 def _chat(r) -> dict:
-    return {"id": str(r["id"]), "doc_id": r["doc_id"], "title": r["title"], "created_at": r["created_at"].isoformat()}
+    out = {"id": str(r["id"]), "doc_id": r["doc_id"], "title": r["title"], "created_at": r["created_at"].isoformat()}
+    try:
+        pid = r["project_id"]
+    except (KeyError, IndexError):
+        pid = None
+    if pid is not None:
+        out["project_id"] = str(pid)
+    return out
 
 
 @router.get("/chats")
 async def list_chats(limit: int | None = None):
     """Newest first. `limit` (1-1000) caps the rows; without it every chat is returned (older clients)."""
     pool = await _pool()
-    q = "select id, doc_id, title, created_at from chats order by created_at desc"
+    q = "select id, doc_id, title, created_at, project_id from chats order by created_at desc"
     if limit is not None:
         rows = await pool.fetch(q + " limit $1", max(1, min(int(limit), 1000)))
     else:
@@ -163,8 +171,16 @@ async def create_chat(body: NewChat):
     doc_id = body.doc_ids[0] if body.doc_ids else None
     if doc_id and not await pool.fetchval("select 1 from documents where doc_id=$1", doc_id):
         raise HTTPException(404, "document not found")
-    r = await pool.fetchrow("insert into chats (doc_id, title) values ($1,$2) returning id, doc_id, title, created_at",
-                            doc_id, body.title)
+    pid = None
+    if body.project_id:
+        try:
+            pid = uuid.UUID(body.project_id)
+        except ValueError:
+            raise HTTPException(404, "project not found")
+        if not await pool.fetchval("select 1 from projects where id=$1", pid):
+            raise HTTPException(404, "project not found")
+    r = await pool.fetchrow("insert into chats (doc_id, title, project_id) values ($1,$2,$3) returning id, doc_id, title, created_at, project_id",
+                            doc_id, body.title, pid)
     return _chat(r)
 
 
@@ -172,7 +188,7 @@ async def create_chat(body: NewChat):
 async def get_chat(chat_id: str):
     pool = await _pool()
     cid = _uuid(chat_id)
-    c = await pool.fetchrow("select id, doc_id, title, created_at from chats where id=$1", cid)
+    c = await pool.fetchrow("select id, doc_id, title, created_at, project_id from chats where id=$1", cid)
     if c is None:
         raise HTTPException(404, "chat not found")
     msgs = await pool.fetch(
@@ -230,6 +246,11 @@ async def ask(chat_id: str, body: NewMessage):
     if c is None:
         raise HTTPException(404, "chat not found")
     doc_ids = body.doc_ids if body.doc_ids is not None else ([c["doc_id"]] if c["doc_id"] else [])
+    if body.doc_ids is None and not doc_ids:   # a project chat with no explicit selection asks all the project's documents
+        pid = await pool.fetchval("select project_id from chats where id=$1", cid)
+        if isinstance(pid, uuid.UUID):
+            from .projects_routes import project_doc_ids
+            doc_ids = await project_doc_ids(pool, pid) or []
     if doc_ids:
         from .changes_source import visible_doc_ids
         listed = await visible_doc_ids(pool)

@@ -48,6 +48,9 @@ async def lifespan(app: FastAPI):
                 await purge_synthetic(conn)
                 mark_checked()
                 await seed_skills(conn)
+            if os.environ.get("SEED_PROJECTS", "1") != "0":
+                from .projects_routes import seed_demo_projects
+                await seed_demo_projects(pool)
         except Exception as e:  # never block startup
             print("migrations failed:", e)
     restore = asyncio.create_task(_restore_uploads())
@@ -88,6 +91,8 @@ from .watch_routes import router as watch_router  # noqa: E402
 app.include_router(watch_router)
 from .pair_routes import router as pair_router  # noqa: E402
 app.include_router(pair_router)
+from .projects_routes import router as projects_router  # noqa: E402
+app.include_router(projects_router)
 
 
 @app.get("/api/health")

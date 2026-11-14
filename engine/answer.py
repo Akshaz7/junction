@@ -521,6 +521,15 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
         # X11: explicit totals across several selected documents are summed from one solver result per document
         if len(doc_ids) >= 2:
             try:
+                from engine.projects import multidoc as _md
+                if (res := _md.answer(question, doc_ids, root, t0)) is not None:
+                    for s_ in res.get("trace", []):
+                        add(s_)
+                    res["trace"] = trace
+                    return res
+            except Exception:  # never break the answer path
+                pass
+            try:
                 from engine import analytics as _an
                 if (res := _an.multi_doc_total(question, doc_ids, root, t0)) is not None:
                     for s_ in res.get("trace", []):

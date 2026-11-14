@@ -106,6 +106,8 @@ def build(res: dict, question: str, root: Path) -> dict | None:
 
 
 def attach(res: dict, question: str, root: Path) -> dict:
+    if res.get("reasoning"):   # a multi-document answer brings its own card
+        return res
     try:
         r = build(res, question, root)
         if r:
