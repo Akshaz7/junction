@@ -1,6 +1,6 @@
 import {
   AmbientLight, Box3, Color, DirectionalLight, PerspectiveCamera,
-  Raycaster, Scene, Sphere, Vector2, Vector3, WebGLRenderer,
+  Plane, Raycaster, Scene, Sphere, Vector2, Vector3, WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
@@ -19,6 +19,7 @@ import { createFrameProbe, type ViewerPerf } from './perf';
 import { createRenderBatches, PICK_LAYER } from './renderBatches';
 import { withAbort, type LoadProgress } from './loadGLTF';
 import { createWalkController, type WalkState } from './walk';
+import { createEditLayer, type ItemEdit, type EditState, type WallMaterial } from './edits';
 
 export const SCENE_LOAD_BUDGET_MS = 60_000;
 
@@ -52,6 +53,14 @@ export interface Viewer {
   /** Local 2D/3D interaction layer, independent of answer/live highlights. */
   setLinkedItems(hovered: string | null, selected: string | null, labels?: Record<string, string>): void;
   getLinkedHighlightState(): HighlightState;
+  getEditState(): EditState;
+  removeItem(item_id: string): ItemEdit | null;
+  changeMaterial(item_id: string, material: WallMaterial): ItemEdit | null;
+  undoEdit(): ItemEdit | null;
+  resetEdits(): ItemEdit | null;
+  beginMove(item_id: string, x: number, y: number): boolean;
+  updateMove(x: number, y: number): void;
+  endMove(cancel?: boolean): ItemEdit | null;
   /** Show the flat plan/top-down IFC view, then raise the architectural items. */
   visualise(onStateChange?: (state: RiseState) => void): void;
   /** Coordinates are viewport client pixels, as in PointerEvent.clientX/clientY. */
@@ -98,6 +107,8 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   let linkedHighlights: ReturnType<typeof createLinkedHighlightController> | null = null;
   let commandVisuals: ReturnType<typeof createCommandVisuals> | null = null;
   let commandState = emptyCommandState();
+  let edits: ReturnType<typeof createEditLayer> | null = null;
+  let moving: { id: string; from: Vector3; start: Vector3; plane: Plane; dx: number; dz: number; controlsEnabled: boolean } | null = null;
   let applyingCommand = false;
   const commandListeners = new Set<(command: SceneCommand) => void>();
   let linked = { hovered: null as string | null, selected: null as string | null, labels: {} as Record<string, string> };
@@ -121,6 +132,41 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   const raycaster = new Raycaster();
   raycaster.layers.enable(PICK_LAYER);
   const pointer = new Vector2();
+
+  function mutateEdit(action: () => ItemEdit | null): ItemEdit | null {
+    if (!active || disposed) return null;
+    // Unwind interaction layers before replacing any base material. Recreate the
+    // lazy selection index so future hover/highlight uses the edited surface.
+    const previous = highlights?.getHighlightState();
+    clearHighlight();
+    linkedHighlights = null;
+    const result = action();
+    if (previous?.highlighted.length) highlight(previous.highlighted, { labels: previous.labels, dimOthers: commandState.isolated === null });
+    else { applyLinkedVisuals(); notifyHighlight(); }
+    batchesDirty = true;
+    return result;
+  }
+
+  function floorPoint(x: number, y: number, plane: Plane): Vector3 | null {
+    const rect = canvas.getBoundingClientRect();
+    if (!rect.width || !rect.height) return null;
+    pointer.set((x - rect.left) / rect.width * 2 - 1, -(y - rect.top) / rect.height * 2 + 1);
+    camera.updateWorldMatrix(true, false);
+    raycaster.setFromCamera(pointer, camera);
+    return raycaster.ray.intersectPlane(plane, new Vector3());
+  }
+
+  function endMove(cancel = false): ItemEdit | null {
+    if (!moving) return null;
+    const drag = moving; moving = null;
+    controls.enabled = drag.controlsEnabled;
+    if (cancel) {
+      active?.items.get(drag.id)?.position.copy(drag.from);
+      batchesDirty = true;
+      return null;
+    }
+    return mutateEdit(() => edits?.move(drag.id, drag.from, drag.dx, drag.dz, true) ?? null);
+  }
 
   function resize(): void {
     if (disposed) return;
@@ -361,8 +407,10 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     rise?.cancelTransitions();
     rise?.animation.restore();
     rise = null;
+    endMove(true);
     clearHighlight();
     commandVisuals?.dispose();
+    edits?.dispose();
     renderBatches?.dispose();
     renderBatches = null;
     if (active) {
@@ -372,6 +420,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     active = scene;
     pickMeshes = null;
     commandState = emptyCommandState();
+    edits = createEditLayer(scene, { apply: (command) => api.applyCommand(command), hidden: () => [...commandState.hidden] });
     linked = { hovered: null, selected: null, labels: {} };
     cutaway = createCutawayController(scene);
     highlights = createHighlightController(scene);
@@ -432,7 +481,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     notifyCutaway();
   }
 
-  return {
+  const api: Viewer = {
     renderer, camera, controls,
     perf: () => probe.read(renderer.info.render.calls, renderer.info.render.triangles),
     resetPerf: () => probe.reset(),
@@ -530,6 +579,36 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       applyLinkedVisuals();
     },
     getLinkedHighlightState,
+    getEditState: () => edits?.state() ?? { undoCount: 0, moved: {}, materials: {} },
+    removeItem: (id) => mutateEdit(() => edits?.remove(id) ?? null),
+    changeMaterial: (id, choice) => mutateEdit(() => edits?.changeMaterial(id, choice) ?? null),
+    undoEdit() { endMove(true); return mutateEdit(() => edits?.undo() ?? null); },
+    resetEdits() { endMove(true); return mutateEdit(() => edits?.reset() ?? null); },
+    beginMove(id, x, y) {
+      if (disposed || !active || walk.state().active || !active.items.has(id) || commandState.hidden.has(id)) return false;
+      endMove(true);
+      flight = null;
+      rise?.cancelTransitions(); rise?.animation.restore(); rise = null;
+      const object = active.items.get(id)!;
+      const bounds = itemBounds(active, [id]);
+      if (bounds.isEmpty()) return false;
+      const plane = new Plane(new Vector3(0, 1, 0), -bounds.min.y);
+      const start = floorPoint(x, y, plane);
+      if (!start) return false;
+      moving = { id, from: object.position.clone(), start, plane, dx: 0, dz: 0, controlsEnabled: controls.enabled };
+      controls.enabled = false;
+      return true;
+    },
+    updateMove(x, y) {
+      if (!moving || !edits) return;
+      const point = floorPoint(x, y, moving.plane);
+      if (!point) return;
+      moving.dx = point.x - moving.start.x;
+      moving.dz = point.z - moving.start.z;
+      edits.move(moving.id, moving.from, moving.dx, moving.dz, false);
+      batchesDirty = true;
+    },
+    endMove,
     getHighlightState() {
       return highlights?.getHighlightState() ?? { highlighted: [], dimmed: 0, labels: {} };
     },
@@ -582,8 +661,10 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       rise?.cancelTransitions();
       rise?.animation.restore();
       rise = null;
+      endMove(true);
       clearHighlight();
       commandVisuals?.dispose();
+      edits?.dispose(); edits = null;
       renderBatches?.dispose();
       renderBatches = null;
       labelRenderer.domElement.remove();
@@ -598,4 +679,5 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       renderer.dispose();
     },
   };
+  return api;
 }

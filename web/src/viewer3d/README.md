@@ -265,3 +265,27 @@ AC20 desktop navigation, answer-target starts, edit retention and two-touch
 phone controls. LEAD runs it and the full `viewer3d-*.spec.ts` set through
 `scripts/heavy.sh` outside the sandbox (Chromium's macOS Mach port is blocked
 inside it).
+
+T-08 adds **Edit**: select an item, Remove through the existing hide/restore
+commands, or Move by dragging on its horizontal floor plane (0.1 m snapping;
+Escape cancels). Walls also offer Concrete, Timber frame and Glass as local
+colour swaps, with the chosen material label. Undo and Reset edits reverse the
+local history without changing the manifest or source files. Movement and
+material swaps remain local; hide/restore use the shared command channel.
+
+Each completed edit and inverse edit queues a POST to `/api/advise` after a
+400 ms debounce. Requests retain operation order, including across slow calls,
+and pass `{doc_id, chat_id?, edit: {op, item_ids, detail}}`. Optional `chat_id`
+is a `Viewer3D` prop. Move details contain `delta_m`/`position_m`; material details
+contain `material`. The existing shared `/ws` connection also receives scoped
+`advisor.cards` events. Live responses supersede older in-flight HTTP responses.
+At most three complete sourced cards render, with kind icons and expandable
+source quotes. Card selection highlights its item IDs with manifest tags. Empty
+responses say “No advice for this change.”; failed requests say advice is
+unavailable. The server currently needs advisor-only move/material validation
+and detail forwarding (recorded in the handoff).
+
+`e2e/viewer3d-edit.spec.ts` uses the real AC20 scene and commands. Only its named
+`advisor-fixture` response is stubbed, marked generated for demo; another test
+uses the real advisor API. A third checks dragging, material requests, and reset.
+The full browser done test remains for LEAD outside the worker sandbox.

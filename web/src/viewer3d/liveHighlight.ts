@@ -1,4 +1,5 @@
 import { applyCommand, applyState, emptyCommandState, type SceneCommand, type SceneSnapshot } from './commands';
+import { decodeAdvisorEvent, type AdvisorEvent } from './advisor';
 
 /** The viewer depends only on these two methods, so W-10 can replace this transport. */
 export interface HighlightChannel {
@@ -20,7 +21,7 @@ export interface SceneChannel extends HighlightChannel {
   onSceneEvent(callback: (event: SceneEvent) => void): () => void;
   sendCommand(doc_id: string, command: SceneCommand): void;
 }
-type LiveMessage = HighlightMessage | SceneEvent | { type: 'ping' };
+type LiveMessage = HighlightMessage | SceneEvent | AdvisorEvent | { type: 'ping' };
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -33,6 +34,7 @@ export function decodeLiveMessage(raw: unknown): LiveMessage | null {
   try { value = JSON.parse(raw); } catch { return null; }
   if (!record(value)) return null;
   if (value.type === 'ping') return { type: 'ping' };
+  if (value.type === 'advisor.cards') return decodeAdvisorEvent(value);
   const ids = (v: unknown): v is string[] => Array.isArray(v) && v.every((id) => typeof id === 'string' && id.length > 0);
   const labels = (v: unknown) => record(v) && Object.values(v).every((label) => typeof label === 'string');
   if ((value.type === 'scene.edit' || value.type === 'scene.state') && typeof value.doc_id === 'string' && value.doc_id) {
@@ -74,9 +76,10 @@ export function sameHighlight(a: HighlightMessage, b: HighlightMessage): boolean
 export function createLiveHighlightClient(options: {
   url?: string;
   connect?: (url: string) => WebSocket;
-} = {}): SceneChannel {
+} = {}): SceneChannel & { onAdvisorCards(callback: (event: AdvisorEvent) => void): () => void } {
   const listeners = new Set<(event: HighlightMessage) => void>();
   const sceneListeners = new Set<(event: SceneEvent) => void>();
+  const advisorListeners = new Set<(event: AdvisorEvent) => void>();
   const sceneStates = new Map<string, SceneEvent & { type: 'scene.state' }>();
   const editIds = new Set<string>();
   const commandQueue: SceneEvent[] = [];
@@ -96,7 +99,7 @@ export function createLiveHighlightClient(options: {
   }
 
   function reconnect() {
-    if (retry !== undefined || (!listeners.size && !sceneListeners.size && !pending.size && !commandQueue.length)) return;
+    if (retry !== undefined || (!listeners.size && !sceneListeners.size && !advisorListeners.size && !pending.size && !commandQueue.length)) return;
     retry = setTimeout(() => {
       retry = undefined;
       connect();
@@ -138,7 +141,7 @@ export function createLiveHighlightClient(options: {
   }
 
   function release() {
-    if (listeners.size || sceneListeners.size) return;
+    if (listeners.size || sceneListeners.size || advisorListeners.size) return;
     if (retry !== undefined) clearTimeout(retry);
     retry = undefined;
     const previous = socket;
@@ -164,6 +167,8 @@ export function createLiveHighlightClient(options: {
         const event = decodeLiveMessage(message.data);
         if (event?.type === 'ping') {
           if (connection.readyState === 1) connection.send(JSON.stringify({ type: 'pong' }));
+        } else if (event?.type === 'advisor.cards') {
+          for (const callback of advisorListeners) callback(event);
         } else if (event?.type === 'scene.edit' || event?.type === 'scene.state') {
           deliverScene(event);
         } else if (event) {
@@ -182,6 +187,11 @@ export function createLiveHighlightClient(options: {
   }
 
   return {
+    onAdvisorCards(callback) {
+      advisorListeners.add(callback);
+      connect();
+      return () => { advisorListeners.delete(callback); release(); };
+    },
     onHighlight(callback) {
       listeners.add(callback);
       for (const event of latest.values()) callback(event);
@@ -218,3 +228,4 @@ export const onHighlight = shared.onHighlight;
 export const sendHighlight = shared.sendHighlight;
 export const onSceneEvent = shared.onSceneEvent;
 export const sendCommand = shared.sendCommand;
+export const onAdvisorCards = shared.onAdvisorCards;

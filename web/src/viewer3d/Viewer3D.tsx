@@ -12,9 +12,12 @@ import { setHover, setSelected, useLinkedItem } from './link';
 import type { LoadProgress } from './loadGLTF';
 import type { WalkState } from './walk';
 import { WalkJoystick } from './WalkJoystick';
+import { EditPanel, useEditAdvisor } from './EditPanel';
+import type { EditState, ItemEdit } from './edits';
 import './viewer3d.css';
 
 interface ViewerOptions {
+  chat_id?: string;
   onPick?: (item_id: string) => void;
   /** Defaults to a cutaway at the ground storey. Null explicitly shows all storeys. */
   storey?: string | null;
@@ -43,7 +46,7 @@ export interface Viewer3DTestHandle {
 }
 export type LinkedViewerCanvas = HTMLCanvasElement & { __viewer3d?: Viewer3DTestHandle };
 
-export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highlightItemIds, highlightOptions, commands, onReady, visualise = false, onRiseStateChange, onError }: Viewer3DProps) {
+export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey, highlightItemIds, highlightOptions, commands, onReady, visualise = false, onRiseStateChange, onError }: Viewer3DProps) {
   const sceneUrl = doc_id !== undefined ? documentSceneUrl(doc_id) : sourceUrl!;
   // Answer objects may be recreated on parent renders. Only new evidence should
   // replace a live selection; equivalent arrays/maps must leave it in place.
@@ -66,6 +69,11 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
   const [storeys, setStoreys] = useState<string[]>([]);
   const [picked, setPicked] = useState<string | null>(null);
   const [manifest, setManifest] = useState<SceneManifest | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [moveItem, setMoveItem] = useState<string | null>(null);
+  const dragPointer = useRef<number | null>(null);
+  const [edits, setEdits] = useState<EditState>({ undoCount: 0, moved: {}, materials: {} });
+  const advice = useEditAdvisor(manifest?.doc_id, chat_id);
   const [elements, setElements] = useState<Map<string, IFCElement>>(new Map());
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState('');
@@ -74,6 +82,30 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
   const helpId = useId();
   const closeDetails = useCallback(() => setPicked(null), []);
   const details = manifest && picked ? buildItemDetails(manifest, picked, elements.get(picked)) : null;
+
+  function finishEdit(edit: ItemEdit | null) {
+    setEdits(viewerRef.current?.getEditState() ?? { undoCount: 0, moved: {}, materials: {} });
+    advice.enqueue(edit);
+  }
+
+  function cancelMove() {
+    viewerRef.current?.endMove(true);
+    dragPointer.current = null;
+    setMoveItem(null);
+  }
+
+  useEffect(() => {
+    if (!editing) return;
+    const cancel = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        viewerRef.current?.endMove(true);
+        dragPointer.current = null;
+        setMoveItem(null);
+      }
+    };
+    window.addEventListener('keydown', cancel);
+    return () => window.removeEventListener('keydown', cancel);
+  }, [editing]);
 
   useEffect(() => { onReadyRef.current = onReady; }, [onReady]);
   useEffect(() => { riseStateRef.current = onRiseStateChange; }, [onRiseStateChange]);
@@ -106,6 +138,8 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
     setStoreys([]);
     setPicked(null);
     setManifest(null);
+    setEditing(false); setMoveItem(null); dragPointer.current = null;
+    setEdits({ undoCount: 0, moved: {}, materials: {} });
     setElements(new Map());
     setHasRoof(false);
     setWalking(false);
@@ -204,6 +238,13 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
   }, [state, visualise, sceneUrl]);
 
   function pick(event: PointerEvent<HTMLCanvasElement>) {
+    if (dragPointer.current === event.pointerId) {
+      viewerRef.current?.updateMove(event.clientX, event.clientY);
+      finishEdit(viewerRef.current?.endMove() ?? null);
+      dragPointer.current = null; pointerStart.current = null; setMoveItem(null);
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+      return;
+    }
     const start = pointerStart.current;
     pointerStart.current = null;
     if (viewerRef.current?.walk().active) return;
@@ -216,6 +257,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
 
   const storeyIndex = storeys.indexOf(cutaway.activeStorey ?? '');
   function selectStorey(name: string | null) {
+    cancelMove();
     viewerRef.current?.setStorey(name);
     setPicked(null);
   }
@@ -225,7 +267,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
     data-linked-selected={highlightState.highlighted.includes(linked.selected ?? '') ? linked.selected : ''}
     data-linked-hover={highlightState.highlighted.includes(linked.hovered ?? '') ? linked.hovered : ''}
     data-active-storey={cutaway.activeStorey ?? ''} data-show-roof={cutaway.showRoof} data-hidden-count={cutaway.hiddenCount}
-    data-walking={walking}>
+    data-walking={walking} data-editing={editing}>
     <div className="viewer3d-toolbar">
       <label htmlFor={selectId}>Storey</label>
       <button type="button" aria-label="Previous storey" disabled={state !== 'ready' || storeyIndex <= 0}
@@ -243,23 +285,40 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
       </label>}
       <button type="button" aria-label="Walk" aria-pressed={walking} disabled={state !== 'ready'}
         onClick={() => {
+          cancelMove(); setEditing(false);
           setPicked(null); setHover(null, '3d');
           const entered = viewerRef.current?.setWalk(!walking);
           setWalkMessage(!walking && !entered ? 'No clear starting position is available on this storey.' : '');
         }}>Walk</button>
+      <button type="button" aria-label="Edit" aria-pressed={editing} disabled={state !== 'ready'} onClick={() => {
+        cancelMove(); viewerRef.current?.setWalk(false); setEditing(!editing);
+      }}>Edit</button>
     </div>
     <div className="viewer3d-stage" aria-busy={state === 'loading'}>
       <canvas ref={canvasRef} tabIndex={0} aria-label="3D building model" aria-describedby={helpId}
+        onPointerDownCapture={(event) => {
+          if (!editing || !moveItem || event.button !== 0 || !event.isPrimary) return;
+          if (viewerRef.current?.beginMove(moveItem, event.clientX, event.clientY)) {
+            event.stopPropagation();
+            event.currentTarget.setPointerCapture(event.pointerId);
+            dragPointer.current = event.pointerId;
+            pointerStart.current = null;
+          }
+        }}
         onPointerDown={(event) => {
           pointerStart.current = !viewerRef.current?.walk().active && event.isPrimary && event.button === 0
             ? { id: event.pointerId, x: event.clientX, y: event.clientY } : null;
         }}
         onPointerMove={(event) => {
+          if (dragPointer.current === event.pointerId) {
+            viewerRef.current?.updateMove(event.clientX, event.clientY); return;
+          }
           if (viewerRef.current?.walk().active || event.pointerType !== 'mouse' || event.buttons !== 0 || state !== 'ready') return;
           setHover(viewerRef.current?.pick(event.clientX, event.clientY) ?? null, '3d');
         }}
         onPointerLeave={() => setHover(null, '3d')}
-        onPointerUp={pick} onPointerCancel={() => { pointerStart.current = null; setHover(null, '3d'); }} />
+        onPointerUp={pick} onPointerCancel={() => { cancelMove(); pointerStart.current = null; setHover(null, '3d'); }}
+        onLostPointerCapture={() => { if (dragPointer.current !== null) cancelMove(); }} />
       {state === 'loading' && <p className="viewer3d-message" role="status">
         {progress.phase === 'parse' ? 'Reading 3D model…'
           : progress.phase === 'prepare' ? 'Preparing 3D view…'
@@ -269,11 +328,22 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
       </p>}
       {state === 'error' && <p className="viewer3d-message" role="alert">{error}</p>}
       {walking && <WalkJoystick onMove={(x, y) => viewerRef.current?.setWalkJoystick(x, y)} />}
-      {state === 'ready' && details && <ItemDetailsCard key={details.item_id} details={details}
+      {state === 'ready' && details && !editing && <ItemDetailsCard key={details.item_id} details={details}
         loading={false} onClose={closeDetails}
         onHighlight={() => viewerRef.current?.highlight([details.item_id])} />}
     </div>
     <div className="viewer3d-footer">
+      {state === 'ready' && editing && manifest && <EditPanel selected={picked} manifest={manifest} edits={edits}
+        moving={moveItem !== null} advice={advice}
+        onRemove={() => { cancelMove(); if (picked) { finishEdit(viewerRef.current?.removeItem(picked) ?? null); selectItem(null); } }}
+        onMove={() => { cancelMove(); if (picked && moveItem !== picked) setMoveItem(picked); }}
+        onMaterial={(choice) => { cancelMove(); if (picked) finishEdit(viewerRef.current?.changeMaterial(picked, choice) ?? null); }}
+        onUndo={() => { cancelMove(); finishEdit(viewerRef.current?.undoEdit() ?? null); }}
+        onReset={() => { cancelMove(); finishEdit(viewerRef.current?.resetEdits() ?? null); }}
+        onHighlight={(ids) => {
+          cancelMove(); selectItem(null);
+          viewerRef.current?.applyCommand({ op: 'highlight', item_ids: ids });
+        }} />}
       <p id={helpId}>{walking
         ? 'WASD / arrow keys to move · Drag to look · Q/E or PageUp/Down for storeys · Esc to return to orbit'
         : 'Drag to orbit · Scroll to zoom · Click an item to identify it'}</p>
