@@ -24,6 +24,7 @@ Image.MAX_IMAGE_PIXELS = None
 
 
 def save_page(img: Image.Image, out: Path, n: int):
+    dpi = img.info.get("dpi")
     if img.mode in ("RGBA", "LA", "P"):
         img = img.convert("RGBA")
         bg = Image.new("RGB", img.size, "white")
@@ -31,7 +32,7 @@ def save_page(img: Image.Image, out: Path, n: int):
         img = bg
     elif img.mode != "RGB":
         img = img.convert("RGB")
-    img.save(out / f"page-{n}.png")
+    img.save(out / f"page-{n}.png", **({"dpi": dpi} if dpi else {}))
     t = img.copy()
     t.thumbnail((THUMB, THUMB))
     t.save(out / f"page-{n}.thumb.png")
@@ -227,12 +228,16 @@ def cap_raster(img: Image.Image, side: int | None = None) -> Image.Image:
     """FIX-15: shrink a huge raster in its own (often 1-byte palette/grey) mode before any RGB copy, so a
     14000x9902 PNG never needs 2 x 416 MB of RGB on a 512 MB container."""
     side = side or MAX_SIDE
+    original_w, original_h = img.size
+    original_dpi = img.info.get("dpi")
     if img.format == "JPEG":
         img.draft("RGB", (side, side))  # decode at reduced size straight from the JPEG
     if max(img.size) > side:
         if img.mode == "P":
             img = img.convert("L") if not img.info.get("transparency") else img.convert("LA")
         img.thumbnail((side, side), Image.BILINEAR, reducing_gap=2.0)
+    if original_dpi:
+        img.info["dpi"] = (original_dpi[0] * img.width / original_w, original_dpi[1] * img.height / original_h)
     return img
 
 
@@ -240,7 +245,7 @@ def do_raster(f: Path, out: Path):
     img = cap_raster(Image.open(f))
     img.load()
     W, H = save_page(img, out, 1)
-    return [{"page": 1, "w": W, "h": H, "dpi": None, "words": 0}]
+    return [{"page": 1, "w": W, "h": H, "dpi": (img.info.get("dpi") or [None])[0], "words": 0}]
 
 
 def process(args):

@@ -678,13 +678,19 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
     if doc.mode == "planmap":
         sc = doc.scale or {}
         if p.type == "area" and kind == "room":
+            from engine.scales import item_scale, scale_description
+            local = [i for i, _ in have if "measurement_scale" in i.props]
+            if local:
+                scales = [item_scale(i) for i in local]
+                sc = min(scales, key=lambda s: float(s.get("confidence") or 0))
+                scale_note = " Scale used: " + "; ".join(dict.fromkeys(scale_description(item_scale(i), i.props.get("scale_region")) for i in local)) + "."
             if sc.get("method") in (None, "none"):
                 return _abstain(question, doc_id, "This plan has no scale I can trust, so I cannot give areas in square metres.", trace, route, t0)
             conf = float(sc.get("confidence") or 0.3)
             if conf < 0.5:
                 scale_note = " Areas are estimated from door sizes because no printed scale was found, so treat them as approximate."
             elif sc.get("method") in ("scalebar", "ratio-dpi", "ratio-sheet"):
-                scale_note = " Sized from the scale printed on the drawing."
+                scale_note = scale_note or " Sized from the scale printed on the drawing."
         else:
             return _abstain(question, doc_id, f"I do not measure {p.type} of {_plural(kind, 2)} from a plan reliably yet.", trace, route, t0)
         conf = min(conf, sum(i.conf for i, _ in have) / len(have)) if have else 0.0

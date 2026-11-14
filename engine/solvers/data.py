@@ -97,11 +97,16 @@ def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
         items, scale = [], None
         for p in pms:
             m = _json(p)
+            from engine.scales import apply_item_scales
+            from pipeline.scale_regions import annotate_cached
+            if meta.get("kind") in ("raster", "dxf", "dwg"):
+                m = annotate_cached(m, d)
             scale = scale or m.get("scale")
+            page_start = len(items)
             for x in m["items"]:
                 pr = x.get("props") or {}
                 q = {}
-                for ak in ("area_m2", "area_m2_label", "area_m2_geom"):   # printed label area wins over polygon area
+                for ak in ("area_m2_label", "area_m2", "area_m2_geom"):   # printed label area wins over polygon area
                     if pr.get(ak) is not None:
                         q["area_m2"] = pr[ak]
                         break
@@ -111,10 +116,11 @@ def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
                 items.append(Item(item_id=x["item_id"], kind=x["kind"], label=x.get("label"), page=m.get("page", 1),
                                   bbox_px=x.get("bbox_px"), polygon_px=x.get("polygon_px"), conf=float(x.get("conf") or 0), q=q, props=pr,
                                   source=x.get("source", "")))
+            apply_item_scales(items[page_start:], m)
         items = dedupe_openings(items)
         try:   # E-57: a printed scale (scale bar, or 1:200 + sheet size / dpi) beats the door-size guess
             from engine import scale_text
-            better = scale_text.refine_scale(d, 1, scale)
+            better = None if any("measurement_scale" in i.props for i in items) else scale_text.refine_scale(d, 1, scale)
             if better:
                 scale_text.rescale_items(items, (scale or {}).get("m_per_px"), better["m_per_px"])
                 scale = {**better, "replaced": (scale or {}).get("method")}

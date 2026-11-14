@@ -74,7 +74,7 @@ def _normalise_raster(doc_id: str, art: Path):
     # FIX-15: huge rasters are shrunk before any RGB conversion; the vision read then sees the capped copy too
     dst = src.with_name(src.stem + ("-capped" if big else "") + ".png")
     img = cap_raster(Image.open(src))
-    (img if img.mode in ("RGB", "L", "LA", "RGBA") else img.convert("RGB")).save(dst)
+    (img if img.mode in ("RGB", "L", "LA", "RGBA") else img.convert("RGB")).save(dst, **({"dpi": img.info["dpi"]} if img.info.get("dpi") else {}))
     d["files"] = {"png": str(Path(rel).with_name(dst.name))}
     (art / doc_id / "doc.json").write_text(json.dumps(d, indent=1))
 
@@ -173,6 +173,11 @@ def _dxf_planmap_usable(ddir: Path) -> bool:
 
 def _extrude(doc_id: str, ddir: Path, page: int):
     from pipeline import extrude
+    try:
+        from pipeline.scale_regions import annotate_document
+        annotate_document(ddir, page)
+    except Exception as ex:  # scale detection must never prevent an upload
+        print("view scale detection skipped:", type(ex).__name__)
     pm = json.loads((ddir / f"planmap-{page}.json").read_text())
     if not pm["scale"].get("m_per_px"):
         # No readable scale: build the 3D anyway on an assumed one, flagged. The engine refuses implausible areas on guessed scales (E-61).

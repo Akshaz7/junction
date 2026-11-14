@@ -1,0 +1,98 @@
+[
+  {
+    "file": "data/junction-dataset-preview/data/habs/al1276_sheet_00001.jpg",
+    "origin": "habs",
+    "format": ".jpg",
+    "image": [
+      3000,
+      2428
+    ],
+    "dpi": null,
+    "ocr_words": 306,
+    "anchors": [
+      {
+        "bbox": [
+          1291.0,
+          2184.0,
+          1941.0,
+          2223.0
+        ],
+        "ratio": 0.8571428571428571,
+        "title": "North ElevationM",
+        "quote": "North ElevationM Scale:14\"=1'-0\" /4\"=1'-0\""
+      },
+      {
+        "bbox": [
+          2463.0,
+          2195.0,
+          2782.0,
+          2224.0
+        ],
+        "ratio": 3000.0,
+        "title": "RiverdaleMillinChambersCountyAlabama.",
+        "quote": "Scale:1\"=250' 1Feet"
+      },
+      {
+        "bbox": [
+          1846.0,
+          2240.0,
+          1901.0,
+          2262.0
+        ],
+        "ratio": 48.0,
+        "title": "",
+        "quote": "1:48 1:48"
+      },
+      {
+        "bbox": [
+          2595.0,
+          2237.0,
+          2855.0,
+          2263.0
+        ],
+        "ratio": 3000.0,
+        "title": "",
+        "quote": "1:3000 Meters AB"
+      }
+    ],
+    "regions": [
+      {
+        "bbox": [
+          161.66666666666669,
+          154.97872340425533,
+          2858.3333333333335,
+          2298.0178448867537
+        ],
+        "scale": {
+          "m_per_px": null,
+          "method": "none",
+          "confidence": 0.0,
+          "evidence": "Several printed scales share a view with no verified boundary"
+        },
+        "title": "North ElevationM"
+      }
+    ],
+    "main_scale": {
+      "m_per_px": null,
+      "method": "none",
+      "confidence": 0.0,
+      "evidence": "Several printed scales share a view with no verified boundary"
+    },
+    "status": "processed; no crash",
+    "measurement_accuracy": "not evaluated; no annotated measurement ground truth"
+  },
+  {
+    "file": "data/junction-dataset-preview/data/swiss_dwellings/site1088_bldg2216_floor10132.dxf",
+    "origin": "swiss_dwellings",
+    "format": ".dxf",
+    "units_code": 6,
+    "image": [
+      1549,
+      3000
+    ],
+    "modelspace_regions": [],
+    "paperspace_regions": [],
+    "status": "processed; no crash",
+    "measurement_accuracy": "not evaluated; no annotated measurement ground truth"
+  }
+]
