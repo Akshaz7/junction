@@ -40,6 +40,12 @@ document documents drawing drawings plan plans sheet sheets file files project m
 number amount total mention mentions mentioned say says contain contains containing present include includes including""".split())
 # words that carry the question but little meaning for retrieval
 WEAK = {"floor", "level", "storey", "story", "room", "rooms"}
+JUNK_DOC = re.compile(r"upload-fixture|generated[\s_-]+for[\s_-]+demo|^qa-|cross-device", re.I)
+
+
+def excluded_doc(summary: dict) -> bool:
+    return bool(summary.get("generated_for_demo") or JUNK_DOC.search(
+        summary.get("doc_id", "") + " " + summary.get("title", "")))
 
 SYN = {  # query-time expansion (weight 0.6); room names in several languages
     "toilet": "wc lavatory restroom washroom toilets bad aborte vessa wc-tila",
@@ -54,9 +60,10 @@ SYN = {  # query-time expansion (weight 0.6); room names in several languages
     "door": "doors",
     "ei": "fire-rated fire-resistance rated",
 }
-for _group in ("kitchen küche kök keittiö", "toilet wc lavatory restroom washroom", "schedule table"):
+for _group in ("kitchen küche kök keittiö", "toilet wc lavatory restroom washroom"):
     for _term in _group.split():
         SYN[_term] = " ".join(dict.fromkeys((SYN.get(_term, "") + " " + _group).split()))
+SYN["table"] = "schedule"  # schedule queries only match tables/lists on schedule sheets
 
 DISCIPLINE = [("architectural", r"(^|[-_ ])(arc|arch|architecture|architectural)([-_ .]|$)"),
               ("structural", r"(^|[-_ ])(str|struc|structural|structure)([-_ .]|$)"),
@@ -209,6 +216,7 @@ def build_chunks(doc_id: str, root: Path, metadata: dict | None = None) -> tuple
     chunks = [(0, sum(m.values()), dict(m)), *[(p, sum(c.values()), dict(c)) for p, c in sorted(page_terms.items()) if c]]
     summary["text_pages"] = [int(p.stem.split("-")[1]) for p in d.glob("text-[0-9]*.json")]
     summary["indexed_pages"] = [p for p, _, _ in chunks if p > 0]
+    summary["artifact_stamp"] = d.stat().st_mtime_ns if d.is_dir() else None
     return summary, chunks, _names_for(doc_id, meta)
 
 
@@ -221,6 +229,8 @@ class Index:
         self.total_len = 0
         self.lock = threading.RLock()
         self.mtime = 0.0
+        self.checked_at = 0.0
+        self.root_stamp = None
 
     # --- mutation -------------------------------------------------------------------------------------
     def remove(self, doc_id: str):
@@ -228,7 +238,7 @@ class Index:
             old = self.docs.pop(doc_id, None)
             if old is None:
                 return
-            for pg in [0, *old.get("text_pages", [])]:
+            for pg in [0, *old.get("indexed_pages", [])]:
                 ent = self.chunks.pop((doc_id, pg), None)
                 if ent:
                     self.total_len -= ent[0]
@@ -281,7 +291,8 @@ class Index:
                     terms.setdefault(st, 0.6)
         return terms
 
-    def search(self, question: str, k: int = 10, boost_sources: dict[str, float] | None = None, per_doc: bool = True) -> list[dict]:
+    def search(self, question: str, k: int = 10, boost_sources: dict[str, float] | None = None, per_doc: bool = True,
+               include_excluded: set[str] | None = None) -> list[dict]:
         """Top documents: [{doc_id, page, score, coverage, matched}], best chunk per doc, best first."""
         terms = self.query_terms(question)
         if not terms:
@@ -308,6 +319,8 @@ class Index:
         for key, sc in scores.items():
             did, page = key
             dm = self.docs.get(did, {})
+            if excluded_doc(dm) and did not in (include_excluded or ()):
+                continue
             boost = (boost_sources or {}).get(dm.get("source", ""), 1.0)
             tt = dm.get("title_toks") or ()
             if len(tt) >= 2:                      # the question quotes much of the document's title: it is about that document
@@ -354,6 +367,34 @@ def index_path(root: Path | str | None = None) -> Path:
 _CACHE: dict[str, Index] = {}
 
 
+def _refresh_index(ix: Index, root: Path) -> Index:
+    """The image contains only baked docs. Discover every dataset/upload restored later by the server."""
+    stamp = root.stat().st_mtime_ns
+    if ix.root_stamp == stamp and time.monotonic() - ix.checked_at < 5:
+        return ix
+    with ix.lock:
+        ix.checked_at, ix.root_stamp = time.monotonic(), stamp
+        changed = False
+        records = registry_records(root)
+        for did in doc_ids_in(root, records):
+            d = root / did
+            old = ix.docs.get(did)
+            artifact_stamp = d.stat().st_mtime_ns if d.is_dir() else None
+            if old is not None and old.get("artifact_stamp") == artifact_stamp:
+                continue
+            try:
+                built = build_chunks(did, root, records.get(did))
+            except Exception as e:  # one partially restored document must not break project search
+                print(f"skip {did}: {type(e).__name__}: {e}", file=sys.stderr)
+                continue
+            if built:
+                ix.add(built)
+                changed = True
+        if changed:
+            ix.save(index_path(root))
+    return ix
+
+
 def load_index(root: Path | str | None = None) -> Index | None:
     """Cached per process; reloaded when the file changes on disk. None when no index was built."""
     p = index_path(root)
@@ -363,7 +404,7 @@ def load_index(root: Path | str | None = None) -> Index | None:
         return None
     ix = _CACHE.get(str(p))
     if ix is not None and ix.mtime >= mt:
-        return ix
+        return _refresh_index(ix, p.parent.parent)
     try:
         with p.open("rb") as f:
             blob = pickle.load(f)
@@ -376,7 +417,7 @@ def load_index(root: Path | str | None = None) -> Index | None:
     ix.rebuild_postings()
     ix.mtime = mt
     _CACHE[str(p)] = ix
-    return ix
+    return _refresh_index(ix, p.parent.parent)
 
 
 def upsert_doc(doc_id: str, root: Path | str | None = None) -> bool:
@@ -409,20 +450,25 @@ def remove_doc(doc_id: str, root: Path | str | None = None) -> bool:
         return False
 
 
-def doc_ids_in(root: Path) -> list[str]:
+def registry_records(root: Path) -> dict[str, dict]:
     reg = Path(root) / "registry.jsonl"
-    ids: list[str] = []
+    records: dict[str, dict] = {}
     if reg.exists():
-        for line in reg.open(encoding="utf-8"):
-            try:
-                ids.append(json.loads(line)["doc_id"])
-            except (ValueError, KeyError):
-                pass
-    else:
-        ids = sorted(p.name for p in Path(root).iterdir() if (p / "doc.json").exists())
+        with reg.open(encoding="utf-8") as f:
+            for line in f:
+                try:
+                    row = json.loads(line)
+                    records[row["doc_id"]] = row
+                except (ValueError, KeyError, TypeError):
+                    pass
+    return records
+
+
+def doc_ids_in(root: Path, records: dict | None = None) -> list[str]:
+    ids = list(registry_records(root) if records is None else records)
     # uploads are registered by the server, not in registry.jsonl: pick up any doc dir with a doc.json
     seen = set(ids)
-    for p in sorted(Path(root).iterdir()):
+    for p in sorted(Path(root).iterdir()) if Path(root).is_dir() else []:
         if p.is_dir() and not p.name.startswith(("_", ".")) and p.name != "index" and p.name not in seen and (p / "doc.json").exists():
             ids.append(p.name)
     return ids
@@ -431,11 +477,12 @@ def doc_ids_in(root: Path) -> list[str]:
 def build_all(root: Path | str | None = None, progress: bool = False) -> Index:
     r = Path(root or os.environ.get("ARTIFACTS_DIR") or ARTIFACTS)
     ix = Index()
-    ids = doc_ids_in(r)
+    records = registry_records(r)
+    ids = doc_ids_in(r, records)
     t0 = time.time()
     for n, did in enumerate(ids, 1):
         try:
-            b = build_chunks(did, r)
+            b = build_chunks(did, r, records.get(did))
         except Exception as e:  # noqa: BLE001 — one bad doc must not stop the build
             print(f"skip {did}: {type(e).__name__}: {e}", file=sys.stderr)
             continue

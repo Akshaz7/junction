@@ -81,3 +81,15 @@ def test_door_schedule_and_kitchen_questions_find_documents():
     for q in ("Which drawings have a door schedule?", "Which drawings show the kitchen?"):
         a = answer(q, [])
         assert not a["answer"]["abstained"] and a["citations"], q
+
+
+def test_answer_never_hangs_past_the_timeout(monkeypatch):
+    import time
+    from engine import answer as ans_mod
+    from server.schema import validate_answer
+    monkeypatch.setenv("ANSWER_TIMEOUT_S", "0.3")
+    monkeypatch.setattr(ans_mod, "_answer_forced", lambda *a, **k: time.sleep(3))
+    t = time.time()
+    r = ans_mod.answer("How many doors are there?", [AC])
+    assert time.time() - t < 2 and r["answer"]["abstained"] and "took longer" in r["answer"]["text_md"]
+    validate_answer(r)

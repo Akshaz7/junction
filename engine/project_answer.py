@@ -20,7 +20,7 @@ import time
 import uuid
 from pathlib import Path
 
-from engine.project_index import Index, load_index, tokenize
+from engine.project_index import Index, SYN, excluded_doc, load_index, tokenize
 
 SMALL_TALK = re.compile(
     r"^\s*(hi|hello|hey|hei|moi|yo|thanks?|thank you|thx|ok(ay)?|cool|great|good (morning|evening|afternoon)|bye|goodbye|"
@@ -30,7 +30,9 @@ GENERAL = re.compile(r"^\s*(what (is|are|does|do)|how (do|does|to|should|can)|wh
 PROJECT_CUE = re.compile(r"\b(our|this project|the project|in the|on the|on sheet|on level|floor plan|drawing|model|schedule|section|"
                          r"elevation|ifc|room \d|door \d|level \d)\b", re.I)
 STRONG_CUE = re.compile(r"\b(our|this project|the project|this (?:drawing|plan|model|sheet|building)|on sheet|on level|ifc|room \d|door \d|level \d)\b", re.I)
-JUNK_DOC = re.compile(r"upload-fixture|generated-for-demo|^qa-|cross-device", re.I)   # test leftovers never answer a project question
+DOCUMENT_LIST = re.compile(
+    r"^\s*(?:(?:which|what)\s+(?:drawings|documents|plans|models|sheets|files)\b|"
+    r"(?:list|show|find)(?:\s+me)?\s+(?:(?:all|the|project|matching)\s+)*(?:drawings|documents|plans|models|sheets|files)\b)", re.I)
 NUMERIC = re.compile(r"\b(how many|how much|count|number of|total|area|length|volume|square|m2|m²)\b", re.I)
 MIN_COVERAGE = 0.5
 MAX_PASSAGES = 5
@@ -242,6 +244,51 @@ def _load(did, root):
     return load_doc(did, root)
 
 
+def document_list_answer(question, ix, named, trace, t0, root, calls):
+    """Enumerate all matching docs before limiting output; never ask a model to invent a document list."""
+    cue = DOCUMENT_LIST.match(question)
+    if not cue:
+        return None
+    subject = question[cue.end():]
+    base = {t for t in tokenize(subject) if "-" not in t}
+    if not base:
+        return None
+    # Generic schedule titles are useful candidates, but do not prove which kind of schedule is on a sheet.
+    schedule = "schedule" in base or "table" in base or bool(re.search(r"\b(?:door|window)\s+lists?\b", subject, re.I))
+    required = {"schedule"} if schedule else base
+    groups = {t: {t, *tokenize(SYN.get(t, ""))} for t in required}
+    hits = ix.search("schedule" if schedule else subject, len(ix.chunks), per_doc=False, include_excluded=set(named))
+    by_doc: dict[str, list[dict]] = {}
+    for h in hits:
+        by_doc.setdefault(h["doc_id"], []).append(h)
+    matches = []
+    for did, docs_hits in by_doc.items():
+        matched = set().union(*(set(h["matched"]) for h in docs_hits))
+        if not all(variants & matched for variants in groups.values()):
+            continue
+        pages = [h for h in docs_hits if h["page"] > 0 and all(variants & set(h["matched"]) for variants in groups.values())]
+        best = max(pages or docs_hits, key=lambda h: h["score"])
+        matches.append({**best, "page": best["page"] or 1})
+    matches.sort(key=lambda h: (-h["score"], h["doc_id"]))
+    trace.append(_step("document_list", f"{len(matches)} matching documents; showing at most 15"))
+    if not matches:
+        return _out(question, [], f"I found no project documents with indexed evidence for **{key_terms(subject)}**.",
+                    trace, t0, abstained=True, calls=calls)
+    shown = matches[:15]
+    text = f"**{len(matches)} drawings match this search.**"
+    if schedule:
+        text += " Schedule sheets are matched by title or indexed text; check the sheet for the requested schedule."
+    cites = []
+    for n, h in enumerate(shown, 1):
+        s = ix.docs[h["doc_id"]]
+        text += f"\n- {s['title']}, page {h['page']}. [{n}]"
+        cites.append({"n": n, "doc_id": h["doc_id"], "page": h["page"], "kind": "text", "bbox_px": None,
+                      "item_ids": [], "quote": s["title"]})
+    if len(matches) > len(shown):
+        text += f"\n\nand {len(matches) - len(shown)} more."
+    return _out(question, [h["doc_id"] for h in shown], text, trace, t0, abstained=False, conf=0.8, cites=cites, calls=calls)
+
+
 def project_answer(question: str, history, on_event, trace: list, t0: float, root: Path, calls: list | None = None) -> dict | None:
     ix = load_index(root)
     if ix is None or not ix.docs or is_small_talk(question):
@@ -261,10 +308,16 @@ def project_answer(question: str, history, on_event, trace: list, t0: float, roo
         if m in ix.docs and m not in named:
             named.append(m)
     boost = {"uploads": 1.3}
-    hits = [h for h in ix.search(question, 14, boost) if not JUNK_DOC.search(h["doc_id"]) or h["doc_id"] in named][:10]
-    add(_step("search", f"{len(ix.docs)} documents searched for '{terms}': " + (
+    eligible = {d for d, s in ix.docs.items() if not excluded_doc(s) or d in named}
+    hits = ix.search(question, 10, boost, include_excluded=set(named))
+    add(_step("search", f"{len(eligible)} documents searched for '{terms}': " + (
         ", ".join(f"{ix.docs[h['doc_id']]['title'][:40]} (p.{h['page']})" if h["page"] else ix.docs[h["doc_id"]]["title"][:40] for h in hits[:3])
         or "no match") + (f"; named: {', '.join(named[:3])}" if named else ""), int((time.perf_counter() - ts) * 1000)))
+
+    listed = document_list_answer(question, ix, named, trace, t0, root, calls)
+    if listed is not None:
+        emit("trace", trace[-1])
+        return listed
 
     from engine.takeoff import parse_takeoff, takeoff_answer, ROOM_CLASSES
     tk = parse_takeoff(question)
@@ -274,7 +327,7 @@ def project_answer(question: str, history, on_event, trace: list, t0: float, roo
         cand = [d for d in named if ix.docs[d].get("mode")]
         if not cand:
             rx = tk.rx
-            match = [d for d, s in ix.docs.items() if s.get("mode") and any(rx.search(str(r)) or re.fullmatch(rx.pattern, str(r), re.I) for r in s.get("rooms", []))]
+            match = [d for d, s in ix.docs.items() if d in eligible and s.get("mode") and any(rx.search(str(r)) or re.fullmatch(rx.pattern, str(r), re.I) for r in s.get("rooms", []))]
             up = [d for d in match if ix.docs[d].get("source") == "uploads"]
             if 0 < len(up) <= 5:
                 cand = up
@@ -319,7 +372,7 @@ def project_answer(question: str, history, on_event, trace: list, t0: float, roo
             res["trace"] = trace + res["trace"]
             return res
         add(_step("route", "per-document path abstained; trying the document's text"))
-        hits = [h for h in ix.search(question, 6, per_doc=False) if h["doc_id"] == clear] or hits
+        hits = [h for h in ix.search(question, len(ix.chunks), per_doc=False, include_excluded=set(named)) if h["doc_id"] == clear][:6] or hits
         only = [clear]
     else:
         only = None
@@ -331,7 +384,7 @@ def project_answer(question: str, history, on_event, trace: list, t0: float, roo
         if GENERAL.match(question) and not STRONG_CUE.search(question) and not named:
             return None            # general know-how: the chat path answers it, labelled as general guidance
         add(_step("abstain", "nothing in the project documents matches"))
-        txt = (f"I searched {len(ix.docs):,} project documents for **{terms}** and none of them covers it, so I cannot answer from the project. "
+        txt = (f"I searched {len(eligible):,} project documents for **{terms}** and none of them covers it, so I cannot answer from the project. "
                "If the document is not uploaded yet, add it in Data; if you know which drawing, select it with @ and ask again.")
         return _out(question, [], txt, trace, t0, abstained=True, route="index", calls=calls)
     passages = gather_passages(question, ix, hits, root, only)

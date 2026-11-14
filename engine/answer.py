@@ -227,6 +227,32 @@ def ensure_markers(res: dict) -> dict:
     return res
 
 
+def _guarded(question, doc_ids, on_event, scene_state, history):
+    """No question may end without an answer: past ANSWER_TIMEOUT_S (default 40, 0 = off) a hung model call is abandoned and a
+    plain 'took too long' answer is returned, so the stream always ends with an answer event."""
+    limit = float(os.environ.get("ANSWER_TIMEOUT_S", "40") or 0)
+    if limit <= 0:
+        return _answer_forced(question, doc_ids, on_event, scene_state=scene_state, history=history)
+    import concurrent.futures as cf
+    t0 = time.perf_counter()
+    ex = cf.ThreadPoolExecutor(1, thread_name_prefix="answer")
+    fut = ex.submit(_answer_forced, question, doc_ids, on_event, scene_state=scene_state, history=history)
+    try:
+        return fut.result(timeout=limit)
+    except cf.TimeoutError:
+        txt = (f"This took longer than {limit:.0f} s, so I stopped. Nothing was guessed. Ask again, or name one drawing with @ "
+               "and ask a narrower question.")
+        step = _step("timeout", f"no answer within {limit:.0f} s; the running model call was abandoned", int(limit * 1000), None, 0)
+        if on_event:
+            try:
+                on_event("trace", step)
+            except Exception:  # noqa: BLE001
+                pass
+        return _abstained(question, doc_ids, txt, [step], t0, route="index")
+    finally:
+        ex.shutdown(wait=False)
+
+
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None) -> dict:
     # thread memory (engine/context.py): every route below sees the resolved, standalone question and document selection
@@ -242,7 +268,7 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
                 on_event("trace", step)
     except Exception:  # noqa: BLE001 — memory is a convenience, never block the answer
         question, step = original, None
-    res = ensure_markers(_answer_forced(question, doc_ids, on_event, scene_state=scene_state, history=history))
+    res = ensure_markers(_guarded(question, doc_ids, on_event, scene_state, history))
     if step is not None:
         res["trace"] = [step, *(res.get("trace") or [])]
         if step.get("cost_usd"):
@@ -305,7 +331,7 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                 res = project_answer(question, history, on_event, trace, t0, root, calls)
                 if res is not None:
                     if res["answer"].get("abstained") and res.get("route") == "index" and os.environ.get("READER", "1") != "0":
-                        top = _top_docs(question, root)
+                        top = [] if any(s["step"] == "document_list" for s in trace) else _top_docs(question, root)
                         if top:
                             rr = _reader(question, top, root, trace, calls, t0, emit)
                             if rr is not None and not rr["answer"].get("abstained"):
