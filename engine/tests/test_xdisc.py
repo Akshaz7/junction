@@ -72,6 +72,7 @@ def test_labels_without_polygons_and_unsigned_legend():
 
 def test_imperial_area_and_flow_units_and_ceiling_units():
     assert xdisc.room_table({"words": [{"text": "100 SF", "bbox_px": [0, 0, 10, 5]}]})[0]["area_m2"] == pytest.approx(9.290304)
+    assert xdisc.room_table({"words": [{"text": "1,250 SF", "bbox_px": [0, 0, 10, 5]}]})[0]["area_m2"] == pytest.approx(116.1288)
     assert xdisc.airflow_labels({"words": [{"text": "36 m³/h", "bbox_px": [0, 0, 10, 5]}]})[0]["flow_ls"] == 10
     b, _, _ = pair()
     b["rooms"][0].pop("ceiling_height_m")
@@ -112,6 +113,73 @@ def test_adapter_missing_or_incompatible_provider_is_explicit():
         pass
     result = xdisc.prepare_mep_pair({}, {}, provider=Missing())
     assert result["ducts"] == [] and result["limitations"] and result["complete"]["terminals"] is False
+
+
+def test_mep_adapter_uses_actual_provider_signatures_and_never_defaults_scale():
+    class Provider:
+        def align(self, *args): return {"T": [[1, 0, 0], [0, 1, 0], [0, 0, 1]], "matches": 4, "residual": 0}
+        def split_mep(self, services, base, *, m_per_pt):
+            assert m_per_pt == pytest.approx(100*.0254/72)
+            return {"mep": [True], "m_per_pt": m_per_pt, "T": self.align(), "method": "geometric"}
+        def ducts(self, page, mask, m_per_pt): return [{"start_pt": [0, 0], "end_pt": [20, 0], "width_pt": 4}]
+        def terminals(self, page, mask, m_per_pt): return [{"center_pt": [10, 10], "size_pt": 5, "airflow_ls": -20}]
+    provider = Provider()
+    assert not xdisc.prepare_mep_pair({}, {}, provider=provider)["ducts"]
+    result = xdisc.prepare_mep_pair({"words": [{"text": "1:100"}]}, {}, provider=provider)
+    assert len(result["ducts"]) == 1 and len(result["terminals"]) == 1
+    normal = xdisc.adapt_pdf_page({"W_pt": 100, "H_pt": 100}, doc_id="mep", image_size=(200, 200),
+                                  ducts=result["ducts"], terminals=result["terminals"])
+    assert normal["ducts"][0]["centreline_px"] == [[0, 0], [40, 0]]
+    assert normal["terminals"][0]["bbox_px"] == [15, 15, 25, 25]
+    assert normal["terminals"][0]["flow_ls"] == 20 and normal["terminals"][0]["role"] == "unknown"
+    assert xdisc.paper_scale({"words": [{"text": '1/8" = 1\'-0"'}]}) == pytest.approx(96*.0254/72)
+    assert xdisc.paper_scale({"words": [{"text": "1:100 and 1:50"}]}) is None
+
+
+def test_recorded_partial_flow_is_explicit_and_not_used_for_absence_or_thresholds():
+    b, s, reg = pair(); s["complete"]["terminals"] = False
+    r = xdisc.analyse(b, s, alignment=reg, threshold_ls_m2=3)
+    assert r["airflow"][0]["recorded_supply_ls"] == 40
+    assert r["airflow"][0]["supply_ls"] is None and "below_user_threshold" not in r["airflow"][0]
+    assert "incomplete evidence, not a room total" in r["airflow"][0]["arithmetic"][0]
+    assert not r["missing_air"]
+
+
+def test_merged_source_regions_are_not_rooms_and_revision_movement_is_registered():
+    b, s, reg = pair()
+    b["rooms"][0]["merged"] = True
+    assert xdisc.room_table(b)[0]["polygon_px"] is None
+    b, s, reg = pair(); before = deepcopy(b)
+    for r in before["rooms"]:
+        r["polygon_px"] = [[x+10, y+20] for x, y in r["polygon_px"]]
+    rev = {"status": "aligned", "matrix": [[1, 0, -10], [0, 1, -20], [0, 0, 1]], "residual_px": 0}
+    assert not xdisc.change_impact(before, b, s, alignment=reg, revision_alignment=rev)["impacts"]
+
+
+def test_room_label_stack_rejects_crossing_equipment_code():
+    words = [{"text": "20 m²", "bbox_px": [100, 100, 150, 110]},
+             {"text": "Office", "bbox_px": [100, 85, 145, 95]},
+             {"text": "Q42", "bbox_px": [100, 70, 120, 80]},
+             {"text": "Z9", "bbox_px": [135, 95, 150, 115]}]
+    room = xdisc.room_table({"words": words})[0]
+    assert room["number"] == "Q42" and room["label"] == "Office"
+
+
+def test_offline_pair_cache_reuses_preprocessing_and_invalidates_changed_input(tmp_path, monkeypatch):
+    sources = [tmp_path / "a.pdf", tmp_path / "b.pdf"]
+    for p in sources: p.write_text("source placeholder; PDF parsing is mocked")
+    calls = []
+    def prepare(path, **kwargs):
+        calls.append(path)
+        return {"page": 1, "image": {"w": 100, "h": 100}, "words": [], "rooms": [], "ducts": [], "terminals": []}
+    monkeypatch.setattr(xdisc, "prepare_pdf", prepare)
+    options = {"doc_ids": ["a", "b"], "image_sizes": [(100, 100), (100, 100)], "cache_dir": tmp_path / "cache"}
+    xdisc.prepare_pair(*sources, **options)
+    xdisc.prepare_pair(*sources, **options)
+    assert len(calls) == 2
+    sources[0].write_text("changed source placeholder")
+    xdisc.prepare_pair(*sources, **options)
+    assert len(calls) == 4
 
 
 def test_corrupt_cache_is_handled_as_missing_evidence(tmp_path):
