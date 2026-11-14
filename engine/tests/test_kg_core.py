@@ -99,3 +99,15 @@ def test_invalid_metadata_does_not_hide_other_files(sample):
     assert any(n['kind']=='door' for n in g['nodes'])
     assert any(n['kind']=='doc' and n['doc_ids']==['malformed'] for n in g['nodes'])
     assert g['warnings']
+
+
+def test_neighbours_keeps_parallel_comparison_proofs():
+    from engine.kg.schema import Records
+    r=Records()
+    a=r.node('level','a','ground','Ground floor')
+    b=r.node('level','b','ground','Ground floor')
+    r.edge('agrees',a,b,'rule',1,{'property':'door_count','values':[4,4]})
+    r.edge('differs',a,b,'rule',1,{'property':'window_count','values':[4,5]})
+    graph={'nodes':list(r.nodes.values()),'edges':list(r.edges.values())}
+    assert len(neighbours(graph,a))==2
+    assert len(neighbours(graph,a,kinds='differs'))==1
