@@ -53,7 +53,7 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
     <WorkspaceNavigation route={view} />
     <main className="workspace" id="main-content" tabIndex={-1}>
       <header className="topbar">
-        <div className="project-title"><span className="wordmark">Hologram</span><span className="topbar-divider" /><span className="workspace-name">Demo workspace</span><div className="mobile-project"><ProjectSwitcher /></div></div>
+        <div className="project-title"><span className="wordmark"><span className="brand-logo" role="img" aria-label="Stoa" /><span className="brand-pro">Pro</span></span><span className="topbar-divider" /><span className="workspace-name">Demo workspace</span><div className="mobile-project"><ProjectSwitcher /></div></div>
         <Badge variant={demo || loadingDocs || error ? 'neutral' : 'success'}>{demo ? 'Local demo' : loadingDocs ? 'Connecting…' : error ? 'Connection unavailable' : 'Connected workspace'}</Badge>
       </header>
       <div className="pagebar">

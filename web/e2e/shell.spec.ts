@@ -6,9 +6,9 @@ const navItems = ['Overview', 'Chat', 'Changes', 'Data', 'Compare', 'Library', '
 
 test('workspace shell exposes every route and restores it on reload', async ({ page }) => {
   await page.goto('/')
-  await expect(page).toHaveTitle('Hologram')
+  await expect(page).toHaveTitle('Stoa Pro')
   const navigation = page.getByRole('navigation', { name: 'Workspace navigation', exact: true })
-  await expect(page.getByRole('link', { name: 'Hologram home' })).toHaveText('Hologram')
+  await expect(page.getByRole('link', { name: 'Stoa Pro home' })).toHaveText('Pro')
   await expect(page.getByRole('combobox', { name: 'Project', exact: true }).filter({ visible: true })).toHaveValue('demo')
   for (const label of navItems.filter((item) => item !== 'Accuracy')) {
     const link = navigation.getByRole('link', { name: label, exact: true })
@@ -76,7 +76,7 @@ test('demo chat and document navigation', async ({ page }) => {
     await route.fulfill({ status: response.status, contentType: response.headers.get('content-type') ?? undefined, body: await response.text() })
   })
   await page.goto('/#/chat')
-  await expect(page).toHaveTitle('Hologram')
+  await expect(page).toHaveTitle('Stoa Pro')
   await page.getByRole('button', { name: /Count something on a plan/ }).click()
   await expect(page.getByText('2 windows', { exact: true })).toBeVisible()
   await page.locator('.sources-summary').click()

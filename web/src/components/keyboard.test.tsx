@@ -94,7 +94,7 @@ it('pairing QR encodes the native app link; the https link stays as text under i
   const reference = document.createElement('div'); reference.innerHTML = expected.createSvgTag({ cellSize: 4, margin: 2, scalable: true })
   expect(document.querySelector('.pair-qr')!.innerHTML).toBe(reference.innerHTML)
   expect(link).toMatch(/^https?:\/\/.*#\/pair\?code=/)
-  expect(document.querySelector('.pair-popover')!.textContent).toContain('Scan with your iPhone camera to open Hologram')
+  expect(document.querySelector('.pair-popover')!.textContent).toContain('Scan with your iPhone camera to open Stoa Pro')
   expect(document.querySelector('.pair-popover')!.textContent).toContain('No app? Open in browser')
 })
 

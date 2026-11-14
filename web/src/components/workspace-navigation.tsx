@@ -46,7 +46,7 @@ function closeMore(event: KeyboardEvent<HTMLDetailsElement>) {
 export function WorkspaceNavigation({ route }: { route: Route }) {
   return <>
     <aside className="rail" aria-label="Workspace sidebar">
-      <a href="#/overview" className="brand-mark" aria-label="Hologram home">Hologram</a>
+      <a href="#/overview" className="brand-mark" aria-label="Stoa Pro home"><span className="brand-logo" role="img" aria-label="Stoa" /><span className="brand-pro">Pro</span></a>
       <ProjectSwitcher />
       <nav aria-label="Workspace navigation">
         {[navigation[0], navigation[1], navigation[4], navigation[2], navigation[5], navigation[3], navigation[6]].map(({ route: destination, label, icon: Icon }) => <Tooltip content={label} key={destination}>

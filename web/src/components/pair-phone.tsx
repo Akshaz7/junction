@@ -60,7 +60,7 @@ export function PairPhoneButton() {
     {open && code && <section ref={dialog} id={dialogId} className="pair-popover" role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
       <header><strong id={titleId}>Pair a phone</strong><button type="button" aria-label="Close pairing" onClick={() => setOpen(false)}><X size={16} /></button></header>
       <div className="pair-qr" role="img" aria-label="QR code to pair a phone" dangerouslySetInnerHTML={{ __html: qrSvg(pairAppLink(code)) }} />
-      <p>Scan with your iPhone camera to open Hologram. Chats you start here then open and stream on the phone, with no other step.</p>
+      <p>Scan with your iPhone camera to open Stoa Pro. Chats you start here then open and stream on the phone, with no other step.</p>
       <label className="pair-link-label" htmlFor={`${dialogId}-link`}>No app? Open in browser</label>
       <input readOnly id={`${dialogId}-link`} className="pair-link" aria-label="Pairing link" value={link} onFocus={(event) => event.currentTarget.select()} />
       <Button variant="raised" onClick={() => { unpair(); setOpen(false) }}>Unpair</Button>

@@ -115,7 +115,7 @@ function UploadSession({ onClose, onAsk, onOpen, onReady }: UploadDialogProps) {
   return <dialog ref={dialog} className="upload-dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}
     onCancel={(event) => { event.preventDefault(); close() }}>
     <header className="upload-dialog-header"><div className="upload-dialog-symbol"><Upload size={20} aria-hidden="true" /></div>
-      <div><h2 id={titleId}>Upload a drawing</h2><p id={descriptionId}>Bring your plans into Hologram.</p></div>
+      <div><h2 id={titleId}>Upload a drawing</h2><p id={descriptionId}>Bring your plans into Stoa Pro.</p></div>
       <Button variant="ghost" size="icon" aria-label="Close upload dialog" onClick={close}><X size={18} /></Button>
     </header>
     <input ref={input} className="upload-dialog-input" type="file" accept={UPLOAD_ACCEPT} aria-label="Choose a drawing"

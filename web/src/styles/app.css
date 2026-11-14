@@ -871,3 +871,8 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 
 .ar-hint { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 10px 0; padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--muted, transparent); font-size: 14px; }
 .ar-hint p { margin: 0; flex: 1 1 220px; }
+/* Stoa Pro wordmark (Ash, judges' request): Stoa logo as a mask so it takes the surrounding text colour, plus "Pro". */
+.brand-logo { display: inline-block; height: .78em; aspect-ratio: 926 / 201; background: currentColor; -webkit-mask: url(/brand/stoa-logo.svg) center / contain no-repeat; mask: url(/brand/stoa-logo.svg) center / contain no-repeat; }
+.brand-mark, .wordmark { display: inline-flex; align-items: center; gap: .3em; }
+.brand-pro { font-weight: 500; letter-spacing: -.02em; }
+.rail .brand-mark { flex-direction: column; gap: 2px; }

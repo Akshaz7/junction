@@ -101,7 +101,7 @@ describe('scene.open (CONTRACT 3.3)', () => {
     answer.evidence.scene.open = 'ar'
     const html = renderToStaticMarkup(createElement(AnswerCard, { answer, docs: [demoDocument], demo: true, onOpenCitation: () => {} }))
     expect(html).toContain('data-testid="ar-hint"')
-    expect(html).toContain('Open the Hologram app on your iPhone and tap')
+    expect(html).toContain('Open the Stoa Pro app on your iPhone and tap')
     expect(html).toContain('Pair a phone')
   })
   it('shows no hint when open is absent or "3d"', () => {

@@ -55,7 +55,7 @@ export function ChatHeaderActions({ chatId, onNew }: { chatId: string | null; on
     url.hash = `/chat/${encodeURIComponent(chatId)}`
     try {
       if (window.matchMedia('(max-width: 800px)').matches && navigator.share) {
-        await navigator.share({ title: 'Hologram', url: url.href })
+        await navigator.share({ title: 'Stoa Pro', url: url.href })
       } else {
         await navigator.clipboard.writeText(url.href)
         setToast('Link copied')

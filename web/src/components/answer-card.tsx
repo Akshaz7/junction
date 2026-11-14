@@ -68,7 +68,7 @@ export function ArHint() {
   useEffect(() => onPairingChange(() => setPaired(isPaired())), [])
   return <div className="ar-hint" role="note" data-testid="ar-hint">
     <Smartphone size={16} aria-hidden="true" />
-    <p>Open the Hologram app on your iPhone and tap <strong>Show on table</strong>.</p>
+    <p>Open the Stoa Pro app on your iPhone and tap <strong>Show on table</strong>.</p>
     {!paired && <PairPhoneButton />}
   </div>
 }
@@ -96,7 +96,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
     citations: citations.filter((citation) => citation.doc_id === docId),
   }))
   const cost = <Tooltip content={callDetails}><span className="cost-chip" data-testid="answer-cost" tabIndex={0} aria-label={`Answer cost ${formatCost(answer.cost.usd_total)}`} title={callDetails}>{formatCost(answer.cost.usd_total)}</span></Tooltip>
-  return <article className="exchange">
+  return <article className="exchange" data-testid="answer-card">
     <div className="question-bubble">{answer.question}</div>
     <details className="answer-detail thought-process"><summary>Show thought process</summary>{answer.trace.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>
     <AnswerBody answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} />
