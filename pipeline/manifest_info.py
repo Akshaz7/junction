@@ -22,7 +22,8 @@ def _ifc_operation(ifc_path: Path | None) -> dict:
         return {}
     try:
         import ifcopenshell
-        f = ifcopenshell.open(str(ifc_path))
+        from pipeline.ifc_index import open_properties
+        f = open_properties(ifc_path)
     except Exception:  # noqa: BLE001
         return {}
     out = {}

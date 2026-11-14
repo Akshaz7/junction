@@ -45,6 +45,14 @@ def _not_built(what: str, status_code=404):
     return JSONResponse({"status": "not_built", "detail": f"{what} not available"}, status_code=status_code)
 
 
+def _missing_scene(folder):
+    state = _read_ingest(folder / "ingest.json") if (folder / "ingest.json").is_file() else {}
+    detail = state.get("reason") or state.get("detail")
+    if state.get("readable"):
+        detail = detail or "The 3D view is still being prepared. Counts and quantities stored in the model are available."
+    return JSONResponse({"status": "not_built", "detail": detail or "No 3D view is available for this document."}, status_code=404)
+
+
 @router.get("/docs/{doc_id}/pages/{n}/image")
 async def page_image(doc_id: str, n: int):
     f = _doc_dir(doc_id) / f"page-{n}.png"
@@ -66,7 +74,7 @@ async def scene(doc_id: str):
     # S-04 will trigger extrusion here when no scene exists.
     f = _doc_dir(doc_id) / "scene.json"
     if not f.is_file():
-        return _not_built("scene")
+        return _missing_scene(f.parent)
     return FileResponse(f, media_type="application/json")
 
 
@@ -79,6 +87,8 @@ async def doc_file(doc_id: str, name: str):
         if name == "elements.json" or re.match(r"^text-\d+\.json$", name):
             # Optional sidecars the viewer probes for every document: an empty payload, not a console-visible 404.
             return JSONResponse({"status": "not_built", "elements": [], "words": []})
+        if name in {"scene.json", "scene.glb", "scene.usdz"}:
+            return _missing_scene(f.parent)
         return _not_built(name)
     return FileResponse(f)
 
@@ -168,6 +178,8 @@ async def _ingest(doc_id: str):
     f = config.artifacts_dir() / doc_id / "ingest.json"
     proc = None
     failure = None
+    waiting = None
+    indexed = False
     try:
         # Includes time waiting for the single heavy-job slot: queued uploads cannot hang forever either.
         async with asyncio.timeout(INGEST_TIMEOUT):
@@ -180,7 +192,17 @@ async def _ingest(doc_id: str):
                     env={**os.environ, "INGEST_MANAGED_JOB": "1",
                          "HEAVY_SLOT_HELD": "1" if prefix or os.environ.get("HEAVY_SLOT_HELD") == "1" else "0"},
                     start_new_session=True)
-                await proc.wait()
+                waiting = asyncio.create_task(proc.wait())
+                while not waiting.done():
+                    await asyncio.wait([waiting], timeout=.5)
+                    state = _read_ingest(f)
+                    if not indexed and state.get("readable") and (f.parent / "elements.json").is_file():
+                        indexed = True
+                        # Persist the usable index while 3D continues; the source
+                        # was already saved by upload(). Avoid resending it.
+                        await _persist(doc_id, originals=False)
+                        await publish({"type": "doc.new", "doc_id": doc_id})
+                await waiting
         state = _read_ingest(f)
         if proc.returncode or state.get("status") not in {"ready", "partial", "failed"}:
             detail = f"Ingestion job exited with code {proc.returncode} without completing."
@@ -202,6 +224,8 @@ async def _ingest(doc_id: str):
             except ProcessLookupError:
                 pass
             await proc.wait()
+        if waiting is not None and not waiting.done():
+            waiting.cancel()
         if failure:
             _fail_ingest(f, failure)
     await _persist(doc_id)
@@ -213,7 +237,7 @@ async def _ingest(doc_id: str):
     await publish({"type": "doc.new", "doc_id": doc_id})
 
 
-async def _persist(doc_id: str):
+async def _persist(doc_id: str, originals: bool = False):
     """After ingestion: update the documents row (pages, kind) and mirror every derived file to PostgreSQL."""
     pool = await db.get_pool()
     if pool is None:
@@ -223,7 +247,7 @@ async def _persist(doc_id: str):
         meta = json.loads((d / "doc.json").read_text())
         await pool.execute("update documents set pages=$2, files=$3::jsonb where doc_id=$1",
                            doc_id, int(meta.get("pages") or 1), json.dumps(meta["files"]))
-        await artifact_store.save_doc(pool, doc_id)
+        await artifact_store.save_doc(pool, doc_id, originals=originals)
     except Exception as e:  # noqa: BLE001
         print("persist failed:", doc_id, repr(e)[:200])
 
@@ -260,7 +284,10 @@ def _read_ingest(f):
 
 def _fail_ingest(f, reason):
     state = _read_ingest(f)
-    state.update(status="failed", detail=reason, reason=reason)
+    readable = state.get("readable") or (f.parent / "elements.json").is_file()
+    if readable:
+        reason += " Counts and quantities already indexed remain available; the 3D view may be unavailable."
+    state.update(status="partial" if readable else "failed", readable=bool(readable), detail=reason, reason=reason)
     tmp = f.with_suffix(".tmp")
     tmp.write_text(json.dumps(state))
     tmp.replace(f)

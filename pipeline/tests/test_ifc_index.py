@@ -60,3 +60,23 @@ def test_bad_header_is_actionable(tmp_path):
     src.write_bytes(b"ISO-10303-21;")
     with pytest.raises(ValueError, match="Export the model again"):
         ifc_index.open_properties(src)
+
+
+@pytest.mark.parametrize("name", ["Area", "Fläche", "Pinta-ala", "Areal"])
+def test_typed_property_area_and_unrelated_values(tmp_path, name):
+    f = ifcopenshell.file(schema="IFC4")
+    units = f.create_entity("IfcUnitAssignment", [
+        f.create_entity("IfcSIUnit", UnitType="LENGTHUNIT", Prefix="MILLI", Name="METRE"),
+        f.create_entity("IfcSIUnit", UnitType="AREAUNIT", Name="SQUARE_METRE")])
+    f.create_entity("IfcProject", GlobalId=ifcopenshell.guid.new(), UnitsInContext=units)
+    room = f.create_entity("IfcSpace", GlobalId=ifcopenshell.guid.new())
+    props = [f.create_entity("IfcPropertySingleValue", Name=name, NominalValue=f.create_entity("IfcAreaMeasure", 12.5)),
+             f.create_entity("IfcPropertySingleValue", Name="Area per person", NominalValue=f.create_entity("IfcAreaMeasure", 80.)),
+             f.create_entity("IfcPropertySingleValue", Name="GrossArea", NominalValue=f.create_entity("IfcReal", 99.))]
+    ps = f.create_entity("IfcPropertySet", GlobalId=ifcopenshell.guid.new(), Name="Dimensions", HasProperties=props)
+    f.create_entity("IfcRelDefinesByProperties", GlobalId=ifcopenshell.guid.new(), RelatedObjects=[room], RelatingPropertyDefinition=ps)
+    f.write(str(tmp_path / "model.ifc"))
+    ifc_index.process(tmp_path / "model.ifc", {"doc_id": "test"}, tmp_path)
+    e = json.loads((tmp_path / "elements.json").read_text())["elements"][0]
+    assert e["quantities"] == {"area_m2": 12.5}
+    assert e["quantity_source"] == {"area_m2": "property"}

@@ -6,6 +6,7 @@ pipeline. No tessellation, geometry-derived measurements or invented boxes.
 from __future__ import annotations
 
 import json
+import math
 import re
 from pathlib import Path
 
@@ -25,13 +26,14 @@ def open_properties(path: Path):
     # Read only the SPF header to select the actual schema, including IFC4x3
     # versions. Avoid a preliminary full-model load just to discover its schema.
     header = bytearray()
+    match = None
     with path.open("rb") as source:
         while len(header) < 1024 * 1024:
             chunk = source.read(4096)
             if not chunk:
                 break
             header.extend(chunk)
-            match = re.search(rb"FILE_SCHEMA\s*\(\s*\(\s*'([^']+)'", header, re.I)
+            match = re.search(rb"FILE_SCHEMA\s*\(\s*\(\s*'([^']+)'", header, re.IGNORECASE)
             if match:
                 break
         else:
@@ -44,9 +46,60 @@ def open_properties(path: Path):
     return ifcopenshell.open(str(path), bypass_types=sorted(skip))
 
 
+def property_quantities_of(el):
+    """Typed dimensions in property sets, with explicit/project units.
+
+    Some exporters use IfcPropertySingleValue instead of Qto sets. Only exact
+    dimension names and matching IFC measure types qualify ("Area per person"
+    and untyped numbers never become a room's floor area).
+    """
+    from pipeline.ifc_scene import QMAP
+    names = {**QMAP, "fläche": ("area_m2", 2), "flaeche": ("area_m2", 2),
+             "pintaala": ("area_m2", 2), "areal": ("area_m2", 2),
+             "länge": ("length_m", 1), "pituus": ("length_m", 1), "längd": ("length_m", 1),
+             "breite": ("width_m", 1), "leveys": ("width_m", 1), "bredd": ("width_m", 1),
+             "höhe": ("height_m", 1), "korkeus": ("height_m", 1), "höjd": ("height_m", 1)}
+    dimensions = {"IfcLengthMeasure": 1, "IfcPositiveLengthMeasure": 1, "IfcNonNegativeLengthMeasure": 1,
+                  "IfcAreaMeasure": 2, "IfcVolumeMeasure": 3}
+    defs = [r.RelatingPropertyDefinition for r in (el.IsDefinedBy or []) if r.is_a("IfcRelDefinesByProperties")]
+    typ = uel.get_type(el)
+    if typ is not None:
+        defs += list(getattr(typ, "HasPropertySets", None) or [])
+    result = {}
+    for definition in defs:
+        if not definition.is_a("IfcPropertySet"):
+            continue
+        for prop in definition.HasProperties or []:
+            name = re.sub(r"[\W_]", "", (prop.Name or "").lower())
+            match = names.get(name)
+            if not match or not prop.is_a("IfcPropertySingleValue") or prop.NominalValue is None:
+                continue
+            key, dim = match
+            if dimensions.get(prop.NominalValue.is_a()) != dim:
+                continue
+            unit = uunit.get_property_unit(prop, el.file, use_cache=True)
+            if unit is None or unit.UnitType != {1: "LENGTHUNIT", 2: "AREAUNIT", 3: "VOLUMEUNIT"}[dim]:
+                continue
+            value = float(prop.NominalValue.wrappedValue) * uunit.get_unit_scale(unit)
+            if math.isfinite(value):
+                result.setdefault(key, round(value, 5))
+    if "area_m2" not in result:
+        for key in ("net_floor_area_m2", "gross_floor_area_m2", "net_area_m2", "gross_area_m2"):
+            if key in result:
+                result["area_m2"] = result[key]
+                break
+    return result
+
+
 def process(path: Path, doc: dict, out: Path) -> dict:
-    from pipeline.ifc_scene import attr_dims, kind_of, props_of, quantities_of, storey_of
     from pipeline.ifc_props import building_meta, enrich_elements
+    from pipeline.ifc_scene import (
+        attr_dims,
+        kind_of,
+        props_of,
+        quantities_of,
+        storey_of,
+    )
 
     f = open_properties(path)
     has_project = bool(f.by_type("IfcProject"))
@@ -71,6 +124,8 @@ def process(path: Path, doc: dict, out: Path) -> dict:
         st, typ = storey_of(e), uel.get_type(e)
         q = attr_dims(e, scale) if length_known else {}
         sources = {k: "attribute" for k in q}
+        for k, v in (property_quantities_of(e) if has_project else {}).items():
+            q[k], sources[k] = v, "property"
         for k, v in (quantities_of(e, scale) if has_project else {}).items():
             q[k], sources[k] = v, "qto"
         elements.append({
@@ -80,8 +135,8 @@ def process(path: Path, doc: dict, out: Path) -> dict:
             "quantities": q, "quantity_source": sources, "props": props_of(e),
         })
     enrich_elements(f, elements)
-    warnings = ["The 3D view is still being prepared. Counts and quantities stored in the model are available; "
-                "measurements that require geometry are not available yet."]
+    warnings = [("The 3D view is still being prepared. Counts and quantities stored in the model are available; "
+                "measurements that require geometry are not available yet.")]
     if not length_known:
         warnings.append("This IFC does not declare length units. Length measurements are unavailable.")
     result = {"doc_id": doc["doc_id"], "version": 2, "schema": f.schema, "units": "m",

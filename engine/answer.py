@@ -87,7 +87,8 @@ def _reader(question, doc_ids, root, trace, calls, t0, emit):
 
 def _use_reader(res, question, doc_ids, root, trace, calls, t0, emit):
     """Run the reader when `res` is an abstention; return the reader's answer if it found one, else `res`."""
-    if res is not None and not res["answer"].get("abstained"):
+    from engine.ifc_pending import missing_quantity
+    if missing_quantity(res, doc_ids, root) or (res is not None and not res["answer"].get("abstained")):
         return res
     rr = _reader(question, doc_ids, root, trace, calls, t0, emit)
     if rr is not None and not rr["answer"].get("abstained"):
@@ -357,7 +358,8 @@ def _answer_forced(question: str, doc_ids: list[str], on_event: Callable | None 
         res = _answer_core(question, doc_ids, on_event, scene_state=scene_state, history=history)
     finally:
         _P.DELTA_SINK.reset(_tok)
-    if (os.environ.get("FORCE_ANSWER", "1") == "0" or not doc_ids or not (question or "").strip() or not res["answer"].get("abstained")
+    from engine.ifc_pending import missing_quantity
+    if (missing_quantity(res, doc_ids, _root()) or os.environ.get("FORCE_ANSWER", "1") == "0" or not doc_ids or not (question or "").strip() or not res["answer"].get("abstained")
             or any(s.get("step") == "unclassified" for s in res.get("trace", []))
             or parse_scene(question) is not None or _other_doc(question, doc_ids)):
         return res
