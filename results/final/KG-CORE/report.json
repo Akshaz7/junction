@@ -1,0 +1,67 @@
+{
+  "status": "PASS",
+  "tested_commit": "ef61a96e804798b6f3f6be2e1f20e7ef3dfd2f55",
+  "tests": {
+    "kg_engine_api_semantics_mep_evaluation": {
+      "passed": 59,
+      "elapsed_s": 0.76
+    },
+    "existing_projects_and_health": {
+      "passed": 25,
+      "elapsed_s": 2.48
+    }
+  },
+  "demo_projects": [
+    {
+      "name": "AC20 Institute (demo project)",
+      "documents": 13,
+      "elapsed_s": 13.6651,
+      "nodes": 2637,
+      "edges": 15594,
+      "under_30_s": true
+    },
+    {
+      "name": "FZK-Haus (demo project)",
+      "documents": 10,
+      "elapsed_s": 0.2538,
+      "nodes": 362,
+      "edges": 1568,
+      "under_30_s": true
+    }
+  ],
+  "other_origins": [
+    {
+      "source": "swiss_dwellings",
+      "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+      "elapsed_s": 0.0247,
+      "nodes": 272,
+      "edges": 394
+    },
+    {
+      "source": "cubicasa5k",
+      "doc_id": "cubicasa5k__colorful-10052",
+      "elapsed_s": 0.0122,
+      "nodes": 39,
+      "edges": 44
+    }
+  ],
+  "unseen": {
+    "group": "opening_design/Sports_Complex/Transfer/_Archive/20150814 - Issued for Permit",
+    "documents": 2,
+    "elapsed_s": 0.0159,
+    "nodes": 3,
+    "edges": 2,
+    "item_link_accuracy": null,
+    "note": "Both preselected files have no readable item index; graph retains documents with explicit missing-data notes. No claim of item-link accuracy."
+  },
+  "invariants": "Every built edge has method, bounded confidence, nonempty evidence, valid endpoint nodes and a unique ID; graphs serialize without NaN/Infinity.",
+  "limitations": [
+    "Optional pipeline.pdf_mep is absent. Vector PDF alignment hook is tested with a protocol fixture; no raw PDF ingestion was modified.",
+    "Independent unseen item-link accuracy is unknown where item data or independent truth is missing.",
+    "Uncalibrated spatial, text-reference and level-name inferences are 0.5 estimates. Same-as uses KG-EVAL measured calibration."
+  ],
+  "cross_file": [
+    "server/app.py: router registration (one hook)"
+  ],
+  "needs_integrator": "Merge final/kg-core. It already includes KG-MEP and KG-EVAL code through the recorded commits; no deploy was performed."
+}
