@@ -1,6 +1,5 @@
 """KG-CORE: evidence integrity, geometry ambiguity, hierarchy and cache invalidation."""
 import json
-from pathlib import Path
 
 import pytest
 

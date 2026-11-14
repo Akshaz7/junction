@@ -39,7 +39,7 @@ async def _graph(project_id):
     try:
         graph = await asyncio.wait_for(asyncio.shield(asyncio.wrap_future(future)), BUILD_WAIT_S)
         return graph, False
-    except asyncio.TimeoutError:
+    except TimeoutError:
         from engine.kg.schema import Records, finalise
         r = Records()
         pn = r.node('project', project_id, 'root', project.get('name') or 'Project', doc_ids=[])
@@ -49,7 +49,7 @@ async def _graph(project_id):
         return finalise({'project_id': project_id, 'version': 1, 'built_at': None, 'building': True,
                          'nodes': list(r.nodes.values()), 'edges': list(r.edges.values()),
                          'warnings': [{'note': 'Graph is still building. Request this address again for the complete result.'}]}), True
-    except Exception:
+    except Exception:  # noqa: BLE001 - worker failures become a stable API error
         _JOBS.pop(key, None)
         raise HTTPException(503, 'The project graph could not be built. Please try again.') from None
 

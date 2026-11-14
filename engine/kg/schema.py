@@ -5,10 +5,10 @@ import hashlib
 import math
 import re
 import unicodedata
-from collections import Counter, defaultdict
+from collections import Counter
 
-KINDS = set('project doc level room door window wall slab stair column duct pipe terminal fixture system type material issue change sheet_ref'.split())
-METHODS = set('ifc_relation guid tag_text position label_text level_name containment_geom legend revision_compare rule model'.split())
+KINDS = {'project', 'doc', 'level', 'room', 'door', 'window', 'wall', 'slab', 'stair', 'column', 'duct', 'pipe', 'terminal', 'fixture', 'system', 'type', 'material', 'issue', 'change', 'sheet_ref'}
+METHODS = {'ifc_relation', 'guid', 'tag_text', 'position', 'label_text', 'level_name', 'containment_geom', 'legend', 'revision_compare', 'rule', 'model'}
 
 
 def norm(value) -> str:
@@ -45,9 +45,9 @@ class Records:
     def node(self, kind, doc, local, label, *, doc_ids=None, level=None, props=None, source=None):
         nid = f'{kind}:{doc}:{local}'
         if nid not in self.nodes:
-            self.nodes[nid] = dict(id=nid, kind=kind, label=readable(label, kind.title()),
-                                   doc_ids=doc_ids if doc_ids is not None else [doc], level=level,
-                                   props=finite(props or {}), source=source, canonical=None, degree=0)
+            self.nodes[nid] = {'id': nid, 'kind': kind, 'label': readable(label, kind.title()),
+                                   'doc_ids': doc_ids if doc_ids is not None else [doc], 'level': level,
+                                   'props': finite(props or {}), 'source': source, 'canonical': None, 'degree': 0}
         return nid
 
     def edge(self, kind, a, b, method, confidence, evidence, doc_ids=None):
@@ -102,9 +102,9 @@ def finalise(graph, counterpart_docs=()):
     eligible = [n for n in items if set(n['doc_ids']) & set(counterpart_docs)]
     ek = Counter(e['kind'] for e in graph['edges'])
     compared = ek['agrees'] + ek['differs']
-    graph['stats'] = dict(nodes=len(nodes), edges=len(graph['edges']), by_kind=dict(Counter(n['kind'] for n in nodes.values())),
-                          edges_by_kind=dict(ek), linked_pct=round(100 * len(linked & {n['id'] for n in eligible}) / len(eligible), 2) if eligible else None,
-                          agree_pct=round(100 * ek['agrees'] / compared, 2) if compared else None,
-                          unlinked=[n['id'] for n in items if n['id'] not in linked][:50], issues=ek['flags'],
-                          counterpart_items=len(eligible), linked_items=len(linked & {n['id'] for n in eligible}))
+    graph['stats'] = {'nodes': len(nodes), 'edges': len(graph['edges']), 'by_kind': dict(Counter(n['kind'] for n in nodes.values())),
+                          'edges_by_kind': dict(ek), 'linked_pct': round(100 * len(linked & {n['id'] for n in eligible}) / len(eligible), 2) if eligible else None,
+                          'agree_pct': round(100 * ek['agrees'] / compared, 2) if compared else None,
+                          'unlinked': [n['id'] for n in items if n['id'] not in linked][:50], 'issues': sum(n['kind'] == 'issue' for n in nodes.values()),
+                          'counterpart_items': len(eligible), 'linked_items': len(linked & {n['id'] for n in eligible})}
     return graph
