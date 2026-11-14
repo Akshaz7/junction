@@ -35,6 +35,14 @@ def recv_type(ws, typ, timeout=2.0):
 def client(schema_url, dirs):  # noqa: F811
     from server.app import app
     with TestClient(app) as c:
+        from server import db
+        from server.seed import seed_documents
+
+        async def seed():
+            pool = await db.get_pool()
+            async with pool.acquire() as conn:
+                await seed_documents(conn, [{"doc_id": DOC, "source": "cubicasa5k", "title": "t", "kind": "raster"}])
+        c.portal.call(seed)
         yield c
 
 
@@ -114,13 +122,17 @@ def test_unknown_client_event_ignored(client):
         assert recv_type(b, "chat.message", 0.7) is None  # relay would deliver it; keepalives are not relays
 
 
-def test_ws_without_db_broadcasts_locally(monkeypatch):
+def test_ws_without_db_broadcasts_locally(monkeypatch, dirs):
+    art, _ = dirs
+    (art / DOC / "doc.json").write_text(json.dumps({"doc_id": DOC}))
+    (art / DOC / "page-1.png").write_bytes(b"preview")
+    (art / DOC / "planmap-1.json").write_text('{"items": []}')
     monkeypatch.setenv("DATABASE_URL", "postgresql://x:x@127.0.0.1:1/none")
     from server import db
     monkeypatch.setattr(db, "_pool", None)
     from server.app import app
     with TestClient(app) as c, c.websocket_connect("/ws") as a, c.websocket_connect("/ws") as b:
-        a.send_json({"type": "scene.highlight", "doc_id": "d", "item_ids": ["i"]})
+        a.send_json({"type": "scene.highlight", "doc_id": DOC, "item_ids": ["i"]})
         assert recv_type(b, "scene.highlight", 2) is not None
 
 

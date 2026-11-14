@@ -94,3 +94,21 @@ def test_hidden_listing_lazy_restore_and_fast_refusal(env, monkeypatch):
         chat = c.post("/api/chats", json={"doc_ids": ["src_a__baked"]}).json()
         r = c.post(f"/api/chats/{chat['id']}/messages", json={"content": "How many doors are there?"})
         assert "1 door" in r.text
+
+
+def test_restored_docs_are_evicted_least_recently_used_first(tmp_path, monkeypatch):
+    import os
+
+    monkeypatch.setenv("ARTIFACTS_DIR", str(tmp_path))
+    for i, name in enumerate(["a__old", "a__mid", "a__new", "a__baked"]):
+        d = tmp_path / name
+        d.mkdir()
+        (d / "page-1.png").write_bytes(b"x" * 1000)
+        if name != "a__baked":  # baked docs carry no .restored marker
+            (d / ".restored").touch()
+            os.utime(d / ".restored", (1000 + i, 1000 + i))
+    gone = artifact_store.evict_restored(keep="a__new", cap=2500)
+    assert gone == ["a__old"]  # 3 restored docs (3 KB + markers) -> drop only the oldest to get under 2.5 KB
+    assert (tmp_path / "a__baked").is_dir() and (tmp_path / "a__new").is_dir() and not (tmp_path / "a__old").exists()
+    assert artifact_store.evict_restored(keep="a__new", cap=0) == ["a__mid"]  # keep= and baked docs always survive
+    assert (tmp_path / "a__new").is_dir() and (tmp_path / "a__baked").is_dir()

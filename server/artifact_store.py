@@ -14,7 +14,8 @@ from . import config
 
 MAX_DOC_BYTES = int(os.environ.get("MAX_DOC_BYTES", 60 * 1024 * 1024))
 ORIGINAL = "__original__/"
-SKIP = {"ingest.json.tmp"}
+SKIP = {"ingest.json.tmp", ".restored"}
+RESTORE_CAP = int(float(os.environ.get("RESTORE_CAP_MB", "400")) * 1024 * 1024)  # disk for docs restored from PostgreSQL
 _restored: set[str] = set()
 
 
@@ -105,13 +106,49 @@ def _on_disk(doc_id: str) -> bool:
     return (d / "page-1.png").is_file()  # dataset docs: baked into the image, or restored from PostgreSQL earlier
 
 
+def _touch(doc_id: str) -> None:
+    m = config.artifacts_dir() / doc_id / ".restored"
+    if m.is_file():
+        try:
+            os.utime(m)
+        except OSError:
+            pass
+
+
+def evict_restored(keep: str | None = None, cap: int | None = None) -> list[str]:
+    """Keep restored dataset docs under the disk cap: delete the least recently used ones. Docs baked into the image
+    (no .restored marker) and uploads are never touched. Returns the evicted doc ids."""
+    import shutil
+    cap = RESTORE_CAP if cap is None else cap
+    art = config.artifacts_dir()
+    rows = []
+    for m in art.glob("*__*/.restored"):
+        d = m.parent
+        size = sum(f.stat().st_size for f in d.rglob("*") if f.is_file())
+        rows.append((m.stat().st_mtime, d.name, size))
+    total = sum(r[2] for r in rows)
+    out = []
+    for _, name, size in sorted(rows):
+        if total <= cap:
+            break
+        if name == keep or name.startswith("uploads__"):
+            continue
+        shutil.rmtree(art / name, ignore_errors=True)
+        _restored.discard(name)
+        total -= size
+        out.append(name)
+    return out
+
+
 async def ensure_doc(doc_id: str) -> None:
     """Make sure a document's files are on disk. Uploads and dataset docs both live in PostgreSQL (doc_artifacts) when
     they are not baked into the image; they are pulled back lazily on first use (cheap no-op afterwards)."""
     if doc_id in _restored:
+        _touch(doc_id)
         return
     if _on_disk(doc_id):
         _restored.add(doc_id)
+        _touch(doc_id)
         return
     from . import db
     pool = await db.get_pool()
@@ -121,6 +158,9 @@ async def ensure_doc(doc_id: str) -> None:
         n = await restore_doc(pool, doc_id)
         if n or doc_id.startswith("uploads__"):
             _restored.add(doc_id)
+        if n and not doc_id.startswith("uploads__"):
+            (config.artifacts_dir() / doc_id / ".restored").touch()
+            evict_restored(keep=doc_id)
     except Exception as e:  # noqa: BLE001 - never break a request over a cache restore
         print("restore failed:", doc_id, repr(e)[:200])
 

@@ -15,6 +15,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from . import config, db, scene_edits
 from .live_labels import clean_labels  # noqa: F401  (re-exported)
+from .ws_guard import InboundLimit, MAX_FRAME_BYTES, scene_target_error
 
 CHANNEL = "hologram_events"
 
@@ -27,7 +28,9 @@ def channel() -> str:
     return f"{CHANNEL}_{m.group(1)}" if m and m.group(1) != "public" else CHANNEL
 INSTANCE = uuid.uuid4().hex  # tags our own NOTIFYs so _on_notify can skip them
 PING_INTERVAL = 20.0  # seconds; keeps Aiven's proxy from cutting idle sockets
-CLIENT_EVENTS = {"scene.highlight", "scene.edit"}  # event types clients may send
+# Web viewer: highlight/edit/pong; iOS LiveSocket: highlight/pong.
+# ping and scene.join are the existing keepalive and late-join requests.
+CLIENT_EVENTS = frozenset({"ping", "pong", "scene.join", "scene.highlight", "scene.edit"})
 
 
 class Hub:
@@ -174,22 +177,44 @@ async def ws_endpoint(ws: WebSocket):
         await asyncio.wait_for(hub.listening.wait(), timeout=3)
     await ws.accept()
     hub.sockets.add(ws)
+    inbound = InboundLimit()
     try:
         if ws.query_params.get("chat_id"):  # late joiner: current edit layer first
             await send_scene_state(ws, ws.query_params["chat_id"], ws.query_params.get("doc_id"))
         while True:
             try:
-                raw = await asyncio.wait_for(ws.receive_text(), timeout=PING_INTERVAL)
+                frame = await asyncio.wait_for(ws.receive(), timeout=PING_INTERVAL)
             except asyncio.TimeoutError:
                 await ws.send_text(json.dumps({"type": "ping"}))
                 continue
+            if frame["type"] == "websocket.disconnect":
+                break
+            raw = frame.get("text")
+            data = frame.get("bytes")
+            if (len(raw.encode("utf-8")) if raw is not None else len(data or b"")) > MAX_FRAME_BYTES:
+                await ws.close(code=1009)
+                break
+            allowed, notice = inbound.accept()
+            if not allowed:
+                if notice:
+                    await ws.send_text(json.dumps({"type": "error", "code": "rate_limited"}))
+                continue
+            if raw is None:  # binary messages have no client event shape
+                continue
             try:
                 msg = json.loads(raw)
-            except ValueError:
+            except (ValueError, RecursionError):
                 continue
             if not isinstance(msg, dict):
                 continue
             t = msg.get("type")
+            if not isinstance(t, str) or t not in CLIENT_EVENTS:
+                continue
+            if t in {"scene.highlight", "scene.edit"}:
+                error = await scene_target_error(msg)
+                if error:
+                    await ws.send_text(json.dumps({"type": "scene.error", "detail": error}))
+                    continue
             if t == "ping":
                 await ws.send_text(json.dumps({"type": "pong"}))
             elif t == "scene.join":
@@ -197,13 +222,12 @@ async def ws_endpoint(ws: WebSocket):
             elif t == "scene.edit":
                 if await record_edit(msg) is None and scene_edits.clean_edit(msg) is None:
                     await ws.send_text(json.dumps({"type": "scene.error", "detail": "invalid scene.edit"}))
-            elif t in CLIENT_EVENTS:
-                if t == "scene.highlight":
-                    ids = [str(i) for i in (msg.get("item_ids") or [])][:500]
-                    event = {"type": t, "doc_id": str(msg.get("doc_id", "")), "item_ids": ids}
-                    labels = clean_labels(msg.get("labels"), ids)
-                    if labels:
-                        event["labels"] = labels
+            elif t == "scene.highlight":
+                ids = msg.get("item_ids", [])
+                event = {"type": t, "doc_id": msg["doc_id"], "item_ids": ids}
+                labels = clean_labels(msg.get("labels"), ids)
+                if labels:
+                    event["labels"] = labels
                 await publish(event)
     except (WebSocketDisconnect, RuntimeError):
         pass
