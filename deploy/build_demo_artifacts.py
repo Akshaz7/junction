@@ -7,7 +7,7 @@
 
 Refuses docs with `publishable: false` in scene.json or a CC-BY-ND / GPL licence in doc.json.
 Copies only the served files (scene.*, elements.json, planmap-*.json, page-N.png + thumb, pages.json,
-text-*.json, doc.json), never tmp/ or .done-* markers. Prints per-doc and total size (target < 150 MB).
+text-*.json, doc.json) plus revisions/<doc>/{truth_changes.json, vN/page+planmap}, never tmp/ or .done-* markers. Prints per-doc and total size (target < 150 MB).
 The Dockerfile copies the output to /app/artifacts (ARTIFACTS_DIR).
 """
 import argparse
@@ -74,6 +74,18 @@ def main() -> int:
             if f.is_file() and KEEP.match(f.name):
                 shutil.copy2(f, dst / f.name)
                 size += f.stat().st_size
+        rev = src_root / "revisions" / d  # synthetic revisions for the Changes view (S-07)
+        if (rev / "truth_changes.json").is_file():
+            rdst = out / "revisions" / d
+            rdst.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(rev / "truth_changes.json", rdst / "truth_changes.json")
+            size += (rev / "truth_changes.json").stat().st_size
+            for v in sorted(p for p in rev.iterdir() if p.is_dir() and re.match(r"^v\d+$", p.name)):
+                (rdst / v.name).mkdir(exist_ok=True)
+                for f in v.iterdir():
+                    if re.match(r"^(page-\d+(\.thumb)?\.png|planmap-\d+\.json)$", f.name):
+                        shutil.copy2(f, rdst / v.name / f.name)
+                        size += f.stat().st_size
         total += size
         print(f"{d:<62} {size / 1e6:7.2f} MB")
     mb = total / 1e6

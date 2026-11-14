@@ -137,13 +137,19 @@ async def ingest_status(doc_id: str):
     return json.loads(f.read_text())
 
 
-@router.get("/changes")
-async def changes():
-    pool = await db.get_pool()
-    if pool is None:
-        raise HTTPException(503, "database unavailable")
-    rows = await pool.fetch("select id, doc_a, doc_b, summary, created_at from changes order by created_at desc")
-    return {"changes": [_change(r) for r in rows]}
+REV_VERSION = re.compile(r"^v\d+$")
+REV_FILE = re.compile(r"^(page-\d+(\.thumb)?\.png|planmap-\d+\.json)$")
+
+
+@router.get("/docs/{doc_id}/revisions/{version}/{name}")
+async def revision_file(doc_id: str, version: str, name: str):
+    """Page images and plan maps of a revision (artifacts/revisions/<doc_id>/<vN>/)."""
+    if not SAFE_ID.match(doc_id) or not REV_VERSION.match(version) or not REV_FILE.match(name):
+        raise HTTPException(404, "unknown file")
+    f = config.artifacts_dir() / "revisions" / doc_id / version / name
+    if not f.is_file():
+        return _not_built(f"{version}/{name}")
+    return FileResponse(f)
 
 
 def _change(r) -> dict:
@@ -152,7 +158,25 @@ def _change(r) -> dict:
     d["created_at"] = d["created_at"].isoformat()
     if isinstance(d.get("summary"), str):
         d["summary"] = json.loads(d["summary"])
+    d["type"] = "new_version"
     return d
+
+
+@router.get("/changes")
+async def changes():
+    """Feed, newest first: new versions (`changes` rows) and new documents (uploads)."""
+    pool = await db.get_pool()
+    if pool is None:
+        raise HTTPException(503, "database unavailable")
+    rows = await pool.fetch("select id, doc_a, doc_b, summary, created_at from changes")
+    docs = await pool.fetch("select doc_id, title, kind, created_at from documents where source='uploads'")
+    feed = [_change(r) for r in rows]
+    feed += [{"id": f"doc:{r['doc_id']}", "type": "new_document", "doc_a": None, "doc_b": r["doc_id"],
+              "summary": {"doc_id": r["doc_id"], "title": r["title"], "kind": r["kind"],
+                          "headline": f"New document: {r['title']}"},
+              "created_at": r["created_at"].isoformat()} for r in docs]
+    feed.sort(key=lambda e: e["created_at"], reverse=True)
+    return {"changes": feed}
 
 
 @router.get("/changes/{change_id}")
@@ -167,7 +191,16 @@ async def change(change_id: str):
     r = await pool.fetchrow("select id, doc_a, doc_b, summary, created_at from changes where id=$1", cid)
     if r is None:
         raise HTTPException(404, "change not found")
-    return _change(r)
+    out = _change(r)
+    from . import changes_source
+    doc_id = (out["doc_a"] or "").split("@")[0]
+    if doc_id and SAFE_ID.match(doc_id) and doc_id in changes_source.revision_docs():
+        try:
+            out.update(changes_source.comparison(doc_id))
+        except Exception as e:  # noqa: BLE001
+            raise HTTPException(500, f"comparison failed: {type(e).__name__}")
+        out["id"] = str(r["id"])
+    return out
 
 
 @router.get("/bench/latest")

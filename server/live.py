@@ -18,6 +18,22 @@ PING_INTERVAL = 20.0  # seconds; keeps Aiven's proxy from cutting idle sockets
 CLIENT_EVENTS = {"scene.highlight"}  # event types clients may send
 
 
+def clean_labels(raw, item_ids: list[str]) -> dict[str, str]:
+    """Keep only labels for highlighted items: item_id -> 1-8 char string, at most len(item_ids) entries."""
+    if not isinstance(raw, dict):
+        return {}
+    ids, out = set(item_ids), {}
+    for k, v in raw.items():
+        if isinstance(v, bool) or not isinstance(v, (str, int)):
+            continue
+        v = str(v).strip()
+        if k in ids and 1 <= len(v) <= 8:
+            out[str(k)] = v
+        if len(out) >= len(item_ids):
+            break
+    return out
+
+
 class Hub:
     def __init__(self):
         self.sockets: set[WebSocket] = set()
@@ -117,8 +133,11 @@ async def ws_endpoint(ws: WebSocket):
                 await ws.send_text(json.dumps({"type": "pong"}))
             elif t in CLIENT_EVENTS:
                 if t == "scene.highlight":
-                    event = {"type": t, "doc_id": str(msg.get("doc_id", "")),
-                             "item_ids": [str(i) for i in (msg.get("item_ids") or [])][:500]}
+                    ids = [str(i) for i in (msg.get("item_ids") or [])][:500]
+                    event = {"type": t, "doc_id": str(msg.get("doc_id", "")), "item_ids": ids}
+                    labels = clean_labels(msg.get("labels"), ids)
+                    if labels:
+                        event["labels"] = labels
                 await publish(event)
     except (WebSocketDisconnect, RuntimeError):
         pass

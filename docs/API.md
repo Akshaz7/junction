@@ -68,8 +68,25 @@ data: {"answer_id": "...", "question": "How many windows are there?", "doc_ids":
 ```
 `status` and `trace` events repeat; `answer` is always last. If the engine fails an `error` event `{"detail": ...}` ends the stream. The user message and the answer are stored.
 
-### GET /api/changes, GET /api/changes/{id}
--> `{"changes": []}` (empty until the changes engine writes rows). One change: `{"id", "doc_a", "doc_b", "summary", "created_at"}`; 404 if unknown.
+### GET /api/changes, GET /api/changes/{id} (S-07)
+Feed, newest first: `{"changes": [{"id", "type": "new_version"|"new_document", "doc_a", "doc_b", "summary", "created_at"}]}`.
+`new_version`: `doc_a`/`doc_b` are `<doc_id>@v1` / `<doc_id>@v2`, `summary` = `{"doc_id", "source", "generated_for_demo", "n_changes", "headline"}`. `new_document`: an upload (`id` is `doc:<doc_id>`, no detail view). Rows are seeded at server start from the revisions on disk, and `changes.new` fires on each insert.
+One comparison (`new_version` ids only; 404 otherwise):
+```
+{"id": "<uuid>", "type": "new_version", "doc_id": "swiss_dwellings__site289-bldg536-floor2149",
+ "source": "truth", "generated_for_demo": true, "image": {"w": 1583, "h": 3000},
+ "v1": {"label": "v1", "page_image": "/api/docs/<doc_id>/revisions/v1/page-1.png", "thumb": ".../page-1.thumb.png", "planmap": ".../planmap-1.json"},
+ "v2": {...},
+ "changes": [{"n": 1, "change_id": "c1", "type": "removed|added|modified", "kind": "wall|door|room|...",
+              "sentence": "Wall 14 (3.1 m long) reads absent where it read present.",
+              "v1": {"item_id": "wall-14", "bbox_px": [798, 1228, 819, 1498]}, "v2": null,
+              "field": null, "old": null, "new": null}]}
+```
+`n` numbers the boxes on both pages; `bbox_px` is in the shared page-image pixel frame (same frame in v1 and v2). A side is `null` when the item does not exist in that version. Sentences follow CONTRACT 5.8: `The area of room 205 reads 47.0 m2 where it read 23.5 m2.`
+`source` is `"truth"` (DATA's synthetic revisions, generated for demo) until E-11's `engine.changes.compare(doc_id, revision_dir)` exists; then `engine` (override with env `CHANGE_SOURCE=truth|engine`).
+
+### GET /api/docs/{doc_id}/revisions/{vN}/{name}
+`name` is `page-<n>.png`, `page-<n>.thumb.png` or `planmap-<n>.json`; `vN` matches `v<digits>`. Other names 404; a missing file 404 `{"status":"not_built"}`.
 
 ### GET /api/bench/latest
 -> `{"file": "run1.json", "data": {...}}` from the newest `results/bench/*.json|jsonl`. 404 `{"status": "no_bench"}` if none.
@@ -96,12 +113,12 @@ Findings/advise (tier 3).
 ```
 {"type": "chat.message", "chat_id": "<uuid>", "message_id": "<uuid>", "role": "user|assistant"}   // refetch GET /api/chats/{id}
 {"type": "chat.status",  "chat_id": "<uuid>", "text": "Thinking…"}                                // same lines as the SSE status events
-{"type": "scene.highlight", "doc_id": "...", "item_ids": ["window-001", "window-002"]}
+{"type": "scene.highlight", "doc_id": "...", "item_ids": ["window-001", "window-002"], "labels": {"window-001": "1", "window-002": "2"}}
 {"type": "doc.new", "doc_id": "uploads__plan-3fa2b1"}                                              // refetch GET /api/docs
 {"type": "changes.new", "id": "<uuid>"}                                                           // refetch GET /api/changes
 {"type": "ping"}                                                                                    // every 20 s; any reply is optional
 ```
-Client-to-server: `{"type": "scene.highlight", "doc_id": "...", "item_ids": [...]}` is re-broadcast to every client, including the sender
+Client-to-server: `{"type": "scene.highlight", "doc_id": "...", "item_ids": [...], "labels": {...}}` is re-broadcast to every client, including the sender. `labels` is optional (the 2D citation numbers): item_id -> string of 1-8 characters, only for ids in `item_ids`; invalid entries are dropped and the key is omitted when none remain
 (web 3D viewer and iOS AR follow it). `{"type": "ping"}` gets `{"type": "pong"}`. Other types are ignored.
 Mechanism: writers call `pg_notify('hologram_events', ...)`; each server process holds one LISTEN connection and fans out to its sockets
 (works across several server instances; reconnects after a drop). `changes.new` comes from a DB trigger, so any writer of `changes` fires it.

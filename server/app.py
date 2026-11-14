@@ -20,6 +20,8 @@ async def lifespan(app: FastAPI):
         try:
             async with pool.acquire() as conn:
                 await apply_migrations(conn)
+                from .changes_source import seed_changes
+                await seed_changes(conn)
         except Exception as e:  # never block startup
             print("migrations failed:", e)
     hub.start()

@@ -38,6 +38,19 @@ def client(schema_url, dirs):  # noqa: F811
         yield c
 
 
+def test_scene_highlight_keeps_valid_labels_only(client):
+    with client.websocket_connect("/ws") as a, client.websocket_connect("/ws") as b:
+        a.send_json({"type": "scene.highlight", "doc_id": DOC, "item_ids": ["w1", "w2"],
+                     "labels": {"w1": "1", "w2": 2, "w3": "9", "w2x": "x", "w9": "ok"}})
+        m = recv_type(b, "scene.highlight")
+        assert m["labels"] == {"w1": "1", "w2": "2"}
+        a.send_json({"type": "scene.highlight", "doc_id": DOC, "item_ids": ["w1"],
+                     "labels": {"w1": "123456789"}})  # too long
+        assert "labels" not in recv_type(b, "scene.highlight")
+        a.send_json({"type": "scene.highlight", "doc_id": DOC, "item_ids": ["w1"], "labels": "nope"})
+        assert "labels" not in recv_type(b, "scene.highlight")
+
+
 def test_scene_highlight_reaches_other_client(client):
     with client.websocket_connect("/ws") as a, client.websocket_connect("/ws") as b:
         t0 = time.monotonic()
