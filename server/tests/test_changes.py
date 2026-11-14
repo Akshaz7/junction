@@ -149,3 +149,14 @@ def test_unlisted_pair_is_absent_even_with_local_artifacts(client):
     client.portal.call(remove)
     assert [e["id"] for e in client.get("/api/changes").json()["changes"]] == [f"ser:{SID}:1"]
     assert client.get(f"/api/changes/ser:{SID}:2").status_code == 404
+
+
+def test_any_two_versions_of_a_series(client):
+    feed = client.get("/api/changes").json()["changes"]
+    s = feed[1]["summary"]
+    assert (s["index_a"], s["index_b"], s["pair_prefix"]) == (1, 2, f"ser:{SID}:")
+    d = client.get(f"/api/changes/ser:{SID}:1-2").json()  # same pair as ser:<sid>:1, served from the cached diff
+    assert d["source"] == "pdf-diff" and len(d["changes"]) == 2
+    far = client.get(f"/api/changes/ser:{SID}:1-3").json()
+    assert far["v1"]["doc_id"] == DOCS[0] and far["v2"]["doc_id"] == DOCS[2] and far["v2"]["label"].startswith("Version 3")
+    assert client.get(f"/api/changes/ser:{SID}:1-9").status_code == 404

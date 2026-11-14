@@ -17,6 +17,7 @@ import type { LoadProgress } from './loadGLTF';
 import type { WalkState } from './walk';
 import { WalkJoystick } from './WalkJoystick';
 import { EditPanel, useEditAdvisor } from './EditPanel';
+import { editSnapshot, hasEdits as snapshotHasEdits, saveDesignVersion, savedMessage } from '../lib/design-versions';
 import type { EditState, ItemEdit } from './edits';
 import { RevisedPlanDialog } from './RevisedPlanDialog';
 import { FindingsPanel } from './FindingsPanel';
@@ -100,6 +101,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
   const dragPointer = useRef<number | null>(null);
   const [edits, setEdits] = useState<EditState>({ undoCount: 0, moved: {}, materials: {} });
   const advice = useEditAdvisor(manifest?.doc_id, chat_id);
+  const [saved, setSaved] = useState<{ busy: boolean; message?: string; href?: string; parent: number; doc?: string }>({ busy: false, parent: 0 });
   const [elements, setElements] = useState<Map<string, IFCElement>>(new Map());
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -126,6 +128,22 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
   function finishEdit(edit: ItemEdit | null) {
     setEdits(viewerRef.current?.getEditState() ?? { undoCount: 0, moved: {}, materials: {} });
     advice.enqueue(edit);
+  }
+
+  /** Save the edited design as a new version (linked to the last version saved here, else the original). */
+  async function saveVersion() {
+    const docId = doc_id ?? manifest?.doc_id, viewer = viewerRef.current;
+    if (!docId || !viewer) return;
+    const snapshot = editSnapshot(viewer.getCommandState().hidden, viewer.getEditState());
+    if (!snapshotHasEdits(snapshot)) return;
+    const parent = saved.doc === docId ? saved.parent : 0;
+    setSaved((s) => ({ ...s, busy: true, message: undefined, href: undefined }));
+    try {
+      const version = await saveDesignVersion(docId, snapshot, { parent, chatId: chat_id });
+      setSaved({ busy: false, message: savedMessage(version), href: version.compare_url, parent: version.n, doc: docId });
+    } catch (e) {
+      setSaved((s) => ({ ...s, busy: false, message: e instanceof Error ? e.message : 'Could not save the version.' }));
+    }
   }
 
   function cancelMove() {
@@ -429,6 +447,8 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       {state === 'ready' && editing && manifest && <EditPanel selected={picked} manifest={manifest} edits={edits}
         moving={moveItem !== null} advice={advice} hidden={hiddenIds}
         onRestore={(ids) => { cancelMove(); finishEdit(viewerRef.current?.restoreItems(ids) ?? null); }}
+        save={{ canSave: hiddenNow > 0 || Object.keys(edits.moveDelta ?? {}).length > 0 || Object.keys(edits.materials).length > 0,
+          busy: saved.busy, message: saved.message, href: saved.href, onSave: () => { cancelMove(); void saveVersion(); } }}
         onRemove={() => { cancelMove(); if (picked) { finishEdit(viewerRef.current?.removeItem(picked) ?? null); selectItem(null); } }}
         onMove={() => { cancelMove(); if (picked && moveItem !== picked) setMoveItem(picked); }}
         onMaterial={(choice) => { cancelMove(); if (picked) finishEdit(viewerRef.current?.changeMaterial(picked, choice) ?? null); }}

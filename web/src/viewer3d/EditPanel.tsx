@@ -24,7 +24,10 @@ export function useEditAdvisor(doc_id?: string, chat_id?: string) {
   return { cards, status, enqueue(edit: ItemEdit | null) { if (edit) requests.current?.enqueue(edit); } };
 }
 
-export function EditPanel({ selected, manifest, edits, moving, advice, hidden = [], onRemove, onMove, onMaterial, onUndo, onReset, onRestore, onHighlight }: {
+/** Optional "Save as new version": keeps the edited design as a new version of the document (original untouched). */
+export interface SaveVersionControl { canSave: boolean; busy: boolean; message?: string; href?: string; onSave(): void }
+
+export function EditPanel({ selected, manifest, edits, moving, advice, hidden = [], onRemove, onMove, onMaterial, onUndo, onReset, onRestore, onHighlight, save }: {
   selected: string | null;
   manifest: SceneManifest;
   edits: EditState;
@@ -39,6 +42,7 @@ export function EditPanel({ selected, manifest, edits, moving, advice, hidden = 
   onReset(): void;
   onRestore?(ids: string[]): void;
   onHighlight(ids: string[]): void;
+  save?: SaveVersionControl;
 }) {
   const item = selected ? manifest.items[selected] : null;
   const label = item?.tag ?? selected;
@@ -56,6 +60,8 @@ export function EditPanel({ selected, manifest, edits, moving, advice, hidden = 
       </label>}
       <button type="button" disabled={!edits.undoCount} onClick={onUndo}>Undo</button>
       <button type="button" disabled={!edits.undoCount && !hidden.length} onClick={onReset}>Reset edits</button>
+      {save && <button type="button" disabled={!save.canSave || save.busy} onClick={save.onSave}
+        title="Keep this edited design as a new version of the document. The original is not changed.">{save.busy ? 'Saving…' : 'Save as new version'}</button>}
     </div>
     {onRestore && hidden.length > 0 && <div className="viewer3d-edit-removed" aria-label="Removed items">
       <span>Removed ({hidden.length}):</span>
@@ -63,6 +69,7 @@ export function EditPanel({ selected, manifest, edits, moving, advice, hidden = 
         onClick={() => onRestore([id])}>{manifest.items[id]?.tag ?? id} ↺</button>)}
       {hidden.length > 1 && <button type="button" onClick={() => onRestore([...hidden])}>Restore all</button>}
     </div>}
+    {save?.message && <p role="status">{save.message}{save.href && <> <a href={save.href}>Compare with the original</a></>}</p>}
     {selected && edits.materials[selected] && <p>Material: {edits.materials[selected]}</p>}
     {moving && <p role="status">Drag on the model to move the selected item. Snaps to 0.1 m. Escape cancels.</p>}
     <div className="viewer3d-advisor" aria-label="Advice for this change" aria-live="polite">

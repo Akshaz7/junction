@@ -25,6 +25,8 @@ const area = (box: number[] | null | undefined, size: { w: number; h: number }) 
 /** Turn one engine sentence into plain words that say what changed and where. */
 export function readChange(change: Item, size: { w: number; h: number }): ChangeReading {
   const s = change.sentence
+  // Saved 3D edits name the exact item (tag, id): never a title block or region guess.
+  if (change.edit) return { change, kind: change.type === 'added' ? 'graphic-added' : change.type === 'removed' ? 'graphic-removed' : 'graphic-edited', small: false, text: s }
   const bbox = (change.v2?.bbox_px || change.v1?.bbox_px) as [number, number, number, number] | null | undefined
   const where = whereOnSheet(bbox, size)
   const at = where ? ` ${where}` : ''
@@ -52,6 +54,12 @@ export function readChange(change: Item, size: { w: number; h: number }): Change
 /** "25 changes: 3 notes edited, 2 added, 4 removed, 12 small linework edits." */
 export function summariseChanges(readings: ChangeReading[]) {
   if (!readings.length) return 'No differences found.'
+  if (readings.every((r) => r.change.edit)) {
+    const by = (action: string) => readings.filter((r) => r.change.action === action).length
+    const parts = [[by('removed'), 'removed'], [by('added'), 'added back'], [by('moved'), 'moved'], [by('material'), 'material changed']]
+      .filter(([k]) => k).map(([k, what]) => `${k} ${k === 1 ? 'item' : 'items'} ${what}`)
+    return parts.length ? `${parts.join(', ').replace(/^./, (c) => c.toUpperCase())}.` : 'No differences found.'
+  }
   const count = (kinds: ChangeReading['kind'][]) => readings.filter((r) => !r.small && kinds.includes(r.kind)).length
   const n = (k: number, one: string, many: string) => k ? [`${k} ${k === 1 ? one : many}`] : []
   const text = [

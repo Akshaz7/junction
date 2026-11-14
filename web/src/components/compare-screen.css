@@ -17,6 +17,7 @@
 .cmp-stack img + img { position: absolute; inset: 0; }
 .cmp-box { position: absolute; border: 2px solid #e5484d; background: rgba(229, 72, 77, .12); }
 .cmp-box.added { border-color: #30a46c; background: rgba(48, 164, 108, .12); }
+.cmp-box.moved { border-color: #f5a524; background: rgba(245, 165, 36, .14); }
 .cmp-box[data-active] { box-shadow: 0 0 0 3px rgba(255, 193, 7, .8); }
 .cmp-box b { position: absolute; top: -10px; left: -10px; min-width: 20px; height: 20px; border-radius: 10px; background: #111; color: #fff; font-size: 11px; display: grid; place-items: center; }
 .cmp-wipe { position: absolute; left: 0; right: 0; bottom: 8px; width: 100%; }
