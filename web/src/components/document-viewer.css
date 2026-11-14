@@ -35,7 +35,6 @@
 .evidence-region.is-hidden > rect { fill: var(--muted-foreground); fill-opacity: .1; stroke-dasharray: 5 4; }
 .evidence-region .evidence-label-bg { fill: currentColor; }
 .evidence-region text { fill: white; font-family: var(--font-sans); font-size: 12px; font-weight: 600; }
-.evidence-region .evidence-secondary-tag text { fill: currentColor; font-size: 10px; }
 .viewer-message { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center; color: var(--muted-foreground); font-size: var(--text-body-sm); }
 .drawing-credit { flex-shrink: 0; padding: 10px 12px max(10px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border); font-size: var(--text-caption); line-height: var(--text-caption--line-height); color: var(--muted-foreground); overflow-wrap: anywhere; background: var(--card); }
 @media (max-width: 800px) {
