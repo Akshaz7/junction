@@ -91,6 +91,9 @@ def scale_anchors(words):
             groups[-1].append(w)
         for group in groups:
             text = " ".join(str(w.get("text") or "") for w in group)
+            # A comma before another 1: label separates scales, rather than
+            # turning the first denominator into a decimal (1:100,1:20).
+            text = re.sub(r",(?=\s*1\s*:)", "; ", text)
             ratio, span = _ratio(text)
             if not ratio:
                 continue

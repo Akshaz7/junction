@@ -153,7 +153,7 @@ def annotate_views(pm, words, image=None, dpi=None, frames=None, views=None):
             distances.append(((dx*dx+dy*dy)**.5, region))
         distances.sort(key=lambda row: row[0])
         distance, nearest = distances[0]
-        if distance <= 4*(a[3]-a[1]) and (len(distances) == 1 or distance + 1e-6 < distances[1][0]):
+        if distance <= 4*(a[3]-a[1]) and (len(distances) == 1 or distance + .5*(a[3]-a[1]) < distances[1][0]):
             anchor['view_id'] = nearest['view_id']
     for region in regions:
         region['scale'] = _scale_for(region, anchors, words, pm, dpi, only_view=len(regions) == 1)

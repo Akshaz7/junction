@@ -259,3 +259,17 @@ def test_multikind_counts_name_views_with_counts(tmp_path):
     result = solve('How many doors and windows?', d.name, root=tmp_path)
     assert result['answer']['value'] == {'door': 2, 'window': 2}
     assert 'Pohjapiirros (page 1): 1 door, 1 window' in result['answer']['text_md']
+
+
+def test_comma_separated_scale_list_is_not_a_decimal_denominator():
+    from engine.scales import scale_anchors
+    assert {a['ratio'] for a in scale_anchors([word('1:100,1:20 1:500')])} == {100, 20, 500}
+
+
+def test_scale_reader_exposes_unassigned_printed_labels(tmp_path):
+    from engine.reader.tools import Session
+    pm = annotate_views(mixed_map(), [], views=views())
+    pm['printed_scale_labels'] = [word('1:100', 10, 780)]
+    d = store(tmp_path, pm)
+    result = Session([d.name], tmp_path).t_scale('d1')
+    assert 'printed scale 1:100' in result and 'physical calibration' in result

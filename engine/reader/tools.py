@@ -328,6 +328,10 @@ class Session:
         from pipeline.scale_regions import region_map
         from engine.scales import scale_description
         pm = region_map(Path(self.root) / did, pg)
+        from engine.scales import scale_anchors
+        for label in scale_anchors(pm.get("printed_scale_labels", [])):
+            ref = self.reg("text", did, pg, label["bbox"], label["quote"])
+            out.append(f"{ref} printed scale 1:{_fmt(label['ratio'])}; physical calibration and view assignment must be checked separately")
         for region in pm.get("regions", []):
             sc = region.get("scale") or {}
             ref = self.reg("region", did, pg, region["bbox"], sc.get("evidence"))
