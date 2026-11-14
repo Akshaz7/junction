@@ -297,6 +297,24 @@ def _leaf_end(arc, segs):
     return best
 
 
+def _radial_lines(arc, segs):
+    """Lines (longer than 0.3 r) that point at the arc centre from inside the circle (ends within 0.06 r of the
+    centre or the line passes through it)."""
+    if not len(segs):
+        return 0
+    cx, cy = arc["c"]; r = arc["r"]
+    x0, y0, x1, y1 = segs[:, 0], segs[:, 1], segs[:, 2], segs[:, 3]
+    L = np.hypot(x1 - x0, y1 - y0)
+    near = (np.hypot(x0 - cx, y0 - cy) < 1.05 * r) & (np.hypot(x1 - cx, y1 - cy) < 1.05 * r) & (L > 0.3 * r)
+    if not near.any():
+        return 0
+    k = np.nonzero(near)[0]
+    # distance from the centre to the infinite line through the segment
+    d = np.abs((x1[k] - x0[k]) * (y0[k] - cy) - (x0[k] - cx) * (y1[k] - y0[k])) / L[k]
+    ang = np.round(np.degrees(np.arctan2(y1[k] - y0[k], x1[k] - x0[k])) % 180 / 5)
+    return len(set(ang[d < 0.06 * r].tolist()))
+
+
 def _tangent_ends(arc, segs):
     """Number of arc ends that run on tangentially into a straight line (a rounded corner / fillet / curved wall,
     not a door swing, whose ends meet the leaf radially and the jamb end-on)."""
@@ -388,6 +406,8 @@ def _doors(page, segs, arcs, wi: _WallIndex):
         keep.append(c)
     doors = []
     for arc in keep:
+        if _radial_lines(arc, segs) >= 5:
+            continue  # spiral stair / fan symbol: many lines radiate from the centre, a hinge has 1-2
         leaf = _leaf_end(arc, segs)
         tang = _tangent_ends(arc, segs)
         if tang >= 2 or (tang == 1 and leaf is None):
@@ -901,6 +921,72 @@ def _fit_window(w, wi: _WallIndex, mpp):
     return out
 
 
+TAG_RX = [re.compile(r"^[A-Z]{2,4}\d{1,3}[a-z]{1,3}$"),            # door-type codes such as ABC12xy, DEF3z
+          re.compile(r"^(?:D|T|O|DR|OV)[-.]?\d{1,4}[A-Z]?$"),       # door marks such as D34, T12, O1
+          re.compile(r"^\d{2,4}[A-Z]$")]                             # door numbers such as 127A
+HEIGHT_RX = re.compile(r"^h\s*=\s*(\d{4})(?:\s*mm)?[;,.:]?$", re.I)
+
+
+def _door_height_note(words):
+    """Page-level 'DOOR HEIGHT h=2100' (mm) -> metres, from the text layer, or None."""
+    for i, w in enumerate(words or []):
+        if w.get("text", "").strip().upper() not in ("HEIGHT", "HEIGHT:", "HEIGHTS"):
+            continue
+        b = w["bbox"]; h = max(b[3] - b[1], 1.0)
+        same = [v for v in words if abs((v["bbox"][1] + v["bbox"][3]) / 2 - (b[1] + b[3]) / 2) < 0.6 * h]
+        if not any(v["text"].strip().upper().startswith("DOOR") and v["bbox"][2] <= b[0] + 1 and
+                   b[0] - v["bbox"][2] < 4 * h for v in same):
+            continue
+        right = sorted((v for v in same if v["bbox"][0] >= b[2] - 1 and v["bbox"][0] - b[2] < 6 * h),
+                       key=lambda v: v["bbox"][0])
+        for v in right[:3]:
+            m = HEIGHT_RX.match(v["text"].strip())
+            if m and 1800 <= int(m.group(1)) <= 3500:
+                return int(m.group(1)) / 1000
+    return None
+
+
+def _tag_doors(doors, words):
+    """props.tag: the nearest door code printed within ~one door width of the opening."""
+    if not words or not doors:
+        return
+    cand = []
+    for w in words:
+        t = w.get("text", "").strip()
+        for rank, rx in enumerate(TAG_RX):
+            if rx.match(t):
+                b = w["bbox"]
+                cand.append(((b[0] + b[2]) / 2, (b[1] + b[3]) / 2, t, rank))
+                break
+    if not cand:
+        return
+    C = np.array([(c[0], c[1]) for c in cand])
+    taken = set()
+    for d in sorted(doors, key=lambda d: -d["conf"]):
+        b = d["bbox"]; cx, cy = (b[0] + b[2]) / 2, (b[1] + b[3]) / 2
+        R = 1.2 * d["props"].get("width_pt", 30)
+        dist = np.hypot(C[:, 0] - cx, C[:, 1] - cy)
+        ok = [k for k in np.nonzero(dist < R)[0] if k not in taken]
+        if ok:
+            k = min(ok, key=lambda k: (cand[k][3], dist[k]))
+            taken.add(k)
+            d["props"]["tag"] = cand[k][2]
+
+
+def _near_doors(wins, doors, mpp):
+    """Windows belong to the occupied building: with >= 4 doors, keep windows within ~4 m of the doors' convex
+    hull (roof planes, skylight hatches and neighbouring roofs drawn around the floor carry no doors)."""
+    swing = [d for d in doors if d["props"].get("radius_pt") or d["props"].get("sliding")]
+    if len(swing) < 4 or not wins:
+        return wins
+    from shapely.geometry import MultiPoint, Polygon
+    hull = MultiPoint([tuple(q) for d in swing for q in d["polygon"]]).convex_hull
+    wd = sorted(d["props"]["width_pt"] for d in swing)
+    m = (4.0 / mpp) if mpp else 4 * wd[len(wd) // 2]
+    zone = hull.buffer(m)
+    return [w for w in wins if zone.intersects(Polygon(w["polygon"]))]
+
+
 def openings(page: dict, walls: list) -> list:
     """Doors and windows on a vector page, in page points (top-left origin, y down)."""
     if not page or not page.get("paths"):
@@ -921,7 +1007,16 @@ def openings(page: dict, walls: list) -> list:
                    for k in wins):
             wins.append(w)
     wins = [w for w in (_fit_window(w, wi, mpp) for w in wins) if w]
-    return _footprint_filter(doors + wins, walls)
+    wins = _near_doors(wins, doors, mpp)
+    out = _footprint_filter(doors + wins, walls)
+    dr = [o for o in out if o["kind"] == "door"]
+    _tag_doors(dr, page.get("words"))
+    hm = _door_height_note(page.get("words"))
+    if hm:
+        for o in dr:
+            o["props"].setdefault("height_m", hm)
+            o["props"].setdefault("height_source", "page note 'DOOR HEIGHT'")
+    return out
 
 
 # ---------------------------------------------------------------- gate

@@ -213,6 +213,18 @@ def test_gate_ignores_body_size_callouts():
     assert not ok
 
 
+def test_door_height_note_and_tags():
+    words = [{"text": t, "bbox": [x, 10, x + 6 * len(t), 16]} for t, x in
+             (("DOOR", 100), ("HEIGHT", 130), ("h=2100;", 170), ("DEVIATING", 215))]
+    assert po._door_height_note(words) == pytest.approx(2.1)
+    assert po._door_height_note(words[1:]) is None              # no DOOR before HEIGHT
+    door = {"kind": "door", "bbox": [200, 200, 240, 210], "conf": 0.9, "props": {"width_pt": 40}}
+    tags = [{"text": "R101", "bbox": [205, 215, 225, 222]}, {"text": "ABC12xy", "bbox": [210, 220, 240, 227]},
+            {"text": "D34", "bbox": [400, 400, 420, 407]}]
+    po._tag_doors([door], tags)
+    assert door["props"]["tag"] == "ABC12xy"                   # room number R101 is not a door tag
+
+
 def test_empty_inputs():
     assert po.openings({}, []) == []
     assert po.gate({}, [], [])[0] is False
