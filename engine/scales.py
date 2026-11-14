@@ -124,13 +124,18 @@ def region_scale(pm, bbox):
     if not owners:
         return unknown("Item crosses view boundaries or has no containing scaled view"), None
     owner = min(owners, key=lambda r: box_area(r["bbox"]))
-    # An item containing part of a nested detail cannot use the enclosing view.
+    # Only strict ancestor frames may overlap the chosen view. Intersecting
+    # peer frames and duplicate boundaries with conflicting scales are ambiguous.
     for r in regions:
         b = r.get("bbox")
-        if r is owner or not valid_box(b) or box_area(b) >= box_area(owner["bbox"]):
+        if r is owner or not valid_box(b):
             continue
         if min(b[2], bbox[2]) > max(b[0], bbox[0]) and min(b[3], bbox[3]) > max(b[1], bbox[1]):
-            return unknown("Item overlaps a nested detail view"), None
+            if contains(b, owner["bbox"]) and box_area(b) > box_area(owner["bbox"]):
+                continue
+            if b == owner["bbox"] and r.get("scale") == owner.get("scale"):
+                continue
+            return unknown("Item overlaps view boundaries or a nested detail view"), None
     return owner.get("scale") or unknown("View scale is missing"), owner
 
 
@@ -171,8 +176,10 @@ def apply_item_scales(items, pm):
         printed = it.props.get("area_m2_label") is not None
         native = it.source == "dxf"
         if not mpp:
-            if not printed and not native:
+            if not native:
                 for key in ("area_m2", "width_m", "height_m", "length_m"):
+                    if key == "area_m2" and printed:
+                        continue
                     it.q.pop(key, None)
                     it.props.pop(key, None)
             continue

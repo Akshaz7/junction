@@ -111,9 +111,26 @@ def test_gutters_and_frames_detect_separate_regions():
 
 def test_nested_detail_wins_and_overlapping_item_is_unknown():
     pm = mixed()
+    pm["regions"].sort(key=lambda r: r["scale"]["ratio"], reverse=True)
     pm["regions"][0]["bbox"] = [0, 0, 1200, 800]
     assert region_scale(pm, [850, 100, 950, 200])[0]["ratio"] == 20
     assert region_scale(pm, [700, 100, 950, 200])[0]["m_per_px"] is None
+
+
+def test_intersecting_peer_regions_cannot_choose_a_scale_by_size():
+    pm = mixed()
+    pm["regions"].sort(key=lambda r: r["scale"]["ratio"], reverse=True)
+    pm["regions"][0]["bbox"] = [0, 0, 1000, 800]
+    assert region_scale(pm, [850, 100, 950, 200])[0]["m_per_px"] is None
+    pm["regions"][0]["bbox"] = list(pm["regions"][1]["bbox"])
+    assert region_scale(pm, [850, 100, 950, 200])[0]["m_per_px"] is None
+
+
+def test_unknown_view_preserves_printed_area_but_removes_pixel_lengths():
+    it = room(q={"area_m2": 7, "width_m": 1}, props={"area_m2_label": 7, "width_m": 1})
+    apply_item_scales([it], mixed(dpi=None))
+    assert it.q == {"area_m2": 7}
+    assert "width_m" not in it.props
 
 
 def test_end_to_end_detail_area_and_measured_card(tmp_path):

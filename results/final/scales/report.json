@@ -1,5 +1,96 @@
 {
   "unseen_final_file": "data/junction-dataset-preview/data/wikimedia/37526373.jpg",
   "selected_before_development": true,
-  "selection": "SystemRandom from wikimedia raster files; contents not inspected until final validation"
+  "selection": "SystemRandom from wikimedia raster files; contents not inspected until final validation",
+  "status": "PARTIAL",
+  "completed_at": "2026-11-14T23:09:40.122455+02:00",
+  "branch": "final/scales",
+  "last_commit": "1906d78cdfa9ac81a3a9a0b93e300c2f2c99a612",
+  "uncommitted_source_files": [
+    "engine/scales.py",
+    "engine/tests/test_scales.py"
+  ],
+  "commit_blocker": "Sandbox denies creation of /Users/akshatthapa/Workspace/junction/.git/worktrees/scales/index.lock (Operation not permitted); git add failed twice, no new commit created.",
+  "works": [
+    "Raster view regions from scale titles, enclosing frames and blank gutters; metric, imperial and spatially split OCR labels.",
+    "Each region stores bbox, title and scale; the largest detected region supplies the legacy main scale. Original calibration is retained as source_scale.",
+    "Printed ratios calibrated from image DPI, matching paper size or a local scale bar; resized raster DPI is preserved.",
+    "DXF uniform block transforms and block/model units; paper viewport calibration hook accepts its rendered layout transform.",
+    "Loaded pixel-derived quantities, reader measurement tools, baseboard calculations and take-off geometry use the containing view scale.",
+    "Measurement evidence names the view and scale; cross-boundary, conflicting or missing calibrations remain unavailable.",
+    "Printed area labels and native DXF quantities remain intact. Unknown raster view scales remove derived lengths even when a printed area is available.",
+    "PDF ingest unchanged; no model calls added."
+  ],
+  "validation": {
+    "engine": {
+      "passed": 181,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 12.385,
+      "groups": {
+        "engine.tests.test_scales": 40,
+        "engine.tests.test_swiss_dxf": 13,
+        "engine.tests.test_rastersanity": 17,
+        "engine.tests.test_scale_text": 16,
+        "engine.tests.test_analytics": 14,
+        "engine.tests.test_complex_q": 27,
+        "engine.tests.test_quantity_takeoff": 5,
+        "engine.tests.test_solvers": 18,
+        "engine.tests.test_solvers_e19": 3,
+        "engine.tests.test_reasoning_measured": 8,
+        "engine.tests.test_reasoning_checked": 5,
+        "engine.tests.test_reasoning_confidence": 6,
+        "engine.tests.test_reader": 9
+      },
+      "models_fake": true
+    },
+    "server_upload": {
+      "command": "MODELS_FAKE=1 /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest -q server/tests/test_ingest_light.py -k 'not artifact_store_round_trip'",
+      "passed": 4,
+      "deselected": 1,
+      "seconds": 0.05,
+      "excluded_reason": "Database round-trip is outside this scale change."
+    },
+    "compile": "PASS: all changed runtime Python modules compiled",
+    "lint": "PASS: ruff on engine/scales.py, pipeline/scale_regions.py and the two new test/validation modules",
+    "diff_check": "PASS",
+    "real_files": "real_files.json",
+    "unseen_and_stored_planmaps": "unseen_final_file.json",
+    "real_source_collections": [
+      "habs",
+      "swiss_dwellings",
+      "opening_design",
+      "wikimedia"
+    ],
+    "real_files_processed_without_crash": 4,
+    "stored_planmap_items_with_quantities_preserved": 355,
+    "stored_planmaps_source_bytes_unchanged": true,
+    "live_model_calls_added": 0,
+    "measurement_accuracy": "Not evaluated: no annotated mixed-view measurement ground truth. Mixed-scale numeric correctness is tested with synthetic inputs generated for demo/testing."
+  },
+  "real_file_findings": [
+    "HABS al1276_sheet_00001.jpg: OCR found conflicting imperial/metric scale labels; no verified separation or DPI, so the region stays unmeasured.",
+    "Swiss site1088_bldg2216_floor10132.dxf: no modelspace block regions or active paper viewports; original single-scale behavior retained.",
+    "Opening Design Site plan.dxf: six modelspace block regions, all uncalibrated because model and block units are absent; no paper viewports.",
+    "Reserved unseen Wikimedia 37526373.jpg: 42 OCR words, no scale anchors or DPI; handled without manufacturing a scale."
+  ],
+  "limits": [
+    "No real sheet in this validation produced verified mixed-scale measurements; real accuracy is not claimed.",
+    "The current DXF renderer selects modelspace. Paper viewport calculations are tested as an explicit-layout hook, not a new paperspace rendering path.",
+    "Arbitrary crops without physical DPI/paper calibration, unreadable labels, unresolved view boundaries, stretched blocks and clipped/perspective viewports remain unmeasured.",
+    "Existing extrusion still places the sheet with one global scale; independent spatial assembly of details is outside this measurement feature."
+  ],
+  "cross_file": [
+    "engine/analytics.py",
+    "engine/complex_q.py",
+    "engine/reader/tools.py",
+    "engine/reasoning_parts/checked.py",
+    "engine/reasoning_parts/measured.py",
+    "engine/solvers/data.py",
+    "engine/solvers/solve.py",
+    "engine/takeoff.py",
+    "server/ingest_job.py"
+  ],
+  "needs_awais": "Optional PDF hook only: annotate_planmap(pm, words, image=None, dpi=None, frames=None) returns a copied plan map with regions. Words use text/bbox_px and frames use page-pixel [x0,y0,x1,y1]. No PDF integration was changed.",
+  "needs": "Integrator must commit the two modified source files plus the result artifacts on final/scales, then merge. Sandbox blocked git metadata writes in this session."
 }
