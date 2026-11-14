@@ -1,4 +1,6 @@
-"""Per-IP in-memory rate limit: 30 requests per rolling 60 s window."""
+"""Per-IP in-memory rate limit per rolling 60 s window."""
+import os
+import re
 import time
 from collections import defaultdict, deque
 
@@ -7,8 +9,15 @@ from starlette.responses import JSONResponse
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app, limit: int = 30, window: float = 60.0):
+    def __init__(self, app, limit: int | None = None, window: float = 60.0):
         super().__init__(app)
+        if limit is None:
+            try:
+                limit = int(os.environ.get("RATE_LIMIT_PER_MIN") or "30")
+            except ValueError:
+                limit = 30
+            if limit < 1:
+                limit = 30
         self.limit = limit
         self.window = window
         self.hits: dict[str, deque] = defaultdict(deque)
@@ -21,8 +30,16 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     @staticmethod
     def _exempt(request) -> bool:
-        """Ingestion status polling (a small local file read) must not eat the quota while an upload is processed."""
-        return request.method == "GET" and request.url.path.startswith("/api/docs/") and request.url.path.endswith("/ingest")
+        """Health, viewer assets and ingestion polling do not consume the quota.
+
+        BaseHTTPMiddleware also passes WebSocket upgrades through without dispatch.
+        """
+        if request.method != "GET":
+            return False
+        path = request.url.path
+        return path == "/api/health" or re.fullmatch(
+            r"/api/docs/[^/]+/(?:files/[^/]+|pages/[^/]+/image|scene|ingest)", path
+        ) is not None
 
     async def dispatch(self, request, call_next):
         if self._exempt(request):

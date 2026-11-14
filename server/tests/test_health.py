@@ -12,7 +12,9 @@ def test_health_without_db(monkeypatch):
     with TestClient(app_module.app) as c:
         r = c.get("/api/health")
     assert r.status_code == 200
-    assert r.json() == {"ok": True, "db": False}
+    assert r.json()["ok"] is True and r.json()["db"] is False
+    assert isinstance(r.json()["models_ok"], bool)
+    assert r.json()["uptime_s"] >= 0
 
 
 def test_rate_limit_429_on_31st():
@@ -47,7 +49,7 @@ def test_rate_limit_enabled_by_env(monkeypatch):
     mod = importlib.reload(app_module)
     try:
         c = TestClient(mod.app)
-        codes = [c.get("/api/health").status_code for _ in range(31)]
+        codes = [c.get("/api/not-a-route").status_code for _ in range(31)]
         assert codes[-1] == 429
     finally:
         monkeypatch.delenv("RATE_LIMIT")

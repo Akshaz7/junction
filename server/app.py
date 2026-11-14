@@ -1,5 +1,7 @@
 import asyncio
 import contextlib
+import os
+import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -35,6 +37,7 @@ async def _restore_uploads():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    app.state.started_at = time.monotonic()
     pool = await db.get_pool()  # apply migrations on startup when a DB is reachable
     if pool is not None:
         try:
@@ -64,9 +67,10 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Hologram API", lifespan=lifespan)
+app.state.started_at = time.monotonic()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 if config.rate_limit_enabled():
-    app.add_middleware(RateLimitMiddleware, limit=30, window=60.0)
+    app.add_middleware(RateLimitMiddleware, window=60.0)
 
 
 app.include_router(docs_router)
@@ -84,4 +88,11 @@ app.include_router(watch_router)
 
 @app.get("/api/health")
 async def health():
-    return {"ok": True, "db": await db.db_ok()}
+    from engine.models.core import api_key, config as models_config
+
+    models_ok = any((api_key(provider) or "").strip()
+                    for provider in models_config()["providers"] if provider != "fake")
+    return {"ok": True, "db": await db.db_ok(),
+            "build_rev": os.environ.get("BUILD_REV", ""),
+            "uptime_s": max(0.0, time.monotonic() - app.state.started_at),
+            "models_ok": models_ok}
