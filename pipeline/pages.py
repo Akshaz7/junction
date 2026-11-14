@@ -18,6 +18,7 @@ REPO = Path(__file__).resolve().parent.parent
 DPI = 150
 MAX_SIDE = 7000
 MAX_PAGES = 20
+FAST_TEXT = False  # ingest on a small container sets this: pdfium text layer instead of pdfminer
 THUMB = 320
 Image.MAX_IMAGE_PIXELS = None
 
@@ -75,7 +76,49 @@ def pdf_words(pdf: Path, page_no: int, scale: float, W: int, H: int):
     return words, wpt, hpt
 
 
-def do_pdf(pdf: Path, doc_id: str, out: Path):
+def pdfium_words(page, s: float, W: int, H: int):
+    """Words of the text layer via pdfium: about 100x faster than pdfminer (0.01 s vs 2 s for a dense sheet), so a
+    small container shows the page and its text at once. Boxes are in render pixels like pdf_words(); the page
+    rotation is mapped here. Box heights are the glyph boxes (tighter than pdfminer's font boxes)."""
+    tp = page.get_textpage()
+    n = tp.count_chars()
+    txt = tp.get_text_range(0, n) if n else ""
+    ml, mb, mr, mt = page.get_mediabox()
+    W0, H0 = mr - ml, mt - mb  # unrotated page size
+    rot = page.get_rotation() % 360
+    Hd = W0 if rot in (90, 270) else H0  # displayed height in points
+    words, cur = [], []
+
+    def flush():
+        if not cur:
+            return
+        l = min(b[0] for _, b in cur); bo = min(b[1] for _, b in cur)
+        r = max(b[2] for _, b in cur); t = max(b[3] for _, b in cur)
+        if rot == 90:
+            x0, y0, x1, y1 = bo, W0 - r, t, W0 - l
+        elif rot == 180:
+            x0, y0, x1, y1 = W0 - r, H0 - t, W0 - l, H0 - bo
+        elif rot == 270:
+            x0, y0, x1, y1 = H0 - t, l, H0 - bo, r
+        else:
+            x0, y0, x1, y1 = l, bo, r, t
+        bx = (x0 * s, (Hd - y1) * s, x1 * s, (Hd - y0) * s)
+        bx = [round(max(0, min(v, lim)), 1) for v, lim in zip(bx, (W, H, W, H))]
+        words.append({"text": "".join(c for c, _ in cur), "bbox_px": bx})
+        cur.clear()
+
+    for i, ch in enumerate(txt):
+        if ch.isspace() or ch == "\ufffe":
+            flush()
+            continue
+        l, b, r, t = tp.get_charbox(i)
+        cur.append((ch, (l - ml, b - mb, r - ml, t - mb)))
+    flush()
+    tp.close()
+    return words
+
+
+def do_pdf(pdf: Path, doc_id: str, out: Path, fast_text: bool = False):
     import pypdfium2 as pdfium
     doc = pdfium.PdfDocument(str(pdf))
     n_pages = min(len(doc), MAX_PAGES)
@@ -90,8 +133,18 @@ def do_pdf(pdf: Path, doc_id: str, out: Path):
         img = page.render(scale=s).to_pil()
         W, H = save_page(img, out, i + 1)
         words = []
+        extractor = "pdfminer"
         try:
-            raw, pw, ph = pdf_words(pdf, i, s, W, H)
+            raw = None
+            if fast_text:
+                try:
+                    words = pdfium_words(page, s, W, H)
+                    extractor, raw = "pdfium", []
+                except Exception as e:  # noqa: BLE001  fall back to pdfminer
+                    print(f"  pdfium text fail {doc_id} p{i+1}: {e!r}", file=sys.stderr)
+                    words = []
+            if raw is None:
+                raw, pw, ph = pdf_words(pdf, i, s, W, H)
             # pdfminer already applies /Rotate: its page box and coordinates are in the displayed (rotated) frame,
             # origin bottom-left, so one mapping covers 0/90/180/270. (An extra per-rotation remap flipped or clipped
             # the words of every rotated page.)
@@ -104,7 +157,7 @@ def do_pdf(pdf: Path, doc_id: str, out: Path):
         if words:
             (out / f"text-{i+1}.json").write_text(json.dumps(
                 {"doc_id": doc_id, "page": i + 1, "image": {"w": W, "h": H}, "dpi": round(dpi),
-                 "source": "pdf-text-layer", "words": words}, ensure_ascii=False))
+                 "source": "pdf-text-layer", "extractor": extractor, "words": words}, ensure_ascii=False))
         pages.append({"page": i + 1, "w": W, "h": H, "dpi": round(dpi), "words": len(words)})
         page.close()
     doc.close()
@@ -183,7 +236,7 @@ def process(args):
     files = {k: root / v for k, v in d["files"].items()}
     try:
         if "pdf" in files:
-            src, pages = "pdf", do_pdf(files["pdf"], d["doc_id"], out)
+            src, pages = "pdf", do_pdf(files["pdf"], d["doc_id"], out, fast_text=FAST_TEXT)
         elif "svg" in files:
             src, pages = "svg", do_svg(files["svg"], out)
         elif "dxf" in files:

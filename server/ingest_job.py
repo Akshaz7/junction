@@ -25,6 +25,7 @@ class Status:
     def __init__(self, path: Path):
         self.path, self.stages, self.mode, self.cost = path, [], None, None
         self.started_at, self.step = time.time(), "starting"
+        self.readable = False  # page images and text exist: the document can be viewed and questioned
         if path.is_file():
             try:
                 self.started_at = json.loads(path.read_text()).get("started_at", self.started_at)
@@ -34,7 +35,7 @@ class Status:
 
     def write(self, status, detail=""):
         state = {"status": status, "stages": self.stages, "detail": detail, "mode": self.mode,
-                 "started_at": self.started_at, "step": self.step,
+                 "started_at": self.started_at, "step": self.step, "readable": self.readable or status == "ready",
                  "progress": 1 if status == "ready" else len(self.stages) / (len(self.stages) + 1),
                                          "cost_usd": round(self.cost["usd"], 5) if self.cost else None,
                  "updated": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
@@ -179,10 +180,53 @@ def _usdz(doc_id: str, ddir: Path):
 def run(doc_id: str) -> str:
     st = Status(_art() / doc_id / "ingest.json")
     try:
-        return _run(doc_id, st)
+        final = _run(doc_id, st)
     except Exception as e:  # noqa: BLE001
         st.write("failed", f"Ingestion could not complete: {str(e)[:300] or type(e).__name__}")
         return "failed"
+    if final in ("ready", "partial"):
+        try:  # after the status is final: the slow, more exact text layer replaces the quick one
+            refine_text(doc_id, _art() / doc_id)
+        except Exception as e:  # noqa: BLE001
+            print("text refine skipped:", repr(e)[:200], file=sys.stderr)
+    return final
+
+
+def refine_text(doc_id: str, ddir: Path) -> int:
+    """Pages whose text came from pdfium (fast, at ingest) are re-read with pdfminer (slow, exact boxes) once the
+    document is already usable. Files are replaced atomically; text.json is rebuilt. Returns pages refined."""
+    from pipeline import pages
+    doc = json.loads((ddir / "doc.json").read_text())
+    rel = (doc.get("files") or {}).get("pdf")
+    if not rel:
+        return 0
+    pdf = REPO / rel
+    n = 0
+    for f in sorted(ddir.glob("text-[0-9]*.json")):
+        t = json.loads(f.read_text())
+        if t.get("extractor") != "pdfium":
+            continue
+        W, H = t["image"]["w"], t["image"]["h"]
+        import pypdfium2 as pdfium
+        d = pdfium.PdfDocument(str(pdf))
+        w_pt, _ = d[t["page"] - 1].get_size()
+        d.close()
+        s = W / w_pt
+        raw, pw, ph = pages.pdf_words(pdf, t["page"] - 1, s, W, H)
+        words = []
+        for tx, x0, y0, x1, y1 in raw:
+            bx = [round(max(0, min(v, lim)), 1) for v, lim in zip((x0 * s, (ph - y1) * s, x1 * s, (ph - y0) * s), (W, H, W, H))]
+            words.append({"text": tx, "bbox_px": bx})
+        if not words:
+            continue
+        t.update(words=words, extractor="pdfminer")
+        tmp = f.with_suffix(".tmp")
+        tmp.write_text(json.dumps(t, ensure_ascii=False))
+        tmp.replace(f)
+        n += 1
+    if n:
+        build_text_json(doc_id, ddir)
+    return n
 
 
 def _run(doc_id: str, st: Status) -> str:
@@ -212,6 +256,7 @@ def _run(doc_id: str, st: Status) -> str:
         from pipeline import pages
         if light:
             pages.MAX_SIDE = int(os.environ.get("PAGES_MAX_SIDE", "4096"))  # keep the render inside the container RAM
+            pages.FAST_TEXT = os.environ.get("INGEST_FAST_TEXT", "1") != "0"  # pdfium text layer: 0.01 s, pdfminer takes 70 s here
         if kind == "raster":
             if not st.stage("normalise", lambda: _normalise_raster(doc_id, art)):
                 st.write("failed", st.stages[-1]["error"])
@@ -225,6 +270,8 @@ def _run(doc_id: str, st: Status) -> str:
         ok = st.stage("pages", do_pages)
         if ok:
             st.stage("text", lambda: build_text_json(doc_id, ddir))
+            st.readable = True  # pages and text are on disk: viewers and questions work while the plan map is read
+            st.write("running")
         if ok:
             n_pages = len(json.loads((ddir / "pages.json").read_text())["pages"])
             doc_json = json.loads((ddir / "doc.json").read_text())
