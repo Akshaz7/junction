@@ -5,6 +5,6 @@ set -euo pipefail
 OUT=${1:?out dir}; ROOT=$(git rev-parse --show-toplevel)
 mkdir -p "$OUT"
 git -C "$ROOT" archive HEAD server engine | tar -x -C "$OUT"
-cp -R "$ROOT/deploy/demo_artifacts" "$OUT/artifacts"; rm -f "$OUT"/artifacts/*/scene.usdz
+cp -R "$ROOT/deploy/demo_artifacts" "$OUT/artifacts"  # includes local scene.usdz files (git-ignored) so iPhone AR can load them
 rm -rf "$OUT/server/tests" "$OUT/engine/tests"
 cp "$ROOT/deploy/vercel_api/index.py" "$ROOT/deploy/vercel_api/requirements.txt" "$ROOT/deploy/vercel_api/vercel.json" "$OUT/"

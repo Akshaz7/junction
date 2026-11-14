@@ -1,1 +1,3396 @@
-{"doc_id": "swiss_dwellings__site1869-bldg2903-floor13293", "glb": "scene.glb", "usdz": null, "units": "m", "up": "Y", "origin_offset_m": [14.8502, 0.0, 21.0054], "storeys": [{"name": "Floor 1", "elevation_m": 0.0}], "plan_image": "page-1.png", "items": {"room-1": {"node": "room-1", "usd_name": "i_0e9770ee13188dec", "bbox_m": [[-5.8368, 0.0, -15.8205], [4.9258, 0.02, -12.8775]], "storey": "Floor 1", "kind": "room", "tag": "R2"}, "room-2": {"node": "room-2", "usd_name": "i_af385aa5b03ee6fc", "bbox_m": [[-1.4681, 0.0, -12.7455], [1.3377, 0.02, -7.8417]], "storey": "Floor 1", "kind": "room", "tag": "R6"}, "room-3": {"node": "room-3", "usd_name": "i_2013ecc125cd2462", "bbox_m": [[1.4783, 0.0, -12.6236], [4.8513, 0.02, -7.8366]], "storey": "Floor 1", "kind": "room", "tag": "R7"}, "room-4": {"node": "room-4", "usd_name": "i_5a5a00315e9e7293", "bbox_m": [[-5.9672, 0.0, -12.9317], [-1.5528, 0.02, -6.2212]], "storey": "Floor 1", "kind": "room", "tag": "R5"}, "room-5": {"node": "room-5", "usd_name": "i_9e79ab030a372210", "bbox_m": [[-1.5477, 0.0, -7.6994], [2.4553, 0.02, -4.6617]], "storey": "Floor 1", "kind": "room", "tag": "R10"}, "room-6": {"node": "room-6", "usd_name": "i_ec89ded13d87b307", "bbox_m": [[2.5857, 0.0, -7.6927], [4.8445, 0.02, -4.6549]], "storey": "Floor 1", "kind": "room", "tag": "R12"}, "room-7": {"node": "room-7", "usd_name": "i_70bb5b94b4d6cd59", "bbox_m": [[-5.9689, 0.0, -6.2144], [-1.5544, 0.02, -4.665]], "storey": "Floor 1", "kind": "room", "tag": "R17"}, "room-8": {"node": "room-8", "usd_name": "i_44e81fa362506db8", "bbox_m": [[0.2404, 0.0, -5.554], [0.4623, 0.02, -4.6617]], "storey": "Floor 1", "kind": "room", "tag": "R21"}, "room-9": {"node": "room-9", "usd_name": "i_24eb5d10c0f99760", "bbox_m": [[0.5893, 0.0, -6.3905], [2.1319, 0.02, -4.66]], "storey": "Floor 1", "kind": "room", "tag": "R18"}, "room-10": {"node": "room-10", "usd_name": "i_e1f6f5c3760893f7", "bbox_m": [[2.2098, 0.0, -6.3888], [2.5078, 0.02, -4.6583]], "storey": "Floor 1", "kind": "room", "tag": "R19"}, "room-11": {"node": "room-11", "usd_name": "i_a4ffd4c5f3624fca", "bbox_m": [[-6.0569, 0.0, -4.941], [-5.6658, 0.02, -4.6701]], "storey": "Floor 1", "kind": "room", "tag": "R22"}, "room-12": {"node": "room-12", "usd_name": "i_d32a01553483b741", "bbox_m": [[5.0189, 0.0, -15.5801], [12.6049, 0.02, -12.8759]], "storey": "Floor 1", "kind": "room", "tag": "R3"}, "room-13": {"node": "room-13", "usd_name": "i_ddcd5d814342f064", "bbox_m": [[5.1307, 0.0, -12.6523], [12.1596, 0.02, -8.0195]], "storey": "Floor 1", "kind": "room", "tag": "R8"}, "room-14": {"node": "room-14", "usd_name": "i_42e512a47d0b7032", "bbox_m": [[7.2812, 0.0, -8.9203], [11.7921, 0.02, -7.4285]], "storey": "Floor 1", "kind": "room", "tag": "R9"}, "room-15": {"node": "room-15", "usd_name": "i_f3ea0bec856d3fcb", "bbox_m": [[7.1508, 0.0, -7.6571], [11.6685, 0.02, -4.3924]], "storey": "Floor 1", "kind": "room", "tag": "R14"}, "room-16": {"node": "room-16", "usd_name": "i_2cda67a985b05a29", "bbox_m": [[-0.0068, 0.0, -8.011], [7.0407, 0.02, -1.1294]], "storey": "Floor 1", "kind": "room", "tag": "R11"}, "room-17": {"node": "room-17", "usd_name": "i_cca942d38d293a99", "bbox_m": [[2.2843, 0.0, -2.9565], [3.9962, 0.02, -1.1277]], "storey": "Floor 1", "kind": "room", "tag": "R26"}, "room-18": {"node": "room-18", "usd_name": "i_2e3327cb95228701", "bbox_m": [[4.1215, 0.0, -2.9531], [7.0357, 0.02, -1.1227]], "storey": "Floor 1", "kind": "room", "tag": "R27"}, "room-19": {"node": "room-19", "usd_name": "i_191ac57ee05a008c", "bbox_m": [[7.1457, 0.0, -4.262], [11.3333, 0.02, -0.7315]], "storey": "Floor 1", "kind": "room", "tag": "R25"}, "room-20": {"node": "room-20", "usd_name": "i_ec3f6ddb2e6d930b", "bbox_m": [[-0.0068, 0.0, -1.0617], [7.0323, 0.02, -0.7349]], "storey": "Floor 1", "kind": "room", "tag": "R30"}, "room-21": {"node": "room-21", "usd_name": "i_139591b078e27f6d", "bbox_m": [[-12.4474, 0.0, -15.7291], [-6.2906, 0.02, -12.3628]], "storey": "Floor 1", "kind": "room", "tag": "R1"}, "room-22": {"node": "room-22", "usd_name": "i_74aca5ce991bb15a", "bbox_m": [[-12.2764, 0.0, -12.9233], [-6.2551, 0.02, -4.4839]], "storey": "Floor 1", "kind": "room", "tag": "R4"}, "room-23": {"node": "room-23", "usd_name": "i_6108d8683ca9b04c", "bbox_m": [[-11.992, 0.0, -7.1], [-7.9517, 0.02, -5.6404]], "storey": "Floor 1", "kind": "room", "tag": "R15"}, "room-24": {"node": "room-24", "usd_name": "i_b5a7ff8e91cd4690", "bbox_m": [[-7.9213, 0.0, -6.1264], [-7.5216, 0.02, -5.6387]], "storey": "Floor 1", "kind": "room", "tag": "R16"}, "room-25": {"node": "room-25", "usd_name": "i_11981b09de8b3141", "bbox_m": [[-11.9005, 0.0, -5.5066], [-7.5521, 0.02, -2.6907]], "storey": "Floor 1", "kind": "room", "tag": "R20"}, "room-26": {"node": "room-26", "usd_name": "i_6c05f9fefd7f27e5", "bbox_m": [[-7.4421, 0.0, -4.4737], [-3.2003, 0.02, 1.358]], "storey": "Floor 1", "kind": "room", "tag": "R23"}, "room-27": {"node": "room-27", "usd_name": "i_ae8c6a0d2e49fae6", "bbox_m": [[-11.7346, 0.0, -2.5755], [-7.5572, 0.02, 0.4403]], "storey": "Floor 1", "kind": "room", "tag": "R28"}, "room-28": {"node": "room-28", "usd_name": "i_95727723b14da6da", "bbox_m": [[-5.3559, 0.0, -0.6214], [-5.1138, 0.02, 0.276]], "storey": "Floor 1", "kind": "room", "tag": "R32"}, "room-29": {"node": "room-29", "usd_name": "i_013e11941ba15aba", "bbox_m": [[-6.1653, 0.0, -0.6451], [-3.2156, 0.02, 1.3987]], "storey": "Floor 1", "kind": "room", "tag": "R31"}, "room-30": {"node": "room-30", "usd_name": "i_ea90fecd50518328", "bbox_m": [[-6.1653, 0.0, 1.4681], [-3.2173, 0.02, 1.7441]], "storey": "Floor 1", "kind": "room", "tag": "R40"}, "room-31": {"node": "room-31", "usd_name": "i_65587637990aba53", "bbox_m": [[-11.5568, 0.0, 0.574], [-6.2872, 0.02, 3.8032]], "storey": "Floor 1", "kind": "room", "tag": "R38"}, "room-32": {"node": "room-32", "usd_name": "i_6a714667710b2d2c", "bbox_m": [[-6.1687, 0.0, 1.8135], [-3.219, 0.02, 3.7185]], "storey": "Floor 1", "kind": "room", "tag": "R39"}, "room-33": {"node": "room-33", "usd_name": "i_822b6e95526c2f27", "bbox_m": [[0.9195, 0.0, -0.5114], [2.8261, 0.02, -0.2354]], "storey": "Floor 1", "kind": "room", "tag": "R34"}, "room-34": {"node": "room-34", "usd_name": "i_f9a81b8acd80fb22", "bbox_m": [[-0.0102, 0.0, -0.4403], [2.821, 0.02, 1.5731]], "storey": "Floor 1", "kind": "room", "tag": "R33"}, "room-35": {"node": "room-35", "usd_name": "i_157e929bf0494e74", "bbox_m": [[2.8837, 0.0, -0.4352], [4.3924, 0.02, 1.778]], "storey": "Floor 1", "kind": "room", "tag": "R36"}, "room-36": {"node": "room-36", "usd_name": "i_1106202956b88805", "bbox_m": [[2.882, 0.0, -0.4318], [8.9846, 0.02, 3.8099]], "storey": "Floor 1", "kind": "room", "tag": "R35"}, "room-37": {"node": "room-37", "usd_name": "i_35548fee9cf3f307", "bbox_m": [[8.9813, 0.0, -0.3133], [11.0691, 0.02, 3.6084]], "storey": "Floor 1", "kind": "room", "tag": "R37"}, "room-38": {"node": "room-38", "usd_name": "i_d0dcb093e6bcee55", "bbox_m": [[1.1091, 0.0, 1.6831], [2.8735, 0.02, 3.8015]], "storey": "Floor 1", "kind": "room", "tag": "R41"}, "room-39": {"node": "room-39", "usd_name": "i_b9ececf68e4d4ff5", "bbox_m": [[1.1074, 0.0, 3.5221], [1.7153, 0.02, 3.7998]], "storey": "Floor 1", "kind": "room", "tag": "R42"}, "room-40": {"node": "room-40", "usd_name": "i_f19d24d0a9add666", "bbox_m": [[-4.643, 0.0, 4.0809], [-3.2528, 0.02, 4.2976]], "storey": "Floor 1", "kind": "room", "tag": "R46"}, "room-41": {"node": "room-41", "usd_name": "i_125b34dca4343d77", "bbox_m": [[-9.4994, 0.0, 4.0741], [-4.7599, 0.02, 7.6537]], "storey": "Floor 1", "kind": "room", "tag": "R44"}, "room-42": {"node": "room-42", "usd_name": "i_6fea8cf5c91f71a8", "bbox_m": [[-4.6447, 0.0, 4.0944], [-0.7434, 0.02, 7.7113]], "storey": "Floor 1", "kind": "room", "tag": "R45"}, "room-43": {"node": "room-43", "usd_name": "i_ed31d775119bbc9f", "bbox_m": [[-4.6481, 0.0, 5.7183], [-2.0286, 0.02, 7.6554]], "storey": "Floor 1", "kind": "room", "tag": "R51"}, "room-44": {"node": "room-44", "usd_name": "i_16fdf7a9d96a8eaa", "bbox_m": [[-11.4111, 0.0, 4.1841], [-9.3369, 0.02, 11.5178]], "storey": "Floor 1", "kind": "room", "tag": "R43"}, "room-45": {"node": "room-45", "usd_name": "i_aa4aad12c15cd88d", "bbox_m": [[-3.7879, 0.0, 7.4912], [-2.0303, 0.02, 7.6571]], "storey": "Floor 1", "kind": "room", "tag": "R54"}, "room-46": {"node": "room-46", "usd_name": "i_a953befa557be7d5", "bbox_m": [[-9.154, 0.0, 7.7536], [-2.352, 0.02, 11.4806]], "storey": "Floor 1", "kind": "room", "tag": "R53"}, "room-47": {"node": "room-47", "usd_name": "i_5877ac9795d3f5d8", "bbox_m": [[-2.3452, 0.0, 7.7198], [-0.7484, 0.02, 11.3654]], "storey": "Floor 1", "kind": "room", "tag": "R55"}, "room-48": {"node": "room-48", "usd_name": "i_35e48d7b712cffd4", "bbox_m": [[-1.4071, 0.0, 11.0251], [-0.6773, 0.02, 11.3485]], "storey": "Floor 1", "kind": "room", "tag": "R59"}, "room-49": {"node": "room-49", "usd_name": "i_608eac575594ba76", "bbox_m": [[2.1471, 0.0, 4.1012], [3.5373, 0.02, 4.3145]], "storey": "Floor 1", "kind": "room", "tag": "R48"}, "room-50": {"node": "room-50", "usd_name": "i_5f19eb253f06a568", "bbox_m": [[-0.3776, 0.0, 4.0978], [3.5373, 0.02, 7.7164]], "storey": "Floor 1", "kind": "room", "tag": "R47"}, "room-51": {"node": "room-51", "usd_name": "i_5115f5648216cdca", "bbox_m": [[3.6508, 0.0, 4.1046], [8.5325, 0.02, 7.6791]], "storey": "Floor 1", "kind": "room", "tag": "R49"}, "room-52": {"node": "room-52", "usd_name": "i_1fe22f16285f4486", "bbox_m": [[0.9161, 0.0, 5.7335], [3.5356, 0.02, 7.6723]], "storey": "Floor 1", "kind": "room", "tag": "R52"}, "room-53": {"node": "room-53", "usd_name": "i_2d27ceb45195e211", "bbox_m": [[0.9144, 0.0, 7.5064], [2.6737, 0.02, 7.6706]], "storey": "Floor 1", "kind": "room", "tag": "R57"}, "room-54": {"node": "room-54", "usd_name": "i_e34e74abcde6c865", "bbox_m": [[8.1956, 0.0, 4.2214], [10.5611, 0.02, 11.6753]], "storey": "Floor 1", "kind": "room", "tag": "R50"}, "room-55": {"node": "room-55", "usd_name": "i_453ec4f6d00354d1", "bbox_m": [[-0.381, 0.0, 7.7248], [1.2767, 0.02, 11.3197]], "storey": "Floor 1", "kind": "room", "tag": "R56"}, "room-56": {"node": "room-56", "usd_name": "i_f2b452a79f983d6c", "bbox_m": [[1.2835, 0.0, 7.7756], [8.1753, 0.02, 11.467]], "storey": "Floor 1", "kind": "room", "tag": "R58"}, "room-57": {"node": "room-57", "usd_name": "i_11c0faae07797fd3", "bbox_m": [[-0.4572, 0.0, 11.02], [0.2167, 0.02, 11.3333]], "storey": "Floor 1", "kind": "room", "tag": "R60"}, "room-58": {"node": "room-58", "usd_name": "i_4af3440b39cbc133", "bbox_m": [[7.1237, 0.0, -7.9365], [7.2778, 0.02, -7.4336]], "storey": "Floor 1", "kind": "room", "tag": "R13"}, "room-59": {"node": "room-59", "usd_name": "i_fc77714518cf3df8", "bbox_m": [[-4.8462, 0.0, -2.5281], [-3.07, 0.02, -0.9245]], "storey": "Floor 1", "kind": "room", "tag": "R29"}, "room-60": {"node": "room-60", "usd_name": "i_82c372654c17b9dc", "bbox_m": [[-3.0615, 0.0, -4.3738], [0.7942, 0.02, 3.7998]], "storey": "Floor 1", "kind": "room", "tag": "R24"}, "wall-1": {"node": "wall-1", "usd_name": "i_e123b5f49bc431f5", "bbox_m": [[-11.3519, 0.0, 10.8456], [-9.9769, 2.7, 11.9361]], "storey": "Floor 1", "kind": "wall", "tag": "WL55"}, "wall-2": {"node": "wall-2", "usd_name": "i_f2ac780f612dbd5f", "bbox_m": [[-9.5688, 0.0, 5.5659], [-1.91, 2.7, 7.8146]], "storey": "Floor 1", "kind": "wall", "tag": "WL46"}, "wall-3": {"node": "wall-3", "usd_name": "i_e98d64e32f56f58f", "bbox_m": [[-3.7896, 0.0, 7.4912], [-2.0286, 2.7, 7.6588]], "storey": "Floor 1", "kind": "wall", "tag": "WL50"}, "wall-4": {"node": "wall-4", "usd_name": "i_a5d6c7780ce14e5a", "bbox_m": [[-9.6264, 0.0, 6.5683], [-9.3318, 2.7, 6.5852]], "storey": "Floor 1", "kind": "wall", "tag": "WL48"}, "wall-5": {"node": "wall-5", "usd_name": "i_7510a99e6e3856ad", "bbox_m": [[-11.7938, 0.0, -3.219], [-1.8711, 2.7, 4.7887]], "storey": "Floor 1", "kind": "wall", "tag": "WL30"}, "wall-6": {"node": "wall-6", "usd_name": "i_3c5b599f4023f557", "bbox_m": [[-6.1653, 0.0, 1.4664], [-3.2173, 2.7, 1.7458]], "storey": "Floor 1", "kind": "wall", "tag": "WL37"}, "wall-7": {"node": "wall-7", "usd_name": "i_85d8d95706ae3143", "bbox_m": [[-5.3576, 0.0, -0.6231], [-5.1138, 2.7, 0.276]], "storey": "Floor 1", "kind": "wall", "tag": "WL34"}, "wall-8": {"node": "wall-8", "usd_name": "i_d5ee5f5be46ee1c3", "bbox_m": [[-4.6447, 0.0, 4.0809], [-3.2528, 2.7, 4.2976]], "storey": "Floor 1", "kind": "wall", "tag": "WL43"}, "wall-9": {"node": "wall-9", "usd_name": "i_28165496f981cf9e", "bbox_m": [[-11.9784, 0.0, -1.5748], [-7.249, 2.7, 1.5003]], "storey": "Floor 1", "kind": "wall", "tag": "WL32"}, "wall-10": {"node": "wall-10", "usd_name": "i_5d4c53e719b1952f", "bbox_m": [[-12.1613, 0.0, -2.943], [-7.437, 2.7, -2.269]], "storey": "Floor 1", "kind": "wall", "tag": "WL29"}, "wall-11": {"node": "wall-11", "usd_name": "i_9be1ef7a3b27f681", "bbox_m": [[-12.356, 0.0, -6.3871], [-7.4251, 2.7, -3.6643]], "storey": "Floor 1", "kind": "wall", "tag": "WL23"}, "wall-12": {"node": "wall-12", "usd_name": "i_67d5abb4534b091b", "bbox_m": [[-7.9213, 0.0, -6.1281], [-7.5199, 2.7, -5.6387]], "storey": "Floor 1", "kind": "wall", "tag": "WL24"}, "wall-13": {"node": "wall-13", "usd_name": "i_d246cab2d11de9fb", "bbox_m": [[-12.6981, 0.0, -12.4187], [-12.1681, 2.7, -10.1767]], "storey": "Floor 1", "kind": "wall", "tag": "WL18"}, "wall-14": {"node": "wall-14", "usd_name": "i_96631c0ea0c77bae", "bbox_m": [[-12.8775, 0.0, -15.6376], [-12.1325, 2.7, -15.0331]], "storey": "Floor 1", "kind": "wall", "tag": "WL1"}, "wall-15": {"node": "wall-15", "usd_name": "i_6df3542ef73a6f91", "bbox_m": [[-8.0483, 0.0, -16.1947], [-7.8332, 2.7, -15.7206]], "storey": "Floor 1", "kind": "wall", "tag": "WL2"}, "wall-16": {"node": "wall-16", "usd_name": "i_0719766ef6e83f0e", "bbox_m": [[-7.5047, 0.0, -16.1422], [-1.397, 2.7, -4.2959]], "storey": "Floor 1", "kind": "wall", "tag": "WL3"}, "wall-17": {"node": "wall-17", "usd_name": "i_35a58c8576d2af56", "bbox_m": [[-6.0569, 0.0, -4.9427], [-5.6658, 2.7, -4.6701]], "storey": "Floor 1", "kind": "wall", "tag": "WL27"}, "wall-18": {"node": "wall-18", "usd_name": "i_c9b0354f0ec41959", "bbox_m": [[-3.8252, 0.0, -13.2399], [-3.7845, 2.7, -12.8437]], "storey": "Floor 1", "kind": "wall", "tag": "WL11"}, "wall-19": {"node": "wall-19", "usd_name": "i_eebca749219d6cbb", "bbox_m": [[-2.1607, 0.0, -13.1705], [0.3708, 2.7, -7.6977]], "storey": "Floor 1", "kind": "wall", "tag": "WL12"}, "wall-20": {"node": "wall-20", "usd_name": "i_4059b032f138af33", "bbox_m": [[0.7789, 0.0, -13.0486], [1.5612, 2.7, -7.696]], "storey": "Floor 1", "kind": "wall", "tag": "WL14"}, "wall-21": {"node": "wall-21", "usd_name": "i_15fe0fef65d65c61", "bbox_m": [[-0.4267, 0.0, -12.9453], [5.6624, 2.7, -4.3044]], "storey": "Floor 1", "kind": "wall", "tag": "WL13"}, "wall-22": {"node": "wall-22", "usd_name": "i_2fb712b8836de15d", "bbox_m": [[2.2081, 0.0, -6.3905], [2.5078, 2.7, -4.6583]], "storey": "Floor 1", "kind": "wall", "tag": "WL25"}, "wall-23": {"node": "wall-23", "usd_name": "i_8666973eacc774b9", "bbox_m": [[0.2404, 0.0, -5.554], [0.464, 2.7, -4.66]], "storey": "Floor 1", "kind": "wall", "tag": "WL26"}, "wall-24": {"node": "wall-24", "usd_name": "i_e7999b6538a59073", "bbox_m": [[7.3828, 0.0, -12.969], [8.9068, 2.7, -12.5372]], "storey": "Floor 1", "kind": "wall", "tag": "WL15"}, "wall-25": {"node": "wall-25", "usd_name": "i_d5172ad82a824165", "bbox_m": [[10.6949, 0.0, -13.013], [10.7135, 2.7, -12.6185]], "storey": "Floor 1", "kind": "wall", "tag": "WL16"}, "wall-26": {"node": "wall-26", "usd_name": "i_2e0d4e04c85fd037", "bbox_m": [[12.1122, 0.0, -13.0587], [12.5965, 2.7, -12.588]], "storey": "Floor 1", "kind": "wall", "tag": "WL17"}, "wall-27": {"node": "wall-27", "usd_name": "i_640287188a700012", "bbox_m": [[11.782, 0.0, -10.3427], [12.3509, 2.7, -8.7679]], "storey": "Floor 1", "kind": "wall", "tag": "WL20"}, "wall-28": {"node": "wall-28", "usd_name": "i_30a4a2a231fc14f4", "bbox_m": [[7.0374, 0.0, -8.0381], [12.102, 2.7, -5.383]], "storey": "Floor 1", "kind": "wall", "tag": "WL21"}, "wall-29": {"node": "wall-29", "usd_name": "i_b8cec03998d26e09", "bbox_m": [[7.122, 0.0, -7.9365], [7.2795, 2.7, -7.4319]], "storey": "Floor 1", "kind": "wall", "tag": "WL22"}, "wall-30": {"node": "wall-30", "usd_name": "i_70d88bc4528f3c33", "bbox_m": [[7.0374, 0.0, -5.0477], [11.8294, 2.7, -3.5898]], "storey": "Floor 1", "kind": "wall", "tag": "WL28"}, "wall-31": {"node": "wall-31", "usd_name": "i_c4c260d4b7cc8e8c", "bbox_m": [[-0.3031, 0.0, -3.2969], [11.4315, 2.7, 1.9676]], "storey": "Floor 1", "kind": "wall", "tag": "WL31"}, "wall-32": {"node": "wall-32", "usd_name": "i_84df7599abc7cb21", "bbox_m": [[-0.0085, 0.0, -1.0617], [7.034, 2.7, -0.7332]], "storey": "Floor 1", "kind": "wall", "tag": "WL33"}, "wall-33": {"node": "wall-33", "usd_name": "i_3c8b01f641ffe489", "bbox_m": [[0.9195, 0.0, -0.5114], [2.8261, 2.7, -0.2337]], "storey": "Floor 1", "kind": "wall", "tag": "WL35"}, "wall-34": {"node": "wall-34", "usd_name": "i_7806d308e67837e4", "bbox_m": [[8.7933, 0.0, 1.5172], [9.1828, 2.7, 1.568]], "storey": "Floor 1", "kind": "wall", "tag": "WL38"}, "wall-35": {"node": "wall-35", "usd_name": "i_ea18a54374394232", "bbox_m": [[0.7518, 0.0, 3.0716], [11.0115, 2.7, 4.8818]], "storey": "Floor 1", "kind": "wall", "tag": "WL39"}, "wall-36": {"node": "wall-36", "usd_name": "i_3605e3d815c22b05", "bbox_m": [[2.1471, 0.0, 4.1012], [3.539, 2.7, 4.3145]], "storey": "Floor 1", "kind": "wall", "tag": "WL44"}, "wall-37": {"node": "wall-37", "usd_name": "i_64858decab655731", "bbox_m": [[1.1074, 0.0, 3.5221], [1.717, 2.7, 3.8015]], "storey": "Floor 1", "kind": "wall", "tag": "WL42"}, "wall-38": {"node": "wall-38", "usd_name": "i_d5a6896b834b1822", "bbox_m": [[8.2972, 0.0, 6.5294], [8.6934, 2.7, 6.5852]], "storey": "Floor 1", "kind": "wall", "tag": "WL49"}, "wall-39": {"node": "wall-39", "usd_name": "i_a5be7e8bb2a3f098", "bbox_m": [[0.7992, 0.0, 5.5845], [8.5901, 2.7, 7.8942]], "storey": "Floor 1", "kind": "wall", "tag": "WL47"}, "wall-40": {"node": "wall-40", "usd_name": "i_6d64dc60e86c657e", "bbox_m": [[0.9144, 0.0, 7.5047], [2.6737, 2.7, 7.6723]], "storey": "Floor 1", "kind": "wall", "tag": "WL51"}, "wall-41": {"node": "wall-41", "usd_name": "i_98ee07644ee40799", "bbox_m": [[7.9907, 0.0, 9.6569], [8.3852, 2.7, 9.7026]], "storey": "Floor 1", "kind": "wall", "tag": "WL53"}, "wall-42": {"node": "wall-42", "usd_name": "i_5c779368339b8eea", "bbox_m": [[7.4725, 0.0, 11.4027], [8.2142, 2.7, 11.9005]], "storey": "Floor 1", "kind": "wall", "tag": "WL61"}, "wall-43": {"node": "wall-43", "usd_name": "i_97b4c64968c70667", "bbox_m": [[2.8634, 0.0, 11.2655], [3.8506, 2.7, 11.7142]], "storey": "Floor 1", "kind": "wall", "tag": "WL60"}, "wall-44": {"node": "wall-44", "usd_name": "i_a5ab3d746e510f59", "bbox_m": [[-1.5629, 0.0, 3.7981], [0.3878, 2.7, 11.7583]], "storey": "Floor 1", "kind": "wall", "tag": "WL41"}, "wall-45": {"node": "wall-45", "usd_name": "i_76212654b5149960", "bbox_m": [[-0.4589, 0.0, 11.02], [0.2184, 2.7, 11.3333]], "storey": "Floor 1", "kind": "wall", "tag": "WL59"}, "wall-46": {"node": "wall-46", "usd_name": "i_4d99c0c3e5f23663", "bbox_m": [[-1.4088, 0.0, 11.0234], [-0.6756, 2.7, 11.3502]], "storey": "Floor 1", "kind": "wall", "tag": "WL58"}, "wall-47": {"node": "wall-47", "usd_name": "i_92e59ff373c5c21a", "bbox_m": [[-5.8402, 0.0, 11.3976], [-4.1452, 2.7, 11.8345]], "storey": "Floor 1", "kind": "wall", "tag": "WL57"}, "wall-48": {"node": "wall-48", "usd_name": "i_a150c931f6197340", "bbox_m": [[-9.3402, 0.0, 11.4213], [-8.4309, 2.7, 11.8954]], "storey": "Floor 1", "kind": "wall", "tag": "WL56"}, "wall-49": {"node": "wall-49", "usd_name": "i_be24b89f92dd8deb", "bbox_m": [[-9.4435, 2.1, 9.6061], [-9.049, 2.7, 9.6298]], "storey": "Floor 1", "kind": "wall", "tag": "WL52"}, "wall-50": {"node": "wall-50", "usd_name": "i_362b4cbab2048b0d", "bbox_m": [[-9.9244, 0.0, -12.6727], [-9.8787, 2.7, -12.4474]], "storey": "Floor 1", "kind": "wall", "tag": "WL19"}, "wall-51": {"node": "wall-51", "usd_name": "i_339d8606d63acab3", "bbox_m": [[8.8678, 0.0, 10.6255], [10.2936, 2.7, 11.9869]], "storey": "Floor 1", "kind": "wall", "tag": "WL54"}, "wall-52": {"node": "wall-52", "usd_name": "i_012ae56fc34f3057", "bbox_m": [[-10.0599, 0.0, 11.5178], [-9.2691, 2.7, 11.9073]], "storey": "Floor 1", "kind": "wall", "tag": "WL62"}, "wall-53": {"node": "wall-53", "usd_name": "i_57d865cccb50ae31", "bbox_m": [[-11.7989, 0.0, 4.0063], [-11.0302, 2.7, 10.9489]], "storey": "Floor 1", "kind": "wall", "tag": "WL40"}, "wall-54": {"node": "wall-54", "usd_name": "i_26ef34304a2272c1", "bbox_m": [[8.0974, 0.0, 11.6347], [8.9559, 2.7, 11.9276]], "storey": "Floor 1", "kind": "wall", "tag": "WL63"}, "wall-55": {"node": "wall-55", "usd_name": "i_59613954f08ff5e4", "bbox_m": [[9.9905, 0.0, 4.7633], [10.8998, 2.7, 10.7]], "storey": "Floor 1", "kind": "wall", "tag": "WL45"}, "wall-56": {"node": "wall-56", "usd_name": "i_2ff75adfb7180b75", "bbox_m": [[10.7152, 0.0, -0.3979], [11.3824, 2.7, 3.3273]], "storey": "Floor 1", "kind": "wall", "tag": "WL36"}, "wall-57": {"node": "wall-57", "usd_name": "i_8f0fdf6ea11439b0", "bbox_m": [[4.9224, 0.0, -15.5648], [5.0206, 2.7, -12.781]], "storey": "Floor 1", "kind": "wall", "tag": "WL9"}, "wall-58": {"node": "wall-58", "usd_name": "i_042c3938ebffbb0f", "bbox_m": [[4.8445, 0.0, -15.8882], [12.8234, 2.7, -15.3921]], "storey": "Floor 1", "kind": "wall", "tag": "WL6"}, "wall-59": {"node": "wall-59", "usd_name": "i_cb818f01cff8ba5f", "bbox_m": [[12.3492, 0.0, -15.8628], [12.8775, 2.7, -12.9385]], "storey": "Floor 1", "kind": "wall", "tag": "WL8"}, "wall-60": {"node": "wall-60", "usd_name": "i_bd3acc0adc159dad", "bbox_m": [[4.1215, 0.0, -15.6918], [5.0172, 2.7, -15.3718]], "storey": "Floor 1", "kind": "wall", "tag": "WL5"}, "wall-61": {"node": "wall-61", "usd_name": "i_d1145363c4631e48", "bbox_m": [[4.9224, 0.0, -15.5648], [5.0206, 2.7, -12.781]], "storey": "Floor 1", "kind": "wall", "tag": "WL10"}, "wall-62": {"node": "wall-62", "usd_name": "i_d558579184e5d2a9", "bbox_m": [[4.8445, 0.0, -15.7189], [5.825, 2.7, -15.3921]], "storey": "Floor 1", "kind": "wall", "tag": "WL7"}, "wall-63": {"node": "wall-63", "usd_name": "i_1ffff4200a8e3ce9", "bbox_m": [[-5.9672, 0.0, -16.1101], [5.0172, 2.7, -15.3718]], "storey": "Floor 1", "kind": "wall", "tag": "WL4"}, "window-1": {"node": "window-1", "usd_name": "i_db2841acbc85d8c8", "bbox_m": [[-12.412, 0.9, -10.2004], [-12.112, 2.1, -6.3634]], "storey": "Floor 1", "kind": "window", "tag": "W8"}, "window-2": {"node": "window-2", "usd_name": "i_318c466a31f77c02", "bbox_m": [[-11.8143, 0.9, 0.9567], [-11.5143, 2.1, 3.5644]], "storey": "Floor 1", "kind": "window", "tag": "W14"}, "window-3": {"node": "window-3", "usd_name": "i_249f036505718c75", "bbox_m": [[-12.1951, 0.9, -15.8291], [-7.9873, 2.1, -15.5291]], "storey": "Floor 1", "kind": "window", "tag": "W1"}, "window-4": {"node": "window-4", "usd_name": "i_61caf1f41a512fba", "bbox_m": [[-7.8518, 0.9, -16.0848], [-6.7343, 2.1, -15.7848]], "storey": "Floor 1", "kind": "window", "tag": "W2"}, "window-5": {"node": "window-5", "usd_name": "i_829e627414330492", "bbox_m": [[-12.18, 0.9, -5.444], [-11.88, 2.1, -2.9192]], "storey": "Floor 1", "kind": "window", "tag": "W11"}, "window-6": {"node": "window-6", "usd_name": "i_62b9efd8088af9bc", "bbox_m": [[-12.2375, 0.9, -12.5577], [-9.8956, 2.1, -12.2577]], "storey": "Floor 1", "kind": "window", "tag": "W6"}, "window-7": {"node": "window-7", "usd_name": "i_0ef39638efa9049a", "bbox_m": [[-12.7211, 0.9, -15.0568], [-12.4211, 2.1, -12.395]], "storey": "Floor 1", "kind": "window", "tag": "W3"}, "window-8": {"node": "window-8", "usd_name": "i_96f1590f57f820ca", "bbox_m": [[-11.998, 0.9, -2.291], [-11.698, 2.1, 0.3166]], "storey": "Floor 1", "kind": "window", "tag": "W13"}, "window-9": {"node": "window-9", "usd_name": "i_790f28862a0483aa", "bbox_m": [[-4.152, 0.9, 11.4288], [-1.5544, 2.1, 11.7288]], "storey": "Floor 1", "kind": "window", "tag": "W21"}, "window-10": {"node": "window-10", "usd_name": "i_b2003650942616ad", "bbox_m": [[-9.696, 0.9, 4.1994], [-9.396, 2.1, 6.5869]], "storey": "Floor 1", "kind": "window", "tag": "W16"}, "window-11": {"node": "window-11", "usd_name": "i_bfbe49e824aceb6a", "bbox_m": [[-9.3446, 0.9, 9.6078], [-9.0446, 2.1, 11.445]], "storey": "Floor 1", "kind": "window", "tag": "W18"}, "window-12": {"node": "window-12", "usd_name": "i_7cace8b3e59d136f", "bbox_m": [[-8.4394, 0.9, 11.5033], [-5.8334, 2.1, 11.8033]], "storey": "Floor 1", "kind": "window", "tag": "W20"}, "window-13": {"node": "window-13", "usd_name": "i_15968f3bc3af9faa", "bbox_m": [[0.3793, 0.9, 11.35], [2.8701, 2.1, 11.65]], "storey": "Floor 1", "kind": "window", "tag": "W22"}, "window-14": {"node": "window-14", "usd_name": "i_90839c0c69228a94", "bbox_m": [[8.4562, 0.9, 4.2739], [8.7562, 2.1, 6.57]], "storey": "Floor 1", "kind": "window", "tag": "W17"}, "window-15": {"node": "window-15", "usd_name": "i_ec656920880b7f75", "bbox_m": [[3.8336, 0.9, 11.4347], [7.4912, 2.1, 11.7347]], "storey": "Floor 1", "kind": "window", "tag": "W23"}, "window-16": {"node": "window-16", "usd_name": "i_9530f51fe4ac1430", "bbox_m": [[7.9516, 0.9, 9.6637], [8.2516, 2.1, 11.4416]], "storey": "Floor 1", "kind": "window", "tag": "W19"}, "window-17": {"node": "window-17", "usd_name": "i_e11d98bacf229dae", "bbox_m": [[8.7398, 0.9, 1.529], [9.0398, 2.1, 3.5627]], "storey": "Floor 1", "kind": "window", "tag": "W15"}, "window-18": {"node": "window-18", "usd_name": "i_522c079087d10700", "bbox_m": [[11.2027, 0.9, -3.6321], [11.5027, 2.1, -0.9601]], "storey": "Floor 1", "kind": "window", "tag": "W12"}, "window-19": {"node": "window-19", "usd_name": "i_5aba911f4d683d77", "bbox_m": [[11.5973, 0.9, -7.6131], [11.8973, 2.1, -5.0054]], "storey": "Floor 1", "kind": "window", "tag": "W10"}, "window-20": {"node": "window-20", "usd_name": "i_65a390736689a258", "bbox_m": [[10.7033, 0.9, -12.9827], [12.1223, 2.1, -12.6827]], "storey": "Floor 1", "kind": "window", "tag": "W5"}, "window-21": {"node": "window-21", "usd_name": "i_e75a72db7545e97e", "bbox_m": [[12.1044, 0.9, -12.6303], [12.4044, 2.1, -10.3003]], "storey": "Floor 1", "kind": "window", "tag": "W7"}, "window-22": {"node": "window-22", "usd_name": "i_3e565845f184ef99", "bbox_m": [[11.7928, 0.9, -8.8102], [12.0928, 2.1, -7.7756]], "storey": "Floor 1", "kind": "window", "tag": "W9"}, "window-23": {"node": "window-23", "usd_name": "i_04dad4e65ec39a73", "bbox_m": [[-5.466, 0.9, -13.2265], [-3.8082, 2.1, -12.9265]], "storey": "Floor 1", "kind": "window", "tag": "W4"}, "door-1": {"node": "door-1", "usd_name": "i_24c4725c4586d0f0", "bbox_m": [[-3.2056, 0.0, -4.2959], [-2.5793, 2.1, -3.219]], "storey": "Floor 1", "kind": "door", "tag": "D12"}, "door-2": {"node": "door-2", "usd_name": "i_10d615cef69c9643", "bbox_m": [[-7.249, 0.0, 1.049], [-6.377, 2.1, 1.5053]], "storey": "Floor 1", "kind": "door", "tag": "D25"}, "door-3": {"node": "door-3", "usd_name": "i_bb568ff0a4d4d4e4", "bbox_m": [[-7.5606, 0.0, -2.4468], [-7.1178, 2.1, -1.5748]], "storey": "Floor 1", "kind": "door", "tag": "D22"}, "door-4": {"node": "door-4", "usd_name": "i_a19cd1c07745a287", "bbox_m": [[-6.2906, 0.0, 0.4606], [-5.8469, 2.1, 1.3309]], "storey": "Floor 1", "kind": "door", "tag": "D24"}, "door-5": {"node": "door-5", "usd_name": "i_eb15b570b0d5cb6c", "bbox_m": [[-6.2923, 0.0, 2.7279], [-5.8486, 2.1, 3.5983]], "storey": "Floor 1", "kind": "door", "tag": "D29"}, "door-6": {"node": "door-6", "usd_name": "i_0113bbcc9a7ecccd", "bbox_m": [[-7.5589, 0.0, -3.666], [-7.1161, 2.1, -2.7939]], "storey": "Floor 1", "kind": "door", "tag": "D19"}, "door-7": {"node": "door-7", "usd_name": "i_cb61a8c38c9adafd", "bbox_m": [[-9.9075, 0.0, -13.8314], [-7.4742, 2.1, -12.5684]], "storey": "Floor 1", "kind": "door", "tag": "D1"}, "door-8": {"node": "door-8", "usd_name": "i_dc3b86188a6b9207", "bbox_m": [[-1.8711, 0.0, 3.4748], [-0.8026, 2.1, 4.0971]], "storey": "Floor 1", "kind": "door", "tag": "D31"}, "door-9": {"node": "door-9", "usd_name": "i_24efb953f583b76b", "bbox_m": [[-4.7649, 0.0, 4.7887], [-4.3684, 2.1, 5.5659]], "storey": "Floor 1", "kind": "door", "tag": "D34"}, "door-10": {"node": "door-10", "usd_name": "i_a6e096d23f07d4ec", "bbox_m": [[-9.4471, 0.0, 7.7926], [-8.4638, 2.1, 9.6298]], "storey": "Floor 1", "kind": "door", "tag": "D40"}, "door-11": {"node": "door-11", "usd_name": "i_bc42e5b0d6490fb6", "bbox_m": [[-9.6003, 0.0, 6.5683], [-8.9963, 2.1, 7.5978]], "storey": "Floor 1", "kind": "door", "tag": "D38"}, "door-12": {"node": "door-12", "usd_name": "i_90f8981b0b692887", "bbox_m": [[-3.7354, 0.0, 5.2711], [-2.8414, 2.1, 5.7234]], "storey": "Floor 1", "kind": "door", "tag": "D36"}, "door-13": {"node": "door-13", "usd_name": "i_0568d7cc841155ae", "bbox_m": [[-0.3183, 0.0, 3.4757], [0.7518, 2.1, 4.0988]], "storey": "Floor 1", "kind": "door", "tag": "D32"}, "door-14": {"node": "door-14", "usd_name": "i_445a180d66da760c", "bbox_m": [[8.2928, 0.0, 6.5446], [8.9183, 2.1, 7.6199]], "storey": "Floor 1", "kind": "door", "tag": "D39"}, "door-15": {"node": "door-15", "usd_name": "i_8bd68627517935b1", "bbox_m": [[8.1269, 0.0, 7.8535], [9.1125, 2.1, 9.6958]], "storey": "Floor 1", "kind": "door", "tag": "D41"}, "door-16": {"node": "door-16", "usd_name": "i_aa6a727ef11fc7f0", "bbox_m": [[1.7322, 0.0, 5.2863], [2.6263, 2.1, 5.7386]], "storey": "Floor 1", "kind": "door", "tag": "D37"}, "door-17": {"node": "door-17", "usd_name": "i_e0677e0e42032291", "bbox_m": [[3.5339, 0.0, 4.8073], [3.9313, 2.1, 5.5862]], "storey": "Floor 1", "kind": "door", "tag": "D35"}, "door-18": {"node": "door-18", "usd_name": "i_026279f2feb53e84", "bbox_m": [[1.375, 0.0, 1.2567], [2.2284, 2.1, 1.6881]], "storey": "Floor 1", "kind": "door", "tag": "D28"}, "door-19": {"node": "door-19", "usd_name": "i_76068f60ef1160d7", "bbox_m": [[8.9269, 0.0, -0.2828], [9.911, 2.1, 1.5561]], "storey": "Floor 1", "kind": "door", "tag": "D23"}, "door-20": {"node": "door-20", "usd_name": "i_a09f8a2f4fecc564", "bbox_m": [[0.8016, 0.0, 1.9676], [1.4407, 2.1, 3.0716]], "storey": "Floor 1", "kind": "door", "tag": "D26"}, "door-21": {"node": "door-21", "usd_name": "i_a0dc3f428b3217d4", "bbox_m": [[3.0395, 0.0, -3.3949], [3.9166, 2.1, -2.9524]], "storey": "Floor 1", "kind": "door", "tag": "D20"}, "door-22": {"node": "door-22", "usd_name": "i_b42e38a86c658b36", "bbox_m": [[-0.299, 0.0, -4.3044], [0.3384, 2.1, -3.2037]], "storey": "Floor 1", "kind": "door", "tag": "D16"}, "door-23": {"node": "door-23", "usd_name": "i_e1fae3a0b4f991d2", "bbox_m": [[5.6522, 0.0, -13.5012], [7.3929, 2.1, -12.5633]], "storey": "Floor 1", "kind": "door", "tag": "D5"}, "door-24": {"node": "door-24", "usd_name": "i_e1ac3b2ec9402f73", "bbox_m": [[6.0654, 0.0, -3.3898], [6.9425, 2.1, -2.9473]], "storey": "Floor 1", "kind": "door", "tag": "D21"}, "door-25": {"node": "door-25", "usd_name": "i_2a1932afff3ca577", "bbox_m": [[7.0349, 0.0, -5.383], [7.4941, 2.1, -4.4703]], "storey": "Floor 1", "kind": "door", "tag": "D11"}, "door-26": {"node": "door-26", "usd_name": "i_4882eb31dfd7a233", "bbox_m": [[7.0332, 0.0, -4.2095], [7.4924, 2.1, -3.2969]], "storey": "Floor 1", "kind": "door", "tag": "D18"}, "door-27": {"node": "door-27", "usd_name": "i_bd2eb6ab86c0c249", "bbox_m": [[8.8966, 0.0, -13.6135], [10.705, 2.1, -12.6437]], "storey": "Floor 1", "kind": "door", "tag": "D6"}, "door-28": {"node": "door-28", "usd_name": "i_1a9e80a9041b80cf", "bbox_m": [[-3.8015, 0.0, -13.7561], [-2.1437, 2.1, -12.8571]], "storey": "Floor 1", "kind": "door", "tag": "D2"}, "door-29": {"node": "door-29", "usd_name": "i_2494940c086ce572", "bbox_m": [[0.3708, 0.0, -8.1514], [1.248, 2.1, -7.6927]], "storey": "Floor 1", "kind": "door", "tag": "D7"}, "door-30": {"node": "door-30", "usd_name": "i_b96bf7a8eda4190f", "bbox_m": [[0.6909, 0.0, -6.7981], [1.4664, 2.1, -6.3871]], "storey": "Floor 1", "kind": "door", "tag": "D10"}, "door-31": {"node": "door-31", "usd_name": "i_093037c5454e2352", "bbox_m": [[-1.397, 0.0, -4.9431], [-0.4267, 2.1, -4.3669]], "storey": "Floor 1", "kind": "door", "tag": "D14"}, "door-32": {"node": "door-32", "usd_name": "i_c6a4f417eb8c98f3", "bbox_m": [[1.5612, 0.0, -8.1497], [2.4384, 2.1, -7.691]], "storey": "Floor 1", "kind": "door", "tag": "D8"}, "door-33": {"node": "door-33", "usd_name": "i_d20d824ea9027082", "bbox_m": [[1.5138, 0.0, -13.5835], [3.2782, 2.1, -12.6344]], "storey": "Floor 1", "kind": "door", "tag": "D4"}, "door-34": {"node": "door-34", "usd_name": "i_e17b5f09dadb1541", "bbox_m": [[-0.9703, 0.0, -13.6876], [0.7959, 2.1, -12.7377]], "storey": "Floor 1", "kind": "door", "tag": "D3"}, "door-35": {"node": "door-35", "usd_name": "i_307249c7e162c55c", "bbox_m": [[2.4519, 0.0, -7.5555], [2.9082, 2.1, -6.6835]], "storey": "Floor 1", "kind": "door", "tag": "D9"}, "door-36": {"node": "door-36", "usd_name": "i_f1e637182fe51359", "bbox_m": [[-0.299, 0.0, -4.3044], [0.3384, 2.1, -3.2037]], "storey": "Floor 1", "kind": "door", "tag": "D17"}, "door-37": {"node": "door-37", "usd_name": "i_0678a7360bb61dad", "bbox_m": [[0.8016, 0.0, 1.9676], [1.4407, 2.1, 3.0716]], "storey": "Floor 1", "kind": "door", "tag": "D27"}, "door-38": {"node": "door-38", "usd_name": "i_dc4222f6a042cd42", "bbox_m": [[-3.2056, 0.0, -4.2959], [-2.5793, 2.1, -3.219]], "storey": "Floor 1", "kind": "door", "tag": "D13"}, "door-39": {"node": "door-39", "usd_name": "i_43dc13b0ebd39303", "bbox_m": [[-0.3183, 0.0, 3.4757], [0.7518, 2.1, 4.0988]], "storey": "Floor 1", "kind": "door", "tag": "D33"}, "door-40": {"node": "door-40", "usd_name": "i_4c0757cec5abc13e", "bbox_m": [[-1.397, 0.0, -4.9431], [-0.4267, 2.1, -4.3669]], "storey": "Floor 1", "kind": "door", "tag": "D15"}, "door-41": {"node": "door-41", "usd_name": "i_6185f26a5287eb0a", "bbox_m": [[-1.8711, 0.0, 3.4748], [-0.8026, 2.1, 4.0971]], "storey": "Floor 1", "kind": "door", "tag": "D30"}}, "source_planmap": "planmap-1.json", "defaults": {"wall_m": 2.7, "door_m": 2.1, "window_sill_m": 0.9, "window_head_m": 2.1}, "note": "generated for demo: extruded from plan map with default heights; stairs only when the plan map has a stairs item (none from raster plans)", "publishable": true}
+{
+ "doc_id": "swiss_dwellings__site1869-bldg2903-floor13293",
+ "glb": "scene.glb",
+ "usdz": "scene.usdz",
+ "units": "m",
+ "up": "Y",
+ "origin_offset_m": [
+  14.8502,
+  0.0,
+  21.0054
+ ],
+ "storeys": [
+  {
+   "name": "Floor 1",
+   "elevation_m": 0.0
+  }
+ ],
+ "plan_image": "page-1.png",
+ "items": {
+  "room-1": {
+   "node": "room-1",
+   "usd_name": "i_0e9770ee13188dec",
+   "bbox_m": [
+    [
+     -5.8368,
+     0.0,
+     -15.8205
+    ],
+    [
+     4.9258,
+     0.02,
+     -12.8775
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-2": {
+   "node": "room-2",
+   "usd_name": "i_af385aa5b03ee6fc",
+   "bbox_m": [
+    [
+     -1.4681,
+     0.0,
+     -12.7455
+    ],
+    [
+     1.3377,
+     0.02,
+     -7.8417
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-3": {
+   "node": "room-3",
+   "usd_name": "i_2013ecc125cd2462",
+   "bbox_m": [
+    [
+     1.4783,
+     0.0,
+     -12.6236
+    ],
+    [
+     4.8513,
+     0.02,
+     -7.8366
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-4": {
+   "node": "room-4",
+   "usd_name": "i_5a5a00315e9e7293",
+   "bbox_m": [
+    [
+     -5.9672,
+     0.0,
+     -12.9317
+    ],
+    [
+     -1.5528,
+     0.02,
+     -6.2212
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-5": {
+   "node": "room-5",
+   "usd_name": "i_9e79ab030a372210",
+   "bbox_m": [
+    [
+     -1.5477,
+     0.0,
+     -7.6994
+    ],
+    [
+     2.4553,
+     0.02,
+     -4.6617
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-6": {
+   "node": "room-6",
+   "usd_name": "i_ec89ded13d87b307",
+   "bbox_m": [
+    [
+     2.5857,
+     0.0,
+     -7.6927
+    ],
+    [
+     4.8445,
+     0.02,
+     -4.6549
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-7": {
+   "node": "room-7",
+   "usd_name": "i_70bb5b94b4d6cd59",
+   "bbox_m": [
+    [
+     -5.9689,
+     0.0,
+     -6.2144
+    ],
+    [
+     -1.5544,
+     0.02,
+     -4.665
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-8": {
+   "node": "room-8",
+   "usd_name": "i_44e81fa362506db8",
+   "bbox_m": [
+    [
+     0.2404,
+     0.0,
+     -5.554
+    ],
+    [
+     0.4623,
+     0.02,
+     -4.6617
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-9": {
+   "node": "room-9",
+   "usd_name": "i_24eb5d10c0f99760",
+   "bbox_m": [
+    [
+     0.5893,
+     0.0,
+     -6.3905
+    ],
+    [
+     2.1319,
+     0.02,
+     -4.66
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-10": {
+   "node": "room-10",
+   "usd_name": "i_e1f6f5c3760893f7",
+   "bbox_m": [
+    [
+     2.2098,
+     0.0,
+     -6.3888
+    ],
+    [
+     2.5078,
+     0.02,
+     -4.6583
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-11": {
+   "node": "room-11",
+   "usd_name": "i_a4ffd4c5f3624fca",
+   "bbox_m": [
+    [
+     -6.0569,
+     0.0,
+     -4.941
+    ],
+    [
+     -5.6658,
+     0.02,
+     -4.6701
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-12": {
+   "node": "room-12",
+   "usd_name": "i_d32a01553483b741",
+   "bbox_m": [
+    [
+     5.0189,
+     0.0,
+     -15.5801
+    ],
+    [
+     12.6049,
+     0.02,
+     -12.8759
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-13": {
+   "node": "room-13",
+   "usd_name": "i_ddcd5d814342f064",
+   "bbox_m": [
+    [
+     5.1307,
+     0.0,
+     -12.6523
+    ],
+    [
+     12.1596,
+     0.02,
+     -8.0195
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-14": {
+   "node": "room-14",
+   "usd_name": "i_42e512a47d0b7032",
+   "bbox_m": [
+    [
+     7.2812,
+     0.0,
+     -8.9203
+    ],
+    [
+     11.7921,
+     0.02,
+     -7.4285
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-15": {
+   "node": "room-15",
+   "usd_name": "i_f3ea0bec856d3fcb",
+   "bbox_m": [
+    [
+     7.1508,
+     0.0,
+     -7.6571
+    ],
+    [
+     11.6685,
+     0.02,
+     -4.3924
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-16": {
+   "node": "room-16",
+   "usd_name": "i_2cda67a985b05a29",
+   "bbox_m": [
+    [
+     -0.0068,
+     0.0,
+     -8.011
+    ],
+    [
+     7.0407,
+     0.02,
+     -1.1294
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-17": {
+   "node": "room-17",
+   "usd_name": "i_cca942d38d293a99",
+   "bbox_m": [
+    [
+     2.2843,
+     0.0,
+     -2.9565
+    ],
+    [
+     3.9962,
+     0.02,
+     -1.1277
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-18": {
+   "node": "room-18",
+   "usd_name": "i_2e3327cb95228701",
+   "bbox_m": [
+    [
+     4.1215,
+     0.0,
+     -2.9531
+    ],
+    [
+     7.0357,
+     0.02,
+     -1.1227
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-19": {
+   "node": "room-19",
+   "usd_name": "i_191ac57ee05a008c",
+   "bbox_m": [
+    [
+     7.1457,
+     0.0,
+     -4.262
+    ],
+    [
+     11.3333,
+     0.02,
+     -0.7315
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-20": {
+   "node": "room-20",
+   "usd_name": "i_ec3f6ddb2e6d930b",
+   "bbox_m": [
+    [
+     -0.0068,
+     0.0,
+     -1.0617
+    ],
+    [
+     7.0323,
+     0.02,
+     -0.7349
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-21": {
+   "node": "room-21",
+   "usd_name": "i_139591b078e27f6d",
+   "bbox_m": [
+    [
+     -12.4474,
+     0.0,
+     -15.7291
+    ],
+    [
+     -6.2906,
+     0.02,
+     -12.3628
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-22": {
+   "node": "room-22",
+   "usd_name": "i_74aca5ce991bb15a",
+   "bbox_m": [
+    [
+     -12.2764,
+     0.0,
+     -12.9233
+    ],
+    [
+     -6.2551,
+     0.02,
+     -4.4839
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-23": {
+   "node": "room-23",
+   "usd_name": "i_6108d8683ca9b04c",
+   "bbox_m": [
+    [
+     -11.992,
+     0.0,
+     -7.1
+    ],
+    [
+     -7.9517,
+     0.02,
+     -5.6404
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-24": {
+   "node": "room-24",
+   "usd_name": "i_b5a7ff8e91cd4690",
+   "bbox_m": [
+    [
+     -7.9213,
+     0.0,
+     -6.1264
+    ],
+    [
+     -7.5216,
+     0.02,
+     -5.6387
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-25": {
+   "node": "room-25",
+   "usd_name": "i_11981b09de8b3141",
+   "bbox_m": [
+    [
+     -11.9005,
+     0.0,
+     -5.5066
+    ],
+    [
+     -7.5521,
+     0.02,
+     -2.6907
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-26": {
+   "node": "room-26",
+   "usd_name": "i_6c05f9fefd7f27e5",
+   "bbox_m": [
+    [
+     -7.4421,
+     0.0,
+     -4.4737
+    ],
+    [
+     -3.2003,
+     0.02,
+     1.358
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-27": {
+   "node": "room-27",
+   "usd_name": "i_ae8c6a0d2e49fae6",
+   "bbox_m": [
+    [
+     -11.7346,
+     0.0,
+     -2.5755
+    ],
+    [
+     -7.5572,
+     0.02,
+     0.4403
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-28": {
+   "node": "room-28",
+   "usd_name": "i_95727723b14da6da",
+   "bbox_m": [
+    [
+     -5.3559,
+     0.0,
+     -0.6214
+    ],
+    [
+     -5.1138,
+     0.02,
+     0.276
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-29": {
+   "node": "room-29",
+   "usd_name": "i_013e11941ba15aba",
+   "bbox_m": [
+    [
+     -6.1653,
+     0.0,
+     -0.6451
+    ],
+    [
+     -3.2156,
+     0.02,
+     1.3987
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-30": {
+   "node": "room-30",
+   "usd_name": "i_ea90fecd50518328",
+   "bbox_m": [
+    [
+     -6.1653,
+     0.0,
+     1.4681
+    ],
+    [
+     -3.2173,
+     0.02,
+     1.7441
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-31": {
+   "node": "room-31",
+   "usd_name": "i_65587637990aba53",
+   "bbox_m": [
+    [
+     -11.5568,
+     0.0,
+     0.574
+    ],
+    [
+     -6.2872,
+     0.02,
+     3.8032
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-32": {
+   "node": "room-32",
+   "usd_name": "i_6a714667710b2d2c",
+   "bbox_m": [
+    [
+     -6.1687,
+     0.0,
+     1.8135
+    ],
+    [
+     -3.219,
+     0.02,
+     3.7185
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-33": {
+   "node": "room-33",
+   "usd_name": "i_822b6e95526c2f27",
+   "bbox_m": [
+    [
+     0.9195,
+     0.0,
+     -0.5114
+    ],
+    [
+     2.8261,
+     0.02,
+     -0.2354
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-34": {
+   "node": "room-34",
+   "usd_name": "i_f9a81b8acd80fb22",
+   "bbox_m": [
+    [
+     -0.0102,
+     0.0,
+     -0.4403
+    ],
+    [
+     2.821,
+     0.02,
+     1.5731
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-35": {
+   "node": "room-35",
+   "usd_name": "i_157e929bf0494e74",
+   "bbox_m": [
+    [
+     2.8837,
+     0.0,
+     -0.4352
+    ],
+    [
+     4.3924,
+     0.02,
+     1.778
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-36": {
+   "node": "room-36",
+   "usd_name": "i_1106202956b88805",
+   "bbox_m": [
+    [
+     2.882,
+     0.0,
+     -0.4318
+    ],
+    [
+     8.9846,
+     0.02,
+     3.8099
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-37": {
+   "node": "room-37",
+   "usd_name": "i_35548fee9cf3f307",
+   "bbox_m": [
+    [
+     8.9813,
+     0.0,
+     -0.3133
+    ],
+    [
+     11.0691,
+     0.02,
+     3.6084
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-38": {
+   "node": "room-38",
+   "usd_name": "i_d0dcb093e6bcee55",
+   "bbox_m": [
+    [
+     1.1091,
+     0.0,
+     1.6831
+    ],
+    [
+     2.8735,
+     0.02,
+     3.8015
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-39": {
+   "node": "room-39",
+   "usd_name": "i_b9ececf68e4d4ff5",
+   "bbox_m": [
+    [
+     1.1074,
+     0.0,
+     3.5221
+    ],
+    [
+     1.7153,
+     0.02,
+     3.7998
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-40": {
+   "node": "room-40",
+   "usd_name": "i_f19d24d0a9add666",
+   "bbox_m": [
+    [
+     -4.643,
+     0.0,
+     4.0809
+    ],
+    [
+     -3.2528,
+     0.02,
+     4.2976
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-41": {
+   "node": "room-41",
+   "usd_name": "i_125b34dca4343d77",
+   "bbox_m": [
+    [
+     -9.4994,
+     0.0,
+     4.0741
+    ],
+    [
+     -4.7599,
+     0.02,
+     7.6537
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-42": {
+   "node": "room-42",
+   "usd_name": "i_6fea8cf5c91f71a8",
+   "bbox_m": [
+    [
+     -4.6447,
+     0.0,
+     4.0944
+    ],
+    [
+     -0.7434,
+     0.02,
+     7.7113
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-43": {
+   "node": "room-43",
+   "usd_name": "i_ed31d775119bbc9f",
+   "bbox_m": [
+    [
+     -4.6481,
+     0.0,
+     5.7183
+    ],
+    [
+     -2.0286,
+     0.02,
+     7.6554
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-44": {
+   "node": "room-44",
+   "usd_name": "i_16fdf7a9d96a8eaa",
+   "bbox_m": [
+    [
+     -11.4111,
+     0.0,
+     4.1841
+    ],
+    [
+     -9.3369,
+     0.02,
+     11.5178
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-45": {
+   "node": "room-45",
+   "usd_name": "i_aa4aad12c15cd88d",
+   "bbox_m": [
+    [
+     -3.7879,
+     0.0,
+     7.4912
+    ],
+    [
+     -2.0303,
+     0.02,
+     7.6571
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-46": {
+   "node": "room-46",
+   "usd_name": "i_a953befa557be7d5",
+   "bbox_m": [
+    [
+     -9.154,
+     0.0,
+     7.7536
+    ],
+    [
+     -2.352,
+     0.02,
+     11.4806
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-47": {
+   "node": "room-47",
+   "usd_name": "i_5877ac9795d3f5d8",
+   "bbox_m": [
+    [
+     -2.3452,
+     0.0,
+     7.7198
+    ],
+    [
+     -0.7484,
+     0.02,
+     11.3654
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-48": {
+   "node": "room-48",
+   "usd_name": "i_35e48d7b712cffd4",
+   "bbox_m": [
+    [
+     -1.4071,
+     0.0,
+     11.0251
+    ],
+    [
+     -0.6773,
+     0.02,
+     11.3485
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-49": {
+   "node": "room-49",
+   "usd_name": "i_608eac575594ba76",
+   "bbox_m": [
+    [
+     2.1471,
+     0.0,
+     4.1012
+    ],
+    [
+     3.5373,
+     0.02,
+     4.3145
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-50": {
+   "node": "room-50",
+   "usd_name": "i_5f19eb253f06a568",
+   "bbox_m": [
+    [
+     -0.3776,
+     0.0,
+     4.0978
+    ],
+    [
+     3.5373,
+     0.02,
+     7.7164
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-51": {
+   "node": "room-51",
+   "usd_name": "i_5115f5648216cdca",
+   "bbox_m": [
+    [
+     3.6508,
+     0.0,
+     4.1046
+    ],
+    [
+     8.5325,
+     0.02,
+     7.6791
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-52": {
+   "node": "room-52",
+   "usd_name": "i_1fe22f16285f4486",
+   "bbox_m": [
+    [
+     0.9161,
+     0.0,
+     5.7335
+    ],
+    [
+     3.5356,
+     0.02,
+     7.6723
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-53": {
+   "node": "room-53",
+   "usd_name": "i_2d27ceb45195e211",
+   "bbox_m": [
+    [
+     0.9144,
+     0.0,
+     7.5064
+    ],
+    [
+     2.6737,
+     0.02,
+     7.6706
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-54": {
+   "node": "room-54",
+   "usd_name": "i_e34e74abcde6c865",
+   "bbox_m": [
+    [
+     8.1956,
+     0.0,
+     4.2214
+    ],
+    [
+     10.5611,
+     0.02,
+     11.6753
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-55": {
+   "node": "room-55",
+   "usd_name": "i_453ec4f6d00354d1",
+   "bbox_m": [
+    [
+     -0.381,
+     0.0,
+     7.7248
+    ],
+    [
+     1.2767,
+     0.02,
+     11.3197
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-56": {
+   "node": "room-56",
+   "usd_name": "i_f2b452a79f983d6c",
+   "bbox_m": [
+    [
+     1.2835,
+     0.0,
+     7.7756
+    ],
+    [
+     8.1753,
+     0.02,
+     11.467
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-57": {
+   "node": "room-57",
+   "usd_name": "i_11c0faae07797fd3",
+   "bbox_m": [
+    [
+     -0.4572,
+     0.0,
+     11.02
+    ],
+    [
+     0.2167,
+     0.02,
+     11.3333
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-58": {
+   "node": "room-58",
+   "usd_name": "i_4af3440b39cbc133",
+   "bbox_m": [
+    [
+     7.1237,
+     0.0,
+     -7.9365
+    ],
+    [
+     7.2778,
+     0.02,
+     -7.4336
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-59": {
+   "node": "room-59",
+   "usd_name": "i_fc77714518cf3df8",
+   "bbox_m": [
+    [
+     -4.8462,
+     0.0,
+     -2.5281
+    ],
+    [
+     -3.07,
+     0.02,
+     -0.9245
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "room-60": {
+   "node": "room-60",
+   "usd_name": "i_82c372654c17b9dc",
+   "bbox_m": [
+    [
+     -3.0615,
+     0.0,
+     -4.3738
+    ],
+    [
+     0.7942,
+     0.02,
+     3.7998
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "room"
+  },
+  "wall-1": {
+   "node": "wall-1",
+   "usd_name": "i_e123b5f49bc431f5",
+   "bbox_m": [
+    [
+     -11.3519,
+     0.0,
+     10.8456
+    ],
+    [
+     -9.9769,
+     2.7,
+     11.9361
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-2": {
+   "node": "wall-2",
+   "usd_name": "i_f2ac780f612dbd5f",
+   "bbox_m": [
+    [
+     -9.5688,
+     0.0,
+     5.5659
+    ],
+    [
+     -1.91,
+     2.7,
+     7.8146
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-3": {
+   "node": "wall-3",
+   "usd_name": "i_e98d64e32f56f58f",
+   "bbox_m": [
+    [
+     -3.7896,
+     0.0,
+     7.4912
+    ],
+    [
+     -2.0286,
+     2.7,
+     7.6588
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-4": {
+   "node": "wall-4",
+   "usd_name": "i_a5d6c7780ce14e5a",
+   "bbox_m": [
+    [
+     -9.6264,
+     0.0,
+     6.5683
+    ],
+    [
+     -9.3318,
+     2.7,
+     6.5852
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-5": {
+   "node": "wall-5",
+   "usd_name": "i_7510a99e6e3856ad",
+   "bbox_m": [
+    [
+     -11.7938,
+     0.0,
+     -3.219
+    ],
+    [
+     -1.8711,
+     2.7,
+     4.7887
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-6": {
+   "node": "wall-6",
+   "usd_name": "i_3c5b599f4023f557",
+   "bbox_m": [
+    [
+     -6.1653,
+     0.0,
+     1.4664
+    ],
+    [
+     -3.2173,
+     2.7,
+     1.7458
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-7": {
+   "node": "wall-7",
+   "usd_name": "i_85d8d95706ae3143",
+   "bbox_m": [
+    [
+     -5.3576,
+     0.0,
+     -0.6231
+    ],
+    [
+     -5.1138,
+     2.7,
+     0.276
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-8": {
+   "node": "wall-8",
+   "usd_name": "i_d5ee5f5be46ee1c3",
+   "bbox_m": [
+    [
+     -4.6447,
+     0.0,
+     4.0809
+    ],
+    [
+     -3.2528,
+     2.7,
+     4.2976
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-9": {
+   "node": "wall-9",
+   "usd_name": "i_28165496f981cf9e",
+   "bbox_m": [
+    [
+     -11.9784,
+     0.0,
+     -1.5748
+    ],
+    [
+     -7.249,
+     2.7,
+     1.5003
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-10": {
+   "node": "wall-10",
+   "usd_name": "i_5d4c53e719b1952f",
+   "bbox_m": [
+    [
+     -12.1613,
+     0.0,
+     -2.943
+    ],
+    [
+     -7.437,
+     2.7,
+     -2.269
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-11": {
+   "node": "wall-11",
+   "usd_name": "i_9be1ef7a3b27f681",
+   "bbox_m": [
+    [
+     -12.356,
+     0.0,
+     -6.3871
+    ],
+    [
+     -7.4251,
+     2.7,
+     -3.6643
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-12": {
+   "node": "wall-12",
+   "usd_name": "i_67d5abb4534b091b",
+   "bbox_m": [
+    [
+     -7.9213,
+     0.0,
+     -6.1281
+    ],
+    [
+     -7.5199,
+     2.7,
+     -5.6387
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-13": {
+   "node": "wall-13",
+   "usd_name": "i_d246cab2d11de9fb",
+   "bbox_m": [
+    [
+     -12.6981,
+     0.0,
+     -12.4187
+    ],
+    [
+     -12.1681,
+     2.7,
+     -10.1767
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-14": {
+   "node": "wall-14",
+   "usd_name": "i_96631c0ea0c77bae",
+   "bbox_m": [
+    [
+     -12.8775,
+     0.0,
+     -15.6376
+    ],
+    [
+     -12.1325,
+     2.7,
+     -15.0331
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-15": {
+   "node": "wall-15",
+   "usd_name": "i_6df3542ef73a6f91",
+   "bbox_m": [
+    [
+     -8.0483,
+     0.0,
+     -16.1947
+    ],
+    [
+     -7.8332,
+     2.7,
+     -15.7206
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-16": {
+   "node": "wall-16",
+   "usd_name": "i_0719766ef6e83f0e",
+   "bbox_m": [
+    [
+     -7.5047,
+     0.0,
+     -16.1422
+    ],
+    [
+     -1.397,
+     2.7,
+     -4.2959
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-17": {
+   "node": "wall-17",
+   "usd_name": "i_35a58c8576d2af56",
+   "bbox_m": [
+    [
+     -6.0569,
+     0.0,
+     -4.9427
+    ],
+    [
+     -5.6658,
+     2.7,
+     -4.6701
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-18": {
+   "node": "wall-18",
+   "usd_name": "i_c9b0354f0ec41959",
+   "bbox_m": [
+    [
+     -3.8252,
+     0.0,
+     -13.2399
+    ],
+    [
+     -3.7845,
+     2.7,
+     -12.8437
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-19": {
+   "node": "wall-19",
+   "usd_name": "i_eebca749219d6cbb",
+   "bbox_m": [
+    [
+     -2.1607,
+     0.0,
+     -13.1705
+    ],
+    [
+     0.3708,
+     2.7,
+     -7.6977
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-20": {
+   "node": "wall-20",
+   "usd_name": "i_4059b032f138af33",
+   "bbox_m": [
+    [
+     0.7789,
+     0.0,
+     -13.0486
+    ],
+    [
+     1.5612,
+     2.7,
+     -7.696
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-21": {
+   "node": "wall-21",
+   "usd_name": "i_15fe0fef65d65c61",
+   "bbox_m": [
+    [
+     -0.4267,
+     0.0,
+     -12.9453
+    ],
+    [
+     5.6624,
+     2.7,
+     -4.3044
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-22": {
+   "node": "wall-22",
+   "usd_name": "i_2fb712b8836de15d",
+   "bbox_m": [
+    [
+     2.2081,
+     0.0,
+     -6.3905
+    ],
+    [
+     2.5078,
+     2.7,
+     -4.6583
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-23": {
+   "node": "wall-23",
+   "usd_name": "i_8666973eacc774b9",
+   "bbox_m": [
+    [
+     0.2404,
+     0.0,
+     -5.554
+    ],
+    [
+     0.464,
+     2.7,
+     -4.66
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-24": {
+   "node": "wall-24",
+   "usd_name": "i_e7999b6538a59073",
+   "bbox_m": [
+    [
+     7.3828,
+     0.0,
+     -12.969
+    ],
+    [
+     8.9068,
+     2.7,
+     -12.5372
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-25": {
+   "node": "wall-25",
+   "usd_name": "i_d5172ad82a824165",
+   "bbox_m": [
+    [
+     10.6949,
+     0.0,
+     -13.013
+    ],
+    [
+     10.7135,
+     2.7,
+     -12.6185
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-26": {
+   "node": "wall-26",
+   "usd_name": "i_2e0d4e04c85fd037",
+   "bbox_m": [
+    [
+     12.1122,
+     0.0,
+     -13.0587
+    ],
+    [
+     12.5965,
+     2.7,
+     -12.588
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-27": {
+   "node": "wall-27",
+   "usd_name": "i_640287188a700012",
+   "bbox_m": [
+    [
+     11.782,
+     0.0,
+     -10.3427
+    ],
+    [
+     12.3509,
+     2.7,
+     -8.7679
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-28": {
+   "node": "wall-28",
+   "usd_name": "i_30a4a2a231fc14f4",
+   "bbox_m": [
+    [
+     7.0374,
+     0.0,
+     -8.0381
+    ],
+    [
+     12.102,
+     2.7,
+     -5.383
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-29": {
+   "node": "wall-29",
+   "usd_name": "i_b8cec03998d26e09",
+   "bbox_m": [
+    [
+     7.122,
+     0.0,
+     -7.9365
+    ],
+    [
+     7.2795,
+     2.7,
+     -7.4319
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-30": {
+   "node": "wall-30",
+   "usd_name": "i_70d88bc4528f3c33",
+   "bbox_m": [
+    [
+     7.0374,
+     0.0,
+     -5.0477
+    ],
+    [
+     11.8294,
+     2.7,
+     -3.5898
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-31": {
+   "node": "wall-31",
+   "usd_name": "i_c4c260d4b7cc8e8c",
+   "bbox_m": [
+    [
+     -0.3031,
+     0.0,
+     -3.2969
+    ],
+    [
+     11.4315,
+     2.7,
+     1.9676
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-32": {
+   "node": "wall-32",
+   "usd_name": "i_84df7599abc7cb21",
+   "bbox_m": [
+    [
+     -0.0085,
+     0.0,
+     -1.0617
+    ],
+    [
+     7.034,
+     2.7,
+     -0.7332
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-33": {
+   "node": "wall-33",
+   "usd_name": "i_3c8b01f641ffe489",
+   "bbox_m": [
+    [
+     0.9195,
+     0.0,
+     -0.5114
+    ],
+    [
+     2.8261,
+     2.7,
+     -0.2337
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-34": {
+   "node": "wall-34",
+   "usd_name": "i_7806d308e67837e4",
+   "bbox_m": [
+    [
+     8.7933,
+     0.0,
+     1.5172
+    ],
+    [
+     9.1828,
+     2.7,
+     1.568
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-35": {
+   "node": "wall-35",
+   "usd_name": "i_ea18a54374394232",
+   "bbox_m": [
+    [
+     0.7518,
+     0.0,
+     3.0716
+    ],
+    [
+     11.0115,
+     2.7,
+     4.8818
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-36": {
+   "node": "wall-36",
+   "usd_name": "i_3605e3d815c22b05",
+   "bbox_m": [
+    [
+     2.1471,
+     0.0,
+     4.1012
+    ],
+    [
+     3.539,
+     2.7,
+     4.3145
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-37": {
+   "node": "wall-37",
+   "usd_name": "i_64858decab655731",
+   "bbox_m": [
+    [
+     1.1074,
+     0.0,
+     3.5221
+    ],
+    [
+     1.717,
+     2.7,
+     3.8015
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-38": {
+   "node": "wall-38",
+   "usd_name": "i_d5a6896b834b1822",
+   "bbox_m": [
+    [
+     8.2972,
+     0.0,
+     6.5294
+    ],
+    [
+     8.6934,
+     2.7,
+     6.5852
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-39": {
+   "node": "wall-39",
+   "usd_name": "i_a5be7e8bb2a3f098",
+   "bbox_m": [
+    [
+     0.7992,
+     0.0,
+     5.5845
+    ],
+    [
+     8.5901,
+     2.7,
+     7.8942
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-40": {
+   "node": "wall-40",
+   "usd_name": "i_6d64dc60e86c657e",
+   "bbox_m": [
+    [
+     0.9144,
+     0.0,
+     7.5047
+    ],
+    [
+     2.6737,
+     2.7,
+     7.6723
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-41": {
+   "node": "wall-41",
+   "usd_name": "i_98ee07644ee40799",
+   "bbox_m": [
+    [
+     7.9907,
+     0.0,
+     9.6569
+    ],
+    [
+     8.3852,
+     2.7,
+     9.7026
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-42": {
+   "node": "wall-42",
+   "usd_name": "i_5c779368339b8eea",
+   "bbox_m": [
+    [
+     7.4725,
+     0.0,
+     11.4027
+    ],
+    [
+     8.2142,
+     2.7,
+     11.9005
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-43": {
+   "node": "wall-43",
+   "usd_name": "i_97b4c64968c70667",
+   "bbox_m": [
+    [
+     2.8634,
+     0.0,
+     11.2655
+    ],
+    [
+     3.8506,
+     2.7,
+     11.7142
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-44": {
+   "node": "wall-44",
+   "usd_name": "i_a5ab3d746e510f59",
+   "bbox_m": [
+    [
+     -1.5629,
+     0.0,
+     3.7981
+    ],
+    [
+     0.3878,
+     2.7,
+     11.7583
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-45": {
+   "node": "wall-45",
+   "usd_name": "i_76212654b5149960",
+   "bbox_m": [
+    [
+     -0.4589,
+     0.0,
+     11.02
+    ],
+    [
+     0.2184,
+     2.7,
+     11.3333
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-46": {
+   "node": "wall-46",
+   "usd_name": "i_4d99c0c3e5f23663",
+   "bbox_m": [
+    [
+     -1.4088,
+     0.0,
+     11.0234
+    ],
+    [
+     -0.6756,
+     2.7,
+     11.3502
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-47": {
+   "node": "wall-47",
+   "usd_name": "i_92e59ff373c5c21a",
+   "bbox_m": [
+    [
+     -5.8402,
+     0.0,
+     11.3976
+    ],
+    [
+     -4.1452,
+     2.7,
+     11.8345
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-48": {
+   "node": "wall-48",
+   "usd_name": "i_a150c931f6197340",
+   "bbox_m": [
+    [
+     -9.3402,
+     0.0,
+     11.4213
+    ],
+    [
+     -8.4309,
+     2.7,
+     11.8954
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-49": {
+   "node": "wall-49",
+   "usd_name": "i_be24b89f92dd8deb",
+   "bbox_m": [
+    [
+     -9.4435,
+     2.1,
+     9.6061
+    ],
+    [
+     -9.049,
+     2.7,
+     9.6298
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-50": {
+   "node": "wall-50",
+   "usd_name": "i_362b4cbab2048b0d",
+   "bbox_m": [
+    [
+     -9.9244,
+     0.0,
+     -12.6727
+    ],
+    [
+     -9.8787,
+     2.7,
+     -12.4474
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-51": {
+   "node": "wall-51",
+   "usd_name": "i_339d8606d63acab3",
+   "bbox_m": [
+    [
+     8.8678,
+     0.0,
+     10.6255
+    ],
+    [
+     10.2936,
+     2.7,
+     11.9869
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-52": {
+   "node": "wall-52",
+   "usd_name": "i_012ae56fc34f3057",
+   "bbox_m": [
+    [
+     -10.0599,
+     0.0,
+     11.5178
+    ],
+    [
+     -9.2691,
+     2.7,
+     11.9073
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-53": {
+   "node": "wall-53",
+   "usd_name": "i_57d865cccb50ae31",
+   "bbox_m": [
+    [
+     -11.7989,
+     0.0,
+     4.0063
+    ],
+    [
+     -11.0302,
+     2.7,
+     10.9489
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-54": {
+   "node": "wall-54",
+   "usd_name": "i_26ef34304a2272c1",
+   "bbox_m": [
+    [
+     8.0974,
+     0.0,
+     11.6347
+    ],
+    [
+     8.9559,
+     2.7,
+     11.9276
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-55": {
+   "node": "wall-55",
+   "usd_name": "i_59613954f08ff5e4",
+   "bbox_m": [
+    [
+     9.9905,
+     0.0,
+     4.7633
+    ],
+    [
+     10.8998,
+     2.7,
+     10.7
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-56": {
+   "node": "wall-56",
+   "usd_name": "i_2ff75adfb7180b75",
+   "bbox_m": [
+    [
+     10.7152,
+     0.0,
+     -0.3979
+    ],
+    [
+     11.3824,
+     2.7,
+     3.3273
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-57": {
+   "node": "wall-57",
+   "usd_name": "i_8f0fdf6ea11439b0",
+   "bbox_m": [
+    [
+     4.9224,
+     0.0,
+     -15.5648
+    ],
+    [
+     5.0206,
+     2.7,
+     -12.781
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-58": {
+   "node": "wall-58",
+   "usd_name": "i_042c3938ebffbb0f",
+   "bbox_m": [
+    [
+     4.8445,
+     0.0,
+     -15.8882
+    ],
+    [
+     12.8234,
+     2.7,
+     -15.3921
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-59": {
+   "node": "wall-59",
+   "usd_name": "i_cb818f01cff8ba5f",
+   "bbox_m": [
+    [
+     12.3492,
+     0.0,
+     -15.8628
+    ],
+    [
+     12.8775,
+     2.7,
+     -12.9385
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-60": {
+   "node": "wall-60",
+   "usd_name": "i_bd3acc0adc159dad",
+   "bbox_m": [
+    [
+     4.1215,
+     0.0,
+     -15.6918
+    ],
+    [
+     5.0172,
+     2.7,
+     -15.3718
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-61": {
+   "node": "wall-61",
+   "usd_name": "i_d1145363c4631e48",
+   "bbox_m": [
+    [
+     4.9224,
+     0.0,
+     -15.5648
+    ],
+    [
+     5.0206,
+     2.7,
+     -12.781
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-62": {
+   "node": "wall-62",
+   "usd_name": "i_d558579184e5d2a9",
+   "bbox_m": [
+    [
+     4.8445,
+     0.0,
+     -15.7189
+    ],
+    [
+     5.825,
+     2.7,
+     -15.3921
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "wall-63": {
+   "node": "wall-63",
+   "usd_name": "i_1ffff4200a8e3ce9",
+   "bbox_m": [
+    [
+     -5.9672,
+     0.0,
+     -16.1101
+    ],
+    [
+     5.0172,
+     2.7,
+     -15.3718
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "wall"
+  },
+  "window-1": {
+   "node": "window-1",
+   "usd_name": "i_db2841acbc85d8c8",
+   "bbox_m": [
+    [
+     -12.412,
+     0.9,
+     -10.2004
+    ],
+    [
+     -12.112,
+     2.1,
+     -6.3634
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-2": {
+   "node": "window-2",
+   "usd_name": "i_318c466a31f77c02",
+   "bbox_m": [
+    [
+     -11.8143,
+     0.9,
+     0.9567
+    ],
+    [
+     -11.5143,
+     2.1,
+     3.5644
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-3": {
+   "node": "window-3",
+   "usd_name": "i_249f036505718c75",
+   "bbox_m": [
+    [
+     -12.1951,
+     0.9,
+     -15.8291
+    ],
+    [
+     -7.9873,
+     2.1,
+     -15.5291
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-4": {
+   "node": "window-4",
+   "usd_name": "i_61caf1f41a512fba",
+   "bbox_m": [
+    [
+     -7.8518,
+     0.9,
+     -16.0848
+    ],
+    [
+     -6.7343,
+     2.1,
+     -15.7848
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-5": {
+   "node": "window-5",
+   "usd_name": "i_829e627414330492",
+   "bbox_m": [
+    [
+     -12.18,
+     0.9,
+     -5.444
+    ],
+    [
+     -11.88,
+     2.1,
+     -2.9192
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-6": {
+   "node": "window-6",
+   "usd_name": "i_62b9efd8088af9bc",
+   "bbox_m": [
+    [
+     -12.2375,
+     0.9,
+     -12.5577
+    ],
+    [
+     -9.8956,
+     2.1,
+     -12.2577
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-7": {
+   "node": "window-7",
+   "usd_name": "i_0ef39638efa9049a",
+   "bbox_m": [
+    [
+     -12.7211,
+     0.9,
+     -15.0568
+    ],
+    [
+     -12.4211,
+     2.1,
+     -12.395
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-8": {
+   "node": "window-8",
+   "usd_name": "i_96f1590f57f820ca",
+   "bbox_m": [
+    [
+     -11.998,
+     0.9,
+     -2.291
+    ],
+    [
+     -11.698,
+     2.1,
+     0.3166
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-9": {
+   "node": "window-9",
+   "usd_name": "i_790f28862a0483aa",
+   "bbox_m": [
+    [
+     -4.152,
+     0.9,
+     11.4288
+    ],
+    [
+     -1.5544,
+     2.1,
+     11.7288
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-10": {
+   "node": "window-10",
+   "usd_name": "i_b2003650942616ad",
+   "bbox_m": [
+    [
+     -9.696,
+     0.9,
+     4.1994
+    ],
+    [
+     -9.396,
+     2.1,
+     6.5869
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-11": {
+   "node": "window-11",
+   "usd_name": "i_bfbe49e824aceb6a",
+   "bbox_m": [
+    [
+     -9.3446,
+     0.9,
+     9.6078
+    ],
+    [
+     -9.0446,
+     2.1,
+     11.445
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-12": {
+   "node": "window-12",
+   "usd_name": "i_7cace8b3e59d136f",
+   "bbox_m": [
+    [
+     -8.4394,
+     0.9,
+     11.5033
+    ],
+    [
+     -5.8334,
+     2.1,
+     11.8033
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-13": {
+   "node": "window-13",
+   "usd_name": "i_15968f3bc3af9faa",
+   "bbox_m": [
+    [
+     0.3793,
+     0.9,
+     11.35
+    ],
+    [
+     2.8701,
+     2.1,
+     11.65
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-14": {
+   "node": "window-14",
+   "usd_name": "i_90839c0c69228a94",
+   "bbox_m": [
+    [
+     8.4562,
+     0.9,
+     4.2739
+    ],
+    [
+     8.7562,
+     2.1,
+     6.57
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-15": {
+   "node": "window-15",
+   "usd_name": "i_ec656920880b7f75",
+   "bbox_m": [
+    [
+     3.8336,
+     0.9,
+     11.4347
+    ],
+    [
+     7.4912,
+     2.1,
+     11.7347
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-16": {
+   "node": "window-16",
+   "usd_name": "i_9530f51fe4ac1430",
+   "bbox_m": [
+    [
+     7.9516,
+     0.9,
+     9.6637
+    ],
+    [
+     8.2516,
+     2.1,
+     11.4416
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-17": {
+   "node": "window-17",
+   "usd_name": "i_e11d98bacf229dae",
+   "bbox_m": [
+    [
+     8.7398,
+     0.9,
+     1.529
+    ],
+    [
+     9.0398,
+     2.1,
+     3.5627
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-18": {
+   "node": "window-18",
+   "usd_name": "i_522c079087d10700",
+   "bbox_m": [
+    [
+     11.2027,
+     0.9,
+     -3.6321
+    ],
+    [
+     11.5027,
+     2.1,
+     -0.9601
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-19": {
+   "node": "window-19",
+   "usd_name": "i_5aba911f4d683d77",
+   "bbox_m": [
+    [
+     11.5973,
+     0.9,
+     -7.6131
+    ],
+    [
+     11.8973,
+     2.1,
+     -5.0054
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-20": {
+   "node": "window-20",
+   "usd_name": "i_65a390736689a258",
+   "bbox_m": [
+    [
+     10.7033,
+     0.9,
+     -12.9827
+    ],
+    [
+     12.1223,
+     2.1,
+     -12.6827
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-21": {
+   "node": "window-21",
+   "usd_name": "i_e75a72db7545e97e",
+   "bbox_m": [
+    [
+     12.1044,
+     0.9,
+     -12.6303
+    ],
+    [
+     12.4044,
+     2.1,
+     -10.3003
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-22": {
+   "node": "window-22",
+   "usd_name": "i_3e565845f184ef99",
+   "bbox_m": [
+    [
+     11.7928,
+     0.9,
+     -8.8102
+    ],
+    [
+     12.0928,
+     2.1,
+     -7.7756
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "window-23": {
+   "node": "window-23",
+   "usd_name": "i_04dad4e65ec39a73",
+   "bbox_m": [
+    [
+     -5.466,
+     0.9,
+     -13.2265
+    ],
+    [
+     -3.8082,
+     2.1,
+     -12.9265
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "window"
+  },
+  "door-1": {
+   "node": "door-1",
+   "usd_name": "i_24c4725c4586d0f0",
+   "bbox_m": [
+    [
+     -3.2056,
+     0.0,
+     -4.2959
+    ],
+    [
+     -2.5793,
+     2.1,
+     -3.219
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-2": {
+   "node": "door-2",
+   "usd_name": "i_10d615cef69c9643",
+   "bbox_m": [
+    [
+     -7.249,
+     0.0,
+     1.049
+    ],
+    [
+     -6.377,
+     2.1,
+     1.5053
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-3": {
+   "node": "door-3",
+   "usd_name": "i_bb568ff0a4d4d4e4",
+   "bbox_m": [
+    [
+     -7.5606,
+     0.0,
+     -2.4468
+    ],
+    [
+     -7.1178,
+     2.1,
+     -1.5748
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-4": {
+   "node": "door-4",
+   "usd_name": "i_a19cd1c07745a287",
+   "bbox_m": [
+    [
+     -6.2906,
+     0.0,
+     0.4606
+    ],
+    [
+     -5.8469,
+     2.1,
+     1.3309
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-5": {
+   "node": "door-5",
+   "usd_name": "i_eb15b570b0d5cb6c",
+   "bbox_m": [
+    [
+     -6.2923,
+     0.0,
+     2.7279
+    ],
+    [
+     -5.8486,
+     2.1,
+     3.5983
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-6": {
+   "node": "door-6",
+   "usd_name": "i_0113bbcc9a7ecccd",
+   "bbox_m": [
+    [
+     -7.5589,
+     0.0,
+     -3.666
+    ],
+    [
+     -7.1161,
+     2.1,
+     -2.7939
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-7": {
+   "node": "door-7",
+   "usd_name": "i_cb61a8c38c9adafd",
+   "bbox_m": [
+    [
+     -9.9075,
+     0.0,
+     -13.8314
+    ],
+    [
+     -7.4742,
+     2.1,
+     -12.5684
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-8": {
+   "node": "door-8",
+   "usd_name": "i_dc3b86188a6b9207",
+   "bbox_m": [
+    [
+     -1.8711,
+     0.0,
+     3.4748
+    ],
+    [
+     -0.8026,
+     2.1,
+     4.0971
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-9": {
+   "node": "door-9",
+   "usd_name": "i_24efb953f583b76b",
+   "bbox_m": [
+    [
+     -4.7649,
+     0.0,
+     4.7887
+    ],
+    [
+     -4.3684,
+     2.1,
+     5.5659
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-10": {
+   "node": "door-10",
+   "usd_name": "i_a6e096d23f07d4ec",
+   "bbox_m": [
+    [
+     -9.4471,
+     0.0,
+     7.7926
+    ],
+    [
+     -8.4638,
+     2.1,
+     9.6298
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-11": {
+   "node": "door-11",
+   "usd_name": "i_bc42e5b0d6490fb6",
+   "bbox_m": [
+    [
+     -9.6003,
+     0.0,
+     6.5683
+    ],
+    [
+     -8.9963,
+     2.1,
+     7.5978
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-12": {
+   "node": "door-12",
+   "usd_name": "i_90f8981b0b692887",
+   "bbox_m": [
+    [
+     -3.7354,
+     0.0,
+     5.2711
+    ],
+    [
+     -2.8414,
+     2.1,
+     5.7234
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-13": {
+   "node": "door-13",
+   "usd_name": "i_0568d7cc841155ae",
+   "bbox_m": [
+    [
+     -0.3183,
+     0.0,
+     3.4757
+    ],
+    [
+     0.7518,
+     2.1,
+     4.0988
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-14": {
+   "node": "door-14",
+   "usd_name": "i_445a180d66da760c",
+   "bbox_m": [
+    [
+     8.2928,
+     0.0,
+     6.5446
+    ],
+    [
+     8.9183,
+     2.1,
+     7.6199
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-15": {
+   "node": "door-15",
+   "usd_name": "i_8bd68627517935b1",
+   "bbox_m": [
+    [
+     8.1269,
+     0.0,
+     7.8535
+    ],
+    [
+     9.1125,
+     2.1,
+     9.6958
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-16": {
+   "node": "door-16",
+   "usd_name": "i_aa6a727ef11fc7f0",
+   "bbox_m": [
+    [
+     1.7322,
+     0.0,
+     5.2863
+    ],
+    [
+     2.6263,
+     2.1,
+     5.7386
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-17": {
+   "node": "door-17",
+   "usd_name": "i_e0677e0e42032291",
+   "bbox_m": [
+    [
+     3.5339,
+     0.0,
+     4.8073
+    ],
+    [
+     3.9313,
+     2.1,
+     5.5862
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-18": {
+   "node": "door-18",
+   "usd_name": "i_026279f2feb53e84",
+   "bbox_m": [
+    [
+     1.375,
+     0.0,
+     1.2567
+    ],
+    [
+     2.2284,
+     2.1,
+     1.6881
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-19": {
+   "node": "door-19",
+   "usd_name": "i_76068f60ef1160d7",
+   "bbox_m": [
+    [
+     8.9269,
+     0.0,
+     -0.2828
+    ],
+    [
+     9.911,
+     2.1,
+     1.5561
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-20": {
+   "node": "door-20",
+   "usd_name": "i_a09f8a2f4fecc564",
+   "bbox_m": [
+    [
+     0.8016,
+     0.0,
+     1.9676
+    ],
+    [
+     1.4407,
+     2.1,
+     3.0716
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-21": {
+   "node": "door-21",
+   "usd_name": "i_a0dc3f428b3217d4",
+   "bbox_m": [
+    [
+     3.0395,
+     0.0,
+     -3.3949
+    ],
+    [
+     3.9166,
+     2.1,
+     -2.9524
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-22": {
+   "node": "door-22",
+   "usd_name": "i_b42e38a86c658b36",
+   "bbox_m": [
+    [
+     -0.299,
+     0.0,
+     -4.3044
+    ],
+    [
+     0.3384,
+     2.1,
+     -3.2037
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-23": {
+   "node": "door-23",
+   "usd_name": "i_e1fae3a0b4f991d2",
+   "bbox_m": [
+    [
+     5.6522,
+     0.0,
+     -13.5012
+    ],
+    [
+     7.3929,
+     2.1,
+     -12.5633
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-24": {
+   "node": "door-24",
+   "usd_name": "i_e1ac3b2ec9402f73",
+   "bbox_m": [
+    [
+     6.0654,
+     0.0,
+     -3.3898
+    ],
+    [
+     6.9425,
+     2.1,
+     -2.9473
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-25": {
+   "node": "door-25",
+   "usd_name": "i_2a1932afff3ca577",
+   "bbox_m": [
+    [
+     7.0349,
+     0.0,
+     -5.383
+    ],
+    [
+     7.4941,
+     2.1,
+     -4.4703
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-26": {
+   "node": "door-26",
+   "usd_name": "i_4882eb31dfd7a233",
+   "bbox_m": [
+    [
+     7.0332,
+     0.0,
+     -4.2095
+    ],
+    [
+     7.4924,
+     2.1,
+     -3.2969
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-27": {
+   "node": "door-27",
+   "usd_name": "i_bd2eb6ab86c0c249",
+   "bbox_m": [
+    [
+     8.8966,
+     0.0,
+     -13.6135
+    ],
+    [
+     10.705,
+     2.1,
+     -12.6437
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-28": {
+   "node": "door-28",
+   "usd_name": "i_1a9e80a9041b80cf",
+   "bbox_m": [
+    [
+     -3.8015,
+     0.0,
+     -13.7561
+    ],
+    [
+     -2.1437,
+     2.1,
+     -12.8571
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-29": {
+   "node": "door-29",
+   "usd_name": "i_2494940c086ce572",
+   "bbox_m": [
+    [
+     0.3708,
+     0.0,
+     -8.1514
+    ],
+    [
+     1.248,
+     2.1,
+     -7.6927
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-30": {
+   "node": "door-30",
+   "usd_name": "i_b96bf7a8eda4190f",
+   "bbox_m": [
+    [
+     0.6909,
+     0.0,
+     -6.7981
+    ],
+    [
+     1.4664,
+     2.1,
+     -6.3871
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-31": {
+   "node": "door-31",
+   "usd_name": "i_093037c5454e2352",
+   "bbox_m": [
+    [
+     -1.397,
+     0.0,
+     -4.9431
+    ],
+    [
+     -0.4267,
+     2.1,
+     -4.3669
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-32": {
+   "node": "door-32",
+   "usd_name": "i_c6a4f417eb8c98f3",
+   "bbox_m": [
+    [
+     1.5612,
+     0.0,
+     -8.1497
+    ],
+    [
+     2.4384,
+     2.1,
+     -7.691
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-33": {
+   "node": "door-33",
+   "usd_name": "i_d20d824ea9027082",
+   "bbox_m": [
+    [
+     1.5138,
+     0.0,
+     -13.5835
+    ],
+    [
+     3.2782,
+     2.1,
+     -12.6344
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-34": {
+   "node": "door-34",
+   "usd_name": "i_e17b5f09dadb1541",
+   "bbox_m": [
+    [
+     -0.9703,
+     0.0,
+     -13.6876
+    ],
+    [
+     0.7959,
+     2.1,
+     -12.7377
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-35": {
+   "node": "door-35",
+   "usd_name": "i_307249c7e162c55c",
+   "bbox_m": [
+    [
+     2.4519,
+     0.0,
+     -7.5555
+    ],
+    [
+     2.9082,
+     2.1,
+     -6.6835
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-36": {
+   "node": "door-36",
+   "usd_name": "i_f1e637182fe51359",
+   "bbox_m": [
+    [
+     -0.299,
+     0.0,
+     -4.3044
+    ],
+    [
+     0.3384,
+     2.1,
+     -3.2037
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-37": {
+   "node": "door-37",
+   "usd_name": "i_0678a7360bb61dad",
+   "bbox_m": [
+    [
+     0.8016,
+     0.0,
+     1.9676
+    ],
+    [
+     1.4407,
+     2.1,
+     3.0716
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-38": {
+   "node": "door-38",
+   "usd_name": "i_dc4222f6a042cd42",
+   "bbox_m": [
+    [
+     -3.2056,
+     0.0,
+     -4.2959
+    ],
+    [
+     -2.5793,
+     2.1,
+     -3.219
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-39": {
+   "node": "door-39",
+   "usd_name": "i_43dc13b0ebd39303",
+   "bbox_m": [
+    [
+     -0.3183,
+     0.0,
+     3.4757
+    ],
+    [
+     0.7518,
+     2.1,
+     4.0988
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-40": {
+   "node": "door-40",
+   "usd_name": "i_4c0757cec5abc13e",
+   "bbox_m": [
+    [
+     -1.397,
+     0.0,
+     -4.9431
+    ],
+    [
+     -0.4267,
+     2.1,
+     -4.3669
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  },
+  "door-41": {
+   "node": "door-41",
+   "usd_name": "i_6185f26a5287eb0a",
+   "bbox_m": [
+    [
+     -1.8711,
+     0.0,
+     3.4748
+    ],
+    [
+     -0.8026,
+     2.1,
+     4.0971
+    ]
+   ],
+   "storey": "Floor 1",
+   "kind": "door"
+  }
+ },
+ "source_planmap": "planmap-1.json",
+ "defaults": {
+  "wall_m": 2.7,
+  "door_m": 2.1,
+  "window_sill_m": 0.9,
+  "window_head_m": 2.1
+ },
+ "note": "generated for demo: extruded from plan map with default heights; stairs only when the plan map has a stairs item (none from raster plans)",
+ "publishable": true
+}
