@@ -106,6 +106,8 @@ def build(res: dict, question: str, root: Path) -> dict | None:
 
 
 def attach(res: dict, question: str, root: Path) -> dict:
+    if res.get("route") == "symbols" and res.get("reasoning"):   # F-SCANSYM: the symbols route builds its own card
+        return res
     try:
         r = build(res, question, root)
         if r:
