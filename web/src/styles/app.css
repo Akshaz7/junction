@@ -934,3 +934,6 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 .composer-upload:disabled { opacity: .5; }
 .composer-drop-overlay { position: absolute; inset: 8px; z-index: 20; display: grid; place-content: center; justify-items: center; gap: 6px; border: 2px dashed var(--foreground); border-radius: var(--radius-popover); background: color-mix(in srgb, var(--card) 92%, transparent); color: var(--foreground); text-align: center; pointer-events: none; }
 .composer-drop-overlay span { color: var(--muted-foreground); font-size: var(--text-caption); }
+
+/* W-83: paperclip sits right beside the + button */
+.composer-actions > .composer-upload { margin-left: 6px; margin-right: auto; }
