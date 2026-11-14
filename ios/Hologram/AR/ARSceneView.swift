@@ -172,14 +172,24 @@ final class ARSceneController: ObservableObject {
             : "Tap a detected flat surface to place the model."
     }
 
-    func setHighlights(_ itemIDs: [String], cameraTargetItemID: String? = nil) {
+    func setHighlights(_ itemIDs: [String], cameraTargetItemID: String? = nil,
+                       labels: [String: String] = [:]) {
         highlightedItemIDs = itemIDs
-        highlightController?.highlight(itemIDs: itemIDs)
+        highlightController?.highlight(itemIDs: itemIDs, labels: labels)
         targetItemID = ([cameraTargetItemID].compactMap { $0 } + itemIDs)
             .first { manifest?.items[$0]?.bbox_m != nil }
         guide = nil
         lastGuideUpdate = 0
         updateWalkGuide()
+    }
+
+    @discardableResult
+    func applyVoiceAnswer(_ answer: VoiceAnswer) -> Bool {
+        guard answer.evidence.scene.doc_id == activeDocID else { return false }
+        setHighlights(answer.evidence.scene.highlight_item_ids,
+                      cameraTargetItemID: answer.evidence.scene.camera_target_item_id,
+                      labels: answer.highlightLabels)
+        return true
     }
 
     func selectTarget(_ itemID: String) {

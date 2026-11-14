@@ -8,6 +8,8 @@ struct ARScreen: View {
     var cameraTargetItemID: String? = nil
     @StateObject private var controller = ARSceneController()
     @StateObject private var liveSocket = LiveSocket()
+    @StateObject private var voice = ARVoiceController()
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -38,6 +40,9 @@ struct ARScreen: View {
                 if let item = controller.selectedItem {
                     ItemDetailsCard(item: item, onDismiss: controller.dismissSelectedItem,
                                     onHighlight: { highlightItem(item.id) })
+                }
+                ARVoicePanel(voice: voice, docID: docID ?? controller.activeDocID) { answer in
+                    controller.applyVoiceAnswer(answer)
                 }
                 VStack(alignment: .leading, spacing: 12) {
                     if controller.isFixture {
@@ -85,8 +90,12 @@ struct ARScreen: View {
                                   itemIDs: highlightedItemIDs, cameraTargetItemID: cameraTargetItemID)
         }
         .onDisappear {
+            voice.stop()
             liveSocket.stop()
             liveSocket.onHighlight = nil
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background { voice.stop() }
         }
         .onChange(of: highlightedItemIDs) { _, items in
             if docID == nil || docID == controller.activeDocID {
