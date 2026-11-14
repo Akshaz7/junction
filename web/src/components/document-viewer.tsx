@@ -317,7 +317,12 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   }
   function finishAnnotation(pointerId: number, save: boolean) {
     if (drawingPointer.current !== pointerId) return
-    if (save && draftRef.current) annotations.add(draftRef.current)
+    if (save && draftRef.current?.tool === 'marker') {
+      // Dragging with the highlighter marks an item: the Tell Stoa bubble opens for the dragged box.
+      const [a, b] = draftRef.current.points
+      const box: [number, number, number, number] = [Math.min(a.x, b.x), Math.min(a.y, b.y), Math.max(a.x, b.x), Math.max(a.y, b.y)]
+      if (box[2] - box[0] >= 4 && box[3] - box[1] >= 4) markup.select({ box })
+    } else if (save && draftRef.current) annotations.add(draftRef.current)
     drawingPointer.current = null; draftRef.current = null; setDraft(null)
   }
   function chooseTool(next: MarkupTool) {
@@ -390,7 +395,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       <Button variant="ghost" size="icon-xs" aria-label="Next match" disabled={!hits.length} onClick={() => setHitIndex((hitIndex + 1) % hits.length)}><ChevronRight size={14} /></Button>
       <Button variant="ghost" size="icon-xs" aria-label="Close sheet search" onClick={closeSearch}><X size={14} /></Button>
     </div>}
-    {mode === '2d' && (tool !== 'pan' || annotations.marks.length > 0) && <div className="viewer-annotation-controls"><span>{tool === 'marker' ? 'Drag to highlight an area' : tool === 'pen' ? 'Draw on the sheet' : 'Annotations saved on this device'}</span><Button variant="ghost" size="xs" disabled={!annotations.marks.length} onClick={annotations.undo}>Undo annotation</Button><Button variant="ghost" size="xs" disabled={!annotations.marks.length} onClick={annotations.clear}>Clear page annotations</Button>{tool !== 'pan' && <Button variant="ghost" size="xs" onClick={() => chooseTool('pan')}>Done</Button>}</div>}
+    {mode === '2d' && (tool !== 'pan' || annotations.marks.length > 0) && <div className="viewer-annotation-controls"><span>{tool === 'marker' ? 'Drag over an item to mark it' : tool === 'pen' ? 'Draw on the sheet' : 'Annotations saved on this device'}</span><Button variant="ghost" size="xs" disabled={!annotations.marks.length} onClick={annotations.undo}>Undo annotation</Button><Button variant="ghost" size="xs" disabled={!annotations.marks.length} onClick={annotations.clear}>Clear page annotations</Button>{tool !== 'pan' && <Button variant="ghost" size="xs" onClick={() => chooseTool('pan')}>Done</Button>}</div>}
     {(downloadError || annotations.warning) && <p className="viewer-tool-error" role="alert">{downloadError || annotations.warning}</p>}
     {mode === '2d' && specCitation && !specOpen && <Button className="viewer-passage-control" variant="ghost" size="sm" onClick={() => setSpecOpen(true)}>Show cited passage</Button>}
     <div className="viewer-item-layout" hidden={mode === '3d'}>
@@ -494,7 +499,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
         const mark = markup.editing ? markup.symbols.find((m) => m.id === markup.editing) : undefined
         const box = mark ? markBox(mark) : markup.selection && 'box' in markup.selection ? markup.selection.box : null
         if (!box) return null
-        return <TellStoaBubble key={mark?.id ?? 'new'} box={box as [number, number, number, number]} view={view} stage={viewport} busy={markup.busy} error={markup.error} legend={markup.data.suggestions}
+        return <TellStoaBubble key={mark?.id ?? 'new'} box={box as [number, number, number, number]} view={view} stage={viewport} busy={markup.busy} error={markup.error}
           initial={mark ? { name: mark.name, kind: mark.canonical_kind ?? null } : undefined}
           onSave={(name, kind) => mark ? markup.rename(mark.id, name, kind) : markup.mark(name, kind)}
           onDelete={mark ? () => markup.remove(mark.id) : undefined} onClose={markup.cancel} />

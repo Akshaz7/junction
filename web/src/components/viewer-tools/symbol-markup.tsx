@@ -50,9 +50,9 @@ export function useSymbolMarkup(docId: string, page: number) {
     toggle(next: 'label' | 'pin') { setOpen(true); setSelection(null); setEditing(null); setMode((old) => old === next ? null : next) },
     close() { setOpen(false); setMode(null); setSelection(null); setEditing(null) },
     showNotes() { setOpen(true); setMode(null); setSelection(null); setEditing(null) },
-    select(value: Selection) { setSelection(value); setEditing(null); setMode(null); setOpen(true) },
+    select(value: Selection) { setSelection(value); setEditing(null); setMode(null) },
     cancel() { setSelection(null); setEditing(null); setMode(null) },
-    edit(id: string | null) { setEditing(id); setSelection(null); setMode(null); setOpen(true) },
+    edit(id: string | null) { setEditing(id); setSelection(null); setMode(null) },
     reload() { setLoaded(false); setError(''); setOpen(false); requestAnimationFrame(() => setOpen(true)) },
     /** Saves the highlighted box as one item of the given kind. No matching of similar marks. */
     mark(name: string, kind: string | null) {
@@ -105,9 +105,7 @@ export const markBox = (s: TaughtSymbol): Bbox => s.matches?.[0]?.bbox ?? s.temp
 export const markName = (s: TaughtSymbol) => kindLabel(s.canonical_kind, s.name)
 type Markup = ReturnType<typeof useSymbolMarkup>
 export function SymbolMarkupTools({ markup, disabled, onActivate }: { markup: Markup; disabled: boolean; onActivate: () => void }) {
-  return <><Button variant="ghost" size="xs" aria-label="Mark an item" aria-pressed={markup.mode === 'label'} disabled={disabled || markup.busy} onClick={() => { onActivate(); markup.toggle('label') }}><PenLine size={16} />Mark</Button>
-    <Button variant="ghost" size="icon-sm" aria-label="Place a note pin" aria-pressed={markup.mode === 'pin'} disabled={disabled || markup.busy} onClick={() => { onActivate(); markup.toggle('pin') }}><MapPin size={16} /></Button>
-    {!markup.open && <Button variant="ghost" size="xs" onClick={() => { onActivate(); markup.showNotes() }}>Marks & notes</Button>}</>
+  return <Button variant="ghost" size="icon-sm" aria-label="Place a note pin" aria-pressed={markup.mode === 'pin'} disabled={disabled || markup.busy} onClick={() => { onActivate(); markup.toggle('pin') }}><MapPin size={16} /></Button>
 }
 
 export function SymbolMarkupLayer({ markup, image, scale }: { markup: Markup; image: Size; scale: number }) {

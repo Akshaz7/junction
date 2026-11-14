@@ -1,26 +1,22 @@
-.tell-stoa { position: absolute; z-index: 6; left: 0; top: 0; width: var(--bubble-w); transform: translate(var(--bubble-x), var(--bubble-y)); display: flex; flex-direction: column; align-items: flex-start; gap: 6px; cursor: default; user-select: none; animation: tell-stoa-in 140ms var(--ease-settle-wide, ease-out); }
+.tell-stoa { position: absolute; z-index: 6; left: 0; top: 0; width: var(--bubble-w); transform: translate(var(--bubble-x), var(--bubble-y)); display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: default; user-select: none; animation: tell-stoa-in 140ms var(--ease-settle-wide, ease-out); }
 @keyframes tell-stoa-in { from { opacity: 0; } to { opacity: 1; } }
-.tell-stoa-composer { width: 100%; display: flex; align-items: center; gap: 6px; padding: 5px 5px 5px 16px; border-radius: 999px; border: 1px solid rgb(255 255 255 / 0.55); background: rgb(236 236 238 / 0.62); -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4); box-shadow: 0 6px 24px rgb(0 0 0 / 0.16), 0 0 0 0.5px rgb(0 0 0 / 0.12); }
+.tell-stoa-composer { width: 100%; display: flex; align-items: center; gap: 6px; padding: 3px 3px 3px 12px; border-radius: 999px; border: 1px solid rgb(255 255 255 / 0.55); background: rgb(236 236 238 / 0.62); -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4); box-shadow: 0 6px 24px rgb(0 0 0 / 0.16), 0 0 0 0.5px rgb(0 0 0 / 0.12); }
 .tell-stoa-composer:focus-within { box-shadow: 0 6px 24px rgb(0 0 0 / 0.18), 0 0 0 2px var(--primary, #1a1a1a); }
-.tell-stoa-composer input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: var(--text-body-sm, 14px); color: var(--primary, #1a1a1a); user-select: text; }
+.tell-stoa-composer input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: var(--text-caption, 12px); color: var(--primary, #1a1a1a); user-select: text; }
 .tell-stoa-composer input::placeholder { color: rgb(60 60 67 / 0.6); }
-.tell-stoa-send { flex: none; width: 30px; height: 30px; border-radius: 50%; border: 0; display: grid; place-items: center; background: var(--primary, #1a1a1a); color: var(--primary-foreground, #fff); cursor: pointer; transition: opacity 120ms, background 120ms; }
+.tell-stoa-send { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 0; display: grid; place-items: center; background: var(--primary, #1a1a1a); color: var(--primary-foreground, #fff); cursor: pointer; transition: opacity 120ms, background 120ms; }
 .tell-stoa-send:hover:not(:disabled) { background: color-mix(in srgb, var(--primary, #1a1a1a) 82%, white); }
 .tell-stoa-send:disabled { opacity: 0.35; cursor: default; }
 .tell-stoa-send:focus-visible, .tell-stoa-pill:focus-visible { outline: 2px solid var(--primary, #1a1a1a); outline-offset: 2px; }
-.tell-stoa-chips { display: flex; flex-wrap: wrap; gap: 4px; max-width: 100%; padding: 6px; border-radius: 16px; border: 1px solid rgb(255 255 255 / 0.55); background: rgb(236 236 238 / 0.62); -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4); box-shadow: 0 6px 24px rgb(0 0 0 / 0.12); }
-.tell-stoa-chip { padding: 2px 9px; border-radius: 999px; border: 1px solid rgb(0 0 0 / 0.14); background: rgb(255 255 255 / 0.6); color: var(--foreground, #1a1a1a); font: inherit; font-size: var(--text-caption, 12px); line-height: 18px; cursor: pointer; }
-.tell-stoa-chip:hover:not(:disabled) { background: rgb(255 255 255 / 0.95); }
-.tell-stoa-chip[aria-pressed='true'] { background: var(--primary, #1a1a1a); color: var(--primary-foreground, #fff); border-color: transparent; }
-.tell-stoa-chip.is-legend { border-style: dashed; }
-.tell-stoa-chip:focus-visible, .tell-stoa-delete:focus-visible { outline: 2px solid var(--primary, #1a1a1a); outline-offset: 2px; }
 .tell-stoa-foot { display: flex; align-items: center; gap: 10px; }
 .tell-stoa-delete { border: 0; background: rgb(255 255 255 / 0.75); border-radius: 999px; padding: 3px 10px; font: inherit; font-size: var(--text-caption, 12px); color: var(--warning, #b45309); cursor: pointer; }
-.tell-stoa-status { margin: 0 0 0 14px; min-height: 0; font-size: var(--text-caption, 12px); color: var(--primary, #1a1a1a); background: rgb(255 255 255 / 0.7); border-radius: 6px; padding: 0 6px; }
+.tell-stoa-status { margin: 0; min-height: 0; font-size: var(--text-caption, 12px); color: var(--primary, #1a1a1a); background: rgb(255 255 255 / 0.7); border-radius: 6px; padding: 0 6px; }
 .tell-stoa-status:empty { display: none; }
 .tell-stoa-status[role='alert'] { color: var(--warning, #b45309); }
-.tell-stoa-pill { position: relative; display: inline-flex; align-items: center; gap: 6px; margin-left: 12px; padding: 4px 10px 4px 8px; border-radius: 999px; background: var(--primary, #1a1a1a); color: var(--primary-foreground, #fff); font-size: var(--text-caption, 12px); font-weight: 500; line-height: 16px; cursor: help; }
-.tell-stoa-tip { position: absolute; left: 0; top: calc(100% + 6px); width: 260px; padding: 8px 10px; border-radius: 10px; background: var(--primary, #1a1a1a); color: var(--primary-foreground, #fff); font-weight: 400; line-height: 1.4; opacity: 0; pointer-events: none; transition: opacity 120ms; }
+.tell-stoa-pill { position: relative; display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px 3px 6px; border-radius: 999px; background: var(--primary, #1a1a1a); color: var(--primary-foreground, #fff); font-size: var(--text-caption, 12px); font-weight: 500; line-height: 16px; cursor: help; }
+.tell-stoa-tip { position: absolute; left: 50%; transform: translateX(-50%); top: calc(100% + 6px); width: 240px; text-align: left; padding: 8px 10px; border-radius: 10px; background: var(--primary, #1a1a1a); color: var(--primary-foreground, #fff); font-weight: 400; line-height: 1.4; opacity: 0; pointer-events: none; transition: opacity 120ms; }
 .tell-stoa-pill:hover .tell-stoa-tip, .tell-stoa-pill:focus .tell-stoa-tip { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .tell-stoa, .tell-stoa-send, .tell-stoa-tip { animation: none; transition: none; } }
 @media (forced-colors: active) { .tell-stoa-composer { border-color: CanvasText; background: Canvas; } }
+
+.tell-stoa-logo { display: block; width: 12px; height: 12px; background: currentColor; -webkit-mask: url(/brand/stoa-logo.svg) left center / auto 100% no-repeat; mask: url(/brand/stoa-logo.svg) left center / auto 100% no-repeat; }
