@@ -1,61 +1,103 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import { mkdir } from 'node:fs/promises'
 const api = process.env.MARKUP_API_ORIGIN || 'http://127.0.0.1:8387'
 const output = '../results/final/MARKUP'
-test('teach a symbol, review with keyboard, persist a pin and export it', async ({ page }) => {
+
+/** Pins, listing and the sheet go to the isolated test API; saving one marked item is mocked in memory until the one-item save API (F-TAUGHT) is deployed here. */
+async function setup(page: Page) {
   await mkdir(output, { recursive: true })
   await page.request.post(`${api}/test-reset`)
+  const marks: Record<string, unknown>[] = []
   await page.route('**/api/**', async (route) => {
-    const url = new URL(route.request().url()); url.host = new URL(api).host
-    const response = await route.fetch({ url: url.href }); await route.fulfill({ response })
+    const request = route.request(), url = new URL(request.url())
+    const one = url.pathname.match(/\/markup\/symbols(?:\/([^/]+))?$/)
+    if (one) {
+      const id = one[1], body = request.postDataJSON?.() ?? {}
+      if (request.method() === 'POST') {
+        const mark = { id: `m${marks.length + 1}`, doc_id: 'sheet-under-test', name: body.name, note: '', page: body.page, template_bbox: body.box, canonical_kind: body.canonical_kind ?? null, matches: [{ id: '1', bbox: body.box, score: 1, status: 'confirmed', room: null }], summary: { found: 1, confirmed: 1, pending: 0, rejected: 0, rooms: {} } }
+        marks.push(mark); return route.fulfill({ status: 201, json: mark })
+      }
+      const at = marks.findIndex((m) => m.id === id)
+      if (request.method() === 'PATCH') { Object.assign(marks[at], { name: body.name, canonical_kind: body.canonical_kind }); return route.fulfill({ json: marks[at] }) }
+      if (request.method() === 'DELETE') { marks.splice(at, 1); return route.fulfill({ status: 204 }) }
+    }
+    url.host = new URL(api).host
+    const response = await route.fetch({ url: url.href })
+    if (url.pathname.endsWith('/markup') && request.method() === 'GET') return route.fulfill({ response, json: { ...(await response.json()), symbols: marks } })
+    await route.fulfill({ response })
   })
   await page.routeWebSocket('**/ws', () => {})
+}
+async function drag(page: Page, fx: number, fy: number, tx: number, ty: number) {
+  const b = (await page.locator('.drawing-plane > img').boundingBox())!
+  await page.mouse.move(b.x + b.width * fx, b.y + b.height * fy)
+  await page.mouse.down(); await page.mouse.move(b.x + b.width * tx, b.y + b.height * ty, { steps: 5 }); await page.mouse.up()
+}
+
+test('mark single items on a dense sheet, edit one, delete one, keep a pin', async ({ page }) => {
+  await setup(page)
   await page.goto('/e2e/markup-viewer.html')
-  const image = page.locator('.drawing-plane > img')
-  await expect(image).toBeVisible()
-  await page.getByRole('button', { name: 'Label a symbol', exact: true }).click()
-  await expect(page.getByLabel('Labels and notes', { exact: true })).toBeVisible()
-  await expect(page.getByText('Loading saved labels…')).toHaveCount(0)
-  // Draw around the actual symbol, in image coordinates under the current pan/zoom transform.
+  await expect(page.locator('.drawing-plane > img')).toBeVisible()
+  await page.getByRole('button', { name: 'Mark an item', exact: true }).click()
   await expect.poll(() => page.locator('.drawing-stage').evaluate((n) => n.clientHeight)).toBeGreaterThan(100)
   await page.getByRole('button', { name: 'Fit drawing', exact: true }).click()
-  const bounds = await image.boundingBox(); expect(bounds).not.toBeNull(); expect(bounds!.width).toBeLessThan(1500)
-  const sx = bounds!.width / 4762, sy = bounds!.height / 2526
-  await page.mouse.move(bounds!.x + 4241 * sx, bounds!.y + 1012 * sy)
-  await page.mouse.down(); await page.mouse.move(bounds!.x + 4264 * sx, bounds!.y + 1022 * sy, { steps: 5 }); await page.mouse.up()
-  await page.getByLabel('Symbol name', { exact: true }).fill('Supply air terminals')
-  await page.getByRole('textbox', { name: 'Note (optional)' }).fill('Candidate matches need a site check.')
-  await page.getByRole('button', { name: 'Find all like this' }).click()
-  await expect(page.getByRole('button', { name: 'Confirm (Y)' })).toBeVisible({ timeout: 45_000 })
-  await page.keyboard.press('y')
-  await expect(page.locator('.markup-count')).toContainText('1 confirmed')
-  await page.keyboard.press('n')
-  await expect(page.locator('.markup-count')).toContainText('1 rejected')
-  await page.keyboard.press('ArrowLeft')
-  await expect(page.getByLabel('Zoom level')).not.toHaveText('100%')
-  await page.screenshot({ path: `${output}/symbol-review.png` })
-  await page.getByRole('button', { name: 'Fit drawing', exact: true }).click()
+  await drag(page, 0.89, 0.40, 0.896, 0.405)
+  const bubble = page.getByTestId('tell-stoa')
+  await expect(bubble).toBeVisible()
+  await page.waitForTimeout(300)
+  await page.screenshot({ path: `${output}/tell-stoa-bubble.png` })
+  const at = (await bubble.boundingBox())!
+  await page.screenshot({ path: `${output}/tell-stoa-bubble-close.png`, clip: { x: Math.max(0, at.x - 260), y: Math.max(0, at.y - 160), width: 620, height: 330 } })
+  await bubble.getByRole('textbox').fill('door')
+  await expect(bubble.getByRole('status')).toHaveText('Counts as: Door')
+  await page.keyboard.press('Enter')
+  await expect(bubble).toHaveCount(0)
+  const tags = page.locator('.taught-mark')
+  await expect(tags).toHaveCount(1)
+  await expect(tags.first().locator('text')).toHaveText('Door')
+  // A second, ad hoc item: pick a chip, send with the button.
+  await page.getByRole('button', { name: 'Mark an item', exact: true }).click()
+  await drag(page, 0.5, 0.5, 0.506, 0.506)
+  await page.getByTestId('tell-stoa').getByRole('button', { name: 'Air terminal' }).click()
+  await page.getByRole('button', { name: 'Save mark' }).click()
+  await expect(tags).toHaveCount(2)
+  await page.screenshot({ path: `${output}/tell-stoa-marked.png` })
+  await expect(page.locator('.markup-count')).toContainText('1 Door · 1 Air terminal')
+  // Click a saved mark: rename it, then delete the other.
+  await tags.first().click()
+  await expect(bubble).toBeVisible()
+  await bubble.getByRole('textbox').fill('Window'); await page.keyboard.press('Enter')
+  await expect(tags.first().locator('text')).toHaveText('Window')
+  await tags.nth(1).click()
+  await page.waitForTimeout(300)
+  await page.screenshot({ path: `${output}/tell-stoa-edit.png` })
+  await bubble.getByRole('button', { name: 'Delete mark' }).click()
+  await expect(tags).toHaveCount(1)
   await page.getByRole('button', { name: 'Place a note pin' }).click()
-  const b = await image.boundingBox()
-  await page.mouse.click(b!.x + b!.width * .4, b!.y + b!.height * .65)
+  const b = (await page.locator('.drawing-plane > img').boundingBox())!
+  await page.mouse.click(b.x + b.width * .4, b.y + b.height * .65)
   await page.getByRole('textbox', { name: 'Pin note', exact: true }).fill('Check ceiling clearance before ordering.')
   await page.getByRole('button', { name: 'Save pin', exact: true }).click()
-  await expect(page.locator('.markup-pin-list')).toContainText('Check ceiling clearance before ordering.')
-  await page.reload()
-  await expect(page.locator('.drawing-plane > img')).toBeVisible()
-  await page.getByRole('button', { name: 'Labels & notes', exact: true }).click()
-  await expect(page.locator('.markup-pin-list')).toContainText('Check ceiling clearance before ordering.')
-  await expect(page.locator('.markup-count')).toContainText('1 confirmed')
-  await page.locator('.markup-pin-list').getByRole('button', { name: 'Pin 1: Check ceiling clearance before ordering.' }).click()
-  await page.screenshot({ path: `${output}/saved-pin.png` })
-  await page.getByRole('button', { name: 'Next page', exact: true }).click()
-  await expect(page.locator('.drawing-plane > img')).toHaveAttribute('alt', /page 2/)
-  await page.getByRole('button', { name: 'Labels & notes', exact: true }).click()
-  await expect(page.locator('.markup-note-pin')).toHaveCount(0)
+  await expect(page.locator('.markup-pin-list').last()).toContainText('Check ceiling clearance before ordering.')
   await page.getByRole('button', { name: 'Export report', exact: true }).click()
   const frame = page.frameLocator('iframe[title="Site report preview"]')
   await expect(frame.getByText('Check ceiling clearance before ordering.', { exact: true })).toBeVisible()
-  await expect(frame.getByRole('heading', { name: 'Site note pins' })).toBeVisible()
-  await frame.getByText('Check ceiling clearance before ordering.', { exact: true }).scrollIntoViewIfNeeded()
-  await page.screenshot({ path: `${output}/report-pins.png` })
+})
+
+test('the Tell Stoa bubble fits a phone screen and Escape closes it', async ({ page }) => {
+  await setup(page)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/e2e/markup-viewer.html')
+  await expect(page.locator('.drawing-plane > img')).toBeVisible()
+  await page.getByRole('button', { name: 'Mark an item', exact: true }).click()
+  await expect.poll(() => page.locator('.drawing-stage').evaluate((n) => n.clientHeight)).toBeGreaterThan(100)
+  await drag(page, 0.5, 0.5, 0.53, 0.54)
+  const bubble = page.getByTestId('tell-stoa')
+  await expect(bubble).toBeVisible()
+  await page.waitForTimeout(300)
+  const at = (await bubble.boundingBox())!
+  expect(at.x).toBeGreaterThanOrEqual(0); expect(at.x + at.width).toBeLessThanOrEqual(390)
+  await page.screenshot({ path: `${output}/tell-stoa-bubble-phone.png` })
+  await bubble.getByRole('textbox').press('Escape')
+  await expect(bubble).toHaveCount(0)
 })

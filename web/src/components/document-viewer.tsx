@@ -22,7 +22,9 @@ import { RoomLabels } from './viewer-tools/room-labels'
 import { SpecPanel } from './viewer-tools/spec-panel'
 import { CalculationPanel } from './calc-panel'
 import { downloadSource } from './viewer-tools/download-source'
-import { SymbolMarkupLayer, SymbolMarkupPanel, SymbolMarkupTools, useSymbolMarkup } from './viewer-tools/symbol-markup'
+import { TellStoaBubble } from './viewer-tools/tell-stoa-bubble'
+import './viewer-tools/tell-stoa-bubble.css'
+import { markBox, SymbolMarkupLayer, SymbolMarkupPanel, SymbolMarkupTools, useSymbolMarkup } from './viewer-tools/symbol-markup'
 import { useDrawingHighlights } from '../viewer3d/useDrawingHighlights'
 
 export function useViewerSheet() {
@@ -340,7 +342,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   return <aside ref={panel} className={`document-viewer ${sheet ? 'viewer-sheet' : ''}`} role={sheet ? 'dialog' : 'region'} aria-modal={sheet || undefined} aria-label={sheet ? undefined : "Drawing viewer"} aria-labelledby={sheet ? titleId : undefined}
     onKeyDown={(event) => {
       if (mode === '3d' && event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); changeMode('2d'); return }
-      if (event.key === 'Escape') { event.stopPropagation(); if (markup.selection || markup.mode) markup.cancel(); else if (markup.open) markup.close(); else if (searchOpen) closeSearch(); else if (tool !== 'pan') chooseTool('pan'); else if (selectedItem) closeItem(); else onClose() }
+      if (event.key === 'Escape') { event.stopPropagation(); if (markup.selection || markup.mode || markup.editing) markup.cancel(); else if (markup.open) markup.close(); else if (searchOpen) closeSearch(); else if (tool !== 'pan') chooseTool('pan'); else if (selectedItem) closeItem(); else onClose() }
       if (sheet && event.key === 'Tab') {
         const controls = Array.from(panel.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), a[href], [tabindex="0"]') ?? []).filter((node) => node.getClientRects().length)
         if (!controls?.length) return
@@ -488,6 +490,15 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       {!highlights.cleared && image && shownPage === citation.page && regions.some((region) => !region.text) && <KindLegend className="kind-legend-2d" kinds={regions.filter((region) => !region.text).map((region) => region.kind)} totals={totalKinds} />}
       {error ? <div className="viewer-message"><p role="alert">{error}</p><Button variant="raised" onClick={() => setRetry(retry + 1)}>Try again</Button></div>
         : !image && <p className="viewer-message" role="status">Loading drawing…</p>}
+      {image && shownPage === citation.page && (() => {
+        const mark = markup.editing ? markup.symbols.find((m) => m.id === markup.editing) : undefined
+        const box = mark ? markBox(mark) : markup.selection && 'box' in markup.selection ? markup.selection.box : null
+        if (!box) return null
+        return <TellStoaBubble key={mark?.id ?? 'new'} box={box as [number, number, number, number]} view={view} stage={viewport} busy={markup.busy} error={markup.error} legend={markup.data.suggestions}
+          initial={mark ? { name: mark.name, kind: mark.canonical_kind ?? null } : undefined}
+          onSave={(name, kind) => mark ? markup.rename(mark.id, name, kind) : markup.mark(name, kind)}
+          onDelete={mark ? () => markup.remove(mark.id) : undefined} onClose={markup.cancel} />
+      })()}
     </div>
     {calcOpen && answer.reasoning && <CalculationPanel reasoning={answer.reasoning} title={doc?.title} docTitle={(id) => id === citation.doc_id && doc?.title ? doc.title : id} onClose={() => setCalcOpen(false)} onFocus={focusCalcItem} />}
     {markup.open && <SymbolMarkupPanel markup={markup} page={citation.page} onFocus={(box) => { if (image) setView(focusBox(box, viewport, Math.max(fittedScale, Math.min(4, viewport.width / Math.max(128, (box[2] - box[0]) * 6), viewport.height / Math.max(128, (box[3] - box[1]) * 6))))) }} />}
