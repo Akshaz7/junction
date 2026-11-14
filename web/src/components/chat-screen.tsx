@@ -39,6 +39,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const [restoredDocIds, setRestoredDocIds] = useState<string[] | null>(null)
   const [busy, setBusy] = useState(false)
   const [pendingQuestion, setPendingQuestion] = useState('')
+  const catchUp = useRef(false) // opened mid-answer: refetch once the live subscription is up
+  const expectingAnswer = useRef(false) // a live user message arrived and its answer has not
   const [statuses, setStatuses] = useState<string[]>([])
   const [traces, setTraces] = useState<TraceStep[]>([])
   const [streamText, setStreamText] = useState('')
@@ -119,7 +121,18 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         if (signal.aborted || generation.current !== version) return
         chatId.current = chat.id
         setLiveChatId(chat.id)
-        setAnswers(savedExchanges(chat))
+        // A chat opened while its question is still being answered (auto-open on a paired phone): show the
+        // in-progress state instead of a failed exchange, and keep following the live events.
+        const opened = savedExchanges(chat)
+        const lastOpened = opened.at(-1)
+        const pendingOpened = chat.active && lastOpened && !lastOpened.answer && !lastOpened.content ? opened.pop() : null
+        setAnswers(opened)
+        if (pendingOpened && chat.active) {
+          catchUp.current = true
+          setPendingQuestion(pendingOpened.question); setBusy(true)
+          setStatuses(chat.active.statuses.length ? chat.active.statuses : ['Thinking…'])
+          setTraces(chat.active.traces ?? []); setStreamText(chat.active.text ?? '')
+        }
         const ids = [...new Set(chat.messages.flatMap((message) => message.answer?.doc_ids ?? []))]
         setRestoredDocIds(ids.length ? ids : chat.doc_id ? [chat.doc_id] : [])
       }).catch((err: unknown) => {
@@ -150,24 +163,27 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         // The server reports a question that is still being answered (also to a device that joined
         // mid-answer): show its status lines and trace so far, then keep following live events.
         const active = chat.active
-        const pending = active && last && !last.answer && !last.content ? exchanges.pop() : null
+        const pending = (active || expectingAnswer.current) && last && !last.answer && !last.content ? exchanges.pop() : null
         setAnswers(exchanges)
         setPendingQuestion(pending ? pending.question : '')
         setBusy(!!pending)
-        setStatuses(pending ? (active!.statuses.length ? active!.statuses : ['Thinking…']) : [])
-        setTraces(pending ? active!.traces ?? [] : [])
-        setStreamText(pending ? active!.text ?? '' : '')
+        setStatuses(pending ? (active?.statuses.length ? active.statuses : ['Thinking…']) : [])
+        setTraces(pending ? active?.traces ?? [] : [])
+        setStreamText(pending ? active?.text ?? '' : '')
         setError('')
       }).catch((err: unknown) => {
         if (!signal.aborted && generation.current === version && !submitting.current)
           setError(err instanceof Error ? err.message : 'This chat could not be refreshed.')
       })
     }
+    if (catchUp.current) { catchUp.current = false; refresh() } // events missed between the opening snapshot and this subscription
     const unsubscribe = chatLive.subscribe((event) => {
       // A (re)connect snapshot also recovers everything missed while backgrounded or in native AR.
-      if (event.type === 'connected') { refresh(); return }
+      if (event.type === 'connected') { expectingAnswer.current = false; refresh(); return }
       if (event.type === 'disconnected') return
       if (event.chat_id !== liveChatId || submitting.current) return
+      if (event.type === 'chat.message' && event.role === 'user') expectingAnswer.current = true
+      else if (event.type === 'chat.message' || event.type === 'chat.done') expectingAnswer.current = false
       if (event.type === 'chat.message' && event.role === 'user' && event.text) {
         // Show the question straight from the event; the snapshot fetch below only reconciles.
         setPendingQuestion(event.text); setBusy(true); setStatuses(['Thinking…']); setTraces([]); setStreamText(''); setError(''); setFailed(null)

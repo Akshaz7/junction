@@ -1,4 +1,4 @@
-import { devices, expect, test, type BrowserContext } from '@playwright/test'
+import { devices, expect, test, type BrowserContext, type Page } from '@playwright/test'
 
 // Demo dry run, the exact judge flow with per-step timings:
 // laptop asks "How many doors?" on ac20_arc -> opens 2D -> Visualise it (3D); the phone follows the streamed chat
@@ -12,6 +12,17 @@ test.setTimeout(120_000)
 if (process.env.E2E_BASE) test.use({ baseURL: process.env.E2E_BASE })
 
 const { defaultBrowserType: _ignored, ...phoneDevice } = devices['iPhone 15 Pro Max']
+
+// Pair the phone with the laptop first (W-39), as a judge would by scanning the QR; no-op on builds without it.
+async function pair(d: Page, p: Page) {
+  const pairBtn = d.getByRole('button', { name: 'Pair a phone' })
+  if (!(await pairBtn.count())) return
+  await pairBtn.click()
+  const link = await d.getByLabel('Pairing link').inputValue()
+  await p.goto(link)
+  await expect(p.getByTestId('pair-notice')).toContainText('Paired')
+  await d.keyboard.press('Escape')
+}
 
 test('demo flow: laptop asks, 2D, 3D; phone follows live, Show on table; voice turn lands on the laptop', async ({ browser, baseURL }, testInfo) => {
   const desktop = await browser.newContext({ baseURL, viewport: { width: 1400, height: 900 } })
@@ -32,6 +43,9 @@ test('demo flow: laptop asks, 2D, 3D; phone follows live, Show on table; voice t
       await page.goto(`/#/chat?chat=${id}`)
       await expect(page.getByRole('combobox', { name: 'Ask about your drawings' })).toBeEnabled({ timeout: 20_000 })
     }
+    await pair(d, p)
+    await p.goto(`/#/chat?chat=${id}`)
+    await expect(p.getByRole('combobox', { name: 'Ask about your drawings' })).toBeEnabled({ timeout: 20_000 })
     await p.waitForTimeout(1500) // live socket open
 
     // 1) Laptop asks.
