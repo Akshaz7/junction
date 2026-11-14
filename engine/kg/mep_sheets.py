@@ -97,7 +97,7 @@ def link_sheet_rooms(writer, source_did, target_did, source_pm, target_pm, sourc
     for src, dst, distance in proposals:
         if counts[dst["id"]] != 1:
             continue
-        writer.edge("same_as", src, dst, "position", 0.59,
+        writer.edge("same_as", src, dst, "position", 0.5,
                     {"rule": "unique same-label room centres after shared-text sheet alignment",
                      "residual_m": distance, "alignment": {"T": T, "residual": residual,
                      "matches": T.get("matches", T.get("n_inliers"))},
