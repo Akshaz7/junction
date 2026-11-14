@@ -23,8 +23,6 @@ from shapely import constrained_delaunay_triangles
 
 REPO = Path(__file__).resolve().parent.parent
 WALL_H, DOOR_H, SILL, HEAD, FLOOR_T = 2.7, 2.1, 0.9, 2.1, 0.02
-COLORS = {"wall": (175, 175, 180, 255), "door": (200, 130, 60, 255), "window": (90, 150, 215, 200),
-          "room": (160, 190, 225, 255)}
 TEX_MAX = 2048
 
 
@@ -33,7 +31,7 @@ def usd_name(item_id: str) -> str:
 
 
 def _polys(pts):
-    g = Polygon(pts)
+    g = pts if isinstance(pts, Polygon) else Polygon(pts)
     if g.area < 1e-9 and len(set(map(tuple, pts))) >= 2:  # zero-thickness drawn line: give it 5 cm
         g = LineString(list(dict.fromkeys(map(tuple, pts)))).buffer(0.025, cap_style="flat")
     if not g.is_valid:
@@ -86,7 +84,7 @@ def _normal_y(t):
 
 def _orient(m, pts_m):
     """Flip side faces that point into the polygon (works for the exterior ring and holes)."""
-    g = Polygon(pts_m)
+    g = pts_m if isinstance(pts_m, Polygon) else Polygon(pts_m)
     g = g if g.is_valid else g.buffer(0)
     nrm = m.face_normals
     for i, f in enumerate(m.faces):
@@ -105,6 +103,137 @@ def _bbox_poly(it):
     return [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
 
 
+ROOM_TINT = {"bedroom": (214, 190, 156), "living": (222, 200, 165), "livingroom": (222, 200, 165),
+             "kitchen": (205, 214, 222), "bathroom": (186, 210, 228), "bath": (186, 210, 228),
+             "wc": (190, 212, 226), "toilet": (190, 212, 226), "sauna": (205, 170, 130),
+             "hall": (225, 218, 205), "entrance": (225, 218, 205), "corridor": (225, 218, 205),
+             "balcony": (178, 200, 178), "terrace": (178, 200, 178), "storage": (200, 200, 204),
+             "laundry": (205, 214, 222)}
+ROOM_DEFAULT = (226, 220, 208)
+FIXTURES = ("toilet", "sink", "bathtub", "shower", "stairs", "stair")
+RISER = 0.18
+
+
+def _mat(rgb, alpha=255, rough=0.85, blend=False, double=False, tex=None):
+    from trimesh.visual.material import PBRMaterial
+    kw = dict(baseColorFactor=[*rgb, alpha], metallicFactor=0.0, roughnessFactor=rough, doubleSided=double)
+    if blend:
+        kw["alphaMode"] = "BLEND"
+    if tex is not None:
+        kw["baseColorTexture"] = tex
+    return PBRMaterial(**kw)
+
+
+MATS = {"wall": lambda: _mat((236, 232, 224)), "frame": lambda: _mat((246, 246, 246), rough=0.5),
+        "glass": lambda: _mat((140, 200, 240), 90, rough=0.1, blend=True, double=True),
+        "doorframe": lambda: _mat((150, 105, 65)), "leaf": lambda: _mat((196, 146, 92)),
+        "ceramic": lambda: _mat((248, 248, 250), rough=0.35), "dark": lambda: _mat((90, 110, 125), rough=0.4),
+        "stair": lambda: _mat((214, 208, 198))}
+
+
+def _flat(m, mat):
+    """Unshare vertices (flat shading), set normals by hand and attach a PBR material."""
+    f = m.faces.reshape(-1)
+    out = trimesh.Trimesh(m.vertices[f], np.arange(len(f)).reshape(-1, 3), process=False)
+    out.vertex_normals = np.repeat(out.face_normals, 3, axis=0)
+    out.visual = trimesh.visual.TextureVisuals(material=MATS[mat]() if isinstance(mat, str) else mat)
+    return out
+
+
+def _boxes(specs):
+    """specs: (x0, x1, y0, y1, z0, z1) world-aligned boxes -> one mesh (None if empty)."""
+    ms = []
+    for x0, x1, y0, y1, z0, z1 in specs:
+        if x1 - x0 < 1e-4 or y1 - y0 < 1e-4 or z1 - z0 < 1e-4:
+            continue
+        b = trimesh.creation.box(extents=(x1 - x0, y1 - y0, z1 - z0))
+        b.apply_translation(((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2))
+        ms.append(b)
+    return trimesh.util.concatenate(ms) if ms else None
+
+
+def _opening(it, to_m):
+    """Axis-aligned opening box in metres: (x0, x1, z0, z1, axis) with axis 'x' or 'z' = long direction."""
+    x0, y0, x1, y1 = it["bbox_px"]
+    (ax, az), (bx, bz) = to_m((x0, y0)), to_m((x1, y1))
+    return min(ax, bx), max(ax, bx), min(az, bz), max(az, bz), ("x" if abs(bx - ax) >= abs(bz - az) else "z")
+
+
+def _wb(ax, u0, u1, y0, y1, v0, v1):
+    """Box from long-axis range u and across-axis range v (v is centred, given as offsets)."""
+    return (u0, u1, y0, y1, v0, v1) if ax == "x" else (v0, v1, y0, y1, u0, u1)
+
+
+def window_parts(o):
+    x0, x1, z0, z1, ax = o
+    u0, u1 = (x0, x1) if ax == "x" else (z0, z1)
+    c = ((z0 + z1) / 2) if ax == "x" else ((x0 + x1) / 2)
+    T = min(max((z1 - z0) if ax == "x" else (x1 - x0), 0.12), 0.3)
+    f = 0.05
+    B = lambda a, b, ya, yb, va, vb: _wb(ax, a, b, ya, yb, c + va, c + vb)
+    fr = [B(u0, u1, SILL, SILL + f, -T / 2, T / 2), B(u0, u1, HEAD - f, HEAD, -T / 2, T / 2),
+          B(u0, u0 + f, SILL, HEAD, -T / 2, T / 2), B(u1 - f, u1, SILL, HEAD, -T / 2, T / 2),
+          B((u0 + u1) / 2 - f / 4, (u0 + u1) / 2 + f / 4, SILL, HEAD, -T / 2 + 0.02, T / 2 - 0.02)]
+    if u1 - u0 < 0.7:
+        fr = fr[:4]
+    glass = [B(u0 + f, u1 - f, SILL + f, HEAD - f, -0.01, 0.01)]
+    return [("frame", _flat(_boxes(fr), "frame")), ("glass", _flat(_boxes(glass), "glass"))]
+
+
+def door_parts(o):
+    x0, x1, z0, z1, ax = o
+    u0, u1 = (x0, x1) if ax == "x" else (z0, z1)
+    c = ((z0 + z1) / 2) if ax == "x" else ((x0 + x1) / 2)
+    T = min(max((z1 - z0) if ax == "x" else (x1 - x0), 0.12), 0.3)
+    f = 0.05
+    B = lambda a, b, ya, yb, va, vb: _wb(ax, a, b, ya, yb, c + va, c + vb)
+    fr = [B(u0, u0 + f, 0, DOOR_H, -T / 2, T / 2), B(u1 - f, u1, 0, DOOR_H, -T / 2, T / 2),
+          B(u0, u1, DOOR_H - f, DOOR_H, -T / 2, T / 2)]
+    w = max(u1 - u0 - 2 * f, 0.2)
+    leaf = _boxes([B(u0 + f, u0 + f + w, 0.01, DOOR_H - f, -0.02, 0.02)])
+    hinge = np.array([(u0 + f) if ax == "x" else c, 0, c if ax == "x" else (u0 + f)])
+    leaf.apply_transform(trimesh.transformations.rotation_matrix(np.radians(28), [0, 1, 0], hinge))
+    return [("frame", _flat(_boxes(fr), "doorframe")), ("leaf", _flat(leaf, "leaf"))]
+
+
+def _cyl(cx, cz, r, y0, y1, n=12):
+    c = trimesh.creation.cylinder(radius=r, height=y1 - y0, sections=n)
+    c.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 2, [1, 0, 0]))  # axis -> Y
+    c.apply_translation((cx, (y0 + y1) / 2, cz))
+    return c
+
+
+def fixture_parts(kind, bb):
+    """bb = (x0, x1, z0, z1) metres. Simple low-poly shapes, long side along the longer axis."""
+    x0, x1, z0, z1 = bb
+    cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
+    ax = "x" if (x1 - x0) >= (z1 - z0) else "z"
+    L, Wd = max(x1 - x0, z1 - z0), min(x1 - x0, z1 - z0)
+    W_ = lambda u0, u1, y0, y1, v0, v1: _wb(ax, cx - L / 2 + u0 * L, cx - L / 2 + u1 * L, y0, y1,
+                                           (cz if ax == "x" else cx) - Wd / 2 + v0 * Wd,
+                                           (cz if ax == "x" else cx) - Wd / 2 + v1 * Wd)
+    if kind == "toilet":
+        tank = _boxes([W_(0, 0.3, 0.0, 0.8, 0.1, 0.9)])
+        bowl = _cyl(cx + (0.15 * L if ax == "x" else 0), cz + (0.15 * L if ax == "z" else 0), min(L * 0.3, Wd * 0.45), 0.0, 0.4)
+        seat_c = trimesh.util.concatenate([tank, bowl])
+        return [("body", _flat(seat_c, "ceramic"))]
+    if kind == "sink":
+        return [("body", _flat(_boxes([W_(0, 1, 0, 0.8, 0, 1)]), "ceramic")),
+                ("basin", _flat(_boxes([W_(0.15, 0.85, 0.8, 0.84, 0.2, 0.8)]), "dark"))]
+    if kind == "bathtub":
+        t = 0.1
+        parts = [W_(0, 1, 0, 0.1, 0, 1), W_(0, 1, 0.1, 0.55, 0, t), W_(0, 1, 0.1, 0.55, 1 - t, 1),
+                 W_(0, t * 0.6, 0.1, 0.55, 0, 1), W_(1 - t * 0.6, 1, 0.1, 0.55, 0, 1)]
+        return [("body", _flat(_boxes([(a, b, c, d, e, f) for a, b, c, d, e, f in parts]), "ceramic"))]
+    if kind == "shower":
+        return [("body", _flat(_boxes([W_(0, 1, 0, 0.08, 0, 1)]), "ceramic")),
+                ("glass", _flat(_boxes([W_(0, 1, 0.08, 2.0, 0.97, 1.0)]), "glass"))]
+    # stairs: flight along the long axis, risers ~0.18 m up to one storey
+    n = max(2, min(int(round(WALL_H / RISER)), int(L / 0.25)))
+    steps = [W_(i / n, 1, 0, (i + 1) * WALL_H / n, 0, 1) for i in range(n)]
+    return [("steps", _flat(_boxes(steps), "stair"))]
+
+
 def process(doc_id: str, art: Path, page: int = 1) -> dict:
     pm = json.loads((art / f"planmap-{page}.json").read_text())
     W, H = pm["image"]["w"], pm["image"]["h"]
@@ -112,46 +241,104 @@ def process(doc_id: str, art: Path, page: int = 1) -> dict:
     to_m = lambda p: ((p[0] - W / 2) * mpp, (p[1] - H / 2) * mpp)
     scene = trimesh.Scene()
     items, counts = {}, {}
-    # textured floor: the plan image
     img = Image.open(art / f"page-{page}.png").convert("RGB")
     s = TEX_MAX / max(img.size)
     if s < 1:
         img = img.resize((int(img.width * s), int(img.height * s)), Image.LANCZOS)
     hx, hz = W * mpp / 2, H * mpp / 2
-    V = np.array([[-hx, 0, -hz], [hx, 0, -hz], [hx, 0, hz], [-hx, 0, hz]], float)
+    # faint plan underlay, just above the room slabs
+    V = np.array([[-hx, 0, -hz], [hx, 0, -hz], [hx, 0, hz], [-hx, 0, hz]], float) + [0, FLOOR_T + 0.003, 0]
     uv = np.array([[0, 1], [1, 1], [1, 0], [0, 0]], float)
     floor = trimesh.Trimesh(V, [[0, 2, 1], [0, 3, 2]], process=False)
     floor.vertex_normals = np.tile([0.0, 1.0, 0.0], (4, 1))
-    floor.visual = trimesh.visual.TextureVisuals(uv=uv, image=img)
+    floor.visual = trimesh.visual.TextureVisuals(uv=uv, material=_mat((255, 255, 255), 90, rough=1.0, blend=True, tex=img))
     scene.add_geometry(floor, node_name="plan_floor", geom_name="plan_floor")
 
     def height_of(it, default):
         return float(it["props"].get("height_m") or default)
 
+    win_o = [_opening(it, to_m) for it in pm["items"] if it["kind"] == "window"]
+    door_o = [_opening(it, to_m) for it in pm["items"] if it["kind"] == "door"]
+
+    def register(iid, k, parts):
+        parts = [(n, m) for n, m in parts if m is not None]
+        if not parts:
+            return
+        if len(parts) == 1:
+            scene.add_geometry(parts[0][1], node_name=iid, geom_name=iid)
+        else:  # group node carries the item id; frame/glass/... hang under it
+            scene.graph.update(frame_to=iid, frame_from=scene.graph.base_frame, matrix=np.eye(4))
+            for n, m in parts:
+                scene.add_geometry(m, node_name=f"{iid}:{n}", geom_name=f"{iid}:{n}", parent_node_name=iid)
+        b = np.array([m.bounds for _, m in parts])
+        lo, hi = b[:, 0].min(axis=0), b[:, 1].max(axis=0)
+        counts[k] = counts.get(k, 0) + 1
+        items[iid] = {"node": iid, "usd_name": usd_name(iid),
+                      "bbox_m": [[round(float(v), 4) for v in lo], [round(float(v), 4) for v in hi]],
+                      "storey": "Floor 1", "kind": k}
+
     for it in pm["items"]:
         k = it["kind"]
-        if k not in ("wall", "door", "window", "room"):
+        if k not in ("wall", "door", "window", "room") + FIXTURES:
             continue
+        iid = it["item_id"]
         poly = it.get("polygon_px") or _bbox_poly(it)
         pts = [to_m(p) for p in poly]
         if k == "wall":
-            y0, y1 = 0.0, height_of(it, WALL_H)
+            hh = height_of(it, WALL_H)
+            g = Polygon(pts)
+            g = g if g.is_valid else g.buffer(0)
+            hit = lambda opens: [o for o in opens if g.bounds[0] - 0.5 < o[1] and o[0] < g.bounds[2] + 0.5
+                                 and g.bounds[1] - 0.5 < o[3] and o[2] < g.bounds[3] + 0.5]
+            wo, do = hit(win_o), hit(door_o)
+            if not wo and not do:
+                m = prism(pts, 0.0, hh)
+            else:
+                from shapely.ops import unary_union
+                from shapely.geometry import Polygon as P
+
+                half = max(0.15, float(it["props"].get("thickness_px") or 0) * mpp / 2 + 0.05)
+
+                def cutter(opens):
+                    shapes = []
+                    for x0, x1, z0, z1, ax in opens:
+                        e = max(0.0, half - ((z1 - z0) if ax == "x" else (x1 - x0)) / 2) + 0.01
+                        sh = P([(x0, z0 - e), (x1, z0 - e), (x1, z1 + e), (x0, z1 + e)]) if ax == "x" \
+                            else P([(x0 - e, z0), (x1 + e, z0), (x1 + e, z1), (x0 - e, z1)])
+                        if sh.intersection(g).area > 1e-4:
+                            shapes.append(sh)
+                    return unary_union(shapes) if shapes else None
+                dc, wc = cutter(do), cutter(wo)
+                low = g if dc is None else g.difference(dc)           # below sill: doors only
+                mid = low if wc is None else low.difference(wc)        # sill..head: doors + windows
+                lv = [(low, 0.0, SILL), (mid, SILL, min(HEAD, hh)), (g, min(HEAD, hh), hh)]
+                ms = [prism(p, y0, y1)
+                      for sh, y0, y1 in lv if sh is not None and not sh.is_empty and y1 - y0 > 1e-4
+                      for p in (list(sh.geoms) if sh.geom_type == "MultiPolygon" else [sh])
+                      if p.geom_type == "Polygon" and p.area > 1e-6]
+                ms = [x for x in ms if x is not None]
+                m = trimesh.util.concatenate(ms) if ms else None
+                if m is not None:
+                    vn = np.zeros_like(m.vertices)
+                    vn[m.faces.reshape(-1)] = np.repeat(m.face_normals, 3, axis=0)
+                    m.vertex_normals = vn
+            if m is not None:
+                m.visual = trimesh.visual.TextureVisuals(material=MATS["wall"]())
+            register(iid, k, [("wall", m)])
         elif k == "door":
-            y0, y1 = 0.0, height_of(it, DOOR_H)
+            register(iid, k, door_parts(_opening(it, to_m)))
         elif k == "window":
-            y0, y1 = SILL, HEAD
+            register(iid, k, window_parts(_opening(it, to_m)))
+        elif k == "room":
+            m = prism(pts, 0.0, FLOOR_T)
+            if m is not None:
+                rgb = ROOM_TINT.get(str(it["props"].get("room_type") or "").lower(), ROOM_DEFAULT)
+                m.visual = trimesh.visual.TextureVisuals(material=_mat(rgb, rough=0.9))
+            register(iid, k, [("floor", m)])
         else:
-            y0, y1 = 0.0, FLOOR_T
-        m = prism(pts, y0, y1)
-        if m is None:
-            continue
-        m.visual = trimesh.visual.ColorVisuals(vertex_colors=np.tile(COLORS[k], (len(m.vertices), 1)))
-        iid = it["item_id"]
-        scene.add_geometry(m, node_name=iid, geom_name=iid)
-        counts[k] = counts.get(k, 0) + 1
-        items[iid] = {"node": iid, "usd_name": usd_name(iid),
-                      "bbox_m": [[round(v, 4) for v in m.bounds[0]], [round(v, 4) for v in m.bounds[1]]],
-                      "storey": "Floor 1", "kind": k}
+            x0, y0, x1, y1 = it["bbox_px"]
+            (ax_, az_), (bx_, bz_) = to_m((x0, y0)), to_m((x1, y1))
+            register(iid, k, fixture_parts(k, (min(ax_, bx_), max(ax_, bx_), min(az_, bz_), max(az_, bz_))))
     glb = scene.export(file_type="glb")
     (art / "scene.glb").write_bytes(glb)
     doc = json.loads((art / "doc.json").read_text()) if (art / "doc.json").exists() else {}
@@ -161,7 +348,8 @@ def process(doc_id: str, art: Path, page: int = 1) -> dict:
           "storeys": [{"name": "Floor 1", "elevation_m": 0.0}], "plan_image": f"page-{page}.png",
           "items": items, "source_planmap": f"planmap-{page}.json",
           "defaults": {"wall_m": WALL_H, "door_m": DOOR_H, "window_sill_m": SILL, "window_head_m": HEAD},
-          "note": "generated for demo: extruded from plan map with default heights",
+          "note": "generated for demo: extruded from plan map with default heights; "
+                  "stairs only when the plan map has a stairs item (none from raster plans)",
           "publishable": not (lic.startswith("CC-BY-ND") or lic.startswith("GPL"))}
     (art / "scene.json").write_text(json.dumps(sc, indent=1))
     return {"counts": counts, "glb_kb": len(glb) // 1024}
