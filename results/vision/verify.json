@@ -1,0 +1,101 @@
+{
+ "before": {
+  "window": 0.299,
+  "toilet": 0.725,
+  "sink": 0.594,
+  "shower_bathtub": 0.115,
+  "door": 0.369
+ },
+ "after_free_pass": {
+  "window": 0.32,
+  "toilet": 0.817,
+  "sink": 0.594,
+  "shower_bathtub": 0.123,
+  "door": 0.443
+ },
+ "after_free_pass_plus_wet_check": {
+  "window": 0.32,
+  "toilet": 0.817,
+  "sink": 0.594,
+  "shower_bathtub": 0.33,
+  "door": 0.443
+ },
+ "per_kind_note": "exact count accuracy, 241 held-out cubicasa drawings (n per kind in verify_rules.json). No kind falls.",
+ "geometry_rules_alone_heldout": {
+  "tiny": {
+   "window": 0.299,
+   "toilet": 0.725,
+   "sink": 0.594,
+   "shower_bathtub": 0.115,
+   "door": 0.369
+  },
+  "dup": {
+   "window": 0.299,
+   "toilet": 0.733,
+   "sink": 0.586,
+   "shower_bathtub": 0.123,
+   "door": 0.392
+  },
+  "on_wall": {
+   "window": 0.245,
+   "toilet": 0.725,
+   "sink": 0.594,
+   "shower_bathtub": 0.115,
+   "door": 0.233
+  },
+  "split": {
+   "window": 0.278,
+   "toilet": 0.725,
+   "sink": 0.594,
+   "shower_bathtub": 0.115,
+   "door": 0.369
+  }
+ },
+ "calibration": {
+  "set": "156 clean single-floor CubiCasa5K drawings, not referenced by any question",
+  "before": {
+   "window": 0.314,
+   "door": 0.333,
+   "toilet": 0.776,
+   "sink": 0.231,
+   "shower_bathtub": 0.115
+  },
+  "after_free_pass": {
+   "window": 0.417,
+   "door": 0.442,
+   "toilet": 0.833,
+   "sink": 0.231,
+   "shower_bathtub": 0.115
+  },
+  "wet_check_shower_bathtub": {
+   "before": 0.115,
+   "after": 0.327
+  }
+ },
+ "model_check_zone_sweep_calib": "flash-lite crop yes/no on conf 0.45-0.85 items did not beat the free pass for door/window/toilet (best: door 0.455 vs 0.442, window 0.404 vs 0.417, toilet 0.788 vs 0.833); not run on held-out, not enabled",
+ "bathroom_crop_check": "showers+bathtubs from bathroom/wc/sauna room crops via call('verify_item'): held-out 0.115 to 0.330 (n=227), calib 0.115 to 0.327; model undercounts (calib error -1 in 71 of 156)",
+ "cost_usd": {
+  "V-09-pilot": {
+   "calls": 6,
+   "usd": 0.0016
+  },
+  "V-09-calib": {
+   "calls": 1187,
+   "usd": 0.3358
+  },
+  "V-09-wet-calib": {
+   "calls": 255,
+   "usd": 0.0871
+  },
+  "V-09-wet-held": {
+   "calls": 410,
+   "usd": 0.1401
+  }
+ },
+ "cost_usd_total": 0.5646,
+ "cost_usd_per_drawing": {
+  "free_pass": 0.0,
+  "bathroom_check_held": 0.00062
+ },
+ "bulk_provider_note": "bulk runs forced verify_item to Runware via an in-process chain_for override (NVIDIA free tier rate limits); engine/ untouched"
+}

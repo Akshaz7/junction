@@ -91,6 +91,108 @@
    "under": 87
   }
  },
+ "by_official_split": {
+  "official_unseen_val_test": {
+   "overall_exact_acc": 0.542,
+   "n_questions": 321,
+   "per_kind": {
+    "balcony": {
+     "n": 12,
+     "exact_acc": 0.75
+    },
+    "bathroom": {
+     "n": 16,
+     "exact_acc": 0.625
+    },
+    "bedroom": {
+     "n": 21,
+     "exact_acc": 0.714
+    },
+    "door": {
+     "n": 32,
+     "exact_acc": 0.375
+    },
+    "kitchen": {
+     "n": 25,
+     "exact_acc": 0.84
+    },
+    "sauna": {
+     "n": 24,
+     "exact_acc": 0.5
+    },
+    "shower_bathtub": {
+     "n": 43,
+     "exact_acc": 0.093
+    },
+    "sink": {
+     "n": 44,
+     "exact_acc": 0.705
+    },
+    "toilet": {
+     "n": 43,
+     "exact_acc": 0.744
+    },
+    "wc_room": {
+     "n": 17,
+     "exact_acc": 0.765
+    },
+    "window": {
+     "n": 44,
+     "exact_acc": 0.341
+    }
+   }
+  },
+  "official_train": {
+   "overall_exact_acc": 0.516,
+   "n_questions": 1573,
+   "per_kind": {
+    "balcony": {
+     "n": 56,
+     "exact_acc": 0.911
+    },
+    "bathroom": {
+     "n": 95,
+     "exact_acc": 0.579
+    },
+    "bedroom": {
+     "n": 133,
+     "exact_acc": 0.684
+    },
+    "door": {
+     "n": 144,
+     "exact_acc": 0.368
+    },
+    "kitchen": {
+     "n": 136,
+     "exact_acc": 0.735
+    },
+    "sauna": {
+     "n": 141,
+     "exact_acc": 0.433
+    },
+    "shower_bathtub": {
+     "n": 184,
+     "exact_acc": 0.12
+    },
+    "sink": {
+     "n": 195,
+     "exact_acc": 0.569
+    },
+    "toilet": {
+     "n": 197,
+     "exact_acc": 0.721
+    },
+    "wc_room": {
+     "n": 95,
+     "exact_acc": 0.716
+    },
+    "window": {
+     "n": 197,
+     "exact_acc": 0.289
+    }
+   }
+  }
+ },
  "planmap": "planmap-1.json",
  "note": "all questions are on held-out drawings; no thresholds tuned on them except coarse det_size choice (4 fixtures)",
  "rows": [

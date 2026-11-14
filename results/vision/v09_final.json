@@ -1,0 +1,30 @@
+{
+ "set": "241 held-out CubiCasa5K drawings (exact count accuracy)",
+ "before": {
+  "window": 0.299,
+  "toilet": 0.725,
+  "sink": 0.594,
+  "shower_bathtub": 0.115,
+  "door": 0.369
+ },
+ "default_free_pass": {
+  "window": 0.32,
+  "toilet": 0.817,
+  "sink": 0.594,
+  "shower_bathtub": 0.123,
+  "door": 0.443
+ },
+ "free_pass_plus_bathroom_crop_check": {
+  "window": 0.32,
+  "toilet": 0.817,
+  "sink": 0.594,
+  "shower_bathtub": 0.33,
+  "door": 0.443
+ },
+ "cost_usd_per_drawing": {
+  "free_pass": 0.0,
+  "bathroom_check_held": 0.00062
+ },
+ "cost_usd_total_experiments": 0.5646,
+ "note": "free pass is default (cost 0); bathroom crop check (verify_item, ~0.0006 USD/drawing) lifts showers+bathtubs 0.123 to 0.330 and is opt-in"
+}

@@ -1,0 +1,21 @@
+{
+  "set": "data/sets/router_test.jsonl",
+  "unique_questions": 120,
+  "force_model": true,
+  "accuracy_type_and_kind": 0.95,
+  "by_source": {
+    "model": {
+      "correct": 114,
+      "n": 120
+    }
+  },
+  "model_calls": 120,
+  "providers": {
+    "nvidia": 118,
+    "runware": 2
+  },
+  "total_cost_usd": 0.000295,
+  "mean_cost_per_question_usd": 2.46e-06,
+  "mean_cost_per_model_call_usd": 2.46e-06,
+  "max_usd_guard": 0.1
+}

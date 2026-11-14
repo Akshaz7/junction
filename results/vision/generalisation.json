@@ -1,0 +1,98 @@
+{
+ "swiss_dwellings": {
+  "docs": 65,
+  "abstain_rate": 0.446,
+  "accuracy_all": {
+   "door": 0.015,
+   "window": 0.215,
+   "toilet": 0.077,
+   "sink": 0.277,
+   "bathtub": 0.0
+  },
+  "accuracy_answered": {
+   "door": 0.028,
+   "window": 0.278,
+   "toilet": 0.056,
+   "sink": 0.25,
+   "bathtub": 0.0
+  },
+  "answered": {
+   "door": 36,
+   "window": 36,
+   "toilet": 36,
+   "sink": 36,
+   "bathtub": 31
+  },
+  "within1": {
+   "door": 0.092,
+   "window": 0.354,
+   "toilet": 0.2,
+   "sink": 0.477,
+   "bathtub": 0.196
+  },
+  "mae": {
+   "door": 14.15,
+   "window": 5.71,
+   "toilet": 3.34,
+   "sink": 2.62,
+   "bathtub": 2.89
+  },
+  "pred_over_gt": {
+   "door": 0.48,
+   "window": 0.65,
+   "toilet": 0.07,
+   "sink": 0.48,
+   "bathtub": 0.0
+  }
+ },
+ "wikimedia": {
+  "docs": 40,
+  "abstain_rate": 0.925,
+  "accuracy": "no ground truth in the dataset (no questions for this source)",
+  "mean_items": {
+   "wall": 42.3,
+   "door": 0.9,
+   "window": 5.3,
+   "room": 5.7,
+   "text": 20.1
+  },
+  "scale_methods": {
+   "door-prior": 20,
+   "none": 18,
+   "dimension": 2
+  }
+ },
+ "habs": {
+  "docs": 40,
+  "abstain_rate": 1.0,
+  "accuracy": "no ground truth in the dataset (no questions for this source)",
+  "mean_items": {
+   "wall": 43.7,
+   "door": 0.9,
+   "window": 1.6,
+   "room": 7.4,
+   "text": 61.9
+  },
+  "scale_methods": {
+   "none": 26,
+   "door-prior": 14
+  }
+ },
+ "finna": {
+  "docs": 40,
+  "abstain_rate": 0.975,
+  "accuracy": "no ground truth in the dataset (no questions for this source)",
+  "mean_items": {
+   "wall": 35.2,
+   "door": 0.1,
+   "window": 3.0,
+   "room": 6.8,
+   "text": 19.1
+  },
+  "scale_methods": {
+   "dimension": 1,
+   "none": 21,
+   "door-prior": 18
+  }
+ }
+}

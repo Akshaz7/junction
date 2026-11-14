@@ -1,0 +1,49 @@
+{
+ "n": 2199,
+ "by_source": {
+  "cubicasa5k_clean": 210,
+  "floorplancad": 1983,
+  "synthetic": 6
+ },
+ "by_split": {
+  "val": 253,
+  "train": 1946
+ },
+ "items_by_kind": {
+  "room": 2684,
+  "wall": 5948,
+  "window": 3116,
+  "door": 9284,
+  "sink": 556,
+  "toilet": 899,
+  "shower": 184,
+  "bathtub": 305
+ },
+ "heldout_ids": 4787,
+ "heldout_docs": 5953,
+ "heldout_images_hashed": 4768,
+ "overlap": 0,
+ "dropped_by_hash": [
+  "cc_high_quality_2135",
+  "cc_high_quality_architectural_10646",
+  "cc_high_quality_architectural_1856",
+  "fp_0839-0043",
+  "fp_0635-0027",
+  "fp_0591-0784",
+  "fp_1293-0100",
+  "fp_0883-0015",
+  "fp_1307-0022",
+  "fp_0372-0050",
+  "fp_1244-2164",
+  "fp_0011-0056",
+  "fp_1010-0021",
+  "fp_0689-0013",
+  "fp_1229-2019",
+  "fp_0360-0020",
+  "fp_1010-0027",
+  "fp_0899-0015",
+  "fp_0797-2382",
+  "fp_0113-0043"
+ ],
+ "check": "ids (clean list vs cubicasa_heldout_ids), doc ids (heldout_docs), sha256 + dHash(<=6) vs every held-out CubiCasa5K image"
+}
