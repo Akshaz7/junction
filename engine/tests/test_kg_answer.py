@@ -96,6 +96,12 @@ def test_project_question_contract(case, graph):
         path = result["reasoning"]["graph_path"]
         assert path and result["citations"]
         assert result["answer"]["confidence"] == pytest.approx(min(e["confidence"] for e in path))
+        nodes = {n["id"]: n for n in graph["nodes"]}
+        for step in path:
+            assert step["from_label"] == nodes[step["from_id"]]["label"]
+            assert step["to_label"] == nodes[step["to_id"]]["label"]
+            assert any(e["from"] == step["from_id"] and e["to"] == step["to_id"]
+                       and e["kind"] == step["edge_kind"] for e in graph["edges"])
     else:
         assert result["answer"]["confidence"] == 0
     import jsonschema
@@ -179,6 +185,9 @@ def test_text_reference_counts_as_an_appearance_without_claiming_identity(graph)
     r = answer("Where else does door D12 appear?", PROJECT, ROOT, graph=graph)
     assert r["answer"]["value"] == 2 and r["answer"]["confidence"] == .7
     assert any(s["edge_kind"] == "references" for s in r["reasoning"]["graph_path"])
+    reference = next(s for s in r["reasoning"]["graph_path"] if s["edge_kind"] == "references")
+    # Lookup traverses this incoming edge from the door, but IDs keep the source edge direction.
+    assert (reference["from_id"], reference["to_id"]) == (sheet["id"], "door:architecture:d1")
     assert any(c["doc_id"] == "notes" and c["page"] == 3 for c in r["citations"])
     affected = impact(graph, "door:architecture:d1", {"prop": "removed", "value": True})
     assert any(e["node"]["id"] == sheet["id"] for e in affected)

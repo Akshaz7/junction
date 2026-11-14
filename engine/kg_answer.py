@@ -155,8 +155,8 @@ def _path_steps(graph, chains):
                 continue
             e = edges[eid]
             seen.add(eid)
-            steps.append({"from_label": _label(nodes[e["from"]]), "edge_kind": e["kind"],
-                          "to_label": _label(nodes[e["to"]]), "method": e.get("method") or "rule",
+            steps.append({"from_id": e["from"], "from_label": _label(nodes[e["from"]]), "edge_kind": e["kind"],
+                          "to_id": e["to"], "to_label": _label(nodes[e["to"]]), "method": e.get("method") or "rule",
                           "confidence": confidence(e)})
     return steps
 
