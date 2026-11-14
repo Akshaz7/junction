@@ -1,8 +1,12 @@
 """Changes feed built from REAL version series (artifacts/series) + PDF diff caches; no synthetic revisions."""
 import json
 
+import base64
+
 import pytest
 from fastapi.testclient import TestClient
+
+_PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==")
 
 SID = "proj--sheet-a1b2c3"
 DOCS = [f"opening_design__proj-transfer-2019010{n}-a501" for n in (1, 2, 3)]
@@ -96,7 +100,7 @@ def test_synthetic_revision_rows_are_purged_and_route_gone(schema_url, tmp_path,
 
 def test_uploads_matching_a_series_become_new_versions(client, monkeypatch):
     monkeypatch.setenv("INGEST", "0")
-    r = client.post("/api/upload", files={"file": ("A501 Wall Sections.png", b"\x89PNG")})
+    r = client.post("/api/upload", files={"file": ("A501 Wall Sections.png", _PNG)})
     doc = r.json()["doc_id"]
     feed = client.get("/api/changes").json()["changes"]
     top = feed[0]
@@ -107,7 +111,7 @@ def test_uploads_matching_a_series_become_new_versions(client, monkeypatch):
 
 def test_unmatched_upload_is_new_document(client, monkeypatch):
     monkeypatch.setenv("INGEST", "0")
-    doc = client.post("/api/upload", files={"file": ("zzz plan.png", b"\x89PNG")}).json()["doc_id"]
+    doc = client.post("/api/upload", files={"file": ("zzz plan.png", _PNG)}).json()["doc_id"]
     top = client.get("/api/changes").json()["changes"][0]
     assert top["type"] == "new_document" and top["doc_b"] == doc
 
@@ -134,7 +138,7 @@ def test_hidden_pair_is_absent_from_feed_groups_refresh_and_detail(client, monke
     assert client.get(f"/api/changes/ser:{SID}:1").status_code == 200
     assert client.get(f"/api/changes/ser:{SID}:2").status_code == 404
     monkeypatch.setenv("INGEST", "0")
-    did = client.post("/api/upload", files={"file": ("A501.png", b"\x89PNG")}).json()["doc_id"]
+    did = client.post("/api/upload", files={"file": ("A501.png", _PNG)}).json()["doc_id"]
     assert client.get(f"/api/changes/upl:{did}").status_code == 404
     assert f"upl:{did}" not in [e["id"] for e in client.get("/api/changes").json()["changes"]]
 

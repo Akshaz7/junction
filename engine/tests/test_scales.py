@@ -240,15 +240,20 @@ def test_conflicting_scales_on_one_line_are_retained_as_unknown():
 
 
 def test_unknown_dxf_units_do_not_default_to_metres(tmp_path):
+    import json
+
     import ezdxf
 
     from pipeline.dxf_planmap import process
     doc = ezdxf.new()
     doc.units = 0
+    doc.modelspace().add_lwpolyline([(0, 0), (4, 0), (4, 3), (0, 3)], close=True)
     p = tmp_path / "unitless.dxf"
     doc.saveas(p)
-    with pytest.raises(RuntimeError, match="units are missing"):
-        process("test__unitless", tmp_path, p)
+    (tmp_path / "pages.json").write_text(json.dumps({"source": "dxf", "pages": [{"w": 800, "h": 600}]}))
+    process("test__unitless", tmp_path, p)   # F-ROBUST: ingest continues, but nothing is measured
+    scale = json.loads((tmp_path / "planmap-1.json").read_text())["scale"]
+    assert scale["m_per_px"] is None and scale["method"] == "none"
 
 
 def test_printed_area_wins_even_when_stale_geometry_is_present(tmp_path):
