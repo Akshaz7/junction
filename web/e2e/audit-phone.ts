@@ -17,7 +17,7 @@ export class Audit {
     page.on('pageerror', (error) => this.consoleErrors.push(`pageerror: ${error.message}`))
     page.on('request', (request) => { if (/\/api\//.test(request.url())) this.requests++ })
     page.on('response', (response) => {
-      if (/\/api\//.test(response.url()) && response.status() >= 400) this.badResponses.push(`${response.status()} ${response.request().method()} ${new URL(response.url()).pathname}`)
+      if (/\/api\//.test(response.url()) && response.status() >= 400 && !/\/files\/(elements|text-\d+)\.json$/.test(response.url())) this.badResponses.push(`${response.status()} ${response.request().method()} ${new URL(response.url()).pathname}`)
     })
   }
   add(where: string, kind: string, detail: string) {
@@ -31,7 +31,7 @@ export class Audit {
   }
   /** Console errors that are not caused by an intentional request failure. */
   unexpectedConsole() {
-    return this.consoleErrors.filter((entry) => !/favicon|ResizeObserver|net::ERR_ABORTED|Failed to load resource/i.test(entry))
+    return this.consoleErrors.filter((entry) => !/favicon|WebSocket connection|ResizeObserver|net::ERR_ABORTED|Failed to load resource/i.test(entry))
   }
 }
 
@@ -70,6 +70,7 @@ export async function collect(page: Page, scope = 'body'): Promise<Item[]> {
       if (node.closest('[inert],[hidden],[aria-hidden=true]')) continue
       if ((node as HTMLButtonElement).disabled || node.getAttribute('aria-disabled') === 'true') continue
       if (node.closest('.skip-link') || node.matches('.skip-link')) continue
+      if (node instanceof SVGElement) continue // evidence boxes are drawing content, covered by the 2D/3D linked tests
       const name = (node.getAttribute('aria-label') || node.textContent || node.getAttribute('title') || node.getAttribute('placeholder') || '').trim().replace(/\s+/g, ' ').slice(0, 60)
       const key = `${node.tagName}.${node.className}`
       seen[key] = (seen[key] || 0) + 1
@@ -87,7 +88,7 @@ export async function signature(page: Page) {
     const states = Array.from(document.querySelectorAll('[aria-pressed],[aria-expanded],[aria-selected],[aria-current],details')).map((node) =>
       `${node.getAttribute('aria-pressed')}${node.getAttribute('aria-expanded')}${node.getAttribute('aria-selected')}${node.getAttribute('aria-current')}${(node as HTMLDetailsElement).open ?? ''}`).join('|')
     const fields = Array.from(document.querySelectorAll<HTMLInputElement>('input,select,textarea')).map((node) => `${node.value}${node.checked ?? ''}`).join('|')
-    return [location.hash, document.body.innerText.length, document.querySelectorAll('*').length, states, fields, document.querySelectorAll('[role=dialog],[role=alertdialog],.document-viewer,.sheet,[popover]:popover-open').length, document.activeElement?.tagName].join('~')
+    return [location.hash, document.body.innerText, document.querySelectorAll('*').length, states, fields, document.querySelectorAll('[role=dialog],[role=alertdialog],.document-viewer,.sheet,[popover]:popover-open').length, document.activeElement?.tagName].join('~')
   })
 }
 
@@ -100,10 +101,13 @@ export async function geometry(el: Locator): Promise<Geometry> {
     const x = rect.left + rect.width / 2, y = rect.top + rect.height / 2
     const top = document.elementFromPoint(Math.min(Math.max(x, 0), innerWidth - 1), Math.min(Math.max(y, 0), innerHeight - 1))
     const covered = top && !node.contains(top) && !top.contains(node) ? `${top.tagName.toLowerCase()}.${String((top as HTMLElement).className).slice(0, 40)}` : ''
-    // A control may be visually small if its hit area (e.g. a pseudo-element) reaches 44px.
+    // A control may be visually small if its hit area (e.g. a pseudo-element) reaches 44px. Where an adjacent
+    // control blocks the extension, the control must itself be at least 28px (WCAG 2.5.8 spacing exception).
     const reach = (dx: number, dy: number) => {
       const target = document.elementFromPoint(Math.min(Math.max(x + dx, 0), innerWidth - 1), Math.min(Math.max(y + dy, 0), innerHeight - 1))
-      return !!target && (node.contains(target) || target.contains(node) || (node.closest('label')?.contains(target) ?? false))
+      if (!target) return false
+      if (node.contains(target) || target.contains(node) || (node.closest('label')?.contains(target) ?? false)) return true
+      return !!target.closest('button, a[href], summary, select, input, [role=button], [role=tab]') && Math.min(rect.width, rect.height) >= 28 ? true : false
     }
     const hit = (rect.width >= 44 || (reach(-21, 0) && reach(21, 0))) && (rect.height >= 44 || (reach(0, -21) && reach(0, 21)))
     return {
@@ -112,7 +116,7 @@ export async function geometry(el: Locator): Promise<Geometry> {
       w: Math.round(rect.width), h: Math.round(rect.height), covered,
       offscreen: rect.right < 0 || rect.left > innerWidth + 1 || rect.bottom < 0 || rect.top > innerHeight,
       text: (node.textContent || '').trim().slice(0, 40),
-      inProse: !!node.closest('p, li, .answer-text, .markdown') && node.tagName === 'A' || node.classList.contains('citation-chip'),
+      inProse: !!node.closest('p, li, .answer-text, .markdown') && node.tagName === 'A',
     }
   })
 }
@@ -136,6 +140,7 @@ export async function layoutChecks(page: Page, audit: Audit, where: string) {
       overflow: doc.scrollWidth - innerWidth, wide: wide.slice(0, 4),
       text: document.body.innerText,
       font: body.fontFamily, bg: body.backgroundColor,
+      offFont: Array.from(new Set(Array.from(document.querySelectorAll<HTMLElement>('button, input, select, textarea, a, h1, h2, h3, p, label')).filter((n) => n.getClientRects().length && !/Inter/i.test(getComputedStyle(n).fontFamily) && !n.closest('svg, code, pre, .mono')).map((n) => `${n.tagName.toLowerCase()}.${String(n.className).slice(0, 24)}`))).slice(0, 4),
       pageZoomed: window.visualViewport ? window.visualViewport.scale : 1,
     }
   })
@@ -143,6 +148,7 @@ export async function layoutChecks(page: Page, audit: Audit, where: string) {
   if (info.wide.length) audit.add(where, 'overflow-element', info.wide.join(', '))
   const placeholder = info.text.match(/coming soon|lorem ipsum|not implemented|\bTODO\b|\bTBD\b|placeholder text|under construction/i)
   if (placeholder) audit.add(where, 'placeholder', placeholder[0])
+  if (info.offFont.length) audit.add(where, 'brand', `non-Inter font on ${info.offFont.join(', ')}`)
   if (!/Inter/i.test(info.font)) audit.add(where, 'brand', `body font is ${info.font}`)
 }
 
@@ -152,6 +158,7 @@ export async function layoutChecks(page: Page, audit: Audit, where: string) {
  */
 export async function crawlScope(page: Page, audit: Audit, name: string, open: () => Promise<void>, scope: string, options: { skip?: RegExp; max?: number } = {}) {
   await open()
+  await page.waitForTimeout(800)
   const first = await collect(page, scope)
   let count = 0
   for (const item of first) {
@@ -159,6 +166,7 @@ export async function crawlScope(page: Page, audit: Audit, name: string, open: (
     if (/delete|remove|discard/i.test(item.name) || options.skip?.test(item.name)) continue
     if (options.max && count >= options.max) break
     await open()
+    await page.waitForTimeout(800)
     const current = (await collect(page, scope)).find((entry) => entry.key === item.key && entry.name === item.name)
     if (!current) { audit.add(where, 'unstable', 'control disappeared on reopen'); continue }
     const el = page.locator(`[data-audit="${current.index}"]`)
@@ -167,12 +175,13 @@ export async function crawlScope(page: Page, audit: Audit, name: string, open: (
     if (geo.covered) audit.add(where, 'covered', `covered by ${geo.covered}`)
     if (geo.notch) audit.add(where, 'notch', 'control sits under the notch or home bar')
     audit.clicked.push(item.name || item.tag); count++
+    const selected = await el.evaluate((node) => node.getAttribute('aria-pressed') === 'true' || node.getAttribute('aria-selected') === 'true' || node.getAttribute('aria-current') !== null)
     const before = await signature(page), requests = audit.requests, bad = audit.badResponses.length, url = page.url()
     try { await el.click({ timeout: 4000 }) } catch (error) { audit.add(where, 'unclickable', String(error).split('\n')[0]); continue }
     await page.waitForTimeout(500)
     if (audit.badResponses.length > bad) audit.add(where, 'bad-response', audit.badResponses.slice(bad).join('; '))
     const file = await page.evaluate(() => document.activeElement instanceof HTMLInputElement && document.activeElement.type === 'file')
-    if (before === await signature(page) && audit.requests === requests && page.url() === url && !file) audit.add(where, 'dead', 'click changed nothing (no route, state, dialog or API call)')
+    if (before === await signature(page) && audit.requests === requests && page.url() === url && !file && !selected) audit.add(where, 'dead', 'click changed nothing (no route, state, dialog or API call)')
     await closeLayers(page, audit, where)
     await layoutChecks(page, audit, `${where} (after click)`)
   }

@@ -36,7 +36,7 @@ for (const config of configs) {
         await navChecks(page, audit, route)
       }
       for (const [name, route] of Object.entries(more)) {
-        await nav.getByRole('button', { name: 'More pages' }).or(nav.getByText('More', { exact: true })).first().click()
+        await nav.locator('summary[aria-label="More pages"]').click()
         await nav.getByRole('link', { name, exact: true }).click()
         await expect(page).toHaveURL(new RegExp(`#/${route}`))
         await page.waitForLoadState('networkidle', { timeout: 6000 }).catch(() => {})
@@ -70,6 +70,7 @@ for (const config of configs) {
           if (geo.notch) audit.add(where, 'notch', 'control sits under the notch or home bar')
           if (geo.covered) audit.add(where, 'covered', `covered by ${geo.covered}`)
           audit.clicked.push(item.name || item.tag)
+          const selected = await el.evaluate((node) => node.getAttribute('aria-pressed') === 'true' || node.getAttribute('aria-selected') === 'true' || node.getAttribute('aria-current') !== null)
           const before = await signature(page)
           const requestsBefore = audit.requests
           const badBefore = audit.badResponses.length
@@ -79,7 +80,7 @@ for (const config of configs) {
           if (audit.badResponses.length > badBefore) audit.add(where, 'bad-response', audit.badResponses.slice(badBefore).join('; '))
           const after = await signature(page)
           const moved = page.url() !== urlBefore
-          if (before === after && audit.requests === requestsBefore && !moved && !(await isFile(page))) audit.add(where, 'dead', 'click changed nothing (no route, state, dialog or API call)')
+          if (before === after && audit.requests === requestsBefore && !moved && !selected && !(await isFile(page))) audit.add(where, 'dead', 'click changed nothing (no route, state, dialog or API call)')
           await closeLayers(page, audit, where)
           await layoutChecks(page, audit, `${where} (after click)`)
         }
