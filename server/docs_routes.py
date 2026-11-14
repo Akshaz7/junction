@@ -1,5 +1,6 @@
 """GET /api/docs, GET /api/docs/{doc_id}, GET /api/folders, GET /api/docs/{doc_id}/source (CONTRACT 5.9 + parity items)."""
 import json
+import os
 import re
 
 from fastapi import APIRouter, HTTPException
@@ -44,10 +45,23 @@ async def _document(doc_id: str) -> dict:
     return dict(r)
 
 
+def _hide_empty() -> bool:
+    return os.environ.get("HIDE_EMPTY_DOCS", "0") == "1"
+
+
+async def _visible(pool, rows):
+    """HIDE_EMPTY_DOCS=1 (deploy image): list only documents this server can show (preview + data). Nothing fake."""
+    if not _hide_empty():
+        return rows
+    from . import artifact_store
+    ok = await artifact_store.servable_ids(pool)
+    return [r for r in rows if r["doc_id"] in ok or r["doc_id"].startswith("uploads__")]
+
+
 @router.get("/docs")
 async def list_docs():
     pool = await _pool_or_503()
-    rows = await pool.fetch(f"select {COLS} from documents order by source, title, doc_id")
+    rows = await _visible(pool, await pool.fetch(f"select {COLS} from documents order by source, title, doc_id"))
     stored, by_doc = docmeta_store.docmeta_file(), docmeta_store.series_by_doc()
     sources: dict[str, list] = {}
     for r in rows:
@@ -61,7 +75,7 @@ async def list_docs():
 async def folders():
     """Folder tree Project > Discipline [> Sub-discipline] with document counts."""
     pool = await _pool_or_503()
-    rows = await pool.fetch("select doc_id, source, title, kind, files from documents")
+    rows = await _visible(pool, await pool.fetch("select doc_id, source, title, kind, files from documents"))
     recs = []
     for r in rows:
         d = dict(r)
@@ -95,6 +109,15 @@ async def doc_source(doc_id: str):
     if isinstance(rec.get("files"), str):
         rec["files"] = json.loads(rec["files"])
     p = docmeta_store.source_file(rec)
+    if p is None:
+        from . import artifact_store
+        pool = await db.get_pool()
+        if pool is not None:
+            try:
+                if await artifact_store.fetch_source(pool, doc_id):
+                    p = docmeta_store.source_file(rec)
+            except Exception as e:  # noqa: BLE001
+                print("source restore failed:", doc_id, repr(e)[:200])
     if p is None:
         return JSONResponse({"status": "not_built", "detail": "original file is not available on this server"}, status_code=404)
     return FileResponse(p, filename=p.name)

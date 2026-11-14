@@ -9,7 +9,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
-from . import db, stub_engine
+from . import config, db, stub_engine
 from . import scene_edits
 from .live import publish, record_edit
 from .schema import validate_answer
@@ -21,7 +21,41 @@ def _real_engine(question, doc_ids, on_event, scene_state=None, history=None):
     return answer(question, doc_ids, on_event, scene_state=scene_state, history=history)
 
 
+def _no_data_answer(question, doc_ids, on_event=None):
+    """Selected documents that have nothing to answer from (no IFC elements, plan map or PDF text): refuse at once,
+    $0, before any model call. Returns an answer object or None."""
+    # Only real dataset/upload ids ("source__name"); ids without "__" are never refused here.
+    if not doc_ids or ENGINE is not _real_engine or os.environ.get("FAST_REFUSE", "1") == "0" \
+            or any("__" not in d for d in doc_ids):
+        return None
+    try:
+        from pathlib import Path
+
+        from engine.solvers.data import load_doc, load_sheet_parent
+        from engine.solvers.solve import _abstain, _step
+        root = Path(config.artifacts_dir())
+        for d in doc_ids:
+            dd = root / d
+            if load_doc(d, root) or load_sheet_parent(d, root) or any(dd.glob("text*.json")):
+                return None
+        running = any(json.loads((root / d / "ingest.json").read_text()).get("status") == "running"
+                      for d in doc_ids if (root / d / "ingest.json").is_file())
+        why = ("This document is still being processed, so there is nothing to answer from yet. Try again in a moment."
+               if running else "This document has no readable drawing data on this server (no plan map, model or text), "
+               "so I cannot answer questions about it.")
+        t0 = time.perf_counter()
+        if on_event:
+            on_event("status", {"text": "Checking the document\u2026"})
+        return _abstain(question, doc_ids[0], why, [_step("route", "no data for the selected document -> refused, no model call")],
+                        "index", t0)
+    except Exception:  # noqa: BLE001  the check only ever saves time; the engine decides otherwise
+        return None
+
+
 def _run_engine(question, doc_ids, on_event, scene_state=None, history=None):
+    quick = _no_data_answer(question, doc_ids, on_event)
+    if quick is not None:
+        return quick
     # E-20: hidden items from this chat's scene edits shape later answers ("how many windows" after "remove W7").
     # history: earlier turns of this chat, for plain conversation without a document.
     if ENGINE is _real_engine:

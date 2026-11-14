@@ -86,3 +86,12 @@ Not available in the deploy image: IFC conversion (stored only, status partial),
 Local `docker run --memory=512m`, no model keys, image 336 MB (1.55 GB unpacked on disk). `pipeline/ifc_scene.convert_py` runs the geometry iterator with
 one thread (`IFC_CONVERT_THREADS`, default 1) and keeps float32 arrays; with 4 threads a 9.6 MB IFC peaked at about 830 MB and was OOM-killed.
 Now: 9.6 MB IFC ready in 55 s (peak 306 MB), 12 MB IFC in 21 s (peak 296 MB). The API idles at about 55 MB. PNG/DXF extrusion needs a VLM key to read the plan; without one they end "ready" with no plan map.
+
+## Dataset artifacts in PostgreSQL (HIDE_EMPTY_DOCS)
+
+The image bakes only `deploy/demo_artifacts`. All other dataset docs keep their previews, plan maps, elements, text and lean 3D in the `doc_artifacts` table and are restored to `/app/artifacts` on first request. `HIDE_EMPTY_DOCS=1` (set in the Dockerfile) lists only docs that have a preview and data in PG or on disk; questions about a doc with no data refuse in under 1 s at $0 (`FAST_REFUSE`, default on).
+
+Load (needs `TARGET_DATABASE_URL`, never printed; dry run is the default):
+`python3 deploy/load_artifacts_pg.py --docs-file <deployed /api/docs json> --apply`
+
+Measured: 353 docs, about 700 MB in PG. Restored docs accumulate on the container's ephemeral disk.
