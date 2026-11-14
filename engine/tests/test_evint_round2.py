@@ -158,3 +158,17 @@ def test_reader_chooses_evidenced_dimension_over_planner_scale(tmp_path):
     assert 'length 1.000 m' in text
     assert s.calculations[0]['scale_origin'].startswith('ranked page scale:')
     assert not s.calculations[0]['supplied_scale']
+
+
+@pytest.mark.parametrize('trace_step,method_id', [('forced', 'scan-vision-best-effort'), ('read', 'scan-vision-read')])
+def test_model_description_is_not_labelled_as_a_deterministic_inventory(trace_step, method_id, tmp_path):
+    fixture(tmp_path)
+    r = response()
+    r['answer']['confidence'] = .2
+    r['trace'] = [{'step': trace_step, 'model': 'generated for demo', 'detail': 'model reading with page image and inventory'}]
+    scan_calc.attach(r, 'What is this?', tmp_path)
+    confidence.attach(r, 'What is this?', tmp_path)
+    method = r['reasoning']['calc']['method']
+    assert method['id'] == method_id
+    assert 'background evidence' in method['why_chosen']
+    assert any(f['label'] == 'Source: vision-model reading' for f in r['reasoning']['confidence']['factors'])

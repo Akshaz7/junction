@@ -214,7 +214,8 @@ def attach(res, question, root):
     if kinds:
         source = ('ifc' if kinds == {'ifc'} else 'cad' if kinds <= {'dxf', 'dwg'} else
                   'scan' if kinds <= {'raster', 'pdf', 'png', 'jpg', 'jpeg', 'image'} else 'unknown')
-    if (card.get('calc') or {}).get('reader'):
+    if ((card.get('calc') or {}).get('reader')
+            or str(((card.get('calc') or {}).get('method') or {}).get('id', '')).startswith('scan-vision-')):
         source = 'vision'
     factors(confidence, res, question, source=source)
     calc = card.get('calc')

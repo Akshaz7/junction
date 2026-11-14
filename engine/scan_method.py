@@ -54,6 +54,23 @@ def describe(res, question, root, reader=None):
         label = method.get('scale', {}).get('label', 'page-specific physical scales')
         method.update(id='scan-pixel-measurement', label='Pixel geometry using ' + label,
                       why_chosen='The solver uses the ranked page scale selected before solving. Printed quantities, when present, retain their source values; pixel geometry uses that page’s scale. ' + method.get('scale', {}).get('why_chosen', 'Each page has its own scale selection.'))
+    traces = res.get('trace') or []
+    model_reads = [t for t in traces if t.get('model') and t.get('step') in ('read', 'forced', 'vision', 'readdraw', 'read_drawing')]
+    recounts = [t for t in traces if t.get('step') == 'recount']
+    if unit == 'count' and recounts:
+        from engine.reasoning_parts.counts import facts, recount_step
+        counted = facts(res, question)
+        policy = recount_step(counted)['text'] if counted and counted.get('reread') else recounts[-1].get('detail', '')
+        method.update(id='scan-recount-count', label='Selected boxed count after drawing recount',
+                      why_chosen=policy + ' The original saved inventory remains comparison context.',
+                      recount=[{'detail': t.get('detail'), 'model': t.get('model')} for t in recounts])
+    if model_reads:
+        reading = model_reads[-1]
+        fallback = reading['step'] == 'forced'
+        method.update(id='scan-vision-best-effort' if fallback else 'scan-vision-read',
+                      label='Best-effort model reading with scan context' if fallback else 'Direct vision-model drawing reading',
+                      why_chosen=reading.get('detail', '') + '. The answer is a model reading; saved detections, scores and pixel geometry below are background evidence, not a deterministic reconstruction of its wording.',
+                      model=reading['model'])
     if reader:
         selected = set(reader.get('selected_refs') or [])
         measurements = [e for e in reader.get('calculations') or [] if e.get('tool') == 'measure' and e.get('evidence_ref') in selected]
