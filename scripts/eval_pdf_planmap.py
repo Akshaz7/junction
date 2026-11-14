@@ -26,13 +26,49 @@ SWISS = ROOT / "data" / "junction-dataset-preview" / "data" / "swiss_dwellings"
 MAX_PDF_PAGES = 4
 
 
+# ------------------------------------------------------------------ overlays
+def _overlay(img, out_png, items=(), header="", ok=True, max_side=4096):
+    """2D overlay: walls dark red, rooms translucent + label/area, doors green, windows blue, verdict in the corner."""
+    from PIL import Image, ImageDraw, ImageFont
+    im = img.convert("RGB")
+    f = min(1.0, max_side / max(im.size))
+    if f < 1:
+        im = im.resize((int(im.width * f), int(im.height * f)))
+    dr = ImageDraw.Draw(im, "RGBA")
+    fs = max(18, im.width // 90)
+    font = ImageFont.load_default(size=fs)
+    col = {"wall": (140, 0, 0, 170), "door": (0, 170, 0, 200), "window": (0, 70, 255, 200)}
+    for i, it in enumerate(items):
+        poly = it.get("polygon_px")
+        k = it["kind"]
+        if k == "room" and poly:
+            c = ((i * 67) % 200 + 30, (i * 131) % 200 + 30, (i * 29) % 200 + 30)
+            dr.polygon([(x * f, y * f) for x, y in poly], fill=c + (60,), outline=c + (255,))
+            pr = it.get("props") or {}
+            a = pr.get("area_m2_geom")
+            cx = sum(q[0] for q in poly) / len(poly) * f; cy = sum(q[1] for q in poly) / len(poly) * f
+            dr.text((cx, cy), f"{it.get('label') or ''} {a if a is not None else ''}", fill=(0, 0, 0, 255),
+                    font=ImageFont.load_default(size=max(12, fs // 2)), anchor="mm")
+        elif k in col and poly:
+            dr.polygon([(x * f, y * f) for x, y in poly], fill=col[k], outline=col[k][:3] + (255,))
+            if k != "wall":
+                b = it["bbox_px"]
+                dr.rectangle([b[0] * f - 4, b[1] * f - 4, b[2] * f + 4, b[3] * f + 4], outline=col[k][:3] + (255,), width=3)
+    tw = max(dr.textlength(ln, font=font) for ln in header.split("\n")) if header else 0
+    n = header.count("\n") + 1
+    dr.rectangle([0, 0, tw + 30, n * fs * 1.35 + 20], fill=(255, 255, 255, 235), outline=(0, 0, 0, 255), width=2)
+    dr.text((12, 8), header, fill=(0, 120, 0, 255) if ok else (190, 0, 0, 255), font=font, spacing=fs // 3)
+    Path(out_png).parent.mkdir(parents=True, exist_ok=True)
+    im.save(out_png)
+
+
 # ------------------------------------------------------------------ workers (run in a subprocess)
 def _rss_mb():
     import resource
     return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
 
 
-def _worker_pdf(pdf, out, doc_id):
+def _worker_pdf(pdf, out, doc_id, shots=""):
     from pipeline import pages, pdf_planmap
     out = Path(out); out.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
@@ -52,6 +88,17 @@ def _worker_pdf(pdf, out, doc_id):
                          "gate": (pm or {}).get("provenance", {}).get("gate"), "error": err})
         if pm and (best is None or nr > best[1]):
             best = (i + 1, nr)
+        if shots:
+            from collections import Counter
+            from PIL import Image
+            Image.MAX_IMAGE_PIXELS = None
+            c = Counter(it["kind"] for it in (pm or {}).get("items", []))
+            sc = (pm or {}).get("scale") or {}
+            hdr = (f"PDF plan map p{i + 1}: {'yes' if pm else 'NONE'}  gate: {(pm or {}).get('provenance', {}).get('gate') or err or 'rejected'}\n"
+                   f"rooms {c['room']}  walls {c['wall']}  doors {c['door']} (green)  windows {c['window']} (blue)  "
+                   f"scale {sc.get('ratio')} {sc.get('method')}")
+            with Image.open(out / f"page-{i + 1}.png") as im:
+                _overlay(im, Path(shots) / f"{doc_id[:48]}-p{i + 1}-planmap.png", (pm or {}).get("items", []), hdr, bool(pm))
     return {"render_s": round(t_render, 2), "total_s": round(time.time() - t0, 2), "pages": per_page,
             "planmap": str(out / f"planmap-{best[0]}.json") if best else None, "rss_mb": round(_rss_mb(), 1)}
 
@@ -70,7 +117,7 @@ def _worker_dxf(dxf, out, doc_id):
             "rss_mb": round(_rss_mb(), 1)}
 
 
-def _worker_gate(pdf, page_index):
+def _worker_gate(pdf, page_index, shots="", tag=""):
     from pipeline import pdf_openings, pdf_rooms, pdf_vector
     t0 = time.time()
     page = pdf_vector.load_page(Path(pdf), int(page_index))
@@ -79,6 +126,14 @@ def _worker_gate(pdf, page_index):
     ok, why = pdf_openings.gate(page, walls, rooms)
     if page.get("W_pt") and pdf_vector.is_scanned(page):
         ok, why = False, "scanned (pdf_vector.is_scanned)"
+    if shots:
+        import pypdfium2 as pdfium
+        d = pdfium.PdfDocument(str(pdf))
+        pg = d[int(page_index)]
+        img = pg.render(scale=min(2.0, 3000 / max(pg.get_size()))).to_pil()
+        d.close()
+        _overlay(img, Path(shots) / f"{tag or Path(pdf).stem[:48]}-p{int(page_index) + 1}-gate.png", (),
+                 f"gate: {'PLAN' if ok else 'NOT PLAN'} - {why}\nwalls {len(walls)}  room labels {len(rooms)}", ok)
     return {"is_plan": ok, "reason": why, "walls": len(walls), "rooms": len(rooms), "s": round(time.time() - t0, 2),
             "rss_mb": round(_rss_mb(), 1)}
 
@@ -139,8 +194,16 @@ def _summ(pm):
     if any(v is not None for v in q):
         out["wall_len_m_own"] = round(sum(v or 0 for v in q), 2)
     out["_rooms"] = []
-    allc = [c for r in rooms if r.get("polygon_px") or r.get("bbox_px") for c in [_centre(r)]]
-    bx = [min(c[0] for c in allc), min(c[1] for c in allc), max(c[0] for c in allc), max(c[1] for c in allc)] if allc else None
+    # normalise centroids by the building extent (wall shapes' bbox), the same in both maps even when the room
+    # sets differ; fall back to the rooms' extent
+    allc = [q for w in walls for q in w["polygon_px"]] or \
+        [c for r in rooms if r.get("polygon_px") or r.get("bbox_px") for c in [_centre(r)]]
+    if walls and len(walls) >= 4:  # trim stray wall shapes (legend / title block): 2nd..98th percentile
+        xs = sorted(q[0] for q in allc); ys = sorted(q[1] for q in allc)
+        k = lambda v, f: v[min(len(v) - 1, int(f * len(v)))]
+        bx = [k(xs, 0.02), k(ys, 0.02), k(xs, 0.98), k(ys, 0.98)]
+    else:
+        bx = [min(c[0] for c in allc), min(c[1] for c in allc), max(c[0] for c in allc), max(c[1] for c in allc)] if allc else None
     for r, g in zip(rooms, geo):
         c = _centre(r)
         nc = [(c[0] - bx[0]) / max(bx[2] - bx[0], 1e-6), (c[1] - bx[1]) / max(bx[3] - bx[1], 1e-6)] if bx else [0, 0]
@@ -158,7 +221,7 @@ def _centre(r):
 
 
 def _match(a, b):
-    """Greedy room matching: same printed area (+label) first, then nearest normalised centroid (< 0.15)."""
+    """Greedy room matching: same printed area (+label) first, then nearest normalised centroid (< 0.06 of the building extent)."""
     pairs, used = [], set()
     for i, ra in enumerate(a):
         if ra["printed"] is None:
@@ -172,7 +235,7 @@ def _match(a, b):
     rest = sorted(((math.dist(ra["c"], rb["c"]), i, j) for i, ra in enumerate(a) if i not in done
                    for j, rb in enumerate(b) if j not in used))
     for d, i, j in rest:
-        if d > 0.15 or i in done or j in used:
+        if d > 0.06 or i in done or j in used:
             continue
         done.add(i); used.add(j); pairs.append((i, j))
     return pairs
@@ -241,15 +304,29 @@ def main():
     ap.add_argument("--full-neg", action="store_true", help="also run the full process() on negatives")
     ap.add_argument("--out", default=str(ROOT / "results" / "eval_pdf_planmap.json"))
     ap.add_argument("--keep", help="keep work dirs here (default: temp)")
+    ap.add_argument("--reuse", action="store_true", help="with --keep: recompute metrics from an earlier run's plan maps")
+    ap.add_argument("--shots", default="", help="write 2D overlays (plan maps, gate verdicts) into this dir")
     a = ap.parse_args()
     pairs = [tuple(Path(x) for x in p.split(":", 1)) for p in a.pair] + swiss_pairs(a.swiss)
     tmp = Path(a.keep) if a.keep else Path(tempfile.mkdtemp(prefix="evalpdf-"))
+    prev = {}
+    if a.reuse and Path(a.out).is_file():
+        prev = {r["doc"]: r for r in json.loads(Path(a.out).read_text()).get("pairs", [])}
     report = {"created": time.strftime("%Y-%m-%dT%H:%M:%S"), "pairs": [], "negatives": [], "positives": []}
     for pdf, dxf in pairs:
         did = pdf.stem.lower()[:60]
         print(f"== {did}", flush=True)
-        rp = _spawn("pdf", pdf, tmp / did / "pdf", did)
-        rd = _spawn("dxf", dxf, tmp / did / "dxf", did)
+        old = prev.get(did, {})
+        fp, fd = tmp / did / "pdf", tmp / did / "dxf"
+        if a.reuse and old and list(fp.glob("planmap-*.json")) and (fd / "planmap-1.json").is_file():
+            # metric-only recompute on the plan maps of an earlier run (no pipeline re-run)
+            pp = old.get("pdf_run", {}).get("pages") or []
+            best = max((x for x in pp if x.get("planmap")), key=lambda x: x["rooms"], default=None)
+            rp = {**old.get("pdf_run", {}), "planmap": str(fp / f"planmap-{best['page']}.json") if best else None}
+            rd = {**old.get("dxf_run", {}), "planmap": str(fd / "planmap-1.json")}
+        else:
+            rp = _spawn("pdf", pdf, fp, did, a.shots)
+            rd = _spawn("dxf", dxf, fd, did)
         row = {"doc": did, "pdf_file": str(pdf), "dxf_file": str(dxf),
                "pdf_run": {k: v for k, v in rp.items() if k != "planmap"},
                "dxf_run": {k: v for k, v in rd.items() if k != "planmap"}}
@@ -268,7 +345,7 @@ def main():
             import pypdfium2 as pdfium
             d = pdfium.PdfDocument(path); idx = list(range(min(len(d), MAX_PDF_PAGES))); d.close()
         for i in idx:
-            r = _spawn("gate", path, i)
+            r = _spawn("gate", path, i, a.shots, Path(path).stem.split("__")[-1][:48])
             row = {"pdf": Path(path).name, "page": i + 1, "expect_plan": expect, **r}
             report["negatives" if not expect else "positives"].append(row)
             print(f"{'pos' if expect else 'neg'} {Path(path).name[:70]} p{i + 1}: plan={r.get('is_plan')} ({r.get('reason')})", flush=True)

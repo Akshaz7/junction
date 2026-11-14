@@ -145,3 +145,20 @@ def test_synthetic_pdf_end_to_end_real_modules(tmp_path):
     if pm is not None:
         assert pm["image"] == {"w": W, "h": H} and pm["scale"]["m_per_px"] > 0
         assert all(0 <= v <= max(W, H) + 1 for i in pm["items"] for v in i["bbox_px"])
+
+
+def test_area_fill_is_not_a_wall():
+    blob = {"polygon": [[100, 100], [400, 100], [400, 300], [100, 300]], "thickness_pt": 10, "style": "fill"}  # 10 x 7 m
+    pm = P.build("d", 1, 1684, 1190, PAGE, WALLS + [blob], ROOMS, OPENS, SC)
+    assert sum(1 for i in pm["items"] if i["kind"] == "wall") == 3
+    assert P.rect_equivalent(3000, 620) == (300.0, 10.0)
+
+
+def test_items_outside_the_building_footprint_are_dropped():
+    legend_wall = {"polygon": [[700, 520], [760, 520], [760, 530], [700, 530]], "thickness_pt": 10, "style": "fill"}
+    legend_door = {"kind": "door", "polygon": None, "bbox": [720, 540, 745, 560], "conf": 0.8, "props": {}}
+    legend_room = {"polygon": None, "label": "Legend", "number": None, "area_printed_m2": 3.0, "label_bbox": [700, 560, 740, 570]}
+    pm = P.build("d", 1, 1684, 1190, PAGE, WALLS + [legend_wall], ROOMS + [legend_room], OPENS + [legend_door], SC)
+    kinds = [i["kind"] for i in pm["items"]]
+    assert kinds.count("wall") == 3 and kinds.count("door") == 1 and kinds.count("room") == 2
+    assert not any(i["label"] == "Legend" for i in pm["items"])

@@ -401,21 +401,26 @@ def _raw_segments(page, box, max_grey=0.8):
     """All straight stroked pieces inside box: rows (x0,y0,x1,y1,width,grey)."""
     bx0, by0, bx1, by1 = box
     rows = []
+    ap = rows.append
     for p in page["paths"]:
         if p["stroke"] is None or p["dashed"] or p["is_arc"]:
             continue
         g = _grey(p["stroke"])
         if g is not None and g > max_grey:
             continue
-        a = np.asarray(p["pts"], float)
+        g = g or 0.0
+        w = p["width"]
+        pts = p["pts"]
         if p["closed"]:
-            a = np.vstack([a, a[:1]])
-        r = np.hstack([a[:-1], a[1:]])
-        k = ((r[:, [0, 2]] >= bx0) & (r[:, [0, 2]] <= bx1)).all(1) & ((r[:, [1, 3]] >= by0) & (r[:, [1, 3]] <= by1)).all(1)
-        r = r[k & (np.hypot(r[:, 2] - r[:, 0], r[:, 3] - r[:, 1]) > 0.02)]
-        if len(r):
-            rows.append(np.hstack([r, np.full((len(r), 1), p["width"]), np.full((len(r), 1), g or 0.0)]))
-    return np.vstack(rows) if rows else np.zeros((0, 6))
+            pts = pts + pts[:1]
+        for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+            ap((x0, y0, x1, y1, w, g))
+    if not rows:
+        return np.zeros((0, 6))
+    r = np.array(rows, dtype=float)
+    k = ((r[:, [0, 2]] >= bx0) & (r[:, [0, 2]] <= bx1)).all(1) & ((r[:, [1, 3]] >= by0) & (r[:, [1, 3]] <= by1)).all(1)
+    k &= np.hypot(r[:, 2] - r[:, 0], r[:, 3] - r[:, 1]) > 0.02
+    return r[k]
 
 
 def _merge_collinear(R, ang_q=math.radians(0.5), off_q=0.25, gap=0.6):
@@ -436,21 +441,28 @@ def _merge_collinear(R, ang_q=math.radians(0.5), off_q=0.25, gap=0.6):
     order = np.lexsort((lo, ko, ka))
     out = []
     cur = None
+    kal, kol, lol, hil = ka.tolist(), ko.tolist(), lo.tolist(), hi.tolist()
+    wl, gl, offl, angl = R[:, 4].tolist(), R[:, 5].tolist(), off.tolist(), ang.tolist()
     for i in order.tolist():
-        key = (ka[i], ko[i])
-        if cur is not None and key == cur[0] and lo[i] <= cur[2] + gap:
-            cur[2] = max(cur[2], hi[i]); cur[3] = max(cur[3], R[i, 4]); cur[4] = min(cur[4], R[i, 5])
-            cur[5].append(i)
+        key = (kal[i], kol[i])
+        if cur is not None and key == cur[0] and lol[i] <= cur[2] + gap:
+            if hil[i] > cur[2]:
+                cur[2] = hil[i]
+            if wl[i] > cur[3]:
+                cur[3] = wl[i]
+            if gl[i] < cur[4]:
+                cur[4] = gl[i]
+            cur[5] += offl[i]; cur[8] += 1
             continue
         if cur is not None:
             out.append(cur)
-        cur = [key, lo[i], hi[i], R[i, 4], R[i, 5], [i], ang[i], off[i]]
+        cur = [key, lol[i], hil[i], wl[i], gl[i], offl[i], angl[i], None, 1]
     out.append(cur)
     rows = []
-    for key, l, h, w, g, idx, a_, o_ in out:
+    for key, l, h, w, g, osum, a_, _, cnt in out:
         ux_, uy_ = math.cos(a_), math.sin(a_)
         # offset: mean of members (keeps sub-quantum precision)
-        o_ = float(np.mean(off[idx]))
+        o_ = osum / cnt
         x0, y0 = l * ux_ - o_ * uy_, l * uy_ + o_ * ux_
         x1, y1 = h * ux_ - o_ * uy_, h * uy_ + o_ * ux_
         rows.append((x0, y0, x1, y1, w, g, h - l, a_ % math.pi))
@@ -566,12 +578,103 @@ def _detail_points(page, box, S_all=None):
     return np.vstack(out) if out else np.zeros((0, 2))
 
 
+def _grid_lines(page, S):
+    """Mask of segments that are column-grid / section-cut lines: their axis runs into a grid bubble (a small
+    circle with a short label inside) beyond one of their ends."""
+    mask = np.zeros(len(S), bool)
+    circles = []
+    for p in page["paths"]:
+        if p["n_curves"] >= 4 and p["closed"] or (p["n_curves"] >= 4 and len(p["pts"]) >= 16):
+            a = np.asarray(p["pts"], float)
+            x0, y0 = a.min(0); x1, y1 = a.max(0)
+            dx, dy = x1 - x0, y1 - y0
+            if 6 <= dx <= 50 and abs(dx - dy) < 0.15 * dx:
+                circles.append(((x0 + x1) / 2, (y0 + y1) / 2, dx / 2))
+    if not circles or not len(S):
+        return mask
+    words = page["words"]
+    wc = np.array([((w["bbox"][0] + w["bbox"][2]) / 2, (w["bbox"][1] + w["bbox"][3]) / 2) for w in words]) \
+        if words else np.zeros((0, 2))
+    C = []
+    for cx, cy, r in circles:
+        if len(wc) and (np.hypot(wc[:, 0] - cx, wc[:, 1] - cy) < 0.8 * r).any():
+            C.append((cx, cy, r))
+    if not C:
+        return mask
+    C = np.array(C)
+    L = S[:, 6]
+    long_ = np.where(L > 40)[0]
+    if not len(long_):
+        return mask
+    ux = (S[long_, 2] - S[long_, 0]) / L[long_]
+    uy = (S[long_, 3] - S[long_, 1]) / L[long_]
+    for k in range(len(C)):
+        cx, cy, r = C[k]
+        vx, vy = cx - S[long_, 0], cy - S[long_, 1]
+        perp = np.abs(vx * -uy + vy * ux)
+        t = vx * ux + vy * uy
+        # bubble centred on the axis, just past an end (or straddling it)
+        hit = (perp < 0.3 * r) & (((t > L[long_] - r) & (t < L[long_] + 4 * r)) | ((t < r) & (t > -4 * r)))
+        mask[long_[hit]] = True
+    return mask
+
+
 def _thickness(poly):
-    if poly.length <= 0:
+    """Short side of the rectangle with this polygon's area and perimeter (works for bars and for rings)."""
+    A, P = poly.area, poly.length
+    if P <= 0 or A <= 0:
         return 0.0
-    return 2 * poly.area / poly.length
+    h = P / 4  # (L + t) / 2
+    disc = h * h - A
+    return h - math.sqrt(disc) if disc > 0 else math.sqrt(A)
 
 
+def _no_holes(poly, depth=0):
+    """Split a polygon with holes into hole-free pieces (cuts through each hole), so consumers that read only
+    the outer ring (extrusion, rooms) never see a wall ring as a solid block."""
+    from shapely.geometry import LineString
+    from shapely.ops import split
+    if not poly.interiors or depth > 40:
+        return [poly]
+    h = poly.interiors[0]
+    c = h.centroid
+    x0, y0, x1, y1 = poly.bounds
+    hx0, hy0, hx1, hy1 = h.bounds
+    if hx1 - hx0 >= hy1 - hy0:
+        cut = LineString([(c.x, y0 - 1), (c.x, y1 + 1)])
+    else:
+        cut = LineString([(x0 - 1, c.y), (x1 + 1, c.y)])
+    try:
+        parts = split(poly, cut).geoms
+    except Exception:  # noqa: BLE001
+        return [poly]
+    out = []
+    for q in parts:
+        if q.geom_type == "Polygon" and q.area > 1e-6:
+            out.extend(_no_holes(q, depth + 1))
+    return out
+
+
+
+
+MAX_WALL_PT = 32.0  # thickest plausible cut wall on paper (60 cm at 1:50 is 34 pt)
+
+
+def _drop_blobs(cands, max_t=MAX_WALL_PT):
+    """Cut away parts thicker than any wall (filled plazas, stair blocks, column clusters, dense tag fields)
+    by morphological opening; keep the thin remainder."""
+    out = []
+    r = max_t / 2
+    for p, t, style in cands:
+        core = p.buffer(-r, join_style=2)
+        if not core.is_empty:
+            p = p.difference(core.buffer(r + 0.5, join_style=2))
+        for q in getattr(p, "geoms", [p]):
+            if q.geom_type == "Polygon" and q.area > 4:
+                tq = _thickness(q)
+                if tq >= 0.5:
+                    out.append((q, tq, style))
+    return out
 
 
 def walls(page: dict) -> list:
@@ -637,7 +740,7 @@ def walls(page: dict) -> list:
         thick_min = max(1.4, 2.5 * wmed)
         thick = (widths >= thick_min) & (S[:, 6] >= np.maximum(6.0, 3 * widths))
         # (b) double lines among non-thick, non-hairline-vs-heavy segments
-        cand = np.where(~thick & (S[:, 6] >= 4.0))[0]
+        cand = np.where(~thick & (S[:, 6] >= 4.0) & ~_grid_lines(page, S))[0]
         Sc = S[cand]
         pairs, nb = _pairs(Sc, 1.0, 30.0)
         bad = _series(Sc, pairs)
@@ -661,6 +764,8 @@ def walls(page: dict) -> list:
                 continue
             if a in dim_seg and b in dim_seg:
                 continue
+            if h - l < 1.5 * d:
+                continue  # stub: dash-drawn grid/section lines side by side, mullions, comb teeth
             x0, y0, x1, y1 = Sc[a, :4]
             L = Sc[a, 6]
             ux, uy = (x1 - x0) / L, (y1 - y0) / L
@@ -720,6 +825,7 @@ def walls(page: dict) -> list:
     else:
         cand_polys = [(p, _thickness(p), "fill") for p, t, g in fills]
 
+    cand_polys = _drop_blobs(cand_polys)
     if not cand_polys:
         return []
     # ---- keep the connected wall network: drop isolated small pieces (furniture, symbols)
@@ -745,21 +851,53 @@ def walls(page: dict) -> list:
     for i in range(n):
         comp_len[find(i)] += lens[i]
     top = max(comp_len.values())
+    kept = []
     for (poly, t, style), i in zip(cand_polys, range(n)):
         cl = comp_len[find(i)]
-        if cl < max(40.0, 0.02 * top):
+        if cl < max(40.0, 0.02 * top) or t < 0.5:
             continue
+        kept.append((poly, style, t))
+    if not kept:
+        return out
+    # one shape per wall: a wall drawn as a hatch fill AND as two outline strokes yields overlapping fill and
+    # double candidates; union them so area and length are counted once. Style = the style covering most.
+    from shapely import STRtree
+    u = unary_union([k[0].buffer(0.05, join_style=2) for k in kept]).buffer(-0.05, join_style=2)
+    ktree = STRtree([k[0] for k in kept])
+    for poly in getattr(u, "geoms", [u]):
+        if poly.geom_type != "Polygon" or poly.area < 1.0:
+            continue
+        votes = defaultdict(float)
+        tw = []
+        for k in ktree.query(poly).tolist():
+            a_ = kept[k][0].intersection(poly).area
+            if a_ > 0:
+                votes[kept[k][1]] += a_
+                tw.append((kept[k][2], a_))
+        style = max(votes, key=votes.get) if votes else "double"
+        # thickness: area-weighted median of the contributing simple shapes (a branched union's own
+        # area/perimeter rectangle underestimates it)
+        if tw:
+            tw.sort()
+            half, acc = sum(a for _, a in tw) / 2, 0.0
+            for t, a_ in tw:
+                acc += a_
+                if acc >= half:
+                    break
+        else:
+            t = _thickness(poly)
         if t < 0.5:
             continue
-        poly = poly.simplify(0.05)
-        out.append({"polygon": [[round(x, 3), round(y, 3)] for x, y in list(poly.exterior.coords)[:-1]],
-                    "holes": [[[round(x, 3), round(y, 3)] for x, y in list(r.coords)[:-1]] for r in poly.interiors],
-                    "thickness_pt": round(t, 3), "style": style})
+        for piece in _no_holes(poly.simplify(0.05)):
+            if piece.area < 1.0:
+                continue
+            out.append({"polygon": [[round(x, 3), round(y, 3)] for x, y in list(piece.exterior.coords)[:-1]],
+                        "thickness_pt": round(t, 3), "style": style})
     return out
 
 
 def wall_length_pt(ws) -> float:
-    """Centre-line length estimate: area / thickness summed."""
+    """Centre-line length estimate: area / thickness, thickness from the wall's whole (pre-split) shape."""
     from shapely.geometry import Polygon
     tot = 0.0
     for w in ws:

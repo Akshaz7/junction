@@ -149,8 +149,12 @@ def label_blocks(words):
         if i in used:
             continue
         t = p["text"]
-        if ROOM_WORDS.search(t) and not SKIP_LABEL.search(t) and len(t) <= 28 and len(t.split()) <= 3 \
-                and sum(ch.isalpha() for ch in t) >= 2 and sum(ch.isdigit() for ch in t) <= 4:
+        plain = len(t) <= 28 and len(t.split()) <= 3 and sum(ch.isalpha() for ch in t) >= 2 \
+            and sum(ch.isdigit() for ch in t) <= 4 and not SKIP_LABEL.search(t.replace("/", " "))
+        tagged = plain and any(ROOM_NO_RE.match(q["text"].replace(" ", "")) and 0.3 * p["h"] < _cy(q["bbox"]) - _cy(p["bbox"])
+                               < 1.8 * p["h"] and abs(_cx(q["bbox"]) - _cx(p["bbox"])) < 1.5 * p["h"] + (p["bbox"][2] - p["bbox"][0]) / 2
+                               for q in ph)   # a name line with a room number directly below it ("Stanza" / "1.02")
+        if plain and (ROOM_WORDS.search(t) or tagged):
             # skip when it sits right above/inside an area block (it will be that block's name)
             near = [b for b in blocks if b["area_printed_m2"] is not None and _near_above(p, b)]
             if near:
@@ -181,7 +185,7 @@ def label_blocks(words):
                 if ROOM_NO_RE.match(t.replace(" ", "")):
                     nums.append((d, t.replace(" ", ""), pb))
                 elif dy > 0 and sum(ch.isalpha() for ch in t) >= 2 and not AREA_RE.search(t) and len(t) <= 40 \
-                        and not SKIP_LABEL.search(t):
+                        and not SKIP_LABEL.search(t.replace("/", " ")):
                     names.append((d, t, pb))
         if names:
             names.sort(key=lambda x: x[0])
@@ -235,7 +239,53 @@ def _ratio(page):
     return ratio, sheet
 
 
+_SB_LABEL = re.compile(r"^(\d{1,3}(?:[.,]\d)?)\s*('|’|′|ft|feet|m)?$", re.I)
+
+
+def _scalebar_irregular(page):
+    """Graphic scale '0 4' 8' 16'' or '0 1 2 5 m': labels on one row starting at 0, positions linear in value
+    (steps may differ), with a unit mark. Returns m per pt or None."""
+    ws = []
+    for w in page.get("words") or []:
+        m = _SB_LABEL.match(str(w.get("text") or "").strip())
+        if m and w.get("bbox"):
+            ws.append((float(m.group(1).replace(",", ".")), (m.group(2) or "").lower(), w["bbox"]))
+    best = None
+    for v0, u0, b0 in ws:
+        if v0 != 0:
+            continue
+        h = max(0.5, b0[3] - b0[1])
+        row = sorted([(v, u, b) for v, u, b in ws if abs(_cy(b) - _cy(b0)) < 0.5 * h and 0 <= _cx(b) - _cx(b0) < 60 * h],
+                     key=lambda t: _cx(t[2]))
+        vals = [v for v, _, _ in row]
+        if len(row) < 3 or vals[0] != 0 or any(b <= a for a, b in zip(vals, vals[1:])):
+            continue
+        xs = [_cx(b) for _, _, b in row]
+        span = xs[-1] - xs[0]
+        if span < 20:
+            continue
+        k = span / vals[-1]  # pt per unit
+        if any(abs(xs[0] + v * k - x) > 0.04 * span for v, x in zip(vals, xs)):
+            continue
+        units = {u for _, u, _ in row if u}
+        near = [str(w.get("text") or "").strip().lower() for w in page.get("words") or [] if w.get("bbox")
+                and abs(_cy(w["bbox"]) - _cy(b0)) < 1.2 * h and -2 * h < w["bbox"][0] - xs[-1] < 8 * h]
+        if units & {"'", "’", "′", "ft", "feet"} or any(t in ("ft", "feet", "'") for t in near):
+            mpu = FT_M
+        elif "m" in units or any(t in ("m", "meter", "meters", "metre", "metres") for t in near):
+            mpu = 1.0
+        else:
+            continue
+        m_per_pt = mpu / k
+        if _plausible(m_per_pt) and (best is None or len(row) > best[0]):
+            best = (len(row), m_per_pt)
+    return best[1] if best else None
+
+
 def _scalebar(page):
+    irr = _scalebar_irregular(page)
+    if irr:
+        return irr
     from engine import scale_text
     ws = [{"text": w["text"], "bbox_px": w["bbox"]} for w in page.get("words") or [] if w.get("bbox")]
     sb = scale_text.scalebar(ws)
@@ -395,13 +445,20 @@ def scale(page: dict, rooms_: list) -> dict:
         if fit:
             check["fit_vs_scalebar_rel"] = round(fit["m_per_pt"] / sb - 1, 4)
         return {"m_per_pt": sb, "method": "scale bar", "confidence": 0.8, "ratio": f"1:{round(sb / PT_M)}", "check": check}
-    if fit:
-        conf = 0.85 if fit["n"] >= 4 and fit["printed_areas_rel_err"] < 0.03 else 0.65
-        return {"m_per_pt": fit["m_per_pt"], "method": "printed areas fit", "confidence": conf,
-                "ratio": f"1:{round(fit['m_per_pt'] / PT_M)}", "check": check}
     dm = _dims(page)
     if dm:
+        check["dims_m_per_pt"] = dm["m_per_pt"]
         check["dims_n"] = dm["n"]
+    # the area fit outranks dimensions unless its own residuals say the room polygons are poor (>5%)
+    if fit and (fit["printed_areas_rel_err"] <= 0.05 or not dm):
+        conf = 0.85 if fit["n"] >= 4 and fit["printed_areas_rel_err"] < 0.03 else 0.65
+        if dm:
+            check["fit_vs_dims_rel"] = round(fit["m_per_pt"] / dm["m_per_pt"] - 1, 4)
+        return {"m_per_pt": fit["m_per_pt"], "method": "printed areas fit", "confidence": conf,
+                "ratio": f"1:{round(fit['m_per_pt'] / PT_M)}", "check": check}
+    if dm:
+        if fit:
+            check["fit_vs_dims_rel"] = round(fit["m_per_pt"] / dm["m_per_pt"] - 1, 4)
         return {"m_per_pt": dm["m_per_pt"], "method": "dimensions", "confidence": 0.6,
                 "ratio": f"1:{round(dm['m_per_pt'] / PT_M)}", "check": check}
     dg = _door_guess(page)
@@ -435,19 +492,209 @@ def _poly_list(g):
     return [x for x in getattr(g, "geoms", []) if x.geom_type == "Polygon"]
 
 
-def rooms(page: dict, walls: list) -> list:
-    blocks = label_blocks(page.get("words") or [])
-    if not blocks:
+LEGEND_RE = re.compile(r"^(legend[ae]?|légende|legende|key|symbols?|zeichenerklärung|progetto|projekt|project|projet|"
+                       r"title|drawing|plan-?nr\.?|massstab|maßstab|scala|échelle|echelle|scale|sheet|date|datum|data)\b", re.I)
+
+
+def _excluded_box(page):
+    """Boxes (pt) holding the legend / title block: from the drawing frame of pdf_vector (if available) and from
+    anchor words ('Legend', 'Project', 'Scale' ...) near the bottom/right edge, cut at the nearest long divider."""
+    W, H = page.get("W_pt") or 0, page.get("H_pt") or 0
+    if not W or not H:
         return []
-    polys = _faces(page, walls, blocks)
-    out = []
+    hl, vl = [], []
+    for p in page.get("paths") or []:
+        pts = p.get("pts") or []
+        for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+            if abs(y0 - y1) < 0.5 and abs(x1 - x0) > 0.3 * W:
+                hl.append((y0 + y1) / 2)
+            elif abs(x0 - x1) < 0.5 and abs(y1 - y0) > 0.3 * H:
+                vl.append((x0 + x1) / 2)
+    boxes = []
+    for w in page.get("words") or []:
+        b = w.get("bbox")
+        if not b or not LEGEND_RE.match(str(w.get("text") or "").strip()):
+            continue
+        h = max(1.0, b[3] - b[1])
+        if _cy(b) > 0.65 * H:
+            cut = [y for y in hl if y < b[1] and y > 0.5 * H]
+            boxes.append([0, max(cut) if cut else b[1] - 2 * h, W, H])
+        elif _cx(b) > 0.7 * W:
+            cut = [x for x in vl if x < b[0] and x > 0.5 * W]
+            boxes.append([max(cut) if cut else b[0] - 2 * h, 0, W, H])
+    return boxes
+
+
+def rooms(page: dict, walls: list) -> list:
+    ex = _excluded_box(page)
+    words = [w for w in page.get("words") or [] if not (w.get("bbox") and any(
+        bx[0] <= _cx(w["bbox"]) <= bx[2] and bx[1] <= _cy(w["bbox"]) <= bx[3] for bx in ex))]
+    blocks = label_blocks(words)
+    comps = _components(page, walls)
+    if comps is None:   # no walls to read regions from: label-only rooms
+        return [_room(None, [b]) for b in blocks]
+    polys, mpp = comps
+    from shapely.geometry import Point
+    owner = {}
+    lone = []
     for i, b in enumerate(blocks):
-        poly, split = polys.get(i, (None, False))
-        out.append({"polygon": poly, "label": b["label"], "number": b["number"],
-                    "area_printed_m2": b["area_printed_m2"], "label_bbox": [round(v, 3) for v in b["bbox"]],
-                    "label_xy": [round(v, 3) for v in b["xy"]], "pts_area": round(shoelace(poly), 3) if poly else None,
-                    "split": split})
+        pt = Point(*b["xy"])
+        hit = [k for k, g in enumerate(polys) if g.covers(pt)]
+        if not hit:
+            near = [(g.distance(pt), k) for k, g in enumerate(polys)]
+            near = [x for x in near if x[0] < 0.5 / mpp]
+            hit = [min(near)[1]] if near else []
+        if hit:
+            owner.setdefault(min(hit, key=lambda k: polys[k].area), []).append(i)
+        else:
+            lone.append(i)
+    out = []
+    for k, g in enumerate(polys):
+        bl = [blocks[i] for i in owner.get(k, [])]
+        if not bl and g.area * mpp * mpp < 2.0:
+            continue   # unlabelled scraps (shafts, wall cavities)
+        out.append(_room(_coords(g), bl))
+    out += [_room(None, [blocks[i]]) for i in lone]
     return out
+
+
+def _room(poly, bl):
+    """One room dict; several labels in one region are kept together (not split). Unit/apartment tags
+    (TYPE B / U212 / Whg. A, or an area covering the others) are dropped when real room labels share the region."""
+    if len(bl) > 1:
+        pr = [b["area_printed_m2"] for b in bl if b["area_printed_m2"]]
+        keep = [b for b in bl if not _is_unit_tag(b) and not (len(pr) >= 3 and b["area_printed_m2"]
+                                                              and b["area_printed_m2"] >= 0.45 * sum(pr))]
+        bl = keep or bl
+    lab = " / ".join(b["label"] for b in bl if b["label"]) or None
+    num = " / ".join(b["number"] for b in bl if b["number"]) or None
+    pr = [b["area_printed_m2"] for b in bl]
+    ap = round(sum(pr), 3) if pr and all(v is not None for v in pr) else None
+    b0 = bl[0] if bl else None
+    if b0:
+        bb = [min(b["bbox"][0] for b in bl), min(b["bbox"][1] for b in bl), max(b["bbox"][2] for b in bl),
+              max(b["bbox"][3] for b in bl)]
+    return {"polygon": poly, "label": lab, "number": num, "area_printed_m2": ap,
+            "label_bbox": [round(v, 3) for v in bb] if b0 else None,
+            "label_xy": [round(v, 3) for v in b0["xy"]] if b0 else None,
+            "labels": [{"label": b["label"], "number": b["number"], "area_printed_m2": b["area_printed_m2"]} for b in bl],
+            "pts_area": round(shoelace(poly), 3) if poly else None, "split": False, "merged": len(bl) > 1}
+
+
+def _components(page, walls, res_m=0.025, close_m=0.6):
+    """Free space between the walls as polygons (pt): rasterise walls at `res_m` per px, close gaps up to
+    2*close_m (doors, windows), flood the exterior from the border, label the interior components, grow each back
+    over the closing (not into the exterior or another room), vectorise. Returns ([shapely Polygon], m_per_pt)."""
+    import numpy as np
+    try:
+        import cv2
+        from shapely.geometry import Polygon
+    except ImportError:
+        return None
+    wl = [w for w in walls or [] if len(w.get("polygon") or []) >= 3]
+    if len(wl) < 3:
+        return None
+    mpp = prelim_m_per_pt(page, walls)
+    k = mpp / res_m                                   # px per pt
+    xs = [q[0] for w in wl for q in w["polygon"]]
+    ys = [q[1] for w in wl for q in w["polygon"]]
+    pad = 2.0 / mpp
+    x0, y0 = min(xs) - pad, min(ys) - pad
+    Wp, Hp = int((max(xs) + pad - x0) * k) + 1, int((max(ys) + pad - y0) * k) + 1
+    if Wp * Hp > 36e6:                                # keep memory bounded on huge sheets
+        f = (36e6 / (Wp * Hp)) ** 0.5
+        k *= f
+        Wp, Hp = int(Wp * f) + 1, int(Hp * f) + 1
+    mask = np.zeros((Hp, Wp), np.uint8)
+
+    def P(poly):
+        return np.round((np.array(poly, float) - [x0, y0]) * k).astype(np.int32)
+    for w in wl:
+        cv2.fillPoly(mask, [P(w["polygon"])], 255)
+    for w in wl:
+        for hole in w.get("holes") or []:
+            if len(hole) >= 3:
+                cv2.fillPoly(mask, [P(hole)], 0)
+    # (a morphological closing does not bridge a door in a thin wall: disks poke in from both sides; so separate
+    # the rooms by dilating the walls, then grow each room back over the dilation)
+    r = max(1, int(round(close_m * 0.8 / mpp * k)))          # doors up to ~1 m
+    r_ext = max(r, int(round(close_m * 1.4 / mpp * k)))      # exterior: windows/openings up to ~1.7 m
+    disk = lambda rr: cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * rr + 1, 2 * rr + 1))  # noqa: E731
+    big = cv2.dilate(mask, disk(r_ext))
+    ne, labe = cv2.connectedComponents((big == 0).astype(np.uint8), connectivity=4)
+    eb = set(np.unique(np.concatenate([labe[0], labe[-1], labe[:, 0], labe[:, -1]]).tolist())) - {0}
+    ext = np.isin(labe, list(eb))
+    # the exterior grows back to the walls (through the dilation) but never through a door-sized gap
+    ext_g = ext.copy()
+    k3 = np.ones((3, 3), np.uint8)
+    for _ in range(r_ext + 1):
+        d = cv2.dilate(ext_g.astype(np.uint8), k3) > 0
+        upd = d & ~ext_g & (mask == 0)
+        if not upd.any():
+            break
+        ext_g |= upd
+    ext = ext_g
+    free_o = (mask == 0) & ~ext
+    dil = cv2.dilate(mask, disk(r))
+    n, lab = cv2.connectedComponents(((dil == 0) & free_o).astype(np.uint8), connectivity=4)
+    cnt = np.bincount(lab.ravel(), minlength=n)
+    speck = np.where(cnt < (0.4 / mpp * k) ** 2)[0]     # seeds smaller than 0.4 m x 0.4 m: slivers in door gaps
+    speck = speck[speck > 0]
+    if speck.size:
+        lab[np.isin(lab, speck)] = 0
+    # narrow rooms (closets, WCs) vanish under the dilation: seed them from what a small erosion keeps outside the
+    # zone the big rooms will grow into, then grow all seeds together (a closet fills before a neighbour gets in)
+    r2 = max(1, r // 3)
+    zone = cv2.dilate((lab > 0).astype(np.uint8), disk(r + r2)) > 0
+    s2 = (cv2.erode(free_o.astype(np.uint8), disk(r2)) > 0) & ~zone
+    n2, lab2 = cv2.connectedComponents(s2.astype(np.uint8), connectivity=4)
+    grow = lab.astype(np.int32)
+    if n2 > 1:
+        grow[lab2 > 0] = lab2[lab2 > 0] + n - 1
+        n = n + n2 - 1
+    for _ in range(r + r2 + 2):
+        d = cv2.dilate(grow.astype(np.float32), k3).astype(np.int32)
+        upd = (grow == 0) & free_o & (d > 0)
+        if not upd.any():
+            break
+        grow[upd] = d[upd]
+    if n2 > 1:  # narrow-room pieces cut apart by a neighbour's door zone belong together
+        base = n - n2 + 1
+        par = {}
+
+        def fnd(a):
+            while par.get(a, a) != a:
+                a = par[a]
+            return a
+        for A, B in ((grow[:, :-1], grow[:, 1:]), (grow[:-1, :], grow[1:, :])):
+            m2 = (A >= base) & (B >= base) & (A != B)
+            for a, b in set(zip(A[m2].tolist(), B[m2].tolist())):
+                ra, rb = fnd(a), fnd(b)
+                if ra != rb:
+                    par[max(ra, rb)] = min(ra, rb)
+        for a in list(par):
+            grow[grow == a] = fnd(a)
+    min_px = (0.3 / mpp * k) ** 2
+    polys = []
+    for c in range(1, n):
+        m = (grow == c).astype(np.uint8)
+        if m.sum() < min_px:
+            continue
+        cs, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if not cs:
+            continue
+        cnt = max(cs, key=cv2.contourArea)
+        cnt = cv2.approxPolyDP(cnt, 1.0, True)[:, 0, :]
+        if len(cnt) < 3:
+            continue
+        g = Polygon([(x / k + x0, y / k + y0) for x, y in cnt])
+        if not g.is_valid:
+            g = g.buffer(0)
+        g = g.buffer(0.5 / k, join_style=2)   # contour runs through pixel centres: push out half a pixel
+        g = max(_poly_list(g), key=lambda q: q.area, default=None)
+        if g is not None and g.area > 0:
+            polys.append(g)
+    return polys, mpp
 
 
 def _faces(page, walls, blocks):

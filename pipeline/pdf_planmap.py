@@ -348,6 +348,7 @@ ROOM_TYPE_WORDS = [  # keyword (lowercase, substring) -> props.room_type (extrud
 
 MIN_WALL_LEN_M = 0.3     # wall pieces shorter than this (at the page scale) are dropped before extrusion
 MIN_WALL_THICK_M = 0.05  # ... and thinner than 50 mm
+MAX_WALL_THICK_M = 1.2   # ... and (rectangle-equivalent) thicker than this: area fills, not walls
 
 
 def room_type(label: str | None) -> str:
@@ -431,6 +432,56 @@ def _draft_on() -> bool:
     return os.environ.get("PDF_PLANMAP_DRAFT", "0") == "1"
 
 
+FOOTPRINT_GAP_M = 1.5     # wall pieces closer than this belong to one building cluster
+FOOTPRINT_MIN_SHARE = 0.15  # clusters with less wall area than this share of the largest are legend/title/detail marks
+FOOTPRINT_PAD_M = 0.6
+
+
+def _wall_ok(w: dict, mpt: float) -> bool:
+    poly = w.get("polygon")
+    if not poly or len(poly) < 3:
+        return False
+    L, t_eq = rect_equivalent(shoelace(poly), _perimeter(poly))
+    if L * mpt < MIN_WALL_LEN_M or t_eq * mpt < MIN_WALL_THICK_M:
+        return False  # casework, fixture outlines, dimension ticks: not walls at full height
+    return t_eq * mpt <= MAX_WALL_THICK_M  # thicker: a filled floor/slab/site area, it would extrude into a solid block
+
+
+def footprint(walls: list, mpt: float):
+    """Building footprint(s) in pt: the hull of each big cluster of wall pieces. Wall pieces in the legend, title block,
+    north arrow or a small detail form small clusters and fall outside. None if no walls."""
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    ps = []
+    for w in walls:
+        try:
+            g = Polygon(w["polygon"])
+            g = g if g.is_valid else g.buffer(0)
+            if not g.is_empty:
+                ps.append((g, w))
+        except Exception:  # noqa: BLE001
+            continue
+    if not ps:
+        return None
+    gap = FOOTPRINT_GAP_M / mpt / 2
+    merged = unary_union([g.buffer(gap) for g, _ in ps])
+    blobs = list(merged.geoms) if merged.geom_type == "MultiPolygon" else [merged]
+    area = [sum(g.area for g, _ in ps if b.intersects(g)) for b in blobs]
+    big = max(area)
+    keep = [b.convex_hull for b, a in zip(blobs, area) if a >= FOOTPRINT_MIN_SHARE * big]
+    return unary_union(keep).buffer(FOOTPRINT_PAD_M / mpt - gap)
+
+
+def _inside(fp, poly=None, bbox=None) -> bool:
+    if fp is None:
+        return True
+    from shapely.geometry import Point
+    pts = poly or [[bbox[0], bbox[1]], [bbox[2], bbox[3]]]
+    cx = sum(q[0] for q in pts) / len(pts)
+    cy = sum(q[1] for q in pts) / len(pts)
+    return fp.contains(Point(cx, cy))
+
+
 def build(doc_id: str, n: int, W: int, H: int, page: dict, walls: list, rooms_: list, opens: list, sc: dict,
           words_pt: list | None = None, used: dict | None = None, ms: int = 0) -> dict:
     """Plan map dict from the role modules' outputs (all geometry in page pt, top-left, y down)."""
@@ -454,6 +505,11 @@ def build(doc_id: str, n: int, W: int, H: int, page: dict, walls: list, rooms_: 
         items.append(it)
         return it
 
+    walls = [w for w in walls if _wall_ok(w, mpt)]
+    fp = footprint(walls, mpt)
+    walls = [w for w in walls if _inside(fp, w["polygon"])]
+    rooms_ = [r for r in rooms_ if _inside(fp, r.get("polygon"), r.get("label_bbox"))]
+    opens = [o for o in opens if (o.get("bbox") or o.get("polygon")) and _inside(fp, o.get("polygon"), o.get("bbox"))]
     for r in rooms_:
         poly = r.get("polygon")
         printed = r.get("area_printed_m2")
@@ -485,8 +541,6 @@ def build(doc_id: str, n: int, W: int, H: int, page: dict, walls: list, rooms_: 
         t = float(w.get("thickness_pt") or 0)
         length_pt, t_eq = rect_equivalent(pts_area, _perimeter(poly))
         t = t or t_eq
-        if length_pt * mpt < MIN_WALL_LEN_M or (t_eq or t) * mpt < MIN_WALL_THICK_M:
-            continue  # casework, fixture outlines, dimension ticks: not walls at full height
         ppx = [px(p) for p in poly]
         props = {"thickness_px": round(t * s, 2), "thickness_m": round(t * mpt, 3), "style": w.get("style"),
                  "length_m": round(length_pt * mpt, 3),

@@ -270,6 +270,25 @@ def _leaf_end(arc, segs):
     return best
 
 
+def _tangent_ends(arc, segs):
+    """Number of arc ends that run on tangentially into a straight line (a rounded corner / fillet / curved wall,
+    not a door swing, whose ends meet the leaf radially and the jamb end-on)."""
+    if not len(segs):
+        return 0
+    cx, cy = arc["c"]; r = arc["r"]
+    tol = max(0.6, 0.04 * r)
+    L = np.hypot(segs[:, 2] - segs[:, 0], segs[:, 3] - segs[:, 1])
+    dx = (segs[:, 2] - segs[:, 0]) / np.maximum(L, 1e-9); dy = (segs[:, 3] - segs[:, 1]) / np.maximum(L, 1e-9)
+    n = 0
+    for ex, ey in arc["ends"]:
+        rx, ry = (ex - cx) / r, (ey - cy) / r          # radial unit; the tangent is (-ry, rx)
+        touch = (np.hypot(segs[:, 0] - ex, segs[:, 1] - ey) < tol) | (np.hypot(segs[:, 2] - ex, segs[:, 3] - ey) < tol)
+        par = np.abs(dx * -ry + dy * rx) > 0.985
+        if np.any(touch & par & (L > 0.25 * r)):
+            n += 1
+    return n
+
+
 def _door_from_arc(arc, leaf_k, wi: _WallIndex):
     cx, cy = arc["c"]; r = arc["r"]
     k_open = leaf_k if leaf_k is not None else None
@@ -329,7 +348,11 @@ def _doors(page, segs, arcs, wi: _WallIndex):
         keep.append(c)
     doors = []
     for arc in keep:
-        dd = _door_from_arc(arc, _leaf_end(arc, segs), wi)
+        leaf = _leaf_end(arc, segs)
+        tang = _tangent_ends(arc, segs)
+        if tang >= 2 or (tang == 1 and leaf is None):
+            continue  # rounded corner / fillet / curved wall
+        dd = _door_from_arc(arc, leaf, wi)
         if wi.tree is not None and not dd["near_wall"] and not dd["leaf"]:
             continue  # with walls known, a swing that touches no wall is furniture / a symbol
         doors.append(dd)
@@ -465,6 +488,159 @@ def _windows(segs, wi: _WallIndex, doors, mpp=None):
     return keep
 
 
+def _end_faces(walls):
+    """Short end faces of wall shapes: [(mid xy, outward unit normal, face length, wall index)]. An end face is an
+    edge no longer than the wall is thick whose two neighbouring edges run (anti)parallel to its normal."""
+    from shapely.geometry import Point, Polygon
+    out = []
+    for wi_, w in enumerate(walls or []):
+        p = [tuple(map(float, q)) for q in w.get("polygon") or []]
+        if len(p) > 3 and p[0] == p[-1]:
+            p = p[:-1]
+        if len(p) < 4:
+            continue
+        try:
+            g = Polygon(p)
+            if not g.is_valid:
+                g = g.buffer(0)
+        except Exception:
+            continue
+        n = len(p)
+        for i in range(n):
+            a, b = p[i], p[(i + 1) % n]
+            L = math.dist(a, b)
+            if L < 0.3:
+                continue
+            ex, ey = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+            nx, ny = -ey, ex
+            prv, nxt = p[i - 1], p[(i + 2) % n]
+            la, lb = math.dist(prv, a), math.dist(b, nxt)
+            if min(la, lb) < 1.2 * L:          # the side edges must be longer than the face (a wall, not a block)
+                continue
+            # neighbours run along the normal
+            ca = abs(((a[0] - prv[0]) * nx + (a[1] - prv[1]) * ny) / la)
+            cb = abs(((nxt[0] - b[0]) * nx + (nxt[1] - b[1]) * ny) / lb)
+            if ca < 0.95 or cb < 0.95:
+                continue
+            mx, my = (a[0] + b[0]) / 2, (a[1] + b[1]) / 2
+            eps = 0.25 * L
+            if g.contains(Point(mx + nx * eps, my + ny * eps)):
+                nx, ny = -nx, -ny
+            if g.contains(Point(mx + nx * eps, my + ny * eps)):
+                continue
+            out.append(((mx, my), (nx, ny), L, wi_))
+    return out
+
+
+def _gap_windows(segs, walls, wi: _WallIndex, doors, mpp=None):
+    """Windows as gaps in a wall run: two collinear wall ends facing each other across 0.4-4 m (scale-free:
+    1.5-40 wall thicknesses), bridged by thin lines along the wall axis (glazing / sill), no swing arc."""
+    faces = _end_faces(walls)
+    if len(faces) < 2 or not len(segs):
+        return []
+    from shapely.geometry import Polygon, box as sbox
+    P = np.array([f[0] for f in faces]); N = np.array([f[1] for f in faces]); T = np.array([f[2] for f in faces])
+    door_polys = []
+    for d in doors:
+        try:
+            door_polys.append(Polygon(d["polygon"]).buffer(0.1 * d["props"].get("width_pt", 10)))
+        except Exception:
+            pass
+    sdx = segs[:, 2] - segs[:, 0]; sdy = segs[:, 3] - segs[:, 1]
+    sL = np.hypot(sdx, sdy)
+    out, used = [], set()
+    order = np.argsort(-T)
+    for i in order:
+        if i in used:
+            continue
+        (mx, my), (nx, ny), t, wa = faces[i]
+        gmin, gmax = (0.4 / mpp, 4.0 / mpp) if mpp else (1.5 * t, 40 * t)
+        gmin = max(gmin, 1.2 * t)
+        d = P - np.array([mx, my])
+        along = d[:, 0] * nx + d[:, 1] * ny
+        lat = np.abs(d[:, 0] * -ny + d[:, 1] * nx)
+        facing = (N[:, 0] * nx + N[:, 1] * ny) < -0.97
+        ok = facing & (along >= gmin) & (along <= gmax) & (lat < 0.3 * t) & (np.abs(T - t) < 0.4 * t)
+        ok[i] = False
+        cand = np.nonzero(ok)[0]
+        if not len(cand):
+            continue
+        j = int(cand[np.argmin(along[cand])])
+        if j in used or faces[j][3] == wa and False:
+            continue
+        g = float(along[j])
+        hw = 0.5 * t
+        # gap rectangle: from face i along n for g, +-t/2 across
+        ux, uy = nx, ny; vx, vy = -ny, nx
+        poly = [[mx + vx * hw, my + vy * hw], [mx + ux * g + vx * hw, my + uy * g + vy * hw],
+                [mx + ux * g - vx * hw, my + uy * g - vy * hw], [mx - vx * hw, my - vy * hw]]
+        gp = Polygon(poly)
+        # nothing solid in between (no wall shape filling the gap)
+        if wi.tree is not None:
+            inter = sum(wi.polys[int(k)][0].intersection(gp).area for k in wi.tree.query(gp))
+            if inter > 0.15 * gp.area:
+                continue
+        if any(dp.intersects(gp) for dp in door_polys):
+            continue
+        # glazing: thin lines inside the gap running along the axis, most of the gap long
+        x0, y0 = mx, my
+        a0 = (segs[:, 0] - x0) * ux + (segs[:, 1] - y0) * uy; a1 = (segs[:, 2] - x0) * ux + (segs[:, 3] - y0) * uy
+        b0 = (segs[:, 0] - x0) * vx + (segs[:, 1] - y0) * vy; b1 = (segs[:, 2] - x0) * vx + (segs[:, 3] - y0) * vy
+        par = np.abs(sdx * ux + sdy * uy) > 0.985 * np.maximum(sL, 1e-9)
+        inside = (np.minimum(a0, a1) > -0.1 * g) & (np.maximum(a0, a1) < 1.1 * g) & \
+                 (np.abs(b0) <= hw * 1.15) & (np.abs(b1) <= hw * 1.15)
+        span = np.abs(a1 - a0)
+        glz = np.nonzero(par & inside & (span >= 0.6 * g))[0]
+        offs = sorted({round(float((b0[k] + b1[k]) / 2), 1) for k in glz})
+        if not offs:
+            continue
+        used.add(i); used.add(j)
+        poly = [[round(x, 2), round(y, 2)] for x, y in poly]
+        out.append({"kind": "window", "polygon": poly, "bbox": [round(v, 2) for v in _bbox(poly)],
+                    "conf": round(0.6 + 0.1 * min(len(offs), 3), 2),
+                    "props": {"width_pt": round(g, 2), "depth_pt": round(t, 2), "n_lines": len(offs),
+                              "angle_deg": int(round(math.degrees(math.atan2(uy, ux)))) % 180, "from": "wall_gap"}})
+    return out
+
+
+def _footprint_filter(ops, walls):
+    """Drop openings away from the building: wall shapes are grouped into clusters (touching within ~1 wall
+    thickness x 4); only clusters holding >= 15% of the largest cluster's wall area count as building. An opening
+    must touch one (legend / title-block symbols and stray sheet furniture sit in tiny clusters or none)."""
+    if not walls or not ops:
+        return ops
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    polys = []
+    for w in walls:
+        try:
+            g = Polygon(w["polygon"])
+            g = g if g.is_valid else g.buffer(0)
+            if not g.is_empty:
+                polys.append(g)
+        except Exception:
+            continue
+    if len(polys) < 3:
+        return ops
+    th = sorted(float(w.get("thickness_pt") or 0) for w in walls if w.get("thickness_pt"))
+    t = th[len(th) // 2] if th else 3.0
+    reach = max(2.0, 4 * t)
+    u = unary_union([g.buffer(reach) for g in polys])
+    comps = list(getattr(u, "geoms", [u]))
+    areas = [sum(g.area for g in polys if c.intersects(g)) for c in comps]
+    big = max(areas)
+    keep = [c for c, a in zip(comps, areas) if a >= 0.15 * big]
+    out = []
+    for o in ops:
+        try:
+            g = Polygon(o["polygon"])
+        except Exception:
+            continue
+        if any(c.intersects(g) for c in keep):
+            out.append(o)
+    return out
+
+
 def openings(page: dict, walls: list) -> list:
     """Doors and windows on a vector page, in page points (top-left origin, y down)."""
     if not page or not page.get("paths"):
@@ -472,7 +648,14 @@ def openings(page: dict, walls: list) -> list:
     segs, arcs = _segments(page)
     wi = _WallIndex(walls)
     doors = _doors(page, segs, arcs, wi)
-    return doors + _windows(segs, wi, doors, page_m_per_pt(page)[0])
+    mpp = page_m_per_pt(page)[0]
+    wins = _gap_windows(segs, walls, wi, doors, mpp)
+    for w in _windows(segs, wi, doors, mpp):  # glazing packs not already covered by a wall-gap window
+        b = w["bbox"]
+        if not any(b[0] < k["bbox"][2] and k["bbox"][0] < b[2] and b[1] < k["bbox"][3] and k["bbox"][1] < b[3]
+                   for k in wins):
+            wins.append(w)
+    return _footprint_filter(doors + wins, walls)
 
 
 # ---------------------------------------------------------------- gate

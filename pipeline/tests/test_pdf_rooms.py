@@ -191,7 +191,7 @@ def test_wrong_printed_ratio_is_flagged():
     page, walls = _page_from_ops_free([3.0, 4.5, 2.5], n=100)
     for w in page["words"]:
         if w["text"] == "1:100":
-            w["text"] = "1:20"   # a detail scale elsewhere on the sheet
+            w["text"] = "1:50"   # a detail scale elsewhere on the sheet
     rs = R.rooms(page, walls)
     sc = R.scale(page, rs)
     assert "flag" in sc["check"]
@@ -232,8 +232,7 @@ def test_synthetic_pdf_end_to_end(tmp_path):
     f = tmp_path / "plan.pdf"
     _pdf(f, W, H, ops)
     page = _load(f)
-    from pipeline import pdf_vector as V
-    walls = V.walls(page) or R.simple_walls(page)
+    walls = R.simple_walls(page)  # this test is about rooms/scale; pdf_vector.walls has its own tests
     rs = R.rooms(page, walls)
     sc = R.scale(page, rs)
     assert sc["ratio"] == "1:100" and math.isclose(sc["m_per_pt"], PT_M * 100, rel_tol=1e-9)
@@ -244,3 +243,11 @@ def test_synthetic_pdf_end_to_end(tmp_path):
     for r in with_poly:
         meas = r["pts_area"] * sc["m_per_pt"] ** 2
         assert abs(meas / r["area_printed_m2"] - 1) < 0.03
+
+
+def test_scale_bar_irregular_steps_feet():
+    k = 9.0  # pt per foot
+    words = [{"text": t, "bbox": [500 + v * k - 3, 800, 500 + v * k + 3, 807]}
+             for t, v in (("0", 0), ("4'", 4), ("8'", 8), ("16'", 16))]
+    sc = R.scale({"W_pt": 1190, "H_pt": 842, "paths": [], "words": words}, [])
+    assert sc["method"] == "scale bar" and abs(sc["m_per_pt"] / (0.3048 / k) - 1) < 1e-6

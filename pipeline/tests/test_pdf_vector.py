@@ -135,3 +135,23 @@ def test_pdfminer_fallback_agrees(tmp_path):
     b = V.load_page(pdf, 0, reader="pdfminer")
     assert (a["W_pt"], a["H_pt"]) == pytest.approx((b["W_pt"], b["H_pt"]))
     assert wall_len(V.walls(a)) == pytest.approx(wall_len(V.walls(b)), rel=0.05)
+
+
+def test_fill_plus_outline_counted_once(tmp_path):
+    """Exporters often draw a wall as a hatch/dark fill AND stroke its two faces: one wall, not two."""
+    body = room_filled(100, 100, 400, 300, 8) + room_double(100, 100, 400, 300, 8)
+    a = V.walls(V.load_page(write_pdf(tmp_path / "a.pdf", room_filled(100, 100, 400, 300, 8)), 0))
+    b = V.walls(V.load_page(write_pdf(tmp_path / "b.pdf", body), 0))
+    assert wall_len(b) == pytest.approx(wall_len(a), rel=0.08)
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    polys = [Polygon(w["polygon"]) for w in b]
+    assert unary_union(polys).area == pytest.approx(sum(p.area for p in polys), rel=0.01)  # no overlaps
+
+
+def test_polygons_have_no_holes(tmp_path):
+    ws = V.walls(V.load_page(write_pdf(tmp_path / "r.pdf", room_filled(100, 100, 400, 300, 8)), 0))
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    u = unary_union([Polygon(w["polygon"]) for w in ws])
+    assert u.area == pytest.approx(2 * 8 * 300 + 2 * 8 * 184, rel=0.02)  # ring area, not the filled box
