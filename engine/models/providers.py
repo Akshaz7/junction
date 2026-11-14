@@ -350,9 +350,15 @@ def _anthropic_stream(cfg, key, body, sink) -> ProviderResponse:
                 except Exception:  # noqa: BLE001 — a broken sink must never break the answer
                     pass
             elif t == "message_start":
-                usage_in = ((ev.get("message") or {}).get("usage") or {}).get("input_tokens", 0)
+                usage = (ev.get("message") or {}).get("usage") or {}
+                usage_in = usage.get("input_tokens", usage_in)
+                usage_out = usage.get("output_tokens", usage_out)
             elif t == "message_delta":
-                usage_out = (ev.get("usage") or {}).get("output_tokens", usage_out)
+                # Both fields are cumulative. Compatible gateways may provide
+                # input usage only in the final delta; never reset omitted fields.
+                usage = ev.get("usage") or {}
+                usage_in = usage.get("input_tokens", usage_in)
+                usage_out = usage.get("output_tokens", usage_out)
             elif t == "error":
                 raise ProviderError(f"anthropic stream error: {str(ev.get('error'))[:200]}")
     return ProviderResponse(text=text, input_tokens=usage_in, output_tokens=usage_out)

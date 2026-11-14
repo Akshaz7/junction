@@ -1,0 +1,580 @@
+{
+  "before": {
+    "phase": "before",
+    "timestamp": "2026-11-14T22:04:16+0200",
+    "mode": "Real artifact data, fake models, explanations disabled; Python engine entry point (no HTTP)",
+    "first_token_note": "Null means the code route emits no answer text before returning its final answer",
+    "documents": [
+      {
+        "doc_id": "ifc_bench__sixty5-arc",
+        "items": 16512,
+        "elements_bytes": 17591079,
+        "scene_glb_bytes": 69787808,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 137.801,
+        "load_repeat_ms": 111.274,
+        "reader_ifc_first_ms": 184.291,
+        "reader_ifc_repeat_ms": 0.925,
+        "reader_observation_first_line": "e1 (cites all 400 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "ifc_bench__sixty5-arc"
+          ],
+          "final_ms": 3040.638,
+          "first_status_ms": 9.092,
+          "first_answer_token_ms": null,
+          "value": 1049,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 17,
+          "route": "index",
+          "event_count": 5
+        }
+      },
+      {
+        "doc_id": "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3",
+        "items": 17554,
+        "elements_bytes": 15586713,
+        "scene_glb_bytes": 30002756,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 79.19,
+        "load_repeat_ms": 64.555,
+        "reader_ifc_first_ms": 66.216,
+        "reader_ifc_repeat_ms": 0.236,
+        "reader_observation_first_line": "e1 (cites all 0 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3"
+          ],
+          "final_ms": 709.359,
+          "first_status_ms": 0.191,
+          "first_answer_token_ms": null,
+          "value": 0,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 1,
+          "route": "index",
+          "event_count": 5
+        }
+      },
+      {
+        "doc_id": "ifc_bench__sixty5-plumbing",
+        "items": 22597,
+        "elements_bytes": 14565051,
+        "scene_glb_bytes": 93895728,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 66.436,
+        "load_repeat_ms": 135.9,
+        "reader_ifc_first_ms": 171.176,
+        "reader_ifc_repeat_ms": 0.294,
+        "reader_observation_first_line": "e1 (cites all 0 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "ifc_bench__sixty5-plumbing"
+          ],
+          "final_ms": 1026.023,
+          "first_status_ms": 0.138,
+          "first_answer_token_ms": null,
+          "value": 0,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 1,
+          "route": "index",
+          "event_count": 5
+        }
+      },
+      {
+        "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+        "items": 2250,
+        "elements_bytes": 1339949,
+        "scene_glb_bytes": 11306348,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 11.305,
+        "load_repeat_ms": 9.108,
+        "reader_ifc_first_ms": 18.232,
+        "reader_ifc_repeat_ms": 0.129,
+        "reader_observation_first_line": "e1 (cites all 211 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "ifc_models__bsc-esplanades-1807-ep-ar-v18"
+          ],
+          "final_ms": 446.821,
+          "first_status_ms": 0.131,
+          "first_answer_token_ms": null,
+          "value": 211,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 5,
+          "route": "index",
+          "event_count": 5
+        }
+      },
+      {
+        "doc_id": "uploads__bsc-esplanades-1807-ep-ar-v18-5c892c",
+        "items": 2250,
+        "elements_bytes": 1322217,
+        "scene_glb_bytes": 579712,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 12.684,
+        "load_repeat_ms": 10.324,
+        "reader_ifc_first_ms": 9.802,
+        "reader_ifc_repeat_ms": 0.139,
+        "reader_observation_first_line": "e1 (cites all 211 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "uploads__bsc-esplanades-1807-ep-ar-v18-5c892c"
+          ],
+          "final_ms": 3806.937,
+          "first_status_ms": 0.134,
+          "first_answer_token_ms": null,
+          "value": 211,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 5,
+          "route": "index",
+          "event_count": 5
+        }
+      }
+    ],
+    "multi_document": {
+      "question": "How many doors are there across all models?",
+      "doc_ids": [
+        "ifc_bench__sixty5-arc",
+        "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3",
+        "ifc_bench__sixty5-plumbing",
+        "ifc_bench__sixty5-electrical",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000",
+        "ifc_bench__sixty5-ventilation",
+        "ifc_models__bsc-clinic-clinic-plumbing",
+        "opening_design__ctr-models-cad-ifc-ctr-ctr-ctr-1st-phase-shell",
+        "ifc_models__bsc-molio-molio-with-uris",
+        "ifc_bench__molio-arc"
+      ],
+      "final_ms": 992.154,
+      "first_status_ms": 0.319,
+      "first_answer_token_ms": null,
+      "value": 1346,
+      "abstained": false,
+      "cost_usd": 0.0,
+      "citation_count": 43,
+      "route": "index",
+      "event_count": 2
+    },
+    "profile": "         2055000 function calls (2054767 primitive calls) in 0.972 seconds\n\n   Ordered by: cumulative time\n   List reduced from 338 to 18 due to restriction <18>\n\n   ncalls  tottime  percall  cumtime  percall filename:lineno(function)\n       11    0.248    0.023    1.499    0.136 data.py:68(load_doc)\n        1    0.000    0.000    0.992    0.992 measure.py:34(ask)\n        1    0.000    0.000    0.992    0.992 measure.py:28(clock)\n        1    0.000    0.000    0.992    0.992 measure.py:39(<lambda>)\n        1    0.000    0.000    0.992    0.992 answer.py:261(answer)\n        1    0.006    0.006    0.992    0.992 reasoning.py:108(attach)\n        1    0.034    0.034    0.987    0.987 reasoning.py:62(build)\n       44    0.000    0.000    0.731    0.017 pathlib.py:835(stat)\n       22    0.000    0.000    0.730    0.033 pathlib.py:870(is_dir)\n        3    0.000    0.000    0.730    0.243 threading.py:323(wait)\n        1    0.000    0.000    0.730    0.730 answer.py:235(_guarded)\n        1    0.000    0.000    0.730    0.730 _base.py:428(result)\n        1    0.000    0.000    0.730    0.730 thread.py:54(run)\n        1    0.000    0.000    0.730    0.730 answer.py:333(_answer_forced)\n        1    0.000    0.000    0.730    0.730 answer.py:375(_answer_core)\n        1    0.033    0.033    0.730    0.730 analytics.py:225(multi_doc_total)\n       10    0.029    0.003    0.697    0.070 solve.py:401(solve)\n       86    0.000    0.000    0.411    0.005 data.py:42(_json)\n\n\n",
+    "max_rss_bytes": 1984823296
+  },
+  "after": {
+    "phase": "after",
+    "timestamp": "2026-11-14T22:16:18+0200",
+    "mode": "Real artifact data, fake models, explanations disabled; Python engine entry point (no HTTP)",
+    "first_token_note": "Null means the code route emits no answer text before returning its final answer",
+    "documents": [
+      {
+        "doc_id": "ifc_bench__sixty5-arc",
+        "items": 16512,
+        "elements_bytes": 17591079,
+        "scene_glb_bytes": 69787808,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 100.361,
+        "load_repeat_ms": 143.497,
+        "reader_ifc_first_ms": 104.226,
+        "reader_ifc_repeat_ms": 0.908,
+        "reader_observation_first_line": "e1 (cites all 400 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "ifc_bench__sixty5-arc"
+          ],
+          "final_ms": 218.648,
+          "first_status_ms": 85.305,
+          "first_answer_token_ms": null,
+          "value": 1049,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 17,
+          "route": "index",
+          "event_count": 5
+        }
+      },
+      {
+        "doc_id": "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3",
+        "items": 17554,
+        "elements_bytes": 15586713,
+        "scene_glb_bytes": 30002756,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 76.375,
+        "load_repeat_ms": 65.193,
+        "reader_ifc_first_ms": 67.401,
+        "reader_ifc_repeat_ms": 0.275,
+        "reader_observation_first_line": "e1 (cites all 0 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3"
+          ],
+          "final_ms": 161.461,
+          "first_status_ms": 0.156,
+          "first_answer_token_ms": null,
+          "value": 0,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 1,
+          "route": "index",
+          "event_count": 5
+        }
+      },
+      {
+        "doc_id": "ifc_bench__sixty5-plumbing",
+        "items": 22597,
+        "elements_bytes": 14565051,
+        "scene_glb_bytes": 93895728,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 105.196,
+        "load_repeat_ms": 102.285,
+        "reader_ifc_first_ms": 242.787,
+        "reader_ifc_repeat_ms": 0.315,
+        "reader_observation_first_line": "e1 (cites all 0 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "ifc_bench__sixty5-plumbing"
+          ],
+          "final_ms": 244.001,
+          "first_status_ms": 0.126,
+          "first_answer_token_ms": null,
+          "value": 0,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 1,
+          "route": "index",
+          "event_count": 5
+        }
+      },
+      {
+        "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+        "items": 2250,
+        "elements_bytes": 1339949,
+        "scene_glb_bytes": 11306348,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 11.554,
+        "load_repeat_ms": 9.448,
+        "reader_ifc_first_ms": 9.402,
+        "reader_ifc_repeat_ms": 0.139,
+        "reader_observation_first_line": "e1 (cites all 211 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "ifc_models__bsc-esplanades-1807-ep-ar-v18"
+          ],
+          "final_ms": 12.362,
+          "first_status_ms": 0.137,
+          "first_answer_token_ms": null,
+          "value": 211,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 5,
+          "route": "index",
+          "event_count": 5
+        }
+      },
+      {
+        "doc_id": "uploads__bsc-esplanades-1807-ep-ar-v18-5c892c",
+        "items": 2250,
+        "elements_bytes": 1322217,
+        "scene_glb_bytes": 579712,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 11.916,
+        "load_repeat_ms": 9.365,
+        "reader_ifc_first_ms": 9.24,
+        "reader_ifc_repeat_ms": 0.133,
+        "reader_observation_first_line": "e1 (cites all 211 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "uploads__bsc-esplanades-1807-ep-ar-v18-5c892c"
+          ],
+          "final_ms": 12.479,
+          "first_status_ms": 0.141,
+          "first_answer_token_ms": null,
+          "value": 211,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 5,
+          "route": "index",
+          "event_count": 5
+        }
+      },
+      {
+        "doc_id": "ifc_models__resbim-454-model",
+        "items": 25,
+        "elements_bytes": 16961,
+        "scene_glb_bytes": 359588,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 0.993,
+        "load_repeat_ms": 0.392,
+        "reader_ifc_first_ms": 0.302,
+        "reader_ifc_repeat_ms": 0.019,
+        "reader_observation_first_line": "e1 (cites all 5 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "ifc_models__resbim-454-model"
+          ],
+          "final_ms": 1.195,
+          "first_status_ms": 0.129,
+          "first_answer_token_ms": null,
+          "value": 5,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 1,
+          "route": "index",
+          "event_count": 5
+        }
+      }
+    ],
+    "multi_document": {
+      "question": "How many doors are there across all models?",
+      "doc_ids": [
+        "ifc_bench__sixty5-arc",
+        "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3",
+        "ifc_bench__sixty5-plumbing",
+        "ifc_bench__sixty5-electrical",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000",
+        "ifc_bench__sixty5-ventilation",
+        "ifc_models__bsc-clinic-clinic-plumbing",
+        "opening_design__ctr-models-cad-ifc-ctr-ctr-ctr-1st-phase-shell",
+        "ifc_models__bsc-molio-molio-with-uris",
+        "ifc_bench__molio-arc"
+      ],
+      "final_ms": 962.701,
+      "first_status_ms": 0.248,
+      "first_answer_token_ms": null,
+      "value": 1346,
+      "abstained": false,
+      "cost_usd": 0.0,
+      "citation_count": 43,
+      "route": "index",
+      "event_count": 2
+    },
+    "profile": "         1322406 function calls (1322178 primitive calls) in 0.944 seconds\n\n   Ordered by: cumulative time\n   List reduced from 345 to 18 due to restriction <18>\n\n   ncalls  tottime  percall  cumtime  percall filename:lineno(function)\n        1    0.000    0.000    0.963    0.963 {method 'get' of '_queue.SimpleQueue' objects}\n        1    0.000    0.000    0.951    0.951 answer.py:264(answer)\n        3    0.000    0.000    0.948    0.316 threading.py:323(wait)\n        1    0.000    0.000    0.948    0.948 answer.py:238(_guarded)\n        1    0.000    0.000    0.948    0.948 _base.py:428(result)\n        1    0.000    0.000    0.948    0.948 thread.py:54(run)\n        1    0.000    0.000    0.948    0.948 {method 'run' of '_contextvars.Context' objects}\n        1    0.000    0.000    0.948    0.948 answer.py:339(_answer_forced)\n        1    0.000    0.000    0.948    0.948 answer.py:381(_answer_core)\n        1    0.030    0.030    0.948    0.948 analytics.py:225(multi_doc_total)\n       10    0.007    0.001    0.918    0.092 solve.py:401(solve)\n       11    0.000    0.000    0.904    0.082 cache.py:63(wrapped)\n       11    0.033    0.003    0.904    0.082 cache.py:26(load)\n       10    0.415    0.042    0.869    0.087 data.py:69(load_doc)\n       65    0.000    0.000    0.353    0.005 data.py:43(_json)\n       65    0.000    0.000    0.350    0.005 __init__.py:274(load)\n       65    0.000    0.000    0.322    0.005 __init__.py:299(loads)\n       65    0.000    0.000    0.322    0.005 decoder.py:333(decode)\n\n\n",
+    "max_rss_bytes": 213385216
+  },
+  "resumed": {
+    "phase": "resumed",
+    "timestamp": "2026-11-14T23:06:53+0200",
+    "mode": "Real artifact data, fake models, explanations disabled; Python engine entry point (no HTTP)",
+    "first_token_note": "Null means the code route emits no answer text before returning its final answer",
+    "documents": [
+      {
+        "doc_id": "ifc_bench__sixty5-arc",
+        "items": 16512,
+        "elements_bytes": 17591079,
+        "scene_glb_bytes": 69787808,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 108.614,
+        "load_repeat_ms": 161.877,
+        "reader_ifc_first_ms": 145.158,
+        "reader_ifc_repeat_ms": 1.109,
+        "reader_observation_first_line": "e1 (cites all 1049 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "ifc_bench__sixty5-arc"
+          ],
+          "final_ms": 337.972,
+          "first_status_ms": 128.012,
+          "first_answer_token_ms": null,
+          "value": 1049,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 17,
+          "route": "index",
+          "event_count": 5
+        }
+      },
+      {
+        "doc_id": "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3",
+        "items": 17554,
+        "elements_bytes": 15586713,
+        "scene_glb_bytes": 30002756,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 154.905,
+        "load_repeat_ms": 100.899,
+        "reader_ifc_first_ms": 107.545,
+        "reader_ifc_repeat_ms": 2.718,
+        "reader_observation_first_line": "e1 (cites all 0 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3"
+          ],
+          "final_ms": 314.253,
+          "first_status_ms": 2.048,
+          "first_answer_token_ms": null,
+          "value": 0,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 1,
+          "route": "index",
+          "event_count": 5
+        }
+      },
+      {
+        "doc_id": "ifc_bench__sixty5-plumbing",
+        "items": 22597,
+        "elements_bytes": 14565051,
+        "scene_glb_bytes": 93895728,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 197.787,
+        "load_repeat_ms": 120.689,
+        "reader_ifc_first_ms": 235.205,
+        "reader_ifc_repeat_ms": 0.319,
+        "reader_observation_first_line": "e1 (cites all 0 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "ifc_bench__sixty5-plumbing"
+          ],
+          "final_ms": 259.411,
+          "first_status_ms": 0.15,
+          "first_answer_token_ms": null,
+          "value": 0,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 1,
+          "route": "index",
+          "event_count": 5
+        }
+      },
+      {
+        "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+        "items": 2250,
+        "elements_bytes": 1339949,
+        "scene_glb_bytes": 11306348,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 13.491,
+        "load_repeat_ms": 10.01,
+        "reader_ifc_first_ms": 9.472,
+        "reader_ifc_repeat_ms": 0.133,
+        "reader_observation_first_line": "e1 (cites all 211 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "ifc_models__bsc-esplanades-1807-ep-ar-v18"
+          ],
+          "final_ms": 12.247,
+          "first_status_ms": 0.118,
+          "first_answer_token_ms": null,
+          "value": 211,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 5,
+          "route": "index",
+          "event_count": 5
+        }
+      },
+      {
+        "doc_id": "uploads__bsc-esplanades-1807-ep-ar-v18-5c892c",
+        "items": 2250,
+        "elements_bytes": 1322217,
+        "scene_glb_bytes": 579712,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 13.057,
+        "load_repeat_ms": 9.632,
+        "reader_ifc_first_ms": 9.634,
+        "reader_ifc_repeat_ms": 0.136,
+        "reader_observation_first_line": "e1 (cites all 211 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "uploads__bsc-esplanades-1807-ep-ar-v18-5c892c"
+          ],
+          "final_ms": 13.249,
+          "first_status_ms": 0.177,
+          "first_answer_token_ms": null,
+          "value": 211,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 5,
+          "route": "index",
+          "event_count": 5
+        }
+      },
+      {
+        "doc_id": "ifc_models__resbim-454-model",
+        "items": 25,
+        "elements_bytes": 16961,
+        "scene_glb_bytes": 359588,
+        "ingest_conversion_ms": null,
+        "ingest_note": "Already converted; shared artifacts left unchanged",
+        "load_first_ms": 0.773,
+        "load_repeat_ms": 0.253,
+        "reader_ifc_first_ms": 0.236,
+        "reader_ifc_repeat_ms": 0.019,
+        "reader_observation_first_line": "e1 (cites all 5 matching elements)",
+        "answer": {
+          "question": "How many doors are in this model?",
+          "doc_ids": [
+            "ifc_models__resbim-454-model"
+          ],
+          "final_ms": 0.966,
+          "first_status_ms": 0.108,
+          "first_answer_token_ms": null,
+          "value": 5,
+          "abstained": false,
+          "cost_usd": 0,
+          "citation_count": 1,
+          "route": "index",
+          "event_count": 5
+        }
+      }
+    ],
+    "multi_document": {
+      "question": "How many doors are there across all models?",
+      "doc_ids": [
+        "ifc_bench__sixty5-arc",
+        "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3",
+        "ifc_bench__sixty5-plumbing",
+        "ifc_bench__sixty5-electrical",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000",
+        "ifc_bench__sixty5-ventilation",
+        "ifc_models__bsc-clinic-clinic-plumbing",
+        "opening_design__ctr-models-cad-ifc-ctr-ctr-ctr-1st-phase-shell",
+        "ifc_models__bsc-molio-molio-with-uris",
+        "ifc_bench__molio-arc"
+      ],
+      "final_ms": 993.408,
+      "first_status_ms": 0.217,
+      "first_answer_token_ms": null,
+      "value": 1346,
+      "abstained": false,
+      "cost_usd": 0.0,
+      "citation_count": 43,
+      "route": "index",
+      "event_count": 2
+    },
+    "profile": "         1322399 function calls (1322175 primitive calls) in 0.975 seconds\n\n   Ordered by: cumulative time\n   List reduced from 349 to 18 due to restriction <18>\n\n   ncalls  tottime  percall  cumtime  percall filename:lineno(function)\n        1    0.000    0.000    0.993    0.993 measure.py:39(ask)\n        1    0.000    0.000    0.993    0.993 measure.py:33(clock)\n        1    0.000    0.000    0.993    0.993 measure.py:44(<lambda>)\n        1    0.000    0.000    0.993    0.993 cache.py:52(wrapped)\n        1    0.000    0.000    0.993    0.993 threading.py:1018(_bootstrap)\n        1    0.000    0.000    0.993    0.993 threading.py:1058(_bootstrap_inner)\n        1    0.000    0.000    0.993    0.993 threading.py:1001(run)\n        1    0.000    0.000    0.993    0.993 thread.py:70(_worker)\n        1    0.000    0.000    0.993    0.993 {method 'get' of '_queue.SimpleQueue' objects}\n        1    0.000    0.000    0.981    0.981 answer.py:264(answer)\n        1    0.000    0.000    0.979    0.979 answer.py:238(_guarded)\n        3    0.000    0.000    0.979    0.326 threading.py:323(wait)\n        1    0.000    0.000    0.979    0.979 _base.py:428(result)\n        1    0.000    0.000    0.979    0.979 thread.py:54(run)\n        1    0.000    0.000    0.979    0.979 {method 'run' of '_contextvars.Context' objects}\n        1    0.000    0.000    0.979    0.979 answer.py:339(_answer_forced)\n        1    0.000    0.000    0.979    0.979 answer.py:381(_answer_core)\n        1    0.030    0.030    0.979    0.979 analytics.py:225(multi_doc_total)\n\n\n",
+    "max_rss_bytes": 213401600
+  }
+}

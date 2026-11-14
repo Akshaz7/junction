@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
+from engine.reader.cache import memoized_document
 
 
 @dataclass
@@ -65,6 +66,7 @@ def dedupe_openings(items: list, thr: float = 0.3) -> list:
     return [i for i in items if id(i) not in drop] if drop else items
 
 
+@memoized_document
 def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
     d = Path(root) / doc_id
     if not d.is_dir():
