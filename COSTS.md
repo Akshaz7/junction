@@ -4,7 +4,7 @@ Caps for run 1. The lead may not raise them; only Ash can. The model layer enfor
 
 | Provider | Cap |
 |---|---|
-| Runware | 300 USD |
+| Runware | 500 USD |
 | Anthropic | 15 USD |
 | Gemini | 20 USD |
 | Modal | 80 USD (GPU; each fine-tune row capped at 2 GPU-hours) |

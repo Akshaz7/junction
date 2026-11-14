@@ -25,3 +25,4 @@ Format for new lines: `YYYY-MM-DD HH:MM — decision — reason`.
 - 2026-11-14 02:45 — LICENSE copyright changed to "2026 Team RS3" — section 11 requires it.
 - 2026-11-14 02:45 — Initial TASKS status: rows with no keys `todo`, rows naming keys `waiting-key` — check_keys.py releases them.
 - 2026-11-14 02:55 — Ash: build every iOS row (I-01..I-09) overnight against the simulator and unit tests; no device tonight. I-05 (install on iPhone) is deferred to Saturday morning when Ash plugs in the phone: the lead writes the exact install steps to MORNING.md and sets I-05 `blocked-human` instead of spending attempts on it. Device absence never counts as a failed attempt for any other iOS row — Ash's instruction.
+- 2026-11-14 02:50 — Runware cap raised from 300 to 500 USD — Ash's instruction.
