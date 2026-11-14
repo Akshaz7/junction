@@ -43,6 +43,20 @@ final class HighlightController {
         capture(root)
     }
 
+    private var roomPlates: [String: Entity] = [:]
+
+    /// Rooms highlight through their floor tint plate (room volumes are hidden). Call after the blueprint is built
+    /// and before the first highlight; the plate's own material is restored on clear.
+    func attachRoomPlates(_ plates: [String: ModelEntity]) {
+        for (id, plate) in plates {
+            roomPlates[id] = plate
+            if let model = plate.components[ModelComponent.self] {
+                originals.append(Original(entity: plate, materials: model.materials))
+                originalMaterials[ObjectIdentifier(plate)] = model.materials
+            }
+        }
+    }
+
     /// Tag and callout size follows the model so a 1:100 table model still reads clearly.
     static func labelUnit(for root: Entity) -> Float {
         let extent = root.visualBounds(relativeTo: root).extents.max()
@@ -92,7 +106,7 @@ final class HighlightController {
             for child in entity.children { select(child, color: color) }
         }
         for (offset, id) in itemIDs.enumerated() where seen.insert(id).inserted {
-            guard let entity = index.entity(for: id) else { continue }
+            guard let entity = roomPlates[id] ?? index.entity(for: id) else { continue }
             select(entity, color: kinds[id].flatMap { $0.isEmpty ? nil : KindColors.style(for: $0).color }
                    ?? Self.accentColor)
             resolved.append((id, entity, labels[id] ?? String(offset + 1)))

@@ -22,6 +22,15 @@ final class CutawayPolicyTests: XCTestCase {
         try JSONDecoder().decode(SceneManifest.self, from: Data(json.utf8))
     }
 
+    func testRoomVolumesStayHiddenEvenWhenHighlighted() throws {
+        let withRoom = json.replacingOccurrences(of: #""wall-002""#, with:
+            #""room-001":{"usd_name":"i_room1","kind":"room","storey":"Ground"},"wall-002""#)
+        let manifest = try JSONDecoder().decode(SceneManifest.self, from: Data(withRoom.utf8))
+        let policy = CutawayPolicy(manifest: manifest)
+        XCTAssertTrue(policy.hiddenUSDNames(activeStorey: "Ground", showRoof: false).contains("i_room1"))
+        XCTAssertTrue(policy.hiddenUSDNames(activeStorey: "Ground", showRoof: false, keep: ["room-001"]).contains("i_room1"))
+    }
+
     func testDefaultHidesRoofAndHigherStoreysButKeepsGroundBasementAndUnknown() throws {
         let policy = CutawayPolicy(manifest: try manifest())
         XCTAssertEqual(policy.storeys.compactMap(\.name), ["Basement", "Ground", "Upper"])

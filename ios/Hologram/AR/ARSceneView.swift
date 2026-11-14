@@ -215,6 +215,7 @@ final class ARSceneController: ObservableObject {
                 detail.build(manifest: manifest, index: index, content: content)
                 content.addChild(detail.root)
                 blueprint = detail
+                highlightController?.attachRoomPlates(detail.roomPlates)
             }
             container.scale = SIMD3(repeating: scale)
             model = container

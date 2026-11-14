@@ -18,6 +18,9 @@ final class BlueprintDetail {
 
     var root: Entity { group }
 
+    /// Thin floor tint per room item ID. An answer that highlights a room lights this plate, never a solid volume.
+    private(set) var roomPlates: [String: ModelEntity] = [:]
+
     // MARK: Materials and wall cut tops (before highlight capture)
 
     static func applyMaterials(manifest: SceneManifest, index: SceneIndex, content: Entity) {
@@ -84,14 +87,14 @@ final class BlueprintDetail {
             r.minZ = min(r.minZ, box.minimum.z); r.maxZ = max(r.maxZ, box.maximum.z)
             rects[storey] = r
         }
-        for item in manifest.items.values {
+        for (id, item) in manifest.items {
             guard let storey = item.storey, elevations[storey] != nil, let box = item.bbox_m else { continue }
             switch item.kind?.lowercased() {
             case "wall": grow(&wallRects, storey, box)
             case "slab", "floor": grow(&slabRects, storey, box)
             case "room", "space":
                 let floorY = floorTops[storey] ?? (elevations[storey] ?? 0) + 0.02
-                addRoom(item, box: box, storey: storey, floorY: floorY)
+                addRoom(id, item, box: box, storey: storey, floorY: floorY)
             default: break
             }
         }
@@ -128,7 +131,7 @@ final class BlueprintDetail {
         return entity
     }
 
-    private func addRoom(_ item: SceneManifest.Item, box: SceneBounds, storey: String, floorY: Float) {
+    private func addRoom(_ id: String, _ item: SceneManifest.Item, box: SceneBounds, storey: String, floorY: Float) {
         let extents = box.maximum - box.minimum
         let footprint = SIMD2(extents.x, extents.z)
         guard footprint.x > 0.5, footprint.y > 0.5 else { return }
@@ -140,6 +143,7 @@ final class BlueprintDetail {
         plate.name = "blueprint-floor"
         plate.position = [box.center.x, floorY + 0.005, box.center.z]
         parent.addChild(plate)
+        roomPlates[id] = plate
         guard let text = BlueprintStyle.roomLabel(name: BlueprintStyle.roomName(item),
                                                   area: BlueprintStyle.roomArea(item)),
               let metrics = Self.measure(text),
@@ -147,8 +151,8 @@ final class BlueprintDetail {
               let label = Self.flatText(text, scale: layout.fontSize / Self.baseFont, color: BlueprintStyle.roomLabelColor)
         else { return }
         if layout.rotated { label.entity.orientation = simd_quatf(angle: .pi / 2, axis: [0, 1, 0]) * label.entity.orientation }
-        // Flat rooms: just above the floor. Volume rooms: on the top face, the box would hide a floor label.
-        let y = max(BlueprintStyle.roomLabelHeight(minY: box.minimum.y, maxY: box.maximum.y), floorY + 0.03)
+        // Room volumes are never drawn on the table, so every label lies on its floor tint.
+        let y = floorY + 0.03
         label.entity.position = [box.center.x, y, box.center.z]
         label.entity.name = "blueprint-room-label"
         parent.addChild(label.entity)

@@ -92,6 +92,27 @@ final class HighlightControllerTests: XCTestCase {
     }
 
     @MainActor
+    func testRoomHighlightLightsTheFloorPlateNotTheVolume() throws {
+        let root = Entity()
+        let volume = Entity()
+        volume.name = SceneIndex.usdName(for: "room-1")
+        let volumeMaterial = SimpleMaterial(color: .gray, isMetallic: false)
+        let box = ModelEntity(mesh: .generateBox(size: 2), materials: [volumeMaterial])
+        volume.addChild(box)
+        root.addChild(volume)
+        let plateMaterial = UnlitMaterial(color: .white)
+        let plate = ModelEntity(mesh: .generateBox(size: [2, 0.01, 2]), materials: [plateMaterial])
+        root.addChild(plate)
+        let controller = HighlightController(root: root)
+        controller.attachRoomPlates(["room-1": plate])
+        controller.highlight(itemIDs: ["room-1"], kinds: ["room-1": "room"])
+        XCTAssertTrue(box.model?.materials.first is SimpleMaterial, "volume untouched")
+        XCTAssertNotNil(controller.labelsByItemID["room-1"])
+        controller.clear()
+        XCTAssertEqual(plate.model?.materials.count, 1)
+    }
+
+    @MainActor
     func testDenseHighlightDropsTagsButKeepsGlowAndRestores() throws {
         XCTAssertFalse(HighlightController.isDense(count: 12))
         XCTAssertTrue(HighlightController.isDense(count: 13))

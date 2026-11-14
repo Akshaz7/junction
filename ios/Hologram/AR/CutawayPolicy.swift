@@ -25,7 +25,8 @@ struct CutawayPolicy {
     }
 
     /// Site terrain and room volumes (IfcSite / IfcSpace) are hidden on the table: they bury the model
-    /// under a slab and coloured boxes. A room stays visible only when an answer highlights it (`keep`).
+    /// under a slab and coloured boxes. Rooms are never drawn as volumes, not even when highlighted: the floor tint
+    /// plate (BlueprintDetail.roomPlates) carries the highlight instead. `keep` is accepted for other kinds.
     func hiddenUSDNames(activeStorey: String?, showRoof: Bool, keep: Set<String> = []) -> Set<String> {
         let sortedStoreys = storeys
         let activeElevation = sortedStoreys.first { $0.name == activeStorey }?.elevation_m
@@ -34,7 +35,7 @@ struct CutawayPolicy {
         var hidden: Set<String> = []
         for (id, item) in manifest.items {
             let kind = item.kind?.lowercased() ?? ""
-            if kind == "site" || kind == "ifcsite" || ((kind == "room" || kind == "space" || kind == "ifcspace") && !keep.contains(id)) {
+            if kind == "site" || kind == "ifcsite" || kind == "room" || kind == "space" || kind == "ifcspace" {
                 hidden.insert(item.usd_name)
                 continue
             }
