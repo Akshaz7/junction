@@ -516,8 +516,11 @@ def audit(res, sources):
             if not operand.get("unit"):
                 fail("calc.input_unit", f"input {operand.get('name')!r} has no explicit unit (use '1' for dimensionless)")
             source_check(operand.get("source"), f"input {operand.get('name')!r}", operand=operand)
-            if re.search(r"model|recount|vision", str(operand.get("name") or ""), re.IGNORECASE) and not re.search(r"model|recount|vision", str(step.get("label") or ""), re.IGNORECASE):
-                fail("calc.model_input", "model output is used without labelling the model step")
+            origin = operand.get("source") or {}
+            model_input = origin.get("kind") == "model" or origin.get("origin") in ("det", "seg", "vlm", "vision")
+            label = " ".join(str(v or "") for v in (operand.get("name"), step.get("label"), origin.get("text")))
+            if model_input and not re.search(r"model|recount|vision|detector|segmentation", label, re.IGNORECASE):
+                fail("calc.model_input", "model output is used without labelling its provenance")
 
     margins = [("reasoning.margin", reasoning.get("margin"))]
     if calc:
@@ -561,11 +564,26 @@ def audit(res, sources):
         second = number(check.get("value"))
         primary = number(check.get("primary_value", value))
         diff = number(check.get("diff_pct"))
+        primaries = [primary] if primary is not None else []
+        ref = check.get("source") or {}
+        if "primary_value" not in check and ref.get("item_id"):
+            # Per-element checks compare this room, not the headline's sum.
+            raw = sources.items(ref.get("doc_id") or default_doc, ref.get("page")).get(ref["item_id"]) or {}
+            props = {**(raw.get("quantities") or {}), **(raw.get("props") or {})}
+            check_unit = unit(check.get("unit") or u)
+            keys = {"m2": ("area_m2_geom", "area_m2_label", "area_m2", "net_floor_area_m2"), "m": ("length_m",), "m3": ("volume_m3",)}.get(check_unit, ())
+            primaries = [v for key in keys if (v := number(props.get(key))) is not None]
+        elif "primary_value" not in check and check.get("unit") and unit(check["unit"]) != u:
+            primaries = []
         if second is not None and primary is not None:
-            relative = abs(second - primary) / abs(primary) * 100 if primary else 0 if second == 0 else None
-            symmetric = abs(second - primary) / max(abs(primary), abs(second)) * 100 if primary or second else 0
-            if diff is not None and not any(close(diff, measured, 0.05) for measured in (relative, symmetric)):
-                fail("check.diff_pct", f"reported difference {diff} is inconsistent with {primary} vs {second}")
+            differences = []
+            for candidate in primaries:
+                differences.extend([abs(second - candidate) / abs(candidate) * 100 if candidate else 0 if second == 0 else None,
+                                    abs(second - candidate) / max(abs(candidate), abs(second)) * 100 if candidate or second else 0])
+            if diff is not None and not primaries:
+                fail("check.primary_unavailable", "comparison primary value cannot be resolved for its element or units", "uncheckable")
+            elif diff is not None and not any(close(diff, measured, 0.05) for measured in differences):
+                fail("check.diff_pct", f"reported difference {diff} is inconsistent with source readings {primaries} vs {second}")
             if check.get("agrees") is True and not close(primary, second) and diff is None:
                 fail("check.agreement_unbounded", "different quantities called agreeing without a measured difference")
     label = confidence.get("label")

@@ -56,7 +56,7 @@ def test_reconciled_source_quantities_pass(source):
     (lambda r: r["reasoning"]["calc"]["steps"][0]["inputs"][0].pop("unit"), "calc.input_unit"),
     (lambda r: r["reasoning"]["calc"]["steps"][0].pop("unit"), "calc.step_unit"),
     (lambda r: r["reasoning"]["calc"]["steps"][0]["inputs"][0].update(source={"doc_id": "generated__audit"}), "source.unresolved"),
-    (lambda r: r["reasoning"]["calc"]["steps"][0]["inputs"][0].update(name="model count"), "calc.model_input"),
+    (lambda r: r["reasoning"]["calc"]["steps"][0]["inputs"][0]["source"].update(kind="model"), "calc.model_input"),
     (lambda r: r["reasoning"]["calc"].pop("rounded_as", None) or r["reasoning"]["calc"]["result"].pop("rounded_as"), "calc.rounding_missing"),
     (lambda r: r["reasoning"]["calc"].pop("formula"), "calc.formula_missing"),
     (lambda r: r["reasoning"].pop("margin"), "scale.margin_missing"),
@@ -300,3 +300,18 @@ def test_read_only_binary_links_resolve_only_to_original_artifacts(source, tmp_p
 def test_nonfinite_source_values_are_preserved_as_defects_in_valid_json():
     data = json.loads(checker.report_json({"answer": {"value": float("nan")}}))
     assert data["answer"]["value"] == {"invalid_numeric": "nan"}
+
+
+def test_labelled_model_input_can_be_added_by_a_plain_sum_step(source):
+    res = good()
+    operand = res["reasoning"]["calc"]["steps"][0]["inputs"][0]
+    operand["name"] = "Model output: room outline"
+    operand["source"]["origin"] = "seg"
+    assert "calc.model_input" not in codes(res, source)
+
+
+def test_element_comparison_does_not_compare_a_room_to_the_floor_total(source):
+    res = good()
+    res["reasoning"]["calc"]["checks"] = [{"method": "printed / outline", "value": 12, "diff_pct": 0,
+                                               "agrees": True, "source": {"doc_id": "generated__audit", "page": 1, "item_id": "a"}}]
+    assert "check.diff_pct" not in codes(res, source)
