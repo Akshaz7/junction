@@ -99,4 +99,5 @@ def test_uncalibrated_estimate_and_bad_alignment(monkeypatch):
     assert confidence_module.confidence("position", .01) == .99
     assert confidence_module.confidence("position", 1) == .5
     assert confidence_module.confidence("position", .01, alignment={"matches": 2, "residual_m": 0}) == 0
+    assert confidence_module.confidence("position", .01, alignment={"matches": 4, "residual_m": 1}) == .5
     assert confidence_module.confidence("made_up") == .5

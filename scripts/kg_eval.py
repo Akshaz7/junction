@@ -202,7 +202,7 @@ def graph_audit(root, project):
         scored[method] = {**metrics(predicted_by_method[method], expected, len(rows) - len(known)),
                           "graph_edges": len(rows), "known": len(known),
                           "residual_m": distribution([r["residual_m"] for r in rows]), "sample": rows[:5]}
-    audited = {k: sample_relations(root, rows) for k, rows in samples.items()}
+    audited = {k: sample_relations(root, samples[k]) for k in ("in_room", "hosted_by", "serves")}
     return {"project": project, "build_seconds": elapsed, "under_30_seconds": elapsed < 30,
             "stats": graph["stats"], "edges_by_kind": dict(Counter(e["kind"] for e in graph["edges"])),
             "warnings": graph.get("warnings", []), "invalid_edge_count": len(invalid), "invalid_edge_sample": invalid[:10],
@@ -267,6 +267,27 @@ def sample_relations(root, rows):
             "correct": sum(s["correct"] for s in known), "unknown": len(samples) - len(known), "samples": samples}
 
 
+def calibration_scores(observations, calibrated):
+    result = {}
+    for split, flag in (("fit_in_sample", False), ("heldout", True)):
+        result[split] = {}
+        for method in METHODS:
+            rows = [o for o in observations if o["heldout"] == flag and o["method"] == method]
+            pairs = [(calibrated(method, o["residual_m"]), int(o["correct"])) for o in rows]
+            bins = []
+            for i in range(10):
+                part = [(p, y) for p, y in pairs if min(9, int(p * 10)) == i]
+                if part:
+                    bins.append({"min_probability": i / 10, "n": len(part),
+                                 "mean_probability": sum(p for p, _ in part) / len(part),
+                                 "observed_precision": sum(y for _, y in part) / len(part)})
+            result[split][method] = {"n": len(pairs),
+                                    "brier": sum((p - y) ** 2 for p, y in pairs) / len(pairs) if pairs else None,
+                                    "ece": sum(b["n"] * abs(b["mean_probability"] - b["observed_precision"]) for b in bins) / len(pairs) if pairs else None,
+                                    "reliability_bins": bins}
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("--manifest", type=Path, required=True)
@@ -329,8 +350,13 @@ def main():
            "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
            "manifest": config, "cases": reports, "unavailable": unavailable, "swiss_twins": swiss,
            "calibration": calibration.CALIBRATION,
+           "calibration_evaluation": calibration_scores(observations, calibration.confidence),
            "calibration_fit_observations": sum(not o["heldout"] for o in observations),
            "heldout_observations_excluded_from_fit": sum(o["heldout"] for o in observations),
+           "calibration_source_membership": {did: {"heldout": heldout(root, did, heldout_ids)}
+                                             for did in config.get("calibration_docs", []) + [p[k] for p in config.get("revision_pairs", []) for k in ("doc_a", "doc_b")]},
+           "code_sha256": {str(p.relative_to(Path(__file__).resolve().parents[1])): hashlib.sha256(p.read_bytes()).hexdigest()
+                           for p in sorted((Path(__file__).resolve().parents[1] / "engine/kg").glob("*.py"))},
            "projects": graphs, "blind": blind,
            "limitations": ["IFC-derived plans and SVG/PDF/PNG twins share source geometry; these scores do not establish detection accuracy on independent scans.",
                            "GUID is code-known source identity within a known pair, not an independently labelled classifier outcome.",
@@ -339,7 +365,12 @@ def main():
                            "No heldout or blind observations are used to fit probabilities."]}
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / "report.json").write_text(json.dumps(out, indent=2, allow_nan=False) + "\n")
-    (args.output / "observations.json").write_text(json.dumps(observations, separators=(",", ":"), allow_nan=False) + "\n")
+    # Keep a compact audit trail; the full deterministic observations can be
+    # regenerated from the manifest without committing megabytes of repeated IDs.
+    audit = {"n": len(observations), "sha256": hashlib.sha256(json.dumps(observations, sort_keys=True).encode()).hexdigest(),
+             "negative_examples": [o for o in observations if not o["correct"]][:20],
+             "counts_by_case_method": dict(Counter(o["case"] + "/" + o["method"] for o in observations))}
+    (args.output / "observations.json").write_text(json.dumps(audit, indent=2, allow_nan=False) + "\n")
     print(json.dumps({"cases": len(reports), "calibration_observations": out["calibration_fit_observations"],
                       "heldout_observations": out["heldout_observations_excluded_from_fit"],
                       "graphs": [{"id": p["project"]["id"], "seconds": round(p["build_seconds"], 3), "invalid_edges": p["invalid_edge_count"]} for p in graphs],

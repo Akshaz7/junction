@@ -77,6 +77,14 @@
         "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-01-erdgeschoss",
         "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-02-dachgeschoss"
       ]
+    },
+    {
+      "id": "kg-eval-services",
+      "name": "Building services relation audit",
+      "docs": [
+        "ifc_models__bsc-clinic-clinic-architectural",
+        "ifc_models__bsc-clinic-clinic-hvac"
+      ]
     }
   ]
 }
