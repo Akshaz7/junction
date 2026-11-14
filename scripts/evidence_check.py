@@ -68,9 +68,10 @@ def read_json(path):
 
 class Sources:
     """Resolve against raw artifacts, not the solver that produced the answer."""
-    def __init__(self, root, repo=ROOT):
+    def __init__(self, root, repo=ROOT, original_artifacts=None):
         self.root = Path(root)
         self.repo = Path(repo)
+        self.original_artifacts = Path(original_artifacts or root)
         self.cache = {}
         self.indexes = {}
         self.fingerprints = {}
@@ -153,7 +154,8 @@ class Sources:
             candidate = self.root / str(ref)
             if not candidate.exists():
                 candidate = path / str(ref)
-            if not candidate.resolve().is_relative_to(self.root.resolve()) or not candidate.is_file():
+            allowed = (self.root.resolve(), self.original_artifacts.resolve())
+            if not any(candidate.resolve().is_relative_to(base) for base in allowed) or not candidate.is_file():
                 errors.append(f"artifact reference does not resolve: {ref}")
             elif source.get("pointer") is not None:
                 pointer = source["pointer"]
@@ -716,7 +718,7 @@ def run(repo, artifacts, rows, output, timeout=20):
         os.environ.update(ARTIFACTS_DIR=str(shadow), RESULTS_DIR=str(local / "results"),
                           MODELS_CACHE_DIR=str(local / "models"), MODELS_COSTS_LOG=str(local / "costs.jsonl"))
         from engine.answer import answer
-        sources = Sources(shadow, repo)
+        sources = Sources(shadow, repo, artifacts)
         for i, row in enumerate(rows, 1):
             t0 = time.perf_counter()
             try:

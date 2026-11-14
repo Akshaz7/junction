@@ -283,3 +283,15 @@ def test_repeated_item_on_different_pages_is_still_a_duplicate(source):
     other["source"]["page"] = 2
     res["reasoning"]["calc"]["rows"].append(other)
     assert "calc.duplicate_row" in codes(res, source)
+
+
+def test_read_only_binary_links_resolve_only_to_original_artifacts(source, tmp_path):
+    shared = tmp_path.parent / (tmp_path.name + "-original")
+    shared.mkdir()
+    (shared / "scene.glb").write_bytes(b"generated for demo")
+    source.original_artifacts = shared
+    target = source.root / "generated__audit/scene.glb"
+    target.symlink_to(shared / "scene.glb")
+    assert not source.resolve({"doc_id": "generated__audit", "artifact": "scene.glb"})
+    source.original_artifacts = source.root / "untrusted"
+    assert source.resolve({"doc_id": "generated__audit", "artifact": "scene.glb"})
