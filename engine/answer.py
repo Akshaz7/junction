@@ -146,12 +146,29 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
     if final != plan_n:
         noun = re.sub(r"^.*?\*\*\d+ ([^*]+)\*\*.*$", r"\1", ans["text_md"], flags=re.S) if re.search(r"\*\*\d+ ", ans["text_md"]) else parsed.kind + "s"
         ans["value"] = final
-        ans["text_md"] = f"There {'is' if final == 1 else 'are'} **{final} {noun if final != 1 else noun.rstrip('s')}** on this floor plan (re-counted from the drawing image; low-resolution detection disagreed)."
+        marks = " ".join(dict.fromkeys(re.findall(r"\[\d+\]", ans["text_md"])))   # keep the inline citation markers
+        ans["text_md"] = (f"There {'is' if final == 1 else 'are'} **{final} {noun if final != 1 else noun.rstrip('s')}** on this floor plan "
+                          f"(re-counted from the drawing image; low-resolution detection disagreed)." + (f" {marks}" if marks else ""))
         ans["confidence"] = round(min(ans.get("confidence", 0.5), 0.5), 3)
     return res
 
 
+def ensure_markers(res: dict) -> dict:
+    """A cited answer always carries its inline [n] markers: if the text lost them, append them after the last sentence."""
+    ans = res.get("answer") or {}
+    cites = res.get("citations") or []
+    t = ans.get("text_md") or ""
+    if cites and t and not ans.get("abstained") and not re.search(r"\[\d+\]", t):
+        ans["text_md"] = t.rstrip() + " " + " ".join(f"[{c['n']}]" for c in cites[:5] if isinstance(c, dict) and "n" in c)
+    return res
+
+
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
+           history: list[dict] | None = None) -> dict:
+    return ensure_markers(_answer_forced(question, doc_ids, on_event, scene_state=scene_state, history=history))
+
+
+def _answer_forced(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None) -> dict:
     """Code -> vision recount -> reader -> forced best-effort answer. Never abstains on a selected document (FORCE_ANSWER=0 restores abstaining)."""
     from engine.models import providers as _P

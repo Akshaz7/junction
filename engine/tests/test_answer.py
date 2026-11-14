@@ -98,3 +98,12 @@ def test_no_document_chat_uses_system_prompt_and_history(monkeypatch):
     assert seen["task"] == "chat" and seen["messages"][0]["role"] == "system"
     assert "Hologram" in seen["messages"][0]["content"] and seen["messages"][1]["content"] == "earlier"
     assert out["answer"]["abstained"] is False and out["answer"]["text_md"].startswith("Hi!") and out["citations"] == []
+
+
+def test_cited_answers_keep_inline_markers():
+    from engine.answer import ensure_markers
+    r = ensure_markers({"answer": {"text_md": "There are **10 windows**.", "abstained": False}, "citations": [{"n": 1}, {"n": 2}]})
+    assert r["answer"]["text_md"].endswith("[1] [2]")
+    kept = ensure_markers({"answer": {"text_md": "Ten [1].", "abstained": False}, "citations": [{"n": 1}]})
+    assert kept["answer"]["text_md"] == "Ten [1]."
+    assert ensure_markers({"answer": {"text_md": "x", "abstained": True}, "citations": [{"n": 1}]})["answer"]["text_md"] == "x"
