@@ -697,7 +697,8 @@ class _Ctx:
 
 
 def _finish(c: _Ctx, text: str, value, unit: str, ids: list[str], steps: list[str], found: str | None = None, measured: str | None = None,
-            checked: str | None = None, cap_pct: int | None = None, cap_reason: str | None = None, improve: str | None = None) -> dict:
+            checked: str | None = None, cap_pct: int | None = None, cap_reason: str | None = None, improve: str | None = None,
+            calc_groups: dict | None = None, calc_values: dict | None = None) -> dict:
     from engine.solvers.solve import _answer_obj, _evidence, _step
     uids = [i for i in dict.fromkeys(ids) if i in c.by_id]
     items = [c.by_id[i] for i in uids[:3000]]
@@ -724,6 +725,9 @@ def _finish(c: _Ctx, text: str, value, unit: str, ids: list[str], steps: list[st
     if cap_pct:
         hint["pct_cap"], hint["reason"], hint["improve"] = cap_pct, cap_reason, improve
     res["reasoning_hint"] = hint
+    if isinstance(value, (int, float)):
+        from engine.calc_routes import mep as calc_mep
+        calc_mep(res, c.doc, c.idx, ids, calc_groups, calc_values)
     return res
 
 
@@ -849,7 +853,7 @@ def _types_answer(c: _Ctx, subj: list[str], trade: str | None) -> dict:
     if not one_kind:
         lines.append(f"- Kinds: {_kinds_phrase(rows, 5)}")
     return _finish(c, head + ".\n" + "\n".join(lines) + " {marks}", len(cnt), "count", [r["id"] for r in rows], [f"{len(cnt)} types over {len(rows)} elements"],
-                   found=f"{_int(len(rows))} {word}, grouped by the type name stored on each one")
+                   found=f"{_int(len(rows))} {word}, grouped by the type name stored on each one", calc_groups={r["id"]: r["t"] for r in rows})
 
 
 def _count_answer(c: _Ctx, subj: list[str], trade: str | None) -> dict:
@@ -979,7 +983,8 @@ def _sizes_answer(c: _Ctx, subj: list[str], trade: str | None) -> dict:
         bul.append("- " + ", ".join(lines[6:14]))
     return _finish(c, head + ".\n" + "\n".join(bul) + " {marks}", len(cnt), "count", [r["id"] for r in sized], [f"{len(cnt)} sizes over {len(sized)} elements"],
                    found=f"{_int(len(sized))} {word} with a recorded size, grouped by size",
-                   checked="Each size was compared with the element's own 3D cross-section; sizes that do not match were dropped" if any(r.get("ws") for r in sized) else None)
+                   checked="Each size was compared with the element's own 3D cross-section; sizes that do not match were dropped" if any(r.get("ws") for r in sized) else None,
+                   calc_groups={r["id"]: _size_label(r) for r in sized})
 
 
 # ---- structure
@@ -1041,13 +1046,15 @@ def _struct_answer(c: _Ctx, kinds: list[str], want: str) -> dict | None:
             return _finish(c, head + ".\n" + "\n".join(lines) + " {marks}", len(g), "count", ids, [f"{len(g)} sizes over {n} elements"],
                            found=f"{_int(n)} {word}, grouped by their section size",
                            checked="Sizes read from each element's stored profile; names are only a fallback" if any((r or {}).get("sz") for _, _, r in pairs) else None,
-                           cap_pct=cap, cap_reason=(f"{unknown} of {n} have no stored size." if cap else None), improve="Ask for the structural model or a column schedule." if cap else None)
+                           cap_pct=cap, cap_reason=(f"{unknown} of {n} have no stored size." if cap else None), improve="Ask for the structural model or a column schedule." if cap else None,
+                           calc_groups={i.item_id: lab for lab, its in g.items() for i in its})
         if want == "material":
             mt = Counter(_mat_of(i, r) or "material not recorded" for _, i, r in pairs)
             head = f"**{_int(len(mt))} material{'s' if len(mt) != 1 else ''} for the {word}**" + (f" on {st}" if st else "")
             for m, v in mt.most_common(8):
                 lines.append(f"- {m}: {_int(v)} ({_share(v, n)})")
-            return _finish(c, head + ".\n" + "\n".join(lines) + " {marks}", len(mt), "count", ids, [f"{len(mt)} materials"], found=f"{_int(n)} {word}, grouped by the material stored on each one")
+            return _finish(c, head + ".\n" + "\n".join(lines) + " {marks}", len(mt), "count", ids, [f"{len(mt)} materials"], found=f"{_int(n)} {word}, grouped by the material stored on each one",
+                           calc_groups={i.item_id: _mat_of(i, r) or "material not recorded" for _, i, r in pairs})
         if len(kinds) > 1 or want == "overview":
             kc = Counter(k for k, _, _ in pairs)
             head = f"**{_int(n)} structural elements**" + (f" on {st}" if st else "") + f": {', '.join(f'{_int(v)} {plural(k, v)}' for k, v in kc.most_common())}"
@@ -1069,7 +1076,8 @@ def _struct_answer(c: _Ctx, kinds: list[str], want: str) -> dict | None:
             m = Counter(_mat_of(i, r) for i, r in sub if _mat_of(i, r))
             ex = (f", {sz.most_common(1)[0][0]}" if sz else "") + (f", {m.most_common(1)[0][0]}" if m else "")
             lines.append(f"- {t}: {_int(v)} ({_share(v, n)}){ex}")
-        return _finish(c, head + ".\n" + "\n".join(lines) + " {marks}", len(ty), "count", ids, [f"{len(ty)} types over {n} elements"], found=f"{_int(n)} {word}, grouped by type")
+        return _finish(c, head + ".\n" + "\n".join(lines) + " {marks}", len(ty), "count", ids, [f"{len(ty)} types over {n} elements"], found=f"{_int(n)} {word}, grouped by type",
+                       calc_groups={i.item_id: clean_type(i.type_name or i.name) for _, i, _ in pairs})
     # volume
     conc_only = bool(CONCRETE.search(c.ql))
     vols = []
@@ -1113,7 +1121,10 @@ def _struct_answer(c: _Ctx, kinds: list[str], want: str) -> dict | None:
     return _finish(c, head + ".\n" + "\n".join(lines) + " {marks}", round(tot, 3), "m3", [x[1].item_id for x in sel], [f"{len(sel)} volumes summed"],
                    found=f"{_int(n)} {word}{f' on {st}' if st else ''}", measured=f"Added the model's own volume of {_int(len(sel))} elements: {_n(tot)} m³",
                    cap_pct=cap, cap_reason=("Volumes are the model's own; some elements have no volume, no clear material, or are layered." if cap else None),
-                   improve="Ask for a model with quantity take-off (volumes) and named materials." if cap else None)
+                   improve="Ask for a model with quantity take-off (volumes) and named materials." if cap else None,
+                   calc_values={i.item_id: {"value": v, "volume": next(x[3] for x in have if x[1].item_id == i.item_id),
+                                            "fraction": next(x[4] for x in have if x[1].item_id == i.item_id) if conc_only else 1,
+                                            "indexed": r is not None} for _, i, r, v in sel})
 
 
 def _loadbearing_walls(c: _Ctx) -> dict | None:

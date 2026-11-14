@@ -122,7 +122,7 @@ def _read_text(ctx: dict) -> str:
         return "The available source data was checked; no matching measurement or element was cited."
     pages = sorted({c.get("page") or 1 for c in cites})
     pg = f" on page {pages[0]}" if len(pages) == 1 and pages[0] > 1 else ""
-    return f"{n} marked region{'s' if n != 1 else ''}{pg} of {noun}{_docs_suffix(ctx)}"
+    return f"Used {noun}{pg} as the source; individual items were not identified{_docs_suffix(ctx)}"
 
 
 def run(ctx: dict) -> None:

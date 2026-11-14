@@ -255,6 +255,7 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
     if doc.mode == "planmap" and (doc.scale or {}).get("method") == "door-prior":
         notes.append("The drawing scale is estimated from door widths; verify sizes before ordering.")
     rows, cites, boxes, highlights, values, calculations = [], [], [], [], {}, []
+    calc_parts = []
     incomplete = bool(error)
     estimated = False
     for label, typ in materials:
@@ -314,6 +315,8 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
             # Counts are whole items; area/length rounded upward to avoid under-ordering.
             need = math.ceil(need - 1e-9) if typ == "count" else math.ceil(need * 100 - 1e-9) / 100
             values[label] = need
+            from engine.order_calc import quantity
+            calc_parts.append(quantity(doc, label, typ, used, measured, need, pct, question, root))
             quantity = str(need) if typ == "count" else f"{need:.2f}".rstrip("0").rstrip(".")
             calculations.append(f"{label}: {str(measured).removesuffix('.0')} {unit} × (1 + {pct:g}%) = {quantity} {unit}" + (", rounded up to whole items" if typ == "count" else ", rounded up to 0.01"))
         rows.append(f"| {label} | {quantity} | {unit if measured is not None else ''} | {pct:g}% | {how} | {src} |")
@@ -329,5 +332,7 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
              *[_step("order_compute", c) for c in calculations]]
     scene = {"doc_id": doc.doc_id, "highlight_item_ids": highlights, "camera_target_item_id": highlights[0] if highlights else None}
     conf = 0.5 if incomplete or estimated or (doc.mode == "planmap" and (doc.scale or {}).get("confidence", 0) < 0.5) else 0.9
-    return _answer_obj(question, [doc.doc_id], text, value, unit if len(materials) == 1 else "quantities", conf, False,
+    res = _answer_obj(question, [doc.doc_id], text, value, unit if len(materials) == 1 else "quantities", conf, False,
                        boxes, cites, scene, trace, "index" if doc.mode == "ifc" else "planmap", t0)
+    from engine.order_calc import attach
+    return attach(res, calc_parts)

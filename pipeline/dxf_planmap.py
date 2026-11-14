@@ -93,11 +93,12 @@ def fit_transform(dxf_texts, words, tol=12.0):
     for w in words:
         wc.setdefault(w["text"], []).append(w["bbox_px"])
     dc = Counter(t for t, _, _ in dxf_texts)
-    pairs = []
+    pairs, labels = [], []
     for t, x, y in dxf_texts:
         if dc[t] == 1 and len(wc.get(t, [])) == 1 and " " not in t:
             b = wc[t][0]
             pairs.append((x, y, (b[0] + b[2]) / 2, (b[1] + b[3]) / 2))
+            labels.append((t, b))
     if len(pairs) < 4:
         return None
     P = np.array(pairs)
@@ -112,7 +113,10 @@ def fit_transform(dxf_texts, words, tol=12.0):
         if keep.sum() < 4:
             return None
     return {"a": float(a), "bx": float(bx), "by": float(by), "n": int(keep.sum()),
-            "rms_px": float(np.sqrt(np.mean(res[keep] ** 2)))}
+            "rms_px": float(np.sqrt(np.mean(res[keep] ** 2))),
+            "anchors": [{"text": labels[i][0], "bbox": labels[i][1], "native": P[i, :2].tolist(),
+                         "pixel": P[i, 2:].tolist(), "residual_px": float(res[i])}
+                        for i in range(len(P)) if keep[i]]}
 
 
 def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
@@ -120,7 +124,10 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
     from pipeline import pages as pg
     doc = ezdxf.readfile(str(dxf_path))
     ms = doc.modelspace()
-    unit_m = UNIT_M.get(int(doc.header.get("$INSUNITS", 6)), 1.0)
+    from pipeline.scale_provenance import dxf_units, dxf_scale
+    unit_m = dxf_units(doc, doc_id)["m_per_unit"]
+    # Preserve unknown units instead of publishing a fabricated physical scale.
+    quantity_factor = unit_m if unit_m is not None else None
     page = json.loads((art / "pages.json").read_text())
     p1 = page["pages"][0]
     W, H = p1["w"], p1["h"]
@@ -163,12 +170,12 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
         area_txt = next((t for t in ts if AREA.match(t)), "")
         add("room", name, r,
             {"number": num, "area_m2_label": float(area_txt.split()[0]) if area_txt else None,
-             "area_m2_geom": round(_poly_area(r) * unit_m ** 2, 2), "labelled": bool(name)}, "dxf")
+             "area_m2_geom": round(_poly_area(r) * quantity_factor ** 2, 2) if quantity_factor is not None else None, "labelled": bool(name)}, "dxf")
     # units
     for e in ms.query('LWPOLYLINE[layer=="UNIT_OUTLINE"]'):
         p = _pts(e)
         lab = next((t for t, x, y in texts if t.startswith("App.") and _inside((x, y), p)), "")
-        add("other", lab, p, {"role": "unit", "area_m2_geom": round(_poly_area(p) * unit_m ** 2, 2)}, "dxf")
+        add("other", lab, p, {"role": "unit", "area_m2_geom": round(_poly_area(p) * quantity_factor ** 2, 2) if quantity_factor is not None else None}, "dxf")
     for e in ms.query('LWPOLYLINE[layer=="WALL"]'):
         add("wall", "", _pts(e), {}, "dxf")
     for e in ms.query('LWPOLYLINE[layer=="WINDOW"]'):
@@ -181,8 +188,8 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
             cx = sum(q[0] for q in p[:4]) / 4; cy = sum(q[1] for q in p[:4]) / 4
             sw = min(arcs, key=lambda c: (c[0] - cx) ** 2 + (c[1] - cy) ** 2, default=None)
             w = max(box(p)[2] - box(p)[0], box(p)[3] - box(p)[1])
-            add("door", "", p, {"swing_radius_m": round(sw[2] * unit_m, 2) if sw else None,
-                                "leaf_len_m": round(w * unit_m, 2)}, "dxf")
+            add("door", "", p, {"swing_radius_m": round(sw[2] * unit_m, 2) if sw and unit_m is not None else None,
+                                "leaf_len_m": round(w * unit_m, 2) if unit_m is not None else None}, "dxf")
     # Blocks represent one fixture, even when several nested curves draw its symbol.
     # Semantic layers/block names can identify a fixture; anonymous FIXTURE geometry stays unknown.
     from ezdxf import bbox as dxf_bbox
@@ -211,12 +218,16 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
         items.append({"item_id": f"text-{cnt['text']}", "kind": "text", "label": t,
                       "bbox_px": [c[0] - 4 * len(t), c[1] - h, c[0] + 4 * len(t), c[1] + h],
                       "polygon_px": None, "props": {"dxf_layer": "ROOM_TEXT"}, "conf": 1.0, "source": "dxf"})
-    m_per_px = unit_m / a
+    scale = dxf_scale(doc, tf, doc_id)
+    if scale["m_per_px"] is not None:
+        scale["method"] = method
     pm = {"doc_id": doc_id, "page": 1, "image": {"w": W, "h": H},
-          "scale": {"m_per_px": round(m_per_px, 6), "method": method, "confidence": 1.0 if tf["rms_px"] < 6 else 0.6},
+          "scale": scale,
           "registration": tf, "items": items,
           "provenance": {"models": {}, "created": time.strftime("%Y-%m-%dT%H:%M:%S"), "ms": 0,
                          "note": "from DXF geometry; $INSUNITS=%s" % doc.header.get("$INSUNITS")}}
+    from engine.scale_proof import enrich
+    pm["scale"] = enrich(pm, art, save_crops=True)
     (art / "planmap-1.json").write_text(json.dumps(pm))
     return {"counts": dict(cnt), "reg": tf}
 

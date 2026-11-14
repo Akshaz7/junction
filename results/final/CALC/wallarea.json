@@ -1,0 +1,51 @@
+{
+  "upstream_commit": "dd2d7f0f391b5957282d2a8339c16a7f65bf31fe",
+  "method": "Executed committed main module read-only; no source artifacts or other worktrees modified",
+  "answers": [
+    {
+      "doc_id": "ifc_bench__ac20-arc",
+      "question": "What is the net wall area per floor?",
+      "routed": true,
+      "value": 4880.455604,
+      "rows": 121,
+      "complete": true,
+      "issues": []
+    },
+    {
+      "doc_id": "ifc_bench__ac20-arc",
+      "question": "What is the facade area of the ground floor?",
+      "routed": true,
+      "value": 228.52,
+      "rows": 12,
+      "complete": true,
+      "issues": []
+    },
+    {
+      "doc_id": "ifc_bench__ac20-arc",
+      "question": "How many plasterboard sheets 1200 x 2400 mm with 10% waste?",
+      "routed": true,
+      "value": 1492,
+      "rows": 121,
+      "complete": true,
+      "issues": []
+    },
+    {
+      "doc_id": "ifc_bench__ac20-arc",
+      "question": "What is the gross wall surface area?",
+      "routed": true,
+      "value": 5857.295604,
+      "rows": 121,
+      "complete": true,
+      "issues": []
+    },
+    {
+      "doc_id": "cubicasa5k__colorful-11397",
+      "question": "What is the net wall surface area?",
+      "routed": true,
+      "value": 553.935484,
+      "rows": 40,
+      "complete": true,
+      "issues": []
+    }
+  ]
+}

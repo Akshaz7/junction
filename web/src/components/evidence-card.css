@@ -16,6 +16,9 @@
 .evidence-pill.is-estimate { color: var(--warning); }
 .evidence-reason, .evidence-improve { font-size: var(--text-body-sm); color: var(--muted-foreground); }
 .evidence-improve { margin: 6px 0 0; }
+.evidence-quantity { margin: 6px 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.evidence-quantity p { margin: 4px 0; }
+.evidence-text, .evidence-pill { font-variant-numeric: tabular-nums; }
 .evidence-numbers { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 8px 0 4px; }
 .evidence-numbers div { display: flex; gap: 6px; align-items: baseline; }
 .evidence-numbers dt { color: var(--muted-foreground); font-size: var(--text-caption); }
