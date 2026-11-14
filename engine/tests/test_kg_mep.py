@@ -189,3 +189,39 @@ def test_enrich_is_idempotent(tmp_path):
     counts = (len(graph["nodes"]), len(graph["edges"]))
     enrich(graph, project, tmp_path)
     assert (len(graph["nodes"]), len(graph["edges"])) == counts
+
+
+def test_optional_pdf_adapter_clips_lengths_and_cites_original_sheet(tmp_path, monkeypatch):
+    """Generated-for-demo vector results stand in for Awais's read-only API."""
+    import sys
+    import time
+    from types import SimpleNamespace
+    from engine.kg.mep_sheets import enrich_sheets
+    for did in ("arch", "services"):
+        folder = tmp_path / did
+        folder.mkdir()
+        (folder / "source.pdf").write_bytes(b"generated for demo; API stub owns parsing")
+        pm = {"page": 1, "image": {"w": 100, "h": 100},
+              "scale": {"m_per_px": .01, "method": "dimension", "confidence": 1},
+              "items": [{"item_id": "room", "bbox_px": [10, 10, 30, 30],
+                         "polygon_px": [[10, 10], [30, 10], [30, 30], [10, 30]]}]}
+        (folder / "planmap-1.json").write_text(json.dumps(pm))
+    T = {"s": 1, "R": [[1, 0], [0, 1]], "t": [0, 0], "matches": 5, "residual": .1}
+    api = SimpleNamespace(load=lambda *args, **kw: {"W_pt": 100, "H_pt": 100},
+                          align=lambda *args: T, split_mep=lambda *args, **kw: {"mep": [True]},
+                          ducts=lambda *args: [{"start_pt": [0, 20], "end_pt": [40, 20], "width_m": .05}],
+                          terminals=lambda *args: [{"center_pt": [20, 20], "size_pt": 2, "airflow_ls": 5}])
+    monkeypatch.setitem(sys.modules, "pipeline.pdf_mep", api)
+    graph = {"nodes": [node("room", "arch", "room", label="Office"),
+                       node("room", "services", "room", label="Office")], "edges": []}
+    project = {"docs": [{"doc_id": "arch", "title": "Architectural plan", "files": {"pdf": "source.pdf"}},
+                         {"doc_id": "services", "title": "Ventilation", "files": {"pdf": "source.pdf"}}]}
+    enrich_sheets(Writer(graph), project, tmp_path, time.monotonic() + 10)
+    assert len([e for e in graph["edges"] if e["kind"] == "same_as"]) == 1
+    result = room_services(graph, "room:arch:room")
+    assert result["count_by_kind"] == {"duct": 1, "terminal": 1}
+    assert result["length_m_by_kind"]["duct"] == pytest.approx(.2)
+    duct = next(s for s in result["services"] if s["node"]["kind"] == "duct")
+    assert duct["element_length_m"] == pytest.approx(.4)
+    assert duct["source"]["doc_id"] == "services" and duct["source"]["bbox"][1] < duct["source"]["bbox"][3]
+    assert all(s["confidence"] < .6 for s in result["services"])

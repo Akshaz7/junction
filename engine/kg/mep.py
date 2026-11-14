@@ -24,7 +24,7 @@ CEILING_NAMES = {"finishceilingheight", "ceilingheight", "clearheight", "lichteh
 def read_json(path, default=None):
     try:
         return json.loads(Path(path).read_text())
-    except (OSError, ValueError, TypeError):
+    except (OSError, ValueError, TypeError, UnicodeError):
         return default
 
 
@@ -328,12 +328,15 @@ def enrich(graph, project, root, *, time_budget_s=20):
         did = doc.get("doc_id")
         if not did:
             continue
+        if Path(did).name != did or did in {".", ".."}:
+            notes["notes"].append("Invalid document identifier; services skipped.")
+            continue
         meta = {**read_json(Path(root) / did / "doc.json", {}), **doc}
         path = resolve_source(meta, root, "ifc")
         if path:
             try:
                 notes["documents"][did] = enrich_ifc(writer, did, path, root, deadline)
-            except (ImportError, RuntimeError, ValueError, OSError, TimeoutError) as exc:
+            except (ImportError, RuntimeError, ValueError, OSError, TimeoutError, AttributeError, TypeError) as exc:
                 notes["documents"][did] = {"status": "partial", "note": f"IFC services unavailable: {type(exc).__name__}: {exc}"}
         elif "ifc" in meta.get("formats", []) or meta.get("kind") == "ifc":
             notes["documents"][did] = {"status": "unavailable", "note": "Original IFC not available; explicit service relationships cannot be read."}
@@ -361,13 +364,22 @@ def room_services(graph, room_node_id):
     if not room or room["kind"] != "room":
         return {"room": room, "services": [], "count_by_kind": {}, "length_m_by_kind": {},
                 "notes": ["Room not present in the graph."]}
-    # Same room on another sheet is also relevant, but keep the matching path.
+    # Same room on another sheet is also relevant; preserve transitive proof.
     rooms = {room_node_id: []}
+    same = {}
+    systems = {}
     for e in graph.get("edges", []):
-        if e["kind"] == "same_as" and room_node_id in (e["from"], e["to"]):
-            peer = e["to"] if e["from"] == room_node_id else e["from"]
-            if nodes.get(peer, {}).get("kind") == "room":
-                rooms[peer] = [e]
+        if e["kind"] == "same_as":
+            same.setdefault(e["from"], []).append((e["to"], e))
+            same.setdefault(e["to"], []).append((e["from"], e))
+        elif e["kind"] == "part_of_system" and e["to"] in nodes:
+            systems.setdefault(e["from"], []).append(nodes[e["to"]])
+    queue = [room_node_id]
+    for rid in queue:
+        for peer, edge in same.get(rid, []):
+            if peer not in rooms and nodes.get(peer, {}).get("kind") == "room":
+                rooms[peer] = [edge, *rooms[rid]]
+                queue.append(peer)
     selected = {}
     for e in graph.get("edges", []):
         n = nodes.get(e["from"])
@@ -375,11 +387,14 @@ def room_services(graph, room_node_id):
             continue
         path = [e, *rooms[e["to"]]]
         confidence = min(x["confidence"] for x in path)
-        old = selected.get(n["id"])
-        if old and old["confidence"] >= confidence:
+        # Matching depictions of one service count once; keep the strongest path.
+        identity = n.get("canonical") or n["id"]
+        old = selected.get(identity)
+        if old and (old["confidence"] > confidence or (old["confidence"] == confidence and old["relationship"] == "serves")):
             continue
-        selected[n["id"]] = {"node": n, "relationship": e["kind"], "why_path": [x["id"] for x in path],
+        selected[identity] = {"node": n, "relationship": e["kind"], "why_path": [x["id"] for x in path],
                               "confidence": confidence, "source": n.get("source"),
+                              "systems": systems.get(n["id"], []),
                               "element_length_m": n.get("props", {}).get("length_m"),
                               "length_in_room_m": e.get("evidence", {}).get("length_in_room_m"),
                               "length_method": e.get("evidence", {}).get("length_method")}

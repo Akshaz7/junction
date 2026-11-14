@@ -14,6 +14,7 @@ def _box(n):
     b = n.get("props", {}).get("world_bbox_m")
     try:
         if len(b) == 2 and all(len(p) == 3 for p in b) and all(math.isfinite(float(v)) for p in b for v in p):
+            b = [[float(v) for v in p] for p in b]
             return b if all(b[1][i] > b[0][i] for i in (0, 2)) else None
     except (TypeError, ValueError):
         pass
@@ -59,7 +60,7 @@ def _frame_registration(graph, source, target):
                     continue
             except np.linalg.LinAlgError:
                 continue
-            candidates.append({"T": T.tolist(), "residual": 0.0, "matches": 1,
+            candidates.append({"T": T.tolist(), "residual": None, "matches": 1,
                                "anchor_method": "declared shared IFC building frame",
                                "building_guid": a["building_guid"], "project_guid": a["project_guid"],
                                "note": "Placement agreement; geometry alignment has not been independently checked."})
@@ -87,6 +88,12 @@ def enrich_spatial(writer):
                 if reg:
                     registrations[did, target] = reg
                     candidates.append((target_rooms, reg))
+        if not candidates:
+            note = {"doc_id": did, "note": "Room assignment unavailable: no rooms in this model and no supported registration to architectural rooms."}
+            documents = writer.graph.setdefault("mep", {}).setdefault("documents", {})
+            documents.setdefault(did, {}).setdefault("notes", [])
+            if note["note"] not in documents[did]["notes"]:
+                documents[did]["notes"].append(note["note"])
         for n in services:
             if n["id"] in explicit:
                 continue

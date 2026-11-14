@@ -131,8 +131,12 @@ def _services(writer, did, page_number, pm, page, target_did, target_pm, target_
                 points = [row["center_pt"]]
                 shape = Point(_apply(T, row["center_pt"]))
                 props = {"airflow_ls": row.get("airflow_ls")}
-            bbox = [min(p[0] for p in points) * sx, min(p[1] for p in points) * sy,
-                    max(p[0] for p in points) * sx, max(p[1] for p in points) * sy]
+            padding = (positive(row.get("width_m")) or 0) / source_scale / 2 if kind == "duct" else (
+                (positive(row.get("size_pt")) or (positive(row.get("size_m")) or 0) / source_scale) / 2)
+            bbox = [max(0, min(p[0] for p in points) - padding) * sx,
+                    max(0, min(p[1] for p in points) - padding) * sy,
+                    min(page["W_pt"], max(p[0] for p in points) + padding) * sx,
+                    min(page["H_pt"], max(p[1] for p in points) + padding) * sy]
             props["extraction"] = "vector PDF; unverified symbol/line-pair detection"
             n = writer.node(kind, did, f"mep-{page_number}-{kind}-{i}", row.get("label") or kind.capitalize(),
                             props, page=page_number, bbox=bbox)
@@ -211,5 +215,5 @@ def enrich_sheets(writer, project, root: Path, deadline):
                 link_sheet_rooms(writer, did, tdid, pm, tpm, page, target, T, scale)
                 report = _services(writer, did, page_no, pm, page, tdid, tpm, target, T, scale, api)
                 writer.graph["mep"].setdefault("documents", {}).setdefault(did, {}).setdefault("pdf_pages", {})[str(page_no)] = report
-            except (OSError, RuntimeError, ValueError, ImportError, TimeoutError) as exc:
+            except (OSError, RuntimeError, ValueError, ImportError, TimeoutError, AttributeError, TypeError, KeyError) as exc:
                 notes.append(f"Vector-PDF services unavailable on page {page_no}: {type(exc).__name__}: {exc}")
