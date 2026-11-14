@@ -80,6 +80,8 @@ export function createHighlightController(scene: LoadedScene) {
           clones.add(clone);
           const surface = clone as Material & { color?: Color; emissive?: Color; emissiveIntensity?: number };
           if (highlighted) {
+            // Blueprint glass is see-through; a highlighted item must pop over it.
+            if (clone.transparent && clone.opacity < 0.92) clone.opacity = 0.92;
             if (surface.emissive) {
               surface.emissive.copy(color);
               surface.emissiveIntensity = 1.5;

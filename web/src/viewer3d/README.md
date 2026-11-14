@@ -335,3 +335,38 @@ for single- and multi-kind answers (`answer.value` may be `{window: 11, door: 11
 ## Answer reveal (cinematic)
 
 `viewer.highlight(ids, { cinematic: true })` (also used by the `highlight` prop, remote highlights and the highlight/isolate commands) plays a short reveal when the view has been open for 2 s and no build-up is running: the rest of the model dims to 55 %, the camera makes one eased 3 s turntable orbit and returns, and answer items light one by one in reading order with an emissive pulse while their numbered tags pop in. Skipped orbit when the user is dragging or touched the view in the last 1.5 s; user input mid-orbit cancels it. Reduced motion: no reveal, instant highlight. `viewer.getCinematicState()` exposes progress. Timeline is the pure `cinematic.ts`. Isolate now tweens its dim (250 ms) instead of snapping.
+
+## Blueprint layer (`blueprint.ts`)
+
+The 3D view carries what a 2D drawing carries. iOS AR mirrors these rules and colours exactly. All of it comes from the
+scene manifest (`scene.json`), nothing is invented: no area in the data means no area on the label.
+
+**Room labels** (kind `room`), lying flat on the floor at `bbox.min.y + 0.05`, centred on the room's bbox:
+- Text: line 1 `item.name` (bold, `#1f2937`), line 2 `props.area_m2` as `23.9 m²` (`#475569`), white 92% halo. Missing name or area drops that line; neither drops the label.
+- Hide when the room's shorter bbox side is under **1.2 m**, or when the fitted text height would be under **0.14 m**.
+- Text height = `clamp(shorterSide × 0.16, 0.14, 0.45)` m; shrink so the width is at most 90% of the room side and the height at most 60% of the other side.
+- Rotate the label 90° when the room is more than 1.6× longer in z than in x.
+- Hidden whenever the room itself is hidden (storey cutaway, command hide, build-up not yet risen).
+
+**Floor tint** by `props.room_type` (raster) or room `name`: wet (wc, toilet, bath, shower, sauna, laundry, Bad, Dusch, WC, pesu, kylpy, suihku) `#cde3f3`; kitchen (kitchen, Küche, keittiö, kök, pantry) `#f4e4c9`; everything else `#f1eee6`.
+
+**Materials** (colour, plain PBR, highlights still override with their per-kind emissive colour):
+
+| Kind | Colour | Notes |
+|---|---|---|
+| wall | `#d9d4c9` | faces pointing up (the cut top) multiplied by 0.42 so walls read as a cut plan |
+| window | `#9fd3ea` | glass: opacity 0.38, no depth write; a highlighted window goes to opacity 0.92 |
+| door | `#9c6b3c` | wood |
+| slab | `#e6e2d9` | |
+| roof | `#9a8f86` | |
+| stairs | `#5f5a54` | darker than the walls |
+| column / railing / furniture | `#bdb7ad` / `#8d99a6` / `#b9ad9d` | |
+| toilet / sink / shower / bathtub | `#f4f7f9` | white ceramic |
+
+**Dimensions**: overall footprint of all walls (else slabs), L × W in metres with one decimal (`42.0 m`), drawn on the two outer
+edges nearest the camera at the build's ground storey (elevation >= 0, else lowest item), offset **1.2 m** outward with 0.25 m end ticks.
+
+**Storey tag**: `Name · +0.00 m` (a real minus sign for negative elevations, `Keller · −3.00 m`) at the building's corner at each storey's
+`elevation_m`. Only storeys that are currently visible show a tag; tags that would overlap on screen (within 20 px) keep the topmost.
+
+`viewer.getBlueprintState()` returns the rooms (shown or why hidden), dimension strings, storey tags and the applied colours for tests.

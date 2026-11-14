@@ -23,6 +23,7 @@ import { createEditLayer, type ItemEdit, type EditState, type WallMaterial } fro
 import { createItemAnnotation, layoutAnnotations } from './annotations';
 import { createFindingsLayer, type Finding, type FindingPinState } from './findings';
 import { kindColor } from '../lib/kind-colors';
+import { createBlueprint, styleSceneMaterials, type Blueprint, type BlueprintState } from './blueprint';
 import { planCinematic, sampleCinematic, type CinematicPlan } from './cinematic';
 
 export const SCENE_LOAD_BUDGET_MS = 60_000;
@@ -78,6 +79,7 @@ export interface Viewer {
   getBuildState(): BuildState | null;
   /** The answer reveal (orbit, dim, one-by-one pulse), for tests and the UI. */
   getCinematicState(): CinematicState;
+  getBlueprintState(): BlueprintState | null;
   onBuildChange(callback: (state: BuildState | null) => void): () => void;
   /** Show steps 1..index complete (1-based). Pauses playback; the camera is not touched. */
   setBuildStep(index: number): void;
@@ -113,6 +115,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   // Populated on the first pointer interaction, never during model loading.
   let pickMeshes: Scene['children'] | null = null;
   let renderBatches: ReturnType<typeof createRenderBatches> | null = null;
+  let blueprint: Blueprint | null = null;
   let batchesDirty = false;
   let cutaway: ReturnType<typeof createCutawayController> | null = null;
   const cutawayListeners = new Set<(state: CutawayState) => void>();
@@ -519,11 +522,13 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     edits?.dispose();
     renderBatches?.dispose();
     renderBatches = null;
+    blueprint?.dispose(); blueprint = null;
     if (active) {
       world.remove(active.root);
       disposeScene(active);
     }
     active = scene;
+    const styled = styleSceneMaterials(scene);
     pickMeshes = null;
     commandState = emptyCommandState();
     sceneShownAt = performance.now();
@@ -537,6 +542,8 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     commandVisuals = createCommandVisuals(scene);
     world.add(scene.root);
     fit(scene);
+    blueprint = createBlueprint(scene, camera.position, styled);
+    world.add(blueprint.root);
     renderBatches = createRenderBatches(scene);
     world.add(renderBatches.root);
     notifyCutaway();
@@ -576,8 +583,9 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       batchesDirty = false;
     }
     findingPins?.update(camera, canvas.clientHeight);
+    blueprint?.update(now, camera, canvas.clientHeight);
     renderer.render(world, camera);
-    if (labels.length || linkedLabel || findingPins) {
+    if (labels.length || linkedLabel || findingPins || blueprint?.hasLabels) {
       labelRenderer.render(world, camera);
       if (active) layoutAnnotations(linkedLabel ? [...labels, linkedLabel] : labels, active, camera,
         canvas.clientWidth, canvas.clientHeight);
@@ -756,6 +764,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
         lit: s ? s.glow.filter((g) => g > 0).length : 0, popped: s ? s.popped.filter(Boolean).length : 0,
         dim: s?.dim ?? 0, angle: s?.orbitAngle ?? null };
     },
+    getBlueprintState: () => blueprint?.getState() ?? null,
     onBuildChange(callback) { buildListeners.add(callback); return () => { buildListeners.delete(callback); }; },
     setBuildStep(index) { if (build) { build.animation.setStep(index); touchBuild(); } },
     playBuild() { if (build) { build.animation.play(performance.now()); touchBuild(); } },
@@ -819,6 +828,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       edits?.dispose(); edits = null;
       renderBatches?.dispose();
       renderBatches = null;
+      blueprint?.dispose(); blueprint = null;
       labelRenderer.domElement.remove();
       if (active) {
         world.remove(active.root);
