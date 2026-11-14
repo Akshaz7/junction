@@ -11,7 +11,7 @@ import re
 import time
 from pathlib import Path
 
-from engine.kg.mep import positive, read_json, resolve_source
+from engine.kg.mep import documents, positive, read_json, resolve_source
 
 MEP_WORDS = re.compile(r"\bmep\b|ventilat|ilmanvaihto|lüftung|\blvi\b|\bhvac\b|\bduct|kanav|vvs|building services", re.I)
 
@@ -160,8 +160,7 @@ def _services(writer, did, page_number, pm, page, target_did, target_pm, target_
 
 def enrich_sheets(writer, project, root: Path, deadline):
     docs = []
-    for entry in project.get("docs", []):
-        entry = {"doc_id": entry} if isinstance(entry, str) else entry
+    for entry in documents(project):
         if not isinstance(entry, dict):
             continue
         did = entry.get("doc_id")

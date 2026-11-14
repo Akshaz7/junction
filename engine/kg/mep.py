@@ -23,9 +23,22 @@ CEILING_NAMES = {"finishceilingheight", "ceilingheight", "clearheight", "lichteh
 
 def read_json(path, default=None):
     try:
-        return json.loads(Path(path).read_text())
+        value = json.loads(Path(path).read_text())
+        if isinstance(default, dict) and not isinstance(value, dict):
+            return default
+        return value
     except (OSError, ValueError, TypeError, UnicodeError):
         return default
+
+
+def documents(project):
+    """Match the core's input aliases and tolerate incomplete project metadata."""
+    for doc in project.get("docs") or project.get("doc_ids") or []:
+        doc = {"doc_id": doc} if isinstance(doc, str) else doc
+        if isinstance(doc, dict) and isinstance(doc.get("doc_id"), str):
+            did = doc["doc_id"]
+            if did and Path(did).name == did and did not in {".", ".."}:
+                yield doc
 
 
 def positive(value):
@@ -138,10 +151,7 @@ def cache_dependencies(project, root):
     """Include optional-reader installation and original sheet/source modifications."""
     base = Path(__file__).resolve().parents[2]
     paths = [base / "pipeline" / "pdf_mep.py", base / "pipeline" / "pdf_vector.py", base / "engine" / "mep.py"]
-    for doc in project.get("docs", []):
-        doc = {"doc_id": doc} if isinstance(doc, str) else doc
-        if not isinstance(doc, dict):
-            continue
+    for doc in documents(project):
         did = doc.get("doc_id")
         if not did or Path(did).name != did or did in {".", ".."}:
             continue
@@ -183,7 +193,8 @@ def _unit_scale(unit, project_scale):
         return uu.get_prefix_multiplier(unit.Prefix)
     if unit.is_a("IfcConversionBasedUnit"):
         factor = unit.ConversionFactor
-        return float(factor.ValueComponent.wrappedValue) * _unit_scale(factor.UnitComponent, 1.0)
+        component = _unit_scale(factor.UnitComponent, None)
+        return float(factor.ValueComponent.wrappedValue) * component if component is not None else None
     return None
 
 
@@ -215,12 +226,12 @@ def _measures(el, scale):
 def enrich_ifc(writer, did, path, root, deadline):
     import ifcopenshell
     import ifcopenshell.util.element as ue
-    import ifcopenshell.util.unit as uu
     f = ifcopenshell.open(str(path))
     projects = _by_type(f, "IfcProject")
     declared_units = getattr(projects[0], "UnitsInContext", None) if projects else None
-    has_length_unit = declared_units and any(getattr(u, "UnitType", None) == "LENGTHUNIT" for u in declared_units.Units)
-    scale = uu.calculate_unit_scale(f) if has_length_unit else None
+    length_units = [u for u in declared_units.Units if getattr(u, "UnitType", None) == "LENGTHUNIT"] if declared_units else []
+    scale = _unit_scale(length_units[0], None) if len(length_units) == 1 else None
+    has_length_unit = scale is not None
     # Shared spatial entity identity + its complete placement gives a declared
     # common engineering frame. Distinct models with unrelated IDs do not align.
     frames = []
@@ -358,9 +369,7 @@ def enrich(graph, project, root, *, time_budget_s=20):
     notes = graph.setdefault("mep", {"documents": {}, "notes": []})
     notes.setdefault("documents", {})
     notes.setdefault("notes", [])
-    for doc in project.get("docs", []):
-        if isinstance(doc, str):
-            doc = {"doc_id": doc}
+    for doc in documents(project):
         if not isinstance(doc, dict):
             notes["notes"].append("Invalid document entry; services skipped.")
             continue
@@ -384,8 +393,8 @@ def enrich(graph, project, root, *, time_budget_s=20):
     enrich_spatial(writer)
     from engine.kg.mep_sheets import enrich_sheets
     enrich_sheets(writer, project, Path(root), deadline)
-    for doc in project.get("docs", []):
-        did = doc if isinstance(doc, str) else doc.get("doc_id")
+    for doc in documents(project):
+        did = doc["doc_id"]
         if not did or Path(did).name != did or did in {".", ".."}:
             continue
         for path in (Path(root) / did).glob("planmap-*.json"):
