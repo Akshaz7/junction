@@ -461,9 +461,12 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 .change-group + .change-group { margin-top: 14px; }
 .change-group > h3 { display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 16px; font-size: 13px; font-weight: 600; }
 .change-group > h3 > span { font-size: 12px; font-weight: 400; background: var(--ink-well); border-radius: 4px; padding: 0 4px; }
-.change-row { display: flex; gap: 8px; align-items: flex-start; height: 70px; width: calc(100% - 24px); margin: 0 12px; padding: 10px 12px; border: 0; border-radius: 8px; text-align: left; background: transparent; }
-.change-row:hover, .change-row[aria-pressed=true] { background: var(--ink-selected); }
-.change-row > span:last-child { min-width: 0; }
+.change-row { display: flex; gap: 8px; align-items: center; height: 52px; width: calc(100% - 24px); margin: 0 12px; padding: 0 12px; border: 0; border-radius: 8px; text-align: left; background: transparent; min-width: 0; overflow: hidden; }
+.change-row:hover { background: var(--ink-well); }
+.change-row[aria-pressed=true] { background: rgb(0 0 0 / .06); }
+.change-row-text { flex: 1 1 0; min-width: 0; }
+.change-row-meta { flex: none; display: flex; align-items: center; gap: 6px; color: var(--muted-foreground); font-size: var(--text-micro); }
+.change-row .change-tile { background: var(--change-edited-surface, #ffedd5); color: var(--change-edited-text); }
 .change-row strong { font-weight: 600; font-size: 13px; line-height: 18px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .change-row small { display: block; color: var(--muted-foreground); font-size: 12px; line-height: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .change-tile { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0; color: var(--muted-foreground); }
@@ -476,7 +479,7 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 .changes-nothing p { margin-top: 4px; color: var(--muted-foreground); }
 .comparison-header { height: 108px; min-height: 108px; padding: 16px; display: flex; justify-content: space-between; gap: 16px; }
 .comparison-header > div { min-width: 0; }
-.comparison-header h2 { font-size: 16px; font-weight: 700; line-height: 24px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.comparison-header h3 { font-size: 16px; font-weight: 700; line-height: 24px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .comparison-header p { color: var(--muted-foreground); font-size: 12px; margin-top: 3px; }
 .comparison-versions { display: flex; gap: 8px; align-items: center; font-size: 12px; margin-top: 12px; white-space: nowrap; }
 .version-tag { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 10px; color: var(--change-edited-text); background: var(--change-edited-surface); font-size: 12px; }
@@ -495,33 +498,9 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 .change-boxes input:focus-visible + span { outline: 2px solid var(--ring); outline-offset: 2px; }
 .comparison-zoom { width: 46px; text-align: center; font-variant-numeric: tabular-nums; }
 .comparison-content { display: flex; flex: 1; min-height: 0; }
-.comparison-canvas { position: relative; min-width: 0; width: 64%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--background); }
-.comparison-sheet { width: calc(100% - 20px); flex-shrink: 0; position: relative; background: white; box-shadow: var(--shadow-card); transform: scale(var(--comparison-zoom)); transition: transform 1.3s var(--ease-settle-wide); }
-.comparison-sheet > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; }
-.comparison-sheet > img + img { transition: clip-path 1.5s cubic-bezier(.45,.05,.55,.95), opacity .3s ease; }
 .change-region { position: absolute; min-width: 7px; min-height: 7px; border: 1px solid var(--change-edited); background: color-mix(in oklab, var(--change-edited) 18%, transparent); }
 .change-region.added { border-color: var(--change-added); background: color-mix(in oklab, var(--change-added) 18%, transparent); }
 .change-region.removed { border-color: var(--change-removed); background: color-mix(in oklab, var(--change-removed) 18%, transparent); }
-.change-region b, .reading-number { position: absolute; width: 16px; height: 16px; display: grid; place-items: center; border-radius: 50%; background: var(--foreground); color: white; font-size: 10px; font-weight: 600; }
-.change-region b { top: -8px; left: -8px; }
-.wipe-labels { position: absolute; z-index: 2; top: 0; inset-inline: 0; height: 24px; display: flex; font-size: 12px; }
-.wipe-labels span { width: var(--wipe); padding-left: 10px; background: #f2f2f2; transition: width 1.5s cubic-bezier(.45,.05,.55,.95); }
-.wipe-labels span + span { flex: 1; background: var(--foreground); color: var(--background); }
-.wipe-seam { position: absolute; top: 0; bottom: 0; left: var(--wipe); width: 2px; background: var(--foreground); transition: left 1.5s cubic-bezier(.45,.05,.55,.95); }
-.wipe-seam > span { position: absolute; top: 50%; left: 50%; translate: -50% -50%; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: white; background: var(--foreground); box-shadow: var(--shadow-card); }
-.wipe-range { position: absolute; top: 0; width: 100%; height: 100%; opacity: 0; cursor: ew-resize; touch-action: none; }
-.comparison-canvas[data-wiping] .comparison-sheet > img + img,
-.comparison-canvas[data-wiping] .wipe-seam,
-.comparison-canvas[data-wiping] .wipe-labels span { transition: none; }
-.comparison-canvas:has(.wipe-range:focus-visible) { outline: 2px solid var(--ring); outline-offset: -3px; }
-.comparison-readings { flex: 1; border-left: 1px solid var(--border); min-width: 0; overflow: auto; }
-.comparison-readings > header { display: flex; align-items: center; justify-content: space-between; height: 32px; font-size: 11px; padding: 0 8px; }
-.comparison-readings > header button { display: flex; align-items: center; gap: 3px; background: transparent; border: 0; font-size: 11px; }
-.comparison-readings article { position: relative; padding: 10px 12px 8px; border-bottom: 1px solid var(--border); }
-.reading-number { top: 4px; left: 4px; z-index: 1; width: 20px; height: 20px; }
-.change-thumbnails { display: flex; gap: 8px; }
-.change-thumbnails img { width: calc(50% - 4px); height: 68px; object-fit: cover; border: 1px solid var(--border); }
-.comparison-readings p { margin-top: 8px; color: var(--muted-foreground); font-size: 12px; line-height: 16px; }
 .all-changes, .phone-comparison-summary { display: none; }
 @media (min-width: 641px) and (max-width: 1000px) {
   .data-browser, .data-browser.has-detail { grid-template-columns: 230px minmax(0, 1fr); }
