@@ -62,6 +62,12 @@ private struct AdvisorSourceDisclosure: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("advisor-source-quote-\(card.id)")
             }
+            ForEach(card.source.links, id: \.self) { url in
+                Link(destination: url) {
+                    Label(AdvisorCard.Source.linkLabel(url), systemImage: "arrow.up.right.square")
+                }
+                .accessibilityIdentifier("advisor-source-link-\(card.id)")
+            }
         }
         .font(.caption2)
     }

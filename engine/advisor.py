@@ -34,7 +34,12 @@ def _quote(q: str) -> str:
 def _source(src: dict) -> dict | None:
     if not src or not src.get("ref") or not src.get("quote"):
         return None
-    return {"type": src.get("type", "rule"), "ref": src["ref"], "title": src.get("title") or src["ref"], "quote": _quote(src["quote"])}
+    out = {"type": src.get("type", "rule"), "ref": src["ref"], "title": src.get("title") or src["ref"], "quote": _quote(src["quote"])}
+    # official pages for the rule (EU / ministry English text, Finlex legal text) so a violation is externally verifiable
+    for k in ("url", "finnish_url"):
+        if str(src.get(k) or "").startswith(("https://", "http://")):
+            out[k] = src[k]
+    return out
 
 
 def _card(kind: str, title: str, body: str, ids: list[str], src: dict, key: str) -> dict | None:

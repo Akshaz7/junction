@@ -16,7 +16,9 @@ export interface AdvisorCard {
   severity?: AdvisorSeverity;
   /** Rule ids the check ran against. */
   checked?: string[];
-  source: { type: 'rule' | 'material_table' | 'document'; ref: string; title: string; quote: string };
+  source: { type: 'rule' | 'material_table' | 'document'; ref: string; title: string; quote: string;
+    /** Official page for the rule (government / EU text), so a violation can be checked externally. */
+    url?: string | null; finnish_url?: string | null };
 }
 export interface AdvisorEvent {
   type: 'advisor.cards';
