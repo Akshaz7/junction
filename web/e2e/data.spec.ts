@@ -1,0 +1,90 @@
+import { expect, test } from '@playwright/test'
+import { readFileSync } from 'node:fs'
+import type { Document } from '../src/lib/types'
+
+test('source folder opens a file with credit and passes its document to Chat', async ({ page, request }) => {
+  const response = await request.get('/api/docs')
+  expect(response.ok()).toBe(true)
+  const grouped = await response.json() as { sources: { source: string; docs: Document[] }[] }
+  const folder = grouped.sources.find((source) => source.source === 'cubicasa5k')
+  expect(folder?.docs.length, 'Seed the real cubicasa5k documents before running this test').toBeGreaterThan(0)
+  const doc = folder!.docs[0]
+  await page.goto('/#/data')
+  await expect(page.getByText('Connected workspace', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Open cubicasa5k folder', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'cubicasa5k', exact: true })).toBeVisible()
+  const row = page.locator('.data-file-row').filter({ has: page.getByRole('button', { name: `Open ${doc.title}`, exact: true }) }).first()
+  await expect(row).toBeVisible()
+  for (const format of doc.formats) await expect(row.getByText(format.toUpperCase(), { exact: true })).toBeVisible()
+  await row.getByRole('button').click()
+  const detail = page.getByRole('complementary', { name: 'Document details' })
+  await expect(detail.getByRole('heading', { name: doc.title, exact: true })).toBeVisible()
+  await expect(detail.locator('dl')).toContainText(doc.credit || 'Not provided')
+  await expect(detail.locator('dl')).toContainText(doc.licence || 'Not provided')
+  await detail.getByRole('button', { name: 'Ask about it', exact: true }).click()
+  await expect(page).toHaveURL(/#\/chat$/)
+  await expect(page.getByLabel('Selected documents')).toContainText(doc.title)
+})
+
+test('PNG upload shows ingestion progress and appears in the uploads folder', async ({ page }) => {
+  test.setTimeout(60_000)
+  await page.goto('/#/data')
+  await expect(page.getByText('Connected workspace', { exact: true })).toBeVisible()
+  const responsePromise = page.waitForResponse((response) => response.request().method() === 'POST' && new URL(response.url()).pathname === '/api/upload')
+  const name = `upload-fixture-${Date.now()}.png`
+  await page.getByLabel('Upload drawing', { exact: true }).setInputFiles({
+    name, mimeType: 'image/png', buffer: readFileSync(new URL('./assets/upload-fixture.png', import.meta.url)),
+  })
+  const response = await responsePromise
+  expect(response.ok()).toBe(true)
+  const receipt = await response.json() as { doc_id: string; status: string }
+  const status = page.locator('.data-upload-status')
+  await expect(status).toContainText(name)
+  await expect(page.getByRole('button', { name: 'Open uploads folder', exact: true })).toHaveAttribute('aria-current', 'page')
+  await expect(page.locator(`.data-file-row[data-doc-id="${receipt.doc_id}"]`)).toBeVisible()
+  await expect(status).toContainText(receipt.status === 'stored' ? 'File stored.' : /Ready to use|Page preview ready/, { timeout: 45_000 })
+  await expect(page.locator(`.data-file-row[data-doc-id="${receipt.doc_id}"]`)).toBeVisible()
+})
+
+test('a document with a scene offers Visualise it and missing previews use an icon', async ({ page }) => {
+  const doc: Document = { doc_id: 'demo__scene', source: 'demo', title: 'Scene fixture, generated for demo', kind: 'ifc', formats: ['ifc'], pages: 1, licence: 'MIT', credit: 'Test fixture, generated for demo', heldout: false }
+  await page.route('**/api/docs', (route) => route.fulfill({ json: { total: 1, sources: [{ source: 'demo', count: 1, docs: [doc] }] } }))
+  await page.route('**/api/docs/demo__scene/files/page-1.thumb.png', (route) => route.fulfill({ status: 404, json: { status: 'not_built' } }))
+  await page.route('**/api/docs/demo__scene/pages/1/image', (route) => route.fulfill({ status: 404, json: { status: 'not_built' } }))
+  await page.route('**/api/docs/demo__scene/files/scene.json', (route) => route.fulfill({ json: { doc_id: doc.doc_id, glb: 'scene.glb' } }))
+  await page.goto('/#/data')
+  await page.getByRole('button', { name: `Open ${doc.title}`, exact: true }).click()
+  const detail = page.getByRole('complementary', { name: 'Document details' })
+  await expect(detail.getByRole('button', { name: 'Visualise it', exact: true })).toBeVisible()
+  await expect(detail.getByText('Page preview unavailable', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Close document details' }).click()
+  await page.route('**/api/docs/demo__scene/files/scene.json', (route) => route.fulfill({ status: 404, json: { status: 'not_built' } }))
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.getByRole('button', { name: `Open ${doc.title}`, exact: true }).click()
+  await expect(detail.getByText('No 3D scene available for this document.', { exact: true })).toBeVisible()
+  await expect(detail.getByRole('button', { name: 'Visualise it', exact: true })).toHaveCount(0)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await page.getByRole('button', { name: 'Close document details' }).click()
+  await expect(page.getByRole('button', { name: `Open ${doc.title}`, exact: true })).toBeFocused()
+})
+
+test('search spans folders and large lists use pages', async ({ page }) => {
+  const docs: Document[] = Array.from({ length: 85 }, (_, n) => ({
+    doc_id: `folder-a__drawing-${n}`, source: 'folder-a', title: `Drawing ${n}`, kind: 'pdf',
+    formats: ['pdf'], pages: 2, licence: 'MIT', credit: 'Test fixture, generated for demo', heldout: false,
+  }))
+  docs.push({ ...docs[0], doc_id: 'folder-b__other', source: 'folder-b', title: 'Other folder drawing' })
+  await page.route('**/api/docs', (route) => route.fulfill({ json: { total: docs.length, sources: [
+    { source: 'folder-a', count: 85, docs: docs.slice(0, 85) }, { source: 'folder-b', count: 1, docs: docs.slice(85) },
+  ] } }))
+  await page.goto('/#/data')
+  await page.getByRole('button', { name: 'Open folder-a folder', exact: true }).click()
+  await expect(page.locator('.data-file-row')).toHaveCount(40)
+  await page.getByRole('button', { name: 'Next document page' }).click()
+  await expect(page.getByLabel('Document pagination')).toContainText('Page 2 of 3')
+  await page.getByRole('searchbox', { name: 'Search documents' }).fill('Other folder drawing')
+  await expect(page.locator('.data-file-row')).toHaveCount(1)
+  await expect(page.getByRole('heading', { name: 'Other folder drawing', exact: true })).toBeVisible()
+  await page.getByRole('searchbox', { name: 'Search documents' }).fill('no matching document')
+  await expect(page.getByText('No documents found.', { exact: true })).toBeVisible()
+})

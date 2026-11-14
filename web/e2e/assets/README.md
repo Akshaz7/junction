@@ -1,0 +1,1 @@
+`upload-fixture.png` is copied from `data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png` for the local upload test. CubiCasa5K, CubiCasa Oy, CC BY-NC-SA 4.0. This fixture is test data, not an application drawing or a claimed model result.

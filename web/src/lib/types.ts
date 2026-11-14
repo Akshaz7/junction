@@ -13,6 +13,18 @@ export interface Document {
   heldout: boolean
 }
 
+export interface IngestStatus {
+  status: 'none' | 'running' | 'ready' | 'partial' | 'failed'
+  stages: { stage: string; ok: boolean; s: number }[]
+  detail: string
+}
+
+export interface UploadReceipt {
+  doc_id: string
+  status: 'ingesting' | 'stored'
+  detail: string
+}
+
 export interface Answer {
   answer_id: string
   question: string

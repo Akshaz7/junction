@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
-import { ArrowRight, FileText, Plus, Search } from 'lucide-react'
-import { Badge, Button, Input } from './components/ui'
+import { useCallback, useEffect, useState } from 'react'
+import { Plus } from 'lucide-react'
+import { Badge, Button } from './components/ui'
 import { ProjectSwitcher, WorkspaceNavigation, navigation } from './components/workspace-navigation'
 import { PlaceholderPage } from './components/placeholder-page'
 import { ChatScreen } from './components/chat-screen'
+import { DataScreen } from './components/data-screen'
 import { workspaceApi } from './lib/api'
 import { navigate, useRoute } from './lib/router'
 import type { Citation, Document } from './lib/types'
@@ -16,9 +17,15 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
   const [loadingDocs, setLoadingDocs] = useState(true)
   const [demo, setDemo] = useState(workspaceApi.isDemo)
   const [error, setError] = useState('')
-  const [search, setSearch] = useState('')
   const [chatKey, setChatKey] = useState(0)
   const [contextDocument, setContextDocument] = useState<Document | null>(null)
+
+  const refreshDocuments = useCallback(async () => {
+    const documents = await workspaceApi.getDocuments()
+    setDocs(documents)
+    setDemo(workspaceApi.isDemo)
+    setError('')
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -43,11 +50,12 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
       </div>
       {error && (view === 'chat' || view === 'data') && <p className="error-message document-error" role="alert">{error}</p>}
       <ChatScreen key={chatKey} docs={docs} loadingDocs={loadingDocs} demo={demo} contextDocument={contextDocument} hidden={view !== 'chat'} onOpenCitation={onOpenCitation} />
-      {view === 'data' ? <section className="data-page" aria-label="Project documents">
-        <div className="data-header"><div><h2>Project documents</h2><p>The sources behind your answers.</p></div><label className="search-field"><Search size={16} /><Input type="search" aria-label="Search documents" placeholder="Search documents" value={search} onChange={(event) => setSearch(event.target.value)} /></label></div>
-        {loadingDocs ? <p role="status">Loading documents…</p> : <div className="document-list">{docs.filter((doc) => doc.title.toLowerCase().includes(search.toLowerCase())).map((doc) => <article className="document-row" key={doc.doc_id}><span className="file-icon"><FileText size={22} /></span><div><h3>{doc.title}</h3><p>{doc.source} · {doc.formats.join(', ').toUpperCase()} · {doc.pages} {doc.pages === 1 ? 'page' : 'pages'}</p><small>{doc.credit} · {doc.licence}</small></div><Button variant="raised" onClick={() => { setContextDocument(doc); navigate('chat') }}>Ask about it<ArrowRight size={15} /></Button></article>)}</div>}
-        {!loadingDocs && !docs.filter((doc) => doc.title.toLowerCase().includes(search.toLowerCase())).length && <p className="empty-state">No documents found.</p>}
-      </section> : view !== 'chat' ? <PlaceholderPage route={view} /> : null}
+      <DataScreen docs={docs} loading={loadingDocs} demo={demo} hidden={view !== 'data'} onRefresh={refreshDocuments} onAsk={(doc) => {
+        setContextDocument(doc)
+        setChatKey((previous) => previous + 1)
+        navigate('chat')
+      }} />
+      {view !== 'data' && view !== 'chat' ? <PlaceholderPage route={view} /> : null}
     </main>
   </div>
 }

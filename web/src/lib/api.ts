@@ -1,4 +1,4 @@
-import type { Answer, Document, TraceStep } from './types'
+import type { Answer, Document, IngestStatus, TraceStep, UploadReceipt } from './types'
 
 type Mode = 'auto' | 'real' | 'demo'
 type StreamCallbacks = { onStatus: (text: string) => void; onTrace: (trace: TraceStep) => void }
@@ -97,6 +97,29 @@ export class WorkspaceApi {
   async getDocument(docId: string): Promise<Document> {
     const response = await this.request(`/api/docs/${encodeURIComponent(docId)}`)
     return response.json() as Promise<Document>
+  }
+
+  async uploadDocument(file: File): Promise<UploadReceipt> {
+    const body = new FormData()
+    body.append('file', file)
+    const response = await this.request('/api/upload', { method: 'POST', body })
+    return response.json() as Promise<UploadReceipt>
+  }
+
+  async getIngestStatus(docId: string, signal: AbortSignal): Promise<IngestStatus> {
+    const response = await this.request(`/api/docs/${encodeURIComponent(docId)}/ingest`, { signal })
+    return response.json() as Promise<IngestStatus>
+  }
+
+  async hasScene(docId: string, signal: AbortSignal): Promise<boolean> {
+    try {
+      // Check the existing artifact; /scene may trigger extrusion on future servers.
+      await this.request(`/api/docs/${encodeURIComponent(docId)}/files/scene.json`, { signal })
+      return true
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 404) return false
+      throw error
+    }
   }
 
   async getPageImage(docId: string, page: number, signal: AbortSignal): Promise<Blob> {
