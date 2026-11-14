@@ -951,3 +951,17 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 .skeleton-line { display: block; height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--muted) 0%, color-mix(in oklab, var(--muted) 55%, var(--background)) 50%, var(--muted) 100%); background-size: 200% 100%; animation: skeleton-shimmer 1.4s ease-in-out infinite; }
 @keyframes skeleton-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
 @media (prefers-reduced-motion: reduce) { .skeleton-line { animation: none; } }
+
+/* Keep the library selection available beside the document preview. */
+@media (min-width: 641px) {
+  .data-browser.has-detail { grid-template-columns: minmax(180px, 230px) minmax(240px, 1fr) minmax(0, 1.2fr); }
+  .data-browser.has-detail .data-files { display: block; }
+  .data-browser.has-detail .data-detail { grid-column: 3; }
+  .data-browser.has-detail .data-folder-search { left: 16px; width: 198px; }
+}
+@media (min-width: 641px) and (max-width: 1100px) {
+  .data-browser.has-detail { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); }
+  .data-browser.has-detail .data-folders { display: none; }
+  .data-browser.has-detail .data-detail { grid-column: 2; }
+  .data-browser.has-detail .data-folder-search { left: 16px; width: calc(45% - 32px); }
+}
