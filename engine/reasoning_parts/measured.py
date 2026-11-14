@@ -114,8 +114,17 @@ def _area(ctx) -> bool:
         _add(steps, "calculated", "Calculated", _cap(txt + _top3(have, n), txt))
         return True
     # plan maps: DXF outlines and raster outlines
+    from engine.scales import item_scale, scale_description
+    local = [r for r in rooms if "measurement_scale" in (r.props or {})]
+    if local:
+        descriptions = list(dict.fromkeys(scale_description(item_scale(r), r.props.get("scale_region")) for r in local))
+        scale_w = "; ".join(descriptions)
+        sc = item_scale(rooms[0], sc) if n == 1 else sc
+        ctx["scale_w"] = scale_w
+        ctx["scale_c"] = min(float(item_scale(r).get("confidence") or 0) for r in local)
+    else:
+        scale_w = ctx["scale_w"]
     mpp = float((sc or {}).get("m_per_px") or 0)
-    scale_w = ctx["scale_w"]
     rows = [(_name(r), _room_m2(r)) for r in rooms]
     have = [(a, b) for a, b in rows if b]
     if n == 1:
@@ -141,7 +150,7 @@ def _area(ctx) -> bool:
         return True
     txt = f"Added {n} room outlines: {_r(v)} m²" + _top3(have, n)
     full = txt + f"; scale from {scale_w}"
-    _add(steps, "calculated", "Calculated", full if len(full) <= MAX_LEN else _cap(txt, f"Added {n} room outlines: {_r(v)} m²"))
+    _add(steps, "calculated", "Calculated", full if local or len(full) <= MAX_LEN else _cap(txt, f"Added {n} room outlines: {_r(v)} m²"))
     return True
 
 
@@ -201,7 +210,14 @@ def run(ctx: dict) -> None:
     elif _trace(ctx["trace"], "order"):
         _add(steps, "read", "Missing measurements", "The file does not provide complete measurements for the requested order.")
     elif unit == "m":
+        start = len(steps)
         _length(ctx)
+        from engine.scales import item_scale, scale_description
+        local = [it for it in cited if "measurement_scale" in (it.props or {})]
+        if local:
+            used = "; ".join(dict.fromkeys(scale_description(item_scale(it), it.props.get("scale_region")) for it in local))
+            for step in steps[start:]:
+                step["text"] += "; scale from " + used
     elif area_q and rooms:
         _area(ctx)
     elif unit in ("m2", "m3"):

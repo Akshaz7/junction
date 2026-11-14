@@ -42,6 +42,12 @@ def _fmt(v: float) -> str:
 
 
 def _done(question, doc, text, value, unit, items, trace, route="analytics", t0=None):
+    if doc.mode == "planmap" and unit == "m2":
+        missing_scale = [i for i in items if "measurement_scale" in i.props and not i.props["measurement_scale"].get("m_per_px") and i.q.get("area_m2") is None]
+        if missing_scale and len(missing_scale) == len(items):
+            text, value = "**Area unavailable**: the view boundaries or scales could not be verified. Check the printed scales and image DPI. {marks}", None
+        elif missing_scale:
+            text += f" {len(missing_scale)} rooms have no verified view scale and are excluded."
     boxes, cites, scene = _evidence(doc, items)
     route = "index" if doc.mode == "ifc" else "planmap"  # answer.schema.json route enum has no "analytics"
     marks = "".join(f"[{c['n']}]" for c in cites)
@@ -570,6 +576,11 @@ def scale_note(doc: Doc) -> str:
     """Plan maps: where the m² come from, in one sentence (the scale source, and how each room was measured)."""
     if doc.mode != "planmap":
         return ""
+    from engine.scales import item_scale, scale_description
+    local = [i for i in doc.items if i.kind == "room" and "measurement_scale" in i.props]
+    if local:
+        descriptions = list(dict.fromkeys(scale_description(item_scale(i), i.props.get("scale_region")) for i in local))
+        return " Scales used by view: " + "; ".join(descriptions) + "."
     sc = doc.scale or {}
     if not sc.get("m_per_px"):
         return ""
@@ -856,6 +867,10 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
     scale, guessed = None, False
     if not ifc:
         sc = doc.scale or {}
+        from engine.scales import item_scale, positive
+        candidates = [item_scale(r, sc) for r in rooms if positive(item_scale(r, sc).get("m_per_px"))]
+        if candidates:
+            sc = min(candidates, key=lambda s: float(s.get("confidence") or 0))
         mpp = sc.get("m_per_px")
         if not mpp or sc.get("method") in (None, "none"):
             trace = [_step("route", "baseboard -> needs a scale; none on this drawing, no model"), _step("scale", "no scale")]
@@ -878,10 +893,16 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
     rows = []
     for r in rooms:
         x0, y0, x1, y1 = _foot(r, ifc)
-        k = 1.0 if ifc else scale
+        from engine.scales import item_scale, positive
+        k = 1.0 if ifc else positive(item_scale(r, doc.scale).get("m_per_px"))
+        if not k:
+            continue
+        band = DOOR_BAND / k
         per = 2 * ((x1 - x0) + (y1 - y0)) * k
         opening, n = 0.0, 0
         for d in doors:
+            if not ifc and (d.page != r.page or item_scale(d, doc.scale) != item_scale(r, doc.scale)):
+                continue
             if ifc and d.storey != r.storey:
                 continue
             f = _foot(d, ifc)
@@ -894,6 +915,8 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
                 opening += min(w, 3.0)
                 n += 1
         rows.append((r, per, opening, n, max(per - opening, 0.0)))
+    if not rows:
+        return _done(question, doc, "**Length unavailable**: no room has a verified view scale. {marks}", None, "m", rooms, [], t0=t0)
     total = round(sum(x[4] for x in rows), 1)
     LAST_BB.clear()
     LAST_BB.update({x[0].item_id: {"per": x[1], "net": x[4], "doors": x[3], "guessed": guessed, "doc": doc.doc_id} for x in rows})
@@ -909,11 +932,14 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
     more = f"\n- … and {len(rows) - 25} more rooms (all numbered on the drawing)" if len(rows) > 25 else ""
     what = (f"{word} room{'s' if len(rows) != 1 else ''}" if not word.endswith("room") else f"{word}{'s' if len(rows) != 1 else ''}") if word else "rooms"
     how = ("from each room's footprint rectangle minus the IfcDoor widths in its walls" if ifc else
-           (f"from each room's drawn box at the drawing's scale ({scale:.4f} m/px, {doc.scale.get('method')}) minus detected door widths" if not guessed else "from each room's drawn box minus the detected door widths"))
+           ("from each room's drawn box at its view's scale minus detected door widths" if any("measurement_scale" in r.props for r in rooms) else
+            (f"from each room's drawn box at the drawing's scale ({scale:.4f} m/px, {doc.scale.get('method')}) minus detected door widths" if not guessed else "from each room's drawn box minus the detected door widths")))
     head = (f"**Baseboard: {_fmt(total)} linear metres** for {len(rows)} {what}{f' on **{st}**' if st else ''}, {how}. "
             "Rooms are treated as rectangles and wall openings other than doors are not deducted, so L-shaped rooms are approximate.")
     trace = [_step("route", "baseboard -> room outline minus door openings, code, no model"), _step("filter", f"{len(rows)} rooms, {len(doors)} doors considered")]
     cav = ("\n\nLengths are estimated from door sizes because no printed scale was found, so treat them as approximate." if guessed else "")
+    if len(rows) < len(rooms):
+        cav += f" {len(rooms) - len(rows)} rooms have no verified view scale and are excluded."
     return _answer_obj(question, [doc.doc_id], head + "\n" + "\n".join(lines) + more + cav, total, "m", 0.4 if guessed else 0.8, False, boxes, cites, scene, trace,
                        "index" if ifc else "planmap", t0 or time.perf_counter())
 

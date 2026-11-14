@@ -117,10 +117,17 @@ def fit_transform(dxf_texts, words, tol=12.0):
 
 def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
     import ezdxf
+    from ezdxf import units
     from pipeline import pages as pg
     doc = ezdxf.readfile(str(dxf_path))
     ms = doc.modelspace()
-    unit_m = UNIT_M.get(int(doc.header.get("$INSUNITS", 6)), 1.0)
+    unit_code = int(doc.header.get("$INSUNITS", 0))
+    try:
+        unit_m = units.conversion_factor(unit_code, 6) if unit_code else None
+    except (TypeError, ValueError):
+        unit_m = None
+    if unit_m is None:
+        raise RuntimeError("DXF drawing units are missing or unsupported; cannot measure geometry")
     page = json.loads((art / "pages.json").read_text())
     p1 = page["pages"][0]
     W, H = p1["w"], p1["h"]
@@ -217,6 +224,10 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
           "registration": tf, "items": items,
           "provenance": {"models": {}, "created": time.strftime("%Y-%m-%dT%H:%M:%S"), "ms": 0,
                          "note": "from DXF geometry; $INSUNITS=%s" % doc.header.get("$INSUNITS")}}
+    from pipeline.scale_regions import dxf_regions
+    details = dxf_regions(doc, tf)
+    if details:
+        pm["regions"] = [{"bbox": [0, 0, W, H], "scale": dict(pm["scale"]), "title": "Main plan"}, *details]
     (art / "planmap-1.json").write_text(json.dumps(pm))
     return {"counts": dict(cnt), "reg": tf}
 

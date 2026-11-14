@@ -662,8 +662,12 @@ def h_skirting(q: str, doc: Doc) -> Ans | None:
         a.body.append("The room is not in the plan map.")
         a.lf("room not found")
         return a
-    sc = doc.scale if isinstance(doc.scale, dict) else {}
+    from engine.scales import item_scale
+    sc = item_scale(r, doc.scale if isinstance(doc.scale, dict) else {})
     s = sc.get("m_per_px")
+    if not s:
+        a.body.append("The room's view has no verified scale, so its length cannot be measured.")
+        return a
     b = r.bbox_px
     per = 2 * ((b[2] - b[0]) + (b[3] - b[1])) * s
     ds = [d for d in doc.items if d.kind == "door" and _touch(d.bbox_px, b)]

@@ -325,6 +325,13 @@ class Session:
             ref = self.reg("text", did, pg, c["bbox_px"], c["text"])
             out.append(f'{ref} printed scale "{c["text"]}" = ratio 1:{_fmt(c["ratio"])}' + (f"; {c['m_per_px']} m per pixel at {dpi:.0f} dpi" if c["m_per_px"] else ""))
         ps = geom.planmap_scale(did, pg, self.root)
+        from pipeline.scale_regions import region_map
+        from engine.scales import scale_description
+        pm = region_map(Path(self.root) / did, pg)
+        for region in pm.get("regions", []):
+            sc = region.get("scale") or {}
+            ref = self.reg("region", did, pg, region["bbox"], sc.get("evidence"))
+            out.append(f"{ref} {scale_description(sc, region.get('title'))}; {sc.get('evidence', '')}")
         if ps:
             out.append(f'plan map scale: {ps["m_per_px"]} m per pixel (method {ps.get("method")}, confidence {ps.get("confidence")})')
         if dpi:
@@ -345,6 +352,17 @@ class Session:
             dpi = geom.page_dpi(did, pg, self.root)
             mpp = float(ratio) * 0.0254 / dpi if dpi else None
         src = "given"
+        from pipeline.scale_regions import region_map
+        from engine.scales import points_scale, positive, scale_description
+        pm = region_map(Path(self.root) / did, pg)
+        if pm.get("regions"):
+            sc, region = points_scale(pm, pts)
+            local_mpp = positive(sc.get("m_per_px"))
+            if not local_mpp:
+                return "error: measurement crosses views or this view has no verified scale; " + str(sc.get("evidence") or "")
+            if mpp and abs(mpp / local_mpp - 1) > .01:
+                return "error: supplied scale disagrees with the scale for this view"
+            mpp, src = local_mpp, scale_description(sc, (region or {}).get("title"))
         if mpp is None:
             ps = geom.planmap_scale(did, pg, self.root)
             if ps and (ps.get("confidence") or 0) >= 0.5:
