@@ -78,6 +78,9 @@ def run(q):
     t0 = time.time()
     try:
         a = remote(q) if BASE else answer(q["question"], [q["doc_id"]], lambda *x, **k: None)
+        if not BASE:   # deployed-like: the API validates every answer against the contract schema
+            from server.schema import validate_answer
+            validate_answer(a)
     except Exception as e:
         return dict(q, grade="wrong", err=repr(e), secs=round(time.time() - t0, 1))
     ans = a.get("answer") or {}

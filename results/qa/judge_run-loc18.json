@@ -1,0 +1,92 @@
+[
+ {
+  "id": "J02",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "Which floor has the most doors?",
+  "type": "compare",
+  "value": null,
+  "must": [
+   "1. Obergeschoss"
+  ],
+  "tol": 0.0,
+  "source": "artifacts/ifc_bench__ac20-arc/elements.json",
+  "expect_abstain": false,
+  "note": "{'Keller': 16, 'Erdgeschoss': 18, '1. Obergeschoss': 22, '2. Obergeschoss': 21}",
+  "grade": "correct",
+  "got": "**1. Obergeschoss** has the most doors: **22**. Per floor: Keller 16, Erdgeschoss 18, 1. Obergeschoss 22, 2. Obergeschoss 21, Dachgeschoss 0. [1]",
+  "value_got": 22,
+  "route": "index",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 22,
+  "secs": 4.6
+ },
+ {
+  "id": "J13",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "Do the exits on the ground floor meet the Finnish fire-escape rules?",
+  "type": "rule",
+  "value": null,
+  "must": [
+   "848/2017"
+  ],
+  "tol": 0.0,
+  "source": "engine/rules/fire_escape.yaml",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "correct",
+  "got": "**No violation found** for fire safety (848/2017) by the checks that can run on this model (checked: 848/2017 §34, 848/2017 §33). 3 rules could not be checked automatically, so this is not a full compliance statement. [1]",
+  "value_got": 0,
+  "route": "index",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 0,
+  "secs": 4.6
+ },
+ {
+  "id": "J18",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "Is the headroom in the doorways sufficient?",
+  "type": "rule",
+  "value": null,
+  "must": [
+   "1007/2017",
+   "14"
+  ],
+  "tol": 0.0,
+  "source": "engine/rules/safety_in_use.yaml (§14)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "correct",
+  "got": "**No violation found** for safety in use (1007/2017) by the checks that can run on this model (checked: 1007/2017 §14). [1]",
+  "value_got": 0,
+  "route": "index",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 0,
+  "secs": 14.2
+ },
+ {
+  "id": "J20",
+  "doc_id": "ifc_bench__ac20-arc",
+  "question": "Does every storey have two exits as required?",
+  "type": "rule",
+  "value": null,
+  "must": [
+   "848/2017",
+   "33"
+  ],
+  "tol": 0.0,
+  "source": "engine/rules/fire_escape.yaml (§33)",
+  "expect_abstain": false,
+  "note": "",
+  "grade": "correct",
+  "got": "**Not clearly compliant on fire safety (848/2017).** 3 findings: Only 1 exit found on Keller (848/2017 §33, suggestion); Only 1 exit found on 1. Obergeschoss (848/2017 §33, suggestion); Only 1 exit found on 2. Obergeschoss (848/2017 §33, suggestion). Checked: 848/2017 §34, 848/2017 §33. Not checkable with this model: 3 rules. [1][2][3]",
+  "value_got": 3,
+  "route": "index",
+  "cost": null,
+  "abstained": false,
+  "n_boxes": 3,
+  "secs": 4.6
+ }
+]

@@ -361,6 +361,25 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         return _answer_obj(question, [doc_id], text, n, "count", 0.6, False, [], [], {"doc_id": doc_id, "highlight_item_ids": [],
                            "camera_target_item_id": None}, trace, route, t0)
 
+    if doc.mode == "ifc" and kind == "storey" and p.type == "count" and not page:
+        sts = sorted(doc.storeys, key=lambda s: s.get("elevation_m", 0))
+        n = len(sts)
+        trace.append(_step("count", f"{n} storey(s) declared in the model"))
+        if not n:
+            return _answer_obj(question, [doc_id], "This model does not declare any storeys (no IfcBuildingStorey), so I cannot give a floor count from it.",
+                               None, None, 0.0, True, [], [], {"doc_id": doc_id, "highlight_item_ids": [], "camera_target_item_id": None},
+                               trace, route, t0)
+        rep = []   # one element per storey (its first slab, else first element) so the citation points at something visible
+        for s_ in sts:
+            its = [i for i in doc.items if i.storey == s_["name"]]
+            its.sort(key=lambda i: (i.kind != "slab", i.kind != "wall", i.item_id))
+            if its:
+                rep.append(its[0])
+        listing = ", ".join(f"{s_['name']} ({s_.get('elevation_m', 0):+.1f} m)" for s_ in sts)
+        _, cites, scene = _evidence(doc, rep)
+        text = f"The model has **{n} {'storey' if n == 1 else 'storeys'}**, from lowest to highest: {listing}. {_cite_marks(cites)}"
+        return _answer_obj(question, [doc_id], text, n, "count", 1.0, False, [], cites, scene, trace, route, t0)
+
     kinds = {kind}
     kind_note = ""
     if kind in ("shower", "bathtub") and re.search(r"\bshowers?\b", question, re.I) and re.search(r"\bbath ?tubs?\b", question, re.I):
@@ -498,6 +517,10 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
             text = f"There {'is' if n == 1 else 'are'} **{n} {kind_note[:-1] if n == 1 else kind_note}** (spaces named as a WC or toilet) {where}. {marks}"
         elif n == 0:
             text = f"I found **no {_plural(kind, 2)}** {where}." if not subject else f"I found **no {_plural(kind, 2)}** matching {subject} {where}."
+            seen = sorted({i.kind for i in doc.items})
+            text += (f" I searched {len(doc.items)} modelled elements ({', '.join(seen[:12])}); a zero here means none of those is a "
+                     f"{kind}, not that the building has none, since it may not be modelled or drawn.")
+            conf = min(conf, 0.5)
         else:
             verb = "is" if n == 1 else "are"
             text = f"There {verb} **{n} {_plural(kind, n)}** {where}. {marks}"

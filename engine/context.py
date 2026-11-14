@@ -90,6 +90,38 @@ def needs_rewrite(question: str, doc_ids: list[str], history) -> bool:
     return words <= 3 or bool(DEICTIC.search(q))
 
 
+PRONOUN = re.compile(r"\b(it|its|them|those|these|that|same|again|instead|the other|this one|that one)\b", re.I)
+
+
+def _kinds(text: str) -> set[str]:
+    """Object kinds named in a text (the parser's synonym table): doors, windows, offices -> room, ..."""
+    from engine.router.parser import _KIND_RE
+    t = (text or "").lower()
+    return {k for k, rx in _KIND_RE if rx.search(t)}
+
+
+def stands_alone(question: str) -> bool:
+    """A full question the rules already understand (it names its own kind, nothing refers back): never rewritten."""
+    q = (question or "").strip()
+    if not q or ELLIPSIS_START.match(q) or STRONG.search(q) or PRONOUN.search(q):
+        return False
+    try:
+        from engine.router.parser import parse
+        p = parse(q)
+        return bool(p.matched and (p.kind or p.kinds)) or bool(_kinds(q) and re.match(r"(?i)\s*(where|how many|how much|what is the (total|number)|count|list|show)", q))
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def rewrite_ok(question: str, candidate: str, history) -> bool:
+    """A rewrite keeps the question's kinds and adds none that neither it nor the thread mentioned."""
+    qk, ck = _kinds(question), _kinds(candidate)
+    seen = set(qk)
+    for h in _turns(history):
+        seen |= _kinds(str(h.get("content") or ""))
+    return qk <= ck and ck <= seen
+
+
 def title_of(doc_id: str, root: Path | None) -> str:
     try:
         return json.loads((Path(root) / doc_id / "doc.json").read_text()).get("title") or doc_id
@@ -120,7 +152,7 @@ def resolve(question: str, doc_ids: list[str] | None, history=None, root: Path |
     doc_ids = list(doc_ids or [])
     out = Resolved(question, doc_ids, False, {"source": "none", "original": question})
     try:
-        if os.environ.get("CONTEXT_REWRITE", "1") == "0" or not needs_rewrite(question, doc_ids, history):
+        if os.environ.get("CONTEXT_REWRITE", "1") == "0" or not needs_rewrite(question, doc_ids, history) or stands_alone(question):
             return out
         last = last_docs(history)
         turns = "\n".join(f"{h['role']}: {str(h['content'])[:CLIP]}" for h in _turns(history))
@@ -131,7 +163,7 @@ def resolve(question: str, doc_ids: list[str] | None, history=None, root: Path |
                 current=_label(doc_ids, root), last=_label(last, root), turns=turns, q=question)}], schema=SCHEMA)
             j = r.json if isinstance(r.json, dict) else {}
             cand = str(j.get("question") or "").strip()
-            if cand and not cand.startswith("fake:") and len(cand) <= 1500:
+            if cand and not cand.startswith("fake:") and len(cand) <= 1500 and rewrite_ok(question, cand, history):
                 new_q = cand
                 pick = j.get("doc")
                 new_docs = doc_ids or (last if pick in ("last", "current") else [])

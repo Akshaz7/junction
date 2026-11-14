@@ -269,7 +269,19 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
                 on_event("trace", step)
     except Exception:  # noqa: BLE001 — memory is a convenience, never block the answer
         question, step = original, None
+    try:   # FIX-6: typo tolerance for domain words (windos, dors, deisng, databse); the user's own words stay in res["question"]
+        from engine.library import fix_typos
+        _fixed, _fx = fix_typos(question)
+        if _fx:
+            question = _fixed
+            _tstep = _step("typos", "read as: " + ", ".join(f"{a} -> {b}" for a, b in _fx))
+            if on_event:
+                on_event("trace", _tstep)
+            step = _tstep if step is None else step
+    except Exception:  # noqa: BLE001
+        pass
     res = ensure_markers(_guarded(question, doc_ids, on_event, scene_state, history))
+    res["question"] = original   # the user's own words are what is stored and shown; the resolved question stays in the trace
     if step is not None:
         res["trace"] = [step, *(res.get("trace") or [])]
         if step.get("cost_usd"):
@@ -326,6 +338,14 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             if _task:
                 add(_step("route", f"document task: {_task}"))
                 return run_task(_task, question, doc_ids, history, on_event, trace, t0, root, calls)
+        if (question or "").strip() and not os.environ.get("LIBRARY_OFF"):
+            from engine.library import library_answer, app_feature_answer   # FIX-6: $0 library and app-feature questions
+            _lib = library_answer(question, root) or app_feature_answer(question, doc_ids)
+            if _lib is not None:
+                for s_ in _lib["trace"]:
+                    add(s_)
+                _lib["trace"] = trace
+                return _lib
         if not doc_ids:
             if (question or "").strip():
                 from engine.project_answer import project_answer
