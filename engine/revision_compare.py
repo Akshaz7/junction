@@ -491,9 +491,17 @@ def compare_documents(doc_a, doc_b, root):
 COMPARE_INTENT = re.compile(r"\b(?:what(?:'s| is)?\s+(?:has\s+)?changed|what\s+has\s+changed|changes?\s+(?:between|from|since|in)|compare\s+(?:these|the\s+(?:two|versions)|versions|revisions)|differences?\s+between)\b", re.I)
 
 
+LEVEL_REF = re.compile(r"\b(?:level|floor|storey|story)s?\s*\d+\b|\b\d+(?:st|nd|rd|th)\s+(?:floor|level|storey|story)\b|"
+                       r"\b(?:ground|first|second|third|fourth|top|basement|roof)\s+(?:floor|level|storey|story)\b", re.I)
+VERSION_WORD = re.compile(r"\b(?:versions?|revisions?|rev\.?|v\d+|issued|transfer|before|after)\b", re.I)
+
+
 def comparison_answer(question, doc_ids, root):
     """Early code route; returning it before context/explain avoids any model call."""
     if not COMPARE_INTENT.search(question or "") and not (len(doc_ids or []) == 2 and re.search(r"\bcompare\b", question or "", re.I)):
+        return None
+    # "compare level 1 and level 2" compares parts of one project (projects engine), not two versions of a drawing.
+    if LEVEL_REF.search(question or "") and not VERSION_WORD.search(question or ""):
         return None
     t0 = time.perf_counter()
     ids = list(dict.fromkeys(doc_ids or []))
