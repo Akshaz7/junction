@@ -1430,6 +1430,10 @@ def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
     res = quantity_takeoff(question, doc, t0)
     if res is not None:
         return res
+    from engine import mep as _mep
+    res = _mep.answer(question, doc, t0)  # F-MEP: building services + structure by code, before the legacy piping handler
+    if res is not None:
+        return res
     for fn in (piping, slab_by_type, baseboard, room_list, wet_rooms, count_where, storey_table, building_safety, storey_pair, storey_compare, total_and_storey, cond_count, exact_size, kind_compare, compliance, plan_total, plain_limits, plan_slab_pipe, superlative_room, where_rooms):
         res = fn(question, doc, t0)
         if res is not None:

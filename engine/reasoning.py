@@ -100,6 +100,15 @@ def build(res: dict, question: str, root: Path) -> dict | None:
             pass
     c = _confidence.run(ctx)
     steps = c.pop("_steps", ctx["steps"])
+    hint = res.get("reasoning_hint")   # F-MEP: engine/mep.py supplies its own Found / Measured / Checked lines and an optional confidence cap
+    if hint and hint.get("steps"):
+        steps = list(hint["steps"])
+        cap = hint.get("pct_cap")
+        if cap and c.get("pct", 0) > cap:
+            c["pct"] = cap
+            c["label"] = "Cross-checked" if cap >= 80 else "Estimate"
+            c["reason"] = hint.get("reason") or c.get("reason")
+            c["improve"] = hint.get("improve") or c.get("improve")
     if not steps:
         return None
     return {"steps": steps[:4], "confidence": c}
@@ -110,6 +119,7 @@ def attach(res: dict, question: str, root: Path) -> dict:
         r = build(res, question, root)
         if r:
             res["reasoning"] = r
+        res.pop("reasoning_hint", None)
     except Exception:  # noqa: BLE001 — evidence is a convenience, never break the answer
         pass
     return res
