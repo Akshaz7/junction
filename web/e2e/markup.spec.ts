@@ -3,7 +3,7 @@ import { mkdir } from 'node:fs/promises'
 const api = process.env.MARKUP_API_ORIGIN || 'http://127.0.0.1:8387'
 const output = '../results/final/MARKUP'
 
-/** Pins, listing and the sheet go to the isolated test API; saving one marked item is mocked in memory until the one-item save API (F-TAUGHT) is deployed here. */
+/** Pins, listing and the sheet go to the isolated test API; saving one marked item uses the real one-item API unless MARKUP_MOCK_SAVE=1 mocks it in memory. */
 async function setup(page: Page) {
   await mkdir(output, { recursive: true })
   await page.request.post(`${api}/test-reset`)
@@ -11,7 +11,7 @@ async function setup(page: Page) {
   await page.route('**/api/**', async (route) => {
     const request = route.request(), url = new URL(request.url())
     const one = url.pathname.match(/\/markup\/symbols(?:\/([^/]+))?$/)
-    if (one) {
+    if (one && process.env.MARKUP_MOCK_SAVE === '1') {
       const id = one[1], body = request.postDataJSON?.() ?? {}
       if (request.method() === 'POST') {
         const mark = { id: `m${marks.length + 1}`, doc_id: 'sheet-under-test', name: body.name, note: '', page: body.page, template_bbox: body.box, canonical_kind: body.canonical_kind ?? null, matches: [{ id: '1', bbox: body.box, score: 1, status: 'confirmed', room: null }], summary: { found: 1, confirmed: 1, pending: 0, rejected: 0, rooms: {} } }
@@ -23,7 +23,7 @@ async function setup(page: Page) {
     }
     url.host = new URL(api).host
     const response = await route.fetch({ url: url.href })
-    if (url.pathname.endsWith('/markup') && request.method() === 'GET') return route.fulfill({ response, json: { ...(await response.json()), symbols: marks } })
+    if (process.env.MARKUP_MOCK_SAVE === '1' && url.pathname.endsWith('/markup') && request.method() === 'GET') return route.fulfill({ response, json: { ...(await response.json()), symbols: marks } })
     await route.fulfill({ response })
   })
   await page.routeWebSocket('**/ws', () => {})
