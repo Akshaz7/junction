@@ -1,19 +1,17 @@
 # Handoff: IOS (Codex worker)
 
-Row ID: I-02 (attempt 1)
-Task: AR screen with RealityKit + ARKit in `ios/Hologram/AR/`:
-- `ARSceneView` (SwiftUI wrapper of `ARView`): horizontal plane detection, coaching overlay, tap to place the scene on a detected surface.
-- Load a USDZ scene (`Entity.load` / `ModelEntity`) from a URL, or from the bundled fixture `ios/Hologram/Resources/fixture.usdz` as the fallback.
-- Gestures: pinch to scale, rotate, drag (`installGestures`), plus a scale slider from 1:100 to 1:1 (log scale; label shows "1:100" … "1:1") and a reset button.
-- `SceneIndex`: walk the loaded entity tree and build `[usd_name: Entity]` (prim names are `usd_name`, CONTRACT 5.1: `"i_" + first 16 hex chars of sha1(item_id)`); also `func usdName(for itemId: String) -> String` (use CryptoKit Insecure.SHA1) so callers can look up by item_id.
-- A way to open the AR screen from the shell (a toolbar button is fine for now; the bridge comes in I-04).
-Fixture: the LEAD will drop `ios/Hologram/Resources/fixture.usdz` and `ios/Hologram/Resources/fixture.scene.json` (5 box prims; scene.json maps item_id -> usd_name) within ~20 minutes. Write the code first; if the files are not there yet when you reach the tests, wait/poll for them (check every 60 s, up to 20 min). Add them to the app target and the test target resources in `project.yml`.
-Unit test (`HologramTests`): load the fixture USDZ (it loads without an ARView), build the SceneIndex, and find the entity for item_id `window-001` via `usdName(for:)`. Also test `usdName(for:)` against the value in fixture.scene.json.
-Rules: only edit `ios/`. Heavy commands through `scripts/heavy.sh`. Build with `-derivedDataPath ios/build/DerivedData`. AR does not run in the simulator; unit tests that only load the entity are fine. If the simulator is not available in your sandbox, at least `build-for-testing` must succeed; the LEAD runs the tests outside the sandbox.
-Input files: CONTRACT.md 5.1, 5.2, 5.5, 5.10; AGENTS.md
-Done test command (LEAD runs): `cd ios && xcodegen generate && cd .. && scripts/heavy.sh xcodebuild test -project ios/Hologram.xcodeproj -scheme Hologram -destination 'platform=iOS Simulator,name=Hologram iPhone' -derivedDataPath ios/build/DerivedData CODE_SIGNING_ALLOWED=NO | tail -5` (must show `** TEST SUCCEEDED **`)
-Last failed attempt (if any): none
+Row ID: I-03 (attempt 2)
+Task: Highlight in AR: `HighlightController` that takes `item_ids` (+ optional labels "1","2",…, CONTRACT 5.7: same numbers as the 2D boxes), makes those entities glow (emissive/unlit accent material, e.g. the brand accent from refs/stoa-hero/theme-tokens.css), dims every other entity (lower opacity or grey material), and shows number labels above each highlighted entity (a text `ModelEntity` or a billboard). `clear()` restores the original materials. Use `SceneIndex.usdName(for:)` to resolve ids.
+Unit test: load the fixture USDZ, apply a highlight to [window-001, door-001] with labels, assert the two entities have the highlight material and the other three are dimmed; `clear()` restores originals.
+Rules: only edit `ios/`. Build with `-derivedDataPath ios/build/DerivedData`; heavy commands via `scripts/heavy.sh`. Simulator is unavailable in your sandbox: `build-for-testing` must pass; the LEAD runs the tests.
+Done test (LEAD runs): `scripts/heavy.sh xcodebuild test -project ios/Hologram.xcodeproj -scheme Hologram -destination 'platform=iOS Simulator,name=Hologram iPhone' -derivedDataPath ios/build/DerivedData CODE_SIGNING_ALLOWED=NO` → `** TEST SUCCEEDED **`
+Last failed attempt (if any): attempt 1 — LEAD ran `xcodebuild test` on 'Hologram iPhone': ** TEST FAILED **, 10 failures in HighlightControllerTests.testFixtureHighlightsTwoItemsDimsThreeAndRestoresMaterials (HighlightControllerTests.swift:27):
+  XCTAssertEqual failed: ("kCGColorSpaceModelRGB 0.658375 0.658375 0.658375 1") is not equal to ("UIExtendedGrayColorSpace 0.831373 1")
+  XCTAssertEqual failed: ("kCGColorSpaceModelRGB 0.132868 0.0251869 0.0168074 1") is not equal to ("UIExtendedSRGBColorSpace 0.4 0.172549 0.137255 1")
+RealityKit returns material colours in linear RGB after a round trip, while the test compares against the original sRGB/grey UIColor. Fix the comparison (convert both to the same colour space, e.g. extended sRGB via CGColor.converted, and compare components with a tolerance) — or better, compare material identity/type and the stored original material objects rather than colour values. Make sure clear() really restores the original materials.
 
 ---
 <!-- Worker appends RESULT: or NEEDS: lines below. -->
-RESULT: I-02 implemented AR placement/coaching, URL loading with bundled demo fallback, pinch/rotate/drag, logarithmic 1:100–1:1 scale and reset, shell toolbar entry, and SHA-1 SceneIndex with fixture tests; xcodegen + heavy.sh xcodebuild build-for-testing succeeded with fixtures in both bundles (ios/build/i02-attempt3.log); CoreSimulator is unavailable in the sandbox, so LEAD must run the assigned test command.
+
+RESULT: I-03 implemented HighlightController.highlight(itemIDs:labels:) with unlit brand accent, grey dimming, numbered billboards, grouped-mesh support, and clear() material restoration; ARSceneController owns it. Two new tests cover the five-item USDZ fixture, labels, replacement/clear, nested meshes, material slots, and missing/duplicate IDs. Local heavy.sh xcodebuild build-for-testing passed (attempt 2, arm64 + x86_64; ios/build/i03-build-for-testing-attempt2.log); simulator test execution remains for LEAD as instructed. No commit.
+RESULT: I-03 attempt 2 colour comparison fix: appearance assertions compare tints from reference RealityKit materials; colour checks convert both tints to extended linear sRGB and compare components with tolerance 0.00001. clear() checks still compare restored materials against saved originals (type, tint, metallic and roughness). scripts/heavy.sh xcodebuild build-for-testing passed for arm64 and x86_64 with -derivedDataPath ios/build/DerivedData (ios/build/i03-build-for-testing-color-fix.log); simulator tests remain for LEAD because CoreSimulator is unavailable in the sandbox. No commit.

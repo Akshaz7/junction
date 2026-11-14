@@ -12,6 +12,7 @@ final class ARSceneController: ObservableObject {
     @Published private(set) var scale: Float = 0.01
 
     private(set) var sceneIndex: SceneIndex?
+    private(set) var highlightController: HighlightController?
     private weak var arView: ARView?
     private var model: ModelEntity?
     private var anchor: AnchorEntity?
@@ -42,6 +43,7 @@ final class ARSceneController: ObservableObject {
             try Task.checkCancellation()
             let content = loaded.entity
             sceneIndex = SceneIndex(root: content)
+            highlightController = HighlightController(root: content)
             let bounds = content.visualBounds(relativeTo: nil)
             // Keep the loaded prim hierarchy intact, with its bottom on the surface.
             content.position.y -= bounds.min.y
@@ -101,6 +103,7 @@ final class ARSceneController: ObservableObject {
     }
 
     func detach() {
+        highlightController?.clear()
         updateSubscription?.cancel()
         updateSubscription = nil
         removeGestures()
