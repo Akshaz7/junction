@@ -253,7 +253,7 @@ def enrich(pm, folder=None, *, effective_scale=None, save_crops=False):
     if measured_spread is not None and measured_spread > 1e-7:
         sc['spread_pct'] = max(sc.get('spread_pct') or 0, measured_spread)
     # Never assign a numeric physical uncertainty from icon scatter.
-    matched = [r for r in unique if r['method'] == method and selected and abs(r['m_per_px'] / selected - 1) < 1e-7]
+    matched = [r for r in unique if not r.get('stored_only') and r['method'] == method and selected and abs(r['m_per_px'] / selected - 1) < 1e-7]
     steps = []
     door_crops = 0
     for n, r in enumerate(unique):

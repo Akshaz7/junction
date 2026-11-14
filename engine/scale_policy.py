@@ -39,7 +39,7 @@ def independent(a, b):
 
 
 def rank(c):
-    return 6 if c.get('stored_only') and RANK[c['method']] > 0 else RANK[c['method']]
+    return (.5 if RANK[c['method']] == 0 else 6) if c.get('stored_only') else RANK[c['method']]
 
 
 def select(candidates):
@@ -82,14 +82,15 @@ def select(candidates):
     return (None if ambiguous else winner), method
 
 
-def choose(pm, folder=None, effective_scale=None):
+def _choose(pm, folder=None, effective_scale=None):
     """Return the chosen scale plus every evidenced candidate; do not mutate pm."""
     sc = enrich(pm, folder, effective_scale=effective_scale, save_crops=False)
+    sc['m_per_px'] = positive(sc.get('m_per_px'))
     # enrich reports cross-method spread. Older margin consumers treat the
     # legacy spread_pct field as an error budget; never feed agreement into it.
     observed_spread = sc.pop('spread_pct', None)
     if observed_spread is not None: sc['method_spread_pct'] = observed_spread
-    candidates = list(sc.get('available_candidates') or []) + known_objects(pm)
+    candidates = list(sc.get('available_candidates') or []) + known_objects(pm) + native_registration(pm, sc)
     old_method, old_value = sc.get('method'), positive(sc.get('m_per_px'))
     # Legacy native-unit artifacts remain native, with missing provenance stated.
     # A bare stored raster estimate cannot outrank a newly evidenced measurement.
@@ -112,7 +113,26 @@ def choose(pm, folder=None, effective_scale=None):
             sc['confidence'] = .3 if selected['method'] == 'door-prior' else .8
     elif method['id'] == 'ambiguous':
         sc.update(m_per_px=None, method='none', confidence=0, selection_rule=method['why_chosen'])
+    # Refresh the proof after selection so no consumer sees an old scale result
+    # next to a new method. Cross-method spread remains sensitivity only.
+    sc = enrich(pm, folder, effective_scale=sc, save_crops=False)
+    spread = sc.pop('spread_pct', None)
+    if spread is not None: sc['method_spread_pct'] = spread
     return sc
+
+
+def choose(pm, folder=None, effective_scale=None):
+    """Odd/missing producer metadata cannot break a structured-data answer."""
+    try:
+        return _choose(pm, folder, effective_scale)
+    except (TypeError, ValueError, KeyError, AttributeError, ArithmeticError, OSError) as exc:
+        original = effective_scale if effective_scale is not None else (pm.get('scale') if isinstance(pm, dict) else {})
+        sc = copy.deepcopy(original) if isinstance(original, dict) else {}
+        sc['m_per_px'] = positive(sc.get('m_per_px'))
+        sc['selection'] = {'id': 'unavailable', 'label': 'Scale evidence unavailable',
+                           'why_chosen': f'Candidate provenance could not be read ({type(exc).__name__}); no new conversion was applied.', 'alternatives': []}
+        sc['candidates'] = []
+        return sc
 
 
 def known_objects(pm):
@@ -141,3 +161,19 @@ def known_objects(pm):
                               operand('matched pixel span', px, 'px', src)],
                              'Physical width supplied by the source producer; object class averages are not measurements.'))
     return out
+
+
+def native_registration(pm, scale):
+    """Recompute a CAD pixel mapping when both recorded operands exist."""
+    from engine.scale_proof import candidate, operand
+    native = scale.get('native_units') or {}
+    factor = positive(native.get('m_per_unit'))
+    signed = (pm.get('registration') or {}).get('a')
+    a = positive(abs(signed)) if isinstance(signed, (int, float)) and not isinstance(signed, bool) else None
+    if factor and a and native.get('method') == 'dxf-units':
+        return [candidate('dxf-units', factor / a, 'scale = metres per drawing unit / abs(registered pixels per drawing unit)',
+                          list(native.get('inputs') or []) + [
+                              operand('metres per drawing unit', factor, 'm/native unit', {'file': f"planmap-{pm.get('page', 1)}.json", 'pointer': '/scale/native_units/m_per_unit'}),
+                              operand('registered signed pixels per drawing unit', signed, 'px/native unit', {'file': f"planmap-{pm.get('page', 1)}.json", 'pointer': '/registration/a'})],
+                          'Uses declared insertion units and the recorded registration; no unitless-to-metre default.', independent=False)]
+    return []
