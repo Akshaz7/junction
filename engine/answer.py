@@ -373,8 +373,11 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             return _abstained(question, doc_ids, f"The question names **{other}**, which is not among the selected documents ({sel}). "
                               "Select that document and ask again, or ask about the selected one.", trace, t0)
 
-        from engine.schedules import answer_schedule
-        if (res := answer_schedule(question, doc_ids, root, t0)) is not None:
+        try:
+            from engine.schedules import answer_schedule
+        except ImportError:  # schedule route is optional until committed
+            answer_schedule = None
+        if answer_schedule and (res := answer_schedule(question, doc_ids, root, t0)) is not None:
             for s_ in res["trace"]:
                 add(s_)
             res["trace"] = trace
