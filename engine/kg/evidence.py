@@ -123,7 +123,7 @@ def references(b):
                 destinations=[target for target in sheets[code] if target!=did]
                 if len(destinations)==1:
                     rn=_ref(b,did,page,text if len(text)<=300 else code,bb)
-                    b.edge('references',rn,b.doc_nodes[destinations[0]],'label_text',.8,
+                    b.edge('references',rn,b.doc_nodes[destinations[0]],'label_text',.5,
                            {'sheet_code':code,'quote':text[:300],'source':b.nodes[rn]['source']})
             # Exact text runs preserve citations; longer plain-text files may contain an explicit tag as a token.
             matches=[folded] if folded in targets else [k for k in targets if re.search(r'(?<!\w)'+re.escape(k)+r'(?!\w)',folded)]
@@ -138,7 +138,7 @@ def references(b):
                 quote=key if len(text)>300 else text
                 rn=_ref(b,did,page,quote,bb)
                 for nid in unique:
-                    b.edge('references',rn,nid,'label_text',.7,
+                    b.edge('references',rn,nid,'label_text',.5,
                            {'text':key,'quote':quote,'source':b.nodes[rn]['source'],'target_source':b.nodes[nid]['source']})
 
 
@@ -204,6 +204,6 @@ def revisions_and_issues(b):
             targets=[n for d in docs for item in issue.get('item_ids',[]) for n in b.item_nodes.get((d,str(item)),[])]
             # A document-level finding need not invent an item citation.
             for target in targets or [b.doc_nodes[d] for d in docs]:
-                b.edge('flags',nid,target,'rule',1 if issue.get('basis')=='exact' else .55,
+                b.edge('flags',nid,target,'rule',1 if issue.get('basis')=='exact' else .5,
                        {'rule':(issue.get('evidence') or {}).get('kind') or 'existing_mistake','finding':issue,
                         'source':b.nodes[target]['source']})

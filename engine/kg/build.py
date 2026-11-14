@@ -132,10 +132,10 @@ class Builder(Records):
                 if level:
                     ln = self.level(did, level)
                     self.edge('on_level', nid, ln, 'ifc_relation' if it.source == 'ifc' else 'level_name',
-                              1 if it.source == 'ifc' else .8, {'level': level, 'source': source})
+                              1 if it.source == 'ifc' else .5, {'level': level, 'source': source})
                     if kind == 'room':
                         self.edge('contains', ln, nid, 'ifc_relation' if it.source == 'ifc' else 'level_name',
-                                  1 if it.source == 'ifc' else .8, {'level': level, 'source': source})
+                                  1 if it.source == 'ifc' else .5, {'level': level, 'source': source})
                 self.properties(nid, did, it)
         self.geometry()
         self.wall_geometry()
@@ -149,7 +149,7 @@ class Builder(Records):
             other = self.node(kind, did, norm(value), value)
             self.edge('contains', self.doc_nodes[did], other, 'rule', 1, {'rule': 'document_property'})
             self.edge(relation, nid, other, 'ifc_relation' if it.source == 'ifc' else 'label_text',
-                      1 if it.source == 'ifc' else .8, {'property': field, 'value': value, 'source': self.nodes[nid]['source']})
+                      1 if it.source == 'ifc' else .5, {'property': field, 'value': value, 'source': self.nodes[nid]['source']})
 
     def geometry(self):
         """Plan geometry uses pixel coordinates only within a page. No invented scale or cross-page proximity."""
@@ -192,7 +192,7 @@ class Builder(Records):
                 if len(hits) == 1:
                     room = valid[hits[0]]
                     polygon = bool(self.items[room].polygon_px)
-                    self.edge('in_room', nid, room, 'containment_geom', .7 if polygon else .55,
+                    self.edge('in_room', nid, room, 'containment_geom', .5,
                               {'rule': 'centre_inside_room_polygon' if polygon else 'centre_inside_room_bbox',
                                'point_px': next(iter(p.coords)), 'page': it.page,
                                'item_source': n['source'], 'room_source': self.nodes[room]['source']})
@@ -232,7 +232,7 @@ class Builder(Records):
                     hits = [int(i) for i in tree.query(point) if shapes[int(i)].covers(point)]
                     if len(hits) == 1:
                         wall = walls[hits[0]]
-                        self.edge('hosted_by', nid, wall, 'containment_geom', .55,
+                        self.edge('hosted_by', nid, wall, 'containment_geom', .5,
                                   {'rule': 'unique_wall_contains_opening_centre', 'point_px': next(iter(point.coords)),
                                    'opening_source': n['source'], 'wall_source': self.nodes[wall]['source']})
                 elif n['kind'] == 'room' and it.polygon_px:
@@ -243,7 +243,7 @@ class Builder(Records):
                             if self.items[wall].polygon_px:
                                 length = shape.boundary.intersection(shapes[int(index)]).length
                                 if length > 0:
-                                    self.edge('bounds', wall, nid, 'containment_geom', .7,
+                                    self.edge('bounds', wall, nid, 'containment_geom', .5,
                                               {'rule': 'wall_outline_intersects_room_boundary', 'contact_length_px': length,
                                                'wall_source': self.nodes[wall]['source'], 'room_source': n['source']})
                     except (ValueError, TypeError):
