@@ -1,6 +1,6 @@
 {
-  "checked_at": "2026-11-14T04:05:28+0200",
-  "rules": 12,
+  "checked_at": "2026-11-14T14:11:37+0200",
+  "rules": 19,
   "passed": true,
   "duplicate_ids": [],
   "results": [
@@ -247,6 +247,181 @@
         {
           "role": "finnish_quote",
           "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/848",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-use-stair-width",
+      "file": "safety_in_use.yaml",
+      "section": "3 §",
+      "check_id": "stair_width",
+      "translation": "unofficial: ministry translation (ym.fi)",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://ym.fi/documents/1410903/0/YMa+k%C3%A4ytt%C3%B6turvallisuus+1007_2017+EN.pdf/ee85f7a4-0ef7-d489-a450-70a2469a2361?t=1668155648754",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        },
+        {
+          "role": "finnish_quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/1007",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-use-stair-dwelling-riser-tread",
+      "file": "safety_in_use.yaml",
+      "section": "4 §",
+      "check_id": "stair_riser_tread_dwelling",
+      "translation": "unofficial: ministry translation (ym.fi)",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://ym.fi/documents/1410903/0/YMa+k%C3%A4ytt%C3%B6turvallisuus+1007_2017+EN.pdf/ee85f7a4-0ef7-d489-a450-70a2469a2361?t=1668155648754",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        },
+        {
+          "role": "finnish_quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/1007",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-use-stair-exit-riser-tread",
+      "file": "safety_in_use.yaml",
+      "section": "4 §",
+      "check_id": "stair_riser_tread_exit",
+      "translation": "unofficial: ministry translation (ym.fi)",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://ym.fi/documents/1410903/0/YMa+k%C3%A4ytt%C3%B6turvallisuus+1007_2017+EN.pdf/ee85f7a4-0ef7-d489-a450-70a2469a2361?t=1668155648754",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        },
+        {
+          "role": "finnish_quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/1007",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-use-door-landing",
+      "file": "safety_in_use.yaml",
+      "section": "6 §",
+      "check_id": "door_landing",
+      "translation": "unofficial: ministry translation (ym.fi)",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://ym.fi/documents/1410903/0/YMa+k%C3%A4ytt%C3%B6turvallisuus+1007_2017+EN.pdf/ee85f7a4-0ef7-d489-a450-70a2469a2361?t=1668155648754",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        },
+        {
+          "role": "finnish_quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/1007",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-use-barrier-height",
+      "file": "safety_in_use.yaml",
+      "section": "7 §",
+      "check_id": "barrier_height",
+      "translation": "unofficial: ministry translation (ym.fi)",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://ym.fi/documents/1410903/0/YMa+k%C3%A4ytt%C3%B6turvallisuus+1007_2017+EN.pdf/ee85f7a4-0ef7-d489-a450-70a2469a2361?t=1668155648754",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        },
+        {
+          "role": "finnish_quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/1007",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-use-headroom",
+      "file": "safety_in_use.yaml",
+      "section": "14 §",
+      "check_id": "headroom",
+      "translation": "unofficial: ministry translation (ym.fi)",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://ym.fi/documents/1410903/0/YMa+k%C3%A4ytt%C3%B6turvallisuus+1007_2017+EN.pdf/ee85f7a4-0ef7-d489-a450-70a2469a2361?t=1668155648754",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        },
+        {
+          "role": "finnish_quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/1007",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        }
+      ],
+      "problems": [],
+      "passed": true
+    },
+    {
+      "id": "fi-use-emergency-window",
+      "file": "safety_in_use.yaml",
+      "section": "15 §",
+      "check_id": "emergency_window",
+      "translation": "unofficial: ministry translation (ym.fi)",
+      "sources": [
+        {
+          "role": "quote",
+          "url": "https://ym.fi/documents/1410903/0/YMa+k%C3%A4ytt%C3%B6turvallisuus+1007_2017+EN.pdf/ee85f7a4-0ef7-d489-a450-70a2469a2361?t=1668155648754",
+          "http_status": 200,
+          "url_ok": true,
+          "quote_found": true
+        },
+        {
+          "role": "finnish_quote",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/1007",
           "http_status": 200,
           "url_ok": true,
           "quote_found": true

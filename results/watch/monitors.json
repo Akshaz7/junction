@@ -28,6 +28,21 @@
       "monitor_id": "mon_ceb6bbd9075c4167b64aed79e5a2d829",
       "created": false,
       "webhook_url": null
+    },
+    {
+      "url": "https://ym.fi/documents/1410903/0/YMa+k%C3%A4ytt%C3%B6turvallisuus+1007_2017+EN.pdf/ee85f7a4-0ef7-d489-a450-70a2469a2361?t=1668155648754",
+      "rule_ids": [
+        "fi-use-stair-width",
+        "fi-use-stair-dwelling-riser-tread",
+        "fi-use-stair-exit-riser-tread",
+        "fi-use-door-landing",
+        "fi-use-barrier-height",
+        "fi-use-headroom",
+        "fi-use-emergency-window"
+      ],
+      "monitor_id": "mon_4b6ebcdfdbd04641a3dfc583682ea85b",
+      "created": true,
+      "webhook_url": null
     }
   ]
 }

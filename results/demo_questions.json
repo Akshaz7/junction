@@ -8,7 +8,7 @@
   "abst": false,
   "route": "index",
   "usd": 0.0,
-  "s": 0.06,
+  "s": 0.28,
   "cites": 4
  },
  {
@@ -92,7 +92,7 @@
   "abst": false,
   "route": "planmap",
   "usd": 0.0,
-  "s": 0.0,
+  "s": 0.01,
   "cites": 1
  },
  {
@@ -104,7 +104,7 @@
   "abst": false,
   "route": "index",
   "usd": 0.0,
-  "s": 0.13,
+  "s": 0.22,
   "cites": 1
  }
 ]
