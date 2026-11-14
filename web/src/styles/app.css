@@ -937,3 +937,5 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 
 /* W-83: paperclip sits right beside the + button */
 .composer-actions > .composer-upload { margin-left: 6px; margin-right: auto; }
+
+.changes-plain-summary { margin: 8px 12px 4px; font-size: 13px; color: var(--muted-foreground); }

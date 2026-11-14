@@ -1,3 +1,4 @@
+import { readChange, summariseChanges } from '../lib/change-copy'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { ArrowLeft, ArrowRight, Check, ChevronDown, Download, FilePlus, FileText, GripVertical, History, Inbox, Maximize2, Minus, Plus, RotateCw, Search, SlidersHorizontal } from 'lucide-react'
 import { Button } from './ui'
@@ -42,7 +43,7 @@ export function RevisionSummary({ comparison }: { comparison: RevisionComparison
     <div className="revision-documents">{([comparison.v1, comparison.v2]).map((version, i) => <a key={i} href={`#/data?doc=${encodeURIComponent(version.doc_id || '')}`}>
       {version.label}{version.pages != null ? ` · ${version.pages} pages` : ''}
     </a>)}</div>
-    {comparison.changes.map((change) => <p key={change.change_id}>{change.n}. {change.sentence}</p>)}
+    {comparison.changes.map((change) => <p key={change.change_id}>{change.n}. {readChange(change, comparison.image ?? { w: 1, h: 1 }).text}</p>)}
   </div>
 }
 
@@ -181,7 +182,12 @@ export function ChangesScreen({ docs, demo }: { docs: FileDocument[]; demo: bool
               }}
               onPointerUp={(event) => { if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); setWiping(false) }}
               onPointerCancel={() => setWiping(false)} onLostPointerCapture={() => setWiping(false)} /></>}
-          </div><aside className="comparison-readings" aria-label="Change readings"><header><span>{comparison.v1.label}</span><span>{comparison.v2.label}</span><button type="button" onClick={exportChanges}><Download size={12} />Export</button></header>{comparison.changes.map((change) => <article key={change.change_id} data-change-id={change.change_id}><span className="reading-number">{change.n}</span><div className="change-thumbnails"><img src={comparison.v1.thumb} alt={`Before change ${change.n}`} /><img src={comparison.v2.thumb} alt={`After change ${change.n}`} /></div><p>{change.sentence}</p></article>)}</aside></div>
+          </div><aside className="comparison-readings" aria-label="Change readings"><header><span>{comparison.v1.label}</span><span>{comparison.v2.label}</span><button type="button" onClick={exportChanges}><Download size={12} />Export</button></header>{(() => {
+            const readings = comparison.changes.map((change) => readChange(change, comparison.image ?? { w: 1, h: 1 }))
+            const row = (r: ReturnType<typeof readChange>) => <article key={r.change.change_id} data-change-id={r.change.change_id}><span className="reading-number">{r.change.n}</span><p>{r.text}</p></article>
+            const minor = readings.filter((r) => r.small)
+            return <><p className="changes-plain-summary">{summariseChanges(readings)} Red boxes were changed or removed, green boxes were added.</p>{readings.filter((r) => !r.small).map(row)}{minor.length > 0 && <details className="cmp-small"><summary>Minor edits ({minor.length})</summary>{minor.map(row)}</details>}</>
+          })()}</aside></div>
         </div> : comparison ? <RevisionSummary comparison={comparison} /> : !error && <p className="data-empty" role="status">{selected.type === 'new_document' ? 'This is a new document; no previous revision is available.' : 'Loading comparison…'}</p>}
         {comparison && <div className="phone-comparison-summary"><span className="summary-grabber" /><strong>{title(selected)}</strong><p><span className="version-tag">New version</span>{comparison.v1.label}<ArrowRight size={12} />{comparison.v2.label}</p><small>{comparison.image ? `${comparison.changes.length} changes` : 'Drawing comparison unavailable'}{comparison.generated_for_demo ? ' · generated for demo' : ''}</small></div>}
       </>}
