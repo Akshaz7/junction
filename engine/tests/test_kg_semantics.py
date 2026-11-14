@@ -140,3 +140,33 @@ def test_same_as_has_one_edge_per_cross_document_pair(tmp_path):
     assert len(identities)==3
     assert len({frozenset((e['from'],e['to'])) for e in identities})==3
     assert sum(n['canonical'] is not None for n in g['nodes'])==2
+
+
+def test_sheet_references_retain_text_location(tmp_path):
+    write(tmp_path/'a'/'doc.json',{'doc_id':'a','title':'A101 - Ground floor','kind':'pdf'})
+    write(tmp_path/'s'/'doc.json',{'doc_id':'s','title':'S201 - Structural detail','kind':'pdf'})
+    write(tmp_path/'s'/'text-1.json',{'words':[{'text':'See A101','bbox_px':[1,2,100,20]}]})
+    g=build({'id':'sheets','docs':[{'doc_id':d,'role':'detail'} for d in ('a','s')]},tmp_path)
+    refs=[e for e in g['edges'] if e['kind']=='references' and e['method']=='label_text']
+    assert len(refs)==1
+    assert refs[0]['evidence']['source']['bbox']==[1,2,100,20]
+    assert refs[0]['to']=='doc:a:root'
+
+
+def test_optional_vector_alignment_converts_points_to_metres(tmp_path,monkeypatch):
+    import sys
+    from types import SimpleNamespace
+
+    from engine.kg.alignment import vector_alignment
+    from engine.kg.build import Builder
+    for did in ('a','b'):
+        plan(tmp_path,did,[item('r','room',[0,0,100,100])],kind='pdf',files={'pdf':'source.pdf'})
+        (tmp_path/did/'source.pdf').write_bytes(b'generated for demo: optional API test')
+    b=Builder({'id':'vectors','docs':[{'doc_id':d,'role':'plan'} for d in ('a','b')]},tmp_path).populate()
+    api=SimpleNamespace(load=lambda path,page_index:{'W_pt':1000,'H_pt':1000},
+                        align=lambda a,z:{'s':1,'R':[[1,0],[0,1]],'t':[100,200],'residual':2,'matches':4})
+    monkeypatch.setitem(sys.modules,'pipeline.pdf_mep',api)
+    fit=vector_alignment(b,'room:a:r','room:b:r')
+    assert fit['residual']==pytest.approx(.02)
+    assert fit['T']==[[1,0,1],[0,1,2],[0,0,1]]
+    assert fit['matches']==4
