@@ -2,7 +2,7 @@ import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSP
 import { ChevronLeft, ChevronRight, Download, FileSymlink, FileText, Highlighter, Maximize2, Minus, PenLine, Plus, Search, X } from 'lucide-react'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document } from '../lib/types'
-import { fitPage, focusBox, zoomAt, type PageTransform, type Point, type Size } from '../lib/page-transform'
+import { fitPage, focusBoxWithin, zoomAt, type PageTransform, type Point, type Size } from '../lib/page-transform'
 import { viewerEvidence } from '../lib/viewer-evidence'
 import { Button } from './ui'
 import { setHover, setSelected, useLinkedItem } from '../viewer3d'
@@ -120,7 +120,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   }, [citation.doc_id, citation.page, searchOpen, specOpen, !!specCitation])
   useEffect(() => {
     const bbox = hits[hitIndex]?.bbox
-    if (image && bbox && viewport.width && viewport.height) setView(focusBox(bbox, viewport, fitPage(image, viewport).scale))
+    if (image && bbox && viewport.width && viewport.height) setView(focusBoxWithin(bbox, viewport, image, fitPage(image, viewport)))
   }, [hits, hitIndex, image, viewport])
   function closeItem() {
     setSelectedItem(null)
@@ -219,7 +219,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
     if (keepView.current) { keepView.current = false; return }
     const fitted = fitPage(image, viewport)
     const bbox = sources[active]?.bbox
-    setView(bbox ? focusBox(bbox, viewport, fitted.scale) : fitted)
+    setView(bbox ? focusBoxWithin(bbox, viewport, image, fitted) : fitted)
   }, [image, viewport, active, sources])
 
   useEffect(() => {
