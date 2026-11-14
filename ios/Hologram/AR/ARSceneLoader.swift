@@ -36,7 +36,7 @@ enum ARSceneLoader {
                 } else {
                     files = try await (repository ?? SceneRepository(apiURL: apiURL)).fetch(docID: docID)
                 }
-                holoLog("api files ready \(elapsed()) model=\(files.modelURL.lastPathComponent)")
+                holoLog("api files ready \(elapsed()) usdz=\(FileManager.default.fileExists(atPath: files.modelURL.path)) glb=\(files.glbURL != nil)")
                 let loaded = try await loadDocument(files: files, docID: docID, isBundledDemo: false)
                 holoLog("api scene loaded \(elapsed())")
                 return loaded
@@ -85,17 +85,42 @@ enum ARSceneLoader {
         let manifest = try await loadManifest(from: files.manifestURL)
         holoLog("manifest decoded items=\(manifest.items.count) doc=\(manifest.doc_id ?? "-")")
         guard manifest.doc_id == docID else { throw LoaderError.wrongDocument }
-        let entity = try await loadEntity(from: files.modelURL)
-        holoLog("entity loaded")
-        try Task.checkCancellation()
-        // A correct JSON response can still accompany a stale or wrong USDZ.
-        let names = Set(SceneIndex(root: entity).entitiesByUSDName.keys.filter { $0.hasPrefix("i_") })
-        let expected = Set(manifest.items.values.map(\.usd_name))
-        guard !names.isDisjoint(with: expected), names.isSubset(of: expected) else {
-            throw LoaderError.wrongDocument
-        }
+        let entity = try await loadFreshEntity(files: files, manifest: manifest)
         return LoadedScene(entity: entity, isFixture: false, manifest: manifest,
                            isBundledDemo: isBundledDemo, documentTitle: files.documentTitle)
+    }
+
+    /// Prefers the USDZ when it exists and matches the manifest; otherwise builds the scene from scene.glb on the
+    /// device. Throws (so the caller shows its soft "unavailable" path) when neither is usable.
+    private static func loadFreshEntity(files: SceneRepository.Files, manifest: SceneManifest) async throws -> Entity {
+        let expected = Set(manifest.items.values.map(\.usd_name))
+        var reason = "no model files"
+        if FileManager.default.fileExists(atPath: files.modelURL.path) {
+            do {
+                let entity = try await loadEntity(from: files.modelURL)
+                try Task.checkCancellation()
+                // A correct JSON response can still accompany a stale or wrong USDZ.
+                let names = Set(SceneIndex(root: entity).entitiesByUSDName.keys.filter { $0.hasPrefix("i_") })
+                if !names.isDisjoint(with: expected), names.isSubset(of: expected) {
+                    holoLog("entity loaded from usdz")
+                    return entity
+                }
+                reason = "usdz does not match the manifest"
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                reason = "usdz unreadable: \(error.localizedDescription)"
+            }
+            holoLog("usdz not used: \(reason)")
+        }
+        guard let glbURL = files.glbURL else { throw LoaderError.noUsableModel(reason) }
+        let nodeNames = Dictionary(manifest.items.values.compactMap { item in item.node.map { ($0, item.usd_name) } },
+                                   uniquingKeysWith: { first, _ in first })
+        let entity = try GLBSceneLoader.entity(from: Data(contentsOf: glbURL), nodeNames: nodeNames)
+        let names = Set(SceneIndex(root: entity).entitiesByUSDName.keys.filter { $0.hasPrefix("i_") })
+        guard !names.isDisjoint(with: expected), names.isSubset(of: expected) else { throw LoaderError.wrongDocument }
+        holoLog("entity built from glb on device items=\(names.count)")
+        return entity
     }
 
     private static func loadManifest(from url: URL) async throws -> SceneManifest {
@@ -138,13 +163,14 @@ enum ARSceneLoader {
     }
 
     private enum LoaderError: LocalizedError {
-        case missingFixture, downloadFailed, wrongDocument
+        case missingFixture, downloadFailed, wrongDocument, noUsableModel(String)
 
         var errorDescription: String? {
             switch self {
             case .missingFixture: "The bundled demo model is unavailable."
             case .downloadFailed: "The model could not be downloaded."
             case .wrongDocument: "The model belongs to a different document."
+            case .noUsableModel(let why): "This drawing has no 3D model the app can open yet (\(why))."
             }
         }
     }

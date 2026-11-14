@@ -30,6 +30,8 @@ struct SceneBounds: Decodable, Equatable {
 struct SceneManifest: Decodable {
     struct Item: Decodable {
         let usd_name: String
+        /// glTF node name in scene.glb, used to rebuild the scene on the device when there is no USDZ.
+        var node: String? = nil
         let bbox_m: SceneBounds?
         let name: String?
         let kind: String?
