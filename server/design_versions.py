@@ -144,7 +144,8 @@ def _saved(v: dict, all_versions: list[dict], created: bool) -> dict:
     data = doc_data(v["doc_id"])
     changes = dv.compare(None, parent["edits"], v["edits"], data)["changes"]
     cid = f"dv:{v['doc_id']}:{v['parent']}-{v['n']}"
-    return v | {"created": created, "change_id": cid, "compare_url": f"#/compare?change={cid}",
+    # The post-save link opens this version against the original (cid is the parent -> version step).
+    return v | {"created": created, "change_id": cid, "compare_url": f"#/compare?change=dv:{v['doc_id']}:0-{v['n']}",
                 "counts": dv.counts(changes), "n_changes": len(changes)}
 
 

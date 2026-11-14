@@ -22,7 +22,7 @@ test('Compare shows a real version pair with numbered boxes and readings', async
   const readings = screen.getByRole('complementary', { name: 'Differences' })
   await expect(readings.locator('article')).toHaveCount(detail.changes.length)
   expect((await readings.locator('.cmp-number').allTextContents()).sort()).toEqual(detail.changes.map((c) => String(c.n)).sort())
-  await expect(readings).toContainText(/\d+ changes?:/)
+  await expect(readings).toContainText(/\d+ changes? to look at|Only minor edits/)  // W-79 heading (the old 'N changes:' summary is gone)
   await expect(readings).not.toContainText(/no text change|Changed region/)
   await expect(screen.getByRole('img', { name: 'Older version' })).toBeVisible()
   await expect(screen.getByRole('img', { name: 'Newer version' })).toBeVisible()
@@ -33,16 +33,14 @@ test('Compare shows a real version pair with numbered boxes and readings', async
   await expect(screen.getByRole('img', { name: 'Newer version' })).toHaveCSS('opacity', '0.5')
 })
 
-test('Library lists live skills and automations', async ({ page, request }) => {
+test('Library lists live skills (W-91: Automations removed, no tabs)', async ({ page, request }) => {
   const body = await (await request.get(`${api}/api/skills`)).json() as { skills?: { name: string }[] } | { name: string }[]
   const list = Array.isArray(body) ? body : body.skills ?? []
   expect(list.length).toBeGreaterThan(0)
   await page.goto('/#/library')
   await expect(page.getByRole('heading', { name: 'Library', level: 1, exact: true })).toBeVisible()
-  await expect(page.getByRole('tabpanel').getByText(list[0].name, { exact: true }).first()).toBeVisible()
-  await page.getByRole('tab', { name: 'Automations' }).click()
-  await expect(page.getByRole('tab', { name: 'Automations' })).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByRole('tabpanel')).not.toBeEmpty()
+  await expect(page.getByRole('region', { name: 'Skills', exact: true }).getByRole('heading', { name: list[0].name, exact: true })).toBeVisible()
+  await expect(page.getByRole('tab', { name: 'Automations' })).toHaveCount(0)
 })
 
 test('Tools shows the findings controls', async ({ page }) => {

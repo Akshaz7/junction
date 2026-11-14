@@ -1,4 +1,5 @@
 import type { Answer, Bbox, Document } from '../lib/types'
+import { handleDesignVersions } from './design-versions'
 
 export const demoDocument: Document = {
   doc_id: 'demo__garden-room',
@@ -46,6 +47,9 @@ export function makeDemoAnswer(question: string, docIds: string[] = [demoDocumen
 /** Only these temporary endpoints are mocked; all other routes reach the backend. */
 export async function handleMockRequest(request: Request): Promise<Response | null> {
   const { pathname } = new URL(request.url)
+  const versioned = await handleDesignVersions(request, { [demoDocument.doc_id]: { title: demoDocument.title, image: { w: 440, h: 320 },
+    boxes: Object.fromEntries(windows.map((window) => [window.item_id, window.bbox_px])) } })
+  if (versioned) return versioned
   if (request.method === 'GET' && pathname === `/api/docs/${demoDocument.doc_id}`) return Response.json(demoDocument)
   if (request.method === 'GET' && pathname === `/api/docs/${demoDocument.doc_id}/pages/1/image`) {
     return new Response('<svg xmlns="http://www.w3.org/2000/svg" width="440" height="320" viewBox="0 0 440 320"><rect width="440" height="320" fill="white"/><path d="M60 46H380V260H60Z" fill="none" stroke="#152e14" stroke-width="8"/><path d="M100 46H180M260 46H340" stroke="#3a89de" stroke-width="10"/><text x="220" y="140" text-anchor="middle" font-family="sans-serif" font-size="18">Garden room</text><text x="220" y="170" text-anchor="middle" font-family="sans-serif" font-size="12">generated for demo</text></svg>', { headers: { 'Content-Type': 'image/svg+xml' } })
