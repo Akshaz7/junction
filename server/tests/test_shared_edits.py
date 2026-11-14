@@ -109,8 +109,8 @@ def test_chat_remove_then_manual_restore_clears_chat_state(client, chat):
     assert len(gone) == 1 and _hidden(client, chat) == gone
     _manual(client, chat, "restore", gone)          # Edit panel: Undo / Restore by hand
     assert _hidden(client, chat) == []
-    # and the chat sees it: nothing left to undo
-    assert _ask(client, chat, "undo")["evidence"]["scene"]["commands"] == []
+    # and the chat sees it: undo now reverses the manual restore (the last persisted visibility edit)
+    assert _ask(client, chat, "undo")["evidence"]["scene"]["commands"] == [{"op": "hide", "item_ids": gone}]
 
 
 @pytestmark_demo

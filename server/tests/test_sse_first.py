@@ -71,6 +71,10 @@ def stream_setup(monkeypatch):
         await stage("scene state")
         return []
 
+    async def load_edits(pool, cid):
+        await stage("scene state")
+        return []
+
     async def publish(event):
         await stage("publish")
         state["notifications"].append(event)
@@ -82,6 +86,7 @@ def stream_setup(monkeypatch):
     monkeypatch.setattr(changes_source, "visible_doc_ids", visible_docs)
     monkeypatch.setattr(artifact_store, "ensure_doc", ensure_doc)
     monkeypatch.setattr(scene_edits, "scene_state", scene_state)
+    monkeypatch.setattr(scene_edits, "load_edits", load_edits)
     app = FastAPI()
     app.include_router(chats_routes.router)
     app.add_middleware(RateLimitMiddleware)
