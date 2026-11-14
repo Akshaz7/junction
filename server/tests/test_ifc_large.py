@@ -119,3 +119,20 @@ def test_batches_publish_only_a_complete_unique_index(tmp_path, monkeypatch, fau
         metrics = ifc_ingest.index(tmp_path / "input.ifc", {}, tmp_path, 90)
         assert calls == [0, 1] and metrics["batches"] == 2
         assert [e["item_id"] for e in json.loads(published.read_text())["elements"]] == ["first", "second"]
+
+
+def test_property_queries_use_the_ready_index_without_reopening_large_source(tmp_path, monkeypatch):
+    from engine import props
+    folder = tmp_path / "uploads__large"
+    folder.mkdir()
+    source = folder / "source.ifc"
+    source.write_text("The property route must not parse this source")
+    (folder / "doc.json").write_text(json.dumps({"files": {"ifc": str(source)}}))
+    (folder / "ingest.json").write_text(json.dumps({"status": "running", "readable": True}))
+    (folder / "elements.json").write_text(json.dumps({"elements": [
+        {"item_id": "door", "kind": "door", "props": {"fire_rating": "60 minutes"}, "quantities": {"width_m": .9}}]}))
+    monkeypatch.setattr(props, "_read_ifc", lambda *a: pytest.fail("The upload's bounded property index is already available"))
+    records, _, status = props.index(folder.name, tmp_path)
+    assert records[0].values["fire_rating"] == "60 minutes"
+    assert records[0].values["width_m"] == .9
+    assert status == "the stored model index"
