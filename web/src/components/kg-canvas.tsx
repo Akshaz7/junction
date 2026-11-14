@@ -39,7 +39,7 @@ export function GraphCanvas({ nodes, edges, selectedId, markedIds, label, onSele
     const read = (name: string, fallback: string) => style.getPropertyValue(name).trim() || fallback
     colors.current = {
       structure: read(groupToken.structure, '#2c412b'), space: read(groupToken.space, '#3a89de'), element: read(groupToken.element, '#8a8a8a'), service: read(groupToken.service, '#c98137'), issue: read(groupToken.issue, '#b14142'),
-      edge: read('--neutral-350', '#c4c4c4'), edgeStrong: read('--neutral-500', '#8a8a8a'), differs: read('--brick-500', '#cb5454'), text: read('--foreground', '#1a1a1a'), halo: read('--background', '#fdfdfd'), ring: read('--foreground', '#1a1a1a'),
+      edge: read('--neutral-350', '#c4c4c4'), edgeStrong: read('--neutral-500', '#8a8a8a'), differs: read('--change-removed', '#ca482a'), text: read('--foreground', '#1a1a1a'), halo: read('--background', '#fdfdfd'), ring: read('--foreground', '#1a1a1a'),
       mark: read('--amber-500', '#e5a648'), font: style.fontFamily || 'sans-serif',
     }
   }, [])
@@ -84,14 +84,26 @@ export function GraphCanvas({ nodes, edges, selectedId, markedIds, label, onSele
     // Labels: hubs always, the focused neighbourhood, and everything once zoomed in.
     ctx.globalAlpha = 1
     ctx.font = `${12 / cam.k}px ${c.font}`; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.lineJoin = 'round'
+    const wanted: SimNode[] = []
     for (const node of simNodes.current.values()) {
       if (node.x == null || node.y == null) continue
       const show = dimming ? active.has(node.id) : node.hub || cam.k >= 1.7 || !!markSet?.has(node.id)
-      if (!show) continue
+      if (show) wanted.push(node)
+    }
+    // Biggest and selected first; a label that would sit on another one is skipped, so text stays readable.
+    const rank = (node: SimNode) => (node.id === selected.current ? 1e6 : 0) + (markSet?.has(node.id) ? 1e5 : 0) + node.r
+    wanted.sort((a, b) => rank(b) - rank(a))
+    const taken: [number, number, number, number][] = []
+    const lineH = 14 / cam.k
+    for (const node of wanted) {
       const text = node.label.length > 28 ? `${node.label.slice(0, 27)}…` : node.label
-      const y = node.y + node.r + 3 / cam.k
-      ctx.lineWidth = 3 / cam.k; ctx.strokeStyle = c.halo; ctx.strokeText(text, node.x, y)
-      ctx.fillStyle = c.text; ctx.fillText(text, node.x, y)
+      const y = node.y! + node.r + 3 / cam.k
+      const half = ctx.measureText(text).width / 2 + 2 / cam.k
+      const box: [number, number, number, number] = [node.x! - half, y, node.x! + half, y + lineH]
+      if (taken.some((t) => box[0] < t[2] && box[2] > t[0] && box[1] < t[3] && box[3] > t[1])) continue
+      taken.push(box)
+      ctx.lineWidth = 3 / cam.k; ctx.strokeStyle = c.halo; ctx.strokeText(text, node.x!, y)
+      ctx.fillStyle = c.text; ctx.fillText(text, node.x!, y)
     }
   }, [])
 
@@ -120,7 +132,7 @@ export function GraphCanvas({ nodes, edges, selectedId, markedIds, label, onSele
   // One simulation for the life of the component.
   useEffect(() => {
     const simulation = forceSimulation<SimNode>([]).alphaDecay(0.035).velocityDecay(0.38)
-      .force('charge', forceManyBody<SimNode>().strength(-95).distanceMax(380))
+      .force('charge', forceManyBody<SimNode>().strength(-150).distanceMax(520))
       .force('collide', forceCollide<SimNode>().radius((node) => node.r + 4))
       .force('x', forceX<SimNode>(0).strength(0.035)).force('y', forceY<SimNode>(0).strength(0.035))
       .force('center', forceCenter(0, 0))
@@ -155,7 +167,7 @@ export function GraphCanvas({ nodes, edges, selectedId, markedIds, label, onSele
     simNodes.current = next
     links.current = edges.filter((edge) => next.has(edge.from) && next.has(edge.to)).map((edge) => ({ source: next.get(edge.from)!, target: next.get(edge.to)!, edge }))
     simulation.nodes([...next.values()])
-    simulation.force('link', forceLink<SimNode, SimLink>(links.current).distance((link) => (link.edge.kind === 'same_as' ? 70 : link.edge.kind === 'contains' || link.edge.kind === 'on_level' ? 52 : 40)).strength((link) => (isEstimate(link.edge) ? 0.25 : 0.55)))
+    simulation.force('link', forceLink<SimNode, SimLink>(links.current).distance((link) => (link.edge.kind === 'same_as' ? 80 : link.edge.kind === 'contains' || link.edge.kind === 'on_level' ? 64 : 48)).strength((link) => (isEstimate(link.edge) ? 0.25 : 0.55)))
     const key = nodes.map((node) => node.id).sort().join('|')
     const replaced = !previous.size || ![...previous.keys()].some((id) => next.has(id))
     const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
