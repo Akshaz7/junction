@@ -1,0 +1,73 @@
+{
+  "time": "2026-11-14T20:15:47+00:00",
+  "worktrees": [
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/3d",
+      "tip": "f42b9d109c095bcb82608317e06ea7acca05e9cd Merge remote-tracking branch 'origin/awais/pdf3d'"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/changes",
+      "tip": "f42b9d109c095bcb82608317e06ea7acca05e9cd Merge remote-tracking branch 'origin/awais/pdf3d'"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/e2e",
+      "tip": "60efc46c0671dbd10026f2351d4720b15836d1ce chore: release regression bench (sample200 156/200) and decision note"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/evidence2",
+      "tip": "60efc46c0671dbd10026f2351d4720b15836d1ce chore: release regression bench (sample200 156/200) and decision note"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/mep",
+      "tip": "f42b9d109c095bcb82608317e06ea7acca05e9cd Merge remote-tracking branch 'origin/awais/pdf3d'"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/mistakes",
+      "tip": "e61c1b40e0f8add3a93fc69dce7ff8b5b03cb2ac F-MISTAKES: code-found mistakes (areas, duplicates, openings, quantities, missing values, clashes) with API route and chat answer"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/order",
+      "tip": "f42b9d109c095bcb82608317e06ea7acca05e9cd Merge remote-tracking branch 'origin/awais/pdf3d'"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/perf",
+      "tip": "f42b9d109c095bcb82608317e06ea7acca05e9cd Merge remote-tracking branch 'origin/awais/pdf3d'"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/proj-engine",
+      "tip": "f42b9d109c095bcb82608317e06ea7acca05e9cd Merge remote-tracking branch 'origin/awais/pdf3d'"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/proj-ui",
+      "tip": "f42b9d109c095bcb82608317e06ea7acca05e9cd Merge remote-tracking branch 'origin/awais/pdf3d'"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/props",
+      "tip": "f42b9d109c095bcb82608317e06ea7acca05e9cd Merge remote-tracking branch 'origin/awais/pdf3d'"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/qa",
+      "tip": "f42b9d109c095bcb82608317e06ea7acca05e9cd Merge remote-tracking branch 'origin/awais/pdf3d'"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/qa2",
+      "tip": "60efc46c0671dbd10026f2351d4720b15836d1ce chore: release regression bench (sample200 156/200) and decision note"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/robust",
+      "tip": "f42b9d109c095bcb82608317e06ea7acca05e9cd Merge remote-tracking branch 'origin/awais/pdf3d'"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/scales",
+      "tip": "f42b9d109c095bcb82608317e06ea7acca05e9cd Merge remote-tracking branch 'origin/awais/pdf3d'"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/scansym",
+      "tip": "f42b9d109c095bcb82608317e06ea7acca05e9cd Merge remote-tracking branch 'origin/awais/pdf3d'"
+    },
+    {
+      "worktree": "/Users/akshatthapa/Workspace/wt/wallarea",
+      "tip": "60efc46c0671dbd10026f2351d4720b15836d1ce chore: release regression bench (sample200 156/200) and decision note"
+    }
+  ]
+}
