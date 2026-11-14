@@ -126,5 +126,9 @@ def attach(res: dict, question: str, root: Path) -> dict:
             res["reasoning"] = r
         res.pop("reasoning_hint", None)
     except Exception:  # noqa: BLE001 — evidence is a convenience, never break the answer
-        pass
+        # A failed optional factor must not bypass count/evidence consistency.
+        from engine.reasoning_parts.counts import enforce
+        r = enforce(res, None, question)
+        if r:
+            res["reasoning"] = r
     return res

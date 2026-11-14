@@ -82,6 +82,16 @@ def test_existing_cards_cannot_bypass_invariant(tmp_path):
     assert r["reasoning"]["confidence"]["pct"] <= 69
 
 
+def test_optional_confidence_failure_cannot_bypass_invariant(tmp_path, monkeypatch):
+    from engine.reasoning_parts import confidence
+    def fail(_):
+        raise ValueError("missing factor")
+    monkeypatch.setattr(confidence, "run", fail)
+    r = attach(response(6, boxed=4), tmp_path)
+    assert "2 are not boxed yet" in texts(r)
+    assert r["reasoning"]["confidence"]["label"] == "Estimate"
+
+
 def test_stale_headline_is_repaired_without_changing_floor_or_bullets(tmp_path):
     r = attach(response(6, headline="There are **4 doors** on level **2**. [1]\n\n- Doors are timber."), tmp_path)
     assert "**6 doors** on level **2**" in r["answer"]["text_md"]
