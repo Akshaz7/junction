@@ -33,6 +33,9 @@ struct ARScreen: View {
                     }
                 }
                 Spacer()
+                if let item = controller.selectedItem {
+                    ItemDetailsCard(item: item, onDismiss: controller.dismissSelectedItem)
+                }
                 VStack(alignment: .leading, spacing: 12) {
                     if controller.isFixture {
                         Text("Sample model · generated for demo")

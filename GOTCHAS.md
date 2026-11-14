@@ -28,3 +28,4 @@
 - Raster scale: most cubicasa plans have no dimension text: scale falls back to the door-width prior (conf 0.3), so area answers there must be low-confidence or abstain.
 - `uv run` can block for minutes on the uv lock while another process syncs: use `uv run --no-sync` (or `.venv/bin/python`) in workers.
 - Aiven Runtime builds from a GitHub repo via the Aiven GitHub App (no registry images), deploys are manual ("Deploy latest commit"), HTTP on 443 only; WebSocket support undocumented.
+- `localhost:5173` (make dev) shows the live working tree and can be broken mid-edit by Codex; `localhost:4173` serves the last commit (git worktree in scratchpad + vite preview) for Ash to look at. LEAD rebuilds it after web commits.

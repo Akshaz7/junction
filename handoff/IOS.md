@@ -1,13 +1,14 @@
 # Handoff: IOS (Codex worker)
 
-Row ID: I-06 (attempt 1)
-Task: Walk mode at 1:1 on the AR screen: a "Walk" toggle that sets scale to 1:1 and aligns the model's floor (lowest storey elevation, or y=0) to the detected floor plane; a small "you are here" mini-map overlay (top-down 2D of the scene's bounding boxes from scene.json, a dot for the camera position projected into model coordinates, highlighted items in accent colour); and a guide arrow (a 3D arrow entity in front of the camera, or a 2D compass arrow in the overlay) pointing toward the highlighted item / camera target, with the distance in metres.
-Put the maths in a pure Swift type `WalkGuide` (input: camera transform in model space, target bbox centre; output: bearing in degrees relative to the camera's heading, horizontal distance in metres, arrived flag under 1 m) so it is unit-testable without AR.
-Unit tests for WalkGuide: target straight ahead gives bearing 0; target to the right gives +90; behind gives 180; arrived under 1 m; mini-map projection maps the scene bbox into the map rect.
-Rules: only edit `ios/`. Build with `-derivedDataPath ios/build/DerivedData`; heavy commands via `scripts/heavy.sh`. Simulator unavailable in your sandbox: `build-for-testing` must pass; the LEAD runs tests.
+Row ID: I-08 (attempt 1)
+Task: Tap to identify in AR: a tap on a placed scene entity resolves to its `item_id` (reverse of SceneIndex: usd_name -> item_id using the scene.json `items` map, which the AR screen should load next to the USDZ; the fixture has `fixture.scene.json`) and shows a SwiftUI card with name, kind, storey and properties when available (from scene.json; for IFC scenes later also from `GET /api/docs/{doc_id}` + elements). The tapped item gets a light outline/glow distinct from the answer highlight; tapping empty space dismisses the card.
+Put the hit-test → item_id logic in a testable type (`ItemPicker`: given an Entity, walk up parents to the first entity whose name is a known usd_name, return the item_id).
+Unit tests: ItemPicker resolves a child mesh of `window-001`'s prim to `window-001`; unknown entity returns nil; card model shows kind "window".
+Rules: only edit `ios/`. `-derivedDataPath ios/build/DerivedData`; heavy commands via scripts/heavy.sh; simulator unavailable in your sandbox: build-for-testing must pass; the LEAD runs the tests.
 Done test (LEAD runs): `scripts/heavy.sh xcodebuild test -project ios/Hologram.xcodeproj -scheme Hologram -destination 'platform=iOS Simulator,name=Hologram iPhone' -derivedDataPath ios/build/DerivedData CODE_SIGNING_ALLOWED=NO` → `** TEST SUCCEEDED **`
 Last failed attempt (if any): none
 
 ---
 <!-- Worker appends RESULT: or NEEDS: lines below. -->
-RESULT: I-06 implemented 1:1 Walk toggle with detected-floor placement and lowest-storey alignment, scene.json mini-map/camera dot, highlighted target arrow and metre distance; build-for-testing passed (ios/build/i06-build-for-testing.log), all 11 pure WalkGuide/manifest tests passed on the host (ios/build/i06-walk-guide-tests.log); simulator done test remains for LEAD as instructed.
+
+RESULT: I-08 implemented manifest-backed ItemPicker, metadata card, separate pale blue selection outline and empty-tap dismissal; four unit tests added; heavy.sh xcodebuild build-for-testing passed (ios/build/I-08-build.log); simulator test execution remains with LEAD.

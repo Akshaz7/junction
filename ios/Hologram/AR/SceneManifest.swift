@@ -31,6 +31,10 @@ struct SceneManifest: Decodable {
     struct Item: Decodable {
         let usd_name: String
         let bbox_m: SceneBounds?
+        let name: String?
+        let kind: String?
+        let storey: String?
+        let props: [String: SceneProperty]?
     }
 
     struct Storey: Decodable {
@@ -45,6 +49,34 @@ struct SceneManifest: Decodable {
     var bounds: SceneBounds? {
         items.values.compactMap(\.bbox_m).reduce(nil) { result, bounds in
             result.map { $0.union(bounds) } ?? bounds
+        }
+    }
+}
+
+/// Preserve optional metadata without assuming that every property is a string.
+enum SceneProperty: Decodable {
+    case string(String), number(Double), bool(Bool)
+    case array([SceneProperty]), object([String: SceneProperty]), null
+
+    init(from decoder: Decoder) throws {
+        let value = try decoder.singleValueContainer()
+        if value.decodeNil() { self = .null }
+        else if let bool = try? value.decode(Bool.self) { self = .bool(bool) }
+        else if let number = try? value.decode(Double.self) { self = .number(number) }
+        else if let string = try? value.decode(String.self) { self = .string(string) }
+        else if let array = try? value.decode([SceneProperty].self) { self = .array(array) }
+        else { self = .object(try value.decode([String: SceneProperty].self)) }
+    }
+
+    var displayText: String {
+        switch self {
+        case .string(let value): return value
+        case .number(let value): return String(value)
+        case .bool(let value): return value ? "Yes" : "No"
+        case .array(let values): return values.map(\.displayText).joined(separator: ", ")
+        case .object(let values):
+            return values.keys.sorted().map { "\($0): \(values[$0]!.displayText)" }.joined(separator: ", ")
+        case .null: return "Not available"
         }
     }
 }

@@ -16,6 +16,7 @@ final class ARSceneController: ObservableObject {
     @Published private(set) var cameraInModel: simd_float4x4?
     @Published private(set) var guide: WalkGuide?
     @Published private(set) var targetItemID: String?
+    @Published private(set) var selectedItem: ItemCardModel?
 
     private(set) var sceneIndex: SceneIndex?
     private(set) var highlightController: HighlightController?
@@ -29,6 +30,8 @@ final class ARSceneController: ObservableObject {
     private var anchor: AnchorEntity?
     private var updateSubscription: (any Cancellable)?
     private var gestureRecognizers: [UIGestureRecognizer] = []
+    private var itemPicker: ItemPicker?
+    private let selectionOutline = ItemSelectionOutline()
 
     var scaleLabel: String { "1:\(Int((1 / scale).rounded()))" }
     var isSupported: Bool { ARWorldTrackingConfiguration.isSupported }
@@ -60,6 +63,9 @@ final class ARSceneController: ObservableObject {
             manifest = loaded.manifest
             sceneIndex = SceneIndex(root: content)
             highlightController = HighlightController(root: content)
+            itemPicker = loaded.manifest.map { ItemPicker(manifest: $0) }
+            // Generate mesh hit targets before answer labels or selection outlines exist.
+            content.generateCollisionShapes(recursive: true)
             let bounds = content.visualBounds(relativeTo: nil)
             tableFloor = bounds.min.y
             // Keep the loaded prim hierarchy intact, with its bottom on the surface.
@@ -102,7 +108,34 @@ final class ARSceneController: ObservableObject {
         if !isWalking { installTableGestures(on: view, model: model) }
         isPlaced = true
         status = isWalking ? "Walk at 1:1. Select an item on the map to guide you."
-            : "Pinch to scale, rotate with two fingers, or drag to move."
+            : "Tap an item for details. Pinch to scale, rotate with two fingers, or drag to move."
+    }
+
+    func tap(at point: CGPoint) {
+        guard isPlaced else {
+            place(at: point)
+            return
+        }
+        guard let view = arView, let itemPicker else {
+            dismissSelectedItem()
+            return
+        }
+        // The placement container also has a collision box for gestures. Skip it
+        // and resolve the nearest real mesh hit through its USD prim parents.
+        let itemID = view.hitTest(point, query: .all).sorted { $0.distance < $1.distance }
+            .lazy.compactMap { itemPicker.itemID(for: $0.entity) }.first
+        guard let itemID, let item = manifest?.items[itemID],
+              let entity = sceneIndex?.entitiesByUSDName[item.usd_name] else {
+            dismissSelectedItem()
+            return
+        }
+        selectedItem = ItemCardModel(itemID: itemID, item: item)
+        selectionOutline.select(entity)
+    }
+
+    func dismissSelectedItem() {
+        selectedItem = nil
+        selectionOutline.clear()
     }
 
     func setScale(_ value: Float) {
@@ -171,6 +204,7 @@ final class ARSceneController: ObservableObject {
     }
 
     private func resetPlacement() {
+        dismissSelectedItem()
         removeGestures()
         model?.removeFromParent()
         if let anchor { arView?.scene.removeAnchor(anchor) }
@@ -183,6 +217,7 @@ final class ARSceneController: ObservableObject {
     }
 
     func detach() {
+        dismissSelectedItem()
         highlightController?.clear()
         updateSubscription?.cancel()
         updateSubscription = nil
@@ -246,7 +281,7 @@ struct ARSceneView: UIViewRepresentable {
         init(controller: ARSceneController) { self.controller = controller }
 
         @objc func tap(_ gesture: UITapGestureRecognizer) {
-            controller.place(at: gesture.location(in: gesture.view))
+            controller.tap(at: gesture.location(in: gesture.view))
         }
     }
 }
