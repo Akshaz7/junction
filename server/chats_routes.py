@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
 from . import db, stub_engine
+from .live import publish
 from .schema import validate_answer
 
 router = APIRouter(prefix="/api")
@@ -89,7 +90,9 @@ async def ask(chat_id: str, body: NewMessage):
     if c is None:
         raise HTTPException(404, "chat not found")
     doc_ids = body.doc_ids or ([c["doc_id"]] if c["doc_id"] else [])
-    await pool.execute("insert into messages (chat_id, role, content) values ($1,'user',$2)", cid, body.content)
+    umid = await pool.fetchval(
+        "insert into messages (chat_id, role, content) values ($1,'user',$2) returning id", cid, body.content)
+    await publish({"type": "chat.message", "chat_id": str(cid), "message_id": str(umid), "role": "user"})
 
     async def stream():
         loop = asyncio.get_running_loop()
@@ -101,6 +104,8 @@ async def ask(chat_id: str, body: NewMessage):
         task = asyncio.create_task(asyncio.to_thread(ENGINE, body.content, doc_ids, on_event))
         task.add_done_callback(lambda _: loop.call_soon_threadsafe(q.put_nowait, None))
         while (item := await q.get()) is not None:
+            if item[0] == "status":
+                await publish({"type": "chat.status", "chat_id": str(cid), "text": item[1].get("text", "")})
             yield {"event": item[0], "data": json.dumps(item[1])}
         try:
             ans = task.result()
@@ -113,6 +118,7 @@ async def ask(chat_id: str, body: NewMessage):
             cid, ans["answer"]["text_md"])
         await pool.execute("insert into answers (message_id, chat_id, doc_id, answer) values ($1,$2,$3,$4::jsonb)",
                            mid, cid, doc_ids[0] if doc_ids else None, json.dumps(ans))
+        await publish({"type": "chat.message", "chat_id": str(cid), "message_id": str(mid), "role": "assistant"})
         yield {"event": "answer", "data": json.dumps(ans)}
 
     return EventSourceResponse(stream())

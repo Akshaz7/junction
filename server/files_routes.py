@@ -7,6 +7,7 @@ from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 
 from . import config, db
+from .live import publish
 
 router = APIRouter(prefix="/api")
 
@@ -98,6 +99,7 @@ async def upload(file: UploadFile = File(...)):
         "insert into documents (doc_id, source, title, kind, formats, pages, credit, files) "
         "values ($1,'uploads',$2,$3,$4,1,$5,$6::jsonb)",
         doc_id, doc["title"], kind, [fmt], doc["credit"], json.dumps(doc["files"]))
+    await publish({"type": "doc.new", "doc_id": doc_id})
     return {"doc_id": doc_id, "status": "stored", "detail": "ingestion not started (S-04)"}
 
 

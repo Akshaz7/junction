@@ -1,0 +1,44 @@
+[project]
+name = "hologram"
+version = "0.1.0"
+description = "Junction 2026 Team RS3: answers about construction drawings with 2D/3D/AR proof"
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+dependencies = [
+  "ifcopenshell==0.9.0.post1",
+  "trimesh==5.2.1",
+  "numpy==2.5.4",
+  "pygltflib==1.16.5",
+  "ezdxf",
+  "shapely",
+  "usd-core",
+  "pypdfium2",
+  "pdfminer.six",
+  "opencv-python-headless",
+  "onnxruntime",
+  "torch",
+  "torchvision",
+  "transformers",
+  "pillow",
+  "fastapi",
+  "uvicorn[standard]",
+  "asyncpg",
+  "httpx",
+  "pydantic>=2",
+  "pyyaml",
+  "python-multipart",
+  "sse-starlette",
+  "jsonschema",
+  "langdetect",
+  "python-dotenv",
+]
+
+[dependency-groups]
+dev = ["pytest", "pytest-asyncio", "ruff"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "engine", "server", "pipeline", "vision"]
+asyncio_mode = "auto"

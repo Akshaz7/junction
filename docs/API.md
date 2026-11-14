@@ -75,4 +75,20 @@ data: {"answer_id": "...", "question": "How many windows are there?", "doc_ids":
 -> `{"total_usd": 0.035, "calls": 3, "by_provider": {"gemini": {"calls": 2, "usd": 0.03}}, "by_task": {"read_drawing": {"calls": 2, "usd": 0.015}}}` from `results/costs.jsonl` (fields `provider`, `task`, `cost_usd`).
 
 ### Not yet
-`POST /api/tts`, findings/advise (tier 3) and `WS /ws` (S-06).
+`POST /api/tts` and findings/advise (tier 3).
+
+### WS /ws (live sync, S-06)
+`ws://localhost:8000/ws` (use `wss://` when deployed). Server-to-client events are small JSON objects; refetch the thing they name.
+```
+{"type": "chat.message", "chat_id": "<uuid>", "message_id": "<uuid>", "role": "user|assistant"}   // refetch GET /api/chats/{id}
+{"type": "chat.status",  "chat_id": "<uuid>", "text": "Thinking…"}                                // same lines as the SSE status events
+{"type": "scene.highlight", "doc_id": "...", "item_ids": ["window-001", "window-002"]}
+{"type": "doc.new", "doc_id": "uploads__plan-3fa2b1"}                                              // refetch GET /api/docs
+{"type": "changes.new", "id": "<uuid>"}                                                           // refetch GET /api/changes
+{"type": "ping"}                                                                                    // every 20 s; any reply is optional
+```
+Client-to-server: `{"type": "scene.highlight", "doc_id": "...", "item_ids": [...]}` is re-broadcast to every client, including the sender
+(web 3D viewer and iOS AR follow it). `{"type": "ping"}` gets `{"type": "pong"}`. Other types are ignored.
+Mechanism: writers call `pg_notify('hologram_events', ...)`; each server process holds one LISTEN connection and fans out to its sockets
+(works across several server instances; reconnects after a drop). `changes.new` comes from a DB trigger, so any writer of `changes` fires it.
+Without a database the server broadcasts to its own sockets directly. Delivery is well under 2 s.
