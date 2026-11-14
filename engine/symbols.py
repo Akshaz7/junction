@@ -318,7 +318,7 @@ def find_legend(image_path, words=None, ink=None) -> dict:
             cur.append(r)
         if cur:
             blocks.append(cur)
-    heads = [s for s in _segments(words, W, H) if LEGEND_KEYS & set(_toks(s["text"])) and len(_toks(s["text"])) <= 6]
+    heads = [s for s in _segments(words, W, H) if (LEGEND_KEYS & set(_toks(s["text"])) or re.search(r"legend|selite|merkinn|zeichenerkl|teckenf|symbols?\b", s["text"].lower())) and len(_toks(s["text"])) <= 6]
     for blk in blocks:
         if len(blk) < 3:
             continue
@@ -363,6 +363,8 @@ def find_legend(image_path, words=None, ink=None) -> dict:
             if len(re.findall(r"[^\W\d_]", label, re.U)) < 4:
                 continue   # an abbreviation or code, not a description of a symbol
             prose = len(set(re.findall(r"\b(?:the|of|and|was|by|is|to|from|in|for|with|that)\b", label.lower()))) >= 2
+            if re.search(r"@|www\.|\.com\b|\btel\b|\bphone\b", label.lower()):
+                continue   # a title-block contact line
             if (len(label.split()) >= 8 and len(label) >= 45) or (len(label) >= 40 and prose) or (len(label) >= 25 and label.endswith((".", ",", ";"))):
                 continue   # a sentence of running text, not the name of a symbol
             ents.append({"label": label, "label_bbox": [int(v) for v in r["seg"]["bbox_px"]], "symbol_bbox": [int(v) for v in sb],
