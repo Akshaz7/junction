@@ -36,6 +36,7 @@ Deadlines (Finland time): hard freeze Sun 15 Nov 07:00, final report 08:30, subm
 - Never ask Ash during PHASE B: decide, write it in DECISIONS.md, continue.
 - Read LESSONS.md and GOTCHAS.md before each row; add 1–2 lines when you learn something.
 - Never commit: `.env*`, `data/`, `refs/`, `weights/`, `artifacts/`, `logs/`, model files, service-account JSON, files >10 MB. Never copy keys anywhere. No force-push, no history rewrite.
+- **LEAD pushes after every commit:** `git push origin main`. On rejection: `git pull --rebase origin main`, then push. Never force.
 - Honesty: numbers only from `results/`. Never train on held-out drawings (`data/sets/heldout_docs.txt`). Label generated content "generated for demo". Advisor never invents rules/sources. No data → say so.
 - Licences: repo MIT. No AGPL/GPL deps (`ultralytics`, `PyMuPDF` banned → pypdfium2 + pdfminer.six; RT-DETR/YOLOX). Record models/datasets in docs/MODELS.md. `refs/` is visual reference only; never copy `refs/stoa-hero/source/` code; no Stoa logo/drawings in git or app. Wordmark: "Hologram". Don't publish converted `duplex_arc`, Dental Clinic (CC BY-ND) or `hitos_arc` (GPL data). cubicasa5k is CC BY-NC-SA.
 - Budget: every model call through `engine/models` `call()`; caps in COSTS.md. Ladder: code → small model → large model. Quick tests on `sample200`; full bench ≤4×/run. Every external service behind a switch with a fallback.
