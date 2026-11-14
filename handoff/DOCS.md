@@ -1,16 +1,14 @@
-# DOCS (Codex): row X-12. Final report draft (due Sun 08:30)
-Scope: docs/REPORT.md (new) only.
-Write the final hackathon report draft for Stoa's "Make Blueprints Talk" track.
-Sections:
-- what we built: the 2D → 3D → AR proof chain, live cross-device chat, uploads, Stoa-parity screens
-- how it works: plan map read once, code over the plan map, the model ladder, the zero-abstention ladder
-- accuracy: numbers ONLY from results/bench/*.json and results/vision/*.json; read them, quote the tag and file, use placeholders where a run is pending
-- visual verifiability
-- creativity
-- inference cost: $/answer from results; the cost shown in the UI
-- honesty: held-out policy, the 2% tolerance, text judging, labelled best-effort answers
-- licences
-- limits and next steps
-Keep it under 1,200 words, with plain sentences and tables where they help. Read DECISIONS.md, docs/ACCURACY.md, docs/MODELS.md and docs/DEMO.md.
+# DOCS (Codex): row X-13. Judge's guide (one page)
+Scope: docs/JUDGES.md (new) and web/public/judges.md (copy of the same text, so the app can link it).
+Stoa's judges will test our interface with their OWN drawings and harder questions. Write a one-page guide, under 500 words:
+- the link
+- no login needed
+- how to upload (pdf, png, jpg, dxf, ifc; the size cap from server/files_routes.py; typical ready time 17–30 s, and IFC in seconds)
+- what to ask, with 8 example questions across counts, areas, multi-kind, take-offs, "where is", spec text, rule checks and edits ("remove the front door")
+- how to verify an answer: numbered boxes ↔ citations, Visualise it in 3D, the cost on each answer, "best estimate" labels
+- cross-device (open the same site on a phone)
+- known limits, stated honestly: scans without a scale, very large IFCs, non-English text
+Plain, friendly English, no marketing fluff. Check the facts against the code and docs (API.md, DEMO.md, REPORT.md).
 Do not commit. Append a RESULT: line.
-RESULT: X-12 PASS — wrote docs/REPORT.md (1,016 words); local Python acceptance check passed for all requested sections, local links, benchmark/vision figures and costs against source JSON, and pending-result qualifiers; no done-test command was supplied; no commit.
+
+RESULT: X-13 passed local content check: 422 words, eight examples, required topics, byte-identical docs/JUDGES.md and web/public/judges.md, server-verified upload formats/100 MiB cap; git diff --check passed. No done-test command supplied, so used these checks.
