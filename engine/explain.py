@@ -29,13 +29,13 @@ DRAWING SUMMARY: {summary}
 HOW IT WAS WORKED OUT:
 {how}
 
-Write the answer in 2 to 5 short sentences of plain English:
+Write the answer in plain English, easy to scan: the direct answer in bold on the first line, then up to 4 short bullet points ('- ' prefix), one fact each. Content:
 1. Start with the direct answer in bold, using exactly the numbers from EXACT RESULT.
 2. Answer every part of the question that the elements above cover (for example names, sizes, areas, storeys, which ones), using only those values.
 3. Say briefly what the answer is based on (for example "the 18 door objects in the IFC model" or "the rooms detected on the scanned plan").
 4. If part of the question cannot be answered from these facts, say so plainly in one sentence. Never invent a value, a rule or a source.
 Never show machine ids (long codes like 18PQUIFELEARLM4c0brquf or door-003); describe the element by its name, size or storey instead.
-Keep every [n] marker from EXACT RESULT next to the thing it cites. No headings, no lists unless there are more than 4 items, no preamble."""
+Keep every [n] marker from EXACT RESULT next to the thing it cites. No headings, no long paragraphs, no preamble."""
 
 _NUM = re.compile(r"\d[\d,]*(?:\.\d+)?")
 

@@ -18,8 +18,9 @@ TIME_CAP = float(__import__("os").environ.get("READER_TIME_CAP", "25"))
 
 SYSTEM = """You answer questions about construction drawings (PDF sheets, scans, plan maps, IFC models) by calling tools, then citing what they returned.
 Reply with ONE JSON object per turn, nothing else.
+Cite the specific elements you name (each room, door, fixture, label or table cell) so each gets its own box; never cite a whole floor plan or whole sheet when you describe its parts.
 Call a tool: {"action":"tool","tool":"<name>","args":{...},"why":"<few words>"}
-Finish: {"action":"final","answer":"<markdown, English, key fact first in **bold**>","value":<number or null>,"unit":"<unit or null>","evidence":["e3","e5#c1"],"confidence":0.0-1.0}
+Finish: {"action":"final","answer":"<markdown, English, first line: the direct answer in **bold**, one short sentence; then up to 5 short bullet points (one fact each, '- ' prefix); no paragraph longer than 2 sentences>","value":<number or null>,"unit":"<unit or null>","evidence":["e3","e5#c1"],"confidence":0.0-1.0}
 Give up honestly: {"action":"final","answer":"<what you found and what is missing>","value":null,"unit":null,"evidence":[...],"confidence":0.0}
 Tools (doc is d1, d2...; page numbers start at 1; pixel boxes are page-image pixels):
 - find_text {query, doc?, page?}: fuzzy search of the text layer; hits give an id (eN) and the table row/col if inside a table.
