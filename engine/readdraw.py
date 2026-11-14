@@ -39,10 +39,11 @@ CENTRE_IN, IOU_MIN = True, 0.2
 
 def png_size(p: Path) -> tuple[int, int] | None:
     try:
-        b = p.read_bytes()[:32]
+        with p.open("rb") as f:
+            b = f.read(32)
         if b[:8] == b"\x89PNG\r\n\x1a\n":
             return struct.unpack(">II", b[16:24])
-    except OSError:
+    except (OSError, struct.error):
         pass
     return None
 

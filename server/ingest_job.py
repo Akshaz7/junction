@@ -55,27 +55,26 @@ class Status:
             self.write("running")
             return True
         except Exception as e:  # noqa: BLE001
-            self.stages.append({"stage": name, "ok": False, "error": repr(e)[:300]})
+            self.stages.append({"stage": name, "ok": False, "error": str(e)[:300] or type(e).__name__})
             self.write("running")
             return False
 
 
 def _normalise_raster(doc_id: str, art: Path):
     """vision.build_planmaps reads doc.json files['png']: make sure the upload is a PNG."""
-    from PIL import Image
     d = json.loads((art / doc_id / "doc.json").read_text())
-    key, rel = next(iter(d["files"].items()))
+    rel = next(iter(d["files"].values()))
     src = REPO / rel
-    from pipeline.pages import MAX_SIDE, cap_raster
-    with Image.open(src) as probe:
-        big = max(probe.size) > MAX_SIDE
-    if key == "png" and not big:
-        return
-    # FIX-15: huge rasters are shrunk before any RGB conversion; the vision read then sees the capped copy too
-    dst = src.with_name(src.stem + ("-capped" if big else "") + ".png")
-    img = cap_raster(Image.open(src))
-    (img if img.mode in ("RGB", "L", "LA", "RGBA") else img.convert("RGB")).save(dst)
-    d["files"] = {"png": str(Path(rel).with_name(dst.name))}
+    from pipeline.pages import MAX_SIDE
+    from pipeline.raster_input import read_raster
+    # Never overwrite an uploaded source (including a PNG). Readers, page images
+    # and their evidence boxes all use this single normalised coordinate system.
+    dst = art / doc_id / "normalised.png"
+    with read_raster(src, MAX_SIDE) as img:
+        img.save(dst)
+    d.setdefault("original_files", dict(d["files"]))
+    target = str(dst.relative_to(REPO)) if dst.is_relative_to(REPO) else str(dst)
+    d["files"] = {"png": target}
     (art / doc_id / "doc.json").write_text(json.dumps(d, indent=1))
 
 
@@ -347,7 +346,13 @@ def _run(doc_id: str, st: Status) -> str:
         from pipeline import ifc_plans, ifc_scene
         ifc = REPO / doc["files"]["ifc"]
         ok = st.stage("ifc_scene", lambda: ifc_scene.process(ifc, doc, ddir))
+        if ok:
+            st.readable = True
+            st.write("running", "The model index and 3D scene are ready. Building drawing previews.")
         ok = ok and st.stage("ifc_plans", lambda: ifc_plans.process(doc_id, art))
+        if ok and (ddir / "pages.json").is_file():
+            doc["pages"] = len(json.loads((ddir / "pages.json").read_text())["pages"])
+            (ddir / "doc.json").write_text(json.dumps(doc, indent=1))
         ok = ok and st.stage("usdz", lambda: _usdz(doc_id, ddir))
         if ok and _has_piping(ifc):
             def pip():
@@ -416,14 +421,29 @@ def _run(doc_id: str, st: Status) -> str:
         elif ok:
             ok = False
     ok = ok and all(s["ok"] for s in st.stages)
-    final = "ready" if ok else "failed"
+    # Optional geometry/reader failure must not hide a successfully rendered
+    # drawing or an IFC index. The detail still explains exactly what failed.
+    usable = st.readable or (ddir / "elements.json").is_file()
+    final = "ready" if ok else ("partial" if usable else "failed")
     st.cost = cost
     detail = "" if ok else next((s.get("error", "") for s in st.stages if not s["ok"]), "")
     if ok and plan_pages:
         detail = f"plan map on page(s) {plan_pages}"
+    warnings = []
+    if (ddir / "pages.json").is_file():
+        for page in json.loads((ddir / "pages.json").read_text()).get("pages", []):
+            warnings.extend(page.get("warnings") or [])
+    if warnings:
+        detail = (detail + ". " if detail else "") + " ".join(dict.fromkeys(warnings))
     st.write(final, detail)
     return final
 
 
 if __name__ == "__main__":
+    # Priority is best-effort. A restricted host may disallow nice(); that must
+    # not prevent every upload from starting. Avoid preexec_fn in the threaded API.
+    try:
+        os.nice(10)
+    except OSError:
+        pass
     print(run(sys.argv[1]))

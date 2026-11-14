@@ -119,8 +119,9 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
     import ezdxf
     from pipeline import pages as pg
     doc = ezdxf.readfile(str(dxf_path))
-    ms = doc.modelspace()
-    unit_m = UNIT_M.get(int(doc.header.get("$INSUNITS", 6)), 1.0)
+    from pipeline.dxf_input import drawing_layout, metres_per_unit
+    ms = drawing_layout(doc)
+    unit_m = metres_per_unit(doc) if ms.name == "Model" else None
     page = json.loads((art / "pages.json").read_text())
     p1 = page["pages"][0]
     W, H = p1["w"], p1["h"]
@@ -163,12 +164,12 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
         area_txt = next((t for t in ts if AREA.match(t)), "")
         add("room", name, r,
             {"number": num, "area_m2_label": float(area_txt.split()[0]) if area_txt else None,
-             "area_m2_geom": round(_poly_area(r) * unit_m ** 2, 2), "labelled": bool(name)}, "dxf")
+             "area_m2_geom": round(_poly_area(r) * unit_m ** 2, 2) if unit_m else None, "labelled": bool(name)}, "dxf")
     # units
     for e in ms.query('LWPOLYLINE[layer=="UNIT_OUTLINE"]'):
         p = _pts(e)
         lab = next((t for t, x, y in texts if t.startswith("App.") and _inside((x, y), p)), "")
-        add("other", lab, p, {"role": "unit", "area_m2_geom": round(_poly_area(p) * unit_m ** 2, 2)}, "dxf")
+        add("other", lab, p, {"role": "unit", "area_m2_geom": round(_poly_area(p) * unit_m ** 2, 2) if unit_m else None}, "dxf")
     for e in ms.query('LWPOLYLINE[layer=="WALL"]'):
         add("wall", "", _pts(e), {}, "dxf")
     for e in ms.query('LWPOLYLINE[layer=="WINDOW"]'):
@@ -181,8 +182,8 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
             cx = sum(q[0] for q in p[:4]) / 4; cy = sum(q[1] for q in p[:4]) / 4
             sw = min(arcs, key=lambda c: (c[0] - cx) ** 2 + (c[1] - cy) ** 2, default=None)
             w = max(box(p)[2] - box(p)[0], box(p)[3] - box(p)[1])
-            add("door", "", p, {"swing_radius_m": round(sw[2] * unit_m, 2) if sw else None,
-                                "leaf_len_m": round(w * unit_m, 2)}, "dxf")
+            add("door", "", p, {"swing_radius_m": round(sw[2] * unit_m, 2) if sw and unit_m else None,
+                                "leaf_len_m": round(w * unit_m, 2) if unit_m else None}, "dxf")
     # Blocks represent one fixture, even when several nested curves draw its symbol.
     # Semantic layers/block names can identify a fixture; anonymous FIXTURE geometry stays unknown.
     from ezdxf import bbox as dxf_bbox
@@ -211,9 +212,10 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
         items.append({"item_id": f"text-{cnt['text']}", "kind": "text", "label": t,
                       "bbox_px": [c[0] - 4 * len(t), c[1] - h, c[0] + 4 * len(t), c[1] + h],
                       "polygon_px": None, "props": {"dxf_layer": "ROOM_TEXT"}, "conf": 1.0, "source": "dxf"})
-    m_per_px = unit_m / a
+    m_per_px = unit_m / a if unit_m else None
     pm = {"doc_id": doc_id, "page": 1, "image": {"w": W, "h": H},
-          "scale": {"m_per_px": round(m_per_px, 6), "method": method, "confidence": 1.0 if tf["rms_px"] < 6 else 0.6},
+          "scale": {"m_per_px": round(m_per_px, 9) if m_per_px else None, "method": method if unit_m else "none",
+                    "confidence": (1.0 if tf["rms_px"] < 6 else 0.6) if unit_m else 0.0},
           "registration": tf, "items": items,
           "provenance": {"models": {}, "created": time.strftime("%Y-%m-%dT%H:%M:%S"), "ms": 0,
                          "note": "from DXF geometry; $INSUNITS=%s" % doc.header.get("$INSUNITS")}}
