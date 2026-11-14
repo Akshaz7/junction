@@ -99,6 +99,43 @@ def test_no_cross_doc_spatial_join_without_registration():
     assert graph["edges"] == []
 
 
+def test_cross_document_room_link_uses_shared_declared_frame():
+    room = node("room", "arch", "r", [[0, 0, 0], [5, 3, 5]], level="Ground floor")
+    terminal = node("terminal", "services", "t", [[1, 2, 1], [2, 2.2, 2]], level="00")
+    frame = {"building_guid": "shared-building", "project_guid": "shared-project",
+             "matrix_z_up_m": [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]}
+    graph = {"nodes": [room, terminal], "edges": [], "mep": {"frames": {"arch": [frame], "services": [frame]}}}
+    enrich_spatial(Writer(graph))
+    assert {e["kind"] for e in graph["edges"]} == {"serves", "in_room"}
+    assert all(e["evidence"]["alignment"]["anchor_method"] == "declared shared IFC building frame" for e in graph["edges"])
+    assert all(e["confidence"] < .6 for e in graph["edges"])
+
+
+def test_renamed_terminal_keeps_all_core_edges_valid(tmp_path):
+    path, _, _, terminal_id = ifc_file(tmp_path)
+    t = node("fixture", "m", terminal_id)
+    doc = {"id": "doc:m:root", "kind": "doc", "doc_ids": ["m"], "props": {}}
+    graph = {"nodes": [doc, t], "edges": [{"id": "core-source", "kind": "contains", "from": doc["id"],
+              "to": t["id"], "method": "rule", "confidence": 1, "evidence": {}, "doc_ids": ["m"]}]}
+    enrich(graph, {"docs": [{"doc_id": "m", "files": {"ifc": str(path)}}]}, tmp_path)
+    assert t["kind"] == "terminal" and t["id"].startswith("terminal:")
+    assert graph["edges"][0]["to"] == t["id"]
+    node_ids = {n["id"] for n in graph["nodes"]}
+    assert all(e["from"] in node_ids and e["to"] in node_ids for e in graph["edges"])
+
+
+def test_declared_missing_units_do_not_assume_metres(tmp_path):
+    path, *_ = ifc_file(tmp_path)
+    ifc = pytest.importorskip("ifcopenshell")
+    f = ifc.open(str(path))
+    f.by_type("IfcProject")[0].UnitsInContext = None
+    f.write(str(path))
+    graph = {"nodes": [], "edges": []}
+    enrich(graph, {"docs": [{"doc_id": "m", "files": {"ifc": str(path)}}]}, tmp_path)
+    assert not any(n["props"].get("length_m") or n["props"].get("ceiling_height_m") for n in graph["nodes"])
+    assert any(n["props"].get("measurement_note") for n in graph["nodes"])
+
+
 def test_sheet_match_requires_alignment_and_one_to_one_rooms():
     a = node("room", "a", "ra", label="Office A")
     b = node("room", "b", "rb", label="Office A")
