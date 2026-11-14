@@ -57,6 +57,24 @@
       "label": "Stairs",
       "plural": "Stairs"
     },
+    "pipe": {
+      "color": "#332288",
+      "on": "#FFFFFF",
+      "label": "Pipe",
+      "plural": "Pipes"
+    },
+    "drain": {
+      "color": "#8C510A",
+      "on": "#FFFFFF",
+      "label": "Drain",
+      "plural": "Drains"
+    },
+    "fitting": {
+      "color": "#B2182B",
+      "on": "#FFFFFF",
+      "label": "Fitting",
+      "plural": "Fittings"
+    },
     "other": {
       "color": "#7F7F7F",
       "on": "#FFFFFF",

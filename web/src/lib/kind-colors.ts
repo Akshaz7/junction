@@ -3,7 +3,7 @@
  * legend. Okabe-Ito based (colour-blind safe). The same table is mirrored in
  * public/kind-colors.json so iOS can copy the values; kind-colors.test.ts keeps them equal.
  */
-export const KIND_KEYS = ['door', 'window', 'wall', 'room', 'toilet', 'sink', 'shower', 'bathtub', 'stairs', 'other'] as const
+export const KIND_KEYS = ['door', 'window', 'wall', 'room', 'toilet', 'sink', 'shower', 'bathtub', 'stairs', 'pipe', 'drain', 'fitting', 'other'] as const
 export type KindKey = typeof KIND_KEYS[number]
 
 export interface KindStyle {
@@ -25,11 +25,15 @@ export const KIND_COLORS: Record<KindKey, KindStyle> = {
   shower: { color: '#F0E442', on: '#1A1A1A', label: 'Shower', plural: 'Showers' },
   bathtub: { color: '#882255', on: '#FFFFFF', label: 'Bathtub', plural: 'Bathtubs' },
   stairs: { color: '#999933', on: '#FFFFFF', label: 'Stairs', plural: 'Stairs' },
+  pipe: { color: '#332288', on: '#FFFFFF', label: 'Pipe', plural: 'Pipes' },
+  drain: { color: '#8C510A', on: '#FFFFFF', label: 'Drain', plural: 'Drains' },
+  fitting: { color: '#B2182B', on: '#FFFFFF', label: 'Fitting', plural: 'Fittings' },
   other: { color: '#7F7F7F', on: '#FFFFFF', label: 'Other', plural: 'Other' },
 }
 
 const ALIASES: Record<string, KindKey> = {
   curtain_wall: 'wall', stair: 'stairs', stairflight: 'stairs', stair_flight: 'stairs', sanitary: 'toilet', wc: 'toilet',
+  pipe_segment: 'pipe', pipe_fitting: 'fitting', valve: 'fitting', valve_damper: 'fitting', pipefitting: 'fitting', pipesegment: 'pipe',
 }
 
 /** Maps any manifest/plan-map kind (or null) onto one of the ten colour keys. */
@@ -37,6 +41,24 @@ export function kindKey(kind: string | null | undefined): KindKey {
   const k = (kind ?? '').toLowerCase()
   if ((KIND_KEYS as readonly string[]).includes(k)) return k as KindKey
   return ALIASES[k] ?? 'other'
+}
+
+const DRAIN = /abwasser|schmutz|drain|waste|sewer|sewage|regenwasser|storm|ht\b|afvoer|riool/i
+
+/** Colour key for a manifest item: pipes carrying waste (system/type/name) are drains, everything else follows `kind`. */
+export function itemKindKey(item: { kind: string; name?: string | null; props?: Record<string, unknown> | null } | null | undefined): KindKey {
+  if (!item) return 'other'
+  const key = kindKey(item.kind)
+  if (key !== 'pipe') return key
+  const p = item.props ?? {}
+  const text = [item.name, p.system, p.type_name, p.system_name].filter((v) => typeof v === 'string').join(' ')
+  return DRAIN.test(text) ? 'drain' : 'pipe'
+}
+
+/** Pipe size group ("DN100") when the manifest carries the nominal diameter, else null. */
+export function pipeSizeLabel(item: { kind: string; props?: Record<string, unknown> | null } | null | undefined): string | null {
+  const dn = item?.props?.dn_mm
+  return item && kindKey(item.kind) === 'pipe' && typeof dn === 'number' && dn > 0 ? `DN${Math.round(dn)}` : null
 }
 
 export function kindStyle(kind: string | null | undefined): KindStyle { return KIND_COLORS[kindKey(kind)] }

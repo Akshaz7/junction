@@ -378,3 +378,7 @@ edges nearest the camera at the build's ground storey (elevation >= 0, else lowe
 - Framing (`fit` and `flyTo`) uses a tight, perspective-aware distance on the highlighted items' bbox (`tightDistance`), never the site or slabs more than 3x the wall footprint (`framingIds`).
 - `IfcSite` ("Gelaende") renders faint (opacity 0.22, no depth write) so it never dominates.
 - The answer's storey is selected by the caller (`setStorey`); the viewer keeps it.
+
+## Piping (W-64)
+
+Kinds `pipe`, `drain`, `fitting` have their own colours in `kind-colors.ts` (mirrored in `public/kind-colors.json` for iOS). Aliases: `pipe_segment`, `pipe_fitting`, `valve`, `valve_damper` map to fitting/pipe. A manifest `pipe` item is a drain when its `name` or `props.system/type_name/system_name` matches waste water (Abwasser, Schmutz, drain, waste, sewer...). The legend shows drains as "Drains N", other pipes grouped by `props.dn_mm` as "DN100 pipes N", and fittings. Served manifests do not yet carry `props.system` / `props.dn_mm`; until the backfill writes them (source: `results/vision/piping/<doc>.json`) every pipe shows as plain Pipes.

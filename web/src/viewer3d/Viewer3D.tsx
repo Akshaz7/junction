@@ -18,6 +18,7 @@ import { EditPanel, useEditAdvisor } from './EditPanel';
 import type { EditState, ItemEdit } from './edits';
 import { FindingsPanel } from './FindingsPanel';
 import { roomTypeLabel } from './blueprint';
+import { itemKindKey, pipeSizeLabel } from '../lib/kind-colors';
 import type { FindingPinState } from './findings';
 import './viewer3d.css';
 
@@ -49,6 +50,8 @@ export interface Viewer3DTestHandle {
   walk(): WalkState;
   findings(): FindingPinState[];
   pick(item_id: string): boolean;
+  /** Camera position and orbit target, to prove a new answer keeps the view. */
+  camera(): { position: number[]; target: number[] };
 }
 export type LinkedViewerCanvas = HTMLCanvasElement & { __viewer3d?: Viewer3DTestHandle };
 
@@ -190,7 +193,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       unsubscribeHighlight = viewer.onHighlightChange(() => {
         setHighlightState(viewer!.getLinkedHighlightState());
         const items = viewer!.scene?.manifest.items;
-        setAnswerKinds(viewer!.getHighlightState().highlighted.map((id) => { const it = items?.[id]; return it?.kind === 'room' ? `room:${roomTypeLabel(it)}` : it?.kind ?? null; }));
+        setAnswerKinds(viewer!.getHighlightState().highlighted.map((id) => { const it = items?.[id]; const size = itemKindKey(it) === 'drain' ? null : pipeSizeLabel(it); return it?.kind === 'room' ? `room:${roomTypeLabel(it)}` : size ? `size:${size}` : it ? itemKindKey(it) : null; }));
       });
       unsubscribeBuild = viewer.onBuildChange(setBuild);
       unsubscribeWalk = viewer.onWalkChange((next) => setWalking(next.active));
@@ -255,6 +258,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       commandState: () => viewerRef.current!.getCommandState(),
       walk: () => viewerRef.current!.walk(),
       findings: () => viewerRef.current!.findings(),
+      camera: () => { const v = viewerRef.current!; return { position: v.camera.position.toArray(), target: v.controls.target.toArray() }; },
       pick(itemId) {
         if (!viewerRef.current?.scene?.items.has(itemId)) return false;
         selectItem(itemId);

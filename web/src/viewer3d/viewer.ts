@@ -22,7 +22,7 @@ import { createWalkController, type WalkState } from './walk';
 import { createEditLayer, type ItemEdit, type EditState, type WallMaterial } from './edits';
 import { createItemAnnotation, layoutAnnotations } from './annotations';
 import { createFindingsLayer, type Finding, type FindingPinState } from './findings';
-import { kindColor } from '../lib/kind-colors';
+import { KIND_COLORS, itemKindKey } from '../lib/kind-colors';
 import { createBlueprint, framingIds, MAX_CALLOUT_TAGS, styleSceneMaterials, type Blueprint, type BlueprintState } from './blueprint';
 import { planCinematic, sampleCinematic, type CinematicPlan } from './cinematic';
 
@@ -350,7 +350,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     // Compute labels using full geometry: a flat node has a singular world matrix.
     build?.animation.restore();
     const scene = active;
-    highlights.highlight(ids, options, (id) => new Color(kindColor(scene.manifest.items[id]?.kind)));
+    highlights.highlight(ids, options, (id) => new Color(KIND_COLORS[itemKindKey(scene.manifest.items[id])].color));
     const state = highlights.getHighlightState();
     // Past 12 items the per-item callouts bury the drawing: keep the glow and legend, tag only the picked item
     // (hover/tap adds a tag through the linked-item path).
