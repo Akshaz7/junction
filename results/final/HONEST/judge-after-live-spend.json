@@ -1,0 +1,5 @@
+{
+ "model_call_cost_usd": 0.0,
+ "returned_answer_cost_usd": 0.0,
+ "note": "All model calls counted, including discarded router/reader results; answer cost fields omit some of those calls."
+}
