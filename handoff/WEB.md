@@ -1,19 +1,24 @@
 # Handoff: WEB (Codex worker)
 
-Row ID: W-05 (attempt 1)
-Task: Chat screen against the REAL backend (S-03 is done: read docs/API.md; the API runs on http://localhost:8000, proxied by Vite at /api and /ws; start it yourself for local checks with `uv run uvicorn server.app:app --port 8000` only if nothing is on :8000 — `make db-up` first; the database is seeded). Keep the mock as a fallback when the API is unreachable.
-- Start screen with four starter cards (as in the reference pack; English copy, our voice per CONTRACT 5.8 and refs/stoabuild-full-text.md), e.g. "Count something on a plan", "Find a room's area", "Where is it on level N?", "What does this drawing say about …".
-- Composer with an `@` document picker (type @ to search /api/docs; selected docs become chips; sent as doc_ids). Create a chat with POST /api/chats, then POST /api/chats/{id}/messages and read the SSE stream.
-- Live status lines from `status` events ("Thinking…", "Exploring document: <name>"), trace lines feed "Show thought process".
-- Answer: key fact bold (markdown bold from text_md), citation chips [1] [2] inline after sentences, "Where it is set out" list, "Sources (n)", "Show thought process", a cost chip (answer.cost.usd_total formatted like "$0.0000" or "< $0.0001", tooltip with calls), "AI can make mistakes. Verify important information." under the composer.
-- Abstained answers render the plain sentence with no chips.
-- Clicking a chip must call a prop/callback `onOpenCitation(citation)` (W-06 builds the viewer next; for now open nothing or log).
-The backend currently uses a STUB engine: "How many windows are there?" on doc `cubicasa5k__colorful-11397` returns 13 boxes; other questions abstain. That is enough for the e2e test.
-Playwright can't run in your sandbox: write `e2e/chat.spec.ts` (asks the fixture question against the real API, sees the bold answer, at least one citation chip and the cost chip); make it type-check; the LEAD runs it with the API up.
-Rules: only edit web/ except web/src/viewer3d/ and web/src/main.tsx (LEAD wired a dev route there). Never copy code from refs/stoa-hero/source/.
-Done test (LEAD runs, API up): `cd web && npm run build && npx vitest run && npx playwright test e2e/chat.spec.ts`
-Last failed attempt (if any): none
+Row ID: W-06 (attempt 2)
+Task: Document viewer beside the chat (desktop: chat left, viewer right, resizable split; phone: full-screen sheet):
+- Shows the page image `GET /api/docs/{doc_id}/pages/{n}/image` (docs/API.md; page images now exist for 739 docs, D-05) with pan and zoom (wheel/pinch, drag, double-click zoom, fit button).
+- Numbered boxes from `answer.evidence.boxes` (bbox_px in page-image pixels, CONTRACT 5.2) drawn as an SVG overlay that scales with zoom; label = box.label ("1","2",… same numbers as the citations and the 3D labels). Text highlights for citations of kind "text" (bbox_px).
+- "n of m" source navigation (previous/next box; the viewer pans to centre the box).
+- Licence credit line under the image from doc.json `credit` + `licence` (GET /api/docs/{doc_id}); always visible when a drawing is shown (licence rule).
+- Clicking a citation chip in the answer (W-05's `onOpenCitation`) opens the right doc + page and focuses its first box.
+- Leave a slot in the viewer toolbar for "Visualise it" (3D is building `VisualiseItButton` in web/src/viewer3d/VisualiseIt.tsx right now; import it if it exists when you finish, otherwise leave a TODO slot; do not edit viewer3d files).
+The backend still uses the stub engine: "How many windows are there?" on `cubicasa5k__colorful-11397` returns 13 boxes (fake coordinates spread over the page; good enough to test the overlay). The real engine (E-04) lands soon with real boxes.
+Tests: unit tests for the coordinate transform (page px → screen at zoom/pan); e2e `e2e/viewer.spec.ts`: ask the fixture question, click chip 1, the viewer shows the page image, box "1" is inside the viewport, and the credit line is visible.
+Rules: only web/ except web/src/viewer3d/ and web/src/main.tsx. Shared dev servers run on :5173/:8000; don't start your own. Playwright can't run in your sandbox; type-check it; the LEAD runs it.
+Done test (LEAD runs): `cd web && npm run build && npx vitest run && npx playwright test e2e/viewer.spec.ts e2e/chat.spec.ts`
+Last failed attempt (if any): attempt 1 — build OK, vitest 41 pass, chat + shell e2e pass; e2e/viewer.spec.ts 2 FAILED:
+  1) viewer.spec.ts:27 "citation opens its page beside chat with numbered evidence, navigation and permanent credit"
+     line 41: expect(imageRequests).toHaveLength(1) → Received length 2: the page image URL /api/docs/cubicasa5k__colorful-11397/pages/1/image is requested twice. Likely React StrictMode double-mount in dev or two <img>/preload paths. Fix the double load (one image element, stable key, or cache the object URL); don't just relax the test unless the second request is a real browser cache hit you can prove.
+  2) viewer.spec.ts:66 "phone opens a full-screen sheet and returns focus to the citation when closed"
+     line 8: expect(page.getByText('Connected workspace', { exact: true })).toBeVisible() → not visible at phone width (the badge is hidden or collapsed in the mobile header). Either show the connection state on phone or make the test wait for a phone-visible indicator; the user should be able to see they're connected on phone too.
 
 ---
 <!-- Worker appends RESULT: or NEEDS: lines below. -->
-RESULT: W-05 implemented real chat creation/content+doc_ids SSE, four starters, searchable @ document chips, live status/trace, citation callbacks, sources, cost tooltip, plain abstentions and labeled offline fallback; npm run build and npx vitest run pass (29 tests), direct localhost:8000 create/stream/stored fixture answer check passes; e2e/chat.spec.ts written and type-checked, browser execution remains for LEAD outside sandbox. No commits; web/src/main.tsx and web/src/viewer3d/ untouched by WEB.
+RESULT: W-06 implemented citation-linked desktop resizable split/mobile sheet, page pan/wheel/pinch/double-click zoom/fit, numbered SVG boxes/text highlights, source centring/navigation, persistent API credit and VisualiseItButton; npm run build + npx vitest run passed (41 tests), viewer/chat e2e type-checked and listed (3 tests), fixture metadata/PNG HTTP 200; LEAD must run browser e2e outside sandbox per handoff.
+RESULT: W-06 attempt 2 defers page loading until after StrictMode effect replay (disposed setup sends no requests; single-request e2e assertion unchanged) and keeps the connection badge visible on phones with a shrinking project selector; npm run build and npx vitest run passed (42 tests), including e2e TypeScript checks; LEAD must run e2e/viewer.spec.ts and e2e/chat.spec.ts outside sandbox per handoff.

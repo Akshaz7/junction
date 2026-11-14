@@ -183,14 +183,14 @@ h1, h2, h3, p { margin: 0; }
   .more-menu a { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: var(--radius-control); font-size: var(--text-body-sm); }
   .more-menu a span { flex: 1; }
   .more-menu a:hover, .more-menu a[aria-current] { background: var(--accent); }
-  .topbar { padding: 0 12px; background: var(--sidebar); color: var(--sidebar-foreground); border-color: var(--sidebar-border); }
-  .topbar .wordmark { color: inherit; font-size: 17px; }
-  .project-title { gap: 8px; min-width: 0; }
+  .topbar { padding: 0 12px; gap: 8px; background: var(--sidebar); color: var(--sidebar-foreground); border-color: var(--sidebar-border); }
+  .topbar .wordmark { color: inherit; font-size: 17px; flex-shrink: 0; }
+  .project-title { flex: 1; gap: 8px; min-width: 0; }
   .mobile-project { display: block; min-width: 0; }
   .mobile-project .project-switcher { padding: 4px; gap: 4px; border: 0; }
   .mobile-project .project-mark { display: none; }
   .mobile-project select { font-size: var(--text-caption); }
-  .topbar .badge { display: none; }
+  .topbar .badge { flex-shrink: 0; }
   .workspace-name, .topbar-divider { display: none; }
   .pagebar { padding: 16px; }
   .conversation { padding: 0 20px 20px; }

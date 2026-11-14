@@ -94,6 +94,16 @@ export class WorkspaceApi {
     return chat.id
   }
 
+  async getDocument(docId: string): Promise<Document> {
+    const response = await this.request(`/api/docs/${encodeURIComponent(docId)}`)
+    return response.json() as Promise<Document>
+  }
+
+  async getPageImage(docId: string, page: number, signal: AbortSignal): Promise<Blob> {
+    const response = await this.request(`/api/docs/${encodeURIComponent(docId)}/pages/${page}/image`, { signal })
+    return response.blob()
+  }
+
   async askQuestion(chatId: string, content: string, docIds: string[], callbacks: StreamCallbacks): Promise<Answer> {
     const response = await this.request(`/api/chats/${encodeURIComponent(chatId)}/messages`, {
       method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },

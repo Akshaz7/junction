@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { ArrowRight, ArrowUp, AtSign, FileText, FolderOpen, Layers3, MapPin, MessageSquareText, Ruler, Search, Sparkles, X } from 'lucide-react'
 import { Button } from './ui'
 import { AnswerCard } from './answer-card'
+import { DocumentViewer, useViewerSheet } from './document-viewer'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document, TraceStep } from '../lib/types'
 
@@ -28,6 +29,10 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const [error, setError] = useState('')
   const [mention, setMention] = useState<Mention | null>(null)
   const [activeOption, setActiveOption] = useState(0)
+  const [viewer, setViewer] = useState<{ answer: Answer; citation: Citation; request: number } | null>(null)
+  const [split, setSplit] = useState(48)
+  const splitContainer = useRef<HTMLDivElement>(null)
+  const sheet = useViewerSheet()
   const chatId = useRef<string | null>(null)
   const submitting = useRef(false)
   const textarea = useRef<HTMLTextAreaElement>(null)
@@ -97,7 +102,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     }
   }
 
-  return <section className="chat-page" aria-label="Drawing questions" hidden={hidden}>
+  return <div ref={splitContainer} className={`chat-workspace ${viewer ? 'has-viewer' : ''}`} hidden={hidden} style={{ '--chat-split': `${split}%` } as CSSProperties}>
+    <section className="chat-page" aria-label="Drawing questions" inert={!!viewer && sheet}>
     <div ref={conversation} className={`conversation ${answers.length || busy ? 'has-answers' : ''}`}>
       {!answers.length && !busy && <div className="welcome">
         <div className="welcome-mark"><Layers3 size={30} strokeWidth={1.5} /></div>
@@ -109,7 +115,10 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         </button>)}</div>
         {demo && <p className="demo-note">Offline sample content generated for demo</p>}
       </div>}
-      {answers.map((answer, index) => <AnswerCard key={`${answer.answer_id}-${index}`} answer={answer} docs={docs} demo={demo} onOpenCitation={onOpenCitation} />)}
+      {answers.map((answer, index) => <AnswerCard key={`${answer.answer_id}-${index}`} answer={answer} docs={docs} demo={demo} onOpenCitation={(citation) => {
+        setViewer((previous) => ({ answer, citation, request: (previous?.request ?? 0) + 1 }))
+        onOpenCitation(citation)
+      }} />)}
       {busy && <div className="exchange pending-exchange" aria-busy="true">
         <div className="question-bubble">{pendingQuestion}</div>
         <div className="status-lines" role="status" aria-live="polite">{statuses.map((status, index) => <p key={index}><Sparkles size={15} />{status}</p>)}</div>
@@ -154,5 +163,20 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       </form>
       <p className="composer-disclaimer">AI can make mistakes. Verify important information.</p>
     </div>
-  </section>
+    </section>
+    {viewer && <>
+      <div className="viewer-split-handle" role="separator" aria-label="Resize chat and drawing" aria-orientation="vertical" aria-valuemin={35} aria-valuemax={65} aria-valuenow={Math.round(split)} tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); setSplit((previous) => Math.max(35, Math.min(65, previous + (event.key === 'ArrowLeft' ? -2 : 2)))) }
+        }}
+        onPointerDown={(event) => event.currentTarget.setPointerCapture(event.pointerId)}
+        onPointerMove={(event) => {
+          if (!event.currentTarget.hasPointerCapture(event.pointerId)) return
+          const bounds = splitContainer.current!.getBoundingClientRect()
+          setSplit(Math.max(35, Math.min(65, (event.clientX - bounds.left) / bounds.width * 100)))
+        }}
+        onPointerUp={(event) => event.currentTarget.releasePointerCapture(event.pointerId)} />
+      <DocumentViewer key={viewer.request} answer={viewer.answer} citation={viewer.citation} sheet={sheet} onClose={() => setViewer(null)} />
+    </>}
+  </div>
 }
