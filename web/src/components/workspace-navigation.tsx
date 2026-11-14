@@ -1,4 +1,4 @@
-import { ChartNoAxesCombined, Check, Database, GitCompare, House, BotMessageSquare, MoreHorizontal, Library, Inbox, Wrench, CircleHelp } from 'lucide-react'
+import { Check, Database, GitCompare, House, BotMessageSquare, MoreHorizontal, Library, Inbox, Wrench, CircleHelp } from 'lucide-react'
 import { Tooltip } from './ui/tooltip'
 import { Button } from './ui'
 import type { Route } from '../lib/router'
@@ -18,7 +18,6 @@ export const navigation = [
   { route: 'compare', label: 'Compare', icon: GitCompare },
   { route: 'library', label: 'Library', icon: Library },
   { route: 'tools', label: 'Tools', icon: Wrench },
-  { route: 'accuracy', label: 'Accuracy', icon: ChartNoAxesCombined },
 ] as const
 
 /** Pages that stay reachable by URL (Library and Tools now hold them) but have no nav entry. */
