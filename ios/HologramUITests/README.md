@@ -35,6 +35,11 @@ The draft and route must match, the composer must remain visible and enabled,
 and the page must not reload. Each probe read has a new ID to reject stale results.
 The read-only probe is compiled only in Debug and shown only with `-UITEST`;
 it uses `evaluateJavaScript`, requires no web changes, and sets no page state.
+Every before/after probe is attached as JSON alongside a screenshot. It includes
+document visibility, the composer's rectangle and computed style, active route
+and tabs, layout ancestors, window/visual viewport dimensions and scale, plus
+the native web frame, safe areas, scroll offset and zoom limits. The test also
+checks that AR did not enlarge the page and that the composer accepts focus again.
 
 Debug builds accept `-AR_BRIDGE_MESSAGE '{"doc_id":"…","item_ids":["…"]}'`
 (or the matching environment variable). After the first navigation finishes,
@@ -51,9 +56,25 @@ The app owns a `WebSession` as a `StateObject`; it retains the WKWebView and
 bridge coordinator across presentation changes and loads the start URL once.
 Both the bridge and toolbar dismiss web editing before presenting AR, allowing
 WebKit to restore its viewport without discarding the input's value.
+The native session dispatches `pagehide` when AR is requested and `pageshow`
+after dismissal so the web's existing handlers resume chat and reveal the composer.
 A UIKit host pins the retained web view to its bounds and lays it out when it
-reappears after the full-screen AR cover. The draft test must pass without an
+reappears after the full-screen AR cover. Once attached, the session restores
+the device-width zoom scale of 1 and clears the outer WebKit scroll offset before
+sending `pageshow`. The scroll delegate declines zooming, pins its minimum and
+maximum scale to 1, and disables zoom bounce. Navigation completion, viewport
+layout (including keyboard changes), and zoom callbacks reapply that policy so
+WebKit cannot preserve an enlarged scale before or after the cover. The test
+asserts both native zoom and visual viewport scale are approximately 1 on both
+sides of AR, in addition to checking that the scale is unchanged. The
+draft test must pass without an
 expected failure or a skip if the composer is missing or cannot focus.
+
+Run the live UI suite without other clients changing the AC20 selection. The
+attempt 1 failure hierarchy recorded one different highlighted door
+(`0Ti0dr3tHAq8uzw2luJtyI`, tag D15) after the bridge requested two doors.
+Native AR intentionally follows subsequent live highlights; the API broadcasts
+document highlights to every connected client.
 
 The simulator panel loads scene metadata and attribution without an AR session.
 Each milestone saves a named screenshot attachment in the Xcode test results.

@@ -82,3 +82,20 @@ The sandbox's `ipconfig getifaddr en0` also returned `ipconfig_server_port faile
 | iPhone OS unsupported by Xcode / device preparation in progress | Use an Xcode version supporting that iOS version and wait for preparation in Devices and Simulators, then rerun. |
 
 Offline scenes remain available through “Show on table.” The bundled CubiCasa5K sample is CC BY-NC-SA, for non-commercial use only; scene credits are included with the resources. UI design follows Stoa's product, with permission from Stoa Technologies Oy.
+
+## Web to AR bridge (I-04)
+
+The web shell registers the `ar` handler before loading the page. A main-frame
+`window.webkit.messageHandlers.ar.postMessage({doc_id, item_ids})` opens that
+document's native AR screen; malformed messages are ignored. Closing AR keeps the
+same web view and its draft/navigation state. The native “Show on table” toolbar
+reopens the last bridge selection. Before any bridge selection it opens the AC20
+demo with the demo-scenes picker available; it does not select the fixture.
+
+AR uses manifest tags for highlighted items and follows `scene.highlight`,
+`scene.edit`, and `scene.state` for the requested document. If `chat_id` is supplied
+in the bridge payload, or the page URL contains `#/chat?chat=<id>`, the socket joins
+`/ws?doc_id=…&chat_id=…` to restore that chat's saved scene state, including after
+reconnection. Events naming another document or chat are ignored. Without a chat
+ID it follows document events; the current web payload does not expose the chat
+ID of a newly created chat whose URL has not been updated.

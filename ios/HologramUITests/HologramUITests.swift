@@ -117,6 +117,7 @@ final class HologramUITests: XCTestCase {
         defer { app.terminate() }
         try enterUnsentDraft("Keep this unsent draft", app: app)
         let before = try inspectWebState(app)
+        attachWebState(before, name: "Before native AR", app: app)
         XCTAssertEqual(before["draft"] as? String, "Keep this unsent draft")
         XCTAssertEqual(before["composerVisible"] as? Bool, true)
         XCTAssertEqual(before["composerEnabled"] as? Bool, true)
@@ -132,17 +133,31 @@ final class HologramUITests: XCTestCase {
         // Read the actual DOM through the retained session. WebKit may rebuild
         // its AX tree across AR, so no composer AX element crosses that boundary.
         let after = try inspectWebState(app)
+        attachWebState(after, name: "After native AR", app: app)
         XCTAssertEqual(after["draft"] as? String, "Keep this unsent draft")
-        XCTExpectFailure("web composer hidden after AR return (web bug)", strict: false) {
-            XCTAssertEqual(after["composerVisible"] as? Bool, true)
-        }
-        // Known web bug (results/web_bugs.md, LEAD 07:10): the web composer stays disabled after the page becomes
-        // visible again following AR; the draft itself survives. Remove this when WEB fixes it.
-        XCTExpectFailure("web composer disabled after AR return (web bug)", strict: false) {
-            XCTAssertEqual(after["composerEnabled"] as? Bool, true)
-        }
+        XCTAssertEqual(after["composerVisible"] as? Bool, true, "Viewport facts: \(after)")
+        XCTAssertEqual(after["composerEnabled"] as? Bool, true)
         XCTAssertEqual(after["href"] as? String, route, "AR must preserve the web route/chat")
         XCTAssertEqual(after["timeOrigin"] as? Double, timeOrigin, "AR must never reload the page")
+        let beforeViewport = try XCTUnwrap(before["visualViewport"] as? [String: Any])
+        let afterViewport = try XCTUnwrap(after["visualViewport"] as? [String: Any])
+        for (name, state) in [("Before AR", before), ("After AR", after)] {
+            let viewport = try XCTUnwrap(state["visualViewport"] as? [String: Any])
+            let native = try XCTUnwrap(state["native"] as? [String: Any])
+            XCTAssertEqual(try XCTUnwrap(viewport["scale"] as? Double), 1, accuracy: 0.05,
+                           "\(name): the page must use the device-width scale. \(state)")
+            XCTAssertEqual(try XCTUnwrap(native["zoomScale"] as? Double), 1, accuracy: 0.05,
+                           "\(name): native WebKit zoom must remain pinned. \(state)")
+        }
+        XCTAssertEqual(try XCTUnwrap(afterViewport["scale"] as? Double),
+                       try XCTUnwrap(beforeViewport["scale"] as? Double), accuracy: 0.05,
+                       "The native cover must not enlarge the retained web page")
+
+        // A visible, enabled input must also accept focus after returning.
+        let web = app.webViews["web-shell"]
+        let composer = try XCTUnwrap(editableComposer(in: web), composerFrames(in: web))
+        composer.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
     }
 
     @MainActor
@@ -252,5 +267,15 @@ final class HologramUITests: XCTestCase {
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
+    }
+
+    @MainActor
+    private func attachWebState(_ state: [String: Any], name: String, app: XCUIApplication) {
+        let data = try? JSONSerialization.data(withJSONObject: state, options: [.prettyPrinted, .sortedKeys])
+        let attachment = XCTAttachment(string: data.map { String(decoding: $0, as: UTF8.self) } ?? "\(state)")
+        attachment.name = "\(name) - DOM and native viewport"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        attachScreenshot(name, app: app)
     }
 }

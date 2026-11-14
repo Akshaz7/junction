@@ -798,3 +798,8 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
   .app-shell:has(.chat-workspace:not([hidden]) .viewer-sheet) .mobile-navigation,
   .app-shell:has(.data-screen:not([hidden]) .data-detail:not([data-docked])) .mobile-navigation { z-index: 5; }
 }
+
+/* LEAD 07:50 (I-15): iOS WebKit zooms the page when a focused field's text is under 16px; only iOS supports -webkit-touch-callout, so desktop/Chromium (and the Stoa fidelity frames) are unchanged. */
+@supports (-webkit-touch-callout: none) {
+  input, textarea, select, .composer textarea { font-size: 16px; }
+}

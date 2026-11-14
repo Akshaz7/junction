@@ -39,13 +39,15 @@ struct HologramApp: App {
                         #endif
                         ToolbarItem(placement: .topBarTrailing) {
                             Button("Show on table", systemImage: "arkit") {
-                                webSession.prepareForAR()
                                 presentation.showFromToolbar()
                             }
                         }
                     }
             }
-            .fullScreenCover(item: $presentation.arRequest) { request in
+            .onChange(of: presentation.arRequest) { _, request in
+                if request != nil { webSession.prepareForAR() }
+            }
+            .fullScreenCover(item: $presentation.arRequest, onDismiss: webSession.resumeAfterAR) { request in
                 ARScreen(docID: request.docID, chatID: request.chatID, highlightedItemIDs: request.itemIDs)
                     .id(request.docID)
             }
