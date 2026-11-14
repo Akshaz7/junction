@@ -295,3 +295,8 @@ def test_read_only_binary_links_resolve_only_to_original_artifacts(source, tmp_p
     assert not source.resolve({"doc_id": "generated__audit", "artifact": "scene.glb"})
     source.original_artifacts = source.root / "untrusted"
     assert source.resolve({"doc_id": "generated__audit", "artifact": "scene.glb"})
+
+
+def test_nonfinite_source_values_are_preserved_as_defects_in_valid_json():
+    data = json.loads(checker.report_json({"answer": {"value": float("nan")}}))
+    assert data["answer"]["value"] == {"invalid_numeric": "nan"}

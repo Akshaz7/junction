@@ -25,6 +25,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+CHECKER_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 NUMBER = r"[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?"
 UNITS = {"m²": "m2", "m³": "m3", "sqm": "m2", "sq m": "m2", "meters": "m", "metres": "m",
          "items": "count", "each": "count"}
@@ -64,6 +65,19 @@ def read_json(path):
         return json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return {}
+
+
+def report_json(value):
+    """Odd source numbers must become a recorded defect, never a broken report."""
+    def clean(item):
+        if isinstance(item, dict):
+            return {str(k): clean(v) for k, v in item.items()}
+        if isinstance(item, (tuple, list)):
+            return [clean(v) for v in item]
+        if isinstance(item, float) and not math.isfinite(item):
+            return {"invalid_numeric": repr(item)}
+        return item
+    return json.dumps(clean(value), ensure_ascii=False, indent=1, allow_nan=False) + "\n"
 
 
 class Sources:
@@ -760,7 +774,7 @@ def run(repo, artifacts, rows, output, timeout=20):
                "fake_model_answers": sum(bool(r.get("fake_model_used")) for r in records)}
     top_cases = sorted((r for r in records if r["findings"]), key=lambda r: (-sum(f["severity"] == "error" for f in r["findings"]), r["question"]))[:30]
     report = {"created_at": datetime.now(UTC).isoformat(), "revision": subprocess.check_output(["git", "-C", str(repo), "rev-parse", "HEAD"], text=True).strip(),
-              "checker_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+              "checker_sha256": CHECKER_SHA256,
               "mode": "MODELS_FAKE=1; code-route evidence audit; no live model accuracy claim", "summary": summary,
               "limitations": ["No PDF internals, live model verification, or correctness claim against potentially noisy dataset gold.",
                               "Unrecognized headline/row semantics are uncheckable, never counted as passing.",
@@ -769,7 +783,7 @@ def run(repo, artifacts, rows, output, timeout=20):
               "failure_groups": top, "top_30": [{"doc_ids": r["doc_ids"], "question": r["question"], "owners": sorted({f["owner"] for f in r["findings"]}),
                                                   "failures": r["findings"]} for r in top_cases], "artifact_sha256": fingerprints, "records": records}
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(report, ensure_ascii=False, indent=1, allow_nan=False) + "\n")
+    output.write_text(report_json(report))
     print(json.dumps(summary, sort_keys=True), flush=True)
     print(f"report: {output}", flush=True)
     return report
@@ -803,7 +817,7 @@ def main():
     report = run(repo, artifacts, rows, output, args.timeout)
     report["selection"] = selection
     report["blind"] = read_json(args.blind)
-    output.write_text(json.dumps(report, ensure_ascii=False, indent=1, allow_nan=False) + "\n")
+    output.write_text(report_json(report))
     return int(any(r["status"] in ("fail", "error", "uncheckable") for r in report["records"]))
 
 
