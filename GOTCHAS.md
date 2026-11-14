@@ -19,3 +19,6 @@
 - Production API image installs only API deps (no torch/ifcopenshell): keep heavy imports out of the engine's API path or update deploy/Dockerfile.
 - ENGINE's costs.jsonl records must keep fields `provider`, `task`, `cost_usd` — /api/costs aggregates on them.
 - A module-level asyncio.Event binds to the first event loop that uses it; each TestClient has its own loop. Create such objects in the lifespan start.
+- IfcConvert waits on stdin if the output file already exists: delete it first and pass stdin=DEVNULL.
+- IfcConvert: `--exclude entities IfcOpeningElement` (before `-j`) overrides the default that drops IfcSpace, so rooms are kept.
+- scene.json `publishable: false` marks duplex, clinic and hitos: never upload or deploy those scenes.
