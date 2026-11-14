@@ -2,6 +2,7 @@
 import asyncio
 import json
 import os
+import time
 import uuid
 
 from fastapi import APIRouter, HTTPException
@@ -49,6 +50,8 @@ ENGINE = _pick_engine()
 # status lines and trace steps so far. Events on /ws carry only small payloads (NOTIFY limit 8 KB).
 ACTIVE: dict[str, dict] = {}
 MAX_TRACE_EVENTS = 60
+DELTA_INTERVAL = 0.125  # at most ~8 text updates per second on /ws and SSE
+MAX_DELTA_CHARS = 6000  # cumulative text per event; keeps NOTIFY under 8 KB
 
 
 def _small(v, n):
@@ -203,6 +206,7 @@ async def ask(chat_id: str, body: NewMessage):
 
         task = asyncio.create_task(asyncio.to_thread(_run_engine, body.content, doc_ids, on_event, sstate, history))
         task.add_done_callback(lambda _: loop.call_soon_threadsafe(q.put_nowait, None))
+        last_delta = 0.0
         while (item := await q.get()) is not None:
             act = ACTIVE.get(str(cid))
             if item[0] == "status":
@@ -210,6 +214,16 @@ async def ask(chat_id: str, body: NewMessage):
                 if act is not None and act["statuses"][-1:] != [text]:
                     act["statuses"] = (act["statuses"] + [text])[-20:]
                 await publish({"type": "chat.status", "chat_id": str(cid), "text": text})
+            elif item[0] == "answer.delta":
+                txt = str(item[1].get("text", ""))[:MAX_DELTA_CHARS]
+                if act is not None:
+                    act["text"] = txt
+                now = time.monotonic()
+                if now - last_delta >= DELTA_INTERVAL:
+                    last_delta = now
+                    await publish({"type": "chat.delta", "chat_id": str(cid), "text": txt})
+                    yield {"event": "delta", "data": json.dumps({"text": txt})}
+                continue
             elif item[0] == "trace" and isinstance(item[1], dict):
                 ev = _trace_event(str(cid), item[1])
                 if act is not None and len(act["traces"]) < MAX_TRACE_EVENTS:

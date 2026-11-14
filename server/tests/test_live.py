@@ -163,3 +163,41 @@ def test_in_progress_events_relay_and_active_snapshot(client, monkeypatch):
     a = snap["active"][chat["id"]]
     assert a["question"] == "How many windows are there?" and a["statuses"][-1] == "Looking" and len(a["traces"]) == 1
     assert "active" not in client.get(f"/api/chats/{chat['id']}").json()
+
+
+def test_answer_delta_is_throttled_relayed_and_in_active_snapshot(client, monkeypatch):
+    """answer.delta from the engine -> cumulative chat.delta on /ws and SSE `delta`, at most ~8/s."""
+    from server import chats_routes, db
+    from server.seed import seed_documents
+    snap = {}
+
+    def engine(question, doc_ids, on_event):
+        for i in range(1, 41):  # 40 chunks in a burst
+            on_event("answer.delta", {"text": "word " * i})
+        time.sleep(0.3)
+        on_event("answer.delta", {"text": "word " * 41})
+        time.sleep(0.05)
+        snap["active"] = chats_routes.ACTIVE.get(next(iter(chats_routes.ACTIVE)))
+        return chats_routes.stub_engine.answer(question, doc_ids, lambda *_: None)
+
+    monkeypatch.setattr(chats_routes, "ENGINE", engine)
+    monkeypatch.setattr(chats_routes, "_real_engine", object())
+
+    async def seed():
+        pool = await db.get_pool()
+        async with pool.acquire() as conn:
+            await seed_documents(conn, [{"doc_id": DOC, "source": "cubicasa5k", "title": "t", "kind": "raster"}])
+    client.portal.call(seed)
+    chat = client.post("/api/chats", json={"doc_ids": [DOC]}).json()
+    with client.websocket_connect("/ws") as w:
+        r = client.post(f"/api/chats/{chat['id']}/messages", json={"content": "q"})
+        seen, end = [], time.monotonic() + 3
+        while time.monotonic() < end and not any(m["type"] == "chat.message" and m["role"] == "assistant" for m in seen):
+            m = recv(w, 0.5)
+            if m:
+                seen.append(m)
+    deltas = [m for m in seen if m["type"] == "chat.delta"]
+    assert 2 <= len(deltas) <= 4  # burst collapses to the first, then one after the interval
+    assert len(deltas[-1]["text"]) >= len(deltas[0]["text"]) and deltas[-1]["chat_id"] == chat["id"]
+    assert r.text.count("event: delta") == len(deltas)
+    assert snap["active"]["text"] == "word " * 41

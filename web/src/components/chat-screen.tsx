@@ -38,6 +38,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const [pendingQuestion, setPendingQuestion] = useState('')
   const [statuses, setStatuses] = useState<string[]>([])
   const [traces, setTraces] = useState<TraceStep[]>([])
+  const [streamText, setStreamText] = useState('')
   const [error, setError] = useState('')
   const [mention, setMention] = useState<Mention | null>(null)
   const [toolsOpen, setToolsOpen] = useState(false)
@@ -141,6 +142,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         setBusy(!!pending)
         setStatuses(pending ? (active!.statuses.length ? active!.statuses : ['Thinking…']) : [])
         setTraces(pending ? active!.traces ?? [] : [])
+        setStreamText(pending ? active!.text ?? '' : '')
         setError('')
       }).catch((err: unknown) => {
         if (!signal.aborted && generation.current === version && !submitting.current)
@@ -154,6 +156,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       if (event.chat_id !== liveChatId || submitting.current) return
       if (event.type === 'chat.message' || event.type === 'chat.done') refresh()
       else if (event.type === 'chat.status') setStatuses((previous) => previous.at(-1) === event.text ? previous : [...previous, event.text])
+      else if (event.type === 'chat.delta') setStreamText(event.text)
       else if (event.type === 'chat.trace') setTraces((previous) => JSON.stringify(previous.at(-1)) === JSON.stringify(event.step) ? previous : [...previous, event.step])
     })
     return () => { controller?.abort(); unsubscribe() }
@@ -209,7 +212,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     // within the conversation; a follow-up starts at its own question.
     const latest = node.querySelector<HTMLElement>('.exchange:last-child')
     if (latest) node.scrollTop = Math.max(0, latest.offsetTop - 64)
-  }, [answers, statuses, traces, busy])
+  }, [answers, statuses, traces, busy, streamText])
   useEffect(() => {
     if (!mention) return
     function close(event: PointerEvent) {
@@ -264,6 +267,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     setPendingQuestion(question.trim())
     setStatuses(['Thinking…'])
     setTraces([])
+    setStreamText('')
     setError('')
     setDraft('')
     setMention(null)
@@ -280,6 +284,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       }
       const answer = await workspaceApi.askQuestion(chatId.current, question.trim(), docIds, {
         onStatus: (text) => { if (generation.current === version) setStatuses((previous) => previous.at(-1) === text ? previous : [...previous, text]) },
+        onDelta: (text) => { if (generation.current === version) setStreamText(text) },
         onTrace: (trace) => { if (generation.current === version) { streamedTraces.push(trace); setTraces([...streamedTraces]) } },
       })
       if (generation.current !== version) return
@@ -293,6 +298,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         submitting.current = false
         setBusy(false)
         setPendingQuestion('')
+        setStreamText('')
       }
     }
   }
@@ -349,6 +355,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       {busy && <div className="exchange pending-exchange" aria-busy="true">
         <div className="question-bubble">{pendingQuestion}</div>
         <div className="status-lines" role="status" aria-live="polite"><span className="thinking-mark" aria-hidden="true">H</span><ThinkingText text={statuses.at(-1) || 'Thinking…'} /></div>
+        {!!streamText && <p className="answer-text streaming-text" data-testid="streaming-answer">{streamText.replace(/\*\*/g, '')}</p>}
         {!!traces.length && <details className="answer-detail"><summary>Show thought process</summary>{traces.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>}
       </div>}
     </div>

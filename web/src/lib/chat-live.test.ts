@@ -25,6 +25,8 @@ describe('live chat notifications', () => {
   it('decodes in-progress trace and done events and the question text on user messages', () => {
     const step = { step: 'x', detail: 'd', ms: 3 }
     expect(decodeChatEvent(JSON.stringify({ type: 'chat.trace', chat_id: 'c', step }))).toEqual({ type: 'chat.trace', chat_id: 'c', step })
+    expect(decodeChatEvent(JSON.stringify({ type: 'chat.delta', chat_id: 'c', text: 'There are' }))).toEqual({ type: 'chat.delta', chat_id: 'c', text: 'There are' })
+    expect(decodeChatEvent(JSON.stringify({ type: 'chat.delta', chat_id: 'c' }))).toBeNull()
     expect(decodeChatEvent(JSON.stringify({ type: 'chat.done', chat_id: 'c' }))).toEqual({ type: 'chat.done', chat_id: 'c' })
     expect(decodeChatEvent(JSON.stringify({ ...message, text: 'How many?' }))).toEqual({ ...message, text: 'How many?' })
     expect(decodeChatEvent(JSON.stringify({ type: 'chat.trace', chat_id: 'c', step: [] }))).toBeNull()

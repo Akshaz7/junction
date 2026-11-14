@@ -1,7 +1,7 @@
 import type { Answer, ChangeEntry, Comparison, Document, IngestStatus, PlanMap, SavedChat, TraceStep, UploadReceipt } from './types'
 
 type Mode = 'auto' | 'real' | 'demo'
-type StreamCallbacks = { onStatus: (text: string) => void; onTrace: (trace: TraceStep) => void }
+type StreamCallbacks = { onStatus: (text: string) => void; onTrace: (trace: TraceStep) => void; onDelta?: (text: string) => void }
 
 class ApiError extends Error {
   constructor(message: string, readonly status: number, readonly empty: boolean) { super(message) }
@@ -18,11 +18,12 @@ export async function readAnswerStream(response: Response, callbacks: StreamCall
     const lines = block.split('\n')
     const event = lines.find((line) => line.startsWith('event:'))?.slice(6).trim()
     const data = lines.filter((line) => line.startsWith('data:')).map((line) => line.slice(5).trimStart()).join('\n')
-    if (!data || !['status', 'trace', 'answer', 'error'].includes(event ?? '')) return
+    if (!data || !['status', 'trace', 'delta', 'answer', 'error'].includes(event ?? '')) return
     const payload = JSON.parse(data)
     if (event === 'error') throw new Error(payload.detail || 'The answer could not be completed. Please try again.')
     if (event === 'status' && typeof payload.text === 'string') callbacks.onStatus(payload.text)
     if (event === 'trace') callbacks.onTrace(payload as TraceStep)
+    if (event === 'delta' && typeof payload.text === 'string') callbacks.onDelta?.(payload.text)
     if (event === 'answer') answer = payload as Answer
   }
   try {

@@ -6,6 +6,7 @@ from anywhere but the `key` argument and never log them.
 from __future__ import annotations
 
 import base64
+import contextvars
 import hashlib
 import json
 import re
@@ -16,6 +17,12 @@ from typing import Any, Callable
 import httpx
 
 TIMEOUT_S = 120.0
+
+# Answer-text streaming: a caller sets DELTA_SINK(callable(cumulative_text)); core.call copies it into
+# STREAM_NOW only for STREAM_TASKS, and the anthropic adapter then streams. Never part of the cache key.
+DELTA_SINK: contextvars.ContextVar = contextvars.ContextVar("delta_sink", default=None)
+STREAM_NOW: contextvars.ContextVar = contextvars.ContextVar("stream_now", default=None)
+STREAM_TASKS = {"write_answer", "chat"}
 
 
 class ProviderError(Exception):
@@ -279,6 +286,9 @@ def anthropic(cfg, model, messages, images, schema, params, key) -> ProviderResp
     if schema is not None:
         body["output_config"] = {"format": {"type": "json_schema", "schema": schema}}
     # temperature/top_p/top_k are removed from API version 2026-10-21: never send them.
+    sink = STREAM_NOW.get()
+    if sink is not None and schema is None:
+        return _anthropic_stream(cfg, key, body, sink)
     resp = _post(
         cfg["base_url"].rstrip("/") + "/messages",
         {"x-api-key": key, "anthropic-version": cfg.get("version", "2026-10-21"), "content-type": "application/json",
@@ -291,6 +301,41 @@ def anthropic(cfg, model, messages, images, schema, params, key) -> ProviderResp
     text = "".join(b.get("text", "") for b in d.get("content", []) if b.get("type") == "text")
     u = d.get("usage") or {}
     return ProviderResponse(text=text, input_tokens=u.get("input_tokens", 0), output_tokens=u.get("output_tokens", 0))
+
+
+def _anthropic_stream(cfg, key, body, sink) -> ProviderResponse:
+    """Same request as a normal call with stream=true; sink gets the cumulative text after each chunk."""
+    headers = {"x-api-key": key, "anthropic-version": cfg.get("version", "2026-10-21"), "content-type": "application/json",
+               **({"Authorization": f"Bearer {key}"} if cfg.get("bearer") else {})}
+    text, usage_in, usage_out = "", 0, 0
+    with httpx.stream("POST", cfg["base_url"].rstrip("/") + "/messages", headers=headers,
+                      json={**body, "stream": True}, timeout=TIMEOUT_S) as r:
+        if r.status_code == 529:
+            raise RateLimited("anthropic HTTP 529")
+        if r.status_code >= 400:
+            r.read()
+            _check(r, "anthropic")
+        for line in r.iter_lines():
+            if not line.startswith("data:"):
+                continue
+            try:
+                ev = json.loads(line[5:].strip())
+            except ValueError:
+                continue
+            t = ev.get("type")
+            if t == "content_block_delta" and (ev.get("delta") or {}).get("type") == "text_delta":
+                text += ev["delta"].get("text", "")
+                try:
+                    sink(text)
+                except Exception:  # noqa: BLE001 — a broken sink must never break the answer
+                    pass
+            elif t == "message_start":
+                usage_in = ((ev.get("message") or {}).get("usage") or {}).get("input_tokens", 0)
+            elif t == "message_delta":
+                usage_out = (ev.get("usage") or {}).get("output_tokens", usage_out)
+            elif t == "error":
+                raise ProviderError(f"anthropic stream error: {str(ev.get('error'))[:200]}")
+    return ProviderResponse(text=text, input_tokens=usage_in, output_tokens=usage_out)
 
 
 # --------------------------------------------------------------------------- runware (native API, NOT OpenAI-compatible)

@@ -1,3 +1,4 @@
+import type { AdvisorCard } from '../viewer3d/advisor'
 import type { SceneCommand } from '../viewer3d/commands'
 
 // CONTRACT.md v3.1. Coordinates are page-image pixels.
@@ -31,16 +32,18 @@ export interface Answer {
   answer_id: string
   question: string
   doc_ids: string[]
-  answer: { text_md: string; value: number | string | null; unit: string | null; confidence: number; abstained: boolean }
-  citations: { n: number; doc_id: string; page: number; kind: 'region' | 'text' | 'element'; bbox_px: Bbox | null; item_ids: string[]; quote: string | null }[]
+  answer: { text_md: string; value: number | string | Record<string, number> | null; unit: string | null; confidence: number; abstained: boolean }
+  citations: { n: number; doc_id: string; page: number; kind: 'region' | 'text' | 'element'; bbox_px: Bbox | null; item_ids: string[]; quote: string | null; item_kind?: string | null }[]
   evidence: {
-    boxes: { item_id: string; page: number; bbox_px: Bbox; label: string }[]
+    boxes: { item_id: string; page: number; bbox_px: Bbox; label: string; kind?: string | null }[]
     scene: { doc_id: string; highlight_item_ids: string[]; camera_target_item_id: string | null; commands?: readonly SceneCommand[] }
   }
   trace: { step: string; detail: string; ms: number; model: string | null; cost_usd: number; stub?: boolean }[]
   route: 'index' | 'planmap' | 'vlm' | 'hybrid'
   cost: { usd_total: number; calls: unknown[] }
   latency_ms: number
+  /** Edit checks for a hide/remove command in chat (severity, checked rules). */
+  advisor_cards?: AdvisorCard[]
 }
 
 export type Citation = Answer['citations'][number]
@@ -57,7 +60,7 @@ export interface SavedChat {
   doc_id: string | null
   messages: { id: string; role: string; content: string; answer: Answer | null }[]
   /** Set while a question in this chat is still being answered (late joiners catch up from it). */
-  active?: { question: string; statuses: string[]; traces: TraceStep[] }
+  active?: { question: string; statuses: string[]; traces: TraceStep[]; text?: string }
 }
 
 export interface ChangeEntry {

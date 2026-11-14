@@ -154,7 +154,12 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None) -> dict:
     """Code -> vision recount -> reader -> forced best-effort answer. Never abstains on a selected document (FORCE_ANSWER=0 restores abstaining)."""
-    res = _answer_core(question, doc_ids, on_event, scene_state=scene_state, history=history)
+    from engine.models import providers as _P
+    _tok = _P.DELTA_SINK.set((lambda t: on_event("answer.delta", {"text": t})) if on_event else None)  # answer-text streaming
+    try:
+        res = _answer_core(question, doc_ids, on_event, scene_state=scene_state, history=history)
+    finally:
+        _P.DELTA_SINK.reset(_tok)
     if (os.environ.get("FORCE_ANSWER", "1") == "0" or not doc_ids or not (question or "").strip() or not res["answer"].get("abstained")
             or parse_scene(question) is not None or _other_doc(question, doc_ids)):
         return res

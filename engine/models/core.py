@@ -338,7 +338,11 @@ def call(
         try:
             _check_budget(prov)
             t0 = time.perf_counter()
-            pr = _with_backoff(lambda: P.ADAPTERS[prov](pcfg, model, msgs, imgs, schema, params, key))
+            _tok = P.STREAM_NOW.set(P.DELTA_SINK.get() if task in P.STREAM_TASKS else None)
+            try:
+                pr = _with_backoff(lambda: P.ADAPTERS[prov](pcfg, model, msgs, imgs, schema, params, key))
+            finally:
+                P.STREAM_NOW.reset(_tok)
             latency = int((time.perf_counter() - t0) * 1000)
             parsed = _validate(pr.text, schema) if schema is not None else None
         except ProviderError as e:  # includes BudgetExceeded, RateLimited, bad JSON
