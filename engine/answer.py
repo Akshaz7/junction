@@ -331,8 +331,10 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
         res["answer"]["text_md"] = re.sub(r"(?m)^(?!- |\* |\||#)(\S[^\n]*)\n(- )", r"\1\n\n\2", _t)
     except Exception:  # noqa: BLE001
         pass
-    from engine.plainwords import apply as _plain_display
+    from engine.plainwords import apply as _plain_display, headline as _headline
     res = _plain_display(res)
+    if doc_ids:
+        res["answer"]["text_md"] = _headline(res["answer"].get("text_md") or "")
     res["question"] = original   # the user's own words are what is stored and shown; the resolved question stays in the trace
     if step is not None:
         res["trace"] = [step, *(res.get("trace") or [])]

@@ -66,3 +66,14 @@ def apply(res: dict) -> dict:
         if isinstance(citation.get("label"), str):
             citation["label"] = plain(citation["label"])
     return res
+
+
+def headline(text: str) -> str:
+    """Bold the opening answer sentence without changing facts or source markers."""
+    if not text or text.lstrip().startswith(("**", "|", "#", "```", "- ")):
+        return text
+    first, newline, rest = text.partition("\n")
+    parts = re.split(r"(?<=[.!?])\s+|\s+(?=\[\d+\])", first, maxsplit=1)
+    lead = parts[0].strip().replace("**", "")
+    tail = (" " + parts[1]) if len(parts) == 2 else ""
+    return "**" + lead + "**" + tail + newline + rest
