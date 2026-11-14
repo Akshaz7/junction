@@ -1,0 +1,1007 @@
+[
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "How many of the walls are load-bearing compared with non-load-bearing?",
+  "ref": "Load-bearing classification data is not available in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "Which sanitary fixtures are available in this building?",
+  "ref": "No Sanitary fixtures were found in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no plumbing fixtures**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 253 furniture items, 206 windows, 121 walls, 77 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "Which structural components exist in this building?",
+  "ref": "Structural Elements Summary:\n   - Beams: 0 elements\n   - Columns: 2 elements\n   - Floor slabs: 5 elements\n   - Roof slabs: 21 elements\n   - Foundations: 0 elements\n   - Structural members: 0 elements\n   - Structural connections: 0 elements\n\n   Total Structural Elements: 28",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2 structural elements**: 2 columns.\n- Columns: 2 in 1 type (Stahlbeton 2747937872 D200: 2) [1]",
+   "num_overlap": 0.2
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "Which beams are used in the building?",
+  "ref": "No beam elements found in the model. This may indicate a flat slab construction system or wall-bearing structure.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no beams**.\n- Its structural-type elements are: 121 walls, 26 slabs, 4 staircases, 2 columns.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "Which column types are present here and how many of each?",
+  "ref": "Total Columns: 2\n\n   Column Types and Quantities:\n   - Stahlbeton 2747937872 D200: 2 columns (100.0%)\n\n   Column Materials (from type names):\n   - Steel: 2 columns",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2 columns in 1 type**.\n- Stahlbeton 2747937872 D200: 2 (100%), diameter 200 mm, Stahlbeton 2747937872 [1]",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "What are the sizes of the columns?",
+  "ref": "Column Dimensions by Type:\n   - Stahlbeton 2747937872 D200: \u00d8200mm (circular column) (2 columns)\n\n   Column Shape Distribution:\n   - Circular columns: 2",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1 column size** across 2 columns.\n- diameter 200 mm: 2 (100%) [1]",
+   "num_overlap": 0.67
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "Which MEP systems are installed in this building?",
+  "ref": "No explicit MEP systems found in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 253 furniture items, 206 windows, 121 walls, 77 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "What types of pipes are used in the building?",
+  "ref": "No Pipe segments or Pipe fittings were found in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no pipes**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 253 furniture items, 206 windows, 121 walls, 77 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "Which heating systems are included in this building?",
+  "ref": "No explicit heating system components found.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 253 furniture items, 206 windows, 121 walls, 77 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "How many walls are load-bearing compared with non-load-bearing?",
+  "ref": "Wall Load-Bearing Classification:\n    - Load-bearing walls: 0 (0.0%)\n    - Non-load-bearing walls: 178 (100.0%)\n    - Total classified: 178 of 178 walls",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What is the structural system applied in this building, including element counts?",
+  "ref": "Structural System: Reinforced Concrete Frame Construction\n\n   Structural Elements:\n   - Beams: 14 elements\n   - Columns: 62 elements\n   - Slabs: 23 elements\n   - Members: 80 elements\n   - Roof Elements: 3 elements\n   - Plates: 25 elements\n\n   Total Structural Elements: 207",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**156 structural elements**: 80 structural members, 62 columns, 14 beams.\n- Structural members: 80 in 5 types (60 x 120: 54; Standard 100-30-25: 14)\n- Columns: 62 in 2 types (STB 250 x 400: 32; STB 250 x 250: 30)\n- Beams: 14 in 1 type (STB 250 x 500: 14) [1][2][3]",
+   "num_overlap": 0.71
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Which beam types are present in the building, with quantities?",
+  "ref": "Total Beams: 14\n   \n   Beam Types:\n   - STB Tr\u00e4ger - rechteckig:STB 250 x 500: 14 beams (100.0%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**14 beams in 1 type**.\n- STB 250 x 500: 14 (100%), STB 250 x 500, Ortbeton - bewehrt [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Which columns are used in the building, showing distribution by type?",
+  "ref": "Total Columns: 62\n\n   Column Types:\n   - STB St\u00fctze - rechteckig:STB 250 x 400: 32 columns (51.6%)\n   - STB St\u00fctze - rechteckig:STB 250 x 250: 30 columns (48.4%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**62 columns in 2 types**.\n- STB 250 x 400: 32 (52%), STB 250 x 400, Ortbeton - bewehrt\n- STB 250 x 250: 30 (48%), STB 250 x 250, Ortbeton - bewehrt [1][2]",
+   "num_overlap": 0.71
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What materials are used for the structural system?",
+  "ref": "Structural Materials Used:\n   - Leichtbeton - Mauerwerk\n   - Metall - Edelstahl geb\u00fcrstet\n   - Metall - Edelstahl satiniert\n   - Metall - Zink\n   - Ortbeton - bewehrt\n   - Ortbeton - bewehrt Verputzt",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**3 materials for the columns, beams, structural members and footings**.\n- Ortbeton - bewehrt: 76 (49%)\n- Kunststoff - grau 70-70-70: 72 (46%)\n- Metall - Edelstahl geb\u00fcrstet: 8 (5%) [1][2][3]",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What are the spans and sizes of the beams?",
+  "ref": "Information not available in BIM model\n   Beam span and sizing information requires structural analysis data",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What type of structural system is used in the building, and how is the structural grid determined?",
+  "ref": "Based on the structural elements available in the model, the structural system is most probably flat slab structures with reinforced concrete columns and slabs. Therefore, the structural grid can be derived based on the placement of columns.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What are the load-bearing structural elements in the building, including their quantities, and what is the typical load path for vertical loads?",
+  "ref": "Load Bearing Elements:\n- Load bearing beams: 14/14\n- Load bearing columns: 62/62\n- Total load bearing elements: 76\n\nLoad Path:\nTypical reinforced concrete frame load path:\nVertical loads transfer: Slabs \u2192 Beams \u2192 Columns \u2192 Foundations",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What is the total concrete volume used structurally, with breakdown by element type?",
+  "ref": "Total Structural Concrete Volume: 1641.47 cu m\n    Elements with volume data: 94\n    \n    Volume by Element Type:\n    - Beams: 10.76 cu m\n    - Columns: 18.52 cu m\n    - Slabs: 1612.18 cu m",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What are the dimensions of the columns, with distribution by size?",
+  "ref": "Column Dimensions:\n- 250 x 400 mm: 32 columns (51.6%)\n- STB St\u00fctze - rechteckig:STB 250 x 250: 30 columns (48.4%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2 column sizes** across 62 columns.\n- STB 250 x 400: 32 (52%)\n- STB 250 x 250: 30 (48%) [1][2]",
+   "num_overlap": 0.67
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Which types of structural members are present, showing quantity breakdown?",
+  "ref": "Total Members: 80\n    \n    Member Types:\n    - Rechteckiger Pfosten:60 x 120: 54 members (67.5%)\n    - Rechteckiger Pfosten:Standard 100-30-25: 14 members (17.5%)\n    - Stair Stringer: 8 members (10.0%)\n    - Rechteckiger Pfosten:Standard L 100-30-25: 2 members (2.5%)\n    - Rechteckiger Pfosten:Stan",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**80 structural members in 5 types**.\n- 60 x 120: 54 (68%), 60 x 120, Kunststoff - grau 70-70-70\n- Standard 100-30-25: 14 (18%), Standard 100-30-25, Kunststoff - grau 70-70-70\n- Metall 10 x 260: 8 (10%), Metall 10 x 260, Metall - Edelstahl geb\u00fcrstet\n- Standard L 100-30-25: 2 (2%), Standard L 100-30-25, Kunststoff - grau 70-70-70\n- Standard R 100-30-25: 2 (2%), Standard R 100-30-25, Kunststoff - gr",
+   "num_overlap": 0.79
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Which roof structural components are used, with type distribution?",
+  "ref": "Total Roof Elements: 3\n    \n    Roof Element Types:\n    - Roof Glazing System: 2 elements (66.7%)\n    - Basisdach:Flachdachaufbau begr\u00fcnt 320: 1 elements (33.3%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Could you provide a comprehensive assessment of the building's structural system efficiency, including the system type, element ratios, building characteristics, and overall efficiency rating?",
+  "ref": "Structural efficiency should be determined through detailed structural analysis. However, based on the data available in this model, the efficiency of the structural system can be summarized as follows:\n    \n    System Type: Reinforced Concrete Frame\n    - Efficient for mid-rise construction\n    - G",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Could you provide a detailed breakdown of all MEP systems present in this building, including their components and a quantitative summary of systems by category?",
+  "ref": "MEP Systems Present:\n\nHeating System:\n- Heat pump-based heating with radiators\n- Copper piping distribution network\n- Temperature sensors and circulation pumps\n\nPlumbing System:\n- Hot water distribution (16 zones)\n- Cold water supply\n- Wastewater collection\n- Rainwater drainage\n\nVentilation System:\n",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 generic objects, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "How many MEP components are there by system type?",
+  "ref": "Total MEP Components: 4112\n   \n   Components by System Type:\n   - Heating: 1795 components\n     * Radiators: 63\n     * Pipe segments: 914\n     * Pipe fittings: 743\n     * Valves: 65\n     * Pumps: 5\n     * Tanks: 2\n     * Sensors: 2\n     * Heat pump equipment: 1\n   - Plumbing: 1010 components\n     * ",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 generic objects, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What is the overall distribution of MEP terminals in the building, including total counts, average per space, and breakdown by type?",
+  "ref": "MEP Terminal Distribution:\n   - Total terminals: 283\n   - Total spaces: 64 (from architecture)\n   - Average terminals per space: 4.4\n   \n   Terminal Types:\n   - Heating terminals (radiators): 63\n   - Plumbing terminals (fixtures): 72\n   - Ventilation terminals (diffusers): 148",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 generic objects, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.17
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Could you provide a breakdown of the MEP systems serving Level B01_OKRD, including the number of major components for each system type, along with the primary functions of this level?",
+  "ref": "B01_OKRD (Basement Level) MEP Systems:\n   - Heating system: 0 major components\n   - Plumbing system: 0 major components\n   - Ventilation system: 0 major components\n   \n   Primary Functions:\n   - Technical equipment rooms\n   - Main utility distribution\n   - Heat pump and mechanical equipment",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 generic objects, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Could you provide a breakdown of the MEP systems serving Level E00_OKRD, including component counts for each system type, along with the primary functions of this level?",
+  "ref": "E00_OKRD (Ground Level) MEP Systems:\n   - Heating system: 0 major components\n   - Plumbing system: 0 major components\n   - Ventilation system: 0 major components\n   \n   Primary Functions:\n   - Occupied spaces conditioning\n   - Public restroom facilities\n   - Main air handling equipment",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 generic objects, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What MEP systems serve Level E01_OKRD, and what are their primary functions?",
+  "ref": "E01_OKRD (First Level) MEP Systems:\n   - Heating system: 0 major components\n   - Plumbing system: 0 major components\n   - Ventilation system: 0 major components\n   \n   Primary Functions:\n   - Office space conditioning\n   - Individual room controls\n   - Zone-specific air distribution",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 generic objects, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What electrical loads are present in the building, broken down by equipment type?",
+  "ref": "Electrical distribution equipment not found in MEP files.\nThis information would typically be in a dedicated electrical IFC file.\n\nHowever, electrical loads are present from:\n- Water heaters: 16 units (instantaneous type)\n- Heat pump equipment: 1 units\n- Circulation pumps: 5 units\n- Ventilation fans",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What are the electrical loads by system type?",
+  "ref": "Electrical Loads by System Type:\n   - Hot Water System: 48.0 kW\n     * 16 instantaneous water heaters at 3 kW each\n   - Heat Pump System: 15.0 kW (estimated)\n     * 1 heat pump unit\n   - Circulation Pumps: 3.8 kW (estimated)\n     * 5 heating circulation pumps\n   - Ventilation Fans: 4.0 kW (estimated",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What are the voltage levels used in the electrical system?",
+  "ref": "Specific voltage levels not available in MEP files.\n    Standard German building voltages likely used:\n    - 230V single-phase for small equipment\n    - 400V three-phase for larger mechanical equipment\n    - Low voltage control systems for building automation",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What lighting systems are installed?",
+  "ref": "Lighting systems not found in model files.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no light fittings**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 generic objects, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What maintenance requirements exist for MEP systems?",
+  "ref": "No explicit maintenance requirements are available in the models.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What is the total length of pipes and ducts in the building, broken down by type (heating pipes, plumbing pipes, and ventilation ducts)?",
+  "ref": "Total Distribution System Lengths:\n- Heating pipes: 1207377.1 m (914 segments)\n- Plumbing pipes: 301106.0 m (504 segments)\n- Ventilation ducts: 88788.6 m (595 segments)\n\nTotal MEP Distribution: 1597271.7 m\nTotal Distribution Components: 2013",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no pipes and ducts**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 generic objects, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-arc",
+  "q": "What are the different wall types in room A203 and what are their load-bearing characteristics?",
+  "ref": "Room A203 has three wall types:\n- Non-load-bearing interior partitions,\n- A CMU party wall with potential structural function, and\n- A likely load-bearing exterior brick wall.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-arc",
+  "q": "What information is available about the ground floor slab, including its dimensions and concrete specification?",
+  "ref": "The ground floor slab is 127 mm thick and covers 64.78 sqm as an interior slab on grade. The concrete specification is not provided in the model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-arc",
+  "q": "Are there any steel beams spanning the living room of Duplex B?",
+  "ref": "No, there are no steel beams spanning the living room of Duplex B.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-arc",
+  "q": "Which walls are the main structural ones?",
+  "ref": "Note: The information is not available directly in the BIM model, so an exact answer is not possible.\n\nBased on the properties of the walls found in the building, the following structural walls are likely to be the main ones:\n- Exterior brick-on-block walls\n- Concrete foundation walls",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-arc",
+  "q": "What is the volume of concrete required for the foundation?",
+  "ref": "The information is not directly available in the BIM model and cannot be exactly calculated. However, the estimated volume of concrete required for the foundation is around 16.528 cubic meters.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**No concrete footings found**: none of the 14 footings names concrete as a material.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-arc",
+  "q": "What is the estimated embodied carbon of the structural elements, including a detailed breakdown by material type, the methodology and assumptions used in the calculation?",
+  "ref": "The information is not available in the BIM model and cannot be exactly calculated. However, we can estimate the embodied carbon of the structural elements in the BIM model to be around 466,787 kgCO2e.\n\nImportant Note about GWP Values: The Global Warming Potential (GWP) values of the individual mate",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-office-building-3-arc",
+  "q": "What proportion of walls are load-bearing, including the total count and breakdown of load-bearing walls by type?",
+  "ref": "Load-Bearing Wall Analysis:\n   - Total walls: 223\n   - Load-bearing walls: 98 (43.9%)\n   - Non-load-bearing walls: 125 (56.1%)\n\n   Load-bearing wall types:\n   - Basiswand:STB 30.0: 58 wall(s)\n   - Basiswand:STB 25.0: 30 wall(s)\n   - Basiswand:STB 20.0: 10 wall(s)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-office-building-3-arc",
+  "q": "What MEP components are used in this model, grouped by the MEP system they belong to, and how are these components distributed across the floors?",
+  "ref": "MEP Components by System:\n   Total MEP components: 115\n\n   Sanitary/Plumbing System (65 components):\n   - WC 02:WC: 30 unit(s)\n   - Urinal 02:Urinal: 25 unit(s)\n   - Waschtisch-Kombi-Doppel WB mit Spiegelk\u00e4sten:1300 x 580 x 860: 10 unit(s)\n\n   Ventilation/HVAC System: No components found\n\n   Bathroo",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**115 service components in 2 system types**.\n- Plumbing: 65 components (55 toilets, 10 washbasins and sinks)\n- System not stated: 50 components (50 terminals)\n- 50 components have no system recorded in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.37
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-office-building-3-arc",
+  "q": "Which column types are present in this building, including their dimensions and quantities?",
+  "ref": "Column Types in Building:\n   Total columns: 20\n\n   Column types with dimensions:\n   - STB St\u00fctze - rund:STB d=30: 12 column(s)\n     Diameter: 30 cm (0.30 m)\n   - STB St\u00fctze - rund:STB d=25: 4 column(s)\n     Diameter: 25 cm (0.25 m)\n   - STB St\u00fctze - rund:STB d=20: 4 column(s)\n     Diameter: 20 cm (0",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**3 column sizes** across 20 columns.\n- STB d=30: 12 (60%)\n- STB d=25: 4 (20%)\n- STB d=20: 4 (20%) [1][2][3][4]",
+   "num_overlap": 0.71
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What percentage of walls are load-bearing vs non-load-bearing?",
+  "ref": "Load-bearing classification data is not available in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What structural elements are in this building, grouped by type with their counts?",
+  "ref": "Structural Elements Summary:\n   - Beams: 86 elements\n   - Columns: 208 elements\n   - Floor slabs: 285 elements\n   - Roof slabs: 78 elements\n   - Total structural slabs: 363 elements\n   - Foundations: 0 elements\n   - Structural members: 0 elements\n\n   Total Structural Elements: 657",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**294 structural elements**: 208 columns, 86 beams.\n- Columns: 208 in 7 types (BS04: 142; BS02: 38)\n- Beams: 86 in 9 types (NO_VF HUP 100x100x6.3: 28; type not named: 23) [1][2][3][4][5][6]",
+   "num_overlap": 0.29
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What beam types are used in this building, with their quantities and percentages?",
+  "ref": "Total Beams: 86\n\n   Beam Types and Quantities:\n   - NO_VF HUP 100x100x6.3: 28 beams (32.6%)\n   - Unnamed Beam: 23 beams (26.7%)\n   - NO_THQ350x390: 9 beams (10.5%)\n   - NO_VF HUP 150x100x6.3: 8 beams (9.3%)\n   - NO_THQ350x270: 6 beams (7.0%)\n   - NO_THQ200x265_Ensidig: 4 beams (4.7%)\n   - Bjelke-01:",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**86 beams in 9 types**.\n- NO_VF HUP 100x100x6.3: 28 (33%)\n- type not named: 23 (27%)\n- NO_THQ350x390: 9 (10%)\n- NO_VF HUP 150x100x6.3: 8 (9%)\n- NO_THQ350x270: 6 (7%)\n- NO_THQ200x265_Ensidig: 4 (5%)\n- Bjelke-01: 3 (3%), Betong b\u00e6rende\n- NO_THQ350x390_ensidig: 3 (3%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.7
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What column types are used in this building, with their quantities and percentages?",
+  "ref": "Total Columns: 208\n\n   Column Types and Quantities:\n   - BS04: 142 columns (68.3%)\n   - BS02: 38 columns (18.3%)\n   - Unnamed Column: 11 columns (5.3%)\n   - BS04 ARK: 8 columns (3.8%)\n   - BS-skive: 6 columns (2.9%)\n   - NO_VF HUP 40x40x4.0: 2 columns (1.0%)\n   - BS-skive ARK: 1 columns (0.5%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**208 columns in 7 types**.\n- BS04: 142 (68%), Betong b\u00e6rende\n- BS02: 38 (18%), Betong b\u00e6rende\n- type not named: 11 (5%)\n- BS04 ARK: 8 (4%), Betong b\u00e6rende\n- BS-skive: 6 (3%), Betong b\u00e6rende\n- NO_VF HUP 40x40x4.0: 2 (1%)\n- BS-skive ARK: 1 (0%), Betong b\u00e6rende [1][2][3][4][5]",
+   "num_overlap": 0.62
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "Could you provide a breakdown of each column type, including the number of elements and their respective dimensions?",
+  "ref": "Column Dimensions by Type:\n\n   BS-skive: 6 column(s)\n     - 1000\u00d7200mm\n\n   BS-skive ARK: 1 column(s)\n     - 1000\u00d7200mm\n\n   BS02: 38 column(s)\n     - \u00d8200mm (R=100mm) (8 columns)\n     - \u00d8350mm (R=175mm) (30 columns)\n\n   BS04: 142 column(s)\n     - 430\u00d7350mm (2 columns)\n     - \u00d8350mm (R=175mm) (3 colum",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2 column sizes** across 208 columns.\n- size not recorded: 206 (99%)\n- 40 x 40 mm: 2 (1%) [1][2][3][4][5]",
+   "num_overlap": 0.2
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What MEP systems are present in this building?",
+  "ref": "69 IfcFlowTerminal elements belonging to plumbing system are found.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What kind of pipes are used in this building?",
+  "ref": "No Pipe Segment or Pipe Fitting elements found in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What is the total length of piping used in this building?",
+  "ref": "No Pipe Segment or Pipe Fitting elements found in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "How many MEP components are there by system type?",
+  "ref": "MEP Components by System Type:\n   - Plumbing:\n      - IfcFlowTerminal: 69 components",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What heating systems are installed?",
+  "ref": "No Heating system found in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What electrical components are present in this building?",
+  "ref": "No Electrical components found in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-clinic-clinic-plumbing",
+  "q": "How many sanitary fixtures are there in the model 'Medical-Dental Clinic - plumbing'?",
+  "ref": "119",
+  "before": {
+   "route": "code",
+   "text": "**3,246.9 m of pipe** in **2893 segments**; longest sizes: DN15 791.6 m, DN100 525.0 m, DN20 417.4 m, DN50 390.2 m. [1] Shown in 3D: the piping model has no 2D plan, so the same pipes glow in the 3D view.",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**119 plumbing fixtures** in this model.\n- By level: Level 1: 74; Level 2: 45\n- By type: 535 mmx485 mm - Public: 42 (35%); 455 mmx455 mm - Private: 36 (30%); Public - 6.1 Lpf: 24 (20%); 510 mmx455 mm: 6 (5%); Standard: 4 (3%)\n- Kinds: 47 plumbing fixtures, 42 washbasins and sinks, 27 toilets, 3 showers [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Are electrical distribution equipment capacities available?",
+  "ref": "Electrical panel capacities not available in the BIM model. This model appears to be an architectural model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+  "q": "How many columns are shown on the floor plan of '1.korrus'?",
+  "ref": "37",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+  "q": "What is the net floor area of the room 'VALVERUUM (102)' on '1.korrus', in m\u00b2?",
+  "ref": "10.32",
+  "before": {
+   "route": "code",
+   "text": "No room matching **room valveruum 102** was found in this model. Room names/types present: ABIRUUM, ARVUTIKLASS, EL.KILP, ELUTUBA+K\u00d6\u00d6K, ESIK, FUAJEE-TREPIKODA, HOOLDUST\u00d6\u00d6TAJAD, HUMANITAARRUUM, ILU- JA HEAOLUTEENUSED, INVA-WC, KORIDOR, KORISTUSRUUM, LIFT, LIIKUMISVAHENDID, MAGAMISTUBA, PERSONALI PUHKERUUM, PESUKODA, RINGIRUUM, SERVER, SOOJUSS\u00d5LM, SOTS.T\u00d6\u00d6TAJA, TREPIKODA, TUALETTRUUM, VALVERUUM, VEE",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "No room matching **room valveruum 102** was found in this model. Room names/types present: ABIRUUM, ARVUTIKLASS, EL.KILP, ELUTUBA+K\u00d6\u00d6K, ESIK, FUAJEE-TREPIKODA, HOOLDUST\u00d6\u00d6TAJAD, HUMANITAARRUUM, ILU- JA HEAOLUTEENUSED, INVA-WC, KORIDOR, KORISTUSRUUM, LIFT, LIIKUMISVAHENDID, MAGAMISTUBA, PERSONALI PUHKERUUM, PESUKODA, RINGIRUUM, SERVER, SOOJUSS\u00d5LM, SOTS.T\u00d6\u00d6TAJA, TREPIKODA, TUALETTRUUM, VALVERUUM, VEE",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+  "q": "Kui suur on ruumi \u201eVALVERUUM (102)\u201c netop\u00f5randapind korrusel \u201e1.korrus\u201c (m\u00b2)?",
+  "ref": "10.32",
+  "before": {
+   "route": "code",
+   "text": "The matching VALVERUUM have no area recorded.",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "The matching VALVERUUM have no area recorded.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+  "q": "What is the net floor area of the room 'VENTILATSIOONIRUUM (503)' on '5.korrus', in m\u00b2?",
+  "ref": "58.88",
+  "before": {
+   "route": "code",
+   "text": "No room matching **room ventilatsiooniruum 503** was found in this model. Room names/types present: ABIRUUM, ARVUTIKLASS, EL.KILP, ELUTUBA+K\u00d6\u00d6K, ESIK, FUAJEE-TREPIKODA, HOOLDUST\u00d6\u00d6TAJAD, HUMANITAARRUUM, ILU- JA HEAOLUTEENUSED, INVA-WC, KORIDOR, KORISTUSRUUM, LIFT, LIIKUMISVAHENDID, MAGAMISTUBA, PERSONALI PUHKERUUM, PESUKODA, RINGIRUUM, SERVER, SOOJUSS\u00d5LM, SOTS.T\u00d6\u00d6TAJA, TREPIKODA, TUALETTRUUM, VALVE",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "No room matching **room ventilatsiooniruum 503** was found in this model. Room names/types present: ABIRUUM, ARVUTIKLASS, EL.KILP, ELUTUBA+K\u00d6\u00d6K, ESIK, FUAJEE-TREPIKODA, HOOLDUST\u00d6\u00d6TAJAD, HUMANITAARRUUM, ILU- JA HEAOLUTEENUSED, INVA-WC, KORIDOR, KORISTUSRUUM, LIFT, LIIKUMISVAHENDID, MAGAMISTUBA, PERSONALI PUHKERUUM, PESUKODA, RINGIRUUM, SERVER, SOOJUSS\u00d5LM, SOTS.T\u00d6\u00d6TAJA, TREPIKODA, TUALETTRUUM, VALVE",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+  "q": "Kui suur on ruumi \u201eVENTILATSIOONIRUUM (503)\u201c netop\u00f5randapind korrusel \u201e5.korrus\u201c (m\u00b2)?",
+  "ref": "58.88",
+  "before": {
+   "route": "code",
+   "text": "The matching VENTILATSIOONIRUUM have no area recorded.",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "The matching VENTILATSIOONIRUUM have no area recorded.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-molio-molio-with-uris",
+  "q": "How many columns are shown on the floor plan of 'Grundplan'?",
+  "ref": "2",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-molio-molio-with-uris",
+  "q": "How many columns are shown on the floor plan of '1. Sal'?",
+  "ref": "2",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-molio-molio-with-uris",
+  "q": "How many columns are shown on the floor plan of '2. Sal'?",
+  "ref": "2",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-molio-molio-with-uris",
+  "q": "How many columns are shown on the floor plan of '3. Sal'?",
+  "ref": "2",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-molio-molio-with-uris",
+  "q": "How many columns are shown on the floor plan of '4. Sal'?",
+  "ref": "2",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-molio-molio-with-uris",
+  "q": "How many columns are shown on the floor plan of '5. Sal'?",
+  "ref": "2",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ }
+]

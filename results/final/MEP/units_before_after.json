@@ -1,0 +1,865 @@
+{
+ "ifc_bench__dental-clinic-mep": {
+  "error": "Syntax error during parse, check logs"
+ },
+ "ifc_bench__digital-hub-heating": {
+  "before": {
+   "n": 914,
+   "with_size": 914,
+   "implausible": 0,
+   "min": 8.0,
+   "max": 65.0,
+   "most_common": [
+    [
+     15.0,
+     538
+    ],
+    [
+     10.0,
+     85
+    ],
+    [
+     20.0,
+     71
+    ],
+    [
+     8.0,
+     64
+    ]
+   ],
+   "total_length_m": 1207.38
+  },
+  "after": {
+   "n": 914,
+   "with_size": 914,
+   "implausible": 0,
+   "min": 8.0,
+   "max": 65.0,
+   "most_common": [
+    [
+     15.0,
+     538
+    ],
+    [
+     10.0,
+     85
+    ],
+    [
+     20.0,
+     71
+    ],
+    [
+     8.0,
+     64
+    ]
+   ],
+   "total_length_m": 1207.38
+  },
+  "services": 1795,
+  "structure": 0
+ },
+ "ifc_bench__digital-hub-plumbing": {
+  "before": {
+   "n": 504,
+   "with_size": 504,
+   "implausible": 0,
+   "min": 12.0,
+   "max": 200.0,
+   "most_common": [
+    [
+     12.0,
+     255
+    ],
+    [
+     100.0,
+     108
+    ],
+    [
+     40.0,
+     40
+    ],
+    [
+     50.0,
+     31
+    ]
+   ],
+   "total_length_m": 301.11
+  },
+  "after": {
+   "n": 504,
+   "with_size": 504,
+   "implausible": 0,
+   "min": 12.0,
+   "max": 200.0,
+   "most_common": [
+    [
+     12.0,
+     255
+    ],
+    [
+     100.0,
+     108
+    ],
+    [
+     40.0,
+     40
+    ],
+    [
+     50.0,
+     31
+    ]
+   ],
+   "total_length_m": 301.11
+  },
+  "services": 1010,
+  "structure": 0
+ },
+ "ifc_bench__digital-hub-ventilation": {
+  "before": null,
+  "after": {
+   "n": 0,
+   "with_size": 0,
+   "implausible": 0,
+   "min": null,
+   "max": null,
+   "most_common": [],
+   "total_length_m": 0
+  },
+  "services": 1310,
+  "structure": 0
+ },
+ "ifc_bench__duplex-mep": {
+  "before": {
+   "n": 427,
+   "with_size": 417,
+   "implausible": 8,
+   "min": 0.08858267716535433,
+   "max": 250.00000000000003,
+   "most_common": [
+    [
+     25.0,
+     280
+    ],
+    [
+     40.0,
+     63
+    ],
+    [
+     15.0,
+     51
+    ],
+    [
+     6.0,
+     8
+    ]
+   ],
+   "total_length_m": 340.36
+  },
+  "after": {
+   "n": 407,
+   "with_size": 407,
+   "implausible": 0,
+   "min": 6.0,
+   "max": 50.0,
+   "most_common": [
+    [
+     25.0,
+     280
+    ],
+    [
+     40.0,
+     63
+    ],
+    [
+     15.0,
+     51
+    ],
+    [
+     6.0,
+     8
+    ]
+   ],
+   "total_length_m": 304.03
+  },
+  "services": 926,
+  "structure": 0
+ },
+ "ifc_bench__sixty5-electrical": {
+  "before": {
+   "n": 7389,
+   "with_size": 112,
+   "implausible": 0,
+   "min": 50.0,
+   "max": 90.0,
+   "most_common": [
+    [
+     75.0,
+     51
+    ],
+    [
+     90.0,
+     40
+    ],
+    [
+     50.0,
+     21
+    ]
+   ],
+   "total_length_m": 11460.32
+  },
+  "after": {
+   "n": 112,
+   "with_size": 112,
+   "implausible": 0,
+   "min": 50.0,
+   "max": 90.0,
+   "most_common": [
+    [
+     80.0,
+     51
+    ],
+    [
+     90.0,
+     40
+    ],
+    [
+     50.0,
+     21
+    ]
+   ],
+   "total_length_m": 124.45
+  },
+  "services": 15812,
+  "structure": 0
+ },
+ "ifc_bench__sixty5-plumbing": {
+  "before": {
+   "n": 10957,
+   "with_size": 10957,
+   "implausible": 0,
+   "min": 15.0,
+   "max": 160.0,
+   "most_common": [
+    [
+     16.0,
+     3847
+    ],
+    [
+     50.0,
+     1368
+    ],
+    [
+     75.0,
+     1343
+    ],
+    [
+     20.0,
+     1288
+    ]
+   ],
+   "total_length_m": 7898.0
+  },
+  "after": {
+   "n": 10957,
+   "with_size": 10957,
+   "implausible": 0,
+   "min": 15.0,
+   "max": 150.0,
+   "most_common": [
+    [
+     15.0,
+     4285
+    ],
+    [
+     80.0,
+     1605
+    ],
+    [
+     20.0,
+     1500
+    ],
+    [
+     50.0,
+     1374
+    ]
+   ],
+   "total_length_m": 7898.0
+  },
+  "services": 22594,
+  "structure": 0
+ },
+ "ifc_bench__sixty5-ventilation": {
+  "before": {
+   "n": 5234,
+   "with_size": 3182,
+   "implausible": 0,
+   "min": 15.0,
+   "max": 125.0,
+   "most_common": [
+    [
+     22.0,
+     2295
+    ],
+    [
+     42.0,
+     213
+    ],
+    [
+     54.0,
+     186
+    ],
+    [
+     35.0,
+     146
+    ]
+   ],
+   "total_length_m": 4630.3
+  },
+  "after": {
+   "n": 3045,
+   "with_size": 3045,
+   "implausible": 0,
+   "min": 15.0,
+   "max": 125.0,
+   "most_common": [
+    [
+     20.0,
+     2295
+    ],
+    [
+     40.0,
+     215
+    ],
+    [
+     50.0,
+     186
+    ],
+    [
+     32.0,
+     146
+    ]
+   ],
+   "total_length_m": 2075.11
+  },
+  "services": 11825,
+  "structure": 0
+ },
+ "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000": {
+  "before": {
+   "n": 4002,
+   "with_size": 0,
+   "implausible": 0,
+   "min": null,
+   "max": null,
+   "most_common": [],
+   "total_length_m": 2842.02
+  },
+  "after": {
+   "n": 3917,
+   "with_size": 0,
+   "implausible": 0,
+   "min": null,
+   "max": null,
+   "most_common": [],
+   "total_length_m": 2789.66
+  },
+  "services": 9316,
+  "structure": 1145
+ },
+ "ifc_models__bimspeed-vitoria-ald26-before": {
+  "before": {
+   "n": 244,
+   "with_size": 0,
+   "implausible": 0,
+   "min": null,
+   "max": null,
+   "most_common": [],
+   "total_length_m": 36.3
+  },
+  "after": {
+   "n": 142,
+   "with_size": 0,
+   "implausible": 0,
+   "min": null,
+   "max": null,
+   "most_common": [],
+   "total_length_m": 166.39
+  },
+  "services": 446,
+  "structure": 321
+ },
+ "ifc_models__bimspeed-vitoria-ald26-project": {
+  "before": {
+   "n": 253,
+   "with_size": 0,
+   "implausible": 0,
+   "min": null,
+   "max": null,
+   "most_common": [],
+   "total_length_m": 36.34
+  },
+  "after": {
+   "n": 151,
+   "with_size": 0,
+   "implausible": 0,
+   "min": null,
+   "max": null,
+   "most_common": [],
+   "total_length_m": 209.21
+  },
+  "services": 459,
+  "structure": 321
+ },
+ "ifc_models__bsc-clinic-clinic-electrical": {
+  "before": null,
+  "after": {
+   "n": 0,
+   "with_size": 0,
+   "implausible": 0,
+   "min": null,
+   "max": null,
+   "most_common": [],
+   "total_length_m": 0
+  },
+  "services": 2089,
+  "structure": 0
+ },
+ "ifc_models__bsc-clinic-clinic-hvac": {
+  "before": {
+   "n": 1548,
+   "with_size": 890,
+   "implausible": 890,
+   "min": 0.328083989501312,
+   "max": 1.14829396325459,
+   "most_common": [
+    [
+     0.656,
+     392
+    ],
+    [
+     0.492,
+     391
+    ],
+    [
+     0.82,
+     76
+    ],
+    [
+     0.328,
+     15
+    ]
+   ],
+   "total_length_m": 2578.87
+  },
+  "after": {
+   "n": 39,
+   "with_size": 39,
+   "implausible": 0,
+   "min": 100.0,
+   "max": 150.0,
+   "most_common": [
+    [
+     150.0,
+     24
+    ],
+    [
+     100.0,
+     15
+    ]
+   ],
+   "total_length_m": 122.23
+  },
+  "services": 3704,
+  "structure": 0
+ },
+ "ifc_models__bsc-clinic-clinic-plumbing": {
+  "before": {
+   "n": 2893,
+   "with_size": 2893,
+   "implausible": 2893,
+   "min": 0.0328083989501312,
+   "max": 1.0,
+   "most_common": [
+    [
+     1.0,
+     833
+    ],
+    [
+     0.049,
+     632
+    ],
+    [
+     0.328,
+     283
+    ],
+    [
+     0.164,
+     266
+    ]
+   ],
+   "total_length_m": 3246.91
+  },
+  "after": {
+   "n": 2893,
+   "with_size": 2893,
+   "implausible": 0,
+   "min": 10.0,
+   "max": 150.0,
+   "most_common": [
+    [
+     15.0,
+     874
+    ],
+    [
+     100.0,
+     418
+    ],
+    [
+     50.0,
+     379
+    ],
+    [
+     20.0,
+     331
+    ]
+   ],
+   "total_length_m": 3246.91
+  },
+  "services": 6587,
+  "structure": 0
+ },
+ "ifc_models__bsc-duplex-duplex-electrical-20121207": {
+  "before": null,
+  "after": {
+   "n": 0,
+   "with_size": 0,
+   "implausible": 0,
+   "min": null,
+   "max": null,
+   "most_common": [],
+   "total_length_m": 0
+  },
+  "services": 99,
+  "structure": 0
+ },
+ "ifc_models__bsc-duplex-duplex-m-20111024-rooms-and-spaces": {
+  "before": {
+   "n": 246,
+   "with_size": 246,
+   "implausible": 246,
+   "min": 0.08202099737532809,
+   "max": 0.8202099737532809,
+   "most_common": [
+    [
+     0.082,
+     240
+    ],
+    [
+     0.131,
+     3
+    ],
+    [
+     0.82,
+     2
+    ],
+    [
+     0.164,
+     1
+    ]
+   ],
+   "total_length_m": 0.19
+  },
+  "after": {
+   "n": 244,
+   "with_size": 244,
+   "implausible": 0,
+   "min": 25.0,
+   "max": 50.0,
+   "most_common": [
+    [
+     25.0,
+     240
+    ],
+    [
+     40.0,
+     3
+    ],
+    [
+     50.0,
+     1
+    ]
+   ],
+   "total_length_m": 184.59
+  },
+  "services": 487,
+  "structure": 0
+ },
+ "ifc_models__bsc-duplex-duplex-mep-20110907": {
+  "before": {
+   "n": 427,
+   "with_size": 417,
+   "implausible": 417,
+   "min": 0.01968503937007874,
+   "max": 0.8202099737532809,
+   "most_common": [
+    [
+     0.082,
+     280
+    ],
+    [
+     0.131,
+     63
+    ],
+    [
+     0.049,
+     51
+    ],
+    [
+     0.089,
+     8
+    ]
+   ],
+   "total_length_m": 2.52
+  },
+  "after": {
+   "n": 407,
+   "with_size": 407,
+   "implausible": 0,
+   "min": 6.0,
+   "max": 50.0,
+   "most_common": [
+    [
+     25.0,
+     280
+    ],
+    [
+     40.0,
+     63
+    ],
+    [
+     15.0,
+     51
+    ],
+    [
+     6.0,
+     8
+    ]
+   ],
+   "total_length_m": 304.03
+  },
+  "services": 926,
+  "structure": 0
+ },
+ "ifc_models__bsc-duplex-duplex-plumbing-20121113": {
+  "before": {
+   "n": 231,
+   "with_size": 231,
+   "implausible": 169,
+   "min": 0.0196850393700787,
+   "max": 40.0,
+   "most_common": [
+    [
+     0.082,
+     80
+    ],
+    [
+     0.131,
+     47
+    ],
+    [
+     0.049,
+     31
+    ],
+    [
+     25.0,
+     29
+    ]
+   ],
+   "total_length_m": 151.44
+  },
+  "after": {
+   "n": 231,
+   "with_size": 231,
+   "implausible": 0,
+   "min": 6.0,
+   "max": 50.0,
+   "most_common": [
+    [
+     25.0,
+     108
+    ],
+    [
+     40.0,
+     60
+    ],
+    [
+     15.0,
+     50
+    ],
+    [
+     6.0,
+     7
+    ]
+   ],
+   "total_length_m": 151.44
+  },
+  "services": 498,
+  "structure": 0
+ },
+ "ifc_models__rwth-digitalhub-digitalhub-fm-hzg-v2": {
+  "before": {
+   "n": 914,
+   "with_size": 914,
+   "implausible": 0,
+   "min": 8.0,
+   "max": 65.0,
+   "most_common": [
+    [
+     15.0,
+     538
+    ],
+    [
+     10.0,
+     85
+    ],
+    [
+     20.0,
+     71
+    ],
+    [
+     8.0,
+     64
+    ]
+   ],
+   "total_length_m": 1207.38
+  },
+  "after": {
+   "n": 914,
+   "with_size": 914,
+   "implausible": 0,
+   "min": 8.0,
+   "max": 65.0,
+   "most_common": [
+    [
+     15.0,
+     538
+    ],
+    [
+     10.0,
+     85
+    ],
+    [
+     20.0,
+     71
+    ],
+    [
+     8.0,
+     64
+    ]
+   ],
+   "total_length_m": 1207.38
+  },
+  "services": 1795,
+  "structure": 0
+ },
+ "ifc_models__rwth-digitalhub-digitalhub-fm-san-v2": {
+  "before": {
+   "n": 504,
+   "with_size": 504,
+   "implausible": 0,
+   "min": 12.0,
+   "max": 200.0,
+   "most_common": [
+    [
+     12.0,
+     255
+    ],
+    [
+     100.0,
+     108
+    ],
+    [
+     40.0,
+     40
+    ],
+    [
+     50.0,
+     31
+    ]
+   ],
+   "total_length_m": 301.11
+  },
+  "after": {
+   "n": 504,
+   "with_size": 504,
+   "implausible": 0,
+   "min": 12.0,
+   "max": 200.0,
+   "most_common": [
+    [
+     12.0,
+     255
+    ],
+    [
+     100.0,
+     108
+    ],
+    [
+     40.0,
+     40
+    ],
+    [
+     50.0,
+     31
+    ]
+   ],
+   "total_length_m": 301.11
+  },
+  "services": 1010,
+  "structure": 0
+ },
+ "ifc_models__rwth-digitalhub-fm-hzg-digitalhub-v1": {
+  "before": {
+   "n": 867,
+   "with_size": 0,
+   "implausible": 0,
+   "min": null,
+   "max": null,
+   "most_common": [],
+   "total_length_m": 1098.01
+  },
+  "after": {
+   "n": 867,
+   "with_size": 0,
+   "implausible": 0,
+   "min": null,
+   "max": null,
+   "most_common": [],
+   "total_length_m": 1091.34
+  },
+  "services": 1707,
+  "structure": 0
+ },
+ "ifc_models__rwth-digitalhub-fm-san-digitalhub-v1": {
+  "before": {
+   "n": 506,
+   "with_size": 0,
+   "implausible": 0,
+   "min": null,
+   "max": null,
+   "most_common": [],
+   "total_length_m": 318.78
+  },
+  "after": {
+   "n": 506,
+   "with_size": 0,
+   "implausible": 0,
+   "min": null,
+   "max": null,
+   "most_common": [],
+   "total_length_m": 301.19
+  },
+  "services": 1012,
+  "structure": 0
+ }
+}

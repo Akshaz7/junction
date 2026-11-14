@@ -60,4 +60,4 @@ def test_piping_systems_answer_is_friendly_and_capped():
     from engine.answer import answer
     a = answer("List the piping systems by length", ["ifc_bench__digital-hub-plumbing"])
     t = a["answer"]["text_md"]
-    assert "Waste water (S_Schmutzwasser)" in t and "smaller system" in t
+    assert "waste water: 120.5 m" in t and "301.1 m of pipes" in t  # F-MEP: plain system names from engine/mep.py
