@@ -50,3 +50,4 @@
 - uvicorn --reload watched the whole repo: every worker edit (tools/, web/, …) restarted the API and dropped /ws + in-flight answers, making live e2e flaky. Now --reload-dir server --reload-dir engine (06:42).
 - Live e2e and the stress harness share the dev API + DB: never run them at the same time (stress creates chats → overview ordering and <2 s live-sync tests fail). LEAD runs stress only when no e2e is queued.
 - When two Codex workers edit web/ at once, never stage 'all modified web files minus the other worker's NEW files': it also grabs existing files the other worker is editing (broke HEAD twice). Stage exactly the files listed in the finished worker's handoff scope, then build pure HEAD (test_snapshot.sh <port> "") before pushing.
+- Headless Chromium uses SwiftShader: any timing test with 3D open measures the CPU rasteriser, not the app. Use channel 'chromium' + --use-angle=metal (now the default in web/playwright.config.ts).

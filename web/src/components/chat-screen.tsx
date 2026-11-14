@@ -10,6 +10,7 @@ import { MicButton } from './voice-controls'
 import { chatLink, savedExchanges, type ChatExchange } from '../lib/chat-history'
 import { chatLive } from '../lib/chat-live'
 import { useSceneEdits } from '../lib/use-scene-edits'
+import { DrawingEditsContext } from '../lib/scene-edit-context'
 import { SkillPicker } from './skills-screen'
 
 const starters = [
@@ -374,9 +375,11 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
           setSplit(Math.max(35, Math.min(65, (event.clientX - bounds.left) / bounds.width * 100)))
         }}
         onPointerUp={(event) => event.currentTarget.releasePointerCapture(event.pointerId)} />
-      <DocumentViewer key={viewer.request} answer={viewer.answer} citation={viewer.citation} sheet={sheet}
-        chatId={liveChatId}
-        edits={sceneEdits[viewer.citation.doc_id]} commands={viewerCommands.length ? viewerCommands : undefined} onClose={() => setViewer(null)} />
+      <DrawingEditsContext value={sceneEdits}>
+        <DocumentViewer key={viewer.request} answer={viewer.answer} citation={viewer.citation} sheet={sheet}
+          chatId={liveChatId}
+          edits={sceneEdits[viewer.citation.doc_id]} commands={viewerCommands.length ? viewerCommands : undefined} onClose={() => setViewer(null)} />
+      </DrawingEditsContext>
     </>}
   </div>
 }

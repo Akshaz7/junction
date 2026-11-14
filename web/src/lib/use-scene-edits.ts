@@ -1,7 +1,9 @@
 import { useEffect, useReducer } from 'react'
+import { flushSync } from 'react-dom'
 import { createLiveHighlightClient, type SceneEvent } from '../viewer3d/liveHighlight'
 import { answerSceneEvents, emptyChatEdits, reduceSceneEvent, type ChatEdits } from './scene-edits'
 import type { ChatExchange } from './chat-history'
+import { applyLiveSceneEvent } from './scene-edit-timing'
 
 type Action = { type: 'clear' } | { type: 'events'; events: SceneEvent[] }
 function reduce(state: ChatEdits, action: Action): ChatEdits {
@@ -21,7 +23,9 @@ export function useSceneEdits(chatId: string | null, exchanges: ChatExchange[], 
     const channel = createLiveHighlightClient({ url: `${protocol}//${window.location.host}/ws?chat_id=${encodeURIComponent(chatId)}` })
     return channel.onSceneEvent((event) => {
       if (event.chat_id && event.chat_id !== chatId) return
-      dispatch({ type: 'events', events: [event] })
+      // Commit socket edits before answer rendering/refetches. The mounted
+      // model consumes the same state in a layout effect within this commit.
+      applyLiveSceneEvent(event, () => flushSync(() => dispatch({ type: 'events', events: [event] })))
     })
   }, [chatId, demo])
   return edits.docs

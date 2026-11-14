@@ -8,6 +8,41 @@ const docId = 'ifc_bench__ac20-arc'
 test.setTimeout(60_000)
 
 async function openChat(page: Page, id: string) {
+  // Measure raw socket arrival to visible 2D + logical 3D application inside
+  // each browser, without Playwright round trips or waiting for the SSE body.
+  await page.addInitScript((chatId) => {
+    const Socket = window.WebSocket
+    window.WebSocket = class extends Socket {
+      constructor(url: string | URL, protocols?: string | string[]) {
+        super(url, protocols)
+        this.addEventListener('message', (message) => {
+          let event: { type: string; chat_id?: string; edit_id?: string; op: string; item_ids: string[] }
+          try { event = JSON.parse(message.data) } catch { return }
+          if (event.type !== 'scene.edit' || event.chat_id !== chatId || !event.edit_id || !['hide', 'restore'].includes(event.op)) return
+          const key = `scene-edit:${event.edit_id}:socket`
+          if (performance.getEntriesByName(`${key}:received`).length) return
+          performance.mark(`${key}:received`, { detail: event })
+          const start = performance.now()
+          const check = () => {
+            const hidden = event.op === 'hide'
+            const nodes = [...document.querySelectorAll<HTMLElement>('.scene-tag, .evidence-region')]
+            const models = [...document.querySelectorAll<HTMLCanvasElement>('dialog canvas')]
+              .map((node) => (node as LinkedViewerCanvas).__viewer3d).filter((model) => !!model)
+            const applied = event.item_ids.every((id) => {
+              const boxes = nodes.filter((node) => node.dataset.itemId === id)
+              return boxes.length >= 2 && boxes.every((node) => node.dataset.hidden === String(hidden))
+                && models.length > 0 && models.every((model) => model!.commandState().hidden.includes(id) === hidden)
+            })
+            if (applied) {
+              performance.mark(`${key}:applied`)
+              performance.measure(`${key}:receive-to-applied`, `${key}:received`, `${key}:applied`)
+            } else if (performance.now() - start < 5000) setTimeout(check, 0)
+          }
+          setTimeout(check, 0)
+        })
+      }
+    }
+  }, id)
   let snapshots = 0
   page.on('response', (response) => {
     if (response.ok() && new URL(response.url()).pathname === `/api/chats/${id}`) snapshots++
@@ -84,6 +119,16 @@ test('real window commands, 2D tags, 3D and Undo stay in sync on two devices', a
       await expect.poll(() => hiddenInModel(target, itemId!), { timeout: 2000 }).toBe(true)
     }
     expect(performance.now() - start, 'The remote edit must arrive within two seconds').toBeLessThan(2000)
+    for (const target of [page, other]) {
+      const key = `scene-edit:${hidden.answer_id}-0`
+      await expect.poll(() => target.evaluate((key) => performance.getEntriesByName(`${key}:socket:receive-to-applied`).length, key), { timeout: 1000 }).toBe(1)
+      const timings = await target.evaluate((key) => ({
+        commit: performance.getEntriesByName(`${key}:receive-to-applied`).map((entry) => entry.duration),
+        socket: performance.getEntriesByName(`${key}:socket:receive-to-applied`).map((entry) => entry.duration),
+      }), key)
+      expect(timings.commit.length).toBeGreaterThan(0)
+      for (const ms of [...timings.commit, ...timings.socket]) expect(ms, 'Socket receipt to 2D and 3D application').toBeLessThan(500)
+    }
     await expect(a.box).toHaveCSS('opacity', '0.4')
     await expect(b.box.locator(':scope > rect')).toHaveCSS('stroke-dasharray', '5px, 4px')
     const undoResponse = page.waitForResponse((res) => res.request().method() === 'POST' && /\/api\/chats\/[^/]+\/messages$/.test(new URL(res.url()).pathname))
