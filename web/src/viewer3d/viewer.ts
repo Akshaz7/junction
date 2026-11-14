@@ -3,6 +3,10 @@ import {
   Raycaster, Scene, Sphere, Vector2, Vector3, WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import {
+  createHighlightController, itemBounds, readHighlightColor, type HighlightOptions, type HighlightState,
+} from './highlight';
 import {
   disposeScene, itemIdForObject, loadScene, setStorey, type LoadedScene,
 } from './scene';
@@ -16,6 +20,9 @@ export interface Viewer {
   /** Transfers ownership; replaced scenes and the active scene are disposed by the viewer. */
   setScene(scene: LoadedScene): void;
   setStorey(name: string | null): void;
+  highlight(item_ids: readonly string[], options?: HighlightOptions): void;
+  clearHighlight(): void;
+  getHighlightState(): HighlightState;
   /** Coordinates are viewport client pixels, as in PointerEvent.clientX/clientY. */
   pick(x: number, y: number): string | null;
   resize(): void;
@@ -24,6 +31,10 @@ export interface Viewer {
 
 export function createViewer(canvas: HTMLCanvasElement): Viewer {
   const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: false });
+  const labelRenderer = new CSS2DRenderer();
+  labelRenderer.domElement.className = 'viewer3d-label-layer';
+  Object.assign(labelRenderer.domElement.style, { position: 'absolute', pointerEvents: 'none', top: '0', left: '0' });
+  canvas.parentElement?.append(labelRenderer.domElement);
   const world = new Scene();
   world.background = new Color('#f4f3ef');
   const camera = new PerspectiveCamera(45, 1, 0.01, 10000);
@@ -39,6 +50,9 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   let storey: string | null = null;
   let disposed = false;
   let loadVersion = 0;
+  let highlights: ReturnType<typeof createHighlightController> | null = null;
+  const labels: CSS2DObject[] = [];
+  let flight: { start: number; from: Vector3; to: Vector3; targetFrom: Vector3; targetTo: Vector3 } | null = null;
   const raycaster = new Raycaster();
   const pointer = new Vector2();
 
@@ -49,9 +63,71 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     const height = Math.max(1, rect.height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(width, height, false);
+    labelRenderer.setSize(width, height);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
   }
+
+  function clearHighlight(): void {
+    flight = null;
+    highlights?.clearHighlight();
+    for (const label of labels) {
+      label.removeFromParent();
+      label.element.remove();
+    }
+    labels.length = 0;
+  }
+
+  function flyTo(bounds: Box3): void {
+    if (bounds.isEmpty()) return;
+    const sphere = bounds.getBoundingSphere(new Sphere());
+    const radius = Math.max(sphere.radius, 0.1);
+    const halfFov = camera.fov * Math.PI / 360;
+    const limitingFov = Math.min(halfFov, Math.atan(Math.tan(halfFov) * camera.aspect));
+    const distance = radius / Math.sin(limitingFov) * 1.25;
+    const direction = camera.position.clone().sub(controls.target).normalize();
+    if (direction.lengthSq() === 0) direction.set(1, 0.8, 1).normalize();
+    flight = {
+      start: performance.now(), from: camera.position.clone(),
+      to: sphere.center.clone().addScaledVector(direction, distance),
+      targetFrom: controls.target.clone(), targetTo: sphere.center,
+    };
+    camera.near = Math.min(camera.near, radius / 1000);
+    camera.far = Math.max(camera.far, distance + radius * 10);
+    camera.updateProjectionMatrix();
+    controls.minDistance = Math.min(controls.minDistance, radius / 100);
+    controls.maxDistance = Math.max(controls.maxDistance, distance * 5);
+  }
+
+  function highlight(ids: readonly string[], options: HighlightOptions = {}): void {
+    clearHighlight();
+    if (disposed || !active || !highlights) return;
+    const accent = readHighlightColor(canvas);
+    highlights.highlight(ids, options, accent);
+    const state = highlights.getHighlightState();
+    for (const id of state.highlighted) {
+      const object = active.items.get(id)!;
+      const bounds = itemBounds(active, [id]);
+      if (bounds.isEmpty()) continue;
+      const element = document.createElement('span');
+      element.className = 'viewer3d-item-label';
+      element.dataset.itemId = id;
+      element.textContent = state.labels[id];
+      element.setAttribute('aria-label', `Item ${state.labels[id]}: ${id}`);
+      element.style.backgroundColor = accent.getStyle();
+      const label = new CSS2DObject(element);
+      const top = bounds.getCenter(new Vector3());
+      top.y = bounds.max.y + Math.max(bounds.getSize(new Vector3()).length() * 0.04, 0.08);
+      label.position.copy(object.worldToLocal(top));
+      object.add(label);
+      labels.push(label);
+    }
+    const target = options.cameraTargetItemId;
+    flyTo(itemBounds(active, target && active.items.has(target) ? [target] : state.highlighted));
+  }
+
+  // Direct orbit/zoom input takes over from a camera flight.
+  controls.addEventListener('start', () => { flight = null; });
 
   function fit(scene: LoadedScene): void {
     scene.root.updateWorldMatrix(true, true);
@@ -75,11 +151,13 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
 
   function attach(scene: LoadedScene): void {
     if (active === scene) return;
+    clearHighlight();
     if (active) {
       world.remove(active.root);
       disposeScene(active);
     }
     active = scene;
+    highlights = createHighlightController(scene);
     world.add(scene.root);
     fit(scene);
     setStorey(scene, storey);
@@ -93,7 +171,16 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   function render(): void {
     if (disposed) return;
     controls.update();
+    if (flight) {
+      const progress = Math.min(1, (performance.now() - flight.start) / 600);
+      const eased = progress * progress * (3 - 2 * progress);
+      controls.target.lerpVectors(flight.targetFrom, flight.targetTo, eased);
+      camera.position.lerpVectors(flight.from, flight.to, eased);
+      camera.lookAt(controls.target);
+      if (progress === 1) flight = null;
+    }
     renderer.render(world, camera);
+    labelRenderer.render(world, camera);
     frame = requestAnimationFrame(render);
   }
   render();
@@ -121,6 +208,11 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       storey = name;
       if (active) setStorey(active, name);
     },
+    highlight,
+    clearHighlight,
+    getHighlightState() {
+      return highlights?.getHighlightState() ?? { highlighted: [], dimmed: 0, labels: {} };
+    },
     pick(x, y) {
       if (disposed || !active) return null;
       const rect = canvas.getBoundingClientRect();
@@ -144,11 +236,14 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       observer.disconnect();
       window.removeEventListener('resize', resize);
       controls.dispose();
+      clearHighlight();
+      labelRenderer.domElement.remove();
       if (active) {
         world.remove(active.root);
         disposeScene(active);
         active = null;
       }
+      highlights = null;
       renderer.dispose();
     },
   };
