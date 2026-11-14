@@ -53,7 +53,8 @@ LABEL = {"fire_rating": "fire rating", "is_external": "external status", "therma
          "width_m": "width", "height_m": "height", "material": "material", "area_m2": "area",
          "escape_route": "escape-route membership", "window_count": "recorded window count", "fire_rated": "fire rating",
          "type_name": "type", "storey": "level", "description": "description"}
-MISSING = {"", "-", "?", "n/a", "na", "unknown", "undefined", "not defined", "not set", "unset", "null", "none specified"}
+MISSING = {"", "-", "?", "n/a", "na", "unknown", "undefined", "not defined", "not set", "unset", "null", "none specified",
+           "tbd", "to be determined", "not specified", "not applicable"}
 KINDS = {"door": r"doors?|türen?|tür|ovet|ovi|dörr(?:ar)?", "window": r"windows?|fenster|ikkunat?|fönster",
          "wall": r"walls?|wände|wand|seinät?|vägg(?:ar)?", "room": r"rooms?|spaces?|räume|raum|huone(?:et)?|rum",
          "column": r"columns?", "beam": r"beams?", "slab": r"slabs?"}
@@ -77,6 +78,8 @@ def clean(value, key):
             return False
         return None
     if key in ("width_m", "height_m", "area_m2", "window_count"):
+        if isinstance(value, bool):
+            return None
         try:
             n = float(value)
             return n if math.isfinite(n) and (n >= 0 if key == "window_count" else n > 0) else None
@@ -265,6 +268,8 @@ def index(doc_id, root):
                 rec.aliases.update(data["aliases"])
             status = "the original model's properties, quantities, types and materials"
         except (ImportError, OSError, RuntimeError, ValueError, AttributeError, TypeError, KeyError):
+            if doc is None:
+                return None  # An unreadable source is not an empty model.
             status = "the stored model index; the original model could not be read"
     for rec in records.values():
         if rec.values.get("reference"):
@@ -307,9 +312,14 @@ def request(question):
         elif re.search(r"\bby (?:storey|floor|level)\b", q):
             prop = "storey"
     special = "windowless" if kind == "room" and re.search(r"\b(?:no|without) windows?\b|\bwindowless\b", q) else None
+    if len(kinds) > 1 and not special:
+        return None  # A single-kind property answer must not drop other kinds.
     tag = None
-    m = re.search(r"\b(?:tag|mark|reference)\s+[\"']?([\w.-]*\d[\w.-]*)|\b(?:door|window|wall|room)\s+[\"']?([\w.-]*\d[\w.-]*)", question, re.I)
-    if m:
+    quoted = re.search(r"\b(?:tag|mark|reference|door|window|wall|room)\s+[\"']([^\"']+)[\"']", question, re.I)
+    m = re.search(r"\b(?:tag|mark|reference)\s+[\"']?((?!(?:of|is|the|for|on|by)\b)[\w.-]+)|\b(?:door|window|wall|room)\s+[\"']?([\w.-]*\d[\w.-]*)", question, re.I)
+    if quoted:
+        tag = quoted[1]
+    elif m:
         tag = (m[1] or m[2]).rstrip(".?")
     if not (prop or schedule or special or (tag and re.search(r"refer|mean|what|describe", q))):
         return None
@@ -317,7 +327,15 @@ def request(question):
         return None
     # Existing quantity/spatial solvers must retain their full question. A
     # property filter cannot silently replace a length, take-off or comparison.
-    if re.search(r"\b(?:total length|total area|volume|perimeter|waste|cost|price|percentage|proportion|ratio|share|near|nearest|adjacent|distance|between|except|excluding|or|thick\w*|narrowest|widest|tallest|shortest|greatest|smallest|largest|requirement\w*|accessib\w*|complian\w*|regulation\w*|meets?|standards?)\b", q):
+    if re.search(r"\b(?:total length|total area|volume|perimeter|waste|cost|price|percentage|proportion|ratio|share|near|nearest|adjacent|distance|between|except|excluding|or|thick\w*|narrowest|widest|tallest|shortest|greatest|smallest|largest|requirement\w*|accessib\w*|complian\w*|regulation\w*|meets?|standards?|compare|energy|savings?|g[ -]values?|connect\w*|beside|through)\b", q):
+        return None
+    if re.search(r"\b(?:and|from)\b.*\b(?:floor|level|storey|story)\b", q) or re.search(r"\band\s+(?:what|how|which|are|is|do|does)\b", q):
+        return None
+    if re.search(r"\b(?:material|fire[ -]rating|acoustic[ -]rating)\s+(?:of|is|equals?)\s+(?!the\b|a\b|an\b|door\b|doors\b|wall\b|walls\b|window\b|windows\b|room\b|rooms\b|tag\b|mark\b|reference\b)[\w\"']", q):
+        return None  # Value comparisons need an explicit, separate value parser.
+    if re.search(r"\b(?:has|have|with)\s+(?:a\s+)?material\s+\S", q):
+        return None
+    if re.search(r"\b(?:widths?|heights?|materials?|ratings?|u[ -]values?)\s+and\s+(?:widths?|heights?|materials?|(?:fire |acoustic )?ratings?|u[ -]values?)\b", q):
         return None
     predicates = []
     for key, rx, positive in (("is_external", r"\bexternal\b|\bexterior\b", True),
@@ -325,7 +343,8 @@ def request(question):
                               ("load_bearing", r"\bload[ -]bearing\b", True),
                               ("escape_route", r"\bescape route\b|\begress route\b", True)):
         if re.search(rx, q) and (key != prop or re.search(r"\bwhich\b|\bhow many\b|\ball\b|\blist\b|\bschedule\b", q)):
-            predicates.append((key, positive))
+            negative = re.search(r"\b(?:not|non)[ -]+(?:" + rx.replace(r"\b", "") + r")", q)
+            predicates.append((key, not positive if negative else positive))
     if prop == "fire_rating" and re.search(r"\b(?:which|how many|list)\b", q) and re.search(r"\bfire[ -]rated\b", q):
         predicates.append(("fire_rated", not bool(re.search(r"\b(?:not|non)[ -]?fire[ -]rated\b", q))))
     threshold = None
@@ -346,7 +365,9 @@ def request(question):
 def _rated(value):
     if value is None:
         return None
-    return str(value).casefold().strip() not in {"0", "no", "none", "not rated", "unrated", "not fire rated"}
+    if isinstance(value, (bool, int, float)):
+        return bool(value)
+    return str(value).casefold().strip() not in {"0", "false", "no", "none", "not rated", "unrated", "not fire rated"}
 
 
 def display(value, key):
@@ -404,11 +425,13 @@ def _result(question, doc_id, records, text, checked, total, root, t0, *, value=
                 reasoning=reasoning, route="index", cost=dict(usd_total=0.0, calls=[]), latency_ms=int((time.perf_counter()-t0)*1000))
 
 
-def _model_answer(question, doc_id, root, req, t0):
+def _model_answer(question, doc_id, root, req, t0, hidden=()):
     loaded = index(doc_id, root)
     if loaded is None:
         return None
     records, storeys, source = loaded
+    hidden = set(hidden or ())
+    records = [r for r in records if r.item.item_id not in hidden]
     scope = [r for r in records if not req.kind or r.item.kind == req.kind]
     noun = (req.kind + "s") if req.kind else "elements"
     if req.tag:
@@ -416,6 +439,9 @@ def _model_answer(question, doc_id, root, req, t0):
         if not scope:
             return _result(question, doc_id, [], f"**No {req.kind or 'element'} matches that tag, name or reference.**", 0, 0, root, t0, complete=False, source=source)
     st = resolve_storey(question, storeys)
+    named_levels = [s for s in storeys if re.search(r"(?<!\w)" + re.escape(s["name"]) + r"(?!\w)", question, re.I)]
+    if len(named_levels) > 1:
+        return None  # Let the multi-scope route keep all requested levels.
     if storey_requested(question) and st is None:
         return _result(question, doc_id, [], "**No matching level is recorded in this model.**", 0, 0, root, t0, complete=False, source=source)
     if st:
@@ -508,7 +534,7 @@ def _model_answer(question, doc_id, root, req, t0):
         text = f"**{len(scope)} {noun} match that tag, name or reference.**" + _table(["Element", "Type", "Level"], [[_name(r), clean_type_name(r.item.type_name or "Not recorded"), r.item.storey or "Not recorded"] for r in scope[:15]])
     if re.search(r"\ball\b", question, re.I) and prop == "fire_rating" and not req.schedule:
         # A nonempty property is not necessarily a fire classification (e.g. 'Not rated').
-        unrated = [r for r in scope if str(r.values.get(prop, "")).casefold().strip() in {"0", "no", "none", "not rated", "unrated", "not fire rated"}]
+        unrated = [r for r in scope if _rated(r.values.get(prop)) is False]
         if complete and not unrated:
             text = "**All selected doors have a recorded fire-rating value.** This checks recorded values only, not compliance with a fire-safety rule." + _table(["Element", "Fire rating"], [[_name(r), display(r.values.get(prop), prop)] for r in scope[:15]])
         else:
@@ -620,19 +646,21 @@ def _drawing_answer(question, doc_id, root, req, t0):
     out["reasoning"]["steps"] = [dict(kind="found", title="Found", text=f"{len(occurrences)} plan tags and one aligned schedule row", cite=len(citations), ok=None),
                                   dict(kind="checked", title="Checked", text=f"Requested field present on {int(bool(selected))} of 1 schedule rows; exact tag match.", cite=len(citations), ok=bool(selected))]
     if not exact:
-        out["reasoning"]["confidence"] = dict(label="Estimate", pct=round(confidence*100), reason="Read from OCR text; check the tag and schedule boxes.", improve="Check the printed row against the scan.")
+        out["reasoning"]["confidence"] = dict(label="Estimate", pct=round(confidence*100) if selected else 0, reason="Read from OCR text; check the tag and schedule boxes." if selected else "The requested schedule field is not recorded.", improve="Check the printed row against the scan.")
     out["trace"] = [dict(step="props", detail="tag -> aligned text schedule; tag, header and row cited", ms=0, model=None, cost_usd=0)]
     return out
 
 
-def answer(question, doc_ids, root, t0=None):
+def answer(question, doc_ids, root, t0=None, *, hidden=None):
     """None means this route does not handle the question, never a guessed answer."""
     req = request(question)
     if req is None or len(doc_ids) != 1:
         return None
     t0 = t0 or time.perf_counter()
     try:
-        result = _model_answer(question, doc_ids[0], Path(root), req, t0)
+        result = _model_answer(question, doc_ids[0], Path(root), req, t0, hidden)
+        if result is not None and hidden:
+            result["answer"]["text_md"] += "\n\nElements hidden in this chat are excluded; source properties are unchanged."
         return result if result is not None else _drawing_answer(question, doc_ids[0], Path(root), req, t0)
     except (OSError, ValueError, KeyError, TypeError, AttributeError):
         return None  # malformed/partial ingest still has the ordinary reader fallback
