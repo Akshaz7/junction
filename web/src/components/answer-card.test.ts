@@ -11,7 +11,8 @@ describe('answer evidence', () => {
     const html = renderToStaticMarkup(createElement(AnswerCard, { answer, docs: [demoDocument], demo: true, onOpenCitation: () => {} }))
     expect(html).toContain('<strong>2 windows</strong>')
     expect(html).toContain('aria-label="Open citation 1"')
-    expect(html).toContain('Where it is set out')
+    expect(html).toContain('class="source-list"')
+    expect(html).not.toContain('Where it is set out') // one-line answers drop the heading
     expect(html).toContain('aria-label="Sources 1"')
     expect(html).toContain('Show thought process')
     expect(html).toContain('data-testid="answer-cost"')
@@ -51,5 +52,45 @@ describe('answer evidence', () => {
     expect(compact.match(/class="scene-tag"/g)).toHaveLength(12)
     expect(compact).toContain('+8 more')
     expect(compact).toContain('data-item-count="20"')
+  })
+})
+
+describe('answer rendering (QA-LIVE #7)', () => {
+  const render = (mutate: (answer: ReturnType<typeof makeDemoAnswer>) => void) => {
+    const answer = makeDemoAnswer('How many windows are there?')
+    mutate(answer)
+    return renderToStaticMarkup(createElement(AnswerCard, { answer, docs: [demoDocument], demo: false, onOpenCitation: () => {} }))
+  }
+  it('renders markdown tables as tables and hides internal ids', () => {
+    const html = render((a) => { a.answer.text_md = 'Rooms:\n\n| Room | Area |\n|---|---|\n| room-004 | **12 m²** |\n\nSee door-012 [1].' })
+    expect(html).toContain('<table class="answer-table">')
+    expect(html).toContain('<th scope="col">Room</th>')
+    expect(html).toContain('<td>Room 4</td>')
+    expect(html).toContain('<strong>12 m²</strong>')
+    expect(html).toContain('Door 12')
+    expect(html).not.toMatch(/room-004|door-012|\|---/)
+  })
+  it('strips ** from quotes and drops the section heading on one-line answers', () => {
+    const html = render((a) => { a.answer.text_md = '**2 windows** [1]'; a.citations[0].quote = 'a **bold** quote' })
+    expect(html).toContain('a bold quote')
+    expect(html).not.toContain('**')
+    expect(html).not.toContain('Where it is set out')
+    expect(html).toContain('source-list')
+  })
+  it('caps citation chips at 8 with a +N more expander', () => {
+    const html = render((a) => {
+      a.answer.text_md = 'Long answer.\n\nSecond paragraph.'
+      a.citations = Array.from({ length: 12 }, (_, i) => ({ ...makeDemoAnswer('How many windows are there?').citations[0], n: i + 1, quote: `Quote ${i + 1}` }))
+    })
+    expect(html).toContain('+4 more')
+    expect(html).toContain('Quote 8')
+    expect(html).not.toContain('Quote 9')
+    expect(html).toContain('aria-label="Sources 12"')
+  })
+  it('shows document chips from answer.doc_ids', () => {
+    const html = render((a) => { a.doc_ids = [demoDocument.doc_id, 'other__doc'] })
+    expect(html).toContain('data-testid="answer-docs"')
+    expect(html).toContain('Garden room')
+    expect(html).toContain('other__doc')
   })
 })

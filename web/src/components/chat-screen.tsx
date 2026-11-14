@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { ArrowUp, AtSign, CalendarClock, FileSearch, FileText, FolderOpen, HardHat, Plus, Scale, X } from 'lucide-react'
 import { Button } from './ui'
 import { AnswerCard } from './answer-card'
+import { NO_ANSWER_MESSAGE } from '../lib/answer-text'
 import { DocumentViewer, useViewerSheet } from './document-viewer'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document, TraceStep } from '../lib/types'
@@ -40,6 +41,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const [traces, setTraces] = useState<TraceStep[]>([])
   const [streamText, setStreamText] = useState('')
   const [error, setError] = useState('')
+  // A question whose stream ended without an answer: kept on screen with Retry.
+  const [failed, setFailed] = useState<{ question: string; docIds: string[] } | null>(null)
   const [mention, setMention] = useState<Mention | null>(null)
   const [toolsOpen, setToolsOpen] = useState(false)
   const [activeOption, setActiveOption] = useState(0)
@@ -91,7 +94,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       submitting.current = false
       chatId.current = null
       setLiveChatId(null)
-      setBusy(false); setAnswers([]); setViewer(null); setError(''); lastAnswerId.current = null
+      setBusy(false); setAnswers([]); setViewer(null); setError(''); setFailed(null); lastAnswerId.current = null
       setMention(null); setToolsOpen(false); setPendingQuestion(''); setStatuses([]); setTraces([])
       setSelected([]); setRestoredDocIds(null); setDraft('')
       if (drawing && !link) {
@@ -163,7 +166,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       if (event.chat_id !== liveChatId || submitting.current) return
       if (event.type === 'chat.message' && event.role === 'user' && event.text) {
         // Show the question straight from the event; the snapshot fetch below only reconciles.
-        setPendingQuestion(event.text); setBusy(true); setStatuses(['Thinking…']); setTraces([]); setStreamText(''); setError('')
+        setPendingQuestion(event.text); setBusy(true); setStatuses(['Thinking…']); setTraces([]); setStreamText(''); setError(''); setFailed(null)
         refresh()
       } else if (event.type === 'chat.message' || event.type === 'chat.done') refresh()
       else if (event.type === 'chat.status') setStatuses((previous) => previous.at(-1) === event.text ? previous : [...previous, event.text])
@@ -280,6 +283,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     setTraces([])
     setStreamText('')
     setError('')
+    setFailed(null)
     setDraft('')
     setMention(null)
     const docIds = documentIds ?? (selected.length ? selected : docs).map((doc) => doc.doc_id)
@@ -303,6 +307,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     } catch (err) {
       if (generation.current !== version) return
       setDraft(question)
+      setFailed({ question: question.trim(), docIds })
       setError(err instanceof Error ? err.message : 'The request failed. Please try again.')
     } finally {
       if (generation.current === version) {
@@ -364,17 +369,23 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         onOpenCitation(citation)
       }} /> : <article className="exchange" key={`${exchange.id}-${index}`}>
         {exchange.question && <div className="question-bubble">{exchange.question}</div>}
-        <p className="answer-text">{exchange.content || 'No answer yet.'}</p>
+        {exchange.content ? <p className="answer-text">{exchange.content}</p>
+          : <p className="error-message" role="alert">{NO_ANSWER_MESSAGE}{exchange.question && <button type="button" className="button button-raised retry-button" disabled={busy || restoring} onClick={() => void ask(exchange.question)}>Retry</button>}</p>}
       </article>)}
+      {failed && !busy && <article className="exchange failed-exchange" data-testid="failed-exchange">
+        <div className="question-bubble">{failed.question}</div>
+        <p className="error-message" role="alert">{error}<button type="button" className="button button-raised retry-button" onClick={() => void ask(failed.question, failed.docIds)}>Retry</button></p>
+      </article>}
       {busy && <div className="exchange pending-exchange" aria-busy="true">
         <div className="question-bubble">{pendingQuestion}</div>
+        {statuses.length > 1 && <ul className="status-trail" aria-label="Steps so far">{statuses.slice(0, -1).map((text, index) => <li key={`${index}-${text}`}>{text}</li>)}</ul>}
         <div className="status-lines" role="status" aria-live="polite"><span className="thinking-mark" aria-hidden="true">H</span><ThinkingText text={statuses.at(-1) || 'Thinking…'} /></div>
         {!!streamText && <p className="answer-text streaming-text" data-testid="streaming-answer">{streamText.replace(/\*\*/g, '')}</p>}
         {!!traces.length && <details className="answer-detail"><summary>Show thought process</summary>{traces.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>}
       </div>}
     </div>
     <div className="composer-area">
-      {error && <p className="error-message" role="alert">{error}</p>}
+      {error && !failed && <p className="error-message" role="alert">{error}</p>}
       <form className="composer" onSubmit={(event) => { event.preventDefault(); if (!mention) void ask(draft) }}>
         {!!selected.length && <div className="selected-documents" aria-label="Selected documents">{selected.map((doc) => <span className="chip document-chip" key={doc.doc_id}><FileText size={13} /><span>{doc.title}</span><button type="button" disabled={busy} aria-label={`Remove ${doc.title}`} onClick={() => setSelected((previous) => previous.filter((item) => item.doc_id !== doc.doc_id))}><X size={13} /></button></span>)}</div>}
         <div className="composer-input"><label className="sr-only" htmlFor="question">Ask about your drawings</label>

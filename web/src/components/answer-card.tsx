@@ -4,6 +4,7 @@ import { AdvisorCardView } from '../viewer3d/AdvisorCardView'
 import { onAdvisorCards } from '../viewer3d/liveHighlight'
 import type { AdvisorCard } from '../viewer3d/advisor'
 import { Tooltip } from './ui'
+import { CITATION_CAP, humanizeIds, isOneLine, parseBlocks, plainQuote } from '../lib/answer-text'
 import type { Answer, Citation, Document } from '../lib/types'
 import { SpeakButton } from './voice-controls'
 import { ExportAnswerButton } from './answer-export'
@@ -20,14 +21,29 @@ function CitationChip({ citation, selected, onOpenCitation }: { citation: Citati
   return <button type="button" className="citation-chip" aria-label={`Open citation ${citation.n}`} aria-pressed={selected?.n === citation.n} onClick={() => onOpenCitation(citation)}>{citation.n}</button>
 }
 
-function AnswerText({ answer, selected, onOpenCitation }: { answer: Answer; selected?: Citation; onOpenCitation: (citation: Citation) => void }) {
-  if (answer.answer.abstained) return answer.answer.text_md.replace(/\*\*/g, '').replace(/\s*\[\d+\]/g, '')
-  return answer.answer.text_md.split(/(\*\*[\s\S]+?\*\*|\[\d+\])/g).map((part, index) => {
-    if (part.startsWith('**')) return <strong key={index}>{part.slice(2, -2)}</strong>
+function labelsOf(answer: Answer): Record<string, string> {
+  return Object.fromEntries(answer.evidence.boxes.map((box) => [box.item_id, box.label]))
+}
+
+function InlineText({ text, answer, selected, onOpenCitation }: { text: string; answer: Answer; selected?: Citation; onOpenCitation: (citation: Citation) => void }) {
+  return <>{text.split(/(\*\*[\s\S]+?\*\*|\[\d+\])/g).map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) return <strong key={index}>{part.slice(2, -2)}</strong>
     const number = part.match(/^\[(\d+)\]$/)?.[1]
     const citation = number ? answer.citations.find((item) => item.n === Number(number)) : undefined
     return citation ? <CitationChip key={index} citation={citation} selected={selected} onOpenCitation={onOpenCitation} /> : part
-  })
+  })}</>
+}
+
+function AnswerBody({ answer, selected, onOpenCitation }: { answer: Answer; selected?: Citation; onOpenCitation: (citation: Citation) => void }) {
+  const labels = labelsOf(answer)
+  if (answer.answer.abstained) return <p className="answer-text">{humanizeIds(answer.answer.text_md, labels).replace(/\*\*/g, '').replace(/\s*\[\d+\]/g, '')}</p>
+  const blocks = parseBlocks(humanizeIds(answer.answer.text_md, labels))
+  const inline = (text: string) => <InlineText text={text} answer={answer} selected={selected} onOpenCitation={onOpenCitation} />
+  if (!blocks.some((block) => block.type === 'table')) return <p className="answer-text">{inline(humanizeIds(answer.answer.text_md, labels))}</p>
+  return <div className="answer-text answer-rich">{blocks.map((block, index) => block.type === 'table'
+    ? <div className="answer-table-wrap" key={index}><table className="answer-table"><thead><tr>{block.header.map((cell, c) => <th key={c} scope="col">{inline(cell)}</th>)}</tr></thead>
+      <tbody>{block.rows.map((row, r) => <tr key={r}>{row.map((cell, c) => <td key={c}>{inline(cell)}</td>)}</tr>)}</tbody></table></div>
+    : block.text.trim() ? <p key={index}>{inline(block.text.trim())}</p> : null)}</div>
 }
 
 /** Edit checks for this answer: the cards saved on it, replaced by live `advisor.cards` for this chat when it hid something. */
@@ -50,7 +66,13 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
   edits?: DrawingEdits; busy?: boolean; onUndo?: () => void; onOpenItem?: (id: string) => void
   chatId?: string | null
 }) {
-  const citations = answer.answer.abstained ? [] : answer.citations
+  const allCitations = answer.answer.abstained ? [] : answer.citations
+  const [showAll, setShowAll] = useState(false)
+  const hidden = showAll ? 0 : Math.max(0, allCitations.length - CITATION_CAP)
+  const citations = hidden ? allCitations.slice(0, CITATION_CAP) : allCitations
+  const labels = labelsOf(answer)
+  const oneLine = isOneLine(answer.answer.text_md)
+  const docChips = answer.doc_ids.map((docId) => ({ docId, title: docs.find((doc) => doc.doc_id === docId)?.title ?? docId, first: allCitations.find((citation) => citation.doc_id === docId) }))
   const advice = useAnswerAdvice(answer, chatId)
   const table = answerTableSelection(answer)
   const generated = demo || answer.trace.some((step) => step.stub)
@@ -63,21 +85,25 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
   return <article className="exchange">
     <div className="question-bubble">{answer.question}</div>
     <details className="answer-detail thought-process"><summary>Show thought process</summary>{answer.trace.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>
-    <p className="answer-text"><AnswerText answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} /></p>
+    <AnswerBody answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} />
+    {!!docChips.length && <div className="answer-docs" aria-label="Documents used" data-testid="answer-docs">{docChips.map(({ docId, title, first }) => first
+      ? <button type="button" key={docId} className="source-file-chip answer-doc-chip" aria-label={`Open document ${title}`} onClick={() => onOpenCitation(first)}><FileText size={14} /><span>{title}</span></button>
+      : <span key={docId} className="source-file-chip answer-doc-chip"><FileText size={14} /><span>{title}</span></span>)}</div>}
     <SceneCommandTags answer={answer} edits={edits} busy={busy} onUndo={onUndo} onOpenItem={onOpenItem} />
     {!!advice.length && <div className="advisor-card-list" aria-label="Advice for this change" data-testid="answer-advisor-cards">
       {advice.map((card) => <AdvisorCardView key={card.card_id} card={card} />)}
     </div>}
     {!!citations.length && <>
-      <h3 className="source-heading">Where it is set out</h3>
+      {!oneLine && <h3 className="source-heading">Where it is set out</h3>}
       <ol className="source-list">{sources.map((source) => <li key={source.docId}>
         <div className="source-document"><strong>{source.title.replace(/\.[a-z0-9]+(?:\s*[—–-]?\s*generated for demo)?$/i, '')}</strong> (<button type="button" className="source-file-chip" aria-label={`Open source document ${source.title}`} onClick={() => onOpenCitation(source.citations[0])}><FileText size={14} /><span>{source.title}</span></button>)</div>
-        <ul>{source.citations.map((citation) => <li key={citation.n}>{citation.quote || `Page ${citation.page}${citation.item_ids.length ? ` · ${citation.item_ids.length} cited ${citation.item_ids.length === 1 ? 'item' : 'items'}` : ''}`} <CitationChip citation={citation} selected={activeCitation} onOpenCitation={onOpenCitation} /></li>)}</ul>
+        <ul>{source.citations.map((citation) => <li key={citation.n}>{(citation.quote && humanizeIds(plainQuote(citation.quote), labels)) || `Page ${citation.page}${citation.item_ids.length ? ` · ${citation.item_ids.length} cited ${citation.item_ids.length === 1 ? 'item' : 'items'}` : ''}`} <CitationChip citation={citation} selected={activeCitation} onOpenCitation={onOpenCitation} /></li>)}</ul>
       </li>)}</ol>
+      {(hidden > 0 || showAll) && allCitations.length > CITATION_CAP && <button type="button" className="citation-more" aria-expanded={showAll} onClick={() => setShowAll((value) => !value)}>{showAll ? 'Show fewer' : `+${hidden} more`}</button>}
     </>}
     <div className="answer-actions">
-      {!!citations.length && <details className="answer-detail sources-detail"><summary className="sources-summary" aria-label={`Sources ${citations.length}`}><FileText size={14} /><span>Sources</span><span className="source-count">{citations.length}</span></summary>{citations.map((citation) => <p key={citation.n}>
-        <CitationChip citation={citation} selected={activeCitation} onOpenCitation={onOpenCitation} /> {citation.item_ids.join(', ')} · Page {citation.page}
+      {!!citations.length && <details className="answer-detail sources-detail"><summary className="sources-summary" aria-label={`Sources ${allCitations.length}`}><FileText size={14} /><span>Sources</span><span className="source-count">{allCitations.length}</span></summary>{allCitations.map((citation) => <p key={citation.n}>
+        <CitationChip citation={citation} selected={activeCitation} onOpenCitation={onOpenCitation} /> {humanizeIds(citation.item_ids.join(', '), labels)} · Page {citation.page}
       </p>)}</details>}
       <SpeakButton text={answer.answer.text_md} />
       <ExportAnswerButton answer={answer} docs={docs} chatId={chatId} demo={demo} />

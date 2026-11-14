@@ -826,3 +826,20 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 .chat-history-popover time { color: var(--muted-foreground); font-size: var(--text-caption); }
 .chat-history-popover > p { padding: 16px; color: var(--muted-foreground); }
 .chat-action-toast { width: max-content; max-width: calc(100vw - 32px); padding: 10px 14px; font-size: var(--text-body-sm); }
+
+/* Answer rendering: tables, document chips, citation cap. */
+.answer-rich p { margin: 0 0 12px; }
+.answer-table-wrap { overflow-x: auto; margin: 4px 0 14px; max-width: 100%; }
+.answer-table { border-collapse: collapse; font-size: 14px; min-width: 60%; }
+.answer-table th, .answer-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+.answer-table th { background: var(--ink-well); font-weight: 600; }
+.answer-docs { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+.answer-doc-chip { max-width: 100%; }
+.answer-doc-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.citation-more { margin: 4px 0 0; border: 0; background: none; color: var(--muted-foreground); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; }
+/* The header buttons sit over the chat pane when the viewer is split open: start the thread below them. */
+.has-viewer .conversation { padding-top: 64px; }
+.error-message .retry-button { margin-left: 10px; }
+.status-trail { list-style: none; margin: 0 0 6px; padding: 0; color: var(--muted-foreground); font-size: 13px; }
+.status-trail li::before { content: '\2713'; margin-right: 8px; }
+.failed-exchange .error-message { margin-top: 0; }
