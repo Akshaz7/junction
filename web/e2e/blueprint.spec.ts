@@ -81,7 +81,7 @@ test('answer highlights still pop over glass and tinted materials', async ({ pag
     const out: { opacity: number; emissive: number }[] = []
     for (const id of ids) viewer.scene!.items.get(id)!.traverse((n) => {
       const m = (n as { material?: { opacity: number; emissiveIntensity?: number } }).material
-      if (m && !Array.isArray(m)) out.push({ opacity: m.opacity, emissive: m.emissiveIntensity ?? 0 })
+      if (m && !Array.isArray(m) && m.emissiveIntensity !== undefined) out.push({ opacity: m.opacity, emissive: m.emissiveIntensity })
     })
     return out
   })
@@ -147,4 +147,34 @@ test('72 highlights: at most 12 callout tags, glow and legend stay, the building
   expect(r.tags).toBeLessThanOrEqual(12)
   expect(r.covered).toBeGreaterThanOrEqual(0.4)
   expect(r.siteOpacity).toBeLessThan(0.5)
+})
+
+test('storey answer: the model is cut above that storey, the build-up ends on it, doors and windows glow with outlines, no pins', async ({ page }) => {
+  await open(page, 'ifc_bench__ac20-arc', 'ifc_bench__ac20-arc')
+  const r = await page.evaluate(async () => {
+    const v = (window as Win).viewer3dTest; const s = v.scene!
+    let last: { label: string; index: number; total: number } | null = null
+    v.onBuildChange((b) => { if (b) last = b })
+    v.visualise()
+    const floor = (k: string) => [...s.items.keys()].filter((i) => s.manifest.items[i].kind === k && ((s.manifest.items[i].storey as { name?: string })?.name ?? s.manifest.items[i].storey) === '1. Obergeschoss')
+    const ids = [...floor('door'), ...floor('window')]
+    v.highlight(ids, {})
+    await new Promise((res) => setTimeout(res, 1200))
+    let aboveVisible = 0, roofVisible = 0, outlines = 0
+    for (const [id, o] of s.items) {
+      const it = s.manifest.items[id]; const st = (it.storey as { name?: string })?.name ?? it.storey
+      if (o.visible && typeof st === 'string' && /Dachgeschoss|2\. Obergeschoss/.test(st)) aboveVisible++
+      if (o.visible && it.kind === 'roof') roofVisible++
+    }
+    s.root.traverse((n) => { if (n.userData.highlightOutline) outlines++ })
+    return { n: ids.length, aboveVisible, roofVisible, outlines, label: (last as { label?: string } | null)?.label ?? '', pins: document.querySelectorAll('.viewer3d-finding-pin').length,
+      edit: document.querySelector('button[aria-label="Edit"]')?.getAttribute('aria-pressed') }
+  })
+  expect(r.n).toBeGreaterThan(12)
+  expect(r.aboveVisible).toBe(0)
+  expect(r.roofVisible).toBe(0)
+  expect(r.outlines).toBeGreaterThan(0)
+  expect(r.label).not.toMatch(/Dachgeschoss|Roof/i)
+  expect(r.pins).toBe(0)
+  expect(r.edit).not.toBe('true')
 })

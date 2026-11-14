@@ -91,7 +91,7 @@ describe('large-scene render buffers preserve original item interactions', () =>
     batches.sync();
     expect(batch.getVisibleAt(0)).toBe(false);
     expect(source.layers.mask & 1).toBe(1);
-    expect((source.material as MeshStandardMaterial).emissiveIntensity).toBe(1.5);
+    expect((source.material as MeshStandardMaterial).emissiveIntensity).toBe(2.8);
     highlights.clearHighlight();
     batches.sync();
     expect(batch.getVisibleAt(0)).toBe(true);

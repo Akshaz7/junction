@@ -174,7 +174,7 @@ describe('highlight materials and contract item state', () => {
     controller.highlight(['window-b']);
     expect(disposeClone).toHaveBeenCalledOnce();
     expect(a.material).toBe(material);
-    expect(b.material.emissiveIntensity).toBe(1.5);
+    expect(b.material.emissiveIntensity).toBe(2.8);
     expect(controller.getHighlightState().highlighted).toEqual(['window-b']);
     const snapshot = controller.getHighlightState();
     snapshot.highlighted.push('fake');
@@ -191,7 +191,7 @@ describe('highlight materials and contract item state', () => {
     setStorey(scene, 'Ground');
     expect(b.visible).toBe(false);
     controller.highlight(['window-b']);
-    expect(b.material.emissiveIntensity).toBe(1.5);
+    expect(b.material.emissiveIntensity).toBe(2.8);
     expect(b.visible).toBe(false);
     controller.clearHighlight();
     expect(b.visible).toBe(false);

@@ -112,6 +112,8 @@ export interface BuildAnimationOptions {
   pinned?: () => ReadonlySet<string> | readonly string[];
   /** Start playing (after the flat intro) instead of waiting on the slider. Ignored under reduced motion. */
   autoplay?: boolean;
+  /** Only these items take part in the build (the cut storey and below; the roof only when shown). */
+  include?: (id: string) => boolean;
 }
 
 /**
@@ -119,7 +121,11 @@ export interface BuildAnimationOptions {
  * Position `p` is 0..N: steps 1..floor(p) are complete, step floor(p)+1 is growing.
  */
 export function createBuildAnimation(scene: LoadedScene, startedAt: number, options: BuildAnimationOptions = {}) {
-  const steps = buildSteps(scene.manifest);
+  const include = options.include;
+  const steps = buildSteps(scene.manifest)
+    .map((step) => include ? { ...step, ids: step.ids.filter(include) } : step)
+    .filter((step) => step.ids.length);
+  if (!steps.length) steps.push({ label: 'Model', ids: Object.keys(scene.manifest.items) });
   const total = steps.length;
   const stepMs = stepDurationMs(total);
   const managed: Managed[] = [];

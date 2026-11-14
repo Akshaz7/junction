@@ -1,5 +1,7 @@
-import { Box3, Color, type Material, type Mesh, type Object3D } from 'three';
+import { Box3, Color, EdgesGeometry, LineBasicMaterial, LineSegments, type Material, type Mesh, type Object3D } from 'three';
 import type { LoadedScene } from './scene';
+
+const GLOW_INTENSITY = 2.8;
 
 export interface HighlightOptions {
   /** CONTRACT 5.7 evidence.boxes labels, keyed by the same item_id. */
@@ -42,7 +44,11 @@ export function createHighlightController(scene: LoadedScene) {
   /** Emissive surfaces per answer item, with their settled intensity, so a reveal can pulse them. */
   const glows = new Map<string, { surface: { emissiveIntensity?: number }; base: number }[]>();
 
+  const outlines: LineSegments[] = [];
+
   function clearHighlight(): void {
+    for (const line of outlines) { line.removeFromParent(); line.geometry.dispose(); (line.material as Material).dispose(); }
+    outlines.length = 0;
     glows.clear();
     for (const [mesh, material] of originals) mesh.material = material;
     originals.clear();
@@ -84,14 +90,19 @@ export function createHighlightController(scene: LoadedScene) {
             if (clone.transparent && clone.opacity < 0.92) clone.opacity = 0.92;
             if (surface.emissive) {
               surface.emissive.copy(color);
-              surface.emissiveIntensity = 1.5;
-              (glows.get(owner!) ?? glows.set(owner!, []).get(owner!)!).push({ surface, base: 1.5 });
+              surface.color?.copy(color);
+              surface.emissiveIntensity = GLOW_INTENSITY;
+              (glows.get(owner!) ?? glows.set(owner!, []).get(owner!)!).push({ surface, base: GLOW_INTENSITY });
             } else surface.color?.copy(color);
           }
           clone.needsUpdate = true;
           return clone;
         };
         mesh.material = Array.isArray(mesh.material) ? mesh.material.map(modify) : modify(mesh.material);
+        // Outline in the kind colour so doors and windows read at any zoom.
+        const line = new LineSegments(new EdgesGeometry(mesh.geometry, 25), new LineBasicMaterial({ color: color.clone().multiplyScalar(0.7), depthTest: false, transparent: true }));
+        line.raycast = () => {}; line.renderOrder = 10; line.userData.highlightOutline = true;
+        mesh.add(line); outlines.push(line);
       });
     },
     clearHighlight,

@@ -55,7 +55,7 @@ test('a new highlight orbits once, dims the rest, and lights items and tags one 
   expect(Math.min(...out.map((s) => s.wall))).toBeGreaterThan(0.4)
   expect(samples.wallEnd).toBe(1)
   expect(samples.end.active).toBe(false)
-  expect(samples.settled).toEqual(doors.map(() => 1.5))
+  expect(samples.settled).toEqual(doors.map(() => 2.8))
   await expect(page.locator('.viewer3d-annotation[data-pop]')).toHaveCount(0)
 })
 
@@ -82,7 +82,7 @@ test('reduced motion shows the lit answer at once', async ({ page }) => {
     return { state: v.getCinematicState(), glow }
   }, doors)
   expect(result.state.active).toBe(false)
-  expect(result.glow).toBe(1.5)
+  expect(result.glow).toBe(2.8)
 })
 
 test('hide fades out, reset fades back in, isolate dims the rest gradually', async ({ page }) => {

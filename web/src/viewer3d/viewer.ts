@@ -315,6 +315,29 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     controls.maxDistance = Math.max(controls.maxDistance, distance * 5);
   }
 
+  /** The answer's storey was cut after the build was created: end the build-up on that storey, not above it. */
+  function retargetBuild(ids: readonly string[]): void {
+    if (!build || !active || !ids.length) return;
+    const was = build;
+    const done = was.phase === 'done';
+    const prevTotal = was.animation.total;
+    was.cancelTransitions(); was.animation.restore();
+    const now = performance.now();
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const animation = createBuildAnimation(active, now, {
+      reducedMotion, pinned: () => highlights?.getHighlightState().highlighted ?? [],
+      include: (id) => active?.items.get(id)?.visible !== false,
+    });
+    if (animation.total === prevTotal && !done) { /* same steps: keep restarted intro */ }
+    if (done) animation.setStep(animation.total);
+    was.animation = animation;
+    was.cancelTransitions = done ? () => {} : scheduleBuildTransitions(sampleRise, animation.timeline(now));
+    was.key = ''; was.dirty = true;
+    const state = animation.sample(now);
+    was.phase = state.phase;
+    emitBuild(state);
+  }
+
   function highlight(ids: readonly string[], options: HighlightOptions = {}): void {
     if (ids.length) ensureInteractionMaterials();
     clearHighlight();
@@ -323,6 +346,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     cutaway?.followHighlight(ids, options.cameraTargetItemId);
     commandVisuals?.captureVisibility();
     notifyCutaway();
+    retargetBuild(ids);
     // Compute labels using full geometry: a flat node has a singular world matrix.
     build?.animation.restore();
     const scene = active;
