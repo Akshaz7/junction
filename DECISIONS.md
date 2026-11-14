@@ -31,3 +31,5 @@ Format for new lines: `YYYY-MM-DD HH:MM — decision — reason`.
 - 2026-11-14 02:55 — LEAD owns root `pyproject.toml`/`uv.lock`; Claude workers request new Python deps with a NEEDS: line in their report instead of running `uv add` — avoids 4 agents racing on the lock file.
 - 2026-11-14 02:55 — Codex runs as `codex exec -s workspace-write -c sandbox_workspace_write.network_access=true` (network for npm); iOS builds use `-derivedDataPath ios/build/DerivedData` so they stay inside the sandbox.
 - 2026-11-14 02:56 — Added row T-00 (viewer core as plain TS, no package.json edits) — 3D had no row with satisfied deps (T-01 needs W-01 and D-06); Ash pointed out it was idle.
+- 2026-11-14 02:57 — Pulse runs every 60 s in `scripts/lead_watch.sh` (logs/pulse.log); it wakes the LEAD only on a '!!' flag or every 10 min for check_keys. Worker completions wake the LEAD directly. Same 60 s pulse, far fewer idle lead turns.
+- 2026-11-14 02:58 — I-02 starts before D-10 using a fixture USDZ the LEAD generates with usd-core (5 prims named by usd_name) — the row allows a bundled fixture; avoids IOS idling for hours. Real scenes swap in when D-10 lands.

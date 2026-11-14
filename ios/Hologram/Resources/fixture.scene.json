@@ -1,0 +1,105 @@
+{
+  "doc_id": "fixture__ios",
+  "usdz": "fixture.usdz",
+  "units": "m",
+  "up": "Y",
+  "origin_offset_m": [
+    0,
+    0,
+    0
+  ],
+  "storeys": [],
+  "items": {
+    "wall-001": {
+      "node": "wall-001",
+      "usd_name": "i_7b48a86d5f6d4471",
+      "kind": "wall",
+      "storey": null,
+      "bbox_m": [
+        [
+          -3.0,
+          0.0,
+          -2.1
+        ],
+        [
+          3.0,
+          2.7,
+          -1.9
+        ]
+      ]
+    },
+    "wall-002": {
+      "node": "wall-002",
+      "usd_name": "i_df1b6aaadb3c980f",
+      "kind": "wall",
+      "storey": null,
+      "bbox_m": [
+        [
+          -3.1,
+          0.0,
+          -2.0
+        ],
+        [
+          -2.9,
+          2.7,
+          2.0
+        ]
+      ]
+    },
+    "door-001": {
+      "node": "door-001",
+      "usd_name": "i_7eea4caad788ba9b",
+      "kind": "door",
+      "storey": null,
+      "bbox_m": [
+        [
+          0.55,
+          0.0,
+          -2.125
+        ],
+        [
+          1.45,
+          2.1,
+          -1.875
+        ]
+      ]
+    },
+    "window-001": {
+      "node": "window-001",
+      "usd_name": "i_52f45ebe784f28cc",
+      "kind": "window",
+      "storey": null,
+      "bbox_m": [
+        [
+          -2.1,
+          0.9,
+          -2.125
+        ],
+        [
+          -0.9,
+          2.1,
+          -1.875
+        ]
+      ]
+    },
+    "window-002": {
+      "node": "window-002",
+      "usd_name": "i_cb9deec18252f998",
+      "kind": "window",
+      "storey": null,
+      "bbox_m": [
+        [
+          -3.125,
+          0.9,
+          0.4
+        ],
+        [
+          -2.875,
+          2.1,
+          1.6
+        ]
+      ]
+    }
+  },
+  "note": "generated for demo: synthetic test fixture"
+}

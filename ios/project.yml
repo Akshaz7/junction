@@ -15,7 +15,10 @@ targets:
     type: application
     platform: iOS
     sources:
-      - Hologram
+      - path: Hologram
+        excludes: [Resources]
+      - path: Hologram/Resources
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.teamrs3.hologram
@@ -28,6 +31,8 @@ targets:
     platform: iOS
     sources:
       - HologramTests
+      - path: Hologram/Resources
+        buildPhase: resources
     dependencies:
       - target: Hologram
     settings:
