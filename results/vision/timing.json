@@ -1,0 +1,82 @@
+{
+ "device": "mps",
+ "params": {
+  "seg_wall_min_frac": 0.005,
+  "seg_size": 512,
+  "det_size": 1024,
+  "seg_min_frac": 0.0001,
+  "det_min_px": 20,
+  "wall_len_frac": 0.03
+ },
+ "per_doc": {
+  "cubicasa5k__colorful-11397": {
+   "image": [
+    475,
+    650
+   ],
+   "seg_ms": 32.2,
+   "walls_from": "seg",
+   "det_ms": 614.4,
+   "ocr_ms": 342.4,
+   "scale": {
+    "m_per_px": 0.02903,
+    "method": "door-prior",
+    "confidence": 0.3,
+    "evidence": "median door icon 31px = 0.9 m"
+   }
+  },
+  "cubicasa5k__high-quality-1097": {
+   "image": [
+    672,
+    469
+   ],
+   "seg_ms": 31.3,
+   "walls_from": "seg",
+   "det_ms": 337.0,
+   "ocr_ms": 179.5,
+   "scale": {
+    "m_per_px": 0.045,
+    "method": "door-prior",
+    "confidence": 0.3,
+    "evidence": "median door icon 20px = 0.9 m"
+   }
+  },
+  "cubicasa5k__high-quality-architectural-10321": {
+   "image": [
+    785,
+    1145
+   ],
+   "seg_ms": 52.5,
+   "walls_from": "seg",
+   "det_ms": 464.1,
+   "ocr_ms": 302.2,
+   "scale": {
+    "m_per_px": 0.03462,
+    "method": "door-prior",
+    "confidence": 0.3,
+    "evidence": "median door icon 26px = 0.9 m"
+   }
+  },
+  "cubicasa5k__high-quality-architectural-12617": {
+   "image": [
+    2480,
+    1748
+   ],
+   "seg_ms": 94.3,
+   "walls_from": "det",
+   "det_ms": 1733.8,
+   "ocr_ms": 332.3,
+   "scale": {
+    "m_per_px": 0.00455,
+    "method": "dimension",
+    "confidence": 0.55,
+    "evidence": "2 stated area text(s)"
+   }
+  }
+ },
+ "mean_ms": {
+  "seg_ms": 52.6,
+  "det_ms": 787.3,
+  "ocr_ms": 289.1
+ }
+}

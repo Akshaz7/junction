@@ -1,0 +1,320 @@
+{
+ "overall_exact_acc": 0.541,
+ "n_questions": 37,
+ "per_kind": {
+  "balcony": {
+   "n": 3,
+   "exact_acc": 0.667,
+   "within1_acc": 1.0,
+   "mae": 0.33,
+   "over": 0,
+   "under": 1
+  },
+  "bathroom": {
+   "n": 3,
+   "exact_acc": 1.0,
+   "within1_acc": 1.0,
+   "mae": 0.0,
+   "over": 0,
+   "under": 0
+  },
+  "bedroom": {
+   "n": 3,
+   "exact_acc": 0.667,
+   "within1_acc": 0.667,
+   "mae": 0.67,
+   "over": 0,
+   "under": 1
+  },
+  "door": {
+   "n": 3,
+   "exact_acc": 0.333,
+   "within1_acc": 0.667,
+   "mae": 1.33,
+   "over": 2,
+   "under": 0
+  },
+  "kitchen": {
+   "n": 3,
+   "exact_acc": 0.667,
+   "within1_acc": 1.0,
+   "mae": 0.33,
+   "over": 1,
+   "under": 0
+  },
+  "sauna": {
+   "n": 3,
+   "exact_acc": 0.667,
+   "within1_acc": 0.667,
+   "mae": 0.67,
+   "over": 0,
+   "under": 1
+  },
+  "shower_bathtub": {
+   "n": 4,
+   "exact_acc": 0.0,
+   "within1_acc": 0.25,
+   "mae": 2.5,
+   "over": 1,
+   "under": 3
+  },
+  "sink": {
+   "n": 4,
+   "exact_acc": 0.75,
+   "within1_acc": 1.0,
+   "mae": 0.25,
+   "over": 1,
+   "under": 0
+  },
+  "toilet": {
+   "n": 4,
+   "exact_acc": 0.75,
+   "within1_acc": 1.0,
+   "mae": 0.25,
+   "over": 1,
+   "under": 0
+  },
+  "wc_room": {
+   "n": 3,
+   "exact_acc": 0.667,
+   "within1_acc": 0.667,
+   "mae": 0.67,
+   "over": 0,
+   "under": 1
+  },
+  "window": {
+   "n": 4,
+   "exact_acc": 0.0,
+   "within1_acc": 0.5,
+   "mae": 2.75,
+   "over": 1,
+   "under": 3
+  }
+ },
+ "planmap": "planmap-1.json",
+ "note": "all questions are on held-out drawings; no thresholds tuned on them except coarse det_size choice (4 fixtures)",
+ "rows": [
+  {
+   "doc_id": "cubicasa5k__colorful-11397",
+   "kind": "window",
+   "truth": 13,
+   "pred": 12
+  },
+  {
+   "doc_id": "cubicasa5k__colorful-11397",
+   "kind": "toilet",
+   "truth": 2,
+   "pred": 2
+  },
+  {
+   "doc_id": "cubicasa5k__colorful-11397",
+   "kind": "sink",
+   "truth": 3,
+   "pred": 3
+  },
+  {
+   "doc_id": "cubicasa5k__colorful-11397",
+   "kind": "shower_bathtub",
+   "truth": 3,
+   "pred": 0
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-1097",
+   "kind": "door",
+   "truth": 8,
+   "pred": 9
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-1097",
+   "kind": "window",
+   "truth": 4,
+   "pred": 5
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-1097",
+   "kind": "bedroom",
+   "truth": 2,
+   "pred": 2
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-1097",
+   "kind": "kitchen",
+   "truth": 1,
+   "pred": 1
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-1097",
+   "kind": "bathroom",
+   "truth": 1,
+   "pred": 1
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-1097",
+   "kind": "wc_room",
+   "truth": 0,
+   "pred": 0
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-1097",
+   "kind": "sauna",
+   "truth": 0,
+   "pred": 0
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-1097",
+   "kind": "balcony",
+   "truth": 0,
+   "pred": 0
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-1097",
+   "kind": "toilet",
+   "truth": 1,
+   "pred": 1
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-1097",
+   "kind": "sink",
+   "truth": 2,
+   "pred": 2
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-1097",
+   "kind": "shower_bathtub",
+   "truth": 1,
+   "pred": 0
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-10321",
+   "kind": "door",
+   "truth": 26,
+   "pred": 29
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-10321",
+   "kind": "window",
+   "truth": 44,
+   "pred": 37
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-10321",
+   "kind": "bedroom",
+   "truth": 8,
+   "pred": 6
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-10321",
+   "kind": "kitchen",
+   "truth": 2,
+   "pred": 2
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-10321",
+   "kind": "bathroom",
+   "truth": 4,
+   "pred": 4
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-10321",
+   "kind": "wc_room",
+   "truth": 2,
+   "pred": 0
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-10321",
+   "kind": "sauna",
+   "truth": 2,
+   "pred": 0
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-10321",
+   "kind": "balcony",
+   "truth": 2,
+   "pred": 1
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-10321",
+   "kind": "toilet",
+   "truth": 4,
+   "pred": 5
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-10321",
+   "kind": "sink",
+   "truth": 6,
+   "pred": 7
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-10321",
+   "kind": "shower_bathtub",
+   "truth": 4,
+   "pred": 0
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-12617",
+   "kind": "door",
+   "truth": 3,
+   "pred": 3
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-12617",
+   "kind": "window",
+   "truth": 4,
+   "pred": 2
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-12617",
+   "kind": "bedroom",
+   "truth": 0,
+   "pred": 0
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-12617",
+   "kind": "kitchen",
+   "truth": 1,
+   "pred": 2
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-12617",
+   "kind": "bathroom",
+   "truth": 1,
+   "pred": 1
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-12617",
+   "kind": "wc_room",
+   "truth": 0,
+   "pred": 0
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-12617",
+   "kind": "sauna",
+   "truth": 0,
+   "pred": 0
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-12617",
+   "kind": "balcony",
+   "truth": 0,
+   "pred": 0
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-12617",
+   "kind": "toilet",
+   "truth": 1,
+   "pred": 1
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-12617",
+   "kind": "sink",
+   "truth": 2,
+   "pred": 2
+  },
+  {
+   "doc_id": "cubicasa5k__high-quality-architectural-12617",
+   "kind": "shower_bathtub",
+   "truth": 1,
+   "pred": 3
+  }
+ ]
+}
