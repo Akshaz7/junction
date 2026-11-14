@@ -119,6 +119,8 @@ def impact(graph: dict, node_id: str, change: dict) -> list[dict]:
 
     hits = paths(graph, node_id, allowed)
     old = number((origin.get("props") or {}).get("ceiling_height_m"))
+    if (origin.get("props") or {}).get("ceiling_height_note"):
+        old = None  # Conflicting recorded heights do not support a take-off.
     result = []
     for nid in sorted(hits):
         entry = hits[nid]

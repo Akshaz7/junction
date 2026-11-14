@@ -87,8 +87,8 @@ def _source(node):
 
 
 def _evidence(nodes):
-    """One citation per source item, numbered across documents; boxes follow the primary document."""
-    cites, all_boxes, seen, marks = [], [], set(), defaultdict(list)
+    """Page citations retain every item; box labels follow the primary scene order."""
+    cites, all_boxes, seen, marks, groups, source_marks = [], [], set(), defaultdict(list), {}, {}
     by_doc = defaultdict(list)
     for n in nodes:
         s = _source(n)
@@ -99,6 +99,7 @@ def _evidence(nodes):
             page = 1
         key = (s["doc_id"], page, s.get("item_id"), str(s.get("bbox")))
         if key in seen:
+            marks[n["id"]].append(source_marks[key])
             continue
         seen.add(key)
         box = s.get("bbox") or s.get("bbox_px")
@@ -107,11 +108,25 @@ def _evidence(nodes):
         else:
             box = [float(v) for v in box]
         iid = s.get("item_id")
-        cn = len(cites) + 1
-        cites.append({"n": cn, "doc_id": s["doc_id"], "page": page,
-                      "kind": "region" if box else "element", "bbox_px": box,
-                      "item_ids": [iid] if iid else [], "quote": None,
-                      "label": _label(n), "item_kind": n.get("kind") or "item"})
+        group = (s["doc_id"], page)
+        if group not in groups:
+            groups[group] = len(cites)
+            cites.append({"n": len(cites) + 1, "doc_id": s["doc_id"], "page": page,
+                          "kind": "region" if box else "element", "bbox_px": box,
+                          "item_ids": [], "quote": (n.get("props") or {}).get("quote"),
+                          "label": _label(n), "item_kind": n.get("kind") or "item"})
+        cite = cites[groups[group]]
+        cn = cite["n"]
+        source_marks[key] = cn
+        if iid and iid not in cite["item_ids"]:
+            cite["item_ids"].append(iid)
+        if box:
+            old_box = cite["bbox_px"]
+            cite["bbox_px"] = [min(old_box[0], box[0]), min(old_box[1], box[1]),
+                               max(old_box[2], box[2]), max(old_box[3], box[3])] if old_box else box
+            cite["kind"] = "region"
+        if cite.get("item_kind") != n.get("kind"):
+            cite.pop("item_kind", None)
         marks[n["id"]].append(cn)
         if iid:
             by_doc[s["doc_id"]].append((iid, n.get("kind")))
@@ -120,9 +135,14 @@ def _evidence(nodes):
                                   "bbox_px": box, "label": str(cn), "kind": n.get("kind") or "item"})
     primary = max(by_doc, key=lambda d: len(by_doc[d])) if by_doc else (cites[0]["doc_id"] if cites else "")
     items = list(dict.fromkeys(iid for iid, _ in by_doc[primary]))
-    boxes = [{k: v for k, v in b.items() if k != "doc_id"} for b in all_boxes if b["doc_id"] == primary]
+    positions = {iid: i + 1 for i, iid in enumerate(items)}
+    boxes = [{**{k: v for k, v in b.items() if k != "doc_id"}, "label": str(positions[b["item_id"]])}
+             for b in all_boxes if b["doc_id"] == primary][:300]
     scene = {"doc_id": primary, "highlight_item_ids": items, "camera_target_item_id": items[0] if items else None,
              "item_kinds": dict(by_doc[primary])}
+    for cite in cites:
+        if len(cite["item_ids"]) > 1:
+            cite["label"] = f"{len(cite['item_ids'])} indexed items on page {cite['page']}"
     return boxes, cites, scene, marks
 
 
@@ -407,10 +427,18 @@ def _impact(q, project, graph, t0):
             length_note = f" {_label(e['node'])}: {qty['value']:g} m ({scope})."
         bullets.append("Check " + ", ".join(f"{v} {k}" + ("s" if v != 1 else "") for k, v in sorted(counts.items())) + " for clearance and service changes." + length_note)
     if not quantities:
-        bullets.append("The graph lacks the dimensions needed to calculate a material quantity change.")
+        bullets.append("Recorded ceiling heights disagree; resolve them before calculating quantities." if (origin.get("props") or {}).get("ceiling_height_note")
+                       else "The graph lacks the dimensions needed to calculate a material quantity change.")
     bullets.append("Potential effects only. Missing links, openings, lining layers and waste need checking.")
-    return _result(q, project, graph, t0, f"Changing {_label(origin)} has {len(distinct)} distinct linked items to check.", bullets,
-                   [origin, *(h["node"] for h in entries)], [h["why_path"] for h in entries],
+    note_sources = []
+    for i, note in enumerate((origin.get("props") or {}).get("ceiling_height_notes") or []):
+        s = note.get("source") or {}
+        if s.get("doc_id"):
+            note_sources.append({"id": f"ceiling-note:{origin['id']}:{i}", "kind": "sheet_ref", "label": "Ceiling height note",
+                                 "source": s, "props": {"quote": s.get("quote")}})
+    action = f"Setting the ceiling in {_label(origin)} to {change['value']:g} m" if change["prop"] == "ceiling_height_m" else f"Changing {_label(origin)}"
+    return _result(q, project, graph, t0, f"{action} has {len(distinct)} distinct linked items to check.", bullets,
+                   [origin, *(h["node"] for h in entries), *note_sources], [h["why_path"] for h in entries],
                    {"shape": "impact", "origin": origin["id"], "change": change, "items": entries,
                     "distinct_items": [e["node"]["id"] for e in distinct]}, len(distinct), "count")
 
