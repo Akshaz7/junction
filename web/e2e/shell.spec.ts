@@ -79,7 +79,7 @@ test('demo chat and document navigation', async ({ page }) => {
   await expect(page).toHaveTitle('Hologram')
   await page.getByRole('button', { name: /Count something on a plan/ }).click()
   await expect(page.getByText('2 windows', { exact: true })).toBeVisible()
-  await page.getByText('Sources (1)', { exact: true }).click()
+  await page.locator('.sources-summary').click()
   await expect(page.getByText(/window-001, window-002/)).toBeVisible()
   await page.getByRole('navigation', { name: 'Workspace navigation', exact: true }).getByRole('link', { name: 'Data', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Garden room — generated for demo' })).toBeVisible()

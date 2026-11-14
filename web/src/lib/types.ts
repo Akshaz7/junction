@@ -43,3 +43,26 @@ export interface Answer {
 
 export type Citation = Answer['citations'][number]
 export type TraceStep = Answer['trace'][number]
+
+export interface ChangeEntry {
+  id: string
+  type: 'new_version' | 'new_document'
+  doc_a: string | null
+  doc_b: string
+  created_at: string
+  summary: { doc_id?: string; title?: string; n_changes?: number; headline?: string; generated_for_demo?: boolean }
+}
+
+export interface Comparison extends ChangeEntry {
+  doc_id: string
+  generated_for_demo: boolean
+  source: string
+  image: { w: number; h: number }
+  v1: { label: string; page_image: string; thumb: string }
+  v2: { label: string; page_image: string; thumb: string }
+  changes: {
+    n: number; change_id: string; type: 'added' | 'removed' | 'modified'; kind: string; sentence: string
+    v1: { item_id: string; bbox_px: Bbox | null } | null
+    v2: { item_id: string; bbox_px: Bbox | null } | null
+  }[]
+}

@@ -12,7 +12,7 @@ describe('answer evidence', () => {
     expect(html).toContain('<strong>2 windows</strong>')
     expect(html).toContain('aria-label="Open citation 1"')
     expect(html).toContain('Where it is set out')
-    expect(html).toContain('Sources (1)')
+    expect(html).toContain('aria-label="Sources 1"')
     expect(html).toContain('Show thought process')
     expect(html).toContain('data-testid="answer-cost"')
     expect(html).toContain('&lt; $0.0001')
@@ -26,7 +26,7 @@ describe('answer evidence', () => {
     const html = renderToStaticMarkup(createElement(AnswerCard, { answer, docs: [demoDocument], demo: false, onOpenCitation: () => {} }))
     expect(html).toContain('The documents do not hold an answer.</p>')
     expect(html).not.toContain('Open citation')
-    expect(html).not.toContain('Sources (')
+    expect(html).not.toContain('sources-summary')
     expect(html).not.toContain('Where it is set out')
   })
 

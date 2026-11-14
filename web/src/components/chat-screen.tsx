@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { ArrowRight, ArrowUp, AtSign, FileText, FolderOpen, Layers3, MapPin, MessageSquareText, Ruler, Search, Sparkles, X } from 'lucide-react'
+import { ArrowUp, AtSign, CalendarClock, FileSearch, FileText, FolderOpen, HardHat, Mic, Plus, Scale, X } from 'lucide-react'
 import { Button } from './ui'
 import { AnswerCard } from './answer-card'
 import { DocumentViewer, useViewerSheet } from './document-viewer'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document, TraceStep } from '../lib/types'
+import { ThinkingText } from './thinking-text'
 
 const starters = [
-  { title: 'Count something on a plan', hint: 'Find windows, doors and more', question: 'How many windows are there?', icon: Search },
-  { title: "Find a room’s area", hint: 'Check the space in your drawing', question: 'What is the area of this room?', icon: Ruler },
-  { title: 'Where is it on level N?', hint: 'Locate it in the project', question: 'Where is the stair core on level 2?', icon: MapPin },
-  { title: 'What does this drawing say about…', hint: 'Read the detail with its source', question: 'What does this drawing say about the doors?', icon: MessageSquareText },
+  { title: 'Count on a plan', label: 'Count something on a plan', question: 'How many windows are there?', icon: Scale },
+  { title: 'Find a room’s area', label: 'Find a room’s area', question: 'What is the area of this room?', icon: CalendarClock },
+  { title: 'Locate something', label: 'Where is it on level N?', question: 'Where is the stair core on level 2?', icon: HardHat },
+  { title: 'Read a drawing', label: 'What does this drawing say about…', question: 'What does this drawing say about the doors?', icon: FileSearch },
 ]
 
 type Mention = { start: number; end: number; query: string }
@@ -41,7 +42,12 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
 
   useEffect(() => { if (contextDocument) setSelected([contextDocument]) }, [contextDocument])
   useEffect(() => {
-    if (conversation.current && (answers.length || busy)) conversation.current.scrollTop = conversation.current.scrollHeight
+    const node = conversation.current
+    if (!node || (!answers.length && !busy)) return
+    // Keep the current question visible as its answer grows. Long answers scroll
+    // within the conversation; a follow-up starts at its own question.
+    const latest = node.querySelector<HTMLElement>('.exchange:last-child')
+    if (latest) node.scrollTop = Math.max(0, latest.offsetTop - 64)
   }, [answers, statuses, traces, busy])
   useEffect(() => {
     if (!mention) return
@@ -106,22 +112,19 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     <section className="chat-page" aria-label="Drawing questions" inert={!!viewer && sheet}>
     <div ref={conversation} className={`conversation ${answers.length || busy ? 'has-answers' : ''}`}>
       {!answers.length && !busy && <div className="welcome">
-        <div className="welcome-mark"><Layers3 size={30} strokeWidth={1.5} /></div>
-        <p className="eyebrow">YOUR DRAWINGS, IN CONVERSATION</p>
         <h2>Where shall we start?</h2>
-        <p className="intro">Ask about your project. Find the answer,<br className="desktop-break" /> with the source to back it up.</p>
-        <div className="starter-grid">{starters.map(({ title, hint, question, icon: Icon }) => <button key={title} className="starter-card" disabled={loadingDocs || !docs.length} onClick={() => void ask(question)}>
-          <span className="starter-icon"><Icon size={18} /></span><span><strong>{title}</strong><span>{hint}</span></span><ArrowRight size={15} />
+        <div className="starter-grid">{starters.map(({ title, label, question, icon: Icon }) => <button key={title} aria-label={label} className="starter-card" disabled={loadingDocs || !docs.length} onClick={() => void ask(question)}>
+          <Icon size={20} /><strong>{title}</strong>
         </button>)}</div>
         {demo && <p className="demo-note">Offline sample content generated for demo</p>}
       </div>}
-      {answers.map((answer, index) => <AnswerCard key={`${answer.answer_id}-${index}`} answer={answer} docs={docs} demo={demo} onOpenCitation={(citation) => {
+      {answers.map((answer, index) => <AnswerCard key={`${answer.answer_id}-${index}`} answer={answer} docs={docs} demo={demo} activeCitation={viewer?.answer === answer ? viewer.citation : undefined} onOpenCitation={(citation) => {
         setViewer((previous) => ({ answer, citation, request: (previous?.request ?? 0) + 1 }))
         onOpenCitation(citation)
       }} />)}
       {busy && <div className="exchange pending-exchange" aria-busy="true">
         <div className="question-bubble">{pendingQuestion}</div>
-        <div className="status-lines" role="status" aria-live="polite">{statuses.map((status, index) => <p key={index}><Sparkles size={15} />{status}</p>)}</div>
+        <div className="status-lines" role="status" aria-live="polite"><span className="thinking-mark" aria-hidden="true">H</span><ThinkingText text={statuses.at(-1) || 'Thinking…'} /></div>
         {!!traces.length && <details className="answer-detail"><summary>Show thought process</summary>{traces.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>}
       </div>}
     </div>
@@ -154,10 +157,10 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
           </button>)}</div>
           {!matches.length && <p className="picker-empty">{loadingDocs ? 'Loading documents…' : 'No matching documents.'}</p>}
         </div>}
-        <div className="composer-actions"><button className="document-context" type="button" disabled={busy || loadingDocs || !docs.length} onClick={() => {
+        <div className="composer-actions"><button className="document-context" aria-label={selected.length ? `Document context: ${selected.length} selected` : `Include a document (${docs.length} available)`} title={selected.length ? `${selected.length} selected` : `All documents (${docs.length})`} type="button" disabled={busy || loadingDocs || !docs.length} onClick={() => {
           const next = draft + (draft && !/\s$/.test(draft) ? ' @' : '@')
           setDraft(next); updateMention(next, next.length); textarea.current?.focus()
-        }}><FolderOpen size={15} />{loadingDocs ? 'Loading documents…' : selected.length ? `${selected.length} selected` : `All documents (${docs.length})`}<AtSign size={13} /></button>
+        }}><Plus size={16} /><span className="sr-only"><FolderOpen size={15} />{loadingDocs ? 'Loading documents…' : selected.length ? `${selected.length} selected` : `All documents (${docs.length})`}<AtSign size={13} /></span></button><Mic className="composer-mic" size={16} aria-label="Voice input unavailable" />
           <Button type="submit" variant="primary" className="send-button" aria-label="Send question" disabled={!draft.trim() || busy || !docs.length || !!mention}><ArrowUp size={18} /></Button>
         </div>
       </form>

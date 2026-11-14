@@ -1,14 +1,14 @@
-import { ChartNoAxesCombined, Check, ChevronDown, Clock3, FolderOpen, GitCompareArrows, House, MessageSquare, MoreHorizontal, WandSparkles } from 'lucide-react'
+import { ChartNoAxesCombined, Check, ChevronDown, Clock3, Database, GitCompare, House, BotMessageSquare, MoreHorizontal, Library, Inbox, Wrench } from 'lucide-react'
 import { Tooltip } from './ui/tooltip'
 import type { Route } from '../lib/router'
 
 export const navigation = [
   { route: 'overview', label: 'Overview', icon: House },
-  { route: 'chat', label: 'Chat', icon: MessageSquare },
-  { route: 'changes', label: 'Changes', icon: GitCompareArrows },
-  { route: 'data', label: 'Data', icon: FolderOpen },
+  { route: 'chat', label: 'Chat', icon: BotMessageSquare },
+  { route: 'changes', label: 'Changes', icon: Inbox },
+  { route: 'data', label: 'Data', icon: Database },
   { route: 'accuracy', label: 'Accuracy', icon: ChartNoAxesCombined },
-  { route: 'skills', label: 'Skills', icon: WandSparkles },
+  { route: 'skills', label: 'Skills', icon: Library },
   { route: 'automations', label: 'Automations', icon: Clock3 },
 ] as const
 
@@ -16,7 +16,7 @@ export function ProjectSwitcher() {
   return <label className="project-switcher">
     <span className="project-mark" aria-hidden="true">D</span>
     <span className="sr-only">Project</span>
-    <select aria-label="Project" defaultValue="demo"><option value="demo">Demo workspace</option></select>
+    <select aria-label="Project" defaultValue="demo"><option value="demo">Construction project</option></select>
     <ChevronDown size={14} aria-hidden="true" />
   </label>
 }
@@ -27,13 +27,14 @@ export function WorkspaceNavigation({ route }: { route: Route }) {
       <a href="#/overview" className="brand-mark" aria-label="Hologram home">Hologram</a>
       <ProjectSwitcher />
       <nav aria-label="Workspace navigation">
-        {navigation.map(({ route: destination, label, icon: Icon }) => <Tooltip content={label} key={destination}>
+        {[navigation[0], navigation[1], { ...navigation[4], icon: GitCompare }, navigation[2], navigation[5], navigation[3], { ...navigation[6], icon: Wrench }].map(({ route: destination, label, icon: Icon }) => <Tooltip content={label} key={destination}>
           <a href={`#/${destination}`} className={`rail-item ${route === destination ? 'active' : ''}`} aria-label={label} aria-current={route === destination ? 'page' : undefined}>
             <Icon size={20} /><span>{label}</span>
           </a>
         </Tooltip>)}
+        <Tooltip content="More"><a href="#/accuracy" className="rail-item" aria-label="More"><MoreHorizontal size={20} /></a></Tooltip>
       </nav>
-      <div className="workspace-footer"><span className="workspace-avatar" aria-hidden="true">H</span><span>Shared workspace<small>No account needed</small></span></div>
+      <div className="workspace-footer"><span className="workspace-avatar" aria-hidden="true">AK</span><span>Shared workspace<small>No account needed</small></span></div>
     </aside>
     <nav className="mobile-navigation" aria-label="Mobile navigation">
       {navigation.slice(0, 4).map(({ route: destination, label, icon: Icon }) => <a key={destination} href={`#/${destination}`} aria-current={route === destination ? 'page' : undefined}><Icon size={19} /><span>{label}</span></a>)}

@@ -43,3 +43,5 @@
 - `echo` inside a zsh `for` loop with `==` breaks: zsh's = expansion. Use `echo '== x'` quoted.
 - pixelmatch/pngjs: clear the diff buffer before diffMask comparisons; masks on transformed (zoomed) drawings must be intersected with their overflow-clipping ancestors (W-18).
 - BSD sed has no \| alternation: use grep -E to pull RESULT/NEEDS lines before rewriting a handoff (lost the T-03 note once; recovered from ~/.codex/sessions).
+- Never edit a file a Codex worker is editing with a regex over JSX: a loose pattern matched an earlier prop and broke App.tsx (05:05, fixed). Use exact-string Edit.
+- git -C <repo> hash-object <relative path> resolves against the REPO, not your cwd: always pass absolute paths when staging a file from a temp copy (broke HEAD build once, fixed 05:20).

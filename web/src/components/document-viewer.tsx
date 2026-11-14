@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { ChevronLeft, ChevronRight, Maximize, Minus, Plus, X } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, Download, FileSymlink, FileText, Highlighter, Maximize2, Minus, PenLine, Plus, Search, X } from 'lucide-react'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document } from '../lib/types'
 import { fitPage, focusBox, zoomAt, type PageTransform, type Point, type Size } from '../lib/page-transform'
@@ -121,30 +121,35 @@ export function DocumentViewer({ answer, citation, sheet, onClose }: {
       if ((event.target as HTMLElement).closest('dialog')) return
       if (event.key === 'Escape') { event.stopPropagation(); onClose() }
       if (sheet && event.key === 'Tab') {
-        const controls = panel.current?.querySelectorAll<HTMLElement>('button:not(:disabled), [tabindex="0"]')
+        const controls = panel.current?.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], [tabindex="0"]')
         if (!controls?.length) return
         const first = controls[0], last = controls[controls.length - 1]
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus() }
         if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
       }
     }}>
-    <header className="viewer-heading"><div><strong>{doc?.title ?? citation.doc_id}</strong><small>Page {citation.page}{doc ? ` of ${doc.pages}` : ''}</small></div>
+    <header className="viewer-heading"><FileText size={24} /><div><strong>{doc?.title ?? citation.doc_id}</strong><small>/{doc?.source || 'Drawings'}</small></div>
+      <div className="viewer-source-nav">
+        <a className="viewer-open-source" aria-label="Open source page" href={imageUrl || undefined} target="_blank" rel="noreferrer"><FileSymlink size={16} /></a>
+        <Button variant="ghost" size="icon" aria-label="Previous source" disabled={!image || active <= 0} onClick={() => setActive(active - 1)}><ChevronLeft size={16} /></Button>
+        <span aria-live="polite" data-testid="source-position">{regions.length ? active + 1 : 0} of {regions.length}</span>
+        <ChevronDown className="viewer-source-chevron" size={14} aria-hidden="true" />
+        <Button variant="ghost" size="icon" aria-label="Next source" disabled={!image || active >= regions.length - 1} onClick={() => setActive(active + 1)}><ChevronRight size={16} /></Button>
+        <Button className="viewer-fit" variant="ghost" size="icon" aria-label="Fit drawing" disabled={!image} onClick={() => image && setView(fitPage(image, viewport))}><Maximize2 size={16} /></Button>
+      </div>
       <button ref={close} type="button" className="button button-ghost button-size-icon" aria-label="Close drawing viewer" onClick={onClose}><X size={18} /></button>
     </header>
     <div className="viewer-toolbar" aria-label="Drawing controls">
-      <div className="viewer-source-nav">
-        <Button variant="ghost" size="icon" aria-label="Previous source" disabled={!image || active <= 0} onClick={() => setActive(active - 1)}><ChevronLeft size={16} /></Button>
-        <span aria-live="polite" data-testid="source-position">{regions.length ? active + 1 : 0} of {regions.length}</span>
-        <Button variant="ghost" size="icon" aria-label="Next source" disabled={!image || active >= regions.length - 1} onClick={() => setActive(active + 1)}><ChevronRight size={16} /></Button>
-      </div>
+      <div className="viewer-page-position"><ChevronLeft size={14} /><span className="page-number">{citation.page}</span><span>/ {doc?.pages ?? '…'}</span><ChevronRight size={14} /></div>
+      <span className="toolbar-spacer" />
+      <span className="viewer-markup-tools" aria-hidden="true"><Search size={16} /><Highlighter size={16} /><PenLine size={16} /></span>
+      <a className="viewer-download" aria-label="Download drawing page" href={imageUrl || undefined} download={`${doc?.title ?? citation.doc_id}-page-${citation.page}.png`}><Download size={16} /></a>
+      <span className="viewer-toolbar-divider" />
       <div className="viewer-zoom-controls">
         <Button variant="ghost" size="icon" aria-label="Zoom out" disabled={!image} onClick={() => zoom(1 / 1.25)}><Minus size={16} /></Button>
         <span aria-label="Zoom level">{Math.round(view.scale / fittedScale * 100)}%</span>
         <Button variant="ghost" size="icon" aria-label="Zoom in" disabled={!image} onClick={() => zoom(1.25)}><Plus size={16} /></Button>
-        <Button variant="ghost" size="icon" aria-label="Fit drawing" disabled={!image} onClick={() => image && setView(fitPage(image, viewport))}><Maximize size={16} /></Button>
       </div>
-      <span className="viewer-3d-slot">{(answer.evidence.scene.doc_id || answer.doc_ids[0]) === citation.doc_id
-        ? <VisualiseItButton answer={answer} /> : <VisualiseItButton docId={citation.doc_id} />}</span>
     </div>
     <div className="drawing-stage" ref={stage} data-testid="drawing-viewport" tabIndex={0} aria-label="Drawing canvas. Drag to pan, scroll or pinch to zoom. Arrow keys pan, plus and minus zoom, zero fits."
       onKeyDown={(event) => {
@@ -199,6 +204,8 @@ export function DocumentViewer({ answer, citation, sheet, onClose }: {
       {error ? <div className="viewer-message"><p role="alert">{error}</p><Button variant="raised" onClick={() => setRetry(retry + 1)}>Try again</Button></div>
         : !image && <p className="viewer-message" role="status">Loading drawing…</p>}
     </div>
+    <span className="viewer-3d-slot">{(answer.evidence.scene.doc_id || answer.doc_ids[0]) === citation.doc_id
+      ? <VisualiseItButton answer={answer} /> : <VisualiseItButton docId={citation.doc_id} />}</span>
     <footer className="drawing-credit" data-testid="drawing-credit">{doc ? <>{doc.credit || 'Credit not supplied'} · {doc.licence || 'Licence not supplied'}</> : 'Loading source credit…'}</footer>
   </aside>
 }

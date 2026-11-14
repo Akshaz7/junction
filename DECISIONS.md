@@ -58,3 +58,5 @@ Format for new lines: `YYYY-MM-DD HH:MM — decision — reason`.
 - 2026-11-14 04:24 — CONTRACT v3: 5.11 scene commands, tags, scene.edit/scene.state events — lets IOS (I-14) and 3D (T-12) build against the contract while SERVER (S-10) and ENGINE (E-20) build their sides.
 - 2026-11-14 04:39 LEAD: CONTRACT 3.1 adds §5.12 advisor card shape so IOS (I-09) and WEB can build against fixtures before E-16 lands.
 - 2026-11-14 04:52 LEAD: W-18 pass rule = each unexplained region ≤0.5% of canvas and total unmasked mismatch ≤1.5% per phase (0 regions is impossible with antialiasing + different content).
+- 2026-11-14 05:07 LEAD: IOS has no available row (I-04 waits W-11, I-05 human), so its Codex slot runs a second WEB-scoped worker WEB2 on W-08 with new-files-only scope; LEAD wires the route.
+- 2026-11-14 05:27 LEAD: checkpoint-commit W-18 attempt 4 (all functional e2e green, desktop fidelity 100 %) while the row stays open, so W-14/W-15/T-03 wiring builds on committed files.

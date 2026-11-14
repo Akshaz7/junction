@@ -1,4 +1,4 @@
-import type { Answer, Document, IngestStatus, TraceStep, UploadReceipt } from './types'
+import type { Answer, ChangeEntry, Comparison, Document, IngestStatus, TraceStep, UploadReceipt } from './types'
 
 type Mode = 'auto' | 'real' | 'demo'
 type StreamCallbacks = { onStatus: (text: string) => void; onTrace: (trace: TraceStep) => void }
@@ -92,6 +92,19 @@ export class WorkspaceApi {
     })
     const chat = await response.json() as { id: string }
     return chat.id
+  }
+
+  async getChanges(signal?: AbortSignal): Promise<ChangeEntry[]> {
+    if (this.isDemo) return []
+    const response = await this.request('/api/changes', { signal })
+    return ((await response.json()) as { changes: ChangeEntry[] }).changes
+  }
+
+  async getComparison(id: string, signal?: AbortSignal): Promise<Comparison> {
+    const response = await this.request(`/api/changes/${encodeURIComponent(id)}`, { signal })
+    const data = await response.json() as Comparison
+    if (!data.image || !data.v1 || !data.v2 || !Array.isArray(data.changes)) throw new Error('Comparison images are not available for this change.')
+    return data
   }
 
   async getDocument(docId: string): Promise<Document> {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type DragEvent } from 'react'
-import { ArrowRight, Box, ChevronLeft, ChevronRight, FileImage, FileText, Folder, FolderOpen, LoaderCircle, Search, Upload, X } from 'lucide-react'
+import { ArrowRight, Box, ChevronDown, ChevronLeft, ChevronRight, Download, File, FileImage, FileText, Folder, FolderPlus, GitCompare, Layers, LoaderCircle, Maximize2, Minus, MoreHorizontal, PenLine, Plus, ScanText, Search, SlidersHorizontal, Upload, X } from 'lucide-react'
 import { Badge, Button, Input } from './ui'
 import { workspaceApi } from '../lib/api'
 import type { Document, IngestStatus } from '../lib/types'
@@ -9,6 +9,11 @@ import './data-screen.css'
 const PAGE_SIZE = 40
 const ACCEPTED = '.ifc,.dxf,.dwg,.pdf,.svg,.png,.jpg,.jpeg,.tif,.tiff'
 const terminal = new Set(['ready', 'partial', 'failed', 'stored'])
+
+function DocumentTitle({ title }: { title: string }) {
+  const suffix = title.match(/^(.*?)(\s*[—–-]?\s*generated for demo)$/i)
+  return suffix ? <><span className="document-title-name">{suffix[1]}</span><small className="document-demo-label">{suffix[2]}</small></> : <span className="document-title-name">{title}</span>
+}
 type UploadState = {
   name: string; docId?: string; status: 'uploading' | 'stored' | IngestStatus['status']
   stages: IngestStatus['stages']; detail: string
@@ -16,9 +21,9 @@ type UploadState = {
 
 function DocumentImage({ doc, preview = false }: { doc: Document; preview?: boolean }) {
   const [failed, setFailed] = useState(false)
-  const Icon = doc.kind === 'ifc' || doc.kind === 'dxf' || doc.kind === 'dwg' ? Box : doc.kind === 'raster' || doc.kind === 'svg' ? FileImage : FileText
+  const Icon = doc.kind === 'ifc' || doc.kind === 'dxf' || doc.kind === 'dwg' ? Box : doc.kind === 'raster' || doc.kind === 'svg' ? FileImage : File
   return <span className={preview ? 'data-preview' : 'data-thumbnail'}>
-    {failed ? <><Icon size={preview ? 56 : 24} aria-hidden="true" />{preview && <span>Page preview unavailable</span>}</> :
+    {!preview || failed ? <><Icon size={preview ? 56 : 18} aria-hidden="true" />{preview && <span>Page preview unavailable</span>}</> :
       <img loading="lazy" src={`/api/docs/${encodeURIComponent(doc.doc_id)}/${preview ? 'pages/1/image' : 'files/page-1.thumb.png'}`}
         alt={preview ? `First page of ${doc.title}` : ''} onError={() => setFailed(true)} />}
   </span>
@@ -30,6 +35,7 @@ function FormatBadges({ doc }: { doc: Document }) {
 
 function DocumentDetail({ doc, onClose, onAsk }: { doc: Document; onClose: () => void; onAsk: (doc: Document) => void }) {
   const [scene, setScene] = useState<'loading' | 'available' | 'missing' | 'error'>('loading')
+  const [zoom, setZoom] = useState(100)
   const closeButton = useRef<HTMLButtonElement>(null)
   useEffect(() => {
     const controller = new AbortController()
@@ -41,13 +47,11 @@ function DocumentDetail({ doc, onClose, onAsk }: { doc: Document; onClose: () =>
   }, [doc.doc_id])
 
   return <aside className="data-detail" aria-label="Document details" onKeyDown={(event) => { if (event.key === 'Escape') onClose() }}>
-    <header><h2>Document details</h2><button ref={closeButton} type="button" className="data-close-detail" aria-label="Close document details" onClick={onClose}><X size={18} /></button></header>
+    <header><FileText size={24} /><div><h2><DocumentTitle title={doc.title} /></h2><small>/{doc.source}</small></div><a className="data-compare" href="#/changes" aria-label="Compare document revisions"><GitCompare size={14} /><span>Compare</span></a><Button variant="ghost" size="icon" aria-label="Fit page" onClick={() => setZoom(100)}><Maximize2 size={16} /></Button><button ref={closeButton} type="button" className="data-close-detail" aria-label="Close document details" onClick={onClose}><X size={18} /></button></header>
+    <div className="data-viewer-toolbar"><ChevronLeft size={14} /><span className="page-number">1</span><span>/ {doc.pages}</span><ChevronRight size={14} /><span className="toolbar-spacer" /><span className="data-viewer-tools" aria-hidden="true"><Search size={14} /><ScanText size={14} /><PenLine size={14} /></span><a aria-label="Download page" href={`/api/docs/${encodeURIComponent(doc.doc_id)}/pages/1/image`} download><Download size={14} /></a><span className="viewer-toolbar-divider" /><span className="data-zoom-controls"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => setZoom((n) => Math.max(25, n - 25))}><Minus size={14} /></Button><span aria-label="Page zoom level">{zoom}%</span><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => setZoom((n) => Math.min(400, n + 25))}><Plus size={14} /></Button></span></div>
     <div className="data-detail-body">
-      <DocumentImage key={doc.doc_id} doc={doc} preview />
-      <h3>{doc.title}</h3><FormatBadges doc={doc} />
-      <dl><div><dt>Folder</dt><dd>{doc.source}</dd></div><div><dt>Pages</dt><dd>{doc.pages}</dd></div>
-        <div><dt>Licence</dt><dd>{doc.licence || 'Not provided'}</dd></div>
-        <div><dt>Credit</dt><dd>{doc.credit || 'Not provided'}</dd></div></dl>
+      <div className="data-page-canvas"><div style={{ width: `${zoom}%`, height: `${zoom}%`, minWidth: '100%', minHeight: '100%' }}><DocumentImage key={doc.doc_id} doc={doc} preview /></div></div>
+      <dl className="data-document-credit"><div><dt>Credit</dt><dd>{doc.credit || 'Not provided'}</dd></div><div><dt>Licence</dt><dd>{doc.licence || 'Not provided'}</dd></div></dl>
       <div className="data-detail-actions"><Button variant="raised" onClick={() => onAsk(doc)}>Ask about it<ArrowRight size={15} /></Button>
         {scene === 'available' && <VisualiseItButton docId={doc.doc_id} />}</div>
       <p className="data-scene-note" role="status">{scene === 'loading' ? 'Checking for a 3D scene…' : scene === 'missing' ? 'No 3D scene available for this document.' : scene === 'error' ? 'Could not check 3D availability. Reopen the document to retry.' : '3D scene available.'}</p>
@@ -67,7 +71,6 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const [uploadError, setUploadError] = useState('')
   const [pollAttempt, setPollAttempt] = useState(0)
   const [dragging, setDragging] = useState(false)
-  const [refreshing, setRefreshing] = useState(false)
   const uploadInput = useRef<HTMLInputElement>(null)
   const uploading = useRef(false)
   const lastOpened = useRef<HTMLButtonElement | null>(null)
@@ -134,9 +137,10 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   }
 
   const sources = [...new Set(docs.map((doc) => doc.source))].sort()
+  const activeFolder = folder === null ? sources[0] || '' : folder
   const query = search.trim().toLowerCase()
   // Searching always spans every source, even with a folder selected.
-  const filtered = docs.filter((doc) => query ? `${doc.title} ${doc.doc_id} ${doc.source} ${doc.formats.join(' ')} ${doc.licence || ''} ${doc.credit || ''}`.toLowerCase().includes(query) : !folder || doc.source === folder)
+  const filtered = docs.filter((doc) => query ? `${doc.title} ${doc.doc_id} ${doc.source} ${doc.formats.join(' ')} ${doc.licence || ''} ${doc.credit || ''}`.toLowerCase().includes(query) : !activeFolder || doc.source === activeFolder)
   if (upload?.docId) filtered.sort((a, b) => Number(b.doc_id === upload.docId) - Number(a.doc_id === upload.docId))
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, pageCount)
@@ -144,14 +148,13 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const selected = docs.find((doc) => doc.doc_id === selectedId)
   const uploadLabel = !upload ? '' : upload.status === 'uploading' ? 'Uploading…' : upload.status === 'running' || upload.status === 'none' ? 'Processing document…' : upload.status === 'ready' ? 'Ready to use' : upload.status === 'partial' ? 'Page preview ready; some processing is unavailable.' : upload.status === 'failed' ? 'Processing failed. The original file is stored.' : 'File stored. Processing is unavailable on this server.'
 
-  return <section className="data-screen" aria-label="Project documents" hidden={hidden}>
+  return <section className="data-screen" aria-label="Project documents" hidden={hidden} onDragOver={(event) => {
+    event.preventDefault()
+    if (!demo && !pending) setDragging(true)
+  }} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false) }} onDrop={(event) => {
+    if (demo || pending) { event.preventDefault(); setDragging(false) } else drop(event)
+  }}>
     <div className="data-screen-toolbar"><div><h2>Project documents</h2><p>The sources behind your answers.</p></div>
-      <label className="search-field"><Search size={16} /><Input type="search" aria-label="Search documents" placeholder="Search all documents" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} /></label>
-      <Button variant="ghost" disabled={refreshing || loading} onClick={async () => {
-        setRefreshing(true)
-        try { await onRefresh(); setUploadError('') } catch (error) { setUploadError(error instanceof Error ? error.message : 'Could not refresh documents.') }
-        finally { setRefreshing(false) }
-      }}>Refresh</Button>
       <Button variant="raised" disabled={demo || pending} onClick={() => uploadInput.current?.click()}><Upload size={16} />Upload</Button>
     </div>
     <input ref={uploadInput} className="data-file-input" type="file" aria-label="Upload drawing" accept={ACCEPTED} disabled={demo || pending} onChange={(event) => {
@@ -159,12 +162,7 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
       event.target.value = ''
       if (file) void uploadFile(file)
     }} />
-    <div className={`data-drop-zone ${dragging ? 'is-dragging' : ''}`} onDragOver={(event) => {
-      event.preventDefault()
-      if (!demo && !pending) setDragging(true)
-    }} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false) }} onDrop={(event) => {
-      if (demo || pending) { event.preventDefault(); setDragging(false) } else drop(event)
-    }}>
+    <div className={`data-drop-zone ${dragging ? 'is-dragging' : ''}`}>
       <Upload size={18} aria-hidden="true" /><span>{demo ? 'Connect to the server to upload a drawing.' : 'Drop a drawing here, or use Upload.'}<small>One file at a time · IFC, DXF, DWG, PDF, SVG, PNG, JPG, TIF · up to 100 MB</small></span>
     </div>
     {upload && <div className="data-upload-status" role="status" aria-live="polite" aria-busy={pending && !uploadError}>
@@ -178,16 +176,19 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
       try { await onRefresh() } catch (error) { setUploadError(error instanceof Error ? error.message : 'Could not refresh documents.') }
     }}>Retry status</Button>}</div>}
     <div className={`data-browser ${selected ? 'has-detail' : ''}`}>
-      <nav className="data-folders" aria-label="Document folders"><h2>Folders</h2>
-        <button type="button" aria-current={!folder && !query ? 'page' : undefined} onClick={() => { setFolder(null); setSearch(''); setPage(1) }}><FolderOpen size={17} /><span>All files</span><small>{docs.length}</small></button>
-        {sources.map((source) => <button key={source} type="button" aria-label={`Open ${source} folder`} aria-current={folder === source && !query ? 'page' : undefined} onClick={() => { setFolder(source); setSearch(''); setPage(1) }}>
-          <Folder size={17} /><span>{source}</span><small>{docs.filter((doc) => doc.source === source).length}</small></button>)}
+      <nav className="data-folders" aria-label="Document folders"><h2>Folders<FolderPlus size={14} /></h2>
+        <button className="all-files" type="button" aria-current={!activeFolder && !query ? 'page' : undefined} onClick={() => { setFolder(''); setSearch(''); setPage(1) }}><Layers size={16} /><span>All Files</span><small>{docs.length}</small></button>
+        {sources.map((source) => <div key={source}><button type="button" aria-label={`Open ${source} folder`} aria-current={activeFolder === source && !query ? 'page' : undefined} onClick={() => { setFolder(source); setSearch(''); setPage(1) }}>
+          <Folder size={14} /><span>{source}</span><small>{docs.filter((doc) => doc.source === source).length}</small></button>
+          {activeFolder === source && <div className="folder-file-tree">{docs.filter((doc) => doc.source === source).slice(0, 10).map((doc) => <button type="button" key={doc.doc_id} aria-label={`Preview ${doc.title}`} aria-current={selectedId === doc.doc_id ? 'page' : undefined} onClick={(event) => { lastOpened.current = event.currentTarget; setSelectedId(doc.doc_id) }}><FileText size={14} /><span className="document-title"><DocumentTitle title={doc.title} /></span></button>)}</div>}
+        </div>)}
       </nav>
-      <div className="data-files"><header><h2>{query ? 'Search results · all folders' : folder || 'All files'}</h2><span>{filtered.length} {filtered.length === 1 ? 'document' : 'documents'}</span></header>
+      <label className={`data-folder-search ${search ? 'has-query' : ''}`}><Search size={16} /><Input type="search" aria-label="Search documents" placeholder="Search all documents" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} /></label>
+      <div className="data-files"><header><h2>{query ? 'Search results · all folders' : activeFolder || 'All Files'}</h2><ChevronLeft className="mobile-folder-back" size={14} /><select className="mobile-folder-select" aria-label="Document folder" value={activeFolder} onChange={(event) => { setFolder(event.target.value); setSearch(''); setPage(1) }}><option value="">All Files</option>{sources.map((source) => <option key={source} value={source}>{source}</option>)}</select><SlidersHorizontal className="mobile-folder-filter" size={14} /><span>Files ({filtered.length})</span></header>
         {loading ? <p className="data-empty" role="status">Loading documents…</p> : !visible.length ? <p className="data-empty">No documents found.</p> : <div className="data-file-list">{visible.map((doc) => <article key={doc.doc_id} className="data-file-row" data-doc-id={doc.doc_id} data-selected={selectedId === doc.doc_id || undefined}>
           <button className="data-open-file" type="button" aria-label={`Open ${doc.title}`} aria-expanded={selectedId === doc.doc_id} onClick={(event) => { lastOpened.current = event.currentTarget; setSelectedId(doc.doc_id) }}>
-            <DocumentImage key={doc.doc_id} doc={doc} /><span><h3>{doc.title}</h3><span className="data-file-meta">{doc.source} · {doc.pages} {doc.pages === 1 ? 'page' : 'pages'}</span><small>{doc.licence || 'Licence not provided'} · {doc.credit || 'Credit not provided'}</small></span>
-          </button><FormatBadges doc={doc} />
+            <span className="file-checkbox" aria-hidden="true" /><DocumentImage key={doc.doc_id} doc={doc} /><span><h3><DocumentTitle title={doc.title} /></h3><span className="data-file-meta">{doc.source} · {doc.pages} {doc.pages === 1 ? 'page' : 'pages'}</span><small>{doc.licence || 'Licence not provided'} · {doc.credit || 'Credit not provided'}</small></span>
+          </button><FormatBadges doc={doc} /><MoreHorizontal className="file-row-more" size={16} />
         </article>)}</div>}
         {!loading && filtered.length > 0 && <div className="data-pagination" aria-label="Document pagination"><span>{(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} of {filtered.length}</span>
           <Button variant="ghost" size="icon" aria-label="Previous document page" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}><ChevronLeft size={17} /></Button>
