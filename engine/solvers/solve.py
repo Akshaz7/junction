@@ -449,8 +449,25 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         extra = n > max(1, doc.pages)
         text = (f"This drawing shows **{n} {'floor' if n == 1 else 'floors'}** "
                 + ("(separate floor plans drawn on the sheet)." if extra else "(one per plan page)."))
-        return _answer_obj(question, [doc_id], text, n, "count", 0.6, False, [], [], {"doc_id": doc_id, "highlight_item_ids": [],
-                           "camera_target_item_id": None}, trace, route, t0)
+        proof = [i for i in doc.items if i.kind == "text" and i.label and any(rx.search(i.label) for rx, _ in _storeys.LABEL_RES)]
+        if proof:
+            text += " Printed floor labels: " + ", ".join(dict.fromkeys(i.label for i in proof)) + "."
+        else:
+            for pg, f in enumerate(found, 1):
+                for block in f["blocks"]:
+                    b = block["bbox_px"]
+                    representative = next((i for i in doc.items if i.page == pg and i.kind in _storeys.STRUCT and i.bbox_px
+                                           and b[0] <= (i.bbox_px[0]+i.bbox_px[2])/2 <= b[2]
+                                           and b[1] <= (i.bbox_px[1]+i.bbox_px[3])/2 <= b[3]), None)
+                    if representative:
+                        proof.append(representative)
+        boxes, cites, scene = _evidence(doc, proof)
+        text += " " + _cite_marks(cites)
+        result = _answer_obj(question, [doc_id], text, n, "count", 0.6, False, boxes, cites, scene, trace, route, t0)
+        result["reasoning_hint"] = {"steps":[{"kind":"found","title":"Found","text":f"{n} floor-plan groups or distinct printed floor labels","cite":cites[0]["n"] if cites else None,"ok":None}],
+                                    "pct_cap":70,"reason":"The floor count uses plan layout and printed labels; confirm it on the marked drawing.",
+                                    "improve":"Check the marked floor labels and separate plans on the sheet."}
+        return result
 
     if doc.mode == "ifc" and kind == "storey" and p.type == "count" and not page:
         sts = sorted(doc.storeys, key=lambda s: s.get("elevation_m", 0))
@@ -539,6 +556,7 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
     # --- room / label filters
     subject = None
     sub_name = None
+    weak = []
     if kind == "room" and doc.mode == "ifc":
         from .filters import room_filter, missing_room_text
         selected = room_filter(question, items)
@@ -666,7 +684,17 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         else:
             verb = "is" if n == 1 else "are"
             text = f"There {verb} **{n} {_plural(kind, n)}** {where}. {marks}"
-        return _answer_obj(question, [doc_id], text, n, "count", conf, False, boxes, cites, scene, trace, route, t0)
+        if weak:
+            text += f" {len(weak)} additional possible {_plural(kind, len(weak))} have uncertain room types and are excluded; this is a confirmed-detection count, not a verified total."
+            conf = min(conf, .5)
+        result = _answer_obj(question, [doc_id], text, n, "count", conf, False, boxes, cites, scene, trace, route, t0)
+        if weak:
+            result["reasoning_hint"] = {
+                "steps": [{"kind": "found", "title": "Found", "text": f"{n} confident detections and {len(weak)} additional candidates with uncertain room types", "cite": cites[0]["n"] if cites else None, "ok": None},
+                          {"kind": "checked", "title": "Checked", "text": "Uncertain classifications were excluded; the complete total needs a drawing check", "cite": None, "ok": False}],
+                "pct_cap": 70, "reason": "Some detected rooms could not be confidently classified; this count may be incomplete.",
+                "improve": "Check the room labels on the drawing to confirm the total."}
+        return result
 
     vals = [(i, _qty(i, kind, p.type)) for i in items]
     if doc.mode == "ifc" and kind == "room" and p.type == "area" and len(items) <= 400 and any(v is None for _, v in vals):
