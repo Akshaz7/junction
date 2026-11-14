@@ -331,3 +331,7 @@ mirrored to `public/kind-colors.json` for iOS (a vitest keeps them equal). 2D
 evidence boxes (`box.kind`, or the citation's `item_kind`, else the id prefix) and
 3D highlights both use it. `KindLegend` shows colour plus label and count ("Windows 11"),
 for single- and multi-kind answers (`answer.value` may be `{window: 11, door: 11}`).
+
+## Answer reveal (cinematic)
+
+`viewer.highlight(ids, { cinematic: true })` (also used by the `highlight` prop, remote highlights and the highlight/isolate commands) plays a short reveal when the view has been open for 2 s and no build-up is running: the rest of the model dims to 55 %, the camera makes one eased 3 s turntable orbit and returns, and answer items light one by one in reading order with an emissive pulse while their numbered tags pop in. Skipped orbit when the user is dragging or touched the view in the last 1.5 s; user input mid-orbit cancels it. Reduced motion: no reveal, instant highlight. `viewer.getCinematicState()` exposes progress. Timeline is the pure `cinematic.ts`. Isolate now tweens its dim (250 ms) instead of snapping.

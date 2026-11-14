@@ -16,7 +16,7 @@ export function bindLiveHighlight(
     const state = viewer.getHighlightState();
     if (sameHighlight(event, { type: 'scene.highlight', doc_id: event.doc_id, item_ids: state.highlighted, labels: state.labels })) return;
     applyingRemote = true;
-    try { viewer.highlight(event.item_ids, { labels: event.labels }); }
+    try { viewer.highlight(event.item_ids, { labels: event.labels, cinematic: true }); }
     finally { applyingRemote = false; }
   }
 

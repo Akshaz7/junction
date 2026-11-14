@@ -14,12 +14,15 @@ export function placeLabels(anchors: readonly LabelAnchor[], width: number, heig
     // A leader only refers to an item actually inside this viewport.
     if (anchor.x < 0 || anchor.x > width || anchor.y < 0 || anchor.y > height) continue;
     let result: LabelPlacement | undefined;
-    for (let row = 0; row < 4 && !result; row++) {
+    // Above the item first; below it when the item is near the top edge of the viewport.
+    for (let attempt = 0; attempt < 8 && !result; attempt++) {
+      const row = attempt % 4;
+      const below = attempt >= 4;
       for (const column of [0, -1, 1]) {
         const x = Math.max(gap, Math.min(width - anchor.width - gap,
           anchor.x - anchor.width / 2 + column * (anchor.width + gap)));
-        const y = anchor.y - 30 - anchor.height - row * (anchor.height + gap);
-        if (x < gap || x + anchor.width > width - gap || y < gap) continue;
+        const y = below ? anchor.y + 30 + row * (anchor.height + gap) : anchor.y - 30 - anchor.height - row * (anchor.height + gap);
+        if (x < gap || x + anchor.width > width - gap || y < gap || y + anchor.height > height - gap) continue;
         const candidate = { id: anchor.id, x, y, width: anchor.width, height: anchor.height };
         if (!placed.some((other) => x < other.x + other.width + gap && x + anchor.width + gap > other.x
           && y < other.y + other.height + gap && y + anchor.height + gap > other.y)) result = candidate;

@@ -253,3 +253,12 @@
 .viewer3d-build input[type="range"] { flex: 1 1 120px; min-width: 80px; accent-color: var(--forest-600, #2f6b4f); }
 .viewer3d-build output { flex: 0 1 auto; min-width: 0; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 520px) { .viewer3d-build { flex-wrap: wrap; } .viewer3d-build output { flex-basis: 100%; } }
+
+/* Answer reveal: numbered tags pop in one by one as their item lights up. */
+.viewer3d-annotation .viewer3d-label-pill { transition: opacity 200ms ease-out, transform 260ms cubic-bezier(.2, 1.4, .4, 1); transform-origin: 50% 100%; }
+.viewer3d-annotation .viewer3d-label-leader { transition: opacity 200ms ease-out; }
+.viewer3d-annotation[data-pop='hidden'] .viewer3d-label-pill { opacity: 0; transform: scale(.4); }
+.viewer3d-annotation[data-pop='hidden'] .viewer3d-label-leader { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .viewer3d-annotation .viewer3d-label-pill, .viewer3d-annotation .viewer3d-label-leader { transition: none; }
+}

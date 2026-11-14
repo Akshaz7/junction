@@ -24,14 +24,15 @@ describe('floating evidence labels', () => {
     }
   });
 
-  it('recomputes on viewport changes and omits off-screen or unplaceable labels', () => {
+  it('recomputes on viewport changes, omits off-screen labels and places a top-edge label below its item', () => {
     const anchors = [
       { id: '1', x: 180, y: 200, width: 60, height: 38 },
       { id: '2', x: -10, y: 200, width: 60, height: 38 },
       { id: '3', x: 20, y: 15, width: 60, height: 38 },
     ];
-    expect(placeLabels(anchors, 250, 300).map((p) => p.id)).toEqual(['1']);
-    expect(placeLabels(anchors, 100, 300)).toEqual([]);
+    expect(placeLabels(anchors, 250, 300).map((p) => p.id)).toEqual(['3', '1']);
+    expect(placeLabels(anchors, 100, 300).map((p) => p.id)).toEqual(['3']);
+    expect(placeLabels(anchors, 100, 300)[0].y).toBeGreaterThan(15);
   });
 });
 

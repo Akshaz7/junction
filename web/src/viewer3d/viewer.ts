@@ -23,8 +23,11 @@ import { createEditLayer, type ItemEdit, type EditState, type WallMaterial } fro
 import { createItemAnnotation, layoutAnnotations } from './annotations';
 import { createFindingsLayer, type Finding, type FindingPinState } from './findings';
 import { kindColor } from '../lib/kind-colors';
+import { planCinematic, sampleCinematic, type CinematicPlan } from './cinematic';
 
 export const SCENE_LOAD_BUDGET_MS = 60_000;
+
+export interface CinematicState { active: boolean; orbit: boolean; total: number; lit: number; popped: number; dim: number; angle: number | null }
 
 export interface Viewer {
   readonly renderer: WebGLRenderer;
@@ -73,6 +76,8 @@ export interface Viewer {
   visualise(onStateChange?: (state: RiseState) => void): void;
   /** Staged build-up (FIX-5): null until visualise() has run, and after walk/edit end it. */
   getBuildState(): BuildState | null;
+  /** The answer reveal (orbit, dim, one-by-one pulse), for tests and the UI. */
+  getCinematicState(): CinematicState;
   onBuildChange(callback: (state: BuildState | null) => void): () => void;
   /** Show steps 1..index complete (1-based). Pauses playback; the camera is not touched. */
   setBuildStep(index: number): void;
@@ -210,6 +215,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   }
 
   function clearHighlight(): void {
+    endCinematic();
     batchesDirty = true;
     if (build) build.dirty = true;
     commandVisuals?.clearMaterials();
@@ -313,7 +319,14 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     applyLinkedVisuals();
     // Highlights stay fully visible while the model builds up (they are pinned in the animation).
     if (build) build.animation.sample(performance.now());
-    if (!(build && build.phase !== 'done') && !walk.state().active) flyTo(itemBounds(active, target ? [target] : []));
+    const canFly = !(build && build.phase !== 'done') && !walk.state().active;
+    if (canFly) {
+      // An explicit camera target wins; otherwise frame every highlighted item so all numbered tags stay in view.
+      const fly = itemBounds(active, options.cameraTargetItemId && active.items.has(options.cameraTargetItemId) ? [options.cameraTargetItemId] : state.highlighted);
+      const reveal = options.cinematic === true && !prefersReducedMotion() && state.highlighted.length > 0
+        && !fly.isEmpty() && performance.now() - sceneShownAt > REVEAL_AFTER_LOAD_MS;
+      if (reveal) startCinematic(state.highlighted, fly); else flyTo(fly);
+    }
     notifyHighlight();
   }
 
@@ -330,8 +343,75 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     applyingCommand = true;
     try {
       commandVisuals?.setState(commandState, performance.now(), window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-      highlight([...commandState.highlighted.keys()], { labels, dimOthers: commandState.isolated === null });
+      const cinematic = cinematicNext; cinematicNext = false;
+      highlight([...commandState.highlighted.keys()], { labels, dimOthers: commandState.isolated === null, cinematic });
     } finally { applyingCommand = false; }
+  }
+
+  // --- Answer reveal: dim the rest, orbit once (unless the user is interacting), light items one by one. ---
+  const UP = new Vector3(0, 1, 0);
+  const USER_IDLE_MS = 1500;
+  const REVEAL_AFTER_LOAD_MS = 2000;
+  let sceneShownAt = 0;
+  let userDragging = false;
+  let lastInteraction = -Infinity;
+  let cinematicNext = false;
+  let cine: { plan: CinematicPlan; start: number; ids: string[]; basePos: Vector3; target: Vector3; focus: Set<string>;
+    fly: Box3 | null; cancelled: boolean; settled: boolean; last: ReturnType<typeof sampleCinematic> } | null = null;
+  const userBusy = (now: number) => userDragging || now - lastInteraction < USER_IDLE_MS || moving !== null || walk.state().active;
+  const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function setLabelPop(popped: (id: string) => boolean | null): void {
+    for (const label of labels) {
+      const state = popped(label.element.dataset.itemId ?? '');
+      if (state === null) delete label.element.dataset.pop;
+      else label.element.dataset.pop = state ? 'in' : 'hidden';
+    }
+  }
+
+  function startCinematic(ids: string[], fly: Box3): void {
+    const now = performance.now();
+    if (!ids.length || !commandVisuals || !highlights) { flyTo(fly); return; }
+    const orbit = !userBusy(now);
+    const plan = planCinematic(ids.length, orbit);
+    cine = { plan, start: now, ids, basePos: camera.position.clone(), target: controls.target.clone(), focus: new Set(ids),
+      fly, cancelled: false, settled: !orbit, last: sampleCinematic(plan, 0) };
+    if (!orbit) flyTo(fly);
+    stepCinematic(now);
+  }
+
+  function endCinematic(): void {
+    const current = cine;
+    if (!current) return;
+    cine = null;
+    for (const id of current.ids) highlights?.setGlow(id, 1);
+    setLabelPop(() => null);
+    commandVisuals?.setFocus(null, 0);
+    batchesDirty = true;
+  }
+
+  function stepCinematic(now: number): void {
+    const c = cine;
+    if (!c || !highlights) return;
+    const s = sampleCinematic(c.plan, now - c.start);
+    c.last = s;
+    if (!c.cancelled && s.orbitAngle !== null) {
+      camera.position.copy(c.target).add(c.basePos.clone().sub(c.target).applyAxisAngle(UP, s.orbitAngle));
+      camera.lookAt(c.target);
+    } else if (!c.settled && s.orbitDone) {
+      c.settled = true;
+      if (!c.cancelled) {
+        camera.position.copy(c.basePos);
+        camera.lookAt(controls.target);
+        if (c.fly) flyTo(c.fly);
+      }
+    }
+    c.ids.forEach((id, index) => highlights!.setGlow(id, s.glow[index]));
+    const popped = new Map(c.ids.map((id, index) => [id, s.popped[index]]));
+    setLabelPop((id) => popped.get(id) ?? null);
+    commandVisuals?.setFocus(c.focus, s.dim);
+    batchesDirty = true;
+    if (s.done) endCinematic();
   }
 
   function visualise(onStateChange?: (state: RiseState) => void): void {
@@ -400,7 +480,10 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   }
 
   // Direct orbit/zoom input takes over the camera (and the intro move), never the build-up itself.
+  controls.addEventListener('end', () => { userDragging = false; lastInteraction = performance.now(); });
   controls.addEventListener('start', () => {
+    userDragging = true; lastInteraction = performance.now();
+    if (cine) cine.cancelled = true;
     flight = null;
     if (build) build.intro = false;
   });
@@ -443,6 +526,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     active = scene;
     pickMeshes = null;
     commandState = emptyCommandState();
+    sceneShownAt = performance.now();
     edits = createEditLayer(scene, { apply: (command) => api.applyCommand(command), hidden: () => [...commandState.hidden] });
     linked = { hovered: null, selected: null, labels: {} };
     cutaway = createCutawayController(scene);
@@ -477,6 +561,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     else controls.update();
     const wasRising = build !== null && build.animation.state(performance.now()).playing;
     sampleRise();
+    stepCinematic(now);
     const fading = commandVisuals?.sample(performance.now());
     if (flight) {
       const progress = Math.min(1, (performance.now() - flight.start) / 600);
@@ -602,7 +687,9 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       const resolved = command.op === 'highlight' || command.op === 'isolate'
         ? { ...command, labels: resolveCommandLabels(command.item_ids, command.labels, active.manifest.items) } : command;
       commandState = applyCommand(commandState, resolved);
+      cinematicNext = command.op === 'highlight' || command.op === 'isolate';
       renderCommandState();
+      cinematicNext = false;
       for (const callback of commandListeners) callback(resolved);
     },
     applyState(snapshot) {
@@ -663,6 +750,12 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     },
     visualise,
     getBuildState: () => build?.animation.state(performance.now()) ?? null,
+    getCinematicState: () => {
+      const s = cine?.last;
+      return { active: cine !== null, orbit: cine?.plan.orbit ?? false, total: cine?.ids.length ?? 0,
+        lit: s ? s.glow.filter((g) => g > 0).length : 0, popped: s ? s.popped.filter(Boolean).length : 0,
+        dim: s?.dim ?? 0, angle: s?.orbitAngle ?? null };
+    },
     onBuildChange(callback) { buildListeners.add(callback); return () => { buildListeners.delete(callback); }; },
     setBuildStep(index) { if (build) { build.animation.setStep(index); touchBuild(); } },
     playBuild() { if (build) { build.animation.play(performance.now()); touchBuild(); } },
