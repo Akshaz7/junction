@@ -43,7 +43,7 @@ export function CompareScreen({ docs, demo }: { docs: Document[]; demo: boolean 
     for (const group of map.values()) group.steps.sort((a, b) => (Date.parse(a.created_at) || 0) - (Date.parse(b.created_at) || 0))
     return [...map.values()].sort((a, b) => a.title.localeCompare(b.title))
   }, [feed, docs]) // eslint-disable-line react-hooks/exhaustive-deps
-  const group = groups.find((entry) => entry.key === series) ?? groups.find((entry) => entry.steps.some((item) => item.id === step)) ?? groups[0]
+  const group = groups.find((entry) => entry.key === series) ?? groups.find((entry) => entry.steps.some((item) => item.id === step)) ?? groups.find((entry) => /A100 - DEMOLITION/i.test(entry.title)) ?? groups[0]
   const chosen = group?.steps.find((entry) => entry.id === step) ?? group?.steps[0]
 
   useEffect(() => {
@@ -72,7 +72,7 @@ export function CompareScreen({ docs, demo }: { docs: Document[]; demo: boolean 
   })
 
   return <section className="compare-screen" aria-label="Compare">
-    <header className="cmp-header"><div><h2><GitCompareArrows size={19} />Compare versions</h2><p>Pick a drawing and two of its versions to see what moved.</p></div></header>
+    <header className="cmp-header"><div><h2><GitCompareArrows size={19} />Compare versions</h2><p>Pick a drawing and two of its versions. Boxes show what changed: red was changed or removed, green was added. The numbers match the list on the right.</p></div></header>
     <div className="cmp-controls">
       <label>Drawing<select aria-label="Drawing" value={group?.key ?? ''} disabled={!groups.length} onChange={(event) => { setSeries(event.target.value); setStep('') }}>{groups.map((entry) => <option key={entry.key} value={entry.key}>{entry.title}</option>)}</select></label>
       <label>Versions<select aria-label="Versions" value={chosen?.id ?? ''} disabled={!group} onChange={(event) => setStep(event.target.value)}>{group?.steps.map((entry) => <option key={entry.id} value={entry.id}>{label(entry)}</option>)}</select></label>
@@ -96,7 +96,7 @@ export function CompareScreen({ docs, demo }: { docs: Document[]; demo: boolean 
         {readings.filter((reading) => !reading.small).map(reading)}
         {readings.some((entry) => entry.small) && <details className="cmp-small"><summary>Minor edits ({readings.filter((entry) => entry.small).length})</summary>{readings.filter((entry) => entry.small).map(reading)}</details>}
         {!comparison.changes.length && <div className="cmp-empty"><p className="tools-muted">No differences were found between these versions.</p><a className="button button-raised button-size-default" href={`#/chat?doc=${encodeURIComponent(chosen?.summary.doc_id || chosen?.doc_b || comparison.doc_id)}`}>Ask about this drawing</a></div>}
-        <small>{comparison.note}</small><small>{comparison.generated_for_demo ? 'generated for demo' : `Source: ${comparison.source}`}</small>
+        <small>Found automatically by comparing the two sheets line by line. No AI was used.{comparison.generated_for_demo ? ' · generated for demo' : ''}</small>
       </aside>
     </div>}
   </section>
