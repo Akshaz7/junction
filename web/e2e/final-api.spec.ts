@@ -64,10 +64,15 @@ for (const kind of ['dxf', 'ifc', 'raster']) {
     const result = await answer(request, doc.doc_id, 'How many doors are there?')
     record('origin.json', { doc_id: doc.doc_id, source: doc.source, kind })
     expect.soft(result.answer.text_md).toMatch(/\*\*[^*]+\*\*/)
-    const pm = await request.get(`/api/docs/${doc.doc_id}/planmap/1`)
-    expect(pm.ok()).toBe(true)
-    const itemIds = new Set((await pm.json()).items.map((i: { item_id: string }) => i.item_id))
-    for (const box of result.evidence.boxes) expect.soft(itemIds.has(box.item_id), `Cited item ${box.item_id} occurs in source`).toBe(true)
+    // IFC boxes span storeys/pages; validate each against its own source page.
+    for (const page of new Set(result.evidence.boxes.map((box) => box.page))) {
+      const pm = await request.get(`/api/docs/${doc.doc_id}/planmap/${page}`)
+      expect(pm.ok()).toBe(true)
+      const itemIds = new Set((await pm.json()).items.map((i: { item_id: string }) => i.item_id))
+      for (const box of result.evidence.boxes.filter((box) => box.page === page)) {
+        expect.soft(itemIds.has(box.item_id), `Page ${page} contains cited item ${box.item_id}`).toBe(true)
+      }
+    }
   })
 }
 

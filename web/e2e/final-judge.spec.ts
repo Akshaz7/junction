@@ -79,7 +79,15 @@ test('[WEB] Export report prepares source evidence; Take-off sheet downloads a c
   await expect(dialog.getByRole('button', { name: 'Copy as Markdown', exact: true })).toBeEnabled({ timeout: 30_000 })
   const frame = page.frameLocator('iframe[title="Site report preview"]')
   await expect(frame.locator('body')).toContainText(answer.question)
-  await expect(frame.locator('body')).toContainText(/source|evidence/i)
+  await expect(frame.getByRole('heading', { name: 'Where it is set out', exact: true })).toBeVisible()
+  for (const citation of answer.citations) {
+    await expect(frame.locator('li').filter({ hasText: `[${citation.n}]` }).first()).toContainText(`Page ${citation.page}`)
+  }
+  const drawings = frame.getByRole('img', { name: /drawing evidence$/ })
+  expect(await drawings.count(), 'Export includes drawing evidence').toBeGreaterThan(0)
+  for (const drawing of await drawings.all()) {
+    await expect.poll(() => drawing.evaluate((node) => (node as HTMLImageElement).naturalWidth)).toBeGreaterThan(0)
+  }
   await expect(dialog.getByRole('button', { name: 'Print / Save PDF', exact: true })).toBeEnabled()
   await dialog.getByRole('button', { name: 'Close export report', exact: true }).click()
   await expect(trigger).toBeFocused()
@@ -166,7 +174,7 @@ test('[3D] Visualise keeps cited item identities; rise, storeys, camera, clear, 
 test('[WEB] Overview, Changes and Findings show live data or explicit empty states', async ({ page, request }) => {
   await page.goto('/#/overview')
   const overview = page.getByRole('region', { name: 'Workspace overview', exact: true })
-  for (const name of ["This week's changes", 'Open findings', 'Latest answers']) {
+  for (const name of ['Recent uploads and revisions', 'Open findings', 'Latest answers']) {
     const section = overview.getByRole('region', { name, exact: true })
     await expect(section).toHaveAttribute('aria-busy', 'false', { timeout: 30_000 })
     await expect(section.getByRole('alert')).toHaveCount(0)
@@ -177,14 +185,23 @@ test('[WEB] Overview, Changes and Findings show live data or explicit empty stat
   expect(changes.ok()).toBe(true)
   const feed = (await changes.json()).changes
   await page.goto('/#/changes')
-  const screen = page.getByRole('region', { name: 'Changes', exact: true })
+  const screen = page.getByRole('region', { name: 'Drawing changes', exact: true })
   await expect(screen).toBeVisible()
+  await expect(screen.getByRole('button', { name: 'Refresh changes', exact: true })).toBeEnabled()
   await expect(screen.getByRole('alert')).toHaveCount(0)
-  if (feed.length) {
+  if (feed.some((entry: { type: string }) => entry.type === 'new_version')) {
     await expect(screen.locator('.change-row').first()).toBeVisible()
     await screen.locator('.change-row').first().click()
     await expect(screen.locator('.comparison-header, .data-empty, .revision-summary').first()).toBeVisible({ timeout: 30_000 })
+  } else if (feed.some((entry: { type: string }) => entry.type === 'rule_change')) {
+    await expect(screen.locator('.rule-change-card').first()).toBeVisible()
   } else await expect(screen).toContainText(/no changes/i)
+  if (feed.some((entry: { type: string }) => entry.type === 'new_document')) {
+    await screen.getByLabel('Change type', { exact: true }).selectOption('new_document')
+    await expect(screen.locator('.change-row').first()).toBeVisible()
+    await screen.locator('.change-row').first().click()
+    await expect(screen).toContainText('This is a new document; no previous revision is available.')
+  }
   await page.goto('/#/findings')
   const findings = page.getByRole('region', { name: 'Findings', exact: true })
   const picker = findings.getByLabel('Drawing', { exact: true })
