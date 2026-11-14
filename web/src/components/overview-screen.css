@@ -46,3 +46,6 @@ button.overview-starter { border: 0; color: var(--foreground); text-align: left;
 .overview-start > p { margin-top: 12px; color: var(--muted-foreground); font-size: var(--text-body-sm); }
 .overview-building { margin: 0 0 8px; color: var(--text-muted, inherit); font-size: var(--text-body-sm); }
 .overview-rule { color: var(--text-muted, inherit); }
+
+/* W-87: balanced overview: changes on the left, findings and answers stacked on the right */
+@media (min-width: 900px) { .overview-grid > .overview-card:first-child { grid-row: span 2; } }

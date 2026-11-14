@@ -44,12 +44,14 @@ export function cleanTitle(raw: string) {
     .replace(/[-_ ]generated[-_ ]for[-_ ]demo.*$/i, '').replace(/[-_ ]?\d{10,}/g, '').replace(/[-_ ]?p\d{3}$/i, '')
     .replace(/^[a-z]{2}[-_][a-z]+[-_][a-z]+-dfe[-_a-z0-9]*$/i, '')
   const words = name.replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim()
-  return words ? words.charAt(0).toUpperCase() + words.slice(1) : 'Untitled drawing'
+  // Keep sheet codes readable: "M 101A piping plan" -> "M-101A piping plan", "A 2 dorm" -> "A-2 dorm".
+  const coded = words.replace(/^([A-Z]{1,2}) (\d{1,4}[A-Z]?)\b/, '$1-$2')
+  return coded ? coded.charAt(0).toUpperCase() + coded.slice(1) : 'Untitled drawing'
 }
 
 export function isTestUpload(raw: string) {
   const name = raw.replace(/^uploads__/, '')
-  return testUpload.test(name) || cleanTitle(name) === 'Untitled drawing'
+  return testUpload.test(name) || /^screenshot/i.test(name) || cleanTitle(name) === 'Untitled drawing'
 }
 
 /** This week's changes, test uploads and repeats of the same file removed. */
