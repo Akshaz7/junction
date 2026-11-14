@@ -6,6 +6,7 @@ export { VisualiseItButton, VisualisePanel, type VisualiseItButtonProps, type Vi
 export { answerToVisualise, type VisualiseAnswer } from './visualise';
 export { type RisePhase, type RiseState } from './rise';
 export { buildItemDetails, indexElements, type ItemDetails, type IFCElement } from './identify';
+export { onHighlight, sendHighlight, type HighlightChannel, type HighlightMessage } from './liveHighlight';
 export {
   createScene, loadScene, setStorey, storeyName, itemIdForObject, disposeScene, documentSceneUrl, documentFileUrl,
   type LoadedScene, type SceneManifest, type SceneItem, type SceneAsset, type Storey, type Vec3,

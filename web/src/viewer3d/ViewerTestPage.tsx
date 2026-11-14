@@ -7,7 +7,11 @@ import { VisualiseItButton } from './VisualiseIt';
 /** The LEAD mounts this page at /#/viewer-test; production callers pass their API URL. */
 export function ViewerTestPage() {
   const [viewer, setViewer] = useState<Viewer | null>(null);
-  const [document, setDocument] = useState('digital_hub');
+  const [document, setDocument] = useState(() => {
+    const requested = new URLSearchParams(window.location.search).get('doc');
+    if (requested === 'colorful-11397' || requested === 'cubicasa5k__colorful-11397') return 'colorful-11397';
+    return requested === 'ifc_bench__ac20-arc' ? requested : 'digital_hub';
+  });
   const [visualiseDocId, setVisualiseDocId] = useState('cubicasa5k__colorful-11397');
   const [visualiseViewer, setVisualiseViewer] = useState<Viewer | null>(null);
   const [highlightState, setHighlightState] = useState<HighlightState>({ highlighted: [], dimmed: 0, labels: {} });
@@ -16,7 +20,8 @@ export function ViewerTestPage() {
   useEffect(() => {
     const target = window as typeof window & { viewer3dTest?: Viewer };
     if (viewer) target.viewer3dTest = viewer;
-    return () => { delete target.viewer3dTest; };
+    const unsubscribe = viewer?.onHighlightChange(setHighlightState);
+    return () => { unsubscribe?.(); delete target.viewer3dTest; };
   }, [viewer]);
 
   useEffect(() => {
@@ -43,14 +48,15 @@ export function ViewerTestPage() {
       ids.push(candidates.splice(Math.floor(Math.random() * candidates.length), 1)[0]);
     }
     viewer.highlight(ids, { labels: Object.fromEntries(ids.map((id, index) => [id, String(index + 1)])) });
-    setHighlightState(viewer.getHighlightState());
   }
 
   return <main className="viewer3d-test-page">
     <header>
-      <h1>{document === 'digital_hub' ? 'DigitalHub' : 'AC20'} — 3D viewer</h1>
+      <h1>{document === 'digital_hub' ? 'DigitalHub' : document === 'colorful-11397' ? 'CubiCasa colorful-11397' : 'AC20'} — 3D viewer</h1>
       <p>{document === 'digital_hub'
         ? 'Copyright (c) 2020 RWTH Aachen University — E3D Institute of Energy Efficiency and Sustainable Building · MIT'
+        : document === 'colorful-11397'
+        ? "CubiCasa5K, (c) 2019 CubiCasa. Kalervo, Ylioinas, Häikiö, Karhu, Kannala: 'CubiCasa5K: A Dataset and an Improved Multi-Task Model for Floorplan Image Analysis', SCIA 2019. CC BY-NC-SA 4.0. Extruded heights generated for demo."
         : 'Institute for Automation and Applied Informatics (IAI) / Karlsruhe Institute of Technology (KIT) · KIT IFC Examples'}</p>
       <div className="viewer3d-test-actions">
         <label htmlFor="viewer3d-document">Document</label>
@@ -60,12 +66,12 @@ export function ViewerTestPage() {
           setDocument(event.target.value);
         }}>
           <option value="digital_hub">DigitalHub (offline fixture)</option>
+          <option value="colorful-11397">CubiCasa colorful-11397 (light offline fixture)</option>
           <option value="ifc_bench__ac20-arc">AC20 (API)</option>
         </select>
         <button type="button" disabled={!viewer} onClick={highlightRandom}>Highlight 3 random items</button>
         <button type="button" disabled={!viewer} onClick={() => {
           viewer?.clearHighlight();
-          if (viewer) setHighlightState(viewer.getHighlightState());
         }}>Clear highlight</button>
         <output aria-label="Highlight state">{JSON.stringify(highlightState)}</output>
       </div>
@@ -78,9 +84,9 @@ export function ViewerTestPage() {
         <VisualiseItButton answer={fakeAnswer} onReady={setVisualiseViewer} />
       </section>
     </header>
-    <Viewer3D key={document} {...(document === 'digital_hub'
-      ? { sceneUrl: `${import.meta.env.BASE_URL}fixtures/digital_hub/scene.json` }
-      : { doc_id: document })} onReady={setViewer} />
+    <Viewer3D key={document} {...(document === 'ifc_bench__ac20-arc'
+      ? { doc_id: document }
+      : { sceneUrl: `${import.meta.env.BASE_URL}fixtures/${document}/scene.json` })} onReady={setViewer} />
   </main>;
 }
 

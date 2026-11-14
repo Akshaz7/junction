@@ -24,6 +24,7 @@ export interface Viewer {
   highlight(item_ids: readonly string[], options?: HighlightOptions): void;
   clearHighlight(): void;
   getHighlightState(): HighlightState;
+  onHighlightChange(callback: (state: HighlightState) => void): () => void;
   /** Show the flat plan/top-down IFC view, then raise the architectural items. */
   visualise(onStateChange?: (state: RiseState) => void): void;
   /** Coordinates are viewport client pixels, as in PointerEvent.clientX/clientY. */
@@ -54,6 +55,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   let disposed = false;
   let loadVersion = 0;
   let highlights: ReturnType<typeof createHighlightController> | null = null;
+  const highlightListeners = new Set<(state: HighlightState) => void>();
   const labels: CSS2DObject[] = [];
   let flight: { start: number; from: Vector3; to: Vector3; targetFrom: Vector3; targetTo: Vector3 } | null = null;
   let rise: {
@@ -140,6 +142,12 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     const target = options.cameraTargetItemId;
     if (rise) rise.animation.sample(performance.now());
     else flyTo(itemBounds(active, target && active.items.has(target) ? [target] : state.highlighted));
+    notifyHighlight();
+  }
+
+  function notifyHighlight(): void {
+    if (!highlights) return;
+    for (const listener of highlightListeners) listener(highlights.getHighlightState());
   }
 
   function visualise(onStateChange?: (state: RiseState) => void): void {
@@ -278,9 +286,13 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       if (active) setStorey(active, name);
     },
     highlight,
-    clearHighlight,
+    clearHighlight() { clearHighlight(); notifyHighlight(); },
     getHighlightState() {
       return highlights?.getHighlightState() ?? { highlighted: [], dimmed: 0, labels: {} };
+    },
+    onHighlightChange(callback) {
+      highlightListeners.add(callback);
+      return () => { highlightListeners.delete(callback); };
     },
     visualise,
     pick(x, y) {
@@ -301,6 +313,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     dispose() {
       if (disposed) return;
       disposed = true;
+      highlightListeners.clear();
       loadVersion++;
       cancelAnimationFrame(frame);
       observer.disconnect();

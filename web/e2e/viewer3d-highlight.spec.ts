@@ -1,18 +1,35 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 test.use({
+  reducedMotion: 'reduce',
+  actionTimeout: 15_000,
   launchOptions: {
     executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
     args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
   },
 });
+test.setTimeout(60_000);
+
+async function waitForRenderedFrame(page: Page) {
+  const frame = () => page.evaluate(() => (window as typeof window & {
+    viewer3dTest: { renderer: { info: { render: { frame: number } } } };
+  }).viewer3dTest.renderer.info.render.frame);
+  const previous = await frame();
+  await expect.poll(frame, { timeout: 15_000, message: 'The current geometry and materials must reach a rendered frame' })
+    .toBeGreaterThan(previous);
+}
 
 test('highlight changes rendered geometry, shows citation numbers, and clears', async ({ page }, testInfo) => {
-  await page.goto('/#/viewer-test');
+  await page.goto('/?doc=colorful-11397#/viewer-test', { timeout: 15_000 });
+  await expect(page.getByRole('combobox', { name: 'Document', exact: true })).toHaveValue('colorful-11397');
   const viewer = page.getByRole('region', { name: '3D viewer', exact: true });
-  await expect(viewer).toHaveAttribute('data-state', 'ready');
+  await expect(viewer).toHaveAttribute('data-state', 'ready', { timeout: 30_000 });
   const canvas = viewer.locator('canvas');
-  const before = await canvas.screenshot({ path: testInfo.outputPath('before-highlight.png') });
+  await canvas.scrollIntoViewIfNeeded();
+  await waitForRenderedFrame(page);
+  const clip = await canvas.boundingBox();
+  expect(clip).not.toBeNull();
+  const before = await page.screenshot({ clip: clip!, animations: 'disabled', path: testInfo.outputPath('before-highlight.png') });
   await page.getByRole('button', { name: 'Highlight 3 random items', exact: true }).click();
   const stateOutput = page.getByLabel('Highlight state', { exact: true });
   const state = JSON.parse((await stateOutput.textContent())!) as {
@@ -30,9 +47,12 @@ test('highlight changes rendered geometry, shows citation numbers, and clears', 
     await expect(label).toHaveAttribute('data-item-id', id);
     await expect(label).toHaveText(String(index + 1));
   }
-  // Wait for the 600ms flight before recording the final rendered frame.
-  await page.waitForTimeout(750);
-  const after = await canvas.screenshot({ path: testInfo.outputPath('after-highlight.png') });
+  // Reduced motion applies the final camera immediately; wait for its render.
+  await waitForRenderedFrame(page);
+  await canvas.scrollIntoViewIfNeeded();
+  const afterClip = await canvas.boundingBox();
+  expect(afterClip).not.toBeNull();
+  const after = await page.screenshot({ clip: afterClip!, animations: 'disabled', path: testInfo.outputPath('after-highlight.png') });
   expect(after.equals(before)).toBe(false);
   await testInfo.attach('before highlight', { body: before, contentType: 'image/png' });
   await testInfo.attach('after highlight', { body: after, contentType: 'image/png' });

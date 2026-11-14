@@ -5,6 +5,7 @@ import { ItemDetailsCard } from './ItemDetailsCard';
 import { createViewer, type Viewer } from './viewer';
 import type { HighlightOptions } from './highlight';
 import type { RiseState } from './rise';
+import { bindLiveHighlight } from './liveViewerHighlight';
 import './viewer3d.css';
 
 interface ViewerOptions {
@@ -59,6 +60,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, h
     if (!canvas) return;
     let active = true;
     let viewer: Viewer | null = null;
+    let live: ReturnType<typeof bindLiveHighlight> | undefined;
     setState('loading');
     setError('');
     setStoreys([]);
@@ -79,8 +81,10 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, h
     try {
       viewer = createViewer(canvas);
       viewerRef.current = viewer;
+      live = bindLiveHighlight(viewer, doc_id);
       void viewer.loadScene(sceneUrl).then((scene) => {
         if (!active) return;
+        live?.sceneReady();
         const names = [
           ...scene.manifest.storeys.map(storeyName),
           ...Object.values(scene.manifest.items).map((item) => storeyName(item.storey)),
@@ -96,6 +100,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, h
 
     return () => {
       active = false;
+      live?.dispose();
       viewer?.dispose();
       if (viewerRef.current === viewer) viewerRef.current = null;
     };
@@ -167,7 +172,8 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, h
       {state === 'loading' && <p className="viewer3d-message" role="status">Loading 3D scene…</p>}
       {state === 'error' && <p className="viewer3d-message" role="alert">{error}</p>}
       {state === 'ready' && details && <ItemDetailsCard key={details.item_id} details={details}
-        loading={elementsLoading} onClose={closeDetails} />}
+        loading={elementsLoading} onClose={closeDetails}
+        onHighlight={() => viewerRef.current?.highlight([details.item_id])} />}
     </div>
     <div className="viewer3d-footer">
       <p id={helpId}>Drag to orbit · Scroll to zoom · Click an item to identify it</p>

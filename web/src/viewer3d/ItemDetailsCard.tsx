@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import type { ItemDetails } from './identify';
 
-export function ItemDetailsCard({ details, loading, onClose }: {
-  details: ItemDetails; loading: boolean; onClose: () => void;
+export function ItemDetailsCard({ details, loading, onClose, onHighlight }: {
+  details: ItemDetails; loading: boolean; onClose: () => void; onHighlight: () => void;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -34,5 +34,6 @@ export function ItemDetailsCard({ details, loading, onClose }: {
     {!details.hasElement && <p className="viewer3d-item-note" role="status">
       {loading ? 'Loading properties…' : 'No additional properties available.'}
     </p>}
+    <button type="button" onClick={onHighlight}>Highlight</button>
   </aside>;
 }

@@ -48,6 +48,8 @@ Pass `highlightItemIds` and `highlightOptions` to highlight answer evidence:
 The imperative API is available from `createViewer(canvas)` or `onReady(viewer)`:
 `viewer.highlight(item_ids, { labels?, cameraTargetItemId? })`,
 `viewer.clearHighlight()`, and `viewer.getHighlightState()`.
+`viewer.onHighlightChange(callback)` observes public highlight/clear calls and
+returns an unsubscribe function. Internal scene disposal does not publish a clear.
 Missing IDs are ignored; labels default to sequential numbers when omitted.
 An empty selection clears the highlight. State reports resolved item IDs,
 the number of other resolved items (including hidden storeys), and label strings.
@@ -67,8 +69,13 @@ router. It loads the real DigitalHub fixture served at
 `/fixtures/digital_hub/scene.json`. The public assets are relative symlinks to the
 existing unit fixture, with the upstream MIT notice alongside them.
 It also provides “Highlight 3 random items” and “Clear highlight” controls.
-The Document dropdown switches between the offline fixture and the real
-`ifc_bench__ac20-arc` API document. Only this test page exposes `window.viewer3dTest`
+The Document dropdown switches between DigitalHub, the light offline CubiCasa
+`colorful-11397` fixture, and the real `ifc_bench__ac20-arc` API document.
+`/?doc=colorful-11397#/viewer-test` selects the light fixture on first load
+(the full `cubicasa5k__colorful-11397` ID is also accepted). Its GLB embeds its
+texture; it needs no API geometry requests. Source credit and CC BY-NC-SA 4.0
+terms are in `public/fixtures/colorful-11397/LICENSE.txt`; extruded heights are
+labelled “generated for demo”. Only this test page exposes `window.viewer3dTest`
 for browser helpers to position the camera and project a known item's bbox.
 
 Validation: `npx vitest run src/viewer3d` and `npx tsc --noEmit` from `web/`.
@@ -78,8 +85,10 @@ The browser test uses SwiftShader and reads pixels during an animation frame;
 more than 1% of the canvas must differ from the background. It also filters a
 storey, clicks a rendered surface, and checks the returned ID against the fixture.
 The LEAD also runs `npx playwright test e2e/viewer3d-highlight.spec.ts` through
-`scripts/heavy.sh`. It saves before/after canvas screenshots, checks they differ,
-checks citation labels, and clears the selection.
+`scripts/heavy.sh`. It uses the light fixture and reduced motion, waits for an
+explicit renderer frame, and saves canvas clips with `page.screenshot` and
+animations disabled. It checks the images differ, checks citation labels, and
+clears the selection. Both highlight and live tests have a 60-second total timeout.
 `e2e/viewer3d-identify.spec.ts` switches to AC20, projects a known Keller door's
 bbox centre, clicks it, checks identity/storey, and dismisses the card. Its camera
 sits within the opening so enclosing IFC space surfaces cannot intercept the
@@ -118,3 +127,31 @@ raised screenshots, checks the five IDs and labels, and covers missing scenes
 and reduced motion. Its clock skips intermediate frames to keep software
 rendering within the test timeout. The worker type-checks it because browser
 launch is blocked in its sandbox.
+
+T-06 connects every `Viewer3D` (including `VisualisePanel`) to the shared lazy
+`/ws` client. Incoming `scene.highlight` events apply only to the open document;
+updates arriving while geometry loads are retained. Item-card **Highlight**,
+answer highlights, and imperative highlight/clear calls publish resolved IDs and
+their citation labels. Remote application does not publish, and equal echoed
+states do not restart the camera flight. The last viewer unsubscribing closes
+the socket and cancels retries. Drops reconnect with capped exponential backoff;
+the latest unsent selection per document is flushed on reconnect. Server `ping`
+gets `pong`. Vite proxies `/ws`; HTTPS uses `wss://` at the current host.
+
+`liveHighlight.ts` exports only `onHighlight(cb)` and
+`sendHighlight(doc_id, item_ids, labels?)` for consumers. W-10 can replace those
+functions with its general socket client; `bindLiveHighlight` accepts the same
+two-method channel for integration/tests. The renderer has no socket dependency.
+The server must relay optional `labels` to preserve nonsequential evidence numbers.
+
+LEAD runs `scripts/heavy.sh` with
+`npx playwright test e2e/viewer3d-live.spec.ts`. Two independent browser contexts
+open the same light CubiCasa fixture, wait for socket handshakes, and verify three IDs,
+sequential and custom labels, and a clear in both directions within two seconds.
+Readiness observes the newest application socket's OPEN state: React StrictMode
+closes the first socket during setup, so waiting for a probe on that socket can
+hang. Geometry readiness allows 30 seconds under load; API/socket waits allow
+nine seconds with named failures and timing logs. Both contexts close with
+`Promise.allSettled` even on failure. The two-second sync assertions stay strict.
+When using `scripts/test_snapshot.sh`, include `web/public/fixtures` alongside
+`web/src/viewer3d` and the `viewer3d-*.spec.ts` files so the light assets are copied.
