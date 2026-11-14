@@ -241,6 +241,79 @@ def _fit_opening(o, walls):
     return local, matrix, footprint, host
 
 
+INFILL_MAX_T = 0.6    # no drawn wall this thick beside a door/window: anything wider is a mis-fit
+INFILL_LONE_T = 0.3   # floating opening with no wall end found: keep the masonry wall-like
+
+
+def _infill_gap(local, matrix, walls, search=0.6, probe=0.45):
+    """Masonry footprint for an opening: only the gap between the wall ends beside it.
+
+    Walks the opening's centreline (u along the wall, v across) to the wall ends on
+    either side, measures each end's own faces just inside it, and keeps the band
+    both ends share. The opening box narrowed to that band minus the existing walls
+    is returned (shapely, plan metres), so infill never overlaps a wall or sticks out
+    past its faces. None when there is no gap to fill.
+    """
+    a, b, v0, v1, _ = local
+    u = np.array([matrix[0, 0], matrix[2, 0]])
+    v = np.array([matrix[0, 2], matrix[2, 2]])
+    plan = lambda s, t: tuple(u * s + v * t)
+    c, mid = (v0 + v1) / 2, (a + b) / 2
+
+    def spans(line, axis):  # wall intervals along a probe line, in that line's own coordinate
+        hit = walls.intersection(line)
+        out = []
+        for g in getattr(hit, "geoms", [hit]):
+            if g.geom_type == "LineString" and g.length > 1e-4:
+                q = np.asarray(g.coords) @ (u if axis == "u" else v)
+                out.append((float(q.min()), float(q.max())))
+        return out
+
+    def end_faces(c):  # across-wall faces of the wall ends met along the line v = c
+        along = spans(LineString([plan(a - search, c), plan(b + search, c)]), "u")
+        left = [hi for lo, hi in along if hi <= mid + 1e-6]
+        right = [lo for lo, hi in along if lo >= mid - 1e-6]
+        found = []
+        for end, sign in ((max(left) if left else None, -1), (min(right) if right else None, 1)):
+            if end is None:
+                continue
+            best = None
+            # Read the wall's faces across a few depths inside its end. A read that runs to the
+            # probe limit crossed a perpendicular wall (corner / T junction), not this wall's
+            # faces; deeper reads get past such a junction to the wall itself.
+            for d in (0.03, 0.08, 0.13, 0.2, 0.3):
+                for lo, hi in spans(LineString([plan(end + sign * d, c - probe), plan(end + sign * d, c + probe)]), "v"):
+                    if lo <= c - probe + 1e-3 or hi >= c + probe - 1e-3:
+                        continue
+                    if lo - 1e-6 <= c <= hi + 1e-6 and (best is None or hi - lo < best[1] - best[0]):
+                        best = (lo, hi)
+            if best:
+                found.append(best)
+        return found
+
+    ranges = []
+    if not walls.is_empty:
+        for dc in (0, -.08, .08, -.16, .16):  # a detection box drawn on one wall face misses the centreline
+            ranges = end_faces(c + dc)
+            if ranges:
+                break
+    if ranges:  # both ends: the band both wall ends share; one end: that wall's faces
+        v0, v1 = max(r[0] for r in ranges), min(r[1] for r in ranges)
+        cap = INFILL_MAX_T
+    else:
+        cap = INFILL_LONE_T
+    if v1 - v0 < 0.02:
+        return None
+    if v1 - v0 > cap:
+        c = (v0 + v1) / 2
+        v0, v1 = c - cap / 2, c + cap / 2
+    gap = Polygon([plan(a, v0), plan(b, v0), plan(b, v1), plan(a, v1)])
+    if not walls.is_empty:
+        gap = gap.difference(walls)
+    parts = [g for g in getattr(gap, "geoms", [gap]) if g.geom_type == "Polygon" and g.area > 1e-4]
+    return unary_union(parts) if parts else None
+
+
 def window_parts(o):
     x0, x1, z0, z1, ax = o
     u0, u1 = (x0, x1) if ax == "x" else (z0, z1)
@@ -641,11 +714,23 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False, *
     # Segmented walls stop at openings: add masonry to the host wall without
     # creating extra answer items or changing the window/door item identity.
     kinds = {it["item_id"]: it["kind"] for it in pm["items"]}
-    for iid, (_, _, footprint, host) in openings.items():
-        specs = [(footprint, HEAD, wall_h)]
+    walls_m = unary_union([g if g.is_valid else g.buffer(0) for _, g in wall_polys]) if wall_polys else Polygon()
+    door_fp = unary_union([openings[i][2].buffer(0.01, join_style="mitre") for i in openings if kinds[i] == "door"])
+    placed = {"head": Polygon(), "sill": Polygon()}  # two detections of one opening must not stack coplanar blocks
+    for iid, (local, matrix, footprint, host) in openings.items():
+        gap = _infill_gap(local, matrix, walls_m)
+        if gap is None:
+            continue
+        head = gap.difference(placed["head"])
+        placed["head"] = placed["head"].union(head)
+        specs = [(head, HEAD, wall_h)]
         if kinds[iid] == "window":
-            specs.append((footprint, 0.0, SILL))
-        meshes = [prism(g, lo, hi) for g, lo, hi in specs if hi > lo]
+            # below the sill: never close a door that shares (part of) this opening
+            sill = gap.difference(placed["sill"]).difference(door_fp)
+            placed["sill"] = placed["sill"].union(sill)
+            specs.append((sill, 0.0, SILL))
+        meshes = [prism(p, lo, hi) for g, lo, hi in specs if hi > lo
+                  for p in getattr(g, "geoms", [g]) if p.geom_type == "Polygon" and p.area > 1e-4]
         meshes = [m for m in meshes if m is not None]
         if not meshes:
             continue

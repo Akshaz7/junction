@@ -7,7 +7,7 @@ import pytest
 import trimesh
 from PIL import Image, ImageDraw
 from shapely.affinity import rotate
-from shapely.geometry import Point, box
+from shapely.geometry import Point, Polygon, box
 
 from pipeline import extrude
 from pipeline.tests.measure_opening_gaps import masonry, measure, section
@@ -142,3 +142,29 @@ def test_corner_to_corner_window_keeps_its_own_axis():
     assert abs(matrix[0, 0]) == pytest.approx(1.0)
     assert local[3] - local[2] <= .5
     assert host in {'wall-001', 'wall-002'}
+
+
+def test_infill_stays_inside_the_gap_and_the_wall_faces():
+    """A fat or long opening box must not grow masonry into or past the walls beside it."""
+    walls = box(-3, -.1, -.8, .1).union(box(.8, -.1, 3, .1))
+    # a perpendicular wall meeting the left end must not widen the band either
+    walls = walls.union(box(-1.0, -1.5, -.8, 1.5))
+    gap = extrude._infill_gap((-1.2, 1.2, -.3, .3, 'x'), np.eye(4), walls)
+    assert gap.intersection(walls).area < 1e-6
+    assert gap.bounds == pytest.approx((-.8, -.1, .8, .1), abs=1e-6)
+
+
+def test_lone_opening_infill_is_wall_thin():
+    gap = extrude._infill_gap((-.5, .5, -1., 1., 'x'), np.eye(4), Polygon())
+    assert gap.bounds[3] - gap.bounds[1] == pytest.approx(extrude.INFILL_LONE_T)
+
+
+def test_window_sill_infill_never_closes_a_door(tmp_path):
+    drawing(tmp_path, [item('wall-001', 'wall', [20, 90, 140, 110]), item('wall-002', 'wall', [220, 90, 370, 110]),
+                       item('window-001', 'window', [140, 96, 220, 104]),
+                       item('door-001', 'door', [140, 92, 180, 108])], size=(400, 400))
+    extrude.process('generated-for-demo', tmp_path)
+    manifest = json.loads((tmp_path / 'scene.json').read_text())
+    walls = masonry(trimesh.load_scene(tmp_path / 'scene.glb'), manifest)
+    assert not section(walls, .45).buffer(1e-5).covers(Point(-.4, -1))   # door half stays open
+    assert section(walls, .45).buffer(1e-5).covers(Point(.0, -1))        # window half keeps its sill wall
