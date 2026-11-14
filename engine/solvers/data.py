@@ -90,6 +90,14 @@ def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
                 items.append(Item(item_id=x["item_id"], kind=x["kind"], label=x.get("label"), page=m.get("page", 1),
                                   bbox_px=x.get("bbox_px"), polygon_px=x.get("polygon_px"), conf=float(x.get("conf") or 0), q=q, props=pr,
                                   source=x.get("source", "")))
+        try:   # E-57: a printed scale (scale bar, or 1:200 + sheet size / dpi) beats the door-size guess
+            from engine import scale_text
+            better = scale_text.refine_scale(d, 1, scale)
+            if better:
+                scale_text.rescale_items(items, (scale or {}).get("m_per_px"), better["m_per_px"])
+                scale = {**better, "replaced": (scale or {}).get("method")}
+        except Exception:  # noqa: BLE001 - never block a document on scale reading
+            pass
         return Doc(doc_id, "planmap", items, title, [], scale, len(pms))
     return None
 

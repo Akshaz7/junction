@@ -1,6 +1,11 @@
 import pytest
 from engine.app_help import app_help_answer, is_app_question, _guide
 
+@pytest.fixture(autouse=True)
+def _no_live_model(monkeypatch):
+    monkeypatch.setenv("MODELS_FAKE", "1")   # unit tests never call a real model; the live path is checked by hand (E-58)
+
+
 CASES = [
     ("how do I upload files?", ["Data", "Upload", "Choose file", "PDF", "DXF", "IFC"]),
     ("Which file formats can I upload?", ["PNG", "100 MiB"]),

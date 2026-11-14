@@ -394,6 +394,17 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             res["trace"] = trace
             return res
 
+        # FIX-14: engineering sheets (M-/S-/P- ids, tag or SF tables) are answered from their own text, never from a plan map
+        try:
+            from engine import sheetqa
+            if len(doc_ids) >= 1 and sheetqa.is_sheet(doc_ids[0], root) and (res := sheetqa.answer(question, doc_ids, root, t0)) is not None:
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                return res
+        except Exception:  # never break the answer path
+            pass
+
         # 0-. "where is the stairs / lift / entrance (on level N)": code over IFC elements, no model
         from engine.locate import locate_answer, thing as _thing
         _what = _thing(question)

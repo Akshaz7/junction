@@ -15,7 +15,7 @@ Go to Chat and type a question in the box ("Ask anything. Type @ to include a do
 The microphone button (Speak a question) next to Send turns speech into the question text. Edit it if needed, then Send.
 
 ## Citations, sources and the 2D viewer
-Every answer carries numbered citations and, where it applies, numbered boxes on the drawing. Click a citation (Open citation) or Sources to open the drawing viewer with those boxes. In the viewer drag to pan, scroll or pinch to zoom, arrow keys pan, plus and minus zoom, zero fits the drawing. Fit drawing resets the view. Next and Previous drawing page move between pages. Find on sheet searches the text on the sheet. Download original source gets the uploaded file. Close drawing viewer closes it. Show thought process under an answer opens the execution trace.
+Every answer carries numbered citations and, where it applies, numbered boxes on the drawing. Click a citation (Open citation) or Sources to open the drawing viewer with those boxes. In the viewer drag to pan, scroll or pinch to zoom, arrow keys pan, plus and minus zoom, zero fits the drawing. Fit drawing resets the view. Next and Previous drawing page move between pages. Find on sheet searches the text on the sheet. Download original source gets the uploaded file. Highlight marker and Pen annotations (toolbar above the drawing) let you mark up the page, and Undo annotation removes the last mark. Zoom in, Zoom out and Zoom level change the zoom. Close drawing viewer closes it. Show thought process under an answer opens the execution trace.
 
 ## Visualise it (3D)
 Under an answer choose Visualise it, or the 3D button in the drawing viewer. The plan rises into a 3D model and the same numbered items glow. In the 3D view:
@@ -52,10 +52,10 @@ Overview is the home page: this week's changes, top findings and recent chats, e
 Changes lists what changed in your documents (for example a new version). Search changes and the filters narrow the list, Refresh changes reloads it. For a new version, Open in Compare jumps to Compare.
 
 ## Compare
-Compare versions: pick a drawing and two of its versions to see what moved. Fit comparison fits both into view. Upload a new version in Data to create a second version.
+Compare versions: pick a drawing and two of its versions to see what moved. It compares versions of one drawing; it does not compare two different drawings (ask a question about both documents in Chat instead, using @ to pick each). Fit comparison fits both into view. Upload a new version in Data to create a second version.
 
 ## Library: Skills and Automations
-Library has two tabs. Skills are saved prompts: choose a skill from the plus button in the chat box or from Library, and its prompt fills the question. Create skill adds your own. Automations run a question on a drawing on a schedule: Create automation, pick the drawing (Run on drawing) and a Schedule, and the last automation report is shown.
+Library has two tabs. Skills are saved prompts: choose a skill from the plus button in the chat box or from Library, and its prompt fills the question. Create skill adds your own. Your own skills and automations have a Delete button (Delete skill, Delete automation); built-in skills cannot be deleted. Automations run a question on a drawing on a schedule: Create automation, pick the drawing (Run on drawing) and a Schedule, and the last automation report is shown.
 
 ## Data
 Data lists every document with its status (Ready, processing, failed), folders, and search. From a Ready document choose Ask about it. Documents can be searched and organised in folders.
@@ -64,4 +64,4 @@ Data lists every document with its status (Ready, processing, failed), folders, 
 More, then Help, shows the written guide with sample questions.
 
 ## Not available
-The app has no accounts, no billing page and no settings page. Questions in languages other than English may be missed. Features not listed in this guide are not in the app.
+Documents cannot be deleted in the app. Reports export as Markdown only (Copy as Markdown), not PDF. There is no teammate invitation, no password, no accounts, no billing page and no settings page. Questions in languages other than English may be missed. Features not listed in this guide are not in the app.

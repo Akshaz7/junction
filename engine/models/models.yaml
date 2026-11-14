@@ -83,6 +83,13 @@ tasks:
       - {provider: runware,     model: "google:gemini@3.1-flash-lite"}   # 2-3 s vs 6-8 s for 3.5-flash on the same crop (2026-11-14); answers are still checked against the plan map
       - {provider: runware,     model: "google:gemini@3.5-flash"}
       - {provider: verda, model: nemotron-3.5-super-vl}   # ~90 s per call on 2026-11-14 (cold/loaded): last resort only
+  read_piping:   # plumbing sheet reader (vision/piping_read.py). Gemini 4 Carbon read P1.02 label/tag counts exactly (results/vision/piping/v10)
+    provider: runware_oai
+    model: gemini-4-carbon
+    max_tokens: 4000
+    temperature: 0
+    fallback:
+      - {provider: runware_claude, model: claude-opus-5-5}
   recount:     # count one kind of object on a raster plan page (engine/recount.py). Gemini 4 Carbon won the 40-doc calibration (results/rc_*.json): windows .68, doors .53, toilets .95, sinks .28, showers .89, at about half the cost of Opus 5.5
     provider: runware_oai
     model: gemini-4-carbon
