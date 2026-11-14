@@ -1,10 +1,11 @@
 import type { Answer, Citation } from '../lib/types'
+import { confidenceText, marginText } from '../lib/evidence-format'
 import './evidence-card.css'
 
 /** "How we know": the steps behind an answer and how sure we are. Steps with a citation open it. */
 export function EvidenceCard({ answer, selected, onOpenCitation }: { answer: Answer; selected?: Citation; onOpenCitation: (citation: Citation) => void }) {
   const reasoning = answer.reasoning
-  if (!reasoning?.steps?.length) return null
+  if (!reasoning) return null
   const { confidence } = reasoning
   const tone = confidence.label === 'Estimate' ? 'is-estimate' : 'is-verified'
   return <section className="evidence-card" aria-label="How we know" data-testid="evidence-card">
@@ -27,10 +28,17 @@ export function EvidenceCard({ answer, selected, onOpenCitation }: { answer: Ans
         </li>
       })}
     </ol>
+    {reasoning.based_on && <p className="evidence-quantity">{reasoning.based_on.text}</p>}
+    {reasoning.margin && <div className="evidence-quantity">
+      <p>{marginText(reasoning.margin)}</p>
+      {Object.entries(reasoning.margin.by_kind ?? {}).map(([kind, margin]) => <p key={kind}>{kind}: {marginText(margin)}{margin.sources.length > 0 && <span className="evidence-reason"> Sources: {margin.sources.join('; ')}</span>}</p>)}
+      {reasoning.margin.sources.length > 0 && <p className="evidence-reason">Sources: {reasoning.margin.sources.join('; ')}</p>}
+    </div>}
     <div className="evidence-confidence">
-      <span className={`evidence-pill ${tone}`} aria-label={`Confidence: ${confidence.label}, ${confidence.pct} percent`}>{confidence.label} · {confidence.pct}%</span>
+      <span className={`evidence-pill ${tone}`} aria-label={`Confidence: ${confidenceText(confidence)}`}>{confidenceText(confidence)}</span>
       <span className="evidence-reason">{confidence.reason}</span>
+      {confidence.calibration && <span className="evidence-reason">Calibration: {confidence.calibration.correct}/{confidence.calibration.n} · {confidence.calibration.source}</span>}
     </div>
-    {confidence.improve && <p className="evidence-improve">To make it exact: {confidence.improve}</p>}
+    {confidence.improve && <p className="evidence-improve">To verify: {confidence.improve}</p>}
   </section>
 }

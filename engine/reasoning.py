@@ -2,7 +2,10 @@
 
 res["reasoning"] = {
   "steps": [{"kind": found|measured|checked|calculated|read, "title", "text", "cite": n|None, "ok": bool|None}],
-  "confidence": {"label": "Verified"|"Cross-checked"|"Estimate", "pct": int, "reason": str, "improve": str|None},
+  "confidence": {"label": "Verified"|"Cross-checked"|"Estimate", "pct": int|None, "reason": str, "improve": str|None},
+  "margin": {"value": float|None, "unit", "pct": float|None, "why", "sources": [...]},
+  "based_on": {"elements": int, "estimated": int, "unresolved": int, "text": str},
+  "arithmetic": [{"formula", "terms": [...], "result", "unit", "text"}],
 }
 Nothing here calls a model or invents a value: every number comes from the plan map / model data the answer cited,
 from its trace, or from the answer object itself.
@@ -89,7 +92,7 @@ def build(res: dict, question: str, root: Path) -> dict | None:
     sc = doc.scale if doc else None
     scale_w, scale_c = _scale_words(sc)
     from_cad = bool(sc and "dxf" in str(sc.get("method") or ""))
-    ctx = dict(res=res, question=question, ans=ans, cites=cites, route=route, trace=trace, unit=unit, value=value, doc=doc, items=items,
+    ctx = dict(root=Path(root), res=res, question=question, ans=ans, cites=cites, route=route, trace=trace, unit=unit, value=value, doc=doc, items=items,
                cited=cited, first_cite=first_cite, models_used=models_used, is_ifc=is_ifc, sc=sc, scale_w=scale_w, scale_c=scale_c,
                from_cad=from_cad, steps=steps, checked=None, area_q=None, rooms=[])
     from engine.reasoning_parts import checked as _checked, confidence as _confidence, found as _found, measured as _measured
@@ -98,6 +101,8 @@ def build(res: dict, question: str, root: Path) -> dict | None:
             part.run(ctx)
         except Exception:  # noqa: BLE001 — one weak step never drops the others
             pass
+    from engine.reasoning_parts import margin
+    quantitative = margin.run(ctx)
     c = _confidence.run(ctx)
     steps = c.pop("_steps", ctx["steps"])
     hint = res.get("reasoning_hint")   # F-MEP: engine/mep.py supplies its own Found / Measured / Checked lines and an optional confidence cap
@@ -109,9 +114,9 @@ def build(res: dict, question: str, root: Path) -> dict | None:
             c["label"] = "Cross-checked" if cap >= 80 else "Estimate"
             c["reason"] = hint.get("reason") or c.get("reason")
             c["improve"] = hint.get("improve") or c.get("improve")
-    if not steps:
+    if not steps and not quantitative:
         return None
-    return {"steps": steps[:4], "confidence": c}
+    return {"steps": steps[:4], "confidence": c, **quantitative}
 
 
 def attach(res: dict, question: str, root: Path) -> dict:
