@@ -136,6 +136,54 @@ def test_unsupported_scope_does_not_get_simplified(model):
     assert props.answer("Door schedule", [did, "other__model"], root) is None
 
 
+@pytest.mark.parametrize("q", [
+    "What materials are the doors and windows made of?",
+    "Door schedule on level 1 and level 2",
+    "Which doors have a fire rating of EI60?",
+    "Which external doors have material Steel?",
+    "What are the widths and fire ratings of doors?",
+    "Which doors connect an office to a corridor and are fire-rated?",
+    "What are the U-values and g-values of external windows, and how much heating energy would replacing them save?",
+])
+def test_unhandled_conditions_remain_for_other_routes(model, q):
+    root, did = model
+    assert props.answer(q, [did], root) is None
+
+
+@pytest.mark.parametrize("q,want", [
+    ("Which doors are not external?", {"d2"}),
+    ("Which walls are non-load-bearing?", {"wall2"}),
+    ("Which walls are not load-bearing?", {"wall2"}),
+])
+def test_negative_property_filters(model, q, want):
+    assert ids(ask(model, q)) == want
+
+
+def test_quoted_name_and_alphabetic_tag(tmp_path):
+    did = write_model(tmp_path, [element("first", pr=dict(tag="MAIN", fire_rating="EI30"), name="Main entrance"),
+                                 element("second", pr=dict(fire_rating="EI60"))])
+    for q in ('What is the fire rating of door "Main entrance"?', "What does tag MAIN refer to?"):
+        assert ids(ask((tmp_path, did), q)) == {"first"}
+
+
+def test_false_rating_and_placeholders_are_not_positive(tmp_path):
+    did = write_model(tmp_path, [element("first", pr=dict(fire_rating=False)),
+                                 element("second", pr=dict(fire_rating="TBD"))])
+    r = ask((tmp_path, did), "Which doors are not fire-rated?")
+    assert ids(r) == {"first"} and r["answer"]["value"] == 1
+    assert "1 lack fire rating" in r["answer"]["text_md"]
+    r = ask((tmp_path, did), "Are all doors fire-rated?")
+    assert "1 explicitly report no rating" in r["answer"]["text_md"]
+
+
+def test_unreadable_original_is_not_verified_empty_model(tmp_path, monkeypatch):
+    d = tmp_path / "upload__incomplete"
+    d.mkdir()
+    (d / "source.ifc").write_text("incomplete upload")
+    monkeypatch.setattr(props, "_read_ifc", lambda *a: (_ for _ in ()).throw(ValueError("bad source")))
+    assert props.answer("Door schedule", [d.name], tmp_path) is None
+
+
 def make_ifc(tmp_path, schema="IFC4", imperial=False):
     import ifcopenshell
     import ifcopenshell.api.unit
@@ -186,7 +234,7 @@ def test_original_inheritance_materials_and_units(tmp_path, schema, imperial):
     assert "Pset_DoorCommon.FireRating" in r["citations"][0]["quote"]
 
 
-def drawing(tmp_path, source="dxf", ambiguous=False, header="Mark"):
+def drawing(tmp_path, source="dxf", ambiguous=False, header="Mark", material="Material", rating="FireRating"):
     d = tmp_path / "drawing__generated"
     d.mkdir()
     items = []
@@ -195,8 +243,8 @@ def drawing(tmp_path, source="dxf", ambiguous=False, header="Mark"):
     text("D12", [10, 20, 30, 30])  # on-plan occurrence
     text("OVILUETTELO", [200, 80, 350, 90])
     text(header, [200, 100, 240, 110])
-    text("Material", [280, 100, 350, 110])
-    text("FireRating", [400, 100, 480, 110])
+    text(material, [280, 100, 350, 110])
+    text(rating, [400, 100, 480, 110])
     text("D12", [200, 120, 240, 130])
     text("Timber", [280, 120, 340, 130])
     text("EI30", [400, 120, 440, 130])
@@ -224,6 +272,20 @@ def test_ocr_schedule_is_not_verified(tmp_path):
     assert r["reasoning"]["confidence"]["label"] == "Estimate"
 
 
+@pytest.mark.parametrize("header,material,rating", [("Mark", "Material", "Fire rating"),
+    ("Tunnus", "Materiaali", "Paloluokka"), ("Kennzeichen", "Baustoff", "Feuerwiderstand"),
+    ("Beteckning", "Material", "Brandklass")])
+def test_translated_schedule_columns(tmp_path, header, material, rating):
+    r = ask(drawing(tmp_path, header=header, material=material, rating=rating), "Fire rating of door D12?")
+    assert "EI30" in r["answer"]["text_md"] and len(r["evidence"]["boxes"]) == 3
+
+
+def test_missing_ocr_schedule_field_has_no_numeric_confidence(tmp_path):
+    r = ask(drawing(tmp_path, source="ocr"), "Acoustic rating of door D12?")
+    assert "does not record acoustic rating" in r["answer"]["text_md"]
+    assert r["answer"]["confidence"] == r["reasoning"]["confidence"]["pct"] == 0
+
+
 def test_ambiguous_schedule_does_not_pick_first(tmp_path):
     r = ask(drawing(tmp_path, ambiguous=True), "Fire rating of door D12?")
     assert "more than one" in r["answer"]["text_md"]
@@ -244,6 +306,20 @@ def test_routing_keeps_exact_values_and_card(model, monkeypatch):
     assert r["reasoning"]["confidence"]["label"] == "Verified"
     import jsonschema
     jsonschema.validate(r, json.loads((REPO / "server/schemas/answer.schema.json").read_text()))
+
+
+def test_scene_commands_keep_their_route_and_hidden_items_are_excluded(model, monkeypatch):
+    from engine.answer import answer
+    root, did = model
+    monkeypatch.setenv("ARTIFACTS_DIR", str(root))
+    monkeypatch.setenv("MODELS_FAKE", "1")
+    monkeypatch.setenv("ANSWER_TIMEOUT_S", "0")
+    r = answer("Hide external walls", [did])
+    assert r["evidence"]["scene"]["commands"][0]["op"] == "hide"
+    assert not any(t["step"] == "props" for t in r["trace"])
+    r = answer("Door schedule", [did], scene_state=dict(hidden=["d1"]))
+    assert ids(r) == {"d2", "d3"} and r["answer"]["value"] == 2
+    assert "hidden in this chat are excluded" in r["answer"]["text_md"]
 
 
 REAL = ["ifc_bench__ac20-arc", "ifc_models__bsc-esplanades-1807-ep-ar-v18", "ifc_bench__molio-arc",
