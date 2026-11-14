@@ -61,8 +61,10 @@ def _room_shape(n, pm, pdf):
 def link_sheet_rooms(writer, source_did, target_did, source_pm, target_pm, source_pdf, target_pdf, T, m_per_pt):
     """Match existing underlay rooms after measured alignment; retain both sources."""
     from shapely.geometry import Point
-    sources = [n for n in writer.nodes.values() if n["kind"] == "room" and (n.get("source") or {}).get("doc_id") == source_did]
-    targets = [n for n in writer.nodes.values() if n["kind"] == "room" and (n.get("source") or {}).get("doc_id") == target_did]
+    sources = [n for n in writer.nodes.values() if n["kind"] == "room" and (n.get("source") or {}).get("doc_id") == source_did
+               and (n.get("source") or {}).get("page", 1) == source_pm.get("page", 1)]
+    targets = [n for n in writer.nodes.values() if n["kind"] == "room" and (n.get("source") or {}).get("doc_id") == target_did
+               and (n.get("source") or {}).get("page", 1) == target_pm.get("page", 1)]
     if T.get("matches", T.get("n_inliers", 0)) < 4:
         return
     residual = float(T.get("residual", T.get("rms_pt", math.inf))) * m_per_pt
@@ -95,7 +97,7 @@ def link_sheet_rooms(writer, source_did, target_did, source_pm, target_pm, sourc
     for src, dst, distance in proposals:
         if counts[dst["id"]] != 1:
             continue
-        writer.edge("same_as", src, dst, "position", 0.59,
+        writer.edge("same_as", src, dst, "position", 0.5,
                     {"rule": "unique same-label room centres after shared-text sheet alignment",
                      "residual_m": distance, "alignment": {"T": T, "residual": residual,
                      "matches": T.get("matches", T.get("n_inliers"))},
@@ -160,10 +162,13 @@ def enrich_sheets(writer, project, root: Path, deadline):
     docs = []
     for entry in project.get("docs", []):
         entry = {"doc_id": entry} if isinstance(entry, str) else entry
+        if not isinstance(entry, dict):
+            continue
         did = entry.get("doc_id")
         if not did:
             continue
-        meta = {**read_json(root / did / "doc.json", {}), **entry}
+        stored = read_json(root / did / "doc.json", {})
+        meta = {**(stored if isinstance(stored, dict) else {}), **entry}
         if (path := resolve_source(meta, root, "pdf")):
             docs.append((did, meta, path))
     if not docs:

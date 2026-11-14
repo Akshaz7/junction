@@ -206,7 +206,8 @@ def graph_audit(root, project):
     return {"project": project, "build_seconds": elapsed, "under_30_seconds": elapsed < 30,
             "stats": graph["stats"], "edges_by_kind": dict(Counter(e["kind"] for e in graph["edges"])),
             "warnings": graph.get("warnings", []), "invalid_edge_count": len(invalid), "invalid_edge_sample": invalid[:10],
-            "same_as": scored, "same_as_all_methods": metrics(set().union(*predicted_by_method.values()), expected),
+            "same_as": scored, "same_as_all_methods": metrics(set().union(*predicted_by_method.values()), expected,
+                                                              sum(s["unknown"] for s in scored.values())),
             "truth_scope": "Cross-document graph node pairs retaining the same source IFC GlobalId. Unknown source identities excluded. Pairwise recall, not transitive cluster recall.",
             "relation_samples": audited}
 
@@ -250,7 +251,9 @@ def sample_relations(root, rows):
                         for rel in getattr(item, "ProvidesBoundaries", ()):
                             possible.add(rel.RelatingSpace.GlobalId)
                     if possible:
-                        result = target in possible; basis = "Raw IFC explicit relationship; no geometry inference."
+                        result = target in possible
+                        basis = ("Raw IFC confirms physical terminal containment only; service function/capacity not independently verified."
+                                 if e["kind"] == "serves" else "Raw IFC explicit relationship; no geometry inference.")
                 except (RuntimeError, AttributeError):
                     pass
         if result is None and e["kind"] == "in_room" and e.get("method") == "containment_geom":
@@ -343,8 +346,12 @@ def main():
     blind = None
     if args.blind:
         did = read_json(args.output / "selection.json")["blind_doc_id"]
-        blind_reports = [evaluate(c)[0] for c in projected_cases(root, did, True)]
+        blind_reports, blind_observations = [], []
+        for case in projected_cases(root, did, True):
+            report, obs = evaluate(case)
+            blind_reports.append(report); blind_observations.extend(obs)
         blind = {"doc_id": did, "calibration_frozen_before_read": True, "cases": blind_reports,
+                 "calibration_evaluation": calibration_scores(blind_observations, calibration.confidence)["heldout"],
                  "graph": graph_audit(root, {"id": "kg-eval-blind", "docs": [did]})}
     out = {"generated_at": datetime.now(UTC).isoformat(),
            "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
