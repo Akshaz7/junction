@@ -61,10 +61,15 @@ export function pairCodeFromHash(hash: string): string | null {
   return match ? new URLSearchParams(match[1]).get('code') : null
 }
 
+/** The deployed backend answers in 1-3 s under load, so a short timeout silently dropped the pairing: allow 8 s (never below 4 s) and retry a failed call once. */
 async function call(method: 'GET' | 'POST', code: string, chatId: string): Promise<Response | null> {
-  try {
-    return await fetch(`/api/pair/${code}/chats/${encodeURIComponent(chatId)}`, { method, signal: AbortSignal.timeout(2500) })
-  } catch { return null }
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const response = await fetch(`/api/pair/${code}/chats/${encodeURIComponent(chatId)}`, { method, signal: AbortSignal.timeout(8000) })
+      if (response.ok || (response.status < 500 && response.status !== 429)) return response
+    } catch { /* retry once */ }
+  }
+  return null
 }
 
 /** Tell the server this chat was created on a paired device. Awaited before the first question so the other device can check it. */
@@ -73,10 +78,12 @@ export async function registerChat(chatId: string): Promise<void> {
 }
 
 /** True when this device knows the chat, or the server says a paired device created it (then it is remembered). */
-export async function isPairedChat(chatId: string): Promise<boolean> {
+export async function isPairedChat(chatId: string, options: { failOpen?: boolean } = {}): Promise<boolean> {
   if (isKnownChat(chatId)) return true
   for (const code of read()) {
     const response = await call('GET', code, chatId)
+    // The server could not answer in time: for a chat that just arrived over this browser's pairing socket, follow it anyway.
+    if (!response && options.failOpen) return true
     if (response?.ok && (await response.json() as { paired?: boolean }).paired) { rememberChat(chatId); return true }
   }
   return false

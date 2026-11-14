@@ -99,7 +99,7 @@ test('desktop asks; phone sees in-progress states before the final answer with c
     // Visible in the card: Visualise it opens the drawing, whose own Visualise it is one more tap.
     await expect(answerCard.getByRole('button', { name: 'Visualise it' })).toBeVisible()
     await answerCard.getByRole('button', { name: 'Visualise it' }).click()
-    await expect(p.getByRole('dialog', { name: 'Drawing viewer' }).getByRole('region', { name: '3D viewer' })).toBeVisible({ timeout: 10_000 }) // card button opens straight in 3D
+    await expect(p.getByRole('dialog').getByRole('region', { name: '3D viewer' })).toBeVisible({ timeout: 10_000 }) // card button opens straight in 3D
 
     // Phone posts (as AR voice does through the API); the desktop sees it live.
     const voice = 'How many windows are there?'

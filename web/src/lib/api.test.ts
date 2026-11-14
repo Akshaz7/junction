@@ -57,7 +57,7 @@ describe('backend chat contract', () => {
     const id = await api.createChat([demoDocument.doc_id], 'Windows')
     const result = await api.askQuestion(id, answer.question, [demoDocument.doc_id], callbacks())
     expect(result.answer.text_md).toContain('generated for demo')
-    expect(transport).toHaveBeenCalledTimes(1)
+    expect(transport).toHaveBeenCalledTimes(2)
   })
 
   it('handles an unreachable Vite proxy but preserves real API and database errors', async () => {

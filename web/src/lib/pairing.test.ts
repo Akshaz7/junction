@@ -51,6 +51,16 @@ describe('pairing', () => {
     expect(await p.isPairedChat('stranger')).toBe(false)
   })
 
+  it('fails open only when asked to and the server cannot answer', async () => {
+    const p = await import('./pairing')
+    p.addPairing('abc12345')
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('timeout') }))
+    expect(await p.isPairedChat('late')).toBe(false)
+    expect(await p.isPairedChat('late', { failOpen: true })).toBe(true)
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => ({ paired: false }) })))
+    expect(await p.isPairedChat('stranger', { failOpen: true })).toBe(false)
+  })
+
   it('unpaired device never asks the server', async () => {
     const p = await import('./pairing')
     const fetchMock = vi.fn()

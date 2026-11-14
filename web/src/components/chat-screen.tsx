@@ -54,6 +54,10 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const [viewer, setViewer] = useState<{ answer: Answer; citation: Citation; request: number; mode?: '2d' | '3d' } | null>(null)
   const [split, setSplit] = useState(48)
   const splitContainer = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    document.documentElement.style.setProperty('--chat-split-live', String(split / 100))
+    return () => { document.documentElement.style.removeProperty('--chat-split-live') }
+  }, [split])
   const sheet = useViewerSheet()
   const chatId = useRef<string | null>(null)
   const [liveChatId, setLiveChatId] = useState<string | null>(null)
@@ -213,7 +217,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       if (event.chat_id === chatId.current) return
       // Strangers' chats never raise the notice: only with Follow on, and only for chats this browser knows.
       if (!followingRef.current) return
-      void isPairedChat(event.chat_id).then((known) => {
+      void isPairedChat(event.chat_id, { failOpen: true }).then((known) => {
         if (known && followingRef.current && !submitting.current) window.location.hash = `#/chat?chat=${encodeURIComponent(event.chat_id)}`
       })
     })

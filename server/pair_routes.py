@@ -4,6 +4,8 @@ The code is a random secret the laptop shows as a QR code. Devices register the 
 codes; a paired device asks whether an unknown chat belongs to one of its codes. Postgres when available
 (table created on first use), otherwise process memory. No accounts: the code is the only credential.
 """
+import asyncio
+import logging
 import re
 
 from fastapi import APIRouter, HTTPException
@@ -15,6 +17,8 @@ CODE = re.compile(r"^[A-Za-z0-9]{6,32}$")
 _memory: dict[str, set[str]] = {}
 _ready = False
 MAX_PER_CODE = 500
+_tasks: set[asyncio.Task] = set()
+log = logging.getLogger(__name__)
 
 
 def _code(code: str) -> str:
@@ -33,24 +37,42 @@ async def _pool():
     return pool
 
 
+def _remember(code: str, chat_id: str) -> None:
+    """In-process (code, chat_id) set: answers checks in microseconds on this instance; the DB covers other instances."""
+    known = _memory.setdefault(code, set())
+    if chat_id in known or len(known) < MAX_PER_CODE:
+        known.add(chat_id)
+
+
+async def _persist(code: str, chat_id: str) -> None:
+    try:
+        pool = await _pool()
+        if pool is not None:
+            await pool.execute("insert into pair_chats (code, chat_id) values ($1,$2) on conflict do nothing", code, chat_id)
+    except Exception:  # the in-process set still serves this instance
+        log.warning("pair register: DB write failed", exc_info=True)
+
+
 @router.post("/{code}/chats/{chat_id}", status_code=204)
 async def register(code: str, chat_id: str):
     code = _code(code)
     if not (0 < len(chat_id) <= 80):
         raise HTTPException(400, "invalid chat id")
-    pool = await _pool()
-    if pool is None:
-        if len(_memory.setdefault(code, set())) < MAX_PER_CODE:
-            _memory[code].add(chat_id)
-        return
-    await pool.execute("insert into pair_chats (code, chat_id) values ($1,$2) on conflict do nothing", code, chat_id)
+    _remember(code, chat_id)
+    task = asyncio.create_task(_persist(code, chat_id))
+    _tasks.add(task)
+    task.add_done_callback(_tasks.discard)
 
 
 @router.get("/{code}/chats/{chat_id}")
 async def check(code: str, chat_id: str):
     code = _code(code)
+    if chat_id in _memory.get(code, set()):
+        return {"paired": True}
     pool = await _pool()
     if pool is None:
-        return {"paired": chat_id in _memory.get(code, set())}
+        return {"paired": False}
     found = await pool.fetchval("select 1 from pair_chats where code=$1 and chat_id=$2", code, chat_id)
+    if found:
+        _remember(code, chat_id)
     return {"paired": bool(found)}

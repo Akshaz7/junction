@@ -140,7 +140,14 @@ export class WorkspaceApi {
   async getDocuments(): Promise<Document[]> {
     let response: Response
     try {
-      response = await this.request('/api/docs', { signal: AbortSignal.timeout(10_000) })
+      try {
+        response = await this.request('/api/docs', { signal: AbortSignal.timeout(10_000) })
+      } catch (first) {
+        // One slow or dropped call must not pin the whole session to offline demo; retry once, longer.
+        const slow = first instanceof TypeError || (first instanceof DOMException && first.name === 'TimeoutError')
+        if (this.mode !== 'auto' || !slow) throw first
+        response = await this.request('/api/docs', { signal: AbortSignal.timeout(20_000) })
+      }
     } catch (error) {
       const unreachable = error instanceof TypeError || (error instanceof DOMException && error.name === 'TimeoutError') ||
         (error instanceof ApiError && ([502, 504].includes(error.status) || (error.status === 500 && error.empty)))
