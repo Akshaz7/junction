@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from engine.answer import answer
-from engine.scene_cmds import parse_scene, tags
+from engine.scene_cmds import parse_scene, scene_answer, tags
 from engine.solvers.data import load_doc
 
 FIX = Path(__file__).parent / "fixtures"
@@ -105,7 +105,58 @@ def test_undo_restores_hidden_state():
     a = answer("undo", [DOC], scene_state={"hidden": h})
     c = a["evidence"]["scene"]["commands"][0]
     assert c["op"] == "restore" and c["item_ids"] == h
-    assert answer("undo", [DOC])["evidence"]["scene"]["commands"][0]["op"] == "reset"
+    untouched = answer("undo", [DOC])
+    assert untouched["evidence"]["scene"]["commands"] == []
+    assert "no scene edit to undo" in untouched["answer"]["text_md"]
+
+
+@pytest.mark.parametrize("question", ["undo", "undo that"])
+def test_undo_reverts_last_group_and_preserves_earlier_removal(question):
+    doc = load_doc(DOC, FIX)
+    by_tag = {tag: iid for iid, tag in tags(doc).items()}
+    first, second = by_tag["W1"], [by_tag["W2"], by_tag["W3"]]
+    state = {"hidden": [first, *second], "edits": [
+        {"doc_id": DOC, "op": "hide", "item_ids": [first]},
+        {"doc_id": "another-doc", "op": "hide", "item_ids": ["unrelated"]},
+        {"doc_id": DOC, "op": "hide", "item_ids": second},
+        {"doc_id": DOC, "op": "highlight", "item_ids": [first]},
+    ]}
+    result = answer(question, [DOC], scene_state=state)
+    assert result["evidence"]["scene"]["commands"] == [{"op": "restore", "item_ids": sorted(second)}]
+
+
+def test_legacy_undo_only_restores_last_hidden_item():
+    result = answer("undo that", [DOC], scene_state={"hidden": ["older", "latest"]})
+    assert result["evidence"]["scene"]["commands"] == [{"op": "restore", "item_ids": ["latest"]}]
+
+
+def test_undo_restore_and_reset_even_when_nothing_is_hidden():
+    for op in ("restore", "reset"):
+        result = answer("undo", [DOC], scene_state={"hidden": [], "edits": [
+            {"op": "hide", "item_ids": ["window-001"]}, {"op": op, "item_ids": []},
+        ]})
+        assert any(c["op"] == "hide" and c["item_ids"] == ["window-001"] for c in result["evidence"]["scene"]["commands"])
+
+
+def test_clear_highlights_never_resets_hidden_items():
+    result = answer("Clear highlights", [DOC], scene_state={"hidden": ["window-001"]})
+    assert result["evidence"]["scene"]["commands"] == [{"op": "highlight", "item_ids": []}]
+    assert not result["answer"]["abstained"]
+
+
+@pytest.mark.parametrize("question", ["is it still compliant?", "is it compliant now?", "is the building still compliant?"])
+def test_compliance_followup_checks_current_hidden_items(monkeypatch, question):
+    seen = []
+    def check(result, doc, hidden):
+        seen.append(hidden)
+        result["answer"]["text_md"] += " Current rule-check result."
+    monkeypatch.setattr("engine.analytics.edit_advice", check)
+    doc = load_doc(DOC, FIX)
+    for hidden in (["window-001"], []):
+        result = scene_answer(question, doc, parse_scene(question), {"hidden": hidden})
+        assert seen[-1] == hidden
+        assert result["evidence"]["scene"]["commands"] == []
+        assert "rule-check result" in result["answer"]["text_md"]
 
 
 def test_can_we_remove_is_a_preview_without_commands():

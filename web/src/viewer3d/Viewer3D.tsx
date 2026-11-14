@@ -8,6 +8,8 @@ import type { BuildState, RiseState } from './rise';
 import { KindLegend } from './KindLegend';
 import { BuildSlider } from './BuildSlider';
 import { bindLiveCommands, bindLiveHighlight } from './liveViewerHighlight';
+import { createLiveHighlightClient } from './liveHighlight';
+import { clearViewerHighlights, itemsOfPickedKind } from './selection';
 import type { CommandTestState, SceneCommand } from './commands';
 import { cutawayStoreys, isRoof, type CutawayState } from './cutaway';
 import { setHover, setSelected, useLinkedItem } from './link';
@@ -200,16 +202,21 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       viewer = createViewer(canvas);
       viewerRef.current = viewer;
       unsubscribeCutaway = viewer.onCutawayChange(setCutaway);
-      unsubscribeCommands = viewer.onCommandChange(() => setHiddenNow(viewer!.getCommandState().hidden.length));
+      unsubscribeCommands = viewer.onCommandChange(() => {
+        setHiddenNow(viewer!.getCommandState().hidden.length);
+        setEdits(viewer!.getEditState());
+      });
       unsubscribeHighlight = viewer.onHighlightChange(() => {
         setHighlightState(viewer!.getLinkedHighlightState());
+        setEdits(viewer!.getEditState());
         const items = viewer!.scene?.manifest.items;
         setAnswerKinds(viewer!.getHighlightState().highlighted.map((id) => { const it = items?.[id]; const size = itemKindKey(it) === 'drain' ? null : pipeSizeLabel(it); return it?.kind === 'room' ? `room:${roomTypeLabel(it)}` : size ? `size:${size}` : it ? itemKindKey(it) : null; }));
       });
       unsubscribeBuild = viewer.onBuildChange(setBuild);
       unsubscribeWalk = viewer.onWalkChange((next) => setWalking(next.active));
-      live = bindLiveHighlight(viewer, doc_id);
-      liveCommands = bindLiveCommands(viewer, doc_id);
+      const channel = chat_id ? createLiveHighlightClient({ chat_id }) : undefined;
+      live = bindLiveHighlight(viewer, doc_id, channel);
+      liveCommands = bindLiveCommands(viewer, doc_id, channel);
       void viewer.loadScene(sceneUrl, { onProgress: (next) => { if (active) setProgress(next); } }).then((scene) => {
         if (!active) return;
         if (storey !== undefined) viewer!.setStorey(storey);
@@ -240,7 +247,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       viewer?.dispose();
       if (viewerRef.current === viewer) viewerRef.current = null;
     };
-  }, [sceneUrl]);
+  }, [sceneUrl, chat_id]);
 
   useEffect(() => {
     if (state !== 'ready' || highlightRequest === undefined || commands?.length) return;
@@ -308,6 +315,9 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     if (viewerRef.current?.pickFinding(event.clientX, event.clientY)) return;
     const itemId = viewerRef.current?.pick(event.clientX, event.clientY) ?? null;
     selectItem(itemId);
+    if (event.shiftKey && itemId && manifest) {
+      viewerRef.current?.applyCommand({ op: 'highlight', item_ids: itemsOfPickedKind(manifest, itemId) });
+    }
   }
 
   // While the build-up plays, the selector names the storey being built, so it agrees with the step label.
@@ -355,6 +365,10 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       <button type="button" aria-label="Edit" aria-pressed={editing} disabled={state !== 'ready'} onClick={() => {
         cancelMove(); viewerRef.current?.setWalk(false); setEditing(!editing);
       }}>Edit</button>
+      <button type="button" disabled={state !== 'ready'} onClick={() => {
+        cancelMove(); setPicked(null);
+        if (viewerRef.current) clearViewerHighlights(viewerRef.current);
+      }}>Clear highlights</button>
       {(() => {
         const hasEdits = hiddenNow > 0 || Object.keys(edits.moveDelta ?? {}).length > 0;
         return <button type="button" className="viewer3d-revised-btn" aria-label="Revised plan"

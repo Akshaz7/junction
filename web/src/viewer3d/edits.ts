@@ -1,6 +1,6 @@
 import { Vector3, type Color, type Material, type Mesh } from 'three';
 import type { LoadedScene } from './scene';
-import type { SceneCommand } from './commands';
+import { applyCommand, readCommandState, type CommandState, type SceneCommand } from './commands';
 
 export const WALL_MATERIALS = {
   Concrete: '#a8aaa6',
@@ -69,8 +69,38 @@ export function createEditLayer(scene: LoadedScene, commands: {
     materials: Object.fromEntries(materials),
   });
 
+  function recordState(before: CommandState, after: CommandState, command?: SceneCommand) {
+    const previous = readCommandState(before);
+    const next = readCommandState(after);
+    const sameIds = (a: string[], b: string[]) => a.length === b.length && a.every((id) => b.includes(id));
+    if (sameIds(previous.hidden, next.hidden) && (previous.isolated === null ? next.isolated === null
+      : next.isolated !== null && sameIds(previous.isolated, next.isolated))) return;
+    const hidden = previous.hidden;
+    const isolated = previous.isolated;
+    const highlighted = Object.keys(previous.highlighted);
+    history.push({ undo: () => {
+      // Invert ordinary removals without changing unrelated hidden items.
+      if (command?.op === 'hide' && isolated === null && next.isolated === null) {
+        const restored = next.hidden.filter((id) => !hidden.includes(id));
+        apply({ op: 'restore', item_ids: restored });
+        return { op: 'restore', item_ids: restored, detail: { undo: 'hide' } };
+      }
+      apply({ op: 'reset', item_ids: [] });
+      if (hidden.length) apply({ op: 'hide', item_ids: hidden });
+      if (isolated !== null) apply({ op: 'isolate', item_ids: isolated, labels: previous.highlighted });
+      if (highlighted.length || isolated !== null) apply({ op: 'highlight', item_ids: highlighted, labels: previous.highlighted });
+      return { op: 'restore', item_ids: command?.item_ids.slice() ?? next.hidden.filter((id) => !hidden.includes(id)), detail: { undo: command?.op ?? 'scene state' } };
+    } });
+  }
+
   return {
     state,
+    /** Typed/remote edits share the viewer's Undo stack with panel edits. */
+    recordCommand(command: SceneCommand, before: CommandState) {
+      if (command.op === 'highlight') return;
+      recordState(before, applyCommand(before, command), command);
+    },
+    recordState,
     remove(id: string): ItemEdit | null {
       if (!scene.items.has(id) || commands.hidden().includes(id)) return null;
       apply({ op: 'hide', item_ids: [id] });

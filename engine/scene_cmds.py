@@ -31,6 +31,8 @@ _HIDE = re.compile(r"\b(hide|remove|take away|take out|get rid of|make\b.*\binvi
                    r"out of the (?:picture|view|scene|way)|delete)\b", re.I)
 _MEASURE = re.compile(r"\b(area|size|length|volume|height|width|depth|thickness|how|much|many|total|sum|average|percent|ratio|compare|difference)\b", re.I)
 _UNDO = re.compile(r"^\W*(undo|undo (?:that|it|the last (?:one|change|edit))|go back|revert|put (?:it|that) back)\W*$", re.I)
+_CLEAR = re.compile(r"^\W*(?:please\s+)?clear\s+(?:all\s+|the\s+)?highlights?\W*$", re.I)
+_CHECK_EDIT = re.compile(r"^\W*(?:is|does)\s+(?:it|this|that|the (?:building|model|scene|edit))\s+(?:(?:still|now)\s+)?(?:compliant|comply|meet (?:the )?(?:rules|code))\s*(?:now|after (?:this|that)(?: edit)?)?\W*$", re.I)
 _SHOW = re.compile(r"^\W*(?:please\s+)?(?:show|display|give)\s+(?:me\s+)?(?:all\s+)?(?:of\s+)?(?:the\s+|all\s+)?", re.I)
 _RESTORE = re.compile(r"\b(unhide|bring (?:back|.* back)|show .* again|restore|put .* back|turn .* back on)\b", re.I)
 _HIGHLIGHT = re.compile(r"\b(highlight|light up|glow|label|mark|point out|point to|flag|tag)\b", re.I)
@@ -90,6 +92,10 @@ _QUESTIONY = re.compile(r"\s*(?:can we|could we|can i|could i|should we|should i
 
 def parse_scene(question: str) -> SceneIntent | None:
     q = question.strip()
+    if _CLEAR.match(q):
+        return SceneIntent("highlight")
+    if _CHECK_EDIT.match(q):
+        return SceneIntent("check")
     # "what if we remove the main entrance?" / "what happens if I delete the front door" is the edit itself, asked as a what-if
     q = _WHATIF.sub("", q, count=1) if _WHATIF.match(q) else q
     if re.match(r"\s*(how many|what|which|where|why|how (?:much|long|big|large)|count|list|is |are |does |do |can you tell)", q, re.I):
@@ -210,14 +216,86 @@ def _noun(kind: str | None, n: int) -> str:
     return k if n == 1 else (k + "es" if k.endswith(("s", "x", "sh")) else k + "s")
 
 
+def undo_commands(doc: Doc, state: dict) -> list[dict]:
+    """Invert the last persisted visibility edit. Highlighting does not consume Undo.
+
+    The server can supply ordered `edits` (including when hidden is empty). Older
+    callers supply only ordered hidden IDs: restore the last one, never all of them.
+    """
+    edits = state.get("edits")
+    if not isinstance(edits, list):
+        hidden = list(state.get("hidden") or [])
+        return [{"op": "restore", "item_ids": hidden[-1:]}] if hidden else []
+    hidden: set[str] = set()
+    isolated: list[str] | None = None
+    highlighted: list[str] = []
+    labels: dict = {}
+    before = None
+    last = None
+    for edit in edits:
+        if not isinstance(edit, dict) or edit.get("doc_id", doc.doc_id) != doc.doc_id:
+            continue
+        op = edit.get("op")
+        ids = list(dict.fromkeys(edit.get("item_ids") or []))
+        previous = (set(hidden), isolated[:] if isolated is not None else None, highlighted[:], dict(labels))
+        if op == "hide":
+            hidden.update(ids)
+            highlighted = [i for i in highlighted if i not in ids]
+            labels = {k: v for k, v in labels.items() if k not in ids}
+            if isolated is not None:
+                isolated = [i for i in isolated if i not in ids]
+        elif op == "restore":
+            hidden.difference_update(ids) if ids else hidden.clear()
+        elif op == "reset":
+            hidden, isolated, highlighted, labels = set(), None, [], {}
+        elif op == "isolate":
+            isolated, highlighted, labels = ids[:], ids[:], dict(edit.get("labels") or {})
+            hidden.difference_update(ids)
+        elif op == "highlight":
+            highlighted, labels = ids[:], dict(edit.get("labels") or {})
+        else:
+            continue
+        if op != "highlight" and previous != (hidden, isolated, highlighted, labels):
+            before, last = previous, op
+    if before is None:
+        return []
+    old_hidden, old_isolated, old_highlighted, old_labels = before
+    # Single hide/restore is the common case: keep other edits and selections intact.
+    if last in ("hide", "restore") and old_isolated == isolated:
+        out = []
+        if hidden - old_hidden:
+            out.append({"op": "restore", "item_ids": sorted(hidden - old_hidden)})
+        if old_hidden - hidden:
+            out.append({"op": "hide", "item_ids": sorted(old_hidden - hidden)})
+        return out
+    out = [{"op": "reset", "item_ids": []}]
+    if old_hidden:
+        out.append({"op": "hide", "item_ids": sorted(old_hidden)})
+    if old_isolated is not None:
+        out.append({"op": "isolate", "item_ids": old_isolated, "labels": old_labels})
+    if old_highlighted != (old_isolated or []):
+        out.append({"op": "highlight", "item_ids": old_highlighted, "labels": old_labels})
+    return out
+
+
 def scene_answer(question: str, doc: Doc, intent: SceneIntent, state: dict | None = None, t0: float | None = None) -> dict:
     t0 = t0 or time.perf_counter()
     tg = tags(doc)
     state = state or {}
     op = intent.op
-    if op == "undo":  # restore what the chat has hidden; with no known state, reset everything
-        intent = SceneIntent("restore" if state.get("hidden") else "reset", None, [], None)
-        op = intent.op
+    if op in ("undo", "check"):
+        res = scene_answer(question, doc, SceneIntent("reset"), state, t0)
+        commands = undo_commands(doc, state) if op == "undo" else []
+        res["evidence"]["scene"]["commands"] = commands
+        res["answer"]["text_md"] = ("**Undid the last scene edit.**" if commands else "There is no scene edit to undo.") if op == "undo" else "For the current scene:"
+        res["trace"][0]["detail"] = f"{op} / current chat scene"
+        if op == "check":
+            from engine.analytics import edit_advice
+            edit_advice(res, doc, list(state.get("hidden") or []))
+            if res["answer"]["text_md"] == "For the current scene:":
+                res["answer"]["text_md"] = "I cannot check compliance from the available model data."
+        return res
+    clearing = op == "highlight" and not intent.kind and not intent.tags
     sel = [] if op == "reset" else _select(doc, intent, question, tg) if (intent.kind or intent.tags) else []
     ids = [i.item_id for i in sel]
     if op == "restore" and not intent.kind and not intent.tags:
@@ -230,7 +308,9 @@ def scene_answer(question: str, doc: Doc, intent: SceneIntent, state: dict | Non
         cmd["labels"] = {i: tg[i] for i in ids if i in tg}
     scene["commands"] = [cmd]
     abstained, conf = False, 1.0
-    if intent.op == "reset":
+    if clearing:
+        text = "**Highlights cleared.**"
+    elif intent.op == "reset":
         text = "Done. **Everything is visible again**, with no highlights."
     elif not ids and intent.op == "restore" and not intent.kind and not intent.tags:
         text = "Done. **Everything hidden is visible again.**"

@@ -79,6 +79,8 @@ export function sameHighlight(a: HighlightMessage, b: HighlightMessage): boolean
 /** Lazy and shared: no socket is created until a consumer subscribes or sends. */
 export function createLiveHighlightClient(options: {
   url?: string;
+  /** Every edit must name its chat: a query parameter alone does not persist it. */
+  chat_id?: string;
   connect?: (url: string) => WebSocket;
 } = {}): SceneChannel & {
   onAdvisorCards(callback: (event: AdvisorEvent) => void): () => void;
@@ -128,6 +130,7 @@ export function createLiveHighlightClient(options: {
   }
 
   function deliverScene(event: SceneEvent) {
+    if (options.chat_id && event.chat_id && event.chat_id !== options.chat_id) return;
     if (event.type === 'scene.edit' && event.edit_id) {
       if (editIds.has(event.edit_id)) return;
       editIds.add(event.edit_id);
@@ -141,6 +144,7 @@ export function createLiveHighlightClient(options: {
       ? event.labels ?? {} : previous?.labels ?? {};
     sceneStates.set(event.doc_id, {
       type: 'scene.state', doc_id: event.doc_id, hidden: [...state.hidden],
+      ...(options.chat_id ? { chat_id: options.chat_id } : {}),
       highlighted: [...state.highlighted.keys()], labels: Object.fromEntries([...state.highlighted.keys()]
         .filter((id) => Object.hasOwn(suppliedLabels, id)).map((id) => [id, suppliedLabels[id]])),
       isolated: state.isolated === null ? null : [...state.isolated],
@@ -162,7 +166,7 @@ export function createLiveHighlightClient(options: {
   function connect() {
     if (socket || retry !== undefined) return;
     try {
-      const url = options.url ?? liveSocketUrl();
+      const url = options.url ?? liveSocketUrl(options.chat_id ? `?chat_id=${encodeURIComponent(options.chat_id)}` : '');
       const connection = (options.connect ?? ((url) => new WebSocket(url)))(url);
       socket = connection;
       connection.addEventListener('open', () => {
@@ -223,7 +227,8 @@ export function createLiveHighlightClient(options: {
       return () => { sceneListeners.delete(callback); release(); };
     },
     sendCommand(doc_id, command) {
-      const event: SceneEvent = { ...command, type: 'scene.edit', doc_id, edit_id: crypto.randomUUID() };
+      const event: SceneEvent = { ...command, type: 'scene.edit', doc_id, edit_id: crypto.randomUUID(),
+        ...(options.chat_id ? { chat_id: options.chat_id } : {}) };
       deliverScene(event);
       commandQueue.push(event);
       connect(); flush();

@@ -25,6 +25,7 @@ import { createFindingsLayer, type Finding, type FindingPinState } from './findi
 import { KIND_COLORS, itemKindKey } from '../lib/kind-colors';
 import { createBlueprint, framingIds, MAX_CALLOUT_TAGS, styleSceneMaterials, type Blueprint, type BlueprintState } from './blueprint';
 import { planCinematic, sampleCinematic, type CinematicPlan } from './cinematic';
+import { createSmoothZoom } from './smoothZoom';
 
 export const SCENE_LOAD_BUDGET_MS = 60_000;
 
@@ -83,6 +84,8 @@ export interface Viewer {
   onBuildChange(callback: (state: BuildState | null) => void): () => void;
   /** Show steps 1..index complete (1-based). Pauses playback; the camera is not touched. */
   setBuildStep(index: number): void;
+  /** Continuous 0..total build position. Geometry is updated in place. */
+  setBuildPosition(position: number): void;
   playBuild(): void;
   pauseBuild(): void;
   /** Coordinates are viewport client pixels, as in PointerEvent.clientX/clientY. */
@@ -105,6 +108,13 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   camera.position.set(12, 10, 12);
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  const zoom = createSmoothZoom(canvas, camera, controls, () => {
+    lastInteraction = performance.now();
+    if (cine) cine.cancelled = true;
+    flight = null;
+    if (build) build.intro = false;
+  }, () => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   world.add(new AmbientLight(0xffffff, 1.5));
   const light = new DirectionalLight(0xffffff, 2.5);
   light.position.set(8, 16, 10);
@@ -132,6 +142,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   let commandVisuals: ReturnType<typeof createCommandVisuals> | null = null;
   let commandState = emptyCommandState();
   let edits: ReturnType<typeof createEditLayer> | null = null;
+  let mutatingEdit = false;
   let moving: { id: string; from: Vector3; start: Vector3; plane: Plane; dx: number; dz: number; controlsEnabled: boolean } | null = null;
   let applyingCommand = false;
   const commandListeners = new Set<(command: SceneCommand) => void>();
@@ -177,7 +188,10 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     const previous = highlights?.getHighlightState();
     clearHighlight();
     linkedHighlights = null;
-    const result = action();
+    let result: ItemEdit | null;
+    mutatingEdit = true;
+    try { result = action(); }
+    finally { mutatingEdit = false; }
     if (previous?.highlighted.length) highlight(previous.highlighted, { labels: previous.labels, dimOthers: commandState.isolated === null });
     else { applyLinkedVisuals(); notifyHighlight(); }
     batchesDirty = true;
@@ -290,6 +304,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
 
   function flyTo(bounds: Box3): void {
     if (bounds.isEmpty()) return;
+    zoom.cancel();
     const sphere = bounds.getBoundingSphere(new Sphere());
     const radius = Math.max(sphere.radius, 0.1);
     const halfFov = camera.fov * Math.PI / 360;
@@ -474,6 +489,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
 
   function visualise(onStateChange?: (state: RiseState) => void): void {
     if (disposed || !active) return;
+    zoom.cancel();
     walk.exit();
     batchesDirty = true;
     endBuild();
@@ -506,6 +522,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     const now = performance.now();
     const peek = current.animation.state(now);
     if (!peek.playing && !current.dirty && peek.phase === current.phase) return;
+    const wasDirty = current.dirty;
     current.dirty = false;
     const state = current.animation.sample(now);
     // The overhead-to-3/4 move only happens on the first, hands-off play; any orbit/zoom ends it.
@@ -515,9 +532,9 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       camera.lookAt(controls.target);
       if (t >= 1) current.intro = false;
     }
-    if (state.playing) batchesDirty = true;
+    if (state.playing || wasDirty) batchesDirty = true;
     const key = `${state.index}|${state.playing}|${state.phase}`;
-    if (key !== current.key) { current.key = key; batchesDirty = true; emitBuild(state); }
+    if (key !== current.key || (wasDirty && !state.playing)) { current.key = key; batchesDirty = true; emitBuild(state); }
     if (state.phase !== current.phase) {
       const previous = current.phase;
       current.phase = state.phase;
@@ -632,7 +649,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     const dt = (now - previousFrame) / 1000;
     previousFrame = now;
     if (walk.state().active) walk.update(dt);
-    else controls.update();
+    else { zoom.update(dt); controls.update(); }
     const wasRising = build !== null && build.animation.state(performance.now()).playing;
     sampleRise();
     stepCinematic(now);
@@ -761,6 +778,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       if (!active || disposed) return;
       const resolved = command.op === 'highlight' || command.op === 'isolate'
         ? { ...command, labels: resolveCommandLabels(command.item_ids, command.labels, active.manifest.items) } : command;
+      if (!mutatingEdit) edits?.recordCommand(resolved, commandState);
       commandState = applyCommand(commandState, resolved);
       cinematicNext = command.op === 'highlight' || command.op === 'isolate';
       renderCommandState();
@@ -769,8 +787,10 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     },
     applyState(snapshot) {
       if (!active || disposed) return;
-      commandState = applyState({ ...snapshot,
+      const next = applyState({ ...snapshot,
         labels: resolveCommandLabels(snapshot.highlighted, snapshot.labels, active.manifest.items) });
+      if (!mutatingEdit) edits?.recordState(commandState, next);
+      commandState = next;
       renderCommandState();
     },
     getCommandState() { return readCommandState(commandState); },
@@ -833,7 +853,8 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     },
     getBlueprintState: () => blueprint?.getState() ?? null,
     onBuildChange(callback) { buildListeners.add(callback); return () => { buildListeners.delete(callback); }; },
-    setBuildStep(index) { if (build) { build.animation.setStep(index); touchBuild(); } },
+    setBuildStep(index) { if (build) { build.intro = false; build.animation.setStep(index); touchBuild(); } },
+    setBuildPosition(position) { if (build) { build.intro = false; build.animation.setPosition(position); touchBuild(); } },
     playBuild() { if (build) { build.animation.play(performance.now()); touchBuild(); } },
     pauseBuild() { if (build) { build.animation.pause(performance.now()); touchBuild(); } },
     pickFinding(x, y) {
@@ -886,6 +907,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       observer.disconnect();
       window.removeEventListener('resize', resize);
       controls.dispose();
+      zoom.dispose();
       endBuild();
       buildListeners.clear();
       endMove(true);
