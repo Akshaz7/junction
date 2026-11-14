@@ -155,7 +155,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -199,7 +201,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -243,7 +247,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -287,7 +293,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -331,7 +339,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -375,7 +385,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -419,7 +431,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -463,7 +477,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -507,7 +523,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -551,7 +569,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -595,7 +615,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -639,7 +661,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -683,7 +707,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -727,7 +753,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -771,7 +799,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -815,7 +845,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -859,7 +891,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -903,7 +937,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -947,7 +983,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -991,7 +1029,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1035,7 +1075,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1079,7 +1121,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1123,7 +1167,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1167,7 +1213,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1211,7 +1259,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1255,7 +1305,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1299,7 +1351,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1343,7 +1397,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1387,7 +1443,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1431,7 +1489,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1475,7 +1535,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1519,7 +1581,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1563,7 +1627,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1607,7 +1673,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1651,7 +1719,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1695,7 +1765,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1739,7 +1811,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1783,7 +1857,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1827,7 +1903,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1871,7 +1949,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1915,7 +1995,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -1959,7 +2041,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2003,7 +2087,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2047,7 +2133,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2091,7 +2179,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2135,7 +2225,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2179,7 +2271,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2223,7 +2317,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2267,7 +2363,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2311,7 +2409,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2355,7 +2455,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2399,7 +2501,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2443,7 +2547,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2487,7 +2593,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2531,7 +2639,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2575,7 +2685,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2619,7 +2731,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2663,7 +2777,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2707,7 +2823,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2751,7 +2869,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2795,7 +2915,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2839,7 +2961,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2883,7 +3007,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2927,7 +3053,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -2971,7 +3099,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -3015,7 +3145,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -3059,7 +3191,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -3103,7 +3237,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -3147,7 +3283,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -3191,7 +3329,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -3235,7 +3375,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -3279,7 +3421,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -3323,7 +3467,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -3367,7 +3513,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -3411,7 +3559,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -3455,7 +3605,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -3499,7 +3651,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -5279,7 +5433,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -5331,7 +5487,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -5383,7 +5541,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -5435,7 +5595,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -5487,7 +5649,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -5539,7 +5703,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -5591,7 +5757,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -5643,7 +5811,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -5695,7 +5865,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -5747,7 +5919,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -5799,7 +5973,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -5851,7 +6027,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -5903,7 +6081,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -5955,7 +6135,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6007,7 +6189,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6059,7 +6243,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6111,7 +6297,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6163,7 +6351,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6215,7 +6405,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6267,7 +6459,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6319,7 +6513,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6371,7 +6567,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2774059904"
+    "material": "Kalksandstein 2774059904",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6423,7 +6621,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2774059904"
+    "material": "Kalksandstein 2774059904",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6475,7 +6675,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6527,7 +6729,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6579,7 +6783,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6631,7 +6837,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6683,7 +6891,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6735,7 +6945,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6787,7 +6999,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6839,7 +7053,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6891,7 +7107,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6943,7 +7161,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -6995,7 +7215,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7047,7 +7269,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7099,7 +7323,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7151,7 +7377,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7203,7 +7431,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7255,7 +7485,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7307,7 +7539,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7359,7 +7593,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7411,7 +7647,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7463,7 +7701,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7515,7 +7755,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7567,7 +7809,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7619,7 +7863,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7671,7 +7917,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7723,7 +7971,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2774059904"
+    "material": "Kalksandstein 2774059904",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7775,7 +8025,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7827,7 +8079,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7879,7 +8133,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2774059904"
+    "material": "Kalksandstein 2774059904",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7931,7 +8187,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -7983,7 +8241,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8035,7 +8295,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8087,7 +8349,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8139,7 +8403,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8191,7 +8457,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8243,7 +8511,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8295,7 +8565,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8347,7 +8619,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8399,7 +8673,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8451,7 +8727,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8503,7 +8781,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8555,7 +8835,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8607,7 +8889,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8659,7 +8943,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8711,7 +8997,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8763,7 +9051,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8815,7 +9105,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8867,7 +9159,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8919,7 +9213,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -8971,7 +9267,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9023,7 +9321,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9075,7 +9375,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9127,7 +9429,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9179,7 +9483,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9231,7 +9537,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9283,7 +9591,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9335,7 +9645,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9387,7 +9699,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2774059904"
+    "material": "Kalksandstein 2774059904",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9439,7 +9753,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2774059904"
+    "material": "Kalksandstein 2774059904",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9491,7 +9807,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9543,7 +9861,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9595,7 +9915,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9647,7 +9969,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9699,7 +10023,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9751,7 +10077,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9803,7 +10131,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9855,7 +10185,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9907,7 +10239,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -9959,7 +10293,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10011,7 +10347,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10063,7 +10401,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10115,7 +10455,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10167,7 +10509,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10219,7 +10563,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10271,7 +10617,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10323,7 +10671,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10375,7 +10725,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10427,7 +10779,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10479,7 +10833,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10531,7 +10887,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10583,7 +10941,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10635,7 +10995,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10687,7 +11049,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10739,7 +11103,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10791,7 +11157,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10843,7 +11211,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10895,7 +11265,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2774059904"
+    "material": "Kalksandstein 2774059904",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10947,7 +11319,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2774059904"
+    "material": "Kalksandstein 2774059904",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -10999,7 +11373,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11051,7 +11427,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11103,7 +11481,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11155,7 +11535,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11207,7 +11589,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11259,7 +11643,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11311,7 +11697,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11363,7 +11751,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11415,7 +11805,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": false,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11467,7 +11859,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11519,7 +11913,9 @@
     "volume_m3": "qto"
    },
    "props": {
-    "material": "Kalksandstein 2816491304"
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11565,7 +11961,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11611,7 +12009,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11657,7 +12057,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11703,7 +12105,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11749,7 +12153,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11795,7 +12201,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11841,7 +12249,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11887,7 +12297,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11933,7 +12345,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -11979,7 +12393,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12025,7 +12441,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12071,7 +12489,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12117,7 +12537,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12163,7 +12585,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12209,7 +12633,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12255,7 +12681,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12301,7 +12729,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12347,7 +12777,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12393,7 +12825,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12439,7 +12873,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12485,7 +12921,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12531,7 +12969,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12577,7 +13017,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12623,7 +13065,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12669,7 +13113,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12715,7 +13161,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12761,7 +13209,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12807,7 +13257,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12853,7 +13305,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12899,7 +13353,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12945,7 +13401,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -12991,7 +13449,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13037,7 +13497,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13083,7 +13545,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13129,7 +13593,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13175,7 +13641,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13221,7 +13689,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13267,7 +13737,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13313,7 +13785,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13359,7 +13833,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13405,7 +13881,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13451,7 +13929,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13497,7 +13977,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13543,7 +14025,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13589,7 +14073,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13635,7 +14121,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13681,7 +14169,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13727,7 +14217,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13773,7 +14265,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13819,7 +14313,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13865,7 +14361,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13911,7 +14409,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -13957,7 +14457,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14003,7 +14505,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14049,7 +14553,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14095,7 +14601,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14141,7 +14649,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14187,7 +14697,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14233,7 +14745,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14279,7 +14793,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14325,7 +14841,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14371,7 +14889,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14417,7 +14937,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14463,7 +14985,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14509,7 +15033,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14555,7 +15081,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14601,7 +15129,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14647,7 +15177,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14693,7 +15225,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14739,7 +15273,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14785,7 +15321,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14831,7 +15369,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14877,7 +15417,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14923,7 +15465,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -14969,7 +15513,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15015,7 +15561,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15061,7 +15609,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15107,7 +15657,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15153,7 +15705,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15199,7 +15753,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15245,7 +15801,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15291,7 +15849,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15337,7 +15897,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15383,7 +15945,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15429,7 +15993,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15475,7 +16041,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15521,7 +16089,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15567,7 +16137,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15613,7 +16185,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15659,7 +16233,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15705,7 +16281,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15751,7 +16329,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15797,7 +16377,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15843,7 +16425,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15889,7 +16473,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15935,7 +16521,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -15981,7 +16569,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16027,7 +16617,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16073,7 +16665,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16119,7 +16713,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16165,7 +16761,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16211,7 +16809,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16257,7 +16857,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16303,7 +16905,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16349,7 +16953,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16395,7 +17001,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16441,7 +17049,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16487,7 +17097,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16533,7 +17145,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16579,7 +17193,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16625,7 +17241,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16671,7 +17289,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16717,7 +17337,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16763,7 +17385,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16809,7 +17433,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16855,7 +17481,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16901,7 +17529,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16947,7 +17577,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -16993,7 +17625,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17039,7 +17673,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17085,7 +17721,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17131,7 +17769,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17177,7 +17817,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17223,7 +17865,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17269,7 +17913,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17315,7 +17961,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17361,7 +18009,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17407,7 +18057,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17453,7 +18105,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17499,7 +18153,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17545,7 +18201,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17591,7 +18249,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17637,7 +18297,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17683,7 +18345,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17729,7 +18393,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17775,7 +18441,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17821,7 +18489,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17867,7 +18537,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17913,7 +18585,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -17959,7 +18633,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18005,7 +18681,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18051,7 +18729,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18097,7 +18777,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18143,7 +18825,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18189,7 +18873,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18235,7 +18921,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18281,7 +18969,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18327,7 +19017,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18373,7 +19065,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18419,7 +19113,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18465,7 +19161,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18511,7 +19209,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18557,7 +19257,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18603,7 +19305,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18649,7 +19353,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18695,7 +19401,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18741,7 +19449,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18787,7 +19497,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18833,7 +19545,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18879,7 +19593,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18925,7 +19641,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -18971,7 +19689,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19017,7 +19737,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19063,7 +19785,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19109,7 +19833,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19155,7 +19881,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19201,7 +19929,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19247,7 +19977,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19293,7 +20025,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19339,7 +20073,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19385,7 +20121,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19431,7 +20169,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19477,7 +20217,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19523,7 +20265,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19569,7 +20313,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19615,7 +20361,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19661,7 +20409,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19707,7 +20457,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19753,7 +20505,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19799,7 +20553,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19845,7 +20601,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19891,7 +20649,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19937,7 +20697,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -19983,7 +20745,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20029,7 +20793,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20075,7 +20841,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20121,7 +20889,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20167,7 +20937,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20213,7 +20985,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20259,7 +21033,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20305,7 +21081,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20351,7 +21129,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20397,7 +21177,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20443,7 +21225,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20489,7 +21273,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20535,7 +21321,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20581,7 +21369,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20627,7 +21417,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20673,7 +21465,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20719,7 +21513,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20765,7 +21561,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20811,7 +21609,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20857,7 +21657,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20903,7 +21705,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20949,7 +21753,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -20995,7 +21801,9 @@
     "depth_m": "qto"
    },
    "props": {
-    "material": "Leer; Luftschicht"
+    "material": "Leer; Luftschicht",
+    "is_external": true,
+    "is_external_source": "space_boundary"
    },
    "bbox_source": "glb"
   },
@@ -28630,7 +29438,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Besprechungsraum I"
+   },
    "bbox_source": "glb"
   },
   {
@@ -28674,7 +29484,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Besprechungsraum II"
+   },
    "bbox_source": "glb"
   },
   {
@@ -28718,7 +29530,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Technikraum I"
+   },
    "bbox_source": "glb"
   },
   {
@@ -28762,7 +29576,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Technikraum II"
+   },
    "bbox_source": "glb"
   },
   {
@@ -28806,7 +29622,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Technikraum III"
+   },
    "bbox_source": "glb"
   },
   {
@@ -28850,7 +29668,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Seminarraum"
+   },
    "bbox_source": "glb"
   },
   {
@@ -28894,7 +29714,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Technikraum IV"
+   },
    "bbox_source": "glb"
   },
   {
@@ -28938,7 +29760,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "WC Herren"
+   },
    "bbox_source": "glb"
   },
   {
@@ -28982,7 +29806,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Labor K1"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29026,7 +29852,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Labor K2"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29070,7 +29898,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Labor K3"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29114,7 +29944,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Labor K4"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29158,7 +29990,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Labor K5"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29202,7 +30036,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Flur Keller West"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29246,7 +30082,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Flur Keller Ost"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29290,7 +30128,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Flur Keller Treppe"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29334,7 +30174,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "WC Damen"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29378,7 +30220,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Meier"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29422,7 +30266,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Labor I"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29466,7 +30312,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Labor II"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29510,7 +30358,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Flur EG West"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29554,7 +30404,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Obermeier"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29598,7 +30450,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "WC Damen"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29642,7 +30496,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "WC Herren"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29686,7 +30542,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Maier"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29730,7 +30588,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Studenten I"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29774,7 +30634,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Meyer"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29818,7 +30680,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Mayer"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29862,7 +30726,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Meyr"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29906,7 +30772,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Mayr"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29950,7 +30818,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Studenten II"
+   },
    "bbox_source": "glb"
   },
   {
@@ -29994,7 +30864,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Flur EG Ost"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30038,7 +30910,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Hausmeister"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30082,7 +30956,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Studenten III"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30126,7 +31002,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Flur EG Eingang"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30170,7 +31048,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Flur 1.OG West"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30214,7 +31094,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "WC Damen"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30258,7 +31140,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "WC Herren"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30302,7 +31186,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Flur 1.OG Ost"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30346,7 +31232,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Schmidt"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30390,7 +31278,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Flur 1.OG Treppe"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30434,7 +31324,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero IL"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30478,7 +31370,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero IL Sekr."
+   },
    "bbox_source": "glb"
   },
   {
@@ -30522,7 +31416,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Schmid"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30566,7 +31462,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Mueller I"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30610,7 +31508,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Mueller II"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30654,7 +31554,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero MuellerIII"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30698,7 +31600,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Mueller V"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30742,7 +31646,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Oberschmitt"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30786,7 +31692,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Obermueller"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30830,7 +31738,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Schmied II"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30874,7 +31784,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Mueller VI + VII"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30918,7 +31830,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Mueller VIII + IX"
+   },
    "bbox_source": "glb"
   },
   {
@@ -30962,7 +31876,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Schmied I"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31006,7 +31922,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Schmitt I"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31050,7 +31968,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Schmitt II"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31094,7 +32014,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero Mueller IV"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31138,7 +32060,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "WC Herren"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31182,7 +32106,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31226,7 +32152,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31270,7 +32198,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31314,7 +32244,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31358,7 +32290,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31402,7 +32336,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31446,7 +32382,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31490,7 +32428,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31534,7 +32474,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31578,7 +32520,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31622,7 +32566,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31666,7 +32612,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31710,7 +32658,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31754,7 +32704,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31798,7 +32750,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31842,7 +32796,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "WC Damen"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31886,7 +32842,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31930,7 +32888,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Buero"
+   },
    "bbox_source": "glb"
   },
   {
@@ -31974,7 +32934,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Flur 2.OG West"
+   },
    "bbox_source": "glb"
   },
   {
@@ -32018,7 +32980,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Flur 2.OG Treppe"
+   },
    "bbox_source": "glb"
   },
   {
@@ -32062,7 +33026,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Flur 2.OG Ost"
+   },
    "bbox_source": "glb"
   },
   {
@@ -32106,7 +33072,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Dachboden-2"
+   },
    "bbox_source": "glb"
   },
   {
@@ -32150,7 +33118,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Dachboden-1"
+   },
    "bbox_source": "glb"
   },
   {
@@ -32194,7 +33164,9 @@
     "area_m2": "qto",
     "volume_m3": "qto"
    },
-   "props": {},
+   "props": {
+    "long_name": "Flur 3.OG Treppe"
+   },
    "bbox_source": "glb"
   },
   {
@@ -32228,5 +33200,32 @@
    "props": {},
    "bbox_source": "glb"
   }
- ]
+ ],
+ "building": {
+  "schema": "IFC4",
+  "header": {
+   "originating_system": "IFC file generated by GRAPHISOFT ARCHICAD-64 20.0.0 GER FULL Windows version (IFC2x3 add-on version: 4009 GER FULL).",
+   "preprocessor_version": "The EXPRESS Data Manager Version 5.02.0100.09 : 26 Sep 2013",
+   "authorization": "The authorising person",
+   "time_stamp": "2017-01-11T15:39:00",
+   "view_definition": "ViewDefinition [, QuantityTakeOffAddOnView, SpaceBoundary2ndLevelAddOnView]; Option [Drawing Scale: 100.000000]; Option [Global Unique Identifiers (GUID): Keep existing]; Option [Elements to export: Entire project]; Option [Partial Structure Display: Entire Model]; Option [IFC Domain: All]; Option [Structural Function: All Elements]; Option [Convert Grid elements: On]; Option [Convert IFC Annotations and ARCHICAD 2D elements: On]; Option [Convert 2D symbols of Doors and Windows: Off]; Option [Explode Composite and Complex Profile elements into parts: Off]; Option [Export geometries that Participates in Collision Detection only: On]; Option [Multi-skin complex geometries: Building element parts]; Option [Elements in Solid Element Operations: Extruded/revolved]; Option [Elements with junctions: Extruded/revolved without junctions]; Option [Slabs with slanted edge(s): Extruded]; Option [Use legacy geometric methods as in Coordination View 1.0: Off]; Option [IFC Site Geometry: As boundary representation (BRep)]; Option [IFC Site Location: At Project Origin]; Option [Properties To Export: All properties]; Option [Space containment: Off]; Option [Bounding Box: On]; Option [Geometry to type objects: On]; Option [Element Properties: On]; Option [Properties To Export: All]; Option [IFC Base Quantities: On]; Option [Window Door Lining and Panel Parameters: On]; Option [IFC Space boundaries: On]; Option [ARCHICAD Zone Categories as IFC Space classification data: On]"
+  },
+  "project": {
+   "name": "Projekt Buerogebaeude",
+   "description": "No real Project",
+   "phase": "Concept"
+  },
+  "site": {
+   "name": "Gelaende 0815",
+   "description": "No real site",
+   "object_type": "LandUse"
+  },
+  "building": {
+   "name": "Buerogebaeude",
+   "description": "No real Building"
+  },
+  "applications": [
+   "ARCHICAD-64 20.0.0"
+  ]
+ }
 }
