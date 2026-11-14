@@ -384,7 +384,13 @@ def symbol_weakness(tmpl: np.ndarray) -> str | None:
     runs = cv2.morphologyEx(t8, cv2.MORPH_OPEN, np.ones((1, L), np.uint8)) | cv2.morphologyEx(t8, cv2.MORPH_OPEN, np.ones((L, 1), np.uint8))
     rest = t8 & (1 - cv2.dilate(runs, np.ones((3, 3), np.uint8)))
     if int(rest.sum()) < 0.3 * n:
-        return "mostly line work"
+        # a closed outline (box, circle, triangle) encloses area; a pipe, wire or wall piece with ticks does not
+        pad = np.pad(t8, 1)
+        ff = (1 - pad).astype(np.uint8)
+        cv2.floodFill(ff, np.zeros((pad.shape[0] + 2, pad.shape[1] + 2), np.uint8), (0, 0), 2)
+        enclosed = int((ff == 1).sum())
+        if enclosed < 0.25 * h * w:
+            return "mostly line work"
     return None
 
 

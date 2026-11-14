@@ -146,10 +146,17 @@ def test_unknown_target_reported(sheet):
     assert r["counts"] == {} and any("No legend entry" in n for n in r["notes"])
 
 
+def _oracle(truth_pts):
+    """a model check that answers like a careful reader: yes only where a real symbol sits"""
+    def f(ref, label, gray, boxes, budget):
+        return [any(abs((b[0] + b[2]) / 2 - x) < 20 and abs((b[1] + b[3]) / 2 - y) < 20 for x, y in truth_pts) for b in boxes]
+    return f
+
+
 def test_model_check_never_adds(sheet, monkeypatch):
-    """A verifier that says yes to everything must not raise the count above what the template found."""
+    """The model only judges candidates the template pass found; with a faithful check the count is the truth, and every counted box was a template candidate."""
     p, words, truth = sheet
-    monkeypatch.setattr(S, "_verify_tiles", lambda ref, label, gray, boxes, budget: [True] * len(boxes))
+    monkeypatch.setattr(S, "_verify_tiles", _oracle(truth["SMOKE DETECTOR"]))
     r = S.count_symbols(p, words=words, target="smoke detectors")
     assert r["counts"]["SMOKE DETECTOR"] == len(truth["SMOKE DETECTOR"])
     assert r["checked"]["agree"] == r["checked"]["sampled"] > 0
@@ -188,7 +195,7 @@ def test_symbols_route_and_card(sheet, tmp_path, monkeypatch):
     pt = T.PageText("doc1", 1, 1400, 900, words, "given")
     monkeypatch.setattr(T, "load_page_text", lambda *a, **k: pt)
     monkeypatch.setattr(S, "CACHE_DIR", tmp_path / "cache")
-    monkeypatch.setattr(S, "_verify_tiles", lambda ref, label, gray, boxes, budget: [True] * len(boxes))
+    monkeypatch.setattr(S, "_verify_tiles", _oracle(truth["SMOKE DETECTOR"]))
     monkeypatch.setattr(S, "page_words", lambda img, words=None: (list(pt.words), "given"))
     res = S.answer_symbols("How many smoke detectors are on this sheet?", ["doc1"], root)
     assert res and res["route"] == "symbols"
