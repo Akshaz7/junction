@@ -92,7 +92,7 @@ app.include_router(pair_router)
 
 @app.get("/api/health")
 async def health():
-    from engine.models.core import api_key, config as models_config
+    from engine.models.core import api_key, caps, config as models_config
     from . import artifact_store
     from .image_info import file_counts, image_info
 
@@ -111,4 +111,4 @@ async def health():
             "build_rev": os.environ.get("BUILD_REV", ""),
             "image": image_info(), **file_counts(), "servable_docs": servable_docs,
             "uptime_s": max(0.0, time.monotonic() - app.state.started_at),
-            "models_ok": models_ok}
+            "models_ok": models_ok, "caps_loaded": bool(caps())}

@@ -47,7 +47,7 @@ PM = {"doc_id": "src_a__full", "page": 1, "image": {"w": 40, "h": 30}, "scale": 
       "items": [{"item_id": "door-001", "kind": "door", "label": None, "bbox_px": [1, 1, 5, 9], "props": {}, "conf": 0.9}]}
 
 
-def test_hidden_listing_lazy_restore_and_fast_refusal(env):
+def test_hidden_listing_lazy_restore_and_fast_refusal(env, monkeypatch):
     art = env
     baked = art / "src_a__baked"
     baked.mkdir()
@@ -78,8 +78,11 @@ def test_hidden_listing_lazy_restore_and_fast_refusal(env):
         r = c.get("/api/docs/src_a__full/source")
         assert r.status_code == 200 and r.content == b"%PDF-1.4 original"
         assert c.get("/api/docs/src_a__baked/source").status_code == 404  # nothing stored: honest 404
-        # fast, free refusal for a doc with nothing to answer from
+        # Hidden documents cannot be selected for a question.
         chat = c.post("/api/chats", json={"doc_ids": ["src_a__empty"]}).json()
+        assert c.post(f"/api/chats/{chat['id']}/messages", json={"content": "How many doors?"}).status_code == 404
+        # With empty documents listed locally, the fast, free refusal still applies.
+        monkeypatch.setenv("HIDE_EMPTY_DOCS", "0")
         t = time.time()
         r = c.post(f"/api/chats/{chat['id']}/messages", json={"content": "How many doors are there?"})
         assert time.time() - t < 1.0

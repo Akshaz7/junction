@@ -136,6 +136,18 @@ def test_chats_and_streamed_question(client, monkeypatch):
                        json={"content": "hi"}).status_code == 404
 
 
+def test_message_length_limit_and_unknown_docs_leave_no_messages(client, monkeypatch):
+    from server import chats_routes
+    monkeypatch.setattr(chats_routes, "ENGINE", stub_engine.answer)
+    chat = client.post("/api/chats", json={"doc_ids": [DOC]}).json()
+    url = f"/api/chats/{chat['id']}/messages"
+    assert client.post(url, json={"content": "x" * 8001}).status_code == 413
+    assert client.post(url, json={"content": "hello", "doc_ids": [DOC, "unknown"]}).status_code == 404
+    assert client.get(f"/api/chats/{chat['id']}").json()["messages"] == []
+    response = client.post(url, json={"content": "x" * 8000, "doc_ids": [DOC]})
+    assert response.status_code == 200 and _sse(response.text)[-1][0] == "answer"
+
+
 def test_real_engine_answer_through_api(client, monkeypatch):
     """Default engine is the real one: no stub marker, valid answer object, abstains without data."""
     from server import chats_routes

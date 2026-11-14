@@ -7,6 +7,7 @@ edit = {"op": "hide"|"resize"|"narrow"|..., "item_ids": [...], "detail": {"width
 from __future__ import annotations
 
 import dataclasses
+import os
 import re
 from pathlib import Path
 
@@ -137,7 +138,7 @@ def _route_cards(doc: Doc, after_doc: Doc, edit: dict, touched: list, touched_id
 
 
 def advise(doc_id: str, edit: dict | None = None, chat_id: str | None = None, root: Path | None = None) -> list[dict]:
-    doc = load_doc(doc_id, Path(root or ARTIFACTS))
+    doc = load_doc(doc_id, Path(root or os.environ.get("ARTIFACTS_DIR") or ARTIFACTS))
     if doc is None:
         return []
     return advise_doc(doc, edit)

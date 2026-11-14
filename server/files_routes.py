@@ -278,6 +278,7 @@ async def _feed(pool) -> dict:
               "summary": {"doc_id": r["doc_id"], "title": r["title"], "kind": r["kind"],
                           "headline": f"New document: {r['title']}"},
               "created_at": r["created_at"].isoformat()} for r in ups if r["doc_id"] not in done]
+    feed = await cs.visible_feed(pool, feed)
     feed.sort(key=lambda e: e["created_at"], reverse=True)
     groups = cs.grouped(feed)
     return {"changes": feed, "checked_at": cs.checked_at(), "groups": groups}
@@ -319,12 +320,14 @@ async def change(change_id: str, page: int | None = None):
         for r in await _upload_rows(pool):
             s = cs.match_series(r) if r["doc_id"] == doc_id else None
             if s:
+                if not await cs.visible_pair(pool, s["versions"][-1]["doc_id"], doc_id):
+                    raise HTTPException(404, "change not found")
                 diff = cs.compute_for_row(r)
                 return cs.comparison(change_id, page, diff, s, len(s["versions"]) - 1, doc_id) | {"type": "new_version"}
         raise HTTPException(404, "change not found")
     if change_id.startswith("ser:"):
         out = cs.comparison(change_id, page)
-        if out is None:
+        if out is None or not await cs.visible_pair(pool, out["v1"]["doc_id"], out["v2"]["doc_id"]):
             raise HTTPException(404, "change not found")
         return out | {"type": "new_version", "created_at": next((e["created_at"] for e in cs.series_entries() if e["id"] == change_id), None)}
     try:
@@ -334,7 +337,10 @@ async def change(change_id: str, page: int | None = None):
     r = await pool.fetchrow("select id, doc_a, doc_b, summary, created_at from changes where id=$1", cid)
     if r is None:
         raise HTTPException(404, "change not found")
-    return _change(r)
+    out = _change(r)
+    if not await cs.visible_feed(pool, [out]):
+        raise HTTPException(404, "change not found")
+    return out
 
 
 def _bench_summaries() -> list[dict]:

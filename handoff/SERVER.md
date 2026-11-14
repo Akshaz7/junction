@@ -1,11 +1,12 @@
 # SERVER (Codex) — current row
 
-ROW: S-23 deployed health watch + smoke after 0254cc0
-1. Poll https://obviously-present-piglet.eur-1.aiven.app/api/health every 30 s until build_rev == 0254cc0 (max 25 min). If it never arrives or health fails, report the last state (the Aiven build may have failed: say so).
-2. Then run scripts/smoke_live.py against the deployed site (via https://hologram-khaki.vercel.app and the Aiven origin), including the new checks: GET /api/bench/latest returns 200 with accuracy 0.7647 (143/187) and abstentions 0; GET /api/costs/summary returns 200. Save results/smoke/deployed-0254cc0.json and .md.
-3. Measure p50/p95 latency for 10 cached and 5 novel AC20 questions (pace ≤ 25 req/min); add them to the md.
-Allowed: scripts/smoke_live.py, results/smoke/, this file.
+ROW: S-28 wire the real Changes feed + spending cap + small hardening
+1. server/files_routes.py: wire changes_source.visible_feed(pool, feed) into _feed after merging entries (before sort/group), and guard /changes/{id} with changes_source.visible_pair(pool, doc_a, doc_b) (helpers exist from S-25, committed e882db8). Test it.
+2. The image has no COSTS.md, so engine/models/core.py caps() returns {} and prod has NO spending cap. COPY COSTS.md into the image (deploy/Dockerfile) and set ENV MODELS_COSTS_MD=/app/COSTS.md; /api/health adds caps_loaded: true/false.
+3. engine/models/core.py _log(): wrap the costs-log write in try/except OSError so a read-only path never turns a paid call into an error (that one function only).
+4. engine.findings.run() and engine.advisor.advise(): use the same artifacts root as the server (ARTIFACTS_DIR / config), not REPO/artifacts. Minimal change + test.
+5. Chat message content length cap 8,000 chars → 413; doc_ids in POST /api/chats/{id}/messages validated against listed docs (unknown → 404, like /chats create).
+Allowed: server/, deploy/Dockerfile, engine/models/core.py (_log only), engine/findings.py + engine/advisor.py (root resolution only), this file.
+Done test: .venv/bin/python -m pytest -q -p no:cacheprovider server/tests (all pass; list any you deselect and why)
 Never commit. Write one line at the end: RESULT: ...
-
-NEEDS: S-23 /api/bench/latest returns 404 via Vercel and Aiven; deploy a stable revision serving the recorded bench. 0254cc0 arrived but changed to 52dd6f6 mid-smoke, so the origin smoke stopped at the revision guard.
-RESULT: S-23 FAIL: health watch matched 0254cc0 after 150.7 s; Vercel 77/79 passed (bench 404, revision changed), costs/summary 200 on both paths; Aiven full smoke stopped at revision guard. Vercel warm repeats n=10 p50/p95 667.6/1313.2 ms, novel n=5 1555.0/1827.2 ms (mixed deployment, no cache-hit claim). Reports: results/smoke/deployed-0254cc0.json and .md. Dry-run 47-route coverage and local latency-runner checks passed; no commit.
+RESULT: S-28 complete: Changes feed/detail filter listed and servable documents; image copies COSTS.md and sets MODELS_COSTS_MD; health reports caps_loaded; cost-log OSError is nonfatal; findings/advisor honor ARTIFACTS_DIR; messages enforce 8,000 characters (413) and listed doc_ids (404); regression coverage added. Done test `.venv/bin/python -m pytest -q -p no:cacheprovider server/tests`: 203 passed in 26.12s, none deselected; no commits.

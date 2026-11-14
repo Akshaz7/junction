@@ -101,6 +101,17 @@ def test_missing_directories_have_zero_files(health_env):
     assert body["bench_files"] == 0 and body["artifacts_docs"] == 0
 
 
+def test_health_reports_loaded_spending_caps(health_env, monkeypatch, tmp_path):
+    client, _, _ = health_env
+    costs = tmp_path / "COSTS.md"
+    monkeypatch.setenv("MODELS_COSTS_MD", str(costs))
+    assert client.get("/api/health").json()["caps_loaded"] is False
+    costs.write_text("| Provider | Cap |\n| Gemini | 1 USD |\n")
+    assert client.get("/api/health").json()["caps_loaded"] is True
+    costs.write_text("| NVIDIA | free tier |\n")
+    assert client.get("/api/health").json()["caps_loaded"] is False
+
+
 @pytest.mark.parametrize("ids, expected", [(set(), 0), ({"demo__one", "db__two"}, 2), (None, None)])
 def test_servable_list_zero_count_and_unavailable(health_env, monkeypatch, ids, expected):
     client, _, _ = health_env

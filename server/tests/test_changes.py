@@ -25,10 +25,19 @@ def client(schema_url, tmp_path, monkeypatch):
     (art / "series" / f"{SID}.json").write_text(json.dumps(SERIES))
     (art / "series" / "diffs" / f"{SID}--1-2.json").write_text(json.dumps(DIFF))
     monkeypatch.setenv("ARTIFACTS_DIR", str(art))
+    monkeypatch.setenv("HIDE_EMPTY_DOCS", "0")
     from server import docmeta_store
     docmeta_store._cache.clear()
     from server.app import app
     with TestClient(app) as c:
+        from server import db
+        from server.seed import seed_documents
+
+        async def seed():
+            pool = await db.get_pool()
+            await seed_documents(pool, [{"doc_id": d, "source": "opening_design", "title": "A501", "kind": "pdf"}
+                                        for d in DOCS])
+        c.portal.call(seed)
         yield c
 
 
@@ -108,3 +117,35 @@ def test_feed_and_detail_agree_on_source(client):
     for e in client.get("/api/changes").json()["changes"]:
         if e["type"] == "new_version":
             assert e["summary"]["source"] == client.get(f"/api/changes/{e['id']}").json()["source"] == "pdf-diff"
+
+
+def test_hidden_pair_is_absent_from_feed_groups_refresh_and_detail(client, monkeypatch):
+    from server import artifact_store
+
+    async def servable(pool):
+        return set(DOCS[:2])
+
+    monkeypatch.setenv("HIDE_EMPTY_DOCS", "1")
+    monkeypatch.setattr(artifact_store, "servable_ids", servable)
+    for response in (client.get("/api/changes"), client.post("/api/changes/refresh")):
+        body = response.json()
+        assert [e["id"] for e in body["changes"]] == [f"ser:{SID}:1"]
+        assert body["groups"][0]["ids"] == [f"ser:{SID}:1"]
+    assert client.get(f"/api/changes/ser:{SID}:1").status_code == 200
+    assert client.get(f"/api/changes/ser:{SID}:2").status_code == 404
+    monkeypatch.setenv("INGEST", "0")
+    did = client.post("/api/upload", files={"file": ("A501.png", b"\x89PNG")}).json()["doc_id"]
+    assert client.get(f"/api/changes/upl:{did}").status_code == 404
+    assert f"upl:{did}" not in [e["id"] for e in client.get("/api/changes").json()["changes"]]
+
+
+def test_unlisted_pair_is_absent_even_with_local_artifacts(client):
+    from server import db
+
+    async def remove():
+        pool = await db.get_pool()
+        await pool.execute("delete from documents where doc_id=$1", DOCS[-1])
+
+    client.portal.call(remove)
+    assert [e["id"] for e in client.get("/api/changes").json()["changes"]] == [f"ser:{SID}:1"]
+    assert client.get(f"/api/changes/ser:{SID}:2").status_code == 404

@@ -194,10 +194,13 @@ def set_db_logger(fn: Callable[[dict], None] | None) -> None:
 def _log(res: Result) -> None:
     rec = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), **{k: v for k, v in asdict(res).items() if k not in ("text", "json", "extra", "audio_url")}}
     p = _costs_log()
-    p.parent.mkdir(parents=True, exist_ok=True)
-    line = (json.dumps(rec, separators=(",", ":")) + "\n").encode()
-    with _lock, p.open("ab") as f:
-        f.write(line)
+    try:
+        p.parent.mkdir(parents=True, exist_ok=True)
+        line = (json.dumps(rec, separators=(",", ":")) + "\n").encode()
+        with _lock, p.open("ab") as f:
+            f.write(line)
+    except OSError:  # a read-only costs log must not turn a paid call into an error
+        pass
     if _db_logger:
         try:
             _db_logger(rec)

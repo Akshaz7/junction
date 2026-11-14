@@ -2,6 +2,7 @@
 least one item. Severity is "suggestion" unless the data clearly fails the rule ("fail"). No model calls."""
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 
@@ -256,7 +257,7 @@ def coverage(doc: Doc) -> dict:
 
 
 def run(doc_id: str, root: Path | None = None) -> list[dict]:
-    doc = load_doc(doc_id, Path(root or ARTIFACTS))
+    doc = load_doc(doc_id, Path(root or os.environ.get("ARTIFACTS_DIR") or ARTIFACTS))
     if doc is None:
         return []
     return run_doc(doc)

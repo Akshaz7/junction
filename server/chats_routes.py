@@ -197,12 +197,19 @@ async def _attach_advice(ans: dict, doc_ids: list[str], hidden: list[str], cid) 
 
 @router.post("/chats/{chat_id}/messages")
 async def ask(chat_id: str, body: NewMessage):
+    if len(body.content) > 8000:
+        raise HTTPException(413, "Message content exceeds 8,000 characters")
     pool = await _pool()
     cid = _uuid(chat_id)
     c = await pool.fetchrow("select id, doc_id from chats where id=$1", cid)
     if c is None:
         raise HTTPException(404, "chat not found")
     doc_ids = body.doc_ids or ([c["doc_id"]] if c["doc_id"] else [])
+    if doc_ids:
+        from .changes_source import visible_doc_ids
+        listed = await visible_doc_ids(pool)
+        if any(d not in listed for d in doc_ids):
+            raise HTTPException(404, "document not found")
     from . import artifact_store
     for _d in doc_ids:  # uploaded docs: files may only be in PostgreSQL after a container restart
         await artifact_store.ensure_doc(_d)
