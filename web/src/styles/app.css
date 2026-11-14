@@ -657,7 +657,7 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
   .mobile-navigation { height: calc(56px + var(--app-safe-bottom)); padding-bottom: var(--app-safe-bottom); }
   .data-screen-toolbar .search-field { top: calc(166px + var(--app-safe-top)); }
   .document-viewer.viewer-sheet, .data-detail { top: 0; padding-top: var(--app-safe-top); }
-  .document-viewer.viewer-sheet { height: 100dvh; }
+  .document-viewer.viewer-sheet { height: calc(100dvh - var(--composer-h, 0px)); }
 }
 .data-folders h2 { padding-bottom: 20px; }
 .data-folders button { max-width: 308px; }

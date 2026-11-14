@@ -1,3 +1,4 @@
+import { searchDocuments } from '../lib/doc-search'
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { ArrowRight, Box, ChevronDown, ChevronLeft, ChevronRight, Download, File, FileImage, FileText, Folder, GitCompare, Info, Layers, Maximize2, MessageSquare, Minus, Plus, Search, Upload, X } from 'lucide-react'
 import { Badge, Button, Input } from './ui'
@@ -245,7 +246,7 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const options = folderOptions(folders)
   const query = search.trim().toLowerCase()
   // Searching always spans every source, even with a folder selected.
-  const filtered = docs.filter((doc) => query ? `${doc.title} ${doc.doc_id} ${doc.source} ${doc.folder || ''} ${doc.formats.join(' ')} ${doc.licence || ''} ${doc.credit || ''}`.toLowerCase().includes(query) : inFolder(doc, activeFolder))
+  const filtered = query ? searchDocuments(docs, query) : docs.filter((doc) => inFolder(doc, activeFolder))
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, pageCount)
   const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)

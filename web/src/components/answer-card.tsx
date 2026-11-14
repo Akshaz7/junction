@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { FileText, Layers3, Box, Smartphone } from 'lucide-react'
+import { FileText, Layers3, Box, Smartphone, Download, ClipboardList } from 'lucide-react'
 import { AdvisorCardView } from '../viewer3d/AdvisorCardView'
 import { onAdvisorCards } from '../viewer3d/liveHighlight'
 import type { AdvisorCard } from '../viewer3d/advisor'
 import { Tooltip } from './ui'
+import { downloadTakeoffCsv, parseTakeoff, TAKEOFF_QUESTION } from '../lib/takeoff'
 import { CITATION_CAP, humanizeIds, isOneLine, parseBlocks, plainQuote } from '../lib/answer-text'
 import type { Answer, Citation, Document } from '../lib/types'
 import { SpeakButton } from './voice-controls'
@@ -73,12 +74,14 @@ export function ArHint() {
   </div>
 }
 
-export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation, onVisualise, edits, busy, onUndo, onOpenItem, chatId }: {
+export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation, onVisualise, edits, busy, onUndo, onOpenItem, chatId, onAsk }: {
   answer: Answer; docs: Document[]; demo: boolean; activeCitation?: Citation; onOpenCitation: (citation: Citation) => void
   /** Open the viewer straight in 3D. */
   onVisualise?: (citation: Citation) => void
   edits?: DrawingEdits; busy?: boolean; onUndo?: () => void; onOpenItem?: (id: string) => void
   chatId?: string | null
+  /** Ask a follow-up question in this chat (the Take-off sheet button). */
+  onAsk?: (question: string) => void
 }) {
   const allCitations = answer.answer.abstained ? [] : answer.citations
   const [showAll, setShowAll] = useState(false)
@@ -87,6 +90,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
   const labels = labelsOf(answer)
   const oneLine = isOneLine(answer.answer.text_md)
   const docChips = answer.doc_ids.map((docId) => ({ docId, title: docs.find((doc) => doc.doc_id === docId)?.title ?? docId, first: allCitations.find((citation) => citation.doc_id === docId) }))
+  const takeoff = parseTakeoff(answer, docs)
   const advice = useAnswerAdvice(answer, chatId)
   const table = answerTableSelection(answer)
   const generated = demo || answer.trace.some((step) => step.stub)
@@ -123,6 +127,8 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
       <SpeakButton text={answer.answer.text_md} />
       <ExportAnswerButton answer={answer} docs={docs} chatId={chatId} demo={demo} />
       {!!citations.length && <button type="button" className="show-on-table visualise-from-answer" onClick={() => (onVisualise ?? onOpenCitation)(citations[0])}><Box size={15} aria-hidden="true" /><span>Visualise it</span></button>}
+      {takeoff && <button type="button" className="show-on-table takeoff-csv" data-testid="takeoff-csv" onClick={() => downloadTakeoffCsv(takeoff)}><Download size={15} aria-hidden="true" /><span>Download CSV</span></button>}
+      {!takeoff && onAsk && !answer.answer.abstained && <button type="button" className="show-on-table takeoff-sheet" data-testid="takeoff-sheet" onClick={() => onAsk(TAKEOFF_QUESTION)}><ClipboardList size={15} aria-hidden="true" /><span>Take-off sheet</span></button>}
       {table && <ShowOnTableButton docId={table.doc_id} itemIds={table.item_ids} chatId={chatId} />}
       {cost}
     </div>

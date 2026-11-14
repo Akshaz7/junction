@@ -48,3 +48,5 @@
   .upload-dialog-actions { flex-direction: column; }
   .upload-dialog-actions .button { width: 100%; white-space: normal; }
 }
+.upload-dialog-details { margin: 6px 0; font-size: var(--text-body-sm); }
+.upload-dialog-details pre { margin: 6px 0 0; white-space: pre-wrap; word-break: break-word; max-height: 8em; overflow: auto; }

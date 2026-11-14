@@ -94,3 +94,10 @@ describe('server-sent answer events', () => {
     await expect(readAnswerStream(chunkedStream(event('status', { text: 'Thinking…' })), callbacks())).rejects.toThrow('before an answer arrived')
   })
 })
+
+describe('readAnswerStream idle watchdog', () => {
+  it('rejects a silent stream instead of waiting forever', async () => {
+    const body = new ReadableStream<Uint8Array>({ start() { /* never sends or closes */ } })
+    await expect(readAnswerStream(new Response(body), { onStatus: () => {}, onTrace: () => {} }, 50)).rejects.toThrow(/connection dropped/)
+  })
+})

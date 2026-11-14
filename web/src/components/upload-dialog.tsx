@@ -2,7 +2,7 @@ import { useEffect, useId, useReducer, useRef, useState, type DragEvent } from '
 import { createPortal } from 'react-dom'
 import { AlertCircle, ArrowRight, Check, FileText, Upload, X } from 'lucide-react'
 import type { Document } from '../lib/types'
-import { uploadFile, UploadError, waitForUpload } from '../lib/upload-client'
+import { friendlyFailure, uploadFile, UploadError, waitForUpload } from '../lib/upload-client'
 import { MAX_UPLOAD_BYTES, UPLOAD_ACCEPT, uploadReducer, validateUpload } from '../lib/upload-state'
 import { Button } from './ui'
 import './upload-dialog.css'
@@ -142,7 +142,7 @@ function UploadSession({ onClose, onAsk, onOpen, onReady }: UploadDialogProps) {
       <small>{state.status === 'uploading' ? 'Keep this dialog open until the upload finishes.' : 'You can close this dialog while your drawing is processed. Find it in Data.'}</small>
     </section>}
 
-    {state.status === 'failed' && <div className="upload-dialog-error" role="alert"><AlertCircle size={20} aria-hidden="true" /><div><strong>{state.retry === 'poll' ? 'Could not confirm processing' : state.docId ? 'Drawing could not be processed' : 'Drawing could not be uploaded'}</strong><p>{state.reason}</p>
+    {state.status === 'failed' && <div className="upload-dialog-error" role="alert"><AlertCircle size={20} aria-hidden="true" /><div><strong>{state.retry === 'poll' ? 'Could not confirm processing' : state.docId ? 'Drawing could not be processed' : 'Drawing could not be uploaded'}</strong><p>{friendlyFailure(state.reason).message}</p>{friendlyFailure(state.reason).raw && <details className="upload-dialog-details"><summary>Details</summary><pre>{friendlyFailure(state.reason).raw}</pre></details>}
       <Button variant="outline" onClick={() => { void retry() }}>Try again</Button></div></div>}
 
     {state.status === 'ready' && <section className="upload-dialog-ready"><p role="status"><Check size={18} aria-hidden="true" /><strong>Ready</strong></p>

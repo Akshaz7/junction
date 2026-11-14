@@ -96,7 +96,7 @@ describe('ingest monitoring', () => {
       .mockResolvedValueOnce(Response.json(doc))
     const onProgress = vi.fn()
     const result = await waitForUpload(doc.doc_id, { signal: controller().signal, transport, intervalMs: 0, onProgress })
-    expect(onProgress).toHaveBeenCalledWith('reading pages', 0.4)
+    expect(onProgress).toHaveBeenCalledWith('Reading drawing', 0.4)
     expect(result.document).toEqual(doc)
     expect(transport.mock.calls.map(([path]) => path)).toEqual([`/api/docs/${doc.doc_id}/ingest`, `/api/docs/${doc.doc_id}/ingest`, `/api/docs/${doc.doc_id}`])
   })
@@ -142,7 +142,7 @@ describe('ingest monitoring', () => {
       .mockResolvedValueOnce(Response.json({ ...doc, ingest: { status: 'ready' } }))
     const onProgress = vi.fn()
     await waitForUpload(doc.doc_id, { signal: controller().signal, transport, onProgress, intervalMs: 0 })
-    expect(onProgress).toHaveBeenCalledWith('Pages', 0.2)
+    expect(onProgress).toHaveBeenCalledWith('Reading drawing', 0.2)
     expect(transport).toHaveBeenCalledTimes(3)
   })
 

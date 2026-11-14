@@ -339,6 +339,12 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   }
 
   function highlight(ids: readonly string[], options: HighlightOptions = {}): void {
+    // A removed item is the subject of the edit: frame its ghost, not whatever else the answer lit.
+    let ghostTarget = false;
+    if (!options.cameraTargetItemId) {
+      const ghost = ids.find((id) => commandState.hidden.has(id));
+      if (ghost) { options = { ...options, cameraTargetItemId: ghost }; ghostTarget = true; }
+    }
     if (ids.length) ensureInteractionMaterials();
     // FIX-2: a new answer replacing a lit one swaps in place; the camera stays where the user left it.
     const swap = (highlights?.getHighlightState().highlighted.length ?? 0) > 0 && ids.length > 0 && options.keepCamera === true;
@@ -368,7 +374,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     applyLinkedVisuals();
     // Highlights stay fully visible while the model builds up (they are pinned in the animation).
     if (build) build.animation.sample(performance.now());
-    const canFly = !swap && !(build && build.phase !== 'done') && !walk.state().active;
+    const canFly = (!swap || ghostTarget) && !(build && build.phase !== 'done') && !walk.state().active;
     if (canFly) {
       // An explicit camera target wins; otherwise frame every highlighted item so all numbered tags stay in view.
       const framed = new Set(framingIds(active));

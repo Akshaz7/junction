@@ -69,7 +69,10 @@
 @media (max-width: 800px) {
   .chat-workspace.has-viewer { display: flex; }
   .viewer-split-handle { display: none; }
-  .viewer-sheet { position: fixed; inset: 0; width: 100%; height: 100dvh; z-index: 30; padding-top: env(safe-area-inset-top); }
+  .viewer-sheet { position: fixed; inset: 0 0 auto 0; width: 100%; height: calc(100dvh - var(--composer-h, 0px)); z-index: 30; padding-top: env(safe-area-inset-top); transition: height .25s var(--ease-settle-wide, ease); }
+  /* Keep the composer reachable under the sheet; while it is focused the sheet shrinks to a peek bar. */
+  .chat-workspace:has(.viewer-sheet) .composer-area { position: fixed; left: 0; right: 0; bottom: 0; width: 100%; margin: 0; padding: 8px 12px calc(10px + env(safe-area-inset-bottom)); background: var(--card); z-index: 32; }
+  .chat-workspace:has(.composer-area:focus-within) .document-viewer.viewer-sheet { height: calc(56px + var(--app-safe-top, env(safe-area-inset-top))); overflow: hidden; }
   .document-viewer .viewer-item-layout:has(.viewer-spec-panel) { flex-direction: column; }
   .viewer-spec-panel { width: 100%; max-height: 35dvh; border-left: 0; border-top: 1px solid var(--border); }
   .document-viewer .viewer-toolbar { padding-inline: 6px; gap: 2px; }

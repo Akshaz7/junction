@@ -51,6 +51,25 @@ export function uploadFile(file: File, signal: AbortSignal, onProgress: (fractio
   })
 }
 
+const stageNames: Record<string, string> = {
+  scene: 'Building 3D', ifc_scene: 'Building 3D', extrude: 'Building 3D', usdz: 'Preparing AR model',
+  publish: 'Finishing up', pool: 'Finishing up',
+}
+/** The server's internal stage name as plain words. */
+export function friendlyStage(step: string | undefined) {
+  if (!step) return ''
+  const key = step.trim().toLowerCase().replace(/ /g, '_')
+  return stageNames[key] ?? 'Reading drawing'
+}
+
+/** A user-facing failure message; the raw server text, when different, is kept for a details expander. */
+export function friendlyFailure(reason: string): { message: string; raw: string } {
+  const raw = reason.trim()
+  if (/no (3d )?geometry|has no geometry|usdz|ifcconvert|zero (meshes|geometry)/i.test(raw)) return { message: 'This file has no 3D geometry we can convert.', raw }
+  if (/runtimeerror|traceback|exception|error:|\bat line\b|\.py\b/i.test(raw)) return { message: 'We could not process this file. Try again, or try a different drawing.', raw }
+  return { message: raw, raw: '' }
+}
+
 type Ingest = { status?: string; readable?: boolean; step?: string; progress?: number; detail?: string; reason?: string }
 type UploadDocument = Document & { status?: string; ingest?: Ingest; ingest_status?: string }
 type PollOptions = {
@@ -119,7 +138,7 @@ export async function waitForUpload(docId: string, options: PollOptions): Promis
         announcedReadable = true
         onReadable(document ?? await readDocument())
       }
-      onProgress(status.step?.replace(/_/g, ' ') || (legacy ? 'Checking your drawing. Detailed progress is unavailable…' : 'Preparing your drawing…'), uploadProgress(status.progress))
+      onProgress(friendlyStage(status.step) || (legacy ? 'Checking your drawing. Detailed progress is unavailable…' : 'Preparing your drawing…'), uploadProgress(status.progress))
       await pause(intervalMs, bounded)
     }
     throw new UploadError('Processing is taking longer than expected. Try again to check this upload.', 'poll')

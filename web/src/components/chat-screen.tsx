@@ -328,11 +328,23 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     })
   }
 
+  const composerArea = useRef<HTMLDivElement>(null)
+  // Phone: the composer stays reachable under the viewer sheet; the sheet is sized to leave room for it.
+  useEffect(() => {
+    const node = composerArea.current, host = splitContainer.current
+    if (!node || !host || typeof ResizeObserver === 'undefined') return
+    const update = () => host.style.setProperty('--composer-h', `${node.offsetHeight}px`)
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [viewer, sheet])
   async function ask(question: string, documentIds?: string[]) {
     if (!question.trim() || submitting.current || restoring || !docs.length) return
     // A drawing question with nothing attached would hang on "Thinking…": ask for a document and keep the text.
     if (!documentIds && !selected.length && !chatId.current && needsDocument(question)) { blocked.current = question; setNeedDoc(true); return }
     setNeedDoc(false)
+    if (viewer && sheet) setViewer(null) // the answer streams into the conversation behind the sheet
     const version = generation.current
     submitting.current = true
     setBusy(true)
@@ -407,8 +419,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
 
   return <><FollowBanner incoming={incoming} onOpen={openIncoming} onDismiss={() => setIncoming(null)} />
   <div ref={splitContainer} className={`chat-workspace ${viewer ? 'has-viewer' : ''}`} hidden={hidden} style={{ '--chat-split': `${split}%` } as CSSProperties}>
-    <section className="chat-page" aria-label="Drawing questions" inert={!!viewer && sheet}>
-    <div ref={conversation} className={`conversation ${answers.length || busy ? 'has-answers' : ''}`}>
+    <section className="chat-page" aria-label="Drawing questions">
+    <div ref={conversation} inert={!!viewer && sheet} className={`conversation ${answers.length || busy ? 'has-answers' : ''}`}>
       {restoring && <p className="chat-loading" role="status">Loading chat…</p>}
       {!answers.length && !busy && !restoring && !failed && <div className="welcome">
         <h2>Where shall we start?</h2>
@@ -419,7 +431,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       </div>}
       {/* SSE and saved snapshots use different message IDs for the same answer.
           Keep its controls mounted when a live refresh replaces the exchange. */}
-      {answers.map((exchange, index) => exchange.answer ? <AnswerCard key={`${exchange.answer.answer_id}-${index}`} answer={exchange.answer} docs={docs} demo={demo} chatId={liveChatId} activeCitation={viewer?.answer.answer_id === exchange.answer.answer_id ? viewer.citation : undefined}
+      {answers.map((exchange, index) => exchange.answer ? <AnswerCard key={`${exchange.answer.answer_id}-${index}`} onAsk={(question) => void ask(question, selected.length ? undefined : exchange.answer?.doc_ids)} answer={exchange.answer} docs={docs} demo={demo} chatId={liveChatId} activeCitation={viewer?.answer.answer_id === exchange.answer.answer_id ? viewer.citation : undefined}
         edits={sceneEdits[exchange.answer.evidence.scene.doc_id || exchange.answer.doc_ids[0]]} busy={busy || restoring}
         onUndo={() => void ask('undo', [exchange.answer!.evidence.scene.doc_id || exchange.answer!.doc_ids[0]])} onOpenItem={(id) => void openCommandItem(exchange.answer!, id)} onOpenCitation={(citation) => {
         setViewer((previous) => ({ answer: exchange.answer!, citation, request: (previous?.request ?? 0) + 1, mode: '2d' }))
@@ -444,7 +456,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         {!!traces.length && <details className="answer-detail"><summary>Show thought process</summary>{traces.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>}
       </div>}
     </div>
-    <div className="composer-area">
+    <div className="composer-area" ref={composerArea}>
       {error && !failed && <p className="error-message" role="alert">{error}</p>}
       {needDoc && !selected.length && <div className="need-document" role="alert" data-testid="need-document">
         <strong>Add a drawing first</strong>

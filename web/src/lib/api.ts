@@ -73,7 +73,7 @@ export function createRetryTransport(transport: typeof fetch = (...args) => fetc
 export const apiFetch = createRetryTransport()
 
 /** A POST stream may split UTF-8, JSON and CRLF across arbitrary network chunks. */
-export async function readAnswerStream(response: Response, callbacks: StreamCallbacks): Promise<Answer> {
+export async function readAnswerStream(response: Response, callbacks: StreamCallbacks, idleMs = 180_000): Promise<Answer> {
   if (!response.body) throw new Error('The answer stream could not be opened.')
   const reader = response.body.getReader()
   const decoder = new TextDecoder()
@@ -93,7 +93,10 @@ export async function readAnswerStream(response: Response, callbacks: StreamCall
   }
   try {
     while (true) {
-      const { value, done } = await reader.read()
+      // A server restart can leave the socket open and silent: give up after idleMs without any event so the UI offers Retry instead of thinking forever.
+      let timer: ReturnType<typeof setTimeout> | undefined
+      const idle = new Promise<never>((_, reject) => { timer = setTimeout(() => reject(new Error('The connection dropped before the answer arrived. Please try again.')), idleMs) })
+      const { value, done } = await Promise.race([reader.read(), idle]).finally(() => clearTimeout(timer))
       buffer = (buffer + decoder.decode(value, { stream: !done })).replace(/\r\n/g, '\n')
       let boundary: number
       while ((boundary = buffer.indexOf('\n\n')) !== -1) {
