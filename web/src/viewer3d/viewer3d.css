@@ -298,3 +298,4 @@
 .revised-plan-dialog { width: min(1400px, 96vw); }
 .revised-plan-stage { width: fit-content; max-width: 100%; margin: 0 auto; overflow: hidden; }
 .revised-plan-stage canvas { max-height: calc(94vh - 130px); width: auto; max-width: 100%; margin: 0; }
+.revised-plan-saved { margin: 6px 0 0; font-size: 13px; }
