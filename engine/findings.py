@@ -246,6 +246,14 @@ def coverage(doc: Doc) -> dict:
            "stair_riser_tread_dwelling": "the stairs carry no riser or tread values", "stair_riser_tread_exit": "the stairs carry no riser or tread values",
            "barrier_height": "no barrier (guard rail) in the model", "emergency_window": "no window marked as an emergency exit",
            "headroom": "no door heights in the model", "door_clear_width": "no door widths in the model"}
+    stairs = [i for i in doc.items if i.kind == "stairs"]
+    if stairs and not _stair_flights(doc):
+        why["stair_width"] = f"{len(stairs)} stair{'s' if len(stairs) != 1 else ''} in the model, each one a single IfcStair volume, so the width of a flight cannot be measured"
+    if stairs:
+        why["stair_riser_tread_dwelling"] = why["stair_riser_tread_exit"] = f"{len(stairs)} stair{'s' if len(stairs) != 1 else ''} in the model, but none carries riser or tread values"
+    rails = [i for i in doc.items if i.kind == "railing"]
+    if rails and not _barriers(doc):
+        why["barrier_height"] = f"{len(rails)} railing{'s' if len(rails) != 1 else ''} in the model, all handrails (a handrail is not a barrier)"
     checked, skipped = [], []
     for cid, r in rules.items():
         if has.get(cid):

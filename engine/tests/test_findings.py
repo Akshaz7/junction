@@ -35,3 +35,20 @@ def test_narrow_door_fails_and_wide_is_silent():
 def test_near_limit_is_a_suggestion():
     f = [f for f in findings.run_doc(_doc(0.9)) if f["check_id"] == "door_clear_width"]
     assert f and f[0]["severity"] == "suggestion"
+
+
+def test_ac20_1007_checks_run_or_say_why_not():
+    """FIX-4: headroom (1007/2017 section 14) runs and is listed as checked; stair and barrier rules say exactly why they cannot run."""
+    from pathlib import Path
+    from engine import findings
+    from engine.solvers import ARTIFACTS
+    from engine.solvers.data import load_doc
+    if not (Path(ARTIFACTS) / "ifc_bench__ac20-arc").exists():
+        pytest.skip("real artifacts not present")
+    doc = load_doc("ifc_bench__ac20-arc", ARTIFACTS)
+    cov = findings.coverage(doc)
+    assert "fi-use-headroom" in cov["checked"]
+    why = {r["rule_id"]: r["reason"] for r in cov["not_checked"]}
+    for rid in ("fi-use-stair-width", "fi-use-stair-dwelling-riser-tread", "fi-use-stair-exit-riser-tread", "fi-use-barrier-height", "fi-use-door-landing"):
+        assert why.get(rid) and "no automatic check" not in why[rid], rid
+    assert "single IfcStair volume" in why["fi-use-stair-width"] and "riser or tread" in why["fi-use-stair-dwelling-riser-tread"]
