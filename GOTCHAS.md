@@ -30,3 +30,4 @@
 - Aiven Runtime builds from a GitHub repo via the Aiven GitHub App (no registry images), deploys are manual ("Deploy latest commit"), HTTP on 443 only; WebSocket support undocumented.
 - `localhost:5173` (make dev) shows the live working tree and can be broken mid-edit by Codex; `localhost:4173` serves the last commit (git worktree in scratchpad + vite preview) for Ash to look at. LEAD rebuilds it after web commits.
 - Without scipy, trimesh GLB export fails on face colours (scipy now added; older code sets vertex_colors/normals by hand).
+- usdchecker is /usr/bin/usdchecker (not in usd-core). UsdPrimvarReader_float2.varname must be typed string, not token.
