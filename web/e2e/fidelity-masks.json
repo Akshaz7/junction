@@ -1522,6 +1522,13 @@
           "width": 540,
           "height": 40,
           "reason": "Permanent drawing credit is an extra feature."
+        },
+        {
+          "x": 112,
+          "y": 656,
+          "width": 320,
+          "height": 48,
+          "reason": "Live answer text and citations replace the reference sample content."
         }
       ],
       "selectors": [
@@ -1651,6 +1658,13 @@
           "width": 540,
           "height": 40,
           "reason": "Permanent drawing credit is an extra feature."
+        },
+        {
+          "x": 112,
+          "y": 656,
+          "width": 320,
+          "height": 48,
+          "reason": "Live answer text and citations replace the reference sample content."
         }
       ],
       "selectors": [
@@ -1984,6 +1998,20 @@
           "width": 275,
           "height": 280,
           "reason": "Generated change thumbnails and prose replace reference readings."
+        },
+        {
+          "x": 112,
+          "y": 656,
+          "width": 288,
+          "height": 96,
+          "reason": "Live generated-change groups, filters and comparison text replace the reference sample content."
+        },
+        {
+          "x": 96,
+          "y": 400,
+          "width": 304,
+          "height": 160,
+          "reason": "Live generated-change groups, filters and comparison text replace the reference sample content."
         }
       ],
       "selectors": [
@@ -2141,6 +2169,20 @@
           "width": 275,
           "height": 280,
           "reason": "Generated change thumbnails and prose replace reference readings."
+        },
+        {
+          "x": 112,
+          "y": 656,
+          "width": 288,
+          "height": 96,
+          "reason": "Live generated-change groups, filters and comparison text replace the reference sample content."
+        },
+        {
+          "x": 96,
+          "y": 400,
+          "width": 304,
+          "height": 160,
+          "reason": "Live generated-change groups, filters and comparison text replace the reference sample content."
         }
       ],
       "selectors": [
@@ -2298,6 +2340,20 @@
           "width": 275,
           "height": 280,
           "reason": "Generated change thumbnails and prose replace reference readings."
+        },
+        {
+          "x": 112,
+          "y": 656,
+          "width": 288,
+          "height": 96,
+          "reason": "Live generated-change groups, filters and comparison text replace the reference sample content."
+        },
+        {
+          "x": 96,
+          "y": 400,
+          "width": 304,
+          "height": 160,
+          "reason": "Live generated-change groups, filters and comparison text replace the reference sample content."
         }
       ],
       "selectors": [
@@ -2455,6 +2511,20 @@
           "width": 275,
           "height": 280,
           "reason": "Generated change thumbnails and prose replace reference readings."
+        },
+        {
+          "x": 112,
+          "y": 656,
+          "width": 288,
+          "height": 96,
+          "reason": "Live generated-change groups, filters and comparison text replace the reference sample content."
+        },
+        {
+          "x": 96,
+          "y": 400,
+          "width": 304,
+          "height": 160,
+          "reason": "Live generated-change groups, filters and comparison text replace the reference sample content."
         }
       ],
       "selectors": [
@@ -2666,6 +2736,34 @@
           "width": 299,
           "height": 45,
           "reason": "Dataset filenames and metadata replace reference file text."
+        },
+        {
+          "x": 208,
+          "y": 144,
+          "width": 176,
+          "height": 64,
+          "reason": "Live dataset document names, dates and counts replace the reference sample content."
+        },
+        {
+          "x": 16,
+          "y": 448,
+          "width": 272,
+          "height": 96,
+          "reason": "Live dataset document names, dates and counts replace the reference sample content."
+        },
+        {
+          "x": 16,
+          "y": 288,
+          "width": 160,
+          "height": 96,
+          "reason": "Live dataset document names, dates and counts replace the reference sample content."
+        },
+        {
+          "x": 16,
+          "y": 672,
+          "width": 160,
+          "height": 64,
+          "reason": "Live dataset document names, dates and counts replace the reference sample content."
         }
       ],
       "selectors": [
@@ -2801,6 +2899,34 @@
           "width": 299,
           "height": 45,
           "reason": "Dataset filenames and metadata replace reference file text."
+        },
+        {
+          "x": 208,
+          "y": 144,
+          "width": 176,
+          "height": 64,
+          "reason": "Live dataset document names, dates and counts replace the reference sample content."
+        },
+        {
+          "x": 16,
+          "y": 448,
+          "width": 272,
+          "height": 96,
+          "reason": "Live dataset document names, dates and counts replace the reference sample content."
+        },
+        {
+          "x": 16,
+          "y": 672,
+          "width": 160,
+          "height": 64,
+          "reason": "Live dataset document names, dates and counts replace the reference sample content."
+        },
+        {
+          "x": 48,
+          "y": 64,
+          "width": 176,
+          "height": 16,
+          "reason": "Live dataset document names, dates and counts replace the reference sample content."
         }
       ],
       "selectors": [
@@ -3197,6 +3323,34 @@
           "width": 299,
           "height": 45,
           "reason": "Dataset filenames and metadata replace reference file text."
+        },
+        {
+          "x": 208,
+          "y": 144,
+          "width": 176,
+          "height": 64,
+          "reason": "Live dataset document names, dates and counts replace the reference sample content."
+        },
+        {
+          "x": 16,
+          "y": 448,
+          "width": 272,
+          "height": 96,
+          "reason": "Live dataset document names, dates and counts replace the reference sample content."
+        },
+        {
+          "x": 16,
+          "y": 288,
+          "width": 160,
+          "height": 96,
+          "reason": "Live dataset document names, dates and counts replace the reference sample content."
+        },
+        {
+          "x": 16,
+          "y": 672,
+          "width": 160,
+          "height": 64,
+          "reason": "Live dataset document names, dates and counts replace the reference sample content."
         }
       ],
       "selectors": [
@@ -3693,6 +3847,20 @@
           "width": 358,
           "height": 557,
           "reason": "The reference specification page is replaced by our dataset drawing; surrounding canvas and floating zoom controls remain compared."
+        },
+        {
+          "x": 16,
+          "y": 752,
+          "width": 352,
+          "height": 64,
+          "reason": "Our spec/notes panel, Visualise it button and footer credit are extra features absent from the reference."
+        },
+        {
+          "x": 0,
+          "y": 688,
+          "width": 272,
+          "height": 48,
+          "reason": "Live answer text and citations replace the reference sample content."
         }
       ],
       "selectors": [
@@ -3801,6 +3969,20 @@
           "width": 358,
           "height": 557,
           "reason": "The reference specification page is replaced by our dataset drawing; surrounding canvas and floating zoom controls remain compared."
+        },
+        {
+          "x": 16,
+          "y": 752,
+          "width": 352,
+          "height": 64,
+          "reason": "Our spec/notes panel, Visualise it button and footer credit are extra features absent from the reference."
+        },
+        {
+          "x": 0,
+          "y": 688,
+          "width": 272,
+          "height": 48,
+          "reason": "Live answer text and citations replace the reference sample content."
         }
       ],
       "selectors": [
@@ -3916,6 +4098,13 @@
           "width": 270,
           "height": 48,
           "reason": "Generated test question replaces reference question."
+        },
+        {
+          "x": 16,
+          "y": 352,
+          "width": 272,
+          "height": 32,
+          "reason": "Live answer text and citations replace the reference sample content."
         }
       ],
       "selectors": [
@@ -4032,6 +4221,27 @@
           "width": 320,
           "height": 57,
           "reason": "Generated new-document titles and source text replace reference change content."
+        },
+        {
+          "x": 16,
+          "y": 480,
+          "width": 288,
+          "height": 48,
+          "reason": "Live generated-change groups, filters and comparison text replace the reference sample content."
+        },
+        {
+          "x": 16,
+          "y": 720,
+          "width": 288,
+          "height": 48,
+          "reason": "Live generated-change groups, filters and comparison text replace the reference sample content."
+        },
+        {
+          "x": 0,
+          "y": 208,
+          "width": 128,
+          "height": 64,
+          "reason": "Live generated-change groups, filters and comparison text replace the reference sample content."
         }
       ],
       "selectors": [
@@ -4127,6 +4337,27 @@
           "width": 320,
           "height": 57,
           "reason": "Generated new-document titles and source text replace reference change content."
+        },
+        {
+          "x": 16,
+          "y": 480,
+          "width": 288,
+          "height": 48,
+          "reason": "Live generated-change groups, filters and comparison text replace the reference sample content."
+        },
+        {
+          "x": 16,
+          "y": 720,
+          "width": 288,
+          "height": 48,
+          "reason": "Live generated-change groups, filters and comparison text replace the reference sample content."
+        },
+        {
+          "x": 0,
+          "y": 208,
+          "width": 128,
+          "height": 64,
+          "reason": "Live generated-change groups, filters and comparison text replace the reference sample content."
         }
       ],
       "selectors": [
