@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ChevronLeft, ChevronRight, Download, FileSymlink, FileText, Highlighter, Maximize2, Minus, PenLine, Plus, Search, X } from 'lucide-react'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document } from '../lib/types'
@@ -68,6 +68,9 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   const draftRef = useRef<Annotation | null>(null)
   const annotations = useAnnotations(citation.doc_id, citation.page)
   const [searchOpen, setSearchOpen] = useState(false)
+  const searchTrigger = useRef<HTMLButtonElement>(null)
+  const titleId = useId()
+  function closeSearch() { setSearchOpen(false); searchTrigger.current?.focus() }
   const [query, setQuery] = useState('')
   const [sheetText, setSheetText] = useState<SheetText[]>([])
   const [textStatus, setTextStatus] = useState('')
@@ -281,10 +284,10 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
     setSelected(sources[index]?.itemIds[0] ?? null, '2d')
   }
 
-  return <aside ref={panel} className={`document-viewer ${sheet ? 'viewer-sheet' : ''}`} role={sheet ? 'dialog' : 'region'} aria-modal={sheet || undefined} aria-label="Drawing viewer"
+  return <aside ref={panel} className={`document-viewer ${sheet ? 'viewer-sheet' : ''}`} role={sheet ? 'dialog' : 'region'} aria-modal={sheet || undefined} aria-label={sheet ? undefined : "Drawing viewer"} aria-labelledby={sheet ? titleId : undefined}
     onKeyDown={(event) => {
       if (mode === '3d' && event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); changeMode('2d'); return }
-      if (event.key === 'Escape') { event.stopPropagation(); if (searchOpen) setSearchOpen(false); else if (tool !== 'pan') chooseTool('pan'); else if (selectedItem) closeItem(); else onClose() }
+      if (event.key === 'Escape') { event.stopPropagation(); if (searchOpen) closeSearch(); else if (tool !== 'pan') chooseTool('pan'); else if (selectedItem) closeItem(); else onClose() }
       if (sheet && event.key === 'Tab') {
         const controls = Array.from(panel.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), a[href], [tabindex="0"]') ?? []).filter((node) => node.getClientRects().length)
         if (!controls?.length) return
@@ -293,7 +296,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
         if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
       }
     }}>
-    <header className="viewer-heading"><FileText size={24} /><div><strong>{doc?.title ?? citation.doc_id}</strong><small>/{doc?.source || 'Drawings'}</small></div>
+    <header className="viewer-heading"><FileText size={24} /><div><strong id={titleId}>{doc?.title ?? citation.doc_id}</strong><small>/{doc?.source || 'Drawings'}</small></div>
       <ViewerModeToggle mode={mode} onChange={changeMode} />
       <div className="viewer-source-nav" hidden={mode === '3d'}>
         {imageUrl && <a className="viewer-open-source" aria-label="Open source page" href={imageUrl} target="_blank" rel="noreferrer"><FileSymlink size={16} /></a>}
@@ -309,7 +312,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       <div className="viewer-page-position"><Button variant="ghost" size="icon-xs" aria-label="Previous page" disabled={citation.page <= 1} onClick={() => changePage(citation.page - 1)}><ChevronLeft size={14} /></Button><span className="page-number">{citation.page}</span><span>/ {doc?.pages ?? '…'}</span><Button variant="ghost" size="icon-xs" aria-label="Next page" disabled={!doc || citation.page >= doc.pages} onClick={() => changePage(citation.page + 1)}><ChevronRight size={14} /></Button></div>
       <span className="toolbar-spacer" />
       <div className="viewer-markup-tools">
-        <Button variant="ghost" size="icon-sm" aria-label="Search sheet" aria-expanded={searchOpen} aria-controls="viewer-sheet-search" onClick={() => setSearchOpen(!searchOpen)}><Search size={16} /></Button>
+        <Button variant="ghost" size="icon-sm" aria-label="Search sheet" aria-expanded={searchOpen} aria-controls="viewer-sheet-search" onClick={(event) => { searchTrigger.current = event.currentTarget; if (searchOpen) closeSearch(); else setSearchOpen(true) }}><Search size={16} /></Button>
         <Button variant="ghost" size="icon-sm" aria-label="Highlight marker" aria-pressed={tool === 'marker'} disabled={!image} onClick={() => chooseTool('marker')}><Highlighter size={16} /></Button>
         <Button variant="ghost" size="icon-sm" aria-label="Pen annotations" aria-pressed={tool === 'pen'} disabled={!image} onClick={() => chooseTool('pen')}><PenLine size={16} /></Button>
       </div>
@@ -328,7 +331,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       <span role="status">{textStatus || (query.trim() ? hits.length ? `${hitIndex + 1} of ${hits.length} matches` : 'No matches' : 'Enter text to find')}</span>
       <Button variant="ghost" size="icon-xs" aria-label="Previous match" disabled={!hits.length} onClick={() => setHitIndex((hitIndex + hits.length - 1) % hits.length)}><ChevronLeft size={14} /></Button>
       <Button variant="ghost" size="icon-xs" aria-label="Next match" disabled={!hits.length} onClick={() => setHitIndex((hitIndex + 1) % hits.length)}><ChevronRight size={14} /></Button>
-      <Button variant="ghost" size="icon-xs" aria-label="Close sheet search" onClick={() => setSearchOpen(false)}><X size={14} /></Button>
+      <Button variant="ghost" size="icon-xs" aria-label="Close sheet search" onClick={closeSearch}><X size={14} /></Button>
     </div>}
     {mode === '2d' && (tool !== 'pan' || annotations.marks.length > 0) && <div className="viewer-annotation-controls"><span>{tool === 'marker' ? 'Drag to highlight an area' : tool === 'pen' ? 'Draw on the sheet' : 'Annotations saved on this device'}</span><Button variant="ghost" size="xs" disabled={!annotations.marks.length} onClick={annotations.undo}>Undo annotation</Button><Button variant="ghost" size="xs" disabled={!annotations.marks.length} onClick={annotations.clear}>Clear page annotations</Button>{tool !== 'pan' && <Button variant="ghost" size="xs" onClick={() => chooseTool('pan')}>Done</Button>}</div>}
     {(downloadError || annotations.warning) && <p className="viewer-tool-error" role="alert">{downloadError || annotations.warning}</p>}

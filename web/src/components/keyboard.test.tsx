@@ -8,6 +8,10 @@ import { UploadDialog } from './upload-dialog'
 import { WorkspaceNavigation } from './workspace-navigation'
 import { LibraryScreen } from './library-screen'
 import { Tooltip } from './ui/tooltip'
+import { DataScreen } from './data-screen'
+import { DocumentViewer } from './document-viewer'
+import { workspaceApi } from '../lib/api'
+import { demoDocument, makeDemoAnswer } from '../mock/handler'
 
 let host: HTMLDivElement
 let root: Root
@@ -25,6 +29,8 @@ beforeEach(() => {
     removeItem: (name: string) => storage.delete(name),
   } })
   vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: false, addEventListener() {}, removeEventListener() {} })))
+  vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} })
+  vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => { callback(0); return 0 })
   window.history.replaceState(null, '', '#/chat')
   vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => ({ chats: [], skills: [], automations: [] }) })))
   host = document.createElement('div'); document.body.append(host); root = createRoot(host)
@@ -148,4 +154,95 @@ it('Escape dismisses a tooltip while keeping focus on its control', async () => 
   await key('Escape')
   expect(host.querySelector<HTMLElement>('[role="tooltip"]')?.style.display).toBe('none')
   expect(document.activeElement).toBe(trigger)
+})
+
+async function openDataDocument(phone = false) {
+  vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: phone, addEventListener() {}, removeEventListener() {} })))
+  vi.spyOn(workspaceApi, 'hasScene').mockResolvedValue(false)
+  await act(async () => root.render(<DataScreen docs={[demoDocument]} loading={false} demo hidden={false} onRefresh={async () => {}} onAsk={() => {}} />))
+  const trigger = host.querySelector<HTMLButtonElement>('.data-open-file')!
+  await click(trigger)
+  return trigger
+}
+
+it.each([false, true])('Data Escape dismisses credit, then page search, then the preview (phone=%s)', async (phone) => {
+  const trigger = await openDataDocument(phone)
+  const panel = host.querySelector<HTMLElement>('.data-detail')!
+  const search = panel.querySelector<HTMLButtonElement>('[aria-label="Search page text"]')!
+  await click(search)
+  expect(document.activeElement).toBe(panel.querySelector('[aria-label="Find in page text"]'))
+  const credit = panel.querySelector<HTMLDetailsElement>('.data-credit-info')!
+  const summary = credit.querySelector('summary')!
+  await click(summary)
+  expect(credit.open).toBe(true)
+  await key('Escape')
+  expect(credit.open).toBe(false)
+  expect(document.activeElement).toBe(summary)
+  expect(panel.querySelector('.data-page-search')).not.toBeNull()
+  await key('Escape')
+  expect(panel.querySelector('.data-page-search')).toBeNull()
+  expect(document.activeElement).toBe(search)
+  expect(panel.isConnected).toBe(true)
+  await key('Escape')
+  expect(panel.isConnected).toBe(false)
+  expect(document.activeElement).toBe(trigger)
+})
+
+it('Data page-search close button restores its Search trigger', async () => {
+  await openDataDocument()
+  const search = host.querySelector<HTMLButtonElement>('[aria-label="Search page text"]')!
+  await click(search)
+  await click(host.querySelector<HTMLButtonElement>('[aria-label="Close page search"]')!)
+  expect(host.querySelector('.data-page-search')).toBeNull()
+  expect(document.activeElement).toBe(search)
+  expect(host.querySelector('.data-detail')).not.toBeNull()
+})
+
+it.each(['Escape', 'button'])('mobile Data detail has a visible dialog title, contains Tab, and returns focus on %s close', async (method) => {
+  const trigger = await openDataDocument(true)
+  const panel = checkDialog('.data-detail')
+  expect(document.getElementById(panel.getAttribute('aria-labelledby')!)?.textContent).toBe(demoDocument.title)
+  expect(panel.contains(document.activeElement)).toBe(true)
+  expect(trigger.closest('[inert]')).not.toBeNull()
+  const first = panel.querySelector('summary')!
+  const last = panel.querySelector<HTMLButtonElement>('.data-detail-actions button')!
+  first.focus()
+  await key('Tab', true)
+  expect(document.activeElement).toBe(last)
+  await key('Tab')
+  expect(document.activeElement).toBe(first)
+  if (method === 'Escape') await key('Escape')
+  else await click(panel.querySelector<HTMLButtonElement>('[aria-label="Close document details"]')!)
+  expect(host.querySelector('.data-detail')).toBeNull()
+  expect(document.activeElement).toBe(trigger)
+  expect(document.querySelector('[inert]')).toBeNull()
+})
+
+it.each([false, true])('viewer search restores Search on Escape and button close, and sheets use their visible title (sheet=%s)', async (sheet) => {
+  vi.spyOn(workspaceApi, 'getDocument').mockResolvedValue(demoDocument)
+  vi.spyOn(workspaceApi, 'getPageImage').mockResolvedValue(new Blob())
+  vi.spyOn(workspaceApi, 'getDocumentTags').mockResolvedValue({})
+  Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: vi.fn(() => 'blob:demo') })
+  Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: vi.fn() })
+  const onClose = vi.fn()
+  const answer = makeDemoAnswer('How many windows?')
+  await act(async () => root.render(<DocumentViewer answer={answer} citation={answer.citations[0]} sheet={sheet} onClose={onClose} />))
+  if (sheet) {
+    const panel = checkDialog('.document-viewer')
+    const title = document.getElementById(panel.getAttribute('aria-labelledby')!)!
+    expect(title).toBe(panel.querySelector('.viewer-heading strong'))
+    expect(title.textContent).toBe(demoDocument.title)
+  }
+  const search = host.querySelector<HTMLButtonElement>('[aria-label="Search sheet"]')!
+  for (const method of ['Escape', 'button']) {
+    await click(search)
+    expect(document.activeElement).toBe(host.querySelector('[aria-label="Find on sheet"]'))
+    if (method === 'Escape') await key('Escape')
+    else await click(host.querySelector<HTMLButtonElement>('[aria-label="Close sheet search"]')!)
+    expect(host.querySelector('#viewer-sheet-search')).toBeNull()
+    expect(document.activeElement).toBe(search)
+    expect(onClose).not.toHaveBeenCalled()
+  }
+  await key('Escape')
+  expect(onClose).toHaveBeenCalledOnce()
 })

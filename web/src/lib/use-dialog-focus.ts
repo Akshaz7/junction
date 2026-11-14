@@ -14,8 +14,17 @@ export function useDialogFocus(
     const panel: HTMLElement = element
     const previous = trigger.current ?? document.activeElement
     const controls = () => [...panel.querySelectorAll<HTMLElement>(
-      'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]',
-    )].filter((node) => !node.closest('[hidden], [inert]') && getComputedStyle(node).display !== 'none')
+      'button:not(:disabled), summary, a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]',
+    )].filter((node) => {
+      if (node.closest('[hidden], [inert]')) return false
+      for (let ancestor: HTMLElement | null = node; ancestor; ancestor = ancestor.parentElement) {
+        const style = getComputedStyle(ancestor)
+        if (style.display === 'none' || style.visibility === 'hidden') return false
+        if (ancestor instanceof HTMLDetailsElement && !ancestor.open && !ancestor.querySelector('summary')?.contains(node)) return false
+        if (ancestor === panel) break
+      }
+      return true
+    })
 
     // Keep the rest of the workspace outside this modal's tab and accessibility trees.
     const siblings: Element[] = []

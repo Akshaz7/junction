@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { ArrowRight, Box, ChevronDown, ChevronLeft, ChevronRight, Download, File, FileImage, FileText, Folder, GitCompare, Info, Layers, Maximize2, MessageSquare, Minus, Plus, Search, Upload, X } from 'lucide-react'
 import { Badge, Button, Input } from './ui'
 import { workspaceApi } from '../lib/api'
@@ -10,6 +10,7 @@ import { ShowOnTableButton } from './show-on-table'
 import { UploadDialog } from './upload-dialog'
 import { ConnectionPill } from './connection-pill'
 import { findSheetText, loadSheetText, type SheetText } from './viewer-tools/sheet-text'
+import { useDialogFocus } from '../lib/use-dialog-focus'
 
 const PAGE_SIZE = 40
 
@@ -90,6 +91,14 @@ function DocumentDetail({ doc, docked, onClose, onAsk }: { doc: Document; docked
   const [phone, setPhone] = useState(() => window.matchMedia('(max-width: 640px)').matches)
   const canvas = useRef<HTMLDivElement>(null)
   const closeButton = useRef<HTMLButtonElement>(null)
+  const panel = useRef<HTMLElement>(null)
+  const credit = useRef<HTMLDetailsElement>(null)
+  const searchTrigger = useRef<HTMLButtonElement>(null)
+  const returnFocus = useRef(document.activeElement as HTMLElement | null)
+  const titleId = useId()
+  const sheet = phone && !docked
+  useDialogFocus(sheet, panel, returnFocus, onClose)
+  function closeSearch() { setSearchOpen(false); searchTrigger.current?.focus() }
   useLayoutEffect(() => {
     const node = canvas.current
     if (!node) return
@@ -116,12 +125,19 @@ function DocumentDetail({ doc, docked, onClose, onAsk }: { doc: Document; docked
     return () => controller.abort()
   }, [doc.doc_id])
 
-  return <aside className="data-detail" data-docked={docked || undefined} aria-label="Document details" onKeyDown={(event) => { if (event.key === 'Escape') { if (mode === '3d') changeMode('2d'); else onClose() } }}>
-    <header><FileText size={24} /><div><h2><DocumentTitle title={doc.title} /></h2><small>/{doc.source}<span className="data-header-demo">{/generated for demo$/i.test(doc.title) ? ' · generated for demo' : ''}</span></small><details className="data-credit-info"><summary aria-label="Drawing credit and licence"><Info size={12} /></summary><div className="data-credit-popover"><dl>{doc.credit && <div><dt>Credit</dt><dd>{doc.credit}</dd></div>}{doc.licence && <div><dt>Licence</dt><dd>{doc.licence}</dd></div>}</dl><div className="data-mobile-scene">{scene === 'available' && <button type="button" className="viewer3d-visualise-button" onClick={() => changeMode('3d')}>Visualise it</button>}</div></div></details></div>{scene === 'available' && <ViewerModeToggle mode={mode} onChange={changeMode} />}<ShowOnTableButton docId={doc.doc_id} sceneAvailable={scene === 'available'} /><button type="button" className="data-header-ask" aria-label="Ask about it" onClick={() => onAsk(doc)}><MessageSquare size={16} /></button><a className="data-compare" href="#/changes" aria-label="Compare document revisions"><GitCompare size={14} /><span>Compare</span></a><Button variant="ghost" size="icon" aria-label="Fit page" onClick={() => setZoom(100)}><Maximize2 size={16} /></Button><button ref={closeButton} type="button" className="data-close-detail" aria-label="Close document details" onClick={onClose}><X size={18} /></button></header>
-    <div className="data-viewer-toolbar" hidden={mode === '3d'}><Button variant="ghost" size="icon-xs" aria-label="Previous drawing page" disabled={page <= 1} onClick={() => changePage(page - 1)}><ChevronLeft size={14} /></Button><span className="page-number">{page}</span><span>/ {doc.pages}</span><Button variant="ghost" size="icon-xs" aria-label="Next drawing page" disabled={page >= doc.pages} onClick={() => changePage(page + 1)}><ChevronRight size={14} /></Button><span className="toolbar-spacer" /><Button variant="ghost" size="icon-xs" aria-label="Search page text" aria-expanded={searchOpen} aria-controls="data-page-search" onClick={() => setSearchOpen(!searchOpen)}><Search size={14} /></Button><a aria-label="Download page" href={`/api/docs/${encodeURIComponent(doc.doc_id)}/pages/${page}/image`} download><Download size={14} /></a><span className="viewer-toolbar-divider" /><span className="data-zoom-controls"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => setZoom((n) => Math.max(25, n - 25))}><Minus size={14} /></Button><span aria-label="Page zoom level">{displayedZoom}%</span><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => setZoom((n) => Math.min(400, n + 25))}><Plus size={14} /></Button></span></div>
+  return <aside ref={panel} className="data-detail" data-docked={docked || undefined} role={sheet ? 'dialog' : undefined} aria-modal={sheet || undefined} aria-labelledby={sheet ? titleId : undefined} aria-label={sheet ? undefined : 'Document details'} tabIndex={sheet ? -1 : undefined} onKeyDown={(event) => {
+    if (event.key !== 'Escape' || event.defaultPrevented) return
+    event.preventDefault(); event.stopPropagation()
+    if (credit.current?.open) { credit.current.open = false; credit.current.querySelector('summary')?.focus() }
+    else if (searchOpen) closeSearch()
+    else if (mode === '3d') changeMode('2d')
+    else onClose()
+  }}>
+    <header><FileText size={24} /><div><h2 id={titleId}><DocumentTitle title={doc.title} /></h2><small>/{doc.source}<span className="data-header-demo">{/generated for demo$/i.test(doc.title) ? ' · generated for demo' : ''}</span></small><details ref={credit} className="data-credit-info"><summary aria-label="Drawing credit and licence"><Info size={12} /></summary><div className="data-credit-popover"><dl>{doc.credit && <div><dt>Credit</dt><dd>{doc.credit}</dd></div>}{doc.licence && <div><dt>Licence</dt><dd>{doc.licence}</dd></div>}</dl><div className="data-mobile-scene">{scene === 'available' && <button type="button" className="viewer3d-visualise-button" onClick={() => changeMode('3d')}>Visualise it</button>}</div></div></details></div>{scene === 'available' && <ViewerModeToggle mode={mode} onChange={changeMode} />}<ShowOnTableButton docId={doc.doc_id} sceneAvailable={scene === 'available'} /><button type="button" className="data-header-ask" aria-label="Ask about it" onClick={() => onAsk(doc)}><MessageSquare size={16} /></button><a className="data-compare" href="#/changes" aria-label="Compare document revisions"><GitCompare size={14} /><span>Compare</span></a><Button variant="ghost" size="icon" aria-label="Fit page" onClick={() => setZoom(100)}><Maximize2 size={16} /></Button><button ref={closeButton} type="button" className="data-close-detail" aria-label="Close document details" onClick={onClose}><X size={18} /></button></header>
+    <div className="data-viewer-toolbar" hidden={mode === '3d'}><Button variant="ghost" size="icon-xs" aria-label="Previous drawing page" disabled={page <= 1} onClick={() => changePage(page - 1)}><ChevronLeft size={14} /></Button><span className="page-number">{page}</span><span>/ {doc.pages}</span><Button variant="ghost" size="icon-xs" aria-label="Next drawing page" disabled={page >= doc.pages} onClick={() => changePage(page + 1)}><ChevronRight size={14} /></Button><span className="toolbar-spacer" /><Button variant="ghost" size="icon-xs" aria-label="Search page text" aria-expanded={searchOpen} aria-controls="data-page-search" onClick={(event) => { searchTrigger.current = event.currentTarget; if (searchOpen) closeSearch(); else setSearchOpen(true) }}><Search size={14} /></Button><a aria-label="Download page" href={`/api/docs/${encodeURIComponent(doc.doc_id)}/pages/${page}/image`} download><Download size={14} /></a><span className="viewer-toolbar-divider" /><span className="data-zoom-controls"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => setZoom((n) => Math.max(25, n - 25))}><Minus size={14} /></Button><span aria-label="Page zoom level">{displayedZoom}%</span><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => setZoom((n) => Math.min(400, n + 25))}><Plus size={14} /></Button></span></div>
     {searchOpen && mode === '2d' && <section className="data-page-search" id="data-page-search" aria-label="Page text search">
       <label>Find on page {page}<Input autoFocus type="search" aria-label="Find in page text" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
-      <Button variant="ghost" size="icon-xs" aria-label="Close page search" onClick={() => setSearchOpen(false)}><X size={14} /></Button>
+      <Button variant="ghost" size="icon-xs" aria-label="Close page search" onClick={closeSearch}><X size={14} /></Button>
       <p role="status">{textStatus || (query.trim() ? `${matches.length} matches on page ${page}` : 'Enter text to search this page.')}</p>
       {!!matches.length && <ul>{matches.map((match, index) => <li key={index}>{match.text}</li>)}</ul>}
     </section>}
