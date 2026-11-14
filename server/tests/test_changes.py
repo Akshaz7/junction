@@ -38,7 +38,7 @@ def test_feed_has_series_entries_checked_at_and_groups(client):
     assert [e["id"] for e in feed] == [f"ser:{SID}:2", f"ser:{SID}:1"]  # newest first
     e = feed[1]
     assert e["type"] == "new_version" and e["doc_a"] == DOCS[0] and e["doc_b"] == DOCS[1]
-    assert e["summary"]["n_changes"] == 2 and e["summary"]["source"] == "pdf-diff" and e["summary"]["generated_for_demo"] is False
+    assert e["summary"]["n_changes"] == 2 and e["summary"]["source"] == "pdf-diff" and "generated_for_demo" not in e["summary"]
     assert e["summary"]["headline"].startswith("2 changes: Text changed")
     assert feed[0]["summary"]["n_changes"] is None  # no diff cache for pair 2 -> honest "not computed"
     assert e["group"] == "earlier" and body["groups"] == [{"key": "earlier", "label": "Earlier", "ids": [f["id"] for f in feed]}]
@@ -47,7 +47,7 @@ def test_feed_has_series_entries_checked_at_and_groups(client):
 
 def test_detail_comparison_and_page_param(client):
     d = client.get(f"/api/changes/ser:{SID}:1").json()
-    assert d["source"] == "pdf-diff" and d["generated_for_demo"] is False and d["image"] == {"w": 100, "h": 80}
+    assert d["source"] == "pdf-diff" and "generated_for_demo" not in d and d["image"] == {"w": 100, "h": 80}
     assert d["v1"]["page_image"] == f"/api/docs/{DOCS[0]}/pages/1/image" and d["v2"]["label"].startswith("Version 2")
     ch = d["changes"]
     assert [c["n"] for c in ch] == [1, 2] and ch[0]["v1"]["bbox_px"] == [1, 2, 3, 4] and ch[1]["v1"] is None

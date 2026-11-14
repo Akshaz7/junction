@@ -9,3 +9,10 @@
 .changes-filters select { display: block; margin-top: 4px; width: 100%; padding: 6px; border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--card); color: var(--foreground); font: inherit; }
 .changes-no-data .button { margin-top: 12px; }
 .change-row time { display: block; margin-top: 3px; font-size: var(--text-micro); color: var(--muted-foreground); }
+
+.changes-filters { flex-wrap: wrap; }
+.changes-filters label { flex-basis: 90px; }
+.open-compare { align-self: flex-start; margin: 0 16px 12px; text-decoration: underline; }
+.revision-summary { margin: 16px; font-size: var(--text-body-sm); line-height: 1.6; }
+.revision-documents { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0; }
+.revision-documents a { text-decoration: underline; }
