@@ -227,6 +227,9 @@ h1, h2, h3, p { margin: 0; }
 .starter-grid .starter-icon { width: 30px; height: 32px; flex-shrink: 0; }
 .starter-grid .starter-card > svg { display: none; }
 .composer { position: relative; }
+.composer-input { position: relative; }
+.phone-composer-placeholder { display: none; }
+.chat-loading { padding-top: 64px; color: var(--muted-foreground); }
 .composer textarea { color: var(--foreground); }
 .document-context { border: 0; padding: 4px 0; background: transparent; }
 .selected-documents { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
@@ -536,7 +539,7 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
   .mobile-navigation > a, .mobile-more summary { font-size: 12px; line-height: 16px; gap: 2px; }
   .mobile-navigation > a > svg, .mobile-more summary > svg { width: 48px; height: 28px; padding: 4px 14px; border-radius: 99px; }
   .mobile-navigation > a[aria-current], .mobile-more summary.active { background: transparent; font-weight: 600; }
-  .mobile-navigation > a[aria-current] > svg, .mobile-more summary.active > svg { background: var(--ink-selected); }
+  .mobile-navigation > a[aria-current] > svg, .mobile-more summary.active > svg { background: transparent; }
   .chat-page { min-height: 0; }
   .welcome { top: 250px; width: calc(100% - 32px); }
   .welcome h2 { font-size: 18px; line-height: 26px; letter-spacing: -.017em; }
@@ -544,9 +547,14 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
   .conversation { padding: 0 16px 20px; }
   .composer-area, .has-viewer .composer-area { width: calc(100% - 32px); margin-bottom: 10px; }
   .composer { height: 96px; padding: 16px 20px 10px; border: 1px solid var(--border); }
-  .composer textarea { height: 30px; text-overflow: ellipsis; }
+  .composer textarea { height: 30px; text-overflow: ellipsis; white-space: nowrap; }
   .composer-actions { margin: 6px -10px 0; }
-  .composer-disclaimer { margin-top: 10px; font-size: 12px; line-height: 16px; }
+  .composer-disclaimer { margin-top: 8px; font-size: 12px; line-height: 16px; }
+  .phone-composer-placeholder { display: block; position: absolute; top: 0; left: 0; right: 0; font-size: 15px; line-height: 24px; color: var(--muted-foreground); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; pointer-events: none; }
+  .composer textarea::placeholder { color: transparent; }
+  .answer-actions { flex-wrap: nowrap; min-height: 30px; align-items: center; }
+  .answer-actions > .voice-control { flex-shrink: 0; }
+  .answer-actions > .voice-control .voice-hint:not(:empty) { position: absolute; bottom: 100%; left: 0; width: max-content; padding: 6px 8px; background: var(--card); box-shadow: var(--shadow-card); border-radius: 8px; }
   .exchange { margin-top: 64px; }
   .question-bubble { padding: 12px 16px; line-height: 1.5; margin-bottom: 20px; }
   .thinking-mark { margin-left: 0; }
@@ -748,6 +756,8 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
   .data-detail > header { gap: 8px; }
   .data-detail .data-document-credit, .data-detail-actions, .data-detail .data-scene-note { display: none; }
   .data-page-canvas { min-height: 0; }
+  .phone-page-plane { inset: 0 auto auto 0; transform-origin: 0 0; }
+  .phone-page-plane .data-preview { padding: 0; min-height: 0; }
   .data-viewer-toolbar { gap: 8px; }
   .data-viewer-toolbar > svg { width: 16px; height: 16px; }
   .data-viewer-tools { margin-right: 12px; }

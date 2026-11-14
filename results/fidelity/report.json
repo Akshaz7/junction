@@ -1,6 +1,6 @@
 {
   "complete": true,
-  "generated_at": "2026-11-14T03:26:57.323Z",
+  "generated_at": "2026-11-14T03:36:24.425Z",
   "reference": "refs/stoa-hero",
   "coordinate_space": "CSS pixels; both PNGs are compared at native 2x resolution",
   "pixelmatch": {
@@ -16,7 +16,7 @@
   "total_phases": 45,
   "measured_phases": 38,
   "not_applicable": 7,
-  "unexplained_regions": 7,
+  "unexplained_regions": 0,
   "errors": 0,
   "status": "fail",
   "phases": [
@@ -2839,8 +2839,8 @@
           "reason": "Our generated document or answer content replaces reference content."
         }
       ],
-      "mismatch_percent": 0.1717813736088155,
-      "mismatch_pixels": 6741,
+      "mismatch_percent": 0.17180685667862844,
+      "mismatch_pixels": 6742,
       "compared_pixels": 3924174,
       "masked_pixels": 171826,
       "unmasked_diff_regions": [
@@ -2865,8 +2865,8 @@
           "y": 16,
           "width": 176,
           "height": 48,
-          "mismatch_pixels": 2136,
-          "canvas_percent": 0.052148437500000006
+          "mismatch_pixels": 2137,
+          "canvas_percent": 0.0521728515625
         },
         {
           "x": 1168,
@@ -5321,8 +5321,8 @@
           "reason": "The comparison zoom is calculated for our dataset drawing; the controls remain compared."
         }
       ],
-      "mismatch_percent": 0.9717137106241995,
-      "mismatch_pixels": 24003,
+      "mismatch_percent": 0.9719566086895973,
+      "mismatch_pixels": 24009,
       "compared_pixels": 2470172,
       "masked_pixels": 1625828,
       "unmasked_diff_regions": [
@@ -5355,8 +5355,8 @@
           "y": 16,
           "width": 224,
           "height": 48,
-          "mismatch_pixels": 3217,
-          "canvas_percent": 0.0785400390625
+          "mismatch_pixels": 3218,
+          "canvas_percent": 0.078564453125
         },
         {
           "x": 112,
@@ -5403,16 +5403,16 @@
           "y": 176,
           "width": 128,
           "height": 64,
-          "mismatch_pixels": 2203,
-          "canvas_percent": 0.053784179687499996
+          "mismatch_pixels": 2204,
+          "canvas_percent": 0.05380859375
         },
         {
           "x": 480,
           "y": 192,
           "width": 32,
           "height": 16,
-          "mismatch_pixels": 23,
-          "canvas_percent": 0.0005615234375
+          "mismatch_pixels": 27,
+          "canvas_percent": 0.0006591796875
         },
         {
           "x": 528,
@@ -7925,12 +7925,12 @@
           "x": 12,
           "y": 157,
           "width": 366,
-          "height": 597,
+          "height": 266.18182373046875,
           "reason": "Our generated document or answer content replaces reference content."
         }
       ],
-      "mismatch_percent": 1.2260210396039604,
-      "mismatch_pixels": 1902,
+      "mismatch_percent": 1.1660736386138615,
+      "mismatch_pixels": 1809,
       "compared_pixels": 155136,
       "masked_pixels": 1161504,
       "unmasked_diff_regions": [
@@ -7993,10 +7993,10 @@
         {
           "x": 176,
           "y": 784,
-          "width": 48,
+          "width": 32,
           "height": 16,
-          "mismatch_pixels": 141,
-          "canvas_percent": 0.010709077652205615
+          "mismatch_pixels": 48,
+          "canvas_percent": 0.0036456434560699965
         }
       ],
       "unexplained_regions": [],
@@ -8060,17 +8060,17 @@
           "reason": "Our generated drawing replaces the reference drawing."
         },
         {
-          "x": 0,
-          "y": 152,
-          "width": 390,
-          "height": 602,
+          "x": 12,
+          "y": 157,
+          "width": 366,
+          "height": 266.18182373046875,
           "reason": "Our generated document or answer content replaces reference content."
         }
       ],
-      "mismatch_percent": 14.598911370134154,
-      "mismatch_pixels": 21242,
-      "compared_pixels": 145504,
-      "masked_pixels": 1171136,
+      "mismatch_percent": 1.6643461221122111,
+      "mismatch_pixels": 2582,
+      "compared_pixels": 155136,
+      "masked_pixels": 1161504,
       "unmasked_diff_regions": [
         {
           "x": 64,
@@ -8105,56 +8105,135 @@
           "canvas_percent": 0.0010633126746870823
         },
         {
-          "x": 0,
+          "x": 16,
           "y": 112,
-          "width": 390,
-          "height": 48,
-          "mismatch_pixels": 4003,
-          "canvas_percent": 0.3040314740551707
+          "width": 80,
+          "height": 32,
+          "mismatch_pixels": 623,
+          "canvas_percent": 0.04731741402357516
+        },
+        {
+          "x": 240,
+          "y": 112,
+          "width": 64,
+          "height": 32,
+          "mismatch_pixels": 428,
+          "canvas_percent": 0.032506987483290804
+        },
+        {
+          "x": 320,
+          "y": 112,
+          "width": 64,
+          "height": 32,
+          "mismatch_pixels": 389,
+          "canvas_percent": 0.02954490217523393
         },
         {
           "x": 0,
-          "y": 784,
-          "width": 160,
+          "y": 160,
+          "width": 16,
+          "height": 16,
+          "mismatch_pixels": 7,
+          "canvas_percent": 0.0005316563373435412
+        },
+        {
+          "x": 384,
+          "y": 160,
+          "width": 6,
+          "height": 16,
+          "mismatch_pixels": 7,
+          "canvas_percent": 0.0005316563373435412
+        },
+        {
+          "x": 0,
+          "y": 240,
+          "width": 16,
           "height": 32,
-          "mismatch_pixels": 8384,
-          "canvas_percent": 0.6367723903268927
+          "mismatch_pixels": 50,
+          "canvas_percent": 0.0037975452667395795
+        },
+        {
+          "x": 384,
+          "y": 240,
+          "width": 6,
+          "height": 32,
+          "mismatch_pixels": 52,
+          "canvas_percent": 0.0039494470774091624
+        },
+        {
+          "x": 0,
+          "y": 352,
+          "width": 16,
+          "height": 48,
+          "mismatch_pixels": 40,
+          "canvas_percent": 0.0030380362133916633
+        },
+        {
+          "x": 0,
+          "y": 480,
+          "width": 16,
+          "height": 16,
+          "mismatch_pixels": 36,
+          "canvas_percent": 0.0027342325920524974
+        },
+        {
+          "x": 384,
+          "y": 480,
+          "width": 6,
+          "height": 16,
+          "mismatch_pixels": 36,
+          "canvas_percent": 0.0027342325920524974
+        },
+        {
+          "x": 0,
+          "y": 592,
+          "width": 16,
+          "height": 32,
+          "mismatch_pixels": 35,
+          "canvas_percent": 0.002658281686717706
+        },
+        {
+          "x": 384,
+          "y": 592,
+          "width": 6,
+          "height": 32,
+          "mismatch_pixels": 35,
+          "canvas_percent": 0.002658281686717706
+        },
+        {
+          "x": 0,
+          "y": 704,
+          "width": 16,
+          "height": 48,
+          "mismatch_pixels": 24,
+          "canvas_percent": 0.0018228217280349982
+        },
+        {
+          "x": 48,
+          "y": 784,
+          "width": 16,
+          "height": 32,
+          "mismatch_pixels": 212,
+          "canvas_percent": 0.01610159193097582
         },
         {
           "x": 176,
           "y": 784,
-          "width": 48,
+          "width": 32,
           "height": 16,
-          "mismatch_pixels": 126,
-          "canvas_percent": 0.00956981407218374
+          "mismatch_pixels": 39,
+          "canvas_percent": 0.0029620853080568723
         },
         {
-          "x": 224,
+          "x": 288,
           "y": 784,
-          "width": 166,
+          "width": 16,
           "height": 32,
-          "mismatch_pixels": 8408,
-          "canvas_percent": 0.6385952120549276
+          "mismatch_pixels": 248,
+          "canvas_percent": 0.018835824523028316
         }
       ],
-      "unexplained_regions": [
-        {
-          "x": 0,
-          "y": 784,
-          "width": 160,
-          "height": 32,
-          "mismatch_pixels": 8384,
-          "canvas_percent": 0.6367723903268927
-        },
-        {
-          "x": 224,
-          "y": 784,
-          "width": 166,
-          "height": 32,
-          "mismatch_pixels": 8408,
-          "canvas_percent": 0.6385952120549276
-        }
-      ],
+      "unexplained_regions": [],
       "status": "fail"
     },
     {
@@ -8215,17 +8294,17 @@
           "reason": "Our generated drawing replaces the reference drawing."
         },
         {
-          "x": 0,
-          "y": 152,
-          "width": 390,
-          "height": 602,
+          "x": 12,
+          "y": 157,
+          "width": 366,
+          "height": 266.18182373046875,
           "reason": "Our generated document or answer content replaces reference content."
         }
       ],
-      "mismatch_percent": 14.829832856828679,
-      "mismatch_pixels": 21578,
-      "compared_pixels": 145504,
-      "masked_pixels": 1171136,
+      "mismatch_percent": 1.880930280528053,
+      "mismatch_pixels": 2918,
+      "compared_pixels": 155136,
+      "masked_pixels": 1161504,
       "unmasked_diff_regions": [
         {
           "x": 64,
@@ -8260,56 +8339,135 @@
           "canvas_percent": 0.01427877020294082
         },
         {
-          "x": 0,
+          "x": 320,
           "y": 96,
-          "width": 390,
-          "height": 64,
-          "mismatch_pixels": 4163,
-          "canvas_percent": 0.3161836189087374
+          "width": 64,
+          "height": 48,
+          "mismatch_pixels": 549,
+          "canvas_percent": 0.04169704702880058
+        },
+        {
+          "x": 16,
+          "y": 112,
+          "width": 80,
+          "height": 32,
+          "mismatch_pixels": 623,
+          "canvas_percent": 0.04731741402357516
+        },
+        {
+          "x": 240,
+          "y": 112,
+          "width": 64,
+          "height": 32,
+          "mismatch_pixels": 428,
+          "canvas_percent": 0.032506987483290804
         },
         {
           "x": 0,
-          "y": 784,
-          "width": 160,
+          "y": 160,
+          "width": 16,
+          "height": 16,
+          "mismatch_pixels": 7,
+          "canvas_percent": 0.0005316563373435412
+        },
+        {
+          "x": 384,
+          "y": 160,
+          "width": 6,
+          "height": 16,
+          "mismatch_pixels": 7,
+          "canvas_percent": 0.0005316563373435412
+        },
+        {
+          "x": 0,
+          "y": 240,
+          "width": 16,
           "height": 32,
-          "mismatch_pixels": 8384,
-          "canvas_percent": 0.6367723903268927
+          "mismatch_pixels": 50,
+          "canvas_percent": 0.0037975452667395795
+        },
+        {
+          "x": 384,
+          "y": 240,
+          "width": 6,
+          "height": 32,
+          "mismatch_pixels": 52,
+          "canvas_percent": 0.0039494470774091624
+        },
+        {
+          "x": 0,
+          "y": 352,
+          "width": 16,
+          "height": 48,
+          "mismatch_pixels": 40,
+          "canvas_percent": 0.0030380362133916633
+        },
+        {
+          "x": 0,
+          "y": 480,
+          "width": 16,
+          "height": 16,
+          "mismatch_pixels": 36,
+          "canvas_percent": 0.0027342325920524974
+        },
+        {
+          "x": 384,
+          "y": 480,
+          "width": 6,
+          "height": 16,
+          "mismatch_pixels": 36,
+          "canvas_percent": 0.0027342325920524974
+        },
+        {
+          "x": 0,
+          "y": 592,
+          "width": 16,
+          "height": 32,
+          "mismatch_pixels": 35,
+          "canvas_percent": 0.002658281686717706
+        },
+        {
+          "x": 384,
+          "y": 592,
+          "width": 6,
+          "height": 32,
+          "mismatch_pixels": 35,
+          "canvas_percent": 0.002658281686717706
+        },
+        {
+          "x": 0,
+          "y": 704,
+          "width": 16,
+          "height": 48,
+          "mismatch_pixels": 24,
+          "canvas_percent": 0.0018228217280349982
+        },
+        {
+          "x": 48,
+          "y": 784,
+          "width": 16,
+          "height": 32,
+          "mismatch_pixels": 212,
+          "canvas_percent": 0.01610159193097582
         },
         {
           "x": 176,
           "y": 784,
-          "width": 48,
+          "width": 32,
           "height": 16,
-          "mismatch_pixels": 126,
-          "canvas_percent": 0.00956981407218374
+          "mismatch_pixels": 39,
+          "canvas_percent": 0.0029620853080568723
         },
         {
-          "x": 224,
+          "x": 288,
           "y": 784,
-          "width": 166,
+          "width": 16,
           "height": 32,
-          "mismatch_pixels": 8408,
-          "canvas_percent": 0.6385952120549276
+          "mismatch_pixels": 248,
+          "canvas_percent": 0.018835824523028316
         }
       ],
-      "unexplained_regions": [
-        {
-          "x": 0,
-          "y": 784,
-          "width": 160,
-          "height": 32,
-          "mismatch_pixels": 8384,
-          "canvas_percent": 0.6367723903268927
-        },
-        {
-          "x": 224,
-          "y": 784,
-          "width": 166,
-          "height": 32,
-          "mismatch_pixels": 8408,
-          "canvas_percent": 0.6385952120549276
-        }
-      ],
+      "unexplained_regions": [],
       "status": "fail"
     },
     {
@@ -8766,16 +8924,16 @@
         },
         {
           "x": 37,
-          "y": 639,
+          "y": 641,
           "width": 316,
           "height": 30,
           "reason": "Our generated document or answer content replaces reference content."
         }
       ],
-      "mismatch_percent": 0.321325907624079,
-      "mismatch_pixels": 3501,
-      "compared_pixels": 1089548,
-      "masked_pixels": 227092,
+      "mismatch_percent": 0.26885672490976853,
+      "mismatch_pixels": 2926,
+      "compared_pixels": 1088312,
+      "masked_pixels": 228328,
       "unmasked_diff_regions": [
         {
           "x": 352,
@@ -8818,20 +8976,28 @@
           "canvas_percent": 0.004481103414752704
         },
         {
-          "x": 32,
+          "x": 288,
           "y": 672,
           "width": 32,
           "height": 32,
-          "mismatch_pixels": 149,
-          "canvas_percent": 0.011316684894883947
+          "mismatch_pixels": 346,
+          "canvas_percent": 0.02627901324583789
+        },
+        {
+          "x": 32,
+          "y": 688,
+          "width": 16,
+          "height": 16,
+          "mismatch_pixels": 76,
+          "canvas_percent": 0.005772268805444161
         },
         {
           "x": 48,
-          "y": 672,
-          "width": 320,
-          "height": 144,
-          "mismatch_pixels": 2677,
-          "canvas_percent": 0.2033205735812371
+          "y": 688,
+          "width": 304,
+          "height": 128,
+          "mismatch_pixels": 1829,
+          "canvas_percent": 0.1389142058573338
         },
         {
           "x": 0,
@@ -8913,16 +9079,16 @@
         },
         {
           "x": 37,
-          "y": 639,
+          "y": 641,
           "width": 316,
           "height": 30,
           "reason": "Our generated document or answer content replaces reference content."
         }
       ],
-      "mismatch_percent": 0.3635452499568629,
-      "mismatch_pixels": 3961,
-      "compared_pixels": 1089548,
-      "masked_pixels": 227092,
+      "mismatch_percent": 0.2914605370518748,
+      "mismatch_pixels": 3172,
+      "compared_pixels": 1088312,
+      "masked_pixels": 228328,
       "unmasked_diff_regions": [
         {
           "x": 352,
@@ -8965,20 +9131,20 @@
           "canvas_percent": 0.004481103414752704
         },
         {
-          "x": 32,
-          "y": 672,
-          "width": 32,
-          "height": 32,
-          "mismatch_pixels": 149,
-          "canvas_percent": 0.011316684894883947
-        },
-        {
           "x": 48,
           "y": 672,
-          "width": 336,
+          "width": 320,
           "height": 144,
-          "mismatch_pixels": 3137,
-          "canvas_percent": 0.2382579900352412
+          "mismatch_pixels": 2421,
+          "canvas_percent": 0.18387714181553044
+        },
+        {
+          "x": 32,
+          "y": 688,
+          "width": 16,
+          "height": 16,
+          "mismatch_pixels": 76,
+          "canvas_percent": 0.005772268805444161
         },
         {
           "x": 0,
@@ -9060,7 +9226,7 @@
         },
         {
           "x": 37,
-          "y": 639,
+          "y": 641,
           "width": 316,
           "height": 30,
           "reason": "Our generated document or answer content replaces reference content."
@@ -9068,7 +9234,7 @@
         {
           "x": 85.703125,
           "y": 173,
-          "width": 268.515625,
+          "width": 268.5,
           "height": 19,
           "reason": "Our generated document or answer content replaces reference content."
         },
@@ -9087,10 +9253,10 @@
           "reason": "Our generated document or answer content replaces reference content."
         }
       ],
-      "mismatch_percent": 0.45432338201656663,
-      "mismatch_pixels": 4910,
-      "compared_pixels": 1080728,
-      "masked_pixels": 235912,
+      "mismatch_percent": 0.3943521582373931,
+      "mismatch_pixels": 4257,
+      "compared_pixels": 1079492,
+      "masked_pixels": 237148,
       "unmasked_diff_regions": [
         {
           "x": 352,
@@ -9133,20 +9299,28 @@
           "canvas_percent": 0.09144489002308909
         },
         {
-          "x": 32,
+          "x": 288,
           "y": 672,
-          "width": 16,
+          "width": 32,
           "height": 32,
-          "mismatch_pixels": 113,
-          "canvas_percent": 0.00858245230283145
+          "mismatch_pixels": 340,
+          "canvas_percent": 0.025823307813829143
+        },
+        {
+          "x": 32,
+          "y": 688,
+          "width": 16,
+          "height": 16,
+          "mismatch_pixels": 76,
+          "canvas_percent": 0.005772268805444161
         },
         {
           "x": 48,
-          "y": 672,
-          "width": 320,
-          "height": 144,
-          "mismatch_pixels": 2781,
-          "canvas_percent": 0.21121946773605543
+          "y": 720,
+          "width": 304,
+          "height": 96,
+          "mismatch_pixels": 1825,
+          "canvas_percent": 0.13861040223599466
         },
         {
           "x": 0,
@@ -9374,8 +9548,8 @@
           "reason": "Spoken-answer playback is an extra feature absent from the reference tour."
         }
       ],
-      "mismatch_percent": 1.6038100719272517,
-      "mismatch_pixels": 12150,
+      "mismatch_percent": 0.9576660141425688,
+      "mismatch_pixels": 7255,
       "compared_pixels": 757571,
       "masked_pixels": 559069,
       "unmasked_diff_regions": [
@@ -9446,10 +9620,26 @@
         {
           "x": 32,
           "y": 640,
-          "width": 336,
-          "height": 176,
-          "mismatch_pixels": 8709,
-          "canvas_percent": 0.6614564345606999
+          "width": 320,
+          "height": 64,
+          "mismatch_pixels": 1913,
+          "canvas_percent": 0.1452940819054563
+        },
+        {
+          "x": 32,
+          "y": 688,
+          "width": 16,
+          "height": 16,
+          "mismatch_pixels": 76,
+          "canvas_percent": 0.005772268805444161
+        },
+        {
+          "x": 48,
+          "y": 720,
+          "width": 304,
+          "height": 96,
+          "mismatch_pixels": 1825,
+          "canvas_percent": 0.13861040223599466
         },
         {
           "x": 0,
@@ -9468,17 +9658,8 @@
           "canvas_percent": 0.010101470409527281
         }
       ],
-      "unexplained_regions": [
-        {
-          "x": 32,
-          "y": 640,
-          "width": 336,
-          "height": 176,
-          "mismatch_pixels": 8709,
-          "canvas_percent": 0.6614564345606999
-        }
-      ],
-      "status": "fail"
+      "unexplained_regions": [],
+      "status": "pass"
     },
     {
       "id": "phone-11-14450",
@@ -9686,8 +9867,8 @@
           "reason": "Spoken-answer playback is an extra feature absent from the reference tour."
         }
       ],
-      "mismatch_percent": 1.6055260827037996,
-      "mismatch_pixels": 12163,
+      "mismatch_percent": 0.9593820249191165,
+      "mismatch_pixels": 7268,
       "compared_pixels": 757571,
       "masked_pixels": 559069,
       "unmasked_diff_regions": [
@@ -9758,10 +9939,26 @@
         {
           "x": 32,
           "y": 640,
-          "width": 336,
-          "height": 176,
-          "mismatch_pixels": 8709,
-          "canvas_percent": 0.6614564345606999
+          "width": 320,
+          "height": 64,
+          "mismatch_pixels": 1913,
+          "canvas_percent": 0.1452940819054563
+        },
+        {
+          "x": 32,
+          "y": 688,
+          "width": 16,
+          "height": 16,
+          "mismatch_pixels": 76,
+          "canvas_percent": 0.005772268805444161
+        },
+        {
+          "x": 48,
+          "y": 720,
+          "width": 304,
+          "height": 96,
+          "mismatch_pixels": 1825,
+          "canvas_percent": 0.13861040223599466
         },
         {
           "x": 0,
@@ -9780,17 +9977,8 @@
           "canvas_percent": 0.010101470409527281
         }
       ],
-      "unexplained_regions": [
-        {
-          "x": 32,
-          "y": 640,
-          "width": 336,
-          "height": 176,
-          "mismatch_pixels": 8709,
-          "canvas_percent": 0.6614564345606999
-        }
-      ],
-      "status": "fail"
+      "unexplained_regions": [],
+      "status": "pass"
     },
     {
       "id": "phone-12-14800",
@@ -10466,7 +10654,7 @@
         {
           "x": 85.703125,
           "y": 173,
-          "width": 268.5,
+          "width": 268.515625,
           "height": 19,
           "reason": "Our generated document or answer content replaces reference content."
         },
@@ -10487,19 +10675,19 @@
         {
           "x": 171.734375,
           "y": 275,
-          "width": 78.765625,
+          "width": 78.75,
           "height": 19,
           "reason": "Our generated document or answer content replaces reference content."
         },
         {
-          "x": 250.5,
+          "x": 250.484375,
           "y": 275,
           "width": 116.828125,
           "height": 19,
           "reason": "Our generated document or answer content replaces reference content."
         },
         {
-          "x": 367.328125,
+          "x": 367.3125,
           "y": 275,
           "width": 4.21875,
           "height": 19,
@@ -10604,8 +10792,8 @@
           "reason": "Spoken-answer playback is an extra feature absent from the reference tour."
         }
       ],
-      "mismatch_percent": 1.6772025328319062,
-      "mismatch_pixels": 12706,
+      "mismatch_percent": 1.0350184999161796,
+      "mismatch_pixels": 7841,
       "compared_pixels": 757571,
       "masked_pixels": 559069,
       "unmasked_diff_regions": [
@@ -10646,8 +10834,8 @@
           "y": 352,
           "width": 144,
           "height": 32,
-          "mismatch_pixels": 926,
-          "canvas_percent": 0.07033053834001701
+          "mismatch_pixels": 937,
+          "canvas_percent": 0.07116599829869973
         },
         {
           "x": 32,
@@ -10670,16 +10858,32 @@
           "y": 560,
           "width": 112,
           "height": 32,
-          "mismatch_pixels": 1294,
-          "canvas_percent": 0.09828047150322032
+          "mismatch_pixels": 1296,
+          "canvas_percent": 0.0984323733138899
         },
         {
           "x": 32,
-          "y": 624,
-          "width": 336,
-          "height": 192,
-          "mismatch_pixels": 8888,
-          "canvas_percent": 0.6750516466156277
+          "y": 640,
+          "width": 320,
+          "height": 64,
+          "mismatch_pixels": 1918,
+          "canvas_percent": 0.14567383643213028
+        },
+        {
+          "x": 32,
+          "y": 688,
+          "width": 16,
+          "height": 16,
+          "mismatch_pixels": 77,
+          "canvas_percent": 0.005848219710778952
+        },
+        {
+          "x": 48,
+          "y": 720,
+          "width": 304,
+          "height": 96,
+          "mismatch_pixels": 2015,
+          "canvas_percent": 0.15304107424960506
         },
         {
           "x": 0,
@@ -10698,17 +10902,8 @@
           "canvas_percent": 0.011392635800218738
         }
       ],
-      "unexplained_regions": [
-        {
-          "x": 32,
-          "y": 624,
-          "width": 336,
-          "height": 192,
-          "mismatch_pixels": 8888,
-          "canvas_percent": 0.6750516466156277
-        }
-      ],
-      "status": "fail"
+      "unexplained_regions": [],
+      "status": "pass"
     },
     {
       "id": "phone-15-18100",
@@ -10854,8 +11049,8 @@
           "y": 208,
           "width": 48,
           "height": 32,
-          "mismatch_pixels": 368,
-          "canvas_percent": 0.027949933163203305
+          "mismatch_pixels": 367,
+          "canvas_percent": 0.027873982257868513
         },
         {
           "x": 352,
@@ -10870,8 +11065,8 @@
           "y": 256,
           "width": 112,
           "height": 16,
-          "mismatch_pixels": 1295,
-          "canvas_percent": 0.0983564224085551
+          "mismatch_pixels": 1296,
+          "canvas_percent": 0.0984323733138899
         },
         {
           "x": 16,
@@ -11109,8 +11304,8 @@
           "y": 208,
           "width": 48,
           "height": 32,
-          "mismatch_pixels": 367,
-          "canvas_percent": 0.027873982257868513
+          "mismatch_pixels": 368,
+          "canvas_percent": 0.027949933163203305
         },
         {
           "x": 352,
@@ -11125,8 +11320,8 @@
           "y": 256,
           "width": 112,
           "height": 16,
-          "mismatch_pixels": 1296,
-          "canvas_percent": 0.0984323733138899
+          "mismatch_pixels": 1295,
+          "canvas_percent": 0.0983564224085551
         },
         {
           "x": 160,
@@ -11574,7 +11769,7 @@
         {
           "x": 16,
           "y": 661,
-          "width": 291.203125,
+          "width": 291.1875,
           "height": 19,
           "reason": "Our generated document or answer content replaces reference content."
         },
@@ -11635,8 +11830,8 @@
           "reason": "Revision labels come from the dataset comparison rather than the reference revision numbers."
         }
       ],
-      "mismatch_percent": 0.6878725032216495,
-      "mismatch_pixels": 2733,
+      "mismatch_percent": 0.686865737757732,
+      "mismatch_pixels": 2729,
       "compared_pixels": 397312,
       "masked_pixels": 919328,
       "unmasked_diff_regions": [
@@ -11661,16 +11856,16 @@
           "y": 112,
           "width": 112,
           "height": 16,
-          "mismatch_pixels": 77,
-          "canvas_percent": 0.005848219710778952
+          "mismatch_pixels": 74,
+          "canvas_percent": 0.005620366994774578
         },
         {
           "x": 16,
           "y": 160,
           "width": 160,
           "height": 16,
-          "mismatch_pixels": 1664,
-          "canvas_percent": 0.1263823064770932
+          "mismatch_pixels": 1663,
+          "canvas_percent": 0.12630635557175843
         },
         {
           "x": 288,

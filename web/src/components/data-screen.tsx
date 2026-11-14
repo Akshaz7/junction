@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState, type DragEvent } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type DragEvent } from 'react'
 import { ArrowRight, Box, ChevronDown, ChevronLeft, ChevronRight, Download, File, FileImage, FileText, Folder, FolderPlus, GitCompare, Info, Layers, LoaderCircle, Maximize2, MessageSquare, Minus, MoreHorizontal, PenLine, Plus, ScanText, Search, SlidersHorizontal, Upload, X } from 'lucide-react'
 import { Badge, Button, Input } from './ui'
 import { workspaceApi } from '../lib/api'
 import type { Document, IngestStatus } from '../lib/types'
+import { fitPhonePage, type Size } from '../lib/page-transform'
 import { VisualiseItButton } from '../viewer3d/VisualiseIt'
 import './data-screen.css'
 
@@ -19,13 +20,14 @@ type UploadState = {
   stages: IngestStatus['stages']; detail: string
 }
 
-function DocumentImage({ doc, preview = false }: { doc: Document; preview?: boolean }) {
+function DocumentImage({ doc, preview = false, onLoad }: { doc: Document; preview?: boolean; onLoad?: (size: Size) => void }) {
   const [failed, setFailed] = useState(false)
   const Icon = doc.kind === 'ifc' || doc.kind === 'dxf' || doc.kind === 'dwg' ? Box : doc.kind === 'raster' || doc.kind === 'svg' ? FileImage : File
   return <span className={preview ? 'data-preview' : 'data-thumbnail'}>
     {!preview || failed ? <><Icon size={preview ? 56 : 18} aria-hidden="true" />{preview && <span>Page preview unavailable</span>}</> :
       <img loading="lazy" src={`/api/docs/${encodeURIComponent(doc.doc_id)}/${preview ? 'pages/1/image' : 'files/page-1.thumb.png'}`}
-        alt={preview ? `First page of ${doc.title}` : ''} onError={() => setFailed(true)} />}
+        alt={preview ? `First page of ${doc.title}` : ''} onError={() => setFailed(true)}
+        onLoad={(event) => onLoad?.({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })} />}
   </span>
 }
 
@@ -37,7 +39,28 @@ function DocumentDetail({ doc, onClose, onAsk }: { doc: Document; onClose: () =>
   const [scene, setScene] = useState<'loading' | 'available' | 'missing' | 'error'>('loading')
   const [zoom, setZoom] = useState(100)
   const [showSceneNote, setShowSceneNote] = useState(false)
+  const [image, setImage] = useState<Size | null>(null)
+  const [viewport, setViewport] = useState<Size>({ width: 0, height: 0 })
+  const [phone, setPhone] = useState(() => window.matchMedia('(max-width: 640px)').matches)
+  const canvas = useRef<HTMLDivElement>(null)
   const closeButton = useRef<HTMLButtonElement>(null)
+  useLayoutEffect(() => {
+    const node = canvas.current
+    if (!node) return
+    const query = window.matchMedia('(max-width: 640px)')
+    const measure = () => {
+      setPhone(query.matches)
+      setViewport({ width: node.clientWidth, height: node.clientHeight })
+    }
+    const observer = new ResizeObserver(measure)
+    observer.observe(node)
+    query.addEventListener('change', measure)
+    measure()
+    return () => { observer.disconnect(); query.removeEventListener('change', measure) }
+  }, [])
+  const fitted = image && viewport.width ? fitPhonePage(image, viewport) : null
+  const phoneScale = fitted ? fitted.scale * zoom / 100 : 1
+  const displayedZoom = phone && fitted ? Math.round(phoneScale * 100) : zoom
   useEffect(() => {
     const controller = new AbortController()
     closeButton.current?.focus()
@@ -49,9 +72,11 @@ function DocumentDetail({ doc, onClose, onAsk }: { doc: Document; onClose: () =>
 
   return <aside className="data-detail" aria-label="Document details" onKeyDown={(event) => { if (event.key === 'Escape') onClose() }}>
     <header><FileText size={24} /><div><h2><DocumentTitle title={doc.title} /></h2><small>/{doc.source}<span className="data-header-demo">{/generated for demo$/i.test(doc.title) ? ' · generated for demo' : ''}</span></small><details className="data-credit-info"><summary aria-label="Drawing credit and licence"><Info size={12} /></summary><div className="data-credit-popover"><dl><div><dt>Credit</dt><dd>{doc.credit || 'Not provided'}</dd></div><div><dt>Licence</dt><dd>{doc.licence || 'Not provided'}</dd></div></dl><div className="data-mobile-scene">{scene === 'available' ? <VisualiseItButton docId={doc.doc_id} /> : <button type="button" disabled={scene === 'loading'} onClick={() => setShowSceneNote(true)}>Visualise it</button>}{showSceneNote && <p role="status">{scene === 'error' ? 'Could not check 3D availability. Reopen the document to retry.' : 'No 3D scene available for this document.'}</p>}</div></div></details></div><button type="button" className="data-header-ask" aria-label="Ask about it" onClick={() => onAsk(doc)}><MessageSquare size={16} /></button><a className="data-compare" href="#/changes" aria-label="Compare document revisions"><GitCompare size={14} /><span>Compare</span></a><Button variant="ghost" size="icon" aria-label="Fit page" onClick={() => setZoom(100)}><Maximize2 size={16} /></Button><button ref={closeButton} type="button" className="data-close-detail" aria-label="Close document details" onClick={onClose}><X size={18} /></button></header>
-    <div className="data-viewer-toolbar"><ChevronLeft size={14} /><span className="page-number">1</span><span>/ {doc.pages}</span><ChevronRight size={14} /><span className="toolbar-spacer" /><span className="data-viewer-tools" aria-hidden="true"><Search size={14} /><ScanText size={14} /><PenLine size={14} /></span><a aria-label="Download page" href={`/api/docs/${encodeURIComponent(doc.doc_id)}/pages/1/image`} download><Download size={14} /></a><span className="viewer-toolbar-divider" /><span className="data-zoom-controls"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => setZoom((n) => Math.max(25, n - 25))}><Minus size={14} /></Button><span aria-label="Page zoom level">{zoom}%</span><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => setZoom((n) => Math.min(400, n + 25))}><Plus size={14} /></Button></span></div>
+    <div className="data-viewer-toolbar"><ChevronLeft size={14} /><span className="page-number">1</span><span>/ {doc.pages}</span><ChevronRight size={14} /><span className="toolbar-spacer" /><span className="data-viewer-tools" aria-hidden="true"><Search size={14} /><ScanText size={14} /><PenLine size={14} /></span><a aria-label="Download page" href={`/api/docs/${encodeURIComponent(doc.doc_id)}/pages/1/image`} download><Download size={14} /></a><span className="viewer-toolbar-divider" /><span className="data-zoom-controls"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => setZoom((n) => Math.max(25, n - 25))}><Minus size={14} /></Button><span aria-label="Page zoom level">{displayedZoom}%</span><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => setZoom((n) => Math.min(400, n + 25))}><Plus size={14} /></Button></span></div>
     <div className="data-detail-body">
-      <div className="data-page-canvas"><div className="data-page-plane" style={{ transform: `scale(${zoom / 100})` }}><DocumentImage key={doc.doc_id} doc={doc} preview /></div></div>
+      <div ref={canvas} className="data-page-canvas"><div className={`data-page-plane ${phone ? 'phone-page-plane' : ''}`} style={phone && image && fitted ? {
+        width: image.width, height: image.height, transform: `translate(${(viewport.width - image.width * phoneScale) / 2}px, ${fitted.y}px) scale(${phoneScale})`,
+      } : { transform: `scale(${zoom / 100})` }}><DocumentImage key={doc.doc_id} doc={doc} preview onLoad={setImage} /></div></div>
       <dl className="data-document-credit"><div><dt>Credit</dt><dd>{doc.credit || 'Not provided'}</dd></div><div><dt>Licence</dt><dd>{doc.licence || 'Not provided'}</dd></div></dl>
       <div className="data-detail-actions"><Button variant="raised" onClick={() => onAsk(doc)}>Ask about it<ArrowRight size={15} /></Button>
         {scene === 'available' && <VisualiseItButton docId={doc.doc_id} />}</div>

@@ -4,6 +4,7 @@ import { Badge, Button } from './components/ui'
 import { ProjectSwitcher, WorkspaceNavigation, navigation } from './components/workspace-navigation'
 import { PlaceholderPage } from './components/placeholder-page'
 import { AccuracyScreen } from './components/accuracy-screen'
+import { OverviewScreen } from './components/overview-screen'
 import { ChatScreen } from './components/chat-screen'
 import { DataScreen } from './components/data-screen'
 import { ChangesScreen } from './components/changes-screen'
@@ -49,7 +50,7 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
       <div className="pagebar">
         <h1>{navigation.find((item) => item.route === view)!.label}</h1>
         {view === 'data' && <span className="documents-breadcrumb"><ChevronRight size={16} /><span><Folder size={14} />Documents<ChevronDown size={12} /></span></span>}
-        {view === 'chat' && <div className="chat-header-actions"><Button variant="raised" aria-label="New chat" onClick={() => { setChatKey((previous) => previous + 1); setContextDocument(null) }}><Plus size={16} /><span>New</span></Button><Button variant="raised" onClick={() => document.querySelector('.conversation')?.scrollTo({ top: 0, behavior: 'smooth' })}><Clock size={16} /><span>History</span></Button><Button variant="raised" onClick={() => { if (navigator.share) void navigator.share({ title: 'Hologram', url: window.location.href }).catch(() => {}); else void navigator.clipboard?.writeText(window.location.href) }}><MessageSquareShare size={16} /><span>Share</span></Button></div>}
+        {view === 'chat' && <div className="chat-header-actions"><Button variant="raised" aria-label="New chat" onClick={() => { navigate('chat'); setChatKey((previous) => previous + 1); setContextDocument(null) }}><Plus size={16} /><span>New</span></Button><Button variant="raised" onClick={() => document.querySelector('.conversation')?.scrollTo({ top: 0, behavior: 'smooth' })}><Clock size={16} /><span>History</span></Button><Button variant="raised" onClick={() => { if (navigator.share) void navigator.share({ title: 'Hologram', url: window.location.href }).catch(() => {}); else void navigator.clipboard?.writeText(window.location.href) }}><MessageSquareShare size={16} /><span>Share</span></Button></div>}
       </div>
       {error && (view === 'chat' || view === 'data') && <p className="error-message document-error" role="alert">{error}</p>}
       <ChatScreen key={chatKey} docs={docs} loadingDocs={loadingDocs} demo={demo} contextDocument={contextDocument} hidden={view !== 'chat'} onOpenCitation={onOpenCitation} />
@@ -60,7 +61,8 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
       }} />
       {view === 'changes' && <ChangesScreen docs={docs} demo={demo} />}
       {view === 'accuracy' && <AccuracyScreen />}
-      {view !== 'data' && view !== 'chat' && view !== 'changes' && view !== 'accuracy' ? <PlaceholderPage route={view} /> : null}
+      {view === 'overview' && <OverviewScreen docs={docs} />}
+      {view !== 'data' && view !== 'chat' && view !== 'changes' && view !== 'accuracy' && view !== 'overview' ? <PlaceholderPage route={view} /> : null}
     </main>
   </div>
 }

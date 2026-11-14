@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { fitPage, focusBox, pageToScreen, screenToPage, zoomAt } from './page-transform'
+import { fitPage, fitPhonePage, focusBox, pageToScreen, screenToPage, zoomAt } from './page-transform'
 
 describe('page pixels to drawing viewport coordinates', () => {
   it('applies scale before pan and reverses it at fractional zoom', () => {
@@ -26,6 +26,17 @@ describe('page pixels to drawing viewport coordinates', () => {
     const anchor = { x: 220, y: 170 }
     const point = screenToPage(anchor, view)
     expect(pageToScreen(point, zoomAt(view, anchor, 2))).toEqual(anchor)
+  })
+
+  it('opens phone pages at the top, fits their width and never enlarges small images', () => {
+    const viewport = { width: 390, height: 699 }
+    for (const image of [{ width: 2384, height: 1684 }, { width: 440, height: 320 }, { width: 160, height: 90 }, { width: 1200, height: 4000 }]) {
+      const view = fitPhonePage(image, viewport)
+      expect(view.scale).toBeLessThanOrEqual(1)
+      expect(pageToScreen({ x: 0, y: 0 }, view).y).toBe(12)
+      expect(pageToScreen({ x: image.width / 2, y: 0 }, view).x).toBeCloseTo(viewport.width / 2)
+      expect(image.width * view.scale).toBeCloseTo(Math.min(image.width, 366))
+    }
   })
 
   it('centres edge boxes and reduces zoom if a box would be clipped', () => {

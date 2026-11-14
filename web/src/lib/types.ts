@@ -44,6 +44,12 @@ export interface Answer {
 export type Citation = Answer['citations'][number]
 export type TraceStep = Answer['trace'][number]
 
+export interface SavedChat {
+  id: string
+  doc_id: string | null
+  messages: { id: string; role: string; content: string; answer: Answer | null }[]
+}
+
 export interface ChangeEntry {
   id: string
   type: 'new_version' | 'new_document'

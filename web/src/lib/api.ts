@@ -1,4 +1,4 @@
-import type { Answer, ChangeEntry, Comparison, Document, IngestStatus, TraceStep, UploadReceipt } from './types'
+import type { Answer, ChangeEntry, Comparison, Document, IngestStatus, SavedChat, TraceStep, UploadReceipt } from './types'
 
 type Mode = 'auto' | 'real' | 'demo'
 type StreamCallbacks = { onStatus: (text: string) => void; onTrace: (trace: TraceStep) => void }
@@ -92,6 +92,11 @@ export class WorkspaceApi {
     })
     const chat = await response.json() as { id: string }
     return chat.id
+  }
+
+  async getChat(id: string, signal?: AbortSignal): Promise<SavedChat> {
+    const response = await this.request(`/api/chats/${encodeURIComponent(id)}`, { signal })
+    return response.json() as Promise<SavedChat>
   }
 
   async getChanges(signal?: AbortSignal): Promise<ChangeEntry[]> {

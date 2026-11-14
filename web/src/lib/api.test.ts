@@ -19,6 +19,18 @@ function chunkedStream(text: string) {
 }
 
 describe('backend chat contract', () => {
+  it('loads a saved chat through the workspace transport and reports real failures', async () => {
+    const saved = { id: 'saved/chat', doc_id: demoDocument.doc_id, messages: [] }
+    const transport = vi.fn<typeof fetch>().mockResolvedValueOnce(Response.json(saved))
+      .mockResolvedValueOnce(Response.json({ detail: 'chat not found' }, { status: 404 }))
+    const api = new WorkspaceApi('real', transport)
+    const signal = new AbortController().signal
+    expect(await api.getChat(saved.id, signal)).toEqual(saved)
+    expect(transport).toHaveBeenCalledWith('/api/chats/saved%2Fchat', { signal })
+    await expect(api.getChat('missing')).rejects.toThrow('chat not found')
+    expect(api.isDemo).toBe(false)
+  })
+
   it('flattens grouped docs, creates a real chat and sends content with selected doc_ids', async () => {
     const transport = vi.fn<typeof fetch>()
       .mockResolvedValueOnce(documentResponse())

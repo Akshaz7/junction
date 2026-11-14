@@ -17,6 +17,12 @@ export function fitPage(image: Size, viewport: Size): PageTransform {
   return { scale, x: (viewport.width - image.width * scale) / 2, y: (viewport.height - image.height * scale) / 2 }
 }
 
+/** Phone documents open at their top edge, fitted to width without upscaling. */
+export function fitPhonePage(image: Size, viewport: Size): PageTransform {
+  const scale = Math.min(1, Math.max(1, viewport.width - 24) / image.width)
+  return { scale, x: (viewport.width - image.width * scale) / 2, y: 12 }
+}
+
 /** Keep the page point under the wheel/pinch midpoint fixed while zooming. */
 export function zoomAt(view: PageTransform, anchor: Point, scale: number): PageTransform {
   const point = screenToPage(anchor, view)

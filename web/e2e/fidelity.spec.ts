@@ -153,12 +153,31 @@ async function preparePhase(page: Page, phase: Phase, answerGate: Promise<void>)
       await expect(page.getByRole('complementary', { name: 'Document details' })).toBeVisible()
       const preview = page.locator('.data-detail .data-preview img')
       await expect.poll(() => preview.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true)
-      await expect(page.getByLabel('Page zoom level', { exact: true })).toHaveText('100%')
-      await expect(page.locator('.data-page-plane')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
+      if (device === 'desktop') {
+        await expect(page.getByLabel('Page zoom level', { exact: true })).toHaveText('100%')
+        await expect(page.locator('.data-page-plane')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
+      } else {
+        // Phone zoom reports actual page pixels, rather than a multiple of fit.
+        await expect.poll(() => preview.evaluate((image: HTMLImageElement) => {
+          const canvas = image.closest('.data-page-canvas')!.getBoundingClientRect()
+          const rect = image.getBoundingClientRect()
+          const width = Math.min(image.naturalWidth, canvas.width - 24)
+          return Math.abs(rect.width - width) < 1 && Math.abs(rect.top - canvas.top - 12) < 1
+        })).toBe(true)
+        const initialZoom = Number.parseFloat(await page.getByLabel('Page zoom level', { exact: true }).innerText())
+        expect(initialZoom).toBeLessThanOrEqual(100)
+      }
     }
     if (device === 'desktop' && n === 4) target = navigation().getByRole('link', { name: 'Chat', exact: true })
     if (device === 'phone') {
-      if (n >= 4) for (let i = 0; i < 11; i++) await page.getByRole('button', { name: 'Zoom in', exact: true }).click()
+      if (n >= 4) {
+        // The reference's large sheet reaches 57% actual scale. Small generated
+        // sheets already open above that; do not enlarge their text 3.75 times.
+        const initialZoom = Number.parseFloat(await page.getByLabel('Page zoom level', { exact: true }).innerText())
+        const clicks = Math.max(0, Math.min(12, Math.floor((57 / initialZoom - 1) * 4)))
+        for (let i = 0; i < clicks; i++) await page.getByRole('button', { name: 'Zoom in', exact: true }).click()
+        expect(Number.parseFloat(await page.getByLabel('Page zoom level', { exact: true }).innerText())).toBeLessThanOrEqual(100)
+      }
       if (n >= 3) {
         // A drawing mask must never conceal a blank or off-canvas preview.
         await expect.poll(() => page.locator('.data-detail .data-preview img').evaluate((image) => {

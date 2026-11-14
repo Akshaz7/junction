@@ -7,6 +7,7 @@ import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document, TraceStep } from '../lib/types'
 import { ThinkingText } from './thinking-text'
 import { MicButton } from './voice-controls'
+import { chatLink, savedExchanges, type ChatExchange } from '../lib/chat-history'
 
 const starters = [
   { title: 'Count on a plan', label: 'Count something on a plan', question: 'How many windows are there?', icon: Scale },
@@ -23,7 +24,9 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
 }) {
   const [draft, setDraft] = useState('')
   const [selected, setSelected] = useState<Document[]>(contextDocument ? [contextDocument] : [])
-  const [answers, setAnswers] = useState<Answer[]>([])
+  const [answers, setAnswers] = useState<ChatExchange[]>([])
+  const [restoring, setRestoring] = useState(false)
+  const [restoredDocIds, setRestoredDocIds] = useState<string[] | null>(null)
   const [busy, setBusy] = useState(false)
   const [pendingQuestion, setPendingQuestion] = useState('')
   const [statuses, setStatuses] = useState<string[]>([])
@@ -40,6 +43,48 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const textarea = useRef<HTMLTextAreaElement>(null)
   const conversation = useRef<HTMLDivElement>(null)
   const picker = useRef<HTMLDivElement>(null)
+  const generation = useRef(0)
+
+  useEffect(() => {
+    let controller: AbortController | undefined
+    function followLink() {
+      controller?.abort()
+      const link = chatLink(window.location.hash)
+      if (!link) { setRestoring(false); return }
+      const version = ++generation.current
+      submitting.current = false
+      chatId.current = null
+      setBusy(false); setAnswers([]); setViewer(null); setError('')
+      setMention(null); setPendingQuestion(''); setStatuses([]); setTraces([])
+      setSelected([]); setRestoredDocIds(null); setDraft('')
+      if (link.kind === 'question') {
+        setRestoring(false)
+        setDraft(link.question)
+        return
+      }
+      setRestoring(true)
+      controller = new AbortController()
+      const signal = controller.signal
+      workspaceApi.getChat(link.id, signal).then((chat) => {
+        if (signal.aborted || generation.current !== version) return
+        chatId.current = chat.id
+        setAnswers(savedExchanges(chat))
+        const ids = [...new Set(chat.messages.flatMap((message) => message.answer?.doc_ids ?? []))]
+        setRestoredDocIds(ids.length ? ids : chat.doc_id ? [chat.doc_id] : [])
+      }).catch((err: unknown) => {
+        if (!signal.aborted && generation.current === version) setError(err instanceof Error ? err.message : 'This chat could not be loaded.')
+      }).finally(() => {
+        if (!signal.aborted && generation.current === version) setRestoring(false)
+      })
+    }
+    followLink()
+    window.addEventListener('hashchange', followLink)
+    return () => { controller?.abort(); generation.current++; window.removeEventListener('hashchange', followLink) }
+  }, [])
+
+  useEffect(() => {
+    if (restoredDocIds) setSelected(docs.filter((doc) => restoredDocIds.includes(doc.doc_id)))
+  }, [docs, restoredDocIds])
 
   useEffect(() => { if (contextDocument) setSelected([contextDocument]) }, [contextDocument])
   useEffect(() => {
@@ -81,7 +126,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   }
 
   async function ask(question: string) {
-    if (!question.trim() || submitting.current || !docs.length) return
+    if (!question.trim() || submitting.current || restoring || !docs.length) return
+    const version = generation.current
     submitting.current = true
     setBusy(true)
     setPendingQuestion(question.trim())
@@ -93,36 +139,48 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     const docIds = (selected.length ? selected : docs).map((doc) => doc.doc_id)
     const streamedTraces: TraceStep[] = []
     try {
-      if (!chatId.current) chatId.current = await workspaceApi.createChat(docIds, question.trim().slice(0, 100))
+      if (!chatId.current) {
+        const id = await workspaceApi.createChat(docIds, question.trim().slice(0, 100))
+        if (generation.current !== version) return
+        chatId.current = id
+      }
       const answer = await workspaceApi.askQuestion(chatId.current, question.trim(), docIds, {
-        onStatus: (text) => setStatuses((previous) => previous.at(-1) === text ? previous : [...previous, text]),
-        onTrace: (trace) => { streamedTraces.push(trace); setTraces([...streamedTraces]) },
+        onStatus: (text) => { if (generation.current === version) setStatuses((previous) => previous.at(-1) === text ? previous : [...previous, text]) },
+        onTrace: (trace) => { if (generation.current === version) { streamedTraces.push(trace); setTraces([...streamedTraces]) } },
       })
-      setAnswers((previous) => [...previous, { ...answer, trace: answer.trace.length ? answer.trace : streamedTraces }])
+      if (generation.current !== version) return
+      setAnswers((previous) => [...previous, { id: answer.answer_id, question: answer.question, content: '', answer: { ...answer, trace: answer.trace.length ? answer.trace : streamedTraces } }])
     } catch (err) {
+      if (generation.current !== version) return
       setDraft(question)
       setError(err instanceof Error ? err.message : 'The request failed. Please try again.')
     } finally {
-      submitting.current = false
-      setBusy(false)
-      setPendingQuestion('')
+      if (generation.current === version) {
+        submitting.current = false
+        setBusy(false)
+        setPendingQuestion('')
+      }
     }
   }
 
   return <div ref={splitContainer} className={`chat-workspace ${viewer ? 'has-viewer' : ''}`} hidden={hidden} style={{ '--chat-split': `${split}%` } as CSSProperties}>
     <section className="chat-page" aria-label="Drawing questions" inert={!!viewer && sheet}>
     <div ref={conversation} className={`conversation ${answers.length || busy ? 'has-answers' : ''}`}>
-      {!answers.length && !busy && <div className="welcome">
+      {restoring && <p className="chat-loading" role="status">Loading chat…</p>}
+      {!answers.length && !busy && !restoring && <div className="welcome">
         <h2>Where shall we start?</h2>
         <div className="starter-grid">{starters.map(({ title, label, question, icon: Icon }) => <button key={title} aria-label={label} className="starter-card" disabled={loadingDocs || !docs.length} onClick={() => void ask(question)}>
           <Icon size={20} /><strong>{title}</strong>
         </button>)}</div>
         {demo && <p className="demo-note">Offline sample content generated for demo</p>}
       </div>}
-      {answers.map((answer, index) => <AnswerCard key={`${answer.answer_id}-${index}`} answer={answer} docs={docs} demo={demo} activeCitation={viewer?.answer === answer ? viewer.citation : undefined} onOpenCitation={(citation) => {
-        setViewer((previous) => ({ answer, citation, request: (previous?.request ?? 0) + 1 }))
+      {answers.map((exchange, index) => exchange.answer ? <AnswerCard key={`${exchange.id}-${index}`} answer={exchange.answer} docs={docs} demo={demo} activeCitation={viewer?.answer === exchange.answer ? viewer.citation : undefined} onOpenCitation={(citation) => {
+        setViewer((previous) => ({ answer: exchange.answer!, citation, request: (previous?.request ?? 0) + 1 }))
         onOpenCitation(citation)
-      }} />)}
+      }} /> : <article className="exchange" key={`${exchange.id}-${index}`}>
+        {exchange.question && <div className="question-bubble">{exchange.question}</div>}
+        <p className="answer-text">{exchange.content || 'No answer yet.'}</p>
+      </article>)}
       {busy && <div className="exchange pending-exchange" aria-busy="true">
         <div className="question-bubble">{pendingQuestion}</div>
         <div className="status-lines" role="status" aria-live="polite"><span className="thinking-mark" aria-hidden="true">H</span><ThinkingText text={statuses.at(-1) || 'Thinking…'} /></div>
@@ -133,8 +191,9 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       {error && <p className="error-message" role="alert">{error}</p>}
       <form className="composer" onSubmit={(event) => { event.preventDefault(); if (!mention) void ask(draft) }}>
         {!!selected.length && <div className="selected-documents" aria-label="Selected documents">{selected.map((doc) => <span className="chip document-chip" key={doc.doc_id}><FileText size={13} /><span>{doc.title}</span><button type="button" disabled={busy} aria-label={`Remove ${doc.title}`} onClick={() => setSelected((previous) => previous.filter((item) => item.doc_id !== doc.doc_id))}><X size={13} /></button></span>)}</div>}
-        <label className="sr-only" htmlFor="question">Ask about your drawings</label>
-        <textarea ref={textarea} id="question" rows={2} placeholder="Ask anything. Type @ to include a document" value={draft} disabled={busy}
+        <div className="composer-input"><label className="sr-only" htmlFor="question">Ask about your drawings</label>
+        {!draft && <span className="phone-composer-placeholder" aria-hidden="true">Ask anything. Type @ to include a document</span>}
+        <textarea ref={textarea} id="question" rows={2} placeholder="Ask anything. Type @ to include a document" value={draft} disabled={busy || restoring}
           role="combobox" aria-autocomplete="list" aria-expanded={!!mention} aria-controls={mention ? 'document-picker' : undefined} aria-activedescendant={mention && matches.length ? `document-option-${optionIndex}` : undefined}
           onChange={(event) => { setDraft(event.target.value); updateMention(event.target.value, event.target.selectionStart) }}
           onClick={(event) => updateMention(event.currentTarget.value, event.currentTarget.selectionStart)}
@@ -150,7 +209,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
               if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); if (matches[optionIndex]) chooseDocument(matches[optionIndex]); return }
             }
             if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); void ask(draft) }
-          }} />
+          }} /></div>
         {mention && <div className="document-picker" ref={picker}>
           <p className="picker-heading">Include a document</p>
           <div id="document-picker" role="listbox" aria-label="Documents">{matches.map((doc, index) => <button type="button" role="option" aria-selected={index === optionIndex} id={`document-option-${index}`} key={doc.doc_id} onClick={() => chooseDocument(doc)}>
@@ -161,8 +220,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         <div className="composer-actions"><button className="document-context" aria-label={selected.length ? `Document context: ${selected.length} selected` : `Include a document (${docs.length} available)`} title={selected.length ? `${selected.length} selected` : `All documents (${docs.length})`} type="button" disabled={busy || loadingDocs || !docs.length} onClick={() => {
           const next = draft + (draft && !/\s$/.test(draft) ? ' @' : '@')
           setDraft(next); updateMention(next, next.length); textarea.current?.focus()
-        }}><Plus size={16} /><span className="sr-only"><FolderOpen size={15} />{loadingDocs ? 'Loading documents…' : selected.length ? `${selected.length} selected` : `All documents (${docs.length})`}<AtSign size={13} /></span></button><MicButton disabled={busy || hidden} onText={(text) => { setDraft(text); setMention(null); textarea.current?.focus() }} />
-          <Button type="submit" variant="primary" className="send-button" aria-label="Send question" disabled={!draft.trim() || busy || !docs.length || !!mention}><ArrowUp size={18} /></Button>
+        }}><Plus size={16} /><span className="sr-only"><FolderOpen size={15} />{loadingDocs ? 'Loading documents…' : selected.length ? `${selected.length} selected` : `All documents (${docs.length})`}<AtSign size={13} /></span></button><MicButton disabled={busy || restoring || hidden} onText={(text) => { setDraft(text); setMention(null); textarea.current?.focus() }} />
+          <Button type="submit" variant="primary" className="send-button" aria-label="Send question" disabled={!draft.trim() || busy || restoring || !docs.length || !!mention}><ArrowUp size={18} /></Button>
         </div>
       </form>
       <p className="composer-disclaimer">AI can make mistakes. Verify important information.</p>
