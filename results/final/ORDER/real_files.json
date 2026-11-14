@@ -1,0 +1,179 @@
+[
+  {
+    "doc_id": "ifc_bench__ac20-arc",
+    "mode": "ifc",
+    "end_only": false,
+    "checks": [
+      {
+        "question": "Order flooring for all rooms with 10% waste",
+        "value": 2133.33,
+        "text": "**Order 2133.33 m² of flooring.**\n\n| Item | Quantity | Unit | Waste % | How measured | Source |\n|---|---|---|---|---|---|\n| Flooring | 2133.33 | m2 | 10% | Sum of recorded floor areas or scaled room outlines. | [1][2][3][4][5] |\n\n- 10% waste applied as requested.",
+        "citations": 5,
+        "highlighted_items": 82,
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. The waste allowance is stated in the order table.",
+          "improve": null
+        }
+      },
+      {
+        "question": "Order plasterboard for all rooms with 10% waste",
+        "value": 2616.49,
+        "text": "**Order 2616.49 m² of plasterboard.**\n\n| Item | Quantity | Unit | Waste % | How measured | Source |\n|---|---|---|---|---|---|\n| Plasterboard | 2616.49 | m2 | 10% | Net wall area; openings deducted in source quantities, one face. | [1][2][3][4][5] |\n\n- 10% waste applied as requested.\n- Plasterboard is listed as one layer of coverage; sheets need board dimensions and layer count.",
+        "citations": 5,
+        "highlighted_items": 121,
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. The waste allowance is stated in the order table.",
+          "improve": null
+        }
+      },
+      {
+        "question": "Order skirting for all rooms with 10% waste",
+        "value": 1720.62,
+        "text": "**Order 1720.62 m of skirting.**\n\n| Item | Quantity | Unit | Waste % | How measured | Source |\n|---|---|---|---|---|---|\n| Skirting | 1720.62 | m | 10% | Estimated room rectangles minus nearby door widths. | [1][2][3][4][5] |\n\n- 10% waste applied as requested.",
+        "citations": 5,
+        "highlighted_items": 159,
+        "confidence": {
+          "label": "Estimate",
+          "pct": 65,
+          "reason": "Some ordering measurements are missing or estimated; check the table before ordering.",
+          "improve": "Check missing measurements and the finish specification before ordering."
+        }
+      },
+      {
+        "question": "How many doors do I need to order?",
+        "value": 77,
+        "text": "**Order 77 items of doors.**\n\n| Item | Quantity | Unit | Waste % | How measured | Source |\n|---|---|---|---|---|---|\n| Doors | 77 | count | 0% | Counted the cited elements. | [1][2][3][4] |\n\n- 0% waste applied; change it by asking for a waste percentage.",
+        "citations": 4,
+        "highlighted_items": 77,
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. The waste allowance is stated in the order table.",
+          "improve": null
+        }
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+    "mode": "planmap",
+    "end_only": false,
+    "checks": [
+      {
+        "question": "Order flooring for all rooms with 10% waste",
+        "value": 377.74,
+        "text": "**Order 377.74 m² of flooring.**\n\n| Item | Quantity | Unit | Waste % | How measured | Source |\n|---|---|---|---|---|---|\n| Flooring | 377.74 | m2 | 10% | Sum of recorded floor areas or scaled room outlines. | [1] |\n\n- 10% waste applied as requested.",
+        "citations": 1,
+        "highlighted_items": 47,
+        "confidence": {
+          "label": "Verified",
+          "pct": 95,
+          "reason": "The result was measured from the CAD file's geometry and units. The waste allowance is stated in the order table.",
+          "improve": null
+        }
+      },
+      {
+        "question": "Order plasterboard for all rooms with 10% waste",
+        "value": null,
+        "text": "**Order list: 0 measured quantities; missing data needs checking.**\n\n| Item | Quantity | Unit | Waste % | How measured | Source |\n|---|---|---|---|---|---|\n| Plasterboard | not in this file |  | 10% | Net wall areas with openings deducted are missing; gross areas were not used. |  |\n\n- 10% waste applied as requested.\n- Plasterboard is listed as one layer of coverage; sheets need board dimensions and layer count.",
+        "citations": 0,
+        "highlighted_items": 0,
+        "confidence": {
+          "label": "Estimate",
+          "pct": 67,
+          "reason": "Some ordering measurements are missing or estimated; check the table before ordering. Confidence is higher due to the drawing scale based on the CAD file's own units.",
+          "improve": "Check missing measurements and the finish specification before ordering."
+        }
+      },
+      {
+        "question": "Order skirting for all rooms with 10% waste",
+        "value": null,
+        "text": "**Order list: 0 measured quantities; missing data needs checking.**\n\n| Item | Quantity | Unit | Waste % | How measured | Source |\n|---|---|---|---|---|---|\n| Skirting | not in this file |  | 10% | A nearby door has no measured width; its opening cannot be deducted. |  |\n\n- 10% waste applied as requested.",
+        "citations": 0,
+        "highlighted_items": 0,
+        "confidence": {
+          "label": "Estimate",
+          "pct": 67,
+          "reason": "Some ordering measurements are missing or estimated; check the table before ordering. Confidence is higher due to the drawing scale based on the CAD file's own units.",
+          "improve": "Check missing measurements and the finish specification before ordering."
+        }
+      },
+      {
+        "question": "How many doors do I need to order?",
+        "value": 36,
+        "text": "**Order 36 items of doors.**\n\n| Item | Quantity | Unit | Waste % | How measured | Source |\n|---|---|---|---|---|---|\n| Doors | 36 | count | 0% | Counted the cited elements. | [1] |\n\n- 0% waste applied; change it by asking for a waste percentage.",
+        "citations": 1,
+        "highlighted_items": 36,
+        "confidence": {
+          "label": "Verified",
+          "pct": 95,
+          "reason": "The objects were counted directly in the CAD drawing. The waste allowance is stated in the order table.",
+          "improve": null
+        }
+      }
+    ]
+  },
+  {
+    "doc_id": "wikimedia__18247337",
+    "mode": "planmap",
+    "end_only": true,
+    "checks": [
+      {
+        "question": "Order flooring for all rooms with 10% waste",
+        "value": null,
+        "text": "**Order list: 0 measured quantities; missing data needs checking.**\n\n| Item | Quantity | Unit | Waste % | How measured | Source |\n|---|---|---|---|---|---|\n| Flooring | not in this file |  | 10% | Some room areas are missing; no partial total was used. |  |\n\n- 10% waste applied as requested.",
+        "citations": 0,
+        "highlighted_items": 0,
+        "confidence": {
+          "label": "Estimate",
+          "pct": 59,
+          "reason": "Some ordering measurements are missing or estimated; check the table before ordering. Confidence is lower due to the drawing scale based on none.",
+          "improve": "Check missing measurements and the finish specification before ordering."
+        }
+      },
+      {
+        "question": "Order plasterboard for all rooms with 10% waste",
+        "value": null,
+        "text": "**Order list: 0 measured quantities; missing data needs checking.**\n\n| Item | Quantity | Unit | Waste % | How measured | Source |\n|---|---|---|---|---|---|\n| Plasterboard | not in this file |  | 10% | Net wall areas with openings deducted are missing; gross areas were not used. |  |\n\n- 10% waste applied as requested.\n- Plasterboard is listed as one layer of coverage; sheets need board dimensions and layer count.",
+        "citations": 0,
+        "highlighted_items": 0,
+        "confidence": {
+          "label": "Estimate",
+          "pct": 59,
+          "reason": "Some ordering measurements are missing or estimated; check the table before ordering. Confidence is lower due to the drawing scale based on none.",
+          "improve": "Check missing measurements and the finish specification before ordering."
+        }
+      },
+      {
+        "question": "Order skirting for all rooms with 10% waste",
+        "value": null,
+        "text": "**Order list: 0 measured quantities; missing data needs checking.**\n\n| Item | Quantity | Unit | Waste % | How measured | Source |\n|---|---|---|---|---|---|\n| Skirting | not in this file |  | 10% | A drawing scale is needed for skirting lengths. |  |\n\n- 10% waste applied as requested.",
+        "citations": 0,
+        "highlighted_items": 0,
+        "confidence": {
+          "label": "Estimate",
+          "pct": 59,
+          "reason": "Some ordering measurements are missing or estimated; check the table before ordering. Confidence is lower due to the drawing scale based on none.",
+          "improve": "Check missing measurements and the finish specification before ordering."
+        }
+      },
+      {
+        "question": "How many doors do I need to order?",
+        "value": null,
+        "text": "**Order list: 0 measured quantities; missing data needs checking.**\n\n| Item | Quantity | Unit | Waste % | How measured | Source |\n|---|---|---|---|---|---|\n| Doors | not in this file |  | 0% | No matching measurements in this file. |  |\n\n- 0% waste applied; change it by asking for a waste percentage.",
+        "citations": 0,
+        "highlighted_items": 0,
+        "confidence": {
+          "label": "Estimate",
+          "pct": 65,
+          "reason": "Some ordering measurements are missing or estimated; check the table before ordering.",
+          "improve": "Check missing measurements and the finish specification before ordering."
+        }
+      }
+    ]
+  }
+]

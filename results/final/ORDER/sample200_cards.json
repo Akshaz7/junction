@@ -1,0 +1,1060 @@
+{
+  "reviewed": [
+    {
+      "doc_id": "cubicasa5k__colorful-13685",
+      "source": "cubicasa5k",
+      "type": "count",
+      "question": "How many bathrooms or washrooms (e.g. KH, KPH, PH, PESUH, SH) are on this floor plan, not counting separate WC rooms?",
+      "answer": "There are **3 bathrooms** on this floor plan. [1]",
+      "before_step_kinds": [
+        "found"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "3 rooms on the scanned drawing, each one numbered",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Cross-checked",
+          "pct": 80,
+          "reason": "Detected on a scanned image.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "3 rooms on the scanned drawing, each one numbered",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Cross-checked",
+          "pct": 80,
+          "reason": "The objects were detected on a scanned image.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0
+    },
+    {
+      "doc_id": "ifc_bench__ac20-arc",
+      "source": "ifc_bench",
+      "type": "text",
+      "question": "How many toilets exist on the ground floor?",
+      "answer": "There are **2 toilet rooms** (spaces named as a WC or toilet) on **Erdgeschoss**. [1]",
+      "before_step_kinds": [
+        "found"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "2 rooms on Erdgeschoss in the building model (IFC), each one numbered",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "Read directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "2 rooms on Erdgeschoss in the building model (IFC), each one numbered",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0
+    },
+    {
+      "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+      "source": "ifc_models",
+      "type": "area",
+      "question": "What is the net floor area of the room 'ABIRUUM (304)' on '3.korrus', in m²?",
+      "answer": "No room matching **room abiruum 304** was found in this model. Room names/types present: ABIRUUM, ARVUTIKLASS, EL.KILP, ELUTUBA+KÖÖK, ESIK, FUAJEE-TREPIKODA, HOOLDUSTÖÖTAJAD, HUMANITAARRUUM, ILU- JA HEAOLUTEENUSED, INVA-WC, KORIDOR, KORISTUSRUUM, LIFT, LIIKUMISVAHENDID, MAGAMISTUBA, PERSONALI PUHKERUUM, PESUKODA, RINGIRUUM, SERVER, SOOJUSSÕLM, SOTS.TÖÖTAJA, TREPIKODA, TUALETTRUUM, VALVERUUM, VEEM.SÕLM, VENTILATSIOONIRUUM, WC, ÜHISTEGEVUSE RUUM. Storey filter: 3.korrus. [1]",
+      "before_step_kinds": [
+        "read"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "read",
+            "title": "Read",
+            "text": "1 marked region of the building model",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "Read directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "read",
+            "title": "Read",
+            "text": "The available source data was checked; no matching measurement or element was cited.",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Estimate",
+          "pct": 65,
+          "reason": "The requested information could not be matched to a source measurement or element.",
+          "improve": "Check the boxed areas, or upload a CAD file to make this exact."
+        }
+      },
+      "issues": [],
+      "cost_usd": 0.0
+    },
+    {
+      "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18-plan-04-4-korrus",
+      "source": "ifc_models",
+      "type": "count",
+      "question": "How many rooms (spaces) are shown on the floor plan of '4.korrus'?",
+      "answer": "There are **60 rooms** on **4.korrus**. [1]",
+      "before_step_kinds": [
+        "read"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "read",
+            "title": "Read",
+            "text": "1 marked region on page 5 of the scanned drawing",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 93,
+          "reason": "Taken from the text printed in the file.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "read",
+            "title": "Read",
+            "text": "1 marked region on page 5 of the cited source",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Cross-checked",
+          "pct": 85,
+          "reason": "The result uses the cited source data; its geometry was unavailable for this evidence card.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0
+    },
+    {
+      "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+      "source": "ifc_models",
+      "type": "length",
+      "question": "What is the total length of all walls on '3. Sal', in metres?",
+      "answer": "The total length of the **26 walls** on **3. Sal** is **229.5 m**. [1][2]",
+      "before_step_kinds": [
+        "found",
+        "calculated"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "26 walls on 3. Sal in the building model (IFC), each one numbered, including [L]AD",
+            "cite": 1,
+            "ok": null
+          },
+          {
+            "kind": "calculated",
+            "title": "Calculated",
+            "text": "Added the lengths of 26 walls: 229.5 m",
+            "cite": null,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "Read directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "26 walls on 3. Sal in the building model (IFC), each one numbered",
+            "cite": 1,
+            "ok": null
+          },
+          {
+            "kind": "calculated",
+            "title": "Calculated",
+            "text": "Added the lengths of 26 walls: 229.5 m",
+            "cite": null,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0
+    },
+    {
+      "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-02-dachgeschoss",
+      "source": "ifc_models",
+      "type": "volume",
+      "question": "What is the total net volume of all walls on 'Dachgeschoss', in m³?",
+      "answer": "The total volume of the **4 walls** on **Dachgeschoss** is **15.2 m³**. [1]",
+      "before_step_kinds": [
+        "read"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "read",
+            "title": "Read",
+            "text": "1 marked region on page 2 of the scanned drawing",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 93,
+          "reason": "Taken from the text printed in the file.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "read",
+            "title": "Read",
+            "text": "1 marked region on page 2 of the cited source",
+            "cite": 1,
+            "ok": null
+          },
+          {
+            "kind": "calculated",
+            "title": "Calculated",
+            "text": "Added the recorded volumes of 4 walls: 15.2 m³",
+            "cite": null,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Cross-checked",
+          "pct": 85,
+          "reason": "The result uses the cited source data; its geometry was unavailable for this evidence card.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0
+    },
+    {
+      "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+      "source": "opening_design",
+      "type": "count",
+      "question": "On sheet A-801 of the Xcel Sports Complex drawings, how many doors does the door schedule list for room 118 (Fitness Center)?",
+      "answer": "**5 doors** are listed for room 118. [1]",
+      "before_step_kinds": [
+        "read"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "read",
+            "title": "Read",
+            "text": "Printed on the sheet: “Door Schedule | Door Number | Room Name | Room Number | Door | Frame | Hardware Group…”",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 93,
+          "reason": "Taken from the text printed in the file.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "read",
+            "title": "Read",
+            "text": "Printed on the sheet: “Door Schedule | Door Number | Room Name | Room Number | Door | Frame | Hardware Group…”",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Cross-checked",
+          "pct": 85,
+          "reason": "The result uses the cited source data; its geometry was unavailable for this evidence card.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0.0
+    },
+    {
+      "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+      "source": "swiss_dwellings",
+      "type": "count",
+      "question": "How many rooms labelled 'Zimmer' are there on this floor?",
+      "answer": "There are **12 rooms** on this floor plan. [1]",
+      "before_step_kinds": [
+        "found"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "12 labels in the CAD drawing (DXF), each one numbered, including Zimmer",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 95,
+          "reason": "Measured from the CAD file's exact geometry and units.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "12 room labels in the CAD drawing (DXF), each one numbered, including Zimmer",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 95,
+          "reason": "The objects were counted directly in the CAD drawing.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0
+    },
+    {
+      "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+      "source": "swiss_dwellings",
+      "type": "area",
+      "question": "What is the net floor area of room 1.51 ('Pièce') in m²?",
+      "answer": "The area of “Pièce” is **10.7 m²**. [1]",
+      "before_step_kinds": [
+        "found",
+        "measured"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "Room “Pièce 1.51” in the CAD drawing (DXF)",
+            "cite": 1,
+            "ok": null
+          },
+          {
+            "kind": "measured",
+            "title": "Measured",
+            "text": "Outline 9,332 px² × (0.033867 m/px)² = 10.7 m²; scale from the CAD file's own units",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 95,
+          "reason": "Measured from the CAD file's exact geometry and units.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "Room “Pièce 1.51” in the CAD drawing (DXF)",
+            "cite": 1,
+            "ok": null
+          },
+          {
+            "kind": "measured",
+            "title": "Measured",
+            "text": "Outline 9,332 px² × (0.033867 m/px)² = 10.7 m²; scale from the CAD file's own units",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 95,
+          "reason": "The result was measured from the CAD file's geometry and units.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0
+    },
+    {
+      "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+      "source": "ifc_models",
+      "type": "area",
+      "question": "What is the net floor area of the room 'ELUTUBA+KÖÖK (7-1)' on '1.korrus', in m²?",
+      "answer": "No room matching **room elutuba kook 7 1** was found in this model. Room names/types present: ABIRUUM, ARVUTIKLASS, EL.KILP, ELUTUBA+KÖÖK, ESIK, FUAJEE-TREPIKODA, HOOLDUSTÖÖTAJAD, HUMANITAARRUUM, ILU- JA HEAOLUTEENUSED, INVA-WC, KORIDOR, KORISTUSRUUM, LIFT, LIIKUMISVAHENDID, MAGAMISTUBA, PERSONALI PUHKERUUM, PESUKODA, RINGIRUUM, SERVER, SOOJUSSÕLM, SOTS.TÖÖTAJA, TREPIKODA, TUALETTRUUM, VALVERUUM, VEEM.SÕLM, VENTILATSIOONIRUUM, WC, ÜHISTEGEVUSE RUUM. Storey filter: 1.korrus. [1]",
+      "before_step_kinds": [
+        "read"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "read",
+            "title": "Read",
+            "text": "1 marked region of the building model",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "Read directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "read",
+            "title": "Read",
+            "text": "The available source data was checked; no matching measurement or element was cited.",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Estimate",
+          "pct": 65,
+          "reason": "The requested information could not be matched to a source measurement or element.",
+          "improve": "Check the boxed areas, or upload a CAD file to make this exact."
+        }
+      },
+      "issues": [],
+      "cost_usd": 0.0
+    },
+    {
+      "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18-plan-04-4-korrus",
+      "source": "ifc_models",
+      "type": "count",
+      "question": "How many windows are there in the model 'Maleva tänav 18 korterelamu (Esplanades example model)'?",
+      "answer": "There are **297 windows** in this model. [1][2][3][4][5][6]",
+      "before_step_kinds": [
+        "read"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "read",
+            "title": "Read",
+            "text": "6 marked regions of the scanned drawing",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 93,
+          "reason": "Taken from the text printed in the file.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "read",
+            "title": "Read",
+            "text": "6 marked regions of the cited source",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Cross-checked",
+          "pct": 85,
+          "reason": "The result uses the cited source data; its geometry was unavailable for this evidence card.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0
+    },
+    {
+      "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+      "source": "opening_design",
+      "type": "count",
+      "question": "On sheet A-801 of the Xcel Sports Complex drawings, how many rooms have all four walls finished with W1 (painted gypsum board)?",
+      "answer": "There are **33** numbered rooms on this floor (100 to 195), counted from the room numbers printed on the plan. I cannot tell from the numbers alone how many are dorm rooms versus other room types, and one floor only: other floors are not on this sheet. [1][2][3][4][5][6][7][8][9][10][11][12][13][14][15][16][17][18][19][20][21][22][23][24][25][26][27][28][29][30][31][32][33]",
+      "before_step_kinds": [
+        "read"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "read",
+            "title": "Read",
+            "text": "Printed on the sheet: “100”",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 93,
+          "reason": "Taken from the text printed in the file.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "read",
+            "title": "Read",
+            "text": "Printed on the sheet: “100”",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Cross-checked",
+          "pct": 85,
+          "reason": "The result uses the cited source data; its geometry was unavailable for this evidence card.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0.0
+    },
+    {
+      "doc_id": "swiss_dwellings__site1040-bldg2136-floor9659",
+      "source": "swiss_dwellings",
+      "type": "count",
+      "question": "How many apartments (residential units) are shown on this floor plan?",
+      "answer": "There are **3 apartments** on this floor plan. [1]",
+      "before_step_kinds": [
+        "found"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "3 others in the CAD drawing (DXF), each one numbered, including App. B, App. A, App. C",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 95,
+          "reason": "Measured from the CAD file's exact geometry and units.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "3 apartments in the CAD drawing (DXF), each one numbered, including App. B, App. A, App. C",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 95,
+          "reason": "The objects were counted directly in the CAD drawing.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0
+    },
+    {
+      "doc_id": "swiss_dwellings__site1098-bldg2234-floor10334",
+      "source": "swiss_dwellings",
+      "type": "area",
+      "question": "What is the net floor area of apartment C in m², summing all its rooms except balconies, loggias, terraces and other outdoor spaces?",
+      "answer": "The net floor area of **App. C** is **70.1 m²** across 10 indoor rooms. [1]",
+      "before_step_kinds": [
+        "found",
+        "calculated"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "10 rooms in the CAD drawing (DXF), each one numbered, including Corridoio 1.19, Cucina 1.18, Stanza 1.20",
+            "cite": 1,
+            "ok": null
+          },
+          {
+            "kind": "calculated",
+            "title": "Calculated",
+            "text": "Added 10 room outlines: 70.1 m²; largest Stanza 1.22 17.8, Stanza 1.23 15.4, Stanza 1.20 10.5",
+            "cite": null,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 95,
+          "reason": "Measured from the CAD file's exact geometry and units.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "10 rooms in the CAD drawing (DXF), each one numbered, including Corridoio 1.19, Cucina 1.18, Stanza 1.20",
+            "cite": 1,
+            "ok": null
+          },
+          {
+            "kind": "calculated",
+            "title": "Calculated",
+            "text": "Added 10 room outlines: 70.1 m²; largest Stanza 1.22 17.8, Stanza 1.23 15.4, Stanza 1.20 10.5",
+            "cite": null,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 95,
+          "reason": "The result was measured from the CAD file's geometry and units.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0
+    },
+    {
+      "doc_id": "ifc_bench__digital-hub-arc",
+      "source": "ifc_bench",
+      "type": "text",
+      "question": "What is the building's total floor area, number of levels, total spaces, and program breakdown by floor?",
+      "answer": "| Storey | Rooms (area m²) |\n|---|---|\n| B01_OKRD | 558.1 |\n| E00_OKRD | 1,157.0 |\n| E01_OKRD | 1,127.1 |\n| **Total** | 2,842.1 |\n\n[1][2][3]",
+      "before_step_kinds": [
+        "found",
+        "calculated"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "64 rooms on B01_OKRD, E00_OKRD, E01_OKRD in the building model (IFC), each one numbered, including 0-3, 0-4",
+            "cite": 1,
+            "ok": null
+          },
+          {
+            "kind": "calculated",
+            "title": "Calculated",
+            "text": "Added the stored floor areas of 64 rooms: 2,842.1 m²; largest 1-1 383.6, 2-1 286.7, 0-10 206.4",
+            "cite": null,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "Read directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "64 rooms on B01_OKRD, E00_OKRD, E01_OKRD in the building model (IFC), each one numbered, including 0-3, 0-4",
+            "cite": 1,
+            "ok": null
+          },
+          {
+            "kind": "calculated",
+            "title": "Calculated",
+            "text": "Added the stored floor areas of 64 rooms: 2,842.1 m²; largest 1-1 383.6, 2-1 286.7, 0-10 206.4",
+            "cite": null,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0.0
+    },
+    {
+      "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+      "source": "ifc_models",
+      "type": "area",
+      "question": "What is the net floor area of the room 'ELUTUBA+KÖÖK (72-1)' on '5.korrus', in m²?",
+      "answer": "No room matching **room elutuba kook 72 1** was found in this model. Room names/types present: ABIRUUM, ARVUTIKLASS, EL.KILP, ELUTUBA+KÖÖK, ESIK, FUAJEE-TREPIKODA, HOOLDUSTÖÖTAJAD, HUMANITAARRUUM, ILU- JA HEAOLUTEENUSED, INVA-WC, KORIDOR, KORISTUSRUUM, LIFT, LIIKUMISVAHENDID, MAGAMISTUBA, PERSONALI PUHKERUUM, PESUKODA, RINGIRUUM, SERVER, SOOJUSSÕLM, SOTS.TÖÖTAJA, TREPIKODA, TUALETTRUUM, VALVERUUM, VEEM.SÕLM, VENTILATSIOONIRUUM, WC, ÜHISTEGEVUSE RUUM. Storey filter: 5.korrus. [1]",
+      "before_step_kinds": [
+        "read"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "read",
+            "title": "Read",
+            "text": "1 marked region of the building model",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "Read directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "read",
+            "title": "Read",
+            "text": "The available source data was checked; no matching measurement or element was cited.",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Estimate",
+          "pct": 65,
+          "reason": "The requested information could not be matched to a source measurement or element.",
+          "improve": "Check the boxed areas, or upload a CAD file to make this exact."
+        }
+      },
+      "issues": [],
+      "cost_usd": 0.0
+    },
+    {
+      "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+      "source": "ifc_models",
+      "type": "count",
+      "question": "How many walls are shown on the floor plan of '1. Sal'?",
+      "answer": "There are **26 walls** on **1. Sal**. [1][2]",
+      "before_step_kinds": [
+        "found"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "26 walls on 1. Sal in the building model (IFC), each one numbered, including [L]AD",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "Read directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "26 walls on 1. Sal in the building model (IFC), each one numbered",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0
+    },
+    {
+      "doc_id": "swiss_dwellings__site1101-bldg2241-floor10275",
+      "source": "swiss_dwellings",
+      "type": "area",
+      "question": "What is the net floor area of apartment A in m², summing all its rooms except balconies, loggias, terraces and other outdoor spaces?",
+      "answer": "The net floor area of **App. A** is **72.4 m²** across 8 indoor rooms. [1]",
+      "before_step_kinds": [
+        "found",
+        "calculated",
+        "checked"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "8 rooms in the CAD drawing (DXF), each one numbered, including Soggiorno/pranzo 5.03, Ripostiglio 5.01",
+            "cite": 1,
+            "ok": null
+          },
+          {
+            "kind": "calculated",
+            "title": "Calculated",
+            "text": "Added 8 room outlines: 72.4 m²; largest Soggiorno/pranzo 5.03 34.1, Stanza 5.04 18.9, Cucina 5.05 5.34",
+            "cite": null,
+            "ok": null
+          },
+          {
+            "kind": "checked",
+            "title": "Checked",
+            "cite": null,
+            "ok": true,
+            "text": "Printed areas on 6 of 6 rooms match their measured outlines within 1%"
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 95,
+          "reason": "Measured from the CAD file's exact geometry and units.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "8 rooms in the CAD drawing (DXF), each one numbered, including Soggiorno/pranzo 5.03, Ripostiglio 5.01",
+            "cite": 1,
+            "ok": null
+          },
+          {
+            "kind": "calculated",
+            "title": "Calculated",
+            "text": "Added 8 room outlines: 72.4 m²; largest Soggiorno/pranzo 5.03 34.1, Stanza 5.04 18.9, Cucina 5.05 5.34",
+            "cite": null,
+            "ok": null
+          },
+          {
+            "kind": "checked",
+            "title": "Checked",
+            "cite": null,
+            "ok": true,
+            "text": "Printed areas on 6 of 6 rooms match their measured outlines within 1%"
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 95,
+          "reason": "The result was measured from the CAD file's geometry and units.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-10785",
+      "source": "cubicasa5k",
+      "type": "count",
+      "question": "How many bedrooms (makuuhuone, usually marked MH) are on this floor plan?",
+      "answer": "There is **1 bedroom** on this floor plan. [1]",
+      "before_step_kinds": [
+        "found"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "One room on the scanned drawing",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Cross-checked",
+          "pct": 80,
+          "reason": "Detected on a scanned image.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "One room on the scanned drawing",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Cross-checked",
+          "pct": 80,
+          "reason": "The objects were detected on a scanned image.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0
+    },
+    {
+      "doc_id": "ifc_bench__duplex-arc",
+      "source": "ifc_bench",
+      "type": "text",
+      "question": "What is the estimated total area of glazed windows in the building?",
+      "answer": "The total area of the **24 windows** in this model is **65.9 m²**. [1][2][3]",
+      "before_step_kinds": [
+        "found"
+      ],
+      "before_reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "24 windows on Level 1, Level 2, Roof in the building model (IFC), each one numbered",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "Read directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "24 windows on Level 1, Level 2, Roof in the building model (IFC), each one numbered",
+            "cite": 1,
+            "ok": null
+          },
+          {
+            "kind": "calculated",
+            "title": "Calculated",
+            "text": "Added the recorded areas of 24 windows: 65.9 m²",
+            "cite": null,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "issues": [],
+      "cost_usd": 0
+    }
+  ],
+  "unsupported_candidates": [
+    {
+      "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+      "question": "On sheet A-801 of the Xcel Sports Complex drawings, what is the area of room 118 (Fitness Center) in the finish room schedule?",
+      "reason": "No supported source answer/card with model calls disabled."
+    },
+    {
+      "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+      "question": "On sheet A-801 of the Xcel Sports Complex drawings, which room in the finish room schedule has the largest area?",
+      "reason": "No supported source answer/card with model calls disabled."
+    },
+    {
+      "doc_id": "cubicasa5k__colorful-8389",
+      "question": "How many showers and bathtubs are drawn on this floor plan in total?",
+      "reason": "No supported source answer/card with model calls disabled."
+    },
+    {
+      "doc_id": "ifc_bench__ac20-arc",
+      "question": "Which ceiling materials are used in the building?",
+      "reason": "No supported source answer/card with model calls disabled."
+    },
+    {
+      "doc_id": "cubicasa5k__colorful-8759",
+      "question": "How many showers and bathtubs are drawn on this floor plan in total?",
+      "reason": "No supported source answer/card with model calls disabled."
+    },
+    {
+      "doc_id": "swiss_dwellings__site1040-bldg2136-floor9659",
+      "question": "How many toilets (WC) are drawn on this floor plan?",
+      "reason": "No supported source answer/card with model calls disabled."
+    }
+  ]
+}

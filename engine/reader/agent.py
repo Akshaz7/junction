@@ -20,7 +20,8 @@ SYSTEM = """You answer questions about construction drawings (PDF sheets, scans,
 Reply with ONE JSON object per turn, nothing else.
 Cite the specific elements you name (each room, door, fixture, label or table cell) so each gets its own box; never cite a whole floor plan or whole sheet when you describe its parts.
 Call a tool: {"action":"tool","tool":"<name>","args":{...},"why":"<few words>"}
-Finish: {"action":"final","answer":"<markdown, English, first line: the direct answer in **bold**, one short sentence; then up to 5 short bullet points (one fact each, '- ' prefix); no paragraph longer than 2 sentences>","value":<number or null>,"unit":"<unit or null>","evidence":["e3","e5#c1"],"confidence":0.0-1.0}
+Finish: {"action":"final","answer":"<markdown, English, first line: the direct answer in **bold**, one short sentence; then up to 4 short bullet points (one fact each, '- ' prefix); no paragraph longer than 2 sentences>","value":<number or null>,"unit":"<unit or null>","evidence":["e3","e5#c1"],"confidence":0.0-1.0}
+Use document titles and plain element names in the answer, never tool aliases (d1, e3), IFC class names or internal item ids.
 Give up honestly: {"action":"final","answer":"<what you found and what is missing>","value":null,"unit":null,"evidence":[...],"confidence":0.0}
 Tools (doc is d1, d2...; page numbers start at 1; pixel boxes are page-image pixels):
 - find_text {query, doc?, page?}: fuzzy search of the text layer; hits give an id (eN) and the table row/col if inside a table.
@@ -176,6 +177,8 @@ def _build(question, doc_ids, sess: Session, fin: dict, trace, calls, t0, forced
             value, conf = None, min(conf, 0.3)
     abstained = bool(forced_abstain) or not refs or str(fin.get("action")) == "abstain" or conf <= 0.0
     cites, boxes, ids, n = [], [], [], 0
+    seen_ids = set()
+    main = sess.ev[refs[0].partition("#c")[0]].doc_id if refs else (doc_ids[0] if doc_ids else "")
     for r in refs:
         base, _, cell = r.partition("#c")
         e = sess.ev[base]
@@ -185,13 +188,14 @@ def _build(question, doc_ids, sess: Session, fin: dict, trace, calls, t0, forced
         kind = "text" if e.kind in ("text", "row") else ("element" if e.kind == "element" else "region")
         if e.kind == "region" and not e.item_ids:
             kind = "region"
-        cites.append({"n": n, "doc_id": e.doc_id, "page": e.page, "kind": kind, "bbox_px": bb, "item_ids": e.item_ids[:50],
+        cites.append({"n": n, "doc_id": e.doc_id, "page": e.page, "kind": kind, "bbox_px": bb, "item_ids": list(e.item_ids),
                       "quote": e.quote})
         if bb:
             boxes.append({"item_id": e.item_ids[0] if e.item_ids else f"{base}", "page": e.page, "bbox_px": bb, "label": str(n)})
         for i in e.item_ids:
-            if i not in ids:
+            if e.doc_id == main and i not in seen_ids:
                 ids.append(i)
+                seen_ids.add(i)
     if abstained:
         why = forced_abstain or "no verifiable evidence" if not refs else (forced_abstain or "the drawings do not settle it")
         text = (text or "I could not find this in the selected drawings.")
@@ -227,6 +231,7 @@ def read_answer(question: str, doc_ids: list[str], root, on_event=None, trace: l
     t0 = t0 or time.perf_counter()
     trace = trace if trace is not None else []
     calls = calls if calls is not None else []
+    emit("status", {"text": "Reading the selected drawings…"})
     root = Path(root)
     steps = max_steps or MAX_STEPS
 
@@ -236,6 +241,12 @@ def read_answer(question: str, doc_ids: list[str], root, on_event=None, trace: l
 
     sess = Session(doc_ids, root, emit=emit, on_cost=lambda c: calls.append(c))
 
+    def observe(tool, args):
+        obs = sess.run(tool, args)
+        from engine.library import reader_partial
+        emit("answer.partial", reader_partial(question, doc_ids, sess, trace, calls, t0))
+        return obs
+
     def spent():
         return sum(c.get("cost_usd", 0) for c in calls)
 
@@ -243,11 +254,11 @@ def read_answer(question: str, doc_ids: list[str], root, on_event=None, trace: l
     pre = []
     ts = time.perf_counter()
     for ident in _ids_in(question):
-        obs = sess.run("find_text", {"query": ident})
+        obs = observe("find_text", {"query": ident})
         if not obs.startswith("no match"):
             pre.append(f"[prefetch find_text {ident}]\n{obs}")
     if len(doc_ids) == 1 and sess.docs["d1"]["pages"] == 1 and not sess.docs["d1"]["ifc"]:
-        obs = sess.run("tables", {"doc": "d1", "page": 1})
+        obs = observe("tables", {"doc": "d1", "page": 1})
         if not obs.startswith("no ruled"):
             pre.append(f"[prefetch tables d1 p1]\n{obs}")
     if pre:
@@ -286,7 +297,7 @@ def read_answer(question: str, doc_ids: list[str], root, on_event=None, trace: l
             add({"step": "answer", "detail": f"{len(sess.ev)} evidence item(s) gathered, {step + 1} planner step(s)", "ms": ms, "model": r.model, "cost_usd": r.cost_usd})
             return _build(question, doc_ids, sess, act, trace, calls, t0)
         tool, args = act.get("tool"), act.get("args") or {}
-        obs = sess.run(str(tool), args if isinstance(args, dict) else {})
+        obs = observe(str(tool), args if isinstance(args, dict) else {})
         last_obs = obs
         add({"step": "read", "detail": f"{tool} {json.dumps(args)[:120]} -> {obs.splitlines()[0][:100] if obs else ''}", "ms": ms, "model": r.model, "cost_usd": r.cost_usd})
         msgs += [{"role": "assistant", "content": json.dumps(act)[:600]}, {"role": "user", "content": f"Observation:\n{obs}"}]

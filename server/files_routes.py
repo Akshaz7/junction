@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 import re
 import signal
 import sys
+import tempfile
 import time
 import uuid
 
@@ -15,6 +16,7 @@ from fastapi.responses import FileResponse, JSONResponse
 
 from . import artifact_store, config, db
 from .live import publish
+from .upload_validation import UPLOAD_EXT, extension_error, validate_header
 
 
 async def _restore(request: Request):
@@ -29,14 +31,12 @@ router = APIRouter(prefix="/api", dependencies=[Depends(_restore)])
 SAFE_ID = re.compile(r"^[A-Za-z0-9_.\-]+$")
 FILE_NAMES = {"scene.glb", "scene.usdz", "scene.json", "elements.json", "text.json", "ingest.json"}
 THUMB = re.compile(r"^(page-\d+\.thumb\.png|page-\d+\.png|planmap-\d+\.json|text-\d+\.json)$")
-UPLOAD_EXT = {".ifc": "ifc", ".dxf": "dxf", ".pdf": "pdf",
-              ".png": "raster", ".jpg": "raster", ".jpeg": "raster"}
 MAX_UPLOAD = 100 * 1024 * 1024
 INGEST_TIMEOUT = 5 * 60
 
 
 def _doc_dir(doc_id: str):
-    if not SAFE_ID.match(doc_id):
+    if not SAFE_ID.fullmatch(doc_id) or doc_id in {".", ".."}:
         raise HTTPException(400, "bad doc_id")
     return config.artifacts_dir() / doc_id
 
@@ -90,29 +90,51 @@ def _slug(s: str) -> str:
 @router.post("/upload")
 async def upload(file: UploadFile = File(...)):
     from pathlib import Path
-    name = Path(file.filename or "upload").name
+    name = Path((file.filename or "upload").replace("\\", "/")).name
     ext = Path(name).suffix.lower()
-    if ext not in UPLOAD_EXT:
-        raise HTTPException(415, f"Unsupported file type {ext or '(none)'}. Supported types: pdf, png, jpg (jpeg), dxf, ifc.")
-    data = await file.read(MAX_UPLOAD + 1)
-    if len(data) > MAX_UPLOAD:
-        raise HTTPException(413, f"File too large. Maximum upload size is {MAX_UPLOAD // (1024 * 1024)} MiB ({MAX_UPLOAD} bytes).")
-    if not data:
-        raise HTTPException(400, "File is empty. Upload a non-empty pdf, png, jpg, dxf or ifc file.")
-    pool = await db.get_pool()
-    if pool is None:
-        raise HTTPException(503, "database unavailable")
-    doc_id = f"uploads__{_slug(Path(name).stem)}-{uuid.uuid4().hex[:6]}"
+    if error := extension_error(ext):
+        raise HTTPException(415, error)
+    # UploadFile already spools multipart data. Copy in bounded chunks, avoiding a
+    # second upload-sized allocation in a 512 MB API container.
+    import hashlib
+    digest = hashlib.sha256()
     updir = config.artifacts_dir() / "uploads"
     updir.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(dir=updir, prefix=".upload-", suffix=".tmp", delete=False) as tmp:
+        pending = Path(tmp.name)
+        size = 0
+        header = b""
+        try:
+            while chunk := await file.read(1024 * 1024):
+                size += len(chunk)
+                if size > MAX_UPLOAD:
+                    raise HTTPException(413, f"File too large. Maximum upload size is {MAX_UPLOAD // (1024 * 1024)} MiB ({MAX_UPLOAD} bytes). Export a smaller file or split the model.")
+                if len(header) < 65536:
+                    header += chunk[:65536 - len(header)]
+                digest.update(chunk)
+                tmp.write(chunk)
+            if not size:
+                raise HTTPException(400, "File is empty. Upload a non-empty pdf, png, jpg, dxf or ifc file.")
+            try:
+                validate_header(ext, header)
+            except ValueError as exc:
+                raise HTTPException(422, str(exc)) from exc
+        except BaseException:
+            pending.unlink(missing_ok=True)
+            raise
+    pool = await db.get_pool()
+    if pool is None:
+        pending.unlink(missing_ok=True)
+        raise HTTPException(503, "database unavailable")
+    doc_id = f"uploads__{_slug(Path(name).stem)[:100]}-{uuid.uuid4().hex[:12]}"
     stored = updir / f"{doc_id}{ext}"
-    stored.write_bytes(data)
+    pending.replace(stored)
     fmt = ext.lstrip(".")
     kind = UPLOAD_EXT[ext]
-    rel = f"artifacts/uploads/{stored.name}"
+    rel = str(stored.relative_to(config.REPO)) if stored.is_relative_to(config.REPO) else str(stored)
     doc = {"doc_id": doc_id, "source": "uploads", "formats": [fmt], "kind": kind,
            "title": Path(name).stem, "pages": 1, "licence": None, "credit": "uploaded by user",
-           "heldout": False, "files": {fmt: rel}}
+           "heldout": False, "files": {fmt: rel}, "content_sha256": digest.hexdigest(), "size_bytes": size}
     d = config.artifacts_dir() / doc_id
     d.mkdir(exist_ok=True)
     (d / "doc.json").write_text(json.dumps(doc, indent=1))
@@ -150,11 +172,14 @@ async def _ingest(doc_id: str):
         # Includes time waiting for the single heavy-job slot: queued uploads cannot hang forever either.
         async with asyncio.timeout(INGEST_TIMEOUT):
             async with _INGEST_LOCK:
+                heavy = config.REPO / "scripts" / "heavy.sh"
+                prefix = [str(heavy)] if heavy.is_file() and os.environ.get("HEAVY_SLOT_HELD") != "1" else []
                 proc = await asyncio.create_subprocess_exec(
-                    sys.executable, "-m", "server.ingest_job", doc_id, cwd=str(config.REPO),
+                    *prefix, sys.executable, "-m", "server.ingest_job", doc_id, cwd=str(config.REPO),
                     stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL,
-                    start_new_session=True,
-                    preexec_fn=lambda: os.nice(10))  # background worker: the API loop keeps priority
+                    env={**os.environ, "INGEST_MANAGED_JOB": "1",
+                         "HEAVY_SLOT_HELD": "1" if prefix or os.environ.get("HEAVY_SLOT_HELD") == "1" else "0"},
+                    start_new_session=True)
                 await proc.wait()
         state = _read_ingest(f)
         if proc.returncode or state.get("status") not in {"ready", "partial", "failed"}:

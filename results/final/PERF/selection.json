@@ -1,0 +1,5 @@
+{
+  "validation_only_doc_id": "ifc_models__resbim-454-model",
+  "selection": "SystemRandom choice of IFC artifact folders before inspecting file content",
+  "baseline_commit": "f42b9d109c095bcb82608317e06ea7acca05e9cd"
+}

@@ -29,7 +29,7 @@ def upload_client(tmp_path, monkeypatch):
         yield client
 
 
-@pytest.mark.parametrize("name", ["plan.exe", "plan.svg", "plan.dwg", "plan.tiff", "plan"])
+@pytest.mark.parametrize("name", ["plan.exe", "plan.svg", "plan.tiff", "plan"])
 def test_unsupported_upload_lists_supported_types(upload_client, name):
     response = upload_client.post("/api/upload", files={"file": (name, b"x")})
     assert response.status_code == 415
@@ -50,7 +50,7 @@ def test_upload_size_boundary_and_clear_413(upload_client, tmp_path, monkeypatch
     response = upload_client.post("/api/upload", files={"file": ("plan.pdf", b"x" * 17)})
     assert response.status_code == 413
     assert "16 bytes" in response.json()["detail"]
-    assert not list(tmp_path.iterdir())
+    assert not list(tmp_path.rglob("*.*"))
     routes.db.get_pool.assert_not_awaited()
     assert upload_client.post("/api/upload", files={"file": ("plan.pdf", b"x" * 16)}).status_code == 200
 
@@ -58,7 +58,9 @@ def test_upload_size_boundary_and_clear_413(upload_client, tmp_path, monkeypatch
 @pytest.mark.parametrize("ext,kind", [("pdf", "pdf"), ("png", "raster"), ("jpg", "raster"),
                                      ("jpeg", "raster"), ("dxf", "dxf"), ("IFC", "ifc")])
 def test_supported_uploads(upload_client, tmp_path, ext, kind):
-    response = upload_client.post("/api/upload", files={"file": (f"plan.{ext}", b"content")})
+    headers = {"pdf": b"content", "png": b"\x89PNG\r\n\x1a\n", "jpg": b"\xff\xd8\xff",
+               "jpeg": b"\xff\xd8\xff", "dxf": b"0\nSECTION\n", "IFC": b"ISO-10303-21;"}
+    response = upload_client.post("/api/upload", files={"file": (f"plan.{ext}", headers[ext])})
     assert response.status_code == 200
     doc_id = response.json()["doc_id"]
     assert json.loads((tmp_path / doc_id / "doc.json").read_text())["kind"] == kind

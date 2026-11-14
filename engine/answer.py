@@ -17,6 +17,9 @@ import time
 import uuid
 from pathlib import Path
 from typing import Callable
+from contextvars import copy_context
+
+from engine.reader.cache import document_scope
 
 from engine.router.parser import Parsed, parse
 from engine.scene_cmds import parse_scene, scene_answer
@@ -241,7 +244,7 @@ def _guarded(question, doc_ids, on_event, scene_state, history):
     import concurrent.futures as cf
     t0 = time.perf_counter()
     ex = cf.ThreadPoolExecutor(1, thread_name_prefix="answer")
-    fut = ex.submit(_answer_forced, question, doc_ids, on_event, scene_state=scene_state, history=history)
+    fut = ex.submit(copy_context().run, _answer_forced, question, doc_ids, on_event, scene_state=scene_state, history=history)
     try:
         return fut.result(timeout=limit)
     except cf.TimeoutError:
@@ -258,8 +261,10 @@ def _guarded(question, doc_ids, on_event, scene_state, history):
         ex.shutdown(wait=False)
 
 
+@document_scope
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None) -> dict:
+    started_at = time.perf_counter()
     # F-CHANGES: revision questions are a complete code route, including evidence.
     from engine.revision_compare import comparison_answer
     comparison = comparison_answer(question, doc_ids, _root())
@@ -311,7 +316,8 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
         pass
     try:   # E-77: exact code answers explained in plain words (numbers unchanged; falls back to the code text)
         from engine.explain import explain
-        res = explain(res, question, _root())
+        if not any(s.get("step") == "props" for s in res.get("trace", [])):
+            res = explain(res, question, _root(), on_event=on_event)
     except Exception:  # noqa: BLE001
         pass
     try:   # X20-X23/D01: feet, acres, unit prices on top of the metric answer (engine/units.py; value unchanged)
@@ -321,7 +327,8 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
         pass
     try:   # E-79: "How we know" steps + confidence label, built by code from the cited elements
         from engine import reasoning
-        res = reasoning.attach(res, question, _root())
+        if not any(s.get("step") == "props" for s in res.get("trace", [])):
+            res = reasoning.attach(res, question, _root())
     except Exception:  # noqa: BLE001
         pass
     try:   # bullets need a blank line before them to render as a list
@@ -329,12 +336,15 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
         res["answer"]["text_md"] = re.sub(r"(?m)^(?!- |\* |\||#)(\S[^\n]*)\n(- )", r"\1\n\n\2", _t)
     except Exception:  # noqa: BLE001
         pass
+    from engine.plainwords import apply as _plain_display
+    res = _plain_display(res)
     res["question"] = original   # the user's own words are what is stored and shown; the resolved question stays in the trace
     if step is not None:
         res["trace"] = [step, *(res.get("trace") or [])]
         if step.get("cost_usd"):
             res["cost"]["calls"] = [{"task": "context_rewrite", "provider": "", "model": step["model"], "cost_usd": step["cost_usd"]}, *res["cost"].get("calls", [])]
             res["cost"]["usd_total"] = round(res["cost"].get("usd_total", 0) + step["cost_usd"], 6)
+    res["latency_ms"] = int((time.perf_counter() - started_at) * 1000)
     return res
 
 
@@ -348,6 +358,7 @@ def _answer_forced(question: str, doc_ids: list[str], on_event: Callable | None 
     finally:
         _P.DELTA_SINK.reset(_tok)
     if (os.environ.get("FORCE_ANSWER", "1") == "0" or not doc_ids or not (question or "").strip() or not res["answer"].get("abstained")
+            or any(s.get("step") == "unclassified" for s in res.get("trace", []))
             or parse_scene(question) is not None or _other_doc(question, doc_ids)):
         return res
     _t = res["answer"].get("text_md", "")
@@ -492,6 +503,27 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                     add(s_)
                 res["trace"] = trace
                 return res
+        from engine.wallarea import answer as wallarea_answer
+        if (res := wallarea_answer(question, doc_ids, root, t0, hidden=set((scene_state or {}).get("hidden") or []))) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
+            return res
+        # F-ORDER: keep ordering allowances and exportable quantities together.
+        if len(doc_ids) == 1:
+            from engine.order import answer_order
+            from engine.solvers.data import load_doc as _load_order
+            if (order_doc := _load_order(doc_ids[0], root)) is not None and (res := answer_order(question, order_doc, t0, root=root)) is not None:
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                return res
+        from engine import props  # F-PROPS: exact properties before broad counts and the reader
+        if parse_scene(question) is None and (res := props.answer(question, doc_ids, root, t0, hidden=(scene_state or {}).get("hidden"))) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
+            return res
 
         if not os.environ.get("COMPLEX_Q_OFF"):    # E-59: multi-condition questions, every condition applied or named
             from engine import complex_q
@@ -558,7 +590,10 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
         # FIX-14: engineering sheets (M-/S-/P- ids, tag or SF tables) are answered from their own text, never from a plan map
         try:
             from engine import sheetqa
-            if len(doc_ids) >= 1 and sheetqa.is_sheet(doc_ids[0], root) and (res := sheetqa.answer(question, doc_ids, root, t0)) is not None:
+            # IFC preview images are generated views, not engineering sheets.
+            # Classifying them as sheets can load OCR just to reject the route.
+            engineering_sheet = not (root / doc_ids[0] / "elements.json").is_file() and sheetqa.is_sheet(doc_ids[0], root)
+            if engineering_sheet and (res := sheetqa.answer(question, doc_ids, root, t0)) is not None:
                 for s_ in res["trace"]:
                     add(s_)
                 res["trace"] = trace
@@ -570,7 +605,7 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                     add(s_)
                 res["trace"] = trace
                 return res
-            if sheetqa.is_sheet(doc_ids[0], root) and re.match(r"\s*how many\b", question, re.I) \
+            if engineering_sheet and re.match(r"\s*how many\b", question, re.I) \
                     and not re.search(r"\b(schedule|table|row|rows|list|finish\w*|walls?)\b", question, re.I):
                 # a count nobody could find on an engineering sheet is "not found", never "About 0"
                 return _abstained(question, doc_ids, "I couldn't find that on this sheet: no matching tags or table rows. "

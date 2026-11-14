@@ -1,4 +1,4 @@
-# CONTRACT — version 3.3
+# CONTRACT — version 3.4
 
 Only the LEAD edits this file. Each change bumps the version and adds one line to DECISIONS.md.
 
@@ -143,3 +143,9 @@ Live sync: `/ws` also carries `chat.trace`, `chat.delta` (cumulative answer text
 
 ### 5.14 Scene open hint (v3.3)
 - `evidence.scene.open`: optional, `"3d"` or `"ar"`. Set by app-feature answers ("show it in 3D", "show on table"). Web: `"3d"` opens Visualise it for the answer's doc; `"ar"` shows the Show-on-table hint (iOS app). Absent means no action. Additive; older clients ignore it.
+
+### 5.14 Additions in v3.4 (versions, shared edits, projects)
+- Advisor card `source` gains optional `url` and `finnish_url` (links to the rule text); clients show them when present.
+- Design versions (migration 006): `GET/POST /api/docs/{doc_id}/versions` (POST stores the current edit snapshot as version n, parent-linked, "generated from edits"), `GET /api/docs/{doc_id}/versions/{n}/pages/{page}/image`. `/api/changes` ids may be `dv:<doc>:<a>-<b>` (design versions) or `ser:<...>` (series); comparison objects gain optional fields (shapes in `server/design_versions.py`, `engine/design_versions.py`).
+- Shared edit layer: manual 3D edits carry `chat_id` and land in the chat's `scene_edits`; `scene_state` gains `last_hidden` (ids of the most recent hide, for "restore them"); `POST /api/advise` edit ops add `reset`. Pending move/material ops and their migration are Awais's and will be added when they land (migration 007 is taken by projects).
+- Projects (migration 007): `GET/POST /api/projects`, `GET/PATCH/DELETE /api/projects/{id}`, `POST /api/projects/{id}/docs`, `POST /api/projects/{id}/upload`, `PATCH/DELETE /api/projects/{id}/docs/{doc_id}`, `GET /api/projects/{id}/overview`. Demo projects (AC20 Institute, FZK-Haus) are seeded from library docs and flagged `demo: true`.

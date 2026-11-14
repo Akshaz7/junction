@@ -135,6 +135,15 @@ class Session:
         fn = getattr(self, f"t_{tool}", None)
         if fn is None:
             return f"error: unknown tool '{tool}'. Tools: find_text, page_text, tables, table, view, scale, measure, planmap, ifc, compute."
+        # Publish before parsing a large model, not after the expensive load.
+        if tool in ("ifc", "planmap"):
+            nouns = {"door": "doors", "window": "windows", "room": "rooms", "wall": "walls", "pipe": "pipes",
+                     "duct": "ducts", "column": "columns", "stairs": "stairs", "toilet": "toilets", "sink": "sinks"}
+            noun = nouns.get(str(args.get("kind") or ""), "model elements" if tool == "ifc" else "drawing items")
+            level = str(args.get("storey") or "").strip()[:60]
+            self.status(f"Checking {noun}" + (f" on {level}" if level else "") + "…")
+        elif tool == "compute":
+            self.status("Calculating from the findings…")
         try:
             obs = fn(**{k: v for k, v in (args or {}).items()})
         except TypeError as e:
@@ -316,6 +325,13 @@ class Session:
             ref = self.reg("text", did, pg, c["bbox_px"], c["text"])
             out.append(f'{ref} printed scale "{c["text"]}" = ratio 1:{_fmt(c["ratio"])}' + (f"; {c['m_per_px']} m per pixel at {dpi:.0f} dpi" if c["m_per_px"] else ""))
         ps = geom.planmap_scale(did, pg, self.root)
+        from pipeline.scale_regions import region_map
+        from engine.scales import scale_description
+        pm = region_map(Path(self.root) / did, pg)
+        for region in pm.get("regions", []):
+            sc = region.get("scale") or {}
+            ref = self.reg("region", did, pg, region["bbox"], sc.get("evidence"))
+            out.append(f"{ref} {scale_description(sc, region.get('title'))}; {sc.get('evidence', '')}")
         if ps:
             out.append(f'plan map scale: {ps["m_per_px"]} m per pixel (method {ps.get("method")}, confidence {ps.get("confidence")})')
         if dpi:
@@ -336,6 +352,17 @@ class Session:
             dpi = geom.page_dpi(did, pg, self.root)
             mpp = float(ratio) * 0.0254 / dpi if dpi else None
         src = "given"
+        from pipeline.scale_regions import region_map
+        from engine.scales import points_scale, positive, scale_description
+        pm = region_map(Path(self.root) / did, pg)
+        if pm.get("regions"):
+            sc, region = points_scale(pm, pts)
+            local_mpp = positive(sc.get("m_per_px"))
+            if not local_mpp:
+                return "error: measurement crosses views or this view has no verified scale; " + str(sc.get("evidence") or "")
+            if mpp and abs(mpp / local_mpp - 1) > .01:
+                return "error: supplied scale disagrees with the scale for this view"
+            mpp, src = local_mpp, scale_description(sc, (region or {}).get("title"))
         if mpp is None:
             ps = geom.planmap_scale(did, pg, self.root)
             if ps and (ps.get("confidence") or 0) >= 0.5:
@@ -403,8 +430,17 @@ class Session:
         out = [f"{len(items)} element(s) matched" + "".join(f"; sum {k} = {_fmt(v)} over {have[k]}" for k, v in tot.items() if have[k])]
         if by_storey and len(by_storey) > 1:
             out.append("per storey: " + ", ".join(f"{k}: {v}" for k, v in sorted(by_storey.items())))
-        ids = [i.item_id for i in items][:400]
-        ref = self.reg("element", did, 1, None, f"{len(items)} {kind or ifc_class or 'elements'} in the model", item_ids=ids)
+        # Keep the full set behind the count; the observation's sample below
+        # limits planner tokens, while citations can still verify every match.
+        ids = [i.item_id for i in items]
+        nouns = {"door": "doors", "window": "windows", "room": "rooms", "wall": "walls", "pipe": "pipes",
+                 "duct": "ducts", "column": "columns", "stairs": "stairs", "toilet": "toilets", "sink": "sinks"}
+        noun = nouns.get(kind, "model elements")
+        scope = (f" on {storey}" if storey else "") + (f' named "{name}"' if name else "")
+        if external is not None:
+            scope += " (external)" if external else " (not marked external)"
+        quote = f"{len(items)} matching {noun}{scope} in {d.title or 'the selected model'}"
+        ref = self.reg("element", did, 1, None, quote, item_ids=ids)
         out.insert(0, f"{ref} (cites all {len(ids)} matching elements)")
         for i in items[:int(limit)]:
             q = " ".join(f"{k}={_fmt(v)}" for k, v in i.q.items() if k in keys)

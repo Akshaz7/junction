@@ -123,11 +123,12 @@ def plan_geom(doc_id: str, root) -> dict:
             pm = json.loads(pf.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
-        sc = pm.get("scale") or {}
-        mpp = sc.get("m_per_px")
-        if not mpp or (sc.get("confidence") or 0) < 0.8:
-            continue
         for x in pm.get("items") or []:
+            from engine.scales import region_scale
+            local, _ = region_scale(pm, x.get("bbox_px"))
+            mpp = local.get("m_per_px")
+            if not mpp or (local.get("confidence") or 0) < 0.8:
+                continue
             poly = x.get("polygon_px")
             if x.get("kind") == "room" and poly and len(poly) >= 3:
                 a = abs(sum(poly[i][0] * poly[(i + 1) % len(poly)][1] - poly[(i + 1) % len(poly)][0] * poly[i][1] for i in range(len(poly)))) / 2

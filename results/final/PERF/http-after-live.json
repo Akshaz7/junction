@@ -1,0 +1,67 @@
+{
+  "phase": "after",
+  "models": "live",
+  "timestamp": "2026-11-14T22:17:36+0200",
+  "stack": "Loopback Uvicorn, real chats router, isolated local Postgres schema, real artifact indexes",
+  "ingestion": "Already converted; skipped; background restore disabled for read-only shared artifacts",
+  "answers": [
+    {
+      "doc_ids": [
+        "ifc_bench__sixty5-arc"
+      ],
+      "question": "How many doors are in this model?",
+      "events": [
+        {
+          "kind": "status",
+          "ms": 10.201
+        },
+        {
+          "kind": "status",
+          "ms": 146.654
+        },
+        {
+          "kind": "trace",
+          "ms": 273.108
+        },
+        {
+          "kind": "status",
+          "ms": 275.269
+        },
+        {
+          "kind": "trace",
+          "ms": 275.654
+        },
+        {
+          "kind": "trace",
+          "ms": 275.665
+        },
+        {
+          "kind": "delta",
+          "ms": 2666.208
+        },
+        {
+          "kind": "answer",
+          "ms": 2767.051
+        }
+      ],
+      "first_status_ms": 10.201,
+      "first_answer_text_ms": 2666.208,
+      "final_ms": 2767.051,
+      "value": 1049,
+      "cost": {
+        "usd_total": 0.031948,
+        "calls": [
+          {
+            "task": "write_answer",
+            "provider": "runware_claude",
+            "model": "claude-sonnet-5-5",
+            "cost_usd": 0.031948
+          }
+        ]
+      },
+      "latency_ms": 2570,
+      "citation_count": 17,
+      "text_md": "**There are 1049 doors in this model.** [1][2][3][4][5][6][7][8][9][10][11][12][13][14][15][16][17]"
+    }
+  ]
+}

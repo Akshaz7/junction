@@ -43,7 +43,8 @@ def doc_files(doc_id: str, originals: bool = True) -> list[tuple[str, Path]]:
     doc = d / "doc.json"
     if originals and doc.is_file():
         import json
-        for rel in (json.loads(doc.read_text()).get("files") or {}).values():
+        meta = json.loads(doc.read_text())
+        for rel in {**(meta.get("files") or {}), **(meta.get("original_files") or {})}.values():
             p = config.REPO / rel
             if p.is_file():
                 out.append((ORIGINAL + p.name, p))

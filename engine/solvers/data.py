@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
+from engine.reader.cache import memoized_document
 
 
 @dataclass
@@ -65,7 +66,22 @@ def dedupe_openings(items: list, thr: float = 0.3) -> list:
     return [i for i in items if id(i) not in drop] if drop else items
 
 
+@memoized_document
 def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
+    """A missing, incomplete or corrupt index is unavailable, never a zero count.
+
+    Upload workers can be interrupted during writes. Callers already handle None
+    as missing evidence; do not let a damaged sidecar crash the first question.
+    """
+    if not doc_id or Path(doc_id).name != doc_id or doc_id in {".", ".."}:
+        return None
+    try:
+        return _load_doc(doc_id, root, prefer)
+    except (OSError, ValueError, TypeError, KeyError, AttributeError, OverflowError):
+        return None
+
+
+def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
     d = Path(root) / doc_id
     if not d.is_dir():
         return None
@@ -97,11 +113,16 @@ def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
         items, scale = [], None
         for p in pms:
             m = _json(p)
+            from engine.scales import apply_item_scales
+            from pipeline.scale_regions import annotate_cached
+            if meta.get("kind") in ("raster", "dxf", "dwg"):
+                m = annotate_cached(m, d)
             scale = scale or m.get("scale")
+            page_start = len(items)
             for x in m["items"]:
                 pr = x.get("props") or {}
                 q = {}
-                for ak in ("area_m2", "area_m2_label", "area_m2_geom"):   # printed label area wins over polygon area
+                for ak in ("area_m2_label", "area_m2", "area_m2_geom"):   # printed label area wins over polygon area
                     if pr.get(ak) is not None:
                         q["area_m2"] = pr[ak]
                         break
@@ -111,10 +132,11 @@ def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
                 items.append(Item(item_id=x["item_id"], kind=x["kind"], label=x.get("label"), page=m.get("page", 1),
                                   bbox_px=x.get("bbox_px"), polygon_px=x.get("polygon_px"), conf=float(x.get("conf") or 0), q=q, props=pr,
                                   source=x.get("source", "")))
+            apply_item_scales(items[page_start:], m)
         items = dedupe_openings(items)
         try:   # E-57: a printed scale (scale bar, or 1:200 + sheet size / dpi) beats the door-size guess
             from engine import scale_text
-            better = scale_text.refine_scale(d, 1, scale)
+            better = None if any("measurement_scale" in i.props for i in items) else scale_text.refine_scale(d, 1, scale)
             if better:
                 scale_text.rescale_items(items, (scale or {}).get("m_per_px"), better["m_per_px"])
                 scale = {**better, "replaced": (scale or {}).get("method")}
