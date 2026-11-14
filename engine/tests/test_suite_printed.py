@@ -35,3 +35,18 @@ def test_ambiguous_or_missing_full_total_defer():
     assert r['answer']['value'] is None and 'not substituted' in r['answer']['text_md']
     pt=page(['TOTALFOURTHFLOOR= 2340 SF','TOTALFOURTHFLOOR= 2510 SF'])
     assert printed_total('What is the total fourth floor area?','generated-for-demo',[pt],'Fourth Floor Plan',time.perf_counter()) is None
+
+
+def test_sheet_ids_are_cited_from_existing_page_title_blocks(tmp_path):
+    import json
+    from engine.solvers.printed import cite_sheet_numbers
+    d=tmp_path/'generated-for-demo';d.mkdir()
+    words=[{'text':'B207','bbox_px':[730,710,790,750]}]
+    (d/'text-2.json').write_text(json.dumps({'image':{'w':800,'h':800},'words':words}))
+    result={'answer':{'text_md':'Sections are on page 2.'},'citations':[{'n':1,'doc_id':d.name,'page':2}],
+            'evidence':{'boxes':[]},'trace':[]}
+    r=cite_sheet_numbers(result,'Which sheets show the building sections?',tmp_path)
+    assert '**B207** (page 2) [2]' in r['answer']['text_md']
+    assert r['citations'][1]['quote']=='B207' and r['citations'][1]['bbox_px']==[730,710,790,750]
+    assert cite_sheet_numbers(r,'Which sheets show the building sections?',tmp_path) is r
+    assert len(r['citations'])==2

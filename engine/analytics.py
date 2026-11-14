@@ -169,7 +169,12 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
         return _done(question, doc, text, None, "m²", hit, trace, t0=t0)
     if len(have) != len(hit):
         return _abstain(question, doc.doc_id, "Some matching rooms have no area recorded, so I cannot give their combined area.", trace, "index", t0)
-    text = (f"The {'combined area' if len(hit) > 1 else 'area'} of **{target}** {where} is **{total:.2f} m²**. {per}. {{marks}}")
+    if doc.mode == "planmap" and len(hit) == 1:
+        text = f"The area of the **{target}** is **{total:.2f} m²**. {{marks}}" + scale_note(doc)
+    else:
+        text = (f"The {'combined area' if len(hit) > 1 else 'area'} of **{target}** {where} is **{total:.2f} m²**. {per}. {{marks}}")
+        if doc.mode == "planmap":
+            text += scale_note(doc)
     return _done(question, doc, text, round(total, 4), "m²", hit, trace, t0=t0)
 
 

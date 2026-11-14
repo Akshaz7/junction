@@ -110,3 +110,37 @@ def answer_printed(question, doc_ids, root, t0):
     n=len(n) if isinstance(n,list) else int(n)
     pts=[load_page_text(doc_ids[0],pg,root) for pg in range(1,min(n,12)+1)]
     return printed_total(question,doc_ids[0],pts,meta.get('title') or '',t0)
+
+
+def cite_sheet_numbers(result, question, root):
+    """Add the actual title-block sheet IDs for pages already cited in a sheet lookup."""
+    if not re.search(r'\bwhich (?:sheets?|pages?)\b', question, re.I) or not result.get('citations'):
+        return result
+    from engine.reader.text import load_page_text
+    from engine.titleblock import _sheet
+    seen=set()
+    additions=[]
+    for citation in list(result['citations']):
+        doc_id,page=citation.get('doc_id'),citation.get('page')
+        if not doc_id or not isinstance(page,int) or (doc_id,page) in seen:
+            continue
+        seen.add((doc_id,page))
+        try:
+            block=_sheet(load_page_text(doc_id,page,root))
+        except (OSError, ValueError, TypeError, KeyError, AttributeError):
+            continue
+        if block is not None and block['text'] not in result['answer'].get('text_md',''):
+            additions.append((doc_id,page,block))
+    if not additions:
+        return result
+    labels=[]
+    for doc_id,page,block in additions:
+        n=max((c.get('n',0) for c in result['citations']),default=0)+1
+        result['citations'].append({'n':n,'doc_id':doc_id,'page':page,'kind':'text','bbox_px':block['bbox_px'],'item_ids':[],
+                                    'quote':block['text']})
+        result['evidence']['boxes'].append({'item_id':f'sheet-text-{page}-{n}','page':page,'bbox_px':block['bbox_px'],'label':str(n)})
+        labels.append(f"**{block['text']}** (page {page}) [{n}]")
+    result['answer']['text_md']+='\n\nSheet numbers: '+', '.join(labels)+'.'
+    result['trace'].append({'step':'text_lookup','detail':'sheet identifiers taken from the title blocks of the already-cited pages',
+                            'ms':0,'model':None,'cost_usd':0})
+    return result

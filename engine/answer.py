@@ -308,6 +308,8 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
         pass
     from engine.solvers.requests import ensure_answer_text
     res = ensure_answer_text(ensure_markers(_guarded(question, doc_ids, on_event, scene_state, history)))
+    from engine.solvers.printed import cite_sheet_numbers
+    res = cite_sheet_numbers(res, question, _root())
     try:   # E-61: implausible raster areas and sparse uploaded plans (engine/rastersanity.py)
         if len(doc_ids) == 1:
             from engine import rastersanity
@@ -477,7 +479,7 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                 return _lib
         if not doc_ids:
             from engine.library import drawing_selection_answer
-            if (selection := drawing_selection_answer(question, root, history)) is not None:
+            if parse(question).type in ("count", "area", "length", "volume") and (selection := drawing_selection_answer(question, root, history)) is not None:
                 return selection
             if (question or "").strip():
                 from engine.project_answer import project_answer

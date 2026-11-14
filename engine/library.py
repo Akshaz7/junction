@@ -220,7 +220,9 @@ def library_answer(question: str, root=None, records=None) -> dict | None:
         text = f"**{len(found)} documents have IFC models:**"
         cites = []
         for n, d in enumerate(found, 1):
-            text += f"\n- {d.get('project') or d.get('title') or d['doc_id']} (`{d['doc_id']}`). [{n}]"
+            title = str(d.get('project') or d.get('title') or "Untitled model")
+            title = re.sub(r"(?<=[a-z])(?=[A-Z])", " ", title).replace("_", " ")
+            text += f"\n- {title}. [{n}]"
             cites.append({"n": n, "doc_id": d["doc_id"], "page": 1, "kind": "text", "bbox_px": None,
                           "item_ids": [], "quote": f"{d.get('title') or d['doc_id']} — IFC file in document metadata"})
         return _result(question, text, docs=[d["doc_id"] for d in found], value=len(found), unit="documents", cites=cites)

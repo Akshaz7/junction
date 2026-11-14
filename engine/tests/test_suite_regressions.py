@@ -160,3 +160,9 @@ def test_uncertain_room_types_are_not_presented_as_a_verified_total(monkeypatch,
     assert r['answer']['value']==1 and r['answer']['confidence']<=.5
     assert '1 additional possible room' in r['answer']['text_md']
     assert 'not a verified total' in r['answer']['text_md']
+
+
+def test_floor_count_carries_drawing_proof():
+    r=ask('How many floors does this drawing show?',['cubicasa5k__colorful-11397'])
+    assert r['answer']['value']==2 and r['citations'] and r['evidence']['boxes']
+    assert '1.kerros' in r['answer']['text_md'] or '1. kerros' in r['answer']['text_md']
