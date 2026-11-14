@@ -6,6 +6,8 @@ The reserved end-only document is read after the other validation has finished.
 from __future__ import annotations
 
 import copy
+import csv
+import io
 import json
 import os
 import re
@@ -24,6 +26,52 @@ from engine.solvers.data import load_doc
 
 OUT = Path("results/final/ORDER")
 ROOT = Path("artifacts").resolve()
+BASELINE = "f42b9d109c095bcb82608317e06ea7acca05e9cd"  # before the paused F-ORDER WIP
+
+
+def check_exports(answers):
+    """Run the production web table/CSV helpers in memory, without shared build caches."""
+    script = r"""
+const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm');
+const ts = require(path.resolve('web/node_modules/typescript'));
+const loaded = new Map();
+function load(file) {
+    file = path.resolve(file);
+    if (loaded.has(file)) return loaded.get(file);
+    const mod = {exports: {}};
+    const code = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
+        compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022}
+    }).outputText;
+    vm.runInNewContext(code, {module: mod, exports: mod.exports,
+        require: id => load(path.resolve(path.dirname(file), id + '.ts'))}, {filename: file});
+    loaded.set(file, mod.exports);
+    return mod.exports;
+}
+const {parseTakeoff, takeoffCsv} = load('web/src/lib/takeoff.ts');
+const answers = JSON.parse(fs.readFileSync(0, 'utf8'));
+process.stdout.write(JSON.stringify(answers.map(answer => {
+    const rows = parseTakeoff(answer);
+    if (!rows) throw new Error('Ordering table was not exportable');
+    return {rows, csv: takeoffCsv(rows)};
+})));
+"""
+    exports = json.loads(subprocess.run(["node", "-e", script], input=json.dumps(answers), text=True,
+                                        capture_output=True, check=True).stdout)
+    quantities = missing = 0
+    for answer, export in zip(answers, exports, strict=True):
+        csv_rows = list(csv.DictReader(io.StringIO(export["csv"].lstrip("\ufeff"))))
+        assert len(csv_rows) == len(export["rows"])
+        value = answer["answer"]["value"]
+        for row, csv_row in zip(export["rows"], csv_rows, strict=True):
+            assert csv_row["Quantity"] == row["quantity"]
+            if row["missing"]:
+                assert csv_row["Unit"] == csv_row["Source"] == ""
+                missing += 1
+            else:
+                assert float(csv_row["Quantity"]) == (value[row["item"]] if isinstance(value, dict) else value)
+                assert csv_row["Source"]
+                quantities += 1
+    return {"answers": len(exports), "matching_quantities": quantities, "explicit_missing_rows": missing}
 
 
 def main():
@@ -33,7 +81,7 @@ def main():
     for module in modules:
         baseline = {"__name__": "baseline_part"}
         file = module.__name__.rsplit(".", 1)[-1]
-        exec(subprocess.check_output(["git", "show", f"HEAD:engine/reasoning_parts/{file}.py"], text=True), baseline)
+        exec(subprocess.check_output(["git", "show", f"{BASELINE}:engine/reasoning_parts/{file}.py"], text=True), baseline)
         baselines.append(baseline["run"])
         currents.append(module.run)
     groups = defaultdict(list)
@@ -92,7 +140,7 @@ def main():
     (OUT / "bathroom_regression.json").write_text(json.dumps(regression, indent=2, ensure_ascii=False) + "\n")
     assert not before_ctx["steps"] and ctx["steps"][0]["kind"] == "measured"
 
-    generality = []
+    generality, order_answers = [], []
     # Different origins: a building model, a CAD drawing, then the preselected unseen scan.
     candidates = []
     for source in ("ifc_bench", "swiss_dwellings"):
@@ -108,6 +156,7 @@ def main():
             assert res is not None and res["cost"]["usd_total"] == 0
             reasoning.attach(res, q, root)
             apply(res)
+            order_answers.append(res)
             assert res.get("reasoning")
             assert "| Item | Quantity | Unit | Waste % | How measured | Source |" in res["answer"]["text_md"]
             if isinstance(res["answer"]["value"], (int, float)):
@@ -118,8 +167,11 @@ def main():
                            "citations": len(res["citations"]), "highlighted_items": len(res["evidence"]["scene"]["highlight_item_ids"]), "confidence": res["reasoning"]["confidence"]})
         generality.append({"doc_id": did, "mode": doc.mode, "end_only": index == 2, "checks": checks})
     (OUT / "real_files.json").write_text(json.dumps(generality, indent=2, ensure_ascii=False) + "\n")
+    export_checks = check_exports(order_answers)
+    (OUT / "exports.json").write_text(json.dumps(export_checks, indent=2) + "\n")
     print(json.dumps({"cards_reviewed": len(review), "issues": sum(len(r["issues"]) for r in review), "unsupported_candidates": len(skipped),
-                      "real_files": len(generality), "real_order_questions": sum(len(r["checks"]) for r in generality), "end_only_doc_id": reserved, "live_cost_usd": 0}))
+                      "real_files": len(generality), "real_order_questions": sum(len(r["checks"]) for r in generality), "end_only_doc_id": reserved,
+                      "export_checks": export_checks, "live_cost_usd": 0}))
 
 
 if __name__ == "__main__":
