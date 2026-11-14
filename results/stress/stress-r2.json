@@ -1,0 +1,5989 @@
+{
+  "tag": "stress-r2",
+  "api_base": "http://localhost:8000",
+  "started_at": "2026-11-14T05:41:49.998509+00:00",
+  "updated_at": "2026-11-14T05:46:54.915193+00:00",
+  "wall_s": 304.89,
+  "group_retries": [],
+  "method": {
+    "seed": 20261114,
+    "schema_sha256": "da19db94ba02ffffd5dbbe384e5964a2dca474519ff9b9f1870eeb8398d67a4e",
+    "schema": "server/schemas/answer.schema.json",
+    "scoring": "engine.bench.score and summarize; text recorded only, not judged",
+    "heldout_usage": "Evaluation only; no training",
+    "pace_seconds": 0.15,
+    "rate_limit_429_count": 0,
+    "limit": 0,
+    "partial_run": false,
+    "leak_detection": "Known credential formats/assignments and system-prompt patterns; heuristic, not a guarantee",
+    "language_detection": "English function-word heuristic; abstentions accepted",
+    "latency": "Client end-to-end includes chat creation, pacing and page bounds requests; engine latency recorded separately",
+    "concurrency": "10 asyncio chats; one burst if no 429 seen, otherwise shared 2.1s pacing"
+  },
+  "coverage": {
+    "population": {
+      "cubicasa5k x count": 666,
+      "ifc_bench x text": 13,
+      "ifc_models x area": 19,
+      "ifc_models x count": 5,
+      "ifc_models x length": 1,
+      "ifc_models x volume": 1,
+      "opening_design x area": 1,
+      "opening_design x count": 1,
+      "opening_design x text": 1,
+      "swiss_dwellings x area": 93,
+      "swiss_dwellings x count": 199
+    },
+    "selected": {
+      "cubicasa5k x count": 199,
+      "swiss_dwellings x count": 59,
+      "ifc_models x area": 5,
+      "swiss_dwellings x area": 27,
+      "opening_design x area": 1,
+      "ifc_bench x text": 4,
+      "opening_design x text": 1,
+      "ifc_models x count": 1,
+      "ifc_models x length": 1,
+      "ifc_models x volume": 1,
+      "opening_design x count": 1
+    },
+    "selected_count": 300,
+    "required_minimum": 300,
+    "all_strata_covered": true
+  },
+  "groups": {
+    "a": {
+      "status": "completed",
+      "total": 300,
+      "passed": 153,
+      "failed": 147
+    },
+    "b": {
+      "status": "completed",
+      "total": 66,
+      "passed": 60,
+      "failed": 6
+    },
+    "c": {
+      "status": "completed",
+      "total": 55,
+      "passed": 55,
+      "failed": 0
+    }
+  },
+  "totals": {
+    "cases": 421,
+    "passed": 268,
+    "failed": 153
+  },
+  "crash_count": 0,
+  "http_5xx_count": 0,
+  "http_5xx": [],
+  "invalid_answer_count": 0,
+  "injection_leak_count": 0,
+  "max_latency_ms": 1522.49,
+  "total_cost_usd": 0.0,
+  "paraphrase_generation_cost_usd": 0.0,
+  "accuracy_by_source_type": {
+    "ALL x ALL": {
+      "n": 300,
+      "correct": 148,
+      "wrong": 111,
+      "abstained": 36,
+      "unscored": 5,
+      "error": 0,
+      "accuracy": 0.5017,
+      "answered_accuracy": 0.5714,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 767,
+      "latency_ms_p95": 853.61
+    },
+    "ALL x area": {
+      "n": 33,
+      "correct": 17,
+      "wrong": 1,
+      "abstained": 15,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.5152,
+      "answered_accuracy": 0.9444,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 760,
+      "latency_ms_p95": 870.29
+    },
+    "ALL x count": {
+      "n": 260,
+      "correct": 131,
+      "wrong": 110,
+      "abstained": 19,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.5038,
+      "answered_accuracy": 0.5436,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 766,
+      "latency_ms_p95": 851.01
+    },
+    "ALL x length": {
+      "n": 1,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 1,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.0,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 839,
+      "latency_ms_p95": 839.93
+    },
+    "ALL x text": {
+      "n": 5,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 0,
+      "unscored": 5,
+      "error": 0,
+      "accuracy": null,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 798,
+      "latency_ms_p95": 839.63
+    },
+    "ALL x volume": {
+      "n": 1,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 1,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.0,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 847,
+      "latency_ms_p95": 847.59
+    },
+    "cubicasa5k x ALL": {
+      "n": 199,
+      "correct": 99,
+      "wrong": 83,
+      "abstained": 17,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.4975,
+      "answered_accuracy": 0.544,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 767,
+      "latency_ms_p95": 851.29
+    },
+    "cubicasa5k x count": {
+      "n": 199,
+      "correct": 99,
+      "wrong": 83,
+      "abstained": 17,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.4975,
+      "answered_accuracy": 0.544,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 767,
+      "latency_ms_p95": 851.29
+    },
+    "ifc_bench x ALL": {
+      "n": 4,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 0,
+      "unscored": 4,
+      "error": 0,
+      "accuracy": null,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 809,
+      "latency_ms_p95": 839.63
+    },
+    "ifc_bench x text": {
+      "n": 4,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 0,
+      "unscored": 4,
+      "error": 0,
+      "accuracy": null,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 809,
+      "latency_ms_p95": 839.63
+    },
+    "ifc_models x ALL": {
+      "n": 8,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 8,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.0,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 736,
+      "latency_ms_p95": 839.93
+    },
+    "ifc_models x area": {
+      "n": 5,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 5,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.0,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 704,
+      "latency_ms_p95": 688.21
+    },
+    "ifc_models x count": {
+      "n": 1,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 1,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.0,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 680,
+      "latency_ms_p95": 680.16
+    },
+    "ifc_models x length": {
+      "n": 1,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 1,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.0,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 839,
+      "latency_ms_p95": 839.93
+    },
+    "ifc_models x volume": {
+      "n": 1,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 1,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.0,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 847,
+      "latency_ms_p95": 847.59
+    },
+    "opening_design x ALL": {
+      "n": 3,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 2,
+      "unscored": 1,
+      "error": 0,
+      "accuracy": 0.0,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 706,
+      "latency_ms_p95": 685.98
+    },
+    "opening_design x area": {
+      "n": 1,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 1,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.0,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 685,
+      "latency_ms_p95": 685.98
+    },
+    "opening_design x count": {
+      "n": 1,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 1,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.0,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 677,
+      "latency_ms_p95": 677.48
+    },
+    "opening_design x text": {
+      "n": 1,
+      "correct": 0,
+      "wrong": 0,
+      "abstained": 0,
+      "unscored": 1,
+      "error": 0,
+      "accuracy": null,
+      "answered_accuracy": null,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 756,
+      "latency_ms_p95": 756.45
+    },
+    "swiss_dwellings x ALL": {
+      "n": 86,
+      "correct": 49,
+      "wrong": 28,
+      "abstained": 9,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.5698,
+      "answered_accuracy": 0.6364,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 768,
+      "latency_ms_p95": 849.76
+    },
+    "swiss_dwellings x area": {
+      "n": 27,
+      "correct": 17,
+      "wrong": 1,
+      "abstained": 9,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.6296,
+      "answered_accuracy": 0.9444,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 773,
+      "latency_ms_p95": 870.29
+    },
+    "swiss_dwellings x count": {
+      "n": 59,
+      "correct": 32,
+      "wrong": 27,
+      "abstained": 0,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.5424,
+      "answered_accuracy": 0.5424,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 765,
+      "latency_ms_p95": 848.17
+    }
+  },
+  "case_results": [
+    {
+      "id": "dataset-000",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 864.16,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-001",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 688.36,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-002",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 809.97,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-003",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 663.45,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-004",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 695.43,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-005",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 819.44,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-006",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 703.92,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-007",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 673.46,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-008",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 844.99,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-009",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 821.87,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-010",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 665.12,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-011",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 669.4,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-012",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 813.17,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-013",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 668.69,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-014",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 693.27,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-015",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 684.36,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-016",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 675.33,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-017",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 674.49,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-018",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 829.17,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-019",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 848.17,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-020",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 816.06,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-021",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 831.35,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-022",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 829.13,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-023",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 823.77,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-024",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 826.14,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-025",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 818.12,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-026",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 834.83,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-027",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 685.98,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-028",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 688.21,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-029",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 693.55,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-030",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 821.35,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-031",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 820.41,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-032",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 851.01,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-033",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 823.39,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-034",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 675.86,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-035",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 821.47,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-036",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 824.71,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-037",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 891.3,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-038",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 805.55,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-039",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 701.12,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-040",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 665.48,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-041",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 721.48,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-042",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 812.96,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-043",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 667.9,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-044",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 690.7,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-045",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "unscored",
+      "latency_ms": 827.23,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-046",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 677.38,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-047",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 670.65,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-048",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "unscored",
+      "latency_ms": 756.45,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-049",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 673.25,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-050",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 806.85,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-051",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 685.89,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-052",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 823.31,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-053",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 859.09,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-054",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 853.61,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-055",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 809.37,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-056",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 674.58,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-057",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 698.84,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-058",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 707.86,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-059",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 810.86,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-060",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 672.06,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-061",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 813.15,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-062",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 684.42,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-063",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 662.67,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-064",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 681.7,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-065",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 838.09,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-066",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 824.03,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-067",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 825.4,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-068",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 694.44,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-069",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 830.6,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-070",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 817.03,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-071",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 847.81,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-072",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 806.2,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-073",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 673.96,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-074",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 817.32,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-075",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 680.16,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-076",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 684.85,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-077",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 822.61,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-078",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 824.81,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-079",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 660.38,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-080",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 674.03,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-081",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 822.21,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-082",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 816.82,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-083",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 667.75,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-084",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 815.76,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-085",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 823.13,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-086",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 667.26,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-087",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 853.97,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-088",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 821.58,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-089",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 696.69,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-090",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 810.62,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-091",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 668.53,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-092",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 827.72,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-093",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 665.24,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-094",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 669.04,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-095",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 690.91,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-096",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 720.08,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-097",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 682.52,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-098",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 671.34,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-099",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 741.67,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-100",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 843.73,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-101",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 669.75,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-102",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 689.35,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-103",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 839.92,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-104",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 704.6,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-105",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 816.67,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-106",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 817.01,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-107",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 700.98,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-108",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 820.19,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-109",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 815.32,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-110",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 678.01,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-111",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 865.37,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-112",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 693.17,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-113",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 839.93,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-114",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 700.53,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-115",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 814.01,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-116",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 698.17,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-117",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 664.82,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-118",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 671.06,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-119",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 828.4,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-120",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 824.99,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-121",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 824.15,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-122",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 836.34,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-123",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 836.4,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-124",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 680.1,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-125",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 813.32,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-126",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 833.98,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-127",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 823.59,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-128",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 680.38,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-129",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 836.57,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-130",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 846.02,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-131",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 840.19,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-132",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 672.08,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-133",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 851.29,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-134",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 817.2,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-135",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 808.94,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-136",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 665.2,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-137",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 678.78,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-138",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 817.0,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-139",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 662.84,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-140",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 720.47,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-141",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 678.37,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-142",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 817.04,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-143",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 824.46,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-144",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 811.34,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-145",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 708.42,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-146",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 672.93,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-147",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 807.64,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-148",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 668.63,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-149",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 671.84,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-150",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 831.32,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-151",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 674.87,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-152",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 817.44,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-153",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 826.72,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-154",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 915.99,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-155",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 697.02,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-156",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 835.48,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-157",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 870.29,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-158",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 820.75,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-159",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 858.32,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-160",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 753.35,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-161",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 820.07,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-162",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 836.81,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-163",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 861.07,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-164",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 692.62,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-165",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 819.65,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-166",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 823.31,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-167",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 820.0,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-168",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 828.22,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-169",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 679.39,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-170",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 683.87,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-171",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 679.1,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-172",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 820.36,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-173",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 672.3,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-174",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 673.89,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-175",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 820.65,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-176",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 825.99,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-177",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 812.63,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-178",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 671.65,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-179",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 824.68,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-180",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 669.23,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-181",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 689.88,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-182",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 758.75,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-183",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 829.47,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-184",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 818.5,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-185",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 695.09,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-186",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "unscored",
+      "latency_ms": 839.63,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-187",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 707.74,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-188",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 740.77,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-189",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 833.72,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-190",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 821.08,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-191",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "unscored",
+      "latency_ms": 906.99,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-192",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 694.66,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-193",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 820.52,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-194",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 808.85,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-195",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 741.71,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-196",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 821.37,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-197",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 847.59,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-198",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 673.63,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-199",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 819.14,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-200",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 810.26,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-201",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 811.3,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-202",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 692.31,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-203",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 814.58,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-204",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 820.26,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-205",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 821.19,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-206",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 820.83,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-207",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 816.46,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-208",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 820.9,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-209",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 820.45,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-210",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 832.47,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-211",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 684.1,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-212",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 830.25,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-213",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 816.09,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-214",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 820.74,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-215",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 813.45,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-216",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 815.05,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-217",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 810.95,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-218",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 687.07,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-219",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 808.63,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-220",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 671.3,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-221",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 817.95,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-222",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 884.48,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-223",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 815.47,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-224",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 665.68,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-225",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 737.5,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-226",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 828.92,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-227",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 663.01,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-228",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 670.88,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-229",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 810.17,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-230",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 825.21,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-231",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 830.85,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-232",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 823.47,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-233",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 849.76,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-234",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 668.52,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-235",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 666.02,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-236",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 692.45,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-237",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 676.05,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-238",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 813.48,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-239",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 673.23,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-240",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 677.48,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-241",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 686.38,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-242",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 663.33,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-243",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "unscored",
+      "latency_ms": 664.12,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "dataset-244",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 672.91,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-245",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 841.33,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-246",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 826.18,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-247",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 707.75,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-248",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 836.73,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-249",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 828.85,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-250",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 881.06,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-251",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 832.71,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-252",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 842.96,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-253",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 871.7,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-254",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 839.8,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-255",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 818.53,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-256",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 716.58,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-257",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 795.54,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-258",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 811.1,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-259",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 690.71,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-260",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 823.66,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-261",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 679.28,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-262",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 827.62,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-263",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 673.64,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-264",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 677.29,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-265",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 718.94,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-266",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 824.27,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-267",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 830.44,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-268",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 682.8,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-269",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 668.23,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-270",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 681.71,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-271",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 825.31,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-272",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 812.44,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-273",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 708.97,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-274",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 836.71,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-275",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 814.56,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-276",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 825.49,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-277",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 820.61,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-278",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 663.57,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-279",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 699.61,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-280",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 809.12,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-281",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 676.44,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-282",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 845.4,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-283",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 702.36,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-284",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 819.97,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-285",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 850.76,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-286",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 873.54,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-287",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 865.78,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-288",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 817.54,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-289",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 812.27,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-290",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 822.13,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-291",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "abstained",
+      "latency_ms": 843.87,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-292",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 702.51,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-293",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 690.13,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-294",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 821.35,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-295",
+      "group": "a",
+      "passed": false,
+      "http_status": 200,
+      "outcome": "wrong",
+      "latency_ms": 816.79,
+      "cost_usd": 0,
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-296",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 664.78,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-297",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 672.35,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-298",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 814.84,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "dataset-299",
+      "group": "a",
+      "passed": true,
+      "http_status": 200,
+      "outcome": "correct",
+      "latency_ms": 678.51,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "C01-original",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 860.25,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-00",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 814.98,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-01",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 670.75,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-02",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 668.86,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-03",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 667.0,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-04",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 715.55,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-05",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 676.59,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-06",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 677.26,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-07",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 665.09,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-08",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 672.84,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "C01-paraphrase-09",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 692.02,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C16-original",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 878.14,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C16-paraphrase-00",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 815.88,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C16-paraphrase-01",
+      "group": "b",
+      "passed": false,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 668.41,
+      "cost_usd": 0.0,
+      "errors": [
+        "paraphrase changed numeric answer"
+      ]
+    },
+    {
+      "id": "C16-paraphrase-02",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 800.22,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C16-paraphrase-03",
+      "group": "b",
+      "passed": false,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 668.06,
+      "cost_usd": 0.0,
+      "errors": [
+        "paraphrase changed numeric answer"
+      ]
+    },
+    {
+      "id": "C16-paraphrase-04",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 816.18,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C16-paraphrase-05",
+      "group": "b",
+      "passed": false,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 671.69,
+      "cost_usd": 0.0,
+      "errors": [
+        "paraphrase changed numeric answer"
+      ]
+    },
+    {
+      "id": "C16-paraphrase-06",
+      "group": "b",
+      "passed": false,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 675.3,
+      "cost_usd": 0.0,
+      "errors": [
+        "paraphrase changed numeric answer"
+      ]
+    },
+    {
+      "id": "C16-paraphrase-07",
+      "group": "b",
+      "passed": false,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 663.21,
+      "cost_usd": 0.0,
+      "errors": [
+        "paraphrase changed numeric answer"
+      ]
+    },
+    {
+      "id": "C16-paraphrase-08",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 789.99,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C16-paraphrase-09",
+      "group": "b",
+      "passed": false,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 697.87,
+      "cost_usd": 0.0,
+      "errors": [
+        "paraphrase changed numeric answer"
+      ]
+    },
+    {
+      "id": "C19-original",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 839.85,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C19-paraphrase-00",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 823.14,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C19-paraphrase-01",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 827.92,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C19-paraphrase-02",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 687.95,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C19-paraphrase-03",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 890.04,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C19-paraphrase-04",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 706.18,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C19-paraphrase-05",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 852.45,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C19-paraphrase-06",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 920.67,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C19-paraphrase-07",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 676.08,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C19-paraphrase-08",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 872.09,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C19-paraphrase-09",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 893.23,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C20-original",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 830.34,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C20-paraphrase-00",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 799.56,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C20-paraphrase-01",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 784.91,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C20-paraphrase-02",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 802.13,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C20-paraphrase-03",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 808.48,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C20-paraphrase-04",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 778.4,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C20-paraphrase-05",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 801.19,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C20-paraphrase-06",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 786.12,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C20-paraphrase-07",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 794.14,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C20-paraphrase-08",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 784.62,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C20-paraphrase-09",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 801.96,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C21-original",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 778.46,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C21-paraphrase-00",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 803.55,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C21-paraphrase-01",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 690.1,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C21-paraphrase-02",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 776.62,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C21-paraphrase-03",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 677.39,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C21-paraphrase-04",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 788.39,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C21-paraphrase-05",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 667.12,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C21-paraphrase-06",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 779.24,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C21-paraphrase-07",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 793.45,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C21-paraphrase-08",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 687.84,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C21-paraphrase-09",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 666.79,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C22-original",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 779.81,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C22-paraphrase-00",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 780.79,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C22-paraphrase-01",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 776.91,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C22-paraphrase-02",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 833.43,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C22-paraphrase-03",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 799.67,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C22-paraphrase-04",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 801.15,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C22-paraphrase-05",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 798.58,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C22-paraphrase-06",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 781.56,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C22-paraphrase-07",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 818.65,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C22-paraphrase-08",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 780.59,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "C22-paraphrase-09",
+      "group": "b",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 835.35,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "empty",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 641.88,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "long",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 696.3,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "finnish",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 698.23,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "spanish",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 693.37,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "german",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 668.54,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "nonsense",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 662.65,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "injection-ignore",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 915.8,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "injection-prompt",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 725.39,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "injection-keys",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 721.27,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "wrong-doc",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 664.19,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "no-doc",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 714.02,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "multi-doc",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 720.3,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "scene-cubicasa5k__high-quality-108-show",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 729.73,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "scene-cubicasa5k__high-quality-108-show-persisted",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 189.81,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "scene-cubicasa5k__high-quality-108-remove",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 703.84,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "scene-cubicasa5k__high-quality-108-remove-persisted",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 127.87,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "scene-cubicasa5k__high-quality-108-undo",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 742.57,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "scene-cubicasa5k__high-quality-108-undo-persisted",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 126.03,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "scene-cubicasa5k__high-quality-108-remove-again",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 706.53,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "scene-cubicasa5k__high-quality-108-remove-again-persisted",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 127.76,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "scene-cubicasa5k__high-quality-108-restore",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 736.26,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "scene-cubicasa5k__high-quality-108-restore-persisted",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 125.84,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "scene-cubicasa5k__high-quality-108-reset",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 731.41,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "scene-cubicasa5k__high-quality-108-reset-persisted",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 125.23,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "scene-ifc_bench__ac20-arc-show",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 717.58,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "scene-ifc_bench__ac20-arc-show-persisted",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 127.17,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "scene-ifc_bench__ac20-arc-remove",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 714.14,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "scene-ifc_bench__ac20-arc-remove-persisted",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 131.8,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "scene-ifc_bench__ac20-arc-undo",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 734.47,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "scene-ifc_bench__ac20-arc-undo-persisted",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 127.69,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "scene-ifc_bench__ac20-arc-remove-again",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 701.99,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "scene-ifc_bench__ac20-arc-remove-again-persisted",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 128.34,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "scene-ifc_bench__ac20-arc-restore",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 706.42,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "scene-ifc_bench__ac20-arc-restore-persisted",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 135.46,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "scene-ifc_bench__ac20-arc-reset",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 684.59,
+      "cost_usd": 0.0,
+      "errors": []
+    },
+    {
+      "id": "scene-ifc_bench__ac20-arc-reset-persisted",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 128.49,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "concurrent-0",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 1321.68,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "concurrent-7",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 1398.74,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "concurrent-9",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 1422.62,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "concurrent-5",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 1437.52,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "concurrent-6",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 1459.96,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "concurrent-2",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 1466.78,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "concurrent-4",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 1478.37,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "concurrent-8",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 1499.94,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "concurrent-3",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 1507.56,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "concurrent-1",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 1522.49,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "live-sync-chat-message",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 513.74,
+      "cost_usd": 0,
+      "errors": []
+    },
+    {
+      "id": "two-device-live-sync",
+      "group": "c",
+      "passed": true,
+      "http_status": null,
+      "outcome": null,
+      "latency_ms": 736.34,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "upload-png",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 144.84,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "upload-jpg",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 126.09,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "upload-pdf",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 144.82,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "upload-dxf",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 154.22,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "upload-ifc",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 152.61,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "upload-svg",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 150.19,
+      "cost_usd": null,
+      "errors": []
+    },
+    {
+      "id": "upload-corrupt",
+      "group": "c",
+      "passed": true,
+      "http_status": 200,
+      "outcome": null,
+      "latency_ms": 153.19,
+      "cost_usd": null,
+      "errors": []
+    }
+  ],
+  "failures": [
+    {
+      "id": "dataset-001",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-003",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-009",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-010",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-012",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-013",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-014",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-015",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-016",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-018",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-026",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-027",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-028",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-029",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-030",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-032",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-033",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-035",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-039",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-040",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-043",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-044",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-046",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-050",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-055",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-056",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-057",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-059",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-060",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-061",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-062",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-063",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-064",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-066",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-067",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-068",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-071",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-072",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-073",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-074",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-075",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-078",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-080",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-082",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-083",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-084",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-085",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-086",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-088",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-090",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-093",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-094",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-095",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-096",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-097",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-098",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-100",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-106",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-112",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-113",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-114",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-117",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-118",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-125",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-126",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-129",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-130",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-133",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-136",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-138",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-143",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-144",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-145",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-146",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-147",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-148",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-150",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-154",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-158",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-166",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-169",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-170",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-172",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-173",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-175",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-176",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-179",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-180",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-181",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-184",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-185",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-187",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-188",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-194",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-197",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-200",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-201",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-202",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-204",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-205",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-207",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-210",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-213",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-216",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-217",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-219",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-220",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-221",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-223",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-224",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-226",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-229",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-231",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-233",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-234",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-238",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-239",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-240",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-241",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-245",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-246",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-252",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-255",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-256",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-258",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-262",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-263",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-264",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-267",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-269",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-270",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-271",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-272",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-275",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-278",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-280",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-283",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-284",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-285",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-286",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-288",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-290",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-291",
+      "group": "a",
+      "errors": [
+        "numeric gold: abstained"
+      ]
+    },
+    {
+      "id": "dataset-292",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-293",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-294",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "dataset-295",
+      "group": "a",
+      "errors": [
+        "numeric gold: wrong"
+      ]
+    },
+    {
+      "id": "C16-paraphrase-01",
+      "group": "b",
+      "errors": [
+        "paraphrase changed numeric answer"
+      ]
+    },
+    {
+      "id": "C16-paraphrase-03",
+      "group": "b",
+      "errors": [
+        "paraphrase changed numeric answer"
+      ]
+    },
+    {
+      "id": "C16-paraphrase-05",
+      "group": "b",
+      "errors": [
+        "paraphrase changed numeric answer"
+      ]
+    },
+    {
+      "id": "C16-paraphrase-06",
+      "group": "b",
+      "errors": [
+        "paraphrase changed numeric answer"
+      ]
+    },
+    {
+      "id": "C16-paraphrase-07",
+      "group": "b",
+      "errors": [
+        "paraphrase changed numeric answer"
+      ]
+    },
+    {
+      "id": "C16-paraphrase-09",
+      "group": "b",
+      "errors": [
+        "paraphrase changed numeric answer"
+      ]
+    }
+  ],
+  "stopped_reason": null
+}

@@ -1,6 +1,6 @@
 # MORNING: report for Ash
 
-_Last updated: Sat 14 Nov 07:26 EET (run 1). See TASKS.md for every row._
+_Last updated: Sat 14 Nov 08:12 EET (run 1). See TASKS.md for every row._
 
 ## 1. What works
 | Demo step (MASTER_PROMPT §12) | Status |
@@ -15,8 +15,8 @@ _Last updated: Sat 14 Nov 07:26 EET (run 1). See TASKS.md for every row._
 | 8. Edit in 3D → sourced advisor card | partly: 3D edit mode (remove/move/material) sends advisor requests and renders sourced cards (T-08); engine advisor rules in progress (E-16). Building-rule sources are watched live: 2 Context.dev monitors (results/watch/monitors.json) feed a 'rule source changed' entry and rerun the checks (E-17; the webhook attaches once the backend is deployed) |
 
 ## 2. Numbers (each from a results/ file)
-- Answer accuracy (results/bench/sample200-r10.json, docs/ACCURACY.md): 66.3 % on sample200 (counts 63.0 %, areas 79.5 %), from 25.7 % at the start of the night; numeric answers cost $0. IFC text questions are weakest (37.5 % judged, r10).
-- Stress (results/stress/stress-r1.json): 411 cases, 0 crashes, 0 server errors, 0 invalid answers, 0 prompt-injection leaks; paraphrases agree 55/56. Dataset group 60/300 because 4,546 CubiCasa drawings had no plan map yet: a vision batch is filling them now (4,241 plan maps at 07:23, inference only), then stress-r2.
+- Answer accuracy (results/bench/sample200-r10.json, docs/ACCURACY.md): 66.3 % on sample200 (counts 63.0 %, areas 79.5 %), from 25.7 % at the start of the night; numeric answers cost $0. IFC text questions went from 37.5 % to 72.7 % judged after E-09 (results/bench/e09_text.json).
+- Stress (results/stress/stress-r2.json, after the overnight CubiCasa plan-map batch): 421 cases, 0 crashes, 0 server errors, 0 invalid answers, 0 prompt-injection leaks, p95 0.85 s, $0. Dataset group 153/300 (r1: 60/300), accuracy 50.2 % (r1: 18.6 %); edge cases 55/55, paraphrases 60/66.
 - 3D performance (results/viewer3d_perf.json): largest model 99.6 MB / 5.4 M triangles loads in 1.2 s, 60 fps on the Mac.
 - Stoa look (results/fidelity/report.json): all desktop screens and nearly all phone screens within 1.5–2 % of the reference frames.
 - Router (question parser): 97.4% on 420 unique held-out questions with rules only, $0 per question; Nemotron fallback alone 95.0% at $0.0000025/question (`results/router_cost.json`). kind/scope labels were written by ENGINE: treat 97.4% as an upper bound.
@@ -27,6 +27,7 @@ _Last updated: Sat 14 Nov 07:26 EET (run 1). See TASKS.md for every row._
 None yet. Aiven Postgres `hologram-pg` is running (EU, do-fra) and seeded. App deploy waits for the Aiven GitHub App (below) and the tier-1 web rows.
 
 ## 4. Rows blocked
+- V-06, V-07, V-08 (vision fine-tunes): the Modal workspace is paused (every call: "Workspace … is paused"). Un-pause it in the Modal dashboard; scripts are ready (results/vision/seg_finetuned.json, det_finetuned.json).
 - I-05 (install on iPhone): blocked-human, by design (Ash plugs in the phone in the morning).
 - ifc_models__resbim-388-model: a 2.5 KB stub IFC, skipped (not a row).
 
@@ -44,7 +45,7 @@ None now. OK: NVIDIA, Runware, HF, ElevenLabs, Modal, Aiven. Missing: GEMINI_API
 
 
 ## 7. Proposed plan for the next run
-All tier-1 done tests except S-05 (deploy) pass. Open: full bench + model comparison (E-10, running), advisor (E-16), vision fine-tunes (V-05..V-08), iOS composer-after-AR bug (I-15 follow-up). Deploy (S-05) as soon as the Aiven GitHub App is installed.
+All tier-1 done tests except S-05 (deploy) pass. Open: full bench + model comparison (E-10, running), advisor (E-16), vision fine-tunes (V-05..V-08), Deploy (S-05) as soon as the Aiven GitHub App is installed.
 
 ## 8. Known weak spots to avoid in the live demo
 - Bathtub/shower counts on raster plans (0/3 on colorful-11397).
