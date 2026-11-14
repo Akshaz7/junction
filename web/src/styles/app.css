@@ -904,3 +904,8 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
   .topbar .wordmark { display: inline-flex !important; color: #fff; font-size: 20px; gap: .25em; }
   .topbar .wordmark .brand-logo { height: .8em; }
 }
+/* W-66e: rail mark stacked (STOA logo, PRO underneath) so both read at a glance. */
+.rail .brand-mark { top: 22px; left: 8px; width: 88px; flex-direction: column; gap: 3px; font-size: 19px; }
+.rail .brand-mark .brand-pro { font-size: .78em; letter-spacing: .32em; margin-right: -.32em; }
+.rail nav { top: 100px; }
+.rail .brand-mark .brand-pro { translate: .62em 0; }
