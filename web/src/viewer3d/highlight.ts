@@ -66,6 +66,8 @@ export function createHighlightController(scene: LoadedScene) {
       scene.root.traverse((object) => {
         const mesh = object as Mesh;
         if (!mesh.isMesh) return;
+        // The textured drawing remains readable beneath the rising items.
+        if (mesh.name === 'plan_floor') return;
         let owner: string | undefined;
         for (let current: Object3D | null = mesh; current; current = current.parent) {
           owner = scene.itemIdsByObject.get(current);

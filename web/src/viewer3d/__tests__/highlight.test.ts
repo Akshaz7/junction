@@ -35,6 +35,20 @@ function fixture() {
 }
 
 describe('highlight materials and contract item state', () => {
+  it('preserves the textured plan floor while the answer items glow', () => {
+    const { scene, controller } = fixture();
+    const floor = new Mesh(new BoxGeometry(), new MeshStandardMaterial());
+    floor.name = 'plan_floor';
+    floor.material.map = new Texture();
+    scene.root.add(floor);
+    const original = floor.material;
+    controller.highlight(['window-a']);
+    expect(floor.material).toBe(original);
+    expect(floor.material.opacity).toBe(1);
+    controller.clearHighlight();
+    expect(floor.material).toBe(original);
+  });
+
   it('keeps citation numbers tied to IDs when selection order differs from scene order', () => {
     const { controller } = fixture();
     const ids = ['wall-c', 'window-b', 'window-a'];

@@ -84,12 +84,18 @@ export function documentFileUrl(manifestUrl: string | URL, name: string): string
   return url.href;
 }
 
+export class SceneLoadError extends Error {
+  constructor(readonly status: number) {
+    super(`Could not load scene manifest (${status})`);
+  }
+}
+
 /** Loads scene.json; API assets use the file route, offline assets stay relative. */
 export async function loadScene(manifestUrl: string | URL): Promise<LoadedScene> {
   const base = typeof location === 'undefined' ? undefined : location.href;
   const url = new URL(manifestUrl, base);
   const response = await fetch(url);
-  if (!response.ok) throw new Error(`Could not load scene manifest (${response.status})`);
+  if (!response.ok) throw new SceneLoadError(response.status);
   const manifest = await response.json() as SceneManifest;
   if (manifest.units !== 'm' || manifest.up !== 'Y' || !manifest.items) {
     throw new Error('Scene must use CONTRACT 5.5: metres, Y up, and an items map');

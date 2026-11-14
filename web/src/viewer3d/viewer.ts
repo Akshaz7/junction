@@ -10,6 +10,7 @@ import {
 import {
   disposeScene, itemIdForObject, loadScene, setStorey, type LoadedScene,
 } from './scene';
+import { createRiseAnimation, scheduleRiseTransitions, type RisePhase, type RiseState } from './rise';
 
 export interface Viewer {
   readonly renderer: WebGLRenderer;
@@ -23,6 +24,8 @@ export interface Viewer {
   highlight(item_ids: readonly string[], options?: HighlightOptions): void;
   clearHighlight(): void;
   getHighlightState(): HighlightState;
+  /** Show the flat plan/top-down IFC view, then raise the architectural items. */
+  visualise(onStateChange?: (state: RiseState) => void): void;
   /** Coordinates are viewport client pixels, as in PointerEvent.clientX/clientY. */
   pick(x: number, y: number): string | null;
   resize(): void;
@@ -53,6 +56,10 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   let highlights: ReturnType<typeof createHighlightController> | null = null;
   const labels: CSS2DObject[] = [];
   let flight: { start: number; from: Vector3; to: Vector3; targetFrom: Vector3; targetTo: Vector3 } | null = null;
+  let rise: {
+    animation: ReturnType<typeof createRiseAnimation>; from: Vector3; to: Vector3;
+    phase: RisePhase; onStateChange?: (state: RiseState) => void; cancelTransitions: () => void;
+  } | null = null;
   const raycaster = new Raycaster();
   const pointer = new Vector2();
 
@@ -92,6 +99,12 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       to: sphere.center.clone().addScaledVector(direction, distance),
       targetFrom: controls.target.clone(), targetTo: sphere.center,
     };
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      camera.position.copy(flight.to);
+      controls.target.copy(flight.targetTo);
+      camera.lookAt(controls.target);
+      flight = null;
+    }
     camera.near = Math.min(camera.near, radius / 1000);
     camera.far = Math.max(camera.far, distance + radius * 10);
     camera.updateProjectionMatrix();
@@ -102,6 +115,8 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   function highlight(ids: readonly string[], options: HighlightOptions = {}): void {
     clearHighlight();
     if (disposed || !active || !highlights) return;
+    // Compute labels using full geometry: a flat node has a singular world matrix.
+    rise?.animation.restore();
     const accent = readHighlightColor(canvas);
     highlights.highlight(ids, options, accent);
     const state = highlights.getHighlightState();
@@ -123,11 +138,61 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       labels.push(label);
     }
     const target = options.cameraTargetItemId;
-    flyTo(itemBounds(active, target && active.items.has(target) ? [target] : state.highlighted));
+    if (rise) rise.animation.sample(performance.now());
+    else flyTo(itemBounds(active, target && active.items.has(target) ? [target] : state.highlighted));
+  }
+
+  function visualise(onStateChange?: (state: RiseState) => void): void {
+    if (disposed || !active) return;
+    rise?.cancelTransitions();
+    rise?.animation.restore();
+    rise = null;
+    flight = null;
+    fit(active);
+    const to = camera.position.clone();
+    const distance = to.distanceTo(controls.target);
+    // A tiny Z offset avoids the camera-up singularity at an exact overhead view.
+    const from = controls.target.clone().add(new Vector3(0, distance, distance * 0.001));
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const animation = createRiseAnimation(active, performance.now(), reducedMotion);
+    const state = animation.sample(performance.now());
+    if (!reducedMotion) {
+      rise = { animation, from, to, phase: state.phase, onStateChange,
+        cancelTransitions: scheduleRiseTransitions(sampleRise) };
+      camera.position.copy(from);
+      camera.lookAt(controls.target);
+    }
+    onStateChange?.(state);
+  }
+
+  function sampleRise(): void {
+    const current = rise;
+    if (!current || disposed) return;
+    const state = current.animation.sample(performance.now());
+    camera.position.lerpVectors(current.from, current.to, state.progress);
+    camera.lookAt(controls.target);
+    if (state.phase !== current.phase) {
+      current.phase = state.phase;
+      current.onStateChange?.(state);
+    }
+    if (state.phase === 'done') {
+      current.cancelTransitions();
+      rise = null;
+    }
   }
 
   // Direct orbit/zoom input takes over from a camera flight.
-  controls.addEventListener('start', () => { flight = null; });
+  controls.addEventListener('start', () => {
+    flight = null;
+    // User input takes over both the camera and the animation.
+    if (rise) {
+      const previous = rise;
+      rise = null;
+      previous.cancelTransitions();
+      previous.animation.restore();
+      previous.onStateChange?.({ phase: 'done', progress: 1 });
+    }
+  });
 
   function fit(scene: LoadedScene): void {
     scene.root.updateWorldMatrix(true, true);
@@ -151,6 +216,9 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
 
   function attach(scene: LoadedScene): void {
     if (active === scene) return;
+    rise?.cancelTransitions();
+    rise?.animation.restore();
+    rise = null;
     clearHighlight();
     if (active) {
       world.remove(active.root);
@@ -171,6 +239,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   function render(): void {
     if (disposed) return;
     controls.update();
+    sampleRise();
     if (flight) {
       const progress = Math.min(1, (performance.now() - flight.start) / 600);
       const eased = progress * progress * (3 - 2 * progress);
@@ -213,6 +282,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     getHighlightState() {
       return highlights?.getHighlightState() ?? { highlighted: [], dimmed: 0, labels: {} };
     },
+    visualise,
     pick(x, y) {
       if (disposed || !active) return null;
       const rect = canvas.getBoundingClientRect();
@@ -236,6 +306,9 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       observer.disconnect();
       window.removeEventListener('resize', resize);
       controls.dispose();
+      rise?.cancelTransitions();
+      rise?.animation.restore();
+      rise = null;
       clearHighlight();
       labelRenderer.domElement.remove();
       if (active) {

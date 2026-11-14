@@ -84,3 +84,37 @@ checks citation labels, and clears the selection.
 bbox centre, clicks it, checks identity/storey, and dismisses the card. Its camera
 sits within the opening so enclosing IFC space surfaces cannot intercept the
 door click. The optional elements endpoint enriches the assertion when available.
+
+For answer cards and documents, T-04 exports the ready-to-place button:
+
+```tsx
+import { VisualiseItButton, VisualisePanel } from './viewer3d';
+
+<VisualiseItButton answer={answer} />
+<VisualiseItButton docId={docId} />
+// Or mount a controlled panel:
+<VisualisePanel docId={docId} highlight={itemIds} labels={labelsByItemId} onClose={close} />
+```
+
+The button opens a modal with focus containment, Escape/Close dismissal and
+focus restoration. The scene loads through the same API routes. It holds a
+top-down flat plan for 600 ms, then eases wall/door/window Y scales to their
+original values over 1200 ms while the camera moves into perspective. The
+textured `plan_floor` stays readable. IFC scenes also begin top-down. Reduced
+motion opens the completed view immediately. Orbit input finishes the rise
+and gives the user camera control. Timer fallbacks advance the rise phases even
+when animation frames are delayed; closing cancels these timers and disposes
+the viewer and animation. The dialog reports `loading`, `flat`, `rising`, `done`,
+or `error` through `data-rise-state`.
+A missing scene displays “3D model not available for this document”.
+
+`answerToVisualise` uses the scene document ID, the exact answer highlight IDs,
+and the original box labels without renumbering. The dev page includes a document
+ID input and a fake answer labelled “generated for demo”. Only this page exposes
+`window.visualise3dTest.getHighlightState()` for the visualise browser test.
+LEAD runs `scripts/heavy.sh` with
+`npx playwright test e2e/viewer3d-visualise.spec.ts`; that test captures flat and
+raised screenshots, checks the five IDs and labels, and covers missing scenes
+and reduced motion. Its clock skips intermediate frames to keep software
+rendering within the test timeout. The worker type-checks it because browser
+launch is blocked in its sandbox.

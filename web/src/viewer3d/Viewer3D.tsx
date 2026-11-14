@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useId, useRef, useState, type PointerEvent } from 'react';
-import { documentFileUrl, documentSceneUrl, storeyName, type SceneManifest } from './scene';
+import { documentFileUrl, documentSceneUrl, SceneLoadError, storeyName, type SceneManifest } from './scene';
 import { buildItemDetails, indexElements, type IFCElement } from './identify';
 import { ItemDetailsCard } from './ItemDetailsCard';
 import { createViewer, type Viewer } from './viewer';
 import type { HighlightOptions } from './highlight';
+import type { RiseState } from './rise';
 import './viewer3d.css';
 
 interface ViewerOptions {
@@ -14,6 +15,9 @@ interface ViewerOptions {
   highlightOptions?: HighlightOptions;
   /** Imperative highlight/clearHighlight API, called once the scene is ready. */
   onReady?: (viewer: Viewer) => void;
+  visualise?: boolean;
+  onRiseStateChange?: (state: RiseState) => void;
+  onError?: (message: string) => void;
 }
 
 /** Provide a document ID for the API, or an offline scene.json URL. */
@@ -21,11 +25,13 @@ export type Viewer3DProps = ViewerOptions & (
   { doc_id: string; sceneUrl?: never } | { sceneUrl: string; doc_id?: never }
 );
 
-export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, highlightItemIds, highlightOptions, onReady }: Viewer3DProps) {
+export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, highlightItemIds, highlightOptions, onReady, visualise = false, onRiseStateChange, onError }: Viewer3DProps) {
   const sceneUrl = doc_id !== undefined ? documentSceneUrl(doc_id) : sourceUrl!;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
   const onReadyRef = useRef(onReady);
+  const riseStateRef = useRef(onRiseStateChange);
+  const onErrorRef = useRef(onError);
   const pointerStart = useRef<{ id: number; x: number; y: number } | null>(null);
   const [selectedStorey, setSelectedStorey] = useState<string | null>(storey);
   const [storeys, setStoreys] = useState<string[]>([]);
@@ -41,6 +47,8 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, h
   const details = manifest && picked ? buildItemDetails(manifest, picked, elements.get(picked)) : null;
 
   useEffect(() => { onReadyRef.current = onReady; }, [onReady]);
+  useEffect(() => { riseStateRef.current = onRiseStateChange; }, [onRiseStateChange]);
+  useEffect(() => { onErrorRef.current = onError; }, [onError]);
 
   useEffect(() => {
     setSelectedStorey(storey);
@@ -60,8 +68,12 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, h
 
     function fail(reason: unknown) {
       if (!active) return;
-      setError(reason instanceof Error ? reason.message : 'Could not load the 3D scene.');
+      const message = reason instanceof SceneLoadError && reason.status === 404
+        ? '3D model not available for this document'
+        : reason instanceof Error ? reason.message : 'Could not load the 3D scene.';
+      setError(message);
       setState('error');
+      onErrorRef.current?.(message);
     }
 
     try {
@@ -116,6 +128,12 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, h
     if (state !== 'ready' || highlightItemIds === undefined) return;
     viewerRef.current?.highlight(highlightItemIds, highlightOptions);
   }, [state, highlightItemIds, highlightOptions, sceneUrl]);
+
+  useEffect(() => {
+    if (state === 'ready' && visualise) {
+      viewerRef.current?.visualise((next) => riseStateRef.current?.(next));
+    }
+  }, [state, visualise, sceneUrl]);
 
   function pick(event: PointerEvent<HTMLCanvasElement>) {
     const start = pointerStart.current;
