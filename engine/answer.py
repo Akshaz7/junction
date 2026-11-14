@@ -75,6 +75,7 @@ def _reader(question, doc_ids, root, trace, calls, t0, emit):
     try:
         from engine.reader import read_answer
         emit("status", {"text": "Reading the drawing closely…"})
+        emit("answer.delta", {"text": "_Reading the drawing closely…_"})   # first text at once; the real answer replaces it
         return read_answer(question, doc_ids, root, on_event=emit, trace=trace, calls=calls, t0=t0)
     except Exception as e:  # noqa: BLE001
         trace.append(_step("error", f"reader failed ({type(e).__name__}: {str(e)[:80]})"))
@@ -497,6 +498,7 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             if tdoc is not None and tdoc.mode == "planmap" and os.environ.get("READ_DRAWING", "1") != "0":
                 from engine.readdraw import read_drawing
                 emit("status", {"text": f"Exploring document: {_title(doc_ids[0], root)}"})
+                emit("answer.delta", {"text": "_Reading the drawing…_"})
                 res = read_drawing(question, tdoc, root)
                 for s_ in res["trace"]:
                     add(s_)

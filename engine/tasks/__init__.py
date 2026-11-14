@@ -129,6 +129,7 @@ def run_task(name: str, question: str, doc_ids: list[str], history, on_event, tr
         emit("trace", step)
 
     emit("status", {"text": f"Gathering evidence for: {LABEL[name].lower()}"})
+    emit("answer.delta", {"text": f"**{LABEL[name]}**\n\n_Gathering evidence from the documents…_"})   # first text at once
     ts = time.perf_counter()
     ev = gather(name, question, doc_ids, root)
     add(_step("evidence", f"{len(ev.items)} evidence item(s); scope: {ev.scope}" + (f"; gaps: {len(ev.gaps)}" if ev.gaps else ""),
@@ -141,6 +142,7 @@ def run_task(name: str, question: str, doc_ids: list[str], history, on_event, tr
         return _finish(question, doc_ids, txt, ev, [], trace, t0, calls, conf=0.3)
 
     emit("status", {"text": f"Writing the {LABEL[name].lower()}…"})
+    emit("answer.delta", {"text": f"**{LABEL[name]}**\n\n_Writing from {len(ev.items)} evidence item(s)…_"})
     text, meta = None, None
     ts = time.perf_counter()
     try:

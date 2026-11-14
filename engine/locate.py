@@ -61,4 +61,13 @@ def locate_answer(question: str, doc: Doc, what: str, t0: float | None = None) -
     label = {"stair core": "stair core element", "stairs": "stair", "lift": "lift", "entrance": "entrance door"}[what] + ("s" if len(items) != 1 else "")
     text = f"**{len(items)} {label}** {where}: {'; '.join(parts)}. [1] Found from the model's elements" + \
            (" and outer-door geometry, an inference rather than a marked entrance." if what == "entrance" else ".")
-    return _out(question, doc, text, ids, [({i: tg[i] for i in ids if i in tg}, st)], t0, trace_detail=f"{what}: {len(items)} items")
+    res = _out(question, doc, text, ids, [({i: tg[i] for i in ids if i in tg}, st)], t0, trace_detail=f"{what}: {len(items)} items")
+    try:   # numbered boxes on the storey plans and one citation per page, same numbers as 3D / AR
+        from engine.solvers.solve import _evidence
+        boxes, cites, _scene = _evidence(doc, items)
+        if boxes:
+            res["evidence"]["boxes"], res["citations"] = boxes, cites
+            res["answer"]["text_md"] = text.replace("[1]", "".join(f"[{c['n']}]" for c in cites), 1)
+    except Exception:  # noqa: BLE001
+        pass
+    return res

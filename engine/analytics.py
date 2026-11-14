@@ -286,7 +286,7 @@ def cond_count(question: str, doc: Doc, t0) -> dict | None:
 # ------------------------------------------------------------------ rooms by name (synonyms, other languages)
 SYN = {
     "office": r"b[uü]e?ro|office|toimisto|arbeits",
-    "kitchen": r"k[uü]e?che|kitchen|keitti",
+    "kitchen": r"k[uü]e?che|kitchen|keitti|teek[uü]e?che",
     "storage": r"lager|storage|varasto|abstell|reduit",
     "corridor": r"flur|korridor|corridor|k[aä]yt[aä]v",
     "bathroom": r"bad\b|bath|kylpy|wc|toilet",
@@ -345,15 +345,15 @@ def named_rooms(question: str, doc: Doc, t0) -> dict | None:
 # ------------------------------------------------------------------ "where is the kitchen" on plan maps (labels from the drawing)
 WHERE = re.compile(r"^\W*(?:please\s+)?(?:where(?:'s| is| are| can i find)?|find|locate|show(?: me)?|point (?:to|out))\b", re.I)
 WSYN = {**SYN, "bedroom": r"zimmer|schlaf|bedroom|makuu|\bmh\b|\bsh\b|\bk\d?\b", "living room": r"wohn|living|oleskelu|\bol\b|stube",
-        "balcony": r"balkon|balcon|parveke|loggia", "terrace": r"terrass|terassi|terrace", "hall": r"entr[eé]e|\bhall\b|eteinen|\bet\b|diele"}
+        "balcony": r"balkon|balcon|parveke|loggia", "terrace": r"terrass|terassi|terrace", "meeting room": r"besprechung|meeting|conference|sitzung|kokous", "hall": r"entr[eé]e|\bhall\b|eteinen|\bet\b|diele"}
 WALIAS = {"bathrooms": "bathroom", "toilets": "bathroom", "toilet": "bathroom", "wcs": "bathroom", "wc": "bathroom", "bedrooms": "bedroom",
           "kitchens": "kitchen", "offices": "office", "balconies": "balcony", "terraces": "terrace", "corridors": "corridor",
-          "hallway": "corridor", "hallways": "corridor", "living": "living room"}
+          "hallway": "corridor", "hallways": "corridor", "meeting": "meeting room", "meetings": "meeting room", "living": "living room"}
 
 
 def where_rooms(question: str, doc: Doc, t0) -> dict | None:
     """"where is the kitchen / are the bathrooms" on a plan map: rooms whose drawn label matches. None when nothing is labelled that way."""
-    if doc.mode != "planmap" or not WHERE.search(question) or re.search(r"\bhow many\b", question, re.I):
+    if not WHERE.search(question) or re.search(r"\bhow many\b", question, re.I):
         return None
     ql = question.lower()
     word = None
@@ -361,11 +361,24 @@ def where_rooms(question: str, doc: Doc, t0) -> dict | None:
         if re.search(rf"\b{re.escape(a)}\b", ql):
             word = base
             break
-    if word is None:
-        return None
-    rx = re.compile(WSYN[word], re.I)
-    hit = [r for r in _of_kind(doc, "room") if r.bbox_px and rx.search(_room_label(r))]
+    ifc = doc.mode == "ifc"
+    if word is None:   # "where are the labs": any noun that is part of drawn room names
+        m = re.search(r"\b(?:where(?:'s| is| are)|find|locate|show(?: me)?)\s+(?:the\s+|all\s+(?:the\s+)?)?([a-zäöüß][\wäöüß\-]{3,})\b", ql)
+        w = m.group(1) if m else ""
+        if not w or w in ("this", "that", "these", "those", "there", "what", "which", "everything", "something", "drawing", "plan", "model", "building"):
+            return None
+        word = w[:-1] if w.endswith("s") and not w.endswith("ss") and len(w) > 3 else w
+        rx = re.compile(rf"\b{re.escape(word)}", re.I)
+    else:
+        rx = re.compile(WSYN[word], re.I)
+    st = resolve_storey(question, doc.storeys) if ifc else None
+    hit = [r for r in _of_kind(doc, "room") if (r.bbox_m if ifc else r.bbox_px) and rx.search(_room_label(r)) and (not st or r.storey == st)]
     if not hit:
+        if ifc and word in WSYN and any(r.props.get("long_name") for r in _of_kind(doc, "room")):
+            n = len(_of_kind(doc, "room"))
+            trace = [_step("route", f"locate / room / '{word}' from space names -> code, no model"), _step("filter", f"0 of {n} spaces match {word}")]
+            text = f"**No {word} is modelled**: none of the {n} spaces is named or typed as one (names checked in German, English and Finnish)."
+            return _answer_obj(question, [doc.doc_id], text, 0, "count", 0.7, False, [], [], {"doc_id": doc.doc_id, "highlight_item_ids": [], "camera_target_item_id": None}, trace, "index", t0 or time.perf_counter())
         return None
     vals = [_qty(r, "room", "area") for r in hit]
     noun = {"bathroom": "bathroom/WC", "living room": "living room"}.get(word, word)
@@ -374,7 +387,15 @@ def where_rooms(question: str, doc: Doc, t0) -> dict | None:
     area = [v for v in vals if v]
     extra = f" Total area **{_fmt(sum(area))} m²**." if area else ""
     trace = [_step("route", f"locate / room / '{word}' from drawn labels -> code, no model"), _step("filter", f"{len(hit)} rooms match {word}")]
-    text = f"**{len(hit)} {noun}{'s' if len(hit) != 1 else ''}** on this floor plan{where}, numbered on the drawing.{extra} {{marks}}"
+    if ifc:
+        by: dict = {}
+        for r in hit:
+            by.setdefault(r.storey, []).append(r)
+        order = {x["name"]: x.get("elevation_m", 0) for x in doc.storeys}
+        parts = "; ".join(f"{len(v)} on {k}" for k, v in sorted(by.items(), key=lambda kv: order.get(kv[0], 0)))
+        text = f"**{len(hit)} {noun}{'s' if len(hit) != 1 else ''}** {f'on **{st}**' if st else 'in this model'}: {parts}{where}, from the model's spaces.{extra} {{marks}}"
+    else:
+        text = f"**{len(hit)} {noun}{'s' if len(hit) != 1 else ''}** on this floor plan{where}, numbered on the drawing.{extra} {{marks}}"
     return _done(question, doc, text, len(hit), "count", hit, trace, t0=t0)
 
 
