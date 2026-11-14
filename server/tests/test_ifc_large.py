@@ -15,7 +15,7 @@ def test_index_usable_before_scene_and_survives_scene_failure(tmp_path, monkeypa
     doc = {"doc_id": "uploads__large", "files": {"ifc": str(src)}}
     st = ingest_job.Status(tmp_path / "ingest.json")
 
-    def phase(name, source, out, timeout):
+    def phase(name, source, out, timeout, **kwargs):
         if name == "ifc_index":
             (out / "elements.json").write_text(json.dumps({"elements": []}))
             return {"peak_worker_rss_mib": 99}
@@ -92,3 +92,30 @@ def test_missing_index_quantity_is_not_sent_to_a_model(tmp_path, monkeypatch):
     module = importlib.import_module("engine.answer")
     monkeypatch.setattr(module, "_reader", lambda *a: pytest.fail("Missing IFC quantities must never be guessed"))
     assert module._use_reader(answer, "What is the area?", [doc.name], tmp_path, [], [], time.perf_counter(), lambda *a: None) is answer
+
+
+@pytest.mark.parametrize("fault", [None, "duplicate", "interrupted"])
+def test_batches_publish_only_a_complete_unique_index(tmp_path, monkeypatch, fault):
+    published = tmp_path / "elements.json"
+    published.write_text('{"old":"complete"}')
+    calls = []
+
+    def phase(name, source, out, timeout, index_offset=0):
+        assert json.loads(published.read_text()) == {"old": "complete"}
+        calls.append(index_offset)
+        if index_offset and fault == "interrupted":
+            raise RuntimeError("Worker memory limit")
+        gid = "first" if not index_offset or fault == "duplicate" else "second"
+        (out / "elements.json").write_text(json.dumps({"geometry": "pending", "total_elements": 2,
+                                                        "elements": [{"item_id": gid}]}))
+        return {"peak_worker_rss_mib": 50 + index_offset, "memory_budget_mib": 320}
+
+    monkeypatch.setattr(ifc_ingest, "phase", phase)
+    if fault:
+        with pytest.raises(RuntimeError, match="duplicate|memory limit"):
+            ifc_ingest.index(tmp_path / "input.ifc", {}, tmp_path, 90)
+        assert json.loads(published.read_text()) == {"old": "complete"}
+    else:
+        metrics = ifc_ingest.index(tmp_path / "input.ifc", {}, tmp_path, 90)
+        assert calls == [0, 1] and metrics["batches"] == 2
+        assert [e["item_id"] for e in json.loads(published.read_text())["elements"]] == ["first", "second"]

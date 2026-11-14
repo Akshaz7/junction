@@ -49,10 +49,11 @@ def _budget():
     return cap
 
 
-def phase(stage, source, out, timeout):
+def phase(stage, source, out, timeout, index_offset=0):
     budget = _budget()
     env = {**os.environ, "IFC_WORKER_MEMORY_BYTES": str(budget), "IFC_CONVERT_THREADS": "1",
-           "IFC_CONVERT_PY": "1", "OPENBLAS_NUM_THREADS": "1", "OMP_NUM_THREADS": "1"}
+           "IFC_CONVERT_PY": "1", "OPENBLAS_NUM_THREADS": "1", "OMP_NUM_THREADS": "1",
+           "IFC_INDEX_OFFSET": str(index_offset)}
     tmp = out / "tmp"
     tmp.mkdir(exist_ok=True)
     log = tmp / f"{stage}.log"
@@ -95,6 +96,51 @@ def phase(stage, source, out, timeout):
     return metrics
 
 
+def index(source, doc, out, timeout):
+    """Discard native property caches after each batch, publish only a complete index.
+
+    Every child reopens the same read-only file lazily, ordered by STEP id. The
+    final JSON is streamed to disk; no process retains all parsed property sets.
+    """
+    work = out / "tmp" / "property-index"
+    work.mkdir(parents=True, exist_ok=True)
+    (work / "doc.json").write_text(json.dumps(doc))
+    assembled = out / "tmp" / "complete-elements.json"
+    offset, total, seen, first = 0, None, set(), True
+    start = time.monotonic()
+    metrics = {"peak_worker_rss_mib": 0, "memory_budget_mib": 0, "worker_exit_code": 0, "batches": 0}
+    with assembled.open("w") as target:
+        while total is None or offset < total:
+            remaining = timeout - (time.monotonic() - start)
+            if remaining <= 0:
+                raise RuntimeError(f"Property indexing exceeded its {timeout:g} second time limit.")
+            result = phase("ifc_index", source, work, remaining, index_offset=offset)
+            metrics["peak_worker_rss_mib"] = max(metrics["peak_worker_rss_mib"], result.get("peak_worker_rss_mib", 0))
+            metrics["memory_budget_mib"] = result.get("memory_budget_mib", 0)
+            metrics["batches"] += 1
+            part = json.loads((work / "elements.json").read_text())
+            elements = part.pop("elements")
+            if total is None:
+                total = part.pop("total_elements", len(elements))
+                part.pop("indexed_offset", None)
+                target.write(json.dumps(part, ensure_ascii=False)[:-1] + ',"elements":[')
+            if not elements and offset < total:
+                raise RuntimeError("The IFC property reader stopped before indexing every object.")
+            for element in elements:
+                gid = element["item_id"]
+                if not gid or gid in seen:
+                    raise RuntimeError("The IFC has missing or duplicate object identifiers. Export the model again as IFC.")
+                seen.add(gid)
+                if not first:
+                    target.write(",")
+                json.dump(element, target, ensure_ascii=False)
+                first = False
+            offset += len(elements)
+        target.write("]}")
+    assembled.replace(out / "elements.json")
+    return metrics
+
+
 def run(source, doc, out, status):
     cap = float(os.environ.get("INGEST_IFC_MAX_MB", str(100 * 1024**2 / 1e6)))
     size = source.stat().st_size / 1e6
@@ -107,7 +153,7 @@ def run(source, doc, out, status):
         metrics = {}
         def execute():
             try:
-                metrics.update(phase(name, source, out, timeout))
+                metrics.update(index(source, doc, out, timeout) if name == "ifc_index" else phase(name, source, out, timeout))
             except PhaseFailure as exc:
                 metrics.update(exc.metrics)
                 raise

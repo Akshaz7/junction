@@ -93,7 +93,7 @@ def property_quantities_of(el):
     return result
 
 
-def process(path: Path, doc: dict, out: Path) -> dict:
+def process(path: Path, doc: dict, out: Path, offset: int = 0, batch_size: int | None = None) -> dict:
     from pipeline.ifc_props import building_meta, enrich_elements
     from pipeline.ifc_scene import (
         attr_dims,
@@ -115,10 +115,11 @@ def process(path: Path, doc: dict, out: Path) -> dict:
 
     storeys = [level(s) for s in f.by_type("IfcBuildingStorey")]
     storeys.sort(key=lambda s: (s["elevation_m"] is None, s["elevation_m"] or 0))
+    target_ids = sorted(e.id() for e in (*f.by_type("IfcElement"), *f.by_type("IfcSpace"), *f.by_type("IfcSite"))
+                        if not e.is_a("IfcOpeningElement"))
     elements, seen = [], set()
-    for e in (*f.by_type("IfcElement"), *f.by_type("IfcSpace"), *f.by_type("IfcSite")):
-        if e.is_a("IfcOpeningElement"):
-            continue
+    for step_id in target_ids[offset:offset + batch_size if batch_size is not None else None]:
+        e = f.by_id(step_id)
         gid = e.GlobalId
         if not gid or gid in seen:
             raise ValueError("The IFC has missing or duplicate object identifiers. Export the model again as IFC.")
@@ -143,7 +144,7 @@ def process(path: Path, doc: dict, out: Path) -> dict:
         warnings.append("This IFC does not declare length units. Length measurements are unavailable.")
     result = {"doc_id": doc["doc_id"], "version": 2, "schema": f.schema, "units": "m",
               "building": building_meta(f), "storeys": storeys, "elements": elements,
-              "geometry": "pending", "warnings": warnings}
+              "geometry": "pending", "warnings": warnings, "total_elements": len(target_ids), "indexed_offset": offset}
     out.mkdir(parents=True, exist_ok=True)
     tmp = out / "tmp" / "elements-index.json"
     tmp.parent.mkdir(exist_ok=True)
