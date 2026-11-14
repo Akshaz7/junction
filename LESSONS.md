@@ -12,3 +12,4 @@ E-19 pass 1 (ENGINE, 14 Nov): plan-map counts of "storeys" = number of pages; ro
 - 14:15 CubiCasa counts: the plan map does not overcount windows/doors/sinks, so reconcile with min(plan, vision); use vision only for showers/bathtubs. (ENGINE-ACC, sample200)
 - Multi-kind counts: Parsed.kinds list (kind = first, str); _solve_multi merges per-kind answers. Advisor cards now carry severity + checked; hide commands go through entrance.py (front/outer door = detected entrance, not every door).
 - Judge-set shapes (floor compare, 'wider than N', waste take-off, named rooms, rule check) are code in engine/analytics.py, hooked before the exit finder; results/qa/run_judge.py grades 43 hand-gold questions (22/43 -> 41/43 correct).
+- /api/changes drops any entry whose summary has generated_for_demo: saved 3D-edit versions are labelled with summary.edited/generated instead (and say 'generated from 3D edits' in the UI).

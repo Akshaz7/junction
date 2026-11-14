@@ -14,6 +14,7 @@ type Counts = Record<ChangeType, number> & { total: number }
 export type PairComparison = {
   doc_a: string; doc_b: string; status: 'ready' | 'partial' | 'unavailable'; method: string; note: string; warnings: string[]
   inventory_a: number; inventory_b: number; matched_items: number
+  generated_for_demo?: boolean
   summary: (Counts & { affected_items: number; by_kind: Record<string, Counts>; by_storey: Record<string, Counts> }) | null
   changes: Change[]
   versions: { doc_id: string; label: string; kind?: string }[]
@@ -148,6 +149,7 @@ export function VersionPairCompare({ docs, onOpen }: { docs: FileDocument[]; onO
     {error && <p className="error-message" role="alert">{error}</p>}
     {result && <div className="revision-pair-result">
       <header><h2>{result.summary ? `${result.summary.total} ${result.summary.total === 1 ? 'change' : 'changes'} across ${result.summary.affected_items} ${result.summary.affected_items === 1 ? 'item' : 'items'}` : 'Comparison unavailable'}</h2><Button variant="ghost" onClick={reset}>Back to change feed</Button></header>
+      {result.generated_for_demo && <p className="revision-pair-message">Includes content generated for demo.</p>}
       {result.summary && <div className="revision-tiles" aria-label="Change summary">{(Object.keys(typeLabels) as ChangeType[]).map((type) => <div key={type} className={type}><strong>{result.summary![type]}</strong><span>{typeLabels[type]}</span></div>)}</div>}
       {result.warnings.map((warning) => <p key={warning} className="revision-pair-message">{warning}</p>)}
       {result.summary && <>

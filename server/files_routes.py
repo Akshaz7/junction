@@ -274,6 +274,8 @@ async def _feed(pool) -> dict:
     matched = cs.upload_entries(ups)
     feed += matched
     done = {e["doc_b"] for e in matched}
+    from . import design_versions
+    feed += await design_versions.feed_entries(pool)  # 3D edits saved as new versions (dv:<doc>:<a>-<b>)
     feed += [{"id": f"doc:{r['doc_id']}", "type": "new_document", "doc_a": None, "doc_b": r["doc_id"],
               "summary": {"doc_id": r["doc_id"], "title": r["title"], "kind": r["kind"],
                           "headline": f"New document: {r['title']}"},
@@ -351,6 +353,12 @@ async def change(change_id: str, page: int | None = None):
                 diff = cs.compute_for_row(r)
                 return cs.comparison(change_id, page, diff, s, len(s["versions"]) - 1, doc_id) | {"type": "new_version"}
         raise HTTPException(404, "change not found")
+    if change_id.startswith("dv:"):
+        from . import design_versions
+        out = await design_versions.comparison(pool, change_id, page)
+        if out is None or not await cs.visible_pair(pool, out["doc_id"], out["doc_id"]):
+            raise HTTPException(404, "change not found")
+        return out
     if change_id.startswith("ser:"):
         out = cs.comparison(change_id, page)
         if out is None or not await cs.visible_pair(pool, out["v1"]["doc_id"], out["v2"]["doc_id"]):

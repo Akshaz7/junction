@@ -437,7 +437,8 @@ def compare_documents(doc_a, doc_b, root):
     root = Path(root)
     da, db = root / doc_a, root / doc_b
     meta_a, meta_b = _dict(_read(da / "doc.json")), _dict(_read(db / "doc.json"))
-    result = {"doc_a": doc_a, "doc_b": doc_b, "source": "revision-code", "generated_for_demo": False,
+    result = {"doc_a": doc_a, "doc_b": doc_b, "source": "revision-code",
+              "generated_for_demo": bool(meta_a.get("generated_for_demo") or meta_b.get("generated_for_demo")),
               "versions": [{"doc_id": d, "label": meta.get("title") or f"Version {label}", "kind": meta.get("kind")}
                            for d, label, meta in ((doc_a, "A", meta_a), (doc_b, "B", meta_b))], "pages": []}
     ea, eb = _read(da / "elements.json"), _read(db / "elements.json")
@@ -533,6 +534,8 @@ def comparison_answer(question, doc_ids, root):
         text += f"\n- [Open the comparison](#/changes?a={ids[0]}&b={ids[1]}) to inspect each change."
         if result["warnings"]:
             text += "\n- " + result["warnings"][0]
+        if result["generated_for_demo"]:
+            text += "\n- Includes content generated for demo."
     scene_ids = list(dict.fromkeys(c["v2"]["item_id"] for c in result["changes"] if c["v2"])) if available else []
     pct = 100 if available and result["status"] == "ready" and result["method"] == "ifc-globalid" else 80 if available and result["status"] == "ready" else 50 if available else 0
     confidence = {"label": "Verified" if pct == 100 else "Cross-checked" if pct == 80 else "Estimate", "pct": pct,

@@ -66,6 +66,12 @@ it('does not turn unavailable data into zero differences', async () => {
   expect(host.querySelector('.revision-tiles')).toBeNull()
 })
 
+it('labels generated versions clearly', async () => {
+  transport.mockImplementation(async () => Response.json({ ...fixture(), generated_for_demo: true }))
+  await render(); await submit()
+  expect(host.textContent).toContain('Includes content generated for demo.')
+})
+
 it('shows API errors and disables selecting the same version twice', async () => {
   transport.mockImplementation(async () => Response.json({ detail: 'Version not available.' }, { status: 404 }))
   await render(); await submit()

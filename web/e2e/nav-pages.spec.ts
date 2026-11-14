@@ -13,7 +13,11 @@ test('Compare shows a real version pair with numbered boxes and readings', async
   await expect(page.getByRole('heading', { name: 'Compare', level: 1, exact: true })).toBeVisible()
   await expect(screen.getByLabel('Drawing', { exact: true }).locator('option').first()).toBeAttached()
   await screen.getByLabel('Drawing', { exact: true }).selectOption(smallest.summary.series_id!)
-  await screen.getByLabel('Versions', { exact: true }).selectOption(smallest.id)
+  // Any two versions can be compared: pick the pair by its From / To version numbers (fixed pairs when a drawing has a matched upload).
+  if (await screen.getByLabel('From version', { exact: true }).count()) {
+    await screen.getByLabel('From version', { exact: true }).selectOption(String(smallest.summary.index_a))
+    await screen.getByLabel('To version', { exact: true }).selectOption(String(smallest.summary.index_b))
+  } else await screen.getByLabel('Versions', { exact: true }).selectOption(smallest.id)
   const detail = await (await request.get(`${api}/api/changes/${smallest.id}`)).json() as { changes: { n: number }[] }
   const readings = screen.getByRole('complementary', { name: 'Differences' })
   await expect(readings.locator('article')).toHaveCount(detail.changes.length)

@@ -138,9 +138,11 @@ def _parties(doc_id: str) -> dict:
 _computed: dict = {}
 
 
-def pair_diff(series: dict, i: int) -> dict | None:
-    a, b = series["versions"][i:i + 2]
-    cached = cached_diff(series["series_id"], i)
+def pair_diff(series: dict, i: int, j: int | None = None) -> dict | None:
+    """Diff of versions i -> j (0-based; j defaults to i + 1, the cached consecutive pair). Any two versions compare."""
+    j = i + 1 if j is None else j
+    a, b = series["versions"][i], series["versions"][j]
+    cached = cached_diff(series["series_id"], i) if j == i + 1 else None
     if cached and cached.get("doc_a") == a["doc_id"] and cached.get("doc_b") == b["doc_id"]:
         return cached
     root = config.artifacts_dir()
@@ -277,7 +279,8 @@ def series_entries() -> list[dict]:
         v = s["versions"]
         for i in range(len(v) - 1):
             entry = _entry(s["series_id"], s["title"], v[i], v[i + 1], i, pair_diff(s, i), _iso(v[i + 1]["date"]))
-            entry["summary"].update(discipline=s.get("discipline"), project=s.get("project"), sheet=s.get("sheet"))
+            entry["summary"].update(discipline=s.get("discipline"), project=s.get("project"), sheet=s.get("sheet"),
+                                    index_a=i + 1, index_b=i + 2, pair_prefix=f"ser:{s['series_id']}:")
             out.append(entry)
     return out
 
@@ -356,10 +359,15 @@ def _pair(change_id: str):
     """-> (series, i, diff, doc_b override) for ser:<sid>:<n> / upl:<doc>, else None."""
     if change_id.startswith("ser:"):
         _, sid, n = change_id.rsplit(":", 2) if change_id.count(":") >= 2 else (None, None, None)
+        span = re.fullmatch(r"(\d{1,4})-(\d{1,4})", n or "")  # ser:<sid>:<a>-<b>: any two versions (1-based)
         for s in real_series():
             if s["series_id"] == sid and n.isdigit() and 1 <= int(n) < len(s["versions"]):
                 i = int(n) - 1
                 return s, i, pair_diff(s, i), s["versions"][i + 1]["doc_id"]
+            if s["series_id"] == sid and span:
+                i, j = int(span[1]) - 1, int(span[2]) - 1
+                if i != j and 0 <= i < len(s["versions"]) and 0 <= j < len(s["versions"]):
+                    return s, i, pair_diff(s, i, j), s["versions"][j]["doc_id"]
     return None
 
 
@@ -371,7 +379,7 @@ def comparison(change_id: str, page: int | None = None, diff=None, series=None, 
         series, i, diff, doc_b = got
     vs = series["versions"]
     a = vs[i]
-    b = vs[i + 1] if i + 1 < len(vs) and vs[i + 1]["doc_id"] == doc_b else {"doc_id": doc_b, "label": "Uploaded version", "date": None}
+    b = next((v for v in vs if v["doc_id"] == doc_b), None) or {"doc_id": doc_b, "label": "Uploaded version", "date": None}
     if diff is None:
         return {"id": change_id, "series_id": series["series_id"], "source": (diff or {}).get("source", SOURCE),
                 "status": "not_built", "note": _headline(None, None, series["title"], a, b),

@@ -19,19 +19,20 @@ export type RevisionEntry = Omit<ChangeEntry, 'summary'> & {
 export type RevisionFeedEntry = RevisionEntry | RuleChangeEntry
 export type RevisionComparison = Omit<Comparison, 'image'> & {
   image: Comparison['image'] | null; status?: string; note?: string
+  page?: number | null; pages?: { page: number | null; n_changes: number }[]
   v1: Comparison['v1'] & { doc_id?: string; pages?: number | null }
   v2: Comparison['v2'] & { doc_id?: string; pages?: number | null }
 }
 
-export async function loadRevisionComparison(id: string, signal: AbortSignal): Promise<RevisionComparison> {
-  try {
+export async function loadRevisionComparison(id: string, signal: AbortSignal, page?: number | null): Promise<RevisionComparison> {
+  if (page == null) try {
     return await workspaceApi.getComparison(id, signal)
   } catch (error) {
     // The existing client requires images. Real issues can have text or issue
     // metadata only; preserve those responses until the shared client supports them.
     if (workspaceApi.isDemo || signal.aborted || !(error instanceof Error) || error.message !== 'Comparison images are not available for this change.') throw error
   }
-  const response = await apiFetch(`/api/changes/${encodeURIComponent(id)}`, { signal })
+  const response = await apiFetch(`/api/changes/${encodeURIComponent(id)}${page != null ? `?page=${page}` : ''}`, { signal })
   if (!response.ok) throw new Error(`Comparison could not be loaded (${response.status}).`)
   const data = await response.json() as RevisionComparison
   if (!data.v1 || !data.v2 || !Array.isArray(data.changes)) throw new Error('Comparison is not available for this change.')

@@ -187,3 +187,12 @@ def test_chat_route_is_code_only_and_matches_contract(tmp_path, monkeypatch):
 def test_chat_needs_two_versions_but_unrelated_questions_keep_existing_route(tmp_path):
     assert comparison_answer("How many windows?", ["a"], tmp_path) is None
     assert comparison_answer("What changed?", ["a"], tmp_path)["answer"]["abstained"]
+
+
+def test_generated_versions_keep_the_demo_label(tmp_path):
+    for doc in ("a", "b"):
+        save(tmp_path, doc, "elements.json", index(element("x")))
+    save(tmp_path, "b", "doc.json", {"generated_for_demo": True})
+    assert compare_documents("a", "b", tmp_path)["generated_for_demo"] is True
+    result = comparison_answer("Compare these versions", ["a", "b"], tmp_path)
+    assert "generated for demo" in result["answer"]["text_md"]
