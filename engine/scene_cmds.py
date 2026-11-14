@@ -181,6 +181,14 @@ def _select(doc: Doc, intent: SceneIntent, question: str, tg: dict[str, str]) ->
             if ent and entrance.wants_single(question):
                 ent = ent[:1]
             return ent
+    if intent.kind == "room":      # "show me the bathroom": only rooms whose drawn name matches the named kind
+        from engine import analytics
+        ql = question.lower()
+        for a, base in list(analytics.WALIAS.items()) + [(k, k) for k in analytics.WSYN]:
+            if re.search(rf"\b{re.escape(a)}\b", ql):
+                rx = re.compile(analytics.WSYN.get(base, base), re.I)
+                its = [i for i in its if rx.search(analytics._room_label(i))]
+                break
     if doc.mode == "ifc":
         s = resolve_storey(question, doc.storeys)
         if s:
@@ -190,6 +198,8 @@ def _select(doc: Doc, intent: SceneIntent, question: str, tg: dict[str, str]) ->
 
 def _noun(kind: str | None, n: int) -> str:
     k = kind or "item"
+    if k.endswith("s") and k not in ("glass",):
+        return k   # stairs
     return k if n == 1 else (k + "es" if k.endswith(("s", "x", "sh")) else k + "s")
 
 

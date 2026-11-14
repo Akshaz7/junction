@@ -359,7 +359,7 @@ def named_rooms(question: str, doc: Doc, t0) -> dict | None:
     plural = word + ("s" if not word.endswith("s") else "")
     noun = {"classroom": "classrooms", "office": "offices", "kitchen": "kitchens", "storage": "storage rooms", "corridor": "corridors", "bathroom": "bathrooms/WCs"}.get(word, f"{word} rooms")
     if len(hit) == 1:
-        noun = noun[:-3] + "room" if noun.endswith("rooms") else noun[:-1] if noun.endswith("s") else noun
+        noun = noun[:-1] if noun.endswith("rooms") else noun[:-1] if noun.endswith("s") else noun
         noun = noun.replace("bathrooms/WCs", "bathroom/WC")
     _lab = [re.sub(r"\s+", " ", _room_label(r).strip().lower()) for r in hit]
     if doc.mode == "planmap" and len(hit) > 1 and wants_area and len(set(_lab)) < len(_lab):   # the same label can mark one room twice: list them, never add them up
@@ -367,6 +367,9 @@ def named_rooms(question: str, doc: Doc, t0) -> dict | None:
         text = (f"There {'are'} **{len(hit)} {noun}** {where} with these areas: {per}. I have not added them up, because the same name can be "
                 f"printed more than once for one room. {{marks}}" + scale_note(doc))
         return _done(question, doc, text, len(hit) if howmany else None, "count" if howmany else "m2", hit, trace, t0=t0)
+    if len(hit) == 1 and wants_area and not howmany and not re.search(r"\b(total|combined|sum)\b", ql):
+        text = f"The area of the **{noun}** is **{_fmt(tot)} m²**. {{marks}}" + scale_note(doc)
+        return _done(question, doc, text, tot, "m2", hit, trace, t0=t0)
     if rx.pattern.startswith("^") and wants_area and not howmany:   # one room named on the plan
         text = f"The area of **{word}** is **{_fmt(tot)} m²**" + (f" ({len(hit)} rooms carry that name, summed)" if len(hit) > 1 else "") + ". {marks}" + scale_note(doc)
         return _done(question, doc, text, tot, "m2", hit, trace, t0=t0)
@@ -513,7 +516,7 @@ def count_where(question: str, doc: Doc, t0) -> dict | None:
     return _done(question, doc, text, len(its), "count", its, trace, t0=t0)
 
 
-LISTROOMS = re.compile(r"\b(?:list|show|give|name)\b.*\b(?:every|each|all)(?: the| of the)?\s+rooms?\b.*\b(?:area|areas|size|sizes|m2|m²)\b|\b(?:area|size)s? of (?:every|each|all) (?:the )?rooms?\b", re.I)
+LISTROOMS = re.compile(r"\b(?:list|show|give|name)\b.*\b(?:every|each|all)(?: the| of the)?\s+rooms?\b.*\b(?:area|areas|size|sizes|m2|m²)\b|\b(?:area|size)s? of (?:every|each|all) (?:the )?rooms?\b|^\W*(?:list|name|show me|give me)\s+(?:all |every |each )?(?:of )?(?:the )?rooms\W*$", re.I)
 
 
 def room_list(question: str, doc: Doc, t0) -> dict | None:
@@ -524,13 +527,19 @@ def room_list(question: str, doc: Doc, t0) -> dict | None:
     rooms = [r for r in _of_kind(doc, "room") if (r.bbox_m if doc.mode == "ifc" else r.bbox_px) and (not st or r.storey == st)]
     if not rooms:
         return None
+    def _rect(r):  # no area quantity in the model: bounding rectangle of the room, labelled as such
+        b = r.bbox_m if doc.mode == "ifc" else None
+        return round((b[1][0] - b[0][0]) * (b[1][1] - b[0][1]), 2) if b and len(b) == 2 else None
     rows = sorted(((_room_label(r) or "room", _qty(r, "room", "area"), r) for r in rooms), key=lambda x: -(x[1] or 0))
+    approx = {r.item_id: _rect(r) for _l, a, r in rows if not a and _rect(r)}
+    rows = sorted(((l, a or approx.get(r.item_id), r) for l, a, r in rows), key=lambda x: -(x[1] or 0))
     boxes, _c, _s = _evidence(doc, [r for _l, _a, r in rows])
     num = {b["item_id"]: b["label"] for b in boxes}
     lines = []
     for label, a, r in rows[:25]:
         n = num.get(r.item_id)
-        lines.append(f"- {label[:40]}: {(_fmt(a) + ' m²') if a else 'area not on the drawing'}{f' [{n}]' if n else ''}")
+        tail = " (bounding rectangle, no area in the model)" if r.item_id in approx else ""
+        lines.append(f"- {label[:40]}: {(('about ' if tail else '') + _fmt(a) + ' m²') if a else 'area not on the drawing'}{tail}{f' [{n}]' if n else ''}")
     more = f"\n- … and {len(rows) - 25} more (all numbered on the drawing)" if len(rows) > 25 else ""
     tot = round(sum(a for _l, a, _r in rows if a), 2)
     head = f"**{len(rows)} rooms**{f' on **{st}**' if st else ''}, total **{_fmt(tot)} m²**, largest first:"
@@ -562,6 +571,8 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
     ql = question.lower()
     st = resolve_storey(question, doc.storeys) if ifc else None
     rooms = [r for r in _of_kind(doc, "room") if _foot(r, ifc) and (not st or r.storey == st)]
+    if not ifc and not re.search(r"balcon|terrace|outdoor|patio|garden", ql):
+        rooms = [r for r in rooms if not _OUTDOOR.search(f"{r.label or ''} {r.props.get('room_type') or ''}")]   # no skirting outdoors
     word, rx = None, None
     for a, base in list(SYN_ALIAS.items()) + [(k, k) for k in {**SYN, **SYN_CLASS}] + [("classrooms", "classroom")]:
         if re.search(rf"\b{a}\b", ql):
@@ -572,17 +583,16 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
         w = m.group(1) if m else ""
         if w and not BASEQ.search(w) and not re.fullmatch(r"base|skirting|linear|running|baseboard", w) and w not in ("total", "all", "each", "every", "this", "the", "building", "model", "plan", "drawing", "floor", "ground", "first", "second", "room", "metre", "meter", "linear") and not re.search(r"floor|storey|level", w) and _kind(w) != "room":
             word, rx = w, re.compile(re.escape(w), re.I)
-    scale = None
+    scale, guessed = None, False
     if not ifc:
         sc = doc.scale or {}
         mpp = sc.get("m_per_px")
-        if not mpp or sc.get("method") in (None, "none", "door-prior"):
-            why = ("this drawing has no scale" if not mpp or sc.get("method") in (None, "none") else
-                   "the only scale available is a guess from door-icon sizes (it assumes 0.9 m doors), not a drawn scale")
-            trace = [_step("route", "baseboard -> needs a real scale; none on this drawing, no model"), _step("scale", why)]
-            text = f"**I can't give baseboard lengths for this plan**: {why}, so any length in metres would be invented. Add a scale or a drawn dimension and ask again."
+        if not mpp or sc.get("method") in (None, "none"):
+            trace = [_step("route", "baseboard -> needs a scale; none on this drawing, no model"), _step("scale", "no scale")]
+            text = "**I can't give baseboard lengths for this plan**: this drawing has no scale, so any length in metres would be invented. Add a scale or a drawn dimension and ask again."
             return _answer_obj(question, [doc.doc_id], text, None, "m", 0.9, False, [], [], {"doc_id": doc.doc_id, "highlight_item_ids": [], "camera_target_item_id": None},
                                trace, "planmap", t0 or time.perf_counter())
+        guessed = sc.get("method") == "door-prior" or float(sc.get("confidence") or 1) < 0.5
         scale = float(mpp)
     if rx is not None:
         rooms = [r for r in rooms if rx.search(_room_label(r))]
@@ -627,11 +637,12 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
     more = f"\n- … and {len(rows) - 25} more rooms (all numbered on the drawing)" if len(rows) > 25 else ""
     what = (f"{word} room{'s' if len(rows) != 1 else ''}" if not word.endswith("room") else f"{word}{'s' if len(rows) != 1 else ''}") if word else "rooms"
     how = ("from each room's footprint rectangle minus the IfcDoor widths in its walls" if ifc else
-           f"from each room's drawn box at the drawing's scale ({scale:.4f} m/px, {doc.scale.get('method')}) minus detected door widths")
+           (f"from each room's drawn box at the drawing's scale ({scale:.4f} m/px, {doc.scale.get('method')}) minus detected door widths" if not guessed else "from each room's drawn box minus the detected door widths"))
     head = (f"**Baseboard: {_fmt(total)} linear metres** for {len(rows)} {what}{f' on **{st}**' if st else ''}, {how}. "
             "Rooms are treated as rectangles and wall openings other than doors are not deducted, so L-shaped rooms are approximate.")
     trace = [_step("route", "baseboard -> room outline minus door openings, code, no model"), _step("filter", f"{len(rows)} rooms, {len(doors)} doors considered")]
-    return _answer_obj(question, [doc.doc_id], head + "\n" + "\n".join(lines) + more, total, "m", 0.8, False, boxes, cites, scene, trace,
+    cav = ("\n\nLengths are estimated from door sizes because no printed scale was found, so treat them as approximate." if guessed else "")
+    return _answer_obj(question, [doc.doc_id], head + "\n" + "\n".join(lines) + more + cav, total, "m", 0.4 if guessed else 0.8, False, boxes, cites, scene, trace,
                        "index" if ifc else "planmap", t0 or time.perf_counter())
 
 
@@ -887,13 +898,89 @@ def superlative_room(question: str, doc: Doc, t0) -> dict | None:
         rooms.reverse()
     r, v = rooms[0]
     rt = r.props.get("room_type") or "room"
-    nm = r.label or f"{rt} room"
-    nxt = "; ".join(f"{(x.label or (str(x.props.get('room_type') or 'room') + ' room'))} {_fmt(y)} m²" for x, y in rooms[1:4])
+    nm = r.label or rt
+    nxt = "; ".join(f"{(x.label or str(x.props.get('room_type') or 'room'))} {_fmt(y)} m²" for x, y in rooms[1:4])
     sc = doc.scale or {}
     est = " Areas are estimated from door sizes because no printed scale was found, so treat them as approximate." if (sc.get("confidence") or 1) < 0.5 else ""
     trace = [_step("route", "largest room / plan map -> code, no model"), _step("compare", f"{len(rooms)} rooms ranked by area")]
     text = f"The {'smallest' if small else 'largest'} room is **{nm}**{'' if not r.label else ' (' + rt + ')'} at **{_fmt(v)} m²**. Next: {nxt}.{est} {{marks}}"
     return _done(question, doc, text, v, "m2", [r], trace, t0=t0)
+
+
+# ------------------------------------------------------------------ E-62: free-form judge questions on plan maps
+PLANTOTAL = re.compile(r"\bhow (?:big|large|much space)\b.*\b(?:flat|apartment|house|home|plan|unit|place|building|floor)\b|\b(?:total|overall|whole|entire)\b.*\b(?:floor )?(?:area|size)\b(?!.*(?:room|kitchen|office|hall|toilet|wc|balcon|terrace|corridor|storage|studio|garage)s?\b)|\b(?:floor|living) (?:area|space) of (?:the |this )?(?:flat|apartment|house|plan|home)\b", re.I)
+_OUTDOOR = re.compile(r"terrace|terrassi|balcon|parveke|outdoor|patio|garden|yard|deck|porch|veranda", re.I)
+
+
+def plan_total(question: str, doc: Doc, t0) -> dict | None:
+    """"how big is this flat": the indoor rooms added up (plan maps only; IFC has its own model totals)."""
+    if doc.mode != "planmap" or not PLANTOTAL.search(question) or re.search(r"\bhow many\b", question, re.I):
+        return None
+    rooms = [(r, _qty(r, "room", "area")) for r in _of_kind(doc, "room") if not _OUTDOOR.search(f"{r.label or ''} {r.props.get('room_type') or ''}")]
+    rooms = [(r, v) for r, v in rooms if v]
+    if not rooms:
+        return None
+    tot = round(sum(v for _, v in rooms), 2)
+    trace = [_step("route", "plan total -> sum of room areas, no model"), _step("sum", f"{len(rooms)} indoor rooms = {tot} m2")]
+    text = f"This place is about **{_fmt(tot)} m²** in total, adding up the **{len(rooms)} rooms** found on the drawing (outdoor spaces left out). {{marks}}" + scale_note(doc)
+    return _done(question, doc, text, tot, "m2", [r for r, _ in rooms], trace, t0=t0)
+
+
+ACCESS = re.compile(r"\baccessib|wheelchair|step[- ]free|disabled|disabilit|mobility", re.I)
+CEILING = re.compile(r"\bceiling\b|\broom height\b|\bstorey height\b|\bfloor.to.floor\b", re.I)
+
+
+def plain_limits(question: str, doc: Doc, t0) -> dict | None:
+    """Plan images do not carry accessibility data or heights: say so plainly and offer what does work."""
+    if doc.mode != "planmap" or not (ACCESS.search(question) or CEILING.search(question)):
+        return None
+    doors = len(_of_kind(doc, "door"))
+    if ACCESS.search(question):
+        text = ("**I can't judge accessibility from a floor plan image.** It needs clear door widths, thresholds, ramps and turning space, and a drawing does not give those reliably."
+                + (f" What I can say: **{doors} doors** were found on the drawing." if doors else "")
+                + " Try: how many doors are there, where is the bathroom, what is the largest room. For a rule check, upload an IFC model.")
+    else:
+        text = ("**This floor plan does not show ceiling height.** Heights come from a section drawing or a 3D model. "
+                "Try: how many rooms are there, what is the area of the largest room. For heights, upload an IFC model.")
+    trace = [_step("route", "limits of a plan image -> plain answer, no model")]
+    return _answer_obj(question, [doc.doc_id], text, None, "count", 0.6, False, [], [], {"doc_id": doc.doc_id, "highlight_item_ids": [], "camera_target_item_id": None}, trace, "planmap", t0 or time.perf_counter())
+
+
+EXISTS = re.compile(r"^\W*(?:is there|are there|does (?:it|this \w+|the \w+) have|has (?:it|this \w+) got|do (?:they|we) have)\s+(?:an?\s+|any\s+|the\s+)?([a-z][a-z ]{2,24}?)\W*$", re.I)
+PERROOM = re.compile(r"\bhow many\s+(doors?|windows?)\b.*\b(?:does|do|has|have|are in|in)\s+(?:the\s+|each\s+)([a-z][a-z ]{2,20}?)(?:\s+have|\s+has)?\W*$", re.I)
+
+
+def exists_or_perroom(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
+    """"is there a balcony" -> Yes/No with the count; "how many doors does the bedroom have" -> whole-plan counts, said plainly."""
+    if doc.mode != "planmap" or solve_fn is None:
+        return None
+    m = EXISTS.match(question)
+    if m:
+        w = m.group(1).strip().lower()
+        base = WALIAS.get(w) or WALIAS.get(w + "s") or (w if w in WSYN else None)
+        if not base:
+            return None
+        res = solve_fn(f"how many {base[:-1] + 'ies' if base.endswith('y') else base + 's'} are there")
+        if not res or (res.get("answer") or {}).get("abstained"):
+            return None
+        a = res["answer"]
+        if a.get("value") == 0:
+            a["text_md"] = f"**No**, I can't find a {base} on this drawing: none of the {len([i for i in doc.items if i.kind == 'room'])} rooms is labelled that way, so the drawing may simply not name it."
+        elif isinstance(a.get("value"), (int, float)):
+            a["text_md"] = "**Yes.** " + a["text_md"]
+        return res
+    m = PERROOM.search(question)
+    if m:
+        kind = m.group(1).lower().rstrip("s")
+        res = solve_fn(f"how many {kind}s are there")
+        if not res or (res.get("answer") or {}).get("abstained") or res["answer"].get("value") is None:
+            return None
+        a = res["answer"]
+        n = int(a["value"])
+        a["text_md"] = (f"I count {kind}s for the whole plan, not room by room, because I can't tell which room each one belongs to: "
+                        f"there are **{n} {kind}{'s' if n != 1 else ''}** on this floor plan. " + " ".join(f"[{c['n']}]" for c in res.get("citations", [])))
+        return res
+    return None
 
 
 SLABQ = re.compile(r"\bslabs?\b|\bfloor plates?\b", re.I)
@@ -994,11 +1081,14 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
 
 def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
     """First handler that recognises the shape wins; every handler may return None."""
-    for fn in (piping, slab_by_type, baseboard, room_list, wet_rooms, count_where, storey_pair, storey_compare, total_and_storey, cond_count, exact_size, kind_compare, compliance, superlative_room, where_rooms):
+    for fn in (piping, slab_by_type, baseboard, room_list, wet_rooms, count_where, storey_pair, storey_compare, total_and_storey, cond_count, exact_size, kind_compare, compliance, plan_total, plain_limits, plan_slab_pipe, superlative_room, where_rooms):
         res = fn(question, doc, t0)
         if res is not None:
             return res
     if solve_fn is not None:
+        res = exists_or_perroom(question, doc, t0, solve_fn)
+        if res is not None:
+            return res
         res = takeoff(question, doc, t0, solve_fn)
         if res is not None:
             return res
@@ -1038,3 +1128,28 @@ def edit_advice(res: dict, doc: Doc, hidden_ids: list[str]) -> None:
         if cites:
             verdict += "".join(f"[{c['n']}]" for c in cites)
     res["answer"]["text_md"] = f"{res['answer']['text_md']} {verdict}"
+
+
+PIPE_PLAN = re.compile(r"\b(pipes?|piping|pipework|plumbing|drains?|drainage|sewer|sewage|DN ?\d{2,4})\b", re.I)
+
+
+def plan_slab_pipe(question: str, doc: Doc, t0) -> dict | None:
+    """Judge categories on a floor-plan image: slab area = floor outline; piping = not drawn. Plain about what a plan cannot hold."""
+    if doc.mode != "planmap":
+        return None
+    nop = {"doc_id": doc.doc_id, "highlight_item_ids": [], "camera_target_item_id": None}
+    if SLABQ.search(question):
+        rooms = [(r, _qty(r, "room", "area")) for r in _of_kind(doc, "room") if not _OUTDOOR.search(f"{r.label or ''} {r.props.get('room_type') or ''}")]
+        rooms = [(r, v) for r, v in rooms if v]
+        if not rooms:
+            return None
+        tot = round(sum(v for _, v in rooms), 2)
+        trace = [_step("route", "slab on a plan image -> floor outline area, no model")]
+        text = (f"The floor slab covers about **{_fmt(tot)} m²**, taken from the floor outline (the **{len(rooms)} rooms** found on the drawing added up). "
+                "A floor plan does not show slab types, thicknesses or reinforcement bars: those need a structural sheet or an IFC model. {marks}" + scale_note(doc))
+        return _done(question, doc, text, tot, "m2", [r for r, _ in rooms], trace, t0=t0)
+    if PIPE_PLAN.search(question):
+        text = ("**No piping is drawn on this floor plan.** Pipe sizes are read from plumbing sheets, and pipe lengths from MEP models. "
+                "Upload a plumbing sheet or an IFC plumbing model and ask again.")
+        return _answer_obj(question, [doc.doc_id], text, None, "m", 0.7, False, [], [], nop, [_step("route", "piping on a plan image -> not drawn, no model")], "planmap", t0 or time.perf_counter())
+    return None

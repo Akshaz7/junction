@@ -100,3 +100,24 @@ def test_shower_and_vent_size(tmp_path):
     assert sheetqa.answer("How many showers are there?", [d], tmp_path)["answer"]["value"] == 2
     assert sheetqa.answer("How many 3 inch roof vents (VTR) are there?", [d], tmp_path)["answer"]["value"] == 2
     assert "1-1/2" in sheetqa.answer("What size is the vent from the kitchen sink?", [d], tmp_path)["answer"]["value"]
+
+
+def test_toilet_and_sink_counts_use_wc_ks_tags(tmp_path):
+    ln = [("WC-1", 100, 100), ("WC-1", 300, 100), ("WC-1", 500, 100), ("KS-1", 100, 300), ("KS-1", 300, 300), ("3\"VTR", 100, 500)]
+    d = _mk(tmp_path, "plb2", ln, "Plumbing P-1.02")
+    assert sheetqa.answer("how many toilets are there?", [d], tmp_path)["answer"]["value"] == 3
+    assert sheetqa.answer("how many sinks?", [d], tmp_path)["answer"]["value"] == 2
+
+
+def test_sheet_identity_and_pipe_sizes(tmp_path, monkeypatch):
+    d = _mk(tmp_path, "plb3", [("WC-1", 100, 100)] * 1 + [("P1.02", 100, 900)], "Plumbing P1.02")
+    sh = {"sheet": {"id": "P1.02", "title": "SECOND FLOOR PLANS", "id_box": [1, 2, 3, 4], "title_box": [5, 6, 7, 8], "confidence": 0.9},
+          "tags": {"pipe_size": {'3"VTR': {"count": 3, "boxes": [[1, 1, 2, 2]]}, '2"ø': {"count": 1, "boxes": [[3, 3, 4, 4]]}}}}
+    import vision.sheet_text as vs
+    monkeypatch.setattr(vs, "read_sheet", lambda p, *a, **k: sh)
+    r = sheetqa.answer("what is this drawing?", [d], tmp_path)
+    assert r["answer"]["value"] == "P1.02" and "Second Floor Plans" in r["answer"]["text_md"] and len(r["citations"]) == 2
+    r = sheetqa.answer("what are the pipe sizes?", [d], tmp_path)
+    assert '3"VTR x3' in r["answer"]["text_md"] and r["cost"]["usd_total"] == 0
+    sh["sheet"]["title"] = "x" * 90  # garbage title block -> reader
+    assert sheetqa.answer("what is this drawing?", [d], tmp_path) is None

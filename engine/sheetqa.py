@@ -223,7 +223,7 @@ def tag_count(question, doc_id, pts, t0):
     if not m:
         return None
     noun = _norm_noun(m.group(1))
-    if not noun or noun in ("room", "door", "window", "wall", "stair", "toilet", "sink", "column", "dorm room", "dorm"):
+    if not noun or noun in ("room", "door", "window", "wall", "stair", "column", "dorm room", "dorm"):
         return None
     tags = _tag_words(pts)
     explicit = re.findall(r"\(([A-Z]{2,4})\)", question)
@@ -317,11 +317,55 @@ def schedule_rows(question, doc_id, pts, t0):
     return _obj(question, doc_id, f"The schedule lists **{len(rows)}** rows with an area (the total row is not counted). {{marks}}", len(rows), "count", rows, "table rows with an SF figure", t0, 0.7)
 
 
+BY_EACH = re.compile(r"\b(?:each|every|per|by|all)\s+(?:the\s+)?(?:room|area|space|slab|floor|use|zone)s?(?:\s+(?:type|types|use|name))?\b|\b(?:areas?|sizes?)\s+by\s+(?:room\s+|area\s+|space\s+)?(?:type|use|room|name)\b|\blist\b.*\b(?:rooms?|areas?|spaces?)\b", re.I)
+
+
+def area_by_type(question, doc_id, pts, t0):
+    """'floor area of each room type / list the rooms with areas': every table row with an SF figure, TOTAL excluded."""
+    if not re.search(r"\b(area|areas|size|sizes|sf|square|m2|m²)\b", question, re.I) or not BY_EACH.search(question):
+        return None
+    rows, seen = [], set()
+    for pt in pts:
+        for sg in pt.segs:
+            t = sg["text"]
+            if re.search(r"\btotal\b", t, re.I) or not re.search(r"[A-Za-z]{3}", t):
+                continue
+            tm = re.findall(r"(\d{1,3}(?:,\d{3})+|\d{2,6})\s*(?:SF|S\.F\.)\b", t, re.I)
+            if not tm:
+                continue
+            name = re.sub(r"[\d,]+\s*(?:SF|S\.F\.)\b.*$", "", t, flags=re.I).strip(" -:.")
+            if len(name) < 3:  # the figure is its own cell: take the nearest text cell to its left on the same row
+                cy, h = (sg["bbox_px"][1] + sg["bbox_px"][3]) / 2, sg["bbox_px"][3] - sg["bbox_px"][1]
+                left = [o for o in pt.segs if o is not sg and o["bbox_px"][2] <= sg["bbox_px"][0] + 5 and re.search(r"[A-Za-z]{3}", o["text"])
+                        and not re.search(r"\bSF\b|\btotal\b", o["text"], re.I) and abs((o["bbox_px"][1] + o["bbox_px"][3]) / 2 - cy) < h * 0.8
+                        and sg["bbox_px"][0] - o["bbox_px"][2] < 900]
+                if left:
+                    o = max(left, key=lambda o: o["bbox_px"][2])
+                    name, t = o["text"].strip(" -:."), o["text"] + " " + t
+            key = (name.lower(), tm[0])
+            if len(name) < 3 or re.search(r"\d", name) or key in seen:
+                continue
+            seen.add(key)
+            rows.append((name, _num(tm[0]), pt.page, sg["bbox_px"], t))
+    if rows:  # one table: the page that carries most rows
+        best = max({r[2] for r in rows}, key=lambda p: sum(1 for r in rows if r[2] == p))
+        rows = [r for r in rows if r[2] == best]
+    if len(rows) < 4:
+        return None
+    rows = rows[:25]
+    lines = [f"- {n[:40]}: {v:,.0f} SF = {v * M2_PER_SF:,.1f} m² {{{i}}}" for i, (n, v, _p, _b, _t) in enumerate(rows, 1)]
+    text = f"The sheet's table lists **{len(rows)}** areas (TOTAL row excluded; 1 SF = 0.0929 m²):\n" + "\n".join(lines)
+    text = re.sub(r"\{(\d+)\}", r"[\1]", text)
+    return _obj(question, doc_id, text, len(rows), "rows", [(p, b, t) for _n, _v, p, b, t in rows], "table rows with an SF figure", t0, 0.8)
+
+
 def area_total(question, doc_id, pts, t0):
     """TOTAL ... SF on a square-footage table, in m2, with the column arithmetic checked."""
     nm = re.search(r"\b(?:area|size)\s+of\s+(?:the\s+)?(.+?)[?.!]*$", question, re.I)
     if nm and not re.search(r"\b(total|floor|building|gross|whole|second|first|level|storey|story)\b", nm.group(1), re.I):
         return None  # a named room: never answer with the table total
+    if BY_EACH.search(question):
+        return None
     if not re.search(r"\b(area|square|floor space|m2|m²|sf|gross)\b", question, re.I) or re.search(r"\b(share|percent|%|proportion)\b", question, re.I):
         return None
     for pt in pts:
@@ -526,6 +570,44 @@ def cross_sheet(question, doc_id, pts, root, t0, other_docs=()):
     return None
 
 
+def _read(doc_id, root):
+    try:
+        from vision.sheet_text import read_sheet
+        tp = Path(root) / doc_id / "text-1.json"
+        return read_sheet(str(tp)) if tp.exists() else None
+    except Exception:
+        return None
+
+
+def sheet_identity(question, doc_id, pts, t0, root=None):
+    """'what is this drawing / which sheet number / sheet title': the title block, with its boxes."""
+    if not re.search(r"\b(what (?:is|sheet is) (?:this|the)\s*(?:drawing|sheet|plan|page)|which sheet|what sheet|sheet (?:number|no\.?|id|title|name)|title of (?:this|the) (?:sheet|drawing)|what does this (?:sheet|drawing) show)\b", question, re.I):
+        return None
+    r = _read(doc_id, root) if root is not None else None
+    sh = (r or {}).get("sheet") or {}
+    sid, title = sh.get("id"), (sh.get("title") or "").strip()
+    if not sid or not re.match(r"^[A-Z]{1,2}[-.]?\d", sid) or len(title) > 70 or len(title) < 4 or (sh.get("confidence") or 0) < 0.6:
+        return None
+    hits = [(1, sh[k], q) for k, q in (("id_box", sid), ("title_box", title)) if sh.get(k)]
+    if not hits:
+        return None
+    return _obj(question, doc_id, f"This is sheet **{sid}**, **{title.title()}**. {{marks}}", sid, None, hits, "title block", t0, 0.9)
+
+
+def pipe_sizes(question, doc_id, pts, t0, root=None):
+    """'what are the pipe sizes': the labelled sizes on the sheet with counts."""
+    if not re.search(r"\bpipe\s+sizes?\b|\bsizes? of (?:the )?pipes?\b|\bwhat (?:size|sizes) .*\bpipes?\b", question, re.I):
+        return None
+    r = _read(doc_id, root) if root is not None else None
+    ps = ((r or {}).get("tags") or {}).get("pipe_size") or {}
+    if not ps:
+        return None
+    items = sorted(ps.items(), key=lambda kv: -kv[1]["count"])[:8]
+    hits = [(1, kv[1]["boxes"][0], kv[0]) for kv in items if kv[1].get("boxes")]
+    lst = "; ".join(f"{k} x{v['count']}" for k, v in items)
+    return _obj(question, doc_id, f"Pipe sizes labelled on this sheet: {lst}. {{marks}}", len(items), "sizes", hits, "pipe size labels", t0, 0.85)
+
+
 def answer(question: str, doc_ids: list[str], root, t0=None, other_docs=()):
     """First handler that recognises the question wins; None sends it to the reader."""
     t0 = t0 or time.perf_counter()
@@ -535,7 +617,12 @@ def answer(question: str, doc_ids: list[str], root, t0=None, other_docs=()):
     pts = _pages(doc_id, root)
     if not any(pt.words for pt in pts):
         return None
-    for fn in (tag_count, scale_answer, share_of_total, room_area, schedule_rows, area_total, note_sum, rebar_of, size_of, room_count, overall_width):
+    for fn in (sheet_identity, pipe_sizes):
+        res = fn(question, doc_id, pts, t0, root)
+        if res is not None:
+            res["doc_ids"] = list(doc_ids)
+            return res
+    for fn in (tag_count, scale_answer, share_of_total, room_area, schedule_rows, area_by_type, area_total, note_sum, rebar_of, size_of, room_count, overall_width):
         res = fn(question, doc_id, pts, t0)
         if res is not None:
             res["doc_ids"] = list(doc_ids)

@@ -151,10 +151,10 @@ def test_baseboard_scaled_raster_uses_the_drawn_scale():
     assert a["route"] == "planmap" and not a["answer"]["abstained"] and a["answer"]["value"] > 20 and "dimension" in a["answer"]["text_md"] and a["evidence"]["boxes"]
 
 
-def test_baseboard_never_invents_a_scale():
+def test_baseboard_on_a_guessed_scale_says_so_and_is_low_confidence():
     a = answer("how many linear metres of skirting in total", ["cubicasa5k__colorful-10052"])
     validate_answer(a)
-    assert a["answer"]["value"] is None and "invented" in a["answer"]["text_md"] and not a["evidence"]["boxes"]
+    assert a["answer"]["value"] and "estimated from door sizes" in a["answer"]["text_md"] and a["answer"]["confidence"] <= 0.4
 
 
 # ---- E-56 piping

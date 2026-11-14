@@ -16,10 +16,10 @@ from collections import Counter
 VOCAB = ("windows window doors door floors floor storeys storey rooms room walls wall toilets toilet sinks sink showers shower "
          "bathtubs bathtub stairs staircase designs design database library documents document drawings drawing blueprint blueprints "
          "many count total area height length width volume kitchen bedroom bathroom balcony corridor elevator elevators columns beams "
-         "slabs roof apartment apartments furniture visualise visualize processed stored").split()
+         "slabs roof apartment apartments furniture visualise visualize processed stored living").split()
 # real words one edit from a vocabulary word: never "corrected"
 KEEP = set("""store stores stored storing storage floored flooring wind wined window's dooms doom roomy rooms' wall's walls' wale sing sink's
-shower's showed shows show wide widen wider length's lengths tower towers beam's beans bean design's desing slab's slabs' roofs roofing
+lining shower's showed shows show wide widen wider length's lengths tower towers beam's beans bean design's desing slab's slabs' roofs roofing
 colum column's columns' stair's stairs' area's areas arena areas many man mane mean meant money count's counts county county's
 total's totals totally toilet's volume's volumes document's documented library's librarian drawing's drawings' height's heights
 doors' door's door-to""".split())
@@ -40,7 +40,7 @@ def _edit1(a: str, b: str) -> bool:
     return s[i:] == l[i + 1:]
 
 
-_SHORT = {"dors": "doors", "dosr": "doors", "doro": "door", "wals": "walls", "romm": "room", "mny": "many", "mnay": "many", "hw": "how", "hoq": "how"}
+_SHORT = {"dors": "doors", "dosr": "doors", "doro": "door", "wals": "walls", "romm": "room", "mny": "many", "mnay": "many", "hw": "how", "hoq": "how", "waht": "what", "wat": "what", "whta": "what", "rom": "room", "hwo": "how", "wich": "which", "whihc": "which"}
 
 
 def fix_typos(question: str) -> tuple[str, list[tuple[str, str]]]:
@@ -62,7 +62,7 @@ def fix_typos(question: str) -> tuple[str, list[tuple[str, str]]]:
             return w
         fixes.append((w, r))
         return r.capitalize() if w[0].isupper() else r
-    return re.sub(r"[A-Za-z]{3,}", sub, question), fixes
+    return re.sub(r"[A-Za-z]{2,}", sub, question), fixes
 
 
 # ------------------------------------------------------------------ library questions
