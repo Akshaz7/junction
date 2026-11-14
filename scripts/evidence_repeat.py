@@ -24,7 +24,7 @@ def git(*args, cwd=ROOT, check=True):
     return subprocess.run(["git", "-C", str(cwd), *args], text=True, capture_output=True, check=check)
 
 
-def once(limit, handoff=HANDOFF, final_blind=False):
+def once(limit, handoff=HANDOFF, final_blind=False, branches=BRANCHES):
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     print(datetime.now().astimezone().isoformat(), flush=True)
     scratch = ROOT / ".evqa-scratch" / stamp
@@ -33,7 +33,7 @@ def once(limit, handoff=HANDOFF, final_blind=False):
     report_path = output_dir / f"run-{stamp}.json"
     merge_path = output_dir / f"merge-{stamp}.json"
     baseline = git("rev-parse", "HEAD").stdout.strip()
-    refs = {branch: git("rev-parse", branch, check=False).stdout.strip() for branch in BRANCHES}
+    refs = {branch: git("rev-parse", branch, check=False).stdout.strip() for branch in branches}
     metadata = {"created_at": datetime.now(UTC).isoformat(), "baseline": baseline,
                 "branches": refs, "merges": [], "complete_merge": False, "audit_report": report_path.name}
     git("worktree", "add", "--detach", str(scratch), baseline)
@@ -49,8 +49,10 @@ def once(limit, handoff=HANDOFF, final_blind=False):
                 git("merge", "--abort", cwd=scratch, check=False)
                 break
             metadata["merges"].append({"branch": branch, "revision": revision, "status": "merged"})
-        metadata["complete_merge"] = len(metadata["merges"]) == len(BRANCHES) and all(r["status"] == "merged" for r in metadata["merges"])
+        metadata["complete_merge"] = len(metadata["merges"]) == len(refs) and all(r["status"] == "merged" for r in metadata["merges"])
+        metadata["all_four_evidence_branches"] = metadata["complete_merge"] and set(refs) == set(BRANCHES)
         metadata["scratch_revision"] = git("rev-parse", "HEAD", cwd=scratch).stdout.strip()
+        merge_path.write_text(json.dumps(metadata, indent=1) + "\n")
         # All data reads use the worker's existing symlinks. Engine caches and
         # JSON modifications are isolated by evidence_check's artifact overlay.
         for name in ("artifacts", "data", ".venv", "weights", "refs", "tools"):
@@ -87,6 +89,7 @@ def main():
     parser.add_argument("--interval", type=float, default=2700, help="seconds between start times (default 45 min)")
     parser.add_argument("--limit", type=int, default=200)
     parser.add_argument("--final-blind", action="store_true", help="test the reserved document once, at final validation")
+    parser.add_argument("--branch", action="append", choices=BRANCHES, help="isolate a branch for diagnosis; default merges all four")
     args = parser.parse_args()
     if args.interval < 60 or args.limit < 1:
         parser.error("interval must be at least 60 seconds and limit positive")
@@ -94,7 +97,7 @@ def main():
         parser.error("the blind document is tested once, not in watch mode")
     while True:
         start = time.monotonic()
-        code = once(args.limit, final_blind=args.final_blind)
+        code = once(args.limit, final_blind=args.final_blind, branches=tuple(args.branch or BRANCHES))
         if not args.watch:
             return code
         remaining = max(0, args.interval - (time.monotonic() - start))

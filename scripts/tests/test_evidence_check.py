@@ -214,3 +214,54 @@ def test_swapped_multikind_counts_are_detected(source):
     res["answer"].update(value={"window": 6, "door": 4}, unit="count", text_md="**4 windows** and **6 doors**.")
     res["reasoning"]["calc"]["result"].update(value={"window": 6, "door": 4}, unit="count")
     assert "card.headline_category" in codes(res, source)
+
+
+def test_step_sources_are_resolved_through_calculation_graph(source):
+    res = good()
+    calc = res["reasoning"]["calc"]
+    calc["steps"].append({"id": "rounded", "label": "Round", "value": 20, "unit": "m2", "operation": "round", "inputs": [
+        {"name": "total", "value": 20, "unit": "m2", "source": {"kind": "step", "step_id": "s1"}},
+        {"name": "places", "value": 1, "unit": "decimal places", "source": {"kind": "policy", "text": "one decimal"}}]})
+    assert checker.audit(res, source)["status"] == "pass"
+    calc["steps"][-1]["inputs"][0]["value"] = 19
+    assert {"source.step_value", "calc.step_operands"} <= codes(res, source)
+
+
+def test_cyclic_step_reference_is_an_error(source):
+    res = good()
+    calc = res["reasoning"]["calc"]
+    calc["steps"][0]["inputs"][0]["source"] = {"kind": "step", "step_id": "s1"}
+    assert "source.unresolved" in codes(res, source)
+
+
+def test_artifact_reference_and_declared_assumption_are_distinct_from_missing_source(source):
+    ref = {"doc_id": "generated__audit", "artifact": "planmap-1.json", "field": "scale"}
+    assert not source.resolve(ref)
+    res = good()
+    res["reasoning"]["calc"]["steps"][0]["inputs"][0]["source"] = {"assumption": "Assumed 0.9 m leaf; not a measured door width"}
+    assert "source.unresolved" not in codes(res, source)
+
+
+def test_symmetric_method_difference_is_accepted(source):
+    res = good()
+    res["reasoning"]["calc"]["checks"] = [{"method": "printed / outline", "primary_value": 20, "value": 22, "agrees": False, "diff_pct": 2/22*100}]
+    assert "check.diff_pct" not in codes(res, source)
+
+
+def test_named_arithmetic_is_verified_using_operands(source):
+    res = good()
+    step = res["reasoning"]["calc"]["steps"][0]
+    step.update(operation="sum", expr="sum of room areas")
+    assert "calc.step_operands" in codes(res, source)
+
+
+@pytest.mark.parametrize("text", ["**Total doors: 64.** [1]", "**Ceiling height: 2.58 m.** [1]", "**Structural elements: 657 in total**"])
+def test_numeric_prose_cannot_bypass_audit_with_null_value(source, text):
+    res = good()
+    res["answer"].update(value=None, unit=None, text_md=text)
+    assert "calc.numeric_value_missing" in codes(res, source)
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), True, 10**1000])
+def test_nonfinite_or_nonnumeric_is_never_a_valid_measurement(value):
+    assert checker.number(value) is None

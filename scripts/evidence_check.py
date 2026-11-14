@@ -39,7 +39,10 @@ class AuditTimeout(BaseException):
 
 
 def number(value):
-    return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) else None
+    try:
+        return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) else None
+    except OverflowError:
+        return None
 
 
 def unit(value):
@@ -144,7 +147,7 @@ class Sources:
                     errors.append("pixel box has no resolvable page dimensions")
                 elif box[2] > dims[0] or box[3] > dims[1]:
                     errors.append("pixel box is outside the page")
-        ref = source.get("file") or source.get("path") or source.get("crop")
+        ref = source.get("file") or source.get("path") or source.get("crop") or source.get("artifact")
         if ref:
             candidate = self.root / str(ref)
             if not candidate.exists():
@@ -180,12 +183,15 @@ def headline_quantities(text, expected_unit):
     if expected_unit == "count":
         nouns = r"(?:windows?|doors?|rooms?|walls?|toilets?|sinks?|showers?|bathtubs?|stairs?|staircases?|storeys?|floors?|columns?|slabs?|elements?|items?|apartments?|bedrooms?|bathrooms?|washrooms?|balcon(?:y|ies)|kitchens?|saunas?|offices?|pipes?|ducts?|beams?|fixtures?|spaces?|lights?|sockets?)"
         tokens = re.findall(rf"({NUMBER})\s+(?:external\s+|internal\s+|separate\s+|matching\s+|indoor\s+|structural\s+)?{nouns}\b", line, re.IGNORECASE)
+        if not tokens:
+            tokens = re.findall(rf"\b(?:total\s+)?{nouns}\s*:\s*({NUMBER})|\b({NUMBER})\s+in total\b", line, re.IGNORECASE)
+            tokens = [a or b for a, b in tokens]
         if not tokens and re.search(rf"could not find any|\bno building.services|\bno\s+{nouns}\b", line, re.IGNORECASE):
             tokens = ["0"]
         return [(float(x.replace(",", "")), 1e-7) for x in tokens]
     aliases = {"m": r"(?:m|metres?|meters?)", "m2": r"(?:m²|m2|sq\.?\s*m|square\s+met(?:er|re)s?)",
                "m3": r"(?:m³|m3|cubic\s+met(?:er|re)s?)", "ft": r"(?:ft|feet)",
-               "ft2": r"(?:ft²|ft2|sq\.?\s*ft)", "ft3": r"(?:ft³|ft3)"}
+               "ft2": r"(?:ft²|ft2|sq\.?\s*ft)", "ft3": r"(?:ft³|ft3)", "mm": r"mm", "cm": r"cm"}
     suffix = aliases.get(expected_unit, re.escape(expected_unit))
     tokens = re.findall(rf"({NUMBER})\s*{suffix}(?![\w²³])", line, re.IGNORECASE) if suffix else []
     if not tokens and re.search(r"could not find any", line, re.IGNORECASE):
@@ -263,6 +269,36 @@ def expression_uses_inputs(step):
     return bool(inputs and literals) and all(any(close(v, i) for i in inputs) for v in literals) and all(any(close(v, i) for v in literals) for i in inputs)
 
 
+def operation_value(step):
+    """Independent arithmetic over declared operands, including named expressions."""
+    values = [number(i.get("value")) for i in step.get("inputs") or []]
+    if any(v is None for v in values):
+        return None
+    operation = step.get("operation")
+    try:
+        if operation == "sum":
+            return math.fsum(values)
+        if operation in ("multiply", "convert"):
+            return math.prod(values)
+        if operation == "divide" and len(values) == 2:
+            return number(values[0] / values[1])
+        if operation == "subtract" and values:
+            return values[0] - math.fsum(values[1:])
+        if operation == "abs_difference" and len(values) == 2:
+            return abs(values[0] - values[1])
+        if operation == "round" and len(values) == 2 and values[1].is_integer() and 0 <= values[1] <= 15:
+            return round(values[0], int(values[1]))
+        if operation == "ceil" and len(values) == 1:
+            return math.ceil(values[0])
+        if operation == "max_zero" and len(values) == 1:
+            return max(0, values[0])
+        if operation == "source" and len(values) == 1:
+            return values[0]
+    except (ZeroDivisionError, OverflowError, ValueError):
+        return None
+    return None
+
+
 def audit(res, sources):
     findings = []
     def fail(code, detail, severity="error"):
@@ -286,9 +322,51 @@ def audit(res, sources):
     if re.search(r"\bRead\s+1\s+marked region|\b1\s+marked region of", card_text, re.IGNORECASE):
         fail("card.meaningless_read", "card describes one marked region without explaining what was found")
 
-    def source_check(source, label, anchor=True):
+    calc_steps = {s.get("id"): s for s in calc.get("steps") or []}
+    if len(calc_steps) != len(calc.get("steps") or []) or None in calc_steps:
+        fail("calc.step_ids", "calculation step IDs are missing or duplicated")
+
+    def source_check(source, label, anchor=True, operand=None, chain=()):
+        if isinstance(source, dict):
+            kind = source.get("kind")
+            if source.get("assumption"):
+                return  # explicitly labelled assumptions are not source measurements
+            if kind in ("question", "assumption", "policy", "conversion"):
+                if not source.get("text"):
+                    fail("source.unresolved", f"{label}: {kind} input has no stated source text")
+                if kind == "question" and source.get("text") != res.get("question"):
+                    fail("source.unresolved", f"{label}: question source differs from the actual question")
+                return
+            if kind == "step":
+                sid = source.get("step_id")
+                if sid not in calc_steps or sid in chain:
+                    fail("source.unresolved", f"{label}: missing or cyclic step reference {sid!r}")
+                    return
+                target = calc_steps[sid]
+                if operand and (not equal(operand.get("value"), target.get("value")) or unit(operand.get("unit")) != unit(target.get("unit"))):
+                    fail("source.step_value", f"{label}: value or unit differs from referenced step {sid!r}")
+                for item in target.get("inputs") or []:
+                    source_check(item.get("source"), f"step {sid!r}", operand=item, chain=(*chain, sid))
+                return
+            if kind == "model" and not source.get("item_id"):
+                if not source.get("doc_id") or sources.doc(source["doc_id"]) is None:
+                    fail("source.unresolved", f"{label}: model input lacks a resolvable document")
+                if not source.get("text") or not any(s.get("model") for s in res.get("trace") or []):
+                    fail("source.unresolved", f"{label}: model input lacks a labelled recorded model call")
+                return
         for error in sources.resolve(source, default_doc, anchor):
             fail("source.unresolved", f"{label}: {error}")
+
+    def exact_reference(ref, chain=()):
+        if not isinstance(ref, dict):
+            return False
+        if ref.get("kind") in ("policy", "conversion"):
+            return bool(ref.get("text"))
+        if ref.get("kind") == "step":
+            sid = ref.get("step_id")
+            inputs = (calc_steps.get(sid) or {}).get("inputs") or []
+            return sid not in chain and bool(inputs) and all(exact_reference(i.get("source"), (*chain, sid)) for i in inputs)
+        return sources.exact(ref, default_doc)
 
     for c in res.get("citations") or []:
         base = {**c, "bbox": c.get("bbox_px")}
@@ -306,7 +384,15 @@ def audit(res, sources):
         source_check({"doc_id": scene.get("doc_id") or default_doc, "item_id": iid}, "3D highlight")
 
     if not numeric:
-        return {"status": "fail" if findings else "not_numeric", "numeric": False, "findings": findings}
+        detected = [{"value": n, "unit": candidate} for candidate in ("count", "m", "m2", "m3", "mm", "cm", "ft", "ft2")
+                    for n, _ in headline_quantities(text, candidate)] if re.search(NUMBER, headline_line(text)) else []
+        if detected and not ans.get("abstained"):
+            fail("calc.numeric_value_missing", f"headline has measured quantities {detected}, but answer.value has no numeric result")
+            if not calc:
+                fail("calc.missing", "measured headline has no reasoning.calc")
+            if not reasoning.get("margin"):
+                fail("calc.margin_missing", "measured headline has no recorded uncertainty")
+        return {"status": "fail" if findings else "not_numeric", "numeric": bool(detected), "findings": findings}
     if ans.get("abstained"):
         fail("card.abstained_numeric", "abstention carries a numeric answer")
     if not u:
@@ -340,7 +426,7 @@ def audit(res, sources):
         other_counts = headline_values(text, "count")
         # A secondary count (e.g. 13 rooms in an area answer) also needs a
         # result entry. Room numbers such as 'room 205' are never matched.
-        extras = result.get("quantities") or []
+        extras = result.get("quantities") or result.get("additional") or []
         for count in other_counts:
             if not any(isinstance(q, dict) and unit(q.get("unit")) == "count" and close(q.get("value"), count) for q in extras):
                 fail("calc.headline_secondary", f"headline also reports {count:g} elements, absent from calc.result quantities")
@@ -365,7 +451,7 @@ def audit(res, sources):
             totals["scalar"] += 1
         else:
             unknown_rows = True
-        item_kind = row.get("kind")
+        item_kind = row.get("kind") or vals.get("kind")
         if not item_kind and isinstance(source, dict):
             item = sources.items(source.get("doc_id") or default_doc, source.get("page")).get(row.get("item_id")) or {}
             item_kind = item.get("kind")
@@ -388,6 +474,9 @@ def audit(res, sources):
         if not result.get("rounded_as"):
             fail("calc.rounding_missing", "calculation does not state display rounding")
     for step in calc.get("steps") or []:
+        actual = operation_value(step)
+        if actual is not None and number(step.get("value")) is not None and not close(actual, step["value"], result_tolerance(result, unit(step.get("unit")))):
+            fail("calc.step_operands", f"step {step.get('id')!r}: declared operands produce {actual:g}, not {step['value']}")
         evaluated = expression_value(step.get("expr"))
         if evaluated is not None and number(step.get("value")) is not None and not close(evaluated, step["value"], result_tolerance(result, unit(step.get("unit")))):
             fail("calc.step_arithmetic", f"step {step.get('id')!r}: {step.get('expr')} evaluates to {evaluated:g}, not {step['value']}")
@@ -398,7 +487,7 @@ def audit(res, sources):
         for operand in step.get("inputs") or []:
             if not operand.get("unit"):
                 fail("calc.input_unit", f"input {operand.get('name')!r} has no explicit unit (use '1' for dimensionless)")
-            source_check(operand.get("source"), f"input {operand.get('name')!r}")
+            source_check(operand.get("source"), f"input {operand.get('name')!r}", operand=operand)
             if re.search(r"model|recount|vision", str(operand.get("name") or ""), re.IGNORECASE) and not re.search(r"model|recount|vision", str(step.get("label") or ""), re.IGNORECASE):
                 fail("calc.model_input", "model output is used without labelling the model step")
 
@@ -430,11 +519,12 @@ def audit(res, sources):
         if not check.get("method"):
             fail("check.method", "comparison does not name its second method")
         second = number(check.get("value"))
-        primary = number(value)
+        primary = number(check.get("primary_value", value))
         diff = number(check.get("diff_pct"))
         if second is not None and primary is not None:
-            measured = abs(second - primary) / abs(primary) * 100 if primary else 0 if second == 0 else None
-            if diff is not None and (measured is None or not close(diff, measured, 0.05)):
+            relative = abs(second - primary) / abs(primary) * 100 if primary else 0 if second == 0 else None
+            symmetric = abs(second - primary) / max(abs(primary), abs(second)) * 100 if primary or second else 0
+            if diff is not None and not any(close(diff, measured, 0.05) for measured in (relative, symmetric)):
                 fail("check.diff_pct", f"reported difference {diff} is inconsistent with {primary} vs {second}")
             if check.get("agrees") is True and not close(primary, second) and diff is None:
                 fail("check.agreement_unbounded", "different quantities called agreeing without a measured difference")
@@ -452,7 +542,7 @@ def audit(res, sources):
         if not reasoning.get("arithmetic") and not calc:
             fail("confidence.unproven", "Verified label has no reproducible arithmetic")
         refs = [r.get("source") for r in rows] or [{"doc_id": c.get("doc_id"), "item_id": iid, "page": c.get("page")} for c in res.get("citations") or [] for iid in c.get("item_ids") or []]
-        if refs and not all(sources.exact(ref, default_doc) for ref in refs):
+        if refs and not all(exact_reference(ref) for ref in refs):
             fail("confidence.source_rule", "Verified label includes sources other than explicit CAD quantities or IFC elements")
     pct = confidence.get("pct")
     calibration = confidence.get("calibration") or {}
@@ -558,11 +648,28 @@ def copy_artifacts(source, target, doc_ids):
         dest = target / did
         dest.mkdir(parents=True)
         for path in (source / did).iterdir():
+            if path.is_dir() and path.name == "evidence":
+                shutil.copytree(path, dest / path.name)
             if path.is_file():
                 if path.suffix == ".json":
                     shutil.copy2(path, dest / path.name)
                 else:
                     (dest / path.name).symlink_to(path.resolve())
+
+
+def compact_reasoning(reasoning):
+    """Keep reviewable findings without copying an entire building's operands."""
+    if not isinstance(reasoning, dict):
+        return reasoning
+    data = {k: v for k, v in reasoning.items() if k not in ("arithmetic", "calc")}
+    if reasoning.get("calc"):
+        calc = reasoning["calc"]
+        data["calc"] = {k: v for k, v in calc.items() if k not in ("rows", "steps")}
+        data["calc"].update(row_count=len(calc.get("rows") or []), step_count=len(calc.get("steps") or []),
+                             row_sample=(calc.get("rows") or [])[:3],
+                             steps=[{**{k: v for k, v in s.items() if k != "inputs"}, "input_count": len(s.get("inputs") or []),
+                                     "input_sample": (s.get("inputs") or [])[:3]} for s in (calc.get("steps") or [])[:10]])
+    return data
 
 
 def run(repo, artifacts, rows, output, timeout=20):
@@ -598,7 +705,7 @@ def run(repo, artifacts, rows, output, timeout=20):
                     signal.signal(signal.SIGALRM, previous)
                 check = audit(res, sources)
                 record = {**row, **check, "answer": res.get("answer"), "route": res.get("route"),
-                          "reasoning": res.get("reasoning"), "cost_usd": (res.get("cost") or {}).get("usd_total", 0),
+                          "reasoning": compact_reasoning(res.get("reasoning")), "cost_usd": (res.get("cost") or {}).get("usd_total", 0),
                           "boxes": len((res.get("evidence") or {}).get("boxes") or []),
                           "fake_model_used": any(s.get("model") for s in res.get("trace") or [])}
             except (Exception, AuditTimeout) as exc:  # noqa: BLE001 -- a failing question is audit data
@@ -622,6 +729,7 @@ def run(repo, artifacts, rows, output, timeout=20):
                "fake_model_answers": sum(bool(r.get("fake_model_used")) for r in records)}
     top_cases = sorted((r for r in records if r["findings"]), key=lambda r: (-sum(f["severity"] == "error" for f in r["findings"]), r["question"]))[:30]
     report = {"created_at": datetime.now(UTC).isoformat(), "revision": subprocess.check_output(["git", "-C", str(repo), "rev-parse", "HEAD"], text=True).strip(),
+              "checker_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               "mode": "MODELS_FAKE=1; code-route evidence audit; no live model accuracy claim", "summary": summary,
               "limitations": ["No PDF internals, live model verification, or correctness claim against potentially noisy dataset gold.",
                               "Unrecognized headline/row semantics are uncheckable, never counted as passing.",
