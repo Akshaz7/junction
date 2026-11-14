@@ -43,7 +43,9 @@ def open_properties(path: Path):
     schema = ifcopenshell.schema_by_name(match[1].decode("ascii"))
     skip = {d.name() for root in GEOMETRY_ROOTS
             for d in uschema.get_subtypes(schema.declaration_by_name(root))}
-    return ifcopenshell.open(str(path), bypass_types=sorted(skip))
+    # Keep unrelated property values lazy as well as omitting geometry. Large
+    # schedules can otherwise exhaust memory before any element is indexed.
+    return ifcopenshell.open(str(path), bypass_types=sorted(skip), lazy=True)
 
 
 def property_quantities_of(el):
