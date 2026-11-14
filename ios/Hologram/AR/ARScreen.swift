@@ -28,6 +28,7 @@ struct ARScreen: View {
                 placementPill
                 kindLegend
                 spotlightCaption
+                storeyChip
                 if controller.isWalking && controller.isPlaced {
                     HStack {
                         if let manifest = controller.manifest {
@@ -105,6 +106,21 @@ struct ARScreen: View {
             .accessibilityIdentifier("ar-done")
             Spacer()
             sceneMenu
+        }
+    }
+
+    /// Current level with step buttons, shown for multi-storey models.
+    @ViewBuilder private var storeyChip: some View {
+        if controller.isPlaced, controller.cutawayStoreys.count > 1, let label = controller.activeStoreyLabel {
+            HologramCardPill {
+                HStack(spacing: 10) {
+                    Button { controller.stepStorey(-1) } label: { Image(systemName: "chevron.down") }
+                        .disabled(!controller.canStepStoreyDown)
+                    Text(label).monospacedDigit().accessibilityIdentifier("ar-storey-chip")
+                    Button { controller.stepStorey(1) } label: { Image(systemName: "chevron.up") }
+                        .disabled(!controller.canStepStoreyUp)
+                }
+            }
         }
     }
 

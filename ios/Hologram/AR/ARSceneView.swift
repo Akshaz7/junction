@@ -61,6 +61,7 @@ final class ARSceneController: ObservableObject {
     private var footprintCenter = SIMD3<Float>.zero
     private var buildAnimator: BuildAnimator?
     private var choreographer: AnswerChoreographer?
+    private var blueprint: BlueprintDetail?
     /// "7 doors" counting up while the voice answer lights items one by one; nil when idle.
     @Published private(set) var spotlight: Spotlight?
 
@@ -79,6 +80,11 @@ final class ARSceneController: ObservableObject {
     var scaleLabel: String { "1:\(Int((1 / scale).rounded()))" }
     var isSupported: Bool { ARWorldTrackingConfiguration.isSupported }
     var cutawayStoreys: [SceneManifest.Storey] { manifest.map { CutawayPolicy(manifest: $0).storeys } ?? [] }
+    /// "Erdgeschoss · ±0.00" for the storey the cutaway is showing.
+    var activeStoreyLabel: String? {
+        guard let name = activeStorey, let storey = cutawayStoreys.first(where: { $0.name == name }) else { return nil }
+        return BlueprintStyle.storeyLabel(name: name, elevation: storey.elevation_m ?? 0)
+    }
     var canStepStoreyDown: Bool { storeyIndex.map { $0 > 0 } ?? false }
     var canStepStoreyUp: Bool { storeyIndex.map { $0 + 1 < cutawayStoreys.count } ?? false }
     private var storeyIndex: Int? { cutawayStoreys.firstIndex { $0.name == activeStorey } }
@@ -128,6 +134,7 @@ final class ARSceneController: ObservableObject {
             self?.updateWalkGuide()
             self?.buildAnimator?.tick()
             self?.choreographer?.tick()
+            self?.updateBlueprint()
             self?.updateAnswerLabels()
         }
     }
@@ -174,6 +181,10 @@ final class ARSceneController: ObservableObject {
                 $0.components[OpacityComponent.self]?.opacity ?? 1
             } ?? [:]
             showRoof = false
+            blueprint = nil
+            if let manifest = loaded.manifest, let index = sceneIndex {
+                BlueprintDetail.applyMaterials(manifest: manifest, index: index, content: content)
+            }
             highlightController = HighlightController(root: content)
             itemPicker = loaded.manifest.map { ItemPicker(manifest: $0) }
             // Generate mesh hit targets before answer labels or selection outlines exist.
@@ -191,6 +202,12 @@ final class ARSceneController: ObservableObject {
             footprintCenter = localBounds.center
             let shape = ShapeResource.generateBox(size: size).offsetBy(translation: localBounds.center)
             container.components.set(CollisionComponent(shapes: [shape]))
+            if let manifest = loaded.manifest, let index = sceneIndex {
+                let detail = BlueprintDetail()
+                detail.build(manifest: manifest, index: index, content: content)
+                content.addChild(detail.root)
+                blueprint = detail
+            }
             container.scale = SIMD3(repeating: scale)
             model = container
             isFixture = loaded.isFixture
@@ -368,6 +385,13 @@ final class ARSceneController: ObservableObject {
 
     var canReplayBuild: Bool { isLoaded && isPlaced && !isWalking }
 
+    private func updateBlueprint() {
+        guard let blueprint, let arView else { return }
+        blueprint.update(activeStorey: activeStorey, hidden: !isPlaced || buildAnimator != nil,
+                         cameraPosition: arView.cameraTransform.translation,
+                         time: ProcessInfo.processInfo.systemUptime)
+    }
+
     private func cancelBuild() {
         buildAnimator?.finish()
         buildAnimator = nil
@@ -448,17 +472,27 @@ final class ARSceneController: ObservableObject {
     }
 
     /// Flat plan drawn from the lowest storey's footprints, laid on the model's base at the model's scale.
+    /// Plan plate drawn from the REAL bounds of the lowest storey's walls, doors, windows and columns, measured on
+    /// the loaded entities in the placement container, so it matches the model's footprint and scale exactly.
+    /// Returns nil (plate hidden) when nothing measurable is found.
     private func makePlanEntity(manifest: SceneManifest) -> Entity? {
+        guard let container = model, let index = sceneIndex else { return nil }
         let lowest = CutawayPolicy(manifest: manifest).storeys.first?.name
-        let kinds: Set<String> = ["wall", "door", "window", "slab", "floor", "column"]
-        let rects = manifest.items.values.compactMap { item -> BuildPlanImage.Rect? in
-            guard let kind = item.kind, kinds.contains(kind), let box = item.bbox_m,
-                  lowest == nil || item.storey == lowest else { return nil }
-            return .init(kind: kind, minX: box.minimum.x, maxX: box.maximum.x,
-                         minZ: box.minimum.z, maxZ: box.maximum.z)
+        let kinds: Set<String> = ["wall", "door", "window", "column"]
+        var rects: [BuildPlanImage.Rect] = []
+        var floorY = Float.greatestFiniteMagnitude
+        for item in manifest.items.values {
+            guard let kind = item.kind, kinds.contains(kind), lowest == nil || item.storey == lowest,
+                  let entity = index.entitiesByUSDName[item.usd_name] else { continue }
+            let box = entity.visualBounds(relativeTo: container)
+            guard box.extents.x.isFinite, box.extents.z.isFinite, box.extents.x > 0 || box.extents.z > 0 else { continue }
+            rects.append(.init(kind: kind, minX: box.min.x, maxX: box.max.x, minZ: box.min.z, maxZ: box.max.z))
+            floorY = min(floorY, box.min.y)
         }
-        guard let image = BuildPlanImage.render(rects: rects),
-              let mesh = BuildPlanImage.mesh(width: footprintExtents.x, depth: footprintExtents.z),
+        guard let image = BuildPlanImage.render(rects: rects), floorY.isFinite else { return nil }
+        let minX = rects.map(\.minX).min()!, maxX = rects.map(\.maxX).max()!
+        let minZ = rects.map(\.minZ).min()!, maxZ = rects.map(\.maxZ).max()!
+        guard let mesh = BuildPlanImage.mesh(width: maxX - minX, depth: maxZ - minZ),
               let texture = try? TextureResource.generate(from: image, withName: nil,
                                                           options: .init(semantic: .color)) else { return nil }
         var material = UnlitMaterial()
@@ -466,7 +500,7 @@ final class ARSceneController: ObservableObject {
         material.faceCulling = .none
         let entity = ModelEntity(mesh: mesh, materials: [material])
         entity.name = "build-plan"
-        entity.position = [footprintCenter.x, 0.01, footprintCenter.z]
+        entity.position = [(minX + maxX) / 2, floorY + 0.01, (minZ + maxZ) / 2]
         return entity
     }
 
@@ -664,13 +698,19 @@ final class ARSceneController: ObservableObject {
         }
         guard docID == activeDocID else { return false }
         switch command {
-        case .highlight(let request): setHighlights(request.itemIDs)
+        case .highlight(let request):
+            setHighlights(request.itemIDs)
+            // A question asked on another device (the laptop chat) gets the same spin and light-up.
+            if !request.itemIDs.isEmpty { startChoreography(itemIDs: request.itemIDs) }
         case .edit(let edit):
             if let id = edit.edit_id, !appliedEditIDs.insert(id).inserted { return true }
             applySceneCommand(edit.command)
         case .state(let state):
             hiddenItemIDs = Set(state.hidden).intersection(Set(manifest?.items.keys.map { $0 } ?? []))
+            let changed = Set(state.highlighted) != Set(highlightedItemIDs)
             setHighlights(state.highlighted, labels: state.labels)
+            // Only a new answer animates; a reconnect re-sending the same state does not.
+            if changed, !state.highlighted.isEmpty { startChoreography(itemIDs: state.highlighted) }
         case .advisorCards, .ping, .ignored: break
         }
         return true
