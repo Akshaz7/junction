@@ -325,13 +325,17 @@ def enrich(graph, project, root, *, time_budget_s=20):
     for doc in project.get("docs", []):
         if isinstance(doc, str):
             doc = {"doc_id": doc}
+        if not isinstance(doc, dict):
+            notes["notes"].append("Invalid document entry; services skipped.")
+            continue
         did = doc.get("doc_id")
         if not did:
             continue
         if Path(did).name != did or did in {".", ".."}:
             notes["notes"].append("Invalid document identifier; services skipped.")
             continue
-        meta = {**read_json(Path(root) / did / "doc.json", {}), **doc}
+        stored = read_json(Path(root) / did / "doc.json", {})
+        meta = {**(stored if isinstance(stored, dict) else {}), **doc}
         path = resolve_source(meta, root, "ifc")
         if path:
             try:

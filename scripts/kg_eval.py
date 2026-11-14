@@ -250,7 +250,9 @@ def sample_relations(root, rows):
                         for rel in getattr(item, "ProvidesBoundaries", ()):
                             possible.add(rel.RelatingSpace.GlobalId)
                     if possible:
-                        result = target in possible; basis = "Raw IFC explicit relationship; no geometry inference."
+                        result = target in possible
+                        basis = ("Raw IFC confirms physical terminal containment only; service function/capacity not independently verified."
+                                 if e["kind"] == "serves" else "Raw IFC explicit relationship; no geometry inference.")
                 except (RuntimeError, AttributeError):
                     pass
         if result is None and e["kind"] == "in_room" and e.get("method") == "containment_geom":
@@ -343,8 +345,12 @@ def main():
     blind = None
     if args.blind:
         did = read_json(args.output / "selection.json")["blind_doc_id"]
-        blind_reports = [evaluate(c)[0] for c in projected_cases(root, did, True)]
+        blind_reports, blind_observations = [], []
+        for case in projected_cases(root, did, True):
+            report, obs = evaluate(case)
+            blind_reports.append(report); blind_observations.extend(obs)
         blind = {"doc_id": did, "calibration_frozen_before_read": True, "cases": blind_reports,
+                 "calibration_evaluation": calibration_scores(blind_observations, calibration.confidence)["heldout"],
                  "graph": graph_audit(root, {"id": "kg-eval-blind", "docs": [did]})}
     out = {"generated_at": datetime.now(UTC).isoformat(),
            "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
