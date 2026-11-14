@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Plan map (CONTRACT 5.4)",
+  "type": "object",
+  "required": ["doc_id", "page", "image", "scale", "items", "provenance"],
+  "properties": {
+    "doc_id": {"type": "string"},
+    "page": {"type": "integer", "minimum": 1},
+    "image": {"type": "object", "required": ["w", "h"], "properties": {"w": {"type": "integer", "minimum": 1}, "h": {"type": "integer", "minimum": 1}}},
+    "scale": {"type": "object", "required": ["m_per_px", "method", "confidence"], "properties": {
+      "m_per_px": {"type": ["number", "null"], "exclusiveMinimum": 0},
+      "method": {"enum": ["dimension", "scalebar", "dxf-units", "ifc", "door-prior", "none"]},
+      "confidence": {"type": "number", "minimum": 0, "maximum": 1}}},
+    "items": {"type": "array", "items": {
+      "type": "object", "required": ["item_id", "kind", "bbox_px", "conf", "source"],
+      "properties": {
+        "item_id": {"type": "string", "pattern": "^[a-z]+-[0-9]{3,}$"},
+        "kind": {"enum": ["wall", "door", "window", "room", "toilet", "sink", "shower", "bathtub", "stairs", "column", "text", "dimension", "other"]},
+        "label": {"type": ["string", "null"]},
+        "bbox_px": {"type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4},
+        "polygon_px": {"anyOf": [{"type": "null"}, {"type": "array", "minItems": 3, "items": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}}]},
+        "props": {"type": "object"},
+        "conf": {"type": "number", "minimum": 0, "maximum": 1},
+        "source": {"enum": ["seg", "det", "vlm", "dxf", "ifc", "ocr", "rule"]}}}},
+    "provenance": {"type": "object", "required": ["models", "created", "ms"]}
+  }
+}
