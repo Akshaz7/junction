@@ -39,6 +39,7 @@ def test_vector_pdf_gets_scene_without_raster_walls(pdf_doc, monkeypatch):
     from pipeline import extrude, pages, pdf_planmap
     doc_id, ddir = pdf_doc
     monkeypatch.setattr(pages, "DPI", 144)
+    monkeypatch.setenv("PDF_VIA_IFC", "0")
     calls, seen = [], []
     monkeypatch.setattr(pdf_planmap, "process", _fake_process(calls))
     monkeypatch.setattr(ingest_job, "_vlm_pages", lambda *a: pytest.fail("VLM path must not run when the vector plan map is usable"))
@@ -109,6 +110,7 @@ def test_vector_extrude_failure_falls_back_to_vlm(pdf_doc, monkeypatch):
     from pipeline import pages, pdf_planmap
     doc_id, ddir = pdf_doc
     monkeypatch.setattr(pages, "DPI", 144)
+    monkeypatch.setenv("PDF_VIA_IFC", "0")
     monkeypatch.setattr(pdf_planmap, "process", _fake_process([]))
     seen, vlm = [], []
 
@@ -127,3 +129,50 @@ def test_vector_extrude_failure_falls_back_to_vlm(pdf_doc, monkeypatch):
     assert ingest_job._run(doc_id, st) == "ready"
     assert seen == [False, True] and vlm == [[]]
     assert any(s["stage"] == "extrude_pdf_vector" for s in st.stages)
+
+
+def test_ifc_route_failure_falls_back_to_extrude(pdf_doc, monkeypatch):
+    from pipeline import pages, pdf_planmap, pdf_to_ifc
+    doc_id, ddir = pdf_doc
+    monkeypatch.setattr(pages, "DPI", 144)
+    monkeypatch.setattr(pdf_planmap, "process", _fake_process([]))
+    monkeypatch.setattr(ingest_job, "_vlm_pages", lambda *a: pytest.fail("no VLM"))
+
+    def boom(*a, **k):
+        (ddir / "model.ifc").write_text("half")  # a partial file must not survive
+        raise RuntimeError("ifc export failed")
+    monkeypatch.setattr(pdf_to_ifc, "build", boom)
+    st = ingest_job.Status(ddir / "ingest.json")
+    assert ingest_job._run(doc_id, st) == "ready"
+    stg = {s["stage"]: s for s in st.stages}
+    assert stg["ifc_from_pdf"]["ok"] and "fell back" in stg["ifc_from_pdf"]["note"] and stg["extrude"]["ok"]
+    assert not (ddir / "model.ifc").exists() and not (ddir / "elements.json").exists() and (ddir / "scene.glb").is_file()
+    pm = json.loads((ddir / "planmap-1.json").read_text())
+    assert any(i["item_id"] == "room-001" for i in pm["items"])  # ids not relinked on failure
+
+
+def test_ifc_route_success(pdf_doc, monkeypatch):
+    pytest.importorskip("ifcopenshell")
+    from pipeline import pages, pdf_planmap
+    doc_id, ddir = pdf_doc
+    monkeypatch.setattr(pages, "DPI", 144)
+    monkeypatch.setattr(pdf_planmap, "process", _fake_process([]))
+    monkeypatch.setattr(ingest_job, "_extrude", lambda *a, **k: pytest.fail("IFC route worked: no extrude"))
+    st = ingest_job.Status(ddir / "ingest.json")
+    assert ingest_job._run(doc_id, st) == "ready", st.stages
+    assert (ddir / "model.ifc").is_file() and (ddir / "elements.json").is_file() and (ddir / "scene.glb").is_file()
+    assert (ddir / "planmap-1.json").is_file() and (ddir / "page-1.png").is_file()
+
+
+def test_label_only_rooms_get_no_floor_but_stay_in_planmap(tmp_path, monkeypatch):
+    from pipeline import extrude
+    pm = {"scale": {"m_per_px": 0.01}, "items": [
+        {"item_id": "room-001", "kind": "room", "polygon_px": [[0, 0], [10, 0], [10, 10]], "bbox_px": [0, 0, 10, 10]},
+        {"item_id": "room-002", "kind": "room", "polygon_px": None, "bbox_px": [20, 20, 30, 25]}]}
+    (tmp_path / "planmap-1.json").write_text(json.dumps(pm))
+    seen = []
+    monkeypatch.setattr(extrude, "process", lambda d, art, page, **k: seen.append(
+        [i["item_id"] for i in json.loads((art / "planmap-1.json").read_text())["items"]]))
+    ingest_job._extrude("d", tmp_path, 1, raster_walls=False)
+    assert seen == [["room-001"]]
+    assert json.loads((tmp_path / "planmap-1.json").read_text()) == pm

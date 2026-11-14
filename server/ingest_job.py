@@ -221,11 +221,45 @@ def _extrude(doc_id: str, ddir: Path, page: int, raster_walls: bool = True):
         pm["scale"] = {"m_per_px": ASSUMED_M_PER_PX, "method": "assumed", "source": "assumed", "confidence": 0.1,
                        "evidence": f"no printed scale, dimension or door found: assumed {ASSUMED_M_PER_PX} m per pixel"}
         (ddir / f"planmap-{page}.json").write_text(json.dumps(pm))
-    try:  # falls back to plan-map walls when cv2 or wall fills are missing
-        extrude.process(doc_id, ddir, page, raster_walls=raster_walls)
-    except Exception as ex:  # noqa: BLE001 - a raster-wall surprise must never cost the upload its 3D
-        print("raster-wall extrude failed, using plan-map walls:", repr(ex)[:160])
-        extrude.process(doc_id, ddir, page)
+    keep = None
+    if not raster_walls:  # vector PDF: a room known only by its label (no outline) gets no label-sized floor slab
+        f = ddir / f"planmap-{page}.json"
+        keep = f.read_text()
+        pm = json.loads(keep)
+        pm["items"] = [i for i in pm["items"] if not (i["kind"] == "room" and not i.get("polygon_px"))]
+        f.write_text(json.dumps(pm))
+    try:
+        try:  # falls back to plan-map walls when cv2 or wall fills are missing
+            extrude.process(doc_id, ddir, page, raster_walls=raster_walls)
+        except Exception as ex:  # noqa: BLE001 - a raster-wall surprise must never cost the upload its 3D
+            print("raster-wall extrude failed, using plan-map walls:", repr(ex)[:160])
+            extrude.process(doc_id, ddir, page)
+    finally:
+        if keep is not None:  # the chat solvers keep every room, label-only ones included
+            (ddir / f"planmap-{page}.json").write_text(keep)
+
+
+def _pdf_via_ifc_on() -> bool:
+    return os.environ.get("PDF_VIA_IFC", "1") != "0"
+
+
+def _pdf_via_ifc(doc_id: str, ddir: Path, doc: dict, page: int):
+    """Vector PDF plan map -> IFC4 (pipeline.pdf_to_ifc) -> the IFC scene path (ifc_scene: scene.glb, scene.json,
+    elements.json), so a PDF looks like an IFC upload in 3D/AR. The page image and planmap-<n>.json stay the PDF's own
+    (ifc_plans is not run: it would replace them); plan-map ids are relinked to the IFC GlobalIds. Any failure leaves
+    no IFC files behind and raises, so the caller extrudes the plan map instead."""
+    from pipeline import ifc_scene, pdf_to_ifc
+    f = ddir / f"planmap-{page}.json"
+    keep = f.read_text()
+    try:
+        ifc = pdf_to_ifc.build(json.loads(keep), ddir / "model.ifc", storey_name="Floor 1", doc_id=doc_id)
+        ifc_scene.process(Path(ifc), doc, ddir)
+        pdf_to_ifc.link_planmap(f, doc_id)
+    except Exception:
+        f.write_text(keep)
+        for name in ("model.ifc", "elements.json", "scene.glb", "scene.json"):
+            (ddir / name).unlink(missing_ok=True)
+        raise
 
 
 ASSUMED_M_PER_PX = 0.02
@@ -460,7 +494,13 @@ def _run(doc_id: str, st: Status) -> str:
             return "partial"
         if plan_pages:
             if vector:  # walls come from the PDF's own geometry: no raster wall read
-                ok = st.stage("extrude", lambda: _extrude(doc_id, ddir, plan_pages[0], raster_walls=False))
+                ok = False
+                if _pdf_via_ifc_on():
+                    ok = st.stage("ifc_from_pdf", lambda: _pdf_via_ifc(doc_id, ddir, doc, plan_pages[0]))
+                    if not ok:  # IFC route failed: extrude the plan map directly
+                        st.stages[-1].update(ok=True, note="fell back to extrude: " + st.stages[-1].pop("error", "")[:200])
+                if not ok:
+                    ok = st.stage("extrude", lambda: _extrude(doc_id, ddir, plan_pages[0], raster_walls=False))
                 if not ok:  # vector plan map would not extrude: today's path (VLM plan map, raster walls)
                     st.stages[-1].update(stage="extrude_pdf_vector", ok=True, note=st.stages[-1].pop("error", "")[:200])
                     for f in ddir.glob("planmap-[0-9]*.json"):

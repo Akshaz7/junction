@@ -677,31 +677,30 @@ def _drop_blobs(cands, max_t=MAX_WALL_PT):
     return out
 
 
-def walls(page: dict) -> list:
-    """Wall polygons in page points. Styles: dark/pattern filled shapes, double parallel lines, thick strokes."""
-    from shapely.geometry import Polygon, LineString, box as sbox
-    from shapely.ops import unary_union
+def _quad(Sx, a, sd, l, h):
+    """Strip between segment a of Sx and its parallel partner at signed offset sd, over [l, h] on a's axis.
+    Returns (polygon, centreline p0, centreline p1)."""
+    from shapely.geometry import Polygon
+    x0, y0, x1, y1 = Sx[a, :4]
+    L = Sx[a, 6]
+    ux, uy = (x1 - x0) / L, (y1 - y0) / L
+    nx, ny = -uy * sd, ux * sd
+    p0 = (x0 + ux * l, y0 + uy * l)
+    p1 = (x0 + ux * h, y0 + uy * h)
+    q = Polygon([p0, p1, (p1[0] + nx, p1[1] + ny), (p0[0] + nx, p0[1] + ny)])
+    return q, (p0[0] + nx / 2, p0[1] + ny / 2), (p1[0] + nx / 2, p1[1] + ny / 2)
+
+
+def _fill_shapes(page, area_box, page_area):
+    """Closed filled shapes as (polygon, grey, obj), even-odd holes per draw object, white fills skipped."""
+    from shapely.geometry import Polygon
     from shapely import make_valid
-
-    W, H = page["W_pt"], page["H_pt"]
-    if W <= 0 or not page["paths"]:
-        return []
-    box = _frame_and_titleblock(page)
-    area_box = sbox(*box)
-    page_area = W * H
-    # text boxes (for dropping glyph-like fills and dimension strings)
-    word_boxes = [w["bbox"] for w in page["words"]]
-
-    # ---- (a) filled polygons, grouped per draw object (even-odd holes)
     groups = defaultdict(list)
     for p in page["paths"]:
         if p["fill"] is None or not p["closed"] or len(p["pts"]) < 3:
             continue
-        g = _grey(p["fill"])
-        if g > 0.8:
-            continue
         groups[p["obj"]].append(p)
-    fills = []
+    out = []
     for oid, ps in groups.items():
         geom = None
         for p in ps:
@@ -709,9 +708,8 @@ def walls(page: dict) -> list:
                 pg = make_valid(Polygon(p["pts"]))
             except Exception:  # noqa: BLE001
                 continue
-            if pg.is_empty:
-                continue
-            geom = pg if geom is None else geom.symmetric_difference(pg)
+            if not pg.is_empty:
+                geom = pg if geom is None else geom.symmetric_difference(pg)
         if geom is None or geom.is_empty or geom.area < 4:
             continue
         geom = geom.intersection(area_box)
@@ -719,120 +717,291 @@ def walls(page: dict) -> list:
             continue
         g = _grey(ps[0]["fill"])
         for poly in getattr(geom, "geoms", [geom]):
-            if poly.geom_type != "Polygon" or poly.area < 4:
-                continue
-            t = _thickness(poly)
-            x0, y0, x1, y1 = poly.bounds
-            span = max(x1 - x0, y1 - y0)
-            if t < 0.5 or t > 40 or span < 8 or span < 2.5 * t and poly.area < 400:
-                continue
-            if g > 0.55 and t > 12:
-                continue  # light fill, thick: room/area tint
-            fills.append((poly, t, g))
+            if poly.geom_type == "Polygon" and poly.area >= 4:
+                out.append((poly, g, oid))
+    return out
 
-    # ---- segments for (b) and (c)
+
+def _segments_from_polys(polys):
+    rows = []
+    for k, poly in enumerate(polys):
+        for ring in [poly.exterior] + list(poly.interiors):
+            c = list(ring.coords)
+            for (x0, y0), (x1, y1) in zip(c, c[1:]):
+                if math.hypot(x1 - x0, y1 - y0) > 0.02:
+                    rows.append((x0, y0, x1, y1, 0.0, float(k)))
+    return np.array(rows, float).reshape(-1, 6)
+
+
+def walls(page: dict) -> list:
+    """Walls in page points: one straight piece per wall run, from a pair of parallel edges.
+    Each: {"polygon": rectangle, "centerline": [[x,y],[x,y]], "thickness_pt": edge distance, "style"}.
+    Evidence, in order of trust: (a) dark/hatch filled wall shapes (pairs of opposite edges inside the fill; the
+    fill's grey is the page's wall grey, lighter fills and fills holding fixture symbols are not walls),
+    (b) double outlines (CAD style), gated by poche hatching when the page hatches its walls, never where a fill
+    wall already is, (c) thick strokes. Thickness is always the distance between the two edges (or the stroke
+    width), never a union of fill and outline."""
+    from shapely.geometry import LineString, Polygon, box as sbox
+    from shapely.ops import unary_union
+    from shapely import STRtree
+
+    W, H = page["W_pt"], page["H_pt"]
+    if W <= 0 or not page["paths"]:
+        return []
+    box = _frame_and_titleblock(page)
+    area_box = sbox(*box)
+    page_area = W * H
+    word_boxes = [w["bbox"] for w in page["words"]]
+
+    # ---------- (a) fill walls
+    shapes = _fill_shapes(page, area_box, page_area)
+    circles = []  # fixture symbols: burners, basins, WC bowls
+    for p in page["paths"]:
+        if p["n_curves"] >= 4 and p["closed"]:
+            a_ = np.asarray(p["pts"], float)
+            x0, y0 = a_.min(0); x1, y1 = a_.max(0)
+            w_, h_ = x1 - x0, y1 - y0
+            if 1.5 <= max(w_, h_) < 30 and max(w_, h_) <= 1.8 * max(min(w_, h_), 1e-6):
+                circles.append(((x0 + x1) / 2, (y0 + y1) / 2))
+    ctree = STRtree([sbox(x - 0.1, y - 0.1, x + 0.1, y + 0.1) for x, y in circles]) if circles else None
+    cand = []
+    for poly, g, oid in shapes:
+        if g > 0.85:
+            continue
+        t = _thickness(poly)
+        x0, y0, x1, y1 = poly.bounds
+        span = max(x1 - x0, y1 - y0)
+        if t < 0.5 or t > 40 or span < 8 or (span < 2.5 * t and poly.area < 400):
+            continue
+        if ctree is not None and len(ctree.query(poly, predicate="contains")):
+            continue  # holds a fixture symbol: counter, bath, basin
+        cand.append((poly, g, t))
+    fill_polys = []
+    if cand:
+        # the page's wall grey: the darkest grey that carries a real share of the elongated fill area
+        by_g = defaultdict(float)
+        for poly, g, t in cand:
+            by_g[round(g, 2)] += poly.area
+        tot = sum(by_g.values())
+        wall_g = min((k for k, v in by_g.items() if v >= 0.2 * tot), default=None)
+        fill_polys = [poly for poly, g, t in cand if g <= wall_g + 0.06] if wall_g is not None else []
+    pieces = []  # (polygon, c0, c1, d, style)
+    fill_u = None
+    if fill_polys:
+        fill_u = unary_union(fill_polys)
+        FE = _merge_collinear(_segments_from_polys(fill_polys), gap=0.3)
+        pairs_f, _ = _pairs(FE, 0.5, MAX_WALL_PT, min_ov=0.3)
+        fq = []
+        for a_, b_, d, sd, l, h in pairs_f:
+            q, c0, c1 = _quad(FE, a_, sd, l, h)
+            if q.is_valid and q.area > 0 and q.intersection(fill_u).area >= 0.85 * q.area:
+                fq.append((q, c0, c1, d, "fill"))
+        fq.sort(key=lambda r: r[3])  # thinnest first: a fill rectangle's short side is its thickness
+        pieces += _accept(fq, [])
+
+    # ---------- (b) double outlines, (c) thick strokes
     S = _segments(page, box)
-    out = []
+    stroke_pieces = []
     if len(S):
         widths = S[:, 4]
         wmed = float(np.median(widths))
-        # (c) thick strokes: clearly heavier than the typical line and not text sized
         thick_min = max(1.4, 2.5 * wmed)
         thick = (widths >= thick_min) & (S[:, 6] >= np.maximum(6.0, 3 * widths))
-        # (b) double lines among non-thick, non-hairline-vs-heavy segments
-        cand = np.where(~thick & (S[:, 6] >= 4.0) & ~_grid_lines(page, S))[0]
-        Sc = S[cand]
-        pairs, nb = _pairs(Sc, 1.0, 30.0)
+        bx0, by0, bx1, by1 = box
+        on_frame = (((np.abs(S[:, 0] - bx0) < 1) & (np.abs(S[:, 2] - bx0) < 1)) | ((np.abs(S[:, 0] - bx1) < 1) & (np.abs(S[:, 2] - bx1) < 1))
+                    | ((np.abs(S[:, 1] - by0) < 1) & (np.abs(S[:, 3] - by0) < 1)) | ((np.abs(S[:, 1] - by1) < 1) & (np.abs(S[:, 3] - by1) < 1)))
+        cidx = np.where(~thick & ~on_frame & (S[:, 6] >= 4.0) & ~_grid_lines(page, S))[0]
+        Sc = S[cidx]
+        pairs, nb = _pairs(Sc, 1.0, MAX_WALL_PT)
         bad = _series(Sc, pairs)
-        # dimension lines: digit words lying along the segment
-        digit_boxes = [b for b, w in zip(word_boxes, page["words"]) if DIMW.match(w["text"]) and DIGIT.search(w["text"])]
+        digit_boxes = [b_ for b_, w in zip(word_boxes, page["words"]) if DIMW.match(w["text"]) and DIGIT.search(w["text"])]
         dim_seg = set()
         if digit_boxes:
-            from shapely import STRtree
-            dtree = STRtree([sbox(*b) for b in digit_boxes])
+            dtree = STRtree([sbox(*b_) for b_ in digit_boxes])
             for k, (x0, y0, x1, y1, *_r) in enumerate(Sc):
-                ls = LineString([(x0, y0), (x1, y1)])
-                hits = dtree.query(ls.buffer(4.0))
+                hits = dtree.query(LineString([(x0, y0), (x1, y1)]).buffer(4.0))
                 horiz = abs(x1 - x0) >= abs(y1 - y0)
-                hits = [h for h in hits.tolist() if (lambda b: (b[2] - b[0] >= b[3] - b[1]) == horiz)(digit_boxes[h])]
-                if hits:
+                if any(((digit_boxes[h_][2] - digit_boxes[h_][0]) >= (digit_boxes[h_][3] - digit_boxes[h_][1])) == horiz
+                       for h_ in hits.tolist()):
                     dim_seg.add(k)
-        quads = []
-        thick_of = []
-        for a, b, d, sd, l, h in pairs:
-            if a in bad or b in bad:
-                continue
-            if a in dim_seg and b in dim_seg:
+        oq = []
+        for a_, b_, d, sd, l, h in pairs:
+            if a_ in bad or b_ in bad or (a_ in dim_seg and b_ in dim_seg):
                 continue
             if h - l < 1.5 * d:
-                continue  # stub: dash-drawn grid/section lines side by side, mullions, comb teeth
-            x0, y0, x1, y1 = Sc[a, :4]
-            L = Sc[a, 6]
-            ux, uy = (x1 - x0) / L, (y1 - y0) / L
-            nx, ny = -uy * sd, ux * sd
-            p0 = (x0 + ux * l, y0 + uy * l)
-            p1 = (x0 + ux * h, y0 + uy * h)
-            q = Polygon([p0, p1, (p1[0] + nx, p1[1] + ny), (p0[0] + nx, p0[1] + ny)])
+                continue  # stub
+            q, c0, c1 = _quad(Sc, a_, sd, l, h)
             if q.is_valid and q.area > 0:
-                quads.append(q)
-                thick_of.append(d)
-        # tag / label boxes: a word covering a large part of the strip
-        if quads and word_boxes:
-            from shapely import STRtree
-            wb = [sbox(*b) for b in word_boxes]
+                oq.append((q, c0, c1, d, "double"))
+        # tag boxes
+        if oq and word_boxes:
+            wb = [sbox(*b_) for b_ in word_boxes]
             wtree = STRtree(wb)
-            qi_, wi_ = wtree.query(quads, predicate="intersects")
-            cover = np.zeros(len(quads))
-            for a_, b_ in zip(qi_.tolist(), wi_.tolist()):
-                cover[a_] += quads[a_].intersection(wb[b_]).area
-            ok = cover < 0.25 * np.array([q.area for q in quads])
-            quads = [q for q, k in zip(quads, ok) if k]
-            thick_of = [t for t, k in zip(thick_of, ok) if k]
-        # hatch / pattern density inside each pair: Revit/ArchiCAD walls carry insulation or poche hatching,
-        # furniture and casework outlines are empty. When a page hatches its walls, demand it.
-        if quads:
-            from shapely import STRtree, points as spoints
+            qs = [r[0] for r in oq]
+            qi_, wi_ = wtree.query(qs, predicate="intersects")
+            cover = np.zeros(len(qs))
+            for x_, y_ in zip(qi_.tolist(), wi_.tolist()):
+                cover[x_] += qs[x_].intersection(wb[y_]).area
+            oq = [r for r, c in zip(oq, cover) if c < 0.25 * r[0].area]
+        # poche hatching inside each strip (Revit/ArchiCAD cut walls); when the page hatches its walls, demand it
+        hatched = np.zeros(len(oq), bool)
+        page_hatches = False
+        if oq:
+            from shapely import points as spoints
             dp = _detail_points(page, box)
+            from shapely.geometry import Polygon as _P
+            halves = []
+            for q, c0, c1, d, st in oq:
+                p0, p1, p2, p3 = list(q.exterior.coords)[:4]
+                halves.append(_P([p0, p1, c1, c0]))
+                halves.append(_P([c0, c1, p2, p3]))
             if len(dp):
-                ptree = STRtree(spoints(dp))
-                qi_, pi_ = ptree.query(quads, predicate="contains")
-                cnt = np.bincount(qi_, minlength=len(quads))
+                qi_, _ = STRtree(spoints(dp)).query(halves, predicate="contains")
+                cnt = np.bincount(qi_, minlength=len(halves))
             else:
-                cnt = np.zeros(len(quads), int)
-            qlen = np.array([q.area / max(t, 0.5) for q, t in zip(quads, thick_of)])
-            dens = cnt / np.maximum(qlen, 1e-6)
-            hatched = dens >= 0.3
+                cnt = np.zeros(len(halves), int)
+            qlen = np.array([r[0].area / max(r[3], 0.5) for r in oq])
+            # poche fills the whole strip: both halves hatched (a wall + an empty band beside it is not a wall)
+            # density per paper area (hatch spacing is a paper quantity): cut-wall poche ~0.2-0.35 marks/pt^2,
+            # floor stipple and finish patterns beside a wall ~0.02-0.08
+            harea = np.array([h_.area for h_ in halves])
+            dens_h = cnt / np.maximum(harea, 1e-6)
+            hatched = np.minimum(dens_h[0::2], dens_h[1::2]) >= 0.1
             hl = float(qlen[hatched].sum())
-            if hl > 0.25 * float(qlen.sum()) and hl > 300:
-                quads = [q for q, h in zip(quads, hatched) if h]
-        dbl = []
-        if quads:
-            u = unary_union([q.buffer(0.3, join_style=2) for q in quads]).buffer(-0.3, join_style=2)
-            for poly in getattr(u, "geoms", [u]):
-                if poly.geom_type == "Polygon" and poly.area > 2:
-                    dbl.append(poly)
-        # thick stroke polygons
-        stk = []
+            page_hatches = hl > 0.25 * float(qlen.sum()) and hl > 300
+            if page_hatches:
+                oq = [r for r, h_ in zip(oq, hatched) if h_]
+                hatched = np.ones(len(oq), bool)
+        # fixtures / casework (un-hatched strips only): a small light-filled shape covering the strip, or
+        # fixture symbols (burners, basins, bowls) inside it
+        light = [poly for poly, g, oid in shapes if g > 0.5 and poly.area < 0.01 * page_area]
+        if oq and (light or ctree is not None):
+            ltree = STRtree(light) if light else None
+            keep = []
+            for r, h_ in zip(oq, hatched):
+                q = r[0]
+                if not h_:
+                    if ltree is not None:
+                        cov = sum(light[k].intersection(q).area for k in ltree.query(q).tolist())
+                        if cov >= 0.5 * q.area:
+                            continue
+                    if ctree is not None and len(ctree.query(q, predicate="contains")):
+                        continue
+                keep.append(r)
+            oq = keep
+        # thickness floor from the page's own walls: strips much thinner than its walls are face/dimension
+        # line pairs or hatch bands (the "fins")
+        ref = [(r[3], r[0].area) for r in (oq if page_hatches or not pieces else pieces)]
+        if ref:
+            ref.sort()
+            half, acc = sum(a_ for _, a_ in ref) / 2, 0.0
+            for t0, a_ in ref:
+                acc += a_
+                if acc >= half:
+                    break
+            oq = [r for r in oq if r[3] >= max(1.0, 0.4 * t0)]
+        oq.sort(key=lambda r: -r[3])  # widest valid pair first: inner hatch bands of a wall then overlap it
+        stroke_pieces += oq
         for x0, y0, x1, y1, w, g, L, ang in S[thick]:
-            stk.append(LineString([(x0, y0), (x1, y1)]).buffer(w / 2, cap_style=2))
-        stk_u = unary_union(stk) if stk else None
-        cand_polys = [(p, _thickness(p), "fill") for p, t, g in fills]
-        cand_polys += [(p, _thickness(p), "double") for p in dbl]
-        if stk_u is not None and not stk_u.is_empty:
-            for p in getattr(stk_u, "geoms", [stk_u]):
-                if p.geom_type == "Polygon":
-                    cand_polys.append((p, _thickness(p), "stroke"))
-    else:
-        cand_polys = [(p, _thickness(p), "fill") for p, t, g in fills]
-
-    cand_polys = _drop_blobs(cand_polys)
-    if not cand_polys:
+            q = LineString([(x0, y0), (x1, y1)]).buffer(w / 2, cap_style=2)
+            stroke_pieces.append((q, (x0, y0), (x1, y1), float(w), "stroke"))
+    pieces = _accept(stroke_pieces, pieces)
+    if not pieces:
         return []
-    # ---- keep the connected wall network: drop isolated small pieces (furniture, symbols)
-    polys = [c[0] for c in cand_polys]
+    segs = _merge_pieces(pieces)
+    segs = _drop_isolated(segs)
+    segs = _extend_ends(segs)
+    out = []
+    for (x0, y0), (x1, y1), t, style in segs:
+        L = math.hypot(x1 - x0, y1 - y0)
+        if L < 1.0:
+            continue
+        ux, uy = (x1 - x0) / L, (y1 - y0) / L
+        nx, ny = -uy * t / 2, ux * t / 2
+        rect = [[x0 + nx, y0 + ny], [x1 + nx, y1 + ny], [x1 - nx, y1 - ny], [x0 - nx, y0 - ny]]
+        out.append({"polygon": [[round(float(x), 3), round(float(y), 3)] for x, y in rect],
+                    "centerline": [[round(float(x0), 3), round(float(y0), 3)], [round(float(x1), 3), round(float(y1), 3)]],
+                    "thickness_pt": round(float(t), 3), "style": style})
+    return out
+
+
+def _accept(cands, accepted, max_overlap=0.3):
+    """Greedy: take candidates in the given order unless they overlap already taken pieces by > max_overlap
+    of their own area (one shape per wall: fill wins over outline, a wall over its inner hatch bands)."""
     from shapely import STRtree
-    tree = STRtree([p.buffer(1.5) for p in polys])
-    n = len(polys)
+    out = list(accepted)
+    if not cands:
+        return out
+    allq = [r[0] for r in out] + [r[0] for r in cands]
+    tree = STRtree(allq)
+    taken = np.zeros(len(allq), bool)
+    taken[:len(out)] = True
+    for k, r in enumerate(cands):
+        gi = len(accepted) + k
+        q = r[0]
+        ov = 0.0
+        for j in tree.query(q).tolist():
+            if taken[j] and j != gi:
+                ov += allq[j].intersection(q).area
+                if ov > max_overlap * q.area:
+                    break
+        if ov <= max_overlap * q.area:
+            taken[gi] = True
+            out.append(r)
+    return out
+
+
+def _merge_pieces(pieces, ang_q=math.radians(1.0), off_q=0.6, gap=1.0):
+    """Join collinear pieces of equal thickness into wall runs: [(c0, c1, t, style)]."""
+    rows = []
+    for q, c0, c1, d, style in pieces:
+        dx, dy = c1[0] - c0[0], c1[1] - c0[1]
+        L = math.hypot(dx, dy)
+        if L <= 0:
+            continue
+        ang = math.atan2(dy, dx) % math.pi
+        if ang > math.pi - ang_q / 2:
+            ang -= math.pi
+        ux, uy = math.cos(ang), math.sin(ang)
+        off = -uy * c0[0] + ux * c0[1]
+        t0, t1 = ux * c0[0] + uy * c0[1], ux * c1[0] + uy * c1[1]
+        rows.append((round(ang / ang_q), round(off / off_q), round(d / max(0.3, 0.12 * d)), min(t0, t1),
+                     max(t0, t1), ang, off, d, style))
+    rows.sort(key=lambda r: (r[0], r[1], r[2], r[3]))
+    out = []
+    cur = None
+    for r in rows:
+        if cur is not None and r[:3] == cur[0] and r[3] <= cur[2] + gap:
+            cur[2] = max(cur[2], r[4]); cur[5].append(r[6]); cur[6].append(r[7]); cur[7][r[8]] += r[4] - r[3]
+            continue
+        if cur is not None:
+            out.append(cur)
+        st = defaultdict(float); st[r[8]] += r[4] - r[3]
+        cur = [r[:3], r[3], r[4], r[5], None, [r[6]], [r[7]], st]
+    if cur is not None:
+        out.append(cur)
+    segs = []
+    for key, lo, hi, ang, _, offs, ds, st in out:
+        ux, uy = math.cos(ang), math.sin(ang)
+        o = float(np.mean(offs))
+        segs.append(((lo * ux - o * uy, lo * uy + o * ux), (hi * ux - o * uy, hi * uy + o * ux), float(np.median(ds)),
+                     max(st, key=st.get)))
+    return segs
+
+
+def _seg_rect(c0, c1, t, ext=0.0):
+    from shapely.geometry import LineString
+    return LineString([c0, c1]).buffer(t / 2 + ext, cap_style=2)
+
+
+def _drop_isolated(segs):
+    """Keep the connected wall network: drop small isolated pieces (furniture, symbols, stray pairs)."""
+    from shapely import STRtree
+    if not segs:
+        return segs
+    rects = [_seg_rect(c0, c1, t, 1.5) for c0, c1, t, _ in segs]
+    tree = STRtree(rects)
+    n = len(segs)
     parent = list(range(n))
 
     def find(i):
@@ -840,59 +1009,47 @@ def walls(page: dict) -> list:
             parent[i] = parent[parent[i]]
             i = parent[i]
         return i
-    qi, qj = tree.query([p.buffer(1.5) for p in polys], predicate="intersects")
+    qi, qj = tree.query(rects, predicate="intersects")
     for a, b in zip(qi.tolist(), qj.tolist()):
         if a != b:
             ra, rb = find(a), find(b)
             if ra != rb:
                 parent[ra] = rb
-    comp_len = defaultdict(float)
-    lens = [p.area / max(c[1], 0.5) for p, c in zip(polys, cand_polys)]
-    for i in range(n):
-        comp_len[find(i)] += lens[i]
-    top = max(comp_len.values())
-    kept = []
-    for (poly, t, style), i in zip(cand_polys, range(n)):
-        cl = comp_len[find(i)]
-        if cl < max(40.0, 0.02 * top) or t < 0.5:
-            continue
-        kept.append((poly, style, t))
-    if not kept:
-        return out
-    # one shape per wall: a wall drawn as a hatch fill AND as two outline strokes yields overlapping fill and
-    # double candidates; union them so area and length are counted once. Style = the style covering most.
+    comp = defaultdict(float)
+    for i, (c0, c1, t, _) in enumerate(segs):
+        comp[find(i)] += math.hypot(c1[0] - c0[0], c1[1] - c0[1])
+    top = max(comp.values())
+    return [s for i, s in enumerate(segs) if comp[find(i)] >= max(40.0, 0.02 * top)]
+
+
+def _extend_ends(segs):
+    """Close corners and T-junctions: an end that runs into another wall is extended by up to half that wall's
+    thickness (+ its own half), so the pieces overlap instead of leaving a notch. Free ends (door jambs) stay."""
     from shapely import STRtree
-    u = unary_union([k[0].buffer(0.05, join_style=2) for k in kept]).buffer(-0.05, join_style=2)
-    ktree = STRtree([k[0] for k in kept])
-    for poly in getattr(u, "geoms", [u]):
-        if poly.geom_type != "Polygon" or poly.area < 1.0:
-            continue
-        votes = defaultdict(float)
-        tw = []
-        for k in ktree.query(poly).tolist():
-            a_ = kept[k][0].intersection(poly).area
-            if a_ > 0:
-                votes[kept[k][1]] += a_
-                tw.append((kept[k][2], a_))
-        style = max(votes, key=votes.get) if votes else "double"
-        # thickness: area-weighted median of the contributing simple shapes (a branched union's own
-        # area/perimeter rectangle underestimates it)
-        if tw:
-            tw.sort()
-            half, acc = sum(a for _, a in tw) / 2, 0.0
-            for t, a_ in tw:
-                acc += a_
-                if acc >= half:
-                    break
-        else:
-            t = _thickness(poly)
-        if t < 0.5:
-            continue
-        for piece in _no_holes(poly.simplify(0.05)):
-            if piece.area < 1.0:
-                continue
-            out.append({"polygon": [[round(x, 3), round(y, 3)] for x, y in list(piece.exterior.coords)[:-1]],
-                        "thickness_pt": round(t, 3), "style": style})
+    from shapely.geometry import Point
+    if not segs:
+        return segs
+    rects = [_seg_rect(c0, c1, t, 0.3) for c0, c1, t, _ in segs]
+    tree = STRtree(rects)
+    out = []
+    for i, (c0, c1, t, st) in enumerate(segs):
+        L = math.hypot(c1[0] - c0[0], c1[1] - c0[1])
+        ux, uy = (c1[0] - c0[0]) / L, (c1[1] - c0[1]) / L
+        ends = [list(c0), list(c1)]
+        for e, sgn in ((0, -1), (1, 1)):
+            best = 0.0
+            for j in tree.query(Point(ends[e]).buffer(t / 2 + 0.5)).tolist():
+                if j == i:
+                    continue
+                tj = segs[j][2]
+                for k in range(1, 9):
+                    ext = k * (t / 2 + tj) / 8
+                    p = Point(ends[e][0] + sgn * ux * ext, ends[e][1] + sgn * uy * ext)
+                    if rects[j].contains(p):
+                        best = max(best, ext)
+            if best > 0:
+                ends[e] = [ends[e][0] + sgn * ux * best, ends[e][1] + sgn * uy * best]
+        out.append((tuple(ends[0]), tuple(ends[1]), t, st))
     return out
 
 

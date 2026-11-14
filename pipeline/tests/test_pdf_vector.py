@@ -146,7 +146,32 @@ def test_fill_plus_outline_counted_once(tmp_path):
     from shapely.geometry import Polygon
     from shapely.ops import unary_union
     polys = [Polygon(w["polygon"]) for w in b]
-    assert unary_union(polys).area == pytest.approx(sum(p.area for p in polys), rel=0.01)  # no overlaps
+    # pieces overlap only in the corner squares (ends are extended into the crossing wall to close corners)
+    assert sum(p.area for p in polys) - unary_union(polys).area <= 4 * 8 * 8 + 1
+
+
+def test_centerlines_and_exact_thickness(tmp_path):
+    """Each wall carries a centreline and the edge-to-edge thickness (fill width), for IfcWall export."""
+    ws = V.walls(V.load_page(write_pdf(tmp_path / "c.pdf", room_filled(100, 100, 400, 300, 8)), 0))
+    assert len(ws) == 4
+    for w in ws:
+        (x0, y0), (x1, y1) = w["centerline"]
+        assert w["thickness_pt"] == pytest.approx(8, abs=0.05)
+        assert x0 == pytest.approx(x1, abs=0.01) or y0 == pytest.approx(y1, abs=0.01)
+    xs = sorted({round(w["centerline"][0][0]) for w in ws if abs(w["centerline"][0][0] - w["centerline"][1][0]) < 0.01})
+    assert xs == [104, 396]  # centres of the 8 pt side walls
+
+
+def test_fixture_fill_not_wall(tmp_path):
+    """A light-grey counter holding burner circles, against a wall, is not a wall."""
+    k = 0.5523 * 4
+    burner = (f"0 G 0.3 w 254 140 m 254 {140 + k} {250 + k} 144 250 144 c {250 - k} 144 246 {140 + k} 246 140 c "
+              f"246 {140 - k} {250 - k} 136 250 136 c {250 + k} 136 254 {140 - k} 254 140 c h S\n")
+    body = room_filled(100, 100, 400, 300, 8) + "0.85 g 0 G 0.5 w 200 108 120 18 re B\n" + burner
+    ws = V.walls(V.load_page(write_pdf(tmp_path / "k.pdf", body), 0))
+    assert all(w["thickness_pt"] < 10 for w in ws)
+    assert wall_len(ws) == pytest.approx(wall_len(V.walls(V.load_page(
+        write_pdf(tmp_path / "k0.pdf", room_filled(100, 100, 400, 300, 8)), 0))), rel=0.03)
 
 
 def test_polygons_have_no_holes(tmp_path):

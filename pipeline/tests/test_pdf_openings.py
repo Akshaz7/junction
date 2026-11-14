@@ -113,6 +113,43 @@ def test_doors_and_window_on_synthetic_pdf(plan_page):
     assert w["bbox"][0] == pytest.approx(350, abs=1) and w["bbox"][2] == pytest.approx(420, abs=1)
 
 
+def test_door_props_and_opening_span_wall(plan_page):
+    doors = [o for o in po.openings(plan_page, _walls()) if o["kind"] == "door"]
+    d1 = next(d for d in doors if d["props"]["width_pt"] > 42)
+    pr = d1["props"]
+    # top wall y 90..100 (y-down): the opening spans exactly that thickness, hinge -> closed along +x
+    assert d1["bbox"][1] == pytest.approx(90, abs=0.3) and d1["bbox"][3] == pytest.approx(100, abs=0.3)
+    assert min(pr["axis_deg"], 360 - pr["axis_deg"]) < 1 and min(pr["wall_axis_deg"], 180 - pr["wall_axis_deg"]) < 1
+    assert pr["swing_side"] == "left"          # leaf opens to +y (down the page, into the room)
+    assert pr["wall_index"] in (0, 1)          # one of the jamb walls
+    assert pr["leaf_width_pt"] == pytest.approx(45, abs=1)
+    assert pr["swing_radius_m"] == pytest.approx(45 * 0.0254 / 72 * 50, abs=0.02) == pr["leaf_len_m"]
+
+
+def _seg(a, b):
+    return {"pts": [list(a), list(b)], "closed": False, "fill": None, "stroke": [0, 0, 0], "width": 0.2,
+            "n_curves": 0, "is_arc": False}
+
+
+def _box(x0, y0, x1, y1, t=10.0):
+    return {"polygon": [[x0, y0], [x1, y0], [x1, y1], [x0, y1]], "thickness_pt": t, "style": "fill"}
+
+
+def test_sliding_door_and_fat_window_rejected():
+    # exterior wall y 100..110 with a 100 pt (1.76 m at 1:50) gap x 150..250 holding two overlapping sliding leaves
+    walls = [_box(0, 100, 150, 110), _box(250, 100, 400, 110), _box(0, 110, 10, 300), _box(390, 110, 400, 300),
+             _box(0, 290, 400, 300), _box(10, 200, 100, 210)]
+    paths = [_seg((150, 103), (210, 103)), _seg((190, 107), (250, 107))]
+    # a 'window' candidate 1 m deep (glazing pack spread across 60 pt) inside a room: must not survive
+    paths += [_seg((120, 150), (200, 150)), _seg((120, 180), (200, 180)), _seg((120, 209), (200, 209))]
+    page = {"W_pt": 600, "H_pt": 400, "paths": paths, "words": [{"text": "1:50", "bbox": [0, 0, 10, 5]}]}
+    ops = po.openings(page, walls)
+    sl = [o for o in ops if o["kind"] == "door"]
+    assert len(sl) == 1 and sl[0]["props"]["sliding"] and sl[0]["props"]["width_pt"] == pytest.approx(100, abs=1)
+    for w in [o for o in ops if o["kind"] == "window"]:
+        assert w["props"]["depth_pt"] * 0.0254 / 72 * 50 <= 0.6
+
+
 def test_window_drawn_over_continuous_wall():
     """Jambs spanning the wall thickness + glazing lines, over an uninterrupted wall shape (CAD hatch runs through)."""
     seg = lambda a, b: {"pts": [list(a), list(b)], "closed": False, "fill": None, "stroke": [0, 0, 0], "width": 0.2,
