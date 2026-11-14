@@ -138,10 +138,13 @@ def cache_dependencies(project, root):
     paths = [base / "pipeline" / "pdf_mep.py", base / "pipeline" / "pdf_vector.py", base / "engine" / "mep.py"]
     for doc in project.get("docs", []):
         doc = {"doc_id": doc} if isinstance(doc, str) else doc
+        if not isinstance(doc, dict):
+            continue
         did = doc.get("doc_id")
         if not did or Path(did).name != did or did in {".", ".."}:
             continue
-        meta = {**read_json(Path(root) / did / "doc.json", {}), **doc}
+        stored = read_json(Path(root) / did / "doc.json", {})
+        meta = {**(stored if isinstance(stored, dict) else {}), **doc}
         for fmt in ("ifc", "pdf"):
             if path := resolve_source(meta, root, fmt):
                 paths.append(path)
