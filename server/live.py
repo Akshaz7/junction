@@ -25,6 +25,7 @@ def channel() -> str:
     import re
     m = re.search(r"search_path(?:%3D|=)([A-Za-z0-9_]+)", config.database_url())
     return f"{CHANNEL}_{m.group(1)}" if m and m.group(1) != "public" else CHANNEL
+INSTANCE = uuid.uuid4().hex  # tags our own NOTIFYs so _on_notify can skip them
 PING_INTERVAL = 20.0  # seconds; keeps Aiven's proxy from cutting idle sockets
 CLIENT_EVENTS = {"scene.highlight", "scene.edit"}  # event types clients may send
 
@@ -76,6 +77,8 @@ class Hub:
             event = json.loads(payload)
         except ValueError:
             return
+        if event.pop("_o", None) == INSTANCE:
+            return  # this process already delivered it directly in publish()
         asyncio.get_running_loop().create_task(self.broadcast(event))
 
     async def broadcast(self, event: dict):
@@ -91,17 +94,36 @@ hub = Hub()
 router = APIRouter()
 
 
+_outbox: "asyncio.Queue[str] | None" = None
+_outbox_task: asyncio.Task | None = None
+_outbox_loop = None
+
+
+async def _pump(q: "asyncio.Queue[str]") -> None:
+    """Send NOTIFYs in order, off the request path (cross-instance fan-out only)."""
+    while True:
+        payload = await q.get()
+        try:
+            pool = await db.get_pool()
+            if pool is not None:
+                await pool.execute("select pg_notify($1, $2)", channel(), payload)
+        except Exception:
+            pass
+
+
 async def publish(event: dict) -> None:
-    """Send an event to every connected client on every server instance."""
-    if hub.listening.is_set():
-        pool = await db.get_pool()
-        if pool is not None:
-            try:
-                await pool.execute("select pg_notify($1, $2)", channel(), json.dumps(event))
-                return
-            except Exception:
-                pass
+    """Deliver to this instance's sockets immediately; NOTIFY the other instances in the background.
+
+    Direct delivery avoids the NOTIFY round trip (app and Postgres sit in different clouds, ~1 s)."""
+    global _outbox, _outbox_task, _outbox_loop
     await hub.broadcast(event)
+    if not hub.listening.is_set():
+        return
+    loop = asyncio.get_running_loop()
+    if _outbox is None or _outbox_loop is not loop or _outbox_task is None or _outbox_task.done():
+        _outbox, _outbox_loop = asyncio.Queue(), loop
+        _outbox_task = loop.create_task(_pump(_outbox))
+    _outbox.put_nowait(json.dumps({**event, "_o": INSTANCE}))
 
 
 def _chat_uuid(v):

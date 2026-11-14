@@ -424,7 +424,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         }}
         onPointerUp={(event) => event.currentTarget.releasePointerCapture(event.pointerId)} />
       <DrawingEditsContext value={sceneEdits}>
-        <DocumentViewer key={viewer.citation.doc_id} answer={viewer.answer} citation={viewer.citation} sheet={sheet} initialMode={viewer.mode}
+        <DocumentViewer key={viewer.citation.doc_id} answer={viewer.answer} citation={viewer.citation} sheet={sheet} initialMode={viewer.mode} openRequest={viewer.request}
           chatId={liveChatId}
           edits={sceneEdits[viewer.citation.doc_id]} commands={viewerCommands.length ? viewerCommands : undefined} onClose={() => setViewer(null)} />
       </DrawingEditsContext>
