@@ -121,6 +121,20 @@ def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
                     page_scale = {**better, "replaced": (page_scale or {}).get("method")}
             except Exception:  # noqa: BLE001 - never block a document on scale reading
                 pass
+            from engine.scale_policy import choose
+            selected_scale = choose(m, d, effective_scale=page_scale)
+            old_mpp = (page_scale or {}).get("m_per_px")
+            new_mpp = selected_scale.get("m_per_px")
+            if new_mpp and new_mpp != old_mpp:
+                from engine.scale_text import rescale_items
+                rescale_items(items[page_start:], old_mpp, new_mpp)
+            elif not new_mpp and old_mpp:
+                # An ambiguous global scale cannot support dimensional values.
+                for it in items[page_start:]:
+                    for key in ("area_m2", "width_m", "height_m", "length_m"):
+                        if key != "area_m2" or it.props.get("area_m2_label") is None:
+                            it.q.pop(key, None)
+            page_scale = selected_scale
             page_scales[m.get("page", 1)] = page_scale
             if scale is None:
                 scale = page_scale

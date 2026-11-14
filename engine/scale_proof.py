@@ -235,6 +235,7 @@ def enrich(pm, folder=None, *, effective_scale=None, save_crops=False):
                 inp['source']['file'] = f'planmap-{page}.json'
             inp['source'] = source(did, page, **{k: v for k, v in inp.get('source', {}).items() if k not in ('doc_id', 'page')})
         unique.append(r)
+    sc['available_candidates'] = unique
     selected = positive(sc.get('m_per_px'))
     method = sc.get('method', 'none')
     checks, deltas = [], []
