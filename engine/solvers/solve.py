@@ -452,9 +452,12 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         if not sel and (quoted or rid) and doc.mode == "planmap" and not any(i.label for i in items):
             return _abstain(question, doc_id, "The room names on this plan have not been read, so I cannot pick out that room.",
                             trace, route, t0)
+        if not sel and p.type == "area" and not quoted and not rid:
+            sel = list(items)        # no room named: answer for all rooms, with a per-room breakdown (never refuse)
+            trace.append(_step("filter", "no room named: all rooms with a breakdown"))
         if not sel and p.type != "count":
             return _abstain(question, doc_id, f"I could not find {'room ' + rid if rid else 'that room'} in the data.", trace, route, t0)
-        if sel or quoted:
+        if (sel or quoted) and not (len(sel) == len(items) > 1 and not quoted and not rid):
             items = sel
             subject = f"room {rid}" if rid and not quoted else f"“{quoted[0]}”"
             trace.append(_step("filter", f"room {subject}: {len(items)} matched"))
@@ -528,5 +531,9 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         text = f"The total {p.type} of the **{len(have)} {_plural(kind, len(have))}** {where} is {num}. {marks}"
     if missing:
         text += f" {missing} of {len(items)} had no {p.type} recorded and are not included."
+    if kind == "room" and p.type == "area" and len(have) > 1 and not subject and not re.search(r"\b(total|sum|all|combined|together|overall)\b", question, re.I):
+        top = sorted(have, key=lambda iv: -iv[1])[:10]
+        text += " Per room: " + "; ".join(f"{(i.label or i.name or i.item_id)}{' (' + i.storey + ')' if i.storey else ''} {_fmt(v, 'area')} m²" for i, v in top) \
+            + (f"; and {len(have) - len(top)} more" if len(have) > len(top) else "") + "."
     text += scale_note
     return _answer_obj(question, [doc_id], text, round(total, 4), unit, conf, False, boxes, cites, scene, trace, route, t0)

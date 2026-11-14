@@ -113,3 +113,44 @@ def test_multi_count_on_colorful_11397_has_both_counts_and_boxes():
     assert {b["kind"] for b in boxes} == {"window", "door"} and len(boxes) == 22
     assert sorted(int(b["label"]) for b in boxes) == list(range(1, 23))
     assert set(a["evidence"]["scene"]["item_kinds"].values()) == {"window", "door"}
+
+
+# ---- room area with no room named, and "where is the stairs / lift / entrance" ------------------------------
+
+_AC20 = "ifc_bench__ac20-arc"
+
+
+def _ac20_root():
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[2] / "artifacts"
+    if not (root / _AC20).exists():
+        _pytest.skip("artifact missing")
+    return root
+
+
+def test_find_a_rooms_area_gives_breakdown_and_total():
+    from engine.solvers.solve import solve
+    for q in ("Find a room's area", "What is the area of the room?"):
+        a = solve(q, _AC20, _parse(q), root=_ac20_root())
+        assert not a["answer"]["abstained"] and a["answer"]["unit"] == "m²" and a["answer"]["value"] > 1000
+        assert "Per room:" in a["answer"]["text_md"] and "m²" in a["answer"]["text_md"]
+
+
+def test_total_area_question_keeps_the_short_answer():
+    from engine.solvers.solve import solve
+    q = "What is the total area of all rooms"
+    assert "Per room" not in solve(q, _AC20, _parse(q), root=_ac20_root())["answer"]["text_md"]
+
+
+def test_locate_routes_are_code_only(monkeypatch):
+    monkeypatch.setenv("MODELS_FAKE", "1")
+    _ac20_root()
+    from engine.answer import answer
+    a = answer("Where is the stair core on level 1?", [_AC20])
+    assert a["cost"]["usd_total"] == 0 and a["latency_ms"] < 3000 and a["evidence"]["scene"]["highlight_item_ids"]
+    assert "1. Obergeschoss" in a["answer"]["text_md"]
+    a = answer("where is the entrance on level 0", [_AC20])
+    assert "Erdgeschoss" in a["answer"]["text_md"] and a["evidence"]["scene"]["highlight_item_ids"]
+    a = answer("where is the lift", [_AC20])
+    assert "No lift" in a["answer"]["text_md"] and a["cost"]["usd_total"] == 0
+    assert "how many" not in __import__("engine.locate", fromlist=["x"]).__dict__ or __import__("engine.locate", fromlist=["x"]).thing("how many stairs are there") is None

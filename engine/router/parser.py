@@ -82,6 +82,7 @@ RE_VOLUME = re.compile(r"\bvolume\b|\bcubic\b|\bm³\b|\bm3\b")
 RE_WEAK_TEXT = re.compile(
     r"\b(types?|materials?|finish(?:es)?|hardware|furniture|systems|software|standards|information|rating|names?|guid|layers?|elevations?|"
     r"heights?|widths?|thicknesses|thickness|depth|dimensions?|specified|schedule[ds]? for|usage|location|function|description|load-bearing)\b")
+RE_AREA_CMD = re.compile(r"^(?:find|get|give(?: me)?|calculate|compute|tell me|work out)\b")
 RE_WH = re.compile(r"^(?:what|which|who|where|when|how|is|are|does|do|can)\b")
 
 
@@ -204,7 +205,7 @@ def parse(question: str) -> Parsed:
     if RE_LENGTH.search(body):
         k = _kind(body, after=r"length of|length")
         return done("length", k, "length", matched=k is not None)
-    if RE_AREA.search(body) and RE_WH.search(body) and not RE_LISTQ.search(body):
+    if RE_AREA.search(body) and (RE_WH.search(body) or RE_AREA_CMD.search(body)) and not RE_LISTQ.search(body):
         k = _kind(body, after=r"\barea (?:of|for)\b") or _kind(body)
         return done("area", k or "room", "area", matched=True)
     # 4. text

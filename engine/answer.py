@@ -219,6 +219,20 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             return _abstained(question, doc_ids, f"The question names **{other}**, which is not among the selected documents ({sel}). "
                               "Select that document and ask again, or ask about the selected one.", trace, t0)
 
+        # 0-. "where is the stairs / lift / entrance (on level N)": code over IFC elements, no model
+        from engine.locate import locate_answer, thing as _thing
+        _what = _thing(question)
+        if _what and parse_scene(question) is None:
+            from engine.solvers.data import load_doc as _ld
+            ldoc = _ld(doc_ids[0], root)
+            if ldoc is not None and ldoc.mode == "ifc":
+                emit("status", {"text": f"Exploring document: {_title(doc_ids[0], root)}"})
+                res = locate_answer(question, ldoc, _what, t0)
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                return res
+
         # 0. scene commands (hide / isolate / highlight / reset): code only, edits never touch data
         intent = parse_scene(question)
         scene_cost, scene_prov = 0.0, None
