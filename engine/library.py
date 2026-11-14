@@ -294,6 +294,7 @@ def drawing_selection_answer(question, root=None, history=None, records=None):
 def reader_partial(question, doc_ids, session, trace, calls, t0):
     """A reader can publish this after each tool: verbatim findings, with its registered evidence only."""
     cites, lines, boxes, ids = [], [], [], []
+    seen_ids = set()
     for evidence in list(session.ev.values())[-6:]:
         if not evidence.quote:
             continue
@@ -302,11 +303,14 @@ def reader_partial(question, doc_ids, session, trace, calls, t0):
                       "kind": "text" if evidence.kind in ("text", "row") else "element" if evidence.kind == "element" else "region",
                       "bbox_px": evidence.bbox_px, "item_ids": list(evidence.item_ids), "quote": evidence.quote})
         lines.append(f"- {evidence.quote} [{n}]")
-        ids.extend(i for i in evidence.item_ids if i not in ids)
+        for iid in evidence.item_ids:
+            if iid not in seen_ids:
+                ids.append(iid)
+                seen_ids.add(iid)
         if evidence.bbox_px:
             boxes.append({"item_id": evidence.item_ids[0] if evidence.item_ids else evidence.ref, "page": evidence.page,
                           "bbox_px": evidence.bbox_px, "label": str(n)})
-    text = "Reader findings so far (not yet a complete answer):\n" + "\n".join(lines) if lines else "No verified findings are available yet."
+    text = "**Findings so far — still checking.**\n\n" + "\n".join(lines) if lines else "No verified findings are available yet."
     ans = _result(question, text, docs=doc_ids, abstained=not cites, cites=cites, step="read")
     ans["answer"]["confidence"] = 0.3 if cites else 0.0
     ans["evidence"]["boxes"] = boxes

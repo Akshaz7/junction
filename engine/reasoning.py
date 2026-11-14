@@ -77,11 +77,13 @@ def build(res: dict, question: str, root: Path) -> dict | None:
         doc = None
     items = {i.item_id: i for i in (doc.items if doc else [])}
     cited = []
+    cited_ids = set()
     first_cite = {}
     for c in cites:
         for iid in c.get("item_ids") or []:
-            if iid in items and items[iid] not in cited:
+            if iid in items and iid not in cited_ids:
                 cited.append(items[iid])
+                cited_ids.add(iid)
                 first_cite.setdefault(iid, c.get("n"))
     steps: list[dict] = []
     models_used = any(s.get("model") and s.get("step") not in ("explain", "context", "typos") for s in trace)

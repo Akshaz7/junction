@@ -25,7 +25,8 @@ _ocr_engine = None
 def png_size(p: Path) -> tuple[int, int] | None:
     import struct
     try:
-        b = p.read_bytes()[:32]
+        with p.open("rb") as image:
+            b = image.read(32)
         if b[:8] == b"\x89PNG\r\n\x1a\n":
             return struct.unpack(">II", b[16:24])
     except OSError:

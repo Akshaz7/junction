@@ -12,6 +12,7 @@ import os
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor
+from contextvars import copy_context
 from pathlib import Path
 
 PROMPT = """You explain answers about construction drawings and BIM models to a site manager.
@@ -83,15 +84,15 @@ def _ok(orig: str, new: str) -> bool:
     if not new or len(new) < 20 or len(new) > 2500:
         return False
     head = re.findall(r"\*\*(.+?)\*\*", orig)
-    nums = set(_NUM.findall(" ".join(head) if head else orig[:200]))
-    flat = new.replace(",", "")
-    if any(n.replace(",", "") not in flat for n in nums):
+    nums = set(_NUM.findall(re.sub(r"\[\d+\]", "", " ".join(head) if head else orig[:200])))
+    new_nums = {n.replace(",", "") for n in _NUM.findall(re.sub(r"\[\d+\]", "", new))}
+    if any(n.replace(",", "") not in new_nums for n in nums):
         return False
     marks = set(re.findall(r"\[\d+\]", orig))
     return marks <= set(re.findall(r"\[\d+\]", new))
 
 
-def explain(res: dict, question: str, root: Path, timeout_s: float = 12.0) -> dict:
+def explain(res: dict, question: str, root: Path, timeout_s: float = 12.0, on_event=None) -> dict:
     if os.environ.get("EXPLAIN", "1") == "0" or os.environ.get("MODELS_FAKE") == "1":
         return res
     ans = res.get("answer") or {}
@@ -101,26 +102,41 @@ def explain(res: dict, question: str, root: Path, timeout_s: float = 12.0) -> di
     if not text or len(text) > 700 or any(s.get("model") and s.get("step") in ("write", "answer", "read", "reader") for s in res.get("trace") or []):
         return res   # model-written answers already explain themselves
     t0 = time.perf_counter()
+    future = None
     try:
         items, summary = _facts(res, root)
         how = "\n".join(f"- {s.get('detail')}" for s in (res.get("trace") or [])[:10] if s.get("detail"))
         from engine.models import call
+        from engine.models import providers as P
         from engine.assistant import with_system
         msgs = with_system(PROMPT.format(q=question, a=text, items=items, summary=summary, how=how))
-        with ThreadPoolExecutor(1) as ex:
-            r = ex.submit(call, "write_answer", msgs).result(timeout=timeout_s)
+        # Explanations run after the core's streaming context has been reset.
+        # Only publish prefixes that already preserve the exact headline/citations.
+        sink = (lambda txt: on_event("answer.delta", {"text": txt}) if _ok(text, txt) else None) if on_event else P.DELTA_SINK.get()
+        token = P.DELTA_SINK.set(sink)
+        try:
+            with ThreadPoolExecutor(1) as ex:
+                future = ex.submit(copy_context().run, call, "write_answer", msgs)
+                r = future.result(timeout=timeout_s)
+        finally:
+            P.DELTA_SINK.reset(token)
         new = (r.text or "").strip()
     except Exception:  # noqa: BLE001 — the exact code answer always stands on its own
-        return res
+        # The executor has joined by this point. A late paid result must be
+        # accounted for even when the explanation deadline rejected its wording.
+        if future is None or not future.done() or future.exception() is not None:
+            return res
+        r, new = future.result(), ""
+    # Paid calls still cost money when the wording fails validation.
+    usd = getattr(r, "cost_usd", 0) or 0
+    cost = res.setdefault("cost", {"usd_total": 0, "calls": []})
+    cost.setdefault("calls", []).append({"task": "write_answer", "provider": r.provider, "model": r.model, "cost_usd": usd})
+    cost["usd_total"] = round((cost.get("usd_total") or 0) + usd, 6)
     if not _ok(text, new):
         res.setdefault("trace", []).append({"step": "explain", "detail": "explanation did not keep the exact numbers; kept the code answer",
                                             "ms": int((time.perf_counter() - t0) * 1000), "model": getattr(r, "model", None), "cost_usd": getattr(r, "cost_usd", 0) or 0})
         return res
     ans["text_md"] = new
-    usd = getattr(r, "cost_usd", 0) or 0
     res.setdefault("trace", []).append({"step": "explain", "detail": "explained in plain words from the cited elements (numbers unchanged)",
                                         "ms": int((time.perf_counter() - t0) * 1000), "model": r.model, "cost_usd": usd})
-    cost = res.setdefault("cost", {"usd_total": 0, "calls": []})
-    cost.setdefault("calls", []).append({"task": "write_answer", "provider": r.provider, "model": r.model, "cost_usd": usd})
-    cost["usd_total"] = round((cost.get("usd_total") or 0) + usd, 6)
     return res

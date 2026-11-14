@@ -135,6 +135,15 @@ class Session:
         fn = getattr(self, f"t_{tool}", None)
         if fn is None:
             return f"error: unknown tool '{tool}'. Tools: find_text, page_text, tables, table, view, scale, measure, planmap, ifc, compute."
+        # Publish before parsing a large model, not after the expensive load.
+        if tool in ("ifc", "planmap"):
+            nouns = {"door": "doors", "window": "windows", "room": "rooms", "wall": "walls", "pipe": "pipes",
+                     "duct": "ducts", "column": "columns", "stairs": "stairs", "toilet": "toilets", "sink": "sinks"}
+            noun = nouns.get(str(args.get("kind") or ""), "model elements" if tool == "ifc" else "drawing items")
+            level = str(args.get("storey") or "").strip()[:60]
+            self.status(f"Checking {noun}" + (f" on {level}" if level else "") + "…")
+        elif tool == "compute":
+            self.status("Calculating from the findings…")
         try:
             obs = fn(**{k: v for k, v in (args or {}).items()})
         except TypeError as e:
