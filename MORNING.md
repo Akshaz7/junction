@@ -1,6 +1,6 @@
 # MORNING: report for Ash
 
-_Last updated: Sat 14 Nov 05:47 EET (run 1). See TASKS.md for every row._
+_Last updated: Sat 14 Nov 06:47 EET (run 1). See TASKS.md for every row._
 
 ## 1. What works
 | Demo step (MASTER_PROMPT §12) | Status |
@@ -9,12 +9,16 @@ _Last updated: Sat 14 Nov 05:47 EET (run 1). See TASKS.md for every row._
 | 2. Count question on raster plan, status lines, bold answer, chips | yes on the real engine: "How many windows are there?" on colorful-11397 → 11 windows, 11 numbered evidence items, $0, 2 ms (S-04 done test still being finished) |
 | 3. Chip opens drawing with numbered boxes; cost chip | yes (W-06, W-07, W-18): Stoa-style viewer header + toolbar, numbered boxes, cost chip, speaker button for the spoken answer (W-14) |
 | 4. "Visualise it" 3D with same items glowing | yes (T-00..T-07, T-11, T-12): roofs hidden by default; 2D↔3D linked clicks (T-03); "show me all the windows" → W1..Wn, "remove W3" fades out live in 3D (client side; engine side E-20 in progress); largest model 99.6 MB loads in 1.2 s, 60 fps on the Mac (results/viewer3d_perf.json). Walk mode T-10 in progress. |
-| 5. iPhone: same chat, "Show on table" AR | partly: iOS shell, AR screen, highlights, walk mode, tap-identify done in simulator (I-01..I-03, I-06, I-08); USDZ for 130 scenes (D-10); scene commands W1../hide/restore in AR done (I-14); advisor cards attempt 2 (I-09); bridge waits for W-11 (I-04); device install needs Ash |
-| 6. IFC fire exit on level 2, camera flies, 1:1 walk | no (E-13 not started; walk mode I-06 done) |
+| 5. iPhone: same chat, "Show on table" AR | yes in the simulator: the web "Show on table" opens native AR with the same doc and items (I-04), AR keeps the web page and draft across the round-trip (I-15), scene commands W1../hide/restore (I-14), advisor cards (I-09). Device install waits for Ash (I-05). |
+| 6. IFC fire exit on level 2, camera flies, 1:1 walk | partly: fire-exit rule check works on AC20 (findings API + red/amber pins in 3D, T-09); browser walk mode (T-10) and AR walk (I-06) done; exit-route answer is model inference and labelled so (DEMO.md) |
 | 7. Dashboard: accuracy by source/type, before/after fine-tune, cost/answer | yes (W-08) on the real bench. First real bench: 25.7 % overall on sample200 (answered 33.3 %), counts 32 %, areas mostly abstain, $0 for numeric answers (results/bench/sample200-r2.json). Improving this is the main work now (E-10/E-19, vision fine-tune V-06/V-07). |
-| 8. Edit in 3D → sourced advisor card | no (tier 3) |
+| 8. Edit in 3D → sourced advisor card | partly: 3D edit mode (remove/move/material) sends advisor requests and renders sourced cards (T-08); engine advisor rules in progress (E-16) |
 
 ## 2. Numbers (each from a results/ file)
+- Answer accuracy (results/bench/sample200-r8.json, docs/ACCURACY.md): 57.2 % on sample200 (answered 69.5 %), from 25.7 % at the start of the night; numeric answers cost $0.
+- Stress (results/stress/stress-r1.json): 411 cases, 0 crashes, 0 server errors, 0 invalid answers, 0 prompt-injection leaks; paraphrases agree 55/56. Dataset group 60/300 because 4,546 CubiCasa drawings had no plan map yet: a vision batch is filling them now (inference only, ~07:40), then stress-r2.
+- 3D performance (results/viewer3d_perf.json): largest model 99.6 MB / 5.4 M triangles loads in 1.2 s, 60 fps on the Mac.
+- Stoa look (results/fidelity/report.json): all desktop screens and nearly all phone screens within 1.5–2 % of the reference frames.
 - Router (question parser): 97.4% on 420 unique held-out questions with rules only, $0 per question; Nemotron fallback alone 95.0% at $0.0000025/question (`results/router_cost.json`). kind/scope labels were written by ENGINE: treat 97.4% as an upper bound.
 - Vision on the 4 cubicasa fixtures (`results/vision/timing.json`, counts in TASKS notes): colorful-11397 windows 12/13, toilets 2/2, sinks 3/3, showers+bathtubs 0/3. Full per-kind accuracy comes with V-04 (`results/vision/baseline.json`).
 - Spend so far (`results/costs.jsonl`): Runware $0.017, ElevenLabs $0.010, NVIDIA $0 (free tier). Modal $0.
