@@ -26,6 +26,7 @@ struct ARScreen: View {
             VStack(spacing: 10) {
                 topBar
                 placementPill
+                kindLegend
                 if controller.isWalking && controller.isPlaced {
                     HStack {
                         if let manifest = controller.manifest {
@@ -103,6 +104,24 @@ struct ARScreen: View {
             .accessibilityIdentifier("ar-done")
             Spacer()
             sceneMenu
+        }
+    }
+
+    /// "Doors 11 · Windows 11": one colour dot per highlighted kind, shown when two or more kinds are lit.
+    @ViewBuilder private var kindLegend: some View {
+        let rows = controller.highlightLegend
+        if rows.count >= 2 {
+            HologramCardPill {
+                HStack(spacing: 10) {
+                    ForEach(rows, id: \.style.key) { row in
+                        HStack(spacing: 5) {
+                            Circle().fill(Color(uiColor: row.style.color)).frame(width: 9, height: 9)
+                            Text("\(row.style.plural) \(row.count)").monospacedDigit()
+                        }
+                    }
+                }
+            }
+            .accessibilityIdentifier("ar-kind-legend")
         }
     }
 

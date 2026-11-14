@@ -23,6 +23,11 @@ final class HighlightController {
     private var labelScale: Float = 1
     private var labelAnchors: [String: (base: SIMD3<Float>, offset: Float)] = [:]
     private var labelSizes: [String: SIMD2<Float>] = [:]
+    /// Per answer item: the mesh entities that carry its highlight material, and that colour.
+    private var litGroups: [String: (entities: [Entity], color: UIColor)] = [:]
+    private var originalMaterials: [ObjectIdentifier: [any Material]] = [:]
+    /// Tags held back while the choreography has not reached their item yet.
+    private var suppressedLabelIDs: Set<String> = []
 
     init(root: Entity) {
         self.root = root
@@ -31,6 +36,7 @@ final class HighlightController {
         func capture(_ entity: Entity) {
             if let model = entity.components[ModelComponent.self] {
                 originals.append(Original(entity: entity, materials: model.materials))
+                originalMaterials[ObjectIdentifier(entity)] = model.materials
             }
             for child in entity.children { capture(child) }
         }
@@ -64,6 +70,7 @@ final class HighlightController {
 
         var selected: Set<ObjectIdentifier> = []
         var colorFor: [ObjectIdentifier: UIColor] = [:]
+        var groups: [String: (entities: [Entity], color: UIColor)] = [:]
         var resolved: [(id: String, entity: Entity, label: String)] = []
         var seen: Set<String> = []
         func select(_ entity: Entity, color: UIColor) {
@@ -76,6 +83,14 @@ final class HighlightController {
             select(entity, color: kinds[id].flatMap { $0.isEmpty ? nil : KindColors.style(for: $0).color }
                    ?? Self.accentColor)
             resolved.append((id, entity, labels[id] ?? String(offset + 1)))
+            let color = colorFor[ObjectIdentifier(entity)] ?? Self.accentColor
+            var meshes: [Entity] = []
+            func collect(_ node: Entity) {
+                if node.components[ModelComponent.self] != nil { meshes.append(node) }
+                for child in node.children { collect(child) }
+            }
+            collect(entity)
+            groups[id] = (meshes, color)
         }
         // Unknown evidence should leave the drawing readable rather than dim everything.
         guard !resolved.isEmpty else { return }
@@ -87,6 +102,7 @@ final class HighlightController {
             model.materials = Array(repeating: highlight, count: max(original.materials.count, 1))
             original.entity.components.set(model)
         }
+        litGroups = groups
         for item in resolved {
             let style = kinds[item.id].flatMap { $0.isEmpty ? nil : KindColors.style(for: $0) }
             addLabel(item.label, caption: style.flatMap { $0.key == "other" ? nil : $0.label } ?? captions[item.id],
@@ -112,7 +128,7 @@ final class HighlightController {
         var candidates: [ProjectedLabelLayout.Candidate] = []
         for (id, label) in labelsByItemID {
             label.isEnabled = false
-            guard visibleItemIDs.contains(id), let anchor = labelAnchors[id],
+            guard !suppressedLabelIDs.contains(id), visibleItemIDs.contains(id), let anchor = labelAnchors[id],
                   let size = labelSizes[id] else { continue }
             let base = root.convert(position: anchor.base + [0, anchor.offset * labelScale, 0], to: nil)
             guard simd_dot(base - camera, back) < 0 else { continue }
@@ -153,8 +169,35 @@ final class HighlightController {
         labelsByItemID.removeAll()
         labelAnchors.removeAll()
         labelSizes.removeAll()
+        litGroups.removeAll()
+        suppressedLabelIDs.removeAll()
         restoreOriginals()
     }
+
+    /// Turns one answer item's highlight on or off without touching its tag (used to light items up in sequence).
+    func setLit(_ itemID: String, _ lit: Bool) {
+        guard let group = litGroups[itemID] else { return }
+        let highlight = UnlitMaterial(color: group.color)
+        for entity in group.entities {
+            guard var model = entity.components[ModelComponent.self] else { continue }
+            let original = originalMaterials[ObjectIdentifier(entity)] ?? model.materials
+            model.materials = lit ? Array(repeating: highlight, count: max(original.count, 1)) : original
+            entity.components.set(model)
+        }
+    }
+
+    /// Hides tags until `revealLabel` is called, e.g. while the choreography waits for their item.
+    func suppressLabels(_ ids: Set<String>) {
+        suppressedLabelIDs.formUnion(ids)
+        for id in ids { labelsByItemID[id]?.isEnabled = false }
+    }
+
+    func revealLabel(_ itemID: String) {
+        suppressedLabelIDs.remove(itemID)
+        labelsByItemID[itemID]?.isEnabled = true
+    }
+
+    var litItemIDs: [String] { Array(litGroups.keys) }
 
     private func restoreOriginals() {
         for original in originals {
