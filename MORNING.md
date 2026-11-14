@@ -1,6 +1,6 @@
 # MORNING: report for Ash
 
-_Last updated: Sat 14 Nov 06:47 EET (run 1). See TASKS.md for every row._
+_Last updated: Sat 14 Nov 07:26 EET (run 1). See TASKS.md for every row._
 
 ## 1. What works
 | Demo step (MASTER_PROMPT §12) | Status |
@@ -8,15 +8,15 @@ _Last updated: Sat 14 Nov 06:47 EET (run 1). See TASKS.md for every row._
 | 1. Stoa-style web app | yes: Stoa 1:1 pass (W-18): all 18 desktop screens and 18/20 phone screens within 1.5 % pixel difference of the reference frames, 2 phone screens at 1.66/1.88 % with no unexplained area (results/fidelity/report.json). Overview, Accuracy dashboard, voice buttons done. Preview: http://localhost:4173 |
 | 2. Count question on raster plan, status lines, bold answer, chips | yes on the real engine: "How many windows are there?" on colorful-11397 → 11 windows, 11 numbered evidence items, $0, 2 ms (S-04 done test still being finished) |
 | 3. Chip opens drawing with numbered boxes; cost chip | yes (W-06, W-07, W-18): Stoa-style viewer header + toolbar, numbered boxes, cost chip, speaker button for the spoken answer (W-14) |
-| 4. "Visualise it" 3D with same items glowing | yes (T-00..T-07, T-11, T-12): roofs hidden by default; 2D↔3D linked clicks (T-03); "show me all the windows" → W1..Wn, "remove W3" fades out live in 3D (client side; engine side E-20 in progress); largest model 99.6 MB loads in 1.2 s, 60 fps on the Mac (results/viewer3d_perf.json). Walk mode T-10 in progress. |
+| 4. "Visualise it" 3D with same items glowing | yes (T-00..T-07, T-11, T-12): roofs hidden by default; 2D↔3D linked clicks (T-03); "show me all the windows" → W1..Wn, "remove W3" fades out live in 2D and 3D on every open device within 0.8 s (W-19, measured on the Mac GPU), and later answers count only what is visible ("how many windows" → 205 after removing W7, E-20); largest model 99.6 MB loads in 1.2 s, 60 fps on the Mac (results/viewer3d_perf.json). Click any tag on a drawing → Item details panel with IFC properties and the other places it appears (W-13). |
 | 5. iPhone: same chat, "Show on table" AR | yes in the simulator: the web "Show on table" opens native AR with the same doc and items (I-04), AR keeps the web page and draft across the round-trip (I-15), scene commands W1../hide/restore (I-14), advisor cards (I-09). Device install waits for Ash (I-05). |
 | 6. IFC fire exit on level 2, camera flies, 1:1 walk | partly: fire-exit rule check works on AC20 (findings API + red/amber pins in 3D, T-09); browser walk mode (T-10) and AR walk (I-06) done; exit-route answer is model inference and labelled so (DEMO.md) |
 | 7. Dashboard: accuracy by source/type, before/after fine-tune, cost/answer | yes (W-08) on the real bench. First real bench: 25.7 % overall on sample200 (answered 33.3 %), counts 32 %, areas mostly abstain, $0 for numeric answers (results/bench/sample200-r2.json). Improving this is the main work now (E-10/E-19, vision fine-tune V-06/V-07). |
-| 8. Edit in 3D → sourced advisor card | partly: 3D edit mode (remove/move/material) sends advisor requests and renders sourced cards (T-08); engine advisor rules in progress (E-16) |
+| 8. Edit in 3D → sourced advisor card | partly: 3D edit mode (remove/move/material) sends advisor requests and renders sourced cards (T-08); engine advisor rules in progress (E-16). Building-rule sources are watched live: 2 Context.dev monitors (results/watch/monitors.json) feed a 'rule source changed' entry and rerun the checks (E-17; the webhook attaches once the backend is deployed) |
 
 ## 2. Numbers (each from a results/ file)
-- Answer accuracy (results/bench/sample200-r8.json, docs/ACCURACY.md): 57.2 % on sample200 (answered 69.5 %), from 25.7 % at the start of the night; numeric answers cost $0.
-- Stress (results/stress/stress-r1.json): 411 cases, 0 crashes, 0 server errors, 0 invalid answers, 0 prompt-injection leaks; paraphrases agree 55/56. Dataset group 60/300 because 4,546 CubiCasa drawings had no plan map yet: a vision batch is filling them now (inference only, ~07:40), then stress-r2.
+- Answer accuracy (results/bench/sample200-r10.json, docs/ACCURACY.md): 66.3 % on sample200 (counts 63.0 %, areas 79.5 %), from 25.7 % at the start of the night; numeric answers cost $0. IFC text questions are weakest (37.5 % judged, r10).
+- Stress (results/stress/stress-r1.json): 411 cases, 0 crashes, 0 server errors, 0 invalid answers, 0 prompt-injection leaks; paraphrases agree 55/56. Dataset group 60/300 because 4,546 CubiCasa drawings had no plan map yet: a vision batch is filling them now (4,241 plan maps at 07:23, inference only), then stress-r2.
 - 3D performance (results/viewer3d_perf.json): largest model 99.6 MB / 5.4 M triangles loads in 1.2 s, 60 fps on the Mac.
 - Stoa look (results/fidelity/report.json): all desktop screens and nearly all phone screens within 1.5–2 % of the reference frames.
 - Router (question parser): 97.4% on 420 unique held-out questions with rules only, $0 per question; Nemotron fallback alone 95.0% at $0.0000025/question (`results/router_cost.json`). kind/scope labels were written by ENGINE: treat 97.4% as an upper bound.
@@ -44,7 +44,7 @@ None now. OK: NVIDIA, Runware, HF, ElevenLabs, Modal, Aiven. Missing: GEMINI_API
 
 
 ## 7. Proposed plan for the next run
-Finish tier 1 (E-04 → S-04 real answers, W-06 viewer, T-04 Visualise it, E-05 bench, W-07, W-08 dashboard, X-01 README), then deploy (S-05) once the GitHub App is installed.
+All tier-1 done tests except S-05 (deploy) pass. Open: full bench + model comparison (E-10, running), advisor (E-16), vision fine-tunes (V-05..V-08), iOS composer-after-AR bug (I-15 follow-up). Deploy (S-05) as soon as the Aiven GitHub App is installed.
 
 ## 8. Known weak spots to avoid in the live demo
 - Bathtub/shower counts on raster plans (0/3 on colorful-11397).
