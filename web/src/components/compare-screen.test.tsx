@@ -84,3 +84,22 @@ it('opens on the most recent edited version against the original, and shows the 
   expect(host.querySelector('[aria-label="3D view"]')).not.toBeNull()
   expect(shown.at(-1)).toMatchObject({ docId: doc, highlight: ['DOOR', 'WIN'], labels: { DOOR: '1 removed · D30', WIN: '2 moved · W81' } })
 })
+
+it('Wipe and Overlay use the shared seam compare: no range slider, a keyboard-operable seam, labels at the top', async () => {
+  await act(async () => { root.render(<CompareScreen docs={[]} demo={false} />); await settle() })
+  const mode = (name: string) => [...host.querySelectorAll<HTMLButtonElement>('[aria-label="Comparison mode"] button')].find((b) => b.textContent === name)!
+  await act(async () => { mode('Wipe').click(); await settle() })
+  expect(host.querySelector('.sheet-compare')).not.toBeNull()
+  expect(host.querySelector('input[type="range"][aria-label="Wipe position"]')).toBeNull()
+  expect(host.querySelector('.wipe-line')).not.toBeNull()
+  expect(host.querySelector('.wipe-label-a')).not.toBeNull()
+  const grip = host.querySelector<HTMLElement>('[role="slider"][aria-label="Wipe position"]')!
+  const before = Number(grip.getAttribute('aria-valuenow'))
+  await act(async () => { grip.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })) })
+  expect(Number(grip.getAttribute('aria-valuenow'))).toBeGreaterThan(before)
+  await act(async () => { mode('Overlay').click(); await settle() })
+  expect(host.querySelector('.sheet-compare')?.getAttribute('data-mode')).toBe('Overlay')
+  expect(host.querySelector('.compare-segments')).toBeNull()  // the screen's own mode control is the only one
+  await act(async () => { mode('Side by side').click(); await settle() })
+  expect(host.querySelector('.sheet-compare')).toBeNull()
+})

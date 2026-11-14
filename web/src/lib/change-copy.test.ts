@@ -7,7 +7,7 @@ const item = (sentence: string, bbox: [number, number, number, number] = [100, 1
 
 describe('plain-language change copy', () => {
   it('names notes and sheet references', () => {
-    expect(readChange(item('Text added: "53703".'), size).text).toBe('Callout label added near the top left of the sheet')
+    expect(readChange(item('Text added: "53703".'), size).text).toBe('Label "53703" added near the top left of the sheet')
     expect(readChange(item('Text added: "Existing roof joist".'), size).text).toBe('Note added near the top left of the sheet: "Existing roof joist"')
     expect(readChange(item('Text changed from "S100 8" to "S300 4 A100 4C".'), size).small).toBe(true)
     expect(readChange(item('Content added in this region (no text change).', [900, 100, 990, 300]), size).text).toBe('Title block updated (logo, stamp or revision list)')
@@ -33,4 +33,12 @@ describe('plain-language change copy', () => {
     const mixed = [readChange(item('Text added: "New stair rail".'), size), readChange(item('Changed region (no text change).', [0, 0, 10, 10]), size)]
     expect(summariseChanges(mixed)).toBe('1 note added. Plus 1 minor edit (callout labels, linework, title block).')
   })
+})
+
+it('long or code-heavy label text is described by kind, not quoted', () => {
+  const size = { w: 1000, h: 800 }
+  const at = (sentence: string) => readChange({ n: 1, change_id: 'x', type: 'modified', kind: 'region', sentence, v1: null, v2: { item_id: 'i', bbox_px: [800, 700, 830, 710] } }, size).text
+  expect(at('Text changed from "S100 9 S100 8 CONCRETE STAIR" to "ES5 - 5 4 - 1 6 - 3 S300 A360 …".')).toMatch(/^Sheet reference text changed near the bottom right/)
+  expect(at('Text changed from "7" to "9".')).toMatch(/^Label "7" changed to "9" near the bottom right/)
+  expect(at('Text added: "S100 9 A100 4C".')).toMatch(/^Sheet reference text added/)
 })

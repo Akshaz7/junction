@@ -4,15 +4,17 @@
 .rule-change-card p { margin-top: 4px; }
 .rule-change-card a { display: inline-block; margin-top: 6px; text-decoration: underline; text-underline-offset: 2px; }
 .rule-change-card small { display: block; margin-top: 6px; color: var(--muted-foreground); }
-.changes-filters { display: flex; gap: 8px; padding: 0 12px 12px; }
+.changes-filter-wrap { position: relative; flex: none; }
+.changes-filter-wrap .button[data-active] { border-color: var(--foreground); }
+.changes-filter-dot { position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--change-edited); }
+.changes-filters { position: absolute; z-index: 20; top: calc(100% + 6px); right: 0; width: 244px; display: grid; gap: 10px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); box-shadow: 0 8px 24px rgb(0 0 0 / .12); }
+.changes-filter-clear { display: inline-flex; align-items: center; gap: 4px; justify-self: start; padding: 0; border: 0; background: transparent; color: var(--foreground); font-size: var(--text-body-sm); font-weight: 500; cursor: pointer; }
+.changes-filter-clear:disabled { opacity: .4; cursor: default; }
 .changes-filters label { flex: 1; min-width: 0; font-size: var(--text-caption); color: var(--muted-foreground); }
 .changes-filters select { display: block; margin-top: 4px; width: 100%; padding: 6px; border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--card); color: var(--foreground); font: inherit; }
 .changes-no-data .button { margin-top: 12px; }
 .change-row time { display: block; margin-top: 3px; font-size: var(--text-micro); color: var(--muted-foreground); }
 
-.changes-filters { flex-wrap: wrap; }
-.changes-filters label { flex-basis: 90px; }
-.open-compare { align-self: flex-start; margin: 0 16px 12px; text-decoration: underline; }
 .revision-summary { margin: 16px; font-size: var(--text-body-sm); line-height: 1.6; }
 .revision-documents { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0; }
 .revision-documents a { text-decoration: underline; }
