@@ -179,7 +179,12 @@ def _fit_opening(o, walls):
     center = corners.mean(axis=0)
     width = max(x1 - x0, z1 - z0, 0.1)
     hint = np.array([1., 0.]) if ax == "x" else np.array([0., 1.])
-    choices = []
+    # An elongated detection box already gives the wall direction. Raster plans
+    # often lose the host wall itself (a window runs corner to corner, leaving
+    # no wall pixels beside it), so the nearest piece is a perpendicular end
+    # wall; fitting to that turns the opening into a strip one wall thick.
+    elongated = max(x1 - x0, z1 - z0) > 1.7 * min(x1 - x0, z1 - z0)
+    choices, crossing = [], []
     for iid, wall in walls:
         if wall.is_empty or wall.geom_type != "Polygon":
             continue
@@ -207,14 +212,24 @@ def _fit_opening(o, walls):
             distance = candidate.distance(Point(center))
             if distance > width + 0.5 or across > max(width * 0.6, 0.35):
                 continue
-            penalty = (1 - abs(u @ hint)) * width if max(x1 - x0, z1 - z0) > 1.7 * min(x1 - x0, z1 - z0) else 0
-            choices.append((distance + across + penalty, iid, u, v, c, float(vs.max() - vs.min())))
+            penalty = (1 - abs(u @ hint)) * width if elongated else 0
+            choice = (distance + across + penalty, iid, u, v, c, float(vs.max() - vs.min()))
+            (crossing if elongated and abs(u @ hint) < 0.8 else choices).append(choice)
     host = None
     u, v = hint, np.array([-hint[1], hint[0]])
     c = float(center @ v)
     thickness = max(0.12, min(x1 - x0, z1 - z0))
     if choices:
         _, host, u, v, c, thickness = min(choices, key=lambda q: q[0])
+    elif crossing:  # keep the box frame; the touching end wall still hosts the sill/head masonry
+        host = min(crossing, key=lambda q: q[0])[1]
+    # A fitted piece that includes a wall junction reports the junction depth as
+    # thickness; the cut and sill/head masonry would then bulge past the faces.
+    short = max(min(x1 - x0, z1 - z0), 0.06)
+    # (The icon itself may be much thinner than its wall, so it is no cap.)
+    thickness = min(thickness, 0.6)
+    if elongated and abs(c - center @ v) > max(short, thickness) / 2:
+        c = float(center @ v)
     us = corners @ u
     a, b = float(us.min()), float(us.max())
     # Coordinates in this frame are still metres; the rotation also aligns frames/glass.
@@ -243,19 +258,35 @@ def window_parts(o):
 
 
 def door_parts(o):
+    """Door in its wall opening: thin jambs + head (wall-deep frame) and a closed 4 cm leaf in the wall plane.
+
+    The plan map has no swing direction for raster doors, so the leaf is shown closed, centred in the
+    wall; it never exceeds the opening (u0..u1) or the door height. Narrow openings get thinner jambs.
+    """
     x0, x1, z0, z1, ax = o
     u0, u1 = (x0, x1) if ax == "x" else (z0, z1)
     c = ((z0 + z1) / 2) if ax == "x" else ((x0 + x1) / 2)
     T = min(max((z1 - z0) if ax == "x" else (x1 - x0), 0.12), 0.3)
-    f = 0.05
+    f = min(0.05, (u1 - u0) / 8)
     B = lambda a, b, ya, yb, va, vb: _wb(ax, a, b, ya, yb, c + va, c + vb)
     fr = [B(u0, u0 + f, 0, DOOR_H, -T / 2, T / 2), B(u1 - f, u1, 0, DOOR_H, -T / 2, T / 2),
           B(u0, u1, DOOR_H - f, DOOR_H, -T / 2, T / 2)]
-    w = max(u1 - u0 - 2 * f, 0.2)
-    leaf = _boxes([B(u0 + f, u0 + f + w, 0.01, DOOR_H - f, -0.02, 0.02)])
-    hinge = np.array([(u0 + f) if ax == "x" else c, 0, c if ax == "x" else (u0 + f)])
-    leaf.apply_transform(trimesh.transformations.rotation_matrix(np.radians(28), [0, 1, 0], hinge))
-    return [("frame", _flat(_boxes(fr), "doorframe")), ("leaf", _flat(leaf, "leaf"))]
+    leaf = [B(u0 + f + 0.003, u1 - f - 0.003, 0.01, DOOR_H - f - 0.003, -0.02, 0.02)]
+    return [("frame", _flat(_boxes(fr), "doorframe")), ("leaf", _flat(_boxes(leaf), "leaf"))]
+
+
+def _door_box(it, to_m):
+    """Door opening box. A detector box that also holds the swing arc is square; the door polygon
+    (leaf/threshold strip) then gives the true width and wall direction."""
+    o = _opening(it, to_m)
+    x0, x1, z0, z1, _ = o
+    poly = it.get("polygon_px")
+    if not poly or max(x1 - x0, z1 - z0) > 1.7 * min(x1 - x0, z1 - z0):
+        return o
+    xs, ys = [p[0] for p in poly], [p[1] for p in poly]
+    q = _opening({"bbox_px": [min(xs), min(ys), max(xs), max(ys)]}, to_m)
+    dx, dz = q[1] - q[0], q[3] - q[2]
+    return q if max(dx, dz) > 1.7 * min(dx, dz) and max(dx, dz) > 0.4 else o
 
 
 def _cyl(cx, cz, r, y0, y1, n=12):
@@ -482,7 +513,7 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False, *
     wall_polys = [(f"wall-r{i:03d}", tm(g)) for i, g in enumerate(rw["walls"], 1)] if rw else [
         (it["item_id"], unary_union(_polys([to_m(p) for p in (it.get("polygon_px") or _bbox_poly(it))])))
         for it in pm["items"] if it["kind"] == "wall"]
-    openings = {it["item_id"]: _fit_opening(_opening(it, to_m), wall_polys)
+    openings = {it["item_id"]: _fit_opening((_door_box if it["kind"] == "door" else _opening)(it, to_m), wall_polys)
                 for it in pm["items"] if it["kind"] in ("window", "door")}
     win_o = [openings[it["item_id"]][2] for it in pm["items"] if it["kind"] == "window"]
     door_o = [openings[it["item_id"]][2] for it in pm["items"] if it["kind"] == "door"]

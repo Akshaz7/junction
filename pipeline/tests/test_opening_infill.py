@@ -131,3 +131,14 @@ def test_connected_raster_wall_network_uses_local_thickness(tmp_path):
     infill = scene.geometry[geometry].copy().apply_transform(transform)
     assert infill.extents[2] == pytest.approx(.39, abs=.03)
     assert measure(tmp_path)['incomplete_width_support'] == 0
+
+
+def test_corner_to_corner_window_keeps_its_own_axis():
+    # Raster plans lose the host wall when a window spans it end to end: only the
+    # perpendicular end walls are near. The pane must still run along the window.
+    ends = [('wall-001', box(-1.7, -2, -1.5, .2)), ('wall-002', box(1.5, -2, 1.7, .2))]
+    local, matrix, footprint, host = extrude._fit_opening((-1.5, 1.5, -.2, .2, 'x'), ends)
+    assert local[1] - local[0] == pytest.approx(3.0)
+    assert abs(matrix[0, 0]) == pytest.approx(1.0)
+    assert local[3] - local[2] <= .5
+    assert host in {'wall-001', 'wall-002'}
