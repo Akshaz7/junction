@@ -3,43 +3,45 @@
     "ifc_bench__digital-hub-arc",
     "ifc_bench__digital-hub-ventilation"
   ],
-  "seconds": 1.385,
+  "build_seconds": 1.593,
   "stats": {
-    "nodes": 2285,
-    "edges": 12957,
+    "nodes": 2358,
+    "edges": 13815,
     "by_kind": {
       "project": 1,
       "doc": 2,
       "level": 6,
       "fixture": 352,
       "type": 157,
-      "material": 26,
+      "material": 47,
       "column": 62,
       "wall": 179,
       "door": 64,
       "slab": 23,
       "stair": 15,
       "window": 47,
-      "room": 64,
+      "room": 116,
       "duct": 1135,
       "terminal": 148,
       "system": 4
     },
     "edges_by_kind": {
-      "contains": 2350,
+      "contains": 2423,
       "on_level": 2087,
       "has_type": 2074,
-      "made_of": 2007,
-      "part_of_system": 1313,
+      "made_of": 2680,
+      "hosted_by": 109,
+      "part_of_system": 1315,
+      "same_as": 1,
       "connects": 1310,
       "in_room": 1720,
       "serves": 96
     },
-    "linked_pct": null,
+    "linked_pct": 0.09,
     "agree_pct": null,
     "issues": 0,
-    "counterpart_items": 0,
-    "linked_items": 0
+    "counterpart_items": 2141,
+    "linked_items": 2
   },
   "mep": {
     "documents": {
@@ -151,7 +153,7 @@
             1.0
           ]
         ],
-        "residual": 0.0,
+        "residual": null,
         "matches": 1,
         "anchor_method": "declared shared IFC building frame",
         "building_guid": "1OVsTAdVr0zxMeLRosmk1X",
@@ -161,5 +163,8 @@
     ]
   },
   "rooms_with_services": 51,
-  "services_lengths_known": 596
+  "declared_ceiling_heights": 64,
+  "services_lengths_known": 596,
+  "dangling_edges": 0,
+  "unknown_length_note": "Whole-element lengths are not lengths inside a room; unrecorded ceilings stay unknown."
 }

@@ -1,0 +1,44 @@
+{
+  "status": "PARTIAL",
+  "completed": [
+    "IFC2x3/IFC4/IFC4x3 semantic services links, ports, systems and units",
+    "Room impact hook with citations, paths, counts, whole-run lengths and separately clipped sheet lengths",
+    "IFC ceiling heights and explicit room-referenced sheet-note hook",
+    "Optional read-only vector-PDF alignment/underlay-room matching adapter",
+    "Original PDF/IFC and optional-reader cache invalidation"
+  ],
+  "tests": {
+    "engine_core_evaluation_passed": 52,
+    "api_passed": 2
+  },
+  "real_runs": {
+    "clinic_build_seconds": 9.188,
+    "ventilation_build_seconds": 1.593,
+    "unseen_build_seconds": 0.023,
+    "dangling_edges": 0,
+    "ventilation_rooms_with_services": 51,
+    "recorded_ceiling_heights": 64
+  },
+  "link_check": {
+    "samples": 10,
+    "source_agreements": 10,
+    "observed_sample_agreement": 1.0,
+    "inspection": "Printed IFC port owner, system member and property records inspected against graph endpoint labels.",
+    "limits": "Topology/system-source agreement only. Ten first source records printed for hand inspection; not a random precision estimate. Spatial room assignments are unmeasured estimates."
+  },
+  "unseen": {
+    "doc_id": "ifc_models__resbim-224-model",
+    "services": 0,
+    "note": "Architectural model has no distribution services; validates honest empty-source handling, not MEP detection accuracy."
+  },
+  "pdf_status": "Both judges PDFs exercised missing-optional-reader fallback. Vector extraction/alignment cannot be claimed until Awais reader is merged.",
+  "cross_file": [
+    "engine/kg/cache.py: three-line cache dependency hook; other core/evaluation files entered through branch merges"
+  ],
+  "needs_awais": {
+    "reader": "Merge pipeline.pdf_mep and dependencies from fetched awais/pdf3d; rerun validate.py against real judges PDFs.",
+    "ceiling_notes_hook": "engine.kg.mep.apply_ceiling_notes(graph, notes) -> int; notes=[{room:{doc_id,page,item_id},ceiling_height_m,source:{doc_id,page,item_id or bbox,quote}}], optionally via planmap.room_ceiling_notes"
+  },
+  "live_model_calls": 0,
+  "source_data_copied": false
+}

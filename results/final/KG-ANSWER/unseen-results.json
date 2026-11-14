@@ -1,0 +1,120 @@
+[
+  {
+    "project": {
+      "id": "kg-answer-ifc_bench__sixty5-str",
+      "docs": [
+        {
+          "doc_id": "ifc_bench__sixty5-str"
+        }
+      ]
+    },
+    "source_schema": "IFC2X3",
+    "nodes": 1465,
+    "edges": 5313,
+    "build_s": 0.31,
+    "passed": 10,
+    "total": 10,
+    "questions": [
+      {
+        "question": "What is connected to wall Basic Wall:22_WA_AT_ihw beton_250 (C35/45):588429?",
+        "pass": true,
+        "error": null,
+        "shape": "connections",
+        "value": 2,
+        "confidence": 1.0,
+        "citations": 1,
+        "graph_path_edges": 2
+      },
+      {
+        "question": "If wall Basic Wall:22_WA_AT_ihw beton_250 (C35/45):588429 moves, what is affected?",
+        "pass": true,
+        "error": null,
+        "shape": "missing",
+        "value": null,
+        "confidence": 0.0,
+        "citations": 1,
+        "graph_path_edges": 0
+      },
+      {
+        "question": "Where else does wall Basic Wall:22_WA_AT_ihw beton_250 (C35/45):588429 appear?",
+        "pass": true,
+        "error": null,
+        "shape": "missing",
+        "value": null,
+        "confidence": 0.0,
+        "citations": 1,
+        "graph_path_edges": 0
+      },
+      {
+        "question": "What is connected to wall Basic Wall:22_WA_AT_ihw beton_300 (C35/45):589012?",
+        "pass": true,
+        "error": null,
+        "shape": "connections",
+        "value": 2,
+        "confidence": 1.0,
+        "citations": 1,
+        "graph_path_edges": 2
+      },
+      {
+        "question": "If wall Basic Wall:22_WA_AT_ihw beton_300 (C35/45):589012 moves, what is affected?",
+        "pass": true,
+        "error": null,
+        "shape": "missing",
+        "value": null,
+        "confidence": 0.0,
+        "citations": 1,
+        "graph_path_edges": 0
+      },
+      {
+        "question": "Where else does wall Basic Wall:22_WA_AT_ihw beton_300 (C35/45):589012 appear?",
+        "pass": true,
+        "error": null,
+        "shape": "missing",
+        "value": null,
+        "confidence": 0.0,
+        "citations": 1,
+        "graph_path_edges": 0
+      },
+      {
+        "question": "What is connected to wall Basic Wall:22_WA_AT_ihw beton_200 (C25/30):625562?",
+        "pass": true,
+        "error": null,
+        "shape": "connections",
+        "value": 2,
+        "confidence": 1.0,
+        "citations": 1,
+        "graph_path_edges": 2
+      },
+      {
+        "question": "If wall Basic Wall:22_WA_AT_ihw beton_200 (C25/30):625562 moves, what is affected?",
+        "pass": true,
+        "error": null,
+        "shape": "missing",
+        "value": null,
+        "confidence": 0.0,
+        "citations": 1,
+        "graph_path_edges": 0
+      },
+      {
+        "question": "Where else does wall Basic Wall:22_WA_AT_ihw beton_200 (C25/30):625562 appear?",
+        "pass": true,
+        "error": null,
+        "shape": "missing",
+        "value": null,
+        "confidence": 0.0,
+        "citations": 1,
+        "graph_path_edges": 0
+      },
+      {
+        "question": "Do the drawings agree on doors on the ground floor?",
+        "pass": true,
+        "error": null,
+        "shape": "missing",
+        "value": null,
+        "confidence": 0.0,
+        "citations": 0,
+        "graph_path_edges": 0
+      }
+    ]
+  }
+]
