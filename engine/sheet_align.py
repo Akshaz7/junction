@@ -17,7 +17,7 @@ import unicodedata
 
 import numpy as np
 
-VERSION = 2
+VERSION = 3
 
 
 def _normal(text):
@@ -60,8 +60,12 @@ def _grid_labels(sheet, labels):
     return {f"grid:{x}/{y}": [(vx, vy)] for x, vx in axes["x"].items() for y, vy in axes["y"].items()}
 
 
-def raster_grid_lines(image_path):
-    """Bounded raster fallback; detects long grid lines on at most 1600 px."""
+@lru_cache(maxsize=32)
+def raster_grid_lines(image_path, stamp=None):
+    """Bounded cached fallback; detects long grid lines on at most 1600 px.
+
+    stamp is the image mtime supplied by the caller to invalidate changed pages.
+    """
     import cv2
     image = cv2.imread(str(image_path), cv2.IMREAD_GRAYSCALE)
     if image is None:
@@ -149,7 +153,7 @@ def _align_labels(base, overlay, *, m_per_px=None, model="similarity", tolerance
         good = np.linalg.norm(_transform(src, matrix)-dst, axis=1) <= tol
         if good.sum() > best.sum():
             best = good
-    if best.sum() < minimum:
+    if best.sum() < max(minimum, math.ceil(n*.15)):
         return _failure("Shared labels do not agree on an alignment. Use two grid crossings.", n)
     matrix = _fit(src[best], dst[best], model == "affine")
     # Recover repeated room/grid labels by proximity to the established transform.
@@ -175,19 +179,39 @@ def _align_labels(base, overlay, *, m_per_px=None, model="similarity", tolerance
     scale = m_per_px if m_per_px is not None else base.get("m_per_px")
     mm = residual*scale*1000 if isinstance(scale, (int, float)) and math.isfinite(scale) and scale > 0 else None
     count = len(accepted)
+    boxes = {}
+    for word in base.get("words", []):
+        box = word.get("bbox_px")
+        if box and len(box) == 4:
+            boxes[(_normal(word.get("text", word.get("label", ""))), (box[0]+box[2])/2, (box[1]+box[3])/2)] = box
     return {"status": "aligned", "matrix": matrix.tolist(), "method": model,
             "anchor_count": count, "candidate_count": n+len(extra), "residual_px": residual,
             "residual_mm": mm, "detail": f"Aligned on {count} shared labels, " +
             (f"± {mm:.1f} mm" if mm is not None else f"± {residual:.1f} px · drawing scale unavailable"),
-            "anchors": [{"label": p[0], "base": list(p[1]), "overlay": list(p[2])} for p in accepted]}
+            "anchors": [{"label": p[0], "base": list(p[1]), "overlay": list(p[2]), "base_bbox": boxes.get((p[0], *p[1]))} for p in accepted]}
 
 
 @lru_cache(maxsize=32)
 def _pdf_text(path, page, width, height, stamp):
     from pdfminer.high_level import extract_pages
-    from pdfminer.layout import LTTextLine
-    layout = next(extract_pages(path, page_numbers=[page-1]))
-    sx, sy = width/layout.width, height/layout.height
+    from pdfminer.layout import LAParams, LTTextLine
+    layout = next(extract_pages(path, page_numbers=[page-1], laparams=LAParams(detect_vertical=True)))
+    # pdfminer positions use the rotated MediaBox; page PNGs use the CropBox.
+    # Transform the crop into pdfminer's coordinate space before scaling it.
+    from pdfminer.pdfpage import PDFPage
+    from pdfminer.utils import apply_matrix_pt
+    with open(path, "rb") as stream:
+        source = next(PDFPage.get_pages(stream, pagenos={page-1}))
+        x0, y0, x1, y1 = source.mediabox
+        c0, d0, c1, d1 = source.cropbox
+        c0, d0, c1, d1 = max(c0,x0), max(d0,y0), min(c1,x1), min(d1,y1)
+        ctm = {90: (0,-1,1,0,-y0,x1), 180: (-1,0,0,-1,x1,y1),
+               270: (0,1,-1,0,y1,-x0)}.get(source.rotate, (1,0,0,1,-x0,-y0))
+        corners = [apply_matrix_pt(ctm, point) for point in ((c0,d0),(c0,d1),(c1,d0),(c1,d1))]
+        left, bottom = np.min(corners, axis=0); right, top = np.max(corners, axis=0)
+    if right <= left or top <= bottom:
+        raise ValueError("The PDF page has no usable crop area.")
+    sx, sy = width/(right-left), height/(top-bottom)
     words = []
 
     def walk(node):
@@ -206,8 +230,10 @@ def _pdf_text(path, page, width, height, stamp):
             for g in groups:
                 x0, y0 = min(c.x0 for c in g), min(c.y0 for c in g)
                 x1, y1 = max(c.x1 for c in g), max(c.y1 for c in g)
-                words.append({"text": "".join(c.get_text() for c in g).strip(),
-                              "bbox_px": [x0*sx, (layout.height-y1)*sy, x1*sx, (layout.height-y0)*sy]})
+                if x1 >= left and x0 <= right and y1 >= bottom and y0 <= top:
+                    words.append({"text": "".join(c.get_text() for c in g).strip(),
+                                  "bbox_px": [max(0.,(x0-left)*sx), max(0.,(top-y1)*sy),
+                                              min(width,(x1-left)*sx), min(height,(top-y0)*sy)]})
         elif hasattr(node, "__iter__"):
             for child in node:
                 walk(child)
@@ -216,7 +242,7 @@ def _pdf_text(path, page, width, height, stamp):
     ratios = {float(m) for word in words for m in re.findall(r"(?<!\d)1\s*:\s*(\d+(?:\.\d+)?)(?!\d)", word["text"])
               if 5 <= float(m) <= 10000}
     if len(ratios) == 1:
-        sheet["m_per_px"] = layout.width / 72 * .0254 / width * next(iter(ratios))
+        sheet["m_per_px"] = (right-left) / 72 * .0254 / width * next(iter(ratios))
     return sheet
 
 
@@ -287,7 +313,7 @@ def provider_alignment(src_page, dst_page, *, aligner=None, m_per_px=None):
             (f"± {mm:.1f} mm" if mm is not None else f"± {residual:.1f} px · drawing scale unavailable")}
 
 
-def _raster_alignment(base, overlay, m_per_px=None):
+def _raster_alignment(base, overlay, m_per_px=None, detector="orb"):
     """Bounded, reciprocal feature fit for rasters without positioned text.
 
     Features are geometric evidence, not shared-label claims. A minimum of 12
@@ -301,13 +327,14 @@ def _raster_alignment(base, overlay, m_per_px=None):
             return [], None, 1
         factor = min(1., 1800 / max(image.shape))
         image = cv2.resize(image, None, fx=factor, fy=factor)
-        points, desc = cv2.ORB_create(nfeatures=3500).detectAndCompute(image, None)
+        finder = cv2.SIFT_create(nfeatures=3500) if detector == "sift" else cv2.ORB_create(nfeatures=3500)
+        points, desc = finder.detectAndCompute(image, None)
         return points, desc, factor
 
     a, da, sa = features(base); b, db, sb = features(overlay)
     if da is None or db is None:
         return _failure("No reliable shared drawing features. Use two grid crossings.")
-    matcher = cv2.BFMatcher(cv2.NORM_HAMMING)
+    matcher = cv2.BFMatcher(cv2.NORM_L2 if detector == "sift" else cv2.NORM_HAMMING)
     forward = {m.queryIdx: m.trainIdx for pair in matcher.knnMatch(db, da, k=2)
                if len(pair) == 2 for m, n in [pair] if m.distance < .7*n.distance}
     reverse = {m.queryIdx: m.trainIdx for pair in matcher.knnMatch(da, db, k=2)
@@ -341,7 +368,10 @@ def align_sheets(base, overlay, *, m_per_px=None, model="similarity", tolerance_
     result = _align_labels(base, overlay, m_per_px=m_per_px, model=model, tolerance_px=tolerance_px)
     if result["status"] == "needs_manual" and all(sheet.get("image_path") for sheet in (base, overlay)):
         try:
-            return _raster_alignment(base, overlay, m_per_px)
+            raster = _raster_alignment(base, overlay, m_per_px)
+            if raster["status"] == "needs_manual":
+                raster = _raster_alignment(base, overlay, m_per_px, detector="sift")
+            return raster
         except (ImportError, OSError, ValueError):
             pass  # OCR-only deployments still support manual alignment.
     return result

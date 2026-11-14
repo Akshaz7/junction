@@ -1,5 +1,6 @@
 """Small bridge from existing document artifacts to the sheet registration engine."""
 import asyncio
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -24,7 +25,7 @@ class AlignmentRequest(BaseModel):
 
 
 def _load_sheet(record, page):
-    from engine.sheet_align import load_pdf_page
+    from engine.sheet_align import load_pdf_page, raster_grid_lines
     from PIL import Image
     root = config.artifacts_dir() / record["doc_id"]
     image_path = root / f"page-{page}.png"
@@ -55,6 +56,10 @@ def _load_sheet(record, page):
             sheet["words"] = pdf["words"]
         if "m_per_px" not in sheet and "m_per_px" in pdf:
             sheet["m_per_px"] = pdf["m_per_px"]
+    # A few grid bubble labels can yield well-distributed grid intersections.
+    # Rich text sheets already have enough room anchors; avoid unnecessary image work.
+    if 0 < len(sheet["words"]) < 30:
+        sheet["grid_lines"] = raster_grid_lines(str(image_path), image_path.stat().st_mtime_ns)
     if not sheet["words"]:
         sheet["detail"] = "No positioned text is available. Use two grid crossings."
     return sheet
@@ -84,4 +89,5 @@ async def sheet_align(request: AlignmentRequest):
             result = await asyncio.to_thread(cached_alignment, base, overlay, model=request.model)
     except (ValueError, IndexError, OSError) as exc:
         raise HTTPException(422, str(exc)) from exc
-    return {**result, "base_image": base["image"], "overlay_image": overlay["image"]}
+    pair_key = hashlib.sha256(json.dumps([base, overlay], sort_keys=True).encode()).hexdigest()
+    return {**result, "pair_key": pair_key, "base_image": base["image"], "overlay_image": overlay["image"]}

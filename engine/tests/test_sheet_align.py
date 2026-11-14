@@ -91,3 +91,28 @@ def test_provider_adapter_direction_and_scale():
 def test_bad_image_size_and_model():
     assert align_sheets({}, {})['status'] == 'needs_manual'
     with pytest.raises(ValueError): align_sheets(sheet(POINTS), sheet(POINTS), model='projective')
+
+
+@pytest.mark.parametrize('rotation', [0,90,180,270])
+def test_pdf_crop_rotation_matches_actual_render_pixels(tmp_path, rotation):
+    from engine.sheet_align import load_pdf_page
+    import pypdfium2 as pdfium
+    # Tiny original test PDF, generated for demo; no repository drawing is copied.
+    objects = [b'<< /Type /Catalog /Pages 2 0 R >>', b'<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+               f'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 600 800] /CropBox [100 100 500 700] /Rotate {rotation} /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>'.encode(),
+               b'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>']
+    content=b'BT /F1 12 Tf 200 600 Td (ROOMA) Tj ET'
+    objects.append(b'<< /Length '+str(len(content)).encode()+b' >>\nstream\n'+content+b'\nendstream')
+    raw=b'%PDF-1.4\n'; offsets=[0]
+    for i,obj in enumerate(objects,1): offsets.append(len(raw)); raw+=f'{i} 0 obj\n'.encode()+obj+b'\nendobj\n'
+    xref=len(raw);raw+=b'xref\n0 6\n0000000000 65535 f \n'+b''.join(f'{o:010} 00000 n \n'.encode() for o in offsets[1:])
+    raw+=f'trailer << /Size 6 /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF'.encode()
+    pdf=tmp_path/'generated.pdf'; pdf.write_bytes(raw)
+    with pdfium.PdfDocument(pdf) as doc:
+        p=doc[0]; bitmap=p.render(scale=1); image=np.asarray(bitmap.to_pil().convert('L')); bitmap.close(); p.close()
+    data=load_pdf_page(pdf,image_size=(image.shape[1],image.shape[0]))
+    box=next(w['bbox_px'] for w in data['words'] if w['text']=='ROOMA')
+    ys,xs=np.where(image<100)
+    # Glyph ink must fall inside the positioned text box (allow font raster rounding).
+    assert box[0]-2 <= xs.min() <= xs.max() <= box[2]+2
+    assert box[1]-2 <= ys.min() <= ys.max() <= box[3]+2
