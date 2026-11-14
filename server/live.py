@@ -157,6 +157,7 @@ async def record_edit(msg: dict, chat_id=None) -> dict | None:
         event["chat_id"] = str(cid)
     if e["labels"]:
         event["labels"] = e["labels"]
+    event.update(e.get("detail") or {})  # move: offset_m, material: material (shared edit layer)
     await publish(event)
     return event
 
@@ -168,7 +169,7 @@ async def send_scene_state(ws: WebSocket, chat_id, doc_id: str | None = None) ->
     if pool is None:
         return
     for st in await scene_edits.scene_state(pool, cid, doc_id):
-        await ws.send_text(json.dumps({**st, "chat_id": str(cid)}))
+        await ws.send_text(json.dumps({**scene_edits.public_state(st), "chat_id": str(cid)}))
 
 
 @router.websocket("/ws")

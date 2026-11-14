@@ -64,11 +64,13 @@ def chat(client):
     return client.post("/api/chats", json={"doc_ids": [DEMO]}).json()["id"]
 
 
-def _manual(client, cid, op, ids):
-    """What the 3D viewer sends for an Edit-panel Remove / Restore / Undo inside a chat."""
+def _manual(client, cid, op, ids, **extra):
+    """What the 3D viewer sends for an Edit-panel Remove / Restore / Undo / Move / material change inside a chat."""
     with client.websocket_connect("/ws") as ws:
-        ws.send_json({"type": "scene.edit", "doc_id": DEMO, "chat_id": cid, "op": op, "item_ids": ids})
-        assert recv_type(ws, "scene.edit", 5)["chat_id"] == cid
+        ws.send_json({"type": "scene.edit", "doc_id": DEMO, "chat_id": cid, "op": op, "item_ids": ids, **extra})
+        m = recv_type(ws, "scene.edit", 5)
+        assert m["chat_id"] == cid
+        return m
 
 
 def _ask(client, cid, q):
@@ -138,3 +140,78 @@ def test_advise_uses_the_shared_state(client, chat):
     assert _hidden(client, chat) == front
     # Reset edits in the panel is accepted by /api/advise (was 422)
     assert client.post("/api/advise", json={"doc_id": DEMO, "chat_id": chat, "edit": {"op": "reset", "item_ids": front}}).status_code == 200
+
+
+# --- moves and materials in the shared layer ---
+WIN = "3xvQAmf45C8PC3qSvtvqlg"
+WALL = "2UZhzWc8v0fA0sfv__WgLn"
+
+
+def test_move_and_material_edits_validate_and_fold():
+    m = se.clean_edit({"doc_id": "d", "op": "move", "item_ids": ["w"], "offset_m": [0.30000000000000004, -1]})
+    assert m["detail"] == {"offset_m": [0.3, -1.0]}
+    for bad in ([1], [1, "x"], [True, 0], [float("nan"), 0], [5000, 0], None):
+        assert se.clean_edit({"doc_id": "d", "op": "move", "item_ids": ["w"], "offset_m": bad}) is None
+    assert se.clean_edit({"doc_id": "d", "op": "move", "offset_m": [1, 0]}) is None           # needs an item
+    assert se.clean_edit({"doc_id": "d", "op": "material", "item_ids": ["w"], "material": None})["detail"] == {"material": None}
+    assert se.clean_edit({"doc_id": "d", "op": "material", "item_ids": ["w"], "material": 5}) is None
+
+    def ed(op, ids, **detail):
+        return {**e(op, ids), "detail": detail}
+    s = se.fold([ed("move", ["w"], offset_m=[1, 0]), ed("material", ["wl"], material="Glass"), e("hide", ["a"])])["d"]
+    assert s["moved"] == {"w": [1, 0]} and s["materials"] == {"wl": "Glass"} and s["hidden"] == ["a"]
+    s = se.fold([ed("move", ["w"], offset_m=[1, 0]), ed("move", ["w"], offset_m=[0, 0]), ed("material", ["wl"], material=None)])["d"]
+    assert s["moved"] == {} and s["materials"] == {}
+    assert se.fold([ed("move", ["w"], offset_m=[1, 0]), e("reset")])["d"]["moved"] == {}
+    # old payload shape unchanged when nothing is moved
+    assert "moved" not in se.public_state(se.fold([e("hide", ["a"])])["d"])
+    # newest edit still in effect, whatever its kind
+    edits = [e("hide", ["a"]), ed("move", ["w"], offset_m=[1, 0]), ed("material", ["wl"], material="Glass")]
+    assert se.last_edit(edits) == {"op": "material", "item_ids": ["wl"]}
+    assert se.last_edit([*edits, ed("material", ["wl"], material=None)]) == {"op": "move", "item_ids": ["w"]}
+    assert se.last_edit([*edits, e("reset")]) is None
+
+
+def _state(client, cid):
+    st = client.get(f"/api/chats/{cid}/scene-state?doc_id={DEMO}").json()["states"]
+    return st[0] if st else {}
+
+
+@pytestmark_demo
+def test_manual_move_then_chat_puts_it_back(client, chat):
+    m = _manual(client, chat, "move", [WIN], offset_m=[0.5, 0])
+    assert m["offset_m"] == [0.5, 0.0]                                   # relayed with its offset
+    assert _state(client, chat)["moved"] == {WIN: [0.5, 0.0]}
+    with client.websocket_connect(f"/ws?chat_id={chat}") as late:       # late joiner gets the move in scene.state
+        assert recv_type(late, "scene.state", 5)["moved"] == {WIN: [0.5, 0.0]}
+    a = _ask(client, chat, "move the window back")
+    cmd = a["evidence"]["scene"]["commands"][0]
+    assert cmd["op"] == "move" and cmd["item_ids"] == [WIN] and cmd["offset_m"] == [0.0, 0.0]
+    assert "moved" not in _state(client, chat)
+
+
+@pytestmark_demo
+def test_manual_material_then_chat_undo_then_manual_move_and_reset(client, chat):
+    _manual(client, chat, "move", [WIN], offset_m=[0, 1])
+    _manual(client, chat, "material", [WALL], material="Glass")
+    a = _ask(client, chat, "undo my edit")                              # newest: the material
+    assert a["evidence"]["scene"]["commands"][0] == {**a["evidence"]["scene"]["commands"][0], "op": "material", "material": None}
+    st = _state(client, chat)
+    assert "materials" not in st and st["moved"] == {WIN: [0.0, 1.0]}
+    assert _ask(client, chat, "put it back where it was")["evidence"]["scene"]["commands"][0]["op"] == "move"
+    assert "moved" not in _state(client, chat)
+    # manual move again, then "restore everything" in chat clears it with the rest
+    _manual(client, chat, "move", [WIN], offset_m=[2, 0])
+    _manual(client, chat, "hide", [DOOR])
+    assert _ask(client, chat, "restore everything")["evidence"]["scene"]["commands"][0]["op"] == "reset"
+    st = _state(client, chat)
+    assert st["hidden"] == [] and "moved" not in st
+
+
+@pytestmark_demo
+def test_two_manual_moves_then_chat_undo_steps_back_once(client, chat):
+    _manual(client, chat, "move", [WIN], offset_m=[0.5, 0])
+    _manual(client, chat, "move", [WIN], offset_m=[1.0, 0])
+    a = _ask(client, chat, "undo")
+    assert a["evidence"]["scene"]["commands"] == [{"op": "move", "item_ids": [WIN], "offset_m": [0.5, 0.0]}]
+    assert _state(client, chat)["moved"] == {WIN: [0.5, 0.0]}

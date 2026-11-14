@@ -93,13 +93,18 @@ test('AC20 edit renders the real advisor API cards or its honest empty state wit
   else {
     const cards = result.cards.filter((card) => card.source).slice(0, 3);
     await expect(viewer.locator('[data-advisor-card]')).toHaveCount(cards.length);
-    for (const card of cards) await expect(viewer.getByText(card.source.title, { exact: true }).first()).toBeVisible();
+    // Cards show a short rule reference; the full source title is the summary's title (AdvisorCardView).
+    for (const card of cards) await expect(viewer.getByTitle(card.source.title, { exact: true }).first()).toBeVisible();
   }
   await viewer.getByRole('button', { name: 'Undo', exact: true }).click();
   await expect.poll(() => hidden(page)).not.toContain(doorId);
 });
 
 test('wall materials and snapped floor dragging stay local and reset together', async ({ page }) => {
+  const sent: { op: string; offset_m: number[]; material?: string | null }[] = [];
+  page.on('websocket', (socket) => socket.on('framesent', ({ payload }) => {
+    try { const e = JSON.parse(String(payload)); if (e.type === 'scene.edit' && (e.op === 'move' || e.op === 'material')) sent.push(e); } catch { /* not JSON */ }
+  }));
   const viewer = await open(page);
   const id = await page.evaluate(() => {
     const viewer = (window as TestWindow).__viewer3d;
@@ -133,5 +138,8 @@ test('wall materials and snapped floor dragging stay local and reset together', 
   expect(await page.evaluate((id) => {
     const viewer = (window as TestWindow).__viewer3d;
     return { manifest: JSON.stringify(viewer.scene!.manifest), position: viewer.scene!.items.get(id)!.position.toArray(), edits: viewer.getEditState() };
-  }, id)).toEqual({ ...before, edits: { undoCount: 0, moved: {}, materials: {} } });
+  }, id)).toEqual({ ...before, edits: { undoCount: 0, moved: {}, moveDelta: {}, materials: {} } });
+  // Shared chat edit layer: the material change, the move and the reset went out as scene.edit commands.
+  await expect.poll(() => sent.map((e) => [e.op, e.op === 'move' ? Math.abs(e.offset_m[0]) + Math.abs(e.offset_m[1]) > 0 : e.material ?? null]))
+    .toEqual([['material', 'Timber frame'], ['move', true], ['move', false], ['material', null]]);
 });
