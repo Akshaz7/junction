@@ -163,6 +163,26 @@ def _cache_put(name: str, data) -> None:
         pass
 
 
+def _dedupe_words(ws: list[dict]) -> list[dict]:
+    """OCR tiles overlap, so a word near a tile edge is read twice: keep one of each same-text, same-place pair."""
+    out: list[dict] = []
+    for w in ws:
+        b = w.get("bbox_px")
+        dup = False
+        if b:
+            for o in out[-400:]:
+                ob = o.get("bbox_px")
+                if ob and o.get("text") == w.get("text"):
+                    iw = min(b[2], ob[2]) - max(b[0], ob[0])
+                    ih = min(b[3], ob[3]) - max(b[1], ob[1])
+                    if iw > 0 and ih > 0 and iw * ih > 0.5 * min((b[2] - b[0]) * (b[3] - b[1]), (ob[2] - ob[0]) * (ob[3] - ob[1])):
+                        dup = True
+                        break
+        if not dup:
+            out.append(w)
+    return out
+
+
 def page_words(image_path, words=None) -> tuple[list[dict], str]:
     """Words with pixel boxes of the image: the caller's, a cached OCR, or a fresh OCR (rapidocr, local, free)."""
     if words is not None:
@@ -170,12 +190,13 @@ def page_words(image_path, words=None) -> tuple[list[dict], str]:
     key = f"ocr-{_sha(image_path)}.json"
     hit = _cache_get(key)
     if hit is not None:
-        return hit, "ocr"
+        return _dedupe_words(hit), "ocr"
     try:
         from engine.reader.text import ocr_words
         w = ocr_words(Path(image_path))
     except Exception:  # noqa: BLE001 - no OCR installed: the legend finder then reports "no legend found"
         return [], "none"
+    w = _dedupe_words(w)
     _cache_put(key, w)
     return w, "ocr"
 
@@ -514,6 +535,11 @@ VERIFY_PROMPT = ("Image 1 is a reference drawing symbol from a legend, labelled 
                  "{\"results\":[{\"n\":<tile number>,\"match\":<true|false>}]}.")
 
 
+def _ref_img(tmpl: np.ndarray) -> np.ndarray:
+    """the legend symbol as a reader sees it: dark lines on white paper (the ink mask itself is white on black)"""
+    return (255 - tmpl.astype(np.uint8) * 255) if tmpl.max() <= 1 else tmpl
+
+
 def _verify_tiles(ref_img: np.ndarray, label: str, gray: np.ndarray, boxes: list, budget: dict) -> list[bool | None]:
     """Yes/no per candidate from the vision model; None = no verdict (no model, over budget, bad reply)."""
     out: list[bool | None] = [None] * len(boxes)
@@ -600,7 +626,8 @@ def count_symbols(image_path, legend: dict | None = None, target: str | None = N
         Hh, Ww = plan_ink.shape
         for wd in pw:
             b = wd.get("bbox_px")
-            if b:
+            # OCR reads stars, crosses and circles as odd characters (CJK, punctuation): a word without a Latin letter or digit is a symbol, not text
+            if b and re.search(r"[0-9A-Za-z\u00c0-\u024f]", str(wd.get("text", ""))):
                 plan_ink[max(0, int(b[1]) - 1):min(Hh, int(b[3]) + 2), max(0, int(b[0]) - 1):min(Ww, int(b[2]) + 2)] = 0
     except Exception:  # noqa: BLE001
         plan_ink = ink
@@ -676,7 +703,7 @@ def count_symbols(image_path, legend: dict | None = None, target: str | None = N
                 c["cls"] = "uncertain"
             strong, sample = [], []
         todo = unc[:VERIFY_TILES_PER_CALL * 2] + sample
-        verdicts = _verify_tiles(tmpl * 255 if tmpl.max() <= 1 else tmpl, e["label"], gray, [c["box"] for c in todo], budget) if (verify and todo) else []
+        verdicts = _verify_tiles(_ref_img(tmpl), e["label"], gray, [c["box"] for c in todo], budget) if (verify and todo) else []
         res["checked"]["uncertain"] += len(unc)
         for c, v in zip(todo, verdicts):
             if c in sample:
@@ -695,7 +722,7 @@ def count_symbols(image_path, legend: dict | None = None, target: str | None = N
         if verify and sample and res["checked"]["sampled"] and res["checked"]["agree"] < res["checked"]["sampled"]:
             # the model disagreed with the template on a sampled hit: do not trust the template for this symbol, check every strong hit
             rest = sorted([c for c in strong if c["cls"] == "strong" and c not in sample], key=lambda c: c["score"])
-            vs = _verify_tiles(tmpl * 255 if tmpl.max() <= 1 else tmpl, e["label"], gray, [c["box"] for c in rest], budget) if rest else []
+            vs = _verify_tiles(_ref_img(tmpl), e["label"], gray, [c["box"] for c in rest], budget) if rest else []
             vs = list(vs) + [None] * (len(rest) - len(vs))
             for c, v in zip(rest, vs):
                 if v is True:
