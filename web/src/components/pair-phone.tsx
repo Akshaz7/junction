@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { Smartphone, X } from 'lucide-react'
 import qrcode from 'qrcode-generator'
 import { Button } from './ui'
-import { ensurePairCode, getPairings, onPairingChange, pairCodeFromHash, addPairing, pairLink, pairAppLink, unpair } from '../lib/pairing'
+import { ensurePairCode, getPairings, onPairingChange, pairCodeFromHash, addPairing, pairLink, pairAppLink, unpair, registerChat } from '../lib/pairing'
 import { useDialogFocus } from '../lib/use-dialog-focus'
 
 function qrSvg(text: string): string {
@@ -10,6 +10,12 @@ function qrSvg(text: string): string {
   qr.addData(text)
   qr.make()
   return qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true })
+}
+
+/** The chat open in this window, from `#/chat?chat=<id>`. */
+export function openChatId(hash = window.location.hash): string | null {
+  const query = hash.split('?')[1]
+  return query ? new URLSearchParams(query).get('chat') : null
 }
 
 /** Opens `#/pair?code=…` on the phone: stores the pairing, then shows the chat. Mounted once in the app shell. */
@@ -52,7 +58,16 @@ export function PairPhoneButton() {
     setCode(ensurePairCode())
     function outside(event: PointerEvent) { if (!host.current?.contains(event.target as Node)) setOpen(false) }
     document.addEventListener('pointerdown', outside)
-    return () => document.removeEventListener('pointerdown', outside)
+    // A chat is already open: register it now and a few more times while the QR is on screen, so a phone that
+    // pairs mid-chat receives pair.chat and opens it (the server publishes on every register).
+    let beats = 0
+    const beat = () => {
+      const chat = openChatId()
+      if (chat && beats++ < 12) void registerChat(chat).catch(() => undefined)
+    }
+    beat()
+    const timer = window.setInterval(beat, 4000)
+    return () => { document.removeEventListener('pointerdown', outside); window.clearInterval(timer) }
   }, [open])
   const link = code ? pairLink(code) : ''
   return <span className="pair-phone" ref={host}>

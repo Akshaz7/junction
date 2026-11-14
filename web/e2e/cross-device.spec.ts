@@ -167,3 +167,22 @@ test('a new chat from another device shows a banner; Open follows its live strea
     console.log(JSON.stringify({ bannerMs }))
   } finally { await desktop.close(); await phone.close() }
 })
+
+test('pairing mid-chat: a phone that pairs while the laptop has a chat open opens that chat', async ({ browser, baseURL }) => {
+  const { desktop, phone } = await contexts(browser, baseURL)
+  try {
+    const p = await phone.newPage(), d = await desktop.newPage()
+    const id = await newChat(desktop.request, `Mid-chat ${Date.now()}`)
+    await d.goto(`/#/chat?chat=${id}`)
+    await ready(d, `/chat?chat=${id}`)
+    await ready(p, '/chat')
+    const pairBtn = d.getByRole('button', { name: 'Pair a phone' })
+    if (!(await pairBtn.count())) return
+    await pairBtn.click()
+    const link = await d.getByLabel('Pairing link').inputValue()
+    const t0 = Date.now()
+    await p.goto(link)
+    await expect(p).toHaveURL(new RegExp(`chat=${id}`), { timeout: 15_000 })
+    console.log(JSON.stringify({ openMs: Date.now() - t0 }))
+  } finally { await desktop.close(); await phone.close() }
+})
