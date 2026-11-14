@@ -29,9 +29,16 @@ export interface UploadReceipt {
 }
 
 export interface ReasoningStep { kind: 'found' | 'measured' | 'checked' | 'calculated' | 'read'; title: string; text: string; cite?: number | null; ok?: boolean | null }
+export interface EvidenceMargin {
+  value: number | null; unit: string; pct: number | null; why: string; sources: string[]; scope?: string
+  by_kind?: Record<string, EvidenceMargin>
+}
 export interface Reasoning {
   steps: ReasoningStep[]
-  confidence: { label: 'Verified' | 'Cross-checked' | 'Estimate'; pct: number; reason: string; improve?: string | null }
+  confidence: { label: 'Verified' | 'Cross-checked' | 'Estimate'; pct: number | null; reason: string; improve?: string | null; calibration?: { n: number; correct: number; source: string; scope?: string; interval_95?: [number, number] | null } | null }
+  margin?: EvidenceMargin
+  based_on?: { elements: number; estimated: number; unresolved: number; text: string }
+  arithmetic?: { formula: string; text: string; terms: { doc_id: string; item_id: string; cite?: number | null; value: number; unit: string; measurement?: { formula: string; operands: { value: number; unit: string }[] } }[]; result: number; unit: string }[]
 }
 
 export interface Answer {
