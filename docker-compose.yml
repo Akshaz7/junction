@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:16
+    container_name: hologram-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hologram
+      POSTGRES_PASSWORD: hologram
+      POSTGRES_DB: hologram
+    ports:
+      - "5433:5432"
+    volumes:
+      - hologram_pg:/var/lib/postgresql/data
+    mem_limit: 1g
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hologram -d hologram"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  hologram_pg:

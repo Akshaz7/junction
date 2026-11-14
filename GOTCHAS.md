@@ -14,3 +14,6 @@
 - Simulator: no devices existed; LEAD created "Hologram iPhone" (iPhone 16 Pro, iOS 26.1). Codex's sandbox cannot reach CoreSimulator, so IOS runs build-for-testing and the LEAD runs `xcodebuild test`.
 - Playwright/Chrome cannot launch inside the Codex sandbox (SIGABRT/EPERM). Codex workers write e2e tests; the LEAD runs them outside the sandbox.
 - Runware is NOT OpenAI-compatible: it uses its own task API (`textInference`, `audioInference`) at https://api.runware.ai/v1. Dedicated adapter in engine/models/providers.py.
+- `.env` has empty values like `DATABASE_URL=`: `os.environ.get(k, default)` returns "" — use `os.environ.get(k) or default`.
+- While `uv sync` (torch) runs, every `uv run` blocks on the venv lock. Test small things with `uv run --no-project --with <pkgs>`.
+- Production API image installs only API deps (no torch/ifcopenshell): keep heavy imports out of the engine's API path or update deploy/Dockerfile.

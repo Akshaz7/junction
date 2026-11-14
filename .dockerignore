@@ -1,0 +1,15 @@
+.git
+.venv
+data
+out
+tools
+refs
+weights
+artifacts
+logs
+results
+ios
+web/node_modules
+**/__pycache__
+.env
+.env.*
