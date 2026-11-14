@@ -56,10 +56,10 @@ def acc(rows, cut):
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("weights"); ap.add_argument("--out", default="results/vision/det_finetuned.json"); ap.add_argument("--limit", type=int, default=10**9)
+    ap = argparse.ArgumentParser(); ap.add_argument("weights"); ap.add_argument("--out", default="results/vision/det_finetuned.json"); ap.add_argument("--limit", type=int, default=10**9); ap.add_argument("--calib-only", action="store_true")
     a = ap.parse_args()
     det = Det(a.weights)
-    cal, held = VE.calib_set()[:a.limit], VE.heldout_set()[:a.limit]
+    cal, held = VE.calib_set()[:a.limit], ([] if a.calib_only else VE.heldout_set()[:a.limit])
     cal_img = lambda pm: Image.open(V.ROOT / "data/cubicasa5k/calib" / (pm["doc_id"][7:] + ".png")).convert("RGB")
     held_img = lambda pm: Image.open(B.image_path(pm["doc_id"])).convert("RGB")
     t = time.time(); rc = run_set(det, cal, cal_img); rh = run_set(det, held, held_img)
@@ -74,6 +74,9 @@ def main():
             s = acc(rc, cc).get(kk, 0)
             if s > best[0]: best = (s, c)
         cut[k] = best[1]
+    if a.calib_only:
+        res = {"weights": a.weights, "cut_picked_on_calib": cut, "finetuned_calib": acc(rc, cut), "mean_calib": round(sum(acc(rc, cut).values()) / 5, 3)}
+        Path(a.out).write_text(json.dumps(res)); print(json.dumps(res)); return
     base_h = VE.score(held, V.ORDER if False else [], None, items_fn=lambda pm: V.free_pass(pm["items"], pm["image"]["w"], pm["image"]["h"]))[0]
     res = {"weights": a.weights, "n_calib": len(cal), "n_heldout": len(held), "cut_picked_on_calib": cut, "ms_per_image_mps": round(ms),
            "baseline_default_heldout": base_h, "finetuned_heldout": acc(rh, cut), "finetuned_calib": acc(rc, cut),

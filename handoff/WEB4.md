@@ -1,10 +1,16 @@
-# WEB4 (Codex) — current row
-
-ROW: W-42 e2e specs follow the real Changes feed
-1. web/e2e/changes.spec.ts asserts comparison.generated_for_demo === false; S-25 omits the field. Assert it is absent, and assert the feed's first entry ids are real dataset ids (no "swiss_dwellings__…-v2" synthetic pairs, no generated_for_demo).
-2. Grep web/e2e for other references to generated/synthetic changes and update them to the real feed shape.
-3. Any web/src text that still says "generated for demo" for Changes: remove it if the data is now real (keep the label anywhere content really is generated).
-Allowed: web/e2e/*.spec.ts, web/src/components/changes-screen.*, compare-screen.*, this file.
-Done test: cd web && npx tsc --noEmit && npx vitest run (0 failures) and `npx playwright test e2e/changes.spec.ts --list` succeeds.
-Never commit. Write one line at the end: RESULT: ...
-RESULT: W-42 passed: changes.spec.ts asserts omitted demo fields and validates all feed document IDs (including first entries) against /api/docs, rejecting synthetic Swiss revision IDs; overview.spec.ts expects the real feed shape. Kept conditional Changes/Compare demo labels because generated offline/fidelity fixtures still use them. Done test: tsc passed, Vitest 60 files/375 tests passed, heavy.sh Playwright changes.spec.ts --list passed (1 test); no browser run, no commit.
+# WEB4 handoff
+ROW: W-52 judge demo use case as one Playwright spec (web/e2e/demo-usecase.spec.ts)
+Story ("fire-safety walk-through before a renovation meeting", AC20 = ifc_bench__ac20-arc), one chat, real local API (make dev, fake model provider; these steps are code-answered):
+1 Data -> search "AC20" -> open it -> Ask.
+2 "How many doors and windows are on the ground floor?" -> answer has both counts, numbered boxes, kind legend (two colours).
+3 Click citation chip 1 -> drawing opens with boxes.
+4 "And on the first floor?" -> open drawing updates in place (no image reload: same <img> element), counts change.
+5 "Where are the toilets?" -> boxes present.
+6 Visualise it -> 3D ready; build-up slider exists and steps.
+7 "Remove the front door. Is it still compliant?" -> answer-advisor-cards visible with text containing "33".
+8 "Reset the model" -> hidden list empty.
+9 Clicking every visible button in the answer card leads somewhere (no dead end).
+Use stable data-testid selectors already in the code (grep web/src for data-testid); add a data-testid only where missing, in the component files of that step. Screenshots to results/qa/shots/w52-<step>.png.
+Done test: cd web && npx tsc --noEmit && npx playwright test e2e/demo-usecase.spec.ts --list  (lists the test). Do NOT run the full Playwright suite (machine swap is high); LEAD runs it via scripts/heavy.sh.
+Write RESULT: one line at the end. Never commit.
+RESULT: W-52 done test passed: npx tsc --noEmit and scripts/heavy.sh npx playwright test e2e/demo-usecase.spec.ts --list (1 test); files: web/e2e/demo-usecase.spec.ts, web/src/components/answer-card.tsx (answer-card testid); all nine AC20 steps use the real API in one chat, with w52-01 through w52-09 screenshots configured under results/qa/shots; browser execution and actual screenshots remain for LEAD, no commit.

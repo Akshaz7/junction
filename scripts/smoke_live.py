@@ -16,12 +16,14 @@ import base64
 import hashlib
 import io
 import json
+import math
 import os
 from pathlib import Path
 import re
 import socket
 import ssl
 import struct
+import subprocess
 import time
 from datetime import datetime, timezone
 from urllib.error import HTTPError
@@ -77,6 +79,7 @@ PLAN = [
     ("GET", "/api/bench", "benchmark summaries"),
     ("GET", "/api/bench/latest", "latest summary or documented no_bench"),
     ("GET", "/api/costs", "cost aggregates"),
+    ("GET", "/api/costs/summary", "24-hour persisted answer costs and median"),
     ("POST", "/api/tts", "MPEG audio or device fallback"),
     ("POST", "/api/speech-intent", "generated silent WAV: intent or device fallback"),
     ("GET", "/api/watch/monitors", "monitor list and rule URLs"),
@@ -86,11 +89,19 @@ PLAN = [
 ]
 
 
-def coverage() -> list[str]:
+def coverage(revision=None) -> list[str]:
     """Fail dry-run if a new application route has no smoke operation."""
     discovered = set()
-    for path in (ROOT / "server").glob("*.py"):
-        tree = ast.parse(path.read_text())
+    if revision:
+        # Other workers may already have added routes beyond the deployed build.
+        paths = subprocess.check_output(["git", "ls-tree", "--name-only", revision, "server/"],
+                                        cwd=ROOT, text=True).splitlines()
+        sources = [subprocess.check_output(["git", "show", f"{revision}:{path}"], cwd=ROOT, text=True)
+                   for path in paths if path.endswith(".py") and path.count("/") == 1]
+    else:
+        sources = [path.read_text() for path in (ROOT / "server").glob("*.py")]
+    for source in sources:
+        tree = ast.parse(source)
         prefix = ""
         for node in ast.walk(tree):
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "APIRouter":
@@ -278,9 +289,12 @@ class WebSocket:
 
 
 class Smoke:
-    def __init__(self, base, timeout, *, expected_build=None, report_path=None, s18=False):
+    def __init__(self, base, timeout, *, expected_build=None, report_path=None, s18=False,
+                 s23=False, ws_origin=None):
         self.base, self.timeout = base.rstrip("/"), timeout
         self.expected_build, self.report_path, self.s18 = expected_build, report_path, s18
+        self.s23, self.ws_origin = s23, (ws_origin or self.base).rstrip("/")
+        self.latency = {}
         self.started_at = datetime.now(timezone.utc).isoformat()
         self.started = time.monotonic()
         self.rows, self.created, self.notes = [], [], [
@@ -312,7 +326,8 @@ class Smoke:
         value = None
         try:
             if method == "WS":
-                with WebSocket(self.base + path, min(self.timeout, 15)) as ws:
+                row["origin"] = self.ws_origin
+                with WebSocket(self.ws_origin + path, min(self.timeout, 15)) as ws:
                     row["status"] = 101
                     ws.ping()
                 row.update(ok=True, check="WebSocket upgrade and JSON pong")
@@ -568,13 +583,36 @@ class Smoke:
         c("GET", "/api/docs/{doc_id}/tags/{tag:path}", lambda v, r: linked(v, r, tagged), allowed=(200,) if tagged else (404,))
         c("GET", "/api/bench", lambda v, r: fields(v, benches=list))
         def bench(v, r):
+            if self.s23:
+                fields(v, file=str, tag=str, data=dict, accuracy=(int, float),
+                       numeric_correct=int, numeric_total=int, abstentions=int)
+                r["measurement"] = {k: v[k] for k in
+                                    ("tag", "accuracy", "numeric_correct", "numeric_total", "abstentions")}
+                require(v["accuracy"] == 0.7647 and v["numeric_correct"] == 143
+                        and v["numeric_total"] == 187 and v["abstentions"] == 0,
+                        "benchmark differs from recorded 143/187, accuracy 0.7647, abstentions 0")
+                return "recorded accuracy 0.7647 (143/187), abstentions 0"
             if r["status"] == 404:
                 fields(v, status=str, detail=str)
                 require(v["status"] == "no_bench", "unexpected bench error")
             else:
                 fields(v, file=str, tag=str, data=dict)
-        c("GET", "/api/bench/latest", bench, allowed=(200, 404), fallback={"no_bench"})
+        c("GET", "/api/bench/latest", bench, allowed=(200,) if self.s23 else (200, 404), fallback=None if self.s23 else {"no_bench"})
         c("GET", "/api/costs", lambda v, r: fields(v, total_usd=(int, float), calls=int, by_provider=dict, by_task=dict))
+        def costs_summary(v, r):
+            fields(v, total_usd=(int, float), calls=int, window_hours=int, answers=int,
+                   answers_with_cost=int, answers_missing_cost=int, answer_cost_usd_total=(int, float),
+                   cost_sources=dict)
+            require(v["window_hours"] == 24, "unexpected cost window")
+            require(v["answers_with_cost"] + v["answers_missing_cost"] == v["answers"],
+                    "answer cost coverage does not add up")
+            median = v.get("median_cost_per_answer")
+            require((median is None and v["answers_with_cost"] == 0) or
+                    (isinstance(median, (int, float)) and math.isfinite(median) and median >= 0),
+                    "invalid median cost per answer")
+            r["measurement"] = {k: v[k] for k in
+                                ("total_usd", "answers", "answers_with_cost", "median_cost_per_answer")}
+        c("GET", "/api/costs/summary", costs_summary)
         def speech(v, r, tts=False):
             if isinstance(v, dict):
                 if v.get("fallback") == "device":
@@ -597,8 +635,59 @@ class Smoke:
         c("WS", "/ws", None)
         if self.s18:
             self.deployed_revisions_and_advisor()
+        if self.s23:
+            self.ac20_latency()
         if self.expected_build:
             c("GET", "/api/health", health)
+
+    def ac20_latency(self):
+        """Warm repeated questions versus unique per-run questions; no inferred cache hits."""
+        original = dict(self.context)
+        try:
+            self.context["doc_id"] = "ifc_bench__ac20-arc"
+            self.context.pop("chat_id", None)
+            chat = self.call("POST", "/api/chats", lambda v, r: fields(v, id=str), body={
+                "doc_ids": [self.context["doc_id"]], "title": "smoke-S23-latency-generated-for-demo"})
+            if not isinstance(chat, dict) or not chat.get("id") or not self.rows[-1]["ok"]:
+                return
+            self.context["chat_id"] = chat["id"]
+            self.created.append({"kind": "chat", "id": chat["id"], "deleted": False, "reason": "no delete API"})
+            self.notes.append("Latency: end-to-end HTTP through terminal SSE answer, excluding pacing; "
+                              "p50/p95 use nearest rank. 'Cached' means exact questions repeated after warmup; "
+                              "the API exposes no cache-hit flag, so a response/model cache hit is not claimed. "
+                              "Novel questions have unique run labels; IFC code routes may use the same loaded index.")
+            def measured(v, r):
+                answer(v)
+                require(not v["answer"]["abstained"], "latency question abstained")
+                r["engine_latency_ms"] = v["latency_ms"]
+                r["answer_route"] = v["route"]
+                r["cost_usd"] = v["cost"]["usd_total"]
+            questions = [f"How many {kind} are there in total across the whole AC20 building model?"
+                         for kind in ("windows", "doors", "walls", "rooms", "storeys")]
+            for question in questions:
+                self.call("POST", "/api/chats/{chat_id}/messages", measured,
+                          body={"content": question}, sse=True)
+                self.rows[-1]["latency_group"] = "warmup"
+            run_label = uuid.uuid4().hex.translate(str.maketrans("0123456789", "ghijklmnop"))
+            novel = [f"In this AC20 model, what is the total number of {kind} in the whole building? "
+                     f"(generated for demo; smoke {run_label})"
+                     for kind in ("windows", "doors", "walls", "rooms", "storeys")]
+            for group, prompts in (("cached", questions * 2), ("novel", novel)):
+                samples = []
+                for question in prompts:
+                    self.call("POST", "/api/chats/{chat_id}/messages", measured,
+                              body={"content": question}, sse=True)
+                    row = self.rows[-1]
+                    row.update(latency_group=group, question=question)
+                    samples.append({k: row.get(k) for k in
+                                    ("latency_ms", "engine_latency_ms", "ok", "answer_route", "cost_usd", "retries")})
+                times = sorted(s["latency_ms"] for s in samples if s["ok"])
+                self.latency[group] = {"requested": len(prompts), "successful": len(times),
+                                       "p50_ms": times[math.ceil(len(times) * .50) - 1] if times else None,
+                                       "p95_ms": times[math.ceil(len(times) * .95) - 1] if times else None,
+                                       "samples": samples}
+        finally:
+            self.context = original
 
     def deployed_revisions_and_advisor(self):
         """S-18: exercise every shipped issue of the three real S-16 sheets."""
@@ -695,6 +784,7 @@ class Smoke:
                   "elapsed_s": round(time.monotonic() - self.started, 1), "expected_build_rev": self.expected_build,
                   "passed": failures == 0 and not interrupted, "failures": failures, "interrupted": interrupted,
                   "created": self.created, "notes": self.notes, "checks": self.rows}
+        report["latency"] = self.latency
         path = self.report_path or ROOT / "results" / "qa" / ("smoke-" + datetime.now().strftime("%H%M") + ".json")
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(report, indent=2) + "\n")
@@ -703,6 +793,12 @@ class Smoke:
                  "| Method | Endpoint | Status | ms | Result |", "| --- | --- | ---: | ---: | --- |"]
         for r in self.rows:
             lines.append(f"| {r['method']} | {r['path']} | {r['status'] or '-'} | {r['latency_ms']} | {'PASS' if r['ok'] else 'FAIL'}: {r['check']} |")
+        if self.latency:
+            lines += ["", "AC20 end-to-end latency (nearest-rank percentiles):", "",
+                      "| Questions | Successful / requested | p50 ms | p95 ms |",
+                      "| --- | ---: | ---: | ---: |"]
+            for group, stats in self.latency.items():
+                lines.append(f"| {group} | {stats['successful']} / {stats['requested']} | {stats['p50_ms']} | {stats['p95_ms']} |")
         lines += ["", *self.notes, "", "Created resources:", ""]
         lines += [f"- {r['kind']} `{r['id']}`: {'deleted' if r['deleted'] else r.get('reason', 'cleanup failed')}" for r in self.created]
         path.with_suffix(".md").write_text("\n".join(lines) + "\n")
@@ -717,6 +813,8 @@ def main():
     parser.add_argument("--timeout", type=float, default=120, help="per-operation timeout in seconds (default 120)")
     parser.add_argument("--expected-build", help="require this health build_rev before and after the smoke")
     parser.add_argument("--s18", action="store_true", help="also check three real revision series and front-door advisor")
+    parser.add_argument("--s23", action="store_true", help="require recorded benchmark and measure 10 warm / 5 novel AC20 questions")
+    parser.add_argument("--ws-origin", help="WebSocket origin (use the Aiven origin for Vercel HTTP checks)")
     parser.add_argument("--report", type=Path, help="write JSON and Markdown reports at this path")
     args = parser.parse_args()
     parsed = urlsplit(args.base_url)
@@ -724,7 +822,9 @@ def main():
         parser.error("base_url must be an http(s) URL without credentials, query or fragment")
     if args.timeout <= 0:
         parser.error("timeout must be positive")
-    errors = coverage()
+    if args.expected_build and not re.fullmatch(r"[0-9a-f]{7,40}", args.expected_build):
+        parser.error("expected-build must be a 7-to-40-character lowercase commit hash")
+    errors = coverage(args.expected_build)
     if args.dry_run:
         print(f"Base: {args.base_url}; <=24 requests/min; no keys required; no network in dry-run.")
         for method, path, detail in PLAN:
@@ -734,6 +834,8 @@ def main():
         print("Watch sync may provision configured monitors; unsigned webhook only tests rejection.")
         if args.s18:
             print("S-18: all issues of S400, S401 and A100 (detail/source/PNG); fresh front-door chat with 848/2017 §33 advisor.")
+        if args.s23:
+            print("S-23: bench 200 with 143/187, accuracy 0.7647, abstentions 0; costs summary 200; 5 warmups + 10 repeated + 5 unique AC20 questions.")
         print("".join(e + "\n" for e in errors) or f"Coverage OK: {len(PLAN)} router operations.")
         return bool(errors)
     if errors:
@@ -741,7 +843,8 @@ def main():
             print(error)
         return 1
     smoke = Smoke(args.base_url, args.timeout, expected_build=args.expected_build,
-                  report_path=args.report.resolve() if args.report else None, s18=args.s18)
+                  report_path=args.report.resolve() if args.report else None, s18=args.s18,
+                  s23=args.s23, ws_origin=args.ws_origin)
     interrupted = False
     try:
         smoke.run()
