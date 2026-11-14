@@ -131,9 +131,8 @@ struct ARScreen: View {
                     Text("Place model").font(.headline).foregroundStyle(.white)
                         .padding(.horizontal, 28).padding(.vertical, 14)
                         .background(.black.opacity(controller.canPlace ? 0.75 : 0.45), in: Capsule())
-                        .overlay(Capsule().stroke(HologramStyle.cyan.opacity(controller.canPlace ? 0.9 : 0.3),
-                                                  lineWidth: 1.5))
-                        .shadow(color: HologramStyle.cyan.opacity(controller.canPlace ? 0.6 : 0), radius: 8)
+                        .overlay(Capsule().stroke(Color.white.opacity(controller.canPlace ? 0.55 : 0.2),
+                                                  lineWidth: 1))
                 }
                 .disabled(!controller.canPlace)
                 .accessibilityIdentifier("ar-place-model")
@@ -151,7 +150,7 @@ struct ARScreen: View {
                 .accessibilityIdentifier("advisor-card-\(card.id)")
             }
         } label: {
-            HologramCapsule(tint: HologramStyle.amber) {
+            HologramCapsule {
                 Label("\(min(advisor.cards.count, 3)) checks", systemImage: "scope")
             }
         }

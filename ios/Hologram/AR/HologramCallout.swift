@@ -5,7 +5,7 @@ import UIKit
 /// joined to the item by a thin leader line. Replaces the flat SwiftUI details card in AR.
 @MainActor
 enum HologramCallout {
-    static let cyan = HighlightController.hologramColor
+    static let grey = UIColor(white: 0.78, alpha: 1)
 
     static func lines(for item: ItemCardModel) -> (title: String, details: String) {
         func clip(_ text: String, _ limit: Int = 30) -> String {
@@ -29,7 +29,7 @@ enum HologramCallout {
                                                    containerFrame: .zero, alignment: .left,
                                                    lineBreakMode: .byClipping)
         let title = ModelEntity(mesh: titleMesh, materials: [UnlitMaterial(color: .white)])
-        let details = ModelEntity(mesh: detailMesh, materials: [UnlitMaterial(color: cyan)])
+        let details = ModelEntity(mesh: detailMesh, materials: [UnlitMaterial(color: grey)])
         let tb = title.visualBounds(relativeTo: title)
         let db = details.visualBounds(relativeTo: details)
 
@@ -38,10 +38,10 @@ enum HologramCallout {
         let width = max(tb.extents.x, db.extents.x) + pad * 2
         let height = tb.extents.y + gap + db.extents.y + pad * 2
 
-        var fill = UnlitMaterial(color: UIColor(red: 0.01, green: 0.09, blue: 0.16, alpha: 1))
+        var fill = UnlitMaterial(color: UIColor(white: 0.04, alpha: 1))
         fill.blending = .transparent(opacity: .init(floatLiteral: 0.72))
-        var edge = UnlitMaterial(color: cyan)
-        edge.blending = .transparent(opacity: .init(floatLiteral: 0.9))
+        var edge = UnlitMaterial(color: grey)
+        edge.blending = .transparent(opacity: .init(floatLiteral: 0.35))
         let border = unit * 0.04
         let edgePlane = ModelEntity(mesh: .generatePlane(width: width + border * 2, height: height + border * 2,
                                                          cornerRadius: pad * 0.6), materials: [edge])
@@ -68,7 +68,7 @@ enum HologramCallout {
         let length = max(simd_length(end), 0.001)
         let thickness = max(unit * 0.03, 0.002)
         let leader = ModelEntity(mesh: .generateBox(size: [thickness, length, thickness]),
-                                 materials: [UnlitMaterial(color: cyan)])
+                                 materials: [UnlitMaterial(color: grey)])
         leader.position = end / 2
         leader.orientation = simd_quatf(from: [0, 1, 0], to: end / length)
         let dot = ModelEntity(mesh: .generateSphere(radius: unit * 0.1),

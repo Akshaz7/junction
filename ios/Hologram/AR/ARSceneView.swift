@@ -54,7 +54,6 @@ final class ARSceneController: ObservableObject {
     private var ghost: AnchorEntity?
     private var ghostSize = SIMD2<Float>(0, 0)
     private var previewPosition: SIMD3<Float>?
-    private var baseDisc: Entity?
 
     var scaleLabel: String { "1:\(Int((1 / scale).rounded()))" }
     var isSupported: Bool { ARWorldTrackingConfiguration.isSupported }
@@ -144,7 +143,6 @@ final class ARSceneController: ObservableObject {
             let shape = ShapeResource.generateBox(size: size).offsetBy(translation: localBounds.center)
             container.components.set(CollisionComponent(shapes: [shape]))
             container.scale = SIMD3(repeating: scale)
-            addBaseDisc(to: container, footprint: localBounds)
             model = container
             isFixture = loaded.isFixture
             isLoaded = true
@@ -191,10 +189,7 @@ final class ARSceneController: ObservableObject {
         view.scene.addAnchor(anchor)
         self.anchor = anchor
         if !isWalking { installTableGestures(on: view, model: model) }
-        // Table mode is a hologram; walk mode keeps real materials so you can see the rooms.
-        highlightController?.hologramEnabled = !isWalking
         highlightController?.setLabelScale(isWalking ? 0.3 : 1)
-        baseDisc?.isEnabled = !isWalking
         if !isWalking { playScanReveal(model) }
         isPlaced = true
         status = isWalking ? "Walk at 1:1. Select an item on the map to guide you."
@@ -251,7 +246,7 @@ final class ARSceneController: ObservableObject {
 
     // MARK: Placement preview and hologram effects
 
-    /// A translucent cyan footprint follows the screen-centre raycast until the model is placed.
+    /// A subtle translucent white footprint outline follows the screen-centre raycast until the model is placed.
     private func updatePlacementPreview() {
         guard !isPlaced, isLoaded, let view = arView, let model, view.bounds.width > 0 else {
             if canPlace { canPlace = false }
@@ -281,11 +276,11 @@ final class ARSceneController: ObservableObject {
     private func buildGhost(size: SIMD2<Float>) {
         removeGhost()
         ghostSize = size
-        var outer = UnlitMaterial(color: HighlightController.hologramColor)
-        outer.blending = .transparent(opacity: .init(floatLiteral: 0.55))
-        var inner = UnlitMaterial(color: HighlightController.hologramColor)
-        inner.blending = .transparent(opacity: .init(floatLiteral: 0.14))
-        let border = max(min(size.x, size.y) * 0.02, 0.003)
+        var outer = UnlitMaterial(color: .white)
+        outer.blending = .transparent(opacity: .init(floatLiteral: 0.7))
+        var inner = UnlitMaterial(color: .white)
+        inner.blending = .transparent(opacity: .init(floatLiteral: 0.07))
+        let border = max(min(size.x, size.y) * 0.008, 0.0015)
         let radius = min(size.x, size.y) * 0.06
         let ring = ModelEntity(mesh: .generatePlane(width: size.x, depth: size.y, cornerRadius: radius),
                                materials: [outer])
@@ -305,32 +300,6 @@ final class ARSceneController: ObservableObject {
         if let ghost { arView?.scene.removeAnchor(ghost) }
         ghost = nil
         previewPosition = nil
-    }
-
-    /// Faint glowing footprint under the placed model, in model units so it scales with it.
-    private func addBaseDisc(to container: Entity, footprint: BoundingBox) {
-        let extents = footprint.extents
-        guard extents.x.isFinite, extents.z.isFinite, extents.x > 0, extents.z > 0 else { return }
-        let margin = max(extents.x, extents.z) * 0.12
-        var outer = UnlitMaterial(color: HighlightController.hologramColor)
-        outer.blending = .transparent(opacity: .init(floatLiteral: 0.16))
-        var inner = UnlitMaterial(color: HighlightController.hologramColor)
-        inner.blending = .transparent(opacity: .init(floatLiteral: 0.10))
-        let lift = max(extents.max() * 0.002, 0.001)
-        let radius = max(extents.x, extents.z) * 0.05
-        let base = Entity()
-        base.name = "hologram-base"
-        let ring = ModelEntity(mesh: .generatePlane(width: extents.x + margin * 2, depth: extents.z + margin * 2,
-                                                    cornerRadius: radius), materials: [outer])
-        let fill = ModelEntity(mesh: .generatePlane(width: extents.x + margin * 1.6, depth: extents.z + margin * 1.6,
-                                                    cornerRadius: radius), materials: [inner])
-        fill.position.y = lift
-        base.addChild(ring)
-        base.addChild(fill)
-        base.position = [footprint.center.x, footprint.min.y - lift, footprint.center.z]
-        base.isEnabled = false
-        container.addChild(base)
-        baseDisc = base
     }
 
     /// Vertical sweep over about 0.8 s when the hologram appears.
@@ -379,7 +348,7 @@ final class ARSceneController: ObservableObject {
         var captions: [String: String] = [:]
         for id in itemIDs {
             if let item = manifest?.items[id] {
-                let text = item.name.flatMap { $0.isEmpty ? nil : $0 } ?? item.kind
+                let text = item.kind.flatMap { $0.isEmpty ? nil : $0 } ?? item.name
                 if let text { captions[id] = text }
             }
         }
@@ -563,8 +532,6 @@ final class ARSceneController: ObservableObject {
     private func resetPlacement() {
         dismissSelectedItem()
         removeGestures()
-        highlightController?.hologramEnabled = false
-        baseDisc?.isEnabled = false
         model?.removeFromParent()
         if let anchor { arView?.scene.removeAnchor(anchor) }
         anchor = nil

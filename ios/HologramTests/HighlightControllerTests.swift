@@ -92,28 +92,32 @@ final class HighlightControllerTests: XCTestCase {
     }
 
     @MainActor
-    func testHologramLookTintsEverythingCyanAndRestoresOriginals() throws {
+    func testUnselectedItemsKeepOriginalMaterialsAndTagsAreStaggered() throws {
         let root = Entity()
-        let group = Entity()
-        group.name = SceneIndex.usdName(for: "window-001")
         let original = SimpleMaterial(color: .red, isMetallic: false)
+        var items: [ModelEntity] = []
+        for (n, id) in ["door-001", "door-002", "door-003"].enumerated() {
+            let group = Entity()
+            group.name = SceneIndex.usdName(for: id)
+            let item = ModelEntity(mesh: .generateBox(size: 1), materials: [original])
+            group.addChild(item)
+            group.position.x = Float(n) * 0.5
+            root.addChild(group)
+            items.append(item)
+        }
         let other = ModelEntity(mesh: .generateBox(size: 1), materials: [original])
-        let item = ModelEntity(mesh: .generateBox(size: 1), materials: [original])
-        group.addChild(item)
-        root.addChild(group)
         root.addChild(other)
         let controller = HighlightController(root: root)
 
-        controller.hologramEnabled = true
-        XCTAssertTrue(try XCTUnwrap(other.model).materials.first is UnlitMaterial)
-        controller.highlight(itemIDs: ["window-001"], captions: ["window-001": "Window W1"])
-        XCTAssertTrue(try XCTUnwrap(item.model).materials.first is UnlitMaterial)
-        XCTAssertNotNil(controller.labelsByItemID["window-001"]?.findEntity(named: "caption"))
-        controller.clear()
-        XCTAssertTrue(controller.labelsByItemID.isEmpty)
-        controller.hologramEnabled = false
+        controller.highlight(itemIDs: ["door-001", "door-002", "door-003"],
+                             captions: ["door-001": "door"])
         assertSameMaterials(try XCTUnwrap(other.model).materials, [original])
-        assertSameMaterials(try XCTUnwrap(item.model).materials, [original])
+        XCTAssertTrue(try XCTUnwrap(items[0].model).materials.first is UnlitMaterial)
+        XCTAssertNotNil(controller.labelsByItemID["door-001"]?.findEntity(named: "caption"))
+        let heights = ["door-001", "door-002", "door-003"].compactMap { controller.labelsByItemID[$0]?.position.y }
+        XCTAssertEqual(Set(heights).count, 3, "Neighbouring tags need different heights")
+        controller.clear()
+        assertSameMaterials(try XCTUnwrap(items[0].model).materials, [original])
     }
 
     @MainActor
@@ -138,10 +142,11 @@ final class HighlightControllerTests: XCTestCase {
                     let expected = UnlitMaterial(color: HighlightController.accentColor)
                     assertSameColor(unlit.color.tint, expected.color.tint, file: file, line: line)
                 } else {
-                    let dim = try XCTUnwrap(material as? SimpleMaterial, file: file, line: line)
-                    let expected = SimpleMaterial(color: HighlightController.dimColor,
-                                                  roughness: 1, isMetallic: false)
-                    assertSameColor(dim.color.tint, expected.color.tint, file: file, line: line)
+                    // Unselected items keep their real materials, never the accent.
+                    if let unlit = material as? UnlitMaterial {
+                        let accent = UnlitMaterial(color: HighlightController.accentColor)
+                        XCTAssertNotEqual(unlit.color.tint, accent.color.tint, file: file, line: line)
+                    }
                 }
             }
         }
