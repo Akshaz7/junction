@@ -52,6 +52,7 @@ class Writer:
                       for n in self.nodes.values() if (s := n.get("source")) and s.get("item_id")}
         self.edges = {(e["kind"], e["from"], e["to"]) for e in graph.setdefault("edges", [])}
         self.docs = {did: n for n in self.nodes.values() if n["kind"] == "doc" for did in n.get("doc_ids", [])}
+        self.renamed = {}
 
     def node(self, kind, did, local, label, props=None, level=None, page=1, bbox=None):
         nid = node_id(kind, did, local)
@@ -63,9 +64,14 @@ class Writer:
             self.nodes[nid] = n
             self.items[did, local] = n
             self.graph["nodes"].append(n)
-        if kind in SERVICE_KINDS and n["kind"] not in SERVICE_KINDS:
+        if kind in SERVICE_KINDS and n["kind"] != kind:
             # IFC2x3 often exports all terminals as generic objects in elements.json.
+            old_id = n["id"]
+            self.renamed[old_id] = nid
+            self.nodes.pop(old_id, None)
+            n["id"] = nid
             n["kind"] = kind
+            self.nodes[nid] = n
         n.setdefault("props", {}).update(props or {})
         if level and not n.get("level"):
             n["level"] = level
@@ -88,6 +94,13 @@ class Writer:
     def doc_link(self, n, did):
         doc = self.docs.get(did) or self.nodes.get(f"doc:{did}")
         self.edge("contains", doc, n, "rule", 1.0, {"rule": "source document", "doc_id": did})
+
+    def finish(self):
+        for edge in self.graph["edges"]:
+            edge["from"] = self.renamed.get(edge["from"], edge["from"])
+            edge["to"] = self.renamed.get(edge["to"], edge["to"])
+        for n in self.graph["nodes"]:
+            n["canonical"] = self.renamed.get(n.get("canonical"), n.get("canonical"))
 
 
 def resolve_source(meta, root, fmt):
@@ -126,7 +139,7 @@ def _kind(el, ue):
     # FlowTerminal covers IFC2x3 and all typed IFC4 terminal subclasses.
     if el.is_a("IfcFlowTerminal"):
         return "terminal"
-    return None
+    return "fixture"  # Other distribution equipment still carries ports/system membership.
 
 
 def _unit_scale(unit, project_scale):
@@ -171,7 +184,23 @@ def enrich_ifc(writer, did, path, root, deadline):
     import ifcopenshell.util.element as ue
     import ifcopenshell.util.unit as uu
     f = ifcopenshell.open(str(path))
-    scale = uu.calculate_unit_scale(f)
+    projects = _by_type(f, "IfcProject")
+    declared_units = getattr(projects[0], "UnitsInContext", None) if projects else None
+    has_length_unit = declared_units and any(getattr(u, "UnitType", None) == "LENGTHUNIT" for u in declared_units.Units)
+    scale = uu.calculate_unit_scale(f) if has_length_unit else None
+    # Shared spatial entity identity + its complete placement gives a declared
+    # common engineering frame. Distinct models with unrelated IDs do not align.
+    frames = []
+    if scale:
+        import ifcopenshell.util.placement as up
+        for building in _by_type(f, "IfcBuilding"):
+            if building.ObjectPlacement is None:
+                continue
+            matrix = up.get_local_placement(building.ObjectPlacement).copy()
+            matrix[:3, 3] *= scale
+            frames.append({"building_guid": building.GlobalId, "project_guid": projects[0].GlobalId,
+                           "matrix_z_up_m": matrix.tolist()})
+    writer.graph.setdefault("mep", {}).setdefault("frames", {})[did] = frames
     artifact = read_json(Path(root) / did / "elements.json", {})
     rows = artifact if isinstance(artifact, list) else artifact.get("elements", [])
     by_id = {e["item_id"]: e for e in rows}
@@ -179,6 +208,8 @@ def enrich_ifc(writer, did, path, root, deadline):
     offset = scene.get("origin_offset_m")
     services = {}
     spaces = {}
+    index = read_json(Path(root) / did / "mep.json", {})
+    indexed = {row["id"]: row for row in index.get("services", []) if row.get("id")}
     for el in _by_type(f, "IfcSpace") + _by_type(f, "IfcDistributionElement"):
         if time.monotonic() > deadline:
             raise TimeoutError("services enrichment reached its time budget")
@@ -192,18 +223,35 @@ def enrich_ifc(writer, did, path, root, deadline):
             st = ue.get_aggregate(st)
         level = getattr(st, "Name", None)
         props = {"ifc_class": el.is_a(), **_measures(el, scale)}
+        if not has_length_unit:
+            props["measurement_note"] = "Length unit not recorded; raw dimensions not converted."
         if room:
             label = getattr(el, "LongName", None) or el.Name or "Unnamed room"
             props["room_number"] = el.Name
         else:
+            from engine.mep import _classify, _first, NAME_KEYS
+            indexed_row = indexed.get(el.GlobalId, {})
+            psets = ue.get_psets(el)
+            service_kind = indexed_row.get("k") or _classify(el, ue.get_type(el), psets)
+            props["service_kind"] = service_kind
+            props["is_flow_terminal"] = el.is_a("IfcFlowTerminal")
+            props["system"] = indexed_row.get("s") or _first(psets, NAME_KEYS)
+            if "length_m" not in props and positive(indexed_row.get("L")):
+                props["length_m"] = float(indexed_row["L"])
+                props["length_m_source"] = {"artifact": "mep.json", "method": indexed_row.get("ls"),
+                                             "note": "Existing unit-resolved services index; not a length inside any room."}
             # Keep author labels in props; never expose a raw GUID as a label.
-            label = f"{kind.capitalize()} · {el.Name}" if el.Name and el.Name != el.GlobalId else kind.capitalize()
+            from engine.kg.schema import readable
+            plain = service_kind.replace("_", " ").capitalize()
+            name = readable(el.Name, "")
+            label = f"{plain} · {name}" if name else plain
         bb = row.get("bbox_m")
         if bb and offset:
             props["world_bbox_m"] = [[float(c) + float(o) for c, o in zip(p, offset)] for p in bb]
         n = writer.node(kind, did, el.GlobalId, label, props, level)
         writer.doc_link(n, did)
         (spaces if room else services)[el.GlobalId] = n
+    writer.finish()
     # Explicit spatial containment and spatial references (IFC4).
     for cls, field in (("IfcRelContainedInSpatialStructure", "RelatedElements"),
                        ("IfcRelReferencedInSpatialStructure", "RelatedElements")):
@@ -217,7 +265,7 @@ def enrich_ifc(writer, did, path, root, deadline):
                     ev = {"relation": cls, "relation_id": rel.GlobalId,
                           "item_id": el.GlobalId, "room_item_id": rel.RelatingStructure.GlobalId}
                     writer.edge("in_room", service, room, "ifc_relation", 1.0, ev)
-                    if service["kind"] in {"terminal", "fixture"} and cls == "IfcRelContainedInSpatialStructure":
+                    if service.get("props", {}).get("is_flow_terminal") and cls == "IfcRelContainedInSpatialStructure":
                         writer.edge("serves", service, room, "ifc_relation", 1.0,
                                     {**ev, "rule": "terminal physically contained in room; no upstream capacity inference"})
     # Systems may overlap: retain every declared assignment, not just the first.
@@ -234,6 +282,18 @@ def enrich_ifc(writer, did, path, root, deadline):
             writer.edge("part_of_system", n, sn, "ifc_relation", 1.0,
                         {"relation": "IfcRelAssignsToGroup", "system_item_id": system.GlobalId,
                          "item_id": n["source"]["item_id"]})
+    # Some exporters record system names only in property sets, not IfcSystem.
+    # Preserve the recorded string verbatim (commas need not delimit systems).
+    assigned = {e["from"] for e in writer.graph["edges"] if e["kind"] == "part_of_system"}
+    for n in services.values():
+        raw_system = n["props"].get("system")
+        if n["id"] not in assigned and isinstance(raw_system, str) and raw_system.strip():
+            sn = writer.node("system", did, "property-" + hashlib.sha256(raw_system.encode()).hexdigest()[:16], raw_system,
+                             {"recorded_system_label": raw_system})
+            writer.doc_link(sn, did)
+            writer.edge("part_of_system", n, sn, "tag_text", 0.9,
+                        {"rule": "recorded system-name property; membership not independently checked",
+                         "value": raw_system, "source": n["source"]})
     # Ports: IFC2x3 uses RelConnectsPortToElement, IFC4 also uses RelNests.
     owner = {}
     for rel in _by_type(f, "IfcRelConnectsPortToElement"):
@@ -260,6 +320,8 @@ def enrich(graph, project, root, *, time_budget_s=20):
     writer = Writer(graph)
     deadline = time.monotonic() + max(0, time_budget_s)
     notes = graph.setdefault("mep", {"documents": {}, "notes": []})
+    notes.setdefault("documents", {})
+    notes.setdefault("notes", [])
     for doc in project.get("docs", []):
         if isinstance(doc, str):
             doc = {"doc_id": doc}
@@ -279,6 +341,7 @@ def enrich(graph, project, root, *, time_budget_s=20):
     enrich_spatial(writer)
     from engine.kg.mep_sheets import enrich_sheets
     enrich_sheets(writer, project, Path(root), deadline)
+    writer.finish()
     degree = Counter()
     for e in graph["edges"]:
         degree.update((e["from"], e["to"]))

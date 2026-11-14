@@ -41,6 +41,31 @@ def _registration(a_rooms, b_rooms):
             "anchor_item_ids": [a["source"]["item_id"] for a, _ in anchors]}
 
 
+def _frame_registration(graph, source, target):
+    """IFC declares the *same* building coordinate frame in both documents."""
+    import numpy as np
+    frames = graph.get("mep", {}).get("frames", {})
+    candidates = []
+    for a in frames.get(source, []):
+        for b in frames.get(target, []):
+            if a["building_guid"] != b["building_guid"] or a["project_guid"] != b["project_guid"]:
+                continue
+            am, bm = np.asarray(a["matrix_z_up_m"]), np.asarray(b["matrix_z_up_m"])
+            try:
+                # Convert the declared building frame transform into graph Y-up.
+                rotate = np.array([[1, 0, 0, 0], [0, 0, 1, 0], [0, -1, 0, 0], [0, 0, 0, 1]])
+                T = rotate @ bm @ np.linalg.inv(am) @ rotate.T
+                if not np.isfinite(T).all():
+                    continue
+            except np.linalg.LinAlgError:
+                continue
+            candidates.append({"T": T.tolist(), "residual": 0.0, "matches": 1,
+                               "anchor_method": "declared shared IFC building frame",
+                               "building_guid": a["building_guid"], "project_guid": a["project_guid"],
+                               "note": "Placement agreement; geometry alignment has not been independently checked."})
+    return candidates[0] if len(candidates) == 1 else None
+
+
 def enrich_spatial(writer):
     rooms_by_doc = defaultdict(list)
     services_by_doc = defaultdict(list)
@@ -56,27 +81,30 @@ def enrich_spatial(writer):
     for did, services in services_by_doc.items():
         own_rooms = rooms_by_doc.get(did, [])
         candidates = [(own_rooms, None)] if own_rooms else []
-        # A model without rooms cannot establish a room-anchor alignment itself.
-        # Core same_as may provide other measured registrations in the future.
-        if own_rooms:
-            for target, target_rooms in rooms_by_doc.items():
-                if target != did:
-                    reg = _registration(own_rooms, target_rooms)
-                    if reg:
-                        registrations[did, target] = reg
-                        candidates.append((target_rooms, reg))
+        for target, target_rooms in rooms_by_doc.items():
+            if target != did:
+                reg = _registration(own_rooms, target_rooms) or _frame_registration(writer.graph, did, target)
+                if reg:
+                    registrations[did, target] = reg
+                    candidates.append((target_rooms, reg))
         for n in services:
             if n["id"] in explicit:
                 continue
             sb = _box(n)
             for rooms, alignment in candidates:
-                shift = [alignment["T"][i][3] for i in range(3)] if alignment else [0, 0, 0]
-                bb = [[p[i] + shift[i] for i in range(3)] for p in sb]
+                if alignment:
+                    T = alignment["T"]
+                    corners = [[sum(T[i][j] * p[j] for j in range(3)) + T[i][3] for i in range(3)]
+                               for p in ((x, y, z) for x in (sb[0][0], sb[1][0])
+                                         for y in (sb[0][1], sb[1][1]) for z in (sb[0][2], sb[1][2]))]
+                    bb = [[min(p[i] for p in corners) for i in range(3)], [max(p[i] for p in corners) for i in range(3)]]
+                else:
+                    bb = sb
                 center = _center(bb)
                 hits = []
                 for room in rooms:
                     rb = _box(room)
-                    if n.get("level") and room.get("level") and n["level"] != room["level"]:
+                    if not alignment and n.get("level") and room.get("level") and n["level"] != room["level"]:
                         continue
                     if bb[1][1] < rb[0][1] or bb[0][1] > rb[1][1]:
                         continue
