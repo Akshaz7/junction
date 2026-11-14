@@ -194,6 +194,21 @@ def chain(res, doc, pairs, base_unit, operations):
     prev, raw, unit = "sum", next(s["value"] for s in c["steps"] if s["id"] == "sum"), base_unit
     extras = []
     for index, (label, op, extra, new_unit) in enumerate(operations):
+        normalized = []
+        for input_index, inp in enumerate(extra):
+            inp = dict(inp)
+            if "percent_input" in inp:
+                pct = inp.pop("percent_input")
+                sid = f"chain-{index}-percent-{input_index}"
+                c["steps"].append(step(sid, "Convert percentage", "percentage / 100", pct / 100, "fraction",
+                                       [input_value("stated percentage", pct, "%", inp["source"]),
+                                        input_value("percent divisor", 100, "%/fraction", {"kind": "conversion", "text": "100 percent = 1"})], operation="divide"))
+                c["steps"].append(step(sid + "-factor", "Include base quantity", "1 + percentage fraction", 1 + pct / 100, "factor",
+                                       [input_value("base quantity factor", 1, "factor", {"kind": "policy", "text": "Include the base quantity"}),
+                                        input_value("percentage fraction", pct / 100, "fraction", step_source(sid))], operation="sum"))
+                inp["source"] = step_source(sid + "-factor")
+            normalized.append(inp)
+        extra = normalized
         args = [input_value("previous quantity", raw, unit, step_source(prev)), *extra]
         raw = evaluate(op, [i["value"] for i in args])
         prev, unit = f"chain-{index}", new_unit
@@ -206,6 +221,10 @@ def chain(res, doc, pairs, base_unit, operations):
     c["formula"] += "; " + "; ".join(o[0] for o in operations)
     c["result"] = {"value": value, "unit": unit, "rounded_as": f"{places(value)} decimal places", "additional": extras}
     return record(res, c)
+
+
+def percentage_factor(name, pct, ref):
+    return {**input_value(name, 1 + pct / 100, "factor", ref), "percent_input": pct}
 
 
 def difference_groups(res, doc, items, a, b, area=False, by="storey"):
@@ -247,7 +266,7 @@ def individual(res, doc, items, columns):
                         "checks": [], "margin": {}})
 
 
-def append_calculation(calc, child, prefix):
+def append_calculation(calc, child, prefix, *, neutralize_count=True, include_rows=True):
     """Include a sub-report without colliding step ids or dropping source rows."""
     import copy
     for old in child["steps"]:
@@ -256,10 +275,10 @@ def append_calculation(calc, child, prefix):
         for i in s["inputs"]:
             if i["source"].get("kind") == "step": i["source"]["step_id"] = prefix + i["source"]["step_id"]
         calc["steps"].append(s)
-    for old in child["rows"]:
+    for old in child["rows"] if include_rows else []:
         r = copy.deepcopy(old)
         if r["source"].get("kind") == "step": r["source"]["step_id"] = prefix + r["source"]["step_id"]
-        r["values"]["count"] = 0
+        if neutralize_count: r["values"]["count"] = 0
         r["values"]["section"] = prefix.rstrip("-")
         calc["rows"].append(r)
     if number(child.get("result", {}).get("value")):
@@ -305,3 +324,58 @@ def quantity_table(res, doc, room_results, doors, windows, baseboard_result, sla
             calc["steps"].append(step(sid, f"Pipe length: {name}", "stored system length", val, "m", [input_value("system length", val, "m", ref)], operation="source"))
             calc["result"]["additional"].append({"label": name, "value": val, "unit": "m", "step_id": sid})
     return record(res, calc)
+
+
+def storey_schedule(res, doc, names):
+    from engine.calc import record_items
+    from engine.solvers.solve import _qty
+    calc = {"formula": "Each floor and quantity is totalled separately; units are not mixed", "steps": [], "rows": [],
+            "result": {"value": None, "unit": "", "mode": "per-element", "rounded_as": "per quantity", "additional": []},
+            "checks": [], "margin": {}, "row_note": "Rows are partitioned by floor and quantity section; room counts and floor areas use separate totals."}
+    for index, name in enumerate(names):
+        for key, kind, unit in (("rooms", "room", "count"), ("doors", "door", "count"), ("windows", "window", "count"), ("area", "room", "m2")):
+            its = [i for i in doc.items if i.kind == kind and i.storey == name]
+            pairs = [(i, 1 if unit == "count" else _qty(i, "room", "area")) for i in its]
+            pairs = [(i, v) for i, v in pairs if number(v)]
+            total = sum(v for i, v in pairs)
+            part = {"answer": {"value": total if unit == "count" else round(total, 1), "unit": unit}}
+            record_items(part, doc, pairs)
+            append_calculation(calc, part["_calc"], f"floor-{index}-{key}-", neutralize_count=False)
+            calc["result"]["additional"][-1]["label"] = f"{name}: {key}"
+    return record(res, calc)
+
+
+def ranked_storeys(res, doc, items, selected, scores, area=False):
+    from engine.calc import record_items
+    from engine.solvers.solve import _qty
+    unit = "m2" if area else "count"
+    vals = [(i, (_qty(i, i.kind, "area") or 0) if area else 1) for i in items]
+    rows = [row(doc, it, v if it.storey == selected else 0, unit, source_quantity=v, storey=it.storey,
+                excluded_reason="" if it.storey == selected else "Another floor; excluded from the selected floor subtotal") for it, v in vals]
+    calc = summed(res, rows, unit, "selected floor subtotal = Σ(source quantities on the selected floor)",
+                  note="Only the selected winning floor contributes to this subtotal. Tied floors are reported separately, not added together.")
+    for idx, (name, value) in enumerate(scores.items()):
+        part = {"answer": {"value": value, "unit": unit}}
+        record_items(part, doc, [(i, v) for i, v in vals if i.storey == name])
+        append_calculation(calc, part["_calc"], f"rank-{idx}-", include_rows=False)
+        calc["result"]["additional"][-1]["label"] = name
+    return record(res, calc)
+
+
+def piping(res, doc, data, ids, groups=None):
+    indexed = {r["item_id"]: r for r in [*(data.get("pipes") or []), *(data.get("drains") or [])]}
+    rows, seen = [], set()
+    unit = res["answer"]["unit"]
+    for iid in dict.fromkeys(ids):
+        r = indexed.get(iid)
+        if r is None: continue
+        value = r.get("length_m") if unit == "m" else 1
+        if groups is not None:
+            value = int(groups[iid] not in seen)
+            seen.add(groups[iid])
+        ref = {"kind": "measurement", "doc_id": doc.doc_id, "page": 1, "item_id": iid, "field": "piping extract",
+               "record": r, "text": "Normalized piping-extract quantities retained with this answer; lengths are in metres"}
+        rows.append(asdict(Row(iid, r.get("name") or r.get("type_name") or "Pipe", {"length_m" if unit == "m" else "count": value,
+                                                                                   "group": groups[iid] if groups is not None else None}, ref)))
+    return record(res, summed(res, rows, formula="sum normalized pipe lengths" if unit == "m" else "count distinct groups" if groups is not None else "count selected pipe/drain items",
+                               note="For grouped counts, one representative contributes 1 per group and the remaining rows contribute 0." if groups is not None else ""))

@@ -36,6 +36,7 @@ export interface EvidenceMargin {
 export interface CalculationSource {
   kind?: string; doc_id?: string; page?: number; item_id?: string | null; bbox?: Bbox | null
   artifact?: string; field?: string; text?: string; step_id?: string
+  origin?: string; record?: Record<string, unknown>
 }
 export interface Calculation {
   formula: string

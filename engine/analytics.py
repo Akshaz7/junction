@@ -307,7 +307,9 @@ def storey_compare(question: str, doc: Doc, t0) -> dict | None:
         lead = (f"**{pick}** has the {word} {what if not area else what}: **{_fmt(best) + ' m²' if area else best}**."
                 if len(ties) == 1 else f"**{' and '.join(ties)}** tie for the {word} {what}: **{_fmt(best) + ' m²' if area else best}** each.")
         text = f"{lead} Per floor: {parts}. {{marks}}"
-        return _done(question, doc, text, best, "m2" if area else "count", by[pick] if len(ties) == 1 else [i for k in ties for i in by[k]], trace, t0=t0)
+        res = _done(question, doc, text, best, "m2" if area else "count", by[pick] if len(ties) == 1 else [i for k in ties for i in by[k]], trace, t0=t0)
+        from engine.calc_routes import ranked_storeys
+        return ranked_storeys(res, doc, items, pick, score, area)
     if as_table:  # "compare door counts per storey in a table": one markdown row per storey, total last
         col = f"{_noun(kind).capitalize()} (area m²)" if area else f"{_noun(kind).capitalize()}"
         rows = [f"| {k} | {_fmt(score[k]) if area else score[k]} |" for k in order if k in score]
@@ -335,7 +337,13 @@ def total_and_storey(question: str, doc: Doc, t0) -> dict | None:
     text = f"There are **{len(items)} {_noun(kind, len(items))}** in total in this model and **{len(on)}** on **{st}**. {{marks}}"
     res = _done(question, doc, text, len(items), "count", on or items, trace, t0=t0)
     from engine.calc import record_items
-    return record_items(res, doc, [(i, 1) for i in items], note="The headline is the whole-building total; the citation also selects the requested storey.")
+    record_items(res, doc, [(i, 1) for i in items], note="The headline is the whole-building total; the citation also selects the requested storey.")
+    part = {"answer": {"value": len(on), "unit": "count"}}
+    record_items(part, doc, [(i, 1) for i in on])
+    from engine.calc_routes import append_calculation
+    append_calculation(res["_calc"], part["_calc"], "selected-floor-", include_rows=False)
+    res["_calc"]["result"]["additional"][-1]["label"] = st
+    return res
 
 
 
@@ -416,7 +424,9 @@ def storey_table(question: str, doc: Doc, t0) -> dict | None:
     big = max(rows, key=lambda r: r[2])
     text = f"Comparison of {' and '.join(names)}:\n\n" + "\n".join(table) + f"\n\n**{big[0]}** has the larger room area ({_fmt(big[2])} m²). {{marks}}"
     trace = [_step("route", "storey table / rooms, area, doors, windows -> code, no model")]
-    return _done(question, doc, text, None, None, items, trace, t0=t0)
+    res = _done(question, doc, text, None, None, items, trace, t0=t0)
+    from engine.calc_routes import storey_schedule
+    return storey_schedule(res, doc, names)
 
 
 SAFE_Q = re.compile(r"\b(?:is|are|how)\b[^.?]*\b(?:safe|safety|fire[- ]safe|unsafe|dangerous)\b|\bsafe (?:to|for)\b|\bsafety (?:check|review|status)\b", re.I)
@@ -1032,13 +1042,15 @@ def piping(question: str, doc: Doc, t0) -> dict | None:
     if st:
         pipes = [p for p in pipes if p.get("storey") == st]
 
-    def done(text, value, unit, ids, steps):
+    def done(text, value, unit, ids, steps, calc_groups=None):
         ids = [i for i in dict.fromkeys(ids) if i in by_id]
         items = [by_id[i] for i in ids[:HL_CAP]]
         _b, cites, _s = _evidence(doc, items)
         scene = {"doc_id": doc.doc_id, "highlight_item_ids": [i.item_id for i in items], "camera_target_item_id": items[0].item_id if items else None}
         trace = [_step("route", "piping -> V-08 plumbing extract (item ids = IFC GlobalIds), code, no model")] + [_step("filter", x) for x in steps]
-        return _answer_obj(question, [doc.doc_id], text + tail + note, value, unit, 1.0 if items else 0.7, False, [], cites, scene, trace, "index", t0 or time.perf_counter())
+        res = _answer_obj(question, [doc.doc_id], text + tail + note, value, unit, 1.0 if items else 0.7, False, [], cites, scene, trace, "index", t0 or time.perf_counter())
+        from engine.calc_routes import piping as calc_piping
+        return calc_piping(res, doc, d, ids, calc_groups)
 
     if DRAINQ.search(ql) and not re.search(r"\bpipes?\b.*\bby\b|\bsizes?\b", ql):
         terms = [x for x in (d.get("drains") or []) if not st or x.get("storey") == st]
@@ -1066,13 +1078,15 @@ def piping(question: str, doc: Doc, t0) -> dict | None:
         g = _group([p for p in pipes if p.get("dn_mm")], "dn_mm")
         g = sorted(g, key=lambda x: float(x[0]))
         txt = ", ".join(f"DN{int(float(k))}: {n} pipes / {_fmt(m)} m" for k, n, m in g[:20])
-        return done(f"**{len(g)} pipe sizes**{f' on {st}' if st else ''}: {txt}. [1]", len(g), "count", [p["item_id"] for p in pipes if p.get("dn_mm")], [f"{len(g)} sizes"])
+        return done(f"**{len(g)} pipe sizes**{f' on {st}' if st else ''}: {txt}. [1]", len(g), "count", [p["item_id"] for p in pipes if p.get("dn_mm")], [f"{len(g)} sizes"],
+                    {p["item_id"]: p["dn_mm"] for p in pipes if p.get("dn_mm")})
     if re.search(r"\bsystems?\b", ql):
         g = _group(pipes, "system")
         shown, rest = system_rows(g)
         txt = "; ".join(f"{friendly_system(k)}: {_fmt(m)} m ({n} pipes)" for k, n, m in shown)
         more = f"; +{rest} smaller system{'s' if rest != 1 else ''} ({_fmt(sum(x[2] for x in g[8:]))} m)" if rest else ""
-        return done(f"**{len(g)} piping systems**{f' on {st}' if st else ''}, longest first: {txt}{more}. Total {_fmt(_pipe_sum(pipes))} m. [1]", len(g), "count", [p["item_id"] for p in pipes], [f"{len(g)} systems"])
+        return done(f"**{len(g)} piping systems**{f' on {st}' if st else ''}, longest first: {txt}{more}. Total {_fmt(_pipe_sum(pipes))} m. [1]", len(g), "count", [p["item_id"] for p in pipes], [f"{len(g)} systems"],
+                    {p["item_id"]: p.get("system") or "Unknown" for p in pipes})
     if re.search(r"by (?:storey|floor|level)|per (?:storey|floor|level)|each (?:storey|floor|level)", ql):
         g = _group(pipes, "storey")
         txt = "; ".join(f"{k}: {_fmt(m)} m ({n} pipes)" for k, n, m in g)
@@ -1254,6 +1268,8 @@ def compliance(question: str, doc: Doc, t0) -> dict | None:
                 + "{marks}")
         val = 0
     res = _done(question, doc, text, val, "count", items, trace, t0=t0)
+    from engine.calc_inventory import findings as calc_findings
+    calc_findings(res, doc, fs, checked)
     res["answer"]["confidence"] = 0.7
     res["advisor_cards"] = advisor.advise_doc(doc, None)[:6] if fs else []
     return res

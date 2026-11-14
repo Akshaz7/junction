@@ -33,18 +33,19 @@ def run(blind=False):
             issues = validate(calc, root) if calc else ["no calculation"]
             entry = {"route": route, "question": q, "docs": dids, "value": value, "unit": res["answer"].get("unit"),
                      "numeric": bool(numeric), "has_calc": bool(calc), "complete": bool(calc) and not issues,
+                     "eligible": bool(numeric or calc),
                      "rows": len(calc.get("rows", [])) if calc else 0, "issues": issues,
                      "answer_trace": [{"step": s["step"], "detail": s["detail"]} for s in res.get("trace", []) if not s.get("model")][:5]}
         except Exception as e:
             entry = {"route": route, "question": q, "docs": dids, "complete": False, "error": f"{type(e).__name__}: {e}"}
         entries.append(entry)
         by_route[route].append(entry)
-    routes = {r: {"answers": len(es), "numeric_answers": sum(bool(e.get("numeric")) for e in es),
+    routes = {r: {"answers": len(es), "numeric_answers": sum(bool(e.get("numeric")) for e in es), "numeric_or_table_answers": sum(bool(e.get("eligible")) for e in es),
                   "with_complete_calc": sum(e.get("complete", False) for e in es),
-                  "complete_pct": 100 * sum(e.get("complete", False) for e in es) / len(es)} for r, es in by_route.items()}
+                  "complete_pct": 100 * sum(e.get("complete", False) for e in es) / sum(bool(e.get("eligible")) for e in es) if any(e.get("eligible") for e in es) else None} for r, es in by_route.items()}
     out = {"generated_at": datetime.now(timezone.utc).isoformat(), "models": "fake; recount/reader/explain disabled; no live calls", "blind_run": blind,
            "scope": "Observed numeric code routes in the listed real-file cases; not a claim that unseen route variants are covered.",
-           "totals": {"answers": len(entries), "complete": sum(e.get("complete", False) for e in entries)}, "routes": routes, "answers": entries}
+           "totals": {"answers": len(entries), "numeric_or_table_answers": sum(bool(e.get("eligible")) for e in entries), "complete": sum(e.get("complete", False) for e in entries)}, "routes": routes, "answers": entries}
     Path("results/final/CALC/coverage.json").write_text(json.dumps(out, indent=2, ensure_ascii=False) + "\n")
     print(json.dumps(out["totals"]))
     for e in entries:

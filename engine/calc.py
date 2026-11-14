@@ -97,7 +97,7 @@ def places(value):
 
 
 def close(a, b, tolerance=1e-8):
-    return number(a) and number(b) and abs(a - b) <= tolerance + 1e-9 * max(abs(a), abs(b))
+    return number(a) and number(b) and abs(a - b) <= tolerance + 8 * max(math.ulp(float(a)), math.ulp(float(b)))
 
 
 def summed(res, rows, unit=None, formula="total = Σ(source quantities)", steps=(), key=None, note=""):
@@ -128,6 +128,20 @@ def record(res, calc):
     """Private seed: do not prevent reasoning.attach from creating the card."""
     res["_calc"] = calc
     return res
+
+
+def record_terms(res, terms, formula="total = Σ(source quantities)", *, unit=None, steps=()):
+    """Hook for text/schedule readers without a structured ``Doc``.
+
+    terms are {label, value, source, item_id?}; each source must identify its
+    document, page and source artifact (for example text-2.json + a text field
+    and bbox). The caller supplies actual parsed terms, never a headline-derived
+    balancing value. Returns the answer with a private seed finalized by attach.
+    """
+    unit = unit_name(unit or res["answer"].get("unit"))
+    rows = [asdict(Row(t.get("item_id") or f"source-term-{idx}", t["label"], {KEYS.get(unit, unit): t["value"]}, t["source"]))
+            for idx, t in enumerate(terms)]
+    return record(res, summed(res, rows, unit, formula, steps))
 
 
 def record_items(res, doc, pairs, unit=None, formula="total = Σ(source quantities)", note=""):
@@ -349,6 +363,12 @@ def validate(calc, root=None):
             if ref.get("step_id") not in known: issues.append(f"{label}: source calculation step is missing.")
         elif kind in ("question", "assumption", "policy", "conversion"):
             if not ref.get("text"): issues.append(f"{label}: unlabelled {kind} input.")
+        elif kind == "metadata":
+            if not isinstance(ref.get("record"), dict) or ref["record"].get("doc_id") != ref.get("doc_id"):
+                issues.append(f"{label}: catalogue snapshot is missing or inconsistent.")
+        elif kind == "measurement":
+            if not ref.get("doc_id") or not isinstance(ref.get("record"), dict) or not ref.get("text"):
+                issues.append(f"{label}: measurement snapshot or provenance is missing.")
         elif kind in ("element", "document", "model", "scale", "geometry"):
             if not ref.get("doc_id"): issues.append(f"{label}: source document missing.")
             if root is not None and kind != "model":
@@ -413,6 +433,9 @@ def _attach(res, question, root):
         res.pop("_calc", None)
         return res
     root = Path(root)
+    if res.get("wallarea", {}).get("rows"):
+        from engine.calc_wallarea import record_wallarea
+        record_wallarea(res, question)
     calc = res.pop("_calc", None)
     if not calc or calc.get("result", {}).get("value") != value:
         calc = _default(res, question, root)
@@ -435,7 +458,11 @@ def _attach(res, question, root):
         ref = {"kind": "model", "doc_id": model.get("doc_id"), "page": model.get("page", 1),
                "text": model["label"], "field": "trace.recount"}
         calc["steps"].append(step(f"model-{idx}", model["label"], "recorded model output", model["value"], ans.get("unit"),
-                                  [input_value(model["label"], model["value"], ans.get("unit"), ref)], model.get("policy", ""), "source"))
+                                  [input_value(model["label"], model["value"], ans.get("unit"), ref)], model.get("policy", "") + f" Reported answer: {value}; model output: {model['value']}.", "source"))
+        if number(value):
+            calc["checks"].append({"method": model["label"], "value": model["value"], "reported_value": value,
+                                    "agrees": close(model["value"], value), "diff_pct": abs(model["value"] - value) / abs(model["value"]) * 100 if model["value"] else None,
+                                    "source": ref, "note": "Agreement is a cross-check, not proof that no items were missed."})
     # Keep the exact API value and the rounded quantity printed in the headline.
     if number(value):
         import re
