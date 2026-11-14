@@ -79,6 +79,7 @@ KEYWORD_KIND = [
 ]
 STRUCT_CLASS_KIND = {"IfcSlab": "slab", "IfcWall": "wall", "IfcColumn": "column", "IfcBeam": "beam", "IfcMember": "member", "IfcFooting": "footing", "IfcPile": "pile", "IfcReinforcingBar": "rebar",
                      "IfcReinforcingMesh": "rebar", "IfcTendon": "rebar", "IfcTendonAnchor": "rebar"}
+AMBIGUOUS_FIXTURES = {"toilet", "basin", "shower", "bath", "drain", "fixture"}
 SERVICE_DOMAINS = ("plumbing", "heating", "cooling", "ventilation", "fire protection", "gas", "electrical", "controls and alarms")
 
 # ------------------------------------------------------------------ systems: words in a system / type name -> plain system kind
@@ -1156,6 +1157,9 @@ def answer(question: str, doc, t0) -> dict | None:
         return None
     if re.search(r"\b(?:remove|delete|hide|isolate|highlight|add|move|resize|change)\b", ql):
         return None
+    # locations, areas and finish take-offs belong to the room / take-off routes, which carry their own boxes
+    if re.search(r"\bwhere\b|\bm2\b|m\u00b2|\bsq\.? ?(?:m|ft)\b|\btiles?\b|\btiling\b|\bflooring\b|\bpaint\w*\b|\bwaste allowance\b|\b\d+ ?% (?:waste|extra)", ql):
+        return None
     if re.search(r"\b(?:capacit\w*|loads?|kw|kwh|watts?|power rating|flow rates?|pressure|voltage|specifications?|maintenance|cost|price|energy|efficien\w*|concept|span|spans|spanning|grid|inferred|estimate|compliant|compliance|code|rooms?|apartment|unit [a-z]?\d+|duplex [ab]|located|location|wattage|ampere\w*|cross[- ]sectional|area|u-?value|thermal)\b", ql):
         return None
     mep_q = bool(subj or generic or trade) and not (ssub and not (subj or generic))
@@ -1165,11 +1169,14 @@ def answer(question: str, doc, t0) -> dict | None:
         c = _Ctx(question, doc, t0, idx)
         if re.search(r"\bload[- ]?bearing\b", ql) and re.search(r"\bwalls?\b", ql):
             return _loadbearing_walls(c)
+        if not ssub and re.search(r"\broofs?\b|\bwalls?\b", ql) and not (VOLUME_Q.search(ql) and CONCRETE.search(ql)):
+            return None  # roof and wall questions are not about the frame; the other routes answer them
         if re.search(r"\b(?:spans?|load path|structural grid|embodied carbon|efficiency|concept|structural analysis|capacity|capacities|design load)\b", ql):
             return None
         kinds = ssub or (["column", "beam", "member", "footing"] if sgen else [])
         if not kinds and VOLUME_Q.search(ql) and CONCRETE.search(ql):
-            kinds = ["column", "beam", "footing", "slab", "wall"]
+            named = [k for k, rx in (("slab", r"\bslabs?\b|\bfloors?\b|\bdecks?\b"), ("wall", r"\bwalls?\b")) if re.search(rx, ql)]
+            kinds = named or ["column", "beam", "footing", "slab", "wall"]
         if "slab" in kinds or re.search(r"\bslabs?\b", ql) and not ssub:
             if CONCRETE.search(ql) and re.search(r"\bslabs?\b", ql):
                 kinds = list(dict.fromkeys(kinds + ["slab"]))
@@ -1193,6 +1200,8 @@ def answer(question: str, doc, t0) -> dict | None:
     idx = load_index(doc)
     if idx is None:
         return None
+    if not idx["services"] and subj and _kinds_of(subj) <= AMBIGUOUS_FIXTURES and not trade:
+        return None  # an architectural model draws toilets and basins as fixtures or rooms; the existing routes know them
     c = _Ctx(question, doc, t0, idx)
     only_groups = [s for s in subj]
     if SIZES_Q.search(ql) and (subj and set(subj) <= {"pipe", "duct", "cable_tray", "conduit"}):
