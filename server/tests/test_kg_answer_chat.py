@@ -10,7 +10,7 @@ def test_project_graph_response_keeps_confidence_and_skips_model_routes(monkeypa
     from engine import kg_answer
     seen = []
     result = {"trace": [{"step": "knowledge_graph"}], "answer": {"confidence": .41},
-              "reasoning": {"graph_path": [{"confidence": .41}]}}
+              "reasoning": {"graph_path": [{"from_id": "door:one:d1", "to_id": "door:two:d2", "confidence": .41}]}}
     project = {"id": "site", "docs": [{"doc_id": "one"}, {"doc_id": "two"}]}
 
     def forbidden(*a, **kw):
@@ -70,6 +70,7 @@ def test_project_chat_streams_real_source_paths_and_explicit_selection_wins(clie
         assert result["graph_answer"]["shape"] == "appearances"
         assert {c["doc_id"] for c in result["citations"]} == set(docs)
         assert result["answer"]["confidence"] == min(e["confidence"] for e in result["reasoning"]["graph_path"])
+        assert all(e["from_id"] and e["to_id"] for e in result["reasoning"]["graph_path"])
         assert result["cost"] == {"usd_total": 0, "calls": []}
 
     def forbidden(*a, **kw):
