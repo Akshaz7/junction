@@ -30,8 +30,11 @@ anything else returns a valid abstained answer.
 
 ### POST /api/upload
 `curl -F file=@plan.pdf localhost:8000/api/upload`
--> `{"doc_id": "uploads__plan-3fa2b1", "status": "stored", "detail": "ingestion not started (S-04)"}`
-Accepts ifc, dxf, dwg, pdf, svg, png, jpg, tif (max 100 MB; 415 otherwise). Stored in `artifacts/uploads/`; a documents row is inserted (source `uploads`).
+-> `{"doc_id": "uploads__plan-3fa2b1", "status": "ingesting", "detail": "..."}` (`"stored"` on a server without the pipeline, e.g. the deployed container).
+Accepts ifc, dxf, dwg, pdf, svg, png, jpg, tif (max 100 MB; 415 otherwise). Stored in `artifacts/uploads/`; a documents row is inserted (source `uploads`) and `doc.new` fires. Where the pipeline is installed, a background job then builds pages, plan map, scene and USDZ (raster about 6 s, DXF seconds, IFC minutes), one job at a time, and fires `doc.new` again when done.
+
+### GET /api/docs/{doc_id}/ingest
+-> `{"status": "none|running|ready|partial|failed", "stages": [{"stage": "pages", "ok": true, "s": 0.1}], "detail": ""}`. `partial` = page image only (pdf/svg have no plan map yet).
 
 ### POST /api/chats
 `curl -X POST localhost:8000/api/chats -H 'content-type: application/json' -d '{"doc_ids":["cubicasa5k__colorful-11397"],"title":"Windows"}'`

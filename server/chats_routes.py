@@ -1,6 +1,7 @@
 """Chats and streamed questions (CONTRACT 5.9)."""
 import asyncio
 import json
+import os
 import uuid
 
 from fastapi import APIRouter, HTTPException
@@ -14,7 +15,26 @@ from .schema import validate_answer
 router = APIRouter(prefix="/api")
 
 # S-04 swaps this for engine.answer.
-ENGINE = stub_engine.answer
+def _real_engine(question, doc_ids, on_event):
+    from engine import answer  # lazy: absent until E-04 lands
+    return answer(question, doc_ids, on_event)
+
+
+def _pick_engine():
+    # ENGINE_IMPL=stub|real. Default: real once engine.answer exists, else stub.
+    impl = os.environ.get("ENGINE_IMPL", "").strip().lower()
+    if impl == "stub":
+        return stub_engine.answer
+    if impl == "real":
+        return _real_engine
+    import importlib
+    try:
+        return _real_engine if hasattr(importlib.import_module("engine"), "answer") else stub_engine.answer
+    except Exception:  # noqa: BLE001
+        return stub_engine.answer
+
+
+ENGINE = _pick_engine()
 
 
 class NewChat(BaseModel):

@@ -7,6 +7,7 @@ Boxes come from the GLB nodes (POSITION accessor min/max x node matrix): no seco
 import argparse
 import hashlib
 import json
+import signal
 import subprocess
 import sys
 import time
@@ -69,6 +70,9 @@ def kind_of(el):
         if el.is_a(cls):
             return k
     return "other"
+
+
+CONVERT_TIMEOUT_S = 1200
 
 
 def usd_name(item_id: str) -> str:
@@ -170,8 +174,16 @@ def convert(ifc: Path, raw_glb: Path):
     import os
     cmd = [str(HEAVY), str(IFC_CONVERT), "--exclude", "entities", "IfcOpeningElement", "-j", "4",
            "--use-element-guids", "--y-up", str(ifc), str(raw_glb)]
-    r = subprocess.run(cmd, capture_output=True, text=True, stdin=subprocess.DEVNULL, env={**os.environ, **env})
-    (raw_glb.parent / "convert.log").write_text((r.stdout or "") + (r.stderr or ""))
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+                            stdin=subprocess.DEVNULL, env={**os.environ, **env}, start_new_session=True)
+    try:
+        out, _ = proc.communicate(timeout=CONVERT_TIMEOUT_S)
+    except subprocess.TimeoutExpired:
+        os.killpg(proc.pid, signal.SIGKILL)  # heavy.sh + IfcConvert
+        proc.communicate()
+        raw_glb.unlink(missing_ok=True)
+        raise RuntimeError(f"IfcConvert timed out after {CONVERT_TIMEOUT_S} s")
+    (raw_glb.parent / "convert.log").write_text(out or "")
     if not raw_glb.exists():
         raise RuntimeError("IfcConvert produced no GLB; see tmp/convert.log")
 

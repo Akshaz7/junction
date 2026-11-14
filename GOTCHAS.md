@@ -33,3 +33,4 @@
 - usdchecker is /usr/bin/usdchecker (not in usd-core). UsdPrimvarReader_float2.varname must be typed string, not token.
 - Only Gemini accepts audio input among our providers: speech-intent falls back to device speech without GEMINI_API_KEY.
 - Running server/tests and engine/tests in ONE pytest process fails 5 engine tests: server tests load .env into os.environ and real keys leak into fake-provider defaults. Being fixed; until then run them separately.
+- Revisions renumber positional item ids (removing a wall renumbers later walls): the changes engine must match by geometry, not id.

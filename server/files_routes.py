@@ -1,6 +1,9 @@
 """Document files, upload, bench and costs (CONTRACT 5.9)."""
+import asyncio
+import importlib.util
 import json
 import re
+import sys
 import uuid
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
@@ -100,7 +103,38 @@ async def upload(file: UploadFile = File(...)):
         "values ($1,'uploads',$2,$3,$4,1,$5,$6::jsonb)",
         doc_id, doc["title"], kind, [fmt], doc["credit"], json.dumps(doc["files"]))
     await publish({"type": "doc.new", "doc_id": doc_id})
-    return {"doc_id": doc_id, "status": "stored", "detail": "ingestion not started (S-04)"}
+    if ingestion_available():
+        asyncio.create_task(_ingest(doc_id))
+        return {"doc_id": doc_id, "status": "ingesting", "detail": "poll GET /api/docs/{doc_id}/ingest; doc.new fires when ready"}
+    return {"doc_id": doc_id, "status": "stored", "detail": "ingestion is not available on this server"}
+
+
+_INGEST_LOCK = asyncio.Lock()  # heavy: one ingestion at a time
+
+
+def ingestion_available() -> bool:
+    import os
+    return os.environ.get("INGEST", "1") != "0" and importlib.util.find_spec("pipeline") is not None
+
+
+async def _ingest(doc_id: str):
+    async with _INGEST_LOCK:
+        proc = await asyncio.create_subprocess_exec(
+            sys.executable, "-m", "server.ingest_job", doc_id, cwd=str(config.REPO),
+            stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
+        await proc.wait()
+    f = config.artifacts_dir() / doc_id / "ingest.json"
+    if not f.is_file() and proc.returncode:
+        f.write_text(json.dumps({"status": "failed", "stages": [], "detail": f"job exited {proc.returncode}"}))
+    await publish({"type": "doc.new", "doc_id": doc_id})
+
+
+@router.get("/docs/{doc_id}/ingest")
+async def ingest_status(doc_id: str):
+    f = _doc_dir(doc_id) / "ingest.json"
+    if not f.is_file():
+        return {"status": "none", "stages": [], "detail": "no ingestion has run for this document"}
+    return json.loads(f.read_text())
 
 
 @router.get("/changes")

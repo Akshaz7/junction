@@ -1,9 +1,14 @@
 """Environment config. Local defaults work with `make dev` and no keys."""
 import os
 
-from dotenv import load_dotenv
+from dotenv import find_dotenv, dotenv_values
 
-load_dotenv()
+# Load .env for server settings only. Provider keys (API keys, tokens) stay out of os.environ:
+# engine.models reads .env itself, and leaking them here made engine tests see real keys.
+_SECRET = ("KEY", "TOKEN", "SECRET")
+for _k, _v in dotenv_values(find_dotenv(usecwd=True)).items():
+    if _v is not None and _k not in os.environ and not any(t in _k.upper() for t in _SECRET):
+        os.environ[_k] = _v
 
 DEFAULT_DATABASE_URL = "postgresql://hologram:hologram@localhost:5433/hologram"
 

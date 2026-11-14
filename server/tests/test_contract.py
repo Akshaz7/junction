@@ -94,11 +94,14 @@ def test_page_planmap_scene_files(client, dirs):
     assert client.get("/api/docs/..%2Fetc/scene").status_code in (400, 404)
 
 
-def test_upload(client, dirs):
+def test_upload(client, dirs, monkeypatch):
     art, _ = dirs
+    monkeypatch.setenv("INGEST", "0")
     r = client.post("/api/upload", files={"file": ("My Plan.pdf", b"%PDF-1.4 fake")})
     assert r.status_code == 200
     doc_id = r.json()["doc_id"]
+    assert r.json()["status"] == "stored"
+    assert client.get(f"/api/docs/{doc_id}/ingest").json()["status"] == "none"
     assert doc_id.startswith("uploads__my-plan")
     assert any((art / "uploads").iterdir())
     d = client.get(f"/api/docs/{doc_id}").json()
@@ -166,3 +169,25 @@ def test_elements_planmap_page_via_files_route(client, dirs):
     for bad in ("page-x.png", "planmap-1.json.bak", "..%2Felements.json", "elements.json%00"):
         assert client.get(f"/api/docs/{DOC}/files/{bad}").status_code in (400, 404, 422)
     assert client.get("/api/docs/..%2Fetc/files/elements.json").status_code in (400, 404)
+
+
+def test_upload_starts_ingestion_when_available(client, dirs, monkeypatch):
+    from server import files_routes
+    started = []
+
+    async def fake(doc_id):
+        started.append(doc_id)
+    monkeypatch.setattr(files_routes, "ingestion_available", lambda: True)
+    monkeypatch.setattr(files_routes, "_ingest", fake)
+    r = client.post("/api/upload", files={"file": ("p.png", b"\x89PNG")})
+    assert r.json()["status"] == "ingesting"
+
+
+def test_engine_impl_flag(monkeypatch):
+    from server import chats_routes, stub_engine
+    monkeypatch.setenv("ENGINE_IMPL", "stub")
+    assert chats_routes._pick_engine() is stub_engine.answer
+    monkeypatch.setenv("ENGINE_IMPL", "real")
+    assert chats_routes._pick_engine() is chats_routes._real_engine
+    monkeypatch.delenv("ENGINE_IMPL")
+    assert chats_routes._pick_engine() in (stub_engine.answer, chats_routes._real_engine)

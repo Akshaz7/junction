@@ -10,6 +10,9 @@ RUN uv pip install --system fastapi "uvicorn[standard]" asyncpg httpx pydantic \
     sse-starlette python-multipart python-dotenv pyyaml jsonschema
 COPY server ./server
 COPY engine ./engine
+# Baked-in demo artifacts (deploy/build_demo_artifacts.py); empty unless built before the image build.
+COPY --chown=app:app deploy/demo_artifacts/ /app/artifacts/
+ENV ARTIFACTS_DIR=/app/artifacts
 USER app
 ENV RATE_LIMIT=1
 EXPOSE 8000

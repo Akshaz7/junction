@@ -112,7 +112,7 @@ def main():
     root, artroot = Path(a.root), Path(a.artifacts)
     if a.build_registry:
         from pipeline import registry
-        docs, _ = registry.build(root, artroot, count_pages=False)
+        docs, _ = registry.build(root, artroot, count_pages=True)
         print(f"registry: {len(docs)} docs", flush=True)
     docs = [json.loads(l) for l in open(artroot / "registry.jsonl")]
     if a.only:
