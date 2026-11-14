@@ -1,0 +1,402 @@
+[
+ {
+  "q": "how many rooms are there",
+  "t": "There are **82 rooms** in this model. [1][2][3][4][5]",
+  "conf": 1.0,
+  "abst": false,
+  "route": "index",
+  "usd": 0,
+  "nb": 82,
+  "s": 0.1
+ },
+ {
+  "q": "whats the biggest room",
+  "t": "**Largest room: 006 (Büroarbeit), 128.3 m², on Keller.** [1]",
+  "conf": 0.9,
+  "abst": false,
+  "route": "index",
+  "usd": 0,
+  "nb": 0,
+  "s": 0.0
+ },
+ {
+  "q": "what is the biggest room on the top floor",
+  "t": "**Largest room: 403 (Büroarbeit), 71.1 m², on Dachgeschoss.** [1]",
+  "conf": 0.9,
+  "abst": false,
+  "route": "index",
+  "usd": 0,
+  "nb": 0,
+  "s": 0.0
+ },
+ {
+  "q": "list all rooms on the top floor",
+  "t": "**Dachgeschoss has 3 rooms, 202.4 m² net:** Büroarbeit 401 (60.2 m²), 402 (71.1 m²) and 403 (71.1 m²). [1]",
+  "conf": 0.9,
+  "abst": false,
+  "route": "index",
+  "usd": 0.002152,
+  "nb": 0,
+  "s": 2.1
+ },
+ {
+  "q": "how many peple fit in this building",
+  "t": "**Roughly 190 people, but this is an estimate, not a stated capacity.** The IFC model has no occupancy or capacity data, so the figure comes from floor area alone. The model's 82 spaces total **1,939.38 m² of net floor area** (e3, across Keller, Erdgeschoss, the two Obergeschosse and Dachgeschoss). Dividing by an assumed 10 m² per occupant gives about 194 people (compute). Actual occupancy depends on the usage of each room and the local building code's occupant-load factors, which the model does not contain. Even with that factor, the count will shift significantly if the spaces are offices versus meeting or circulation areas. [1][2]",
+  "conf": 0.3,
+  "abst": false,
+  "route": "hybrid",
+  "usd": 0.002106,
+  "nb": 0,
+  "s": 13.7
+ },
+ {
+  "q": "how many people can fit in the seminar room",
+  "t": "There are **82 rooms** in this model. [1][2][3][4][5]",
+  "conf": 1.0,
+  "abst": false,
+  "route": "index",
+  "usd": 0,
+  "nb": 82,
+  "s": 0.0
+ },
+ {
+  "q": "is this building safe",
+  "t": "**The drawings do not allow a safety judgement.** The model is an architectural IFC of an office building (AC20 Phantasy Office Building) with 784 elements across six storeys (Keller, Erdgeschoss, 1. and 2. Obergeschoss, Dachgeschoss, plus one unassigned element). It contains geometry only: columns, doors, walls, slabs and so on, with dimensions and materials. It has no fire-rating, egress-route, sprinkler, structural-capacity or code-compliance data that I could find, and the sheet text is only titles and a drawing number.\n\nWhat I can confirm from the model: doors are mainly 1.0 m wide by 2.1 m high, with some 1.8 m and 2.0 m leaves, and the ground-floor external door (Tür-019) is 2.0 m wide. Structural columns are listed as reinforced concrete (Stahlbeton).\n\nSafety would need a structural engineer's analysis, fire-protection and escape-route documentation, and a check against the applicable building code, none of which are in this file. [1][2][3]",
+  "conf": 0.2,
+  "abst": false,
+  "route": "hybrid",
+  "usd": 0.000885,
+  "nb": 2,
+  "s": 7.3
+ },
+ {
+  "q": "is it fire safe",
+  "t": "**Cannot confirm the building is fire safe from this model.** The IFC file contains 77 doors across four storeys (Keller, Erdgeschoss, 1. and 2. Obergeschoss), but none carry fire-rating or fire-resistance properties, and no fire-related text appears in the model. The door schedule shows standard leaf widths of 1.0 m, with a few at 1.8 m and 2.0 m (one external door at 2.0 m). Fire safety depends on fire ratings, compartmentation, escape routes, sprinklers and detection, none of which this model records. A proper assessment needs the fire safety concept and the applicable building code. [1]",
+  "conf": 0.3,
+  "abst": false,
+  "route": "hybrid",
+  "usd": 0.001274,
+  "nb": 0,
+  "s": 11.1
+ },
+ {
+  "q": "how much would flooring cost",
+  "t": "**The model contains no flooring finish layer, so a flooring cost cannot be calculated from these drawings.** What the IFC model does show is 26 IfcSlab elements (structural floor slabs and roof slabs) with a total area of 3255.37 m² (sum of area_m2 across all slabs, e2). The structural slabs are concrete (Decke-001/002, 0.3 m thick, roughly 500–528 m² each on the Keller, Erdgeschoss, 1./2. Obergeschoss and Dachgeschoss), and the rest are 0.38 m aluminium roof slabs (Dach-001) on the Dachgeschoss. Those slab areas are the base for a flooring quantity, but a price needs a flooring finish type and a unit rate, neither of which is in the model. Flooring finishes (IfcCovering or room finishes) would have to be added or supplied separately. Once a rate per m² is provided, cost = rate × the relevant floor area (for example, the 1,000–1,500 m² or so of occupied floors, excluding the roof). [1]",
+  "conf": 0.45,
+  "abst": false,
+  "route": "hybrid",
+  "usd": 0.00082,
+  "nb": 0,
+  "s": 6.3
+ },
+ {
+  "q": "how much would it cost to floor the ground floor",
+  "t": "**Ground floor (Erdgeschoss) area to floor: 521.4 m²**, from slab Decke-001 (IfcSlab, Erdgeschoss, 0.3 m thick, Stahlbeton).\n\nThe model contains no flooring finish types or unit prices, so a cost cannot be computed from the drawings alone. Cost = 521.4 m² × your flooring unit rate (€/m²). Note that this is the slab area, which may differ slightly from the usable floor area after deducting shafts, columns or stairs. [1]",
+  "conf": 0.6,
+  "abst": false,
+  "route": "hybrid",
+  "usd": 0.001895,
+  "nb": 0,
+  "s": 10.3
+ },
+ {
+  "q": "where's the lift",
+  "t": "No lift or elevator is modelled in this model: no element or space is named or typed as one.",
+  "conf": 0.7,
+  "abst": false,
+  "route": "index",
+  "usd": 0.0,
+  "nb": 0,
+  "s": 0.0
+ },
+ {
+  "q": "where are the stairs",
+  "t": "**4 stairs** in this model: 1 on Keller (Treppe-KG); 1 on Erdgeschoss (Treppe-EG); 1 on 1. Obergeschoss (Treppe-1-OG); 1 on 2. Obergeschoss (Treppe-2-OG). [1][2][3][4] Found from the model's elements.",
+  "conf": 0.7,
+  "abst": false,
+  "route": "index",
+  "usd": 0.0,
+  "nb": 4,
+  "s": 0.0
+ },
+ {
+  "q": "can I remove a wall",
+  "t": "**The model doesn't say which walls can be removed.** It lists 121 walls in total: 67 are Kalksandstein (sand-lime brick), 300 mm, and 54 are Kalksandstein (sand-lime brick), 200 mm. Whether a given wall is load-bearing isn't shown here, so have a structural engineer confirm before any wall is removed. [1]",
+  "conf": 0.9,
+  "abst": false,
+  "route": "index",
+  "usd": 0.002688,
+  "nb": 0,
+  "s": 3.8
+ },
+ {
+  "q": "can i remove the wall between the offices",
+  "t": "**Scope I applied:** a what-if on the internal wall beside the named room; nothing is changed in the model or the 3D view.\n\nThe model has 0 internal wall(s) touching or beside that room.\nThey are built as masonry. Masonry walls like these often carry load, and there are slabs and storeys above this level.\n\n**I cannot say you can remove it or widen the opening without propping.** The model has no load-bearing flag on its walls and no structural drawings, so whether it is load-bearing, and what temporary support or a lintel it needs, is not in this document. Treat it as possibly load-bearing: a structural engineer must confirm before any opening is widened.\n\nConditions applied: internal walls beside the room (by outline, within 0.5 m); what-if only, not saved.\n\n**Partial answer. Not applied or not verifiable from this document:** structural capacity, load paths and propping are not in the model.",
+  "conf": 0.6,
+  "abst": false,
+  "route": "index",
+  "usd": 0.0,
+  "nb": 0,
+  "s": 0.0
+ },
+ {
+  "q": "how many floors",
+  "t": "The model has **5 storeys**, from lowest to highest: Keller (-3.0 m), Erdgeschoss (+0.0 m), 1. Obergeschoss (+3.0 m), 2. Obergeschoss (+6.0 m), Dachgeschoss (+9.0 m). [1]",
+  "conf": 1.0,
+  "abst": false,
+  "route": "index",
+  "usd": 0,
+  "nb": 0,
+  "s": 0.0
+ },
+ {
+  "q": "how tall is the building",
+  "t": "**The height could not be determined from the model.** The IFC model contains six storeys (Keller, Erdgeschoss, 1. Obergeschoss, 2. Obergeschoss, Dachgeschoss, plus one unassigned group), but none of my queries returned storey elevations, roof elevations or level markers, so no overall height figure is available. Element heights I did see (doors about 2.1 m) are not building height. A storey-elevation query on the IfcBuildingStorey class and a search for level labels on the drawings would be needed to get the figure. [1][2]",
+  "conf": 0.1,
+  "abst": false,
+  "route": "hybrid",
+  "usd": 0.00273,
+  "nb": 0,
+  "s": 14.9
+ },
+ {
+  "q": "what is the total floor area",
+  "t": "The total area of the **82 rooms** in this model is **1,939.4 m²**. [1][2][3][4][5]",
+  "conf": 1.0,
+  "abst": false,
+  "route": "index",
+  "usd": 0,
+  "nb": 82,
+  "s": 0.0
+ },
+ {
+  "q": "how many windows",
+  "t": "There are **206 windows** in this model. [1][2][3][4]",
+  "conf": 1.0,
+  "abst": false,
+  "route": "index",
+  "usd": 0,
+  "nb": 206,
+  "s": 0.0
+ },
+ {
+  "q": "how mny doors are on the first flor",
+  "t": "There are **77 doors** in this model. [1][2][3][4]",
+  "conf": 1.0,
+  "abst": false,
+  "route": "index",
+  "usd": 0,
+  "nb": 77,
+  "s": 0.0
+ },
+ {
+  "q": "which room has the most windows",
+  "t": "The facts don't break windows down by room, so I can't say which room has the most. They only show **206 windows in total**, all of type \"IFC Fenster - ein Panel\". To get a per-room count, open Data and choose \"Ask about it\", or type @ in the composer to include a drawing that shows room assignments. [1]",
+  "conf": 0.9,
+  "abst": false,
+  "route": "index",
+  "usd": 0.002368,
+  "nb": 0,
+  "s": 1.9
+ },
+ {
+  "q": "what is the smallest room",
+  "t": "**Smallest room: 014 (Büroarbeit), 11.1 m², on Keller.** [1]",
+  "conf": 0.9,
+  "abst": false,
+  "route": "index",
+  "usd": 0,
+  "nb": 0,
+  "s": 0.0
+ },
+ {
+  "q": "how many toilets",
+  "t": "There are **8 toilet rooms** (spaces named as a WC or toilet) in this model. [1][2][3][4]",
+  "conf": 1.0,
+  "abst": false,
+  "route": "index",
+  "usd": 0,
+  "nb": 8,
+  "s": 0.0
+ },
+ {
+  "q": "where is the main entrance",
+  "t": "**1 entrance door** in this model: 1 on Erdgeschoss (D34). [1] Found from the model's elements and outer-door geometry, an inference rather than a marked entrance.",
+  "conf": 0.7,
+  "abst": false,
+  "route": "index",
+  "usd": 0.0,
+  "nb": 1,
+  "s": 0.0
+ },
+ {
+  "q": "is there a kitchen",
+  "t": "**No room named or classified as a kitchen was found.** A text search for \"kitchen\" returned no matches, and the IFC model contains 82 IfcSpace elements across Keller (basement), Erdgeschoss (ground floor), 1. and 2. Obergeschoss (upper floors) and Dachgeschoss (attic). The listed space names shown (e.g. numbers 001-017, 101-116) are numeric, so the room function cannot be confirmed from the portion of the list I was able to inspect. The list was truncated (57 more entries), so I could not check every space name.\n\nIf a kitchen exists, it would have to be identified by checking the long names or function of the remaining spaces, which the tool output did not show. [1]",
+  "conf": 0.3,
+  "abst": false,
+  "route": "hybrid",
+  "usd": 0.000782,
+  "nb": 0,
+  "s": 5.5
+ },
+ {
+  "q": "is there disabled access",
+  "t": "**The drawings do not show whether there is disabled access.** I searched the document for the term \"accessible\" and found no match in the text layer. The IFC model contains no ramps (IfcRamp), no lifts (IfcLift), and no elements tagged as accessibility features (IfcAccessibilityFeature). That absence is not proof of non-compliance: the model may simply not include these elements, and the drawings may not show doors, circulation or sanitary layouts in enough detail to judge access. Confirming disabled access would need the accessibility notes or schedules, the door and sanitary layouts, and the local building code requirements, none of which are in this document. [1][2][3]",
+  "conf": 0.3,
+  "abst": false,
+  "route": "hybrid",
+  "usd": 0.000869,
+  "nb": 0,
+  "s": 20.1
+ },
+ {
+  "q": "what is the ceiling height",
+  "t": "**The ceiling height is not stated in the model.** No ceiling elements (IfcCovering or ceiling-named items) were found, and the text layer has no ceiling height entry. The only height data returned are door heights of 2.1 m (clear door height, not ceiling height). Storey elevations would be needed to estimate a floor-to-floor height, and they were not retrieved. [1][2][3][4]",
+  "conf": 0.2,
+  "abst": false,
+  "route": "hybrid",
+  "usd": 0.001328,
+  "nb": 0,
+  "s": 8.2
+ },
+ {
+  "q": "how many square meters is the basement",
+  "t": "**The basement (Keller) is about 516 m²**, based on the single slab element on that storey (Decke-002, area 516 m², 0.3 m thick).\n\nCaveat: this is the slab's gross area as recorded in the IFC model, not a net floor area. Storey-level net floor areas were not available to cross-check. [1]",
+  "conf": 0.7,
+  "abst": false,
+  "route": "hybrid",
+  "usd": 0.001402,
+  "nb": 0,
+  "s": 7.9
+ },
+ {
+  "q": "show me the stairs",
+  "t": "Highlighted 4 stairses on the drawing.",
+  "conf": 1.0,
+  "abst": false,
+  "route": "index",
+  "usd": 0.0,
+  "nb": 0,
+  "s": 0.0
+ },
+ {
+  "q": "highlight all the doors",
+  "t": "Highlighted 77 doors on the drawing.",
+  "conf": 1.0,
+  "abst": false,
+  "route": "index",
+  "usd": 0.0,
+  "nb": 0,
+  "s": 0.0
+ },
+ {
+  "q": "what rooms are in the basement",
+  "t": "**The Keller has 17 rooms, 438.1 m² net**, all named Büroarbeit and numbered 001 to 017. The largest is 006 at 128.3 m², followed by 016 at 45.6 m² and 015 at 34.3 m². The smallest is 014 at 11.1 m². [1]",
+  "conf": 0.9,
+  "abst": false,
+  "route": "index",
+  "usd": 0.002692,
+  "nb": 0,
+  "s": 3.6
+ },
+ {
+  "q": "how many offices are there",
+  "t": "There are **45 offices** in this model. [1][2][3]",
+  "conf": 1.0,
+  "abst": false,
+  "route": "index",
+  "usd": 0.0,
+  "nb": 45,
+  "s": 0.0
+ },
+ {
+  "q": "what is this building",
+  "t": "**Buerogebaeude**, part of Projekt Buerogebaeude (phase Concept) on the site Gelaende 0815. It has 5 levels and 82 spaces, all of type Büroarbeit.",
+  "conf": 0.9,
+  "abst": false,
+  "route": "index",
+  "usd": 0.002208,
+  "nb": 0,
+  "s": 2.3
+ },
+ {
+  "q": "summarise this building",
+  "t": "**The Phantasy Office Building is a six-level IFC model (basement, ground floor, two upper floors, an attic level and one unassigned level) with 784 matched elements, including about 1,939 m² of net floor area across 82 spaces.**\n\nKey figures from the model totals (all elements matched by the query, not filtered by type):\n\n- **Storeys:** Keller (basement, 179 elements), Erdgeschoss (ground, 202), 1. Obergeschoss (182), 2. Obergeschoss (182), Dachgeschoss (attic, 38), and one element with no storey assigned.\n- **Quantities:** 1,171.4 m of length, 5,683.17 m² of area, 7,208.86 m³ of volume, 330.68 m of width and 1,013.19 m of height summed over the matched elements.\n- **Elements sampled:** doors (e.g. Tür-002 to Tür-019 across basement and ground floor) and columns (Stütze-001, reinforced concrete, ground floor).\n\nThe totals mix element types, so they are not a clean breakdown of the building; I did not query walls, slabs or spaces separately. Whether the building is office use is inferred from its name only. [1]",
+  "conf": 0.6,
+  "abst": false,
+  "route": "hybrid",
+  "usd": 0.001353,
+  "nb": 0,
+  "s": 8.0
+ },
+ {
+  "q": "what materials are the walls made of",
+  "t": "**Kalksandstein** is the only wall material listed, in two variants. Kalksandstein 2816491304 covers 113 of the 121 walls. Kalksandstein 2774059904 covers the other 8. [1]",
+  "conf": 0.9,
+  "abst": false,
+  "route": "index",
+  "usd": 0.002118,
+  "nb": 0,
+  "s": 1.7
+ },
+ {
+  "q": "how thick are the external walls",
+  "t": "The total length of the **44 walls** in this model, exterior only (from the model's space boundaries) is **557.7 m**. [1][2][3][4][5]",
+  "conf": 1.0,
+  "abst": false,
+  "route": "index",
+  "usd": 0.0,
+  "nb": 44,
+  "s": 1.7
+ },
+ {
+  "q": "how many external doors",
+  "t": "There is **1 door** in this model, exterior only (from the model's space boundaries). [1]",
+  "conf": 1.0,
+  "abst": false,
+  "route": "index",
+  "usd": 0,
+  "nb": 1,
+  "s": 0.0
+ },
+ {
+  "q": "is it accessible for wheelchairs",
+  "t": "**Probably not fully accessible as modelled.** Most interior doors are 1.0 m wide, which is at or below the usual minimum clear width for a wheelchair route, and the model shows no ramps or lifts. The only door at 2.0 m is an external entrance on the ground floor. The 1.8 m doors are the only other doors wide enough to comfortably pass a wheelchair.\n\nThe IFC door data shows 77 doors across four storeys (Keller 16, Erdgeschoss 18, 1. Obergeschoss 22, 2. Obergeschoss 21). Their widths total 85.2 m, and the individual widths I can see are 1.0 m (most), 1.8 m (a few in the basement) and 2.0 m (one external door). I only saw about 25 of the 77 doors, so this is not a full census.\n\nThis check covers doors only. I did not verify circulation routes, lift or ramp provision, or sanitary and turning spaces, and the drawings do not state the accessibility standard that applies. A full answer needs those checked against the local building code. [1]",
+  "conf": 0.45,
+  "abst": false,
+  "route": "hybrid",
+  "usd": 0.000703,
+  "nb": 0,
+  "s": 7.6
+ },
+ {
+  "q": "hello",
+  "t": "This took longer than 40 s, so I stopped. Nothing was guessed. Ask again, or name one drawing with @ and ask a narrower question.",
+  "conf": 0.0,
+  "abst": true,
+  "route": "index",
+  "usd": 0,
+  "nb": 0,
+  "s": 40.0
+ },
+ {
+  "q": "what can you do",
+  "t": "Stoa Pro answers questions about your drawings and models, and every answer shows proof. You can: **upload** PDF, PNG, JPG, DXF or IFC files (Data, then Upload); **ask** questions in Chat and use @ to pick a document; open **citations** on the 2D drawing; use **Visualise it** for 3D (build slider, storeys, Walk, Edit); run rule checks under **Tools** (Findings, Run checks); **pair a phone** with the QR code and use **Show on table** for AR in the iPhone app; **Export report**, **Share**, reopen chats from **History**; and use **Overview**, **Changes**, **Compare** and **Library** (Skills, Automations). Ask me how to do any of these.",
+  "conf": 1.0,
+  "abst": false,
+  "route": "index",
+  "usd": 0,
+  "nb": 0,
+  "s": 0.0
+ },
+ {
+  "q": "show me the biggest room in 3D",
+  "t": "Use **Visualise it** under any answer: it lifts this plan into 3D, and the same numbered items glow. You can open it from the 3D button on the drawing too.",
+  "conf": 1.0,
+  "abst": false,
+  "route": "index",
+  "usd": 0.0,
+  "nb": 0,
+  "s": 0.0
+ }
+]

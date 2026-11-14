@@ -78,3 +78,17 @@ def test_where_are_the_toilets_boxes_carry_kind_toilet():
     a = answer("Where are the toilets?", ["ifc_bench__ac20-arc"])
     kinds = {b.get("kind") for b in a["evidence"]["boxes"]}
     assert kinds == {"toilet"}
+
+
+@pytest.mark.parametrize("q,has,hasnt", [
+    ("how many people can fit in the seminar room", "Seminarraum", "82 rooms"),
+    ("how mny doors are on the first flor", "1. Obergeschoss", "77 doors"),
+    ("show me the stairs", "Highlighted 4 stairs on the drawing.", "stairses"),
+    ("how thick are the external walls", "300 mm", "total length"),
+    ("how tall is the building", "About ", "could not be determined"),
+    ("hello", "Hello.", "took longer"),
+])
+def test_free_form_judge_questions(q, has, hasnt):
+    from engine.answer import answer
+    t = answer(q, ["ifc_bench__ac20-arc"])["answer"]["text_md"]
+    assert has in t and hasnt not in t

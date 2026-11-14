@@ -562,6 +562,9 @@ def _foot(it: Item, ifc: bool):
     return tuple(b) if b else None
 
 
+LAST_BB: dict = {}  # item_id -> per-room baseboard numbers of the latest call, read by engine/takeoff.py
+
+
 def baseboard(question: str, doc: Doc, t0) -> dict | None:
     """"how many linear metres of baseboard per room / in the classrooms / in total": room outline minus door openings, code only.
     IFC: room footprint rectangle (bbox) and IfcDoor widths on its walls. Plan map: room box x scale, only when the drawing has a real scale."""
@@ -625,6 +628,8 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
                 n += 1
         rows.append((r, per, opening, n, max(per - opening, 0.0)))
     total = round(sum(x[4] for x in rows), 1)
+    LAST_BB.clear()
+    LAST_BB.update({x[0].item_id: {"per": x[1], "net": x[4], "doors": x[3], "guessed": guessed, "doc": doc.doc_id} for x in rows})
     boxes, cites, scene = _evidence(doc, [x[0] for x in rows])
     num = {b["item_id"]: b["label"] for b in boxes}
     if ifc:
@@ -755,6 +760,44 @@ def piping(question: str, doc: Doc, t0) -> dict | None:
 # ------------------------------------------------------------------ material take-off with waste
 TAKEOFF = re.compile(r"\b(?:how (?:many|much)|calculate|work out|estimate)\b.*\b(?:m2|m²|sq\.? ?m|square met(?:er|re)s)\b|\bhow much\b.*\b(?:tiles?|flooring|floor covering|paint|carpet|laminate|parquet|screed|plaster)\b", re.I)
 WASTE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(?:%|percent)\s*(?:extra|waste|wastage|overage|spare|allowance|margin|buffer|more|on top|added)?|(?:waste|wastage|overage|allowance|margin)\s*(?:of)?\s*(\d+(?:[.,]\d+)?)\s*(?:%|percent)", re.I)
+
+
+TILE_BOX_M2 = 1.44      # assumed: a box of four 60 x 60 cm tiles
+TILE_EUR_M2 = 35.0      # assumed price, not a quote
+WET = r"bath(room)?s?|shower rooms?|wet rooms?|toilets?|wcs?|restrooms?|washrooms?|lavator\w+|water closets?"
+
+
+def wet_room_takeoff(question: str, doc: Doc, t0) -> dict | None:
+    """'floor tiles for the bathrooms': bathrooms mean bath, shower and WC rooms. Area, waste, whole boxes, assumed price, only those rooms boxed."""
+    from engine import takeoff as _tk
+    if not re.search(r"\b(tiles?|tiling|tiled)\b", question, re.I) or not re.search(r"\bbath ?rooms?\b|\bwet rooms?\b", question, re.I):
+        return None
+    tk = _tk.parse_takeoff(question)
+    if tk is None or tk.material != "tile":
+        return None
+    tk = _tk.Takeoff("tile", "bathroom", re.compile(WET, re.I), False)
+    base = _tk.takeoff_answer(question, [doc], tk, t0)
+    if base["answer"].get("abstained") or not isinstance(base["answer"].get("value"), (int, float)):
+        return None
+    wm = WASTE.search(question)
+    pct = float((wm.group(1) or wm.group(2)).replace(",", ".")) if wm else 10.0
+    area = sum(a for _, a in _tk.rooms_of(doc, tk) if a) or None
+    if not area:
+        m = re.search(r"([\d,.]+) m² of bathroom floor", base["answer"]["text_md"])
+        area = float(m.group(1).replace(",", "")) if m else None
+    if not area:
+        return None
+    need = area * (1 + pct / 100)
+    boxes = int(-(-need // TILE_BOX_M2))
+    cost = boxes * TILE_BOX_M2 * TILE_EUR_M2
+    n = len(base.get("citations") or [])
+    marks = "".join(f"[{c['n']}]" for c in (base.get("citations") or [])[:8])
+    txt = (f"Order about **{_fmt(need)} m²** of floor tiles, which is **{boxes} boxes**. "
+           f"That is {_fmt(area)} m² of floor in the {n} bathrooms and WCs, plus {pct:g}% for cuts and breakage. {marks}\n\n"
+           f"Assumptions, not from the drawing: {TILE_BOX_M2} m² per box (four 60 x 60 cm tiles) and about €{TILE_EUR_M2:.0f} per m², "
+           f"so roughly **€{cost:,.0f}**. This is a rough guide, not a quote.")
+    base["answer"].update({"text_md": txt, "value": round(need, 1), "unit": "m2", "confidence": min(base["answer"].get("confidence") or 0.85, 0.85)})
+    return base
 
 
 def takeoff(question: str, doc: Doc, t0, solve_fn) -> dict | None:
@@ -1081,6 +1124,10 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
 
 def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
     """First handler that recognises the shape wins; every handler may return None."""
+    from engine.quantity_takeoff import quantity_takeoff
+    res = quantity_takeoff(question, doc, t0)
+    if res is not None:
+        return res
     for fn in (piping, slab_by_type, baseboard, room_list, wet_rooms, count_where, storey_pair, storey_compare, total_and_storey, cond_count, exact_size, kind_compare, compliance, plan_total, plain_limits, plan_slab_pipe, superlative_room, where_rooms):
         res = fn(question, doc, t0)
         if res is not None:
@@ -1089,7 +1136,7 @@ def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
         res = exists_or_perroom(question, doc, t0, solve_fn)
         if res is not None:
             return res
-        res = takeoff(question, doc, t0, solve_fn)
+        res = wet_room_takeoff(question, doc, t0) or takeoff(question, doc, t0, solve_fn)
         if res is not None:
             return res
     return named_rooms(question, doc, t0)

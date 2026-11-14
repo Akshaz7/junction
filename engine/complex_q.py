@@ -500,7 +500,9 @@ def h_remove_wall(q: str, doc: Doc) -> Ans | None:
         p = _plan(target)
         walls = [w for w in doc.items if w.kind == "wall" and w.storey == target.storey and not _ext(w) and w.bbox_m
                  and _plan(w)[0] <= p[2] + 0.5 and _plan(w)[2] >= p[0] - 0.5 and _plan(w)[1] <= p[3] + 0.5 and _plan(w)[3] >= p[1] - 0.5]
-    a = Ans(f"a what-if on the internal wall beside {_ln(target) if target else 'the named room'}; nothing is changed in the model or the 3D view.")
+    if not target:
+        return None   # no room named: the general "can I remove a wall" answer (structure-honest) handles it
+    a = Ans(f"a what-if on the internal wall beside {_ln(target)}; nothing is changed in the model or the 3D view.")
     a.items = walls[:12]
     a.ap("internal walls beside the room (by outline, within 0.5 m)", "what-if only, not saved")
     mats = sorted({f"{w.props.get('material', '')} {_mm(w.q.get('width_m') or 0)} mm" for w in walls})
@@ -676,8 +678,75 @@ def h_skirting(q: str, doc: Doc) -> Ans | None:
     return a
 
 
+def _only_ifc(doc: Doc) -> bool:
+    return doc.mode == "ifc"
+
+
+def h_capacity(q: str, doc: Doc) -> Ans | None:
+    if not _only_ifc(doc) or not re.search(r"\b(?:how many (?:people|persons|occupants)|capacity|occupancy|people (?:can )?(?:fit|use|work|sit))\b", q, re.I):
+        return None
+    st = storeys_in(q, _snames(doc))
+    rooms = _rooms(doc)
+    named = [r for r in rooms if re.search(r"\bseminar", q, re.I) and "seminar" in fold(_ln(r))]
+    if not named:
+        named = [r for r in rooms if fold(_ln(r)).strip() and len(fold(_ln(r))) > 3 and re.search(re.escape(fold(_ln(r))), fold(q)) and not fold(_ln(r)).startswith("flur")]
+    scope_rooms = named or [r for r in rooms if not st or r.storey in st]
+    per = 2.0 if named and any("seminar" in fold(_ln(r)) for r in named) else 10.0
+    area = sum((r.q or {}).get("net_floor_area_m2") or 0 for r in scope_rooms)
+    if not area:
+        return None
+    what = ", ".join(sorted({_ln(r) for r in named})[:3]) if named else (", ".join(st) if st else "the whole building")
+    a = Ans(f"an estimate of how many people fit in {what}, from net floor area only.")
+    a.items = scope_rooms[:30]
+    n = int(area // per)
+    a.ap(f"net floor area {area:,.1f} m² from {len(scope_rooms)} space(s)", f"assumed {per:g} m² per person ({'seminar or meeting use' if per == 2 else 'office use'})")
+    a.body.append(f"**Roughly {n} people, but this is an estimate, not a stated capacity.** {area:,.1f} m² divided by an assumed {per:g} m² per person.")
+    a.lf("the model stores no occupancy or capacity, and the real limit depends on use, furniture and the fire-safety exit capacity")
+    return a
+
+
+def h_thickness(q: str, doc: Doc) -> Ans | None:
+    if not _only_ifc(doc) or not (re.search(r"\b(?:how thick|thickness)\b", q, re.I) and re.search(r"\bwalls?\b", q, re.I)):
+        return None
+    ext = re.search(r"\b(?:external|exterior|outer|outside)\b", q, re.I)
+    inn = re.search(r"\b(?:internal|interior|inner|partition)\b", q, re.I)
+    st = storeys_in(q, _snames(doc))
+    ws = [w for w in doc.items if w.kind == "wall" and (w.q or {}).get("width_m") and (not st or w.storey in st)
+          and (not ext or _ext(w)) and (not inn or not _ext(w))]
+    if not ws:
+        return None
+    a = Ans(f"{'external ' if ext else 'internal ' if inn else ''}walls{' on ' + ', '.join(st) if st else ''}, thickness from the model's wall width.")
+    groups: dict = {}
+    for w in ws:
+        groups.setdefault((_mm(w.q["width_m"]), re.sub(r"\s+\d{6,}$", "", w.props.get("material") or "") or "material not stated"), []).append(w)
+    rows = [[f"{t} mm", m, len(v)] for (t, m), v in sorted(groups.items())]
+    a.ap(f"{len(ws)} walls", "thickness = IFC wall width")
+    a.body += _table(rows, ["Thickness", "Material", "Walls"])
+    a.items = [v[0] for v in groups.values()][:12]
+    if len(groups) == 1:
+        a.body.append(f"\nAll {len(ws)} walls are **{rows[0][0]}** thick.")
+    return a
+
+
+def h_height(q: str, doc: Doc) -> Ans | None:
+    if not _only_ifc(doc) or not re.search(r"\bhow (?:tall|high) is (?:the|this|it)\b|\b(?:building|overall|total) height\b|\bheight of the building\b", q, re.I):
+        return None
+    its = [i for i in doc.items if i.bbox_m and i.kind in ("wall", "slab", "roof", "column", "stairs", "door", "window")]
+    if not its:
+        return None
+    top = max(its, key=lambda i: i.bbox_m[1][1])
+    bot = min(its, key=lambda i: i.bbox_m[0][1])
+    h = top.bbox_m[1][1] - bot.bbox_m[0][1]
+    a = Ans("the overall height of the building, from the lowest to the highest modelled element.")
+    a.items = [top]
+    a.ap("height = highest element top minus lowest element bottom, in model coordinates")
+    a.body.append(f"**About {h:.1f} m** from the underside of the lowest element ({bot.storey or 'lowest level'}, {bot.bbox_m[0][1]:.1f} m) to the top of the highest ({top.storey or 'highest level'}, {top.bbox_m[1][1]:.1f} m).")
+    a.lf("roof ridge, parapet and any plant on top may not be modelled, so this is the modelled extent, not a surveyed height")
+    return a
+
+
 HANDLERS = [h_tiling, h_external_face, h_paint, h_masonry, h_wide_doors, h_windows, h_offices, h_walls_filter, h_shared_wall, h_stacking,
-            h_schedule_doors, h_schedule_rooms, h_remove_wall, h_unanswerable, h_compliance, h_spatial_honest, h_labels, h_skirting]
+            h_schedule_doors, h_schedule_rooms, h_remove_wall, h_capacity, h_thickness, h_height, h_unanswerable, h_compliance, h_spatial_honest, h_labels, h_skirting]
 
 
 def answer(question: str, doc_ids: list[str], root: Path, t0: float | None = None) -> dict | None:
@@ -685,7 +754,7 @@ def answer(question: str, doc_ids: list[str], root: Path, t0: float | None = Non
     import importlib
     S = importlib.import_module("engine.solvers.solve")
     t0 = t0 or time.perf_counter()
-    if len(doc_ids) != 1 or not question or len(question) < 25:
+    if len(doc_ids) != 1 or not question or len(question) < 14:
         return None
     try:
         doc = load_doc(doc_ids[0], root)

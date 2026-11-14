@@ -322,13 +322,14 @@ BY_EACH = re.compile(r"\b(?:each|every|per|by|all)\s+(?:the\s+)?(?:room|area|spa
 
 def area_by_type(question, doc_id, pts, t0):
     """'floor area of each room type / list the rooms with areas': every table row with an SF figure, TOTAL excluded."""
-    if not re.search(r"\b(area|areas|size|sizes|sf|square|m2|m²)\b", question, re.I) or not BY_EACH.search(question):
+    if not re.search(r"\b(area|areas|size|sizes|sf|square|m2|m²)\b", question, re.I) or not BY_EACH.search(question) \
+            or re.search(r"\b(slabs?|base ?boards?|skirting|pipes?|piping|doors?|windows?)\b", question, re.I):
         return None
     rows, seen = [], set()
     for pt in pts:
         for sg in pt.segs:
             t = sg["text"]
-            if re.search(r"\btotal\b", t, re.I) or not re.search(r"[A-Za-z]{3}", t):
+            if re.search(r"\btotal\b", t, re.I):
                 continue
             tm = re.findall(r"(\d{1,3}(?:,\d{3})+|\d{2,6})\s*(?:SF|S\.F\.)\b", t, re.I)
             if not tm:
@@ -343,7 +344,7 @@ def area_by_type(question, doc_id, pts, t0):
                     o = max(left, key=lambda o: o["bbox_px"][2])
                     name, t = o["text"].strip(" -:."), o["text"] + " " + t
             key = (name.lower(), tm[0])
-            if len(name) < 3 or re.search(r"\d", name) or key in seen:
+            if len(re.findall(r"[A-Za-z]", name)) < 4 or key in seen:
                 continue
             seen.add(key)
             rows.append((name, _num(tm[0]), pt.page, sg["bbox_px"], t))
@@ -357,6 +358,23 @@ def area_by_type(question, doc_id, pts, t0):
     text = f"The sheet's table lists **{len(rows)}** areas (TOTAL row excluded; 1 SF = 0.0929 m²):\n" + "\n".join(lines)
     text = re.sub(r"\{(\d+)\}", r"[\1]", text)
     return _obj(question, doc_id, text, len(rows), "rows", [(p, b, t) for _n, _v, p, b, t in rows], "table rows with an SF figure", t0, 0.8)
+
+
+def takeoff_sheet(question, doc_id, pts, t0):
+    """quantity take-off on a PDF sheet: the table's room areas; everything a PDF cannot give is 'not in this file'."""
+    from engine.quantity_takeoff import TAKEOFF_Q, NIF
+    if not TAKEOFF_Q.search(question):
+        return None
+    r = area_by_type("area of each room", doc_id, pts, t0)
+    if r is None:
+        return None
+    rows = [f"| Floor area - {m.group(1)} | {m.group(2)} | m2 | [{m.group(3)}] |"
+            for m in re.finditer(r"^- (.+?): [\d,]+ SF = ([\d,.]+) m² \[(\d+)\]", r["answer"]["text_md"], re.M)]
+    miss = [f"| {k} | {NIF} |  |  |" for k in ("Baseboard", "Doors", "Windows", "Slab area by type", "Piping by system")]
+    r["answer"]["text_md"] = ("**Quantity take-off** from the sheet's own table, no model call. A PDF sheet gives no wall, door or window geometry.\n\n"
+                              "| Item | Quantity | Unit | Source |\n|---|---|---|---|\n" + "\n".join(rows + miss))
+    r["answer"]["unit"] = "rooms"
+    return r
 
 
 def area_total(question, doc_id, pts, t0):
@@ -622,7 +640,7 @@ def answer(question: str, doc_ids: list[str], root, t0=None, other_docs=()):
         if res is not None:
             res["doc_ids"] = list(doc_ids)
             return res
-    for fn in (tag_count, scale_answer, share_of_total, room_area, schedule_rows, area_by_type, area_total, note_sum, rebar_of, size_of, room_count, overall_width):
+    for fn in (tag_count, scale_answer, share_of_total, room_area, schedule_rows, takeoff_sheet, area_by_type, area_total, note_sum, rebar_of, size_of, room_count, overall_width):
         res = fn(question, doc_id, pts, t0)
         if res is not None:
             res["doc_ids"] = list(doc_ids)

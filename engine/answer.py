@@ -328,6 +328,19 @@ def _answer_forced(question: str, doc_ids: list[str], on_event: Callable | None 
         return res
 
 
+_TYPOS = [(r"\bflor\b", "floor"), (r"\bflors\b", "floors"), (r"\bmny\b", "many"), (r"\bpeple\b|\bpeopel\b|\bpepole\b", "people"),
+          (r"\bwindws\b|\bwindoes\b|\bwindos\b", "windows"), (r"\bdors\b|\bdoores\b", "doors"), (r"\brooom\b", "room"), (r"\broomss\b", "rooms"),
+          (r"\bwich\b", "which"), (r"\bwher\b|\bwhere's\b(?=\s+the\s+lift)", "where"), (r"\bbiggets\b|\bbigest\b", "biggest"), (r"\bstares\b|\bstiars\b", "stairs"), (r"\btoilests\b|\btoliets\b", "toilets")]
+
+
+def _fix_typos(q: str) -> str:
+    """Common judge typos fixed before routing, so 'first flor' still means the first floor."""
+    out = q or ""
+    for rx, rep in _TYPOS:
+        out = re.sub(rx, rep, out, flags=re.I)
+    return out
+
+
 def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
                  history: list[dict] | None = None) -> dict:
     emit = on_event or (lambda kind, payload: None)
@@ -341,6 +354,12 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
         emit("trace", step)
 
     emit("status", {"text": "Thinking…"})
+    question = _fix_typos(question)
+    if doc_ids and re.match(r"^\W*(?:hi|hello|hey|hej|moi|hei|thanks|thank you|thx|cheers)\W*$", question or "", re.I):
+        from engine.solvers.solve import _answer_obj
+        txt = ("Hello. Ask me anything about the open drawing, for example how many doors there are, where the stairs are, "
+               "which room is the biggest, or whether a wall can be removed. Every answer shows its proof on the drawing.")
+        return _answer_obj(question, doc_ids, txt, None, None, 1.0, False, [], [], {"doc_id": doc_ids[0] if doc_ids else None, "highlight_item_ids": [], "camera_target_item_id": None}, trace, "index", t0)
     try:
         if (question or "").strip() and not os.environ.get("TASKS_OFF"):
             from engine.tasks import detect, run_task   # Stoa starters: Draft claim, Meeting prep, Plan work phase, Review contract
@@ -424,6 +443,19 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                 # a count nobody could find on an engineering sheet is "not found", never "About 0"
                 return _abstained(question, doc_ids, "I couldn't find that on this sheet: no matching tags or table rows. "
                                   "Check the legend or ask with the tag (for example FP-1).", trace, t0, "index", calls=None)
+        except Exception:  # never break the answer path
+            pass
+
+        # text-layer upload with no plan map: answer from the file's printed text (notes, schedule rows), "not shown" only when absent
+        try:
+            from engine import textfile
+            from engine.solvers.data import load_doc as _ldt
+            if len(doc_ids) == 1 and _ldt(doc_ids[0], root) is None \
+                    and (res := textfile.answer(question, doc_ids, root, t0)) is not None:
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                return res
         except Exception:  # never break the answer path
             pass
 

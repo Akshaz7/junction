@@ -121,3 +121,13 @@ def test_sheet_identity_and_pipe_sizes(tmp_path, monkeypatch):
     assert '3"VTR x3' in r["answer"]["text_md"] and r["cost"]["usd_total"] == 0
     sh["sheet"]["title"] = "x" * 90  # garbage title block -> reader
     assert sheetqa.answer("what is this drawing?", [d], tmp_path) is None
+
+
+def test_area_by_type_lists_table_rows(tmp_path):
+    ln = [("DINING", 100, 100), ("164 SF", 500, 100), ("KITCHEN", 100, 200), ("254 SF", 500, 200), ("STORAGE ROOM", 100, 300), ("901 SF", 500, 300),
+          ("OFFICE 1 (MEZZ.)", 100, 400), ("222 SF", 500, 400), ("TOTAL", 100, 500), ("1541 SF", 500, 500)]
+    d = _mk(tmp_path, "arch1", ln, "A-201 floor plan")
+    r = sheetqa.answer("What is the floor area of each room type?", [d], tmp_path)
+    t = r["answer"]["text_md"]
+    assert r["answer"]["value"] == 4 and "DINING: 164 SF = 15.2 m²" in t and "OFFICE 1" in t and "1541" not in t and len(r["citations"]) == 4
+    assert sheetqa.answer("What is the slab area by type?", [d], tmp_path) is None

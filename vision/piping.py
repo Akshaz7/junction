@@ -86,6 +86,20 @@ def extract(doc_id, ifc_path, elements_json=None):
         # Revit psets are mm; a pset length is converted with the IFC unit only when it comes from a Qto (IfcQuantityLength)
         if length is not None:
             length_m = length / 1000.0
+            bb = (g or {}).get("bbox_m")
+            if bb:  # unit guard: US/metric Revit psets are not always mm; trust the unit that agrees with the geometry
+                import math
+                a, b = bb
+                diag = sum((b[i] - a[i]) ** 2 for i in range(3)) ** 0.5
+                if diag > 0.02 and length > 0 and not 0.33 <= length_m / diag <= 1.5:
+                    best = min((1.0, 0.3048, 0.001), key=lambda u: abs(math.log(length * u / diag)))
+                    if 0.5 <= length * best / diag <= 1.5:
+                        length_m = length * best
+                if dn and dn < 3:  # diameter given in feet or metres: take the unit that matches the cross-section
+                    ext = sorted(b[i] - a[i] for i in range(3))
+                    cs = max(ext[0], ext[1]) * 1000  # mm, larger of the two short sides
+                    if cs > 5:
+                        dn = min((dn, dn * 304.8, dn * 1000), key=lambda v: abs(math.log(v / cs)))
         elif g and g.get("bbox_m"):
             a, b = g["bbox_m"]
             length_m = sum((b[i] - a[i]) ** 2 for i in range(3)) ** 0.5  # bbox diagonal: upper bound for diagonal runs
