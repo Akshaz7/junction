@@ -84,17 +84,20 @@ server/ — FastAPI + PostgreSQL + /ws live events
 
 ## Accuracy and cost
 
-Numbers last refreshed: 2026-11-14 03:33:12 UTC.
+Numbers last refreshed: 2026-11-14 08:25 EET.
 
-These are recorded local results, not a claim that every drawing is answered accurately. The latest available non-fake benchmark is `sample200-r2`, with **200 questions**, **48 correct**, **96 wrong**, **43 numeric abstentions**, and **13 text questions excluded from numeric scoring**, in [results/bench/sample200-r2.json](results/bench/sample200-r2.json).
+These are recorded local results, not a claim that every drawing is answered accurately. Latest sample (200 questions, `e09_text`) and the first full run (`full_1`, all 63,307 numeric questions; text questions subsampled 1 in 6):
 
-| Numeric metric or question type | Recorded accuracy | Accuracy among answered | Abstained | Evidence |
-| --- | --- | --- | --- | --- |
-| Overall | 0.2567 | 0.3333 | 43 | [results/bench/sample200-r2.json](results/bench/sample200-r2.json), `cells["ALL x ALL"]` |
-| Count | 0.3219 | 0.3406 | 8 | [results/bench/sample200-r2.json](results/bench/sample200-r2.json), `cells["ALL x count"]` |
-| Area | 0.0 | 0.0 | 34 | [results/bench/sample200-r2.json](results/bench/sample200-r2.json), `cells["ALL x area"]` |
-| Length | 1.0 | 1.0 | 0 | [results/bench/sample200-r2.json](results/bench/sample200-r2.json), `cells["ALL x length"]`; a single question |
-| Volume | 0.0 | null (all abstained) | 1 | [results/bench/sample200-r2.json](results/bench/sample200-r2.json), `cells["ALL x volume"]` |
+| Metric | sample200 accuracy | answered | abstained | full_1 accuracy | answered | abstained |
+| --- | --- | --- | --- | --- | --- | --- |
+| Overall | 0.6631 | 0.7251 | 16 | 0.5671 | 0.6272 | 6071 |
+| Count | 0.6301 | 0.6715 | 9 | 0.5608 | 0.6002 | 3677 |
+| Area | 0.7949 | 0.9394 | 6 | 0.6234 | 0.9098 | 2293 |
+| Length | 1.0 | 1.0 | 0 | 0.0 | None | 32 |
+| Volume | 0.0 | None | 1 | 0.0 | None | 69 |
+| Text (model-judged, `text.ALL`) | 0.7273 | – | 2 | 0.4205 (140-question subsample) | – | 52 |
+
+Evidence: [results/bench/e09_text.json](results/bench/e09_text.json), [results/bench/full_1.json](results/bench/full_1.json) (`cells`). Numeric answers cost $0 (plan-map code); the full run cost $0.05 in total. Stress run [results/stress/stress-r2.json](results/stress/stress-r2.json): 421 cases, 0 crashes, 0 server errors, 0 invalid answers, 0 prompt-injection leaks.
 
 Numeric accuracy includes abstentions as unsuccessful; answered accuracy excludes them, and text questions are unscored in those cells ([engine/bench.py](engine/bench.py)). The source/type cells with numeric abstentions are `ifc_models × area` (**15**), `ifc_models × count` (**2**), `ifc_models × volume` (**1**), `opening_design × area` (**1**), `opening_design × count` (**2**), `swiss_dwellings × area` (**18**), and `swiss_dwellings × count` (**4**), all in [results/bench/sample200-r2.json](results/bench/sample200-r2.json).
 
