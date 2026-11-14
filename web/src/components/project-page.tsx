@@ -153,7 +153,8 @@ export function ProjectPage({ id, tab, docs }: { id: string; tab: Tab; docs: Doc
           <Panel title="Files" description={project.docs.length ? fileCount(project.docs.length) : 'Plans, models, scans and PDFs'} onClick={() => go('files')}
             action={<Button variant="ghost" size="icon-sm" aria-label="Add files" onClick={() => setAdding(true)}><Plus size={16} /></Button>}>
             {project.docs.length || uploads.pending.length ? <ul className="pj-mini">{shown.map((doc) => <li key={doc.doc_id}><button type="button" onClick={() => viewer.open(doc.doc_id)} disabled={isReading(doc)}><TypeTag doc={doc} /><span>{docTitle(doc)}</span></button></li>)}
-              {project.docs.length > shown.length && <li><button type="button" className="pj-more" onClick={() => go('files')}>and {project.docs.length - shown.length} more</button></li>}</ul>
+              {project.docs.length > shown.length && <li><span className="pj-more-text">and {project.docs.length - shown.length} more</span></li>}
+              {project.docs.length > 0 && <li><button type="button" className="pj-more" onClick={() => go('files')}>View all</button></li>}</ul>
               : <button type="button" className="pj-dashed" onClick={() => setAdding(true)}>Add plans, models, scans or PDFs for this building</button>}
           </Panel>
           <Panel title="Overview" description={overview.loading ? 'Reading the files…' : summary.totals(overview.data) || 'Totals and levels across all files'} onClick={() => go('overview')} />

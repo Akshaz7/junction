@@ -137,11 +137,11 @@ export function FilesTab({ project, docs = [], pending, onDismiss, onProject, on
     {error && <ErrorLine message={error} />}
     <ExplorerBrowser title={activeRole ? rolePlural[activeRole] : 'All Files'} count={visible.length}
       mobileFolder={<select className="mobile-folder-select" aria-label="Document folder" value={activeRole} onChange={(event) => go(event.target.value as ProjectRole | '')}><option value="">All Files</option>{roles.map((role) => <option key={role} value={role}>{rolePlural[role]}</option>)}</select>}
-      actions={<span className="pj-explorer-actions">
-        <Button variant="outline" size="sm" onClick={() => input.current?.click()}><Upload size={15} />Upload</Button>
-        <Button variant="outline" size="sm" onClick={onAdd}>Add from library</Button>
+      actions={<div className="pj-explorer-actions">
+        <Button variant="outline" onClick={() => input.current?.click()}><Upload size={15} />Upload</Button>
+        <Button variant="outline" onClick={onAdd}>Add from library</Button>
         <input ref={input} type="file" multiple hidden accept={UPLOAD_ACCEPT} aria-label="Choose files to upload" onChange={(event) => pick(event.target.files)} />
-      </span>}
+      </div>}
       nav={<>
         <FolderItem label="All Files" count={project.docs.length} current={!activeRole} icon={<Layers size={16} />} onClick={() => go('')} />
         {roles.map((role) => <FolderItem key={role} label={rolePlural[role]} count={project.docs.filter((doc) => doc.role === role).length} current={activeRole === role} onClick={() => go(role)} />)}

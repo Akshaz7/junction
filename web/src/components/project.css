@@ -72,6 +72,7 @@ button.pj-panel-title:hover .pj-panel-h { text-decoration: underline; text-under
 .pj-mini button:hover:not(:disabled) span { text-decoration: underline; text-underline-offset: 3px; }
 .pj-mini span:not(.pj-tag) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pj-mini .pj-more { color: var(--muted-foreground); padding-left: 0; }
+.pj-mini .pj-more-text { display: block; padding: 6px 0; color: var(--muted-foreground); font-size: var(--text-body-sm); }
 .pj-dashed { display: block; width: 100%; margin-top: 12px; padding: 20px 16px; border: 1px dashed var(--neutral-350); border-radius: var(--radius-control); background: none; color: var(--muted-foreground); text-align: center; font-size: var(--text-body-sm); line-height: var(--text-body-sm--line-height); }
 .pj-dashed:hover { background: var(--ink-hover); }
 
@@ -211,7 +212,6 @@ button.pj-panel-title:hover .pj-panel-h { text-decoration: underline; text-under
 .pj-explorer .data-files, .pj-explorer .data-folders, .pj-explorer .data-detail { overflow: auto; }
 .pj-explorer .data-files > header { position: relative; }
 .pj-explorer-actions { position: absolute; top: 12px; right: 16px; display: flex; gap: 8px; align-items: center; }
-.pj-explorer-actions > * { height: 32px; box-sizing: border-box; margin: 0; }
 .pj-explorer .data-file-row { position: relative; }
 .pj-explorer .data-file-row[data-status="busy"] .data-open-file { opacity: .6; }
 .pj-explorer .data-file-row.pj-file-pending { cursor: default; }
