@@ -60,3 +60,5 @@ Web (Vercel) needs the API origin as its API/WS base URL; CORS is already open (
 
 ## 2026-11-14 08:55 attempt (LEAD)
 `hologram-api` (aws-eu-central-1, startup-10-256) was created with only `repository_url` (public repo). Aiven accepted it but the build ended `FAILURE` / deployment `ABORTED` with no logs, and `-c application.source.commit_sha=…` is refused: "commit_sha requires a VCS integration: set vcs_integration_id and remote_repository_id". The same Dockerfile builds from a fresh public clone and runs healthy locally against hologram-pg. After installing the GitHub App: `avn service update hologram-api -c application.source.vcs_integration_id=… -c application.source.remote_repository_id=…`, then power it on (`avn service update hologram-api --power-on`).
+
+- 09:40: Aiven API has no create endpoint for VCS integrations (OpenAPI lists only GET .../application/vcs-integrations, which returns an empty list), so this step is console-only.
