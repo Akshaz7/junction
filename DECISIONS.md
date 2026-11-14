@@ -103,3 +103,4 @@ Format for new lines: `YYYY-MM-DD HH:MM — decision — reason`.
 
 2026-11-15 00:20 RELEASE (acting LEAD for Awais): CONTRACT 3.4 documents advisor source urls, design versions + /api/changes dv:/ser: ids, shared-edit layer (chat_id, last_hidden, advise reset) and the projects API. Migration 007 is projects; Awais pending-ops migration will take 008.
 - RELEASE (15 Nov): CONTRACT 3.5 documents scene `move`/`material` ops and `moved`/`materials` state (Awais PR #8, migration 008); LEAD approved.
+- RELEASE (15 Nov): CONTRACT 3.6 adds `pdf_vector` to the plan-map source enum and the scale method names printed, scale bar, printed areas fit, dimensions, door guess, dxf_units_fit (Awais PR #6, documents existing behaviour); LEAD approved.
