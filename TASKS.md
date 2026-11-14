@@ -17,8 +17,8 @@ Status values: `todo`, `doing`, `done`, `blocked`, `waiting-key`, `blocked-human
 ### DATA (Claude)
 | ID | Tier | Depends | Keys | Task | Done test | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| D-01 | 1 | - | - | LONG. Download the full dataset to `data/full/` with resume (`curl -C -`), unzip. Keep the preview. | `questions.jsonl` in `data/full` has over 100,000 lines. If the download fails 3 times, continue on the preview and retry each hour. | todo | |
-| D-02 | 1 | - | - | Registry: scan the dataset, write `artifacts/<doc_id>/doc.json` and `artifacts/registry.jsonl`. Parse licence and credit from each `LICENSE.md`. | Every preview file maps to a doc. `ac20_arc` licence is the KIT one. Docs with no credit are listed in `results/missing_credits.txt`. | todo | |
+| D-01 | 1 | - | - | LONG. Download the full dataset to `data/full/` with resume (`curl -C -`), unzip. Keep the preview. | `questions.jsonl` in `data/full` has over 100,000 lines. If the download fails 3 times, continue on the preview and retry each hour. | doing | |
+| D-02 | 1 | - | - | Registry: scan the dataset, write `artifacts/<doc_id>/doc.json` and `artifacts/registry.jsonl`. Parse licence and credit from each `LICENSE.md`. | Every preview file maps to a doc. `ac20_arc` licence is the KIT one. Docs with no credit are listed in `results/missing_credits.txt`. | doing | |
 | D-03 | 1 | D-02 | - | Question sets in `data/sets/`: `questions_en.jsonl` (English only), `heldout_docs.txt` (every doc with a question, plus same-stem siblings), `cubicasa_heldout_ids.txt` (dataset name `colorful-11397` maps to CubiCasa5K sample `colorful/11397`), `sample200.jsonl` (stratified by source and type, seed 42), `router_train.jsonl` and `router_test.jsonl` (80/20 split BY DRAWING). | 200 rows in the sample. No drawing is in both router files. A language check finds no Finnish row in the sample. `doc.json.heldout` is set. | todo | |
 | D-04 | 1 | D-02 | - | Write `tests/fixtures.json` and a loader helper. | The loader returns 10 existing docs. | todo | |
 | D-05 | 1 | D-02 | - | Page images for PDF, SVG, DXF (and DWG if a converter works) at a fixed DPI, plus thumbnails. Extract the PDF text layer and vector paths to `text-<n>.json` where they exist. | Every fixture has `page-1.png`. Vector PDFs in the fixtures have words with boxes. DWG failure is allowed: note it in `GOTCHAS.md`. | todo | |
@@ -36,6 +36,7 @@ Status values: `todo`, `doing`, `done`, `blocked`, `waiting-key`, `blocked-human
 ### VISION (Claude)
 | ID | Tier | Depends | Keys | Task | Done test | Status | Notes |
 |---|---|---|---|---|---|---|---|
+| V-00 | 1 | - | - | ◆ Prep (added by LEAD): shortlist pretrained floor-plan segmentation and symbol-detection models with permissive licences, download weights to `weights/`, record each in `docs/MODELS.md`. Start the official CubiCasa5K download (LONG, background, `data/cubicasa5k/`) for V-05. | `docs/MODELS.md` lists at least 2 candidates with source, licence and training data; one loads and runs on `cubicasa5k/colorful-11397.png` in a smoke test. | doing | Added so VISION is not idle while D-04 is open. |
 | V-01 | 1 | D-04 | - | Baseline segmentation of walls, doors, windows and rooms on raster plans with a pretrained open model. Candidates: the CubiCasa5K official model, a SegFormer-B0 floor-plan model, a ResNet-UNet floor-plan model. Record licence and training data in `docs/MODELS.md`. Vectorise masks to plan-map items. | Valid plan maps (schema check) for the 4 cubicasa fixtures. Time per image is recorded. | todo | |
 | V-02 | 1 | D-04 | - | Baseline symbol detection: doors, windows, toilets, sinks, showers, bathtubs. Permissive licence only. | Plan maps for the cubicasa fixtures hold fixture items with boxes. | todo | |
 | V-03 | 1 | V-01 | - | Rooms and scale: room polygons, room labels by OCR, scale from dimension text or a scale bar. If neither exists, use the door-width prior and set low confidence. Area per room. | `colorful-11397` has rooms with labels. `scale.method` and `confidence` are set on every fixture. | todo | |
@@ -51,7 +52,7 @@ Status values: `todo`, `doing`, `done`, `blocked`, `waiting-key`, `blocked-human
 ### ENGINE (Claude)
 | ID | Tier | Depends | Keys | Task | Done test | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| E-01 | 1 | - | - | Model layer (5.6): `fake` provider, adapters, `models.yaml`, disk cache, cost log, budget caps, backoff. | Tests pass with `fake`. A call over the cap raises `BudgetExceeded`. A repeated call hits the cache. | todo | |
+| E-01 | 1 | - | - | Model layer (5.6): `fake` provider, adapters, `models.yaml`, disk cache, cost log, budget caps, backoff. | Tests pass with `fake`. A call over the cap raises `BudgetExceeded`. A repeated call hits the cache. | doing | |
 | E-02 | 1 | D-03 | - | Question parser: rules and a synonym table give `{type, kind, scope}` with no model call. | At least 90% correct on `router_test.jsonl`. | todo | |
 | E-03 | 1 | E-02, D-06, D-07 | - | Solvers for count, area, length and volume over `elements.json` and plan maps. Build the answer object (5.7) with boxes, scene highlights, trace and cost. Numeric text from templates. | `ac20_arc`: doors 77, windows 206, walls 121. A hand-made plan map of `colorful-11397` gives 13 windows with 13 boxes. Cost of these answers is 0. | todo | |
 | E-04 | 1 | E-03 | - | Public function `engine.answer(question, doc_ids, on_event)` that emits `status` and `trace` events and returns the answer object. Abstain with a plain sentence when data is missing or confidence is low. | An event test sees `status`, then `trace`, then `answer`. A question with no data returns `abstained: true`. | todo | |
@@ -74,7 +75,7 @@ Status values: `todo`, `doing`, `done`, `blocked`, `waiting-key`, `blocked-human
 ### SERVER (Claude)
 | ID | Tier | Depends | Keys | Task | Done test | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| S-01 | 1 | - | - | Scaffold `server/`, `deploy/`, `Makefile`, Docker compose with local Postgres. `make dev` also starts the web dev server once `web/` exists. | `make dev` serves `/api/health`. `make test` runs. | todo | |
+| S-01 | 1 | - | - | Scaffold `server/`, `deploy/`, `Makefile`, Docker compose with local Postgres. `make dev` also starts the web dev server once `web/` exists. | `make dev` serves `/api/health`. `make test` runs. | doing | |
 | S-02 | 1 | S-01, D-02 | - | Database schema and migrations. Seed documents from `artifacts/registry.jsonl`. | Migrations apply on an empty database. `/api/docs` lists the preview docs by source. | todo | |
 | S-03 | 1 | S-02 | - | All tier 1 endpoints of 5.9 with the `fake` provider and a stub engine that returns contract-valid answers for the fixtures. Publish `docs/API.md` with one example request and response per endpoint. This unblocks the Codex side early. | Contract tests pass for each endpoint. A streamed question returns `status`, `trace`, `answer`. | todo | |
 | S-04 | 1 | S-03, E-04 | - | Replace the stub with the real `engine.answer`. Upload starts real ingestion. | A fixture question through the API returns the same answer as a direct engine call. | todo | |
@@ -87,7 +88,7 @@ Status values: `todo`, `doing`, `done`, `blocked`, `waiting-key`, `blocked-human
 ### WEB (Codex)
 | ID | Tier | Depends | Keys | Task | Done test | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| W-01 | 1 | - | - | Scaffold `web/` (Vite, React, TypeScript, Tailwind v4, lucide-react). Tokens from the reference pack. Until S-03 is done, use a local mock that serves the contract examples. | The dev server starts and the build passes. | todo | |
+| W-01 | 1 | - | - | Scaffold `web/` (Vite, React, TypeScript, Tailwind v4, lucide-react). Tokens from the reference pack. Until S-03 is done, use a local mock that serves the contract examples. | The dev server starts and the build passes. | doing | |
 | W-04 | 1 | W-01 | - | App shell from the reference pack: sidebar, layout, type, colours, controls. Our own wordmark. | A Playwright test finds the nav items and checks 10 CSS variables against `theme-tokens.css`. | todo | |
 | W-05 | 1 | W-04, S-03 | - | Chat screen: start screen with four starter cards, composer with `@` document picker, live status lines, answer with bold fact, citation chips, "Where it is set out", "Sources (n)", "Show thought process", cost chip, and the notice from 5.8. | A Playwright test asks a fixture question and sees the answer, the citation chips and the cost chip. | todo | |
 | W-06 | 1 | W-05 | - | Document viewer beside the chat: pan and zoom, numbered boxes, text highlight, "n of m" source navigation, licence credit line. A click on a chip opens the right page and box. | A Playwright test clicks chip 1 and sees the viewer with the box in view and the credit line. | todo | |
@@ -105,6 +106,7 @@ Status values: `todo`, `doing`, `done`, `blocked`, `waiting-key`, `blocked-human
 ### 3D (Codex)
 | ID | Tier | Depends | Keys | Task | Done test | Status | Notes |
 |---|---|---|---|---|---|---|---|
+| T-00 | 1 | - | - | ◆ Prep (added by LEAD): write the viewer core in `web/src/viewer3d/` as plain TypeScript modules on three.js (load a GLB through a `scene.json` manifest, map `item_id` to node, orbit camera, storey filter, pick to `item_id`), with vitest unit tests against a fixture `scene.json` built from `out/digital_hub_arc.elements.json` + `out/digital_hub_arc.glb`. No changes to `web/package.json` (WEB is scaffolding it); list needed packages as NEEDS:. | After W-01 lands and the LEAD adds `three`: `cd web && npx vitest run src/viewer3d` passes, and resolves 5 item_ids to nodes. | doing | Added so 3D is not idle while W-01 and D-06 are open. |
 | T-01 | 1 | W-01, D-06 | - | Viewer: load `scene.glb` through `scene.json`, orbit, storey filter, pick an item to get its `item_id`. | A unit test resolves 5 `item_id`s to nodes. A Playwright test (software GL) shows a non-blank canvas. | todo | |
 | T-02 | 1 | T-01 | - | Highlight API: `highlight(item_ids)` makes items glow, dims the rest, shows the same number labels as the 2D boxes, and flies the camera to the target. | A unit test checks highlight state. A screenshot differs from the unhighlighted one. | todo | |
 | T-03 | 1 | T-02, W-06 | - | 2D and 3D side by side, linked: hover or click a box and the 3D item responds, and the reverse. | A Playwright test clicks box 3 and reads highlight state for the same `item_id`. | todo | |
@@ -119,7 +121,7 @@ Status values: `todo`, `doing`, `done`, `blocked`, `waiting-key`, `blocked-human
 ### IOS (Codex)
 | ID | Tier | Depends | Keys | Task | Done test | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| I-01 | 2 | - | - | Xcode project with XcodeGen. SwiftUI shell with a WKWebView that loads `WEB_URL` (local dev URL until deploy). | `xcodebuild` builds for the simulator. | todo | |
+| I-01 | 2 | - | - | Xcode project with XcodeGen. SwiftUI shell with a WKWebView that loads `WEB_URL` (local dev URL until deploy). | `xcodebuild` builds for the simulator. | doing | |
 | I-02 | 2 | I-01, D-10 | - | AR screen with RealityKit: find a flat surface, place `scene.usdz` (a bundled fixture scene as fallback), pinch to scale, rotate, drag, a scale slider from 1:100 to 1:1, reset. | The build succeeds. A unit test loads the fixture USDZ and finds a prim by `usd_name`. | todo | |
 | I-03 | 2 | I-02 | - | Highlight in AR: glow the answer items, dim the rest, show the number labels. | A unit test applies a highlight to named entities of the fixture scene. | todo | |
 | I-04 | 2 | I-03, W-11 | - | Bridge and live link: "Show on table" from the web view opens AR with the right doc and items. The AR screen follows `scene.highlight` from `/ws`. | A test message through the bridge handler opens the AR screen with the given `doc_id`. | todo | |
