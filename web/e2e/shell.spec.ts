@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import { handleMockRequest } from '../src/mock/handler'
 
-const navItems = ['Overview', 'Chat', 'Changes', 'Data', 'Compare', 'Library', 'Tools', 'Accuracy']
+const navItems = ['Overview', 'Projects', 'Chat', 'Changes', 'Data', 'Compare', 'Library', 'Tools', 'Accuracy']
 
 test('workspace shell exposes every route and restores it on reload', async ({ page }) => {
   await page.goto('/')
@@ -45,7 +45,7 @@ test('phone navigation keeps all pages reachable without horizontal overflow', a
   const navigation = page.getByRole('navigation', { name: 'Mobile navigation', exact: true })
   await expect(navigation).toBeVisible()
   for (const label of navItems.filter((item) => item !== 'Accuracy')) {
-    const underMore = ['Compare', 'Library', 'Tools', 'Accuracy'].includes(label)
+    const underMore = ['Data', 'Compare', 'Library', 'Tools', 'Accuracy'].includes(label)
     const more = navigation.getByLabel('More pages', { exact: true })
     if (underMore) await more.click()
     await navigation.getByRole('link', { name: label, exact: true }).click()

@@ -1,4 +1,4 @@
-import { Check, Database, GitCompare, House, BotMessageSquare, MoreHorizontal, Library, Inbox, Wrench, CircleHelp } from 'lucide-react'
+import { Check, Database, FolderKanban, GitCompare, House, BotMessageSquare, MoreHorizontal, Library, Inbox, Wrench, CircleHelp } from 'lucide-react'
 import { Tooltip } from './ui/tooltip'
 import { Button } from './ui'
 import type { Route } from '../lib/router'
@@ -12,6 +12,7 @@ export function UploadAction({ children = 'Upload' }: { children?: string }) {
 
 export const navigation = [
   { route: 'overview', label: 'Overview', icon: House },
+  { route: 'projects', label: 'Projects', icon: FolderKanban },
   { route: 'chat', label: 'Chat', icon: BotMessageSquare },
   { route: 'changes', label: 'Changes', icon: Inbox },
   { route: 'data', label: 'Data', icon: Database },

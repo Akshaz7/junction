@@ -15,6 +15,8 @@ import { CompareScreen } from './components/compare-screen'
 import { LibraryScreen } from './components/library-screen'
 import { ChangesScreen } from './components/changes-screen'
 import { HelpScreen } from './components/help-screen'
+import { ProjectsScreen } from './components/project-page'
+import { ChatCrumb, PanelToggle, ProjectContentPanel, projectLibraryDocs, useChatProject } from './components/project-chat-panel'
 import { workspaceApi } from './lib/api'
 import { navigate, useRoute } from './lib/router'
 import type { Citation, Document } from './lib/types'
@@ -29,7 +31,12 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
   const [error, setError] = useState('')
   const [activeChatId, setActiveChatId] = useState<string | null>(null)
   const [chatKey, setChatKey] = useState(0)
+  const activeChatTitle = undefined as string | undefined
   const [contextDocument, setContextDocument] = useState<Document | null>(null)
+  const chatProject = useChatProject(view === 'chat')
+  const [panelOpen, setPanelOpen] = useState(() => window.innerWidth > 800)
+  const inProject = !!chatProject.id
+  const chatDocs = chatProject.id ? projectLibraryDocs(chatProject.project, chatProject.project ? docs : []) : docs
 
   const refreshDocuments = useCallback(async () => {
     const documents = await workspaceApi.getDocuments()
@@ -56,18 +63,23 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
         <div className="project-title"><span className="wordmark"><span className="brand-logo" role="img" aria-label="Stoa" /><span className="brand-pro">Pro</span></span><span className="topbar-divider" /><span className="workspace-name">Demo workspace</span><div className="mobile-project"><ProjectSwitcher /></div></div>
         <Badge variant={demo || loadingDocs || error ? 'neutral' : 'success'}>{demo ? 'Local demo' : loadingDocs ? 'Connecting…' : error ? 'Connection unavailable' : 'Connected workspace'}</Badge>
       </header>
-      <div className="pagebar">
+      <div className={`pagebar${view === 'chat' && inProject ? ' pj-pagebar' : ''}`}>
         <h1>{pageLabel(view)}</h1>
+        {view === 'chat' && chatProject.id && <ChatCrumb project={chatProject.project} id={chatProject.id} title={activeChatTitle} />}
         {view === 'data' && <span className="documents-breadcrumb"><ChevronRight size={16} /><span><Folder size={14} />Documents</span></span>}
-        {view === 'chat' && <ChatHeaderActions chatId={activeChatId} onNew={() => { navigate('chat'); setChatKey((previous) => previous + 1); setContextDocument(null); setActiveChatId(null) }} />}
+        {view === 'chat' && <div className="pj-pagebar-right"><ChatHeaderActions chatId={activeChatId} onNew={() => { if (chatProject.id) window.location.hash = `/chat?project=${encodeURIComponent(chatProject.id)}`; else navigate('chat'); setChatKey((previous) => previous + 1); setContextDocument(null); setActiveChatId(null) }} />{chatProject.project && <PanelToggle open={panelOpen} onClick={() => setPanelOpen((open) => !open)} />}</div>}
       </div>
       {error && (view === 'chat' || view === 'data') && <p className="error-message document-error" role="alert">{error}</p>}
-      <ChatScreen onChatChange={setActiveChatId} key={chatKey} docs={docs} loadingDocs={loadingDocs} demo={demo} contextDocument={contextDocument} hidden={view !== 'chat'} onRefresh={refreshDocuments} onOpenCitation={onOpenCitation} />
+      <div className={inProject ? 'chat-with-project' : 'chat-passthrough'}>
+        <ChatScreen onChatChange={setActiveChatId} key={chatKey} docs={chatDocs} projectId={chatProject.id} loadingDocs={loadingDocs || (inProject && !chatProject.project && !chatProject.error)} demo={demo} contextDocument={contextDocument} hidden={view !== 'chat'} onRefresh={refreshDocuments} onOpenCitation={onOpenCitation} />
+        {view === 'chat' && chatProject.project && panelOpen && <ProjectContentPanel project={chatProject.project} />}
+      </div>
       <DataScreen docs={docs} loading={loadingDocs} demo={demo} hidden={view !== 'data'} onRefresh={refreshDocuments} onAsk={(doc) => {
         setContextDocument(doc)
         setChatKey((previous) => previous + 1)
         navigate('chat')
       }} />
+      {view === 'projects' && <ProjectsScreen docs={docs} />}
       {view === 'compare' && <CompareScreen docs={docs} demo={demo} />}
       {view === 'library' && <LibraryScreen docs={docs} />}
       {view === 'tools' && <FindingsScreen docs={docs} />}
