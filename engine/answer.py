@@ -373,6 +373,17 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
         from engine.solvers.solve import _answer_obj
         txt = "That question looks unfinished. Could you finish it? For example: how many doors are there, or what is the area of the biggest room."
         return _answer_obj(question, doc_ids, txt, None, None, 1.0, False, [], [], {"doc_id": doc_ids[0], "highlight_item_ids": [], "camera_target_item_id": None}, trace, "index", t0)
+    if len(doc_ids or []) == 1 and _q and re.search(r"\bhow many (?:pages|sheets)\b|\bnumber of (?:pages|sheets)\b|\bpage count\b", _q, re.I) \
+            and not re.search(r"\b(?:door|window|room|toilet|wc|stair|wall)s?\b", _q, re.I):   # FIX-19: the file's own page count
+        try:
+            _pm = json.loads((root / doc_ids[0] / "doc.json").read_text())
+        except (OSError, ValueError):
+            _pm = {}
+        if _pm:
+            from engine.solvers.solve import _answer_obj
+            _n = int(_pm.get("pages") or 1)
+            txt = f"This file has **{_n} {'page' if _n == 1 else 'pages'}**."
+            return _answer_obj(question, doc_ids, txt, _n, "count", 1.0, False, [], [], {"doc_id": doc_ids[0], "highlight_item_ids": [], "camera_target_item_id": None}, trace, "index", t0)
     if doc_ids and _q and re.search(r"\b(?:what|which)\s+(?:file|document|doc|drawing)(?:\s+(?:format|type|name))?\s+(?:is\s+)?(?:this|it|open|that|here|the\s+(?:open|current)\s+\w+)?\s*\??$|\bfile\s+(?:format|type|name)\b|\bwhat\s+(?:format|type)\s+is\s+(?:this|it)\b", _q, re.I):
         try:
             _meta = json.loads((root / doc_ids[0] / "doc.json").read_text())
