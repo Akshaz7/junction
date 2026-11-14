@@ -31,3 +31,4 @@ web/test-results/
 web/playwright-report/
 *.whl
 results/bench/full_1.rows.jsonl
+deploy/demo_artifacts/**/*.usdz
