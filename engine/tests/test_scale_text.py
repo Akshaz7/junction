@@ -106,7 +106,7 @@ def test_no_printed_scale_keeps_guess_and_says_so(tmp_path):
     assert doc.scale["method"] == "door-prior"
     from engine import analytics
     import time
-    assert analytics.scale_note(doc).startswith(" The drawing has no printed scale")
+    assert analytics.scale_note(doc).startswith(" Areas are estimated from door sizes because no printed scale")
 
 
 def _w(texts, y=100, x0=100, dx=60):

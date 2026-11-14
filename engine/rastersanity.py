@@ -59,12 +59,22 @@ def _try(doc) -> str:
     return "Try: " + ", ".join(ex) + "."
 
 
+CAVEAT = "Areas are estimated from door sizes because no printed scale was found, so treat them as approximate."
+ROOMWORD = re.compile(r"kitchen|bed ?room|bath|living|dining|hall|closet|office|\bwc\b|garage|laundry|toilet|lounge|study|utility|pantry|foyer|balcon", re.I)
+
+
+def _undercounted(doc) -> bool:
+    """More room-like words printed on the drawing than rooms the reader found."""
+    words = sum(1 for i in doc.items if i.kind == "text" and ROOMWORD.search(str(i.label or i.props.get("text") or "")))
+    return words >= 3 and words > sum(1 for i in doc.items if i.kind == "room") + 1
+
+
 def sparse_note(doc, question: str, res: dict) -> str | None:
     if doc.mode != "planmap" or not doc.doc_id.startswith("uploads__") or not Q_COUNT.search(question):
         return None
     n = lambda k: sum(1 for i in doc.items if i.kind == k)
     rooms, doors, wins = n("room"), n("door"), n("window")
-    if rooms >= SPARSE_ROOMS and doors + wins >= 3:
+    if rooms >= SPARSE_ROOMS and doors + wins >= 3 and not _undercounted(doc):
         return None
     return (f"On this drawing the automatic reader found {rooms} room{'s' if rooms != 1 else ''}, {doors} door{'s' if doors != 1 else ''} "
             f"and {wins} window{'s' if wins != 1 else ''}. It reads the image, and a sparse or unusual plan can be missed, so treat these as what was found, not a full count. {_try(doc)}")
@@ -79,6 +89,13 @@ def guard(res: dict, question: str, doc) -> dict:
                     "value": None, "confidence": 0.3, "abstained": False})
         res["trace"] = list(res.get("trace") or []) + [{"step": "sanity", "detail": f"area withheld: {why}", "ms": 0, "model": None, "cost_usd": 0}]
         return res
+    if doc.mode == "planmap" and _guessed_scale(doc) and not ans.get("abstained") and "m²" in ans.get("text_md", ""):
+        t = ans["text_md"].rstrip()
+        for old in (" This is approximate: the drawing has no printed scale, so the size is estimated from the doors.",
+                    " The drawing has no printed scale, so areas are estimated from door sizes and are approximate."):
+            t = t.replace(old, "")
+        ans["text_md"] = f"{t.rstrip()}\n\n{CAVEAT}" if "estimated from door sizes" not in t else t
+        ans["confidence"] = min(float(ans.get("confidence") or 0.4), 0.4)
     note = sparse_note(doc, question, res)
     if note and not ans.get("abstained") and note not in ans.get("text_md", ""):
         ans["text_md"] = f"{ans.get('text_md', '').rstrip()}\n\n{note}"

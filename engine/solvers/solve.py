@@ -602,7 +602,7 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
                 return _abstain(question, doc_id, "This plan has no scale I can trust, so I cannot give areas in square metres.", trace, route, t0)
             conf = float(sc.get("confidence") or 0.3)
             if conf < 0.5:
-                scale_note = " This is approximate: the drawing has no printed scale, so the size is estimated from the doors."
+                scale_note = " Areas are estimated from door sizes because no printed scale was found, so treat them as approximate."
             elif sc.get("method") in ("scalebar", "ratio-dpi", "ratio-sheet"):
                 scale_note = " Sized from the scale printed on the drawing."
         else:

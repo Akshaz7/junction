@@ -315,7 +315,7 @@ def scale_note(doc: Doc) -> str:
         ev = f"{ev}; " if " " in ev else ""
         return f" Sized from the scale printed on the drawing ({ev}{basis})."
     if m == "door-prior":
-        return " The drawing has no printed scale, so areas are estimated from door sizes and are approximate."
+        return " Areas are estimated from door sizes because no printed scale was found, so treat them as approximate."
     return " Sized from the drawing's own units."
 
 
@@ -361,6 +361,12 @@ def named_rooms(question: str, doc: Doc, t0) -> dict | None:
     if len(hit) == 1:
         noun = noun[:-3] + "room" if noun.endswith("rooms") else noun[:-1] if noun.endswith("s") else noun
         noun = noun.replace("bathrooms/WCs", "bathroom/WC")
+    _lab = [re.sub(r"\s+", " ", _room_label(r).strip().lower()) for r in hit]
+    if doc.mode == "planmap" and len(hit) > 1 and wants_area and len(set(_lab)) < len(_lab):   # the same label can mark one room twice: list them, never add them up
+        per = "; ".join(f"{_fmt(v)} m²" for v in sorted((v for v in vals if v), reverse=True)[:8])
+        text = (f"There {'are'} **{len(hit)} {noun}** {where} with these areas: {per}. I have not added them up, because the same name can be "
+                f"printed more than once for one room. {{marks}}" + scale_note(doc))
+        return _done(question, doc, text, len(hit) if howmany else None, "count" if howmany else "m2", hit, trace, t0=t0)
     if rx.pattern.startswith("^") and wants_area and not howmany:   # one room named on the plan
         text = f"The area of **{word}** is **{_fmt(tot)} m²**" + (f" ({len(hit)} rooms carry that name, summed)" if len(hit) > 1 else "") + ". {marks}" + scale_note(doc)
         return _done(question, doc, text, tot, "m2", hit, trace, t0=t0)
@@ -429,7 +435,13 @@ def where_rooms(question: str, doc: Doc, t0) -> dict | None:
         text = f"**{len(hit)} {noun}{'s' if len(hit) != 1 else ''}** {f'on **{st}**' if st else 'in this model'}: {parts}{where}, from the model's spaces.{extra} {{marks}}"
     else:
         text = f"**{len(hit)} {noun}{'s' if len(hit) != 1 else ''}** on this floor plan{where}, numbered on the drawing.{extra} {{marks}}"
-    return _done(question, doc, text, len(hit), "count", hit, trace, t0=t0)
+    res = _done(question, doc, text, len(hit), "count", hit, trace, t0=t0)
+    # rooms drawn as WC / toilets are the toilets: their 2D boxes carry kind toilet so the legend and colours say Toilets
+    wc = {r.item_id for r in hit if re.search(r"\b(?:wc|toilet\w*|lavator\w*)\b", f"{_room_label(r)} {r.props.get('long_name') or ''}", re.I)}
+    for b in res.get("evidence", {}).get("boxes", []):
+        if b.get("item_id") in wc:
+            b["kind"] = "toilet"
+    return res
 
 
 # ------------------------------------------------------------------ E-50: wet rooms, "how many X and where", room lists
@@ -878,7 +890,7 @@ def superlative_room(question: str, doc: Doc, t0) -> dict | None:
     nm = r.label or f"{rt} room"
     nxt = "; ".join(f"{(x.label or (str(x.props.get('room_type') or 'room') + ' room'))} {_fmt(y)} m²" for x, y in rooms[1:4])
     sc = doc.scale or {}
-    est = " The scale is estimated from door sizes, so areas are approximate." if (sc.get("confidence") or 1) < 0.5 else ""
+    est = " Areas are estimated from door sizes because no printed scale was found, so treat them as approximate." if (sc.get("confidence") or 1) < 0.5 else ""
     trace = [_step("route", "largest room / plan map -> code, no model"), _step("compare", f"{len(rooms)} rooms ranked by area")]
     text = f"The {'smallest' if small else 'largest'} room is **{nm}**{'' if not r.label else ' (' + rt + ')'} at **{_fmt(v)} m²**. Next: {nxt}.{est} {{marks}}"
     return _done(question, doc, text, v, "m2", [r], trace, t0=t0)
