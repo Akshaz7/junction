@@ -2,7 +2,7 @@
 
 Caps for run 1. The lead may not raise them; only Ash can.
 
-**Ash, 14 Nov ~04:00: up to \$500 total may be spent tonight on testing ("don't be shy").** Runware cap 500 USD covers it; per-provider caps below still apply to the other providers. The model layer enforces them (raises `BudgetExceeded`).
+**Ash, 14 Nov ~04:00: up to $500 total may be spent tonight on testing ("don't be shy").** Runware cap 500 USD covers it; per-provider caps below still apply to the other providers. The model layer enforces them (raises `BudgetExceeded`).
 
 | Provider | Cap |
 |---|---|
