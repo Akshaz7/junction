@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Bell, ChevronDown, ChevronRight, Folder } from 'lucide-react'
+import { ChevronRight, Folder } from 'lucide-react'
 import { Badge } from './components/ui'
 import { ProjectSwitcher, WorkspaceNavigation, pageLabel } from './components/workspace-navigation'
-import { PlaceholderPage } from './components/placeholder-page'
 import { AccuracyScreen } from './components/accuracy-screen'
 import { FindingsScreen } from './components/findings-screen'
 import { SkillsScreen } from './components/skills-screen'
@@ -52,12 +51,12 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
     <WorkspaceNavigation route={view} />
     <main className="workspace" id="main-content" tabIndex={-1}>
       <header className="topbar">
-        <div className="project-title"><span className="wordmark">Hologram</span><span className="topbar-divider" /><span className="workspace-name">Demo workspace</span><div className="mobile-project"><ProjectSwitcher /></div></div><Bell className="project-bell" size={20} />
+        <div className="project-title"><span className="wordmark">Hologram</span><span className="topbar-divider" /><span className="workspace-name">Demo workspace</span><div className="mobile-project"><ProjectSwitcher /></div></div>
         <Badge variant={demo || loadingDocs || error ? 'neutral' : 'success'}>{demo ? 'Local demo' : loadingDocs ? 'Connecting…' : error ? 'Connection unavailable' : 'Connected workspace'}</Badge>
       </header>
       <div className="pagebar">
         <h1>{pageLabel(view)}</h1>
-        {view === 'data' && <span className="documents-breadcrumb"><ChevronRight size={16} /><span><Folder size={14} />Documents<ChevronDown size={12} /></span></span>}
+        {view === 'data' && <span className="documents-breadcrumb"><ChevronRight size={16} /><span><Folder size={14} />Documents</span></span>}
         {view === 'chat' && <ChatHeaderActions chatId={activeChatId} onNew={() => { navigate('chat'); setChatKey((previous) => previous + 1); setContextDocument(null); setActiveChatId(null) }} />}
       </div>
       {error && (view === 'chat' || view === 'data') && <p className="error-message document-error" role="alert">{error}</p>}
@@ -77,7 +76,6 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
       {view === 'automations' && <AutomationsScreen docs={docs} />}
       {view === 'overview' && <OverviewScreen docs={docs} />}
       {view === 'help' && <HelpScreen />}
-      {view !== 'data' && view !== 'chat' && view !== 'changes' && view !== 'accuracy' && view !== 'overview' && view !== 'findings' && view !== 'skills' && view !== 'automations' && view !== 'compare' && view !== 'library' && view !== 'tools' && view !== 'help' ? <PlaceholderPage route={view} /> : null}
     </main>
   </div>
 }

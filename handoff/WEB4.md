@@ -1,12 +1,32 @@
 # WEB4 (Codex) — current row
 
-ROW: W-32 live-QA polish (results/qa/live-1439.md items 9 and 10)
-1. Never show "size unavailable" / "version unavailable" / similar placeholder labels: omit the field when missing.
-2. Accuracy page: if /api/bench/latest fails, fall back to the bundled public results file (web/public/ or the API's static results; check what exists) and show the latest recorded run (e-s200-z1: 143/187, 76.47%, 0 abstentions); never "No bench runs" when results exist. Number must come from a results file, not hard-coded text.
-3. Rate limit (HTTP 429) anywhere in the API client: friendly message "Too many requests, retrying in Ns" with automatic retry (respect Retry-After, max 2 retries), never raw "rate limit exceeded".
-4. Transient 502/503 during a backend restart: API client retries GETs twice with 1 s backoff; the live socket reconnects with backoff and shows a small "Reconnecting…" pill, which clears on reconnect.
-Allowed files: web/src/lib/api.ts, web/src/lib/live*.ts, web/src/components/accuracy-screen.*, overview-screen.*, changes-screen.*, data-screen.*, a new web/src/components/connection-pill.* , their tests, this file.
-Done test: cd web && npx tsc --noEmit && npx vitest run (0 failures) + one test per item.
+ROW: W-34 no decorative (fake) controls — Ash: "a feature that doesn't work end to end must not be shown"
+Audit every visible control in web/src that has no working handler (results/parity_audit.md section 0 lists some; re-check, it is older than the code). For each: make it work with an existing real API/handler if a few lines do it, else remove it. Known candidates:
+- Data viewer toolbar search / scan-text / pen icons (aria-hidden spans, no handler): search = filter the open document's page text if the API gives text (check docs/API.md), else remove.
+- File-row checkbox that does nothing: make it select rows for "Ask about selected" (open chat with those doc ids, the existing ?doc= path supports one; check whether chat supports several) or remove.
+- Project switcher one-option select: replace with a plain project name label (no fake dropdown).
+- Hard-coded avatar "AK": keep only if it has no menu promise; no dead click.
+- placeholder-page.tsx: delete if no route uses it (help is mounted); keep tsc clean.
+Write a list in this file: control → kept (how it works) / removed.
+Allowed: web/src/** except viewer3d/ and chat-screen.tsx, answer-card.tsx (others are working there).
+Done test: cd web && npx tsc --noEmit && npx vitest run (0 failures), plus a click test for each kept control.
 Never commit. Write one line at the end: RESULT: ...
 
-RESULT: W-32 passed: missing metadata omitted; accuracy-screen.results.json bundles the unchanged results/bench/e-s200-z1.json (143/187, 76.47%, 0 abstentions); WorkspaceApi plus Accuracy/Overview transports retry 429 twice with Retry-After countdown and GET 502/503 twice at 1 s; shared live socket backoff drives a cross-route Reconnecting… pill. Done test: cd web && npx tsc --noEmit && npx vitest run — 54 files, 309 tests passed. Learning: retry mocks must return fresh Response bodies. No commit.
+W-34 control audit (current source, excluding the files reserved for other workers):
+- Data toolbar search → kept: opens page-text search; reads the existing text-<page>.json / planmap artifacts and filters real extracted text. Reports missing text honestly; changing page reloads text.
+- Data toolbar scan-text / pen icons → removed: no handlers in this viewer.
+- Data page chevrons → kept: real previous/next buttons update preview, page number, search text and download URL; disabled at page boundaries.
+- Data download, zoom −/+, Fit, Ask, credit disclosure and Close → kept: current-page PNG link, real zoom state/reset, existing onAsk callback, native details disclosure and existing close handler. Click-tested in data-controls.test.tsx.
+- File-row checkbox → removed: decorative span; no row-selection state or multi-selection action.
+- Folder-plus, file-row ellipsis, mobile folder-back/filter icons → removed: no working actions. Existing folder tree/select and document-name search remain functional.
+- Project dropdown → removed: replaced with static Construction project label (compact rail mark retains accessible project text).
+- AK avatar → kept: static span; no focus target, link, menu cue or click handler.
+- Notification bell, Documents breadcrumb dropdown chevron, drawing-source dropdown chevron → removed: no menu/actions behind them.
+- Drawing viewer Open source page → kept only after an actual image URL exists; avoids a dead anchor during loading/error.
+- Data Visualise it → kept only for a confirmed scene; removed the missing-scene button that merely displayed an unavailable message. Existing 2D/3D controls and native AR action use their working handlers.
+- PlaceholderPage → removed with its import and unreachable fallback; every valid route already mounts its real screen, including Help.
+- Other navigation, upload, chat-header, Changes/Compare, Library/Skills/Automations, Findings, Accuracy, Help, voice, evidence/annotation and export controls → kept: existing links, form submissions, state changes or real API handlers; no additional inert controls found within allowed scope. chat-screen.tsx, answer-card.tsx and viewer3d/ were untouched.
+
+Files: web/src/App.tsx; web/src/components/{data-screen.tsx,data-screen.css,data-controls.test.tsx,document-viewer.tsx,workspace-navigation.tsx,placeholder-page.tsx (deleted)}; web/src/styles/app.css.
+Validation: cd web && npx tsc --noEmit && npx vitest run — passed on first run, 55 files / 314 tests, 0 failures. New jsdom click tests exercise retained Data controls and assert fake controls are absent. No browser/Playwright run was needed for this done test.
+RESULT: W-34 passed; decorative controls removed, real page-text search and page navigation wired, static project/avatar labels retained; tsc and all 314 Vitest tests pass; no commit.

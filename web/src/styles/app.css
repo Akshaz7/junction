@@ -26,7 +26,7 @@ h1, h2, h3, p { margin: 0; }
 .brand-mark { color: inherit; display: flex; align-items: center; min-height: 36px; padding: 0 12px; font-size: 23px; font-weight: 600; letter-spacing: -.05em; }
 .project-switcher { display: flex; align-items: center; gap: 8px; padding: 8px; color: inherit; border: 1px solid var(--sidebar-border); border-radius: var(--radius-control); min-width: 0; }
 .project-mark { display: grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0; border: 1px solid var(--sidebar-border); border-radius: 7px; background: var(--brand-forest); color: var(--sidebar-foreground); font-weight: 600; font-size: var(--text-caption); }
-.project-switcher select { width: 100%; min-width: 0; appearance: none; background: transparent; border: 0; color: inherit; font: inherit; font-size: var(--text-body-sm); cursor: pointer; }
+.project-name { min-width: 0; font-size: var(--text-body-sm); }
 .project-switcher option { background: var(--card); color: var(--foreground); }
 .project-switcher:focus-within { outline: 2px solid var(--sidebar-ring); outline-offset: 3px; }
 .project-switcher select:focus { outline: none; }
@@ -278,6 +278,7 @@ h1, h2, h3, p { margin: 0; }
 .rail .brand-mark { position: absolute; top: 29px; left: 5px; width: 54px; min-height: 30px; padding: 0; justify-content: center; font-size: 11px; letter-spacing: -.05em; }
 .rail .project-switcher { position: absolute; top: 85px; left: 9px; width: 40px; height: 40px; padding: 0; border: 0; }
 .rail .project-mark { width: 40px; height: 40px; background: #465845; border-radius: 8px; }
+.rail .project-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .rail .project-switcher select { position: absolute; inset: 0; opacity: 0; }
 .rail .project-switcher > svg { display: none; }
 .rail nav { position: absolute; top: 152px; left: 12px; gap: 8px; }

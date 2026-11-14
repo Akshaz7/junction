@@ -1,4 +1,4 @@
-import { ChartNoAxesCombined, Check, ChevronDown, Database, GitCompare, House, BotMessageSquare, MoreHorizontal, Library, Inbox, Wrench, CircleHelp } from 'lucide-react'
+import { ChartNoAxesCombined, Check, Database, GitCompare, House, BotMessageSquare, MoreHorizontal, Library, Inbox, Wrench, CircleHelp } from 'lucide-react'
 import { Tooltip } from './ui/tooltip'
 import { Button } from './ui'
 import type { Route } from '../lib/router'
@@ -28,12 +28,10 @@ export function pageLabel(route: Route): string {
 }
 
 export function ProjectSwitcher() {
-  return <label className="project-switcher">
+  return <div className="project-switcher" aria-label="Project: Construction project">
     <span className="project-mark" aria-hidden="true">D</span>
-    <span className="sr-only">Project</span>
-    <select aria-label="Project" defaultValue="demo"><option value="demo">Construction project</option></select>
-    <ChevronDown size={14} aria-hidden="true" />
-  </label>
+    <span className="project-name">Construction project</span>
+  </div>
 }
 
 export function WorkspaceNavigation({ route }: { route: Route }) {

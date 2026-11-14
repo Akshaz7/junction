@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import { ChevronDown, ChevronLeft, ChevronRight, Download, FileSymlink, FileText, Highlighter, Maximize2, Minus, PenLine, Plus, Search, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, FileSymlink, FileText, Highlighter, Maximize2, Minus, PenLine, Plus, Search, X } from 'lucide-react'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document } from '../lib/types'
 import { fitPage, focusBox, zoomAt, type PageTransform, type Point, type Size } from '../lib/page-transform'
@@ -296,10 +296,9 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
     <header className="viewer-heading"><FileText size={24} /><div><strong>{doc?.title ?? citation.doc_id}</strong><small>/{doc?.source || 'Drawings'}</small></div>
       <ViewerModeToggle mode={mode} onChange={changeMode} />
       <div className="viewer-source-nav" hidden={mode === '3d'}>
-        <a className="viewer-open-source" aria-label="Open source page" href={imageUrl || undefined} target="_blank" rel="noreferrer"><FileSymlink size={16} /></a>
+        {imageUrl && <a className="viewer-open-source" aria-label="Open source page" href={imageUrl} target="_blank" rel="noreferrer"><FileSymlink size={16} /></a>}
         <Button variant="ghost" size="icon" aria-label="Previous source" disabled={active <= 0} onClick={() => selectSource(active - 1)}><ChevronLeft size={16} /></Button>
         <span aria-live="polite" data-testid="source-position">{sources.length ? active + 1 : 0} of {sources.length}</span>
-        <ChevronDown className="viewer-source-chevron" size={14} aria-hidden="true" />
         <Button variant="ghost" size="icon" aria-label="Next source" disabled={active >= sources.length - 1} onClick={() => selectSource(active + 1)}><ChevronRight size={16} /></Button>
         <Button className="viewer-fit" variant="ghost" size="icon" aria-label="Fit drawing" disabled={!image} onClick={() => image && setView(fitPage(image, viewport))}><Maximize2 size={16} /></Button>
       </div>
