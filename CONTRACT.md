@@ -1,4 +1,4 @@
-# CONTRACT — version 3.1
+# CONTRACT — version 3.2
 
 Only the LEAD edits this file. Each change bumps the version and adds one line to DECISIONS.md.
 
@@ -123,3 +123,20 @@ The iOS app shows the web app (mobile layout) in a WKWebView. The web app calls 
 `POST /api/advise` {doc_id, chat_id?, edit?: {op, item_ids}} → `{cards: [Card]}`, at most 3. Also pushed over `/ws` as event `advisor.cards` {doc_id, chat_id, cards}.
 Card: `{card_id, kind: "warning"|"option"|"info", title (≤60 chars), body (≤200 chars, voice guide 5.8), item_ids: [item_id], source: {type: "rule"|"material_table"|"document", ref (rule id / table row / doc_id+page), title, quote (≤200 chars, verbatim)}}`.
 Hard rule: no `source` → no card. Never invented. Clients show the source title and quote with the card, and highlight `item_ids` like a citation.
+
+### 5.13 Additions in v3.2 (multi-kind answers, severity, locate)
+Answer object (5.7), all optional:
+- `answer.value`: a number, or for a multi-kind count ("how many windows and doors") an object `{kind: count}`, e.g. `{"window": 11, "door": 11}`; unit "count". `text_md` carries both counts.
+- `evidence.boxes[].kind`: kind of the boxed item. Labels run 1..N across all kinds; clients colour by kind (shared table `web/public/kind-colors.json`).
+- `evidence.scene.item_kinds`: `{item_id: kind}` for highlighted items; 3D and AR colour by it.
+- `citations[].item_kind`: kind of the cited items in a multi-kind count.
+- `advisor_cards` (max 3): cards for a hide/remove command in chat, computed on the edited model (all hidden in the chat so far plus this command); also published as `advisor.cards` over `/ws`.
+- Forced best-effort answers use route `hybrid`, with low confidence and one line saying what they rest on.
+Advisor cards (5.12) gain:
+- `severity`: "violation" (rule broken; kind warning), "suggestion" (worth checking; kind option) or "info" (nothing broken or nothing checkable). Clients show severity.
+- `checked`: rule ids from engine/rules checked for this result. A clean edit still returns one info card, "No rule broken by this edit" (body "Checked: <decree §>"). Raster/DXF drawings get "Checks need an IFC model" unless an entrance door was detected.
+- Rule library adds engine/rules/safety_in_use.yaml (1007/2017 §3, 4, 6, 7, 14, 15). English quotes are the ministry's unofficial translation (labelled); the Finnish Finlex quotes are verified. 848/2017, 241/2017 and 1007/2017 stay in force under Act 752/2023.
+- `POST /api/advise` edit: `{op: hide|restore|move|material|undo, item_ids, detail?}`.
+Scene commands: "front door / main door / entrance" selects the one detected entrance door; "outer / exterior / exit doors" selects all detected outer doors.
+Routes: "where is the stairs / stair core / lift / entrance (on level N)" is a code route (engine/locate.py), cost 0, route "index".
+Live sync: `/ws` also carries `chat.trace`, `chat.delta` (cumulative answer text, ≤8/s) and `chat.done`. `GET /api/chats/{id}` returns `active` (statuses, traces and text so far) for an in-flight question.

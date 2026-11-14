@@ -12,7 +12,7 @@
       "required": ["text_md", "value", "unit", "confidence", "abstained"],
       "properties": {
         "text_md": {"type": "string"},
-        "value": {},
+        "value": {"description": "Number, string, boolean, array, null, or for a multi-kind count an object {kind: count}, e.g. {\"window\": 11, \"door\": 11}.", "type": ["number", "string", "boolean", "array", "object", "null"], "additionalProperties": {"type": "number"}},
         "unit": {"type": ["string", "null"]},
         "confidence": {"type": "number", "minimum": 0, "maximum": 1},
         "abstained": {"type": "boolean"}
@@ -30,7 +30,8 @@
           "kind": {"enum": ["region", "text", "element"]},
           "bbox_px": {"type": ["array", "null"], "items": {"type": "number"}, "minItems": 4, "maxItems": 4},
           "item_ids": {"type": "array", "items": {"type": "string"}},
-          "quote": {"type": ["string", "null"]}
+          "quote": {"type": ["string", "null"]},
+          "item_kind": {"type": "string", "description": "Kind of the cited items in a multi-kind count (window, door, ...)."}
         }
       }
     },
@@ -47,7 +48,8 @@
               "item_id": {"type": "string"},
               "page": {"type": "integer", "minimum": 1},
               "bbox_px": {"type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4},
-              "label": {"type": "string"}
+              "label": {"type": "string"},
+              "kind": {"type": "string", "description": "Kind of the boxed item (window, door, ...) so clients can colour by kind."}
             }
           }
         },
@@ -58,6 +60,7 @@
             "doc_id": {"type": "string"},
             "highlight_item_ids": {"type": "array", "items": {"type": "string"}},
             "camera_target_item_id": {"type": ["string", "null"]},
+            "item_kinds": {"type": "object", "additionalProperties": {"type": "string"}, "description": "item_id -> kind for the highlighted items of a multi-kind answer."},
             "commands": {
               "type": "array",
               "items": {
@@ -94,6 +97,25 @@
       "required": ["usd_total", "calls"],
       "properties": {"usd_total": {"type": "number"}, "calls": {"type": "array"}}
     },
-    "latency_ms": {"type": "number"}
+    "latency_ms": {"type": "number"},
+    "advisor_cards": {
+      "type": "array", "maxItems": 3,
+      "description": "Advisor cards (CONTRACT 5.12) for a hide/remove command: the same checks on the edited model.",
+      "items": {
+        "type": "object",
+        "required": ["card_id", "kind", "title", "body", "item_ids", "source"],
+        "properties": {
+          "card_id": {"type": "string"},
+          "kind": {"enum": ["warning", "option", "info"]},
+          "severity": {"enum": ["violation", "suggestion", "info"], "description": "violation = a rule is broken; suggestion = worth checking; info = nothing broken or nothing checkable."},
+          "title": {"type": "string", "maxLength": 60},
+          "body": {"type": "string", "maxLength": 200},
+          "item_ids": {"type": "array", "items": {"type": "string"}},
+          "checked": {"type": "array", "items": {"type": "string"}, "description": "Rule ids (engine/rules) checked for this result."},
+          "source": {"type": "object", "required": ["type", "ref", "title", "quote"],
+                     "properties": {"type": {"type": "string"}, "ref": {"type": "string"}, "title": {"type": "string"}, "quote": {"type": "string"}}}
+        }
+      }
+    }
   }
 }

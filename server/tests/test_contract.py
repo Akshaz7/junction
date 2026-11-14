@@ -287,3 +287,25 @@ def test_e12_linked_item_and_tag_lookup(client, monkeypatch):
     assert client.get(f"/api/docs/{AC20}/items/{j['tag']}").status_code == 404  # tags are not item ids
     assert client.get(f"/api/docs/{AC20}/tags/ZZ999").status_code == 404
     assert client.get("/api/docs/no_such_doc/items/x").status_code == 404
+
+
+def test_answer_schema_accepts_multi_kind_fields_and_advisor_cards():
+    from server.schema import validate_answer
+    a = {"answer_id": "x", "question": "q", "doc_ids": ["d"],
+         "answer": {"text_md": "t", "value": {"window": 11, "door": 11}, "unit": "count", "confidence": 1, "abstained": False},
+         "citations": [{"n": 1, "doc_id": "d", "page": 1, "kind": "element", "bbox_px": None, "item_ids": ["a"], "quote": None, "item_kind": "window"}],
+         "evidence": {"boxes": [{"item_id": "a", "page": 1, "bbox_px": [0, 0, 1, 1], "label": "1", "kind": "window"}],
+                      "scene": {"doc_id": "d", "highlight_item_ids": ["a"], "camera_target_item_id": None, "item_kinds": {"a": "window"}}},
+         "trace": [], "route": "planmap", "cost": {"usd_total": 0, "calls": []}, "latency_ms": 1,
+         "advisor_cards": [{"card_id": "c", "kind": "warning", "severity": "violation", "title": "t", "body": "b", "item_ids": ["a"],
+                            "checked": ["fi-fire-exits-per-storey"], "source": {"type": "rule", "ref": "r", "title": "t", "quote": "q"}}]}
+    validate_answer(a)
+    a["answer"]["value"] = 11
+    validate_answer(a)
+    import pytest
+    for bad in ({"severity": "fatal"}, {"checked": "x"}):
+        b = {**a, "advisor_cards": [{**a["advisor_cards"][0], **bad}]}
+        with pytest.raises(Exception):
+            validate_answer(b)
+    with pytest.raises(Exception):
+        validate_answer({**a, "evidence": {**a["evidence"], "boxes": [{**a["evidence"]["boxes"][0], "kind": 3}]}})
