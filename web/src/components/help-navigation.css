@@ -1,0 +1,8 @@
+.help-more { position: relative; }
+.help-more > summary { cursor: pointer; list-style: none; }
+.help-more > summary::-webkit-details-marker { display: none; }
+.help-more-menu { position: absolute; top: 0; left: calc(100% + 10px); z-index: 70; width: 208px; padding: 6px; background: var(--card); color: var(--foreground); border: 1px solid var(--border); border-radius: var(--radius-popover); box-shadow: var(--shadow-float); }
+.help-more-menu a { display: flex; align-items: center; gap: 10px; padding: 12px; font-size: var(--text-body-sm); border-radius: var(--radius-control); }
+.help-more-menu a span { flex: 1; }
+.help-more-menu a:hover, .help-more-menu a[aria-current] { background: var(--accent); }
+.help-more a:focus-visible, .help-more > summary:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }

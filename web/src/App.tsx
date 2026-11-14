@@ -14,6 +14,7 @@ import { DataScreen } from './components/data-screen'
 import { CompareScreen } from './components/compare-screen'
 import { LibraryScreen } from './components/library-screen'
 import { ChangesScreen } from './components/changes-screen'
+import { HelpScreen } from './components/help-screen'
 import { workspaceApi } from './lib/api'
 import { navigate, useRoute } from './lib/router'
 import type { Citation, Document } from './lib/types'
@@ -75,7 +76,8 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
       {view === 'skills' && <SkillsScreen docs={docs} />}
       {view === 'automations' && <AutomationsScreen docs={docs} />}
       {view === 'overview' && <OverviewScreen docs={docs} />}
-      {view !== 'data' && view !== 'chat' && view !== 'changes' && view !== 'accuracy' && view !== 'overview' && view !== 'findings' && view !== 'skills' && view !== 'automations' && view !== 'compare' && view !== 'library' && view !== 'tools' ? <PlaceholderPage route={view} /> : null}
+      {view === 'help' && <HelpScreen />}
+      {view !== 'data' && view !== 'chat' && view !== 'changes' && view !== 'accuracy' && view !== 'overview' && view !== 'findings' && view !== 'skills' && view !== 'automations' && view !== 'compare' && view !== 'library' && view !== 'tools' && view !== 'help' ? <PlaceholderPage route={view} /> : null}
     </main>
   </div>
 }
