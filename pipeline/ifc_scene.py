@@ -170,7 +170,10 @@ def props_of(el):
 def convert_py(ifc: Path, raw_glb: Path):
     """Pure-Python IFC -> GLB (ifcopenshell geometry iterator + trimesh), used where IfcConvert is not available
     (the Linux deploy image). Same contract as IfcConvert --y-up --use-element-guids: node name = GlobalId, metres,
-    Y-up, IfcOpeningElement dropped, IfcSpace kept. One mesh per element, coloured by its dominant IFC style."""
+    Y-up, IfcOpeningElement dropped, IfcSpace kept. One mesh per element, coloured by its dominant IFC style.
+    Memory matters here (512 MB container): the iterator runs with IFC_CONVERT_THREADS threads (default 1), geometry is
+    kept as compact float32/int32 arrays, and the IFC model and iterator are freed before trimesh builds the GLB."""
+    import gc
     import multiprocessing
 
     import ifcopenshell.geom as geom
@@ -180,17 +183,17 @@ def convert_py(ifc: Path, raw_glb: Path):
     st = geom.settings()
     st.set("use-world-coords", True)
     inc = [e for e in list(f.by_type("IfcElement")) + list(f.by_type("IfcSpace")) if not e.is_a("IfcOpeningElement")]
-    scene = trimesh.Scene()
-    it = geom.iterator(st, f, max(1, min(4, multiprocessing.cpu_count())), include=inc)
-    n = 0
+    threads = int(os.environ.get("IFC_CONVERT_THREADS", "1"))
+    it = geom.iterator(st, f, max(1, min(threads, multiprocessing.cpu_count())), include=inc)
+    parts = []  # (guid, verts float32 Y-up, faces int32, rgba)
     if it.initialize():
         while True:
             sh = it.get()
             gm = sh.geometry
-            v = np.array(gm.verts, dtype=np.float64).reshape(-1, 3)
-            fc = np.array(gm.faces, dtype=np.int64).reshape(-1, 3)
+            v = np.array(gm.verts, dtype=np.float32).reshape(-1, 3)
+            fc = np.array(gm.faces, dtype=np.int32).reshape(-1, 3)
             if len(v) and len(fc):
-                v = np.column_stack([v[:, 0], v[:, 2], -v[:, 1]])  # Z-up -> Y-up (as IfcConvert --y-up)
+                v = np.ascontiguousarray(np.column_stack([v[:, 0], v[:, 2], -v[:, 1]]))  # Z-up -> Y-up (as IfcConvert --y-up)
                 rgba = [0.8, 0.8, 0.8, 1.0]
                 try:
                     mats = list(gm.materials)
@@ -204,16 +207,25 @@ def convert_py(ifc: Path, raw_glb: Path):
                         rgba = [min(1.0, max(0.0, c)) if c == c else dflt for c, dflt in zip(rgba, (0.8, 0.8, 0.8, 1.0))]
                 except Exception:  # noqa: BLE001
                     pass
-                mesh = trimesh.Trimesh(vertices=v, faces=fc, process=False)
-                mesh.visual = trimesh.visual.TextureVisuals(material=trimesh.visual.material.PBRMaterial(
-                    baseColorFactor=[int(255 * c) for c in rgba], metallicFactor=0.0, roughnessFactor=0.9,
-                    alphaMode="BLEND" if rgba[3] < 0.99 else "OPAQUE"))
-                scene.add_geometry(mesh, node_name=sh.guid, geom_name=sh.guid)
-                n += 1
+                parts.append((sh.guid, v, fc, rgba))
             if not it.next():
                 break
-    if not n:
+    del it, st, inc, f
+    gc.collect()
+    if not parts:
         raise RuntimeError("the IFC has no geometry that could be converted")
+    scene = trimesh.Scene()
+    mats = {}  # one material per distinct colour, shared between meshes
+    for guid, v, fc, rgba in parts:
+        key = tuple(int(255 * c) for c in rgba)
+        if key not in mats:
+            mats[key] = trimesh.visual.material.PBRMaterial(
+                baseColorFactor=list(key), metallicFactor=0.0, roughnessFactor=0.9,
+                alphaMode="BLEND" if rgba[3] < 0.99 else "OPAQUE")
+        mesh = trimesh.Trimesh(vertices=v, faces=fc, process=False)
+        mesh.visual = trimesh.visual.TextureVisuals(material=mats[key])
+        scene.add_geometry(mesh, node_name=guid, geom_name=guid)
+    del parts
     raw_glb.unlink(missing_ok=True)
     raw_glb.write_bytes(scene.export(file_type="glb"))
 

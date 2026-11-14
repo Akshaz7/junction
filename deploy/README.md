@@ -81,3 +81,8 @@ Not available in the deploy image: IFC conversion (stored only, status partial),
 - PDF / PNG / JPG: pages, text layer, VLM plan map, extruded scene.glb (+ scene.usdz), all persisted to `doc_artifacts`.
 - DXF: Swiss Dwellings layer names use the exact DXF reader; any other DXF is rendered and read by the VLM (then extruded).
 - IFC: `pipeline/ifc_scene.convert_py` (ifcopenshell + trimesh, no IfcConvert binary) builds scene.glb, elements.json, scene.json, plan pages, scene.usdz. Peak RSS is about 420 MB for an 11 MB IFC: use the 512 MB plan or larger, and tune `INGEST_IFC_MAX_MB` (default 15 here, 400 locally).
+
+### Memory on Aiven (512 MB plan), measured 14 Nov
+Local `docker run --memory=512m`, no model keys, image 336 MB (1.55 GB unpacked on disk). `pipeline/ifc_scene.convert_py` runs the geometry iterator with
+one thread (`IFC_CONVERT_THREADS`, default 1) and keeps float32 arrays; with 4 threads a 9.6 MB IFC peaked at about 830 MB and was OOM-killed.
+Now: 9.6 MB IFC ready in 55 s (peak 306 MB), 12 MB IFC in 21 s (peak 296 MB). The API idles at about 55 MB. PNG/DXF extrusion needs a VLM key to read the plan; without one they end "ready" with no plan map.
