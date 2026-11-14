@@ -51,6 +51,7 @@ def test_equally_ranked_conflicting_scales_need_region_scope():
 @pytest.mark.parametrize('value', [None, 0, -1, True, float('nan'), float('inf')])
 def test_invalid_scales_never_win(value):
     assert select([reading('dimension', value)])[0] is None
+    assert choose(pm({'method': 'dimension', 'm_per_px': value}))['m_per_px'] is None
 
 
 def test_printed_dimensions_upgrade_stored_prior_and_keep_original_untouched(tmp_path):

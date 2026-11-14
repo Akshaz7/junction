@@ -85,6 +85,7 @@ def select(candidates):
 def _choose(pm, folder=None, effective_scale=None):
     """Return the chosen scale plus every evidenced candidate; do not mutate pm."""
     sc = enrich(pm, folder, effective_scale=effective_scale, save_crops=False)
+    sc['m_per_px'] = positive(sc.get('m_per_px'))
     # enrich reports cross-method spread. Older margin consumers treat the
     # legacy spread_pct field as an error budget; never feed agreement into it.
     observed_spread = sc.pop('spread_pct', None)
@@ -127,6 +128,7 @@ def choose(pm, folder=None, effective_scale=None):
     except (TypeError, ValueError, KeyError, AttributeError, ArithmeticError, OSError) as exc:
         original = effective_scale if effective_scale is not None else (pm.get('scale') if isinstance(pm, dict) else {})
         sc = copy.deepcopy(original) if isinstance(original, dict) else {}
+        sc['m_per_px'] = positive(sc.get('m_per_px'))
         sc['selection'] = {'id': 'unavailable', 'label': 'Scale evidence unavailable',
                            'why_chosen': f'Candidate provenance could not be read ({type(exc).__name__}); no new conversion was applied.', 'alternatives': []}
         sc['candidates'] = []
