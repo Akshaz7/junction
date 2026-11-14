@@ -31,3 +31,5 @@
 - `localhost:5173` (make dev) shows the live working tree and can be broken mid-edit by Codex; `localhost:4173` serves the last commit (git worktree in scratchpad + vite preview) for Ash to look at. LEAD rebuilds it after web commits.
 - Without scipy, trimesh GLB export fails on face colours (scipy now added; older code sets vertex_colors/normals by hand).
 - usdchecker is /usr/bin/usdchecker (not in usd-core). UsdPrimvarReader_float2.varname must be typed string, not token.
+- Only Gemini accepts audio input among our providers: speech-intent falls back to device speech without GEMINI_API_KEY.
+- Running server/tests and engine/tests in ONE pytest process fails 5 engine tests: server tests load .env into os.environ and real keys leak into fake-provider defaults. Being fixed; until then run them separately.

@@ -9,6 +9,7 @@ from .docs_routes import router as docs_router
 from .chats_routes import router as chats_router
 from .files_routes import router as files_router
 from .live import hub, router as live_router
+from .speech_routes import router as speech_router
 from .ratelimit import RateLimitMiddleware
 
 
@@ -37,6 +38,7 @@ app.include_router(docs_router)
 app.include_router(files_router)
 app.include_router(chats_router)
 app.include_router(live_router)
+app.include_router(speech_router)
 
 
 @app.get("/api/health")

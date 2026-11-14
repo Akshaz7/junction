@@ -22,3 +22,4 @@ Every third-party model and dataset: name, source URL, licence, training data, a
 | advise | NVIDIA | nvidia/nemotron-3-super-120b-a12b | build.nvidia.com/nvidia/nemotron-3-super-120b-a12b | Anthropic claude-sonnet-5-5; Runware anthropic:claude@sonnet-4.6 |
 | tts | Runware | fishaudio:s2.1@pro | runware.ai/docs/models/fishaudio-s2-1-pro | — (ElevenLabs to be wired in S-08) |
 | OCR | local | RapidOCR (rapidocr-onnxruntime) | https://github.com/RapidAI/RapidOCR | Apache-2.0 |
+| tts | ElevenLabs | eleven_flash_v2_5 (voice SAz9YHcvj6GT2YYXdXww) | https://elevenlabs.io/docs | Runware fishaudio:s2.1@pro |

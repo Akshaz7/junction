@@ -12,8 +12,8 @@ from .live import publish
 router = APIRouter(prefix="/api")
 
 SAFE_ID = re.compile(r"^[A-Za-z0-9_.\-]+$")
-FILE_NAMES = {"scene.glb", "scene.usdz", "scene.json"}
-THUMB = re.compile(r"^page-\d+\.thumb\.png$")
+FILE_NAMES = {"scene.glb", "scene.usdz", "scene.json", "elements.json"}
+THUMB = re.compile(r"^(page-\d+\.thumb\.png|page-\d+\.png|planmap-\d+\.json)$")
 UPLOAD_EXT = {".ifc": "ifc", ".dxf": "dxf", ".dwg": "dwg", ".pdf": "pdf", ".svg": "svg",
               ".png": "raster", ".jpg": "raster", ".jpeg": "raster", ".tif": "raster", ".tiff": "raster"}
 MAX_UPLOAD = 100 * 1024 * 1024

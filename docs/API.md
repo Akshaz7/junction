@@ -26,7 +26,7 @@ anything else returns a valid abstained answer.
 -> `scene.json` (CONTRACT 5.5). Else `404 {"status": "not_built"}` (S-04 will trigger extrusion).
 
 ### GET /api/docs/{doc_id}/files/{name}
-`name` is `scene.glb`, `scene.usdz`, `scene.json` or `page-<n>.thumb.png`. Returns the file bytes. Other names 404.
+`name` is `scene.glb`, `scene.usdz`, `scene.json`, `elements.json` (IFC element index), `planmap-<n>.json`, `page-<n>.png` or `page-<n>.thumb.png`. Returns the file bytes; 404 `{"status":"not_built"}` if the file does not exist yet. Other names 404.
 
 ### POST /api/upload
 `curl -F file=@plan.pdf localhost:8000/api/upload`
@@ -74,8 +74,19 @@ data: {"answer_id": "...", "question": "How many windows are there?", "doc_ids":
 ### GET /api/costs
 -> `{"total_usd": 0.035, "calls": 3, "by_provider": {"gemini": {"calls": 2, "usd": 0.03}}, "by_task": {"read_drawing": {"calls": 2, "usd": 0.015}}}` from `results/costs.jsonl` (fields `provider`, `task`, `cost_usd`).
 
+### POST /api/tts (S-08)
+Body `{"text": "...", "voice": "<elevenlabs voice id, optional>"}` (text 1-1500 chars; 400 empty or bad voice, 413 too long).
+-> `200 audio/mpeg` bytes (headers `X-TTS-Provider`, `X-TTS-Cache: hit|miss`, `Cache-Control: public, max-age=86400`). Play with `new Audio(URL.createObjectURL(await r.blob()))`.
+-> `200 {"fallback": "device", "reason": "..."}` (JSON) when no TTS key is set, the budget cap is hit or the provider fails: the client must use the browser's `speechSynthesis`. Check `content-type` to tell the two apart.
+Backend: ElevenLabs `eleven_flash_v2_5` (about 0.00017 USD per character, logged in `results/costs.jsonl`), fallback Runware fishaudio. Identical text is served from the disk cache and costs nothing.
+
+### POST /api/speech-intent (S-08)
+Multipart upload, field `file`, audio/wav, mpeg, mp4, ogg, webm, flac, aac or aiff, max 5 MB.
+-> `{"text": "how many windows are there", "intent": "ask", "provider": "gemini"}`; `intent` is one of `ask`, `visualise`, `show_on_table`, `changes`, `other`.
+-> `200 {"fallback": "device", "reason": "..."}` when no provider can take audio. Only Gemini accepts audio (the NVIDIA and Runware adapters reject it), so without `GEMINI_API_KEY` this always returns the fallback: the client should use the browser's `SpeechRecognition` and send the text to `/api/chats/{id}/messages`.
+
 ### Not yet
-`POST /api/tts` and findings/advise (tier 3).
+Findings/advise (tier 3).
 
 ### WS /ws (live sync, S-06)
 `ws://localhost:8000/ws` (use `wss://` when deployed). Server-to-client events are small JSON objects; refetch the thing they name.

@@ -151,3 +151,18 @@ def test_bench_and_costs(client, dirs):
     assert c["calls"] == 3 and c["total_usd"] == 0.035
     assert c["by_provider"]["gemini"] == {"calls": 2, "usd": 0.03}
     assert c["by_task"]["read_drawing"]["calls"] == 2
+
+
+def test_elements_planmap_page_via_files_route(client, dirs):
+    art, _ = dirs
+    for n in ("elements.json", "planmap-2.json", "page-2.png"):
+        assert client.get(f"/api/docs/{DOC}/files/{n}").json()["status"] == "not_built"
+    (art / DOC / "elements.json").write_text('{"elements": []}')
+    (art / DOC / "planmap-2.json").write_text('{"items": []}')
+    (art / DOC / "page-2.png").write_bytes(b"\x89PNG")
+    assert client.get(f"/api/docs/{DOC}/files/elements.json").json() == {"elements": []}
+    assert client.get(f"/api/docs/{DOC}/files/planmap-2.json").json() == {"items": []}
+    assert client.get(f"/api/docs/{DOC}/files/page-2.png").content == b"\x89PNG"
+    for bad in ("page-x.png", "planmap-1.json.bak", "..%2Felements.json", "elements.json%00"):
+        assert client.get(f"/api/docs/{DOC}/files/{bad}").status_code in (400, 404, 422)
+    assert client.get("/api/docs/..%2Fetc/files/elements.json").status_code in (400, 404)
