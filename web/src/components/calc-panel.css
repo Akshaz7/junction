@@ -1,4 +1,4 @@
-.viewer-calc-panel { width: clamp(300px, 50%, 560px); flex-shrink: 0; display: flex; flex-direction: column; min-height: 0; min-width: 0; border-left: 1px solid var(--border); background: var(--card); animation: spec-panel-in .55s var(--ease-settle-wide) both; }
+.viewer-calc-panel { width: clamp(340px, 58%, 600px); flex-shrink: 0; display: flex; flex-direction: column; min-height: 0; min-width: 0; border-left: 1px solid var(--border); background: var(--card); animation: spec-panel-in .55s var(--ease-settle-wide) both; }
 .viewer-calc-panel > header { display: flex; align-items: start; gap: 4px; padding: 12px; border-bottom: 1px solid var(--border); }
 .viewer-calc-panel > header > div { flex: 1; min-width: 0; }
 .viewer-calc-panel > header strong { font-weight: 500; }
@@ -57,7 +57,6 @@
 .calc-path { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 4px; }
 .calc-path li { display: inline-flex; align-items: center; gap: 4px; }
 .calc-edge { color: var(--muted-foreground); font-size: var(--text-caption); }
-.calc-edge::before { content: '→ '; }
 .calc-node { border: 1px solid var(--border); border-radius: 6px; background: var(--ink-well); padding: 1px 7px; font: inherit; color: var(--foreground); }
 button.calc-node { cursor: pointer; }
 button.calc-node:hover, button.calc-node:focus-visible { border-color: var(--foreground); }

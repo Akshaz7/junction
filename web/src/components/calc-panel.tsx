@@ -81,7 +81,7 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
 
       {!!reasoning.graph_path?.length && <Section id="path" title="Chain of evidence">
         <ol className="calc-path" aria-label="Chain of evidence">{reasoning.graph_path.map((node, i) => <li key={i}>
-          {i > 0 && <span className="calc-edge" aria-hidden="true">{node.relation ?? '→'}</span>}
+          {i > 0 && <span className="calc-edge" aria-hidden="true">→{node.relation ? ` ${node.relation}` : ''}</span>}
           {node.item_id && onFocus ? <button type="button" className="calc-node" onClick={() => onFocus({ item_id: node.item_id!, ...(node.doc_id ? { doc_id: node.doc_id } : {}), ...(node.page != null ? { page: node.page } : {}) })}>{node.label}</button> : <span className="calc-node">{node.label}</span>}
           {node.kind && <small>{node.kind}</small>}
         </li>)}</ol>
