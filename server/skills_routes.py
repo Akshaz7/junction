@@ -147,6 +147,11 @@ def _auto(r) -> dict:
             "last_report": rep, "created_at": r["created_at"].isoformat()}
 
 
+def _cite_line(c: dict) -> str:
+    what = c.get("label") or c.get("quote") or (f"{len(c['item_ids'])} item(s)" if c.get("item_ids") else "")
+    return f"- {c.get('doc_id', '')} p.{c.get('page', '?')}" + (f": {what}" if what else "")
+
+
 def report_markdown(name: str, prompt: str, ans: dict, ran_at: str) -> str:
     a = ans["answer"]
     lines = [f"# {name}", "", f"_Ran {ran_at}. Question: {prompt}_", "", a["text_md"], ""]
@@ -154,8 +159,7 @@ def report_markdown(name: str, prompt: str, ans: dict, ran_at: str) -> str:
         lines += ["No verified answer was found.", ""]
     cites = ans.get("citations") or []
     if cites:
-        lines += ["## Sources", ""] + [f"- {c.get('doc_id', '')} p.{c.get('page', '?')}: {c.get('label') or c.get('quote') or ''}".rstrip()
-                                       for c in cites] + [""]
+        lines += ["## Sources", ""] + [_cite_line(c) for c in cites] + [""]
     lines.append(f"Confidence {a.get('confidence', 0):.2f}, cost ${ans['cost']['usd_total']:.4f}.")
     return "\n".join(lines) + "\n"
 
@@ -169,7 +173,7 @@ async def run_automation(pool, row) -> dict:
                   "markdown": report_markdown(row["name"], row["prompt"], ans, ran_at.isoformat()), "answer": ans}
     except Exception as e:  # noqa: BLE001  a failed run is a report too, never a crash of the scheduler
         report = {"report_id": uuid.uuid4().hex, "ran_at": ran_at.isoformat(), "ok": False,
-                  "markdown": f"# {row['name']}\n\nThe run failed: {type(e).__name__}.\n", "answer": None}
+                  "markdown": f"# {row['name']}\n\nThe run failed: {type(e).__name__}: {str(e)[:200]}\n", "answer": None}
     r = await pool.fetchrow("update automations set last_run_at=$2, last_report=$3::jsonb where id=$1 returning *",
                             row["id"], ran_at, json.dumps(report))
     await publish({"type": "automation.report", "automation_id": str(row["id"]), "report_id": report["report_id"]})
@@ -182,15 +186,25 @@ async def run_due(pool, now: datetime | None = None) -> int:
     rows = await pool.fetch(
         "select * from automations where enabled and coalesce(last_run_at, created_at) + (interval_minutes * interval '1 minute') <= $1 "
         "order by coalesce(last_run_at, created_at)", now)
+    n = 0
     for r in rows:
-        await run_automation(pool, r)
-    return len(rows)
+        # claim the row first (compare-and-set on last_run_at) so two API instances, or a restart overlapping a run,
+        # never run the same automation twice
+        got = await pool.fetchval("update automations set last_run_at=$2 where id=$1 and last_run_at is not distinct from $3 returning 1",
+                                  r["id"], now, r["last_run_at"])
+        if got:
+            await run_automation(pool, r)
+            n += 1
+    return n
 
 
-async def scheduler(period: float = 30.0):
-    """Background loop started by the app (AUTOMATIONS=0 turns it off)."""
+async def scheduler(period: float = 30.0, first: float = 5.0):
+    """Background loop started by the app (AUTOMATIONS=0 turns it off). All state is in PostgreSQL (last_run_at), so a
+    restart loses nothing: the first tick after `first` seconds catches up on every run that fell due while down."""
+    delay = first
     while True:
-        await asyncio.sleep(period)
+        await asyncio.sleep(delay)
+        delay = period
         with contextlib.suppress(Exception):
             pool = await db.get_pool()
             if pool is not None:

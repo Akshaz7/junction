@@ -118,3 +118,51 @@ def test_scheduler_runs_only_due_and_survives_failures(client, monkeypatch):
     client.portal.call(go)
     rep = client.get(f"/api/automations/{a['id']}").json()["last_report"]
     assert rep["ok"] is False and "failed" in rep["markdown"]
+
+
+def test_findings_message_falls_back_to_text_and_title(client, monkeypatch):
+    """Regression: engine findings carry `text`/`title` instead of `message`; the API must never return an empty message."""
+    raw = [{"rule_id": RULE, "item_ids": ["d1"], "severity": "suggestion", "text": "Only one exit found."},
+           {"rule_id": RULE, "item_ids": ["d2"], "severity": "suggestion", "title": "Narrow door"}]
+    monkeypatch.setattr(findings_routes, "_engine_run", lambda: (lambda doc_id: raw))
+    fs = client.post("/api/findings/run", json={"doc_id": DOC}).json()["findings"]
+    assert sorted(f["message"] for f in fs) == ["Narrow door", "Only one exit found."]
+    assert all(f["message"] for f in client.get("/api/findings").json()["findings"])
+
+
+def test_report_pdf_download(client, monkeypatch):
+    from server import chats_routes
+    monkeypatch.setattr(chats_routes, "ENGINE", fake_answer)
+    monkeypatch.setattr(skills_routes, "validate_answer", lambda a: None)
+    a = client.post("/api/automations", json={"name": "Doors", "prompt": "How many doors?", "doc_ids": [DOC]}).json()
+    assert client.get(f"/api/automations/{a['id']}/report.pdf").status_code == 404  # no report yet
+    client.post(f"/api/automations/{a['id']}/run")
+    r = client.get(f"/api/automations/{a['id']}/report.pdf")
+    assert r.status_code == 200 and r.headers["content-type"] == "application/pdf" and r.content.startswith(b"%PDF")
+    from pdfminer.high_level import extract_text
+    import io
+    assert "Echo: How many doors?" in extract_text(io.BytesIO(r.content))
+
+
+def test_scheduler_catches_up_after_restart_and_never_double_runs(client, monkeypatch):
+    """State lives in PostgreSQL: a fresh scheduler (new container) runs what fell due while down, once."""
+    from datetime import datetime, timedelta, timezone
+    from server import chats_routes, db
+    monkeypatch.setattr(chats_routes, "ENGINE", fake_answer)
+    monkeypatch.setattr(skills_routes, "validate_answer", lambda a: None)
+    a = client.post("/api/automations", json={"name": "A", "prompt": "q", "doc_ids": [DOC], "interval_minutes": 1}).json()
+
+    async def go():
+        pool = await db.get_pool()
+        await pool.execute("update automations set created_at = now() - interval '2 hours' where id=$1::uuid", a["id"])
+        t = asyncio.create_task(skills_routes.scheduler(period=0.2, first=0.05))  # the "restarted" scheduler
+        await asyncio.sleep(1.0)
+        t.cancel()
+        # two concurrent due-checks: the claim lets exactly one of them run it
+        await pool.execute("update automations set last_run_at = now() - interval '2 hours' where id=$1::uuid", a["id"])
+        later = datetime.now(timezone.utc)
+        res = await asyncio.gather(skills_routes.run_due(pool, later), skills_routes.run_due(pool, later))
+        return sorted(res)
+    assert client.portal.call(go) == [0, 1]
+    got = client.get(f"/api/automations/{a['id']}").json()
+    assert got["last_report"]["ok"] and got["last_run_at"]

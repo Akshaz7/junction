@@ -101,3 +101,10 @@ def test_unmatched_upload_is_new_document(client, monkeypatch):
     doc = client.post("/api/upload", files={"file": ("zzz plan.png", b"\x89PNG")}).json()["doc_id"]
     top = client.get("/api/changes").json()["changes"][0]
     assert top["type"] == "new_document" and top["doc_b"] == doc
+
+
+def test_feed_and_detail_agree_on_source(client):
+    """Regression: the list summary said one source and the detail another."""
+    for e in client.get("/api/changes").json()["changes"]:
+        if e["type"] == "new_version":
+            assert e["summary"]["source"] == client.get(f"/api/changes/{e['id']}").json()["source"] == "pdf-diff"
