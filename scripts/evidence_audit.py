@@ -96,7 +96,7 @@ def area_pair(room, doc):
     return None
 
 
-def expected_checked(response, cited, docs):
+def expected_checked(response, cited, docs, metadata=None):
     """Independent arithmetic; never calls the card builder being audited."""
     for trace in response.get("trace", []):
         m = re.search(r"plan map (\d+), drawing re-read (\d+)", trace.get("detail", ""))
@@ -104,7 +104,8 @@ def expected_checked(response, cited, docs):
             a, b = map(int, m.groups())
             return a == b, {"method": "recount", "plan": a, "reread": b}
     rooms = [(did, it) for did, it in cited if it.kind in ("room", "space")]
-    if response["answer"].get("unit") in ("m2", "m²") and rooms:
+    checked_text = " ".join(s.get("text", "") for s in (response.get("reasoning") or {}).get("steps", []) if s.get("kind") == "checked")
+    if rooms and (response["answer"].get("unit") in ("m2", "m²") or re.search(r"printed (?:label|areas?)|outline|footprint", checked_text, re.I)):
         pairs = [area_pair(it, docs[did]) for did, it in rooms[:12] if docs.get(did) and docs[did].mode != "ifc"]
         pairs = [p for p in pairs if p]
         if pairs:
@@ -120,6 +121,12 @@ def expected_checked(response, cited, docs):
                 footprint = dx*dz
                 if footprint > .5:
                     return .6*footprint <= area <= 1.02*footprint, {"method": "IFC_bbox_plausibility_only", "area": area, "footprint": footprint, "width": dx, "depth": dz}
+    scene_claim = re.search(r"All ([\d,]+) counted items are found in the 3D model", checked_text)
+    if scene_claim and metadata is not None:
+        claimed = int(scene_claim[1].replace(",", ""))
+        if all("_scene_item_ids" in metadata.get(did, {}) for did, _ in cited):
+            rendered = sum(it.item_id in metadata[did]["_scene_item_ids"] for did, it in cited)
+            return rendered == claimed, {"method": "scene_manifest_membership", "claimed": claimed, "cited": len(cited), "rendered": rendered}
     if len(rooms) == 1:
         p = rooms[0][1].props
         if p.get("label_room_type") and p.get("model_room_type"):
@@ -155,15 +162,18 @@ def audit(case, response, docs, metadata):
         return issues, checks, None
 
     label, pct = conf.get("label"), conf.get("pct")
-    if label not in ("Verified", "Cross-checked", "Estimate") or not isinstance(pct, int) or not 0 <= pct <= 100:
+    if label not in ("Verified", "Cross-checked", "Estimate") or (pct is not None and (type(pct) is not int or not 0 <= pct <= 100)):
         issue("invalid_confidence", f"Malformed confidence {conf!r}.")
     else:
         exact_sources = all(metadata.get(d, {}).get("kind") in ("ifc", "dxf", "dwg") for d in response.get("doc_ids", [case["doc_id"]]))
-        if label == "Verified" and (not exact_sources or pct < 92):
+        if label == "Verified" and not exact_sources:
             issue("verified_without_exact_source", f"{label} {pct}% on source kind {metadata.get(case['doc_id'], {}).get('kind')}; scans cannot be Verified.")
-        expected_label = "Verified" if pct >= 92 and exact_sources else "Cross-checked" if pct >= 80 else "Estimate"
-        if label != expected_label:
-            issue("label_threshold_mismatch", f"{pct}% maps to {expected_label}, shown as {label}.")
+        # Empirical percentages describe observed accuracy, not source exactness.
+        # Apply the old thresholds only to cards produced by the heuristic builder.
+        if pct is not None and not conf.get("calibration"):
+            expected_label = "Verified" if pct >= 92 and exact_sources else "Cross-checked" if pct >= 80 else "Estimate"
+            if label != expected_label:
+                issue("label_threshold_mismatch", f"{pct}% maps to {expected_label}, shown as {label}.")
         approximate_claims = [str(t.get("detail", "")) for t in response.get("trace", []) if t.get("step") not in ("route", "explain")]
         approximate_claims += [s.get("text", "") for s in steps]
         if label == "Verified" and any(re.search(r"bounding.box|approximat|estimat|fallback", t, re.I) for t in approximate_claims):
@@ -244,7 +254,7 @@ def audit(case, response, docs, metadata):
                 issue("qualified_count_unchecked", f"Width condition was not checked: only {len(sized)} of {len(doors)} source doors have a width, and the response silently returns an unqualified count.")
         checks.append("qualified_door_count_against_available_widths")
 
-    expected, facts = expected_checked(response, cited, docs)
+    expected, facts = expected_checked(response, cited, docs, metadata)
     for step in [s for s in steps if s.get("kind") == "checked"]:
         if expected is None:
             issue("checked_not_recomputable", f"No independent inputs support Checked: {step.get('text')!r}.")
@@ -421,7 +431,7 @@ class CacheOnly:
 def artifact_hashes(did, artifacts):
     result = {}
     for p in sorted((artifacts / did).glob("*.json")):
-        if p.name == "elements.json" or p.name == "doc.json" or re.match(r"planmap-\d+\.json|scale-ocr.*\.json|text-\d+\.json|rtext-\d+\.json", p.name):
+        if p.name in ("elements.json", "doc.json", "scene.json") or re.match(r"planmap-\d+\.json|scale-ocr.*\.json|text-\d+\.json|rtext-\d+\.json", p.name):
             result[p.name] = hashlib.sha256(p.read_bytes()).hexdigest()
     return result
 
@@ -458,6 +468,9 @@ def execute(cases, artifacts, output):
                     snapshot_doc(cited_did, artifacts, overlay)
                     docs[cited_did] = load_doc(cited_did, overlay)
                     meta[cited_did] = metadata_for(cited_did, artifacts)
+                    scene_path = overlay / cited_did / "scene.json"
+                    if scene_path.exists():
+                        meta[cited_did]["_scene_item_ids"] = set(read_json(scene_path).get("items", {}))
                 issues, checks, facts = audit(case, response, docs, meta)
                 if error:
                     issues.append({"code": "engine_error", "severity": "error", "detail": error})
@@ -490,6 +503,7 @@ def execute(cases, artifacts, output):
                "live_cost_usd": 0, "cached_calls": len(costs), "cache_miss_provider_attempts": sum(cache.refused.values())}
     document = {"schema_version": 1, "created_utc": timestamp,
                 "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+                "auditor_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                 "mode": "real code + read-only model cache; all network inference refused; no fake outputs",
                 "limitations": ["Cache misses follow the production unavailable-provider fallback; this is not a fresh live-model benchmark.",
                                 "Dataset numeric gold uses engine.bench.score: exact rounded counts; area/length/volume within max(0.05, 2%).",
@@ -504,6 +518,49 @@ def execute(cases, artifacts, output):
     return document
 
 
+def recheck(path, artifacts):
+    """Recompute audit checks on saved responses without any model/answer calls.
+
+    Uses the current engine's document loader. Refuse changed source snapshots
+    instead of attributing new source data to an earlier engine response.
+    """
+    from engine.solvers.data import load_doc
+    document = read_json(path)
+    problems = []
+    for row in document["rows"]:
+        case, response = row["case"], row["response"]
+        current_hashes = artifact_hashes(case["doc_id"], artifacts)
+        if any(current_hashes.get(name) != digest for name, digest in row["artifact_sha256"].items()):
+            row["issues"] = [i for i in row["issues"] if i["code"] != "source_changed_cannot_recheck"]
+            row["issues"].append({"code": "source_changed_cannot_recheck", "severity": "warning", "detail": "Saved response's source hashes differ; original checks preserved."})
+        else:
+            ids = {case["doc_id"]} | {c["doc_id"] for c in response.get("citations", []) if c.get("doc_id")}
+            docs = {did: load_doc(did, artifacts) for did in ids}
+            meta = {did: metadata_for(did, artifacts) for did in ids}
+            for did in ids:
+                scene = artifacts / did / "scene.json"
+                if scene.exists():
+                    meta[did]["_scene_item_ids"] = set(read_json(scene).get("items", {}))
+            old_errors = [i for i in row["issues"] if i["code"] in ("engine_error", "external_artifact_drift")]
+            issues, row["checks"], row["checked_recomputation"] = audit(case, response, docs, meta)
+            row["issues"] = issues + old_errors
+            row["rechecked_artifact_sha256"] = current_hashes
+        for issue in row["issues"]:
+            problems.append({"case_id": case["case_id"], "question": case["question"], "doc_id": case["doc_id"], **issue})
+    priority = {"checked_verdict_false": 0, "card_answer_number_mismatch": 0, "false_card_equation": 0,
+                "claimed_sum_not_supported": 0, "verified_without_exact_source": 1,
+                "citation_item_missing": 2, "verified_with_estimated_geometry": 2,
+                "missing_evidence_card": 3, "reason_not_sentence": 5}
+    problems.sort(key=lambda p: (priority.get(p["code"], 4), p["case_id"]))
+    document["summary"]["without_findings"] = sum(not r["issues"] for r in document["rows"])
+    document["summary"]["issue_counts"] = dict(Counter(p["code"] for p in problems))
+    document["top_20_problems"] = problems[:20]
+    document["checks_recomputed_utc"] = datetime.now(timezone.utc).isoformat()
+    document["auditor_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    write_json(path, document)
+    print(json.dumps(document["summary"], indent=2))
+
+
 def generalisation(artifacts):
     """Only called after the audit, with no tuning or fixes based on these files."""
     selection = read_json(OUT / "holdout_selection.json")
@@ -511,16 +568,24 @@ def generalisation(artifacts):
     cases = []
     for file in selection["files"]:
         pool = [dict(r, origin="generalisation", gold_kind="dataset") for r in full
-                if r["doc_id"] == file["doc_id"] and r["type"] in ("count", "area", "length", "volume")]
-        picked = stratified(pool, 3, selection["seed"])
+                if r["doc_id"] == file["doc_id"]]
+        numeric = [r for r in pool if r["type"] in ("count", "area", "length", "volume")]
+        picked = stratified(numeric, 3, selection["seed"])
+        used = {r["question"] for r in picked}
+        picked += stratified([r for r in pool if r["question"] not in used], 3-len(picked), selection["seed"])
         if len(picked) != 3:
-            raise RuntimeError(f"Not enough numeric gold for {file['doc_id']}")
+            raise RuntimeError(f"Not enough gold questions for {file['doc_id']}")
         for case in picked:
             eligible(case, artifacts, set())
             case["case_id"] = f"generalisation-{len(cases)+1:03d}"
             cases.append(case)
     result = execute(cases, artifacts, OUT / "generalisation.json")
     result["selection"] = selection
+    outcomes = result["summary"]["gold_outcomes"]
+    scored = sum(outcomes.get(k, 0) for k in ("correct", "wrong", "abstained"))
+    result["accuracy"] = {"correct": outcomes.get("correct", 0), "n": scored,
+                          "accuracy": outcomes.get("correct", 0) / scored if scored else None}
+    result["selection_note"] = "Original fixed-seed files retained. Prefer numeric gold; files without three numeric questions use text gold for the remaining questions. Text gold is audited for evidence but not numerically scored."
     result["failures"] = [{"case_id": r["case"]["case_id"], "doc_id": r["case"]["doc_id"],
                            "question": r["case"]["question"], "gold": r["case"]["answer"],
                            "value": r["response"]["answer"].get("value"), "outcome": r["outcome"]}
@@ -552,6 +617,14 @@ class AuditorTests(unittest.TestCase):
         values = self.base(); values[1]["reasoning"]["confidence"].update(label="Verified", pct=97)
         self.assertIn("verified_without_exact_source", self.codes(values))
 
+    def test_unmatched_calibration_has_no_percent(self):
+        values = self.base(); values[1]["reasoning"]["confidence"]["pct"] = None
+        self.assertNotIn("invalid_confidence", self.codes(values))
+
+    def test_bool_is_not_a_percent(self):
+        values = self.base(); values[1]["reasoning"]["confidence"]["pct"] = True
+        self.assertIn("invalid_confidence", self.codes(values))
+
     def test_missing_item(self):
         values = self.base(); values[1]["citations"][0]["item_ids"] = ["absent"]
         self.assertIn("citation_item_missing", self.codes(values))
@@ -565,6 +638,28 @@ class AuditorTests(unittest.TestCase):
         values = self.base(); values[1]["trace"] = [{"detail": "plan map 3, drawing re-read 1"}]
         values[1]["reasoning"]["steps"].append({"kind": "checked", "ok": False, "text": "A second look counted 1; kept the 3 boxed"})
         self.assertIn("checked_box_count_false", self.codes(values))
+
+    def test_scene_check_uses_manifest(self):
+        values = self.base()
+        values[1]["reasoning"]["steps"].append({"kind": "checked", "ok": True, "text": "All 1 counted items are found in the 3D model"})
+        values[3]["scan"]["_scene_item_ids"] = set()
+        self.assertIn("checked_verdict_false", self.codes(values))
+        values[3]["scan"]["_scene_item_ids"] = {"door-001"}
+        self.assertNotIn("checked_verdict_false", self.codes(values))
+
+    def test_recheck_preserves_checks_when_source_changed(self):
+        values = self.base()
+        row = {"case": dict(values[0], case_id="test"), "response": values[1],
+               "artifact_sha256": {"doc.json": "old"},
+               "issues": [{"code": "original", "severity": "error", "detail": "Original finding."}]}
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "audit.json"
+            write_json(path, {"rows": [row], "summary": {}})
+            with patch(__name__ + ".artifact_hashes", return_value={"doc.json": "changed"}), patch("builtins.print"):
+                recheck(path, Path(tmp))
+            saved = read_json(path)
+        self.assertEqual(saved["rows"][0]["response"], values[1])
+        self.assertEqual({i["code"] for i in saved["rows"][0]["issues"]}, {"original", "source_changed_cannot_recheck"})
 
     def test_false_equation(self):
         values = self.base(); values[1]["answer"].update(value=50, unit="m2", text_md="**50 m²**")
@@ -598,17 +693,23 @@ class AuditorTests(unittest.TestCase):
 
 
 def main():
+    global OUT
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--artifacts", type=Path, default=ROOT / "artifacts")
+    p.add_argument("--output-dir", type=Path, default=OUT)
     p.add_argument("--prepare", action="store_true")
     p.add_argument("--run", action="store_true")
     p.add_argument("--generalisation", action="store_true")
+    p.add_argument("--recheck", type=Path, help="Recompute checks on saved responses; no inference")
     p.add_argument("--self-test", action="store_true")
     args = p.parse_args()
+    OUT = args.output_dir.resolve()
     if args.self_test:
         unittest.main(argv=[sys.argv[0]], exit=True)
     if args.prepare:
         prepare(args.artifacts)
+    if args.recheck:
+        recheck(args.recheck, args.artifacts)
     if args.run:
         cases_path = OUT / "audit_cases.json"
         cases = read_json(cases_path) if cases_path.exists() else prepare(args.artifacts)
