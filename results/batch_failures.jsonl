@@ -1,0 +1,27 @@
+{"doc_id": "opening_design__new-2nd-story-transfer-20180920-markups-for-regis-pdf-sheet-a202-elevation-west", "stage": "pages", "reason": "error: PdfiumError('Failed to load page.')", "t": "2026-11-14 03:56:31"}
+{"doc_id": "swiss_dwellings__site3316-bldg5008-floor22637", "stage": "planmap", "reason": "RuntimeError: could not register DXF to page image", "t": "2026-11-14 04:02:10"}
+{"doc_id": "swiss_dwellings__site3454-bldg5332-floor23651", "stage": "planmap", "reason": "RuntimeError: could not register DXF to page image", "t": "2026-11-14 04:02:13"}
+{"doc_id": "swiss_dwellings__site3594-bldg5485-floor23864", "stage": "planmap", "reason": "RuntimeError: could not register DXF to page image", "t": "2026-11-14 04:02:16"}
+{"doc_id": "swiss_dwellings__site3704-bldg5711-floor24487", "stage": "planmap", "reason": "RuntimeError: could not register DXF to page image", "t": "2026-11-14 04:02:19"}
+{"doc_id": "swiss_dwellings__site3912-bldg6120-floor25531", "stage": "planmap", "reason": "RuntimeError: could not register DXF to page image", "t": "2026-11-14 04:02:23"}
+{"doc_id": "wikimedia__120885376", "stage": "pages", "reason": "error: CalledProcessError(1, ['rsvg-convert', '-d', '150', '-p', '150', '-b', 'white', '-o', '/Users/akshatthapa/Workspace/junction/artifacts/wikimedia__120885376/tmp/svg.png', 'data/full/junction-dataset/data/wikimedia/120885376.svg'])", "t": "2026-11-14 04:03:15"}
+{"doc_id": "wikimedia__1639504", "stage": "pages", "reason": "error: CalledProcessError(1, ['rsvg-convert', '-d', '150', '-p', '150', '-b', 'white', '-o', '/Users/akshatthapa/Workspace/junction/artifacts/wikimedia__1639504/tmp/svg.png', 'data/full/junction-dataset/data/wikimedia/1639504.svg'])", "t": "2026-11-14 04:03:19"}
+{"doc_id": "wikimedia__1639425", "stage": "pages", "reason": "error: CalledProcessError(1, ['rsvg-convert', '-d', '150', '-p', '150', '-b', 'white', '-o', '/Users/akshatthapa/Workspace/junction/artifacts/wikimedia__1639425/tmp/svg.png', 'data/full/junction-dataset/data/wikimedia/1639425.svg'])", "t": "2026-11-14 04:03:19"}
+{"doc_id": "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3", "stage": "usdz", "reason": "AttributeError: 'Path3D' object has no attribute 'faces'", "t": "2026-11-14 04:14:06"}
+{"doc_id": "ifc_bench__dental-clinic-mep", "stage": "scene", "reason": "RuntimeError: IfcConvert produced no GLB; see tmp/convert.log", "t": "2026-11-14 04:19:31"}
+{"doc_id": "cubicasa5k__colorful-10062", "stage": "extrude", "reason": "TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'", "t": "2026-11-14 07:33:23"}
+{"doc_id": "cubicasa5k__high-quality-3097", "stage": "extrude", "reason": "TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'", "t": "2026-11-14 07:33:51"}
+{"doc_id": "cubicasa5k__high-quality-5712", "stage": "extrude", "reason": "TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'", "t": "2026-11-14 07:33:56"}
+{"doc_id": "cubicasa5k__high-quality-architectural-11209", "stage": "extrude", "reason": "TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'", "t": "2026-11-14 07:34:22"}
+{"doc_id": "cubicasa5k__high-quality-architectural-13044", "stage": "extrude", "reason": "TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'", "t": "2026-11-14 07:34:46"}
+{"doc_id": "cubicasa5k__high-quality-architectural-3222", "stage": "extrude", "reason": "TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'", "t": "2026-11-14 07:35:20"}
+{"doc_id": "cubicasa5k__high-quality-architectural-3624", "stage": "extrude", "reason": "TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'", "t": "2026-11-14 07:35:22"}
+{"doc_id": "cubicasa5k__high-quality-architectural-3849", "stage": "extrude", "reason": "TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'", "t": "2026-11-14 07:35:23"}
+{"doc_id": "cubicasa5k__high-quality-architectural-4825", "stage": "extrude", "reason": "TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'", "t": "2026-11-14 07:35:28"}
+{"doc_id": "cubicasa5k__high-quality-architectural-5505", "stage": "extrude", "reason": "TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'", "t": "2026-11-14 07:35:33"}
+{"doc_id": "cubicasa5k__high-quality-architectural-5825", "stage": "extrude", "reason": "TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'", "t": "2026-11-14 07:35:36"}
+{"doc_id": "cubicasa5k__high-quality-architectural-6631", "stage": "extrude", "reason": "TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'", "t": "2026-11-14 07:35:45"}
+{"doc_id": "cubicasa5k__high-quality-architectural-7918", "stage": "extrude", "reason": "TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'", "t": "2026-11-14 07:35:54"}
+{"doc_id": "cubicasa5k__high-quality-architectural-913", "stage": "extrude", "reason": "TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'", "t": "2026-11-14 07:36:04"}
+{"doc_id": "cubicasa5k__colorful-10062", "stage": "extrude", "reason": "TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'", "t": "2026-11-14 07:41:31"}
+{"doc_id": "cubicasa5k__colorful-10062", "stage": "extrude", "reason": "TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'", "t": "2026-11-14 07:41:34"}
