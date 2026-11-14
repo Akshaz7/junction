@@ -619,6 +619,11 @@ def process(doc_id: str, ddir: Path, pdf_path: Path, page_index: int = 0, write:
     if sum(1 for i in pm["items"] if i["kind"] in ("room", "wall")) < 3:
         return None
     pm["provenance"]["gate"] = reason
+    try:  # ingest-time accuracy score vs the PDF's own evidence; can never break ingest
+        from pipeline import pdf_quality
+        pm["quality"] = pdf_quality.assess(page, pm, raw_walls=walls)
+    except Exception as e:
+        pm["quality"] = {"error": f"{type(e).__name__}: {e}"[:200]}
     if write:
         (ddir / f"planmap-{n}.json").write_text(json.dumps(pm))
     return pm

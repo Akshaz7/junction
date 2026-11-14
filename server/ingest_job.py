@@ -243,6 +243,18 @@ def _pdf_via_ifc_on() -> bool:
     return os.environ.get("PDF_VIA_IFC", "1") != "0"
 
 
+def _copy_quality(ddir: Path, page: int):
+    """Copy the plan map's quality block (pipeline.pdf_quality: score, ci95, summary) into scene.json so the 3D/AR
+    clients see it. Best effort: never fails the ingest."""
+    try:
+        q = json.loads((ddir / f"planmap-{page}.json").read_text()).get("quality")
+        sj = ddir / "scene.json"
+        if q and sj.is_file():
+            sj.write_text(json.dumps({**json.loads(sj.read_text()), "quality": q}, indent=1))
+    except Exception as e:  # noqa: BLE001
+        print("quality copy skipped:", repr(e)[:200], file=sys.stderr)
+
+
 def _pdf_via_ifc(doc_id: str, ddir: Path, doc: dict, page: int):
     """Vector PDF plan map -> IFC4 (pipeline.pdf_to_ifc) -> the IFC scene path (ifc_scene: scene.glb, scene.json,
     elements.json), so a PDF looks like an IFC upload in 3D/AR. The page image and planmap-<n>.json stay the PDF's own
@@ -255,6 +267,7 @@ def _pdf_via_ifc(doc_id: str, ddir: Path, doc: dict, page: int):
         ifc = pdf_to_ifc.build(json.loads(keep), ddir / "model.ifc", storey_name="Floor 1", doc_id=doc_id)
         ifc_scene.process(Path(ifc), doc, ddir)
         pdf_to_ifc.link_planmap(f, doc_id)
+        _copy_quality(ddir, page)
     except Exception:
         f.write_text(keep)
         for name in ("model.ifc", "elements.json", "scene.glb", "scene.json"):
@@ -501,6 +514,8 @@ def _run(doc_id: str, st: Status) -> str:
                         st.stages[-1].update(ok=True, note="fell back to extrude: " + st.stages[-1].pop("error", "")[:200])
                 if not ok:
                     ok = st.stage("extrude", lambda: _extrude(doc_id, ddir, plan_pages[0], raster_walls=False))
+                    if ok:
+                        _copy_quality(ddir, plan_pages[0])
                 if not ok:  # vector plan map would not extrude: today's path (VLM plan map, raster walls)
                     st.stages[-1].update(stage="extrude_pdf_vector", ok=True, note=st.stages[-1].pop("error", "")[:200])
                     for f in ddir.glob("planmap-[0-9]*.json"):
