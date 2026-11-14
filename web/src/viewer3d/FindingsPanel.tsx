@@ -40,7 +40,7 @@ export function FindingsPanel({ viewer, stage }: { viewer: Viewer | null; stage:
         if (!active || current !== version) return;
         setFindings(data.findings); setSelected([]);
         setStatus(data.status === 'no_checks' ? data.detail || 'Checks are not available yet.'
-          : data.findings.length ? '' : 'No findings returned.');
+          : data.findings.length ? '' : 'Checks ran: no rule problems found on this drawing.');
       } catch (reason) {
         if (active && current === version) setError(reason instanceof Error ? reason.message : 'Findings unavailable.');
       } finally {
