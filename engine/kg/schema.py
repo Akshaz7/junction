@@ -17,7 +17,7 @@ def norm(value) -> str:
 
 def kind_of(kind: str) -> str:
     return {'space': 'room', 'stairs': 'stair', 'curtain_wall': 'wall', 'air_terminal': 'terminal',
-            'duct_fitting': 'duct', 'pipe_fitting': 'pipe'}.get(kind, kind if kind in KINDS else 'fixture')
+            'duct_fitting': 'duct', 'pipe_fitting': 'pipe', 'text': 'sheet_ref', 'dimension': 'sheet_ref', 'annotation': 'sheet_ref'}.get(kind, kind if kind in KINDS else 'fixture')
 
 
 def readable(value, fallback: str) -> str:
@@ -76,9 +76,14 @@ def finalise(graph, counterpart_docs=()):
 
     def find(x):
         parent.setdefault(x, x)
-        if parent[x] != x:
-            parent[x] = find(parent[x])
-        return parent[x]
+        root = x
+        while parent[root] != root:
+            root = parent[root]
+        while parent[x] != x:
+            following = parent[x]
+            parent[x] = root
+            x = following
+        return root
 
     linked = set()
     clean = {}

@@ -111,3 +111,11 @@ def test_neighbours_keeps_parallel_comparison_proofs():
     graph={'nodes':list(r.nodes.values()),'edges':list(r.edges.values())}
     assert len(neighbours(graph,a))==2
     assert len(neighbours(graph,a,kinds='differs'))==1
+
+
+def test_text_is_reference_evidence_not_a_service_fixture(tmp_path):
+    plan(tmp_path,'drawing',[item('r','room',[0,0,100,100]),item('label','text',[10,10,20,20],label='Kitchen')])
+    g=build({'id':'text','docs':[{'doc_id':'drawing','role':'plan'}]},tmp_path)
+    n=next(n for n in g['nodes'] if n.get('source') and n['source']['item_id']=='label')
+    assert n['kind']=='sheet_ref'
+    assert not any(e['kind']=='in_room' and e['from']==n['id'] for e in g['edges'])
