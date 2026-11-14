@@ -29,8 +29,9 @@ export async function loadRevisionComparison(id: string, signal: AbortSignal, pa
   } catch (error) {
     // The existing client requires images. Real issues can have text or issue
     // metadata only; preserve those responses until the shared client supports them.
-    if (workspaceApi.isDemo || signal.aborted || !(error instanceof Error) || error.message !== 'Comparison images are not available for this change.') throw error
+    if (signal.aborted || !(error instanceof Error) || error.message !== 'Comparison images are not available for this change.') throw error
   }
+  if (workspaceApi.isDemo) return workspaceApi.fetchJson<RevisionComparison>(`/api/changes/${encodeURIComponent(id)}${page != null ? `?page=${page}` : ''}`, signal)
   const response = await apiFetch(`/api/changes/${encodeURIComponent(id)}${page != null ? `?page=${page}` : ''}`, { signal })
   if (!response.ok) throw new Error(`Comparison could not be loaded (${response.status}).`)
   const data = await response.json() as RevisionComparison
