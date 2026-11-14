@@ -1,6 +1,6 @@
 # MORNING: report for Ash
 
-_Last updated: Sat 14 Nov 08:28 EET (run 1). See TASKS.md for every row._
+_Last updated: Sat 14 Nov 09:00 EET (run 1). See TASKS.md for every row._
 
 ## 1. What works
 | Demo step (MASTER_PROMPT §12) | Status |
@@ -25,7 +25,8 @@ _Last updated: Sat 14 Nov 08:28 EET (run 1). See TASKS.md for every row._
 - Spend so far (`results/costs.jsonl`): Runware $0.017, ElevenLabs $0.010, NVIDIA $0 (free tier). Modal $0.
 
 ## 3. Deployed URLs
-None yet. Aiven Postgres `hologram-pg` is running (EU, do-fra) and seeded. App deploy waits for the Aiven GitHub App (below) and the tier-1 web rows.
+- Web (Vercel, offline demo mode, generated sample data): https://hologram-khaki.vercel.app — checked live at 09:00 (question answered with citations, 0 page errors).
+- Backend: not yet. Aiven Runtime needs the Aiven GitHub App (builds fail without it; see deploy/README.md). The image runs healthy against hologram-pg. Once the backend is up, the web gets an /api rewrite and drops demo mode.
 
 ## 4. Rows blocked
 - V-06, V-07, V-08 (vision fine-tunes): the Modal workspace is paused (every call: "Workspace … is paused"). Un-pause it in the Modal dashboard; scripts are ready (results/vision/seg_finetuned.json, det_finetuned.json).
