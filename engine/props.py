@@ -313,6 +313,8 @@ def request(question):
         ("width_m", r"\bwidth\b|\bwider\b|\bnarrower\b"),
         ("height_m", r"\bheight\b|\btaller\b|\bshorter\b")) if re.search(rx, q)), None)
     schedule = bool(re.search(r"\bschedule\b|türliste|oviluettelo|dörrförteckning|fensterliste", q))
+    if not schedule and re.search(r"\b(?:area|length|volume|perimeter)\b", q):
+        return None  # Named-room quantities belong to the existing quantity solver.
     if re.search(r"\b(?:group|by)\b", q):
         if re.search(r"\bby type\b", q):
             prop = "type_name"

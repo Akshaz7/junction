@@ -102,6 +102,11 @@ def test_missing_fire_rating_counts_presence_instead_of_summarising(tmp_path):
     assert recorded["answer"]["value"] == 2  # 'Not rated' is recorded, not missing.
 
 
+def test_property_tag_lookup_does_not_intercept_named_room_quantities():
+    for name in ("Arbeitsraum (3-2)", "Toimisto (14)", "Kontor (Rum nr. 206)"):
+        assert props.request(f"What is the net floor area of room '{name}' on level 3, in m²?") is None
+
+
 @pytest.mark.parametrize("schema", ["IFC2X3", "IFC4", "IFC4X3"])
 @pytest.mark.parametrize("imperial", [False, True])
 def test_overall_width_is_source_dimension_not_index_estimate(tmp_path, schema, imperial):
