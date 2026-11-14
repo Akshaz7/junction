@@ -43,6 +43,7 @@ for (const extension of ['.png', '.jpg', '.dxf', '.ifc']) {
     const detail = page.getByRole('complementary', { name: 'Document details', exact: true })
     await detail.getByRole('button', { name: 'Ask about it', exact: true }).first().click()
     await expect(page.getByLabel('Selected documents')).toBeVisible()
+    test.info().annotations.push({ type: 'owner', description: 'ENGINE' })
     const answer = await ask(page, 'How many doors are there?')
     expect(answer.doc_ids).toContain(receipt.doc_id)
     expect(answer.answer.text_md.trim().length).toBeGreaterThan(0)

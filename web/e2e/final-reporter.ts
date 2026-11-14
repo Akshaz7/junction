@@ -18,7 +18,8 @@ export default class FinalReporter implements Reporter {
       writeFileSync(path, attachment.body)
       attachment.path = path
     }
-    const owner = test.title.match(/\[(WEB|3D|ENGINE|SERVER|PROJECTS)\]/)?.[1] ?? 'WEB'
+    const owner = test.annotations.find((annotation) => annotation.type === 'owner')?.description
+      ?? test.title.match(/\[(WEB|3D|ENGINE|SERVER|PROJECTS)\]/)?.[1] ?? 'WEB'
     const row = {
       title: test.titlePath().join(' > '), owner, status: result.status, duration_ms: result.duration,
       errors: result.errors.map((e) => e.message?.replace(/\u001b\[[0-9;]*m/g, '')),
