@@ -127,9 +127,14 @@ def _chat(r) -> dict:
 
 
 @router.get("/chats")
-async def list_chats():
+async def list_chats(limit: int | None = None):
+    """Newest first. `limit` (1-1000) caps the rows; without it every chat is returned (older clients)."""
     pool = await _pool()
-    rows = await pool.fetch("select id, doc_id, title, created_at from chats order by created_at desc")
+    q = "select id, doc_id, title, created_at from chats order by created_at desc"
+    if limit is not None:
+        rows = await pool.fetch(q + " limit $1", max(1, min(int(limit), 1000)))
+    else:
+        rows = await pool.fetch(q)
     return {"chats": [_chat(r) for r in rows]}
 
 
@@ -199,8 +204,9 @@ async def _attach_advice(ans: dict, doc_ids: list[str], hidden: list[str], cid) 
 async def ask(chat_id: str, body: NewMessage):
     if len(body.content) > 8000:
         raise HTTPException(413, "Message content exceeds 8,000 characters")
-    pool = await _pool()
     cid = _uuid(chat_id)
+    # Refusals must be HTTP errors, before SSE commits the response headers.
+    pool = await _pool()
     c = await pool.fetchrow("select id, doc_id from chats where id=$1", cid)
     if c is None:
         raise HTTPException(404, "chat not found")
@@ -210,42 +216,50 @@ async def ask(chat_id: str, body: NewMessage):
         listed = await visible_doc_ids(pool)
         if any(d not in listed for d in doc_ids):
             raise HTTPException(404, "document not found")
-    from . import artifact_store
-    for _d in doc_ids:  # uploaded docs: files may only be in PostgreSQL after a container restart
-        await artifact_store.ensure_doc(_d)
-    def _ids(v):   # answers.answer->'doc_ids' (jsonb text) of an assistant turn: thread memory resolves "this one" / "and doors?" with it
-        try:
-            v = json.loads(v) if isinstance(v, str) else v
-            return [d for d in v if isinstance(d, str)] if isinstance(v, list) else []
-        except ValueError:
-            return []
-    history = [{"role": r["role"], "content": r["content"], "doc_ids": _ids(r["doc_ids"])} for r in reversed(await pool.fetch(
-        "select m.role, m.content, (select a.answer->'doc_ids' from answers a where a.message_id=m.id limit 1) as doc_ids "
-        "from messages m where m.chat_id=$1 order by m.created_at desc limit 10", cid))]
-    umid = await pool.fetchval(
-        "insert into messages (chat_id, role, content) values ($1,'user',$2) returning id", cid, body.content)
-    ACTIVE[str(cid)] = {"question": body.content, "statuses": ["Thinking…"], "traces": []}
-    await publish({"type": "chat.message", "chat_id": str(cid), "message_id": str(umid), "role": "user",
-                   "text": body.content[:300]})
-
-    hidden: list[str] = []
-    try:
-        for st in await scene_edits.scene_state(pool, cid):
-            if not doc_ids or st.get("doc_id") in doc_ids:
-                hidden.extend(st.get("hidden") or [])
-    except Exception:  # noqa: BLE001 — scene state is optional context, never block the answer
-        hidden = []
-    sstate = {"hidden": hidden} if hidden else None
 
     async def stream():
         try:
+            # Flush before restoring documents, loading history or writing the user turn.
+            yield {"event": "status", "data": json.dumps({"text": "Thinking…"})}
             async for ev in _stream():
                 yield ev
+        except HTTPException as e:
+            # Headers are already sent; retain the usual detail in the SSE error envelope.
+            yield {"event": "error", "data": json.dumps({"detail": e.detail})}
+        except Exception as e:
+            yield {"event": "error", "data": json.dumps({"detail": f"request failed: {e}"})}
         finally:
             if ACTIVE.pop(str(cid), None) is not None:  # failed or abandoned: tell watchers to resync
                 await publish({"type": "chat.done", "chat_id": str(cid)})
 
     async def _stream():
+        from . import artifact_store
+        for _d in doc_ids:  # uploaded docs: files may only be in PostgreSQL after a container restart
+            await artifact_store.ensure_doc(_d)
+        def _ids(v):   # answers.answer->'doc_ids' (jsonb text) of an assistant turn: thread memory resolves "this one" / "and doors?" with it
+            try:
+                v = json.loads(v) if isinstance(v, str) else v
+                return [d for d in v if isinstance(d, str)] if isinstance(v, list) else []
+            except ValueError:
+                return []
+        history = [{"role": r["role"], "content": r["content"], "doc_ids": _ids(r["doc_ids"])} for r in reversed(await pool.fetch(
+            "select m.role, m.content, (select a.answer->'doc_ids' from answers a where a.message_id=m.id limit 1) as doc_ids "
+            "from messages m where m.chat_id=$1 order by m.created_at desc limit 10", cid))]
+        umid = await pool.fetchval(
+            "insert into messages (chat_id, role, content) values ($1,'user',$2) returning id", cid, body.content)
+        ACTIVE[str(cid)] = {"question": body.content, "statuses": ["Thinking…"], "traces": []}
+        await publish({"type": "chat.message", "chat_id": str(cid), "message_id": str(umid), "role": "user",
+                       "text": body.content[:300]})
+
+        hidden: list[str] = []
+        try:
+            for st in await scene_edits.scene_state(pool, cid):
+                if not doc_ids or st.get("doc_id") in doc_ids:
+                    hidden.extend(st.get("hidden") or [])
+        except Exception:  # noqa: BLE001 — scene state is optional context, never block the answer
+            hidden = []
+        sstate = {"hidden": hidden} if hidden else None
+
         loop = asyncio.get_running_loop()
         q: asyncio.Queue = asyncio.Queue()
 

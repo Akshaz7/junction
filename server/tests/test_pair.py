@@ -90,3 +90,23 @@ def test_db_write_failure_does_not_fail_register(monkeypatch):
         await asyncio.gather(*list(pair_routes._tasks))
         assert await pair_routes.check("ABCD1234", "chat-x") == {"paired": True}
     asyncio.run(run())
+
+
+def test_register_publishes_a_proof_not_the_code(monkeypatch):
+    import asyncio
+    import json
+
+    sent = []
+
+    async def publish(event):
+        sent.append(event)
+
+    async def no_pool():
+        return None
+    monkeypatch.setattr(pair_routes.live, "publish", publish)
+    monkeypatch.setattr(pair_routes, "_pool", no_pool)
+    pair_routes._memory.clear()
+    asyncio.run(pair_routes.register("ABCD1234", "chat-7"))
+    assert sent == [{"type": "pair.chat", "chat_id": "chat-7", "proof": pair_routes.proof("ABCD1234", "chat-7")}]
+    assert "ABCD1234" not in json.dumps(sent)
+    assert pair_routes.proof("OTHER9999", "chat-7") != sent[0]["proof"]

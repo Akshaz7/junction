@@ -5,12 +5,13 @@ codes; a paired device asks whether an unknown chat belongs to one of its codes.
 (table created on first use), otherwise process memory. No accounts: the code is the only credential.
 """
 import asyncio
+import hashlib
 import logging
 import re
 
 from fastapi import APIRouter, HTTPException
 
-from . import db
+from . import db, live
 
 router = APIRouter(prefix="/api/pair")
 CODE = re.compile(r"^[A-Za-z0-9]{6,32}$")
@@ -53,12 +54,21 @@ async def _persist(code: str, chat_id: str) -> None:
         log.warning("pair register: DB write failed", exc_info=True)
 
 
+def proof(code: str, chat_id: str) -> str:
+    """Lets a paired device recognise the chat from a live event without the code being broadcast."""
+    return hashlib.sha256(f"{code}:{chat_id}".encode()).hexdigest()[:16]
+
+
 @router.post("/{code}/chats/{chat_id}", status_code=204)
 async def register(code: str, chat_id: str):
     code = _code(code)
     if not (0 < len(chat_id) <= 80):
         raise HTTPException(400, "invalid chat id")
     _remember(code, chat_id)
+    try:  # instant path: paired sockets learn the chat belongs to them before its first message event
+        await live.publish({"type": "pair.chat", "chat_id": chat_id, "proof": proof(code, chat_id)})
+    except Exception:
+        log.warning("pair register: live publish failed", exc_info=True)
     task = asyncio.create_task(_persist(code, chat_id))
     _tasks.add(task)
     task.add_done_callback(_tasks.discard)

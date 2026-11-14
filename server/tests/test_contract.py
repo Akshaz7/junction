@@ -132,8 +132,9 @@ def test_chats_and_streamed_question(client, monkeypatch):
     assert [m["role"] for m in got["messages"]] == ["user", "assistant"]
     assert got["messages"][1]["answer"]["answer_id"] == ans["answer_id"]
     assert client.get("/api/chats/not-a-uuid").status_code == 404
-    assert client.post("/api/chats/00000000-0000-0000-0000-000000000000/messages",
-                       json={"content": "hi"}).status_code == 404
+    missing = client.post("/api/chats/00000000-0000-0000-0000-000000000000/messages",
+                          json={"content": "hi"})
+    assert missing.status_code == 404 and missing.json() == {"detail": "chat not found"}
 
 
 def test_message_length_limit_and_unknown_docs_leave_no_messages(client, monkeypatch):
@@ -142,7 +143,8 @@ def test_message_length_limit_and_unknown_docs_leave_no_messages(client, monkeyp
     chat = client.post("/api/chats", json={"doc_ids": [DOC]}).json()
     url = f"/api/chats/{chat['id']}/messages"
     assert client.post(url, json={"content": "x" * 8001}).status_code == 413
-    assert client.post(url, json={"content": "hello", "doc_ids": [DOC, "unknown"]}).status_code == 404
+    missing = client.post(url, json={"content": "hello", "doc_ids": [DOC, "unknown"]})
+    assert missing.status_code == 404 and missing.json() == {"detail": "document not found"}
     assert client.get(f"/api/chats/{chat['id']}").json()["messages"] == []
     response = client.post(url, json={"content": "x" * 8000, "doc_ids": [DOC]})
     assert response.status_code == 200 and _sse(response.text)[-1][0] == "answer"

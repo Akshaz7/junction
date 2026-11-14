@@ -4,7 +4,7 @@ import { ArrowUp, AtSign, CalendarClock, FileSearch, FileText, FolderOpen, HardH
 import { Button } from './ui'
 import { AnswerCard } from './answer-card'
 import { rememberChat } from '../lib/known-chats'
-import { isPairedChat, registerChat } from '../lib/pairing'
+import { acceptPairProof, isPairedChat, registerChat } from '../lib/pairing'
 import { NO_ANSWER_MESSAGE } from '../lib/answer-text'
 import { DocumentViewer, useViewerSheet } from './document-viewer'
 import { workspaceApi } from '../lib/api'
@@ -213,6 +213,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   useEffect(() => {
     if (demo) return
     return chatLive.subscribe((event) => {
+      if (event.type === 'pair.chat') { void acceptPairProof(event.chat_id, event.proof); return }
       if (event.type !== 'chat.message' || event.role !== 'user' || submitting.current) return
       if (event.chat_id === chatId.current) return
       // Strangers' chats never raise the notice: only with Follow on, and only for chats this browser knows.

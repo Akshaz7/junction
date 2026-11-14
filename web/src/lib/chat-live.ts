@@ -6,6 +6,7 @@ export type ChatLiveEvent =
   | { type: 'chat.trace'; chat_id: string; step: TraceStep }
   | { type: 'chat.delta'; chat_id: string; text: string }
   | { type: 'chat.done'; chat_id: string }
+  | { type: 'pair.chat'; chat_id: string; proof: string }
   | { type: 'connected' }
   | { type: 'disconnected' }
 
@@ -20,6 +21,7 @@ export function decodeChatEvent(raw: unknown): Extract<ChatLiveEvent, { chat_id:
   if (event.type === 'chat.trace' && event.step && typeof event.step === 'object' && !Array.isArray(event.step))
     return { type: event.type, chat_id: event.chat_id, step: event.step as TraceStep }
   if (event.type === 'chat.delta' && typeof event.text === 'string') return { type: event.type, chat_id: event.chat_id, text: event.text }
+  if (event.type === 'pair.chat' && typeof event.proof === 'string') return { type: event.type, chat_id: event.chat_id, proof: event.proof }
   if (event.type === 'chat.done') return { type: event.type, chat_id: event.chat_id }
   if (event.type === 'chat.status' && typeof event.text === 'string')
     return { type: event.type, chat_id: event.chat_id, text: event.text }
