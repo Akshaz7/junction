@@ -32,6 +32,9 @@ _WASTE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(?:%|percent)\s*(?:waste|wastage|extra
 def wants_order(question: str) -> bool:
     if re.search(r"\bin what order\b|\border (?:of|by)\b", question, re.I):
         return False
+    if re.search(r"\b(?:linear|metres?|meters?|lengths?|per room)\b", question, re.I) and not re.search(
+            r"\b(?:order|buy|purchase|procure|waste|wastage|allowance|overage)\b", question, re.I):
+        return False   # plain measurement questions stay with the measuring solvers
     return bool(_ASK.search(question) and (
         re.search(r"\b(?:order|buy|purchase|procure)\b", question, re.I)
         or any(re.search(rx, question, re.I) for _, typ, rx in _MATERIALS if typ != "count")))

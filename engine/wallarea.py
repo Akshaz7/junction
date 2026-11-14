@@ -611,7 +611,7 @@ def wants_wallarea(question):
     q = (question or "").casefold()
     if re.search(r"\b(?:plasterboard|drywall|gypsum board|wallboard|facade|façade)\b", q):
         return not bool(re.search(r"\b(?:thickness|fire rating|material is|made of|how many walls)\b", q))
-    return bool(re.search(r"\bwalls?\b", q) and re.search(r"\b(?:area|surface|paint|render|cladding|insulation|take.?off|sheets?)\b", q))
+    return bool(re.search(r"\bwalls?\b", q) and re.search(r"\b(?:area|surface|paint|render|cladding|insulation|take.?off|sheets? (?:of|needed|required|to buy|to order))\b", q))
 
 
 def _number(value):

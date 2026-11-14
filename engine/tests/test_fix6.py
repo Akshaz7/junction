@@ -172,7 +172,8 @@ def test_piping_total_is_true_metres_and_glows_in_3d():
 
 
 def test_piping_sizes_dn_length_systems_drains():
-    assert "DN100" in answer("what pipe sizes are used", [DH])["answer"]["text_md"]
+    sizes = answer("what pipe sizes are used", [DH])["answer"]["text_md"]
+    assert "DN100" in sizes or "nominal diameter 100" in sizes   # F-ORDER plain-words guard spells DN out
     d = answer("DN100 length", [DH])
     assert abs(d["answer"]["value"] - 81.96) < 0.01 and len(d["evidence"]["scene"]["highlight_item_ids"]) == 108
     assert "S_Schmutzwasser" in answer("pipes by system", [DH])["answer"]["text_md"]
