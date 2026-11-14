@@ -212,6 +212,7 @@ final class ARSceneController: ObservableObject {
             model = container
             isFixture = loaded.isFixture
             isLoaded = true
+            holoLog("scene ready doc=\(activeDocID ?? "-") items=\(manifest?.items.count ?? 0) bundled=\(isBundledDemo)")
             // Never put evidence for an unavailable document on unrelated fixture items.
             setHighlights(docID == nil || docID == activeDocID ? itemIDs : [],
                           cameraTargetItemID: docID == nil || docID == activeDocID ? cameraTargetItemID : nil)
@@ -256,6 +257,7 @@ final class ARSceneController: ObservableObject {
     }
 
     private func finishPlacement(at position: SIMD3<Float>) {
+        holoLog("placement")
         guard let view = arView, let model else { return }
         removeGhost()
         // Keep scene Y vertical even if the estimated plane is slightly tilted.

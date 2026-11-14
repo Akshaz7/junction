@@ -1,6 +1,9 @@
 import Foundation
 import RealityKit
 
+/// Obvious, greppable device log line: `xcrun devicectl ... --console | grep HOLO:`.
+func holoLog(_ message: String) { NSLog("HOLO: %@", message) }
+
 @MainActor
 enum ARSceneLoader {
     struct LoadedScene {
@@ -22,6 +25,9 @@ enum ARSceneLoader {
                      url: URL?, manifestURL: URL? = nil,
                      repository: SceneRepository? = nil,
                      fetcher: ((String) async throws -> SceneRepository.Files)? = nil) async throws -> LoadedScene {
+        let started = Date()
+        func elapsed() -> String { String(format: "+%.2fs", Date().timeIntervalSince(started)) }
+        holoLog("load start doc=\(docID ?? "-") url=\(url?.absoluteString ?? "-")")
         if let docID {
             do {
                 let files: SceneRepository.Files
@@ -30,17 +36,27 @@ enum ARSceneLoader {
                 } else {
                     files = try await (repository ?? SceneRepository(apiURL: apiURL)).fetch(docID: docID)
                 }
-                return try await loadDocument(files: files, docID: docID, isBundledDemo: false)
+                holoLog("api files ready \(elapsed()) model=\(files.modelURL.lastPathComponent)")
+                let loaded = try await loadDocument(files: files, docID: docID, isBundledDemo: false)
+                holoLog("api scene loaded \(elapsed())")
+                return loaded
             } catch {
+                holoLog("api path failed \(elapsed()): \(error.localizedDescription)")
                 try Task.checkCancellation()
             }
             if let files = DemoScenes.files(for: docID) {
                 do {
-                    return try await loadDocument(files: files, docID: docID, isBundledDemo: true)
+                    let loaded = try await loadDocument(files: files, docID: docID, isBundledDemo: true)
+                    holoLog("bundled scene loaded \(elapsed())")
+                    return loaded
                 } catch {
+                    holoLog("bundled path failed \(elapsed()): \(error.localizedDescription)")
                     try Task.checkCancellation()
                 }
+            } else {
+                holoLog("no bundled copy for \(docID)")
             }
+            holoLog("falling back to fixture \(elapsed())")
             return try await load(url: nil)
         }
         if let url {
@@ -67,8 +83,10 @@ enum ARSceneLoader {
     private static func loadDocument(files: SceneRepository.Files, docID: String,
                                      isBundledDemo: Bool) async throws -> LoadedScene {
         let manifest = try await loadManifest(from: files.manifestURL)
+        holoLog("manifest decoded items=\(manifest.items.count) doc=\(manifest.doc_id ?? "-")")
         guard manifest.doc_id == docID else { throw LoaderError.wrongDocument }
         let entity = try await loadEntity(from: files.modelURL)
+        holoLog("entity loaded")
         try Task.checkCancellation()
         // A correct JSON response can still accompany a stale or wrong USDZ.
         let names = Set(SceneIndex(root: entity).entitiesByUSDName.keys.filter { $0.hasPrefix("i_") })
@@ -100,7 +118,12 @@ enum ARSceneLoader {
         if url.isFileURL {
             return try await Entity(contentsOf: url)
         }
-        let (downloadURL, response) = try await URLSession.shared.download(from: url)
+        holoLog("download start \(url.absoluteString)")
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 15
+        let (downloadURL, response) = try await URLSession.shared.download(for: request)
+        let bytes = (try? FileManager.default.attributesOfItem(atPath: downloadURL.path)[.size] as? Int) ?? 0
+        holoLog("download end bytes=\(bytes)")
         defer { try? FileManager.default.removeItem(at: downloadURL) }
         guard let response = response as? HTTPURLResponse, (200..<300).contains(response.statusCode) else {
             throw LoaderError.downloadFailed

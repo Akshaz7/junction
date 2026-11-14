@@ -39,8 +39,9 @@ final class BlueprintStyleTests: XCTestCase {
 
     func testLabelOpacityFadesWithAngularSize() {
         XCTAssertEqual(BlueprintStyle.labelOpacity(width: 1, distance: 100), 0)
-        XCTAssertEqual(BlueprintStyle.labelOpacity(width: 1, distance: 3), 1)
-        let mid = BlueprintStyle.labelOpacity(width: 1, distance: 8)
+        XCTAssertEqual(BlueprintStyle.labelOpacity(width: 0.04, distance: 0.4), 1)
+        XCTAssertEqual(BlueprintStyle.labelOpacity(width: 1, distance: 8), 1)
+        let mid = BlueprintStyle.labelOpacity(width: 1, distance: 25)
         XCTAssertTrue(mid > 0 && mid < 1)
     }
 }

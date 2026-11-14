@@ -67,34 +67,48 @@ final class BlueprintDetail {
 
     // MARK: Floor labels, dimensions, storey label (after placement geometry is final)
 
+    /// Everything here reads manifest boxes (they share the USD content frame; see DemoSceneTests), never the
+    /// visible entities: room volumes are hidden by the cutaway and report no bounds.
     func build(manifest: SceneManifest, index: SceneIndex, content: Entity) {
         group.name = "blueprint-detail"
         let policy = CutawayPolicy(manifest: manifest)
         let elevations = Dictionary(policy.storeys.compactMap { s in s.name.map { ($0, s.elevation_m ?? 0) } },
                                     uniquingKeysWith: { first, _ in first })
-        var wallRects: [String: (minX: Float, maxX: Float, minZ: Float, maxZ: Float, y: Float)] = [:]
+        let floorTops = Self.floorTops(manifest: manifest, elevations: elevations)
+        var wallRects: [String: (minX: Float, maxX: Float, minZ: Float, maxZ: Float)] = [:]
         for item in manifest.items.values {
-            guard let storey = item.storey, elevations[storey] != nil,
-                  let entity = index.entitiesByUSDName[item.usd_name] else { continue }
-            let box = entity.visualBounds(relativeTo: content)
-            guard box.extents.x.isFinite, box.extents.z.isFinite, box.extents.x > 0 || box.extents.z > 0 else { continue }
+            guard let storey = item.storey, elevations[storey] != nil, let box = item.bbox_m else { continue }
             switch item.kind?.lowercased() {
             case "wall":
-                var r = wallRects[storey] ?? (box.min.x, box.max.x, box.min.z, box.max.z, box.min.y)
-                r.minX = min(r.minX, box.min.x); r.maxX = max(r.maxX, box.max.x)
-                r.minZ = min(r.minZ, box.min.z); r.maxZ = max(r.maxZ, box.max.z)
-                r.y = min(r.y, box.min.y)
+                var r = wallRects[storey] ?? (box.minimum.x, box.maximum.x, box.minimum.z, box.maximum.z)
+                r.minX = min(r.minX, box.minimum.x); r.maxX = max(r.maxX, box.maximum.x)
+                r.minZ = min(r.minZ, box.minimum.z); r.maxZ = max(r.maxZ, box.maximum.z)
                 wallRects[storey] = r
             case "room", "space":
-                addRoom(item, box: box, storey: storey, content: content)
+                addRoom(item, box: box, storey: storey, floorY: floorTops[storey] ?? (elevations[storey] ?? 0) + 0.02)
             default: break
             }
         }
         for (storey, rect) in wallRects {
             let label = BlueprintStyle.storeyLabel(name: storey, elevation: elevations[storey] ?? 0)
-            addDimensions(rect: rect, storey: storey, storeyLabel: label)
+            addDimensions(rect: (rect.minX, rect.maxX, rect.minZ, rect.maxZ,
+                                 floorTops[storey] ?? (elevations[storey] ?? 0) + 0.02),
+                          storey: storey, storeyLabel: label)
         }
         for (name, entity) in storeyGroups { entity.isEnabled = name == policy.activeStorey() }
+    }
+
+    /// Top of each storey's floor slab, +2 cm: the highest slab surface that starts at the storey elevation.
+    static func floorTops(manifest: SceneManifest, elevations: [String: Float]) -> [String: Float] {
+        var tops: [String: Float] = [:]
+        for item in manifest.items.values {
+            guard item.kind?.lowercased() == "slab" || item.kind?.lowercased() == "floor",
+                  let storey = item.storey, let elevation = elevations[storey], let box = item.bbox_m,
+                  box.minimum.y <= elevation + 0.1, box.maximum.y <= elevation + 0.6,
+                  box.maximum.y >= elevation - 0.6 else { continue }
+            tops[storey] = max(tops[storey] ?? -.greatestFiniteMagnitude, box.maximum.y)
+        }
+        return tops.mapValues { $0 + 0.02 }
     }
 
     private func storeyGroup(_ name: String) -> Entity {
@@ -106,25 +120,25 @@ final class BlueprintDetail {
         return entity
     }
 
-    private func addRoom(_ item: SceneManifest.Item, box: BoundingBox, storey: String, content: Entity) {
-        let footprint = SIMD2(box.extents.x, box.extents.z)
+    private func addRoom(_ item: SceneManifest.Item, box: SceneBounds, storey: String, floorY: Float) {
+        let extents = box.maximum - box.minimum
+        let footprint = SIMD2(extents.x, extents.z)
         guard footprint.x > 0.5, footprint.y > 0.5 else { return }
         let name = BlueprintStyle.roomName(item)
         let area = BlueprintStyle.roomArea(item, footprint: footprint)
         let parent = storeyGroup(storey)
-        let floorY = box.min.y
         // Floor tint, inset so the walls stay crisp.
         let plate = ModelEntity(
             mesh: .generateBox(size: [max(footprint.x - 0.2, 0.1), 0.01, max(footprint.y - 0.2, 0.1)]),
             materials: [Self.flatMaterial(BlueprintStyle.roomTint(BlueprintStyle.roomType(name: name)), alpha: 0.7)])
         plate.name = "blueprint-floor"
-        plate.position = [box.center.x, floorY + 0.045, box.center.z]
+        plate.position = [box.center.x, floorY + 0.005, box.center.z]
         parent.addChild(plate)
         guard area >= BlueprintStyle.minLabelledArea else { return }
         let text = BlueprintStyle.roomLabel(name: name, area: area)
         guard let label = Self.flatText(text, fitWidth: footprint.x * 0.8, fitDepth: footprint.y * 0.7,
                                         color: UIColor(white: 0.15, alpha: 1)) else { return }
-        label.entity.position = [box.center.x, floorY + 0.07, box.center.z]
+        label.entity.position = [box.center.x, floorY + 0.03, box.center.z]
         label.entity.name = "blueprint-room-label"
         parent.addChild(label.entity)
         floorLabels.append((storey, label))
@@ -135,7 +149,7 @@ final class BlueprintDetail {
         let parent = storeyGroup(storey)
         let width = rect.maxX - rect.minX, depth = rect.maxZ - rect.minZ
         guard width > 1, depth > 1 else { return }
-        let y = rect.y + 0.07
+        let y = rect.y + 0.01
         let line = Self.flatMaterial(UIColor(white: 0.12, alpha: 1), alpha: 1)
         let offset: Float = 0.7
         func bar(_ size: SIMD3<Float>, _ at: SIMD3<Float>) {

@@ -93,7 +93,7 @@ enum BlueprintStyle {
     static func labelOpacity(width: Float, distance: Float) -> Float {
         guard distance > 0.01, width > 0 else { return 0 }
         let angular = width / distance
-        return min(max((angular - 0.09) / 0.05, 0), 1)
+        return min(max((angular - 0.03) / 0.03, 0), 1)
     }
 
     private static func propertyText(_ property: SceneProperty) -> String? {
