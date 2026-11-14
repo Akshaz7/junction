@@ -40,6 +40,8 @@ describe('live chat notifications', () => {
     sockets[0].receive('{"type": "ping"}')
     expect(sockets[0].sent).toEqual(['{"type":"pong"}'])
     sockets[0].close()
+    expect(a).toHaveBeenLastCalledWith({ type: 'disconnected' })
+    expect(b).toHaveBeenLastCalledWith({ type: 'disconnected' })
     vi.advanceTimersByTime(250)
     expect(connect).toHaveBeenCalledTimes(2)
     sockets[1].open()

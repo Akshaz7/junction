@@ -8,6 +8,7 @@ import { chatLive } from '../lib/chat-live'
 
 function useOverviewSection<T>(load: (signal: AbortSignal) => Promise<T>, liveChats = false) {
   const [state, setState] = useState<{ data?: T; loading: boolean; error: string }>({ loading: true, error: '' })
+  const [live, setLive] = useState('connecting')
   useEffect(() => {
     let controller: AbortController
     function refresh() {
@@ -22,11 +23,13 @@ function useOverviewSection<T>(load: (signal: AbortSignal) => Promise<T>, liveCh
     }
     refresh()
     const unsubscribe = liveChats ? chatLive.subscribe((event) => {
+      if (event.type === 'connected') setLive('open')
+      if (event.type === 'disconnected') setLive('connecting')
       if (event.type === 'chat.message' || event.type === 'connected') refresh()
     }) : undefined
     return () => { controller.abort(); unsubscribe?.() }
   }, [load, liveChats])
-  return state
+  return { ...state, live }
 }
 
 const loadChanges = (signal: AbortSignal) => overviewApi.getChanges(signal)
@@ -54,7 +57,7 @@ export function OverviewScreen({ docs = [] }: { docs?: Document[] }) {
   const total = bench.data?.data.cells?.['ALL x ALL']
   const docTitle = (id: string) => docs.find((doc) => doc.doc_id === id)?.title || id
 
-  return <section className="overview-screen" aria-label="Workspace overview">
+  return <section className="overview-screen" aria-label="Workspace overview" data-live={chats.live}>
     <header className="overview-greeting"><h2>Your workspace at a glance</h2><p>Pick up a question or see what has changed.</p></header>
     <div className="overview-grid">
       <OverviewCard title="This week's changes" href="#/changes" loading={changes.loading} error={changes.error}>

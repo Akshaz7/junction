@@ -2,8 +2,9 @@ export type ChatLiveEvent =
   | { type: 'chat.message'; chat_id: string; message_id: string; role: string }
   | { type: 'chat.status'; chat_id: string; text: string }
   | { type: 'connected' }
+  | { type: 'disconnected' }
 
-export function decodeChatEvent(raw: unknown): Exclude<ChatLiveEvent, { type: 'connected' }> | null {
+export function decodeChatEvent(raw: unknown): Extract<ChatLiveEvent, { chat_id: string }> | null {
   if (typeof raw !== 'string') return null
   let event: Record<string, unknown>
   try { event = JSON.parse(raw) } catch { return null }
@@ -49,6 +50,7 @@ export function createChatLiveClient(options: { url?: string; connect?: (url: st
       connection.addEventListener('close', () => {
         if (socket !== connection) return
         socket = null
+        emit({ type: 'disconnected' })
         reconnect()
       })
       connection.addEventListener('error', () => { if (socket === connection) connection.close() })

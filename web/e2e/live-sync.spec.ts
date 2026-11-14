@@ -57,18 +57,18 @@ test('the overview chat list refreshes when another device asks a question', asy
   const receiver = await browser.newContext({ baseURL })
   try {
     const page = await receiver.newPage()
-    let snapshots = 0
-    page.on('response', (response) => { if (response.ok() && new URL(response.url()).pathname === '/api/chats') snapshots++ })
     await page.goto('/#/overview')
-    await expect.poll(() => snapshots, { timeout: 15_000 }).toBeGreaterThanOrEqual(2)
+    await expect(page.getByRole('region', { name: 'Workspace overview', exact: true })).toHaveAttribute('data-live', 'open', { timeout: 15_000 })
     const title = `Live overview ${Date.now()}`
     const created = await request.post('http://localhost:8000/api/chats', { data: { doc_ids: [docId], title } })
     expect(created.ok()).toBe(true)
     const { id } = await created.json() as { id: string }
-    const answered = await request.post(`http://localhost:8000/api/chats/${id}/messages`, { data: { content: 'How many windows are there?', doc_ids: [docId] } })
-    expect(answered.ok()).toBe(true)
     const link = page.locator(`[data-testid="overview-chat"][href="#/chat?chat=${id}"]`)
+    const start = performance.now()
+    const answered = request.post(`http://localhost:8000/api/chats/${id}/messages`, { data: { content: 'How many windows are there?', doc_ids: [docId] } })
     await expect(link).toBeVisible({ timeout: 2000 })
     await expect(link.locator('.overview-answer')).not.toHaveText('No answer yet.', { timeout: 2000 })
+    expect(performance.now() - start, 'Remote overview answer must appear within two seconds of sending').toBeLessThan(2000)
+    expect((await answered).ok()).toBe(true)
   } finally { await receiver.close() }
 })

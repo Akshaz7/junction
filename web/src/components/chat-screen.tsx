@@ -116,6 +116,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     }
     const unsubscribe = chatLive.subscribe((event) => {
       if (event.type === 'connected') { refresh(); return }
+      if (event.type === 'disconnected') return
       if (event.chat_id !== liveChatId || submitting.current) return
       if (event.type === 'chat.message') {
         pendingMessageId = event.role === 'user' ? event.message_id : null
