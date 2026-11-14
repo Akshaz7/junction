@@ -35,3 +35,6 @@ deploy/demo_artifacts/ifc_bench__digital-hub-arc/scene.usdz
 web/public/brand/stoa-logo.svg
 web/public/brand/favicon-180.png
 web/node_modules
+
+# symlinked into worktrees; without a trailing slash so the symlink itself is ignored
+node_modules
