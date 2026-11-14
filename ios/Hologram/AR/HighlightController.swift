@@ -66,6 +66,11 @@ final class HighlightController {
         }
     }
 
+    /// More than this many highlighted items and the per-item tags are dropped (same number as the web, W-53).
+    static let tagLimit = 12
+
+    static func isDense(count: Int) -> Bool { count > tagLimit }
+
     /// Labels are keyed by item ID so a filtered selection can retain its 2D numbers.
     /// Without explicit labels, numbers follow the original request order, including missing IDs.
     /// Captions are short item names shown under each number.
@@ -111,6 +116,9 @@ final class HighlightController {
             original.entity.components.set(model)
         }
         litGroups = groups
+        // Dense answers (web W-53 rule): keep the per-kind glow and the legend chip, drop the per-item tags.
+        // The tapped item still gets its callout through ARSceneController.selectedItem.
+        guard !Self.isDense(count: resolved.count) else { return }
         for item in resolved {
             let style = kinds[item.id].flatMap { $0.isEmpty ? nil : KindColors.style(for: $0) }
             let base = style.flatMap { $0.key == "other" ? nil : $0.label } ?? captions[item.id]

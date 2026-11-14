@@ -92,6 +92,33 @@ final class HighlightControllerTests: XCTestCase {
     }
 
     @MainActor
+    func testDenseHighlightDropsTagsButKeepsGlowAndRestores() throws {
+        XCTAssertFalse(HighlightController.isDense(count: 12))
+        XCTAssertTrue(HighlightController.isDense(count: 13))
+        let root = Entity()
+        let original = SimpleMaterial(color: .red, isMetallic: false)
+        var ids: [String] = [], models: [ModelEntity] = []
+        for n in 0..<13 {
+            let id = "door-\(n)"
+            let group = Entity()
+            group.name = SceneIndex.usdName(for: id)
+            let model = ModelEntity(mesh: .generateBox(size: 0.1), materials: [original])
+            group.addChild(model)
+            root.addChild(group)
+            ids.append(id); models.append(model)
+        }
+        let controller = HighlightController(root: root)
+        controller.highlight(itemIDs: ids, kinds: Dictionary(uniqueKeysWithValues: ids.map { ($0, "door") }))
+        XCTAssertTrue(controller.labelsByItemID.isEmpty, "13 items: no per-item tags")
+        XCTAssertTrue(models.allSatisfy { $0.model?.materials.first is UnlitMaterial }, "glow stays")
+        controller.highlight(itemIDs: Array(ids.prefix(12)))
+        XCTAssertEqual(controller.labelsByItemID.count, 12, "12 items keep tags")
+        controller.highlight(itemIDs: ids)
+        controller.clear()
+        XCTAssertTrue(models.allSatisfy { $0.model?.materials.first is SimpleMaterial }, "clear restores")
+    }
+
+    @MainActor
     func testUnselectedItemsKeepOriginalMaterialsAndTagsAreStaggered() throws {
         let root = Entity()
         let original = SimpleMaterial(color: .red, isMetallic: false)

@@ -44,7 +44,7 @@ final class BlueprintDetailSceneTests: XCTestCase {
         let named = manifest.items.values.filter { $0.kind == "room" }.compactMap(BlueprintStyle.roomName)
         XCTAssertTrue(named.contains("Besprechungsraum I"), "rooms: \(named.prefix(5))")
         let room = try XCTUnwrap(manifest.items.values.first { BlueprintStyle.roomName($0) == "Besprechungsraum I" })
-        XCTAssertEqual(BlueprintStyle.roomArea(room, footprint: [1, 1]), 23.9, accuracy: 0.01)
+        XCTAssertEqual(try XCTUnwrap(BlueprintStyle.roomArea(room)), 23.9, accuracy: 0.01)
     }
 
     /// Renders the Keller storey from above with an offscreen ARView and writes a PNG for review.

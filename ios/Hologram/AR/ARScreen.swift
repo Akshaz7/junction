@@ -157,7 +157,7 @@ struct ARScreen: View {
     /// "Doors 11 · Windows 11": one colour dot per highlighted kind, shown when two or more kinds are lit.
     @ViewBuilder private var kindLegend: some View {
         let rows = controller.highlightLegend
-        if rows.count >= 2 {
+        if rows.count >= 2 || (!rows.isEmpty && HighlightController.isDense(count: controller.highlightedItemIDs.count)) {
             HologramCardPill {
                 HStack(spacing: 10) {
                     ForEach(rows, id: \.style.key) { row in
