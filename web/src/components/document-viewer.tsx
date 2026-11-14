@@ -18,6 +18,7 @@ import { kindFromItemId, kindStyle } from '../lib/kind-colors'
 import { placeEvidence, type ItemPlace, type LinkedItem } from '../lib/linked'
 import { AnnotationLayer, useAnnotations, type Annotation, type MarkupTool } from './viewer-tools/annotations'
 import { findSheetText, loadSheetText, type SheetText } from './viewer-tools/sheet-text'
+import { RoomLabels } from './viewer-tools/room-labels'
 import { SpecPanel } from './viewer-tools/spec-panel'
 import { downloadSource } from './viewer-tools/download-source'
 
@@ -177,14 +178,22 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
     return () => { setHover(null, '2d'); setSelected(null, '2d') }
   }, [citation.doc_id, citation.page])
 
+  // The page being shown. A new page of the same document loads behind the old one and swaps in place (same <img> node,
+  // no blank frame); evidence for the new page waits until its image has painted.
+  const urlRef = useRef('')
+  const loadingPage = useRef(citation.page)
+  const loadedDoc = useRef('')
+  const [shownPage, setShownPage] = useState(citation.page)
+  useEffect(() => () => { if (urlRef.current) URL.revokeObjectURL(urlRef.current) }, [])
   useEffect(() => {
     const controller = new AbortController()
     let disposed = false
-    let url = ''
     setError('')
-    setDoc(null)
-    setImageUrl('')
-    setImage(null)
+    if (loadedDoc.current !== citation.doc_id || retry) {
+      setDoc(null)
+      setImageUrl('')
+      setImage(null)
+    }
     // Let StrictMode's setup/cleanup replay finish before starting network requests.
     Promise.resolve()
       .then(async () => {
@@ -195,13 +204,18 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
           workspaceApi.getPageImage(citation.doc_id, citation.page, controller.signal),
         ])
         if (disposed) return
-        url = URL.createObjectURL(blob)
+        const url = URL.createObjectURL(blob)
+        const old = urlRef.current
+        urlRef.current = url
+        loadedDoc.current = citation.doc_id
+        loadingPage.current = citation.page
         setDoc(metadata)
         setImageUrl(url)
+        if (old) setTimeout(() => URL.revokeObjectURL(old), 1000)
       }).catch((err: unknown) => {
         if (!disposed) setError(err instanceof Error ? err.message : 'The drawing could not be loaded.')
       })
-    return () => { disposed = true; controller.abort(); if (url) URL.revokeObjectURL(url) }
+    return () => { disposed = true; controller.abort() }
   }, [citation.doc_id, citation.page, retry])
 
   useLayoutEffect(() => {
@@ -406,10 +420,11 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       onPointerCancel={(event) => { finishAnnotation(event.pointerId, false); pointers.current.delete(event.pointerId) }}
       onLostPointerCapture={(event) => { finishAnnotation(event.pointerId, false); pointers.current.delete(event.pointerId) }}>
       {imageUrl && <div className="drawing-plane" style={{ width: image?.width, height: image?.height, transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`, visibility: image ? 'visible' : 'hidden' }}>
-        <img src={imageUrl} alt={`Drawing: ${doc?.title ?? citation.doc_id}, page ${citation.page}`} draggable={false}
-          onLoad={(event) => setImage({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })}
+        <img src={imageUrl} alt={`Drawing: ${doc?.title ?? citation.doc_id}, page ${shownPage}`} draggable={false}
+          onLoad={(event) => { setImage({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight }); setShownPage(loadingPage.current) }}
           onError={() => { setImage(null); setError('This page image could not be displayed.') }} />
-        {image && <svg className="drawing-evidence" width={image.width} height={image.height} viewBox={`0 0 ${image.width} ${image.height}`} aria-label="Numbered drawing evidence">
+        {image && shownPage === citation.page && <RoomLabels docId={citation.doc_id} page={citation.page} width={image.width} height={image.height} scale={view.scale} />}
+        {image && shownPage === citation.page && <svg className="drawing-evidence" width={image.width} height={image.height} viewBox={`0 0 ${image.width} ${image.height}`} aria-label="Numbered drawing evidence">
           {regions.map((region, index) => {
             const [x, y, right, bottom] = region.bbox
             const labelSize = 22 / view.scale
@@ -448,7 +463,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
           <AnnotationLayer marks={annotations.marks} draft={draft} />
         </svg>}
       </div>}
-      {image && regions.some((region) => !region.text) && <KindLegend className="kind-legend-2d" kinds={regions.filter((region) => !region.text).map((region) => region.kind)} totals={totalKinds} />}
+      {image && shownPage === citation.page && regions.some((region) => !region.text) && <KindLegend className="kind-legend-2d" kinds={regions.filter((region) => !region.text).map((region) => region.kind)} totals={totalKinds} />}
       {error ? <div className="viewer-message"><p role="alert">{error}</p><Button variant="raised" onClick={() => setRetry(retry + 1)}>Try again</Button></div>
         : !image && <p className="viewer-message" role="status">Loading drawing…</p>}
     </div>

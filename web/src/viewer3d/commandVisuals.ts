@@ -5,6 +5,8 @@ import { DIM_OPACITY } from './cinematic';
 
 const ISOLATE_OPACITY = 0.18;
 const ISOLATE_MS = 250;
+/** A removed item the answer also highlights stays as a faint ghost (with its glow, outline and tag) instead of vanishing. */
+export const GHOST_AMOUNT = 0.22;
 
 /** Last material layer: never mutate the source, answer or local-selection materials. */
 export function createCommandVisuals(scene: LoadedScene) {
@@ -110,7 +112,7 @@ export function createCommandVisuals(scene: LoadedScene) {
         const wasHidden = state.hidden.has(id);
         const hidden = next.hidden.has(id);
         if (hidden === wasHidden) continue;
-        const target = hidden ? 0 : 1;
+        const target = hidden ? (next.highlighted.has(id) ? GHOST_AMOUNT : 0) : 1;
         if (reducedMotion) { amounts.set(id, target); fades.delete(id); }
         else fades.set(id, { from: amounts.get(id) ?? 1, to: target, start: now });
       }

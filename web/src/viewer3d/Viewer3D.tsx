@@ -52,6 +52,12 @@ export interface Viewer3DTestHandle {
   pick(item_id: string): boolean;
   /** Camera position and orbit target, to prove a new answer keeps the view. */
   camera(): { position: number[]; target: number[] };
+  /** Vertical scale of an item's node (0 = still to be built), to prove highlights show during the build-up. */
+  scaleY(item_id: string): number | null;
+  /** Whether the item's node is drawn (a removed but highlighted item is a visible ghost). */
+  drawn(item_id: string): boolean;
+  /** Storey the selector shows and the build-up step label, to prove they agree. */
+  storeyAndStep(): { storey: string | null; step: string };
 }
 export type LinkedViewerCanvas = HTMLCanvasElement & { __viewer3d?: Viewer3DTestHandle };
 
@@ -261,6 +267,9 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       walk: () => viewerRef.current!.walk(),
       findings: () => viewerRef.current!.findings(),
       camera: () => { const v = viewerRef.current!; return { position: v.camera.position.toArray(), target: v.controls.target.toArray() }; },
+      drawn: (id) => { for (let n: { visible: boolean; parent: unknown } | null = viewerRef.current?.scene?.items.get(id) ?? null; n; n = n.parent as typeof n) if (!n.visible) return false; return !!viewerRef.current?.scene?.items.has(id) },
+      scaleY: (id) => viewerRef.current?.scene?.items.get(id)?.scale.y ?? null,
+      storeyAndStep: () => ({ storey: (document.querySelector('.drawing-model select') as HTMLSelectElement | null)?.selectedOptions[0]?.textContent ?? null, step: document.querySelector('.drawing-model [data-testid="build-step-label"]')?.textContent ?? '' }),
       pick(itemId) {
         if (!viewerRef.current?.scene?.items.has(itemId)) return false;
         selectItem(itemId);
@@ -295,7 +304,10 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     selectItem(itemId);
   }
 
-  const storeyIndex = storeys.indexOf(cutaway.activeStorey ?? '');
+  // While the build-up plays, the selector names the storey being built, so it agrees with the step label.
+  const stepStorey = build && build.phase !== 'done' ? [...storeys].sort((a, b) => b.length - a.length).find((name) => build.label.startsWith(`${name} `)) : undefined;
+  const shownStorey = stepStorey ?? cutaway.activeStorey ?? '';
+  const storeyIndex = storeys.indexOf(shownStorey);
   function selectStorey(name: string | null) {
     cancelMove();
     viewerRef.current?.setStorey(name);
@@ -312,7 +324,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       <label htmlFor={selectId}>Storey</label>
       <button type="button" aria-label="Previous storey" disabled={state !== 'ready' || storeyIndex <= 0}
         onClick={() => selectStorey(storeys[storeyIndex - 1])}>−</button>
-      <select id={selectId} value={cutaway.activeStorey ?? ''} disabled={state !== 'ready'}
+      <select id={selectId} value={shownStorey} disabled={state !== 'ready'}
         onChange={(event) => selectStorey(event.target.value || null)}>
         <option value="">All storeys</option>
         {storeys.map((name) => <option key={name} value={name}>{name}</option>)}
