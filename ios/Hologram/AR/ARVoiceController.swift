@@ -64,7 +64,8 @@ final class ARVoiceController: NSObject, ObservableObject, AVSpeechSynthesizerDe
                 transcript = ""
                 answerText = ""
                 seconds = 0
-                status = "Listening… Tap to send (15 seconds maximum)."
+                status = "Listening… I will send when you stop talking."
+                var detector = SilenceDetector()
                 metering = Task { [weak self] in
                     while !Task.isCancelled {
                         try? await Task.sleep(for: .milliseconds(100))
@@ -72,6 +73,15 @@ final class ARVoiceController: NSObject, ObservableObject, AVSpeechSynthesizerDe
                         recorder.updateMeters()
                         self.level = min(1, max(0, pow(10, recorder.averagePower(forChannel: 0) / 20)))
                         self.seconds = min(15, Int(recorder.currentTime))
+                        switch detector.feed(powerDB: recorder.averagePower(forChannel: 0), at: recorder.currentTime) {
+                        case .endOfSpeech:
+                            self.finishRecording(docID: docID, onAnswer: onAnswer)
+                            return
+                        case .noSpeech:
+                            self.cancelListening(message: "No speech heard. Tap the mic to try again.")
+                            return
+                        case .listening: break
+                        }
                         if !recorder.isRecording {
                             self.finishRecording(docID: docID, onAnswer: onAnswer)
                             return
@@ -84,6 +94,21 @@ final class ARVoiceController: NSObject, ObservableObject, AVSpeechSynthesizerDe
                 if !Task.isCancelled { fail(error) }
             }
         }
+    }
+
+    /// Stops the recorder without sending anything.
+    private func cancelListening(message: String) {
+        recorder?.stop()
+        recorder = nil
+        metering?.cancel()
+        metering = nil
+        isRecording = false
+        level = 0
+        if let url = recordingURL {
+            try? FileManager.default.removeItem(at: url)
+            recordingURL = nil
+        }
+        status = message
     }
 
     private func finishRecording(docID: String, onAnswer: @escaping (VoiceAnswer) -> Void) {

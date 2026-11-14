@@ -60,6 +60,14 @@ final class ARSceneController: ObservableObject {
     private var previewPosition: SIMD3<Float>?
     private var footprintCenter = SIMD3<Float>.zero
     private var buildAnimator: BuildAnimator?
+    private var choreographer: AnswerChoreographer?
+    /// "7 doors" counting up while the voice answer lights items one by one; nil when idle.
+    @Published private(set) var spotlight: Spotlight?
+
+    struct Spotlight: Equatable {
+        let text: String
+        let color: UIColor
+    }
 
     /// Colour legend rows for the current highlights ("Doors 11 . Windows 11"); empty unless kinds are known.
     var highlightLegend: [(style: KindStyle, count: Int)] {
@@ -119,6 +127,7 @@ final class ARSceneController: ObservableObject {
             self?.updatePlacementPreview()
             self?.updateWalkGuide()
             self?.buildAnimator?.tick()
+            self?.choreographer?.tick()
             self?.updateAnswerLabels()
         }
     }
@@ -362,6 +371,61 @@ final class ARSceneController: ObservableObject {
     private func cancelBuild() {
         buildAnimator?.finish()
         buildAnimator = nil
+        cancelChoreography()
+    }
+
+    /// Ends a running voice choreography at its final pose and removes the dimming.
+    private func cancelChoreography() {
+        choreographer?.finish()
+        choreographer?.restoreDim()
+        choreographer = nil
+        spotlight = nil
+    }
+
+    /// Voice answers: spin once, dim the rest, light the answer items one by one in reading order.
+    private func startChoreography(itemIDs: [String]) {
+        guard !UIAccessibility.isReduceMotionEnabled, isPlaced, buildAnimator == nil,
+              let model, let content, let manifest, let index = sceneIndex,
+              let highlights = highlightController else { return }
+        let elevation = Dictionary(uniqueKeysWithValues: (manifest.storeys ?? []).compactMap { storey in
+            storey.name.map { ($0, storey.elevation_m ?? 0) }
+        })
+        var entries: [AnswerChoreographer.Entry] = []
+        var answerNames: Set<String> = []
+        for id in Set(itemIDs) {
+            guard let item = manifest.items[id], let entity = index.entitiesByUSDName[item.usd_name],
+                  entity.isEnabled, highlights.litItemIDs.contains(id) else { continue }
+            let center = item.bbox_m.map { SIMD2($0.center.x, $0.center.z) } ?? .zero
+            entries.append(.init(
+                item: .init(id: id, kind: item.kind, center: center,
+                            elevation: item.storey.flatMap { elevation[$0] } ?? 0),
+                entity: entity,
+                color: item.kind.flatMap { $0.isEmpty ? nil : KindColors.style(for: $0).color }
+                    ?? HighlightController.accentColor))
+            answerNames.insert(item.usd_name)
+        }
+        guard !entries.isEmpty else { return }
+        let visible = visibleItemIDs
+        var dimmed: [(Entity, Float)] = []
+        for (id, item) in manifest.items where visible.contains(id) && !answerNames.contains(item.usd_name) {
+            guard let entity = index.entitiesByUSDName[item.usd_name], entity.isEnabled else { continue }
+            dimmed.append((entity, originalOpacity[item.usd_name] ?? 1))
+        }
+        let kinds = entries.map(\.item.kind)
+        let accent = entries.first?.color ?? HighlightController.accentColor
+        let uniform = Set(kinds.map { KindColors.key(for: $0) }).count == 1
+        let animator = AnswerChoreographer(
+            container: model, content: content, pivot: footprintCenter, highlights: highlights,
+            entries: entries, dimmed: dimmed, spin: !isWalking,
+            unit: HighlightController.labelUnit(for: content),
+            onCount: { [weak self] count in
+                self?.spotlight = count == 0 ? nil
+                    : Spotlight(text: AnswerChoreography.caption(count: count, kinds: kinds),
+                                color: uniform ? accent : HighlightController.accentColor)
+            },
+            onFinish: { })
+        choreographer = animator
+        animator.begin()
     }
 
     /// Plan first, then the building rises out of it in construction order. Returns false when there is nothing
@@ -441,6 +505,7 @@ final class ARSceneController: ObservableObject {
 
     func setHighlights(_ itemIDs: [String], cameraTargetItemID: String? = nil,
                        labels: [String: String] = [:]) {
+        cancelChoreography()
         highlightedItemIDs = itemIDs
         // Measure label positions against the full model before hiding the new cutaway.
         let visibility = sceneIndex?.entitiesByUSDName.mapValues(\.isEnabled) ?? [:]
@@ -561,13 +626,17 @@ final class ARSceneController: ObservableObject {
     @discardableResult
     func applyVoiceAnswer(_ answer: VoiceAnswer) -> Bool {
         guard answer.evidence.scene.doc_id == activeDocID else { return false }
+        var endedOnHighlight = true
         if let commands = answer.evidence.scene.commands, !commands.isEmpty {
             for command in commands { applySceneCommand(command) }
+            if let last = commands.last { endedOnHighlight = last.op == .highlight }
         } else {
             setHighlights(answer.evidence.scene.highlight_item_ids,
                           cameraTargetItemID: answer.evidence.scene.camera_target_item_id,
                           labels: answer.highlightLabels)
         }
+        // The wow moment follows whichever highlight the answer ended on.
+        if endedOnHighlight, !highlightedItemIDs.isEmpty { startChoreography(itemIDs: highlightedItemIDs) }
         return true
     }
 

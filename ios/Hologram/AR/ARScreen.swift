@@ -27,6 +27,7 @@ struct ARScreen: View {
                 topBar
                 placementPill
                 kindLegend
+                spotlightCaption
                 if controller.isWalking && controller.isPlaced {
                     HStack {
                         if let manifest = controller.manifest {
@@ -104,6 +105,19 @@ struct ARScreen: View {
             .accessibilityIdentifier("ar-done")
             Spacer()
             sceneMenu
+        }
+    }
+
+    /// "12 doors" counting up while the voice answer lights items one by one.
+    @ViewBuilder private var spotlightCaption: some View {
+        if let spotlight = controller.spotlight {
+            HologramCardPill {
+                HStack(spacing: 8) {
+                    Circle().fill(Color(uiColor: spotlight.color)).frame(width: 10, height: 10)
+                    Text(spotlight.text).font(.system(size: 17, weight: .semibold)).monospacedDigit()
+                }
+            }
+            .accessibilityIdentifier("ar-spotlight-caption")
         }
     }
 

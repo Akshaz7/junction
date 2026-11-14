@@ -116,6 +116,9 @@ struct ARMicButton: View {
             if let docID { voice.toggle(docID: docID, onAnswer: onAnswer) }
         } label: {
             ZStack {
+                if voice.isRecording {
+                    ListeningPulse().accessibilityHidden(true)
+                }
                 Circle().fill(voice.isRecording ? HologramStyle.redColor : Color.white)
                 Circle().stroke(voice.isRecording ? Color.white.opacity(0.3) : HologramStyle.borderColor, lineWidth: 1)
                 Circle()
@@ -138,6 +141,29 @@ struct ARMicButton: View {
         .disabled(voice.isBusy || docID == nil)
         .accessibilityLabel(voice.isRecording ? "Send voice question" : "Ask by voice")
         .accessibilityIdentifier("ar-voice-mic")
+    }
+}
+
+/// Two expanding rings behind the mic while it is listening.
+private struct ListeningPulse: View {
+    @State private var expanded = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        ZStack {
+            ring(delay: 0)
+            ring(delay: 0.6)
+        }
+        .onAppear { expanded = true }
+    }
+
+    private func ring(delay: Double) -> some View {
+        Circle()
+            .stroke(HologramStyle.redColor.opacity(0.7), lineWidth: 2)
+            .scaleEffect(reduceMotion ? 1.25 : (expanded ? 1.7 : 1))
+            .opacity(reduceMotion ? 0.5 : (expanded ? 0 : 0.8))
+            .animation(reduceMotion ? nil : .easeOut(duration: 1.2).repeatForever(autoreverses: false).delay(delay),
+                       value: expanded)
     }
 }
 
