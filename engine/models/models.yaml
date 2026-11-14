@@ -100,6 +100,14 @@ tasks:
       - {provider: runware_claude, model: claude-opus-5-5}
       - {provider: runware_oai, model: gemini-4-carbon}
       - {provider: runware_oai, model: gemini-4-carbon}
+  symbols_verify:   # yes/no per numbered tile: is this candidate the legend symbol (engine/symbols.py). Never invents candidates
+    provider: runware_oai
+    model: gemini-4-carbon
+    max_tokens: 600
+    temperature: 0
+    fallback:
+      - {provider: runware_claude, model: claude-opus-5-5}
+      - {provider: runware_oai, model: gemini-4-carbon}
   recount_boxes:   # one bounding box per object (engine/recount.py detect). Calibration results/box_*.json: Carbon .63 windows / .54 doors; Gemini 3.5 flash best on showers (.63)
     provider: runware_oai
     model: gemini-4-carbon

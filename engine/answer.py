@@ -546,6 +546,13 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                     add(s_)
                 res["trace"] = trace
                 return res
+            # F-SCANSYM: legend questions and "how many <legend symbol>" on raster drawings, counted by template match + model check
+            from engine import symbols as _symbols
+            if (res := _symbols.answer_symbols(question, doc_ids, root, t0)) is not None:
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                return res
             if sheetqa.is_sheet(doc_ids[0], root) and re.match(r"\s*how many\b", question, re.I) \
                     and not re.search(r"\b(schedule|table|row|rows|list|finish\w*|walls?)\b", question, re.I):
                 # a count nobody could find on an engineering sheet is "not found", never "About 0"
