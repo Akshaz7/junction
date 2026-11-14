@@ -925,3 +925,6 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 /* W-66h: PRO with natural tracking, centred under STOA. */
 .rail .brand-mark { align-items: center; left: 8px; width: 88px; }
 .rail .brand-mark .brand-pro { margin-left: 1.05em; letter-spacing: .02em; margin-right: 0; font-size: 1.02em; translate: none; }
+
+/* W-77: phone touch target for source chips */
+@media (max-width:640px){ .source-file-chip{min-height:44px;display:inline-flex;align-items:center} }

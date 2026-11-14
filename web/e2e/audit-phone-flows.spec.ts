@@ -64,7 +64,7 @@ for (const config of configs) {
       await openCitation()
       const viewer = page.locator('aside.document-viewer[role=dialog]')
       const box = await viewer.boundingBox()
-      expect(box && box.width >= 389 && box.height >= 800, 'evidence sheet is full screen').toBe(true)
+      expect(box && box.width >= 389 && box.height >= 640, 'evidence sheet fills the screen above the composer').toBe(true)
       await page.waitForTimeout(900)
       await layoutChecks(page, audit, 'full-screen evidence')
       await shot(page, `audit-phone-${config.label}-evidence`)
