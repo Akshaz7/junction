@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { ArrowRight, CalendarClock, FileSearch, HardHat, Scale } from 'lucide-react'
 import { formatPercent, formatUsd } from '../lib/dashboard'
-import { chatHref, chatPreview, findingCounts, overviewApi, overviewDate, topFindings, weeklyChanges } from '../lib/overview'
+import { chatHref, chatPreview, findingCounts, OverviewApi, overviewDate, topFindings, weeklyChanges } from '../lib/overview'
 import type { Document } from '../lib/types'
 import './overview-screen.css'
-import { workspaceApi } from '../lib/api'
+import { apiFetch, workspaceApi } from '../lib/api'
+import { loadBenchWithFallback } from './accuracy-screen'
+
+const overviewApi = new OverviewApi(apiFetch)
 import { chatLive } from '../lib/chat-live'
 
 function useOverviewSection<T>(load: (signal: AbortSignal) => Promise<T>, liveChats = false) {
@@ -36,7 +39,7 @@ function useOverviewSection<T>(load: (signal: AbortSignal) => Promise<T>, liveCh
 const loadChanges = (signal: AbortSignal) => overviewApi.getChanges(signal)
 const loadFindings = (signal: AbortSignal) => overviewApi.getFindings(signal)
 const loadChats = (signal: AbortSignal) => overviewApi.getChats(signal)
-const loadBench = (signal: AbortSignal) => overviewApi.getBench(signal)
+const loadBench = (signal: AbortSignal) => loadBenchWithFallback(undefined, signal)
 const constructionStarters = [
   { title: 'Draft claim', detail: 'Build a claim from documented changes.', icon: Scale, question: 'Draft a construction claim using the available project documents. Identify documented changes, affected work, dates, and supporting citations. State where cost, delay, or entitlement evidence is missing.' },
   { title: 'Meeting prep', detail: 'Bring the right questions to the table.', icon: CalendarClock, question: 'Prepare a construction coordination meeting agenda from the project documents. Summarise drawing revisions, open questions, interfaces between trades, and decisions needed, with citations.' },
@@ -87,7 +90,7 @@ export function OverviewScreen({ docs = [] }: { docs?: Document[] }) {
       <OverviewCard title="This week's changes" href="#/changes" loading={changes.loading} error={changes.error}>
         {week.length ? <ul className="overview-list">{week.map((change) => {
           const doc = change.summary.doc_id || change.doc_b
-          return <li key={change.id}><a href="#/changes" data-testid="overview-change"><strong>{change.summary.title || change.summary.headline || docTitle(doc)}</strong><span>{docTitle(doc)}</span><small><time dateTime={change.created_at}>{overviewDate(change.created_at)}</time>{change.summary.generated_for_demo && ' · generated for demo'}</small></a></li>
+          return <li key={change.id}><a href="#/changes" data-testid="overview-change"><strong>{change.summary.title || change.summary.headline || docTitle(doc)}</strong><span>{docTitle(doc)}</span><small>{Number.isFinite(Date.parse(change.created_at)) && <time dateTime={change.created_at}>{overviewDate(change.created_at)}</time>}{change.summary.generated_for_demo && ' · generated for demo'}</small></a></li>
         })}</ul> : <p className="overview-empty">No changes this week.</p>}
       </OverviewCard>
       <OverviewCard title="Open findings" loading={findings.loading} error={findings.error}>
@@ -99,12 +102,12 @@ export function OverviewScreen({ docs = [] }: { docs?: Document[] }) {
       <OverviewCard title="Latest answers" href="#/chat" loading={chats.loading} error={chats.error}>
         {chats.data?.length ? <ul className="overview-list">{chats.data.map((chat) => {
           const preview = chatPreview(chat)
-          return <li key={chat.id}><a href={chatHref(chat.id)} data-testid="overview-chat"><strong>{preview.question}</strong><span className="overview-answer">{preview.answer}</span><small>Cost: {formatUsd(preview.cost)}</small></a></li>
+          return <li key={chat.id}><a href={chatHref(chat.id)} data-testid="overview-chat"><strong>{preview.question}</strong><span className="overview-answer">{preview.answer}</span>{typeof preview.cost === 'number' && Number.isFinite(preview.cost) && <small>Cost: {formatUsd(preview.cost)}</small>}</a></li>
         })}</ul> : <p className="overview-empty">No answers yet. Start with a question below.</p>}
       </OverviewCard>
       <OverviewCard title="Accuracy" href="#/accuracy" loading={bench.loading} error={bench.error}>
         {bench.data ? <>
-          <dl className="overview-metrics"><div><dt>Accuracy</dt><dd data-testid="overview-accuracy">{formatPercent(total?.accuracy)}</dd></div><div><dt>Cost per answer</dt><dd data-testid="overview-cost-per-answer">{formatUsd(total?.cost_usd_per_answer)}</dd></div></dl>
+          <dl className="overview-metrics">{typeof total?.accuracy === 'number' && <div><dt>Accuracy</dt><dd data-testid="overview-accuracy">{formatPercent(total?.accuracy)}</dd></div>}{typeof total?.cost_usd_per_answer === 'number' && <div><dt>Cost per answer</dt><dd data-testid="overview-cost-per-answer">{formatUsd(total?.cost_usd_per_answer)}</dd></div>}</dl>
           {bench.data.data.fake === true ? <p className="overview-run-note">test run, fake model</p> : bench.data.data.fake == null && <p className="overview-run-note">Model mode unknown.</p>}
           {bench.data.data.totals?.stopped_by_max_usd && <p className="overview-run-note">Partial run: stopped at the cost limit.</p>}
           <p className="overview-run-file">{bench.data.file}</p>

@@ -63,7 +63,7 @@ describe('backend chat contract', () => {
   it('handles an unreachable Vite proxy but preserves real API and database errors', async () => {
     const offline = new WorkspaceApi('auto', vi.fn<typeof fetch>().mockResolvedValue(new Response('', { status: 500 })))
     expect(await offline.getDocuments()).toEqual([demoDocument])
-    const unavailable = new WorkspaceApi('auto', vi.fn<typeof fetch>().mockResolvedValue(Response.json({ detail: 'Database unavailable' }, { status: 503 })))
+    const unavailable = new WorkspaceApi('auto', vi.fn<typeof fetch>().mockImplementation(async () => Response.json({ detail: 'Database unavailable' }, { status: 503 })))
     await expect(unavailable.getDocuments()).rejects.toThrow('Database unavailable')
     expect(unavailable.isDemo).toBe(false)
     const real = new WorkspaceApi('real', vi.fn<typeof fetch>().mockRejectedValue(new TypeError('Failed to fetch')))

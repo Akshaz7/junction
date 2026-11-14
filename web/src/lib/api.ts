@@ -7,6 +7,71 @@ class ApiError extends Error {
   constructor(message: string, readonly status: number, readonly empty: boolean) { super(message) }
 }
 
+type RetryListener = (message: string) => void
+const retryMessages = new Map<symbol, string>()
+const retryListeners = new Set<RetryListener>()
+export const retryMessage = () => [...retryMessages.values()][0] || ''
+export function subscribeApiRetry(listener: RetryListener) {
+  retryListeners.add(listener)
+  listener(retryMessage())
+  return () => { retryListeners.delete(listener) }
+}
+function publishRetry(key: symbol, message: string) {
+  if (message) retryMessages.set(key, message)
+  else retryMessages.delete(key)
+  for (const listener of retryListeners) listener(retryMessage())
+}
+
+function retryDelay(response: Response) {
+  const value = response.headers.get('Retry-After')?.trim()
+  if (!value) return 1_000
+  const seconds = Number(value)
+  if (Number.isFinite(seconds) && seconds >= 0) return seconds * 1_000
+  const date = Date.parse(value)
+  return Number.isFinite(date) ? Math.max(0, date - Date.now()) : 1_000
+}
+
+async function waitToRetry(ms: number, signal: AbortSignal | null | undefined, update: (seconds: number) => void) {
+  signal?.throwIfAborted()
+  const deadline = Date.now() + ms
+  update(Math.ceil(ms / 1_000))
+  await new Promise<void>((resolve, reject) => {
+    const interval = setInterval(() => update(Math.max(0, Math.ceil((deadline - Date.now()) / 1_000))), 1_000)
+    const finish = () => { clearTimeout(timer); clearInterval(interval); signal?.removeEventListener('abort', abort) }
+    const abort = () => { finish(); reject(signal?.reason ?? new DOMException('Aborted', 'AbortError')) }
+    const timer = setTimeout(() => { finish(); resolve() }, ms)
+    signal?.addEventListener('abort', abort, { once: true })
+  })
+}
+
+/** Retry rejected rate-limited requests, and safe reads during a backend restart. */
+export function createRetryTransport(transport: typeof fetch = (...args) => fetch(...args)): typeof fetch {
+  return async (input, init) => {
+    const method = (init?.method || (input instanceof Request ? input.method : 'GET')).toUpperCase()
+    const signal = init?.signal ?? (input instanceof Request ? input.signal : undefined)
+    const key = Symbol('request')
+    try {
+      for (let attempt = 0; ; attempt++) {
+        signal?.throwIfAborted()
+        // Keep a replayable Request body when callers supply a Request rather than RequestInit.
+        const response = await transport(input instanceof Request ? input.clone() : input, init)
+        const limited = response.status === 429
+        const restarting = method === 'GET' && (response.status === 502 || response.status === 503)
+        if (!limited && !restarting) return response
+        if (attempt === 2) {
+          if (limited) throw new ApiError('Too many requests. Please try again shortly.', 429, false)
+          return response
+        }
+        await response.body?.cancel().catch(() => {})
+        await waitToRetry(limited ? retryDelay(response) : 1_000, signal,
+          (seconds) => { if (limited) publishRetry(key, `Too many requests, retrying in ${seconds}s`) })
+      }
+    } finally { publishRetry(key, '') }
+  }
+}
+
+export const apiFetch = createRetryTransport()
+
 /** A POST stream may split UTF-8, JSON and CRLF across arbitrary network chunks. */
 export async function readAnswerStream(response: Response, callbacks: StreamCallbacks): Promise<Answer> {
   if (!response.body) throw new Error('The answer stream could not be opened.')
@@ -47,8 +112,10 @@ export async function readAnswerStream(response: Response, callbacks: StreamCall
 
 export class WorkspaceApi {
   isDemo: boolean
-  constructor(private mode: Mode = 'auto', private transport: typeof fetch = (...args) => fetch(...args)) {
+  private transport: typeof fetch
+  constructor(private mode: Mode = 'auto', transport: typeof fetch = (...args) => fetch(...args)) {
     this.isDemo = mode === 'demo'
+    this.transport = createRetryTransport(transport)
   }
 
   private async request(path: string, init?: RequestInit): Promise<Response> {

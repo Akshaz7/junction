@@ -33,7 +33,7 @@ describe('document uploads and artifacts', () => {
     const transport = vi.fn<typeof fetch>()
       .mockResolvedValueOnce(Response.json({ glb: 'scene.glb' }))
       .mockResolvedValueOnce(Response.json({ status: 'not_built', detail: 'scene not available' }, { status: 404 }))
-      .mockResolvedValueOnce(Response.json({ detail: 'Server unavailable' }, { status: 503 }))
+      .mockImplementation(async () => Response.json({ detail: 'Server unavailable' }, { status: 503 }))
     const api = new WorkspaceApi('real', transport)
     const signal = new AbortController().signal
     expect(await api.hasScene('ifc__example', signal)).toBe(true)

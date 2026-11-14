@@ -8,6 +8,7 @@ import { DrawingModel, ViewerModeToggle, type ViewerMode } from './drawing-model
 import './data-screen.css'
 import { ShowOnTableButton } from './show-on-table'
 import { UploadDialog } from './upload-dialog'
+import { ConnectionPill } from './connection-pill'
 
 const PAGE_SIZE = 40
 
@@ -19,12 +20,12 @@ export type FileDocument = Document & {
 type FolderNode = { name: string; path: string; count: number; children: FolderNode[] }
 const inFolder = (doc: FileDocument, path: string) => !path || doc.folder === path || !!doc.folder?.startsWith(`${path}/`)
 function fileSize(size?: number | null) {
-  if (size == null) return 'Size unavailable'
+  if (size == null || !Number.isFinite(size) || size < 0) return null
   if (size < 1024) return `${size} B`
   return size < 1024 * 1024 ? `${(size / 1024).toFixed(1)} KB` : `${(size / (1024 * 1024)).toFixed(1)} MB`
 }
 function fileDate(value?: string | null) {
-  return value && !Number.isNaN(Date.parse(value)) ? new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date unavailable'
+  return value && !Number.isNaN(Date.parse(value)) ? new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : null
 }
 function FolderBranch({ node, active, onSelect }: { node: FolderNode; active: string; onSelect: (path: string) => void }) {
   const [expanded, setExpanded] = useState(false)
@@ -97,13 +98,13 @@ function DocumentDetail({ doc, docked, onClose, onAsk }: { doc: Document; docked
   }, [doc.doc_id])
 
   return <aside className="data-detail" data-docked={docked || undefined} aria-label="Document details" onKeyDown={(event) => { if (event.key === 'Escape') { if (mode === '3d') changeMode('2d'); else onClose() } }}>
-    <header><FileText size={24} /><div><h2><DocumentTitle title={doc.title} /></h2><small>/{doc.source}<span className="data-header-demo">{/generated for demo$/i.test(doc.title) ? ' · generated for demo' : ''}</span></small><details className="data-credit-info"><summary aria-label="Drawing credit and licence"><Info size={12} /></summary><div className="data-credit-popover"><dl><div><dt>Credit</dt><dd>{doc.credit || 'Not provided'}</dd></div><div><dt>Licence</dt><dd>{doc.licence || 'Not provided'}</dd></div></dl><div className="data-mobile-scene">{scene === 'available' ? <button type="button" className="viewer3d-visualise-button" onClick={() => { setShowSceneNote(false); changeMode('3d') }}>Visualise it</button> : <button type="button" disabled={scene === 'loading'} onClick={() => setShowSceneNote(true)}>Visualise it</button>}{showSceneNote && <p role="status">{scene === 'error' ? 'Could not check 3D availability. Reopen the document to retry.' : 'No 3D scene available for this document.'}</p>}</div></div></details></div>{scene === 'available' && <ViewerModeToggle mode={mode} onChange={changeMode} />}<ShowOnTableButton docId={doc.doc_id} sceneAvailable={scene === 'available'} /><button type="button" className="data-header-ask" aria-label="Ask about it" onClick={() => onAsk(doc)}><MessageSquare size={16} /></button><a className="data-compare" href="#/changes" aria-label="Compare document revisions"><GitCompare size={14} /><span>Compare</span></a><Button variant="ghost" size="icon" aria-label="Fit page" onClick={() => setZoom(100)}><Maximize2 size={16} /></Button><button ref={closeButton} type="button" className="data-close-detail" aria-label="Close document details" onClick={onClose}><X size={18} /></button></header>
+    <header><FileText size={24} /><div><h2><DocumentTitle title={doc.title} /></h2><small>/{doc.source}<span className="data-header-demo">{/generated for demo$/i.test(doc.title) ? ' · generated for demo' : ''}</span></small><details className="data-credit-info"><summary aria-label="Drawing credit and licence"><Info size={12} /></summary><div className="data-credit-popover"><dl>{doc.credit && <div><dt>Credit</dt><dd>{doc.credit}</dd></div>}{doc.licence && <div><dt>Licence</dt><dd>{doc.licence}</dd></div>}</dl><div className="data-mobile-scene">{scene === 'available' ? <button type="button" className="viewer3d-visualise-button" onClick={() => { setShowSceneNote(false); changeMode('3d') }}>Visualise it</button> : <button type="button" disabled={scene === 'loading'} onClick={() => setShowSceneNote(true)}>Visualise it</button>}{showSceneNote && <p role="status">{scene === 'error' ? 'Could not check 3D availability. Reopen the document to retry.' : 'No 3D scene available for this document.'}</p>}</div></div></details></div>{scene === 'available' && <ViewerModeToggle mode={mode} onChange={changeMode} />}<ShowOnTableButton docId={doc.doc_id} sceneAvailable={scene === 'available'} /><button type="button" className="data-header-ask" aria-label="Ask about it" onClick={() => onAsk(doc)}><MessageSquare size={16} /></button><a className="data-compare" href="#/changes" aria-label="Compare document revisions"><GitCompare size={14} /><span>Compare</span></a><Button variant="ghost" size="icon" aria-label="Fit page" onClick={() => setZoom(100)}><Maximize2 size={16} /></Button><button ref={closeButton} type="button" className="data-close-detail" aria-label="Close document details" onClick={onClose}><X size={18} /></button></header>
     <div className="data-viewer-toolbar" hidden={mode === '3d'}><ChevronLeft size={14} /><span className="page-number">1</span><span>/ {doc.pages}</span><ChevronRight size={14} /><span className="toolbar-spacer" /><span className="data-viewer-tools" aria-hidden="true"><Search size={14} /><ScanText size={14} /><PenLine size={14} /></span><a aria-label="Download page" href={`/api/docs/${encodeURIComponent(doc.doc_id)}/pages/1/image`} download><Download size={14} /></a><span className="viewer-toolbar-divider" /><span className="data-zoom-controls"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => setZoom((n) => Math.max(25, n - 25))}><Minus size={14} /></Button><span aria-label="Page zoom level">{displayedZoom}%</span><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => setZoom((n) => Math.min(400, n + 25))}><Plus size={14} /></Button></span></div>
     <div className="data-detail-body" hidden={mode === '3d'}>
       <div ref={canvas} className="data-page-canvas"><div className={`data-page-plane ${phone ? 'phone-page-plane' : ''}`} style={phone && image && fitted ? {
         width: image.width, height: image.height, transform: `translate(${(viewport.width - image.width * phoneScale) / 2}px, ${fitted.y}px) scale(${phoneScale})`,
       } : { transform: `scale(${zoom / 100})` }}><DocumentImage key={doc.doc_id} doc={doc} preview onLoad={setImage} /></div></div>
-      <dl className="data-document-credit"><div><dt>Credit</dt><dd>{doc.credit || 'Not provided'}</dd></div><div><dt>Licence</dt><dd>{doc.licence || 'Not provided'}</dd></div></dl>
+      <dl className="data-document-credit">{doc.credit && <div><dt>Credit</dt><dd>{doc.credit}</dd></div>}{doc.licence && <div><dt>Licence</dt><dd>{doc.licence}</dd></div>}</dl>
       <div className="data-detail-actions"><Button variant="raised" onClick={() => onAsk(doc)}>Ask about it<ArrowRight size={15} /></Button>
         {scene === 'available' && <button type="button" className="viewer3d-visualise-button" onClick={() => { setShowSceneNote(false); changeMode('3d') }}>Visualise it</button>}</div>
       <p className="data-scene-note" role="status">{scene === 'loading' ? 'Checking for a 3D scene…' : scene === 'missing' ? 'No 3D scene available for this document.' : scene === 'error' ? 'Could not check 3D availability. Reopen the document to retry.' : '3D scene available.'}</p>
@@ -200,7 +201,7 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const currentPage = Math.min(page, pageCount)
   const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
   const selected = docs.find((doc) => doc.doc_id === selectedId) || (olderDoc?.doc_id === selectedId ? olderDoc : null)
-  return <section className="data-screen" aria-label="Project documents" hidden={hidden}>
+  return <><ConnectionPill enabled={!demo} /><section className="data-screen" aria-label="Project documents" hidden={hidden}>
     <div className="data-screen-toolbar"><div><h2>Project documents</h2><p>The sources behind your answers.</p></div>
       <Button variant="raised" disabled={demo} onClick={openUpload}><Upload size={16} />Upload</Button>
     </div>
@@ -230,8 +231,8 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
         {loading ? <p className="data-empty" role="status">Loading documents…</p> : !visible.length ? <div className="data-empty"><p>{query ? 'No documents match' : 'No documents yet.'}</p><div className="data-empty-actions">{(query || activeFolder) && <Button variant="outline" onClick={() => { setSearch(''); setFolder(''); setPage(1) }}>{query ? 'Clear search' : 'All files'}</Button>}<Button variant="raised" disabled={demo} onClick={openUpload}>Upload</Button></div></div> : <div className="data-file-list">{visible.map((doc) => <article key={doc.doc_id} className="data-file-row" data-doc-id={doc.doc_id} data-selected={selectedId === doc.doc_id || undefined}>
           <button className="data-open-file" type="button" aria-label={`Open ${doc.title}`} aria-expanded={selectedId === doc.doc_id} onClick={(event) => { lastOpened.current = event.currentTarget; setPreviewDocked(false); setSelectedId(doc.doc_id) }}>
             <span className="file-checkbox" aria-hidden="true" /><DocumentImage key={doc.doc_id} doc={doc} /><span><h3><DocumentTitle title={doc.title} /></h3><span className="data-file-meta">{doc.folder || doc.source} · {doc.pages} {doc.pages === 1 ? 'page' : 'pages'}</span><small>{doc.licence || 'Licence not provided'} · {doc.credit || 'Credit not provided'}</small></span>
-          </button><div className="data-file-facts"><span aria-label="File size">{fileSize(doc.size)}</span><time aria-label="File date" dateTime={doc.date || doc.updated_at || undefined}>{fileDate(doc.date || doc.updated_at)}</time>
-            {doc.versions?.length ? <label className="data-version-picker"><span>{doc.version_count ?? doc.versions.length} versions</span><select aria-label={`Versions of ${doc.title}`} value={doc.versions.some((version) => version.doc_id === selectedId) ? selectedId! : doc.doc_id} disabled={versionLoading} onChange={(event) => void openVersion(event.target.value)}>{doc.versions.map((version) => <option key={version.doc_id} value={version.doc_id}>{version.label}</option>)}</select></label> : <span>{doc.version_count == null ? 'Version count unavailable' : `${doc.version_count} ${doc.version_count === 1 ? 'version' : 'versions'}`}</span>}
+          </button><div className="data-file-facts">{fileSize(doc.size) !== null && <span aria-label="File size">{fileSize(doc.size)}</span>}{fileDate(doc.date || doc.updated_at) && <time aria-label="File date" dateTime={doc.date || doc.updated_at || undefined}>{fileDate(doc.date || doc.updated_at)}</time>}
+            {doc.versions?.length ? <label className="data-version-picker"><span>{doc.version_count ?? doc.versions.length} versions</span><select aria-label={`Versions of ${doc.title}`} value={doc.versions.some((version) => version.doc_id === selectedId) ? selectedId! : doc.doc_id} disabled={versionLoading} onChange={(event) => void openVersion(event.target.value)}>{doc.versions.map((version) => <option key={version.doc_id} value={version.doc_id}>{version.label}</option>)}</select></label> : doc.version_count != null && Number.isFinite(doc.version_count) && <span>{doc.version_count} {doc.version_count === 1 ? 'version' : 'versions'}</span>}
           </div><FormatBadges doc={doc} /><MoreHorizontal className="file-row-more" size={16} />
         </article>)}</div>}
         {!loading && filtered.length > 0 && <div className="data-pagination" aria-label="Document pagination"><span>{(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} of {filtered.length}</span>
@@ -240,5 +241,5 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
       </div>
       {selected && <DocumentDetail key={selected.doc_id} doc={selected} docked={previewDocked} onClose={closeDetail} onAsk={onAsk} />}
     </div>
-  </section>
+  </section></>
 }

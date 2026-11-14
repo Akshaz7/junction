@@ -2,11 +2,16 @@ import { useEffect, useState } from 'react'
 import { ArrowRight, BarChart3, RotateCw } from 'lucide-react'
 import { Button } from './ui'
 import {
-  dashboardApi, finite, formatDelta, formatLatency, formatNumber, formatPercent,
+  DashboardApi, finite, formatDelta, formatLatency, formatNumber, formatPercent,
   formatUsd, questionsScored, runLabel, runTag,
   type BenchCell, type BenchResult, type BenchRun, type CostsResult,
 } from '../lib/dashboard'
 import './accuracy-screen.css'
+import { apiFetch } from '../lib/api'
+import recordedRun from './accuracy-screen.results.json'
+
+const dashboardApi = new DashboardApi(apiFetch)
+
 
 interface AccuracyCell extends BenchCell {
   abstained?: number
@@ -24,10 +29,23 @@ interface TextCell {
   score?: number | null
   judge_usd?: number
 }
-type AccuracyBench = BenchResult & { data: {
+type AccuracyBench = BenchResult & { recorded?: boolean; data: {
   cells?: Record<string, AccuracyCell>
   text?: Record<string, TextCell>
 } }
+
+/** A recorded result is bundled with the UI so a backend restart cannot erase the evidence. */
+export async function loadBenchWithFallback(tag?: string, signal?: AbortSignal, api = dashboardApi): Promise<AccuracyBench | null> {
+  try {
+    const bench = await api.getBench(tag, signal)
+    if (bench) return bench
+  } catch (error) {
+    if (signal?.aborted || (tag && tag !== recordedRun.tag)) throw error
+  }
+  signal?.throwIfAborted()
+  if (tag && tag !== recordedRun.tag) return null
+  return { file: `${recordedRun.tag}.json`, data: recordedRun, recorded: true }
+}
 
 /** Use the server's marginal totals, never average percentages or percentiles. */
 export function deriveAccuracyTables(cells: Record<string, AccuracyCell> = {}) {
@@ -47,6 +65,7 @@ export function deriveAccuracyTables(cells: Record<string, AccuracyCell> = {}) {
 }
 
 function Metric({ label, value, testId }: { label: string; value: string; testId?: string }) {
+  if (!value || ['Not available', 'not scored'].includes(value)) return null
   return <div className="accuracy-metric"><dt>{label}</dt><dd data-testid={testId}>{value}</dd></div>
 }
 
@@ -164,7 +183,7 @@ export function AccuracyScreen() {
     setLoading(true)
     setBench(null)
     setBenchError('')
-    dashboardApi.getBench(tag || undefined, controller.signal).then((data) => { if (!controller.signal.aborted) setBench(data) })
+    loadBenchWithFallback(tag || undefined, controller.signal).then((data) => { if (!controller.signal.aborted) setBench(data) })
       .catch((err: Error) => { if (!controller.signal.aborted) setBenchError(err.message) })
       .finally(() => { if (!controller.signal.aborted) setLoading(false) })
     return () => controller.abort()
@@ -187,14 +206,16 @@ export function AccuracyScreen() {
     </header>
     {runsError && <p className="accuracy-message" role="alert">{runsError} Showing the selected result where available.</p>}
     {loading ? <p className="accuracy-message" role="status">Loading bench results…</p> : benchError ? <p className="accuracy-message" role="alert">{benchError}</p> : !bench ? <div className="accuracy-empty" role="status"><h3>No bench run yet.</h3><p>Run <code>python -m engine.bench --set sample200 --tag &lt;t&gt;</code>.</p></div> : <>
-      <div className="accuracy-run-meta"><span>Question set: <strong>{bench.data.set || 'Not available'}</strong></span><span>{bench.file}</span></div>
+      {bench.recorded && <p className="accuracy-message">Latest bundled recorded run. Live results are temporarily unavailable.</p>}
+      <div className="accuracy-run-meta">{bench.data.set && <span>Question set: <strong>{bench.data.set}</strong></span>}<span>{bench.file}</span></div>
       <RunNotice fake={bench.data.fake} />
       {bench.data.totals?.stopped_by_max_usd && <p className="accuracy-message">Partial run: stopped at the cost limit. {formatNumber(bench.data.totals.questions)} of {formatNumber(bench.data.totals.of)} questions completed.</p>}
       <dl className="accuracy-metrics" aria-label="Bench totals">
-        <Metric label="Numeric accuracy" value={formatPercent(total?.accuracy)} testId="bench-accuracy" />
+        <Metric label="Numeric accuracy" value={finite(total?.accuracy) ? `${(total.accuracy * 100).toFixed(2)}%` : ''} testId="bench-accuracy" />
         <Metric label="Abstentions · numeric" value={formatNumber(total?.abstained)} testId="bench-abstentions" />
         <Metric label="Cost per answer" value={formatUsd(total?.cost_usd_per_answer)} testId="bench-cost-per-answer" />
         <Metric label="Answered accuracy" value={formatPercent(total?.answered_accuracy)} testId="bench-answered-accuracy" />
+        {finite(total?.correct) && finite(questionsScored(total)) && <Metric label="Correct / scored" value={`${formatNumber(total.correct)} / ${formatNumber(questionsScored(total))}`} testId="bench-correct" />}
         <Metric label="Questions scored" value={formatNumber(questionsScored(total))} testId="bench-scored" />
         <Metric label="Mean latency" value={formatLatency(total?.latency_ms_mean)} testId="bench-latency" />
       </dl>
@@ -207,7 +228,7 @@ export function AccuracyScreen() {
     <section className="accuracy-card accuracy-measurement" aria-labelledby="accuracy-measurement-title"><header><h3 id="accuracy-measurement-title">How we measure</h3></header>
       <p>Held-out drawings are never used for training or tuning. Counts must match exactly; area, length and volume allow a 2% tolerance or 0.05 absolute units, whichever is larger.</p>
       <p>Text answers are judged separately by a model against the dataset’s gold answer and question: correct means the same facts, partial means some facts match, and wrong means contradictory or unrelated facts. The judge can err; unjudged answers stay unscored. A statement that data is missing can be judged correct when it matches the gold answer.</p>
-      <p>Missing metrics are shown as unavailable or not scored. Fake-model runs are labelled and do not measure real model performance.</p>
+      <p>Missing summary metrics are omitted; unscored table cells are labelled. Fake-model runs are labelled and do not measure real model performance.</p>
     </section>
     <div className="accuracy-bottom-grid">
       <section className="accuracy-card" aria-labelledby="accuracy-costs-title"><header><h3 id="accuracy-costs-title">Model costs</h3><p>All logged calls, across runs and workspace questions.</p></header>

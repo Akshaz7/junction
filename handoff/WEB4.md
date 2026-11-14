@@ -1,27 +1,12 @@
 # WEB4 (Codex) — current row
 
-ROW: W-30 empty states with a next step (no dead ends)
-Goal: every empty state gives one working action, in Stoa's copy style (short, plain):
-- Data, no search results: "No documents match" + Clear search button (+ Upload, which opens the existing upload dialog).
-- Changes, empty feed: Upload action; Clear filters enabled whenever any filter (type/folder too) is set.
-- Library > Automations with no documents: one line of guidance + Upload.
-- Compare, no versions: Upload a new version action; after zero differences: "Ask about this drawing" opens chat with the doc.
-- History popover empty: "New chat" button.
-Each action must call the real existing handler (no new fake flows). Add one vitest per empty state that clicks the action and asserts the handler ran.
-Allowed files: web/src/components/{data-screen,changes-screen,library-screen,compare-screen,workspace-navigation,chat-screen}.tsx and their .css/.test.tsx, plus this file.
-Done test: cd web && npx tsc --noEmit && npm test -- --run (all pass).
-Write one line at the end: RESULT: ...
+ROW: W-32 live-QA polish (results/qa/live-1439.md items 9 and 10)
+1. Never show "size unavailable" / "version unavailable" / similar placeholder labels: omit the field when missing.
+2. Accuracy page: if /api/bench/latest fails, fall back to the bundled public results file (web/public/ or the API's static results; check what exists) and show the latest recorded run (e-s200-z1: 143/187, 76.47%, 0 abstentions); never "No bench runs" when results exist. Number must come from a results file, not hard-coded text.
+3. Rate limit (HTTP 429) anywhere in the API client: friendly message "Too many requests, retrying in Ns" with automatic retry (respect Retry-After, max 2 retries), never raw "rate limit exceeded".
+4. Transient 502/503 during a backend restart: API client retries GETs twice with 1 s backoff; the live socket reconnects with backoff and shows a small "Reconnecting…" pill, which clears on reconnect.
+Allowed files: web/src/lib/api.ts, web/src/lib/live*.ts, web/src/components/accuracy-screen.*, overview-screen.*, changes-screen.*, data-screen.*, a new web/src/components/connection-pill.* , their tests, this file.
+Done test: cd web && npx tsc --noEmit && npx vitest run (0 failures) + one test per item.
+Never commit. Write one line at the end: RESULT: ...
 
-NEEDS: W-30 History is in web/src/components/chat-header-actions.tsx, outside this row's allowed files. Add a New chat button beside "No saved chats yet." calling the existing setOpen(false), setToast(''), onNew() handler, with a click test.
-NEEDS: W-30 component click tests need web/vite.config.ts to include src/**/*.test.tsx (currently only .test.ts) and a DOM test environment dependency (jsdom or happy-dom) in web/package.json/package-lock.json; both are outside WEB4 scope.
-RESULT: W-30 permitted changes implemented in data/changes/library/compare/chat/workspace-navigation components and their CSS; Data search clears or uploads, Changes uploads and clears type/folder-only filters, Library Automations guides to upload, Compare uploads or opens Chat with its drawing. Done command passed (tsc; 46 files/273 tests); all 9 new click tests in data-screen.test.tsx passed separately with /private/tmp/junction-web4-vitest.config.mts and temporary jsdom 31.0.1. Row remains incomplete pending the two NEEDS above; no commits or out-of-scope source edits.
-
----
-ROW: W-30b finish (LEAD widened scope)
-LEAD enabled .test.tsx tests: web/vite.config.ts now includes src/**/*.test.tsx and jsdom is a devDependency. Full suite now: 1 failure:
-data-screen.test.tsx "opens chat with the drawing after a comparison finds no differences": hash becomes #/chat?doc=<id> but .selected-documents stays empty. Find out whether ChatScreen really ignores ?doc= on a hash change (real bug → fix in chat-screen.tsx / App.tsx) or the test renders the wrong tree (fix the test). A real user path must work: Compare → "Ask about this drawing" → chat opens with that drawing selected.
-Also: History empty popover "New chat" button in web/src/components/chat-header-actions.tsx calling the existing setOpen(false), setToast(''), onNew(), with a click test.
-Allowed files: the W-30 list plus web/src/App.tsx, web/src/components/chat-header-actions.tsx(+test).
-Done test: cd web && npx tsc --noEmit && npx vitest run (all pass, 0 failures).
-Write one line at the end: RESULT2: ...
-RESULT2: W-30b complete. Compare → Ask about this drawing works through App with the drawing selected; the failing test used a permanently hidden ChatScreen and asserted before jsdom delivered hashchange, so it now renders App and awaits navigation (no production routing change needed). Empty History now offers New chat calling setOpen(false), setToast(''), onNew(), with a click test asserting the callback, closed popover, and cleared toast. Done test passed: cd web && npx tsc --noEmit && npx vitest run (49 files, 285 tests, 0 failures). Changed only data-screen.test.tsx, chat-header-actions.tsx, chat-header-actions.test.tsx and this handoff; no commits.
+RESULT: W-32 passed: missing metadata omitted; accuracy-screen.results.json bundles the unchanged results/bench/e-s200-z1.json (143/187, 76.47%, 0 abstentions); WorkspaceApi plus Accuracy/Overview transports retry 429 twice with Retry-After countdown and GET 502/503 twice at 1 s; shared live socket backoff drives a cross-route Reconnecting… pill. Done test: cd web && npx tsc --noEmit && npx vitest run — 54 files, 309 tests passed. Learning: retry mocks must return fresh Response bodies. No commit.

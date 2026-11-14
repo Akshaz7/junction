@@ -41,7 +41,7 @@ export function ChangesScreen({ docs, demo }: { docs: FileDocument[]; demo: bool
   for (const entry of filtered) {
     const date = new Date(entry.created_at || '')
     const day = new Date(date); day.setHours(0, 0, 0, 0)
-    const label = Number.isNaN(date.getTime()) ? 'Date unavailable' : day.getTime() === today.getTime() ? 'Today' : day.getTime() === yesterday.getTime() ? 'Yesterday' : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+    const label = Number.isNaN(date.getTime()) ? '' : day.getTime() === today.getTime() ? 'Today' : day.getTime() === yesterday.getTime() ? 'Yesterday' : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
     groups.set(label, [...(groups.get(label) || []), entry])
   }
   useEffect(() => {
@@ -81,7 +81,7 @@ export function ChangesScreen({ docs, demo }: { docs: FileDocument[]; demo: bool
     <div className="changes-list">
       <div className="changes-search"><label className="search-field"><Search size={14} /><input type="search" aria-label="Search changes" placeholder="Search changes..." value={search} onChange={(event) => setSearch(event.target.value)} /></label><Button variant="outline" size="icon" aria-label="Clear change filters" disabled={!search && !typeFilter && !folderFilter} onClick={() => { setSearch(''); setTypeFilter(''); setFolderFilter('') }}><SlidersHorizontal size={16} /></Button></div>
       <div className="changes-filters"><label>Type<select aria-label="Change type" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}><option value="">All types</option><option value="new_version">New versions</option><option value="new_document">New documents</option><option value="rule_change">Rule sources</option></select></label><label>Folder<select aria-label="Change folder" value={folderFilter} onChange={(event) => setFolderFilter(event.target.value)}><option value="">All folders</option>{folders.map((folder) => <option key={folder} value={folder}>{folder}</option>)}</select></label></div>
-      {[...groups].map(([date, entries]) => <section key={date} className="changes-date-group" aria-label={`Changes: ${date}`}><h2 className="changes-today">{date}<ChevronDown size={14} /></h2>
+      {[...groups].map(([date, entries]) => <section key={date} className="changes-date-group" aria-label={`Changes: ${date}`}>{date && <h2 className="changes-today">{date}<ChevronDown size={14} /></h2>}
         {(['rule_change', 'new_version', 'new_document'] as const).map((type) => {
           const rows = entries.filter((entry) => entry.type === type)
           if (!rows.length) return null
@@ -91,8 +91,8 @@ export function ChangesScreen({ docs, demo }: { docs: FileDocument[]; demo: bool
                 const card = ruleChangeCard(entry)
                 return card && <article className="rule-change-card" key={card.id} data-change-id={card.id} aria-label={`Rule source changed: ${card.title}`}>
                   <strong>Rule source changed</strong><h4>{card.title}</h4>{card.detail && <p>{card.detail}</p>}
-                  {card.url ? <a href={card.url} target="_blank" rel="noopener noreferrer">View rule source</a> : <p>Source link unavailable.</p>}
-                  <small>Detected: {card.detectedAt ? <time dateTime={card.detectedAt}>{new Date(card.detectedAt).toLocaleString('en-GB')}</time> : 'Time unavailable'}</small><small>Findings rerun</small>
+                  {card.url ? <a href={card.url} target="_blank" rel="noopener noreferrer">View rule source</a> : null}
+                  {card.detectedAt && Number.isFinite(Date.parse(card.detectedAt)) && <small>Detected: <time dateTime={card.detectedAt}>{new Date(card.detectedAt).toLocaleString('en-GB')}</time></small>}<small>Findings rerun</small>
                 </article>
               }
               return <button className="change-row" type="button" key={entry.id} data-change-id={entry.id} aria-pressed={entry.id === selected?.id} onClick={() => setSelected(entry)}>

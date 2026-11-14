@@ -161,3 +161,18 @@ describe('empty-state next steps', () => {
     expect(host.querySelector('.selected-documents')?.textContent).toContain(drawing.title)
   })
 })
+
+
+describe('document metadata', () => {
+  it('omits missing size, date, and version fields and preserves recorded zeroes', async () => {
+    await render(<DataScreen docs={[drawing]} loading={false} demo={true} hidden={false} onRefresh={refresh} onAsk={ask} />)
+    expect(host.querySelector('[aria-label="File size"]')).toBeNull()
+    expect(host.querySelector('[aria-label="File date"]')).toBeNull()
+    expect(host.textContent).not.toMatch(/size unavailable|version count unavailable|date unavailable/i)
+    expect(host.querySelector('.data-file-facts')?.textContent).toBe('')
+    await render(<DataScreen docs={[{ ...drawing, size: 0, version_count: 1, date: '2026-11-14' }]} loading={false} demo={true} hidden={false} onRefresh={refresh} onAsk={ask} />)
+    expect(host.querySelector('[aria-label="File size"]')?.textContent).toBe('0 B')
+    expect(host.querySelector('[aria-label="File date"]')?.textContent).toContain('2026')
+    expect(host.querySelector('.data-file-facts')?.textContent).toContain('1 version')
+  })
+})

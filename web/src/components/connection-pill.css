@@ -1,0 +1,15 @@
+.connection-pill {
+  position: fixed;
+  right: 16px;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  z-index: 100;
+  max-width: calc(100vw - 32px);
+  padding: 7px 12px;
+  border: 1px solid var(--border, #e4e4e7);
+  border-radius: 999px;
+  background: var(--background, #fff);
+  color: var(--foreground, #27272a);
+  box-shadow: 0 2px 8px #0000000d;
+  font-size: 12px;
+  pointer-events: none;
+}
