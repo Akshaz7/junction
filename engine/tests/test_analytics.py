@@ -93,3 +93,19 @@ def test_bathroom_tiles_only_wet_rooms_with_boxes_and_price():
     assert len(a["evidence"]["boxes"]) == 8 and a["cost"]["usd_total"] == 0
     b = A("how many m2 of tiles for the bathrooms including 15% waste", AC)
     assert abs(b["answer"]["value"] - 113.9) < 0.2
+
+
+def test_compare_two_floors_gives_table_of_rooms_area_doors_windows():
+    need(AC)
+    a = A("compare the ground floor and the first floor", AC)
+    t = a["answer"]["text_md"]
+    assert "| Floor | Rooms | Area (m²) | Doors | Windows |" in t and "Erdgeschoss" in t and "1. Obergeschoss" in t
+    assert a["cost"]["usd_total"] == 0 and a["citations"]
+
+
+def test_is_building_safe_uses_findings_and_is_not_a_certificate():
+    need(AC)
+    a = A("is this building safe?", AC)
+    t = a["answer"]["text_md"]
+    assert "not a safety certificate" in t and "848/2017" in t and "82 rooms" in t and "Exits found per storey" in t
+    assert a["cost"]["usd_total"] == 0

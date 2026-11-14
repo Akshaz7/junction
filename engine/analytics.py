@@ -741,6 +741,36 @@ def _piping_data(doc: Doc) -> dict | None:
     return None
 
 
+SYS_NAMES = [
+    (r"schmutz|sanitary|abwasser|sewage|sewer|waste|^s_sw\b|sanitario", "Waste water"),
+    (r"regen|storm|rain|hemelwater|^s_rw\b|pluvial", "Rainwater"),
+    (r"\bpwc\b|^s_pwc|^s_twk|domestic cold|cold water|agua fr[ií]a|trinkwasser kalt", "Potable cold"),
+    (r"\bpwh\b|^s_pwh|^s_tww|domestic hot|hot water|agua caliente|trinkwasser warm", "Potable hot"),
+    (r"natural gas|\bgas\b", "Natural gas"),
+    (r"hydronic|heating|hidr[oó]nico|^h_", "Heating water"),
+    (r"supply air", "Supply air"),
+    (r"return air", "Return air"),
+    (r"exhaust air", "Exhaust air"),
+]
+
+
+def friendly_system(name: str) -> str:
+    """"S_Schmutzwasser" -> "Waste water (S_Schmutzwasser)". Unknown names stay as they are; blank/unknown is "Unnamed system"."""
+    raw = str(name or "").strip()
+    if not raw or raw.lower() in ("unknown", "none", "undefined"):
+        return "Unnamed system"
+    low = raw.lower()
+    for rx, nice in SYS_NAMES:
+        if re.search(rx, low):
+            return f"{nice} ({raw})"
+    return raw
+
+
+def system_rows(g: list, top: int = 8) -> tuple[list, int]:
+    """(rows[:top], number rolled into '+N smaller systems') from a longest-first list."""
+    return g[:top], max(len(g) - top, 0)
+
+
 def _pipe_sum(rows: list[dict]) -> float:
     return round(sum(r.get("length_m") or 0 for r in rows), 2)
 
@@ -806,8 +836,9 @@ def piping(question: str, doc: Doc, t0) -> dict | None:
         return done(f"**{len(g)} pipe sizes**{f' on {st}' if st else ''}: {txt}. [1]", len(g), "count", [p["item_id"] for p in pipes if p.get("dn_mm")], [f"{len(g)} sizes"])
     if re.search(r"\bsystems?\b", ql):
         g = _group(pipes, "system")
-        txt = "; ".join(f"{k}: {_fmt(m)} m ({n} pipes)" for k, n, m in g[:12])
-        more = f" … and {len(g) - 12} more systems" if len(g) > 12 else ""
+        shown, rest = system_rows(g)
+        txt = "; ".join(f"{friendly_system(k)}: {_fmt(m)} m ({n} pipes)" for k, n, m in shown)
+        more = f"; +{rest} smaller system{'s' if rest != 1 else ''} ({_fmt(sum(x[2] for x in g[8:]))} m)" if rest else ""
         return done(f"**{len(g)} piping systems**{f' on {st}' if st else ''}, longest first: {txt}{more}. Total {_fmt(_pipe_sum(pipes))} m. [1]", len(g), "count", [p["item_id"] for p in pipes], [f"{len(g)} systems"])
     if re.search(r"by (?:storey|floor|level)|per (?:storey|floor|level)|each (?:storey|floor|level)", ql):
         g = _group(pipes, "storey")

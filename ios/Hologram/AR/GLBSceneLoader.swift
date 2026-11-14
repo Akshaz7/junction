@@ -5,8 +5,8 @@ import UIKit
 /// Builds a RealityKit entity tree from the server's `scene.glb` on the device, for scenes whose
 /// `scene.usdz` is missing or stale (uploaded drawings: the server only has usd-core for the demo set).
 /// Handles what the server's extruder writes: triangle meshes with POSITION and optional NORMAL, a node tree with
-/// optional TRS or matrix transforms, and constant base-colour materials (textures are ignored; `plan_floor`,
-/// the textured plan image, is skipped). Item nodes are renamed to the manifest's `usd_name` so `SceneIndex` works.
+/// optional TRS or matrix transforms, and base-colour materials. The one embedded PNG (the plan image on the
+/// `plan_floor` node) is decoded into a texture; if that fails the node is skipped and the scene still loads. Item nodes are renamed to the manifest's `usd_name` so `SceneIndex` works.
 enum GLBSceneLoader {
     enum GLBError: LocalizedError {
         case notGLB, malformed(String)
@@ -65,11 +65,11 @@ enum GLBSceneLoader {
             ?? Array(nodes.indices)
         guard !nodes.isEmpty, !meshes.isEmpty else { throw GLBError.malformed("no geometry") }
 
-        var meshCache: [Int: [(MeshResource, PhysicallyBasedMaterial)]] = [:]
-        func parts(of index: Int) throws -> [(MeshResource, PhysicallyBasedMaterial)] {
+        var meshCache: [Int: [(MeshResource, PhysicallyBasedMaterial, Bool)]] = [:]
+        func parts(of index: Int) throws -> [(MeshResource, PhysicallyBasedMaterial, Bool)] {
             if let cached = meshCache[index] { return cached }
             guard meshes.indices.contains(index) else { throw GLBError.malformed("bad mesh index") }
-            var result: [(MeshResource, PhysicallyBasedMaterial)] = []
+            var result: [(MeshResource, PhysicallyBasedMaterial, Bool)] = []
             for primitive in meshes[index]["primitives"] as? [[String: Any]] ?? [] {
                 if let mode = primitive["mode"] as? Int, mode != 4 { continue }
                 guard let attributes = primitive["attributes"] as? [String: Int],
@@ -86,6 +86,12 @@ enum GLBSceneLoader {
                         SIMD3(normals[$0], normals[$0 + 1], normals[$0 + 2])
                     })
                 }
+                if let uvAccessor = attributes["TEXCOORD_0"], let uvs = try? floats(uvAccessor, components: 2, doc: doc),
+                   uvs.count == positions.count / 3 * 2 {
+                    // glTF has the UV origin top-left, RealityKit bottom-left.
+                    descriptor.textureCoordinates = MeshBuffers.TextureCoordinates(
+                        stride(from: 0, to: uvs.count - 1, by: 2).map { SIMD2(uvs[$0], 1 - uvs[$0 + 1]) })
+                }
                 let count = positions.count / 3
                 let indices: [UInt32]
                 if let indexAccessor = primitive["indices"] as? Int {
@@ -98,7 +104,8 @@ enum GLBSceneLoader {
                 }
                 descriptor.primitives = .triangles(Array(indices.prefix(indices.count - indices.count % 3)))
                 let mesh = try MeshResource.generate(from: [descriptor])
-                result.append((mesh, material(primitive["material"] as? Int, json: json)))
+                let (resolved, textured) = material(primitive["material"] as? Int, json: json, doc: doc)
+                result.append((mesh, resolved, textured))
             }
             meshCache[index] = result
             return result
@@ -111,12 +118,14 @@ enum GLBSceneLoader {
             defer { visiting.remove(index) }
             let node = nodes[index]
             let rawName = node["name"] as? String ?? ""
-            if rawName == "plan_floor" { return nil }
             let entity = Entity()
             entity.name = nodeNames[rawName] ?? rawName
             entity.transform = transform(of: node)
             if let meshIndex = node["mesh"] as? Int {
-                for (mesh, material) in try parts(of: meshIndex) {
+                let built = try parts(of: meshIndex)
+                // The plan image is optional decoration: without its texture the bare white plane is skipped.
+                if rawName == "plan_floor", built.contains(where: { !$0.2 }) { return nil }
+                for (mesh, material, _) in built {
                     entity.addChild(ModelEntity(mesh: mesh, materials: [material]))
                 }
             }
@@ -130,23 +139,50 @@ enum GLBSceneLoader {
         return root
     }
 
-    private static func material(_ index: Int?, json: [String: Any]) -> PhysicallyBasedMaterial {
+    /// `textured` is false when the material asked for a base-colour texture that could not be decoded.
+    private static func material(_ index: Int?, json: [String: Any], doc: Document) -> (PhysicallyBasedMaterial, Bool) {
         var material = PhysicallyBasedMaterial()
         var rgba: [Double] = [0.7, 0.7, 0.7, 1]
         var doubleSided = false
+        var textureIndex: Int?
         if let index, let list = json["materials"] as? [[String: Any]], list.indices.contains(index) {
             let entry = list[index]
             if let pbr = entry["pbrMetallicRoughness"] as? [String: Any],
                let factor = pbr["baseColorFactor"] as? [Double], factor.count == 4 { rgba = factor }
+            textureIndex = ((entry["pbrMetallicRoughness"] as? [String: Any])?["baseColorTexture"] as? [String: Any])?["index"] as? Int
             doubleSided = entry["doubleSided"] as? Bool ?? false
         }
         let color = UIColor(red: rgba[0], green: rgba[1], blue: rgba[2], alpha: 1)
-        material.baseColor = .init(tint: color)
+        var textured = true
+        if let textureIndex {
+            if let texture = texture(textureIndex, doc: doc) {
+                material.baseColor = .init(tint: .white, texture: .init(texture))
+            } else {
+                textured = false
+                material.baseColor = .init(tint: color)
+            }
+        } else {
+            material.baseColor = .init(tint: color)
+        }
         material.roughness = .init(floatLiteral: 0.9)
         material.metallic = .init(floatLiteral: 0)
         if rgba[3] < 0.99 { material.blending = .transparent(opacity: .init(floatLiteral: Float(rgba[3]))) }
         if doubleSided { material.faceCulling = .none }
-        return material
+        return (material, textured)
+    }
+
+    /// Decodes the PNG/JPEG embedded in the GLB for glTF texture `index`; nil when absent or undecodable.
+    private static func texture(_ index: Int, doc: Document) -> TextureResource? {
+        guard let textures = doc.json["textures"] as? [[String: Any]], textures.indices.contains(index),
+              let source = textures[index]["source"] as? Int,
+              let images = doc.json["images"] as? [[String: Any]], images.indices.contains(source),
+              let viewIndex = images[source]["bufferView"] as? Int,
+              let views = doc.json["bufferViews"] as? [[String: Any]], views.indices.contains(viewIndex),
+              let length = views[viewIndex]["byteLength"] as? Int else { return nil }
+        let start = views[viewIndex]["byteOffset"] as? Int ?? 0
+        guard start >= 0, length > 0, start + length <= doc.bin.count,
+              let image = UIImage(data: doc.bin.subdata(in: start..<start + length))?.cgImage else { return nil }
+        return try? TextureResource.generate(from: image, options: .init(semantic: .color))
     }
 
     private static func transform(of node: [String: Any]) -> Transform {

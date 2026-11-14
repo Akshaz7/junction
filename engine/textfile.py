@@ -47,8 +47,121 @@ def _count_rows(question, doc_id, pts, t0):
                         "door numbers counted from the printed schedule", t0)
 
 
+SF_ROW = re.compile(r"(?<![\d,.])(\d[\d,]*)\s?SF\s+(\d{3}[A-Z]?)\s+([A-Z][A-Z0-9 .&'/()-]*?)(?=\s+[A-Z]\d\b|\s+-\s|\s*$)")
+M2_SF = 0.09290304
+WETRX = re.compile(r"\b(restrooms?|toilets?|wcs?|bath\w*|shower\w*|lavator\w+|locker)\b", re.I)
+WET_STRICT = re.compile(r"\b(restrooms?|toilets?|wcs?|bath\w*|shower\w*|lavator\w+)\b", re.I)
+TILE_BOX_M2, TILE_EUR_M2 = 1.44, 35.0
+
+
+def _room_rows(doc_id, root, pts):
+    """room table rows 'AREA SF NUMBER NAME F1 B1 ...' -> [(number, name, m2, page, bbox)]"""
+    import json
+    from pathlib import Path
+    try:
+        t = json.loads((Path(root) / doc_id / "text.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    segs = [(pt.page, s) for pt in pts for s in pt.segs]
+    rows, seen = [], set()
+    for pg in t.get("pages") or []:
+        for line in str(pg.get("text") or "").split("\n"):
+            line = re.sub(r"^[A-Z]\s+(?=\d)", "", line.strip())
+            m = SF_ROW.search(line)
+            if not m:
+                continue
+            num, name = m.group(2), m.group(3).strip(" .-")
+            if num in seen or len(name) < 3:
+                continue
+            seen.add(num)
+            sf = float(m.group(1).replace(",", ""))
+            hit = next(((p_, s["bbox_px"]) for p_, s in segs if re.match(rf"(?:[A-Z]\s+)?{int(sf)} SF\b(?!.*\bSF\b)|{int(sf)} SF$", s["text"].replace(",", "").strip())), (pg.get("page", 1), None))
+            rows.append((num, name, round(sf * M2_SF, 1), sf, hit[0], hit[1]))
+    return rows
+
+
+def _mk(question, doc_id, text, value, unit, rows, step, t0):
+    hits = [(pg, bb, f"{nm}: {int(sf):,} SF") for _, nm, _, sf, pg, bb in rows[:30] if bb]
+    return sheetqa._obj(question, doc_id, text, value, unit, hits, step, t0, 0.85)
+
+
+def _room_table(question, doc_id, pts, t0, rooms):
+    if not rooms:
+        return None
+    q = question.lower()
+    f = lambda v: f"{v:,.1f}"
+    if re.search(r"\b(tiles?|tiling)\b", q):
+        sel = [r for r in rooms if WET_STRICT.search(r[1])]
+        if not sel:
+            return None
+        area = sum(r[2] for r in sel)
+        wm = re.search(r"(\d+(?:[.,]\d+)?)\s*%", question)
+        pct = float(wm.group(1).replace(",", ".")) if wm else 10.0
+        need = area * (1 + pct / 100)
+        boxes = int(-(-need // TILE_BOX_M2))
+        text = (f"Order about **{f(need)} m²** of floor tiles, which is **{boxes} boxes**. That is {f(area)} m² of floor in the {len(sel)} "
+                f"{'bathroom or WC' if len(sel) == 1 else 'bathrooms and WCs'} listed in the room table, plus {pct:g}% for cuts and breakage. {{marks}}\n\n"
+                f"Assumptions, not from the drawing: {TILE_BOX_M2} m² per box (four 60 x 60 cm tiles) and about €{TILE_EUR_M2:.0f} per m², "
+                f"so roughly **€{boxes * TILE_BOX_M2 * TILE_EUR_M2:,.0f}**. This is a rough guide, not a quote. The room table gives areas in square feet; converted to m².")
+        return _mk(question, doc_id, text, round(need, 1), "m2", sel, "tile take-off from the room table", t0)
+    if re.search(r"\bquantity take-?off\b|\btake-?off\b|\bquantities\b", q):
+        lines = "\n".join(f"| {nm.title().replace("'S","'s")} ({num}) | {f(m2)} | m² |" for num, nm, m2, *_ in rooms[:30])
+        doors = _doors(pts)
+        text = ("**Quantity take-off from this sheet's room table.**\n\n| Room | Floor area | Unit |\n|---|---|---|\n" + lines
+                + f"\n\nTotal of the {len(rooms)} rooms: **{f(sum(r[2] for r in rooms))} m²**." + (f" Doors in the schedule: **{len(doors)}**." if doors else "")
+                + "\n\nBaseboard lengths, slab area by type and piping are not in this file. Areas are converted from square feet. {marks}")
+        return _mk(question, doc_id, text, len(rooms), "rooms", rooms, "take-off from the room table", t0)
+    if re.search(r"\b(areas?|how (big|large)|square|largest|biggest)\b", q):
+        words = [w for w in re.findall(r"[a-z]{3,}", q) if w not in {"what", "the", "area", "areas", "room", "rooms", "total", "how", "big", "large", "square", "metres", "meters", "all", "are", "many", "and", "for", "this", "sheet"}]
+        sel = [r for r in rooms if any(w.rstrip("s") in r[1].lower() for w in words)] if words else []
+        if re.search(r"\b(largest|biggest)\b", q):
+            sel = [max(rooms, key=lambda r: r[2])]
+            text = f"The largest room is the **{sel[0][1].title().replace("'S","'s")}** at **{f(sel[0][2])} m²**. {{marks}}"
+            return _mk(question, doc_id, text, sel[0][2], "m2", sel, "largest room from the room table", t0)
+        if sel:
+            tot = sum(r[2] for r in sel)
+            parts = "; ".join(f"{r[1].title().replace("'S","'s")} ({r[0]}) {f(r[2])} m²" for r in sel[:8])
+            text = (f"The area is **{f(tot)} m²**: {parts}. {{marks}}" if len(sel) > 1 else f"The area of the **{sel[0][1].title().replace("'S","'s")}** is **{f(tot)} m²**. {{marks}}")
+            return _mk(question, doc_id, text, round(tot, 1), "m2", sel, "room areas from the room table", t0)
+        tot = sum(r[2] for r in rooms)
+        text = f"The room table lists **{len(rooms)} rooms** adding up to **{f(tot)} m²** (converted from square feet). {{marks}}"
+        return _mk(question, doc_id, text, round(tot, 1), "m2", rooms, "room table total", t0)
+    return None
+
+
+def _doors(pts):
+    nums = []
+    for pt in pts:
+        for w in pt.words:
+            t = str(w.get("text") or "")
+            if re.fullmatch(r"\d{3}\.[A-Z]\d?", t) and t not in [n for n, _, _ in nums]:
+                nums.append((t, pt.page, w["bbox_px"]))
+    return nums
+
+
+def _takeoff(question, doc_id, pts, t0):
+    """'quantity take-off' / 'floor tiles for the bathrooms' on a sheet with no room areas: say what the text has and what it lacks."""
+    tile = re.search(r"\b(tiles?|tiling)\b", question, re.I)
+    if not (tile or re.search(r"\bquantity take-?off\b|\btake-?off\b|\bbill of quantities\b|\bquantities\b", question, re.I)):
+        return None
+    areas = [(pg, s) for pg, s in _segs(pts) if AREA_NUM.search(s["text"])]
+    if areas:
+        return None   # the file has areas: the area handler quotes them
+    doors = _doors(pts)
+    if tile:
+        text = ("**I can't size the tiles from this file.** Its printed text has no floor areas, so there is nothing to add up for the bathrooms. "
+                "Upload the floor plan or the room table with areas and I will work out the area, 10% waste, boxes and a rough price.")
+        return sheetqa._obj(question, doc_id, text, None, None, [], "no floor areas in the file text", t0, 0.6)
+    lines = [f"- Doors: **{len(doors)}** in the door schedule {{marks}}"] if doors else []
+    lines += ["- Floor areas: not in this file", "- Baseboard lengths: not in this file", "- Slab area by type: not in this file", "- Piping by system: not in this file"]
+    text = "**Quantity take-off from this sheet's printed text.**\n" + "\n".join(lines) + \
+           "\n\nThis sheet is a schedule, so it carries door data but no room areas. Upload the floor plan to get areas and baseboard."
+    return sheetqa._obj(question, doc_id, text, len(doors) or None, "doors" if doors else None,
+                        [(pg, bb, t) for t, pg, bb in doors[:12]], "take-off from printed text", t0, 0.7)
+
+
 def _notes(question, doc_id, pts, t0):
-    if re.search(r"\b(schedule|table|sheet [A-Z]-?\d)", question, re.I):   # schedule lookups belong to the schedule reader
+    if re.search(r"\b(schedule|sheet [A-Z]-?\d)", question, re.I):   # schedule lookups belong to the schedule reader
         return None
     for qre, nre, noun in TOPICS:
         if not re.search(qre, question, re.I):
@@ -101,7 +214,8 @@ def answer(question: str, doc_ids: list[str], root, t0=None):
         return None
     if not any(pt.words for pt in pts):
         return None
-    for fn in (_count_rows, _notes):
+    rooms = _room_rows(doc_ids[0], root, pts)
+    for fn in (_count_rows, lambda *a: _room_table(*a, rooms), _takeoff, _notes):
         res = fn(question, doc_ids[0], pts, t0)
         if res is not None:
             res["doc_ids"] = list(doc_ids)

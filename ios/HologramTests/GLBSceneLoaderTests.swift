@@ -66,6 +66,11 @@ final class GLBSceneLoaderTests: XCTestCase {
         XCTAssertFalse(items.isEmpty)
         for item in items.values { XCTAssertNotNil(index.entitiesByUSDName[item.usd_name], item.usd_name) }
         XCTAssertGreaterThan(scene.entity.visualBounds(relativeTo: nil).extents.x, 1)
+        // The embedded plan image is decoded onto the plan_floor plane.
+        let floor = try XCTUnwrap(index.entitiesByUSDName["plan_floor"])
+        let model = try XCTUnwrap(floor.children.first?.components[ModelComponent.self])
+        let material = try XCTUnwrap(model.materials.first as? PhysicallyBasedMaterial)
+        XCTAssertNotNil(material.baseColor.texture)
     }
 
     /// A stale USDZ (belongs to another scene) is skipped in favour of the GLB.

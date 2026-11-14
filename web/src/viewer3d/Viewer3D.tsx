@@ -308,6 +308,10 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
   const stepStorey = build && build.phase !== 'done' ? [...storeys].sort((a, b) => b.length - a.length).find((name) => build.label.startsWith(`${name} `)) : undefined;
   const shownStorey = stepStorey ?? cutaway.activeStorey ?? '';
   const storeyIndex = storeys.indexOf(shownStorey);
+  // Raster plans are extruded from pixels with default heights: say so. IFC/DXF scenes carry real geometry.
+  const approximated = manifest !== null && (Boolean(manifest.plan_image)
+    || (manifest as { approx?: boolean }).approx === true
+    || Object.values(manifest.items).some((item) => (item.props as { approx?: unknown } | null | undefined)?.approx === true));
   function selectStorey(name: string | null) {
     cancelMove();
     viewerRef.current?.setStorey(name);
@@ -380,6 +384,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
           : 'Loading 3D scene…'}
       </p>}
       {state === 'error' && <p className="viewer3d-message" role="alert">{error}</p>}
+      {state === 'ready' && approximated && <p className="viewer3d-approx" data-testid="approx-note">3D approximated from the drawing</p>}
       {state === 'ready' && answerKinds.length > 0 && <KindLegend className="kind-legend-3d" kinds={answerKinds} />}
       {picked && <output className="viewer3d-picked-overlay" aria-label="Picked item" aria-live="polite">{picked}</output>}
       {walking && <WalkJoystick onMove={(x, y) => viewerRef.current?.setWalkJoystick(x, y)} />}

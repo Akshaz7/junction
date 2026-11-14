@@ -181,6 +181,13 @@ def _select(doc: Doc, intent: SceneIntent, question: str, tg: dict[str, str]) ->
             if ent and entrance.wants_single(question):
                 ent = ent[:1]
             return ent
+    if intent.kind == "stairs" and re.search(r"\b(?:main|principal|primary)\s+(?:stair\w*|staircase|stairway)\b", question, re.I) and its:
+        # "the main staircase" is ONE stair: the ground-floor one with the biggest footprint (else the biggest anywhere)
+        def _foot(i):
+            b = getattr(i, "bbox_m", None)
+            return (b[1][0] - b[0][0]) * (b[1][2] - b[0][2]) if b else 0.0
+        ground = [i for i in its if (i.storey or "").lower() in ("erdgeschoss", "ground floor", "ground")] or its
+        return [max(ground, key=_foot)]
     if intent.kind == "room":      # "show me the bathroom": only rooms whose drawn name matches the named kind
         from engine import analytics
         ql = question.lower()
@@ -235,7 +242,8 @@ def scene_answer(question: str, doc: Doc, intent: SceneIntent, state: dict | Non
         text, abstained, conf = f"I could not find any {what} in this document, so nothing changed.", True, 0.0
     else:
         n = len(ids)
-        who = ", ".join(tg[i] for i in ids if i in tg) if n <= 6 and intent.tags else f"{n} {_noun(intent.kind, n)}"
+        who = ", ".join(tg[i] for i in ids if i in tg) if n <= 6 and intent.tags else \
+            (f"1 {'staircase' if intent.kind == 'stairs' else intent.kind or 'item'}" if n == 1 else f"{n} {_noun(intent.kind, n)}")
         verb = {"hide": "Hidden", "restore": "Restored", "isolate": "Showing only", "highlight": "Highlighted"}[intent.op]
         text = (f"{verb} {who} on the drawing." if intent.op == "highlight" and not intent.tags else f"{verb} **{who}**.")
         kinds = {i.kind for i in sel}
@@ -246,15 +254,18 @@ def scene_answer(question: str, doc: Doc, intent: SceneIntent, state: dict | Non
             hidden = hidden | set(ids) if intent.op == "hide" else hidden - set(ids)
             vis = total - sum(1 for i in doc.items if i.kind == k and i.item_id in hidden)
             one = text
-            if n == 1 and ids[0] in tg:
+            if n == 1 and (ids[0] in tg or k == "stairs"):
                 # name the item the user meant ("the front door (D34)") and its storey
                 m_ = re.search(r"\b(front|main|street)\s+door\b|\b(main\s+entrance|entrance(?:\s+door)?)\b", question, re.I)
                 nm = f"the {re.sub(r'\\s+', ' ', m_.group(0).lower())}" if m_ else k.capitalize()
+                if not m_ and k == "stairs":
+                    nm = "The main staircase" if re.search(r"\bmain\b", question, re.I) else "The staircase"
                 if m_ and "door" not in nm and k == "door":
                     nm += " door"
                 nm = nm[0].upper() + nm[1:]
                 st_ = f" on {sel[0].storey}" if sel[0].storey else ""
-                one = f"{nm} ({tg[ids[0]]}){st_} is hidden." if intent.op == "hide" else f"{nm} ({tg[ids[0]]}){st_} is visible again."
+                tg_ = f" ({tg[ids[0]]})" if ids[0] in tg else ""
+                one = f"{nm}{tg_}{st_} is hidden." if intent.op == "hide" else f"{nm}{tg_}{st_} is visible again."
             text = f"{one} {vis} of {total} {_noun(k, total)} remain visible." if intent.op == "hide" else f"{one} {vis} of {total} {_noun(k, total)} are visible."
     boxes = []
     if doc.mode == "planmap" and intent.op in ("highlight", "isolate"):

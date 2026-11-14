@@ -293,7 +293,7 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False) -
         except Exception as ex:  # noqa: BLE001
             print("raster walls skipped:", repr(ex)[:200])
     approx = False
-    if raster_walls and rw is None and sum(1 for it in pm["items"] if it["kind"] == "wall") < 3:
+    if raster_walls and rw is None and mpp <= 1 and sum(1 for it in pm["items"] if it["kind"] == "wall") < 3:
         # ladder step 3: no wall pixels and no usable plan-map walls -> clean shell around the drawing's outline
         try:
             rw = _shell(pm, img_gray=np.asarray(Image.open(art / f"page-{page}.png").convert("L"), dtype=float), mpp=mpp)
@@ -448,7 +448,7 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False) -
           "note": "generated for demo: extruded from plan map with default heights; "
                   "stairs only when the plan map has a stairs item (none from raster plans)",
           "publishable": not (lic.startswith("CC-BY-ND") or lic.startswith("GPL"))}
-    if approx:
+    if approx or rw is not None:  # walls read from pixels or a shell: 3D is approximated from the drawing
         sc["props"] = {"approx": True}
         sc["note"] = "3D approximated from the drawing"
     (art / "scene.json").write_text(json.dumps(sc, indent=1))

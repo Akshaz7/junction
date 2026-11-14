@@ -148,7 +148,7 @@ function UploadSession({ onClose, onAsk, onOpen, onReady }: UploadDialogProps) {
     {state.status === 'ready' && <section className="upload-dialog-ready"><p role="status"><Check size={18} aria-hidden="true" /><strong>Ready</strong></p>
       {state.processing && <p className="upload-dialog-note" data-testid="upload-still-processing">Still processing 3D…</p>}
       {state.note && <p className="upload-dialog-note">{state.note}</p>}
-      <div className="upload-dialog-actions"><Button onClick={() => { onAsk(state.document); close() }}>Ready — Ask about it<ArrowRight size={16} /></Button>
+      <div className="upload-dialog-actions"><Button onClick={() => { onAsk(state.document); close() }}>{state.processing ? 'Ask about it (reading drawing…)' : 'Ready — Ask about it'}<ArrowRight size={16} /></Button>
         <Button variant="outline" onClick={() => { onOpen(state.document); close() }}>Open</Button></div>
     </section>}
     <footer className="upload-dialog-footer">AI can make mistakes. Verify important information.</footer>

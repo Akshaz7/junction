@@ -1,3 +1,4 @@
+import { askUntilReadable, STILL_READING_STATUS } from '../lib/still-reading'
 import { sceneOpen, sceneOpenCitation } from '../lib/scene-open'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { ArrowUp, AtSign, CalendarClock, FileSearch, FileText, FolderOpen, HardHat, Plus, Scale, X } from 'lucide-react'
@@ -369,11 +370,11 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         // Preserve the active stream: a hashchange would reload this new chat.
         window.history.replaceState(window.history.state, '', `#/chat?chat=${encodeURIComponent(id)}`)
       }
-      const answer = await workspaceApi.askQuestion(chatId.current, question.trim(), docIds, {
+      const answer = await askUntilReadable(() => workspaceApi.askQuestion(chatId.current!, question.trim(), docIds, {
         onStatus: (text) => { if (generation.current === version) setStatuses((previous) => previous.at(-1) === text ? previous : [...previous, text]) },
         onDelta: (text) => { if (generation.current === version) setStreamText(text) },
         onTrace: (trace) => { if (generation.current === version) { streamedTraces.push(trace); setTraces([...streamedTraces]) } },
-      })
+      }), { cancelled: () => generation.current !== version, onWait: () => { setStreamText(''); setStatuses([STILL_READING_STATUS]) } })
       if (generation.current !== version) return
       setAnswers((previous) => [...previous, { id: answer.answer_id, question: answer.question, content: '', answer: { ...answer, trace: answer.trace.length ? answer.trace : streamedTraces } }])
     } catch (err) {

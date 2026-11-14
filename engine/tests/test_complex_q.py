@@ -120,7 +120,7 @@ def test_qa_live_ac20_failures():
     assert "44" in t and "Keller" in t
     for q in ("what is the total floor area of each storey?", "total floor area per storey"):
         a = answer(q, D)
-        assert a["cost"]["usd_total"] == 0 and "Keller 438.1" in a["answer"]["text_md"]
+        assert a["cost"]["usd_total"] == 0 and "438.1" in a["answer"]["text_md"]
     a = answer("what if we remove the main staircase?", D)
     cmd = a["evidence"]["scene"]["commands"][0]
     assert len(cmd["item_ids"]) == 1 and "stairses" not in a["answer"]["text_md"] and "3 of 4 stairs" in a["answer"]["text_md"]

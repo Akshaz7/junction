@@ -682,6 +682,31 @@ def _only_ifc(doc: Doc) -> bool:
     return doc.mode == "ifc"
 
 
+def h_extreme_room(q: str, doc: Doc) -> Ans | None:
+    """'where is the biggest meeting room' names the room and its area, not a count."""
+    m = re.search(r"\b(biggest|largest|smallest|tiniest)\s+(meeting|seminar|office|conference|toilet|wc|lab(?:oratory)?)\s*(?:room)?\b", q, re.I)
+    if not _only_ifc(doc) or not m:
+        return None
+    kind = m.group(2).lower()
+    key = {"meeting": "besprechung", "conference": "besprechung", "seminar": "seminar", "office": "buro", "toilet": "wc", "wc": "wc", "lab": "labor", "laboratory": "labor"}[kind]
+    rs = [r for r in _rooms(doc) if fold(_ln(r)).startswith(key) and (r.q or {}).get("net_floor_area_m2")]
+    st = storeys_in(q, _snames(doc))
+    rs = [r for r in rs if not st or r.storey in st]
+    if not rs:
+        a0 = Ans(f"{kind} rooms identified by room name{' on ' + ', '.join(st) if st else ''}.")
+        a0.body.append(f"**No room named like a {kind} room was found{' on ' + ', '.join(st) if st else ' in this model'}.**")
+        return a0
+    big = m.group(1).lower() in ("biggest", "largest")
+    best = (max if big else min)(rs, key=lambda r: r.q["net_floor_area_m2"])
+    a = Ans(f"{kind} rooms identified by room name ({len(rs)} found){' on ' + ', '.join(st) if st else ''}.")
+    a.items = [best]
+    a.ap(f"{len(rs)} {kind} rooms", "area = net floor area of each space")
+    a.body.append(f"**The {'largest' if big else 'smallest'} {kind} room is {_ln(best)}, {best.q['net_floor_area_m2']:.1f} m², on {best.storey}.**")
+    if len(rs) > 1:
+        a.body.append("Others: " + ", ".join([f"{_ln(r)} {r.q['net_floor_area_m2']:.1f} m²" for r in sorted(rs, key=lambda r: -r.q["net_floor_area_m2"] if big else r.q["net_floor_area_m2"]) if r is not best][:5]) + (f" and {len(rs) - 6} more" if len(rs) > 6 else "") + ".")
+    return a
+
+
 def h_capacity(q: str, doc: Doc) -> Ans | None:
     if not _only_ifc(doc) or not re.search(r"\b(?:how many (?:people|persons|occupants)|capacity|occupancy|people (?:can )?(?:fit|use|work|sit))\b", q, re.I):
         return None
@@ -745,7 +770,7 @@ def h_height(q: str, doc: Doc) -> Ans | None:
     return a
 
 
-HANDLERS = [h_tiling, h_external_face, h_paint, h_masonry, h_wide_doors, h_windows, h_offices, h_walls_filter, h_shared_wall, h_stacking,
+HANDLERS = [h_extreme_room, h_tiling, h_external_face, h_paint, h_masonry, h_wide_doors, h_windows, h_offices, h_walls_filter, h_shared_wall, h_stacking,
             h_schedule_doors, h_schedule_rooms, h_remove_wall, h_capacity, h_thickness, h_height, h_unanswerable, h_compliance, h_spatial_honest, h_labels, h_skirting]
 
 
