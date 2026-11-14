@@ -84,13 +84,8 @@ test('desktop asks; phone sees in-progress states before the final answer with c
     await expect(d.locator('.question-bubble').filter({ hasText: SLOW_QUESTION })).toHaveCount(1)
     await expect(p.locator('.question-bubble').filter({ hasText: SLOW_QUESTION })).toHaveCount(1)
 
-    // 2) A cited count answer reaches the phone with citations (fresh chat: a follow-up question in a threaded chat
-    //    is rewritten by the thread-memory step, so this check would not match the typed text).
-    const id1 = id
-    const id2c = await newChat(desktop.request, `Cross-device cited ${Date.now()}`)
-    await ready(d, `/chat?chat=${id2c}`)
-    await ready(p, `/chat?chat=${id2c}`)
-    void id1
+    // 2) A cited count answer reaches the phone with citations, as a follow-up in the SAME chat (the judges' flow).
+    const id2c = id
     await d.getByRole('combobox', { name: 'Ask about your drawings' }).fill(QUESTION)
     await d.getByRole('button', { name: 'Send question', exact: true }).click()
     const answerCard = p.locator('.exchange:not(.pending-exchange)').filter({ hasText: QUESTION }).last()
@@ -113,8 +108,8 @@ test('desktop asks; phone sees in-progress states before the final answer with c
     await expect(d.locator('.question-bubble').filter({ hasText: voice })).toBeVisible({ timeout: 3000 })
     const voiceMs = Date.now() - t1
     expect((await posted).ok()).toBe(true)
-    // (The thread-memory step may rewrite the follow-up's text, so count answers instead of matching it.)
-    await expect(d.locator('.exchange:not(.pending-exchange) .answer-text')).toHaveCount(2, { timeout: 20_000 })
+    const voiceCard = d.locator('.exchange:not(.pending-exchange)').filter({ hasText: voice }).last()
+    await expect(voiceCard.locator('.answer-text')).toBeVisible({ timeout: 20_000 })
     await testInfo.attach('cross-device-times', { contentType: 'application/json', body: JSON.stringify({ firstEventMs, answerMs, voiceMs, seen }) })
     console.log(JSON.stringify({ firstEventMs, answerMs, voiceMs }))
   } finally { await desktop.close(); await phone.close() }
