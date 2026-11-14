@@ -50,7 +50,7 @@ struct WalkMiniMap: View {
                     }
                 }
                 .frame(width: Self.canvasSize.width, height: Self.canvasSize.height)
-                .background(.black.opacity(0.25), in: RoundedRectangle(cornerRadius: 8))
+                .background(HologramStyle.forestColor.opacity(0.6), in: RoundedRectangle(cornerRadius: HologramStyle.radiusControl))
                 .contentShape(Rectangle())
                 .gesture(SpatialTapGesture().onEnded { event in
                     selectItem(at: event.location, bounds: bounds)
@@ -84,9 +84,8 @@ struct WalkMiniMap: View {
         }
         .frame(width: Self.canvasSize.width, alignment: .leading)
         .padding(8)
-        .background(.ultraThinMaterial.opacity(0.7), in: RoundedRectangle(cornerRadius: 14))
-        .background(.black.opacity(0.25), in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(tint.opacity(0.4), lineWidth: 1))
+        .background(HologramStyle.headerColor, in: RoundedRectangle(cornerRadius: HologramStyle.radiusCard, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: HologramStyle.radiusCard, style: .continuous).stroke(.white.opacity(0.14), lineWidth: 1))
         .environment(\.colorScheme, .dark)
         .accessibilityIdentifier("walk-mini-map")
     }

@@ -162,10 +162,12 @@ final class HighlightController {
         let bounds = entity.visualBounds(relativeTo: root)
         let offset = unit * 1.6
         let white = UnlitMaterial(color: .white)
-        let grey = UnlitMaterial(color: UIColor(white: 0.78, alpha: 1))
+        let ink = UnlitMaterial(color: HologramStyle.ink)
+        let red = UnlitMaterial(color: HologramStyle.brandRed)
 
+        // White card, brand-red numbered badge, dark kind label: the same look as the web's citation chips.
         let mesh = MeshResource.generateText(text, extrusionDepth: unit * 0.02,
-                                             font: .boldSystemFont(ofSize: CGFloat(unit * 0.9)))
+                                             font: .systemFont(ofSize: CGFloat(unit * 0.7), weight: .semibold))
         let number = ModelEntity(mesh: mesh, materials: [white])
         number.name = text
         let nb = number.visualBounds(relativeTo: number)
@@ -175,44 +177,46 @@ final class HighlightController {
         if let caption, !caption.isEmpty {
             let short = caption.count > 22 ? String(caption.prefix(21)) + "…" : caption
             let captionMesh = MeshResource.generateText(short.capitalized(with: nil), extrusionDepth: unit * 0.01,
-                                                        font: .systemFont(ofSize: CGFloat(unit * 0.4), weight: .medium))
-            let entity = ModelEntity(mesh: captionMesh, materials: [grey])
+                                                        font: .systemFont(ofSize: CGFloat(unit * 0.55), weight: .medium))
+            let entity = ModelEntity(mesh: captionMesh, materials: [ink])
             entity.name = "caption"
             cb = entity.visualBounds(relativeTo: entity)
             captionEntity = entity
         }
 
-        let pad = unit * 0.28
-        let gap = captionEntity == nil ? 0 : unit * 0.12
-        let contentWidth = max(nb.extents.x, cb.extents.x)
-        let contentHeight = nb.extents.y + gap + (captionEntity == nil ? 0 : cb.extents.y)
-        let width = max(contentWidth + pad * 2, unit * 1.2)
-        let height = contentHeight + pad * 2
+        let pad = unit * 0.2
+        let gap = captionEntity == nil ? 0 : unit * 0.3
+        let badgeH = unit * 1.0
+        let badgeW = max(badgeH, nb.extents.x + unit * 0.5)
+        let contentWidth = badgeW + gap + (captionEntity == nil ? 0 : cb.extents.x)
+        let width = contentWidth + pad * 2
+        let height = badgeH + pad * 2
 
-        var fill = UnlitMaterial(color: UIColor(white: 0.04, alpha: 1))
-        fill.blending = .transparent(opacity: .init(floatLiteral: 0.82))
-        var edge = UnlitMaterial(color: .white)
-        edge.blending = .transparent(opacity: .init(floatLiteral: 0.35))
-        let border = unit * 0.03
+        let border = unit * 0.035
+        let radius = height * 0.32
+        var edge = UnlitMaterial(color: .black)
+        edge.blending = .transparent(opacity: .init(floatLiteral: 0.28))
         let edgePlane = ModelEntity(mesh: .generatePlane(width: width + border * 2, height: height + border * 2,
-                                                         cornerRadius: height / 2 + border), materials: [edge])
-        let fillPlane = ModelEntity(mesh: .generatePlane(width: width, height: height, cornerRadius: height / 2),
-                                    materials: [fill])
-        // Capsule bottom sits at the card origin; the leader hangs from there.
+                                                         cornerRadius: radius + border), materials: [edge])
+        let fillPlane = ModelEntity(mesh: .generatePlane(width: width, height: height, cornerRadius: radius),
+                                    materials: [white])
+        let badge = ModelEntity(mesh: .generatePlane(width: badgeW, height: badgeH, cornerRadius: badgeH * 0.3),
+                                materials: [red])
+        // Card bottom sits at the origin; the leader hangs from there.
         let cy = height / 2
+        let left = -width / 2 + pad
         edgePlane.position = [0, cy, -unit * 0.004]
         fillPlane.position = [0, cy, 0]
-        let textZ = unit * 0.01
-        var cursor = height - pad
-        number.position = [-nb.center.x, cursor - nb.max.y, textZ]
-        cursor -= nb.extents.y + gap
+        badge.position = [left + badgeW / 2, cy, unit * 0.005]
+        number.position = [left + badgeW / 2 - nb.center.x, cy - nb.center.y, unit * 0.01]
         if let captionEntity {
-            captionEntity.position = [-cb.center.x, cursor - cb.max.y, textZ]
+            captionEntity.position = [left + badgeW + gap - cb.min.x, cy - cb.center.y, unit * 0.01]
         }
 
         let card = Entity()
         card.addChild(edgePlane)
         card.addChild(fillPlane)
+        card.addChild(badge)
         card.addChild(number)
         if let captionEntity { card.addChild(captionEntity) }
 
@@ -228,11 +232,11 @@ final class HighlightController {
 
         // Thin grey leader and a small white dot where it meets the item.
         let width2 = max(unit * 0.02, 0.0015)
-        let leader = ModelEntity(mesh: .generateBox(size: [width2, offset, width2]), materials: [grey])
+        let leader = ModelEntity(mesh: .generateBox(size: [width2, offset, width2]), materials: [ink])
         leader.name = "answer-leader"
         leader.position = [0, -offset / 2, 0]
         label.addChild(leader)
-        let dot = ModelEntity(mesh: .generateSphere(radius: unit * 0.07), materials: [white])
+        let dot = ModelEntity(mesh: .generateSphere(radius: unit * 0.07), materials: [red])
         dot.name = "answer-dot"
         dot.position = [0, -offset, 0]
         label.addChild(dot)

@@ -28,8 +28,8 @@ enum HologramCallout {
                                                    font: .systemFont(ofSize: CGFloat(unit * 0.42)),
                                                    containerFrame: .zero, alignment: .left,
                                                    lineBreakMode: .byClipping)
-        let title = ModelEntity(mesh: titleMesh, materials: [UnlitMaterial(color: .white)])
-        let details = ModelEntity(mesh: detailMesh, materials: [UnlitMaterial(color: grey)])
+        let title = ModelEntity(mesh: titleMesh, materials: [UnlitMaterial(color: HologramStyle.ink)])
+        let details = ModelEntity(mesh: detailMesh, materials: [UnlitMaterial(color: HologramStyle.muted)])
         let tb = title.visualBounds(relativeTo: title)
         let db = details.visualBounds(relativeTo: details)
 
@@ -38,10 +38,9 @@ enum HologramCallout {
         let width = max(tb.extents.x, db.extents.x) + pad * 2
         let height = tb.extents.y + gap + db.extents.y + pad * 2
 
-        var fill = UnlitMaterial(color: UIColor(white: 0.04, alpha: 1))
-        fill.blending = .transparent(opacity: .init(floatLiteral: 0.72))
-        var edge = UnlitMaterial(color: grey)
-        edge.blending = .transparent(opacity: .init(floatLiteral: 0.35))
+        let fill = UnlitMaterial(color: .white)
+        var edge = UnlitMaterial(color: .black)
+        edge.blending = .transparent(opacity: .init(floatLiteral: 0.22))
         let border = unit * 0.04
         let edgePlane = ModelEntity(mesh: .generatePlane(width: width + border * 2, height: height + border * 2,
                                                          cornerRadius: pad * 0.6), materials: [edge])
@@ -68,11 +67,11 @@ enum HologramCallout {
         let length = max(simd_length(end), 0.001)
         let thickness = max(unit * 0.03, 0.002)
         let leader = ModelEntity(mesh: .generateBox(size: [thickness, length, thickness]),
-                                 materials: [UnlitMaterial(color: grey)])
+                                 materials: [UnlitMaterial(color: HologramStyle.bark)])
         leader.position = end / 2
         leader.orientation = simd_quatf(from: [0, 1, 0], to: end / length)
         let dot = ModelEntity(mesh: .generateSphere(radius: unit * 0.1),
-                              materials: [UnlitMaterial(color: .white)])
+                              materials: [UnlitMaterial(color: HologramStyle.brandRed)])
 
         let container = Entity()
         container.name = "item-callout"

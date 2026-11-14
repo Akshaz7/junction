@@ -108,15 +108,15 @@ struct ARScreen: View {
 
     @ViewBuilder private var placementPill: some View {
         if controller.isLoaded, let notice = controller.sceneIdentity.notice {
-            HologramCapsule { Text(notice).lineLimit(3) }
+            HologramCardPill { Text(notice).lineLimit(3) }
                 .accessibilityIdentifier("ar-fallback-notice")
         }
         if !controller.isLoaded || controller.status.hasPrefix("Unable") || controller.status.hasPrefix("Augmented") {
             if !(controller.status.hasPrefix("Move your device") && controller.isLoaded) {
-                HologramCapsule { Text(controller.status).lineLimit(2) }
+                HologramCardPill { Text(controller.status).lineLimit(2) }
             }
         } else if isPlacing {
-            HologramCapsule {
+            HologramCardPill {
                 Text(controller.canPlace
                      ? (controller.isWalking ? "Tap to place on the floor" : "Tap to place your model")
                      : (controller.isWalking ? "Aim at the floor" : "Aim at a flat surface"))
@@ -134,13 +134,8 @@ struct ARScreen: View {
                 if !advisor.cards.isEmpty { advisorPill }
             }
             if isPlacing {
-                Button { controller.confirmPlacement() } label: {
-                    Text("Place model").font(.headline).foregroundStyle(.white)
-                        .padding(.horizontal, 28).padding(.vertical, 14)
-                        .background(.black.opacity(controller.canPlace ? 0.75 : 0.45), in: Capsule())
-                        .overlay(Capsule().stroke(Color.white.opacity(controller.canPlace ? 0.55 : 0.2),
-                                                  lineWidth: 1))
-                }
+                Button { controller.confirmPlacement() } label: { Text("Place model") }
+                    .buttonStyle(HologramPrimaryButtonStyle())
                 .disabled(!controller.canPlace)
                 .accessibilityIdentifier("ar-place-model")
             }
@@ -157,7 +152,7 @@ struct ARScreen: View {
                 .accessibilityIdentifier("advisor-card-\(card.id)")
             }
         } label: {
-            HologramCapsule {
+            HologramCardPill {
                 Label("\(min(advisor.cards.count, 3)) checks", systemImage: "scope")
             }
         }
@@ -231,7 +226,7 @@ struct ARScreen: View {
                 HStack(spacing: 6) {
                     Text(controller.isWalking ? "Walk · \(sceneName)" : sceneName).lineLimit(1)
                         .accessibilityIdentifier("scene-name")
-                    Image(systemName: "chevron.down").font(.caption2.weight(.bold))
+                    Image(systemName: "chevron.down").font(.system(size: 10, weight: .bold))
                 }
                 .frame(maxWidth: 220)
             }
