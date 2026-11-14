@@ -126,6 +126,11 @@ def swiss_truth():
     for room in picked:
         label = room["props"]["number"]
         ids = []
+        for wall in pm["items"]:
+            if wall["kind"] == "wall" and wall.get("polygon_px"):
+                boundary = polygons[room["item_id"]].boundary
+                if boundary.intersection(Polygon(wall["polygon_px"]).buffer(0)).length > 0:
+                    ids.append(wall["item_id"])
         for item in pm["items"]:
             if item["kind"] in ("room", "wall", "text", "label", "annotation", "dimension") or not item.get("bbox_px"):
                 continue
@@ -136,7 +141,7 @@ def swiss_truth():
                 ids.append(item["item_id"])
         questions.append({"question": f"What is connected to room {label}?", "doc_id": SWISS,
                           "expect": {"shape": "connections" if ids else "missing", "required_source_item_ids": sorted(ids)},
-                          "truth": "Unambiguous physical CAD item centres inside the extracted room polygon; annotation text is not a physical connection"})
+                          "truth": "Raw CAD wall outlines touching the room boundary, plus unambiguous physical item centres inside the room; annotation text is not a physical connection"})
         questions.append({"question": f"Where else does room {label} appear?", "doc_id": SWISS,
                           "expect": {"shape": "missing"}, "truth": "Single-source project has no cross-file identity/reference evidence"})
     return {"project": {"id": "kg-answer-dxf", "docs": [{"doc_id": SWISS}]}, "questions": questions, "source_format": "dxf"}

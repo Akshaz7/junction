@@ -141,10 +141,15 @@
         "question": "What is connected to room 3.01?",
         "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833",
         "expect": {
-          "shape": "missing",
-          "required_source_item_ids": []
+          "shape": "connections",
+          "required_source_item_ids": [
+            "wall-13",
+            "wall-15",
+            "wall-16",
+            "wall-55"
+          ]
         },
-        "truth": "Unambiguous physical CAD item centres inside the extracted room polygon; annotation text is not a physical connection"
+        "truth": "Raw CAD wall outlines touching the room boundary, plus unambiguous physical item centres inside the room; annotation text is not a physical connection"
       },
       {
         "question": "Where else does room 3.01 appear?",
@@ -161,10 +166,12 @@
           "shape": "connections",
           "required_source_item_ids": [
             "other-11",
-            "other-12"
+            "other-12",
+            "wall-13",
+            "wall-15"
           ]
         },
-        "truth": "Unambiguous physical CAD item centres inside the extracted room polygon; annotation text is not a physical connection"
+        "truth": "Raw CAD wall outlines touching the room boundary, plus unambiguous physical item centres inside the room; annotation text is not a physical connection"
       },
       {
         "question": "Where else does room 3.02 appear?",
@@ -178,10 +185,13 @@
         "question": "What is connected to room 3.03?",
         "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833",
         "expect": {
-          "shape": "missing",
-          "required_source_item_ids": []
+          "shape": "connections",
+          "required_source_item_ids": [
+            "wall-15",
+            "wall-16"
+          ]
         },
-        "truth": "Unambiguous physical CAD item centres inside the extracted room polygon; annotation text is not a physical connection"
+        "truth": "Raw CAD wall outlines touching the room boundary, plus unambiguous physical item centres inside the room; annotation text is not a physical connection"
       },
       {
         "question": "Where else does room 3.03 appear?",
@@ -195,10 +205,14 @@
         "question": "What is connected to room 3.04?",
         "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833",
         "expect": {
-          "shape": "missing",
-          "required_source_item_ids": []
+          "shape": "connections",
+          "required_source_item_ids": [
+            "wall-16",
+            "wall-17",
+            "wall-18"
+          ]
         },
-        "truth": "Unambiguous physical CAD item centres inside the extracted room polygon; annotation text is not a physical connection"
+        "truth": "Raw CAD wall outlines touching the room boundary, plus unambiguous physical item centres inside the room; annotation text is not a physical connection"
       },
       {
         "question": "Where else does room 3.04 appear?",
@@ -214,10 +228,15 @@
         "expect": {
           "shape": "connections",
           "required_source_item_ids": [
-            "other-1"
+            "other-1",
+            "wall-16",
+            "wall-18",
+            "wall-20",
+            "wall-23",
+            "wall-25"
           ]
         },
-        "truth": "Unambiguous physical CAD item centres inside the extracted room polygon; annotation text is not a physical connection"
+        "truth": "Raw CAD wall outlines touching the room boundary, plus unambiguous physical item centres inside the room; annotation text is not a physical connection"
       },
       {
         "question": "Where else does room 3.05 appear?",

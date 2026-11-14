@@ -1,5 +1,8 @@
 {
   "first_run_passed": 15,
   "first_run_total": 20,
-  "correction": "Five DXF connection gold rows incorrectly required text annotation nodes to be physical connections. Excluded text/label/annotation/dimension nodes from independent geometry truth; product code unchanged. First results retained. No threshold or model changed."
+  "correction": "Five DXF connection gold rows incorrectly required text annotation nodes to be physical connections. Excluded text/label/annotation/dimension nodes from independent geometry truth; product code unchanged. First results retained. No threshold or model changed.",
+  "second_run_passed": 17,
+  "second_run_total": 20,
+  "second_correction": "Raw geometry gold omitted walls bounding rooms. Added wall-outline/room-boundary contacts. Product answers were returning those walls correctly. Second results retained; no product change or tuned threshold."
 }
