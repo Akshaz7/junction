@@ -1,4 +1,4 @@
-# CONTRACT — version 1
+# CONTRACT — version 2
 
 Only the LEAD edits this file. Each change bumps the version and adds one line to DECISIONS.md.
 
@@ -6,7 +6,7 @@ Only the LEAD edits this file. Each change bumps the version and adds one line t
 All workers build against this contract. If something is unclear, the lead decides and bumps the version.
 
 ### 5.1 IDs
-- `doc_id`: `<source>__<file stem>` in lowercase with non-alphanumerics replaced by `-`. Files with the same stem in one source share one `doc_id` and are listed as `formats`.
+- `doc_id`: `<source>__<file stem>`: source folder name verbatim, file stem lowercased with non-alphanumerics replaced by `-` (v2 clarification). Example: `ifc_bench__ac20-arc`. Files with the same stem in one source share one `doc_id` and are listed as `formats`.
 - `item_id`: unique inside one doc. IFC elements use the IFC GlobalId. Plan-map items use `<kind>-<3 digits>`, for example `window-007`.
 - `usd_name`: USD prim names cannot hold every character of a GlobalId. `usd_name = "i_" + first 16 hex chars of sha1(item_id)`. The map lives in `scene.json`.
 - The same `item_id` is used in the 2D boxes, the GLB node name, the USDZ prim (through `usd_name`), and every answer. This is the backbone of 2D to 3D to AR.
@@ -19,7 +19,7 @@ All workers build against this contract. If something is unclear, the lead decid
 ### 5.3 Files per document, under `artifacts/<doc_id>/`
 | File | Content |
 |---|---|
-| `doc.json` | `doc_id`, `source`, `formats[]`, `kind` (raster, pdf, dxf, dwg, ifc, svg), `title`, `pages`, `licence`, `credit`, `heldout` (bool) |
+| `doc.json` | `doc_id`, `source`, `formats[]`, `files` {format: path relative to dataset root} (v2), `kind` (raster, pdf, dxf, dwg, ifc, svg), `title`, `pages`, `licence`, `credit`, `heldout` (bool) |
 | `page-<n>.png` | Page image. `page-<n>.thumb.png` thumbnail. |
 | `text-<n>.json` | Words with `bbox_px`, from the PDF text layer or OCR. Optional. |
 | `planmap-<n>.json` | The plan map for page n (5.4). |

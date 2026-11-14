@@ -35,3 +35,4 @@ Format for new lines: `YYYY-MM-DD HH:MM — decision — reason`.
 - 2026-11-14 02:58 — I-02 starts before D-10 using a fixture USDZ the LEAD generates with usd-core (5 prims named by usd_name) — the row allows a bundled fixture; avoids IOS idling for hours. Real scenes swap in when D-10 lands.
 - 2026-11-14 03:04 — T-01 starts before D-06 on the digital_hub fixture from T-00 — same reasoning as I-02; real ac20 scene swaps in when D-06 lands.
 - 2026-11-14 03:05 — Router chain for task `route`: rules parser → NVIDIA Nemotron → Runware; Gemini removed from route — section 2 assigns the router fallback to Nemotron (NVIDIA challenge).
+- 2026-11-14 03:08 — doc_id keeps the source folder name verbatim and slugs only the stem (`ifc_bench__ac20-arc`, `cubicasa5k__colorful-11397`); matches the CONTRACT 5.1 example. CONTRACT v2: doc.json gains `files` {format: path relative to dataset root}.
