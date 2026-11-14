@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { ArrowUp, AtSign, CalendarClock, FileSearch, FileText, FolderOpen, HardHat, Plus, Scale, X } from 'lucide-react'
 import { Button } from './ui'
 import { AnswerCard } from './answer-card'
-import { isKnownChat, rememberChat } from '../lib/known-chats'
+import { rememberChat } from '../lib/known-chats'
+import { isPairedChat, registerChat } from '../lib/pairing'
 import { NO_ANSWER_MESSAGE } from '../lib/answer-text'
 import { DocumentViewer, useViewerSheet } from './document-viewer'
 import { workspaceApi } from '../lib/api'
@@ -190,9 +191,10 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       if (event.type !== 'chat.message' || event.role !== 'user' || submitting.current) return
       if (event.chat_id === chatId.current) return
       // Strangers' chats never raise the notice: only with Follow on, and only for chats this browser knows.
-      if (!followingRef.current || !isKnownChat(event.chat_id)) return
-      if (followingRef.current) { window.location.hash = `#/chat?chat=${encodeURIComponent(event.chat_id)}`; return }
-      setIncoming({ chatId: event.chat_id, question: event.text ?? 'New question' })
+      if (!followingRef.current) return
+      void isPairedChat(event.chat_id).then((known) => {
+        if (known && followingRef.current && !submitting.current) window.location.hash = `#/chat?chat=${encodeURIComponent(event.chat_id)}`
+      })
     })
   }, [demo])
   useEffect(() => { if (liveChatId) setIncoming((previous) => previous?.chatId === liveChatId ? null : previous) }, [liveChatId])
@@ -308,6 +310,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         const id = await workspaceApi.createChat(docIds, question.trim().slice(0, 100))
         if (generation.current !== version) return
         chatId.current = id
+        await registerChat(id) // paired devices can now recognise this chat
+        if (generation.current !== version) return
         setLiveChatId(id)
         // Preserve the active stream: a hashchange would reload this new chat.
         window.history.replaceState(window.history.state, '', `#/chat?chat=${encodeURIComponent(id)}`)

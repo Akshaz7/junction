@@ -853,3 +853,14 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 @keyframes voice-pulse { from { transform: scale(.8); opacity: .8; } to { transform: scale(1.5); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .voice-button.listening::after { animation: none; opacity: .5; } }
 .voice-hint[data-tone="error"] { color: var(--destructive, #c0392b); }
+
+/* Device pairing */
+.pair-phone { pointer-events: auto; position: relative; display: inline-flex; }
+.pair-popover { pointer-events: auto; position: absolute; top: calc(100% + 8px); right: 0; z-index: 20; width: 260px; padding: 14px; display: grid; gap: 10px; background: var(--card); color: var(--foreground); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-float); font-size: var(--text-body-sm); }
+.pair-popover header { display: flex; justify-content: space-between; align-items: center; }
+.pair-popover header button { border: 0; background: none; color: inherit; cursor: pointer; }
+.pair-popover p { margin: 0; color: var(--muted-foreground); }
+.pair-qr { width: 200px; height: 200px; margin: 0 auto; background: #fff; border-radius: 8px; padding: 6px; }
+.pair-qr svg { width: 100%; height: 100%; display: block; }
+.pair-link { width: 100%; font: inherit; font-size: 12px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--ink-well); color: inherit; }
+.pair-notice { position: fixed; left: 50%; bottom: 24px; translate: -50% 0; z-index: 80; padding: 10px 16px; border-radius: 10px; background: var(--foreground); color: var(--background); font-size: 14px; max-width: calc(100vw - 32px); }

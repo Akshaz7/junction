@@ -86,6 +86,8 @@ app.include_router(bench_router)
 app.include_router(skills_router)
 from .watch_routes import router as watch_router  # noqa: E402
 app.include_router(watch_router)
+from .pair_routes import router as pair_router  # noqa: E402
+app.include_router(pair_router)
 
 
 @app.get("/api/health")

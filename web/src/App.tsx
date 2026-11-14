@@ -9,6 +9,7 @@ import { AutomationsScreen } from './components/automations-screen'
 import { OverviewScreen } from './components/overview-screen'
 import { ChatScreen } from './components/chat-screen'
 import { ChatHeaderActions } from './components/chat-header-actions'
+import { PairingLanding } from './components/pair-phone'
 import { DataScreen } from './components/data-screen'
 import { CompareScreen } from './components/compare-screen'
 import { LibraryScreen } from './components/library-screen'
@@ -48,6 +49,7 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
 
   return <div className={`app-shell route-${view}`}>
     <a href="#main-content" className="skip-link" onClick={(event) => { event.preventDefault(); document.getElementById('main-content')?.focus() }}>Skip to content</a>
+    <PairingLanding />
     <WorkspaceNavigation route={view} />
     <main className="workspace" id="main-content" tabIndex={-1}>
       <header className="topbar">
