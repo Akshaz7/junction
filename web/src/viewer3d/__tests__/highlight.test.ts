@@ -35,6 +35,22 @@ function fixture() {
 }
 
 describe('highlight materials and contract item state', () => {
+  it('keeps citation numbers tied to IDs when selection order differs from scene order', () => {
+    const { controller } = fixture();
+    const ids = ['wall-c', 'window-b', 'window-a'];
+    controller.highlight(ids);
+    expect(controller.getHighlightState()).toEqual({
+      highlighted: ids, dimmed: 0,
+      labels: { 'wall-c': '1', 'window-b': '2', 'window-a': '3' },
+    });
+    // Supplied 2D evidence labels take precedence over selection position.
+    controller.highlight(ids, { labels: { 'window-a': '7', 'window-b': '12', 'wall-c': '4' } });
+    expect(controller.getHighlightState().labels).toEqual({
+      'wall-c': '4', 'window-b': '12', 'window-a': '7',
+    });
+    controller.clearHighlight();
+  });
+
   it('glows only selected IDs, dims/desaturates other items, and uses citation labels', () => {
     const { controller, material, a, b, c } = fixture();
     const originalColor = material.color.clone();

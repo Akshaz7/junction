@@ -24,8 +24,11 @@ test('highlight changes rendered geometry, shows citation numbers, and clears', 
   await expect(labels).toHaveCount(3);
   for (const [index, id] of state.highlighted.entries()) {
     expect(state.labels[id]).toBe(String(index + 1));
-    await expect(labels.nth(index)).toHaveAttribute('data-item-id', id);
-    await expect(labels.nth(index)).toHaveText(String(index + 1));
+    // CSS2DRenderer inserts overlays in scene traversal order. Citation
+    // identity must stay tied to the item ID, regardless of that DOM order.
+    const label = viewer.getByLabel(`Item ${index + 1}: ${id}`, { exact: true });
+    await expect(label).toHaveAttribute('data-item-id', id);
+    await expect(label).toHaveText(String(index + 1));
   }
   // Wait for the 600ms flight before recording the final rendered frame.
   await page.waitForTimeout(750);
