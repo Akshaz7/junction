@@ -330,6 +330,23 @@ final class ARSceneController: ObservableObject {
         showCallout(for: card, entity: entity)
     }
 
+    /// Tap-to-hide: hides the selected item with the same fade as a voice edit. Returns the hidden id.
+    @discardableResult
+    func hideSelectedItem() -> String? {
+        guard let id = selectedItem?.id, manifest?.items[id] != nil else { return nil }
+        dismissSelectedItem()
+        hiddenItemIDs.insert(id)
+        applyCutaway(animated: true)
+        return id
+    }
+
+    /// "Put it back" from the chrome: every hidden item returns.
+    func restoreHiddenItems() {
+        guard !hiddenItemIDs.isEmpty else { return }
+        hiddenItemIDs = []
+        applyCutaway(animated: true)
+    }
+
     func dismissSelectedItem() {
         selectedItem = nil
         selectionOutline.clear()

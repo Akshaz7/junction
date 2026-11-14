@@ -45,6 +45,7 @@ struct ARScreen: View {
                 }
                 Spacer()
                 ARSubtitle(voice: voice)
+                editChips
                 if let state = controller.buildState, controller.isPlaced, !controller.isWalking {
                     BuildScrubber(state: state, onPrevious: { controller.previousBuildStep() },
                                   onToggle: { state.playing ? controller.pauseBuild() : controller.playBuild() },
@@ -194,9 +195,7 @@ struct ARScreen: View {
             HStack(alignment: .bottom) {
                 ARMicButton(voice: voice, docID: controller.activeDocID) { answer in
                     controller.applyVoiceAnswer(answer)
-                    if let cards = answer.advisor_cards, !cards.isEmpty {
-                        advisor.setEditCards(cards, docID: answer.evidence.scene.doc_id)
-                    }
+                    handleVoiceEdit(answer)
                 }
                 Spacer()
                 if !advisor.cards.isEmpty { advisorPill }
@@ -206,6 +205,48 @@ struct ARScreen: View {
                     .buttonStyle(HologramPrimaryButtonStyle())
                 .disabled(!controller.canPlace)
                 .accessibilityIdentifier("ar-place-model")
+            }
+        }
+    }
+
+    /// Hide ids from a voice answer's commands (the server already ran the checks and sends cards with the answer).
+    private func handleVoiceEdit(_ answer: VoiceAnswer) {
+        let docID = answer.evidence.scene.doc_id
+        if let cards = answer.advisor_cards, !cards.isEmpty {
+            advisor.setEditCards(cards, docID: docID)
+            return
+        }
+        let hidden = (answer.evidence.scene.commands ?? []).filter { $0.op == .hide }.flatMap(\.item_ids)
+        guard !hidden.isEmpty else { return }
+        // The answer carried no cards for a hide: ask the advisor ourselves rather than show nothing.
+        Task { await advisor.checkHide(itemIDs: hidden, docID: docID, chatID: voice.chatID) }
+    }
+
+    private func hideSelected() {
+        guard let docID = controller.activeDocID, let id = controller.hideSelectedItem() else { return }
+        Task { await advisor.checkHide(itemIDs: [id], docID: docID, chatID: requestedDocID == self.docID ? chatID : nil) }
+    }
+
+    /// Tap-to-hide and put-back, plus the rule-check status line. Shown only for a placed model.
+    @ViewBuilder private var editChips: some View {
+        if controller.isPlaced {
+            if let message = advisor.status.message {
+                HologramCardPill { Text(message).lineLimit(3) }
+                    .accessibilityIdentifier("advisor-status")
+            }
+            HStack(spacing: 8) {
+                if let item = controller.selectedItem {
+                    Button { hideSelected() } label: {
+                        HologramCapsule { Label("Hide \(item.name)", systemImage: "eye.slash").lineLimit(1) }
+                    }
+                    .accessibilityIdentifier("ar-hide-item")
+                }
+                if controller.hasHiddenItems {
+                    Button { controller.restoreHiddenItems() } label: {
+                        HologramCapsule { Label("Put it back", systemImage: "arrow.uturn.backward") }
+                    }
+                    .accessibilityIdentifier("ar-restore-items")
+                }
             }
         }
     }
