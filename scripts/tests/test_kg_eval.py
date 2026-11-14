@@ -22,6 +22,7 @@ def test_known_graph_pairs_unknown_pairs_and_zero_denominators(tmp_path, monkeyp
     assert report["same_as"]["guid"]["recall"] == 1
     assert report["same_as"]["position"]["unknown"] == 1
     assert report["same_as"]["position"]["precision"] is None
+    assert report["same_as_all_methods"]["unknown"] == 1
     assert report["relation_samples"]["serves"]["sample_size"] == 0
 
 
