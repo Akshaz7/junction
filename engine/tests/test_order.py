@@ -134,6 +134,8 @@ def test_page_specific_scale(tmp_path):
     (dest / "planmap-2.json").write_text(json.dumps({"scale": {"method": "dimension", "m_per_px": .2}}))
     assert answer_order("Order tiles for the bathrooms", doc, root=tmp_path)["answer"]["value"] == 4
     assert answer_order("Order tiles for the bathrooms", doc)["answer"]["value"] is None
+    (dest / "planmap-2.json").unlink()
+    assert answer_order("Order tiles for the bathrooms", doc, root=tmp_path)["answer"]["value"] is None
 
 
 def test_missing_data_confidence_never_claims_verified(tmp_path):
@@ -172,6 +174,43 @@ def test_explicit_room_exclusion_and_multiple_room_types():
     assert answer_order("Order tiles for the bathrooms excluding WCs", doc)["answer"]["value"] == 12
     doc.items.append(Item("k", "room", label="Kitchen", q={"area_m2": 20}))
     assert answer_order("Order tiles for the bathrooms and kitchens", doc)["answer"]["value"] == 34
+
+
+def test_room_scope_is_not_dropped_when_a_floor_is_identified():
+    res = answer_order("Order flooring for the wizard laboratory on level 1", _doc())
+    assert res["answer"]["value"] is None
+    assert not res["citations"]
+    assert answer_order("Order flooring for all rooms on level 1", _doc())["answer"]["value"] == 12
+
+
+def test_explicit_room_door_association_and_exclusions():
+    doc = _doc()
+    doc.items[1].props.clear()
+    assert answer_order("Order doors for the bathrooms", doc)["answer"]["value"] == 1
+    doc.items.append(Item("wc", "room", name="WC", q={"area_m2": 2}))
+    assert answer_order("Order flooring for all rooms excluding WCs", doc)["answer"]["value"] == 112
+    res = answer_order("Order flooring for all rooms excluding the wizard laboratory", doc)
+    assert res["answer"]["value"] is None
+
+
+def test_wall_paint_does_not_turn_floor_tiles_into_wall_tiles():
+    res = answer_order("Order wall paint and floor tiles for the bathrooms", _doc())
+    assert res["answer"]["value"] == {"Paint coverage": 32, "Floor tiles": 12}
+
+
+def test_large_building_quantity_keeps_cents_in_table_and_headline():
+    doc = Doc("large", "ifc", [Item("r", "room", q={"area_m2": 123456.78})])
+    res = answer_order("Order flooring for all rooms", doc)
+    assert res["answer"]["value"] == 123456.78
+    assert "**Order 123456.78 m²" in res["answer"]["text_md"]
+    assert "| Flooring | 123456.78 |" in res["answer"]["text_md"]
+
+
+def test_unusable_numeric_range_cannot_crash_or_produce_an_order():
+    doc = Doc("odd", "ifc", [Item("r", "room", q={"area_m2": 1e308})])
+    res = answer_order("Order flooring for all rooms with 100% waste", doc)
+    assert res["answer"]["value"] is None
+    assert "calculate reliably" in res["answer"]["text_md"]
 
 
 @pytest.mark.parametrize("waste", ["-10% waste", "10% waste and 20% extra"])

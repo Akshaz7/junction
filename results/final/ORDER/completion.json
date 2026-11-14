@@ -1,0 +1,47 @@
+{
+  "worker": "F-ORDER",
+  "completed_at": "2026-11-14T23:12:01+02:00",
+  "status": "PARTIAL: implementation and validation passed; commit blocked by filesystem permissions",
+  "branch": "final/order",
+  "last_commit": "f2df35d0715252e6aeb613e502d25e606e803c04",
+  "tests": {
+    "focused_python_passed": 80,
+    "broader_python_passed": 113,
+    "web_passed": 7,
+    "py_compile": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "validation": {
+    "cards_reviewed": 20,
+    "card_issues": 0,
+    "real_files": 3,
+    "real_order_questions": 12,
+    "live_cost_usd": 0,
+    "exports": {
+      "answers": 12,
+      "matching_quantities": 6,
+      "explicit_missing_rows": 6
+    },
+    "bathroom_measured_steps_before": 0,
+    "bathroom_measured_steps_after": 1,
+    "end_only_doc_id": "wikimedia__18247337",
+    "selection_record": "results/final/ORDER/selection.json"
+  },
+  "commands": [
+    "MODELS_FAKE=1 /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest -q engine/tests/test_order.py engine/tests/test_plainwords.py engine/tests/test_reasoning*.py engine/tests/test_analytics.py",
+    "MODELS_FAKE=1 /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest -q engine/tests/test_answer.py engine/tests/test_quantity_takeoff.py engine/tests/test_solvers.py engine/tests/test_solvers_e19.py engine/tests/test_units.py engine/tests/test_rastersanity.py engine/tests/test_context_standalone.py engine/tests/test_app_help.py engine/tests/test_complex_q.py",
+    "(cd web && npx vitest run src/lib/takeoff.test.ts src/lib/answer-text.test.ts --configLoader runner --no-cache)",
+    "PYTHONPATH=. scripts/heavy.sh /Users/akshatthapa/Workspace/junction/.venv/bin/python engine/tests/order_validation.py"
+  ],
+  "commit_error": "fatal: Unable to create '/Users/akshatthapa/Workspace/junction/.git/worktrees/order/index.lock': Operation not permitted",
+  "uncommitted_code": [
+    "engine/order.py",
+    "engine/tests/test_order.py",
+    "engine/tests/order_validation.py"
+  ],
+  "cross_file_in_paused_wip": [
+    "engine/answer.py",
+    "engine/explain.py"
+  ],
+  "coordination": "Preserve F-EVIDENCE2 calibrated confidence and margin hook. The paused WIP already changed confidence.py; carry over only ordering/missing-source guards and sentence wording when merging their implementation."
+}

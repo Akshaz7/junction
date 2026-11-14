@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 
 from engine.solvers.data import Doc, Item
-from engine.solvers.filters import room_filter, storey_requested
+from engine.solvers.filters import STOREY_REQUEST, room_filter, storey_requested
 from engine.solvers.solve import MIN_CONF, _answer_obj, _evidence, _step, resolve_storey
 from engine.takeoff import CLASS_Q, ROOM_CLASSES, Takeoff, _matches, _tag_inside
 
@@ -57,7 +57,8 @@ def _scale(doc, room, root):
         try:
             sc = json.loads((Path(root) / doc.doc_id / f"planmap-{room.page}.json").read_text()).get("scale") or {}
         except (OSError, ValueError):
-            pass
+            if doc.pages > 1:
+                return None
     elif doc.pages > 1:
         return None
     return _number(sc.get("m_per_px")) if sc.get("method") not in (None, "none") else None
@@ -81,6 +82,7 @@ def _selection(question, doc):
         return [], [], "The requested floor cannot be identified in this file; no other floor was substituted."
     items = [i for i in doc.items if (doc.mode == "ifc" or i.conf >= MIN_CONF) and (not st or i.storey == st)]
     rooms = [r for r in items if r.kind in ("room", "space")]
+    scope_rooms = rooms
     scope_q = re.split(r"\b(?:excluding|except|not counting|without)\b", question, flags=re.I)[0]
     classes = [c for c, rx in CLASS_Q.items() if re.search(rx, scope_q, re.I)]
     scoped = False
@@ -99,21 +101,41 @@ def _selection(question, doc):
         rooms = [r for r in rooms if r.item_id in ids]
         scoped = True
     else:
-        picked = room_filter(question, rooms)
+        picked = room_filter(scope_q, rooms)
         if picked:
             rooms = picked[1]
             scoped = True
         else:
             # An unknown explicit room name must not silently select the whole building.
-            m = re.search(r"\bfor\s+(?:the\s+)?(.+?)(?=\s+(?:with|including|plus)\b|[?.]|$)", question, re.I)
-            if m and not st and not re.fullmatch(r"(?:all |the |whole |entire )*(?:rooms?|building|model|plan|floor)", m[1].strip(), re.I):
-                return [], [], "The requested rooms cannot be identified in this file; no other rooms were substituted."
+            m = re.search(r"\bfor\s+(?:the\s+)?(.+?)(?=\s+(?:with|including|plus)\b|[?.]|$)", scope_q, re.I)
+            if m:
+                target = STOREY_REQUEST.sub("", m[1])
+                if st:
+                    target = re.sub(re.escape(st), "", target, flags=re.I)
+                target = re.sub(r"\b(?:on|in|of|the)\b", "", target, flags=re.I).strip()
+                if target and not re.fullmatch(r"(?:all |whole |entire )*(?:rooms?|building|model|plan|floor)", target, re.I):
+                    return [], [], "The requested rooms cannot be identified in this file; no other rooms were substituted."
+    excluded = re.split(r"\b(?:excluding|except|not counting|without)\b", question, maxsplit=1, flags=re.I)
+    if len(excluded) == 2:
+        # Resolve exclusions independently of the positive selection. A WC can
+        # exist on this floor while already absent from the bathroom subset.
+        picked = room_filter(excluded[1], scope_rooms)
+        exclusion_classes = [c for c, rx in CLASS_Q.items() if re.search(rx, excluded[1], re.I)]
+        excluded_ids = {r.item_id for r in picked[1]} if picked else set()
+        for cls in exclusion_classes:
+            tk = Takeoff(None, cls, re.compile(ROOM_CLASSES[cls], re.I))
+            excluded_ids.update(r.item_id for r in scope_rooms if _matches(r, tk) or (r.name and tk.rx.search(r.name)))
+        if not excluded_ids:
+            return [], [], "The excluded rooms cannot be identified in this file; no exclusion was guessed."
+        rooms = [r for r in rooms if r.item_id not in excluded_ids]
+        scoped = True
     if scoped:
         if not rooms:
             return [], [], "No matching rooms were found in this file; no other rooms were substituted."
         ids = {r.item_id for r in rooms}
+        opening_ids = {iid for r in rooms for iid in (r.props.get("door_ids") or [])}
         # Explicit spatial containment is preferable to guessing from overlapping bounding boxes.
-        items = [i for i in items if i.item_id in ids or i.props.get("room_id") in ids
+        items = [i for i in items if i.item_id in ids or i.item_id in opening_ids or i.props.get("room_id") in ids
                  or set(i.props.get("room_ids") or []) & ids]
     return items, rooms, None
 
@@ -199,7 +221,7 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
     unspecified = not materials
     if unspecified:
         materials = [("Floor finish (confirm material)", "floor"), ("Wall finish (confirm material)", "wall"), ("Doors", "count")]
-    if re.search(r"\bwalls?\b", question, re.I):
+    if re.search(r"\bwall\s+(?:tiles?|tiling)\b|\b(?:tiles?|tiling)\s+(?:for|on)\s+(?:the\s+)?walls?\b", question, re.I):
         materials = [("Wall tiles", "wall") if label == "Floor tiles" else (label, typ) for label, typ in materials]
     if re.search(r"\bceiling\b", question, re.I):
         materials = [("Ceiling paint coverage", "floor") if label == "Paint coverage" else (label, typ) for label, typ in materials]
@@ -266,6 +288,8 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
         elif not error and typ == "length":
             measured, used, how = _skirting(rooms, doc.items, doc, root)
             estimated |= measured is not None and ("Estimated" in how or "nearby" in how)
+        if measured is not None and not math.isfinite(measured * (1 + pct / 100) * 100):
+            measured, used, how = None, [], "The recorded quantity or allowance is too large to calculate reliably."
         src = ""
         if used and measured is not None:
             bx, cs, _ = _evidence(doc, used)
@@ -287,12 +311,12 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
             # Counts are whole items; area/length rounded upward to avoid under-ordering.
             need = math.ceil(need - 1e-9) if typ == "count" else math.ceil(need * 100 - 1e-9) / 100
             values[label] = need
-            quantity = f"{need:g}"
-            calculations.append(f"{label}: {measured:g} {unit} × (1 + {pct:g}%) = {quantity} {unit}" + (", rounded up to whole items" if typ == "count" else ", rounded up to 0.01"))
+            quantity = str(need) if typ == "count" else f"{need:.2f}".rstrip("0").rstrip(".")
+            calculations.append(f"{label}: {str(measured).removesuffix('.0')} {unit} × (1 + {pct:g}%) = {quantity} {unit}" + (", rounded up to whole items" if typ == "count" else ", rounded up to 0.01"))
         rows.append(f"| {label} | {quantity} | {unit if measured is not None else ''} | {pct:g}% | {how} | {src} |")
     if len(values) == 1 and len(materials) == 1:
         label, value = next(iter(values.items()))
-        head = f"**Order {value:g} {'items' if materials[0][1] == 'count' else 'm' if materials[0][1] == 'length' else 'm²'} of {label.lower()}.**"
+        head = f"**Order {quantity} {'items' if materials[0][1] == 'count' else 'm' if materials[0][1] == 'length' else 'm²'} of {label.lower()}.**"
     else:
         value = values or None
         head = f"**Order list: {len(values)} measured quantities" + ("; missing data needs checking." if incomplete else ".") + "**"
