@@ -454,11 +454,11 @@ def _peaks(res: np.ndarray, thr: float, rad: int):
     return [(int(xs[i]), int(ys[i]), float(sc[i])) for i in order]
 
 
-def match_symbol(plan_ink: np.ndarray, tmpl: np.ndarray, _small_cache: dict | None = None) -> list[dict]:
+def match_symbol(plan_ink: np.ndarray, tmpl: np.ndarray, _small_cache: dict | None = None, scales=None, mirror: bool = False, target_px: float | None = None) -> list[dict]:
     """Candidates [{box, score, recall, clutter, rot, scale}] of one symbol on a sheet (full-resolution pixel boxes), NMS-ed."""
     th, tw = tmpl.shape
     tmax = max(th, tw)
-    f = max(1.0, tmax / TARGET_PX)
+    f = max(1.0, tmax / (target_px or TARGET_PX))
     fkey = round(f * 4) / 4
     cache = _small_cache if _small_cache is not None else {}
     if fkey not in cache:
@@ -468,6 +468,9 @@ def match_symbol(plan_ink: np.ndarray, tmpl: np.ndarray, _small_cache: dict | No
     plan_s = cache[fkey]
     f = fkey
     tf = tmpl.astype(np.float32)
+    if mirror:
+        tf = tf[:, ::-1]
+        tmpl = np.ascontiguousarray(tmpl[:, ::-1])
     cands = []
     seen_sym = []
     for k in range(4):
@@ -475,7 +478,7 @@ def match_symbol(plan_ink: np.ndarray, tmpl: np.ndarray, _small_cache: dict | No
         if k and any(np.corrcoef(base.ravel(), np.rot90(tf, j).ravel())[0, 1] > 0.985 for j in seen_sym if base.shape == np.rot90(tf, j).shape):
             continue   # the symbol looks the same turned: no need to search it again
         seen_sym.append(k)
-        for s in SCALES:
+        for s in (scales or SCALES):
             bh, bw = base.shape
             nh, nw = max(3, int(round(bh * s / f))), max(3, int(round(bw * s / f)))
             if min(nh, nw) < 5 or nh >= plan_s.shape[0] or nw >= plan_s.shape[1]:
@@ -486,7 +489,7 @@ def match_symbol(plan_ink: np.ndarray, tmpl: np.ndarray, _small_cache: dict | No
             res = cv2.matchTemplate(plan_s, t, cv2.TM_CCOEFF_NORMED)
             res = np.nan_to_num(res, nan=0.0, posinf=0.0, neginf=0.0)
             for x, y, sc in _peaks(res, LOW_NCC, max(2, int(0.4 * min(nh, nw)))):
-                cands.append({"box": [x * f, y * f, (x + nw) * f, (y + nh) * f], "score": sc, "rot": k, "scale": s})
+                cands.append({"box": [x * f, y * f, (x + nw) * f, (y + nh) * f], "score": sc, "rot": k, "scale": s, "mir": mirror})
     cands.sort(key=lambda c: -c["score"])
     kept = []
     for c in cands:
@@ -512,6 +515,97 @@ def match_symbol(plan_ink: np.ndarray, tmpl: np.ndarray, _small_cache: dict | No
         c["clutter"] = float(win.sum()) / tn
         del c["_cx"], c["_cy"], c["_sz"]
     return kept
+
+
+def _refine(ink: np.ndarray, tmpl: np.ndarray, cands: list[dict]) -> list[dict]:
+    """Coarse hits sit on a grid of a few px; slide the full-resolution template around each one to land exactly (score, box, recall, prec updated)."""
+    H, W = ink.shape
+    pf = ink.astype(np.float32)
+    ones = np.ones((3, 3), np.uint8)
+    out = []
+    for c in cands:
+        x0, y0, x1, y1 = [int(round(v)) for v in c["box"]]
+        w, h = x1 - x0, y1 - y0
+        if w < 6 or h < 6:
+            continue
+        m = max(4, int(0.18 * max(w, h)))
+        ax0, ay0, ax1, ay1 = max(0, x0 - m), max(0, y0 - m), min(W, x1 + m), min(H, y1 + m)
+        area = _smooth(pf[ay0:ay1, ax0:ax1], 0.8)
+        base = tmpl[:, ::-1] if c.get("mir") else tmpl
+        base = np.rot90(base, c["rot"]).astype(np.float32)
+        best = None
+        for g in (0.85, 0.92, 1.0, 1.08, 1.18, 1.3):
+            tw, th = max(5, int(round(w * g))), max(5, int(round(h * g)))
+            if th >= area.shape[0] or tw >= area.shape[1]:
+                continue
+            t = _smooth(cv2.resize(base, (tw, th), interpolation=cv2.INTER_AREA), 0.8)
+            if float(t.std()) < 1e-3:
+                continue
+            res = np.nan_to_num(cv2.matchTemplate(area, t, cv2.TM_CCOEFF_NORMED))
+            _, mx, _, loc = cv2.minMaxLoc(res)
+            if best is None or mx > best[0]:
+                best = (float(mx), ax0 + loc[0], ay0 + loc[1], tw, th)
+        if best is None:
+            continue
+        sc, bx, by, tw, th = best
+        win = ink[by:by + th, bx:bx + tw]
+        if win.size == 0:
+            continue
+        tb = cv2.resize(base.astype(np.uint8), (win.shape[1], win.shape[0]), interpolation=cv2.INTER_NEAREST)
+        tn = max(int(tb.sum()), 1)
+        out.append({**c, "box": [bx, by, bx + tw, by + th], "score": sc,
+                    "recall": float((tb & cv2.dilate(win, ones)).sum()) / tn,
+                    "prec": float((win & cv2.dilate(tb, ones)).sum()) / max(int(win.sum()), 1),
+                    "clutter": float(win.sum()) / tn})
+    return out
+
+
+def find_similar(image_path, box, page: int = 0, max_matches: int = 500) -> dict:
+    """Click-drag a box over one symbol (image px x0,y0,x1,y1); return every look-alike on the sheet.
+
+    Binarised NCC on a downscaled pyramid, scales 0.8-1.25, 4 rotations plus mirror, NMS.
+    score = NCC x ink recall x ink precision (each capped at 1, damped by clutter), so 0.8+ means very likely the same symbol.
+    `page` is accepted for API symmetry; image_path is already one page."""
+    t0 = time.time()
+    gray = load_gray(image_path)
+    ink = ink_mask(gray)
+    H, W = ink.shape
+    x0, y0, x1, y1 = [int(round(v)) for v in box]
+    x0, x1, y0, y1 = max(0, min(x0, x1)), min(W, max(x0, x1)), max(0, min(y0, y1)), min(H, max(y0, y1))
+    sub = ink[y0:y1, x0:x1]
+    if sub.sum() < 4 or min(sub.shape) < 4:
+        return {"matches": [], "template_bbox": [x0, y0, x1, y1], "method": "ncc-pyramid", "ms": int((time.time() - t0) * 1000), "note": "box holds no ink"}
+    ys, xs = np.nonzero(sub)
+    tb = [x0 + int(xs.min()), y0 + int(ys.min()), x0 + int(xs.max()) + 1, y0 + int(ys.max()) + 1]   # trim to the ink
+    tmpl = _crop(ink, tb, pad=1)
+    sc = (0.8, 1.0, 1.25)
+    cache: dict = {}
+    tpx = 14
+    cands = match_symbol(ink, tmpl, cache, scales=sc, target_px=tpx)
+    if tmpl.shape == tmpl[:, ::-1].shape and np.corrcoef(tmpl.ravel().astype(float), tmpl[:, ::-1].ravel().astype(float))[0, 1] < 0.985:
+        cands += match_symbol(ink, tmpl, cache, scales=sc, mirror=True, target_px=tpx)   # a mirror-symmetric symbol needs no second pass
+    cands.sort(key=lambda c: -c["score"])
+    cands = _refine(ink, tmpl, cands[:300])
+    cands.sort(key=lambda c: -c["score"])
+    out = []
+    for c in cands:
+        b = c["box"]
+        cx, cy, sz = (b[0] + b[2]) / 2, (b[1] + b[3]) / 2, max(b[2] - b[0], b[3] - b[1])
+        if any(abs(cx - o["_c"][0]) < 0.45 * max(sz, o["_c"][2]) and abs(cy - o["_c"][1]) < 0.45 * max(sz, o["_c"][2]) for o in out):
+            continue
+        if c["prec"] < 0.45 or c["recall"] < 0.6 or c["clutter"] > 3.0:
+            continue
+        # product: NCC is the discriminator, recall/precision only veto; one weak component (clutter inside the box, missing ink, low NCC) pulls the score down
+        q = max(c["score"], 0.0) * min(1.0, c["recall"] / 0.9) * min(1.0, c["prec"] / 0.9)
+        q *= min(1.0, 2.0 / max(c["clutter"], 1e-6))
+        if q < 0.5:
+            continue
+        out.append({"bbox": [round(v) for v in b], "score": round(float(q), 3), "_c": (cx, cy, sz)})
+    out.sort(key=lambda o: -o["score"])
+    out = out[:max_matches]
+    for o in out:
+        del o["_c"]
+    return {"matches": out, "template_bbox": tb, "method": "ncc-pyramid+rot4+mirror", "ms": int((time.time() - t0) * 1000)}
 
 
 def classify(c: dict, weak: bool) -> str:

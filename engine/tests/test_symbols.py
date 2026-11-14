@@ -235,3 +235,27 @@ def test_area_swatch_is_not_countable():
         v = np.array([np.cos(a * np.pi / 4), np.sin(a * np.pi / 4)]) * 20
         cv2.line(star, (int(30 - v[0]), int(30 - v[1])), (int(30 + v[0]), int(30 + v[1])), 0, 2)
     assert S.symbol_weakness(S.ink_mask(star)) != S.SWATCH
+
+
+def test_find_similar_finds_copies_rotated_and_mirrored(tmp_path):
+    import cv2
+    import numpy as np
+    from engine import symbols as S
+    img = np.full((600, 900), 255, np.uint8)
+    def sym(a, x, y):
+        a = a.copy()
+        img[y:y + 40, x:x + 40] = np.minimum(img[y:y + 40, x:x + 40], a)
+    base = np.full((40, 40), 255, np.uint8)
+    cv2.rectangle(base, (2, 2), (37, 37), 0, 2)
+    cv2.line(base, (8, 8), (30, 20), 0, 3)
+    cv2.circle(base, (12, 30), 4, 0, -1)
+    pts = [(100, 100), (400, 300), (700, 450), (200, 480)]
+    sym(base, *pts[0]); sym(np.rot90(base), *pts[1]); sym(base[:, ::-1], *pts[2]); sym(base, *pts[3])
+    cv2.circle(img, (500, 100), 25, 0, 3)   # a decoy
+    p = tmp_path / "s.png"; cv2.imwrite(str(p), img)
+    r = S.find_similar(str(p), (95, 95, 145, 145))
+    hits = [m for m in r["matches"] if m["score"] >= 0.8]
+    assert len(hits) == 4
+    cs = sorted((round((m["bbox"][0] + m["bbox"][2]) / 2 / 50), round((m["bbox"][1] + m["bbox"][3]) / 2 / 50)) for m in hits)
+    assert cs == sorted((round((x + 20) / 50), round((y + 20) / 50)) for x, y in pts)
+    assert r["template_bbox"][2] - r["template_bbox"][0] >= 30
