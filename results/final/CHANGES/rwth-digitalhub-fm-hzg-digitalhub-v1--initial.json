@@ -1,0 +1,132 @@
+{
+  "doc_a": "ifc_models__rwth-digitalhub-fm-hzg-digitalhub-v1",
+  "doc_b": "ifc_models__rwth-digitalhub-digitalhub-fm-hzg-v2",
+  "status": "ready",
+  "summary": {
+    "total": 1248,
+    "added": 216,
+    "removed": 128,
+    "moved": 17,
+    "resized": 41,
+    "property_changed": 846,
+    "by_kind": {
+      "equipment": {
+        "total": 2,
+        "added": 0,
+        "removed": 0,
+        "moved": 0,
+        "resized": 1,
+        "property_changed": 1
+      },
+      "mep_other": {
+        "total": 2,
+        "added": 0,
+        "removed": 0,
+        "moved": 0,
+        "resized": 0,
+        "property_changed": 2
+      },
+      "pipe": {
+        "total": 299,
+        "added": 121,
+        "removed": 74,
+        "moved": 16,
+        "resized": 29,
+        "property_changed": 59
+      },
+      "pipe_fitting": {
+        "total": 792,
+        "added": 72,
+        "removed": 41,
+        "moved": 0,
+        "resized": 8,
+        "property_changed": 671
+      },
+      "pump": {
+        "total": 11,
+        "added": 4,
+        "removed": 5,
+        "moved": 0,
+        "resized": 1,
+        "property_changed": 1
+      },
+      "site": {
+        "total": 2,
+        "added": 1,
+        "removed": 1,
+        "moved": 0,
+        "resized": 0,
+        "property_changed": 0
+      },
+      "tank": {
+        "total": 2,
+        "added": 0,
+        "removed": 0,
+        "moved": 0,
+        "resized": 0,
+        "property_changed": 2
+      },
+      "terminal": {
+        "total": 63,
+        "added": 0,
+        "removed": 0,
+        "moved": 0,
+        "resized": 0,
+        "property_changed": 63
+      },
+      "valve": {
+        "total": 75,
+        "added": 18,
+        "removed": 7,
+        "moved": 1,
+        "resized": 2,
+        "property_changed": 47
+      }
+    },
+    "by_storey": {
+      "B01_OKFB": {
+        "total": 79,
+        "added": 0,
+        "removed": 79,
+        "moved": 0,
+        "resized": 0,
+        "property_changed": 0
+      },
+      "B01_OKRD": {
+        "total": 339,
+        "added": 177,
+        "removed": 0,
+        "moved": 13,
+        "resized": 24,
+        "property_changed": 125
+      },
+      "E00_OKRD": {
+        "total": 435,
+        "added": 31,
+        "removed": 38,
+        "moved": 2,
+        "resized": 14,
+        "property_changed": 350
+      },
+      "E01_OKRD": {
+        "total": 393,
+        "added": 7,
+        "removed": 10,
+        "moved": 2,
+        "resized": 3,
+        "property_changed": 371
+      },
+      "Storey not recorded": {
+        "total": 2,
+        "added": 1,
+        "removed": 1,
+        "moved": 0,
+        "resized": 0,
+        "property_changed": 0
+      }
+    },
+    "affected_items": 1203
+  },
+  "matched": 1580,
+  "warnings": []
+}

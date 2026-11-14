@@ -1,4 +1,5 @@
 """Design versions (saved 3D edits): exact item-id diff between any two versions, code only."""
+import json
 from pathlib import Path
 
 import pytest
@@ -54,4 +55,9 @@ def test_ac20_removed_door_and_moved_window_carry_ids_tags_and_boxes():
 def test_raster_plan_map_doc():
     res = dv.compare(ROOT / RASTER, dv.empty(), {"removed": ["door-001"], "moved": {}, "materials": {}})
     (c,) = res["changes"]
-    assert c["item_id"] == "door-001" and c["tag"] == "D1" and c["page"] == 1 and c["bbox_px_v1"] == [43.0, 156.0, 77.0, 168.0]
+    scene = json.loads((ROOT / RASTER / "scene.json").read_text()) if (ROOT / RASTER / "scene.json").is_file() else {}
+    plan = json.loads((ROOT / RASTER / "planmap-1.json").read_text())
+    door = next(it for it in plan["items"] if it["item_id"] == "door-001")
+    # Regenerated and newly uploaded scenes can have no tag; never invent one.
+    tag = scene.get("items", {}).get("door-001", {}).get("tag") or door.get("props", {}).get("tag")
+    assert c["item_id"] == "door-001" and c["tag"] == tag and c["page"] == 1 and c["bbox_px_v1"] == [43.0, 156.0, 77.0, 168.0]

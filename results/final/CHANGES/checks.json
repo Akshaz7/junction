@@ -1,0 +1,61 @@
+{
+  "python": {
+    "passed": 55,
+    "command": "MODELS_FAKE=1 /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest engine/tests/test_revision_compare.py engine/tests/test_revision_compare_real.py engine/tests/test_design_versions.py engine/tests/test_changes.py server/tests/test_revision_compare.py server/tests/test_changes.py server/tests/test_design_versions.py server/tests/test_docs.py -q"
+  },
+  "web": {
+    "passed": 17,
+    "preexisting_skipped": 1,
+    "typecheck": "npx tsc --noEmit -p .",
+    "tests": "npx vitest run --configLoader runner src/components/changes-screen.pair.test.tsx src/components/changes-screen.test.tsx src/components/compare-screen.test.tsx src/lib/design-versions.test.ts src/lib/change-copy.test.ts",
+    "production_build": "npx vite build --configLoader runner --outDir /tmp/f-changes-final-web-build",
+    "build_passed": true
+  },
+  "real_questions": [
+    {
+      "pair": "DigitalHub heating v1 to v2",
+      "question": "What changed between these two versions?",
+      "changes": 1235,
+      "citations": 2470,
+      "model_calls": 0,
+      "cost_usd": 0,
+      "contract_valid": true,
+      "reasoning_steps": [
+        "Found",
+        "Checked"
+      ]
+    },
+    {
+      "pair": "DigitalHub ventilation v1 to v2",
+      "question": "What changed between these two versions?",
+      "changes": 776,
+      "citations": 1552,
+      "model_calls": 0,
+      "cost_usd": 0,
+      "contract_valid": true,
+      "reasoning_steps": [
+        "Found",
+        "Checked"
+      ]
+    },
+    {
+      "pair": "Facilities Building transfer to working model",
+      "question": "What changed between these two versions?",
+      "changes": 715,
+      "citations": 1430,
+      "model_calls": 0,
+      "cost_usd": 0,
+      "contract_valid": true,
+      "reasoning_steps": [
+        "Found",
+        "Checked"
+      ]
+    }
+  ],
+  "git": {
+    "branch": "final/changes",
+    "last_commit": "faae60b314822253036dbb4bc52a46945fbfa130",
+    "awais_base": "8f77a541aac0e92149979454d17c4a9d8ee0dbb9",
+    "history_update_blocked": "Sandbox rejects writes to .git/worktrees/changes/ORIG_HEAD.lock. Awais changes applied to working files; merge and final commits remain for integrator."
+  }
+}
