@@ -32,6 +32,9 @@ def _plural(n: int, w: str) -> str:
 
 
 def run(ctx: dict) -> dict:
+    if ctx.get("wallarea_confidence") is not None:
+        from engine.reasoning_parts.wallarea_steps import card
+        return {**ctx["wallarea_confidence"], "_steps": card(ctx["res"]["wallarea"])["steps"]}
     ans, cites, route, unit = ctx['ans'], ctx['cites'], ctx['route'], ctx['unit']
     cited, models_used, is_ifc, sc, scale_w, scale_c, from_cad = ctx['cited'], ctx['models_used'], ctx['is_ifc'], ctx['sc'], ctx['scale_w'], ctx['scale_c'], ctx['from_cad']
     steps = ctx['steps']; checked = ctx.get('checked'); area_q = ctx.get('area_q')

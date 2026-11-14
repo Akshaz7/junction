@@ -477,6 +477,13 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             return _abstained(question, doc_ids, f"The question names **{other}**, which is not among the selected documents ({sel}). "
                               "Select that document and ask again, or ask about the selected one.", trace, t0)
 
+        from engine.wallarea import answer as wallarea_answer
+        if (res := wallarea_answer(question, doc_ids, root, t0, hidden=set((scene_state or {}).get("hidden") or []))) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
+            return res
+
         if not os.environ.get("COMPLEX_Q_OFF"):    # E-59: multi-condition questions, every condition applied or named
             from engine import complex_q
             if (res := complex_q.answer(question, doc_ids, root, t0)) is not None:
