@@ -12,7 +12,7 @@ COPY server ./server
 COPY engine ./engine
 # Baked-in demo artifacts (deploy/build_demo_artifacts.py); empty unless built before the image build.
 COPY --chown=app:app deploy/demo_artifacts/ /app/artifacts/
-ENV ARTIFACTS_DIR=/app/artifacts
+ENV ARTIFACTS_DIR=/app/artifacts MODELS_CACHE_DIR=/tmp/hologram/models-cache MODELS_COSTS_LOG=/tmp/hologram/costs.jsonl
 USER app
 ENV RATE_LIMIT=1
 EXPOSE 8000
