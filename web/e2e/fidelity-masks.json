@@ -3664,6 +3664,13 @@
           "width": 270,
           "height": 48,
           "reason": "Generated test question replaces reference question."
+        },
+        {
+          "x": 16,
+          "y": 352,
+          "width": 272,
+          "height": 32,
+          "reason": "Live answer text replaces the reference sample answer."
         }
       ],
       "selectors": [
@@ -3759,6 +3766,13 @@
           "width": 270,
           "height": 48,
           "reason": "Generated test question replaces reference question."
+        },
+        {
+          "x": 16,
+          "y": 352,
+          "width": 272,
+          "height": 32,
+          "reason": "Live answer text replaces the reference sample answer."
         }
       ],
       "selectors": [

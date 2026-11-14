@@ -60,3 +60,4 @@
   .site-report img { max-height: 210mm; object-fit: contain; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .site-report-entry + .site-report-entry { break-before: page; border: 0; margin: 0; }
 }
+.answer-export-button { white-space: nowrap; flex-shrink: 0; }

@@ -73,5 +73,18 @@
   .document-viewer .viewer-item-layout:has(.viewer-spec-panel) { flex-direction: column; }
   .viewer-spec-panel { width: 100%; max-height: 35dvh; border-left: 0; border-top: 1px solid var(--border); }
   .document-viewer .viewer-toolbar { padding-inline: 6px; gap: 2px; }
-  .document-viewer .viewer-markup-tools { gap: 0; }
+  .document-viewer .viewer-markup-tools { gap: 8px; }
+  .document-viewer.viewer-sheet { animation: viewer-sheet-in .5s var(--ease-settle-wide) both; }
+}
+
+/* Stoa motion parity: spec panel enters with opacity .35s ease + translateX(32px) .55s settle-wide;
+   passage highlight fades in .4s ease after a .45s delay; phone sheet rises opacity .3s + translateY(24px) .5s. */
+.viewer-spec-panel { animation: spec-panel-in .55s var(--ease-settle-wide) both; }
+.viewer-spec-content mark { animation: passage-in .4s ease .45s both; }
+@keyframes spec-panel-in { from { opacity: 0; transform: translateX(32px); } to { opacity: 1; transform: none; } }
+@keyframes passage-in { from { background-color: transparent; } }
+@keyframes viewer-sheet-in { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@media (max-width: 800px) { .viewer-spec-panel { animation: product-fade .35s ease both; } }
+@media (prefers-reduced-motion: reduce) {
+  .viewer-spec-panel, .viewer-spec-content mark, .document-viewer.viewer-sheet { animation: none; }
 }

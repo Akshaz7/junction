@@ -156,7 +156,8 @@ test('real quoted note opens a side panel highlighted in yellow', async ({ page,
   const passage = viewer.getByRole('complementary', { name: 'Cited passage', exact: true })
   await expect(passage).toBeVisible()
   await expect(passage.getByTestId('cited-passage')).toHaveText(citation!.quote!)
-  expect(await passage.getByTestId('cited-passage').evaluate((node) => getComputedStyle(node).backgroundColor)).toBe('rgb(254, 240, 138)')
+  // Stoa parity: the passage highlight fades in after a .45s delay over .4s.
+  await expect.poll(() => passage.getByTestId('cited-passage').evaluate((node) => getComputedStyle(node).backgroundColor), { timeout: 3000 }).toBe('rgb(254, 240, 138)')
   await passage.getByRole('button', { name: 'Close cited passage', exact: true }).click()
   await expect(passage).toHaveCount(0)
   await viewer.getByRole('button', { name: 'Show cited passage', exact: true }).click()
