@@ -76,6 +76,9 @@ async def doc_file(doc_id: str, name: str):
         raise HTTPException(404, "unknown file")
     f = _doc_dir(doc_id) / name
     if not f.is_file():
+        if name == "elements.json" or re.match(r"^text-\d+\.json$", name):
+            # Optional sidecars the viewer probes for every document: an empty payload, not a console-visible 404.
+            return JSONResponse({"status": "not_built", "elements": [], "words": []})
         return _not_built(name)
     return FileResponse(f)
 
@@ -335,18 +338,8 @@ async def change(change_id: str, page: int | None = None):
 
 
 def _bench_summaries() -> list[dict]:
-    """Bench summaries (results/bench/<tag>.json), newest first. *.rows.jsonl row dumps are ignored."""
-    d = config.results_dir() / "bench"
-    out = []
-    for f in d.glob("*.json") if d.is_dir() else []:
-        try:
-            data = json.loads(f.read_text())
-        except (OSError, ValueError):
-            continue
-        if isinstance(data, dict):
-            out.append({"path": f, "file": f.name, "tag": str(data.get("tag") or f.stem), "stem": f.stem,
-                        "set": data.get("set"), "fake": data.get("fake"), "mtime": f.stat().st_mtime, "data": data})
-    return sorted(out, key=lambda r: r["mtime"], reverse=True)
+    from .bench_routes import summaries
+    return summaries()
 
 
 @router.get("/bench")
@@ -358,14 +351,8 @@ async def bench_list():
 
 @router.get("/bench/latest")
 async def bench_latest(tag: str | None = None):
-    found = _bench_summaries()
-    if tag is not None:
-        found = [r for r in found if tag in (r["tag"], r["stem"])]
-    if not found:
-        detail = f"no bench results for tag {tag!r}" if tag is not None else "no bench results yet"
-        return JSONResponse({"status": "no_bench", "detail": detail}, status_code=404)
-    r = found[0]
-    return {"file": r["file"], "tag": r["tag"], "data": r["data"]}
+    from .bench_routes import latest_bench
+    return latest_bench(tag)
 
 
 @router.get("/costs")
