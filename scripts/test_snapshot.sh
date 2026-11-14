@@ -17,9 +17,15 @@ else
   rm -rf "$SNAP"; git worktree add -f --detach "$SNAP" HEAD -q
 fi
 for p in $PATHS; do
-  if [ -e "$ROOT/$p" ]; then mkdir -p "$SNAP/$(dirname "$p")"; rm -rf "$SNAP/$p"; cp -R "$ROOT/$p" "$SNAP/$p"; fi
+  if [ -d "$ROOT/$p" ]; then
+    mkdir -p "$SNAP/$p"
+    rsync -a --delete --exclude node_modules --exclude dist --exclude test-results --exclude playwright-report "$ROOT/$p/" "$SNAP/$p/"
+  elif [ -e "$ROOT/$p" ]; then mkdir -p "$SNAP/$(dirname "$p")"; cp "$ROOT/$p" "$SNAP/$p"; fi
 done
-ln -sfn "$ROOT/web/node_modules" "$SNAP/web/node_modules"
+rm -rf "$SNAP/web/node_modules"; ln -sfn "$ROOT/web/node_modules" "$SNAP/web/node_modules"
+# Git-ignored inputs the tests read (reference pack, data, artifacts): link them in read-only.
+for d in refs data artifacts; do [ -e "$ROOT/$d" ] && { rm -rf "$SNAP/$d"; ln -sfn "$ROOT/$d" "$SNAP/$d"; }; done
+mkdir -p "$SNAP/results"
 cd "$SNAP/web"
 sed -i '' "s#http://localhost:5173#http://localhost:$PORT#g" playwright.config.ts
 # Serve the built snapshot with the same /api and /ws proxies (vite preview reuses server.proxy).
