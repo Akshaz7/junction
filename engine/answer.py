@@ -469,7 +469,7 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                     edit_advice(res, _wdoc, list(_cmd["item_ids"]))
                     t_ = res["answer"]["text_md"]
                     t_ = t_.replace(" is hidden.", " would be removed in this what-if.", 1).replace(" remain visible.", " would remain.", 1)
-                    res["answer"]["text_md"] = t_ + "\n\n_Preview only: nothing was changed or saved. Say \"remove it\" to apply the edit._"
+                    res["answer"]["text_md"] = t_ + "\n\nPreview only: nothing was changed or saved. Say \"remove it\" to apply the edit."
                     res["evidence"]["scene"]["commands"] = []
                     res["question"] = question
                     for s_ in res["trace"]:

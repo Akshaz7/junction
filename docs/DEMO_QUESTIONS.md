@@ -10,7 +10,7 @@ Order is the suggested running order. Numbers in square brackets are the numbere
 
 **Expected answer** (confidence 0.95, route code, 4 cited items, cost $0.00):
 
-> **Scope I applied:** every WC Herren / WC Damen room on Keller, Erdgeschoss, 1. Obergeschoss, 2. Obergeschoss; floor area = net floor area from the model. Conditions applied: rooms: 8 matched; storeys: Keller to 2. Obergeschoss; waste 10%; box coverage 1.44 m²; price EUR 32 per box, excluding VAT.
+> **Scope I applied:** every WC Herren / WC Damen room on Keller, Erdgeschoss, 1. Obergeschoss, 2. Obergeschoss; floor area = net floor area from the model.
 > 
 > | Storey | Room | Net floor area (m²) |
 > |---|---|---|
@@ -26,7 +26,9 @@ Order is the suggested running order. Numbers in square brackets are the numbere
 > Net floor area total: **99.02 m²**.
 > With 10% waste: **108.92 m²**.
 > Whole boxes at 1.44 m² each: **76 boxes** (109.44 m²).
-> Cost: 76 x EUR 32 = **EUR 2,432.00 excluding VAT**. [1] [2] [3] [4]
+> Cost: 76 x EUR 32 = **EUR 2,432.00 excluding VAT**.
+> 
+> Conditions applied: rooms: 8 matched; storeys: Keller to 2. Obergeschoss; waste 10%; box coverage 1.44 m²; price EUR 32 per box, excluding VAT. [1] [2] [3] [4]
 
 ## 2. Paint take-off
 
@@ -36,11 +38,13 @@ Order is the suggested running order. Numbers in square brackets are the numbere
 
 **Expected answer** (confidence 0.95, route code, 1 cited items, cost $0.00):
 
-> **Scope I applied:** internal walls (not external) on 1. Obergeschoss, 2 face(s) each, net of openings. Conditions applied: internal walls: 21; 2 faces; 2 coats; 8 m2/litre per coat; 10% extra; 9 litre tins; reveals excluded (side-area figure only); ceilings excluded (not measured).
+> **Scope I applied:** internal walls (not external) on 1. Obergeschoss, 2 face(s) each, net of openings.
 > 
 > Painted area: 378.12 m² net per face x 2 = **756.24 m²**.
 > Paint: 756.24 x 2 coats / 8 = 189.1 litres, +10% = **208.0 litres**.
-> Tins of 9 litres: **24 tins**. [1]
+> Tins of 9 litres: **24 tins**.
+> 
+> Conditions applied: internal walls: 21; 2 faces; 2 coats; 8 m²/litre per coat; 10% extra; 9 litre tins; reveals excluded (side-area figure only); ceilings excluded (not measured). [1]
 
 ## 3. Masonry budget by storey
 
@@ -50,14 +54,16 @@ Order is the suggested running order. Numbers in square brackets are the numbere
 
 **Expected answer** (confidence 0.95, route code, 2 cited items, cost $0.00):
 
-> **Scope I applied:** internal Kalksandstein walls on 1. Obergeschoss, 2. Obergeschoss, net volume (openings removed), shown per storey. Conditions applied: walls: 42; storeys: 1. Obergeschoss, 2. Obergeschoss; net volume; 5% waste; EUR 210/m3 excluding VAT.
+> **Scope I applied:** internal Kalksandstein walls on 1. Obergeschoss, 2. Obergeschoss, net volume (openings removed), shown per storey.
 > 
-> | Storey | Walls | Net volume (m3) | +5% (m3) | Cost excl. VAT |
+> | Storey | Walls | Net volume (m³) | +5% (m³) | Cost excl. VAT |
 > |---|---|---|---|---|
 > | 1. Obergeschoss | 21 | 96.42 | 101.24 | EUR 21,261 |
 > | 2. Obergeschoss | 21 | 96.84 | 101.68 | EUR 21,353 |
 > 
-> Total: 193.26 m3, with waste 202.92 m3, **EUR 42,614 excluding VAT** (assumed unit price). [1] [2]
+> Total: 193.26 m³, with waste 202.92 m³, **EUR 42,614 excluding VAT** (assumed unit price).
+> 
+> Conditions applied: walls: 42; storeys: 1. Obergeschoss, 2. Obergeschoss; net volume; 5% waste; EUR 210/m³ excluding VAT. [1] [2]
 
 ## 4. Multi-condition filter (rooms)
 
@@ -67,13 +73,15 @@ Order is the suggested running order. Numbers in square brackets are the numbere
 
 **Expected answer** (confidence 0.6, route code, 1 cited items, cost $0.00):
 
-> **Scope I applied:** offices on 1. Obergeschoss with NET floor area 12 to 25 m² inclusive, excluding the secretary's office and rooms whose name contains muller, obermuller. Conditions applied: storey 1. Obergeschoss; office class from the room name (type_name is Büroarbeit for every room); net area 12-25 m² inclusive; secretary's office excluded (name 'Sekr.'); names excluded: muller, obermuller (umlaut and ue spellings folded).
+> **Scope I applied:** offices on 1. Obergeschoss with net floor area 12 to 25 m² inclusive, excluding the secretary's office and rooms whose name contains muller, obermuller.
 > 
 > | Room no. | Name | Net area (m²) |
 > |---|---|---|
 > | 204 | Buero Oberschmitt | 24.75 |
 > 
-> Just outside on NET area (net is just under the lower bound): Buero Schmidt (11.95 m²), Buero Schmid (11.95 m²), Buero Schmied I (11.95 m²), Buero Schmitt I (11.95 m²), Buero Schmitt II (11.95 m²).
+> Just under the 12 m² limit on net area: Buero Schmidt (11.95 m²), Buero Schmid (11.95 m²), Buero Schmied I (11.95 m²), Buero Schmitt I (11.95 m²), Buero Schmitt II (11.95 m²).
+> 
+> Conditions applied: storey 1. Obergeschoss; offices identified by room name; net area 12-25 m² inclusive; secretary's office excluded; names excluded: muller, obermuller (ü and ue spellings treated alike).
 > 
 > **Partial answer. Not applied or not verifiable from this document:** the model has no occupant assignment; 'assigned to' is read from the name in the room label. [1]
 
@@ -85,14 +93,16 @@ Order is the suggested running order. Numbers in square brackets are the numbere
 
 **Expected answer** (confidence 0.95, route code, 1 cited items, cost $0.00):
 
-> **Scope I applied:** external windows on Erdgeschoss, 1. Obergeschoss, exactly 0.9 m wide x 2.0 m high (nominal sizes from the model). Conditions applied: storeys Erdgeschoss, 1. Obergeschoss; width 0.9 m; height 2.0 m; external.
+> **Scope I applied:** external windows on Erdgeschoss, 1. Obergeschoss, exactly 0.9 m wide x 2.0 m high (nominal sizes from the model).
 > 
 > | Storey | Type | Count | Nominal opening area (m²) | Marks |
 > |---|---|---|---|---|
 > | Erdgeschoss | IFC Fenster - ein Panel | 3 | 5.40 | Fenster-013, Fenster-015, Fenster-015 |
 > 
 > **3 windows**, total nominal opening area **5.40 m²** (windows 1.5 m high not included).
-> None on 1. Obergeschoss. [1]
+> None on 1. Obergeschoss.
+> 
+> Conditions applied: storeys Erdgeschoss, 1. Obergeschoss; width 0.9 m; height 2.0 m; external. [1]
 
 ## 6. Stacking check
 
@@ -102,7 +112,7 @@ Order is the suggested running order. Numbers in square brackets are the numbere
 
 **Expected answer** (confidence 0.95, route code, 4 cited items, cost $0.00):
 
-> **Scope I applied:** WC Herren and WC Damen on Keller, Erdgeschoss, 1. Obergeschoss, 2. Obergeschoss; positions are the room outline centres in plan. Conditions applied: storeys Keller to 2. Obergeschoss; WC Herren, WC Damen; horizontal offset from outline centres.
+> **Scope I applied:** WC Herren and WC Damen on Keller, Erdgeschoss, 1. Obergeschoss, 2. Obergeschoss; positions are the room outline centres in plan.
 > 
 > | Room | Storey | Room no. | Offset from lowest storey |
 > |---|---|---|---|
@@ -115,7 +125,9 @@ Order is the suggested running order. Numbers in square brackets are the numbere
 > | WC Damen | 1. Obergeschoss | room 214 | 0.00 m |
 > | WC Damen | 2. Obergeschoss | room 314 | 0.00 m |
 > 
-> **Each WC sits directly above the one below (every offset under 5 cm): neither room shifts.** [1] [2] [3] [4]
+> **Each WC sits directly above the one below (every offset under 5 cm): neither room shifts.**
+> 
+> Conditions applied: storeys Keller to 2. Obergeschoss; WC Herren, WC Damen; horizontal offset from outline centres. [1] [2] [3] [4]
 
 ## 7. Door schedule for procurement
 
@@ -125,7 +137,7 @@ Order is the suggested running order. Numbers in square brackets are the numbere
 
 **Expected answer** (confidence 0.6, route code, 4 cited items, cost $0.00):
 
-> **Scope I applied:** every door in the model, grouped by storey, original mark, type and width x height in mm. Conditions applied: all storeys; original marks kept (no merging); size in mm.
+> **Scope I applied:** every door in the model, grouped by storey, original mark, type and width x height in mm.
 > 
 > | Storey | Mark | Type | W x H (mm) | Qty |
 > |---|---|---|---|---|
@@ -150,7 +162,7 @@ Order is the suggested running order. Numbers in square brackets are the numbere
 
 > The front door (D34) on Erdgeschoss would be removed in this what-if. 76 of 77 doors would remain. **Not compliant after this edit:** Fewer than two exits left on Erdgeschoss (848/2017 §33).[1]
 > 
-> _Preview only: nothing was changed or saved. Say "remove it" to apply the edit._
+> Preview only: nothing was changed or saved. Say "remove it" to apply the edit.
 
 ## 9. Finnish glossary (second drawing, cubicasa colorful-11397)
 
@@ -160,13 +172,15 @@ Order is the suggested running order. Numbers in square brackets are the numbere
 
 **Expected answer** (confidence 0.6, route code, 1 cited items, cost $0.00):
 
-> **Scope I applied:** the meaning of KPH and KHH+PH, whether WC is printed, and which space holds each toilet symbol. Conditions applied: printed labels KPH and KHH+PH; toilet fixtures not counted as rooms.
+> **Scope I applied:** the meaning of KPH and KHH+PH, whether WC is printed, and which space holds each toilet symbol.
 > 
 > - **KPH** = kylpyhuone (bathroom).
 > - **KHH+PH** = KHH kodinhoitohuone (utility room) + PH pesuhuone (washroom): one combined space.
 > - **WC is not written on this drawing**; the 2 toilets are symbols only.
-> - Toilet symbol toilet-001 is nearest to **KPH**: a fixture in that space, not a separate room.
-> - Toilet symbol toilet-002 is nearest to **KHH+PH**: a fixture in that space, not a separate room.
+> - Toilet symbol 1 is nearest to **KPH**: a fixture in that space, not a separate room.
+> - Toilet symbol 2 is nearest to **KHH+PH**: a fixture in that space, not a separate room.
+> 
+> Conditions applied: printed labels KPH and KHH+PH; toilet fixtures not counted as rooms.
 > 
 > **Partial answer. Not applied or not verifiable from this document:** the nearest-label match for each toilet is by distance on the sheet, not by a room boundary. [1]
 

@@ -80,10 +80,10 @@ class Ans:
         self.left += c
 
     def text(self) -> str:
-        head = f"**Scope I applied:** {self.scope}" + (f" Conditions applied: {'; '.join(self.applied)}." if self.applied else "")
-        tail = ""
+        head = f"**Scope I applied:** {self.scope}"
+        tail = f"\n\nConditions applied: {'; '.join(self.applied)}." if self.applied else ""
         if self.left:
-            tail = "\n\n**Partial answer. Not applied or not verifiable from this document:** " + "; ".join(self.left) + "."
+            tail += "\n\n**Partial answer. Not applied or not verifiable from this document:** " + "; ".join(self.left) + "."
         return head + "\n\n" + "\n".join(self.body) + tail
 
 
@@ -176,7 +176,7 @@ def h_paint(q: str, doc: Doc) -> Ans | None:
     tins = math.ceil(litres / tin - 1e-9)
     a = Ans(f"internal walls (not external) on {', '.join(st) or 'all storeys'}, {faces} face(s) each, net of openings.")
     a.items = walls
-    a.ap(f"internal walls: {len(walls)}", f"{faces} faces", f"{coats:g} coats", f"{cov:g} m2/litre per coat", f"{extra:g}% extra", f"{tin:g} litre tins")
+    a.ap(f"internal walls: {len(walls)}", f"{faces} faces", f"{coats:g} coats", f"{cov:g} m²/litre per coat", f"{extra:g}% extra", f"{tin:g} litre tins")
     if re.search(r"reveal", q, re.I):
         a.ap("reveals excluded (side-area figure only)")
     if re.search(r"ceiling", q, re.I):
@@ -204,10 +204,10 @@ def h_masonry(q: str, doc: Doc) -> Ans | None:
         tot += v
         rows.append([s, sum(1 for w in walls if w.storey == s), f"{v:.2f}", f"{v * (1 + waste / 100):.2f}",
                      f"EUR {v * (1 + waste / 100) * price:,.0f}" if price else "n/a"])
-    a.body += _table(rows, ["Storey", "Walls", "Net volume (m3)", f"+{waste:g}% (m3)", "Cost excl. VAT"])
+    a.body += _table(rows, ["Storey", "Walls", "Net volume (m³)", f"+{waste:g}% (m³)", "Cost excl. VAT"])
     if price:
-        a.ap(f"EUR {price:g}/m3 excluding VAT")
-        a.body += ["", f"Total: {tot:.2f} m3, with waste {tot * (1 + waste / 100):.2f} m3, **EUR {tot * (1 + waste / 100) * price:,.0f} excluding VAT** (assumed unit price)."]
+        a.ap(f"EUR {price:g}/m³ excluding VAT")
+        a.body += ["", f"Total: {tot:.2f} m³, with waste {tot * (1 + waste / 100):.2f} m³, **EUR {tot * (1 + waste / 100) * price:,.0f} excluding VAT** (assumed unit price)."]
         a.value = round(tot * (1 + waste / 100) * price)
     return a
 
@@ -306,14 +306,14 @@ def h_offices(q: str, doc: Doc) -> Ans | None:
             out.append(r)
         elif lo - 0.1 <= na < lo or hi < na <= hi + 0.1:
             edge.append(r)
-    a = Ans(f"offices on {', '.join(st)} with NET floor area {lo:g} to {hi:g} m² inclusive, excluding the secretary's office and rooms whose name contains {', '.join(excl)}.")
+    a = Ans(f"offices on {', '.join(st)} with net floor area {lo:g} to {hi:g} m² inclusive, excluding the secretary's office and rooms whose name contains {', '.join(excl)}.")
     a.items = out
-    a.ap(f"storey {', '.join(st)}", "office class from the room name (type_name is Büroarbeit for every room)", f"net area {lo:g}-{hi:g} m² inclusive",
-         "secretary's office excluded (name 'Sekr.')", f"names excluded: {', '.join(excl)} (umlaut and ue spellings folded)")
+    a.ap(f"storey {', '.join(st)}", "offices identified by room name", f"net area {lo:g}-{hi:g} m² inclusive",
+         "secretary's office excluded", f"names excluded: {', '.join(excl)} (ü and ue spellings treated alike)")
     out.sort(key=lambda r: (r.q.get("net_floor_area_m2", 0), r.name))
     a.body += _table([[r.name, _ln(r), f"{r.q['net_floor_area_m2']:.2f}"] for r in out], ["Room no.", "Name", "Net area (m²)"]) if out else ["No office matches."]
     if edge:
-        a.body += ["", "Just outside on NET area (net is just under the lower bound): " + ", ".join(f"{_ln(r)} ({r.q['net_floor_area_m2']:.2f} m²)" for r in edge) + "."]
+        a.body += ["", f"Just under the {lo:g} m² limit on net area: " + ", ".join(f"{_ln(r)} ({r.q['net_floor_area_m2']:.2f} m²)" for r in edge) + "."]
     a.lf("the model has no occupant assignment; 'assigned to' is read from the name in the room label")
     a.value = len(out)
     return a
@@ -333,11 +333,11 @@ def h_walls_filter(q: str, doc: Doc) -> Ans | None:
     a.ap(f"storeys {', '.join(st)}", "internal", "Kalksandstein", f"thickness {int(t * 1000)} mm", f"height >= {h} m", "net < gross volume")
     rows = [[w.name, w.storey, f"{w.q['gross_volume_m3']:.2f}", f"{w.q['net_volume_m3']:.2f}", f"{w.q['gross_volume_m3'] - w.q['net_volume_m3']:.2f}"]
             for w in sorted(ws, key=lambda w: (w.storey, w.name))]
-    a.body += _table(rows, ["Wall", "Storey", "Gross (m3)", "Net (m3)", "Removed (m3)"]) if rows else ["No wall matches."]
+    a.body += _table(rows, ["Wall", "Storey", "Gross (m³)", "Net (m³)", "Removed (m³)"]) if rows else ["No wall matches."]
     a.body.append("")
     for s in st:
         sub = [w for w in ws if w.storey == s]
-        a.body.append(f"{s}: **{len(sub)} walls**, removed volume **{sum(w.q['gross_volume_m3'] - w.q['net_volume_m3'] for w in sub):.2f} m3**.")
+        a.body.append(f"{s}: **{len(sub)} walls**, removed volume **{sum(w.q['gross_volume_m3'] - w.q['net_volume_m3'] for w in sub):.2f} m³**.")
     a.value = len(ws)
     return a
 
@@ -614,10 +614,10 @@ def h_labels(q: str, doc: Doc) -> Ans | None:
         a.body += [f"- **KPH** = {GL['KPH']}.", f"- **KHH+PH** = KHH {GL['KHH']} + PH {GL['PH']}: one combined space.",
                    f"- **WC is not written on this drawing**; the {len(toilets)} toilets are symbols only."]
         wet = [t for t in texts if t.label in ("KPH", "KHH+PH")]
-        for tl in toilets:
+        for n_, tl in enumerate(toilets, 1):
             cx, cy = _mean(tl.bbox_px)
             near = min(wet, key=lambda t: math.hypot(_mean(t.bbox_px)[0] - cx, _mean(t.bbox_px)[1] - cy))
-            a.body.append(f"- Toilet symbol {tl.item_id} is nearest to **{near.label}**: a fixture in that space, not a separate room.")
+            a.body.append(f"- Toilet symbol {n_} is nearest to **{near.label}**: a fixture in that space, not a separate room.")
             a.items.append(tl)
         a.lf("the nearest-label match for each toilet is by distance on the sheet, not by a room boundary")
         return a
@@ -704,7 +704,7 @@ def answer(question: str, doc_ids: list[str], root: Path, t0: float | None = Non
             scene.setdefault("commands", [])
         conf = 0.6 if a.left else 0.95
         trace = [{"step": "complex_q", "detail": f"{h.__name__}: applied {len(a.applied)}, left {len(a.left)}", "ms": 0, "model": None, "cost_usd": 0.0}]
-        res = S._answer_obj(question, doc_ids, a.text(), a.value, None, conf, False, boxes, cites, scene, trace, "code", t0)
+        res = S._answer_obj(question, doc_ids, a.text(), a.value, None, conf, False, boxes, cites, scene, trace, "index" if doc.mode == "ifc" else "planmap", t0)
         res["conditions"] = {"applied": a.applied, "left": a.left, "handler": h.__name__}
         return res
     return None

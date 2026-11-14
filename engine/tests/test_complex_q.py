@@ -59,3 +59,22 @@ def test_wall_removal_is_structure_honest():
 def test_ordinary_questions_fall_through():
     assert ask("How many doors are there?") is None
     assert ask("What is the area of Seminarraum?") is None
+
+
+def test_every_complex_q_answer_passes_the_api_schema():
+    # the server validates each answer against the contract; route must be one of index/planmap/vlm/hybrid
+    import importlib, json
+    from pathlib import Path
+    from engine.answer import answer
+    sch = importlib.import_module("server.schema")
+    for q, d in [("How much floor tiling should I order for all WC Herren and WC Damen rooms, allowing 10% waste, if each box covers 1.44 m² and costs €32?", "ifc_bench__ac20-arc"),
+                 ("Can we remove the front door?", "ifc_bench__ac20-arc")]:
+        a = answer(q, [d])
+        sch.validate_answer(a)
+
+
+def test_where_are_the_toilets_boxes_carry_kind_toilet():
+    from engine.answer import answer
+    a = answer("Where are the toilets?", ["ifc_bench__ac20-arc"])
+    kinds = {b.get("kind") for b in a["evidence"]["boxes"]}
+    assert kinds == {"toilet"}
