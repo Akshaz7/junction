@@ -101,7 +101,7 @@ class Builder(Records):
             # Some plan maps contain several pages with the same local item IDs.
             repeated = Counter(str(it.item_id) for it in doc.items)
             for seq, it in enumerate(doc.items):
-                kind = kind_of(it.kind)
+                kind = 'sheet_ref' if it.props.get('ifc_class') == 'IfcAnnotation' else kind_of(it.kind)
                 if kind in ('project', 'doc', 'level'):
                     continue
                 level = it.storey or it.props.get('level') or it.props.get('storey') or info.level
@@ -180,7 +180,7 @@ class Builder(Records):
             tree = STRtree(shapes)
             for nid in ids:
                 n, it = self.nodes[nid], self.items[nid]
-                if n['kind'] in ('room', 'wall'):
+                if n['kind'] in ('room', 'wall', 'sheet_ref'):
                     continue
                 try:
                     bb = it.bbox_px

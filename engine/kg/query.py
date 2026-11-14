@@ -3,7 +3,7 @@ from collections import Counter, defaultdict, deque
 
 
 def neighbours(graph, node_id, kinds=None, depth=1):
-    """Undirected breadth-first traversal; each reached node appears once with its discovery edge."""
+    """Undirected breadth-first traversal; preserve every relationship, including parallel comparisons."""
     if isinstance(kinds, str):
         kinds = {k.strip() for k in kinds.split(',') if k.strip()}
     allowed = set(kinds) if kinds else None
@@ -15,15 +15,19 @@ def neighbours(graph, node_id, kinds=None, depth=1):
         if allowed is None or e['kind'] in allowed:
             adj[e['from']].append((e, e['to']))
             adj[e['to']].append((e, e['from']))
-    seen, todo, out = {node_id}, deque([(node_id, 0)]), []
+    seen, seen_edges, todo, out = {node_id}, set(), deque([(node_id, 0)]), []
     while todo:
         nid, d = todo.popleft()
         if d >= max(0, min(int(depth), 20)):
             continue
         for edge, other in adj[nid]:
-            if other not in seen and other in nodes:
-                seen.add(other)
+            if other not in nodes:
+                continue
+            if edge['id'] not in seen_edges:
+                seen_edges.add(edge['id'])
                 out.append({'edge': edge, 'node': nodes[other]})
+            if other not in seen:
+                seen.add(other)
                 todo.append((other, d + 1))
     return out
 

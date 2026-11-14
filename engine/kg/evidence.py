@@ -94,7 +94,14 @@ def _ref(b,did,page,text,bb):
 
 
 def references(b):
+    from engine.docmeta import derive, sheet_code
     targets=defaultdict(list)
+    sheets=defaultdict(list)
+    for did, info in b.combined.infos.items():
+        meta=read_dict(b.root/did/'doc.json')
+        code=meta.get('sheet') or meta.get('sheet_number') or sheet_code(info.title) or derive({**meta,'doc_id':did}).get('sheet')
+        if code:
+            sheets[norm(code)].append(did)
     # References only use meaningful, unique labels/tags in each source. Generic type words are too ambiguous.
     for nid in b.items:
         n=b.nodes[nid]
@@ -111,6 +118,13 @@ def references(b):
                        {'rule':'derived_model_sheet','parent_doc_id':parent,'level':info.level})
         for page,text,bb in _words(b,did):
             folded=norm(text)
+            code=norm(sheet_code(text))
+            if code in sheets:
+                destinations=[target for target in sheets[code] if target!=did]
+                if len(destinations)==1:
+                    rn=_ref(b,did,page,text if len(text)<=300 else code,bb)
+                    b.edge('references',rn,b.doc_nodes[destinations[0]],'label_text',.8,
+                           {'sheet_code':code,'quote':text[:300],'source':b.nodes[rn]['source']})
             # Exact text runs preserve citations; longer plain-text files may contain an explicit tag as a token.
             matches=[folded] if folded in targets else [k for k in targets if re.search(r'(?<!\w)'+re.escape(k)+r'(?!\w)',folded)]
             for key in matches:

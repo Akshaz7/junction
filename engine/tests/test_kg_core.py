@@ -99,3 +99,34 @@ def test_invalid_metadata_does_not_hide_other_files(sample):
     assert any(n['kind']=='door' for n in g['nodes'])
     assert any(n['kind']=='doc' and n['doc_ids']==['malformed'] for n in g['nodes'])
     assert g['warnings']
+
+
+def test_neighbours_keeps_parallel_comparison_proofs():
+    from engine.kg.schema import Records
+    r=Records()
+    a=r.node('level','a','ground','Ground floor')
+    b=r.node('level','b','ground','Ground floor')
+    r.edge('agrees',a,b,'rule',1,{'property':'door_count','values':[4,4]})
+    r.edge('differs',a,b,'rule',1,{'property':'window_count','values':[4,5]})
+    graph={'nodes':list(r.nodes.values()),'edges':list(r.edges.values())}
+    assert len(neighbours(graph,a))==2
+    assert len(neighbours(graph,a,kinds='differs'))==1
+
+
+def test_text_is_reference_evidence_not_a_service_fixture(tmp_path):
+    plan(tmp_path,'drawing',[item('r','room',[0,0,100,100]),item('label','text',[10,10,20,20],label='Kitchen')])
+    g=build({'id':'text','docs':[{'doc_id':'drawing','role':'plan'}]},tmp_path)
+    n=next(n for n in g['nodes'] if n.get('source') and n['source']['item_id']=='label')
+    assert n['kind']=='sheet_ref'
+    assert not any(e['kind']=='in_room' and e['from']==n['id'] for e in g['edges'])
+
+
+def test_enrichment_same_as_links_contribute_to_coverage():
+    from engine.kg.schema import Records, finalise
+    r=Records()
+    a=r.node('room','a','r','Room A',source={'doc_id':'a','item_id':'r','page':1,'bbox':None})
+    b=r.node('room','b','r','Room A',source={'doc_id':'b','item_id':'r','page':1,'bbox':None})
+    r.edge('same_as',a,b,'label_text',.5,{'value':'Room A'})
+    graph=finalise({'nodes':list(r.nodes.values()),'edges':list(r.edges.values())})
+    assert graph['stats']['linked_pct']==100
+    assert graph['stats']['counterpart_items']==2

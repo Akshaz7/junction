@@ -17,7 +17,7 @@ def norm(value) -> str:
 
 def kind_of(kind: str) -> str:
     return {'space': 'room', 'stairs': 'stair', 'curtain_wall': 'wall', 'air_terminal': 'terminal',
-            'duct_fitting': 'duct', 'pipe_fitting': 'pipe'}.get(kind, kind if kind in KINDS else 'fixture')
+            'duct_fitting': 'duct', 'pipe_fitting': 'pipe', 'text': 'sheet_ref', 'dimension': 'sheet_ref', 'annotation': 'sheet_ref'}.get(kind, kind if kind in KINDS else 'fixture')
 
 
 def readable(value, fallback: str) -> str:
@@ -76,11 +76,17 @@ def finalise(graph, counterpart_docs=()):
 
     def find(x):
         parent.setdefault(x, x)
-        if parent[x] != x:
-            parent[x] = find(parent[x])
-        return parent[x]
+        root = x
+        while parent[root] != root:
+            root = parent[root]
+        while parent[x] != x:
+            following = parent[x]
+            parent[x] = root
+            x = following
+        return root
 
     linked = set()
+    counterpart_docs = set(counterpart_docs)
     clean = {}
     for e in graph['edges']:
         if e['from'] not in nodes or e['to'] not in nodes or e['from'] == e['to']:
@@ -95,6 +101,8 @@ def finalise(graph, counterpart_docs=()):
             parent[max(ra, rb)] = min(ra, rb)
             if set(nodes[a]['doc_ids']) != set(nodes[b]['doc_ids']):
                 linked.update((a, b))
+                counterpart_docs.update(nodes[a]['doc_ids'])
+                counterpart_docs.update(nodes[b]['doc_ids'])
     for n in nodes.values():
         n['degree'] = degree[n['id']]
         n['canonical'] = find(n['id']) if n['id'] in parent and find(n['id']) != n['id'] else None
