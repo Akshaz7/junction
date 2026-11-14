@@ -166,6 +166,8 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
         doc = load_doc(did, root)
         if doc is None or doc.mode != "planmap" or doc.pages != 1 or not any(i.source == "det" for i in doc.items):
             return res
+        if any(i.props.get('confirmed_by_user') and i.kind == parsed.kind for i in doc.items):
+            return res
         det = Path(root) / did / "planmap-det.json"
         # calibration: the fine-tuned detector is far below the vision recount (shower/bath .28 vs .89 exact count), so it is opt-in (DET_BOXES=1)
         if det.exists() and os.environ.get("DET_BOXES") == "1":
@@ -310,7 +312,12 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
             step = _tstep if step is None else step
     except Exception:  # noqa: BLE001
         pass
-    res = ensure_markers(_guarded(question, doc_ids, on_event, scene_state, history))
+    from engine.taught_items import query as taught_query
+    try:
+        marked = taught_query(question, doc_ids, _root(), {iid: iid for iid in (scene_state or {}).get('hidden', [])})
+    except (OSError, ValueError, TypeError, KeyError):
+        marked = None  # A partially ingested or malformed source keeps the normal guarded answer path.
+    res = ensure_markers(marked if marked is not None else _guarded(question, doc_ids, on_event, scene_state, history))
     try:   # E-61: implausible raster areas and sparse uploaded plans (engine/rastersanity.py)
         if len(doc_ids) == 1:
             from engine import rastersanity
@@ -322,7 +329,7 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
         pass
     try:   # E-77: exact code answers explained in plain words (numbers unchanged; falls back to the code text)
         from engine.explain import explain
-        if not any(s.get("step") == "props" for s in res.get("trace", [])):
+        if marked is None and not any(s.get("step") == "props" for s in res.get("trace", [])):
             res = explain(res, question, _root())
     except Exception:  # noqa: BLE001
         pass

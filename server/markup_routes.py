@@ -11,7 +11,9 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field, field_validator
 
-from engine.symbol_teach import find_similar, room_for, summary, taught_answer
+from engine.symbol_teach import room_for, summary
+from engine.taught_items import canonical_kind, ALIASES
+from . import taught_store
 from . import artifact_store, config, db
 
 router = APIRouter(prefix='/api')
@@ -23,6 +25,16 @@ class Selection(BaseModel):
     name: str = Field(min_length=1, max_length=160)
     note: str = Field(default='', max_length=4000)
     project_id: str | None = Field(default=None, max_length=160)
+    canonical_kind: str | None = None
+
+    @field_validator('canonical_kind')
+    @classmethod
+    def known_kind(cls, value):
+        if value == 'stair':
+            return 'stairs'
+        if value is not None and value not in ALIASES:
+            raise ValueError('Unknown standard item kind')
+        return value
 
     @field_validator('box')
     @classmethod
@@ -41,7 +53,20 @@ class Selection(BaseModel):
 
 
 class Review(BaseModel):
-    statuses: dict[str, Literal['confirmed', 'rejected', 'pending']] = Field(max_length=500)
+    statuses: dict[str, Literal['confirmed', 'rejected']] = Field(default_factory=dict, max_length=1)
+    name: str | None = Field(default=None, min_length=1, max_length=160)
+    note: str | None = Field(default=None, max_length=4000)
+    canonical_kind: str | None = None
+
+    @field_validator('name')
+    @classmethod
+    def name_nonblank(cls, value):
+        return Selection.valid_name(value) if value is not None else None
+
+    @field_validator('canonical_kind')
+    @classmethod
+    def kind_valid(cls, value):
+        return Selection.known_kind(value)
 
 
 class Pin(BaseModel):
@@ -124,7 +149,7 @@ async def get_markup(doc_id: str, page: int = 1):
         raise HTTPException(400, 'Invalid page')
     doc_dir(doc_id)
     pool = await pool_required()
-    symbols = [record(r) for r in await pool.fetch('select * from taught_symbols where doc_id=$1 order by created_at', doc_id)]
+    symbols = [record(r) for r in await pool.fetch('select * from taught_symbols where doc_id=$1 and manual_selection order by created_at', doc_id)]
     pins = [record(r) for r in await pool.fetch('select * from markup_pins where doc_id=$1 order by created_at, id', doc_id)]
     for n, p in enumerate(pins, 1):
         p['n'] = n
@@ -140,18 +165,22 @@ async def teach(doc_id: str, body: Selection):
     from PIL import Image
     with Image.open(image) as im:
         w, h = im.size
-    if body.box[2] > w or body.box[3] > h or (body.box[2]-body.box[0])*(body.box[3]-body.box[1]) > w*h/4:
-        raise HTTPException(400, 'Select one symbol inside the page, not a large sheet area')
-    if await pool.fetchval('select exists(select 1 from taught_symbols where doc_id=$1 and lower(name)=lower($2) and page=$3)', doc_id, body.name, body.page):
-        raise HTTPException(409, 'This label already exists on this page. Review its saved boxes or choose a different name.')
-    result = await asyncio.to_thread(find_similar, image, body.box, page=body.page-1)
+    if body.box[2] > w or body.box[3] > h:
+        raise HTTPException(400, 'Select one item inside the page')
     ctx = await asyncio.to_thread(context, image, body.page)
-    matches = [{'id': str(i), 'bbox': m['bbox'], 'score': m['score'], 'status': 'pending',
-                'room': room_for(m['bbox'], ctx['rooms'])} for i, m in enumerate(result['matches'], 1)]
-    r = await pool.fetchrow('insert into taught_symbols(doc_id, project_id, name, note, template_bbox, page, matches) '
-                            'values($1,$2,$3,$4,$5::jsonb,$6,$7::jsonb) returning *',
-                            doc_id, body.project_id, body.name, body.note, json.dumps(list(body.box)), body.page, json.dumps(matches))
-    return {**record(r), 'matcher_note': result.get('note'), 'method': result.get('method')}
+    matches = [{'id': '1', 'bbox': list(body.box), 'score': 1.0, 'status': 'confirmed',
+                'room': room_for(body.box, ctx['rooms'])}]
+    async with pool.acquire() as c:
+        async with c.transaction():
+            await c.execute('select pg_advisory_xact_lock(hashtext($1))', 'taught:' + doc_id)
+            r = await c.fetchrow('insert into taught_symbols(doc_id, name, note, template_bbox, page, matches, canonical_kind, manual_selection) '
+                                'values($1,$2,$3,$4::jsonb,$5,$6::jsonb,$7,true) returning *',
+                                doc_id, body.name, body.note, json.dumps(list(body.box)), body.page, json.dumps(matches),
+                                body.canonical_kind or canonical_kind(body.name))
+            path, plan = await taught_store.materialize(c, doc_id, body.page, {'w': w, 'h': h})
+            taught_store.atomic_json(path, plan)
+    await asyncio.to_thread(taught_store.invalidate, doc_id)
+    return {**record(r), 'method': 'user_label'}
 
 
 def identifier(value):
@@ -168,17 +197,41 @@ async def review(doc_id: str, symbol_id: str, body: Review):
     # Lock the row so reviews on two devices cannot lose each other's changes.
     async with pool.acquire() as c:
         async with c.transaction():
+            await c.execute('select pg_advisory_xact_lock(hashtext($1))', 'taught:' + doc_id)
             row = await c.fetchrow('select * from taught_symbols where id=$1 and doc_id=$2 for update', identifier(symbol_id), doc_id)
             if not row:
                 raise HTTPException(404, 'Label not found')
             r = record(row)
+            if not r.get('manual_selection'):
+                raise HTTPException(409, 'Mark this item individually to save a manual label')
             if set(body.statuses) - {m['id'] for m in r['matches']}:
                 raise HTTPException(400, 'Unknown match')
             for m in r['matches']:
                 if m['id'] in body.statuses:
                     m['status'] = body.statuses[m['id']]
-            row = await c.fetchrow('update taught_symbols set matches=$1::jsonb where id=$2 returning *', json.dumps(r['matches']), identifier(symbol_id))
+            name = body.name if body.name is not None else r['name']
+            kind = (body.canonical_kind or canonical_kind(name)) if {'name', 'canonical_kind'} & body.model_fields_set else r.get('canonical_kind')
+            row = await c.fetchrow('update taught_symbols set matches=$1::jsonb,name=$3,note=$4,canonical_kind=$5 where id=$2 returning *',
+                                   json.dumps(r['matches']), identifier(symbol_id), name, body.note if body.note is not None else r['note'], kind)
+            path, plan = await taught_store.materialize(c, doc_id, r['page'], None)
+            taught_store.atomic_json(path, plan)
+    await asyncio.to_thread(taught_store.invalidate, doc_id)
     return record(row)
+
+
+@router.delete('/docs/{doc_id}/markup/symbols/{symbol_id}', status_code=204)
+async def delete_symbol(doc_id: str, symbol_id: str):
+    doc_dir(doc_id)
+    pool = await pool_required()
+    async with pool.acquire() as c:
+        async with c.transaction():
+            await c.execute('select pg_advisory_xact_lock(hashtext($1))', 'taught:' + doc_id)
+            row = await c.fetchrow('delete from taught_symbols where id=$1 and doc_id=$2 and manual_selection returning page', identifier(symbol_id), doc_id)
+            if row is None:
+                raise HTTPException(404, 'Marked item not found')
+            path, plan = await taught_store.materialize(c, doc_id, row['page'], None)
+            taught_store.atomic_json(path, plan)
+    await asyncio.to_thread(taught_store.invalidate, doc_id)
 
 
 @router.get('/docs/{doc_id}/markup/pins')
@@ -211,11 +264,7 @@ async def delete_pin(doc_id: str, pin_id: str):
 
 
 async def answer_taught(pool, question, doc_ids):
-    if not doc_ids or not re.search(r'\b(how many|count|number of)\b', question, re.I):
-        return None
-    from asyncpg import UndefinedTableError
-    try:
-        rows = await pool.fetch('select * from taught_symbols where doc_id=any($1::text[]) order by created_at', doc_ids)
-    except UndefinedTableError:  # Rolling deploy: ordinary answers still work until migration lands.
-        return None
-    return taught_answer(question, doc_ids, [record(r) for r in rows])
+    for doc_id in doc_ids:
+        await taught_store.restore_materialized(pool, doc_id)
+    # All answers use the standard item index, including scene edits and filters.
+    return None

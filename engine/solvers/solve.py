@@ -57,7 +57,7 @@ class SolverUnsupported(Exception):
 
 
 def _plural(kind: str, n: int) -> str:
-    w = NOUN.get(kind, kind)
+    w = NOUN.get(kind, kind.removeprefix("custom:"))
     if n == 1:
         return w
     if w.endswith("y") and not w.endswith("ey"):
@@ -660,6 +660,11 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         else:
             verb = "is" if n == 1 else "are"
             text = f"There {verb} **{n} {_plural(kind, n)}** {where}. {marks}"
+        from engine.taught_items import evidence_step
+        manual = evidence_step(items)
+        if manual:
+            text += '\n\n- ' + manual['text']
+            trace.append(_step('user_label', manual['text']))
         return _answer_obj(question, [doc_id], text, n, "count", conf, False, boxes, cites, scene, trace, route, t0)
 
     vals = [(i, _qty(i, kind, p.type)) for i in items]
