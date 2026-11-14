@@ -2,7 +2,7 @@
 import json, subprocess, sys
 from dotenv import dotenv_values
 env = dotenv_values(".env")
-vals = {"RATE_LIMIT": "1", "RATE_LIMIT_PER_MIN": "120", "BUILD_REV": sys.argv[1], "DATABASE_URL": env.get("DATABASE_URL") or "",
+vals = {"RATE_LIMIT": "1", "RATE_LIMIT_PER_MIN": "120", "BUILD_REV": sys.argv[1], "PAGES_MAX_SIDE": "6000", "RESTORE_CAP_MB": "400", "DATABASE_URL": env.get("DATABASE_URL") or "",
         **{k: env.get(k) or "" for k in ("RUNWARE_API_KEY", "NVIDIA_API_KEY", "ELEVENLABS_API_KEY")},
         **{k: env[k] for k in ("VERDA_INFERENCE_KEY", "GEMINI_API_KEY", "ANTHROPIC_API_KEY") if env.get(k)}}
 missing = [k for k, v in vals.items() if not v]
