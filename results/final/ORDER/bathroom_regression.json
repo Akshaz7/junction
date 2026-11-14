@@ -1,0 +1,13 @@
+{
+  "source": "unit-test fixture; not a real-file measurement",
+  "before_steps": [],
+  "after_steps": [
+    {
+      "kind": "measured",
+      "title": "Measured",
+      "text": "Outline 23,400 px² × (0.01 m/px)² = 2.34 m²; scale from the printed scale",
+      "cite": null,
+      "ok": null
+    }
+  ]
+}

@@ -84,12 +84,13 @@ def test_analytics_answers_validate_against_server_schema(q, d):
     jsonschema.validate(A(q, d), schema)
 
 
-def test_bathroom_tiles_only_wet_rooms_with_boxes_and_price():
+def test_bathroom_tiles_only_wet_rooms_with_boxes_and_explicit_waste():
     need(AC)
-    a = A("How many square metres of floor tiles should I order for the bathrooms?", AC)
+    a = A("How many square metres of floor tiles should I order for the bathrooms with 10% waste?", AC)
     t = a["answer"]["text_md"]
-    assert abs(a["answer"]["value"] - 108.9) < 0.2 and "99.0" in t and "8 bathrooms" in t
-    assert "76 boxes" in t and "1.44 m² per box" in t and "€" in t and "not a quote" in t
+    assert abs(a["answer"]["value"] - 108.9) < 0.2 and "10% waste applied as requested" in t
+    assert "| Floor tiles |" in t and "| Source |" in t
+    assert "boxes" not in t and "€" not in t  # No invented pack size or unit price.
     assert len(a["evidence"]["boxes"]) == 8 and a["cost"]["usd_total"] == 0
     b = A("how many m2 of tiles for the bathrooms including 15% waste", AC)
     assert abs(b["answer"]["value"] - 113.9) < 0.2

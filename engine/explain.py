@@ -95,6 +95,8 @@ def explain(res: dict, question: str, root: Path, timeout_s: float = 12.0) -> di
     if os.environ.get("EXPLAIN", "1") == "0" or os.environ.get("MODELS_FAKE") == "1":
         return res
     ans = res.get("answer") or {}
+    if any(s.get("step") == "order" for s in res.get("trace") or []):
+        return res  # Preserve the table, measurement notes and stated allowance for CSV export.
     if ans.get("abstained") or res.get("route") not in ("planmap", "index") or not res.get("citations"):
         return res
     text = ans.get("text_md") or ""

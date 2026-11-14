@@ -60,3 +60,12 @@ def test_length_walls_exterior():
 
 def test_zero_length_no_step():
     assert _texts(_ctx(unit="m", value=0.0, trace=[{"step": "length", "detail": "sum over 0 wall = 0 m"}])) == []
+
+
+def test_room_area_in_count_explanation_gets_measured_step():
+    room = Item("r", "room", label="Bathroom", q={"area_m2": 2.34}, polygon_px=[[0, 0], [100, 0], [100, 234], [0, 234]])
+    ctx = _ctx(unit="count", value=1, question="How many bathrooms?", ans={"text_md": "**1 bathroom**, 2.34 m². [1]"},
+               cited=[room], sc={"m_per_px": .01}, first_cite={"r": 1})
+    texts = _texts(ctx)
+    assert "23,400 px²" in texts[0] and "2.34 m²" in texts[0] and "scale from" in texts[0]
+    assert ctx["area_q"] and ctx["steps"][0]["cite"] == 1

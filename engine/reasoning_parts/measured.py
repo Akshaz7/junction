@@ -27,7 +27,7 @@ def _num(v):
 
 def _room_m2(it):
     q, p = it.q or {}, it.props or {}
-    for v in (q.get("area_m2"), q.get("net_area_m2"), p.get("area_m2")):
+    for v in (q.get("net_floor_area_m2"), q.get("area_m2"), q.get("net_area_m2"), p.get("area_m2")):
         if v:
             return float(v)
     return None
@@ -187,13 +187,31 @@ def _length(ctx) -> bool:
 
 def run(ctx: dict) -> None:
     steps, unit, value, question, cited = ctx["steps"], ctx["unit"], ctx["value"], ctx["question"], ctx["cited"]
-    area_q = unit == "m2" or (unit not in ("count", "m") and bool(re.search(r"\b(area|how big|size|m2|m²|square)\b", question or "", re.I)))
+    # A count headline can also report a room size in its explanation.
+    text = ctx["ans"].get("text_md") or ""
+    area_in_answer = bool(re.search(r"\d[\d.,]*\s*(?:m²|m2|square met(?:er|re)s)\b", text, re.I))
+    area_q = unit == "m2" or area_in_answer or (unit not in ("count", "m") and bool(re.search(r"\b(area|how big|size|m2|m²|square)\b", question or "", re.I)))
     rooms = [it for it in cited if it.kind in ("room", "space")]
     ctx.update(area_q=area_q, rooms=rooms)
-    if unit == "m":
+    order_math = _trace(ctx["trace"], "order_compute")
+    if order_math:
+        _add(steps, "calculated", "Calculated", "; ".join(order_math), ctx["cites"][0].get("n") if ctx["cites"] else None)
+    elif _trace(ctx["trace"], "order"):
+        _add(steps, "read", "Missing measurements", "The file does not provide complete measurements for the requested order.")
+    elif unit == "m":
         _length(ctx)
     elif area_q and rooms:
         _area(ctx)
+    elif unit in ("m2", "m3"):
+        step = "area" if unit == "m2" else "volume"
+        for detail in _trace(ctx["trace"], step):
+            match = re.search(r"sum over (\d+) (\w+) = ([\d.]+)", detail)
+            if match and _num(value) is not None:
+                n, kind, _ = match.groups()
+                word = KIND_WORD.get(kind, kind)
+                suffix = "²" if unit == "m2" else "³"
+                _add(steps, "calculated", "Calculated", f"Added the recorded {step}s of {n} {word}{'' if int(n) == 1 else 's'}: {_r(value)} m{suffix}")
+                break
     elif unit in ("count", "", None):
         txt = _filter_step(ctx)
         if txt:

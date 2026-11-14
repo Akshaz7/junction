@@ -39,3 +39,15 @@ def test_disagreement_drops():
 def test_vision_reader_low():
     r = confidence.run(_ctx(route="vision", ans={"confidence": 0.6}))
     assert r["label"] == "Estimate" and r["pct"] <= 70
+
+
+def test_empty_placeholder_citation_never_verified():
+    r = confidence.run(_ctx(is_ifc=True, route="index", cites=[{"item_ids": [], "bbox_px": None, "quote": None}]))
+    assert r["label"] == "Estimate"
+    assert "could not be matched" in r["reason"]
+
+
+def test_confidence_factors_are_grammatical_sentences():
+    r = confidence.run(_ctx(unit="m2", sc={"method": "printed-ratio"}, scale_c=1, checked=True))
+    assert "because an independent second look agrees" not in r["reason"]
+    assert "agreement from an independent second look" in r["reason"]
