@@ -245,3 +245,14 @@ def test_existing_structured_calc_is_preserved(tmp_path):
     card = {"calc": {"result": {"value": 2}}, "confidence": {"label": "Estimate"}}
     res = {"answer": {"value": 2, "unit": "count"}, "reasoning": card}
     assert xcheck.augment_existing(res, "Count", tmp_path)["reasoning"] is card
+
+
+def test_unreadable_sources_cannot_retain_legacy_percentage(tmp_path, monkeypatch):
+    import engine.reasoning
+    def broken(*args):
+        raise ValueError("Invalid source")
+    monkeypatch.setattr(engine.reasoning, "build", broken)
+    res = {"answer": {"value": 2, "unit": "count"}, "reasoning": {"confidence": {"label": "Verified", "pct": 99}}}
+    xcheck.augment_existing(res, "Count", tmp_path)
+    assert res["reasoning"]["confidence"]["pct"] is None
+    assert res["reasoning"]["confidence"]["label"] == "Estimate"
