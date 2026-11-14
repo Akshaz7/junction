@@ -104,7 +104,8 @@ def _position(b, a, z, anchors, linked_a, linked_z):
         if p is not None:
             points[nid]=p
     ps=[(points[x],points[y]) for x,y in anchors if x in points and y in points]
-    alignment=fit_similarity(ps)
+    from .alignment import vector_alignment
+    alignment=vector_alignment(b, a[0], z[0]) or fit_similarity(ps)
     if not alignment:
         return
     # 10 cm is a building coordination tolerance, not a document-specific threshold.
@@ -154,6 +155,8 @@ def _match_pair(b,a,z):
     pages=defaultdict(list)
     for x,y in anchors:
         pages[(b.nodes[x]['source']['page'],b.nodes[y]['source']['page'])].append((x,y))
+    if not pages and len({b.nodes[n]['source']['page'] for n in a}) == 1 and len({b.nodes[n]['source']['page'] for n in z}) == 1:
+        pages[(b.nodes[a[0]]['source']['page'], b.nodes[z[0]]['source']['page'])] = []
     for (pa,pz),pairs in pages.items():
         left=[n for n in a if b.nodes[n]['source']['page']==pa]
         right=[n for n in z if b.nodes[n]['source']['page']==pz]
