@@ -218,6 +218,7 @@ def evaluate(operation, values):
     if operation == "round": return round(values[0], int(values[1])) if len(values) == 2 else None
     if operation == "ceil": return math.ceil(values[0]) if len(values) == 1 else None
     if operation == "max_zero": return max(0, values[0]) if len(values) == 1 else None
+    if operation == "min": return min(values) if values else None
     if operation == "source": return values[0] if len(values) == 1 else None
     return None
 

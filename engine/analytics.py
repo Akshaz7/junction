@@ -929,7 +929,7 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
                 w = d.q.get("width_m") if ifc else None
                 w = float(w) if w else max(f[2] - f[0], f[3] - f[1]) * k
                 opening += min(w, 3.0)
-                calc_openings.setdefault(r.item_id, []).append((d, min(w, 3.0)))
+                calc_openings.setdefault(r.item_id, []).append((d, w, min(w, 3.0)))
                 n += 1
         rows.append((r, per, opening, n, max(per - opening, 0.0)))
     total = round(sum(x[4] for x in rows), 1)

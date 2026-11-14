@@ -75,8 +75,20 @@ def baseboard(res, doc, results, openings, scale):
             factors.append(input_value("scale", k, "m/px", {**ref, "kind": "scale", "item_id": None, "field": "scale.m_per_px"}))
         steps.append(step(sid + "-perimeter", "Rectangle perimeter", "2 × (width + depth) × scale", perimeter, "m", factors,
                           "Rectangle approximation; other wall openings are not deducted.", "multiply"))
+        door_inputs = []
+        for door_index, (door, raw_width, capped_width) in enumerate(openings.get(it.item_id, [])):
+            cap_id = sid + f"-door-{door_index}"
+            width_ref = source(doc, door, "width_m / footprint")
+            if doc.mode != "ifc" and door.bbox_px:
+                px_width = max(door.bbox_px[2] - door.bbox_px[0], door.bbox_px[3] - door.bbox_px[1])
+                steps.append(step(cap_id + "-width", "Scale drawn door width", "longest box side × page scale", raw_width, "m",
+                                  [input_value("drawn width", px_width, "px", width_ref), input_value("scale", scale, "m/px", {**width_ref, "kind": "scale", "item_id": None, "field": "scale.m_per_px"})], operation="multiply"))
+                width_ref = step_source(cap_id + "-width")
+            steps.append(step(cap_id, "Limit doorway deduction", "min(door width, maximum doorway deduction)", capped_width, "m",
+                              [input_value("door width", raw_width, "m", width_ref), input_value("deduction cap", 3, "m", {"kind": "policy", "text": "Baseboard solver's maximum doorway deduction is 3 m"})], operation="min"))
+            door_inputs.append(input_value("adjacent doorway deduction", capped_width, "m", step_source(cap_id)))
         steps.append(step(sid + "-openings", "Door widths deducted", "Σ(capped widths of adjacent doors)", deducted, "m",
-                          [input_value("adjacent door width (capped)", w, "m", source(doc, d, "width_m / footprint")) for d, w in openings.get(it.item_id, [])],
+                          door_inputs,
                           "Door association uses the solver's proximity band; each width is capped at 3 m as in the solver.", "sum"))
         steps.append(step(sid + "-difference", "Subtract openings", "perimeter − door openings", perimeter - deducted, "m",
                           [input_value("perimeter", perimeter, "m", step_source(sid + "-perimeter")),
@@ -94,7 +106,14 @@ def mep(res, doc, index, ids, groups=None, values=None):
     lookup = {i.item_id: i for i in doc.items}
     items = [lookup[i] for i in dict.fromkeys(ids) if i in lookup]
     if groups is not None:
-        return grouped(res, doc, items, groups, "recorded category")
+        grouped(res, doc, items, groups, "recorded category")
+        indexed_ids = {r["id"] for r in [*(index.get("services") or []), *(index.get("structure") or [])]}
+        refs = [r["source"] for r in res["_calc"]["rows"]]
+        refs.extend(i["source"] for s in res["_calc"]["steps"] for i in s["inputs"])
+        for ref in refs:
+            if ref.get("item_id") in indexed_ids:
+                ref.update(artifact="mep.json", field="recorded type / size / material category")
+        return res
     indexed = {r["id"]: r for r in index.get("services", [])}
     rows, steps = [], []
     for index, it in enumerate(items):

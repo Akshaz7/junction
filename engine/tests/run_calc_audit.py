@@ -13,6 +13,23 @@ from engine.calc import number, validate
 from engine.tests.calc_cases import CASES
 
 
+def include_wallarea(out):
+    path = Path("results/final/CALC/wallarea.json")
+    if not path.is_file(): return out
+    wall = json.loads(path.read_text())
+    out["answers"] = [e for e in out["answers"] if not e["route"].startswith("wallarea/")]
+    for index, entry in enumerate(wall["answers"]):
+        route = f"wallarea/case-{index + 1}"
+        e = {**entry, "route": route, "docs": [entry["doc_id"]], "numeric": number(entry.get("value")),
+             "eligible": number(entry.get("value")), "has_calc": bool(entry.get("complete")), "upstream_commit": wall["upstream_commit"]}
+        out["answers"].append(e)
+        out["routes"][route] = {"answers": 1, "numeric_answers": int(e["numeric"]), "numeric_or_table_answers": int(e["eligible"]),
+                               "with_complete_calc": int(e.get("complete", False)), "complete_pct": 100.0 if e.get("complete") else 0.0}
+    out["totals"] = {"answers": len(out["answers"]), "numeric_or_table_answers": sum(bool(e.get("eligible")) for e in out["answers"]),
+                     "complete": sum(e.get("complete", False) for e in out["answers"])}
+    return out
+
+
 def run(blind=False):
     root = Path("artifacts")
     entries, by_route = [], defaultdict(list)
@@ -46,6 +63,7 @@ def run(blind=False):
     out = {"generated_at": datetime.now(timezone.utc).isoformat(), "models": "fake; recount/reader/explain disabled; no live calls", "blind_run": blind,
            "scope": "Observed numeric code routes in the listed real-file cases; not a claim that unseen route variants are covered.",
            "totals": {"answers": len(entries), "numeric_or_table_answers": sum(bool(e.get("eligible")) for e in entries), "complete": sum(e.get("complete", False) for e in entries)}, "routes": routes, "answers": entries}
+    out = include_wallarea(out)
     Path("results/final/CALC/coverage.json").write_text(json.dumps(out, indent=2, ensure_ascii=False) + "\n")
     print(json.dumps(out["totals"]))
     for e in entries:
@@ -55,4 +73,12 @@ def run(blind=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--blind", action="store_true")
-    run(parser.parse_args().blind)
+    parser.add_argument("--merge-wallarea", action="store_true", help="Merge completed audit summaries without running questions again")
+    args = parser.parse_args()
+    if args.merge_wallarea:
+        path = Path("results/final/CALC/coverage.json")
+        result = include_wallarea(json.loads(path.read_text()))
+        path.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n")
+        print(json.dumps(result["totals"]))
+    else:
+        run(args.blind)
