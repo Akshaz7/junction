@@ -876,3 +876,11 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 .brand-mark, .wordmark { display: inline-flex; align-items: center; gap: .3em; }
 .brand-pro { font-weight: 500; letter-spacing: -.02em; }
 .rail .brand-mark { flex-direction: column; gap: 2px; }
+/* W-66: wider rail so the Stoa Pro mark reads at a glance; PRO set in a serif to match the STOA wordmark. */
+.app-shell { grid-template-columns: 104px minmax(0, 1fr); }
+.rail .brand-mark { top: 28px; left: 6px; width: 92px; min-height: 30px; flex-direction: row; justify-content: center; align-items: center; gap: 4px; font-size: 16px; letter-spacing: 0; }
+.rail .brand-logo { height: .8em; }
+.brand-pro { font-family: "Times New Roman", Times, Georgia, serif; font-weight: 400; text-transform: uppercase; letter-spacing: .04em; font-size: .74em; line-height: 1; translate: 0 .04em; }
+.rail .project-switcher { left: 32px; }
+.rail nav { left: 32px; }
+.workspace-footer { left: 32px; }
