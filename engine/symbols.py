@@ -362,10 +362,15 @@ def find_legend(image_path, words=None, ink=None) -> dict:
             label = _clean_label(r["seg"]["text"])
             if len(re.findall(r"[^\W\d_]", label, re.U)) < 4:
                 continue   # an abbreviation or code, not a description of a symbol
+            prose = len(set(re.findall(r"\b(?:the|of|and|was|by|is|to|from|in|for|with|that)\b", label.lower()))) >= 2
+            if (len(label.split()) >= 8 and len(label) >= 45) or (len(label) >= 40 and prose) or (len(label) >= 25 and label.endswith((".", ",", ";"))):
+                continue   # a sentence of running text, not the name of a symbol
             ents.append({"label": label, "label_bbox": [int(v) for v in r["seg"]["bbox_px"]], "symbol_bbox": [int(v) for v in sb],
                          "kind": "line" if line_like else "symbol", "section": section, "titled": titled, "side": r["side"]})
         if len(ents) < 3:
             continue
+        if not titled and sum(1 for e in ents if e["label"][:1].islower()) >= 0.5 * len(ents):
+            continue   # lines that mostly continue a sentence (lower-case starts) are a paragraph, not a legend
         xs = [e["label_bbox"][0] for e in ents] + [e["symbol_bbox"][0] for e in ents]
         xe = [e["label_bbox"][2] for e in ents] + [e["symbol_bbox"][2] for e in ents]
         ys = [e["label_bbox"][1] for e in ents] + [e["symbol_bbox"][1] for e in ents]
