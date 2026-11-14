@@ -4,16 +4,16 @@
     "ifc_models__bsc-clinic-clinic-hvac",
     "ifc_models__bsc-clinic-clinic-plumbing"
   ],
-  "seconds": 12.234,
+  "build_seconds": 9.188,
   "stats": {
-    "nodes": 13650,
-    "edges": 66688,
+    "nodes": 14037,
+    "edges": 73709,
     "by_kind": {
       "project": 1,
       "doc": 3,
       "level": 11,
       "fixture": 1689,
-      "material": 10,
+      "material": 18,
       "wall": 1111,
       "door": 254,
       "type": 105,
@@ -21,17 +21,19 @@
       "stair": 9,
       "window": 58,
       "terminal": 441,
-      "room": 532,
+      "room": 911,
       "pipe": 6288,
       "duct": 3061,
       "system": 74
     },
     "edges_by_kind": {
-      "contains": 14181,
+      "contains": 14568,
       "on_level": 13443,
-      "made_of": 2027,
+      "made_of": 4907,
       "has_type": 11517,
-      "in_room": 4505,
+      "in_room": 5655,
+      "bounds": 2302,
+      "hosted_by": 302,
       "serves": 542,
       "part_of_system": 10252,
       "connects": 10221
@@ -57,7 +59,10 @@
       "ifc_models__bsc-clinic-clinic-plumbing": {
         "schema": "IFC2X3",
         "services": 6587,
-        "rooms": 0
+        "rooms": 0,
+        "notes": [
+          "Room assignment unavailable: no rooms in this model and no supported registration to architectural rooms."
+        ]
       }
     },
     "notes": [],
@@ -160,6 +165,9 @@
       ]
     }
   },
-  "rooms_with_services": 281,
-  "services_lengths_known": 4441
+  "rooms_with_services": 456,
+  "declared_ceiling_heights": 0,
+  "services_lengths_known": 4441,
+  "dangling_edges": 0,
+  "unknown_length_note": "Whole-element lengths are not lengths inside a room; unrecorded ceilings stay unknown."
 }
