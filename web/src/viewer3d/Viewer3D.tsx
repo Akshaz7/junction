@@ -16,6 +16,7 @@ import type { WalkState } from './walk';
 import { WalkJoystick } from './WalkJoystick';
 import { EditPanel, useEditAdvisor } from './EditPanel';
 import type { EditState, ItemEdit } from './edits';
+import { RevisedPlanDialog } from './RevisedPlanDialog';
 import { FindingsPanel } from './FindingsPanel';
 import { roomTypeLabel } from './blueprint';
 import { itemKindKey, pipeSizeLabel } from '../lib/kind-colors';
@@ -88,6 +89,8 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
   const [picked, setPicked] = useState<string | null>(null);
   const [manifest, setManifest] = useState<SceneManifest | null>(null);
   const [editing, setEditing] = useState(false);
+  const [hiddenNow, setHiddenNow] = useState(0);
+  const [revisedOpen, setRevisedOpen] = useState(false);
   const [moveItem, setMoveItem] = useState<string | null>(null);
   const dragPointer = useRef<number | null>(null);
   const [edits, setEdits] = useState<EditState>({ undoCount: 0, moved: {}, materials: {} });
@@ -162,6 +165,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     let live: ReturnType<typeof bindLiveHighlight> | undefined;
     let liveCommands: ReturnType<typeof bindLiveCommands> | undefined;
     let unsubscribeCutaway: (() => void) | undefined;
+    let unsubscribeCommands: (() => void) | undefined;
     let unsubscribeHighlight: (() => void) | undefined;
     let unsubscribeWalk: (() => void) | undefined;
     let unsubscribeBuild: (() => void) | undefined;
@@ -196,6 +200,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       viewer = createViewer(canvas);
       viewerRef.current = viewer;
       unsubscribeCutaway = viewer.onCutawayChange(setCutaway);
+      unsubscribeCommands = viewer.onCommandChange(() => setHiddenNow(viewer!.getCommandState().hidden.length));
       unsubscribeHighlight = viewer.onHighlightChange(() => {
         setHighlightState(viewer!.getLinkedHighlightState());
         const items = viewer!.scene?.manifest.items;
@@ -225,6 +230,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     return () => {
       active = false;
       unsubscribeCutaway?.();
+      unsubscribeCommands?.();
       unsubscribeHighlight?.();
       unsubscribeWalk?.();
       unsubscribeBuild?.();
@@ -349,6 +355,13 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       <button type="button" aria-label="Edit" aria-pressed={editing} disabled={state !== 'ready'} onClick={() => {
         cancelMove(); viewerRef.current?.setWalk(false); setEditing(!editing);
       }}>Edit</button>
+      {(() => {
+        const hasEdits = hiddenNow > 0 || Object.keys(edits.moveDelta ?? {}).length > 0;
+        return <button type="button" className="viewer3d-revised-btn" aria-label="Revised plan"
+          disabled={state !== 'ready' || !hasEdits || !(doc_id ?? manifest?.doc_id)}
+          title={hasEdits ? 'Show the 2D plan with your 3D edits applied' : 'Make an edit in 3D first'}
+          onClick={() => setRevisedOpen(true)}>Revised plan</button>;
+      })()}
       <FindingsPanel viewer={state === 'ready' ? viewerRef.current : null} stage={stage} />
     </div>
     <div ref={setStage} className="viewer3d-stage" aria-busy={state === 'loading'}>
@@ -408,6 +421,9 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       {walking && <p id={helpId}>WASD / arrow keys to move · Drag to look · Q/E or PageUp/Down for storeys · Esc to return to orbit</p>}
       {walkMessage && <p role="status">{walkMessage}</p>}
     </div>
+  {revisedOpen && (doc_id ?? manifest?.doc_id) && viewerRef.current && <RevisedPlanDialog docId={(doc_id ?? manifest?.doc_id)!} manifest={manifest}
+    removed={viewerRef.current.getCommandState().hidden} moved={viewerRef.current.getEditState().moveDelta ?? {}}
+    onClose={() => setRevisedOpen(false)} />}
   </section>;
 }
 

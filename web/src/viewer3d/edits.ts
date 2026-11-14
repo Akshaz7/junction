@@ -16,6 +16,8 @@ export interface ItemEdit {
 export interface EditState {
   undoCount: number;
   moved: Record<string, [number, number, number]>;
+  /** Metres moved from the original spot, world X/Z (east, south). */
+  moveDelta?: Record<string, [number, number]>;
   materials: Record<string, WallMaterial>;
 }
 type Surface = Material & { color?: Color };
@@ -61,6 +63,9 @@ export function createEditLayer(scene: LoadedScene, commands: {
 
   const state = (): EditState => ({ undoCount: history.length,
     moved: Object.fromEntries([...positions.keys()].map((id) => [id, scene.items.get(id)!.position.toArray()])),
+    moveDelta: Object.fromEntries([...positions.entries()].map(([id, from]) => {
+      const now = scene.items.get(id)!.position; return [id, [now.x - from.x, now.z - from.z]];
+    }).filter(([, d]) => Math.abs((d as number[])[0]) + Math.abs((d as number[])[1]) > 1e-6)),
     materials: Object.fromEntries(materials),
   });
 

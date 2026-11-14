@@ -58,7 +58,7 @@ describe('local edit layer', () => {
     expect(commands().hidden.has('door')).toBe(false);
     expect(wall.material).toBe(surface);
     expect(wall.position.length()).toBe(0);
-    expect(layer.state()).toEqual({ undoCount: 0, moved: {}, materials: {} });
+    expect(layer.state()).toEqual({ undoCount: 0, moved: {}, moveDelta: {}, materials: {} });
     layer.dispose(); disposeScene(scene);
   });
 
