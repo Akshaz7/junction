@@ -35,4 +35,15 @@
   .viewer-mode-toggle button { min-height: 32px; min-width: 36px; }
   /* "Visualise it" sat on top of the drawing credit and under the home bar. */
   .viewer-sheet .viewer-3d-slot { left: auto; right: 12px; bottom: calc(var(--app-safe-bottom) + 76px); }
+
+  /* Nothing in the chat may be wider than the screen: no sideways scroll, the action row wraps, long ids break. */
+  html, body, .workspace, .chat-page, .chat-workspace, .conversation { overflow-x: clip; max-width: 100%; }
+  .exchange, .exchange * { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+  .exchange .answer-actions { flex-wrap: wrap; row-gap: 8px; }
+  .exchange .answer-actions > * { max-width: 100%; }
+  .exchange pre, .exchange table { display: block; overflow-x: auto; }
+  /* Header actions get their own solid row above the conversation instead of floating over it. */
+  .route-chat .pagebar { background: var(--background); right: 0; left: 0; padding: 12px 16px; justify-content: flex-end; }
+  .route-chat .pagebar .chat-header-actions { margin-left: auto; }
+  .chat-page .conversation, .has-viewer .conversation { padding-top: 64px; }
 }
