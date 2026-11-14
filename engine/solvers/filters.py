@@ -49,6 +49,9 @@ ROOM_ALIASES = {"offices": "office", "meeting rooms": "meeting room", "laborator
 
 def room_filter(question: str, rooms: list[Item]) -> tuple[str, list[Item]] | None:
     """Recognise a drawn name, a translated room type, or an explicit area target."""
+    # A quoted label that carries its own room number ('Toilet (Rum nr. S11)') is matched by the exact-label path in solve.py.
+    if re.search(r"['\"\u2018\u2019\u201c][^'\"]*\([^)]*\d[^)]*\)\s*['\"\u2018\u2019\u201d]", question):
+        return None
     q = fold(question)
     if re.search(r"\b(?:largest|biggest|smallest|tiniest)\s+room\b", q):
         return None
