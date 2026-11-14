@@ -41,3 +41,5 @@
 - Rebuilding derived files: `uv run` wrapped in heavy.sh silently did nothing twice (stale 03:35 GLB/USDZ). Always check output mtimes after a rebuild; `PYTHONPATH=. .venv/bin/python -m pipeline.<x>` works.
 - LEAD runs web e2e on a stable snapshot via scripts/test_snapshot.sh <port> "<worker paths>" -- <specs>: HEAD + only that worker's files, built and served by vite preview. The live :5173 dev server breaks whenever a Codex worker is mid-edit.
 - `echo` inside a zsh `for` loop with `==` breaks: zsh's = expansion. Use `echo '== x'` quoted.
+- pixelmatch/pngjs: clear the diff buffer before diffMask comparisons; masks on transformed (zoomed) drawings must be intersected with their overflow-clipping ancestors (W-18).
+- BSD sed has no \| alternation: use grep -E to pull RESULT/NEEDS lines before rewriting a handoff (lost the T-03 note once; recovered from ~/.codex/sessions).

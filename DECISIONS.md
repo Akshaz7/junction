@@ -57,3 +57,4 @@ Format for new lines: `YYYY-MM-DD HH:MM — decision — reason`.
 - 2026-11-14 04:17 — Added scene-command feature (E-20, S-10, T-12, I-14, W-19): 'show me all the windows' → tagged W1..Wn; 'remove window W7' → hidden live in 3D/AR/2D via /ws scene.edit; edits are a per-chat layer, never changing source data — Ash's idea.
 - 2026-11-14 04:24 — CONTRACT v3: 5.11 scene commands, tags, scene.edit/scene.state events — lets IOS (I-14) and 3D (T-12) build against the contract while SERVER (S-10) and ENGINE (E-20) build their sides.
 - 2026-11-14 04:39 LEAD: CONTRACT 3.1 adds §5.12 advisor card shape so IOS (I-09) and WEB can build against fixtures before E-16 lands.
+- 2026-11-14 04:52 LEAD: W-18 pass rule = each unexplained region ≤0.5% of canvas and total unmasked mismatch ≤1.5% per phase (0 regions is impossible with antialiasing + different content).

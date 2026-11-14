@@ -1,15 +1,15 @@
 # MORNING: report for Ash
 
-_Last updated: Sat 14 Nov 03:45 EET (run 1, ~55 min in)_
+_Last updated: Sat 14 Nov 04:55 EET (run 1). Rows: 49 done, 10 doing, 43 todo, 4 waiting for a key, 1 needs Ash._
 
 ## 1. What works
 | Demo step (MASTER_PROMPT §12) | Status |
 |---|---|
 | 1. Stoa-style web app | partly: shell, chat screen and Data screen done (W-01, W-04, W-05); see http://localhost:4173 |
-| 2. Count question on raster plan, status lines, bold answer, chips | partly: UI done on the real API; answers still come from the STUB engine until E-04 + S-04 |
-| 3. Chip opens drawing with numbered boxes; cost chip | partly: cost chip done; drawing viewer in progress (W-06) |
-| 4. "Visualise it" 3D with same items glowing | partly: viewer, highlight, identify done (T-00..T-02, T-05); 3D scenes for 130 docs (D-06, D-09); button in progress (T-04) |
-| 5. iPhone: same chat, "Show on table" AR | partly: iOS shell, AR screen, highlights, walk mode, tap-identify done in simulator (I-01..I-03, I-06, I-08); USDZ for 130 scenes (D-10); bridge in progress (I-04); device install needs Ash |
+| 2. Count question on raster plan, status lines, bold answer, chips | yes on the real engine: "How many windows are there?" on colorful-11397 → 11 windows, 11 numbered evidence items, $0, 2 ms (S-04 done test still being finished) |
+| 3. Chip opens drawing with numbered boxes; cost chip | yes (W-06, W-07). Stoa 1:1 look: in progress (W-18 attempt 3; pixel diff now 0.1–8 % per screen, was meaningless before) |
+| 4. "Visualise it" 3D with same items glowing | yes (T-00..T-02, T-04..T-06, T-11): roofs hidden by default, live highlight sync between devices. 2D↔3D linked clicks: code ready (T-03), wiring after W-18. "Show me all the windows" / "remove W3" in 3D: T-12 in progress |
+| 5. iPhone: same chat, "Show on table" AR | partly: iOS shell, AR screen, highlights, walk mode, tap-identify done in simulator (I-01..I-03, I-06, I-08); USDZ for 130 scenes (D-10); scene commands W1../hide/restore in AR done (I-14); advisor cards attempt 2 (I-09); bridge waits for W-11 (I-04); device install needs Ash |
 | 6. IFC fire exit on level 2, camera flies, 1:1 walk | no (E-13 not started; walk mode I-06 done) |
 | 7. Dashboard: accuracy by source/type, before/after fine-tune, cost/answer | no (bench E-05, vision eval V-04 in progress) |
 | 8. Edit in 3D → sourced advisor card | no (tier 3) |
