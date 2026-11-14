@@ -341,7 +341,9 @@ for single- and multi-kind answers (`answer.value` may be `{window: 11, door: 11
 The 3D view carries what a 2D drawing carries. iOS AR mirrors these rules and colours exactly. All of it comes from the
 scene manifest (`scene.json`), nothing is invented: no area in the data means no area on the label.
 
-**Room labels** (kind `room`), lying flat, centred on the room's bbox, at `bbox.min.y + 0.05` for flat rooms (bbox height <= 0.3 m, raster plans) or at `bbox.max.y + 0.03` (the top face) for volume rooms (IFC spaces are opaque boxes, so a floor-level label would be inside them):
+**Rooms are never solids.** IFC spaces (0 to 2.7 m volumes) are drawn as a thin floor tint only: squash the room to 0.02 m thick, sitting at `bbox.min.y + 0.01`, so from above you look into the rooms (walls, doors, windows, stairs, fixtures stay as they are). A highlighted room glows as the floor tint plus an outline, not a box. Raster rooms are already flat.
+
+**Room labels** (kind `room`), lying flat, centred on the room's bbox, always at `bbox.min.y + 0.05` (just above the floor tint):
 - Text: line 1 `item.name` (bold, `#1f2937`), line 2 `props.area_m2` as `23.9 m²` (`#475569`), white 92% halo. Missing name or area drops that line; neither drops the label.
 - Hide when the room's shorter bbox side is under **1.2 m**, or when the fitted text height would be under **0.14 m**.
 - Text height = `clamp(shorterSide × 0.2, 0.14, 0.9)` m; shrink so the width is at most 90% of the room side and the height at most 60% of the other side.

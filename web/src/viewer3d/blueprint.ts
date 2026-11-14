@@ -110,10 +110,34 @@ function styleMaterial(kind: string, source: Material, floor: RoomClass | null):
   return material;
 }
 
+/** IFC rooms (IfcSpace) are 0..2.7 m volumes: squash them to a thin floor tint (floor level + ~0.02 m) so you look into the plan. */
+export const ROOM_FLOOR_THICKNESS_M = 0.02;
+const flattened = new WeakSet<Object3D>();
+export function flattenRoomVolumes(scene: LoadedScene): void {
+  scene.root.updateWorldMatrix(true, true);
+  const parentY = new Vector3();
+  for (const [id, object] of scene.items) {
+    const item = scene.manifest.items[id];
+    if (!item || item.kind !== 'room' || !item.bbox_m || flattened.has(object)) continue;
+    const [min, max] = item.bbox_m;
+    const height = max[1] - min[1];
+    if (height <= ROOM_VOLUME_M) continue;
+    const k = ROOM_FLOOR_THICKNESS_M / height;
+    object.parent?.getWorldPosition(parentY);
+    const pivot = min[1] - (object.parent ? parentY.y : 0);
+    object.position.y = object.position.y + (1 - k) * (pivot - object.position.y) + 0.01;
+    object.scale.y *= k;
+    object.userData.flatScaleY = object.scale.y;
+    flattened.add(object);
+  }
+  scene.root.updateWorldMatrix(true, true);
+}
+
 /** Per-element materials. Run before any highlight/command layer captures the original materials. */
 export function styleSceneMaterials(scene: LoadedScene): Record<string, string> {
   const cache = new Map<string, Material>();
   const applied: Record<string, string> = {};
+  flattenRoomVolumes(scene);
   for (const [id, object] of scene.items) {
     const item = scene.manifest.items[id];
     if (!item) continue;
@@ -135,7 +159,7 @@ export function styleSceneMaterials(scene: LoadedScene): Record<string, string> 
 // ---- labels, dimensions, storey tags ----
 
 function shown(object: Object3D): boolean {
-  if (object.scale.y < 0.999) return false;
+  if (object.scale.y < ((object.userData.flatScaleY as number | undefined) ?? 1) * 0.999) return false;
   for (let node: Object3D | null = object; node; node = node.parent) if (!node.visible) return false;
   return true;
 }
@@ -209,8 +233,8 @@ export function createBlueprint(scene: LoadedScene, eye: Vector3, materials: Rec
     mesh.renderOrder = 5;
     mesh.rotation.x = -Math.PI / 2;
     if (fit.rotated) mesh.rotation.z = Math.PI / 2;
-    // IFC rooms are opaque volumes: the label goes on their top face (the visible one from above); raster rooms are flat.
-    const y = max[1] - min[1] > ROOM_VOLUME_M ? max[1] + 0.03 : min[1] + 0.05;
+    // Rooms are drawn as a thin floor tint (volumes are flattened), so the label lies flat just above the floor.
+    const y = min[1] + 0.05;
     mesh.position.set((min[0] + max[0]) / 2, y, (min[2] + max[2]) / 2);
     root.add(mesh);
     rooms.push({ id, mesh, object, info });

@@ -98,22 +98,25 @@ test('IFC model: every storey gets a name and elevation tag, rooms carry names a
   expect(bp.dimensions).toHaveLength(2)
 })
 
-test('IFC volume rooms carry labels on their top face and overlapping storey tags are thinned', async ({ page }) => {
+test('IFC rooms are thin floor tints (no lids), labels lie flat on the floor, and overlapping storey tags are thinned', async ({ page }) => {
   await open(page, 'ifc_bench__ac20-arc', 'ifc_bench__ac20-arc')
   await page.evaluate(() => (window as Win).viewer3dTest.setStorey('Erdgeschoss'))
   await page.waitForTimeout(600)
   const r = await page.evaluate(() => {
     const v = (window as Win).viewer3dTest; const s = v.scene!
-    const labels: { y: number; top: number }[] = []
+    const labels: { y: number; min: number }[] = []
+    let tallRooms = 0
+    for (const [id, o] of s.items) { if (s.manifest.items[id].kind !== 'room' || !o.visible) continue; const b = o.scale.y * (s.manifest.items[id].bbox_m![1][1] - s.manifest.items[id].bbox_m![0][1]); if (b > 0.3) tallRooms++ }
     s.root.parent?.traverse((n) => {
       if (!n.name.startsWith('room-label:') || !n.visible) return
       const item = s.manifest.items[n.name.slice('room-label:'.length)]
-      labels.push({ y: n.position.y, top: item.bbox_m![1][1] })
+      labels.push({ y: n.position.y, min: item.bbox_m![0][1] })
     })
-    return { labels, tags: [...document.querySelectorAll('.viewer3d-storey-label')].filter((e) => (e.parentElement as HTMLElement).style.display !== 'none').length }
+    return { labels, tallRooms, tags: [...document.querySelectorAll('.viewer3d-storey-label')].filter((e) => (e.parentElement as HTMLElement).style.display !== 'none').length }
   })
   expect(r.labels.length).toBeGreaterThan(5)
-  for (const l of r.labels) expect(l.y).toBeCloseTo(l.top + 0.03, 3)
+  for (const l of r.labels) expect(l.y).toBeCloseTo(l.min + 0.05, 3)
+  expect(r.tallRooms).toBe(0)
   expect(r.tags).toBeLessThan(5)
 })
 
