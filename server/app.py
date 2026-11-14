@@ -90,6 +90,8 @@ from .pair_routes import router as pair_router  # noqa: E402
 app.include_router(pair_router)
 from .design_versions import router as design_versions_router  # noqa: E402
 app.include_router(design_versions_router)
+from .markup_routes import router as markup_router  # noqa: E402
+app.include_router(markup_router)
 
 
 @app.get("/api/health")

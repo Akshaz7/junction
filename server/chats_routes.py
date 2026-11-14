@@ -310,7 +310,11 @@ async def ask(chat_id: str, body: NewMessage):
                 except RuntimeError:  # a disconnected request's loop may already be closed
                     pass
 
-        task = asyncio.create_task(asyncio.to_thread(_run_engine, body.content, doc_ids, on_event, sstate, history, catalogue))
+        from .markup_routes import answer_taught
+        taught = await answer_taught(pool, body.content, doc_ids) if ENGINE is _real_engine else None
+        async def run_selected():
+            return taught if taught is not None else await asyncio.to_thread(_run_engine, body.content, doc_ids, on_event, sstate, history, catalogue)
+        task = asyncio.create_task(run_selected())
         task.add_done_callback(lambda _: q.put_nowait(None) if accepting else None)
         deadline = time.monotonic() + partial_deadline()
         last_delta = 0.0
