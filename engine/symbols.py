@@ -33,12 +33,13 @@ import numpy as np
 
 # ------------------------------------------------------------------------------------------------ tunables (physics-free, relative)
 TARGET_PX = 26          # work resolution: the symbol's longest side is shrunk to about this many pixels
-SCALES = (0.7, 0.85, 1.0, 1.2, 1.45)
+SCALES = (0.3, 0.4, 0.5, 0.6, 0.7, 0.85, 1.0, 1.2, 1.45)   # legends are often drawn larger than the symbols on the plan
 LOW_NCC, ACCEPT_NCC = 0.50, 0.72
 LOW_RECALL, ACCEPT_RECALL = 0.62, 0.80
 MAX_PEAKS = 400
+MIN_HIT_PX = 14                 # smallest side of a counted hit (about 1.2 mm at 300 dpi)
 VERIFY_TILES_PER_CALL = 20
-VERIFY_MAX_CALLS = 4            # per question across all symbols (budget cap on top of the model layer's own caps)
+VERIFY_MAX_CALLS = 8            # per question across all symbols (budget cap on top of the model layer's own caps)
 VERIFY_SAMPLE_OK = 6            # strong hits re-checked by the model per symbol
 MAX_ENTRIES_PER_QUESTION = 8
 MAX_PAGES = 6
@@ -634,6 +635,8 @@ def count_symbols(image_path, legend: dict | None = None, target: str | None = N
         cands = match_symbol(plan_ink, tmpl, cache)
         keep = []
         for c in cands:
+            if min(c["box"][2] - c["box"][0], c["box"][3] - c["box"][1]) < MIN_HIT_PX:
+                continue       # smaller than anything a person could read as a symbol: a dot or a crossing
             cls = classify(c, bool(weak_why))
             if cls == "drop":
                 continue
@@ -689,6 +692,22 @@ def count_symbols(image_path, legend: dict | None = None, target: str | None = N
                 elif v is False:
                     c["cls"] = "drop"
                     res["checked"]["rejected"] += 1
+        if verify and sample and res["checked"]["sampled"] and res["checked"]["agree"] < res["checked"]["sampled"]:
+            # the model disagreed with the template on a sampled hit: do not trust the template for this symbol, check every strong hit
+            rest = sorted([c for c in strong if c["cls"] == "strong" and c not in sample], key=lambda c: c["score"])
+            vs = _verify_tiles(tmpl * 255 if tmpl.max() <= 1 else tmpl, e["label"], gray, [c["box"] for c in rest], budget) if rest else []
+            vs = list(vs) + [None] * (len(rest) - len(vs))
+            for c, v in zip(rest, vs):
+                if v is True:
+                    c["cls"] = "confirmed"
+                    res["checked"]["confirmed"] += 1
+                elif v is False:
+                    c["cls"] = "drop"
+                    res["checked"]["rejected"] += 1
+                else:
+                    c["cls"] = "uncertain"       # no verdict: possible, not counted
+            res["checked"]["uncertain"] += sum(1 for v in vs if v is None)
+            notes.append(f"\"{e['label']}\": the template matched hatching and line crossings too, so every hit was checked by the model")
         kept = [c for c in live if c["cls"] in ("strong", "confirmed")]
         poss = [c for c in live if c["cls"] == "uncertain"]
         res["counts"][e["label"]] = res["counts"].get(e["label"], 0) + len(kept)
