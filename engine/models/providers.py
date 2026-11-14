@@ -265,6 +265,18 @@ def cand_finish(d: dict) -> str:
 
 
 # --------------------------------------------------------------------------- anthropic
+_UNSUPPORTED = {"minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "minLength", "maxLength", "minItems", "maxItems", "multipleOf"}
+
+
+def _strip_unsupported(x):
+    """Claude's structured outputs reject numeric/length bounds; the caller still validates the schema locally."""
+    if isinstance(x, dict):
+        return {k: _strip_unsupported(v) for k, v in x.items() if k not in _UNSUPPORTED}
+    if isinstance(x, list):
+        return [_strip_unsupported(v) for v in x]
+    return x
+
+
 def anthropic(cfg, model, messages, images, schema, params, key) -> ProviderResponse:
     if any(im.mime.startswith("audio/") for im in images):  # audio rides in `images` (Image with an audio mime); only Gemini takes it
         raise ProviderError("audio input not supported by this provider")
@@ -284,7 +296,13 @@ def anthropic(cfg, model, messages, images, schema, params, key) -> ProviderResp
     if system:
         body["system"] = system
     if schema is not None:
-        body["output_config"] = {"format": {"type": "json_schema", "schema": schema}}
+        body["output_config"] = {"format": {"type": "json_schema", "schema": _strip_unsupported(schema)}}
+    if cfg.get("bearer"):   # Runware Claude 5.x: thinking is on by default and eats max_tokens; Haiku can switch it off, the others take an effort level
+        if "haiku" in model:
+            body["thinking"] = {"type": "disabled"}
+        else:
+            body["thinking"] = {"type": "adaptive"}
+            body.setdefault("output_config", {})["effort"] = params.get("effort", "low")
     # temperature/top_p/top_k are removed from API version 2026-10-21: never send them.
     sink = STREAM_NOW.get()
     if sink is not None and schema is None:

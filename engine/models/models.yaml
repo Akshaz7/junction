@@ -101,18 +101,20 @@ tasks:
       - {provider: runware, model: "google:gemini@3.1-flash-lite"}
       - {provider: verda, model: nemotron-3.5-super-vl}   # ~90 s per call on 2026-11-14 (cold/loaded): last resort only
   write_answer:
-    provider: anthropic
+    provider: runware_claude
     model: claude-sonnet-5-5
     max_tokens: 1024
     fallback:
+      - {provider: anthropic, model: claude-sonnet-5-5}
       - {provider: gemini,  model: gemini-3.8-flash}
       - {provider: runware, model: "anthropic:claude@sonnet-4.6"}
       - {provider: verda, model: nemotron-3.5-super-vl}   # ~90 s per call on 2026-11-14 (cold/loaded): last resort only
   chat:   # free conversation with no document selected (engine/assistant.py system prompt); text only, never project numbers
-    provider: anthropic
+    provider: runware_claude
     model: claude-sonnet-5-5
     max_tokens: 700
     fallback:
+      - {provider: anthropic, model: claude-sonnet-5-5}
       - {provider: runware, model: "anthropic:claude@sonnet-4.6"}
       - {provider: runware, model: "google:gemini@3.1-flash-lite"}
       - {provider: nvidia,  model: nvidia/nemotron-3.5-lightning-30b-a3b }
