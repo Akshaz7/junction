@@ -62,26 +62,27 @@ tasks:
     temperature: 0
     extra_body: {chat_template_kwargs: {enable_thinking: false}}   # Nemotron is a reasoning model; thinking off = 10 tokens instead of ~340
     fallback:
-      - {provider: runware, model: "google:gemini@3.1-flash-lite"}
+      - {provider: runware_oai, model: gemini-4-carbon}
   reader_plan:     # tool-using drawing reader planner (engine/reader): JSON actions, text-only after the first step
     provider: runware_claude   # Haiku 5.5: 1.3-2.1 s per step on 2026-11-14 vs 4-18 s (high variance) for Sonnet 4.6 on Runware; ids and JSON held up in profiling
     model: claude-haiku-5-5
     max_tokens: 1200
     temperature: 0
     fallback:
-      - {provider: runware, model: "google:gemini@3.1-flash-lite"}   # ~1.1 s
-      - {provider: runware, model: "google:gemini@3.5-flash"}
+      - {provider: runware_oai, model: gemini-4-carbon}   # ~1.1 s
+      - {provider: runware_oai, model: gemini-4-carbon}
       - {provider: runware, model: "anthropic:claude@sonnet-4.6"}
-      - {provider: gemini,  model: gemini-3.5-flash-lite}
+      - {provider: runware_oai, model: gemini-4-carbon}
       - {provider: verda, model: nemotron-3.5-super-vl}   # ~90 s per call on 2026-11-14 (cold/loaded): last resort only
-  read_drawing:
-    provider: gemini
-    model: gemini-3.8-flash
+  read_drawing:   # Gemini 4 family first (Ash, 2026-11-14); 3.8 Flash kept as the first fallback
+    provider: runware_oai
+    model: gemini-4-carbon
     max_tokens: 8192
     fallback:
+      - {provider: runware_oai, model: gemini-4-carbon}
       - {provider: featherless, model: Qwen/Qwen3-VL-30B-A3B-Instruct}
-      - {provider: runware,     model: "google:gemini@3.1-flash-lite"}   # 2-3 s vs 6-8 s for 3.5-flash on the same crop (2026-11-14); answers are still checked against the plan map
-      - {provider: runware,     model: "google:gemini@3.5-flash"}
+      - {provider: runware_oai, model: gemini-4-carbon}   # 2-3 s vs 6-8 s for 3.5-flash on the same crop (2026-11-14); answers are still checked against the plan map
+      - {provider: runware_oai, model: gemini-4-carbon}
       - {provider: verda, model: nemotron-3.5-super-vl}   # ~90 s per call on 2026-11-14 (cold/loaded): last resort only
   read_piping:   # plumbing sheet reader (vision/piping_read.py). Gemini 4 Carbon read P1.02 label/tag counts exactly (results/vision/piping/v10)
     provider: runware_oai
@@ -97,30 +98,30 @@ tasks:
     temperature: 0
     fallback:
       - {provider: runware_claude, model: claude-opus-5-5}
-      - {provider: runware, model: "google:gemini@3.1-flash-lite"}
-      - {provider: gemini,  model: gemini-3.5-flash-lite}
+      - {provider: runware_oai, model: gemini-4-carbon}
+      - {provider: runware_oai, model: gemini-4-carbon}
   recount_boxes:   # one bounding box per object (engine/recount.py detect). Calibration results/box_*.json: Carbon .63 windows / .54 doors; Gemini 3.5 flash best on showers (.63)
     provider: runware_oai
     model: gemini-4-carbon
     max_tokens: 2000
     fallback:
       - {provider: runware_claude, model: claude-opus-5-5}
-      - {provider: runware, model: "google:gemini@3.5-flash"}
+      - {provider: runware_oai, model: gemini-4-carbon}
   forced_answer:   # last rung (engine/forced.py): a best-effort answer instead of an abstention; cheapest vision model first
-    provider: runware
-    model: "google:gemini@3.1-flash-lite"
+    provider: runware_oai
+    model: gemini-4-carbon
     max_tokens: 500
     temperature: 0
     fallback:
-      - {provider: gemini,  model: gemini-3.5-flash-lite}
+      - {provider: runware_oai, model: gemini-4-carbon}
       - {provider: verda,   model: nemotron-3.5-super-vl}
   verify_item:
-    provider: gemini
-    model: gemini-3.5-flash-lite
+    provider: runware_oai
+    model: gemini-4-carbon
     max_tokens: 512
     fallback:
       - {provider: nvidia,  model: nvidia/nemotron-3.5-super-vl-120b-a12b}
-      - {provider: runware, model: "google:gemini@3.1-flash-lite"}
+      - {provider: runware_oai, model: gemini-4-carbon}
       - {provider: verda, model: nemotron-3.5-super-vl}   # ~90 s per call on 2026-11-14 (cold/loaded): last resort only
   write_answer:
     provider: runware_claude
@@ -128,7 +129,7 @@ tasks:
     max_tokens: 1024
     fallback:
       - {provider: anthropic, model: claude-sonnet-5-5}
-      - {provider: gemini,  model: gemini-3.8-flash}
+      - {provider: runware_oai, model: gemini-4-carbon}
       - {provider: runware, model: "anthropic:claude@sonnet-4.6"}
       - {provider: verda, model: nemotron-3.5-super-vl}   # ~90 s per call on 2026-11-14 (cold/loaded): last resort only
   chat:   # free conversation with no document selected (engine/assistant.py system prompt); text only, never project numbers
@@ -138,7 +139,7 @@ tasks:
     fallback:
       - {provider: anthropic, model: claude-sonnet-5-5}
       - {provider: runware, model: "anthropic:claude@sonnet-4.6"}
-      - {provider: runware, model: "google:gemini@3.1-flash-lite"}
+      - {provider: runware_oai, model: gemini-4-carbon}
       - {provider: nvidia,  model: nvidia/nemotron-3.5-lightning-30b-a3b }
       - {provider: verda, model: nemotron-3.5-super-vl}   # ~90 s per call on 2026-11-14 (cold/loaded): last resort only
   scene_intent:   # odd phrasing of a viewer command (E-20); Nemotron first, tiny outputs
@@ -148,13 +149,13 @@ tasks:
     temperature: 0
     extra_body: {chat_template_kwargs: {enable_thinking: false}}
     fallback:
-      - {provider: runware, model: "google:gemini@3.1-flash-lite"}
+      - {provider: runware_oai, model: gemini-4-carbon}
   judge_text:   # grades free-text answers against gold (bench only); cheap, cached
-    provider: gemini
-    model: gemini-3.5-flash-lite
+    provider: runware_oai
+    model: gemini-4-carbon
     max_tokens: 512
     fallback:   # E-10 (results/model_compare.json): Runware flash-lite agrees 0.867 vs Nemotron 0.467 (parse failures)
-      - {provider: runware, model: "google:gemini@3.1-flash-lite"}
+      - {provider: runware_oai, model: gemini-4-carbon}
       - {provider: nvidia,  model: nvidia/nemotron-3.5-lightning-30b-a3b }
   advise:
     provider: nvidia
@@ -163,13 +164,13 @@ tasks:
     fallback:
       - {provider: anthropic, model: claude-sonnet-5-5}
       - {provider: runware,   model: "anthropic:claude@sonnet-4.6"}
-  speech_intent:
+  speech_intent:   # voice audio needs Google's native audio input: stays on Gemini direct
     provider: gemini
     model: gemini-3.5-flash-lite
     max_tokens: 256
     fallback:
       - {provider: nvidia,  model: nvidia/nemotron-3.5-lightning-30b-a3b}
-      - {provider: runware, model: "google:gemini@3.1-flash-lite"}
+      - {provider: runware_oai, model: gemini-4-carbon}
   tts:      # ElevenLabs flash v2.5: fast, 32 languages, 40k chars per request (GET /v1/models, 2026-11-14)
     provider: elevenlabs
     model: eleven_flash_v2_5
@@ -182,7 +183,7 @@ tasks:
     fallback:
       - {provider: runware_claude, model: claude-sonnet-5-5}
       - {provider: anthropic, model: claude-haiku-5-5}
-      - {provider: runware, model: "google:gemini@3.1-flash-lite"}
+      - {provider: runware_oai, model: gemini-4-carbon}
   app_help:   # engine/app_help.py: how-to questions about the app the keyword match missed; Haiku with only engine/app_guide.md as context
     provider: runware_claude
     model: claude-haiku-5-5
@@ -190,7 +191,7 @@ tasks:
     temperature: 0
     fallback:
       - {provider: anthropic, model: claude-haiku-5-5}
-      - {provider: runware, model: "google:gemini@3.1-flash-lite"}
+      - {provider: runware_oai, model: gemini-4-carbon}
   task_write:   # engine/tasks: Draft claim / Meeting prep / Plan work phase / Review contract; long cited deliverable, Opus 5.5 (Ash)
     provider: runware_claude
     model: claude-opus-5-5
