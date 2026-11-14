@@ -64,6 +64,13 @@ struct HologramApp: App {
                     .id(request.docID)
             }
             .task {
+                // Test build (AR_DEMO=1 install): open the bundled AC20 hologram straight away, six doors lit.
+                if Bundle.main.object(forInfoDictionaryKey: "AR_DEMO") as? String == "YES" {
+                    presentation.showAR(ARRequest(docID: DemoScenes.all[0].id, itemIDs: [
+                        "3qloCPnZDEQBom1ZjBlwJP", "0_flqizUv5_A_EGt7DzP3T", "17n0YjYkvEshOmsrIPLGOb",
+                        "31Gx3VvgP1fvwL2I0a9YtY", "0Xbk1qGZnCY9arQDkkuJ8L"]))
+                    return
+                }
                 #if DEBUG
                 if AppConfiguration.advisorFixtureURL != nil {
                     presentation.showAR(ARRequest(docID: "fixture__ios", itemIDs: []))

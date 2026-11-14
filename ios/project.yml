@@ -34,6 +34,7 @@ targets:
         CODE_SIGN_STYLE: Automatic
         HOLOGRAM_WEB_URL: "http://localhost:5173"   # install_on_device.py overrides with the chosen WEB_URL
         HOLOGRAM_API_URL: ""
+        HOLOGRAM_AR_DEMO: "NO"   # AR_DEMO=YES install opens bundled AC20 AR on launch (test build)
   HologramTests:
     type: bundle.unit-test
     platform: iOS

@@ -238,3 +238,6 @@
 .viewer3d-test-visualise { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
 .viewer3d-test-visualise input { width: min(340px, 100%); padding: 6px 10px; border: 1px solid var(--border, #e7e7e7); border-radius: 8px; font: inherit; }
 .viewer3d-test-visualise p { flex-basis: 100%; }
+
+.viewer3d-footer:empty { display: none; }
+.viewer3d-picked-overlay { position: absolute; left: 12px; bottom: 12px; max-width: calc(100% - 24px); padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); color: var(--foreground); font: 11px/16px monospace; overflow-wrap: anywhere; pointer-events: none; }

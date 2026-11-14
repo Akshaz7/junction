@@ -302,7 +302,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       <FindingsPanel viewer={state === 'ready' ? viewerRef.current : null} stage={stage} />
     </div>
     <div ref={setStage} className="viewer3d-stage" aria-busy={state === 'loading'}>
-      <canvas ref={canvasRef} tabIndex={0} aria-label="3D building model" aria-describedby={helpId}
+      <canvas ref={canvasRef} tabIndex={0} aria-label="3D building model" aria-describedby={walking ? helpId : undefined}
         onPointerDownCapture={(event) => {
           if (!editing || !moveItem || event.button !== 0 || !event.isPrimary) return;
           if (viewerRef.current?.beginMove(moveItem, event.clientX, event.clientY)) {
@@ -334,6 +334,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
           : 'Loading 3D scene…'}
       </p>}
       {state === 'error' && <p className="viewer3d-message" role="alert">{error}</p>}
+      {picked && <output className="viewer3d-picked-overlay" aria-label="Picked item" aria-live="polite">{picked}</output>}
       {walking && <WalkJoystick onMove={(x, y) => viewerRef.current?.setWalkJoystick(x, y)} />}
       {state === 'ready' && details && !editing && <ItemDetailsCard key={details.item_id} details={details}
         loading={false} onClose={closeDetails}
@@ -351,11 +352,8 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
           cancelMove(); selectItem(null);
           viewerRef.current?.applyCommand({ op: 'highlight', item_ids: ids });
         }} />}
-      <p id={helpId}>{walking
-        ? 'WASD / arrow keys to move · Drag to look · Q/E or PageUp/Down for storeys · Esc to return to orbit'
-        : 'Drag to orbit · Scroll to zoom · Click an item to identify it'}</p>
+      {walking && <p id={helpId}>WASD / arrow keys to move · Drag to look · Q/E or PageUp/Down for storeys · Esc to return to orbit</p>}
       {walkMessage && <p role="status">{walkMessage}</p>}
-      <output aria-label="Picked item" aria-live="polite">{picked ?? 'No item selected'}</output>
     </div>
   </section>;
 }

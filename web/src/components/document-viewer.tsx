@@ -5,14 +5,13 @@ import type { Answer, Citation, Document } from '../lib/types'
 import { fitPage, focusBox, zoomAt, type PageTransform, type Point, type Size } from '../lib/page-transform'
 import { viewerEvidence } from '../lib/viewer-evidence'
 import { Button } from './ui'
-import { VisualiseItButton } from '../viewer3d/VisualiseIt'
 import { setHover, setSelected, useLinkedItem } from '../viewer3d'
 import './document-viewer.css'
 import { answerTableSelection } from '../lib/ar-bridge'
 import { ShowOnTableButton } from './show-on-table'
 import { itemIsHidden, type DrawingEdits } from '../lib/scene-edits'
 import type { SceneCommand } from '../viewer3d/commands'
-import { DrawingModel } from './drawing-model'
+import { DrawingModel, ViewerModeToggle, type ViewerMode } from './drawing-model'
 import { ItemPanel } from './item-panel'
 import { placeEvidence, type ItemPlace, type LinkedItem } from '../lib/linked'
 
@@ -33,6 +32,9 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   edits?: DrawingEdits; commands?: readonly SceneCommand[]
   chatId?: string | null
 }) {
+  const [mode, setMode] = useState<ViewerMode>('2d')
+  const [modelVisited, setModelVisited] = useState(false)
+  function changeMode(next: ViewerMode) { setMode(next); if (next === '3d') setModelVisited(true) }
   const [place, setPlace] = useState<{ location: ItemPlace; item: LinkedItem } | null>(null)
   const [selectedItem, setSelectedItem] = useState<{ docId: string; itemId: string } | null>(null)
   const itemTrigger = useRef<Element | null>(null)
@@ -177,11 +179,10 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
 
   return <aside ref={panel} className={`document-viewer ${sheet ? 'viewer-sheet' : ''}`} role={sheet ? 'dialog' : 'region'} aria-modal={sheet || undefined} aria-label="Drawing viewer"
     onKeyDown={(event) => {
-      // The 3D viewer owns keyboard handling while its native modal is open.
-      if ((event.target as HTMLElement).closest('dialog')) return
+      if (mode === '3d' && event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); changeMode('2d'); return }
       if (event.key === 'Escape') { event.stopPropagation(); if (selectedItem) closeItem(); else onClose() }
       if (sheet && event.key === 'Tab') {
-        const controls = panel.current?.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], [tabindex="0"]')
+        const controls = Array.from(panel.current?.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], [tabindex="0"]') ?? []).filter((node) => node.getClientRects().length)
         if (!controls?.length) return
         const first = controls[0], last = controls[controls.length - 1]
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus() }
@@ -189,7 +190,8 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       }
     }}>
     <header className="viewer-heading"><FileText size={24} /><div><strong>{doc?.title ?? citation.doc_id}</strong><small>/{doc?.source || 'Drawings'}</small></div>
-      <div className="viewer-source-nav">
+      <ViewerModeToggle mode={mode} onChange={changeMode} />
+      <div className="viewer-source-nav" hidden={mode === '3d'}>
         <a className="viewer-open-source" aria-label="Open source page" href={imageUrl || undefined} target="_blank" rel="noreferrer"><FileSymlink size={16} /></a>
         <Button variant="ghost" size="icon" aria-label="Previous source" disabled={active <= 0} onClick={() => selectSource(active - 1)}><ChevronLeft size={16} /></Button>
         <span aria-live="polite" data-testid="source-position">{sources.length ? active + 1 : 0} of {sources.length}</span>
@@ -200,7 +202,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       <ShowOnTableButton docId={citation.doc_id} itemIds={table?.doc_id === citation.doc_id ? table.item_ids : citation.item_ids} chatId={chatId} />
       <button ref={close} type="button" className="button button-ghost button-size-icon" aria-label="Close drawing viewer" onClick={onClose}><X size={18} /></button>
     </header>
-    <div className="viewer-toolbar" aria-label="Drawing controls">
+    <div className="viewer-toolbar" aria-label="Drawing controls" hidden={mode === '3d'}>
       <div className="viewer-page-position"><ChevronLeft size={14} /><span className="page-number">{citation.page}</span><span>/ {doc?.pages ?? '…'}</span><ChevronRight size={14} /></div>
       <span className="toolbar-spacer" />
       <span className="viewer-markup-tools" aria-hidden="true"><Search size={16} /><Highlighter size={16} /><PenLine size={16} /></span>
@@ -212,7 +214,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
         <Button variant="ghost" size="icon" aria-label="Zoom in" disabled={!image} onClick={() => zoom(1.25)}><Plus size={16} /></Button>
       </div>
     </div>
-    <div className="viewer-item-layout">
+    <div className="viewer-item-layout" hidden={mode === '3d'}>
     <div className="drawing-stage" ref={stage} data-testid="drawing-viewport" tabIndex={0} aria-label="Drawing canvas. Drag to pan, scroll or pinch to zoom. Arrow keys pan, plus and minus zoom, zero fits."
       onKeyDown={(event) => {
         if (event.target !== event.currentTarget) return
@@ -285,10 +287,10 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       if (sheet) closeItem()
     }} />}
     </div>
-    <div className="viewer-3d-slot">{!sheet
-      ? <DrawingModel docId={citation.doc_id} chatId={chatId} answer={(answer.evidence.scene.doc_id || answer.doc_ids[0]) === citation.doc_id ? visualiseAnswer : undefined} />
-      : (answer.evidence.scene.doc_id || answer.doc_ids[0]) === citation.doc_id
-        ? <VisualiseItButton answer={visualiseAnswer} /> : <VisualiseItButton docId={citation.doc_id} />}</div>
+    {modelVisited && <div className="viewer-model-slot" hidden={mode !== '3d'}>
+      <DrawingModel docId={citation.doc_id} chatId={chatId} answer={(answer.evidence.scene.doc_id || answer.doc_ids[0]) === citation.doc_id ? visualiseAnswer : undefined} />
+    </div>}
+    <div className="viewer-3d-slot" hidden={mode === '3d'}><button type="button" className="viewer3d-visualise-button" onClick={() => changeMode('3d')}>Visualise it</button></div>
     <footer className="drawing-credit" data-testid="drawing-credit">{doc ? <>{doc.credit || 'Credit not supplied'} · {doc.licence || 'Licence not supplied'}</> : 'Loading source credit…'}</footer>
   </aside>
 }

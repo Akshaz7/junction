@@ -78,11 +78,11 @@ test('DigitalHub renders with software GL, filters storeys, and picks an item', 
   const pixels = await readModelPixels(canvas);
   await page.mouse.click(pixels.pickX, pixels.pickY);
   const picked = viewer.getByLabel('Picked item', { exact: true });
-  await expect(picked).not.toHaveText('No item selected');
+  await expect(picked).toBeVisible();
   const response = await request.get('/fixtures/digital_hub/scene.json');
   expect(response.ok()).toBe(true);
   const manifest = await response.json();
   expect(manifest.items[(await picked.textContent())!]?.storey).toBe('E00_OKRD');
   await filter.selectOption({ label: 'All storeys' });
-  await expect(picked).toHaveText('No item selected');
+  await expect(picked).toHaveCount(0);
 });

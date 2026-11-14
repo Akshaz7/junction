@@ -4,7 +4,7 @@ export const routes = ['overview', 'chat', 'changes', 'data', 'accuracy', 'skill
 export type Route = typeof routes[number]
 
 function currentRoute(): Route {
-  const route = window.location.hash.replace(/^#\/?/, '').split('?')[0]
+  const route = window.location.hash.replace(/^#\/?/, '').split('?')[0].split('/')[0]
   return routes.includes(route as Route) ? route as Route : 'chat'
 }
 

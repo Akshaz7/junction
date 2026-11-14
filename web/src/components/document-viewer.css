@@ -15,11 +15,6 @@
 .viewer-source-nav > span { min-width: 55px; text-align: center; }
 .viewer-zoom-controls > span { min-width: 38px; text-align: center; }
 .viewer-3d-slot:empty { display: none; }
-.viewer-3d-slot:has(.drawing-model.is-open) { display: flex; flex: 0 1 60%; min-height: 0; }
-.drawing-model.is-open { display: flex; flex: 1; flex-direction: column; min-width: 0; min-height: 0; gap: 8px; }
-.drawing-model > .viewer3d-visualise-button { align-self: flex-start; flex-shrink: 0; }
-.document-viewer .drawing-model-panel[open] { position: static; inset: auto; z-index: auto; width: 100%; height: auto; min-height: 0; flex: 1; margin: 0; padding: 12px; gap: 8px; box-shadow: none; overflow: hidden; }
-.drawing-model-panel .viewer3d-visualise-heading h2 { font-size: 14px; }
 .drawing-stage { position: relative; isolation: isolate; flex: 1; min-height: 0; overflow: hidden; background: var(--neutral-75); touch-action: none; cursor: grab; user-select: none; }
 .drawing-stage:active { cursor: grabbing; }
 .drawing-stage:focus-visible { outline-offset: -3px; }

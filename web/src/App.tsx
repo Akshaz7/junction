@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Bell, ChevronDown, ChevronRight, Clock, Folder, MessageSquareShare, Plus } from 'lucide-react'
-import { Badge, Button } from './components/ui'
+import { Bell, ChevronDown, ChevronRight, Folder } from 'lucide-react'
+import { Badge } from './components/ui'
 import { ProjectSwitcher, WorkspaceNavigation, navigation } from './components/workspace-navigation'
 import { PlaceholderPage } from './components/placeholder-page'
 import { AccuracyScreen } from './components/accuracy-screen'
@@ -9,6 +9,7 @@ import { SkillsScreen } from './components/skills-screen'
 import { AutomationsScreen } from './components/automations-screen'
 import { OverviewScreen } from './components/overview-screen'
 import { ChatScreen } from './components/chat-screen'
+import { ChatHeaderActions } from './components/chat-header-actions'
 import { DataScreen } from './components/data-screen'
 import { ChangesScreen } from './components/changes-screen'
 import { workspaceApi } from './lib/api'
@@ -23,6 +24,7 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
   const [loadingDocs, setLoadingDocs] = useState(true)
   const [demo, setDemo] = useState(workspaceApi.isDemo)
   const [error, setError] = useState('')
+  const [activeChatId, setActiveChatId] = useState<string | null>(null)
   const [chatKey, setChatKey] = useState(0)
   const [contextDocument, setContextDocument] = useState<Document | null>(null)
 
@@ -53,10 +55,10 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
       <div className="pagebar">
         <h1>{navigation.find((item) => item.route === view)!.label}</h1>
         {view === 'data' && <span className="documents-breadcrumb"><ChevronRight size={16} /><span><Folder size={14} />Documents<ChevronDown size={12} /></span></span>}
-        {view === 'chat' && <div className="chat-header-actions"><Button variant="raised" aria-label="New chat" onClick={() => { navigate('chat'); setChatKey((previous) => previous + 1); setContextDocument(null) }}><Plus size={16} /><span>New</span></Button><Button variant="raised" onClick={() => document.querySelector('.conversation')?.scrollTo({ top: 0, behavior: 'smooth' })}><Clock size={16} /><span>History</span></Button><Button variant="raised" onClick={() => { if (navigator.share) void navigator.share({ title: 'Hologram', url: window.location.href }).catch(() => {}); else void navigator.clipboard?.writeText(window.location.href) }}><MessageSquareShare size={16} /><span>Share</span></Button></div>}
+        {view === 'chat' && <ChatHeaderActions chatId={activeChatId} onNew={() => { navigate('chat'); setChatKey((previous) => previous + 1); setContextDocument(null); setActiveChatId(null) }} />}
       </div>
       {error && (view === 'chat' || view === 'data') && <p className="error-message document-error" role="alert">{error}</p>}
-      <ChatScreen key={chatKey} docs={docs} loadingDocs={loadingDocs} demo={demo} contextDocument={contextDocument} hidden={view !== 'chat'} onOpenCitation={onOpenCitation} />
+      <ChatScreen onChatChange={setActiveChatId} key={chatKey} docs={docs} loadingDocs={loadingDocs} demo={demo} contextDocument={contextDocument} hidden={view !== 'chat'} onOpenCitation={onOpenCitation} />
       <DataScreen docs={docs} loading={loadingDocs} demo={demo} hidden={view !== 'data'} onRefresh={refreshDocuments} onAsk={(doc) => {
         setContextDocument(doc)
         setChatKey((previous) => previous + 1)

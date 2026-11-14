@@ -55,3 +55,4 @@
 - Vercel FastAPI: a root index.py exporting app works zero-config; a vercel.json rewrite to /api/index makes every route 404 (path is rewritten).
 - Deployed e2e from one IP hits the API's 30 req/min/IP limit; wait for a 200 from /api/changes between spec batches.
 - server/config.py must never take DATABASE_URL from .env (that is prod Aiven); deploys pass it as a real env var.
+- 12:55 Aiven Runtime: `avn service get --json` returns secret env values MASKED (10 chars). Never round-trip them into `avn service update`; rebuild env from .env + `avn service get hologram-pg` service_uri. (Wiped DATABASE_URL + keys once; restored 12:56.)

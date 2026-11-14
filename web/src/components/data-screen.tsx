@@ -4,7 +4,7 @@ import { Badge, Button, Input } from './ui'
 import { workspaceApi } from '../lib/api'
 import type { Document, IngestStatus } from '../lib/types'
 import { fitPhonePage, type Size } from '../lib/page-transform'
-import { VisualiseItButton } from '../viewer3d/VisualiseIt'
+import { DrawingModel, ViewerModeToggle, type ViewerMode } from './drawing-model'
 import './data-screen.css'
 import { ShowOnTableButton } from './show-on-table'
 
@@ -37,6 +37,9 @@ function FormatBadges({ doc }: { doc: Document }) {
 }
 
 function DocumentDetail({ doc, docked, onClose, onAsk }: { doc: Document; docked: boolean; onClose: () => void; onAsk: (doc: Document) => void }) {
+  const [mode, setMode] = useState<ViewerMode>('2d')
+  const [modelVisited, setModelVisited] = useState(false)
+  function changeMode(next: ViewerMode) { setMode(next); if (next === '3d') setModelVisited(true) }
   const [scene, setScene] = useState<'loading' | 'available' | 'missing' | 'error'>('loading')
   const [zoom, setZoom] = useState(100)
   const [showSceneNote, setShowSceneNote] = useState(false)
@@ -71,18 +74,19 @@ function DocumentDetail({ doc, docked, onClose, onAsk }: { doc: Document; docked
     return () => controller.abort()
   }, [doc.doc_id])
 
-  return <aside className="data-detail" data-docked={docked || undefined} aria-label="Document details" onKeyDown={(event) => { if (event.key === 'Escape') onClose() }}>
-    <header><FileText size={24} /><div><h2><DocumentTitle title={doc.title} /></h2><small>/{doc.source}<span className="data-header-demo">{/generated for demo$/i.test(doc.title) ? ' · generated for demo' : ''}</span></small><details className="data-credit-info"><summary aria-label="Drawing credit and licence"><Info size={12} /></summary><div className="data-credit-popover"><dl><div><dt>Credit</dt><dd>{doc.credit || 'Not provided'}</dd></div><div><dt>Licence</dt><dd>{doc.licence || 'Not provided'}</dd></div></dl><div className="data-mobile-scene">{scene === 'available' ? <VisualiseItButton docId={doc.doc_id} /> : <button type="button" disabled={scene === 'loading'} onClick={() => setShowSceneNote(true)}>Visualise it</button>}{showSceneNote && <p role="status">{scene === 'error' ? 'Could not check 3D availability. Reopen the document to retry.' : 'No 3D scene available for this document.'}</p>}</div></div></details></div><ShowOnTableButton docId={doc.doc_id} sceneAvailable={scene === 'available'} /><button type="button" className="data-header-ask" aria-label="Ask about it" onClick={() => onAsk(doc)}><MessageSquare size={16} /></button><a className="data-compare" href="#/changes" aria-label="Compare document revisions"><GitCompare size={14} /><span>Compare</span></a><Button variant="ghost" size="icon" aria-label="Fit page" onClick={() => setZoom(100)}><Maximize2 size={16} /></Button><button ref={closeButton} type="button" className="data-close-detail" aria-label="Close document details" onClick={onClose}><X size={18} /></button></header>
-    <div className="data-viewer-toolbar"><ChevronLeft size={14} /><span className="page-number">1</span><span>/ {doc.pages}</span><ChevronRight size={14} /><span className="toolbar-spacer" /><span className="data-viewer-tools" aria-hidden="true"><Search size={14} /><ScanText size={14} /><PenLine size={14} /></span><a aria-label="Download page" href={`/api/docs/${encodeURIComponent(doc.doc_id)}/pages/1/image`} download><Download size={14} /></a><span className="viewer-toolbar-divider" /><span className="data-zoom-controls"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => setZoom((n) => Math.max(25, n - 25))}><Minus size={14} /></Button><span aria-label="Page zoom level">{displayedZoom}%</span><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => setZoom((n) => Math.min(400, n + 25))}><Plus size={14} /></Button></span></div>
-    <div className="data-detail-body">
+  return <aside className="data-detail" data-docked={docked || undefined} aria-label="Document details" onKeyDown={(event) => { if (event.key === 'Escape') { if (mode === '3d') changeMode('2d'); else onClose() } }}>
+    <header><FileText size={24} /><div><h2><DocumentTitle title={doc.title} /></h2><small>/{doc.source}<span className="data-header-demo">{/generated for demo$/i.test(doc.title) ? ' · generated for demo' : ''}</span></small><details className="data-credit-info"><summary aria-label="Drawing credit and licence"><Info size={12} /></summary><div className="data-credit-popover"><dl><div><dt>Credit</dt><dd>{doc.credit || 'Not provided'}</dd></div><div><dt>Licence</dt><dd>{doc.licence || 'Not provided'}</dd></div></dl><div className="data-mobile-scene">{scene === 'available' ? <button type="button" className="viewer3d-visualise-button" onClick={() => { setShowSceneNote(false); changeMode('3d') }}>Visualise it</button> : <button type="button" disabled={scene === 'loading'} onClick={() => setShowSceneNote(true)}>Visualise it</button>}{showSceneNote && <p role="status">{scene === 'error' ? 'Could not check 3D availability. Reopen the document to retry.' : 'No 3D scene available for this document.'}</p>}</div></div></details></div>{scene === 'available' && <ViewerModeToggle mode={mode} onChange={changeMode} />}<ShowOnTableButton docId={doc.doc_id} sceneAvailable={scene === 'available'} /><button type="button" className="data-header-ask" aria-label="Ask about it" onClick={() => onAsk(doc)}><MessageSquare size={16} /></button><a className="data-compare" href="#/changes" aria-label="Compare document revisions"><GitCompare size={14} /><span>Compare</span></a><Button variant="ghost" size="icon" aria-label="Fit page" onClick={() => setZoom(100)}><Maximize2 size={16} /></Button><button ref={closeButton} type="button" className="data-close-detail" aria-label="Close document details" onClick={onClose}><X size={18} /></button></header>
+    <div className="data-viewer-toolbar" hidden={mode === '3d'}><ChevronLeft size={14} /><span className="page-number">1</span><span>/ {doc.pages}</span><ChevronRight size={14} /><span className="toolbar-spacer" /><span className="data-viewer-tools" aria-hidden="true"><Search size={14} /><ScanText size={14} /><PenLine size={14} /></span><a aria-label="Download page" href={`/api/docs/${encodeURIComponent(doc.doc_id)}/pages/1/image`} download><Download size={14} /></a><span className="viewer-toolbar-divider" /><span className="data-zoom-controls"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => setZoom((n) => Math.max(25, n - 25))}><Minus size={14} /></Button><span aria-label="Page zoom level">{displayedZoom}%</span><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => setZoom((n) => Math.min(400, n + 25))}><Plus size={14} /></Button></span></div>
+    <div className="data-detail-body" hidden={mode === '3d'}>
       <div ref={canvas} className="data-page-canvas"><div className={`data-page-plane ${phone ? 'phone-page-plane' : ''}`} style={phone && image && fitted ? {
         width: image.width, height: image.height, transform: `translate(${(viewport.width - image.width * phoneScale) / 2}px, ${fitted.y}px) scale(${phoneScale})`,
       } : { transform: `scale(${zoom / 100})` }}><DocumentImage key={doc.doc_id} doc={doc} preview onLoad={setImage} /></div></div>
       <dl className="data-document-credit"><div><dt>Credit</dt><dd>{doc.credit || 'Not provided'}</dd></div><div><dt>Licence</dt><dd>{doc.licence || 'Not provided'}</dd></div></dl>
       <div className="data-detail-actions"><Button variant="raised" onClick={() => onAsk(doc)}>Ask about it<ArrowRight size={15} /></Button>
-        {scene === 'available' && <VisualiseItButton docId={doc.doc_id} />}</div>
+        {scene === 'available' && <button type="button" className="viewer3d-visualise-button" onClick={() => { setShowSceneNote(false); changeMode('3d') }}>Visualise it</button>}</div>
       <p className="data-scene-note" role="status">{scene === 'loading' ? 'Checking for a 3D scene…' : scene === 'missing' ? 'No 3D scene available for this document.' : scene === 'error' ? 'Could not check 3D availability. Reopen the document to retry.' : '3D scene available.'}</p>
     </div>
+    {modelVisited && <div className="viewer-model-slot" hidden={mode !== '3d'}><DrawingModel docId={doc.doc_id} /></div>}
   </aside>
 }
 

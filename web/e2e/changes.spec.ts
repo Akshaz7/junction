@@ -5,23 +5,24 @@ import type { ChangeEntry, Comparison } from '../src/lib/types'
 const api = 'http://localhost:8000'
 test.setTimeout(60_000)
 
-test('real synthetic revision shows numbered changes and a draggable wipe, then opens a new document', async ({ page, request }) => {
+test('real revision series shows numbered changes and a draggable wipe, then opens a new document', async ({ page, request }) => {
   const response = await request.get(`${api}/api/changes`)
   expect(response.ok()).toBe(true)
   const { changes: feed } = await response.json() as { changes: ChangeEntry[] }
-  const revision = feed.find((entry) => entry.type === 'new_version' && entry.summary.generated_for_demo)
-  expect(revision, 'Seed a synthetic revision on the real API before this done test').toBeTruthy()
+  const revisions = feed.filter((entry) => entry.type === 'new_version' && entry.summary.source === 'pdf-diff' && (entry.summary.n_changes ?? 0) > 0)
+  expect(revisions.length, 'The real API must serve revision series').toBeGreaterThan(0)
+  const revision = revisions.reduce((best, entry) => (entry.summary.n_changes! < best.summary.n_changes! ? entry : best))
   const detail = await request.get(`${api}/api/changes/${revision!.id}`)
   expect(detail.ok()).toBe(true)
   const comparison = await detail.json() as Comparison
-  expect(comparison.generated_for_demo).toBe(true)
+  expect(comparison.generated_for_demo).toBe(false)
   expect(comparison.changes.length).toBeGreaterThan(0)
 
   await page.goto('/#/changes')
   await expect(page.getByText('Connected workspace', { exact: true })).toBeVisible()
   await page.locator(`.change-row[data-change-id="${revision!.id}"]`).click()
   await expect(page.locator('.comparison-box')).toBeVisible()
-  await expect(page.locator('.comparison-header')).toContainText('generated for demo')
+  await expect(page.locator('.comparison-header')).toContainText(comparison.source)
   await expect(page.getByRole('img', { name: 'Previous revision', exact: true })).toHaveAttribute('src', comparison.v1.page_image)
   await expect(page.getByRole('img', { name: 'Latest revision', exact: true })).toHaveAttribute('src', comparison.v2.page_image)
   await expect.poll(() => page.locator('.comparison-sheet > img').evaluateAll((nodes) => nodes.every((node) => (node as HTMLImageElement).complete && (node as HTMLImageElement).naturalWidth > 0))).toBe(true)

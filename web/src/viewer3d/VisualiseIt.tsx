@@ -48,16 +48,13 @@ export function VisualisePanel({ docId, highlight = NO_HIGHLIGHTS, labels, comma
     <header className="viewer3d-visualise-heading">
       <div>
         <h2 id={titleId}>Visualise it</h2>
-        <p>{docId}</p>
       </div>
       <button type="button" onClick={onClose} autoFocus aria-label="Close 3D view">Close</button>
     </header>
     <Viewer3D key={docId} doc_id={docId} highlightItemIds={highlight} highlightOptions={highlightOptions}
       commands={commands}
       visualise onRiseStateChange={(state) => setPhase(state.phase)} onError={() => setPhase('error')} onReady={onReady} />
-    <p className="viewer3d-rise-status" role="status" aria-live="polite">
-      {phase === 'loading' ? 'Loading 3D scene…' : phase === 'flat' ? 'Plan view' : phase === 'rising' ? 'Raising the model…' : phase === 'done' ? '3D view ready' : ''}
-    </p>
+
   </dialog>;
   // The drawing panel clips its contents. A portal keeps both viewports visible.
   return linked ? createPortal(panel, document.body) : panel;

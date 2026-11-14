@@ -26,6 +26,8 @@
     <string>$(HOLOGRAM_WEB_URL)</string>
     <key>API_URL</key>
     <string>$(HOLOGRAM_API_URL)</string>
+    <key>AR_DEMO</key>
+    <string>$(HOLOGRAM_AR_DEMO)</string>
     <key>NSAppTransportSecurity</key>
     <dict>
         <key>NSAllowsLocalNetworking</key>

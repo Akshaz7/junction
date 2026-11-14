@@ -258,6 +258,8 @@ async function screenshotPhase(page: Page, phase: Phase, testInfo: TestInfo) {
   // state depends on mouseup: each phase has its own context and click setup.
   await page.locator('.rail a:focus').evaluateAll((nodes) => nodes.forEach((node) => (node as HTMLElement).blur()))
   await page.mouse.move(1, 1)
+  // Moving with a held press drags a text selection across the page; the reference has none.
+  await page.evaluate(() => window.getSelection()?.removeAllRanges())
   await settled(page)
   const state = phase.expected_state
   if (!state) throw new Error(`Missing settled app state for ${phase.id}`)

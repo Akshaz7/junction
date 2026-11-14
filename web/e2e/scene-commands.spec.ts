@@ -26,7 +26,7 @@ async function openChat(page: Page, id: string) {
           const check = () => {
             const hidden = event.op === 'hide'
             const nodes = [...document.querySelectorAll<HTMLElement>('.scene-tag, .evidence-region')]
-            const models = [...document.querySelectorAll<HTMLCanvasElement>('dialog canvas')]
+            const models = [...document.querySelectorAll<HTMLCanvasElement>('.drawing-model canvas')]
               .map((node) => (node as LinkedViewerCanvas).__viewer3d).filter((model) => !!model)
             const applied = event.item_ids.every((id) => {
               const boxes = nodes.filter((node) => node.dataset.itemId === id)
@@ -70,7 +70,7 @@ async function openTaggedDrawingAndModel(page: Page, itemId: string) {
   await expect(box).toBeVisible()
   await expect(box.locator('text')).toHaveText('W3')
   await page.getByRole('button', { name: 'Visualise it', exact: true }).click()
-  const model = page.getByRole('dialog', { name: 'Visualise it', exact: true })
+  const model = page.getByRole('region', { name: '3D model pane', exact: true })
   await expect(model.getByRole('region', { name: '3D viewer', exact: true })).toHaveAttribute('data-state', 'ready', { timeout: 25_000 })
   const drawing = page.getByRole('region', { name: 'Drawing viewer', exact: true })
   const panelBounds = await model.boundingBox(), drawingBounds = await drawing.boundingBox()
@@ -83,7 +83,7 @@ async function openTaggedDrawingAndModel(page: Page, itemId: string) {
 }
 
 async function hiddenInModel(page: Page, id: string) {
-  return page.getByRole('dialog', { name: 'Visualise it', exact: true }).locator('canvas').evaluate((node: LinkedViewerCanvas, itemId) => {
+  return page.locator('.drawing-model').locator('canvas').evaluate((node: LinkedViewerCanvas, itemId) => {
     if (!node.__viewer3d) throw new Error('Viewer test handle is not ready')
     return node.__viewer3d.commandState().hidden.includes(itemId)
   }, id)
@@ -129,6 +129,8 @@ test('real window commands, 2D tags, 3D and Undo stay in sync on two devices', a
       expect(timings.commit.length).toBeGreaterThan(0)
       for (const ms of [...timings.commit, ...timings.socket]) expect(ms, 'Socket receipt to 2D and 3D application').toBeLessThan(500)
     }
+    await page.getByRole('button', { name: '2D', exact: true }).click()
+    await other.getByRole('button', { name: '2D', exact: true }).click()
     await expect(a.box).toHaveCSS('opacity', '0.4')
     await expect(b.box.locator(':scope > rect')).toHaveCSS('stroke-dasharray', '5px, 4px')
     const undoResponse = page.waitForResponse((res) => res.request().method() === 'POST' && /\/api\/chats\/[^/]+\/messages$/.test(new URL(res.url()).pathname))

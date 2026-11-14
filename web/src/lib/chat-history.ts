@@ -5,6 +5,10 @@ export interface ChatExchange { id: string; question: string; answer: Answer | n
 export function chatLink(hash: string) {
   const [route, query] = hash.replace(/^#\/?/, '').split('?')
   const params = new URLSearchParams(query)
+  if (route.startsWith('chat/')) {
+    try { return { kind: 'chat' as const, id: decodeURIComponent(route.slice(5)) } }
+    catch { return null }
+  }
   if (route !== 'chat') return null
   const id = params.get('chat')
   if (id) return { kind: 'chat' as const, id }

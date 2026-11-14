@@ -159,7 +159,8 @@ def main(argv=None):
          "-allowProvisioningDeviceRegistration", "-destination", destination,
          "-derivedDataPath", IOS / "build/DerivedData", "CODE_SIGN_STYLE=Automatic",
          f"DEVELOPMENT_TEAM={team}", f"PRODUCT_BUNDLE_IDENTIFIER={bundle}",
-         *([f"HOLOGRAM_WEB_URL={web}", f"HOLOGRAM_API_URL={api or ''}"] if web else []), "build"])
+         *([f"HOLOGRAM_WEB_URL={web}", f"HOLOGRAM_API_URL={api or ''}"] if web else []),
+         f"HOLOGRAM_AR_DEMO={'YES' if os.environ.get('AR_DEMO') == '1' else 'NO'}", "build"])
     if args.build_only:
         print("Signed generic iOS build succeeded; install and AR still require the iPhone.")
         return 0

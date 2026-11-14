@@ -146,9 +146,10 @@ export async function viewerState(panel: Locator) {
 
 export async function visualise(page: Page, drawing: Locator, answer: Answer) {
   await drawing.getByRole('button', { name: 'Visualise it', exact: true }).click()
-  const panel = page.getByRole('dialog', { name: 'Visualise it', exact: true })
+  const panel = drawing.getByRole('region', { name: '3D model pane', exact: true })
   await expect(panel.getByRole('region', { name: '3D viewer', exact: true })).toHaveAttribute('data-state', 'ready', { timeout: 60_000 })
-  await expect(panel.getByText('3D view ready', { exact: true })).toBeVisible({ timeout: 60_000 })
+  await expect(panel).toHaveAttribute('data-rise-state', 'done', { timeout: 60_000 })
+  await expect(drawing.getByTestId('drawing-viewport')).toBeHidden()
   const expected = [...answer.evidence.scene.highlight_item_ids].sort()
   expect(expected.length).toBeGreaterThan(0)
   await expect.poll(async () => (await viewerState(panel)).highlight.highlighted.sort(), { timeout: 15_000 }).toEqual(expected)

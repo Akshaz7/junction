@@ -22,8 +22,9 @@ const starters = [
 
 type Mention = { start: number; end: number; query: string }
 
-export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, onOpenCitation }: {
+export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, onOpenCitation, onChatChange }: {
   docs: Document[]; loadingDocs: boolean; demo: boolean; contextDocument: Document | null; hidden: boolean
+  onChatChange: (id: string | null) => void
   onOpenCitation: (citation: Citation) => void
 }) {
   const [draft, setDraft] = useState('')
@@ -45,6 +46,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const sheet = useViewerSheet()
   const chatId = useRef<string | null>(null)
   const [liveChatId, setLiveChatId] = useState<string | null>(null)
+  useEffect(() => { onChatChange(liveChatId) }, [liveChatId, onChatChange])
   const submitting = useRef(false)
   const textarea = useRef<HTMLTextAreaElement>(null)
   const conversation = useRef<HTMLDivElement>(null)
@@ -303,7 +305,9 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         </button>)}</div>
         {demo && <p className="demo-note">Offline sample content generated for demo</p>}
       </div>}
-      {answers.map((exchange, index) => exchange.answer ? <AnswerCard key={`${exchange.id}-${index}`} answer={exchange.answer} docs={docs} demo={demo} chatId={liveChatId} activeCitation={viewer?.answer === exchange.answer ? viewer.citation : undefined}
+      {/* SSE and saved snapshots use different message IDs for the same answer.
+          Keep its controls mounted when a live refresh replaces the exchange. */}
+      {answers.map((exchange, index) => exchange.answer ? <AnswerCard key={`${exchange.answer.answer_id}-${index}`} answer={exchange.answer} docs={docs} demo={demo} chatId={liveChatId} activeCitation={viewer?.answer.answer_id === exchange.answer.answer_id ? viewer.citation : undefined}
         edits={sceneEdits[exchange.answer.evidence.scene.doc_id || exchange.answer.doc_ids[0]]} busy={busy || restoring}
         onUndo={() => void ask('undo', [exchange.answer!.evidence.scene.doc_id || exchange.answer!.doc_ids[0]])} onOpenItem={(id) => void openCommandItem(exchange.answer!, id)} onOpenCitation={(citation) => {
         setViewer((previous) => ({ answer: exchange.answer!, citation, request: (previous?.request ?? 0) + 1 }))

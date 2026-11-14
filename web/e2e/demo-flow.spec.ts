@@ -33,9 +33,9 @@ test('desktop: live raster proof carries into 3D, then AC20 door evidence and sc
   expect([...new Set(counted.answer.evidence.boxes.map((box) => box.item_id))].sort())
     .toEqual([...counted.answer.evidence.scene.highlight_item_ids].sort())
   await shot(page, 'desktop-03-numbered-drawing')
-  const rasterPanel = await visualise(page, drawing, counted.answer)
+  await visualise(page, drawing, counted.answer)
   await shot(page, 'desktop-04-raster-3d')
-  await rasterPanel.getByRole('button', { name: 'Close 3D view', exact: true }).click()
+  await drawing.getByRole('button', { name: '2D', exact: true }).click()
   await drawing.getByRole('button', { name: 'Close drawing viewer', exact: true }).click()
 
   // Start a fresh UI chat so the raster count's selected document cannot leak into C13.
@@ -56,7 +56,7 @@ test('desktop: live raster proof carries into 3D, then AC20 door evidence and sc
   await narrowest.card.locator('.answer-text').getByRole('button', { name: 'Open citation 1', exact: true }).click()
   const buildingDrawing = page.getByRole('region', { name: 'Drawing viewer', exact: true })
   const buildingPanel = await visualise(page, buildingDrawing, narrowest.answer)
-  await expect(buildingPanel).toHaveClass(/viewer3d-linked-panel/)
+  await expect(buildingDrawing.getByTestId('drawing-viewport')).toBeHidden()
   await shot(page, 'desktop-07-narrowest-door-3d')
 
   const sceneResponse = await page.request.get(`${api}/api/docs/${ac20}/scene`)
