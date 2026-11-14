@@ -25,7 +25,8 @@ def finite(value):
 @lru_cache(maxsize=32)
 def _read(path, modified):
     try:
-        return json.loads(Path(path).read_text())
+        data = json.loads(Path(path).read_text())
+        return data if isinstance(data, dict) else {}
     except (OSError, ValueError):
         return {}
 
@@ -84,7 +85,7 @@ def room_checks(doc, item):
     if label is not None:
         dependent_scale = any(s in str(sc.get("method", "")).lower() for s in ("printed-area", "room-area", "rooms-printed"))
         c = compare("printed area / room outline", label, outline, "m2", label_sources,
-                    independent=not dependent_scale, note="Outline area = shoelace(px) × (m/px)²; shared scale uncertainty is not bounded.")
+                    independent=not dependent_scale, kind="room", note="Outline area = shoelace(px) × (m/px)²; shared scale uncertainty is not bounded.")
         if c:
             checks.append(c)
     fill = finite(props.get("area_px"))
@@ -100,7 +101,7 @@ def calibration(check, cohort):
     """Descriptive method agreement, explicitly never a probability of correctness."""
     report = read(REPORT)
     for row in report.get("pairs", []):
-        if row.get("method") == check["method"] and row.get("cohort") == cohort and row.get("unit") == check["unit"]:
+        if row.get("method") == check["method"] and row.get("cohort") == cohort and row.get("unit") == check["unit"] and row.get("kind") == check.get("kind"):
             n = row.get("n")
             a, b = row.get("within_1pct"), row.get("within_5pct")
             if type(n) is int and n > 0 and all(type(v) is int and 0 <= v <= n for v in (a, b)):
@@ -118,7 +119,13 @@ def item_checks(doc, item, unit, root):
     records = data.get("elements", {})
     if not isinstance(records, dict):
         return []
-    cached = [c for c in records.get(item.item_id, []) if c.get("unit") == unit and c.get("independent") is True]
+    cached = []
+    for c in records.get(item.item_id, []):
+        if not isinstance(c, dict) or c.get("unit") != unit or c.get("independent") is not True or not c.get("sources"):
+            continue
+        fresh = compare(c.get("method", "IFC quantity / geometry"), c.get("primary_value"), c.get("value"), unit, c["sources"])
+        if fresh:
+            cached.append({**fresh, "kind": item.kind})
     if cached:
         return cached
     # Reuse the already converted scene, where available. Provenance must prove
@@ -128,7 +135,10 @@ def item_checks(doc, item, unit, root):
     keys = {"m2": ("net_floor_area_m2", "area_m2", "net_area_m2", "gross_area_m2"),
             "m3": ("net_volume_m3", "volume_m3", "gross_volume_m3"), "m": ("length_m",)}.get(unit, ())
     key = next((k for k in keys if item.q.get(k) is not None), None)
-    if not key or (element.get("quantity_source") or {}).get(key) != "qto" or "gross" in key:
+    semantic = "net_floor_area_m2" if unit == "m2" else "net_volume_m3"
+    # Generic aliases can be gross quantities. Compare only a known net
+    # quantity with a net mesh measurement, with solver precedence unchanged.
+    if not key or item.q.get(semantic) != item.q[key] or (element.get("quantity_source") or {}).get(key) != "qto":
         return []
     if unit == "m" or (unit == "m2" and item.kind not in ("room", "space")):
         return []
@@ -136,7 +146,51 @@ def item_checks(doc, item, unit, root):
     measured = mesh_quantity(Path(root) / doc.doc_id / "scene.glb", item.item_id, unit, item.kind)
     method = "IFC Qto / geometry footprint" if unit == "m2" else "IFC Qto / closed geometry volume"
     c = compare(method, item.q[key], measured, unit, [{**source(doc, item), "quantity": key, "geometry": "scene.glb", "geometry_units": "metres, Y-up"}])
-    return [c] if c else []
+    return [{**c, "kind": item.kind}] if c else []
+
+
+def floor_check(ctx, rows, arithmetic):
+    """Room sum vs independently drawn unit boundaries minus wall solids.
+
+    Applies only when the selected rooms completely cover those units. Shared
+    stairs/corridors outside the units and partial room selections are rejected.
+    """
+    if not arithmetic or len(rows) < 2 or any(d.mode == "ifc" or i.kind not in ("room", "space") for d, i, _ in rows):
+        return None
+    if len({(d.doc_id, i.page) for d, i, _ in rows}) != 1:
+        return None
+    try:
+        from shapely.geometry import Polygon
+        from shapely.ops import unary_union
+        doc, first, _ = rows[0]
+        scale = finite((doc.scale or {}).get("m_per_px"))
+        if not scale or scale <= 0:
+            return None
+        selected = {i.item_id for _, i, _ in rows}
+        all_rooms = [(i, Polygon(i.polygon_px)) for i in doc.items if i.page == first.page and i.kind in ("room", "space") and i.polygon_px]
+        units = [(i, Polygon(i.polygon_px)) for i in doc.items if i.page == first.page and i.props.get("role") in ("unit", "floor_outline") and i.polygon_px]
+        walls = [(i, Polygon(i.polygon_px)) for i in doc.items if i.page == first.page and i.kind == "wall" and i.polygon_px]
+        if len([i for i, _ in all_rooms if i.item_id in selected]) != len(selected):
+            return None
+        if not units or not walls or not all(p.is_valid for _, p in all_rooms + units + walls):
+            return None
+        chosen = [(i, p) for i, p in units if any(iid.item_id in selected and p.covers(rp) for iid, rp in all_rooms)]
+        outer = unary_union([p for _, p in chosen])
+        if not all(outer.covers(p) for i, p in all_rooms if i.item_id in selected):
+            return None
+        if any(outer.intersection(p).area > max(outer.area, 1) * 1e-8 for i, p in all_rooms if i.item_id not in selected):
+            return None
+        net = outer.difference(unary_union([p for _, p in walls])).area * scale ** 2
+        c = compare("room sum / outer outline minus walls", ctx["value"], net, "m2",
+                    [source(doc, i) for i, _ in chosen + walls],
+                    note="Net area = union of drawn unit outlines minus union of wall solids, in px² × (m/px)². Scope excludes uncovered or unselected rooms.")
+        if c:
+            c["kind"] = "room"
+            c["cohort"] = "cad" if all(i.source == "dxf" for _, i, _ in rows) else "scan"
+            c["calibration"] = calibration(c, c["cohort"])
+        return c
+    except (ImportError, TypeError, ValueError):
+        return None
 
 
 def run(ctx, rows, missing, arithmetic):
@@ -160,9 +214,14 @@ def run(ctx, rows, missing, arithmetic):
                 second = b if abs(a-value) <= tol else a
                 c = compare(method, value, second, unit, [s for _, _, c in group for s in c["sources"]])
                 if c:
+                    c["kind"] = next(iter({i.kind for _, i, _ in group})) if len({i.kind for _, i, _ in group}) == 1 else "mixed"
                     c["cohort"] = "ifc" if all(d.mode == "ifc" for d, _, _ in group) else "cad" if all(i.source == "dxf" for _, i, _ in group) else "scan"
                     c["calibration"] = calibration(c, c["cohort"])
                     checks.append(c)
+    if unit == "m2":
+        floor = floor_check(ctx, rows, arithmetic)
+        if floor:
+            checks.append(floor)
     # Existing real recounts only. Never pay for an additional call here.
     if unit == "count" and len(ctx.get("res", {}).get("doc_ids", [])) == 1:
         for step in ctx.get("trace", []):
@@ -173,6 +232,8 @@ def run(ctx, rows, missing, arithmetic):
                     c = compare("detector / drawing recount", value, b if value == a else a, unit,
                                 [{"doc_id": ctx["res"]["doc_ids"][0], "page": 1, "trace_step": step.get("step"), "model": step["model"]}])
                     c["cohort"] = "scan"
+                    from engine.router.parser import parse
+                    c["kind"] = parse(ctx.get("question") or "").kind
                     c["calibration"] = calibration(c, "scan")
                     checks.append(c)
                     break
@@ -184,14 +245,22 @@ def run(ctx, rows, missing, arithmetic):
         c = max(checks, key=lambda c: c["diff_pct"])
         ctx["steps"].append({"kind": "checked", "title": "Checked", "ok": ctx["checked"], "cite": None,
                              "text": f"{c['method']}: {c['primary_value']:.6g} and {c['value']:.6g} {unit}; {c['diff_pct']:.3g}% apart."})
-    elif ctx.get("is_ifc") and unit in ("m2", "m", "m3"):
+    elif ctx.get("checked") is True and unit in ("m2", "m", "m3"):
         # A room's enclosing box is not an independent measurement of its area.
         ctx["checked"] = None
         ctx["steps"] = [s for s in ctx["steps"] if s.get("kind") != "checked"]
     terms = (arithmetic or {}).get("terms", [])
+    resolved = {(d.doc_id, i.item_id): (d, i) for d, i, _ in rows}
+    calc_rows, inputs = [], []
+    for t in terms:
+        d, i = resolved[(t["doc_id"], t["item_id"])]
+        src = source(d, i)
+        label = i.label or i.name or i.kind.replace("_", " ").capitalize()
+        calc_rows.append({"item_id": i.item_id, "label": label, "values": {unit: t["value"]}, "source": src})
+        inputs.append({"name": label, "value": t["value"], "unit": unit, "source": src})
     return {"formula": (arithmetic or {}).get("formula", "Full source arithmetic unavailable"),
-            "steps": [], "rows": [{"item_id": t["item_id"], "label": t["item_id"], "values": {unit: t["value"]},
-                                     "source": {"doc_id": t["doc_id"], "item_id": t["item_id"]}} for t in terms],
+            "steps": [{"id": "sum", "label": "Add cited quantities", "expr": "Σ source quantities", "value": value,
+                       "unit": unit, "inputs": inputs}] if terms else [], "rows": calc_rows,
             "result": {"value": value, "unit": unit, "rounded_as": "as reported in the answer"},
             "checks": checks, "item_checks": per_item,
             "unavailable": [] if checks else ["No independent second reading covers the complete answer."],

@@ -137,3 +137,39 @@ def test_mesh_footprint_is_not_bounding_rectangle(tmp_path):
 
 def test_missing_geometry_never_raises(tmp_path):
     assert mesh_quantity(tmp_path / "absent.glb", "room", "m2", "room") is None
+
+
+def test_floor_check_rejects_missing_selected_outlines_and_partial_scope():
+    r1, r2 = room("r1", 100), room("r2", 100)
+    r2.polygon_px = [[100, 0], [200, 0], [200, 100], [100, 100]]
+    unit = Item("u", "other", source="dxf", polygon_px=[[0, 0], [200, 0], [200, 100], [0, 100]], props={"role": "unit"})
+    wall = Item("w", "wall", source="dxf", polygon_px=[[99, 0], [101, 0], [101, 100], [99, 100]])
+    doc = Doc("d", "planmap", [r1, r2, unit, wall], scale={"method": "dxf-units", "m_per_px": .1})
+    ctx = context(doc, value=200)
+    check = xcheck.floor_check(ctx, [(doc, r1, 1), (doc, r2, 1)], {"terms": []})
+    assert check["value"] == pytest.approx(198)
+    assert xcheck.floor_check(ctx, [(doc, r1, 1), (doc, Item("absent", "room"), 1)], {"terms": []}) is None
+    r2.polygon_px = None
+    assert xcheck.floor_check(ctx, [(doc, r1, 1), (doc, r2, 1)], {"terms": []}) is None
+
+
+def test_correlated_checks_do_not_propagate_old_cross_checked_label():
+    doc = Doc("d", "planmap", [room()], scale={"method": "printed-areas", "m_per_px": .1})
+    ctx = context(doc, checked=True)
+    calc = margin.run(ctx)["calc"]
+    assert calc["checks"] == [] and ctx["checked"] is None
+
+
+def test_agreement_is_not_presented_as_accuracy_or_an_error_bound(tmp_path, monkeypatch):
+    p = tmp_path / "agreement.json"
+    p.write_text(json.dumps({"pairs": [{"method": "printed area / room outline", "cohort": "cad", "kind": "room", "unit": "m2", "n": 10, "within_1pct": 6, "within_5pct": 8}]}))
+    monkeypatch.setattr(xcheck, "REPORT", p)
+    monkeypatch.setattr(confidence, "CALIBRATION_PATH", tmp_path / "missing.json")
+    doc = Doc("d", "planmap", [room()], scale={"method": "dxf-units", "m_per_px": .1})
+    ctx = context(doc)
+    result = margin.run(ctx)
+    assert result["margin"]["agreement"][0]["pct"] == 80
+    assert result["margin"]["value"] != 20  # disagreement frequency is not ±20 m²
+    conf = confidence.run(ctx)
+    assert conf["pct"] is None and conf["agreement"][0]["pct"] == 80
+    assert "8 of 10" in conf["reason"] and "not answer accuracy" in conf["reason"]
