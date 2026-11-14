@@ -1,22 +1,20 @@
 # ENGINE2 (Codex) — current row
 
-ROW: E-33 project-wide questions search every doc with data (QA-LIVE #3, results/qa/live-1439.md)
-Today, questions with no doc selected search only ~22 docs:
-- "Which drawings have a door schedule?" says none, but at least 18 opening_design docs have "schedule" in the id and title (e.g. opening_design__aalseth-residence-...-a600-...-schedules, opening_design__ctr-most-current-set-full-size-sheets-a700-schedules).
-- The kitchen list includes upload-fixture junk and misses AC20 (IFC spaces named Küche) and the Swiss plans.
-Fix in engine/project_index.py (and whichever engine module answers project-wide questions, find it from engine/answer.py):
-1. The index covers every listed doc with data: titles and ids (tokenised, e.g. "a600 schedules"), page text, plan-map room labels, IFC space names (LongName) and element kinds. Find why only ~22 are indexed (build step? only baked artifacts?) and fix it; say how deployed builds the index (deploy/Dockerfile runs `python -m engine.project_index build`).
-2. Exclude uploads whose id contains "upload-fixture" and docs with generated_for_demo, unless the user selected them.
-3. Synonyms: kitchen = Küche/kök/keittiö; WC/toilet; schedule = table/list on schedule sheets.
-4. Answers list docs with one citation each (doc title + page), capped at 15, with "and N more".
-Tests in engine/tests/test_project_index.py with a tmp artifacts tree: schedule question finds the schedule docs by title; kitchen finds an IFC Küche space and a plan-map "Kitchen" label; fixtures excluded.
-Allowed: engine/project_index.py, the project-wide answer module, engine/tests/, this file. Do not edit engine/answer.py beyond a call-site line (others work there).
-Done test: .venv/bin/python -m pytest -q -p no:cacheprovider engine/tests/test_project_index.py
+ROW: E-35 text questions on PDF sheets (dataset type "text")
+data/junction-dataset-preview/questions.jsonl has text-type questions (answers are words, not numbers) on opening_design PDF sheets. Goal: answer them from the page text layer with exact quotes and citations, code first.
+1. Pick 40 text questions on docs NOT in data/sets/heldout_docs.txt, with gold answers; save as results/qa/text40.jsonl (question, doc_id, gold).
+2. Run them through engine.answer locally with MODELS_FAKE unset only if keys exist in .env; otherwise run with the fake provider and measure the code path only (say which). Grade: exact or normalised match, or gold contained in the answer. Save results/qa/text40-r1.json.
+3. Fix the top failure classes in the text route (find it from engine/answer.py: page-text search, title-block fields like sheet number, scale, project name, drawn by, date, revision; note/legend lookup). Prefer code: title-block regexes and nearest-label lookup in the pdfminer text with positions. Every answer quotes the source text and cites page + bbox.
+4. Rerun → text40-r2.json. Report before/after.
+Allowed: engine/ (text route modules, a new engine/titleblock.py if useful), engine/tests/, results/qa/text40*, this file. Only call-site lines in engine/answer.py (others work there).
+Done test: .venv/bin/python -m pytest -q -p no:cacheprovider engine/tests/test_titleblock.py (write it) and the r2 file exists.
 Never commit. Write one line at the end: RESULT: ...
 
-NOTE from LEAD (mid-row): ENGINE-FIX already changed engine/project_index.py and engine/project_answer.py (committed in E-34: synonym hits, test junk excluded). Build on that version; don't revert it. Your remaining scope: index coverage of every listed doc with data (titles/ids, page text, plan-map labels, IFC space names), and the door-schedule question finding schedule sheets by title.
+E-35 scope finding: registry files map all 265 preview text questions (16 opening_design PDFs, 249 IFC) to held-out docs. No eligible existing text questions remain. Using 40 questions labelled "generated for demo", with gold quotes/bboxes from 7 non-held-out PDFs; this measures development behavior, not dataset accuracy. Registry IDs include nested path slugs, so stem-only doc IDs give a false non-held-out result. All evaluation checks use actual doc.json IDs.
+NEEDS: LEAD supply/authorize a non-held-out dataset text set if E-35 requires 40 existing dataset questions; the supplied split has zero.
 
-Deployment: deploy/Dockerfile already runs `python -m engine.project_index build` over deploy/demo_artifacts (currently 22 document directories, no registry). PostgreSQL dataset artifacts are restored later; server/app.py only explicitly upserts uploads. Index v3 now discovers restored dataset directories on load and refreshes changed directory contents (at most five seconds between scans), and builds registry title/id records even before their files arrive. Rebuild existing v2 indexes with the same build command; no deploy/server edits needed.
-NEEDS: DATA/LEAD: current artifacts/ifc_bench__ac20-arc/elements.json has no Küche/kitchen/kuche/kueche room name; check source/enrichment before expecting AC20 in kitchen results. Retrieval supports actual IFC LongName values; it does not invent missing rooms.
-NEEDS: LEAD: record the lesson that the image-build index sees baked files only and startup restoration previously reindexed uploads only; dataset restores need index discovery too.
-RESULT: E-33 PASS — required test_project_index.py: 9 passed; existing project_search/context_tasks: 19 passed. Covers registry metadata, restored dataset discovery, page text + plan-map labels + IFC LongName/kinds, multilingual synonyms, fixture/demo exclusion, one citation per document, 15-result cap and remaining count; empty lists skip the reader via one answer.py call-site line. No commits.
+NOTE from LEAD: engine/answer.py now imports engine.titleblock inside try/except ImportError (committed E-37). Your title-block route currently answers "What does note 4 on this sheet require?" with route "index" before the reader, which breaks engine/tests/test_reader.py::test_answer_routes_sheet_to_reader. Only answer title-block FIELDS (sheet no., scale, project, drawn by, date, revision); let note/requirement questions fall through to the reader. Run the whole engine/tests suite before RESULT.
+
+E-35 validation: required done test 20 passed; r2 exists. Per LEAD, early routing handles title-block fields only; note/requirement questions still fall through to the reader (original reader test unchanged). Full engine/tests: 240 passed, 3 failed in test_readdraw; disabling titleblock reproduces the same three failures (220 passed excluding the 20 titleblock tests), while test_readdraw alone passes 4/4.
+NEEDS: LEAD/ENGINE resolve existing full-suite ordering failures in test_readdraw.py (checked_region_becomes_citation, unbacked_regions_are_flagged, cannot_answer_and_no_image); reproduced with E-35 route disabled.
+RESULT: E-35 title-block code route with verbatim quotes and page/pixel-box citations; generated-for-demo non-held-out text40 33/40 (82.5%, real providers, $0.037038) -> 40/40 (100%, 0 model calls, $0); done test 20 passed and text40-r2.json saved. Dataset accuracy unavailable: every supplied text question is held out. Full suite 240 passed/3 pre-existing ordering failures, reproduced with route disabled. No commit.

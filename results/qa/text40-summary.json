@@ -1,0 +1,39 @@
+{
+  "row": "E-35",
+  "origin": "generated for demo",
+  "dataset_accuracy": null,
+  "reason": "All 265 preview text questions map to held-out registry IDs; zero eligible dataset questions.",
+  "documents": 7,
+  "provider_mode": "real providers available; MODELS_FAKE unset",
+  "before": {
+    "total": 40,
+    "correct": 33,
+    "answered": 40,
+    "cost_usd": 0.037038
+  },
+  "after": {
+    "total": 40,
+    "correct": 40,
+    "answered": 40,
+    "cost_usd": 0.0
+  },
+  "before_percent": 82.5,
+  "after_percent": 100.0,
+  "r2_cited_with_quote_page_bbox": 40,
+  "fixed_failure_classes": [
+    "split project headings and footer project/address lines",
+    "nearest-label architect name",
+    "title-block date versus revision/plot date",
+    "title-block scale versus detail scales/timestamps"
+  ],
+  "validation": {
+    "required_done_test": "20 passed",
+    "full_engine_suite": "240 passed, 3 failed",
+    "same_suite_with_titleblock_disabled": "220 passed, same 3 failed (titleblock tests excluded)",
+    "unrelated_failures": [
+      "test_readdraw.py::test_checked_region_becomes_citation",
+      "test_readdraw.py::test_unbacked_regions_are_flagged",
+      "test_readdraw.py::test_cannot_answer_and_no_image"
+    ]
+  }
+}
