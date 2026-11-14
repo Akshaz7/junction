@@ -7,6 +7,7 @@ Boxes come from the GLB nodes (POSITION accessor min/max x node matrix): no seco
 import argparse
 import hashlib
 import json
+import os
 import signal
 import subprocess
 import sys
@@ -166,12 +167,65 @@ def props_of(el):
     return p
 
 
+def convert_py(ifc: Path, raw_glb: Path):
+    """Pure-Python IFC -> GLB (ifcopenshell geometry iterator + trimesh), used where IfcConvert is not available
+    (the Linux deploy image). Same contract as IfcConvert --y-up --use-element-guids: node name = GlobalId, metres,
+    Y-up, IfcOpeningElement dropped, IfcSpace kept. One mesh per element, coloured by its dominant IFC style."""
+    import multiprocessing
+
+    import ifcopenshell.geom as geom
+    import trimesh
+    raw_glb.parent.mkdir(parents=True, exist_ok=True)
+    f = ifcopenshell.open(str(ifc))
+    st = geom.settings()
+    st.set("use-world-coords", True)
+    inc = [e for e in list(f.by_type("IfcElement")) + list(f.by_type("IfcSpace")) if not e.is_a("IfcOpeningElement")]
+    scene = trimesh.Scene()
+    it = geom.iterator(st, f, max(1, min(4, multiprocessing.cpu_count())), include=inc)
+    n = 0
+    if it.initialize():
+        while True:
+            sh = it.get()
+            gm = sh.geometry
+            v = np.array(gm.verts, dtype=np.float64).reshape(-1, 3)
+            fc = np.array(gm.faces, dtype=np.int64).reshape(-1, 3)
+            if len(v) and len(fc):
+                v = np.column_stack([v[:, 0], v[:, 2], -v[:, 1]])  # Z-up -> Y-up (as IfcConvert --y-up)
+                rgba = [0.8, 0.8, 0.8, 1.0]
+                try:
+                    mats = list(gm.materials)
+                    if mats:
+                        ids = np.array(gm.material_ids)
+                        ids = ids[ids >= 0]
+                        m = mats[int(np.bincount(ids).argmax())] if len(ids) else mats[0]
+                        d = m.diffuse
+                        a = 1.0 - float(m.transparency) if m.has_transparency else 1.0
+                        rgba = [float(d.r()), float(d.g()), float(d.b()), a]
+                        rgba = [min(1.0, max(0.0, c)) if c == c else dflt for c, dflt in zip(rgba, (0.8, 0.8, 0.8, 1.0))]
+                except Exception:  # noqa: BLE001
+                    pass
+                mesh = trimesh.Trimesh(vertices=v, faces=fc, process=False)
+                mesh.visual = trimesh.visual.TextureVisuals(material=trimesh.visual.material.PBRMaterial(
+                    baseColorFactor=[int(255 * c) for c in rgba], metallicFactor=0.0, roughnessFactor=0.9,
+                    alphaMode="BLEND" if rgba[3] < 0.99 else "OPAQUE"))
+                scene.add_geometry(mesh, node_name=sh.guid, geom_name=sh.guid)
+                n += 1
+            if not it.next():
+                break
+    if not n:
+        raise RuntimeError("the IFC has no geometry that could be converted")
+    raw_glb.unlink(missing_ok=True)
+    raw_glb.write_bytes(scene.export(file_type="glb"))
+
+
 def convert(ifc: Path, raw_glb: Path):
+    import platform
+    if not IFC_CONVERT.exists() or platform.system() != "Darwin" or os.environ.get("IFC_CONVERT_PY") == "1":
+        return convert_py(ifc, raw_glb)
     raw_glb.parent.mkdir(parents=True, exist_ok=True)
     raw_glb.unlink(missing_ok=True)  # IfcConvert asks before overwriting
     big = ifc.stat().st_size > 50e6
     env = {"HEAVY_SLOTS": "1"} if big else {}
-    import os
     cmd = [str(HEAVY), str(IFC_CONVERT), "--exclude", "entities", "IfcOpeningElement", "-j", "4",
            "--use-element-guids", "--y-up", str(ifc), str(raw_glb)]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,

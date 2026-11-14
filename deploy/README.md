@@ -76,3 +76,8 @@ Project search: `python -m engine.project_index build` runs at image build over 
 
 Switches: `INGEST_MODE` (vlm|full), `DERIVE_WALLS`, `MAX_VLM_PAGES` (4), `PAGES_MAX_SIDE` (4096), `TEXT_PAGE_WORDS`, `TEXT_PAGE_COVER`, `MAX_DOC_BYTES`.
 Not available in the deploy image: IFC conversion (stored only, status partial), SVG, DWG, USDZ/AR for uploads (needs usd-core).
+
+## Upload ingestion by format (deploy image)
+- PDF / PNG / JPG: pages, text layer, VLM plan map, extruded scene.glb (+ scene.usdz), all persisted to `doc_artifacts`.
+- DXF: Swiss Dwellings layer names use the exact DXF reader; any other DXF is rendered and read by the VLM (then extruded).
+- IFC: `pipeline/ifc_scene.convert_py` (ifcopenshell + trimesh, no IfcConvert binary) builds scene.glb, elements.json, scene.json, plan pages, scene.usdz. Peak RSS is about 420 MB for an 11 MB IFC: use the 512 MB plan or larger, and tune `INGEST_IFC_MAX_MB` (default 15 here, 400 locally).

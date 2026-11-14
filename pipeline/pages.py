@@ -92,17 +92,11 @@ def do_pdf(pdf: Path, doc_id: str, out: Path):
         words = []
         try:
             raw, pw, ph = pdf_words(pdf, i, s, W, H)
-            rot = page.get_rotation() % 360
+            # pdfminer already applies /Rotate: its page box and coordinates are in the displayed (rotated) frame,
+            # origin bottom-left, so one mapping covers 0/90/180/270. (An extra per-rotation remap flipped or clipped
+            # the words of every rotated page.)
             for t, x0, y0, x1, y1 in raw:
-                # pdfminer coords: points, origin bottom-left of the unrotated mediabox
-                if rot == 0:
-                    bx = (x0 * s, (ph - y1) * s, x1 * s, (ph - y0) * s)
-                elif rot == 90:
-                    bx = (y0 * s, x0 * s, y1 * s, x1 * s)
-                elif rot == 180:
-                    bx = ((pw - x1) * s, y0 * s, (pw - x0) * s, y1 * s)
-                else:
-                    bx = ((ph - y1) * s, (pw - x1) * s, (ph - y0) * s, (pw - x0) * s)
+                bx = (x0 * s, (ph - y1) * s, x1 * s, (ph - y0) * s)
                 bx = [round(max(0, min(v, lim)), 1) for v, lim in zip(bx, (W, H, W, H))]
                 words.append({"text": t, "bbox_px": bx})
         except Exception as e:  # noqa: BLE001

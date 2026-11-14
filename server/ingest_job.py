@@ -136,6 +136,15 @@ def _vlm_pages(doc_id: str, ddir: Path, st: "Status", cost: dict):
     return sorted(found)
 
 
+def _dxf_planmap_usable(ddir: Path) -> bool:
+    f = ddir / "planmap-1.json"
+    if not f.is_file():
+        return False
+    pm = json.loads(f.read_text())
+    n = sum(1 for i in pm["items"] if i["kind"] in ("room", "wall", "door", "window"))
+    return n >= 3 and bool(pm["scale"].get("m_per_px"))
+
+
 def _extrude(doc_id: str, ddir: Path, page: int):
     from pipeline import extrude
     pm = json.loads((ddir / f"planmap-{page}.json").read_text())
@@ -165,9 +174,11 @@ def run(doc_id: str) -> str:
     ok = True
     plan_pages: list[int] = []
     if kind == "ifc":
-        if light:
-            st.write("partial", "IFC conversion needs IfcConvert and ifcopenshell, which are not in the deploy image: "
-                                "the file is stored, but no 3D scene or element list was built")
+        ifc_path = REPO / doc["files"]["ifc"]
+        cap = float(os.environ.get("INGEST_IFC_MAX_MB", "15" if light else "400"))
+        if ifc_path.stat().st_size > cap * 1e6:
+            st.write("partial", f"IFC is {ifc_path.stat().st_size / 1e6:.0f} MB; this server converts IFC files up to {cap:.0f} MB. "
+                                "The file is stored, but no 3D scene or element list was built")
             return "partial"
         from pipeline import ifc_plans, ifc_scene
         ifc = REPO / doc["files"]["ifc"]
@@ -197,9 +208,14 @@ def run(doc_id: str) -> str:
         if ok and kind == "dxf":
             from pipeline import dxf_planmap
             have = st.stage("dxf_planmap", lambda: dxf_planmap.process(doc_id, ddir, REPO / doc["files"]["dxf"]))
-            if have and (ddir / "planmap-1.json").exists():
+            if have and _dxf_planmap_usable(ddir):
                 plan_pages = [1]
             else:
+                # dxf_planmap only knows the layer names of the Swiss Dwellings set (ROOM_OUTLINE, WALL, DOOR, ...).
+                # A DXF with other layer names gives an empty plan map: read the rendered drawing with the VLM instead.
+                (ddir / "planmap-1.json").unlink(missing_ok=True)
+                if have:
+                    st.stages[-1]["note"] = "no rooms/walls/doors/windows on the expected layers: read the render with the VLM"
                 plan_pages = _vlm_pages(doc_id, ddir, st, cost)
         elif ok and kind == "raster" and not light:
             def vision():
