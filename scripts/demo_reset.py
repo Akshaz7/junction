@@ -1,8 +1,17 @@
 #!/usr/bin/env python3
-"""Prepare the judging demo using only the public API and Python's stdlib.
+"""Remove judging-demo test junk, optionally warming the demo over the API.
 
-Usage: python3 scripts/demo_reset.py <base_url> [--dry-run]
-Dry-run reads chat titles, demo document metadata and OpenAPI; it never writes
+Usage: python3 scripts/demo_reset.py [base_url] [--dry-run] [--keep-id ID]
+DATABASE_URL enables transactional DB cleanup; no .env is read or printed.
+Without a URL, --dry-run exits successfully without contacting any service.
+Only marked test uploads (source=uploads AND uploads__ ID) can be deleted;
+dataset documents and unmarked uploads are always preserved. --keep-id can
+retain an intentional generated document, change or chat (repeat as needed).
+Stop e2e/upload jobs before applying. Local artifact/source files and persisted
+search indexes are never removed: recreate the deployed ephemeral API container
+after DB cleanup to discard its old upload/search cache (a process restart alone
+does not clear it).
+Optional API dry-run reads metadata and OpenAPI; it never writes
 or fetches scenes (which may trigger extrusion). Real requests are spaced by
 2.5 seconds, including reads, to stay below 25 writes/min and the 30/min quota.
 Run separately from live e2e/stress jobs sharing the same IP. No .env is read.
@@ -10,8 +19,10 @@ Run separately from live e2e/stress jobs sharing the same IP. No .env is read.
 from __future__ import annotations
 
 import argparse
+import asyncio
 from datetime import datetime, timezone
 import json
+import os
 from pathlib import Path
 import re
 import sys
@@ -22,7 +33,13 @@ from urllib.request import Request, urlopen
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PREFIXES = ("smoke-", "e2e-", "test", "Voice in AR")
+PREFIXES = ("smoke-", "e2e-", "test-", "test ", "Voice in AR", "WEB2: ")
+CHAT_PATTERNS = re.compile(
+    r"^(?:(?:Cross-device|Follow|Live overview|W-20 history) \d+(?: second)?"
+    r"|warmup-\d{8}T\d{12}Z|FIX-2 in place|Live sync verification"
+    r"|Visibility return verification|Scene commands verification)$", re.I)
+TEST_UPLOAD = re.compile(r"^(?:upload-fixture(?:-|$)|smoke-|e2e-)", re.I)
+GENERATED = re.compile(r"generated[ -]for[ -]demo", re.I)
 INTERVAL = 2.5
 DOC_ID = re.compile(r"[A-Za-z0-9_-]+__[A-Za-z0-9_.-]+")
 
@@ -65,7 +82,93 @@ def demo_questions(path: Path) -> list[tuple[str, str]]:
 
 def automated(chat: dict) -> bool:
     title = chat.get("title")
-    return isinstance(title, str) and title.startswith(PREFIXES)
+    return isinstance(title, str) and (
+        title.casefold().startswith(tuple(p.casefold() for p in PREFIXES))
+        or CHAT_PATTERNS.fullmatch(title) is not None)
+
+
+def test_document(doc: dict) -> bool:
+    """Never infer that a dataset document is disposable from its title."""
+    if doc.get("source") != "uploads" or not doc.get("doc_id", "").startswith("uploads__"):
+        return False
+    title = doc.get("title") or ""
+    return bool(TEST_UPLOAD.search(title) or GENERATED.search(title)
+                or TEST_UPLOAD.search(doc["doc_id"].removeprefix("uploads__"))
+                or GENERATED.search(doc["doc_id"]))
+
+
+def test_change(change: dict) -> bool:
+    summary = change.get("summary") or {}
+    if isinstance(summary, str):
+        summary = json.loads(summary)
+    if not isinstance(summary, dict):
+        return False
+    return summary.get("generated_for_demo") is True or any(
+        GENERATED.search(summary.get(k) or "") for k in ("title", "headline", "summary")
+        if isinstance(summary.get(k), str))
+
+
+async def reset_database(conn, *, dry_run: bool, keep_ids=()) -> list[tuple[str, str, object]]:
+    """Plan and apply the same deletes under row locks; cascades remove chat history.
+
+    Documents referenced by retained chats/explicitly kept changes stay intact. Child deletes
+    cover non-cascading findings/artifact/answer/scene references in migrations.
+    The injectable asyncpg-shaped connection also permits offline sqlite tests.
+    """
+    keep = set(keep_ids)
+    async with conn.transaction(isolation="repeatable_read", readonly=dry_run):
+        lock = "" if dry_run else " for update"
+        docs = [dict(r) for r in await conn.fetch("select doc_id, source, title from documents" + lock)]
+        chats = [dict(r) for r in await conn.fetch("select id, doc_id, title from chats" + lock)]
+        changes = [dict(r) for r in await conn.fetch("select id, doc_a, doc_b, summary from changes" + lock)]
+        chat_targets = [r for r in chats if str(r["id"]) not in keep and automated(r)]
+        chat_ids = {str(r["id"]) for r in chat_targets}
+        doc_targets = {r["doc_id"] for r in docs if r["doc_id"] not in keep and test_document(r)}
+        # A retained conversation or explicitly retained change protects its docs.
+        for chat in chats:
+            if str(chat["id"]) not in chat_ids:
+                doc_targets.discard(chat["doc_id"])
+        for change in changes:
+            if str(change["id"]) in keep:
+                doc_targets.difference_update((change["doc_a"], change["doc_b"]))
+        change_targets = [r for r in changes if str(r["id"]) not in keep and (
+            test_change(r) or r["doc_a"] in doc_targets or r["doc_b"] in doc_targets)]
+        plan = []
+        for row in chat_targets:
+            plan.append(("chats", "id", row["id"]))
+            print(f"DELETE chats id={display(str(row['id']))} title={display(row['title'])}")
+        for row in change_targets:
+            plan.append(("changes", "id", row["id"]))
+            print(f"DELETE changes id={display(str(row['id']))} (test/generated change or test upload)")
+        for doc_id in sorted(doc_targets):
+            for table in ("findings", "doc_artifacts", "answers", "scene_edits", "documents"):
+                plan.append((table, "doc_id", doc_id))
+                print(f"DELETE {table} doc_id={display(doc_id)}")
+        print(f"Preserving {len(docs) - len(doc_targets)} documents; "
+              f"{len(chats) - len(chat_targets)} chats; {len(changes) - len(change_targets)} changes.")
+        if not dry_run:
+            for table, column, value in plan:
+                # Table/column names are constants above; values are always bound.
+                await conn.execute(f"delete from {table} where {column}=$1", value)
+        return plan
+
+
+async def database_cleanup(dry_run: bool, keep_ids) -> bool:
+    url = os.environ.get("DATABASE_URL", "").strip()
+    if not url:
+        print("no DATABASE_URL: database cleanup skipped (no database contacted).")
+        return False
+    try:
+        import asyncpg
+        conn = await asyncpg.connect(url, timeout=10, command_timeout=30)
+        try:
+            await reset_database(conn, dry_run=dry_run, keep_ids=keep_ids)
+        finally:
+            await conn.close()
+    except Exception:
+        # Connection/DB exceptions can embed credentials or query values.
+        raise DemoError("Database cleanup failed; transaction rolled back. Check schema and connectivity.") from None
+    return True
 
 
 def segment(value: str) -> str:
@@ -184,7 +287,7 @@ def delete_chat(client: Client, chat_id: str, *, warmup_title: str | None = None
     client.request("DELETE", path, "Delete " + str(current["title"]))
 
 
-def prepare(client: Client, dry_run: bool):
+def prepare(client: Client, dry_run: bool, keep_ids=()):
     questions = demo_questions(ROOT / "docs" / "DEMO.md")
     docs = list(dict.fromkeys(doc_id for doc_id, _ in questions))
     listed = client.request("GET", "/api/chats", "List chats")
@@ -193,7 +296,7 @@ def prepare(client: Client, dry_run: bool):
     chats = listed["chats"]
     if not all(isinstance(c, dict) and isinstance(c.get("id"), str) for c in chats):
         raise DemoError("Invalid chat entry")
-    targets = [c for c in chats if automated(c)]
+    targets = [c for c in chats if automated(c) and c["id"] not in keep_ids]
     print(f"{len(targets)} matching automated chats; preserving {len(chats) - len(targets)} others.")
     for chat in targets:
         print(f"  DELETE {display(chat['id'])} title={display(chat['title'])}")
@@ -258,15 +361,23 @@ def prepare(client: Client, dry_run: bool):
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("base_url", help="API origin, e.g. http://localhost:8000")
+    parser.add_argument("base_url", nargs="?", help="optional API origin for chat cleanup and demo warm-up")
     parser.add_argument("--dry-run", action="store_true", help="read metadata and list actions; no writes/assets")
+    parser.add_argument("--keep-id", action="append", default=[], help="preserve this document/chat/change ID; repeatable")
     args = parser.parse_args()
     started = time.monotonic()
     client = None
     try:
-        client = Client(args.base_url)
         print("DRY RUN: no writes or asset fetches." if args.dry_run else "Preparing judging demo.", flush=True)
-        prepare(client, args.dry_run)
+        # Validate an optional API URL before any DB mutation.
+        client = Client(args.base_url) if args.base_url else None
+        cleaned = asyncio.run(database_cleanup(args.dry_run, args.keep_id))
+        if client is not None:
+            if not cleaned:
+                print("Database cleanup unavailable: API mode cleans chats only, not uploads/changes.")
+            prepare(client, args.dry_run, args.keep_id)
+        elif not cleaned and not args.dry_run:
+            raise DemoError("Set DATABASE_URL for cleanup or supply an API base URL")
         return 0
     except DemoError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

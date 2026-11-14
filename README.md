@@ -135,14 +135,36 @@ Repository code is **MIT**, see [LICENSE](LICENSE). Dataset and model rights are
 
 | Name | Licence / status |
 | --- | --- |
-| Yytsi ResNet34-UNet, floorplan-to-3d-walls | MIT code and weights |
+| Claude via Runware (Sonnet/Opus/Haiku; recorded Fable candidate) | Proprietary hosted API; [Runware terms](https://runware.ai/terms). Direct fallback: [Anthropic commercial terms](https://www.anthropic.com/legal/commercial-terms). No weights redistributed. |
+| Gemini 3.x and Gemini 4 Hydrogen/Carbon via Runware | Proprietary hosted API; [Runware terms](https://runware.ai/terms). Direct fallback: [Gemini API terms](https://ai.google.dev/gemini-api/terms). Gemini 4 entries are catalog/price candidates in current config. |
+| Nemotron 3.5 Lightning / 3.5 Super VL (NVIDIA; VL recovery hosted on Verda) | **OpenMDW-1.1**, [Lightning card](https://build.nvidia.com/nvidia/nemotron-3.5-lightning-30b-a3b/modelcard), [VL card](https://build.nvidia.com/nvidia/nemotron-3.5-super-vl-120b-a12b/modelcard); hosting/API terms separate |
+| Nemotron 3 Super | **NVIDIA Nemotron Open Model License**, [official card](https://huggingface.co/nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-BF16) |
+| Featherless Qwen3-VL / Qwen3-Next candidate | **Apache-2.0** model cards; hosted-service terms separate |
+| ElevenLabs Flash v2.5 | Proprietary TTS; [publication terms](https://elevenlabs.io/docs/help-center/legal/can-i-publish-the-content-i-generate-on-the-platform). Paid non-beta output can have commercial rights; free-plan output is noncommercial with attribution. |
+| Runware Fish Audio S2.1 Pro | Hosted API terms; no S2.1 Pro weight redistribution permission established here |
+| Yytsi ResNet34-UNet, floorplan-to-3d-walls | Base card declares MIT; CubiCasa5K training restrictions remain relevant |
+| Our RT-DETR detector and UNet fine-tuned weights | RT-DETR base **Apache-2.0**; project carries **CC BY-NC-SA 4.0** obligations from CubiCasa5K into derived checkpoints. Noncommercial demo/research treatment; FloorPlanCAD rights conflict remains unresolved. |
 | CubiCasa5K official multi-task, hg_furukawa_original | CC BY-NC 4.0 code and weights; internal baseline, not shipped as the final detector |
 | CubiCasa5K dataset | **CC BY-NC-SA 4.0**; non-commercial use and share-alike obligations apply |
+| FloorPlanCAD training data | Card narrative CC BY-NC 4.0 vs metadata CC BY-SA 4.0: treat as noncommercial; commercial permission unresolved |
+| Swiss Dwellings | **CC BY 4.0**, credit Standfest and collaborators / Archilyse AG; identify rendered/labelled changes |
+| OpeningDesign / Aalseth | **CC BY-SA 4.0**, or MIT for the individual projects listed in the dataset manifest; retain project-team credits |
+| IFC models / IFC-Bench | Per model: KIT unrestricted (AC20; credit IAI/KIT), MIT (DigitalHub; RWTH E3D), CC BY 4.0, CC BY-ND 3.0 or GPL data. IFC-Bench questions CC BY 4.0, Sylvain Hellin. ND conversions and HITOS GPL data are excluded from publication. |
+| HABS / HAER / HALS | Public domain in the US / PDM; courtesy credit National Park Service / Library of Congress |
+| Finna | **CC BY 4.0**, exact creator/archive credit per file |
+| Europeana | Per file: CC0/PDM, CC BY/SA/NC/NC-SA and version/jurisdiction variants; retain exact institution/creator terms |
+| Wikimedia / WAFFLE-selected drawings | Per file: CC0/PDM, CC BY/SA, OGL-UK-1.0 or individual Commons rights statements; retain author and exact terms |
+| Synthetic training/demo plans | **generated for demo**; inherit originating document restrictions |
+| Upstream COCO / ImageNet pretraining | COCO annotations CC BY 4.0, images retain individual rights; ImageNet research/education access terms. Images are not redistributed here. |
 | RF-DETR-medium “2dplan2strct” | rfdetr Apache-2.0; checkpoint non-commercial research only; evaluated, not used |
 | Patnev71 SegFormer-B0 floorplan | Licence listed as “other”; rejected |
 | RapidOCR / rapidocr-onnxruntime | Apache-2.0 |
+| IfcOpenShell / three.js | **LGPL-3.0-or-later** / **MIT**, respectively; preserve library and third-party notices |
+| Deterministic fake provider / device speech | Fake adapter MIT; platform speech service terms apply to device recognition/synthesis |
 
-The same [inventory](docs/MODELS.md) lists configured NVIDIA Nemotron, Google Gemini, Anthropic Claude, Featherless Qwen, Runware/Fish Audio, and ElevenLabs API models and provider documentation; configuration alone does not prove a provider ran. API access does not make hosted model weights MIT.
+The same [inventory](docs/MODELS.md) records exact model IDs, source links, training provenance and dependency licences; configuration alone does not prove a provider ran. API access does not make hosted model weights MIT. The challenge distribution is for noncommercial Junction use; each drawing keeps its own `data/<source>/LICENSE.md` credit and terms.
+
+**Dependency check (X-18):** `web/package.json`, Python project/requirements, the Dockerfile, npm lockfile licences and installed Python metadata show **no direct GPL/AGPL package dependencies** (`ultralytics` and `PyMuPDF` are absent). LGPL IfcOpenShell is present. Local SciPy metadata lists bundled **GPL-3.0-or-later WITH GCC-exception-3.1** runtimes and **LGPL-2.1-or-later** libquadmath; these notices must be retained. See the [dependency table](docs/MODELS.md#dependency-licence-check--x-18) for scope and other licences, including OpenUSD and native-library notices.
 
 The retained `samples/aalseth_stairs.*` derive from OpeningDesign's [Aalseth Residence](https://github.com/OpeningDesign/Aalseth_Residence), credited to the entire project team under CC BY-SA 4.0. `samples/digital_hub_arc.*` derive from DigitalHub, copyright RWTH Aachen University, E3D Institute of Energy Efficiency and Sustainable Building, under MIT; see the source `LICENSE.md` files under `data/junction-dataset-preview/data/` for original dataset credits.
 
