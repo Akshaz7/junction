@@ -4,6 +4,9 @@ import { Badge, Button } from './components/ui'
 import { ProjectSwitcher, WorkspaceNavigation, navigation } from './components/workspace-navigation'
 import { PlaceholderPage } from './components/placeholder-page'
 import { AccuracyScreen } from './components/accuracy-screen'
+import { FindingsScreen } from './components/findings-screen'
+import { SkillsScreen } from './components/skills-screen'
+import { AutomationsScreen } from './components/automations-screen'
 import { OverviewScreen } from './components/overview-screen'
 import { ChatScreen } from './components/chat-screen'
 import { DataScreen } from './components/data-screen'
@@ -61,8 +64,11 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
       }} />
       {view === 'changes' && <ChangesScreen docs={docs} demo={demo} />}
       {view === 'accuracy' && <AccuracyScreen />}
+      {view === 'findings' && <FindingsScreen docs={docs} />}
+      {view === 'skills' && <SkillsScreen docs={docs} />}
+      {view === 'automations' && <AutomationsScreen docs={docs} />}
       {view === 'overview' && <OverviewScreen docs={docs} />}
-      {view !== 'data' && view !== 'chat' && view !== 'changes' && view !== 'accuracy' && view !== 'overview' ? <PlaceholderPage route={view} /> : null}
+      {view !== 'data' && view !== 'chat' && view !== 'changes' && view !== 'accuracy' && view !== 'overview' && view !== 'findings' && view !== 'skills' && view !== 'automations' ? <PlaceholderPage route={view} /> : null}
     </main>
   </div>
 }

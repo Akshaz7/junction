@@ -61,6 +61,10 @@ async function expectInside(box: Locator, viewport: Locator) {
 }
 
 test('citation opens its page beside chat with numbered evidence, navigation and permanent credit', async ({ page, request }) => {
+  // Stable document tags must never replace an ordinary answer's numbers.
+  await page.route(`**/api/docs/${fixtureId}/files/scene.json`, (route) => route.fulfill({ json: {
+    items: Object.fromEntries(Array.from({ length: 50 }, (_, n) => [`window-${String(n + 1).padStart(3, '0')}`, { tag: `W${n + 1}` }])),
+  } }))
   const response = await request.get(`http://localhost:8000/api/docs/${fixtureId}`)
   expect(response.ok()).toBe(true)
   const fixture = await response.json() as Document
@@ -72,6 +76,8 @@ test('citation opens its page beside chat with numbered evidence, navigation and
   const viewer = page.getByRole('region', { name: 'Drawing viewer' })
   const viewport = viewer.getByTestId('drawing-viewport')
   await waitForDrawing(viewer)
+  await expect(viewer.locator('.evidence-region').first()).toHaveAttribute('data-tag', /^W\d+$/)
+  await expect(viewer.locator('.evidence-region > svg > text')).toHaveText(regions.map((region) => region.label))
   expect(imageRequests).toHaveLength(1)
   await expectInside(viewer.getByTestId('evidence-box-1'), viewport)
   expect(regions.length).toBeGreaterThan(1)

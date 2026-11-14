@@ -1,0 +1,16 @@
+@import './skills-screen.css';
+.automation-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.automation-list article { display: flex; flex-direction: column; gap: 12px; }
+.automation-list article > header, .automation-report > header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.automation-list h3, .automation-report > header h3 { margin: 0; }
+.automation-list dl { display: flex; flex-wrap: wrap; gap: 12px 28px; margin: 4px 0 8px; font-size: var(--text-caption); }
+.automation-list dt { color: var(--muted-foreground); }
+.automation-list dd { margin: 4px 0 0; font-variant-numeric: tabular-nums; }
+.automation-report > .tools-muted { margin-top: 12px; }
+.automation-markdown { margin-top: 18px; line-height: 1.7; overflow-wrap: anywhere; font-size: var(--text-body-sm); }
+.automation-markdown > * + * { margin-top: 14px; }
+.automation-markdown h3 { font-size: var(--text-body-lg); margin-bottom: 0; }
+.automation-markdown h4 { font-weight: 600; }
+.automation-markdown p { white-space: pre-wrap; }
+.automation-markdown ul { padding-left: 20px; list-style: disc; }
+@media (max-width: 800px) { .automation-list { grid-template-columns: minmax(0, 1fr); } }

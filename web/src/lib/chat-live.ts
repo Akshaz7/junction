@@ -22,13 +22,14 @@ export function createChatLiveClient(options: { url?: string; connect?: (url: st
   let socket: WebSocket | null = null
   let retry: ReturnType<typeof setTimeout> | undefined
   let attempt = 0
+  let suspended = false
   function emit(event: ChatLiveEvent) { for (const listener of listeners) listener(event) }
   function reconnect() {
-    if (retry !== undefined || !listeners.size) return
+    if (suspended || retry !== undefined || !listeners.size) return
     retry = setTimeout(() => { retry = undefined; connect() }, Math.min(250 * 2 ** Math.min(attempt++, 6), 10_000))
   }
   function connect() {
-    if (socket || retry !== undefined || !listeners.size) return
+    if (suspended || socket || retry !== undefined || !listeners.size) return
     try {
       const url = options.url ?? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`
       const connection = (options.connect ?? ((url) => new WebSocket(url)))(url)
@@ -56,19 +57,45 @@ export function createChatLiveClient(options: { url?: string; connect?: (url: st
       connection.addEventListener('error', () => { if (socket === connection) connection.close() })
     } catch { reconnect() }
   }
+  function disconnect() {
+    if (retry !== undefined) clearTimeout(retry)
+    retry = undefined
+    const previous = socket
+    socket = null
+    previous?.close()
+    if (previous) emit({ type: 'disconnected' })
+  }
+  function suspend() { suspended = true; disconnect() }
+  function resume() {
+    if (document.visibilityState === 'hidden' || navigator.onLine === false) return
+    suspended = false
+    attempt = 0
+    if (retry !== undefined) clearTimeout(retry)
+    retry = undefined
+    connect()
+  }
+  function visibility() { if (document.visibilityState === 'hidden') suspend(); else resume() }
+  function watchPage(watch: boolean) {
+    if (typeof window === 'undefined') return
+    const method = watch ? 'addEventListener' : 'removeEventListener'
+    window[method]('pagehide', suspend)
+    window[method]('pageshow', resume)
+    window[method]('offline', suspend)
+    window[method]('online', resume)
+    document[method]('visibilitychange', visibility)
+  }
   return {
     subscribe(listener: (event: ChatLiveEvent) => void) {
+      if (!listeners.size) watchPage(true)
       listeners.add(listener)
       if (socket?.readyState === 1) listener({ type: 'connected' })
       connect()
       return () => {
         listeners.delete(listener)
         if (listeners.size) return
-        if (retry !== undefined) clearTimeout(retry)
-        retry = undefined
-        const previous = socket
-        socket = null
-        previous?.close()
+        watchPage(false)
+        disconnect()
+        suspended = false
         attempt = 0
       }
     },

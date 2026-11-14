@@ -10,7 +10,7 @@ const pages = {
   automations: { icon: Clock3, heading: 'Keep the routine work moving.', description: 'A place for recurring checks on your project documents.', empty: 'No automations set up yet', detail: 'Recurring checks will appear here when they are available.' },
 } as const
 
-export function PlaceholderPage({ route }: { route: Exclude<Route, 'chat' | 'data'> }) {
+export function PlaceholderPage({ route }: { route: Exclude<Route, 'chat' | 'data' | 'findings'> }) {
   const page = pages[route]
   const Icon = page.icon
   return <section className="placeholder-page" aria-label={`${route} page`}>

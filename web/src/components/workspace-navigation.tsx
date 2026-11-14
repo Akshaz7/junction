@@ -10,6 +10,7 @@ export const navigation = [
   { route: 'accuracy', label: 'Accuracy', icon: ChartNoAxesCombined },
   { route: 'skills', label: 'Skills', icon: Library },
   { route: 'automations', label: 'Automations', icon: Clock3 },
+  { route: 'findings', label: 'Findings', icon: Check },
 ] as const
 
 export function ProjectSwitcher() {

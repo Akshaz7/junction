@@ -10,6 +10,7 @@ import { MicButton } from './voice-controls'
 import { chatLink, savedExchanges, type ChatExchange } from '../lib/chat-history'
 import { chatLive } from '../lib/chat-live'
 import { useSceneEdits } from '../lib/use-scene-edits'
+import { SkillPicker } from './skills-screen'
 
 const starters = [
   { title: 'Count on a plan', label: 'Count something on a plan', question: 'How many windows are there?', icon: Scale },
@@ -35,6 +36,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const [traces, setTraces] = useState<TraceStep[]>([])
   const [error, setError] = useState('')
   const [mention, setMention] = useState<Mention | null>(null)
+  const [toolsOpen, setToolsOpen] = useState(false)
   const [activeOption, setActiveOption] = useState(0)
   const [viewer, setViewer] = useState<{ answer: Answer; citation: Citation; request: number } | null>(null)
   const [split, setSplit] = useState(48)
@@ -46,6 +48,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const textarea = useRef<HTMLTextAreaElement>(null)
   const conversation = useRef<HTMLDivElement>(null)
   const picker = useRef<HTMLDivElement>(null)
+  const tools = useRef<HTMLDivElement>(null)
+  const toolsButton = useRef<HTMLButtonElement>(null)
   const generation = useRef(0)
   const sceneEdits = useSceneEdits(liveChatId, answers, demo)
   const viewerDoc = viewer?.citation.doc_id
@@ -66,7 +70,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       chatId.current = null
       setLiveChatId(null)
       setBusy(false); setAnswers([]); setViewer(null); setError('')
-      setMention(null); setPendingQuestion(''); setStatuses([]); setTraces([])
+      setMention(null); setToolsOpen(false); setPendingQuestion(''); setStatuses([]); setTraces([])
       setSelected([]); setRestoredDocIds(null); setDraft('')
       if (link.kind === 'question') {
         setRestoring(false)
@@ -123,8 +127,16 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       })
     }
     const unsubscribe = chatLive.subscribe((event) => {
-      if (event.type === 'connected') { refresh(); return }
-      if (event.type === 'disconnected') return
+      if (event.type === 'connected' || event.type === 'disconnected') {
+        // A remote request observed before suspension may never produce another
+        // notification here. A reconnect snapshot is history, not an active job.
+        pendingMessageId = null
+        if (!submitting.current) {
+          setBusy(false); setPendingQuestion(''); setStatuses([]); setTraces([])
+        }
+        if (event.type === 'connected') refresh()
+        return
+      }
       if (event.chat_id !== liveChatId || submitting.current) return
       if (event.type === 'chat.message') {
         pendingMessageId = event.role === 'user' ? event.message_id : null
@@ -134,6 +146,24 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     })
     return () => { controller?.abort(); unsubscribe() }
   }, [demo, liveChatId])
+
+  useEffect(() => {
+    let frame = 0
+    function resume() {
+      if (hidden || document.visibilityState === 'hidden' || (viewer && sheet)) return
+      cancelAnimationFrame(frame)
+      // WKWebView can retain the keyboard's scroll offset across native AR.
+      // Keep the mounted input and its draft, and reveal it after layout resumes.
+      frame = requestAnimationFrame(() => textarea.current?.scrollIntoView({ block: 'nearest', inline: 'nearest' }))
+    }
+    document.addEventListener('visibilitychange', resume)
+    window.addEventListener('pageshow', resume)
+    return () => {
+      cancelAnimationFrame(frame)
+      document.removeEventListener('visibilitychange', resume)
+      window.removeEventListener('pageshow', resume)
+    }
+  }, [hidden, viewer, sheet])
 
   useEffect(() => {
     if (restoredDocIds) setSelected(docs.filter((doc) => restoredDocIds.includes(doc.doc_id)))
@@ -156,6 +186,22 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     document.addEventListener('pointerdown', close)
     return () => document.removeEventListener('pointerdown', close)
   }, [mention])
+  useEffect(() => {
+    if (busy || restoring || hidden) setToolsOpen(false)
+  }, [busy, restoring, hidden])
+  useEffect(() => {
+    if (!toolsOpen) return
+    tools.current?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus()
+    function close(event: PointerEvent) {
+      if (!tools.current?.contains(event.target as Node) && !toolsButton.current?.contains(event.target as Node)) setToolsOpen(false)
+    }
+    function escape(event: KeyboardEvent) {
+      if (event.key === 'Escape') { event.preventDefault(); setToolsOpen(false); toolsButton.current?.focus() }
+    }
+    document.addEventListener('pointerdown', close)
+    document.addEventListener('keydown', escape)
+    return () => { document.removeEventListener('pointerdown', close); document.removeEventListener('keydown', escape) }
+  }, [toolsOpen])
 
   const matches = mention ? docs.filter((doc) => !selected.some((item) => item.doc_id === doc.doc_id) &&
     `${doc.title} ${doc.doc_id} ${doc.source}`.toLowerCase().includes(mention.query.toLowerCase())) : []
@@ -301,10 +347,15 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
           </button>)}</div>
           {!matches.length && <p className="picker-empty">{loadingDocs ? 'Loading documents…' : 'No matching documents.'}</p>}
         </div>}
-        <div className="composer-actions"><button className="document-context" aria-label={selected.length ? `Document context: ${selected.length} selected` : `Include a document (${docs.length} available)`} title={selected.length ? `${selected.length} selected` : `All documents (${docs.length})`} type="button" disabled={busy || loadingDocs || !docs.length} onClick={() => {
-          const next = draft + (draft && !/\s$/.test(draft) ? ' @' : '@')
-          setDraft(next); updateMention(next, next.length); textarea.current?.focus()
-        }}><Plus size={16} /><span className="sr-only"><FolderOpen size={15} />{loadingDocs ? 'Loading documents…' : selected.length ? `${selected.length} selected` : `All documents (${docs.length})`}<AtSign size={13} /></span></button><MicButton disabled={busy || restoring || hidden} onText={(text) => { setDraft(text); setMention(null); textarea.current?.focus() }} />
+        {toolsOpen && <div className="composer-tools" ref={tools} id="composer-tools" role="dialog" aria-label="Add to question">
+          <button type="button" className="composer-document-option" disabled={loadingDocs || !docs.length} onClick={() => {
+            const next = draft + (draft && !/\s$/.test(draft) ? ' @' : '@')
+            setToolsOpen(false); setDraft(next); updateMention(next, next.length); textarea.current?.focus()
+          }}><FolderOpen size={16} />Include a document<AtSign size={13} /></button>
+          <p className="picker-heading">Skills</p>
+          <SkillPicker disabled={busy || restoring || hidden} onPick={(prompt) => { setDraft(prompt); setMention(null); setToolsOpen(false); textarea.current?.focus() }} />
+        </div>}
+        <div className="composer-actions"><button ref={toolsButton} className="document-context" aria-label="Add to question" aria-haspopup="dialog" aria-expanded={toolsOpen} aria-controls={toolsOpen ? 'composer-tools' : undefined} title="Add documents or skills" type="button" disabled={busy || restoring || hidden} onClick={() => { setMention(null); setToolsOpen((open) => !open) }}><Plus size={16} /></button><MicButton disabled={busy || restoring || hidden} onText={(text) => { setDraft(text); setMention(null); textarea.current?.focus() }} />
           <Button type="submit" variant="primary" className="send-button" aria-label="Send question" disabled={!draft.trim() || busy || restoring || !docs.length || !!mention}><ArrowUp size={18} /></Button>
         </div>
       </form>

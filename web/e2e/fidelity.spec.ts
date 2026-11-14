@@ -92,12 +92,21 @@ function checkSettledReferences() {
 }
 
 async function press(page: Page, locator: Locator) {
-  await expect(locator).toBeVisible()
-  await locator.scrollIntoViewIfNeeded()
-  const box = await locator.boundingBox()
-  if (!box) throw new Error('Press target has no bounding box')
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-  await page.mouse.down()
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      await expect(locator).toBeVisible()
+      // Trial clicks wait for stability and scroll into view without releasing
+      // the held press used by the reference. Re-resolve after a chat refresh.
+      await locator.click({ trial: true })
+      const box = await locator.boundingBox()
+      if (!box) throw new Error('Press target has no bounding box')
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+      await page.mouse.down()
+      return
+    } catch (error) {
+      if (attempt || !(error instanceof Error) || !/not attached|detached|no bounding box/i.test(error.message)) throw error
+    }
+  }
 }
 
 async function setWipe(page: Page, value: number) {

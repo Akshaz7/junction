@@ -239,6 +239,11 @@ h1, h2, h3, p { margin: 0; }
 .document-chip button:hover { background: var(--ink-hover); }
 .document-picker { position: absolute; bottom: calc(100% + 8px); left: 0; right: 0; z-index: 6; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-popover); box-shadow: var(--shadow-float); padding: 6px; }
 .picker-heading, .picker-empty { padding: 8px 10px; font-size: var(--text-caption); color: var(--muted-foreground); }
+.composer-tools { position: absolute; bottom: calc(100% + 8px); left: 0; z-index: 6; width: min(280px, 100%); padding: 6px; border: 1px solid var(--border); border-radius: var(--radius-popover); background: var(--card); box-shadow: var(--shadow-float); }
+.composer-document-option { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--foreground); text-align: left; font: inherit; }
+.composer-document-option:hover { background: var(--ink-selected); }
+.composer-tools .skill-picker { display: flex; max-width: 100%; padding: 0 10px 8px; }
+.composer-tools .skill-picker select { flex: 1; max-width: 100%; }
 .document-picker [role=listbox] { max-height: min(30dvh, 240px); overflow-y: auto; }
 .document-picker [role=option] { width: 100%; display: flex; align-items: center; gap: 10px; text-align: left; background: transparent; border: 0; padding: 10px; border-radius: var(--radius-control); color: var(--foreground); }
 .document-picker [role=option]:hover, .document-picker [aria-selected=true] { background: var(--ink-selected); }
