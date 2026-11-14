@@ -46,6 +46,7 @@ test('teach a symbol, review with keyboard, persist a pin and export it', async 
   await page.getByRole('button', { name: 'Labels & notes', exact: true }).click()
   await expect(page.locator('.markup-pin-list')).toContainText('Check ceiling clearance before ordering.')
   await expect(page.locator('.markup-count')).toContainText('1 confirmed')
+  await page.locator('.markup-pin-list').getByRole('button', { name: 'Pin 1: Check ceiling clearance before ordering.' }).click()
   await page.screenshot({ path: `${output}/saved-pin.png` })
   await page.getByRole('button', { name: 'Next page', exact: true }).click()
   await expect(page.locator('.drawing-plane > img')).toHaveAttribute('alt', /page 2/)
