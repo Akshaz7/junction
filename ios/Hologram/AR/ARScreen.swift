@@ -23,128 +23,28 @@ struct ARScreen: View {
         #else
         ZStack {
             ARSceneView(controller: controller).ignoresSafeArea()
-            VStack(spacing: 16) {
-                HStack {
-                    Text(controller.isWalking ? "Walk at 1:1" : "Show on table").font(.headline)
-                    Spacer()
-                    Button("Done") { dismiss() }
-                }
-                .padding().background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
-                if controller.isWalking {
+            VStack(spacing: 10) {
+                topBar
+                placementPill
+                if controller.isWalking && controller.isPlaced {
                     HStack {
                         if let manifest = controller.manifest {
                             WalkMiniMap(manifest: manifest, cameraTransform: controller.cameraInModel,
                                         highlightedItemIDs: controller.highlightedItemIDs,
                                         guide: controller.guide, targetItemID: controller.targetItemID,
                                         onSelectItem: controller.selectTarget)
-                        } else {
-                            Text("Scene map unavailable.").font(.caption).padding()
-                                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
                         }
                         Spacer()
                     }
                 }
                 Spacer()
-                if let item = controller.selectedItem {
-                    ItemDetailsCard(item: item, onDismiss: controller.dismissSelectedItem,
-                                    onHighlight: { highlightItem(item.id) })
-                }
-                ARVoicePanel(voice: voice, docID: controller.activeDocID) { answer in
-                    controller.applyVoiceAnswer(answer)
-                }
-                ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    Picker("Demo scenes", selection: Binding(
-                        get: { requestedDocID ?? "" },
-                        set: { voice.stop(); controller.demoDocID = $0 }
-                    )) {
-                        if !DemoScenes.all.contains(where: { $0.id == requestedDocID }) {
-                            Text("Choose a scene").tag(requestedDocID ?? "")
-                        }
-                        ForEach(DemoScenes.all) { demo in
-                            Text(demo.title).tag(demo.id)
-                        }
-                    }
-                    .pickerStyle(.menu)
-                    .accessibilityIdentifier("demo-scenes-picker")
-                    if controller.isFixture {
-                        if let docID = requestedDocID, docID != "fixture__ios" {
-                            Text("Requested model unavailable. Showing sample.").font(.caption)
-                        }
-                        Text("Sample model · generated for demo")
-                            .font(.caption).foregroundStyle(.secondary)
-                    }
-                    if controller.isBundledDemo {
-                        Text("Bundled demo scene").font(.caption).foregroundStyle(.secondary)
-                    }
-                    if let attribution = controller.attribution {
-                        Text("\(attribution.credit) · \(attribution.licence)")
-                            .font(.caption2).foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .accessibilityIdentifier("scene-credit")
-                    }
-                    if let note = controller.manifest?.note {
-                        Text(note).font(.caption2).foregroundStyle(.secondary)
-                    }
-                    Text(controller.status).font(.callout)
-                        .accessibilityIdentifier("ar-status")
-                    Toggle("Show roof", isOn: Binding(get: { controller.showRoof },
-                                                      set: { controller.setShowRoof($0) }))
-                        .disabled(!controller.isLoaded)
-                        .accessibilityIdentifier("show-roof-toggle")
-                    HStack {
-                        Text("Storey")
-                        Spacer()
-                        Button { controller.stepStorey(-1) } label: {
-                            Image(systemName: "chevron.down")
-                        }
-                        .accessibilityLabel("Lower storey")
-                        .disabled(!controller.canStepStoreyDown)
-                        Text(controller.activeStorey ?? "Unavailable").font(.callout)
-                            .accessibilityIdentifier("active-storey")
-                        Button { controller.stepStorey(1) } label: {
-                            Image(systemName: "chevron.up")
-                        }
-                        .accessibilityLabel("Higher storey")
-                        .disabled(!controller.canStepStoreyUp)
-                    }
-                    Toggle("Walk", isOn: Binding(get: { controller.isWalking },
-                                                 set: { controller.setWalking($0) }))
-                        .disabled(!controller.isLoaded)
-                        .accessibilityIdentifier("walk-toggle")
-                    HStack {
-                        Text("Scale")
-                        Spacer()
-                        Text(controller.scaleLabel).monospacedDigit()
-                    }
-                    Slider(value: Binding(
-                        get: { log10(Double(controller.scale)) },
-                        set: { controller.setScale(Float(pow(10, $0))) }
-                    ), in: -2...0)
-                    .accessibilityLabel("Model scale")
-                    .accessibilityValue(controller.scaleLabel)
-                    .disabled(!controller.isLoaded || controller.isWalking)
-                    HStack {
-                        Text("1:100")
-                        Spacer()
-                        Text("1:1")
-                    }.font(.caption).foregroundStyle(.secondary)
-                    Button("Reset placement", systemImage: "arrow.counterclockwise") { controller.reset() }
-                        .disabled(!controller.isPlaced)
-                }
-                .padding()
-                }
-                .frame(maxHeight: advisor.cards.isEmpty ? 420 : 160)
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
-                if !advisor.cards.isEmpty {
-                    ScrollView {
-                        AdvisorCardsOverlay(cards: advisor.cards, onSelect: selectAdvisorCard)
-                    }
-                    .frame(maxHeight: 300)
-                }
-            }.padding()
+                ARSubtitle(voice: voice)
+                bottomBar
+            }
+            .padding(.horizontal, 16).padding(.vertical, 8)
         }
         .task(id: requestedDocID) {
+            controller.onActivateSelectedItem = { highlightItem($0) }
             liveSocket.stop()
             liveSocket.onHighlight = { request in
                 controller.applyLiveHighlight(request)
@@ -184,6 +84,152 @@ struct ARScreen: View {
             }
         }
         #endif
+    }
+
+    private var sceneName: String {
+        DemoScenes.all.first { $0.id == requestedDocID }?.title ?? (controller.isFixture ? "Sample" : "Scene")
+    }
+
+    private var isPlacing: Bool { controller.isLoaded && !controller.isPlaced }
+
+    private var topBar: some View {
+        HStack(alignment: .top) {
+            Button { dismiss() } label: {
+                HologramCapsule { Label("Done", systemImage: "xmark").labelStyle(.titleAndIcon) }
+            }
+            .accessibilityIdentifier("ar-done")
+            Spacer()
+            sceneMenu
+        }
+    }
+
+    @ViewBuilder private var placementPill: some View {
+        if !controller.isLoaded || controller.status.hasPrefix("Unable") || controller.status.hasPrefix("Augmented") {
+            if !(controller.status.hasPrefix("Move your device") && controller.isLoaded) {
+                HologramCapsule { Text(controller.status).lineLimit(2) }
+            }
+        } else if isPlacing {
+            HologramCapsule {
+                Text(controller.canPlace
+                     ? (controller.isWalking ? "Tap to place on the floor" : "Tap to place your model")
+                     : (controller.isWalking ? "Aim at the floor" : "Aim at a flat surface"))
+            }
+        }
+    }
+
+    private var bottomBar: some View {
+        ZStack(alignment: .bottom) {
+            HStack(alignment: .bottom) {
+                ARMicButton(voice: voice, docID: controller.activeDocID) { answer in
+                    controller.applyVoiceAnswer(answer)
+                }
+                Spacer()
+                if !advisor.cards.isEmpty { advisorPill }
+            }
+            if isPlacing {
+                Button { controller.confirmPlacement() } label: {
+                    Text("Place model").font(.headline).foregroundStyle(.white)
+                        .padding(.horizontal, 28).padding(.vertical, 14)
+                        .background(.black.opacity(controller.canPlace ? 0.75 : 0.45), in: Capsule())
+                        .overlay(Capsule().stroke(HologramStyle.cyan.opacity(controller.canPlace ? 0.9 : 0.3),
+                                                  lineWidth: 1.5))
+                        .shadow(color: HologramStyle.cyan.opacity(controller.canPlace ? 0.6 : 0), radius: 8)
+                }
+                .disabled(!controller.canPlace)
+                .accessibilityIdentifier("ar-place-model")
+            }
+        }
+    }
+
+    /// One small pill instead of stacked advisor cards; each check is a menu entry.
+    private var advisorPill: some View {
+        Menu {
+            ForEach(advisor.cards.prefix(3)) { card in
+                Button { selectAdvisorCard(card) } label: {
+                    Label(card.title, systemImage: advisorIcon(card.kind))
+                }
+                .accessibilityIdentifier("advisor-card-\(card.id)")
+            }
+        } label: {
+            HologramCapsule(tint: HologramStyle.amber) {
+                Label("\(min(advisor.cards.count, 3)) checks", systemImage: "scope")
+            }
+        }
+        .accessibilityIdentifier("advisor-checks")
+    }
+
+    private func advisorIcon(_ kind: AdvisorCard.Kind) -> String {
+        switch kind {
+        case .warning: return "exclamationmark.triangle"
+        case .option: return "lightbulb"
+        case .info: return "info.circle"
+        }
+    }
+
+    private var sceneMenu: some View {
+        Menu {
+            Picker("Demo scenes", selection: Binding(
+                get: { requestedDocID ?? "" },
+                set: { voice.stop(); controller.demoDocID = $0 }
+            )) {
+                if !DemoScenes.all.contains(where: { $0.id == requestedDocID }) {
+                    Text("Choose a scene").tag(requestedDocID ?? "")
+                }
+                ForEach(DemoScenes.all) { demo in
+                    Text(demo.title).tag(demo.id)
+                }
+            }
+            .pickerStyle(.menu)
+            .accessibilityIdentifier("demo-scenes-picker")
+            Section {
+                Toggle("Show roof", isOn: Binding(get: { controller.showRoof },
+                                                  set: { controller.setShowRoof($0) }))
+                    .disabled(!controller.isLoaded)
+                    .accessibilityIdentifier("show-roof-toggle")
+                Button { controller.stepStorey(1) } label: { Label("Storey up", systemImage: "chevron.up") }
+                    .disabled(!controller.canStepStoreyUp)
+                Button { controller.stepStorey(-1) } label: { Label("Storey down", systemImage: "chevron.down") }
+                    .disabled(!controller.canStepStoreyDown)
+                Text("Storey: \(controller.activeStorey ?? "Unavailable")")
+                    .accessibilityIdentifier("active-storey")
+                Toggle("Walk at 1:1", isOn: Binding(get: { controller.isWalking },
+                                                    set: { controller.setWalking($0) }))
+                    .disabled(!controller.isLoaded)
+                    .accessibilityIdentifier("walk-toggle")
+            }
+            Section("Scale \(controller.scaleLabel)") {
+                ForEach([100, 50, 20, 10], id: \.self) { denominator in
+                    Button("1:\(denominator)") { controller.setScale(1 / Float(denominator)) }
+                        .disabled(!controller.isLoaded || controller.isWalking)
+                }
+            }
+            Button("Reset placement", systemImage: "arrow.counterclockwise") { controller.reset() }
+                .disabled(!controller.isPlaced)
+            Section {
+                if controller.isFixture {
+                    if let docID = requestedDocID, docID != "fixture__ios" {
+                        Text("Requested model unavailable. Showing sample.")
+                    }
+                    Text("Sample model · generated for demo")
+                }
+                if controller.isBundledDemo { Text("Bundled demo scene") }
+                if let attribution = controller.attribution {
+                    Text("\(attribution.credit) · \(attribution.licence)")
+                        .accessibilityIdentifier("scene-credit")
+                }
+                if let note = controller.manifest?.note { Text(note) }
+                Text(controller.status).accessibilityIdentifier("ar-status")
+            }
+        } label: {
+            HologramCapsule {
+                HStack(spacing: 6) {
+                    Text(controller.isWalking ? "Walk · \(sceneName)" : sceneName).lineLimit(1)
+                    Image(systemName: "chevron.down").font(.caption2.weight(.bold))
+                }
+                .frame(maxWidth: 220)
+            }
+        }
+        .accessibilityIdentifier("ar-scene-menu")
     }
 
     private func highlightItem(_ itemID: String) {

@@ -92,6 +92,31 @@ final class HighlightControllerTests: XCTestCase {
     }
 
     @MainActor
+    func testHologramLookTintsEverythingCyanAndRestoresOriginals() throws {
+        let root = Entity()
+        let group = Entity()
+        group.name = SceneIndex.usdName(for: "window-001")
+        let original = SimpleMaterial(color: .red, isMetallic: false)
+        let other = ModelEntity(mesh: .generateBox(size: 1), materials: [original])
+        let item = ModelEntity(mesh: .generateBox(size: 1), materials: [original])
+        group.addChild(item)
+        root.addChild(group)
+        root.addChild(other)
+        let controller = HighlightController(root: root)
+
+        controller.hologramEnabled = true
+        XCTAssertTrue(try XCTUnwrap(other.model).materials.first is UnlitMaterial)
+        controller.highlight(itemIDs: ["window-001"], captions: ["window-001": "Window W1"])
+        XCTAssertTrue(try XCTUnwrap(item.model).materials.first is UnlitMaterial)
+        XCTAssertNotNil(controller.labelsByItemID["window-001"]?.findEntity(named: "caption"))
+        controller.clear()
+        XCTAssertTrue(controller.labelsByItemID.isEmpty)
+        controller.hologramEnabled = false
+        assertSameMaterials(try XCTUnwrap(other.model).materials, [original])
+        assertSameMaterials(try XCTUnwrap(item.model).materials, [original])
+    }
+
+    @MainActor
     private func renderables(in entity: Entity) -> [Entity] {
         (entity.components[ModelComponent.self] == nil ? [] : [entity])
             + entity.children.flatMap { renderables(in: $0) }

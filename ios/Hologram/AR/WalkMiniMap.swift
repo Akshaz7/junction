@@ -10,6 +10,9 @@ struct WalkMiniMap: View {
     let onSelectItem: (String) -> Void
 
     private let accent = Color(uiColor: HighlightController.accentColor)
+    private let cyan = Color(uiColor: HighlightController.hologramColor)
+    private static let canvasSize = CGSize(width: 112, height: 96)
+    private static let inset: CGFloat = 8
 
     private var cameraPosition: SIMD3<Float>? {
         cameraTransform.map { SIMD3($0.columns.3.x, $0.columns.3.y, $0.columns.3.z) }
@@ -24,10 +27,10 @@ struct WalkMiniMap: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label("You are here", systemImage: "location.fill").font(.caption.bold())
+            Label("You are here", systemImage: "location.fill").font(.caption2.bold()).foregroundStyle(cyan)
             if let bounds = mapBounds {
                 Canvas { context, size in
-                    let rect = CGRect(origin: .zero, size: size).insetBy(dx: 12, dy: 12)
+                    let rect = CGRect(origin: .zero, size: size).insetBy(dx: Self.inset, dy: Self.inset)
                     for id in manifest.items.keys.sorted() {
                         guard let item = manifest.items[id]?.bbox_m else { continue }
                         let first = WalkGuide.project(item.minimum, bounds: bounds, into: rect)
@@ -36,8 +39,8 @@ struct WalkMiniMap: View {
                                          width: max(last.x - first.x, 1), height: max(last.y - first.y, 1))
                         let selected = highlightedItemIDs.contains(id) || targetItemID == id
                         let path = Path(box)
-                        context.fill(path, with: .color(selected ? accent.opacity(0.65) : .secondary.opacity(0.15)))
-                        context.stroke(path, with: .color(selected ? accent : .secondary.opacity(0.4)), lineWidth: 1)
+                        context.fill(path, with: .color(selected ? accent.opacity(0.75) : cyan.opacity(0.14)))
+                        context.stroke(path, with: .color(selected ? accent : cyan.opacity(0.55)), lineWidth: 1)
                     }
                     if let cameraPosition {
                         let dot = WalkGuide.project(cameraPosition, bounds: bounds, into: rect)
@@ -46,29 +49,29 @@ struct WalkMiniMap: View {
                         context.stroke(circle, with: .color(.white), lineWidth: 2)
                     }
                 }
-                .frame(width: 164, height: 140)
-                .background(.background.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
+                .frame(width: Self.canvasSize.width, height: Self.canvasSize.height)
+                .background(.black.opacity(0.25), in: RoundedRectangle(cornerRadius: 8))
                 .contentShape(Rectangle())
                 .gesture(SpatialTapGesture().onEnded { event in
                     selectItem(at: event.location, bounds: bounds)
                 })
-                .accessibilityLabel("Scene map. Blue dot is your position. Highlighted items are red.")
+                .accessibilityLabel("Scene map. Blue dot is your position. Highlighted items are amber.")
             } else {
                 Text("Scene map unavailable.").font(.caption)
             }
             if let guide {
                 HStack(spacing: 10) {
                     Image(systemName: guide.arrived ? "checkmark.circle.fill" : "arrow.up")
-                        .font(.title2.bold())
+                        .font(.body.bold())
                         .rotationEffect(.degrees(guide.arrived ? 0 : Double(guide.bearingDegrees)))
                         .foregroundStyle(accent)
-                        .frame(width: 32, height: 32)
+                        .frame(width: 24, height: 24)
                         .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(guide.arrived ? "Arrived" : "\(guide.horizontalDistance, specifier: "%.1f") m")
-                            .font(.callout.bold()).monospacedDigit()
+                            .font(.caption.bold()).monospacedDigit().foregroundStyle(.white)
                         if let targetItemID {
-                            Text(targetItemID).font(.caption2).lineLimit(1).truncationMode(.middle)
+                            Text(targetItemID).font(.system(size: 9)).foregroundStyle(.white.opacity(0.7)).lineLimit(1).truncationMode(.middle)
                         }
                     }
                 }
@@ -76,17 +79,21 @@ struct WalkMiniMap: View {
                 .accessibilityLabel("\(guide.arrived ? "Arrived. " : "")\(guide.horizontalDistance, specifier: "%.1f") metres, \(guide.bearingDegrees, specifier: "%.0f") degrees relative to your heading")
             } else {
                 Text(cameraPosition == nil ? "Place on the floor to locate yourself." : "Tap an item to guide you.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.system(size: 10)).foregroundStyle(.white.opacity(0.7))
             }
         }
-        .frame(width: 164, alignment: .leading)
-        .padding(12)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .frame(width: Self.canvasSize.width, alignment: .leading)
+        .padding(8)
+        .background(.ultraThinMaterial.opacity(0.7), in: RoundedRectangle(cornerRadius: 14))
+        .background(.black.opacity(0.25), in: RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(cyan.opacity(0.4), lineWidth: 1))
+        .environment(\.colorScheme, .dark)
         .accessibilityIdentifier("walk-mini-map")
     }
 
     private func selectItem(at point: CGPoint, bounds: SceneBounds) {
-        let rect = CGRect(x: 12, y: 12, width: 140, height: 116)
+        let rect = CGRect(x: Self.inset, y: Self.inset,
+                          width: Self.canvasSize.width - Self.inset * 2, height: Self.canvasSize.height - Self.inset * 2)
         // Prefer the smallest overlapping bbox so windows/doors win over room boxes.
         let hits = manifest.items.compactMap { id, item -> (String, CGFloat)? in
             guard let box = item.bbox_m else { return nil }
