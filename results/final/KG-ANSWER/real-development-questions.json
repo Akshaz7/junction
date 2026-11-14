@@ -1,0 +1,247 @@
+[
+  {
+    "project": {
+      "id": "kg-answer-ifc_bench__fzk-house-arc",
+      "docs": [
+        {
+          "doc_id": "ifc_bench__fzk-house-arc"
+        },
+        {
+          "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus"
+        }
+      ]
+    },
+    "questions": [
+      {
+        "question": "What is connected to door Innentuer-1?",
+        "doc_id": "ifc_bench__fzk-house-arc",
+        "expect": {
+          "shape": "connections",
+          "required_source_item_ids": [
+            "3$f2p7VyLB7eox67SA_zKE",
+            "347jFE2yX7IhCEIALmupEH",
+            "3PfS__Y_DBAfq5naM6zD2Z"
+          ]
+        },
+        "truth": "IFC fills/voids and space-boundary relationships; type/material associations are additional connections"
+      },
+      {
+        "question": "If door Innentuer-1 is removed, what is affected?",
+        "doc_id": "ifc_bench__fzk-house-arc",
+        "expect": {
+          "shape": "impact",
+          "required_source_item_ids": [
+            "3$f2p7VyLB7eox67SA_zKE",
+            "347jFE2yX7IhCEIALmupEH",
+            "3PfS__Y_DBAfq5naM6zD2Z"
+          ]
+        },
+        "truth": "IFC host wall and adjoining spaces"
+      },
+      {
+        "question": "Where else does door Innentuer-1 appear?",
+        "doc_id": "ifc_bench__fzk-house-arc",
+        "expect": {
+          "shape": "appearances"
+        },
+        "truth": "IFC GlobalId in the counterpart index"
+      },
+      {
+        "question": "What is connected to door Innentuer-2?",
+        "doc_id": "ifc_bench__fzk-house-arc",
+        "expect": {
+          "shape": "connections",
+          "required_source_item_ids": [
+            "0e_hbkIQ5DMQlIJ$2V3j_m",
+            "3$f2p7VyLB7eox67SA_zKE",
+            "3jjW3rL656ex34Gws22EfM"
+          ]
+        },
+        "truth": "IFC fills/voids and space-boundary relationships; type/material associations are additional connections"
+      },
+      {
+        "question": "If door Innentuer-2 is removed, what is affected?",
+        "doc_id": "ifc_bench__fzk-house-arc",
+        "expect": {
+          "shape": "impact",
+          "required_source_item_ids": [
+            "0e_hbkIQ5DMQlIJ$2V3j_m",
+            "3$f2p7VyLB7eox67SA_zKE",
+            "3jjW3rL656ex34Gws22EfM"
+          ]
+        },
+        "truth": "IFC host wall and adjoining spaces"
+      },
+      {
+        "question": "Where else does door Innentuer-2 appear?",
+        "doc_id": "ifc_bench__fzk-house-arc",
+        "expect": {
+          "shape": "appearances"
+        },
+        "truth": "IFC GlobalId in the counterpart index"
+      },
+      {
+        "question": "What is connected to door Innentuer-3?",
+        "doc_id": "ifc_bench__fzk-house-arc",
+        "expect": {
+          "shape": "connections",
+          "required_source_item_ids": [
+            "2RSCzLOBz4FAK$_wE8VckM",
+            "3$f2p7VyLB7eox67SA_zKE",
+            "3jjW3rL656ex34Gws22EfM"
+          ]
+        },
+        "truth": "IFC fills/voids and space-boundary relationships; type/material associations are additional connections"
+      },
+      {
+        "question": "If door Innentuer-3 is removed, what is affected?",
+        "doc_id": "ifc_bench__fzk-house-arc",
+        "expect": {
+          "shape": "impact",
+          "required_source_item_ids": [
+            "2RSCzLOBz4FAK$_wE8VckM",
+            "3$f2p7VyLB7eox67SA_zKE",
+            "3jjW3rL656ex34Gws22EfM"
+          ]
+        },
+        "truth": "IFC host wall and adjoining spaces"
+      },
+      {
+        "question": "Where else does door Innentuer-3 appear?",
+        "doc_id": "ifc_bench__fzk-house-arc",
+        "expect": {
+          "shape": "appearances"
+        },
+        "truth": "IFC GlobalId in the counterpart index"
+      },
+      {
+        "question": "Do the drawings agree on doors on the ground floor?",
+        "doc_id": "ifc_bench__fzk-house-arc",
+        "expect": {
+          "shape": "agreement",
+          "value": 100.0
+        },
+        "truth": "Ground-floor door counts computed independently from both source indexes"
+      }
+    ],
+    "source_schema": "IFC4",
+    "source_file": "ifc_bench/fzk_house_arc.ifc"
+  },
+  {
+    "project": {
+      "id": "kg-answer-dxf",
+      "docs": [
+        {
+          "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833"
+        }
+      ]
+    },
+    "questions": [
+      {
+        "question": "What is connected to room 3.01?",
+        "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833",
+        "expect": {
+          "shape": "connections",
+          "required_source_item_ids": [
+            "text-1",
+            "text-2"
+          ]
+        },
+        "truth": "Unambiguous CAD item centres inside the extracted room polygon"
+      },
+      {
+        "question": "Where else does room 3.01 appear?",
+        "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833",
+        "expect": {
+          "shape": "missing"
+        },
+        "truth": "Single-source project has no cross-file identity/reference evidence"
+      },
+      {
+        "question": "What is connected to room 3.02?",
+        "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833",
+        "expect": {
+          "shape": "connections",
+          "required_source_item_ids": [
+            "other-11",
+            "other-12",
+            "text-3",
+            "text-4"
+          ]
+        },
+        "truth": "Unambiguous CAD item centres inside the extracted room polygon"
+      },
+      {
+        "question": "Where else does room 3.02 appear?",
+        "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833",
+        "expect": {
+          "shape": "missing"
+        },
+        "truth": "Single-source project has no cross-file identity/reference evidence"
+      },
+      {
+        "question": "What is connected to room 3.03?",
+        "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833",
+        "expect": {
+          "shape": "connections",
+          "required_source_item_ids": [
+            "text-5",
+            "text-6"
+          ]
+        },
+        "truth": "Unambiguous CAD item centres inside the extracted room polygon"
+      },
+      {
+        "question": "Where else does room 3.03 appear?",
+        "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833",
+        "expect": {
+          "shape": "missing"
+        },
+        "truth": "Single-source project has no cross-file identity/reference evidence"
+      },
+      {
+        "question": "What is connected to room 3.04?",
+        "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833",
+        "expect": {
+          "shape": "connections",
+          "required_source_item_ids": [
+            "text-7",
+            "text-8"
+          ]
+        },
+        "truth": "Unambiguous CAD item centres inside the extracted room polygon"
+      },
+      {
+        "question": "Where else does room 3.04 appear?",
+        "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833",
+        "expect": {
+          "shape": "missing"
+        },
+        "truth": "Single-source project has no cross-file identity/reference evidence"
+      },
+      {
+        "question": "What is connected to room 3.05?",
+        "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833",
+        "expect": {
+          "shape": "connections",
+          "required_source_item_ids": [
+            "other-1",
+            "text-10",
+            "text-11",
+            "text-9"
+          ]
+        },
+        "truth": "Unambiguous CAD item centres inside the extracted room polygon"
+      },
+      {
+        "question": "Where else does room 3.05 appear?",
+        "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833",
+        "expect": {
+          "shape": "missing"
+        },
+        "truth": "Single-source project has no cross-file identity/reference evidence"
+      }
+    ],
+    "source_format": "dxf"
+  }
+]
