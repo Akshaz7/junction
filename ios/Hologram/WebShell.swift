@@ -120,6 +120,12 @@ final class WebSession: ObservableObject {
     }
     #endif
 
+    /// Load the web app's pair page; it pairs this phone and shows the laptop's chat.
+    func openPair(_ link: PairLink) {
+        guard let url = link.webURL(base: webView.url ?? AppConfiguration.webURL) else { return }
+        webView.load(URLRequest(url: url))
+    }
+
     init(url: URL) {
         coordinator = WebShell.Coordinator()
         let configuration = WKWebViewConfiguration()

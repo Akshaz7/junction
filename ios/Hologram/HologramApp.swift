@@ -10,6 +10,9 @@ final class ShellPresentation: ObservableObject {
         arRequest = request
     }
 
+    /// A pair link while AR is open: leave AR so the web chat is what the person sees.
+    func closeAR() { arRequest = nil }
+
     func showFromToolbar() {
         arRequest = lastBridgeRequest ?? ARRequest(docID: DemoScenes.all[0].id, itemIDs: [])
     }
@@ -55,6 +58,11 @@ struct HologramApp: App {
                         .ignoresSafeArea()
                         .background(Color(red: 0.004, green: 0.118, blue: 0.004).ignoresSafeArea())
                 }
+            }
+            .onOpenURL { url in
+                guard let link = PairLink(url: url) else { return }
+                presentation.closeAR()
+                webSession.openPair(link)
             }
             .onChange(of: presentation.arRequest) { _, request in
                 if request != nil { webSession.prepareForAR() }
