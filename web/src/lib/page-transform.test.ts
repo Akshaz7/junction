@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { fitPage, fitPhonePage, focusBox, pageToScreen, screenToPage, zoomAt } from './page-transform'
+import { fitPage, fitPhonePage, focusBox, focusBoxWithin, pageToScreen, screenToPage, zoomAt } from './page-transform'
 
 describe('page pixels to drawing viewport coordinates', () => {
   it('applies scale before pan and reverses it at fractional zoom', () => {
@@ -50,5 +50,11 @@ describe('page pixels to drawing viewport coordinates', () => {
     expect(start.y).toBeGreaterThanOrEqual(32)
     expect(end.x).toBeLessThanOrEqual(368)
     expect(end.y).toBeLessThanOrEqual(268)
+  })
+  it('keeps the page centred when the focused box is near an edge', () => {
+    const image = { width: 923, height: 816 }, viewport = { width: 430, height: 715 }
+    const fitted = fitPage(image, viewport)
+    expect(focusBox([400, 20, 460, 60], viewport, fitted.scale).y).toBeGreaterThan(300)
+    expect(focusBoxWithin([400, 20, 460, 60], viewport, image, fitted)).toEqual(fitted)
   })
 })

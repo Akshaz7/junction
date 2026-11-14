@@ -33,3 +33,14 @@ export function focusBox(box: Bbox, viewport: Size, scale: number): PageTransfor
   const visibleScale = Math.min(scale, Math.max(1, viewport.width - 64) / Math.max(1, box[2] - box[0]), Math.max(1, viewport.height - 64) / Math.max(1, box[3] - box[1]))
   return { scale: visibleScale, x: viewport.width / 2 - (box[0] + box[2]) / 2 * visibleScale, y: viewport.height / 2 - (box[1] + box[3]) / 2 * visibleScale }
 }
+
+/**
+ * Focus a box without leaving empty canvas: when the whole page already fits (focus scale equals the fitted scale)
+ * the centred fit is kept, otherwise the focused view is clamped so the page edges never pull away from the viewport.
+ */
+export function focusBoxWithin(box: Bbox, viewport: Size, image: Size, fitted: PageTransform): PageTransform {
+  const focus = focusBox(box, viewport, fitted.scale)
+  if (focus.scale <= fitted.scale * 1.001) return fitted
+  const clamp = (offset: number, view: number, page: number) => page <= view ? (view - page) / 2 : Math.min(0, Math.max(view - page, offset))
+  return { scale: focus.scale, x: clamp(focus.x, viewport.width, image.width * focus.scale), y: clamp(focus.y, viewport.height, image.height * focus.scale) }
+}
