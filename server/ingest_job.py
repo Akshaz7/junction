@@ -24,15 +24,30 @@ def _art() -> Path:
 class Status:
     def __init__(self, path: Path):
         self.path, self.stages, self.mode, self.cost = path, [], None, None
+        self.started_at, self.step = time.time(), "starting"
+        if path.is_file():
+            try:
+                self.started_at = json.loads(path.read_text()).get("started_at", self.started_at)
+            except ValueError:
+                pass
         self.write("running")
 
     def write(self, status, detail=""):
-        self.path.write_text(json.dumps({"status": status, "stages": self.stages, "detail": detail, "mode": self.mode,
+        state = {"status": status, "stages": self.stages, "detail": detail, "mode": self.mode,
+                 "started_at": self.started_at, "step": self.step,
+                 "progress": 1 if status == "ready" else len(self.stages) / (len(self.stages) + 1),
                                          "cost_usd": round(self.cost["usd"], 5) if self.cost else None,
-                                         "updated": time.strftime("%Y-%m-%dT%H:%M:%S%z")}, indent=1))
+                 "updated": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
+        if status == "failed":
+            state["reason"] = detail or "Ingestion failed. Please upload the file again."
+        tmp = self.path.with_suffix(".job.tmp")
+        tmp.write_text(json.dumps(state, indent=1))
+        tmp.replace(self.path)
 
     def stage(self, name, fn):
         t = time.time()
+        self.step = name
+        self.write("running")
         try:
             fn()
             self.stages.append({"stage": name, "ok": True, "s": round(time.time() - t, 1)})
@@ -162,10 +177,18 @@ def _usdz(doc_id: str, ddir: Path):
 
 
 def run(doc_id: str) -> str:
+    st = Status(_art() / doc_id / "ingest.json")
+    try:
+        return _run(doc_id, st)
+    except Exception as e:  # noqa: BLE001
+        st.write("failed", f"Ingestion could not complete: {str(e)[:300] or type(e).__name__}")
+        return "failed"
+
+
+def _run(doc_id: str, st: Status) -> str:
     art = _art()
     ddir = art / doc_id
     doc = json.loads((ddir / "doc.json").read_text())
-    st = Status(ddir / "ingest.json")
     kind = doc["kind"]
     light = light_mode()
     st.mode = "vlm" if light else "full"
@@ -190,7 +213,9 @@ def run(doc_id: str) -> str:
         if light:
             pages.MAX_SIDE = int(os.environ.get("PAGES_MAX_SIDE", "4096"))  # keep the render inside the container RAM
         if kind == "raster":
-            st.stage("normalise", lambda: _normalise_raster(doc_id, art))
+            if not st.stage("normalise", lambda: _normalise_raster(doc_id, art)):
+                st.write("failed", st.stages[-1]["error"])
+                return "failed"
             doc = json.loads((ddir / "doc.json").read_text())
 
         def do_pages():
@@ -239,6 +264,7 @@ def run(doc_id: str) -> str:
             return "ready"
         elif ok:
             ok = False
+    ok = ok and all(s["ok"] for s in st.stages)
     final = "ready" if ok else "failed"
     st.cost = cost
     detail = "" if ok else next((s.get("error", "") for s in st.stages if not s["ok"]), "")

@@ -1,8 +1,9 @@
-# SERVER (Codex): row S-12. Judging-day hardening
-Scope: server/ratelimit.py, server/app.py (middleware config + health), server/tests/.
-1. Make the rate limit configurable: RATE_LIMIT_PER_MIN, default 30. Exempt /api/health and GET static file routes (/api/docs/*/files/*, page images, /api/docs/*/scene), since a viewer loads many files at once. Also exempt the /ws upgrade. Keep 30/min on POST /api/chats*, uploads and /api/advise.
-2. /api/health returns {ok, db, build_rev (env BUILD_REV), uptime_s, models_ok (any provider key present)}, with no secrets.
-3. A tests case for each.
-Done test: `.venv/bin/python -m pytest -q -p no:cacheprovider server/tests/test_ratelimit*.py server/tests/test_contract.py`. If DB tests can't run in the sandbox, say so.
+# SERVER (Codex): row S-13. Upload robustness for judges' own files
+Scope: server/files_routes.py, server/ingest_job.py (error paths only), server/tests/.
+1. Upload limits: give a clear 413 JSON error above the size cap (read the current cap), a clear 415 for unsupported types (list the supported ones: pdf, png, jpg, dxf, ifc), and reject zero-byte files.
+2. Ingest failures must set the ingest status to "failed" with a human-readable reason, never stay "running" forever. Add a watchdog: if a job is running longer than 5 min, mark it failed with "timed out".
+3. GET /api/docs/{id}/ingest returns {status, step, progress 0..1, reason?}, so the web can show progress and errors.
+4. Add tests for each case.
+Done test: `.venv/bin/python -m pytest -q -p no:cacheprovider server/tests/test_files*.py server/tests/test_upload*.py`. If DB tests can't run in the sandbox, say so.
 Do not commit. Append a RESULT: line.
-RESULT: S-12 passed: configurable RATE_LIMIT_PER_MIN (default 30), GET health/viewer assets and WebSocket upgrades exempt, writes still limited; health reports DB/build/uptime/provider-key availability without secrets. Done test: 50 passed in 1.67s (DB tests ran); existing test_health.py: 4 passed in 0.93s. Files: server/ratelimit.py, server/app.py, server/tests/test_ratelimit.py, server/tests/test_health.py; no commit.
+RESULT: S-13 passed: scripts/heavy.sh .venv/bin/python -m pytest -q -p no:cacheprovider server/tests/test_files*.py server/tests/test_upload*.py — 35 passed in 8.83s, including PostgreSQL upload end-to-end tests. Added 100 MiB/empty/type validation, failed-ingest reasons, five-minute watchdog with process-group cleanup and stale-status recovery, and step/progress status fields. Changed server/files_routes.py, server/ingest_job.py, server/tests/test_files_upload.py; no commit.

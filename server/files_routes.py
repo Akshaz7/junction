@@ -2,9 +2,12 @@
 import asyncio
 import importlib.util
 import json
+import os
 from datetime import datetime, timezone
 import re
+import signal
 import sys
+import time
 import uuid
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
@@ -26,9 +29,10 @@ router = APIRouter(prefix="/api", dependencies=[Depends(_restore)])
 SAFE_ID = re.compile(r"^[A-Za-z0-9_.\-]+$")
 FILE_NAMES = {"scene.glb", "scene.usdz", "scene.json", "elements.json", "text.json", "ingest.json"}
 THUMB = re.compile(r"^(page-\d+\.thumb\.png|page-\d+\.png|planmap-\d+\.json|text-\d+\.json)$")
-UPLOAD_EXT = {".ifc": "ifc", ".dxf": "dxf", ".dwg": "dwg", ".pdf": "pdf", ".svg": "svg",
-              ".png": "raster", ".jpg": "raster", ".jpeg": "raster", ".tif": "raster", ".tiff": "raster"}
+UPLOAD_EXT = {".ifc": "ifc", ".dxf": "dxf", ".pdf": "pdf",
+              ".png": "raster", ".jpg": "raster", ".jpeg": "raster"}
 MAX_UPLOAD = 100 * 1024 * 1024
+INGEST_TIMEOUT = 5 * 60
 
 
 def _doc_dir(doc_id: str):
@@ -83,16 +87,18 @@ def _slug(s: str) -> str:
 @router.post("/upload")
 async def upload(file: UploadFile = File(...)):
     from pathlib import Path
-    pool = await db.get_pool()
-    if pool is None:
-        raise HTTPException(503, "database unavailable")
     name = Path(file.filename or "upload").name
     ext = Path(name).suffix.lower()
     if ext not in UPLOAD_EXT:
-        raise HTTPException(415, f"unsupported file type {ext or '(none)'}")
+        raise HTTPException(415, f"Unsupported file type {ext or '(none)'}. Supported types: pdf, png, jpg (jpeg), dxf, ifc.")
     data = await file.read(MAX_UPLOAD + 1)
     if len(data) > MAX_UPLOAD:
-        raise HTTPException(413, "file too large")
+        raise HTTPException(413, f"File too large. Maximum upload size is {MAX_UPLOAD // (1024 * 1024)} MiB ({MAX_UPLOAD} bytes).")
+    if not data:
+        raise HTTPException(400, "File is empty. Upload a non-empty pdf, png, jpg, dxf or ifc file.")
+    pool = await db.get_pool()
+    if pool is None:
+        raise HTTPException(503, "database unavailable")
     doc_id = f"uploads__{_slug(Path(name).stem)}-{uuid.uuid4().hex[:6]}"
     updir = config.artifacts_dir() / "uploads"
     updir.mkdir(parents=True, exist_ok=True)
@@ -117,7 +123,8 @@ async def upload(file: UploadFile = File(...)):
     except Exception as e:  # noqa: BLE001
         print("artifact save failed:", repr(e)[:200])
     if ingestion_available():
-        (d / "ingest.json").write_text(json.dumps({"status": "running", "stages": [], "detail": "queued"}))
+        (d / "ingest.json").write_text(json.dumps({"status": "running", "stages": [], "detail": "queued",
+                                                  "step": "queued", "progress": 0, "started_at": time.time()}))
         asyncio.create_task(_ingest(doc_id))
         return {"doc_id": doc_id, "status": "ingesting",
                 "detail": "poll GET /api/docs/{doc_id}/ingest until status is not running; doc.new fires again when it ends"}
@@ -133,15 +140,41 @@ def ingestion_available() -> bool:
 
 
 async def _ingest(doc_id: str):
-    async with _INGEST_LOCK:
-        proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-m", "server.ingest_job", doc_id, cwd=str(config.REPO),
-            stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
-        await proc.wait()
     f = config.artifacts_dir() / doc_id / "ingest.json"
-    if not f.is_file() or (proc.returncode and json.loads(f.read_text()).get("status") == "running"):
-        detail = f"job exited {proc.returncode}" + (" (killed: out of memory?)" if proc.returncode in (-9, 137) else "")
-        f.write_text(json.dumps({"status": "failed", "stages": [], "detail": detail}))
+    proc = None
+    failure = None
+    try:
+        # Includes time waiting for the single heavy-job slot: queued uploads cannot hang forever either.
+        async with asyncio.timeout(INGEST_TIMEOUT):
+            async with _INGEST_LOCK:
+                proc = await asyncio.create_subprocess_exec(
+                    sys.executable, "-m", "server.ingest_job", doc_id, cwd=str(config.REPO),
+                    stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL,
+                    start_new_session=True)
+                await proc.wait()
+        state = _read_ingest(f)
+        if proc.returncode or state.get("status") not in {"ready", "partial", "failed"}:
+            detail = f"Ingestion job exited with code {proc.returncode} without completing."
+            if proc.returncode in (-9, 137):
+                detail += " The server may have run out of memory."
+            _fail_ingest(f, state.get("reason") or detail)
+    except TimeoutError:
+        failure = "Ingestion timed out after 5 minutes. Try a smaller file."
+    except asyncio.CancelledError:
+        failure = "Ingestion was interrupted. Please upload the file again."
+        raise
+    except Exception as e:  # noqa: BLE001
+        failure = f"Ingestion could not complete: {str(e)[:300] or type(e).__name__}"
+    finally:
+        if proc is not None and proc.returncode is None:
+            # Also stop converter grandchildren, which otherwise outlive the Python job.
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            await proc.wait()
+        if failure:
+            _fail_ingest(f, failure)
     await _persist(doc_id)
     try:  # searchable project-wide at once (never raises; returns bool)
         from engine.project_index import upsert_doc
@@ -170,8 +203,39 @@ async def _persist(doc_id: str):
 async def ingest_status(doc_id: str):
     f = _doc_dir(doc_id) / "ingest.json"
     if not f.is_file():
-        return {"status": "none", "stages": [], "detail": "no ingestion has run for this document"}
-    return json.loads(f.read_text())
+        return {"status": "none", "step": "none", "progress": 0, "stages": [],
+                "detail": "no ingestion has run for this document"}
+    state = _read_ingest(f)
+    # Also recover stale statuses restored from a previous container/process.
+    if state["status"] == "running" and time.time() - state.get("started_at", f.stat().st_mtime) >= INGEST_TIMEOUT:
+        state = _fail_ingest(f, "Ingestion timed out after 5 minutes. Try a smaller file.")
+        await _persist(doc_id)
+    return state
+
+
+def _read_ingest(f):
+    try:
+        state = json.loads(f.read_text())
+        if not isinstance(state, dict) or "status" not in state:
+            raise ValueError("invalid ingestion status")
+    except (OSError, ValueError):
+        state = {"status": "failed", "detail": "Ingestion stopped without a readable status. Please upload the file again."}
+    stages = state.get("stages") or []
+    state.setdefault("step", stages[-1]["stage"] if stages else state.get("detail") or state["status"])
+    # Completed-stage fraction; the current stage remains pending until a terminal status.
+    state["progress"] = 1 if state["status"] == "ready" else len(stages) / (len(stages) + 1)
+    if state["status"] == "failed":
+        state["reason"] = state.get("reason") or state.get("detail") or "Ingestion failed. Please upload the file again."
+    return state
+
+
+def _fail_ingest(f, reason):
+    state = _read_ingest(f)
+    state.update(status="failed", detail=reason, reason=reason)
+    tmp = f.with_suffix(".tmp")
+    tmp.write_text(json.dumps(state))
+    tmp.replace(f)
+    return state
 
 
 def _change(r) -> dict:
