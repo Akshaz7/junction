@@ -1,0 +1,13 @@
+# E-10 model choices per task: cheapest model that keeps accuracy. Evidence: results/model_compare.json
+# (route: results/compare/route-route1.json; judge_text: results/compare/judge_text-j1.json).
+# Gemini and Claude-direct were NOT compared (keys missing); those tasks keep their engine/models/models.yaml defaults.
+# The live config is engine/models/models.yaml (override path: MODELS_YAML); this file is the recommendation, LEAD applies it.
+route:
+  provider: runware
+  model: "google:gemini@3.1-flash-lite"      # 0.949 acc, $0.000144/call, 873 ms; sonnet-4.6 ties at 0.949 for 8x the cost
+  fallback: [{provider: nvidia, model: nvidia/nemotron-3.5-lightning-30b-a3b}]   # free; 0.576 in route1 (schema errors), re-verify
+judge_text:
+  provider: runware
+  model: "google:gemini@3.1-flash-lite"      # 0.867 agreement with sonnet-4.6 ref at $0.000054/call; haiku-4.5 0.90 at 10x cost
+  fallback: [{provider: runware, model: "anthropic:claude@haiku-4.5"}]
+# Not compared (no key or no gold data): read_drawing, verify_item, write_answer, advise, scene_intent, speech_intent -> keep engine/models/models.yaml.

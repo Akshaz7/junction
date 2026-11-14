@@ -1,0 +1,50 @@
+{
+ "task": "judge_text",
+ "metric": "agreement with reference judge (no human labels)",
+ "reference": "runware:anthropic:claude@sonnet-4.6",
+ "n_triples": 60,
+ "reference_cost_usd": 0.0,
+ "models": [
+  {
+   "model": "nvidia:nvidia/nemotron-3.5-lightning-30b-a3b",
+   "n": 60,
+   "agreement_with_reference": 0.4667,
+   "unparsed": 30,
+   "errors": 30,
+   "cost_usd_total": 0.0,
+   "cost_usd_per_call": 0.0,
+   "latency_ms_mean": 6779
+  },
+  {
+   "model": "runware:google:gemini@3.1-flash-lite",
+   "n": 60,
+   "agreement_with_reference": 0.8667,
+   "unparsed": 0,
+   "errors": 0,
+   "cost_usd_total": 0.003247,
+   "cost_usd_per_call": 5.412e-05,
+   "latency_ms_mean": 387
+  },
+  {
+   "model": "runware:anthropic:claude@haiku-4.5",
+   "n": 60,
+   "agreement_with_reference": 0.9,
+   "unparsed": 0,
+   "errors": 0,
+   "cost_usd_total": 0.03391,
+   "cost_usd_per_call": 0.00056517,
+   "latency_ms_mean": 1220
+  },
+  {
+   "model": "runware:google:gemini@3.5-flash",
+   "n": 60,
+   "agreement_with_reference": 0.7167,
+   "unparsed": 10,
+   "errors": 10,
+   "cost_usd_total": 0.166078,
+   "cost_usd_per_call": 0.00276797,
+   "latency_ms_mean": 2677
+  }
+ ],
+ "pick": "runware:google:gemini@3.1-flash-lite"
+}

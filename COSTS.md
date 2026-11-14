@@ -18,3 +18,6 @@ Caps for run 1. The lead may not raise them; only Ash can.
 | Time | Runware | Anthropic | Gemini | Modal | ElevenLabs | Context.dev | NVIDIA calls | Total USD |
 |---|---|---|---|---|---|---|---|---|
 | 03:45 | 0.017 | 0 | 0 | 0 | 0.010 | 0 | ~120 | 0.027 |
+| 07:00-08:07 (ENGINE4 E-10, plus other workers' calls; from results/costs.jsonl) | 0.94 | 0 | 0 | 0 | 0 | 0 | ~0 (Nemotron judge/route free) | 0.94 |
+
+E-10 own spend about 0.4 USD (full bench 0.05 incl. judge; judge_text comparison ~0.2 + reference ~0.1): see results/bench/full_1.json totals and results/compare/judge_text-j1.json. Gemini and Anthropic keys missing, 0 spent.

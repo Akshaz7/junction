@@ -82,9 +82,9 @@ tasks:
     provider: gemini
     model: gemini-3.5-flash-lite
     max_tokens: 512
-    fallback:
-      - {provider: nvidia,  model: nvidia/nemotron-3.5-lightning-30b-a3b }
+    fallback:   # E-10 (results/model_compare.json): Runware flash-lite agrees 0.867 vs Nemotron 0.467 (parse failures)
       - {provider: runware, model: "google:gemini@3.1-flash-lite"}
+      - {provider: nvidia,  model: nvidia/nemotron-3.5-lightning-30b-a3b }
   advise:
     provider: nvidia
     model: nvidia/nemotron-3-super-120b-a12b

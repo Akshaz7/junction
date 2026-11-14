@@ -1,0 +1,123 @@
+{
+ "row": "E-10",
+ "generated": "2026-11-14",
+ "note": "Models compared one at a time, no fallback (engine.models.call(only=...)). Sources: results/compare/route-route1.json (route), results/compare/judge_text-j1.json (judge_text). Only providers with keys were run.",
+ "tasks": {
+  "route": {
+   "metric": "accuracy on type+kind vs dataset/router labels",
+   "n": 177,
+   "source": "results/compare/route-route1.json",
+   "models": [
+    {
+     "model": "nvidia:nvidia/nemotron-3.5-lightning-30b-a3b",
+     "acc": 0.5763,
+     "n": 177,
+     "cost_usd_per_call": 0.0,
+     "latency_ms_mean": 9174,
+     "errors": 60
+    },
+    {
+     "model": "runware:google:gemini@3.1-flash-lite",
+     "acc": 0.9492,
+     "n": 177,
+     "cost_usd_per_call": 0.00014378,
+     "latency_ms_mean": 873,
+     "errors": 0
+    },
+    {
+     "model": "runware:google:gemini@3.5-flash",
+     "acc": 0.8136,
+     "n": 177,
+     "cost_usd_per_call": 0.00332244,
+     "latency_ms_mean": 2543,
+     "errors": 30
+    },
+    {
+     "model": "runware:anthropic:claude@haiku-4.5",
+     "acc": 0.9209,
+     "n": 177,
+     "cost_usd_per_call": 0.00037077,
+     "latency_ms_mean": 825,
+     "errors": 2
+    },
+    {
+     "model": "runware:anthropic:claude@sonnet-4.6",
+     "acc": 0.9492,
+     "n": 177,
+     "cost_usd_per_call": 0.00112576,
+     "latency_ms_mean": 1180,
+     "errors": 0
+    }
+   ],
+   "pick": "runware:google:gemini@3.1-flash-lite",
+   "caveat": "Nemotron lightning errors in this run were schema violations (60/177); results/router_model_only.json (thinking off, 120 q) shows 0.95 at $0.0000025/call, so Nemotron stays as first/cheap option only if re-verified."
+  },
+  "judge_text": {
+   "metric": "agreement with reference judge claude@sonnet-4.6 (no human labels)",
+   "n": 60,
+   "source": "results/compare/judge_text-j1.json",
+   "models": [
+    {
+     "model": "nvidia:nvidia/nemotron-3.5-lightning-30b-a3b",
+     "acc": 0.4667,
+     "n": 60,
+     "cost_usd_per_call": 0.0,
+     "latency_ms_mean": 6779,
+     "errors": 30
+    },
+    {
+     "model": "runware:google:gemini@3.1-flash-lite",
+     "acc": 0.8667,
+     "n": 60,
+     "cost_usd_per_call": 5.412e-05,
+     "latency_ms_mean": 387,
+     "errors": 0
+    },
+    {
+     "model": "runware:anthropic:claude@haiku-4.5",
+     "acc": 0.9,
+     "n": 60,
+     "cost_usd_per_call": 0.00056517,
+     "latency_ms_mean": 1220,
+     "errors": 0
+    },
+    {
+     "model": "runware:google:gemini@3.5-flash",
+     "acc": 0.7167,
+     "n": 60,
+     "cost_usd_per_call": 0.00276797,
+     "latency_ms_mean": 2677,
+     "errors": 10
+    }
+   ],
+   "pick": "runware:google:gemini@3.1-flash-lite"
+  },
+  "read_drawing": {
+   "status": "not run: GEMINI_API_KEY missing; no gold set for drawing reading in this row"
+  },
+  "verify_item": {
+   "status": "not run: GEMINI_API_KEY missing; no item-level gold set"
+  },
+  "write_answer": {
+   "status": "not run: ANTHROPIC_API_KEY and GEMINI_API_KEY missing; free-text gold too small (13 text rows in sample200)"
+  },
+  "advise": {
+   "status": "not run: no gold data (advisor must not invent rules/sources)"
+  },
+  "scene_intent": {
+   "status": "not run: no gold data"
+  },
+  "speech_intent": {
+   "status": "not run: GEMINI_API_KEY missing; no gold data"
+  }
+ },
+ "not_run_key_missing": {
+  "gemini": "not run: key missing",
+  "anthropic": "not run: key missing (Claude only via Runware-hosted sonnet-4.6/haiku-4.5 in route and judge_text)"
+ },
+ "full_bench": {
+  "file": "results/bench/full_1.json",
+  "questions": 63447,
+  "cost_usd": 0.049671
+ }
+}
