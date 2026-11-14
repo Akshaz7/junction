@@ -1,68 +1,66 @@
 # Hologram — final report draft
 
-Team RS3 · Stoa “Make Blueprints Talk” · Junction 2026
+Team RS3 · Stoa “Make Blueprints Talk” · Junction
 
-Draft from recorded repository results; final submission measurements remain pending.
+Draft from recorded repository results. Final submission measurements remain pending.
 
 ## What we built
 
-Hologram answers English questions about construction drawings and BIM models, then carries their evidence from **2D → 3D → AR**. Users inspect numbered regions on a drawing, select **Visualise it** to see matching model elements, and use **Show on table** in the native iPhone app for AR placement and highlights.
+Hologram answers English questions about construction drawings and BIM models, then carries evidence from **2D → 3D → AR**. Users inspect numbered regions on a drawing, select **Visualise it** for matching model elements, and use **Show on table** in the native iPhone app for AR placement and highlights.
 
-The web app recreates Stoa-style document browsing, chat, sources, drawing inspection, changes and upload flows under our own Hologram identity. Uploads feed ingestion before questions can use their extracted data. PDF, image, DXF and IFC routes have different capabilities; accepting an extension does not establish complete processing or AR availability.
+The web app provides document browsing, chat, sources, drawing inspection, changes and uploads under our Hologram identity. Uploads must complete ingestion before questions can use their extracted data. PDF, image, DXF and IFC routes have different capabilities; an accepted extension does not establish complete processing or AR availability.
 
-Shared chat and scene events connect laptop and phone through PostgreSQL and the backend WebSocket service. Voice in AR can continue the conversation and select elements. Physical-device rehearsal, current live delivery timing and the plan build-up/highlight animations remain submission gates in [DEMO.md](DEMO.md), rather than measured claims here.
+Chat has thread memory: earlier turns and their document selections are passed into question handling, so follow-ups can reuse context ([chat handling](../server/chats_routes.py), [context resolver](../engine/context.py)). PostgreSQL-backed chat and WebSocket scene events support cross-device live sync between laptop and phone ([live service](../server/live.py)). The native AR implementation includes a plan-to-building build-up and voice interaction ([build animator](../ios/Hologram/AR/BuildAnimator.swift), [voice controller](../ios/Hologram/AR/ARVoiceController.swift)). Physical-device rehearsal, observed animation behavior and current live-delivery timing remain gates in [DEMO.md](DEMO.md); these implementation references are not device-performance measurements.
 
 ## How it works
 
-We read a drawing into a reusable **plan map**: walls, openings, rooms, fixtures, text, positions, scale and provenance. IFC supplies element properties and geometry; raster reading combines vision and OCR. Plain code then counts, filters and measures this structured data. Numeric code answers use templates. Repeated questions reuse extraction instead of requiring a complete model reading each time.
+A reusable **plan map** records walls, openings, rooms, fixtures, text, positions, scale and provenance. IFC supplies element properties and geometry; raster reading combines vision and OCR. Code counts, filters and measures this structured data, with templates for numeric code answers. Later questions reuse extraction.
 
-The model ladder starts with code, then local vision or targeted checks, then a document reader and larger reasoning/writing models where needed. Gemini, Nemotron, Claude and Runware-backed alternatives have task-specific roles and fallbacks. All calls pass through `engine/models.call()` for caching, budget enforcement and cost logging; [MODELS.md](MODELS.md) records the configuration.
+All inference passes through `engine.models.call()` for caching, budget enforcement and cost logging. The current [task configuration](../engine/models/models.yaml) uses **Claude Sonnet 5.5** through Runware's Anthropic-compatible `/v1/messages` for written answers and chat; **Opus 5.5** for recount boxes (the current YAML replaces the handoff’s **Fable 5.2**); and **Gemini 3.1 Flash-Lite via Runware** for cheap recounts and forced answers. Nemotron handles model-assisted routing, advisor writing and scene intent; ElevenLabs handles TTS. Verda Nemotron VL is a slow last resort wherever included. Haiku resolves context-dependent follow-ups; Opus also handles long-form chat and task writing. [MODELS.md](MODELS.md) lists the complete chains.
 
-The newer **zero-abstention ladder** adds image recounting, reader recovery and a final best-effort response when ordinary routes cannot answer. It labels estimates with low confidence and their basis. If no readable numeric evidence survives, the final rung can emit a labelled default; that is not a measured quantity. Answer coverage must therefore be reported separately from correctness and evidence coverage.
+Production uses **no direct Gemini or Anthropic keys**. Those providers remain configured for other environments and are skipped without credentials. Voice input uses device recognition when direct Gemini audio input is unavailable; this is separate from ElevenLabs speech output.
+
+The zero-abstention ladder adds recounting, reader recovery and a final best-effort answer when ordinary document routes cannot answer. Estimates state their uncertainty and basis. A labelled default without readable evidence is not a measured quantity. The recorded sample has no abstentions; coverage and correctness remain separate.
 
 ## Accuracy
 
-These are recorded snapshots, not the final build's guaranteed performance. Benchmarks below use real-provider mode (`fake: false`). Numeric accuracy includes abstentions as unsuccessful and excludes text.
+These are recorded real-provider snapshots, not guaranteed final-build scores. Numeric accuracy excludes text and counts numeric abstentions as unsuccessful. Later model-chain or evidence changes require a fresh benchmark before claiming the same performance.
 
-| Tag and result file | Scope | Numeric result | Numeric abstentions |
-| --- | --- | --- | --- |
-| [sample200-r10](../results/bench/sample200-r10.json) | Earlier sample; basis of [ACCURACY.md](ACCURACY.md) | 124/187 correct, 66.31% | 16 |
-| [e-s200-z1](../results/bench/e-s200-z1.json) | Newer zero-abstention sample | 143/187 correct, 76.47% | 0 |
-| [full_1](../results/bench/full_1.json) | Earlier full numeric set; text subsampled every sixth question | 35,900/63,307 correct, 56.71% | 6,071 |
-| [e-ifc-full5](../results/bench/e-ifc-full5.json) | IFC numeric subset | 1,612/1,710 correct, 94.27% | 64 |
+| Run | Scope | Numeric accuracy | Correct numeric answers | Numeric abstentions |
+|---|---|---|---|---|
+| [sample200-r10](../results/bench/sample200-r10.json) | Earlier sample | [66.31%](../results/bench/sample200-r10.json#/cells/ALL%20x%20ALL/accuracy) | [124](../results/bench/sample200-r10.json#/cells/ALL%20x%20ALL/correct) | [16](../results/bench/sample200-r10.json#/cells/ALL%20x%20ALL/abstained) |
+| [e-s200-z1](../results/bench/e-s200-z1.json) | Zero-abstention sample | **[76.47%](../results/bench/e-s200-z1.json#/cells/ALL%20x%20ALL/accuracy)** | [143](../results/bench/e-s200-z1.json#/cells/ALL%20x%20ALL/correct) | **[0](../results/bench/e-s200-z1.json#/cells/ALL%20x%20ALL/abstained)** |
+| [full_1](../results/bench/full_1.json) | Earlier full numeric set; text subsampled | [56.71%](../results/bench/full_1.json#/cells/ALL%20x%20ALL/accuracy) | [35,900](../results/bench/full_1.json#/cells/ALL%20x%20ALL/correct) | [6,071](../results/bench/full_1.json#/cells/ALL%20x%20ALL/abstained) |
+| [e-ifc-full5](../results/bench/e-ifc-full5.json) | IFC numeric subset | [94.27%](../results/bench/e-ifc-full5.json#/cells/ALL%20x%20ALL/accuracy) | [1,612](../results/bench/e-ifc-full5.json#/cells/ALL%20x%20ALL/correct) | [64](../results/bench/e-ifc-full5.json#/cells/ALL%20x%20ALL/abstained) |
 
-The newer sample also records zero text abstentions. Its text judge marks **9/13 correct (69.23%)**, one partial and three wrong. This small, model-judged sample is separate from numeric accuracy. The IFC subset and earlier full run do not establish universal zero abstentions.
+The zero-abstention sample contains [200 questions](../results/bench/e-s200-z1.json#/totals/questions). Its separate text judge records [9 correct](../results/bench/e-s200-z1.json#/text/ALL/correct) among [13 text answers](../results/bench/e-s200-z1.json#/text/ALL/n), or [69.23%](../results/bench/e-s200-z1.json#/text/ALL/accuracy), and [0 text abstentions](../results/bench/e-s200-z1.json#/text/ALL/abstained). This small model-judged text sample is separate from numeric accuracy. Earlier full and IFC runs do not establish universal zero abstentions.
 
-Vision remains a bottleneck. [v09_final.json](../results/vision/v09_final.json), which has no tag field, reports exact-count evaluation over a held-out CubiCasa5K drawing set: default window accuracy **32.0%**, door **44.3%**, and shower/bathtub **12.3%**. Its optional bathroom crop check reaches **33.0%** for showers/bathtubs. These are reader measurements, not whole-system scores.
+Vision remains a bottleneck. The [held-out reader evaluation](../results/vision/v09_final.json) records default exact-count accuracy of [32.0% for windows](../results/vision/v09_final.json#/default_free_pass/window), [44.3% for doors](../results/vision/v09_final.json#/default_free_pass/door), and [12.3% for showers/bathtubs](../results/vision/v09_final.json#/default_free_pass/shower_bathtub). Its optional bathroom crop check records [33.0% for showers/bathtubs](../results/vision/v09_final.json#/free_pass_plus_bathroom_crop_check/shower_bathtub). These are reader scores, not whole-system accuracy.
 
-`[PENDING: final full benchmark tag/file and accuracy after the latest changes]`
-
-`[PENDING: matched fine-tuning before/after evaluation]` — [seg_finetuned.json](../results/vision/seg_finetuned.json) and [det_finetuned.json](../results/vision/det_finetuned.json) still record blocked snapshots with `after: null`; newer training work does not establish a gain without updated results.
+Final full benchmark after the latest changes: **pending**. Matched fine-tuning gain: **not established**; the [segmenter](../results/vision/seg_finetuned.json) and [detector](../results/vision/det_finetuned.json) result snapshots still have `after: null`.
 
 ## Visual verifiability
 
-Stable item IDs connect page boxes, GLB nodes and USDZ prims. Answer numbers persist across views; scene commands use separate tags such as W3. Citations open the source, while **Sources** and **Show thought process** expose evidence and execution trace. Cutaway/storey controls make internal elements visible. An incorrect reading can still produce consistent highlights, so visual consistency supports inspection without proving accuracy. Best-effort answers may lack item-level evidence.
+For boxed object counts, **the headline count always equals the numbered boxes**: the recount path drops low-confidence detections when lowering a count and requires drawable boxes before increasing it (row `E-25`; [implementation](../engine/answer.py), [regressions](../engine/tests/test_answer.py)). Stable item IDs connect boxes, citations and scene highlights. This is a consistency safeguard, not proof that the underlying detections are correct. Text-schedule totals, scene commands and forced best-effort estimates can lack object-level boxes; do not extend the boxed-count claim to them.
+
+Citations open the source; **Sources** and **Show thought process** expose evidence and execution traces. Cutaway/storey controls expose internal elements. Scene commands use stable item tags independently of answer numbers.
 
 ## Creativity
 
-The same evidence becomes a spatial interface: inspect a counted window, locate it in the building, then place the model on a table. Natural-language hide, restore and isolate commands modify a persistent per-chat layer. Source data stays intact. Advisor cards link observations to quoted sources. The demo combines shared chat, voice and spatial selection; its recordings must identify any fallback or separate prepared scene.
+The same evidence becomes a spatial interface: inspect a counted object, locate it in a building, then place the model on a table. Natural-language hide, restore and isolate commands modify a persistent chat edit layer while preserving source data. Advisor cards cite quoted sources. Shared chat, thread memory, AR build-up and voice connect this flow across devices. Recordings must identify any fallback or separate prepared scene.
 
 ## Inference cost
 
-The [e-s200-z1 result](../results/bench/e-s200-z1.json) records **$0.00010339 per answer**, **$0.020677** for answers and **$0.000248** for text judging: **$0.020925 total**. The [sample200-r10 result](../results/bench/sample200-r10.json) records **$0 per answer**. These are recorded incremental model charges; they exclude earlier extraction, training, hosting and separately billed services. Cache hits can cost zero.
+The [zero-abstention sample](../results/bench/e-s200-z1.json) records [$0.00010339 per answer](../results/bench/e-s200-z1.json#/cells/ALL%20x%20ALL/cost_usd_per_answer), [$0.020677 for answers](../results/bench/e-s200-z1.json#/cells/ALL%20x%20ALL/cost_usd_total), and [$0.000248 for text judging](../results/bench/e-s200-z1.json#/text/ALL/judge_usd): [$0.020925 total](../results/bench/e-s200-z1.json#/totals/cost_usd). The [earlier sample](../results/bench/sample200-r10.json) records [$0 per answer](../results/bench/sample200-r10.json#/cells/ALL%20x%20ALL/cost_usd_per_answer).
 
-The answer card displays model cost, and its trace identifies code/model work. That figure is not the total cost of operating the system. `[PENDING: fresh-upload extraction plus answer cost]`
+These are incremental model charges, including cache effects. They exclude earlier extraction, training, hosting and separately billed services, and do not price the latest model chain. The answer-card cost is not the total operating cost. Fresh-upload extraction plus answer spend remains pending.
 
-## Honesty
+## Honesty, provenance and limits
 
-Our fine-tuning policy excludes drawings referenced by any evaluation question set, with ID/hash overlap checks. Pretrained models may already have seen evaluation drawings; we disclose that limitation. English-only evaluation uses exact counts and a **2% relative or 0.05 absolute** tolerance for area, length and volume. Text uses a separate cached model judge comparing facts against human gold answers, which may themselves contain errors.
+Our fine-tuning policy excludes drawings referenced by evaluation questions and checks overlap. Pretrained checkpoints may already have seen evaluation drawings; our split checks cannot establish their full training provenance. English evaluation uses exact counts, tolerance-based measurement scoring and a separate cached text judge; gold answers can also contain errors.
 
-Low-confidence estimates retain their qualifications. Missing data is disclosed. Generated samples carry **“generated for demo”**; prepared examples must never be presented as answers to a judge's unseen upload.
+Low-confidence estimates retain their qualifications. Missing data is disclosed. Synthetic documents carry **“generated for demo”**; prepared examples must never be presented as answers to a judge's unseen upload.
 
-## Licences
+Repository code is MIT; dataset, model and library terms remain separate. [MODELS.md](MODELS.md) records the noncommercial treatment of derived fine-tunes, unresolved FloorPlanCAD declarations and geometry-library notices. Restricted drawings and Stoa reference code, logos and drawings are excluded from publishing.
 
-Repository code is MIT. Dataset, model and library terms remain separate: CubiCasa5K carries noncommercial/share-alike restrictions; FloorPlanCAD declarations conflict. We conservatively treat derived fine-tunes as noncommercial research/demo assets, as documented in [MODELS.md](MODELS.md). IfcOpenShell is LGPL, with separate distribution obligations; OpenUSD has its own licence. Restricted ND/GPL drawings are excluded from publishing. Stoa reference code, logos and drawings are not redistributed.
-
-## Limits and next steps
-
-Raster omissions, uncertain scale, unsupported conversions and incomplete IFC properties limit answers. Prioritize unseen judge uploads, complex questions spanning documents, evidence completeness and reliable cross-device continuation. Complete physical-iPhone rehearsal and final benchmarks, publish matched training results, and resolve commercial dataset rights before a commercial model release. An extruded plan is an inferred scene, not surveyed BIM geometry or verified compliance advice.
+Raster omissions, uncertain scale, unsupported conversions and incomplete IFC properties limit answers. An extruded plan is inferred geometry. Rule checks cover available properties and sources, and do not establish building compliance. Remaining work is physical-iPhone rehearsal, a final benchmark, matched training evaluation and measured fresh-upload cost.
