@@ -799,7 +799,6 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
   .app-shell:has(.data-screen:not([hidden]) .data-detail:not([data-docked])) .mobile-navigation { z-index: 5; }
 }
 
-/* LEAD 07:50 (I-15): iOS WebKit zooms the page when a focused field's text is under 16px; only iOS supports -webkit-touch-callout, so desktop/Chromium (and the Stoa fidelity frames) are unchanged. */
-@supports (-webkit-touch-callout: none) {
-  input, textarea, select, .composer textarea { font-size: 16px; }
-}
+
+/* Stoa phone header has no connection line; keep only the honest 'Local demo' / error states visible. */
+@media (max-width: 640px) { .topbar > .badge-success { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; padding: 0; } }

@@ -129,6 +129,11 @@ final class WebSession: ObservableObject {
         webView.scrollView.delegate = coordinator
         coordinator.pinZoom(in: webView.scrollView)
         webView.accessibilityIdentifier = "web-shell"
+        // Let the page draw under the status bar and home indicator; it pads itself with env(safe-area-inset-*).
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
+        webView.isOpaque = false
+        webView.backgroundColor = .clear
+        webView.scrollView.backgroundColor = .clear
         webView.allowsBackForwardNavigationGestures = true
         // Load once for this session, independent of SwiftUI mounting the view.
         webView.load(URLRequest(url: url))

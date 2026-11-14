@@ -238,7 +238,7 @@ final class HologramUITests: XCTestCase {
         // Start on Chat regardless of the phone's default tab; avoid navigating through Data.
         var webURL = URLComponents(string: environment["WEB_URL"] ?? "http://localhost:4173")!
         webURL.fragment = "/chat"
-        app.launchArguments = ["-WEB_URL", webURL.url!.absoluteString,
+        app.launchArguments = ["-NATIVE_TOOLBAR", "-WEB_URL", webURL.url!.absoluteString,
                                "-API_URL", environment["API_URL"] ?? "http://localhost:8000"]
         return app
     }
