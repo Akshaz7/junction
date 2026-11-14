@@ -98,6 +98,15 @@ async def get_doc(doc_id: str):
     return _row(await _document(doc_id))
 
 
+@router.get("/docs/{doc_id}/mistakes")
+async def get_mistakes(doc_id: str):
+    """F-MISTAKES: checkable errors found by code in this document (worst first, at most 20)."""
+    await _document(doc_id)
+    import asyncio
+    from engine import mistakes
+    return {"doc_id": doc_id, "mistakes": await asyncio.to_thread(mistakes.find_doc, doc_id, None)}
+
+
 @router.get("/docs/{doc_id}/pages/{n}.png")
 async def page_png(doc_id: str, n: int):
     """PNG alias for the contract's /pages/{n}/image URL, including old issues."""

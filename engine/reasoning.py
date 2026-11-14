@@ -106,6 +106,8 @@ def build(res: dict, question: str, root: Path) -> dict | None:
 
 
 def attach(res: dict, question: str, root: Path) -> dict:
+    if res.get("mistakes") is not None and res.get("reasoning"):   # F-MISTAKES: the code route brings its own Checked card
+        return res
     try:
         r = build(res, question, root)
         if r:

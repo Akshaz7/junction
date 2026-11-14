@@ -477,6 +477,14 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             return _abstained(question, doc_ids, f"The question names **{other}**, which is not among the selected documents ({sel}). "
                               "Select that document and ask again, or ask about the selected one.", trace, t0)
 
+        if not os.environ.get("MISTAKES_OFF"):    # F-MISTAKES: "are there any mistakes?" is answered by code checks
+            from engine import mistakes
+            if (res := mistakes.answer(question, doc_ids, root, t0, list(trace))) is not None:
+                for s_ in res["trace"][len(trace):]:
+                    add(s_)
+                res["trace"] = trace
+                return res
+
         if not os.environ.get("COMPLEX_Q_OFF"):    # E-59: multi-condition questions, every condition applied or named
             from engine import complex_q
             if (res := complex_q.answer(question, doc_ids, root, t0)) is not None:
