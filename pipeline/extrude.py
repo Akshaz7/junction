@@ -134,6 +134,8 @@ MATS = {"wall": lambda: _mat((236, 232, 224)), "frame": lambda: _mat((246, 246, 
 
 def _flat(m, mat):
     """Unshare vertices (flat shading), set normals by hand and attach a PBR material."""
+    if m is None:
+        return None
     f = m.faces.reshape(-1)
     out = trimesh.Trimesh(m.vertices[f], np.arange(len(f)).reshape(-1, 3), process=False)
     out.vertex_normals = np.repeat(out.face_normals, 3, axis=0)

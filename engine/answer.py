@@ -360,6 +360,29 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
         txt = ("Hello. Ask me anything about the open drawing, for example how many doors there are, where the stairs are, "
                "which room is the biggest, or whether a wall can be removed. Every answer shows its proof on the drawing.")
         return _answer_obj(question, doc_ids, txt, None, None, 1.0, False, [], [], {"doc_id": doc_ids[0] if doc_ids else None, "highlight_item_ids": [], "camera_target_item_id": None}, trace, "index", t0)
+    _q = (question or "").strip()
+    if doc_ids and _q and len(re.findall(r"\w+", _q)) <= 3 and re.match(r"^\W*(?:what|which|how|where|who|when|why)(?:\s+(?:is|are|the|a|an|of|in|on|to|many|much|was|were|does|do))*\W*$", _q, re.I):
+        from engine.solvers.solve import _answer_obj
+        txt = "That question looks unfinished. Could you finish it? For example: how many doors are there, or what is the area of the biggest room."
+        return _answer_obj(question, doc_ids, txt, None, None, 1.0, False, [], [], {"doc_id": doc_ids[0], "highlight_item_ids": [], "camera_target_item_id": None}, trace, "index", t0)
+    if doc_ids and _q and re.search(r"\b(?:what|which)\s+(?:file|document|doc|drawing)(?:\s+(?:format|type|name))?\s+(?:is\s+)?(?:this|it|open|that|here|the\s+(?:open|current)\s+\w+)?\s*\??$|\bfile\s+(?:format|type|name)\b|\bwhat\s+(?:format|type)\s+is\s+(?:this|it)\b", _q, re.I):
+        try:
+            _meta = json.loads((root / doc_ids[0] / "doc.json").read_text())
+        except (OSError, ValueError):
+            _meta = {}
+        if _meta:
+            from engine.solvers.solve import _answer_obj
+            _fm = [str(f).upper() for f in (_meta.get("formats") or [])] or [str(_meta.get("kind") or "unknown").upper()]
+            _src = [Path(v).name for v in (_meta.get("files") or {}).values()]
+            _lines = [f"**{_meta.get('title') or doc_ids[0]}**", f"- File type: {', '.join(_fm)}"]
+            if _src:
+                _lines.append(f"- File: {', '.join(_src)}")
+            _lines.append(f"- Pages: {_meta.get('pages') or 1}")
+            if _meta.get("scale"):
+                _lines.append(f"- Scale: {_meta['scale']}")
+            if _meta.get("source"):
+                _lines.append(f"- Source: {_meta['source']}")
+            return _answer_obj(question, doc_ids, "\n".join(_lines), None, None, 0.95, False, [], [], {"doc_id": doc_ids[0], "highlight_item_ids": [], "camera_target_item_id": None}, trace, "index", t0)
     try:
         if (question or "").strip() and not os.environ.get("TASKS_OFF"):
             from engine.tasks import detect, run_task   # Stoa starters: Draft claim, Meeting prep, Plan work phase, Review contract

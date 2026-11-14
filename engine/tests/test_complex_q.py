@@ -92,3 +92,17 @@ def test_free_form_judge_questions(q, has, hasnt):
     from engine.answer import answer
     t = answer(q, ["ifc_bench__ac20-arc"])["answer"]["text_md"]
     assert has in t and hasnt not in t
+
+
+@pytest.mark.parametrize("q,must", [
+    ("what file is this", "File type"),
+    ("what file format is this", "File type"),
+    ("what is", "unfinished"),
+    ("how many", "unfinished"),
+])
+def test_file_info_and_incomplete_questions_cost_nothing(monkeypatch, q, must):
+    import engine.models
+    monkeypatch.setattr(engine.models, "call", lambda *a, **k: pytest.fail("model called"))
+    from engine.answer import answer
+    a = answer(q, ["ifc_bench__ac20-arc"])
+    assert must in a["answer"]["text_md"] and a["cost"]["usd_total"] == 0

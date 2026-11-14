@@ -179,7 +179,11 @@ def _extrude(doc_id: str, ddir: Path, page: int):
         pm["scale"] = {"m_per_px": ASSUMED_M_PER_PX, "method": "assumed", "source": "assumed", "confidence": 0.1,
                        "evidence": f"no printed scale, dimension or door found: assumed {ASSUMED_M_PER_PX} m per pixel"}
         (ddir / f"planmap-{page}.json").write_text(json.dumps(pm))
-    extrude.process(doc_id, ddir, page, raster_walls=True)  # falls back to plan-map walls when cv2 or wall fills are missing
+    try:  # falls back to plan-map walls when cv2 or wall fills are missing
+        extrude.process(doc_id, ddir, page, raster_walls=True)
+    except Exception as ex:  # noqa: BLE001 - a raster-wall surprise must never cost the upload its 3D
+        print("raster-wall extrude failed, using plan-map walls:", repr(ex)[:160])
+        extrude.process(doc_id, ddir, page)
 
 
 ASSUMED_M_PER_PX = 0.02
