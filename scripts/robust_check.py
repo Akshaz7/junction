@@ -68,6 +68,8 @@ def _worker(case, work: Path, timeout: float):
     app.dependency_overrides[routes._restore] = lambda: None
     t0 = time.perf_counter()
     result = dict(case)
+    result["http_start_peak_rss_mib"] = round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss /
+                                               (1024 ** 2 if platform.system() == "Darwin" else 1024), 1)
     result["bytes"] = Path(case["path"]).stat().st_size
     with TestClient(app) as client:
         with open(case["path"], "rb") as source:
@@ -92,6 +94,7 @@ def _worker(case, work: Path, timeout: float):
                 if tasks:
                     await asyncio.gather(*tasks)
             client.portal.call(finish)
+            result["post_ingest_peak_process_rss_mib"] = _rss()
             result["ingest"] = state
             result["user_message"] = state.get("detail")
             art = Path(os.environ["ARTIFACTS_DIR"])
@@ -99,27 +102,37 @@ def _worker(case, work: Path, timeout: float):
             result["preview"] = (d / "page-1.png").is_file()
             result["scene"] = (d / "scene.glb").is_file() and (d / "scene.json").is_file()
             if result["scene"]:
+                from pygltflib import GLTF2
                 scene = json.loads((d / "scene.json").read_text())
                 result["scene_items"] = len(scene["items"])
                 result["origin_offset_m"] = scene["origin_offset_m"]
+                nodes = {node.name for node in GLTF2().load(str(d / "scene.glb")).nodes}
+                result["scene_valid"] = bool(scene["items"]) and all(item["node"] in nodes for item in scene["items"].values())
+            if (d / "elements.json").is_file():
+                result["index_schema"] = json.loads((d / "elements.json").read_text()).get("schema")
             if result["preview"]:
                 from PIL import Image
                 with Image.open(d / "page-1.png") as im:
                     result["preview_size"] = list(im.size)
             from engine.solvers.data import load_doc
             document = load_doc(doc_id, art)
+            result["post_load_peak_process_rss_mib"] = _rss()
             if document is not None:
                 kinds = Counter(i.kind for i in document.items)
                 result["counts"] = dict(kinds)
                 # Ask a useful question about a kind actually represented in the
                 # source index; no expected count is encoded in the script.
-                kind = next((k for k in ("door", "window", "wall", "room", "stairs", "column", "slab", "pipe") if kinds[k]), None)
+                kind = next((k for k in ("door", "window", "wall", "room", "stairs", "column", "slab", "pipe", "beam", "roof", "railing", "covering", "furniture") if kinds[k]), None)
+                if kind is None and document.mode == "ifc":
+                    kind = "door"  # missing classification must give an honest unknown, not a zero
                 if kind:
                     from engine.answer import answer
-                    query = f"How many {kind if kind == 'stairs' else kind + 's'} are there?"
+                    noun = "pieces of furniture" if kind == "furniture" else kind if kind == "stairs" else kind + "s"
+                    query = f"How many {noun} are there?"
                     a = answer(query, [doc_id])
                     result["first_answer"] = {"question": query, "text": a["answer"]["text_md"],
                                               "value": a["answer"].get("value"), "abstained": a["answer"].get("abstained"),
+                                              "unclassified": any(s.get("step") == "unclassified" for s in a.get("trace", [])),
                                               "citations": len(a.get("citations") or []),
                                               "boxes": len((a.get("evidence") or {}).get("boxes") or []),
                                               "reasoning": a.get("reasoning"), "cost_usd": a["cost"]["usd_total"]}
@@ -134,10 +147,14 @@ def _worker(case, work: Path, timeout: float):
             else:
                 first = result.get("first_answer") or {}
                 result["ok"] = (state["status"] in {"ready", "partial"} and result["scene"] and result["preview"]
-                                and bool(first.get("citations")) and bool(first.get("reasoning"))
-                                and not first.get("abstained"))
+                                and result.get("scene_valid") and bool(first.get("citations")) and bool(first.get("reasoning"))
+                                and (not first.get("abstained") or (first.get("unclassified") and first.get("value") is None)))
     result["seconds"] = round(time.perf_counter() - t0, 3)
     result["peak_process_rss_mib"] = _rss()
+    divisor = 1024 ** 2 if platform.system() == "Darwin" else 1024
+    result["peak_http_process_rss_mib"] = round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / divisor, 1)
+    result["peak_ingest_process_rss_mib"] = max(
+        (s.get("peak_process_rss_mib", 0) for s in result.get("ingest", {}).get("stages", [])), default=None)
     (work / "result.json").write_text(json.dumps(result))
 
 
@@ -159,6 +176,21 @@ def _schema4x3(source: Path, target: Path):
     new.write(str(target))
 
 
+def _translate_roots(f, dx_m, dy_m):
+    """Translate placements without mutating points shared by local geometry."""
+    from ifcopenshell.util.element import copy
+    from ifcopenshell.util.unit import calculate_unit_scale
+    scale = calculate_unit_scale(f)
+    for placement in f.by_type("IfcLocalPlacement"):
+        if placement.PlacementRelTo is None:
+            relative = copy(f, placement.RelativePlacement)
+            xyz = list(relative.Location.Coordinates)
+            xyz[0] += dx_m / scale
+            xyz[1] += dy_m / scale
+            relative.Location = f.createIfcCartesianPoint(tuple(xyz))
+            placement.RelativePlacement = relative
+
+
 def _prepare(root: Path, work: Path, reserve: dict, live: bool):
     """Transforms retain source content; generated fixtures are never called real."""
     import ezdxf
@@ -167,7 +199,7 @@ def _prepare(root: Path, work: Path, reserve: dict, live: bool):
     from ezdxf import transform
     from ezdxf.addons.r12export import convert as r12
     from ezdxf.math import Matrix44
-    from ifcopenshell.util.unit import calculate_unit_scale, convert_file_length_units
+    from ifcopenshell.util.unit import convert_file_length_units
     from PIL import Image
 
     candidates = sorted(root.rglob("*"))
@@ -203,11 +235,23 @@ def _prepare(root: Path, work: Path, reserve: dict, live: bool):
         add(name, p, raster, "re-encoded source pixels as " + mode, coverage=coverage, live=live and name == "png_original")
     for name, changed in [("rotated", im.rotate(90, expand=True)), ("skewed", im.rotate(2, expand=True, fillcolor="white")),
                            ("tiny", im.resize((32, 32))),
-                           ("huge_10k", im.resize((10000, max(1, int(im.height * 10000 / im.width)))) )]:
+                           ("huge_10k", im.convert("L").resize((max(1, round(im.width * 10000 / max(im.size))),
+                                                                max(1, round(im.height * 10000 / max(im.size))))))]:
         p = work / f"{name}.png"
         changed.save(p)
         changed.close()
-        add(name, p, raster, name + " source pixels", coverage="preprocessing_only")
+        add(name, p, raster, name + " source pixels" + (" in greyscale" if name == "huge_10k" else ""), coverage="preprocessing_only")
+    huge = im.resize((max(1, round(im.width * 10000 / max(im.size))), max(1, round(im.height * 10000 / max(im.size)))))
+    p = work / "huge_colour.png"
+    huge.save(p)
+    from pipeline.raster_input import MAX_DECODE_BYTES
+    limited = huge.width * huge.height * 3 > MAX_DECODE_BYTES
+    add("huge_colour_decode_limit", p, raster, "source RGB pixels enlarged to 10k longest side; decode-memory guard",
+        expected_failure=limited, coverage="memory_limit" if limited else "preprocessing_only")
+    p = work / "huge.jpeg"
+    huge.save(p)
+    huge.close()
+    add("huge_jpeg_10k", p, raster, "source enlarged to 10k longest side and JPEG compressed", coverage="preprocessing_only")
     exif = Image.Exif()
     exif[274] = 6
     p = work / "exif.jpg"
@@ -268,14 +312,7 @@ def _prepare(root: Path, work: Path, reserve: dict, live: bool):
     f.write(str(p))
     add("ifc_no_storeys_or_spaces", p, ifc, "removed source storeys and spaces; other elements retained")
     f = ifcopenshell.open(str(ifc))
-    scale = calculate_unit_scale(f)
-    for placement in f.by_type("IfcLocalPlacement"):
-        if placement.PlacementRelTo is None:
-            loc = placement.RelativePlacement.Location
-            xyz = list(loc.Coordinates)
-            xyz[0] += 5_000_000 / scale
-            xyz[1] += 6_000_000 / scale
-            loc.Coordinates = xyz
+    _translate_roots(f, 5_000_000, 6_000_000)
     p = work / "survey_coordinates.ifc"
     f.write(str(p))
     add("ifc_far_origin", p, ifc, "translated source root placements by 5000 km / 6000 km (geometry unchanged)")
@@ -352,13 +389,33 @@ def _compare(results):
         if not other or not base.get("counts"):
             continue
         same = base.get("counts") == other.get("counts")
+        same_bounds = set(base.get("bounds", {})) == set(other.get("bounds", {}))
         max_error = 0.0
         for item_id, bbox in base.get("bounds", {}).items():
             b = other.get("bounds", {}).get(item_id)
             if b:
                 max_error = max(max_error, *(abs((bbox[1][k] - bbox[0][k]) - (b[1][k] - b[0][k])) for k in range(3)))
+        quantity_errors = []
+        for item_id, quantities in base.get("quantities", {}).items():
+            for key, value in quantities.items():
+                transformed = other.get("quantities", {}).get(item_id, {}).get(key)
+                quantity_errors.append(abs(value - transformed) if transformed is not None else float("inf"))
+        quantity_error = max(quantity_errors, default=0.0)
         checks.append({"case": name, "same_counts": same, "max_bbox_extent_error_m": round(max_error, 6),
-                       "ok": same and max_error < 0.001})
+                       "max_quantity_error_si": round(quantity_error, 6) if quantity_error != float("inf") else None,
+                       "same_bbox_items": same_bounds,
+                       "ok": same and same_bounds and max_error < 0.001 and quantity_error < 0.001})
+    dxf = by_case.get("dxf_original") or {}
+    for name in ("dxf_r12", "dxf_r2018", "dxf_feet"):
+        other = by_case.get(name)
+        if other and dxf.get("counts"):
+            same = dxf["counts"] == other.get("counts")
+            checks.append({"case": name, "same_counts": same, "ok": same})
+    image = by_case.get("png_original") or {}
+    exif = by_case.get("exif_rotation") or {}
+    if image.get("preview_size") and exif.get("preview_size"):
+        rotated = image["preview_size"][::-1] == exif["preview_size"]
+        checks.append({"case": "exif_rotation", "display_size_rotated": rotated, "ok": rotated})
     # Avoid bloating the committed matrix with every source quantity and bound.
     for r in results:
         r.pop("quantities", None)
@@ -436,12 +493,14 @@ def main():
                   "reserved": reserve, "reserved_tested_last": bool(results and results[-1]["case"] == "reserved_unseen_ifc"),
                   "environment": {"platform": platform.platform(), "python": platform.python_version(),
                                   "ingest": "deploy VLM mode, Python IFC converter", "database": "no-op adapter; persistence NOT tested",
-                                  "memory": "Maximum single-process high-water RSS across HTTP worker and its completed ingest/converter children, not simultaneous total RSS",
+                                  "memory": "Maximum single-process high-water RSS across the in-process TestClient/API worker and completed ingest/converter children, not simultaneous total RSS. Includes client multipart encoding; oversized-probe RSS is not production API RSS.",
                                   "live_cost_usd": total_cost},
                   "limits": ["PDF internals excluded (Awais)", "DWG converter unavailable; export to DXF or IFC",
                              "Standalone CSV/XLSX/TXT and ZIP unsupported; actionable 415 responses",
                              "Upload maximum 100 MiB; >200 MiB probe tests clear rejection, not conversion",
+                             "Raster decode budget defaults to 128 MiB of source pixels (RASTER_MAX_DECODE_MB); larger colour PNGs fail clearly, JPEG draft decoding stays bounded",
                              "IFC4X3 test is a migrated real file, not a native authoring export",
+                             "Scene files and referenced nodes validated; browser rendering not exercised",
                              "Raster transforms except explicitly live rows test preprocessing only; no model accuracy claim",
                              "DXF simplified line renderer omits text/hatches; arbitrary-layer semantics require the live reader"],
                   "passed": sum(bool(r["ok"]) for r in results), "total": len(results),

@@ -66,6 +66,48 @@ def test_decompression_limit_checks_before_load(tmp_path, monkeypatch):
         read_raster(p, 100)
 
 
+def test_decode_byte_budget_counts_colour_channels(tmp_path, monkeypatch):
+    from pipeline import raster_input
+    monkeypatch.setattr(raster_input, "MAX_DECODE_BYTES", 1000)
+    for mode in ("RGB", "L"):
+        p = tmp_path / f"scan-{mode}.png"
+        Image.new(mode, (20, 20)).save(p)
+        if mode == "RGB":
+            with pytest.raises(ValueError, match="lower resolution or as JPEG"):
+                read_raster(p, 10)
+        else:
+            assert read_raster(p, 10).size == (10, 10)
+
+
+def test_16bit_scan_is_shrunk_before_tone_conversion(tmp_path):
+    p = tmp_path / "16bit.png"
+    Image.fromarray(np.full((300, 500), 32768, dtype=np.uint16)).save(p)
+    out = read_raster(p, 100)
+    assert out.size == (100, 60) and out.getpixel((50, 30))[0] == 127
+
+
+def test_jpeg_draft_size_follows_image_aspect_ratio(tmp_path, monkeypatch):
+    from pipeline import raster_input
+    monkeypatch.setattr(raster_input, "MAX_DECODE_BYTES", 600_000)
+    p = tmp_path / "scan.jpeg"
+    Image.new("RGB", (1000, 700)).save(p)
+    assert read_raster(p, 400).size == (400, 280)
+
+
+@pytest.mark.parametrize("source", ["dxf", "ifc-storeys", "ifc-overview"])
+def test_derived_geometry_previews_do_not_start_ocr_models(tmp_path, monkeypatch, source):
+    from unittest.mock import Mock
+    from engine.reader import text
+    d = tmp_path / "doc"
+    d.mkdir()
+    Image.new("RGB", (100, 100), "white").save(d / "page-1.png")
+    (d / "pages.json").write_text(json.dumps({"source": source, "pages": [{"page": 1}]}))
+    ocr = Mock(return_value=[])
+    monkeypatch.setattr(text, "ocr_words", ocr)
+    assert text.load_page_text("doc", 1, tmp_path).words == []
+    ocr.assert_not_called()
+
+
 @pytest.mark.parametrize("version", ["R12", "R2000", "R2018"])
 def test_dxf_blocks_and_versions(tmp_path, version):
     doc = ezdxf.new(version)
@@ -158,3 +200,92 @@ def test_png_header_read_handles_truncated_input(tmp_path):
     p = tmp_path / "page.png"
     p.write_bytes(b"\x89PNG\r\n\x1a\n")
     assert png_size(p) is None and other_size(p) is None
+
+
+def test_far_origin_transform_preserves_shared_local_points():
+    import ifcopenshell
+    from scripts.robust_check import _translate_roots
+    f = ifcopenshell.file(schema="IFC4")
+    point = f.createIfcCartesianPoint((1.0, 2.0, 3.0))
+    axes = f.createIfcAxis2Placement3D(point)
+    roots = [f.createIfcLocalPlacement(None, axes) for _ in range(2)]
+    child = f.createIfcLocalPlacement(roots[0], axes)
+    _translate_roots(f, 100.0, 200.0)
+    assert point.Coordinates == (1.0, 2.0, 3.0)
+    assert child.RelativePlacement.Location.Coordinates == point.Coordinates
+    assert all(p.RelativePlacement.Location.Coordinates == (101.0, 202.0, 3.0) for p in roots)
+
+
+def test_corrupt_dxf_has_actionable_message(tmp_path):
+    p = tmp_path / "broken.dxf"
+    p.write_text("0\nSECTION\n2\nENTITIES\n0\n")
+    with pytest.raises(ValueError, match="Export it again as DXF or IFC"):
+        pages.do_dxf(p, tmp_path)
+
+
+@pytest.mark.parametrize("version", ["R12", "R2018"])
+def test_legacy_polyline_rooms_preserve_counts_without_declared_units(tmp_path, version):
+    doc = ezdxf.new(version)
+    doc.modelspace().add_polyline2d([(0, 0), (10, 0), (10, 5), (0, 5)], close=True,
+                                    dxfattribs={"layer": "ROOM_OUTLINE"})
+    src = tmp_path / "legacy.dxf"
+    doc.saveas(src)
+    meta = pages.do_dxf(src, tmp_path)[0]
+    (tmp_path / "pages.json").write_text(json.dumps({"source": "dxf", "pages": [meta]}))
+    dxf_planmap.process("test", tmp_path, src)
+    pm = json.loads((tmp_path / "planmap-1.json").read_text())
+    assert [i["kind"] for i in pm["items"]] == ["room"]
+    if version == "R12":
+        assert pm["items"][0]["props"]["area_m2_geom"] is None
+
+
+def test_ifc_quantity_units_are_independent_and_can_override_project():
+    import ifcopenshell
+    import ifcopenshell.api
+    from pipeline.ifc_scene import quantities_of
+    f = ifcopenshell.file(schema="IFC4")
+    project = f.createIfcProject(ifcopenshell.guid.new())
+    mm = f.createIfcSIUnit(None, "LENGTHUNIT", "MILLI", "METRE")
+    sqm = f.createIfcSIUnit(None, "AREAUNIT", None, "SQUARE_METRE")
+    cbm = f.createIfcSIUnit(None, "VOLUMEUNIT", None, "CUBIC_METRE")
+    project.UnitsInContext = f.createIfcUnitAssignment([mm, sqm, cbm])
+    foot = ifcopenshell.api.run("unit.add_conversion_based_unit", f, name="foot")
+    el = f.createIfcWall(ifcopenshell.guid.new())
+    qs = [f.createIfcQuantityLength("Length", None, None, 3000.0),
+          f.createIfcQuantityLength("Width", None, foot, 3.0),
+          f.createIfcQuantityArea("NetArea", None, None, 25.0),
+          f.createIfcQuantityVolume("NetVolume", None, None, 6.0)]
+    qto = f.createIfcElementQuantity(ifcopenshell.guid.new(), None, "Qto_WallBaseQuantities", None, None, qs)
+    f.createIfcRelDefinesByProperties(ifcopenshell.guid.new(), None, None, None, [el], qto)
+    q = quantities_of(el, 0.001)
+    assert q["length_m"] == 3.0 and q["width_m"] == pytest.approx(0.9144)
+    assert q["area_m2"] == 25.0 and q["volume_m3"] == 6.0
+    project.UnitsInContext = None
+    f.units.clear()  # emulate a new file with no project unit assignment
+    assert quantities_of(el, 1) == {"width_m": pytest.approx(0.9144)}
+
+
+@pytest.mark.parametrize("kind", ["door", "window", "wall"])
+def test_missing_ifc_types_are_unknown_with_evidence_not_zero(tmp_path, monkeypatch, kind):
+    from unittest.mock import Mock
+    from engine.answer import answer
+    from engine import forced
+    d = tmp_path / "generated__unknown-types"
+    d.mkdir()
+    (d / "doc.json").write_text(json.dumps({"kind": "ifc", "title": "generated for demo test fixture"}))
+    (d / "elements.json").write_text(json.dumps({"elements": [
+        {"item_id": f"shape-{n}", "kind": "proxy", "ifc_class": "IfcBuildingElementProxy",
+         "bbox_m": [[n, 0, 0], [n + 1, 1, 1]]} for n in range(3)]}))
+    monkeypatch.setenv("ARTIFACTS_DIR", str(tmp_path))
+    monkeypatch.setenv("MODELS_FAKE", "1")
+    monkeypatch.setenv("FORCE_ANSWER", "1")
+    fallback = Mock()
+    monkeypatch.setattr(forced, "forced_answer", fallback)
+    a = answer(f"How many {kind}s are there?", [d.name])
+    assert a["answer"]["value"] is None and a["answer"]["abstained"]
+    assert "shapes without object types" in a["answer"]["text_md"]
+    assert a["citations"][0]["item_ids"] == [f"shape-{n}" for n in range(3)]
+    assert a["evidence"]["scene"]["highlight_item_ids"] == a["citations"][0]["item_ids"]
+    assert a["reasoning"]["steps"][0]["title"] == "Missing object types"
+    assert a["cost"]["usd_total"] == 0
+    fallback.assert_not_called()

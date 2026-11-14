@@ -101,3 +101,45 @@ def test_managed_ingest_keeps_converter_in_watchdog_group(tmp_path, monkeypatch)
     monkeypatch.setattr(ifc_scene.subprocess, "Popen", popen)
     ifc_scene.convert(src, dst)
     assert captured["start_new_session"] is False
+
+
+def test_ifc_conversion_limit_is_failed_with_a_next_step(tmp_path, monkeypatch):
+    monkeypatch.setenv("ARTIFACTS_DIR", str(tmp_path))
+    monkeypatch.setenv("INGEST_IFC_MAX_MB", "0")
+    d = tmp_path / "doc"
+    d.mkdir()
+    src = tmp_path / "source.ifc"
+    src.write_bytes(b"ISO-10303-21;")
+    (d / "doc.json").write_text(json.dumps({"doc_id": "doc", "kind": "ifc", "files": {"ifc": str(src)}}))
+    assert ingest_job.run("doc") == "failed"
+    state = json.loads((d / "ingest.json").read_text())
+    assert not state["readable"] and "Split the model" in state["reason"]
+
+
+def test_ifc_parser_error_has_a_next_step(tmp_path):
+    status = ingest_job.Status(tmp_path / "ingest.json")
+    assert not status.stage("ifc_scene", lambda: (_ for _ in ()).throw(RuntimeError("Unable to parse IFC SPF header")))
+    assert "Export it again as IFC" in status.stages[0]["error"]
+
+
+def test_original_download_restores_metadata_before_choosing_source(tmp_path, monkeypatch):
+    import asyncio
+    from unittest.mock import AsyncMock
+    from server import artifact_store, docs_routes
+    monkeypatch.setenv("ARTIFACTS_DIR", str(tmp_path))
+    doc_id = "uploads__restored"
+    d = tmp_path / doc_id
+    original = tmp_path / "original.jpeg"
+    normalised = tmp_path / "normalised.png"
+    normalised.write_bytes(b"reader copy")
+    record = {"doc_id": doc_id, "files": {"png": str(normalised)}}
+    monkeypatch.setattr(docs_routes, "_document", AsyncMock(return_value=record))
+
+    async def restore(doc_id):
+        d.mkdir()
+        original.write_bytes(b"original source")
+        (d / "doc.json").write_text(json.dumps({"original_files": {"jpeg": str(original)}}))
+
+    monkeypatch.setattr(artifact_store, "ensure_doc", restore)
+    response = asyncio.run(docs_routes.doc_source(doc_id))
+    assert response.path == original

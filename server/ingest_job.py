@@ -51,13 +51,24 @@ class Status:
         self.write("running")
         try:
             fn()
-            self.stages.append({"stage": name, "ok": True, "s": round(time.time() - t, 1)})
+            self.stages.append({"stage": name, "ok": True, "s": round(time.time() - t, 1),
+                                "peak_process_rss_mib": _peak_rss_mib()})
             self.write("running")
             return True
         except Exception as e:  # noqa: BLE001
-            self.stages.append({"stage": name, "ok": False, "error": str(e)[:300] or type(e).__name__})
+            error = str(e)[:300] or type(e).__name__
+            if name == "ifc_scene":
+                error = ("This IFC could not be read or converted. Export it again as IFC, or split the model into smaller files. "
+                         + error)
+            self.stages.append({"stage": name, "ok": False, "error": error})
             self.write("running")
             return False
+
+
+def _peak_rss_mib():
+    """Single ingest process high-water RSS, for upload diagnostics."""
+    import resource
+    return round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / (1024 ** 2 if sys.platform == "darwin" else 1024), 1)
 
 
 def _normalise_raster(doc_id: str, art: Path):
@@ -167,7 +178,7 @@ def _dxf_planmap_usable(ddir: Path) -> bool:
         return False
     pm = json.loads(f.read_text())
     n = sum(1 for i in pm["items"] if i["kind"] in ("room", "wall", "door", "window"))
-    return n >= 3 and bool(pm["scale"].get("m_per_px"))
+    return n >= 3  # counts remain usable without units; physical sizes remain unknown
 
 
 def _extrude(doc_id: str, ddir: Path, page: int):
@@ -178,8 +189,11 @@ def _extrude(doc_id: str, ddir: Path, page: int):
         pm["scale"] = {"m_per_px": ASSUMED_M_PER_PX, "method": "assumed", "source": "assumed", "confidence": 0.1,
                        "evidence": f"no printed scale, dimension or door found: assumed {ASSUMED_M_PER_PX} m per pixel"}
         (ddir / f"planmap-{page}.json").write_text(json.dumps(pm))
+    # Explicit CAD walls already have geometry. Reconstructing their thin preview
+    # strokes as raster walls adds spurious surfaces and can exhaust memory.
+    cad_walls = any(i["kind"] == "wall" and i.get("source") == "dxf" for i in pm["items"])
     try:  # falls back to plan-map walls when cv2 or wall fills are missing
-        extrude.process(doc_id, ddir, page, raster_walls=True)
+        extrude.process(doc_id, ddir, page, raster_walls=not cad_walls)
     except Exception as ex:  # noqa: BLE001 - a raster-wall surprise must never cost the upload its 3D
         print("raster-wall extrude failed, using plan-map walls:", repr(ex)[:160])
         extrude.process(doc_id, ddir, page)
@@ -340,9 +354,9 @@ def _run(doc_id: str, st: Status) -> str:
         ifc_path = REPO / doc["files"]["ifc"]
         cap = float(os.environ.get("INGEST_IFC_MAX_MB", "15" if light else "400"))
         if ifc_path.stat().st_size > cap * 1e6:
-            st.write("partial", f"IFC is {ifc_path.stat().st_size / 1e6:.0f} MB; this server converts IFC files up to {cap:.0f} MB. "
-                                "The file is stored, but no 3D scene or element list was built")
-            return "partial"
+            st.write("failed", f"IFC is {ifc_path.stat().st_size / 1e6:.0f} MB; this server converts IFC files up to {cap:.0f} MB. "
+                               "The original is stored, but it cannot be viewed or questioned yet. Split the model into smaller IFC files and upload them separately.")
+            return "failed"
         from pipeline import ifc_plans, ifc_scene
         ifc = REPO / doc["files"]["ifc"]
         ok = st.stage("ifc_scene", lambda: ifc_scene.process(ifc, doc, ddir))
@@ -430,6 +444,8 @@ def _run(doc_id: str, st: Status) -> str:
     if ok and plan_pages:
         detail = f"plan map on page(s) {plan_pages}"
     warnings = []
+    if kind == "ifc" and (ddir / "scene.json").is_file():
+        warnings.extend(json.loads((ddir / "scene.json").read_text()).get("warnings") or [])
     if (ddir / "pages.json").is_file():
         for page in json.loads((ddir / "pages.json").read_text()).get("pages", []):
             warnings.extend(page.get("warnings") or [])

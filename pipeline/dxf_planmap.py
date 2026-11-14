@@ -68,7 +68,12 @@ def assign_room_texts(rooms, texts):
 
 
 def _pts(e):
-    return [(float(x), float(y)) for x, y in e.get_points("xy")]
+    vertices = e.vertices_in_wcs() if e.dxftype() == "LWPOLYLINE" else e.points_in_wcs()
+    return [(float(p.x), float(p.y)) for p in vertices]
+
+
+def _closed(e):
+    return e.closed if e.dxftype() == "LWPOLYLINE" else e.is_closed
 
 
 def _poly_area(p):
@@ -155,7 +160,7 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
                       "polygon_px": poly, "props": props, "conf": 1.0, "source": src})
 
     # rooms
-    rooms = [p for e in ms.query('LWPOLYLINE[layer=="ROOM_OUTLINE"]') if e.closed for p in [_pts(e)]]
+    rooms = [p for e in ms.query('LWPOLYLINE POLYLINE[layer=="ROOM_OUTLINE"]') if _closed(e) for p in [_pts(e)]]
     assign = assign_room_texts(rooms, texts)
     for i, r in enumerate(rooms):
         ts = [t for t, _, _ in assign[i]]
@@ -166,17 +171,17 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
             {"number": num, "area_m2_label": float(area_txt.split()[0]) if area_txt else None,
              "area_m2_geom": round(_poly_area(r) * unit_m ** 2, 2) if unit_m else None, "labelled": bool(name)}, "dxf")
     # units
-    for e in ms.query('LWPOLYLINE[layer=="UNIT_OUTLINE"]'):
+    for e in ms.query('LWPOLYLINE POLYLINE[layer=="UNIT_OUTLINE"]'):
         p = _pts(e)
         lab = next((t for t, x, y in texts if t.startswith("App.") and _inside((x, y), p)), "")
         add("other", lab, p, {"role": "unit", "area_m2_geom": round(_poly_area(p) * unit_m ** 2, 2) if unit_m else None}, "dxf")
-    for e in ms.query('LWPOLYLINE[layer=="WALL"]'):
+    for e in ms.query('LWPOLYLINE POLYLINE[layer=="WALL"]'):
         add("wall", "", _pts(e), {}, "dxf")
-    for e in ms.query('LWPOLYLINE[layer=="WINDOW"]'):
-        if e.closed:
+    for e in ms.query('LWPOLYLINE POLYLINE[layer=="WINDOW"]'):
+        if _closed(e):
             add("window", "", _pts(e), {}, "dxf")
     arcs = [(e.dxf.center.x, e.dxf.center.y, e.dxf.radius) for e in ms.query('ARC[layer=="DOOR"]')]
-    for e in ms.query('LWPOLYLINE[layer=="DOOR"]'):
+    for e in ms.query('LWPOLYLINE POLYLINE[layer=="DOOR"]'):
         p = _pts(e)
         if len(p) == 5:  # door leaf frame; the 2-point lines and arcs are swing symbols
             cx = sum(q[0] for q in p[:4]) / 4; cy = sum(q[1] for q in p[:4]) / 4
@@ -187,13 +192,13 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
     # Blocks represent one fixture, even when several nested curves draw its symbol.
     # Semantic layers/block names can identify a fixture; anonymous FIXTURE geometry stays unknown.
     from ezdxf import bbox as dxf_bbox
-    for e in ms.query("LWPOLYLINE INSERT ELLIPSE CIRCLE"):
+    for e in ms.query("LWPOLYLINE POLYLINE INSERT ELLIPSE CIRCLE"):
         name = e.dxf.name if e.dxftype() == "INSERT" else ""
         kind = fixture_kind(e.dxf.layer, name)
         if kind is None and e.dxf.layer != "FIXTURE":
             continue
-        if e.dxftype() == "LWPOLYLINE":
-            if not e.closed:
+        if e.dxftype() in ("LWPOLYLINE", "POLYLINE"):
+            if not _closed(e):
                 continue
             poly = _pts(e)
         else:

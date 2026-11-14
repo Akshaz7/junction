@@ -197,6 +197,12 @@ def load_page_text(doc_id: str, page: int, root, allow_ocr: bool = True) -> Page
     d = root / doc_id
     img = image_path(doc_id, page, root)
     size = png_size(img)
+    # The lightweight CAD preview omits text/hatches. OCR cannot recover omitted
+    # text, and starting an OCR model for every vector count can exhaust the API.
+    # Existing vector/PDF text layers still take precedence below.
+    preview = _read_json(d / "pages.json")
+    if isinstance(preview, dict) and preview.get("source") in {"dxf", "ifc-storeys", "ifc-overview"}:
+        allow_ocr = False
     stamps = tuple((p.stat().st_mtime_ns if p.exists() else 0) for p in (d / f"text-{page}.json", d / f"rtext-{page}.json"))
     key = (str(root), doc_id, page, stamps, allow_ocr)
     if key in _cache:

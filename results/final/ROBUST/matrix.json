@@ -1,0 +1,2839 @@
+{
+  "row": "F-ROBUST",
+  "time": "2026-11-14T21:29:50.009053+00:00",
+  "long": true,
+  "reserved": {
+    "path": "data/junction-dataset-preview/data/opening_design/Sports_Complex/IFC Roundtrip/FreeCAD Detail/detail_Yorik_FreeCAD_materials.ifc",
+    "bytes": 1250123,
+    "selection": "random.SystemRandom; selected before implementation; not opened until final matrix"
+  },
+  "reserved_tested_last": true,
+  "environment": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.12.14",
+    "ingest": "deploy VLM mode, Python IFC converter",
+    "database": "no-op adapter; persistence NOT tested",
+    "memory": "Maximum single-process high-water RSS across the in-process TestClient/API worker and completed ingest/converter children, not simultaneous total RSS. Includes client multipart encoding; oversized-probe RSS is not production API RSS.",
+    "live_cost_usd": 0.024408
+  },
+  "limits": [
+    "PDF internals excluded (Awais)",
+    "DWG converter unavailable; export to DXF or IFC",
+    "Standalone CSV/XLSX/TXT and ZIP unsupported; actionable 415 responses",
+    "Upload maximum 100 MiB; >200 MiB probe tests clear rejection, not conversion",
+    "Raster decode budget defaults to 128 MiB of source pixels (RASTER_MAX_DECODE_MB); larger colour PNGs fail clearly, JPEG draft decoding stays bounded",
+    "IFC4X3 test is a migrated real file, not a native authoring export",
+    "Scene files and referenced nodes validated; browser rendering not exercised",
+    "Raster transforms except explicitly live rows test preprocessing only; no model accuracy claim",
+    "DXF simplified line renderer omits text/hatches; arbitrary-layer semantics require the live reader"
+  ],
+  "passed": 41,
+  "total": 41,
+  "transformation_checks": [
+    {
+      "case": "ifc_feet",
+      "same_counts": true,
+      "max_bbox_extent_error_m": 0.0,
+      "max_quantity_error_si": 0.0,
+      "same_bbox_items": true,
+      "ok": true
+    },
+    {
+      "case": "ifc_far_origin",
+      "same_counts": true,
+      "max_bbox_extent_error_m": 0.0,
+      "max_quantity_error_si": 0.0,
+      "same_bbox_items": true,
+      "ok": true
+    },
+    {
+      "case": "dxf_r12",
+      "same_counts": true,
+      "ok": true
+    },
+    {
+      "case": "dxf_r2018",
+      "same_counts": true,
+      "ok": true
+    },
+    {
+      "case": "dxf_feet",
+      "same_counts": true,
+      "ok": true
+    },
+    {
+      "case": "exif_rotation",
+      "display_size_rotated": true,
+      "ok": true
+    }
+  ],
+  "cases": [
+    {
+      "case": "png_original",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/png_original.png",
+      "filename": "png_original.png",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "re-encoded source pixels as RGB",
+      "coverage": "full",
+      "live": true,
+      "http_start_peak_rss_mib": 53.5,
+      "bytes": 43901,
+      "upload_http": 200,
+      "upload_seconds": 0.022,
+      "post_ingest_peak_process_rss_mib": 220.3,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "normalise",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 26.9
+          },
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 27.4
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 27.4
+          },
+          {
+            "stage": "planmap_vlm",
+            "ok": true,
+            "s": 36.8,
+            "peak_process_rss_mib": 52.3
+          },
+          {
+            "stage": "extrude",
+            "ok": true,
+            "s": 0.5,
+            "peak_process_rss_mib": 160.1
+          },
+          {
+            "stage": "usdz",
+            "ok": true,
+            "s": 0.3,
+            "peak_process_rss_mib": 219.8
+          }
+        ],
+        "detail": "plan map on page(s) [1]",
+        "mode": "vlm",
+        "started_at": 1794691714.6198761,
+        "step": "usdz",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.02441,
+        "updated": "2026-11-14T23:29:12+0200"
+      },
+      "user_message": "plan map on page(s) [1]",
+      "preview": true,
+      "scene": true,
+      "scene_items": 68,
+      "origin_offset_m": [
+        5.776949999999999,
+        0.0,
+        7.9052999999999995
+      ],
+      "scene_valid": true,
+      "preview_size": [
+        475,
+        650
+      ],
+      "post_load_peak_process_rss_mib": 431.4,
+      "counts": {
+        "door": 12,
+        "room": 12,
+        "shower": 3,
+        "sink": 3,
+        "stairs": 2,
+        "toilet": 2,
+        "wall": 43,
+        "window": 14
+      },
+      "first_answer": {
+        "question": "How many doors are there?",
+        "text": "There are **12 doors** on this floor plan. [1]",
+        "value": 12,
+        "abstained": false,
+        "unclassified": false,
+        "citations": 1,
+        "boxes": 12,
+        "reasoning": {
+          "steps": [
+            {
+              "kind": "found",
+              "title": "Found",
+              "text": "12 doors on the scanned drawing, each one numbered",
+              "cite": 1,
+              "ok": null
+            }
+          ],
+          "confidence": {
+            "label": "Estimate",
+            "pct": 75,
+            "reason": "Detected on a scanned image; lowered because detector confidence 55%.",
+            "improve": "Check box 1, or upload a CAD file or vector PDF to make the count exact."
+          }
+        },
+        "cost_usd": 0
+      },
+      "ok": true,
+      "seconds": 38.334,
+      "peak_process_rss_mib": 433.3,
+      "peak_http_process_rss_mib": 433.3,
+      "peak_ingest_process_rss_mib": 219.8
+    },
+    {
+      "case": "jpeg_recompressed",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/jpeg_recompressed.jpeg",
+      "filename": "jpeg_recompressed.jpeg",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "re-encoded source pixels as RGB",
+      "coverage": "preprocessing_only",
+      "live": false,
+      "http_start_peak_rss_mib": 53.3,
+      "bytes": 40708,
+      "upload_http": 200,
+      "upload_seconds": 0.018,
+      "post_ingest_peak_process_rss_mib": 55.1,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "normalise",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 27.1
+          },
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 27.8
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 27.8
+          },
+          {
+            "stage": "planmap_vlm",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 44.0
+          }
+        ],
+        "detail": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+        "mode": "vlm",
+        "started_at": 1794691753.190324,
+        "step": "planmap_vlm",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:13+0200"
+      },
+      "user_message": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+      "preview": true,
+      "scene": false,
+      "preview_size": [
+        475,
+        650
+      ],
+      "post_load_peak_process_rss_mib": 57.2,
+      "ok": true,
+      "seconds": 0.242,
+      "peak_process_rss_mib": 57.2,
+      "peak_http_process_rss_mib": 57.2,
+      "peak_ingest_process_rss_mib": 44.0
+    },
+    {
+      "case": "greyscale",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/greyscale.png",
+      "filename": "greyscale.png",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "re-encoded source pixels as L",
+      "coverage": "preprocessing_only",
+      "live": false,
+      "http_start_peak_rss_mib": 53.1,
+      "bytes": 20087,
+      "upload_http": 200,
+      "upload_seconds": 0.017,
+      "post_ingest_peak_process_rss_mib": 54.9,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "normalise",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 25.8
+          },
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 27.5
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 27.5
+          },
+          {
+            "stage": "planmap_vlm",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 43.9
+          }
+        ],
+        "detail": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+        "mode": "vlm",
+        "started_at": 1794691753.639364,
+        "step": "planmap_vlm",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:13+0200"
+      },
+      "user_message": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+      "preview": true,
+      "scene": false,
+      "preview_size": [
+        475,
+        650
+      ],
+      "post_load_peak_process_rss_mib": 57.1,
+      "ok": true,
+      "seconds": 0.24,
+      "peak_process_rss_mib": 57.1,
+      "peak_http_process_rss_mib": 57.1,
+      "peak_ingest_process_rss_mib": 43.9
+    },
+    {
+      "case": "alpha",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/alpha.png",
+      "filename": "alpha.png",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "re-encoded source pixels as RGBA",
+      "coverage": "preprocessing_only",
+      "live": false,
+      "http_start_peak_rss_mib": 53.3,
+      "bytes": 46398,
+      "upload_http": 200,
+      "upload_seconds": 0.016,
+      "post_ingest_peak_process_rss_mib": 55.1,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "normalise",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 27.8
+          },
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 28.0
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 28.1
+          },
+          {
+            "stage": "planmap_vlm",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 46.0
+          }
+        ],
+        "detail": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+        "mode": "vlm",
+        "started_at": 1794691754.1001909,
+        "step": "planmap_vlm",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:14+0200"
+      },
+      "user_message": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+      "preview": true,
+      "scene": false,
+      "preview_size": [
+        475,
+        650
+      ],
+      "post_load_peak_process_rss_mib": 57.3,
+      "ok": true,
+      "seconds": 0.242,
+      "peak_process_rss_mib": 57.3,
+      "peak_http_process_rss_mib": 57.3,
+      "peak_ingest_process_rss_mib": 46.0
+    },
+    {
+      "case": "rotated",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/rotated.png",
+      "filename": "rotated.png",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "rotated source pixels",
+      "coverage": "preprocessing_only",
+      "http_start_peak_rss_mib": 53.2,
+      "bytes": 44344,
+      "upload_http": 200,
+      "upload_seconds": 0.02,
+      "post_ingest_peak_process_rss_mib": 55.0,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "normalise",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 27.0
+          },
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 28.5
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 28.5
+          },
+          {
+            "stage": "planmap_vlm",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 45.3
+          }
+        ],
+        "detail": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+        "mode": "vlm",
+        "started_at": 1794691754.552554,
+        "step": "planmap_vlm",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:14+0200"
+      },
+      "user_message": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+      "preview": true,
+      "scene": false,
+      "preview_size": [
+        650,
+        475
+      ],
+      "post_load_peak_process_rss_mib": 57.2,
+      "ok": true,
+      "seconds": 0.246,
+      "peak_process_rss_mib": 57.2,
+      "peak_http_process_rss_mib": 57.2,
+      "peak_ingest_process_rss_mib": 45.3
+    },
+    {
+      "case": "skewed",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/skewed.png",
+      "filename": "skewed.png",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "skewed source pixels",
+      "coverage": "preprocessing_only",
+      "http_start_peak_rss_mib": 53.1,
+      "bytes": 49810,
+      "upload_http": 200,
+      "upload_seconds": 0.017,
+      "post_ingest_peak_process_rss_mib": 54.8,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "normalise",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 26.6
+          },
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 27.7
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 27.7
+          },
+          {
+            "stage": "planmap_vlm",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 44.3
+          }
+        ],
+        "detail": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+        "mode": "vlm",
+        "started_at": 1794691755.004933,
+        "step": "planmap_vlm",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:15+0200"
+      },
+      "user_message": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+      "preview": true,
+      "scene": false,
+      "preview_size": [
+        499,
+        668
+      ],
+      "post_load_peak_process_rss_mib": 57.2,
+      "ok": true,
+      "seconds": 0.243,
+      "peak_process_rss_mib": 57.2,
+      "peak_http_process_rss_mib": 57.2,
+      "peak_ingest_process_rss_mib": 44.3
+    },
+    {
+      "case": "tiny",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/tiny.png",
+      "filename": "tiny.png",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "tiny source pixels",
+      "coverage": "preprocessing_only",
+      "http_start_peak_rss_mib": 53.1,
+      "bytes": 1823,
+      "upload_http": 200,
+      "upload_seconds": 0.017,
+      "post_ingest_peak_process_rss_mib": 54.9,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "normalise",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 24.2
+          },
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 24.2
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 24.2
+          },
+          {
+            "stage": "planmap_vlm",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 40.9
+          }
+        ],
+        "detail": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+        "mode": "vlm",
+        "started_at": 1794691755.4543989,
+        "step": "planmap_vlm",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:15+0200"
+      },
+      "user_message": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+      "preview": true,
+      "scene": false,
+      "preview_size": [
+        32,
+        32
+      ],
+      "post_load_peak_process_rss_mib": 57.0,
+      "ok": true,
+      "seconds": 0.245,
+      "peak_process_rss_mib": 57.0,
+      "peak_http_process_rss_mib": 57.0,
+      "peak_ingest_process_rss_mib": 40.9
+    },
+    {
+      "case": "huge_10k",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/huge_10k.png",
+      "filename": "huge_10k.png",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "huge_10k source pixels in greyscale",
+      "coverage": "preprocessing_only",
+      "http_start_peak_rss_mib": 53.1,
+      "bytes": 1743840,
+      "upload_http": 200,
+      "upload_seconds": 0.02,
+      "post_ingest_peak_process_rss_mib": 176.2,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "normalise",
+            "ok": true,
+            "s": 0.4,
+            "peak_process_rss_mib": 135.2
+          },
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.2,
+            "peak_process_rss_mib": 152.4
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 152.4
+          },
+          {
+            "stage": "planmap_vlm",
+            "ok": true,
+            "s": 0.2,
+            "peak_process_rss_mib": 168.8
+          }
+        ],
+        "detail": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+        "mode": "vlm",
+        "started_at": 1794691755.911176,
+        "step": "planmap_vlm",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:16+0200"
+      },
+      "user_message": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+      "preview": true,
+      "scene": false,
+      "preview_size": [
+        2993,
+        4096
+      ],
+      "post_load_peak_process_rss_mib": 176.2,
+      "ok": true,
+      "seconds": 0.878,
+      "peak_process_rss_mib": 176.2,
+      "peak_http_process_rss_mib": 64.1,
+      "peak_ingest_process_rss_mib": 168.8
+    },
+    {
+      "case": "huge_colour_decode_limit",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/huge_colour.png",
+      "filename": "huge_colour.png",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "source RGB pixels enlarged to 10k longest side; decode-memory guard",
+      "expected_failure": true,
+      "coverage": "memory_limit",
+      "http_start_peak_rss_mib": 53.5,
+      "bytes": 4056455,
+      "upload_http": 200,
+      "upload_seconds": 0.024,
+      "post_ingest_peak_process_rss_mib": 71.7,
+      "ingest": {
+        "status": "failed",
+        "stages": [
+          {
+            "stage": "normalise",
+            "ok": false,
+            "error": "This image needs more decoding memory than this server allows. Export it at a lower resolution or as JPEG and upload it again."
+          }
+        ],
+        "detail": "This image needs more decoding memory than this server allows. Export it at a lower resolution or as JPEG and upload it again.",
+        "mode": "vlm",
+        "started_at": 1794691756.9743302,
+        "step": "normalise",
+        "readable": false,
+        "progress": 0.5,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:17+0200",
+        "reason": "This image needs more decoding memory than this server allows. Export it at a lower resolution or as JPEG and upload it again."
+      },
+      "user_message": "This image needs more decoding memory than this server allows. Export it at a lower resolution or as JPEG and upload it again.",
+      "preview": false,
+      "scene": false,
+      "post_load_peak_process_rss_mib": 71.9,
+      "ok": true,
+      "seconds": 0.136,
+      "peak_process_rss_mib": 71.9,
+      "peak_http_process_rss_mib": 71.9,
+      "peak_ingest_process_rss_mib": 0
+    },
+    {
+      "case": "huge_jpeg_10k",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/huge.jpeg",
+      "filename": "huge.jpeg",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "source enlarged to 10k longest side and JPEG compressed",
+      "coverage": "preprocessing_only",
+      "http_start_peak_rss_mib": 53.5,
+      "bytes": 2123166,
+      "upload_http": 200,
+      "upload_seconds": 0.024,
+      "post_ingest_peak_process_rss_mib": 226.3,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "normalise",
+            "ok": true,
+            "s": 0.2,
+            "peak_process_rss_mib": 198.9
+          },
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.2,
+            "peak_process_rss_mib": 201.7
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 201.7
+          },
+          {
+            "stage": "planmap_vlm",
+            "ok": true,
+            "s": 0.2,
+            "peak_process_rss_mib": 218.1
+          }
+        ],
+        "detail": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+        "mode": "vlm",
+        "started_at": 1794691757.328941,
+        "step": "planmap_vlm",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:17+0200"
+      },
+      "user_message": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+      "preview": true,
+      "scene": false,
+      "preview_size": [
+        2993,
+        4096
+      ],
+      "post_load_peak_process_rss_mib": 226.3,
+      "ok": true,
+      "seconds": 0.674,
+      "peak_process_rss_mib": 226.3,
+      "peak_http_process_rss_mib": 66.0,
+      "peak_ingest_process_rss_mib": 218.1
+    },
+    {
+      "case": "exif_rotation",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/exif.jpg",
+      "filename": "exif.jpg",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "source JPEG with EXIF orientation 6",
+      "coverage": "preprocessing_only",
+      "http_start_peak_rss_mib": 53.5,
+      "bytes": 40744,
+      "upload_http": 200,
+      "upload_seconds": 0.019,
+      "post_ingest_peak_process_rss_mib": 55.2,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "normalise",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 27.2
+          },
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 28.2
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 28.3
+          },
+          {
+            "stage": "planmap_vlm",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 44.2
+          }
+        ],
+        "detail": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+        "mode": "vlm",
+        "started_at": 1794691758.222354,
+        "step": "planmap_vlm",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:18+0200"
+      },
+      "user_message": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+      "preview": true,
+      "scene": false,
+      "preview_size": [
+        650,
+        475
+      ],
+      "post_load_peak_process_rss_mib": 57.4,
+      "ok": true,
+      "seconds": 0.242,
+      "peak_process_rss_mib": 57.4,
+      "peak_http_process_rss_mib": 57.4,
+      "peak_ingest_process_rss_mib": 44.2
+    },
+    {
+      "case": "16bit_png",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/16bit.png",
+      "filename": "16bit.png",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "8-bit source greyscale expanded losslessly to 16-bit",
+      "coverage": "preprocessing_only",
+      "http_start_peak_rss_mib": 53.3,
+      "bytes": 31540,
+      "upload_http": 200,
+      "upload_seconds": 0.018,
+      "post_ingest_peak_process_rss_mib": 55.1,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "normalise",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 26.6
+          },
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 27.5
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 27.5
+          },
+          {
+            "stage": "planmap_vlm",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 40.5
+          }
+        ],
+        "detail": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+        "mode": "vlm",
+        "started_at": 1794691758.680021,
+        "step": "planmap_vlm",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:18+0200"
+      },
+      "user_message": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+      "preview": true,
+      "scene": false,
+      "preview_size": [
+        475,
+        650
+      ],
+      "post_load_peak_process_rss_mib": 57.3,
+      "ok": true,
+      "seconds": 0.244,
+      "peak_process_rss_mib": 57.3,
+      "peak_http_process_rss_mib": 57.3,
+      "peak_ingest_process_rss_mib": 40.5
+    },
+    {
+      "case": "palette_alpha",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/palette.png",
+      "filename": "palette.png",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "source quantised with transparent palette index 0",
+      "coverage": "preprocessing_only",
+      "http_start_peak_rss_mib": 53.3,
+      "bytes": 17418,
+      "upload_http": 200,
+      "upload_seconds": 0.021,
+      "post_ingest_peak_process_rss_mib": 55.1,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "normalise",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 27.2
+          },
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 29.7
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 29.7
+          },
+          {
+            "stage": "planmap_vlm",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 46.1
+          }
+        ],
+        "detail": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+        "mode": "vlm",
+        "started_at": 1794691759.1360571,
+        "step": "planmap_vlm",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:19+0200"
+      },
+      "user_message": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+      "preview": true,
+      "scene": false,
+      "preview_size": [
+        475,
+        650
+      ],
+      "post_load_peak_process_rss_mib": 57.3,
+      "ok": true,
+      "seconds": 0.247,
+      "peak_process_rss_mib": 57.3,
+      "peak_http_process_rss_mib": 57.3,
+      "peak_ingest_process_rss_mib": 46.1
+    },
+    {
+      "case": "duplicate_1",
+      "path": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "filename": "colorful-11397.png",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "original",
+      "coverage": "preprocessing_only",
+      "http_start_peak_rss_mib": 53.7,
+      "bytes": 44754,
+      "upload_http": 200,
+      "upload_seconds": 0.019,
+      "post_ingest_peak_process_rss_mib": 55.5,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "normalise",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 26.4
+          },
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 29.0
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 29.0
+          },
+          {
+            "stage": "planmap_vlm",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 42.0
+          }
+        ],
+        "detail": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+        "mode": "vlm",
+        "started_at": 1794691759.584994,
+        "step": "planmap_vlm",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:19+0200"
+      },
+      "user_message": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+      "preview": true,
+      "scene": false,
+      "preview_size": [
+        475,
+        650
+      ],
+      "post_load_peak_process_rss_mib": 57.8,
+      "ok": true,
+      "seconds": 0.248,
+      "peak_process_rss_mib": 57.8,
+      "peak_http_process_rss_mib": 57.8,
+      "peak_ingest_process_rss_mib": 42.0
+    },
+    {
+      "case": "duplicate_2",
+      "path": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "filename": "colorful-11397.png",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "original",
+      "coverage": "preprocessing_only",
+      "http_start_peak_rss_mib": 53.4,
+      "bytes": 44754,
+      "upload_http": 200,
+      "upload_seconds": 0.019,
+      "post_ingest_peak_process_rss_mib": 55.2,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "normalise",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 27.0
+          },
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 28.8
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 28.8
+          },
+          {
+            "stage": "planmap_vlm",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 41.8
+          }
+        ],
+        "detail": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+        "mode": "vlm",
+        "started_at": 1794691760.0461571,
+        "step": "planmap_vlm",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:20+0200"
+      },
+      "user_message": "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene",
+      "preview": true,
+      "scene": false,
+      "preview_size": [
+        475,
+        650
+      ],
+      "post_load_peak_process_rss_mib": 57.4,
+      "ok": true,
+      "seconds": 0.241,
+      "peak_process_rss_mib": 57.4,
+      "peak_http_process_rss_mib": 57.4,
+      "peak_ingest_process_rss_mib": 41.8
+    },
+    {
+      "case": "dxf_original",
+      "path": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/swiss_dwellings/site3434_bldg5310_floor23630.dxf",
+      "filename": "site3434_bldg5310_floor23630.dxf",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/swiss_dwellings/site3434_bldg5310_floor23630.dxf",
+      "transform": "original",
+      "http_start_peak_rss_mib": 53.5,
+      "bytes": 103770,
+      "upload_http": 200,
+      "upload_seconds": 0.018,
+      "post_ingest_peak_process_rss_mib": 242.0,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 104.0
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 104.0
+          },
+          {
+            "stage": "dxf_planmap",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 107.2
+          },
+          {
+            "stage": "extrude",
+            "ok": true,
+            "s": 0.4,
+            "peak_process_rss_mib": 182.7
+          },
+          {
+            "stage": "usdz",
+            "ok": true,
+            "s": 0.2,
+            "peak_process_rss_mib": 241.7
+          }
+        ],
+        "detail": "plan map on page(s) [1]",
+        "mode": "vlm",
+        "started_at": 1794691760.5032792,
+        "step": "usdz",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:21+0200"
+      },
+      "user_message": "plan map on page(s) [1]",
+      "preview": true,
+      "scene": true,
+      "scene_items": 31,
+      "origin_offset_m": [
+        4.5003,
+        0.0,
+        6.7236
+      ],
+      "scene_valid": true,
+      "preview_size": [
+        2008,
+        3000
+      ],
+      "post_load_peak_process_rss_mib": 242.0,
+      "counts": {
+        "room": 8,
+        "other": 24,
+        "wall": 9,
+        "window": 7,
+        "door": 7,
+        "text": 21
+      },
+      "first_answer": {
+        "question": "How many doors are there?",
+        "text": "There are **7 doors** on this floor plan. [1]",
+        "value": 7,
+        "abstained": false,
+        "unclassified": false,
+        "citations": 1,
+        "boxes": 7,
+        "reasoning": {
+          "steps": [
+            {
+              "kind": "found",
+              "title": "Found",
+              "text": "7 doors in the CAD drawing (DXF), each one numbered",
+              "cite": 1,
+              "ok": null
+            }
+          ],
+          "confidence": {
+            "label": "Verified",
+            "pct": 95,
+            "reason": "Measured from the CAD file's exact geometry and units.",
+            "improve": null
+          }
+        },
+        "cost_usd": 0
+      },
+      "ok": true,
+      "seconds": 1.034,
+      "peak_process_rss_mib": 242.0,
+      "peak_http_process_rss_mib": 69.1,
+      "peak_ingest_process_rss_mib": 241.7
+    },
+    {
+      "case": "dxf_r12",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/R12.dxf",
+      "filename": "R12.dxf",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/swiss_dwellings/site3434_bldg5310_floor23630.dxf",
+      "transform": "converted source to R12",
+      "http_start_peak_rss_mib": 53.5,
+      "bytes": 162096,
+      "upload_http": 200,
+      "upload_seconds": 0.019,
+      "post_ingest_peak_process_rss_mib": 243.2,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.2,
+            "peak_process_rss_mib": 105.2
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 105.2
+          },
+          {
+            "stage": "dxf_planmap",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 109.2
+          },
+          {
+            "stage": "extrude",
+            "ok": true,
+            "s": 0.4,
+            "peak_process_rss_mib": 185.2
+          },
+          {
+            "stage": "usdz",
+            "ok": true,
+            "s": 0.3,
+            "peak_process_rss_mib": 243.2
+          }
+        ],
+        "detail": "plan map on page(s) [1]. Drawing units are not declared for this view. Physical sizes cannot be verified from DXF coordinates.",
+        "mode": "vlm",
+        "started_at": 1794691761.7803059,
+        "step": "usdz",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:22+0200"
+      },
+      "user_message": "plan map on page(s) [1]. Drawing units are not declared for this view. Physical sizes cannot be verified from DXF coordinates.",
+      "preview": true,
+      "scene": true,
+      "scene_items": 31,
+      "origin_offset_m": [
+        20.08,
+        0.0,
+        30.0
+      ],
+      "scene_valid": true,
+      "preview_size": [
+        2008,
+        3000
+      ],
+      "post_load_peak_process_rss_mib": 243.2,
+      "counts": {
+        "room": 8,
+        "other": 24,
+        "wall": 9,
+        "window": 7,
+        "door": 7,
+        "text": 21
+      },
+      "first_answer": {
+        "question": "How many doors are there?",
+        "text": "There are **7 doors** on this floor plan. [1]",
+        "value": 7,
+        "abstained": false,
+        "unclassified": false,
+        "citations": 1,
+        "boxes": 7,
+        "reasoning": {
+          "steps": [
+            {
+              "kind": "found",
+              "title": "Found",
+              "text": "7 doors in the CAD drawing (DXF), each one numbered",
+              "cite": 1,
+              "ok": null
+            }
+          ],
+          "confidence": {
+            "label": "Cross-checked",
+            "pct": 83,
+            "reason": "Detected on a scanned image; raised because detector confidence 100%.",
+            "improve": null
+          }
+        },
+        "cost_usd": 0
+      },
+      "ok": true,
+      "seconds": 1.132,
+      "peak_process_rss_mib": 243.2,
+      "peak_http_process_rss_mib": 69.9,
+      "peak_ingest_process_rss_mib": 243.2
+    },
+    {
+      "case": "dxf_r2018",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/R2018.dxf",
+      "filename": "R2018.dxf",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/swiss_dwellings/site3434_bldg5310_floor23630.dxf",
+      "transform": "converted source to R2018",
+      "http_start_peak_rss_mib": 53.3,
+      "bytes": 103768,
+      "upload_http": 200,
+      "upload_seconds": 0.019,
+      "post_ingest_peak_process_rss_mib": 243.6,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 104.4
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 104.4
+          },
+          {
+            "stage": "dxf_planmap",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 107.8
+          },
+          {
+            "stage": "extrude",
+            "ok": true,
+            "s": 0.4,
+            "peak_process_rss_mib": 185.2
+          },
+          {
+            "stage": "usdz",
+            "ok": true,
+            "s": 0.2,
+            "peak_process_rss_mib": 243.2
+          }
+        ],
+        "detail": "plan map on page(s) [1]",
+        "mode": "vlm",
+        "started_at": 1794691763.1141171,
+        "step": "usdz",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:23+0200"
+      },
+      "user_message": "plan map on page(s) [1]",
+      "preview": true,
+      "scene": true,
+      "scene_items": 31,
+      "origin_offset_m": [
+        4.5003,
+        0.0,
+        6.7236
+      ],
+      "scene_valid": true,
+      "preview_size": [
+        2008,
+        3000
+      ],
+      "post_load_peak_process_rss_mib": 243.6,
+      "counts": {
+        "room": 8,
+        "other": 24,
+        "wall": 9,
+        "window": 7,
+        "door": 7,
+        "text": 21
+      },
+      "first_answer": {
+        "question": "How many doors are there?",
+        "text": "There are **7 doors** on this floor plan. [1]",
+        "value": 7,
+        "abstained": false,
+        "unclassified": false,
+        "citations": 1,
+        "boxes": 7,
+        "reasoning": {
+          "steps": [
+            {
+              "kind": "found",
+              "title": "Found",
+              "text": "7 doors in the CAD drawing (DXF), each one numbered",
+              "cite": 1,
+              "ok": null
+            }
+          ],
+          "confidence": {
+            "label": "Verified",
+            "pct": 95,
+            "reason": "Measured from the CAD file's exact geometry and units.",
+            "improve": null
+          }
+        },
+        "cost_usd": 0
+      },
+      "ok": true,
+      "seconds": 1.087,
+      "peak_process_rss_mib": 243.6,
+      "peak_http_process_rss_mib": 68.8,
+      "peak_ingest_process_rss_mib": 243.2
+    },
+    {
+      "case": "dxf_paperspace",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/paper.dxf",
+      "filename": "paper.dxf",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/swiss_dwellings/site3434_bldg5310_floor23630.dxf",
+      "transform": "source entities moved to paper layout",
+      "coverage": "preprocessing_only",
+      "http_start_peak_rss_mib": 53.4,
+      "bytes": 104598,
+      "upload_http": 200,
+      "upload_seconds": 0.019,
+      "post_ingest_peak_process_rss_mib": 241.6,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 104.2
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 104.2
+          },
+          {
+            "stage": "dxf_planmap",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 107.5
+          },
+          {
+            "stage": "extrude",
+            "ok": true,
+            "s": 0.4,
+            "peak_process_rss_mib": 183.4
+          },
+          {
+            "stage": "usdz",
+            "ok": true,
+            "s": 0.2,
+            "peak_process_rss_mib": 241.2
+          }
+        ],
+        "detail": "plan map on page(s) [1]. Drawing units are not declared for this view. Physical sizes cannot be verified from DXF coordinates.",
+        "mode": "vlm",
+        "started_at": 1794691764.4343219,
+        "step": "usdz",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:25+0200"
+      },
+      "user_message": "plan map on page(s) [1]. Drawing units are not declared for this view. Physical sizes cannot be verified from DXF coordinates.",
+      "preview": true,
+      "scene": true,
+      "scene_items": 31,
+      "origin_offset_m": [
+        20.08,
+        0.0,
+        30.0
+      ],
+      "scene_valid": true,
+      "preview_size": [
+        2008,
+        3000
+      ],
+      "post_load_peak_process_rss_mib": 241.6,
+      "counts": {
+        "room": 8,
+        "other": 24,
+        "wall": 9,
+        "window": 7,
+        "door": 7,
+        "text": 21
+      },
+      "first_answer": {
+        "question": "How many doors are there?",
+        "text": "There are **7 doors** on this floor plan. [1]",
+        "value": 7,
+        "abstained": false,
+        "unclassified": false,
+        "citations": 1,
+        "boxes": 7,
+        "reasoning": {
+          "steps": [
+            {
+              "kind": "found",
+              "title": "Found",
+              "text": "7 doors in the CAD drawing (DXF), each one numbered",
+              "cite": 1,
+              "ok": null
+            }
+          ],
+          "confidence": {
+            "label": "Cross-checked",
+            "pct": 83,
+            "reason": "Detected on a scanned image; raised because detector confidence 100%.",
+            "improve": null
+          }
+        },
+        "cost_usd": 0
+      },
+      "ok": true,
+      "seconds": 1.051,
+      "peak_process_rss_mib": 241.6,
+      "peak_http_process_rss_mib": 69.1,
+      "peak_ingest_process_rss_mib": 241.2
+    },
+    {
+      "case": "dxf_feet",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/imperial.dxf",
+      "filename": "imperial.dxf",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/swiss_dwellings/site3434_bldg5310_floor23630.dxf",
+      "transform": "source coordinates and declared units converted to feet",
+      "http_start_peak_rss_mib": 53.5,
+      "bytes": 104079,
+      "upload_http": 200,
+      "upload_seconds": 0.022,
+      "post_ingest_peak_process_rss_mib": 242.2,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 104.1
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 104.1
+          },
+          {
+            "stage": "dxf_planmap",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 107.4
+          },
+          {
+            "stage": "extrude",
+            "ok": true,
+            "s": 0.4,
+            "peak_process_rss_mib": 182.7
+          },
+          {
+            "stage": "usdz",
+            "ok": true,
+            "s": 0.2,
+            "peak_process_rss_mib": 241.8
+          }
+        ],
+        "detail": "plan map on page(s) [1]",
+        "mode": "vlm",
+        "started_at": 1794691765.704177,
+        "step": "usdz",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:26+0200"
+      },
+      "user_message": "plan map on page(s) [1]",
+      "preview": true,
+      "scene": true,
+      "scene_items": 31,
+      "origin_offset_m": [
+        4.5003,
+        0.0,
+        6.7236
+      ],
+      "scene_valid": true,
+      "preview_size": [
+        2008,
+        3000
+      ],
+      "post_load_peak_process_rss_mib": 242.2,
+      "counts": {
+        "room": 8,
+        "other": 24,
+        "wall": 9,
+        "window": 7,
+        "door": 7,
+        "text": 21
+      },
+      "first_answer": {
+        "question": "How many doors are there?",
+        "text": "There are **7 doors** on this floor plan. [1]",
+        "value": 7,
+        "abstained": false,
+        "unclassified": false,
+        "citations": 1,
+        "boxes": 7,
+        "reasoning": {
+          "steps": [
+            {
+              "kind": "found",
+              "title": "Found",
+              "text": "7 doors in the CAD drawing (DXF), each one numbered",
+              "cite": 1,
+              "ok": null
+            }
+          ],
+          "confidence": {
+            "label": "Verified",
+            "pct": 95,
+            "reason": "Measured from the CAD file's exact geometry and units.",
+            "improve": null
+          }
+        },
+        "cost_usd": 0
+      },
+      "ok": true,
+      "seconds": 1.038,
+      "peak_process_rss_mib": 242.2,
+      "peak_http_process_rss_mib": 69.3,
+      "peak_ingest_process_rss_mib": 241.8
+    },
+    {
+      "case": "dxf_unitless",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/unitless.dxf",
+      "filename": "unitless.dxf",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/swiss_dwellings/site3434_bldg5310_floor23630.dxf",
+      "transform": "removed declared units",
+      "coverage": "preprocessing_only",
+      "http_start_peak_rss_mib": 53.6,
+      "bytes": 103770,
+      "upload_http": 200,
+      "upload_seconds": 0.018,
+      "post_ingest_peak_process_rss_mib": 242.6,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 104.3
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 104.3
+          },
+          {
+            "stage": "dxf_planmap",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 107.6
+          },
+          {
+            "stage": "extrude",
+            "ok": true,
+            "s": 0.4,
+            "peak_process_rss_mib": 183.3
+          },
+          {
+            "stage": "usdz",
+            "ok": true,
+            "s": 0.2,
+            "peak_process_rss_mib": 242.3
+          }
+        ],
+        "detail": "plan map on page(s) [1]. Drawing units are not declared for this view. Physical sizes cannot be verified from DXF coordinates.",
+        "mode": "vlm",
+        "started_at": 1794691766.971849,
+        "step": "usdz",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:27+0200"
+      },
+      "user_message": "plan map on page(s) [1]. Drawing units are not declared for this view. Physical sizes cannot be verified from DXF coordinates.",
+      "preview": true,
+      "scene": true,
+      "scene_items": 31,
+      "origin_offset_m": [
+        20.08,
+        0.0,
+        30.0
+      ],
+      "scene_valid": true,
+      "preview_size": [
+        2008,
+        3000
+      ],
+      "post_load_peak_process_rss_mib": 242.6,
+      "counts": {
+        "room": 8,
+        "other": 24,
+        "wall": 9,
+        "window": 7,
+        "door": 7,
+        "text": 21
+      },
+      "first_answer": {
+        "question": "How many doors are there?",
+        "text": "There are **7 doors** on this floor plan. [1]",
+        "value": 7,
+        "abstained": false,
+        "unclassified": false,
+        "citations": 1,
+        "boxes": 7,
+        "reasoning": {
+          "steps": [
+            {
+              "kind": "found",
+              "title": "Found",
+              "text": "7 doors in the CAD drawing (DXF), each one numbered",
+              "cite": 1,
+              "ok": null
+            }
+          ],
+          "confidence": {
+            "label": "Cross-checked",
+            "pct": 83,
+            "reason": "Detected on a scanned image; raised because detector confidence 100%.",
+            "improve": null
+          }
+        },
+        "cost_usd": 0
+      },
+      "ok": true,
+      "seconds": 1.091,
+      "peak_process_rss_mib": 242.6,
+      "peak_http_process_rss_mib": 68.9,
+      "peak_ingest_process_rss_mib": 242.3
+    },
+    {
+      "case": "dxf_missing_xref",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/missing_xref.dxf",
+      "filename": "missing_xref.dxf",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/swiss_dwellings/site3434_bldg5310_floor23630.dxf",
+      "transform": "added unresolved external reference; existing content retained",
+      "http_start_peak_rss_mib": 53.4,
+      "bytes": 104246,
+      "upload_http": 200,
+      "upload_seconds": 0.018,
+      "post_ingest_peak_process_rss_mib": 242.4,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 104.5
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 104.5
+          },
+          {
+            "stage": "dxf_planmap",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 107.8
+          },
+          {
+            "stage": "extrude",
+            "ok": true,
+            "s": 0.4,
+            "peak_process_rss_mib": 183.4
+          },
+          {
+            "stage": "usdz",
+            "ok": true,
+            "s": 0.2,
+            "peak_process_rss_mib": 242.0
+          }
+        ],
+        "detail": "plan map on page(s) [1]. This drawing uses external references. Linked files are not loaded; counts cover only geometry stored in this DXF.",
+        "mode": "vlm",
+        "started_at": 1794691768.262517,
+        "step": "usdz",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:29+0200"
+      },
+      "user_message": "plan map on page(s) [1]. This drawing uses external references. Linked files are not loaded; counts cover only geometry stored in this DXF.",
+      "preview": true,
+      "scene": true,
+      "scene_items": 31,
+      "origin_offset_m": [
+        4.5003,
+        0.0,
+        6.7236
+      ],
+      "scene_valid": true,
+      "preview_size": [
+        2008,
+        3000
+      ],
+      "post_load_peak_process_rss_mib": 242.4,
+      "counts": {
+        "room": 8,
+        "other": 24,
+        "wall": 9,
+        "window": 7,
+        "door": 7,
+        "text": 21
+      },
+      "first_answer": {
+        "question": "How many doors are there?",
+        "text": "There are **7 doors** on this floor plan. [1]",
+        "value": 7,
+        "abstained": false,
+        "unclassified": false,
+        "citations": 1,
+        "boxes": 7,
+        "reasoning": {
+          "steps": [
+            {
+              "kind": "found",
+              "title": "Found",
+              "text": "7 doors in the CAD drawing (DXF), each one numbered",
+              "cite": 1,
+              "ok": null
+            }
+          ],
+          "confidence": {
+            "label": "Verified",
+            "pct": 95,
+            "reason": "Measured from the CAD file's exact geometry and units.",
+            "improve": null
+          }
+        },
+        "cost_usd": 0
+      },
+      "ok": true,
+      "seconds": 1.088,
+      "peak_process_rss_mib": 242.4,
+      "peak_http_process_rss_mib": 69.0,
+      "peak_ingest_process_rss_mib": 242.0
+    },
+    {
+      "case": "ifc_original",
+      "path": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/ifc_bench/duplex_arc.ifc",
+      "filename": "duplex_arc.ifc",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/ifc_bench/duplex_arc.ifc",
+      "transform": "original",
+      "http_start_peak_rss_mib": 53.3,
+      "bytes": 1656153,
+      "upload_http": 200,
+      "upload_seconds": 0.024,
+      "post_ingest_peak_process_rss_mib": 278.6,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "ifc_scene",
+            "ok": true,
+            "s": 1.6,
+            "peak_process_rss_mib": 196.5
+          },
+          {
+            "stage": "ifc_plans",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 220.4
+          },
+          {
+            "stage": "usdz",
+            "ok": true,
+            "s": 0.4,
+            "peak_process_rss_mib": 277.2
+          }
+        ],
+        "detail": "",
+        "mode": "vlm",
+        "started_at": 1794691769.598509,
+        "step": "usdz",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:32+0200"
+      },
+      "user_message": "",
+      "preview": true,
+      "scene": true,
+      "scene_items": 236,
+      "origin_offset_m": [
+        4.4,
+        0.0,
+        8.9
+      ],
+      "scene_valid": true,
+      "index_schema": "IFC2X3",
+      "preview_size": [
+        783,
+        1504
+      ],
+      "post_load_peak_process_rss_mib": 278.6,
+      "counts": {
+        "beam": 8,
+        "covering": 13,
+        "door": 14,
+        "footing": 7,
+        "member": 4,
+        "railing": 4,
+        "roof": 1,
+        "slab": 21,
+        "stairs": 4,
+        "wall": 57,
+        "window": 24,
+        "furniture": 61,
+        "room": 21,
+        "site": 1
+      },
+      "first_answer": {
+        "question": "How many doors are there?",
+        "text": "There are **14 doors** in this model. [1][2]",
+        "value": 14,
+        "abstained": false,
+        "unclassified": false,
+        "citations": 2,
+        "boxes": 14,
+        "reasoning": {
+          "steps": [
+            {
+              "kind": "found",
+              "title": "Found",
+              "text": "14 doors on Level 1, Level 2 in the building model (IFC), each one numbered",
+              "cite": 1,
+              "ok": null
+            }
+          ],
+          "confidence": {
+            "label": "Verified",
+            "pct": 97,
+            "reason": "Read directly from the building model's own data. Nothing is estimated.",
+            "improve": null
+          }
+        },
+        "cost_usd": 0
+      },
+      "ok": true,
+      "seconds": 2.789,
+      "peak_process_rss_mib": 278.6,
+      "peak_http_process_rss_mib": 77.1,
+      "peak_ingest_process_rss_mib": 277.2
+    },
+    {
+      "case": "ifc_no_storeys_or_spaces",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/no_levels_or_spaces.ifc",
+      "filename": "no_levels_or_spaces.ifc",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/ifc_bench/duplex_arc.ifc",
+      "transform": "removed source storeys and spaces; other elements retained",
+      "http_start_peak_rss_mib": 53.2,
+      "bytes": 1623360,
+      "upload_http": 200,
+      "upload_seconds": 0.024,
+      "post_ingest_peak_process_rss_mib": 272.6,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "ifc_scene",
+            "ok": true,
+            "s": 1.7,
+            "peak_process_rss_mib": 196.8
+          },
+          {
+            "stage": "ifc_plans",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 214.0
+          },
+          {
+            "stage": "usdz",
+            "ok": true,
+            "s": 0.4,
+            "peak_process_rss_mib": 271.1
+          }
+        ],
+        "detail": "",
+        "mode": "vlm",
+        "started_at": 1794691772.598678,
+        "step": "usdz",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:35+0200"
+      },
+      "user_message": "",
+      "preview": true,
+      "scene": true,
+      "scene_items": 215,
+      "origin_offset_m": [
+        4.4,
+        0.0,
+        8.9
+      ],
+      "scene_valid": true,
+      "index_schema": "IFC2X3",
+      "preview_size": [
+        822,
+        2205
+      ],
+      "post_load_peak_process_rss_mib": 272.6,
+      "counts": {
+        "beam": 8,
+        "covering": 13,
+        "door": 14,
+        "footing": 7,
+        "member": 4,
+        "railing": 4,
+        "roof": 1,
+        "slab": 21,
+        "stairs": 4,
+        "wall": 57,
+        "window": 24,
+        "furniture": 61,
+        "site": 1
+      },
+      "first_answer": {
+        "question": "How many doors are there?",
+        "text": "There are **14 doors** in this model. [1]",
+        "value": 14,
+        "abstained": false,
+        "unclassified": false,
+        "citations": 1,
+        "boxes": 0,
+        "reasoning": {
+          "steps": [
+            {
+              "kind": "found",
+              "title": "Found",
+              "text": "14 doors in the building model (IFC), each one numbered",
+              "cite": 1,
+              "ok": null
+            }
+          ],
+          "confidence": {
+            "label": "Verified",
+            "pct": 97,
+            "reason": "Read directly from the building model's own data. Nothing is estimated.",
+            "improve": null
+          }
+        },
+        "cost_usd": 0
+      },
+      "ok": true,
+      "seconds": 2.688,
+      "peak_process_rss_mib": 272.6,
+      "peak_http_process_rss_mib": 75.5,
+      "peak_ingest_process_rss_mib": 271.1
+    },
+    {
+      "case": "ifc_far_origin",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/survey_coordinates.ifc",
+      "filename": "survey_coordinates.ifc",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/ifc_bench/duplex_arc.ifc",
+      "transform": "translated source root placements by 5000 km / 6000 km (geometry unchanged)",
+      "http_start_peak_rss_mib": 53.5,
+      "bytes": 1627436,
+      "upload_http": 200,
+      "upload_seconds": 0.024,
+      "post_ingest_peak_process_rss_mib": 278.5,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "ifc_scene",
+            "ok": true,
+            "s": 1.6,
+            "peak_process_rss_mib": 196.7
+          },
+          {
+            "stage": "ifc_plans",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 221.0
+          },
+          {
+            "stage": "usdz",
+            "ok": true,
+            "s": 0.4,
+            "peak_process_rss_mib": 277.0
+          }
+        ],
+        "detail": "",
+        "mode": "vlm",
+        "started_at": 1794691775.4875991,
+        "step": "usdz",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:37+0200"
+      },
+      "user_message": "",
+      "preview": true,
+      "scene": true,
+      "scene_items": 236,
+      "origin_offset_m": [
+        5000004.4,
+        0.0,
+        -5999991.1
+      ],
+      "scene_valid": true,
+      "index_schema": "IFC2X3",
+      "preview_size": [
+        783,
+        1504
+      ],
+      "post_load_peak_process_rss_mib": 278.5,
+      "counts": {
+        "beam": 8,
+        "covering": 13,
+        "door": 14,
+        "footing": 7,
+        "member": 4,
+        "railing": 4,
+        "roof": 1,
+        "slab": 21,
+        "stairs": 4,
+        "wall": 57,
+        "window": 24,
+        "furniture": 61,
+        "room": 21,
+        "site": 1
+      },
+      "first_answer": {
+        "question": "How many doors are there?",
+        "text": "There are **14 doors** in this model. [1][2]",
+        "value": 14,
+        "abstained": false,
+        "unclassified": false,
+        "citations": 2,
+        "boxes": 14,
+        "reasoning": {
+          "steps": [
+            {
+              "kind": "found",
+              "title": "Found",
+              "text": "14 doors on Level 1, Level 2 in the building model (IFC), each one numbered",
+              "cite": 1,
+              "ok": null
+            }
+          ],
+          "confidence": {
+            "label": "Verified",
+            "pct": 97,
+            "reason": "Read directly from the building model's own data. Nothing is estimated.",
+            "improve": null
+          }
+        },
+        "cost_usd": 0
+      },
+      "ok": true,
+      "seconds": 2.791,
+      "peak_process_rss_mib": 278.5,
+      "peak_http_process_rss_mib": 75.3,
+      "peak_ingest_process_rss_mib": 277.0
+    },
+    {
+      "case": "ifc_feet",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/feet.ifc",
+      "filename": "feet.ifc",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/ifc_bench/duplex_arc.ifc",
+      "transform": "source geometry and units converted to feet",
+      "http_start_peak_rss_mib": 53.5,
+      "bytes": 1648414,
+      "upload_http": 200,
+      "upload_seconds": 0.026,
+      "post_ingest_peak_process_rss_mib": 280.2,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "ifc_scene",
+            "ok": true,
+            "s": 1.7,
+            "peak_process_rss_mib": 198.5
+          },
+          {
+            "stage": "ifc_plans",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 223.0
+          },
+          {
+            "stage": "usdz",
+            "ok": true,
+            "s": 0.4,
+            "peak_process_rss_mib": 279.0
+          }
+        ],
+        "detail": "",
+        "mode": "vlm",
+        "started_at": 1794691778.497609,
+        "step": "usdz",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:40+0200"
+      },
+      "user_message": "",
+      "preview": true,
+      "scene": true,
+      "scene_items": 236,
+      "origin_offset_m": [
+        4.4,
+        0.0,
+        8.9
+      ],
+      "scene_valid": true,
+      "index_schema": "IFC2X3",
+      "preview_size": [
+        783,
+        1504
+      ],
+      "post_load_peak_process_rss_mib": 280.2,
+      "counts": {
+        "beam": 8,
+        "covering": 13,
+        "door": 14,
+        "footing": 7,
+        "member": 4,
+        "railing": 4,
+        "roof": 1,
+        "slab": 21,
+        "stairs": 4,
+        "wall": 57,
+        "window": 24,
+        "furniture": 61,
+        "room": 21,
+        "site": 1
+      },
+      "first_answer": {
+        "question": "How many doors are there?",
+        "text": "There are **14 doors** in this model. [1][2]",
+        "value": 14,
+        "abstained": false,
+        "unclassified": false,
+        "citations": 2,
+        "boxes": 14,
+        "reasoning": {
+          "steps": [
+            {
+              "kind": "found",
+              "title": "Found",
+              "text": "14 doors on Level 1, Level 2 in the building model (IFC), each one numbered",
+              "cite": 1,
+              "ok": null
+            }
+          ],
+          "confidence": {
+            "label": "Verified",
+            "pct": 97,
+            "reason": "Read directly from the building model's own data. Nothing is estimated.",
+            "improve": null
+          }
+        },
+        "cost_usd": 0
+      },
+      "ok": true,
+      "seconds": 2.776,
+      "peak_process_rss_mib": 280.2,
+      "peak_http_process_rss_mib": 76.3,
+      "peak_ingest_process_rss_mib": 279.0
+    },
+    {
+      "case": "ifc4_other_author",
+      "path": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/opening_design/Aalseth_Residence/Models & CAD/BIM/stairs.blend.ifc",
+      "filename": "stairs.blend.ifc",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/opening_design/Aalseth_Residence/Models & CAD/BIM/stairs.blend.ifc",
+      "transform": "original",
+      "http_start_peak_rss_mib": 53.4,
+      "bytes": 347731,
+      "upload_http": 200,
+      "upload_seconds": 0.018,
+      "post_ingest_peak_process_rss_mib": 251.9,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "ifc_scene",
+            "ok": true,
+            "s": 0.3,
+            "peak_process_rss_mib": 192.6
+          },
+          {
+            "stage": "ifc_plans",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 193.3
+          },
+          {
+            "stage": "usdz",
+            "ok": true,
+            "s": 0.3,
+            "peak_process_rss_mib": 251.3
+          }
+        ],
+        "detail": "",
+        "mode": "vlm",
+        "started_at": 1794691781.462968,
+        "step": "usdz",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:42+0200"
+      },
+      "user_message": "",
+      "preview": true,
+      "scene": true,
+      "scene_items": 46,
+      "origin_offset_m": [
+        217.81001,
+        0.0,
+        -60.49786
+      ],
+      "scene_valid": true,
+      "index_schema": "IFC4",
+      "preview_size": [
+        334,
+        246
+      ],
+      "post_load_peak_process_rss_mib": 251.9,
+      "counts": {
+        "beam": 1,
+        "member": 3,
+        "plate": 8,
+        "railing": 1,
+        "slab": 1,
+        "stairs": 2,
+        "accessory": 8,
+        "fastener": 22,
+        "site": 1
+      },
+      "first_answer": {
+        "question": "How many stairs are there?",
+        "text": "There are **2 staircases** in this model. [1]",
+        "value": 2,
+        "abstained": false,
+        "unclassified": false,
+        "citations": 1,
+        "boxes": 2,
+        "reasoning": {
+          "steps": [
+            {
+              "kind": "found",
+              "title": "Found",
+              "text": "2 stairses on Ground Floor in the building model (IFC), each one numbered",
+              "cite": 1,
+              "ok": null
+            }
+          ],
+          "confidence": {
+            "label": "Verified",
+            "pct": 97,
+            "reason": "Read directly from the building model's own data. Nothing is estimated.",
+            "improve": null
+          }
+        },
+        "cost_usd": 0
+      },
+      "ok": true,
+      "seconds": 1.178,
+      "peak_process_rss_mib": 251.9,
+      "peak_http_process_rss_mib": 69.1,
+      "peak_ingest_process_rss_mib": 251.3
+    },
+    {
+      "case": "ifc4x3_migrated",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/schema4x3.ifc",
+      "filename": "schema4x3.ifc",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/opening_design/Aalseth_Residence/Models & CAD/BIM/stairs.blend.ifc",
+      "transform": "IFC4 source migrated to IFC4X3; deprecated style wrappers unwrapped (not a native IFC4X3 sample)",
+      "http_start_peak_rss_mib": 53.4,
+      "bytes": 344683,
+      "upload_http": 200,
+      "upload_seconds": 0.019,
+      "post_ingest_peak_process_rss_mib": 253.1,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "ifc_scene",
+            "ok": true,
+            "s": 0.3,
+            "peak_process_rss_mib": 194.2
+          },
+          {
+            "stage": "ifc_plans",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 194.7
+          },
+          {
+            "stage": "usdz",
+            "ok": true,
+            "s": 0.3,
+            "peak_process_rss_mib": 252.8
+          }
+        ],
+        "detail": "",
+        "mode": "vlm",
+        "started_at": 1794691782.8301508,
+        "step": "usdz",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:43+0200"
+      },
+      "user_message": "",
+      "preview": true,
+      "scene": true,
+      "scene_items": 46,
+      "origin_offset_m": [
+        217.81001,
+        0.0,
+        -60.49786
+      ],
+      "scene_valid": true,
+      "index_schema": "IFC4X3",
+      "preview_size": [
+        334,
+        246
+      ],
+      "post_load_peak_process_rss_mib": 253.1,
+      "counts": {
+        "beam": 1,
+        "member": 3,
+        "plate": 8,
+        "railing": 1,
+        "slab": 1,
+        "stairs": 2,
+        "accessory": 8,
+        "fastener": 22,
+        "site": 1
+      },
+      "first_answer": {
+        "question": "How many stairs are there?",
+        "text": "There are **2 staircases** in this model. [1]",
+        "value": 2,
+        "abstained": false,
+        "unclassified": false,
+        "citations": 1,
+        "boxes": 2,
+        "reasoning": {
+          "steps": [
+            {
+              "kind": "found",
+              "title": "Found",
+              "text": "2 stairses on Ground Floor in the building model (IFC), each one numbered",
+              "cite": 1,
+              "ok": null
+            }
+          ],
+          "confidence": {
+            "label": "Verified",
+            "pct": 97,
+            "reason": "Read directly from the building model's own data. Nothing is estimated.",
+            "improve": null
+          }
+        },
+        "cost_usd": 0
+      },
+      "ok": true,
+      "seconds": 1.176,
+      "peak_process_rss_mib": 253.1,
+      "peak_http_process_rss_mib": 69.4,
+      "peak_ingest_process_rss_mib": 252.8
+    },
+    {
+      "case": "csv_schedule",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/schedule.csv",
+      "filename": "schedule.csv",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/ifc_bench/duplex_arc.ifc",
+      "transform": "source element labels exported as CSV",
+      "expected_http": 415,
+      "http_start_peak_rss_mib": 53.3,
+      "bytes": 23871,
+      "upload_http": 415,
+      "upload_seconds": 0.019,
+      "user_message": "Standalone text and spreadsheet schedules are not supported by this upload path. Export the schedule as PDF and upload it again.",
+      "ok": true,
+      "seconds": 0.019,
+      "peak_process_rss_mib": 54.8,
+      "peak_http_process_rss_mib": 54.8,
+      "peak_ingest_process_rss_mib": null
+    },
+    {
+      "case": "text_schedule",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/schedule.txt",
+      "filename": "schedule.txt",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/ifc_bench/duplex_arc.ifc",
+      "transform": "source CSV as plain text",
+      "expected_http": 415,
+      "http_start_peak_rss_mib": 53.5,
+      "bytes": 23871,
+      "upload_http": 415,
+      "upload_seconds": 0.014,
+      "user_message": "Standalone text and spreadsheet schedules are not supported by this upload path. Export the schedule as PDF and upload it again.",
+      "ok": true,
+      "seconds": 0.014,
+      "peak_process_rss_mib": 55.1,
+      "peak_http_process_rss_mib": 55.1,
+      "peak_ingest_process_rss_mib": null
+    },
+    {
+      "case": "xlsx_schedule",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/schedule.xlsx",
+      "filename": "schedule.xlsx",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/ifc_bench/duplex_arc.ifc",
+      "transform": "source labels exported as XLSX",
+      "expected_http": 415,
+      "http_start_peak_rss_mib": 53.0,
+      "bytes": 57517,
+      "upload_http": 415,
+      "upload_seconds": 0.014,
+      "user_message": "Standalone text and spreadsheet schedules are not supported by this upload path. Export the schedule as PDF and upload it again.",
+      "ok": true,
+      "seconds": 0.014,
+      "peak_process_rss_mib": 54.5,
+      "peak_http_process_rss_mib": 54.5,
+      "peak_ingest_process_rss_mib": null
+    },
+    {
+      "case": "dwg",
+      "path": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/opening_design/Aalseth_Residence/Transfer/20190527 - to interior designer - backgrounds/20190527 - 3196 Aalseth Lane-Sheet - A202 - BULDING ELEVATION - WEST.dwg",
+      "filename": "20190527 - 3196 Aalseth Lane-Sheet - A202 - BULDING ELEVATION - WEST.dwg",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/opening_design/Aalseth_Residence/Transfer/20190527 - to interior designer - backgrounds/20190527 - 3196 Aalseth Lane-Sheet - A202 - BULDING ELEVATION - WEST.dwg",
+      "transform": "original",
+      "expected_http": 415,
+      "http_start_peak_rss_mib": 53.1,
+      "bytes": 256320,
+      "upload_http": 415,
+      "upload_seconds": 0.015,
+      "user_message": "This server cannot convert DWG files. Export the drawing as DXF or IFC and upload it again.",
+      "ok": true,
+      "seconds": 0.016,
+      "peak_process_rss_mib": 55.1,
+      "peak_http_process_rss_mib": 55.1,
+      "peak_ingest_process_rss_mib": null
+    },
+    {
+      "case": "zip",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/drawings.zip",
+      "filename": "drawings.zip",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "archive of the real raster and DXF",
+      "expected_http": 415,
+      "http_start_peak_rss_mib": 53.0,
+      "bytes": 148798,
+      "upload_http": 415,
+      "upload_seconds": 0.014,
+      "user_message": "ZIP archives are not supported. Extract the files and upload them individually. Supported types: pdf, png, jpg (jpeg), dxf, ifc.",
+      "ok": true,
+      "seconds": 0.015,
+      "peak_process_rss_mib": 54.8,
+      "peak_http_process_rss_mib": 54.8,
+      "peak_ingest_process_rss_mib": null
+    },
+    {
+      "case": "wrong_extension",
+      "path": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "filename": "wrong.jpg",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "PNG source named .jpg",
+      "expected_http": 422,
+      "http_start_peak_rss_mib": 53.2,
+      "bytes": 44754,
+      "upload_http": 422,
+      "upload_seconds": 0.014,
+      "user_message": "The file contents are PNG, but the filename ends in .jpg. Upload it with the correct extension.",
+      "ok": true,
+      "seconds": 0.015,
+      "peak_process_rss_mib": 54.7,
+      "peak_http_process_rss_mib": 54.7,
+      "peak_ingest_process_rss_mib": null
+    },
+    {
+      "case": "corrupt_png",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/corrupt_png.png",
+      "filename": "corrupt_png.png",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "source truncated to first 128 bytes",
+      "expected_failure": true,
+      "http_start_peak_rss_mib": 53.0,
+      "bytes": 128,
+      "upload_http": 200,
+      "upload_seconds": 0.016,
+      "post_ingest_peak_process_rss_mib": 54.9,
+      "ingest": {
+        "status": "failed",
+        "stages": [
+          {
+            "stage": "normalise",
+            "ok": false,
+            "error": "This image could not be read. It may be corrupt or incomplete. Export it again as PNG or JPEG."
+          }
+        ],
+        "detail": "This image could not be read. It may be corrupt or incomplete. Export it again as PNG or JPEG.",
+        "mode": "vlm",
+        "started_at": 1794691785.4609122,
+        "step": "normalise",
+        "readable": false,
+        "progress": 0.5,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:45+0200",
+        "reason": "This image could not be read. It may be corrupt or incomplete. Export it again as PNG or JPEG."
+      },
+      "user_message": "This image could not be read. It may be corrupt or incomplete. Export it again as PNG or JPEG.",
+      "preview": false,
+      "scene": false,
+      "post_load_peak_process_rss_mib": 55.3,
+      "ok": true,
+      "seconds": 0.13,
+      "peak_process_rss_mib": 55.3,
+      "peak_http_process_rss_mib": 55.3,
+      "peak_ingest_process_rss_mib": 0
+    },
+    {
+      "case": "corrupt_dxf",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/corrupt_dxf.dxf",
+      "filename": "corrupt_dxf.dxf",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/swiss_dwellings/site3434_bldg5310_floor23630.dxf",
+      "transform": "source truncated to first 128 bytes",
+      "expected_failure": true,
+      "http_start_peak_rss_mib": 53.4,
+      "bytes": 128,
+      "upload_http": 200,
+      "upload_seconds": 0.023,
+      "post_ingest_peak_process_rss_mib": 55.2,
+      "ingest": {
+        "status": "failed",
+        "stages": [
+          {
+            "stage": "pages",
+            "ok": false,
+            "error": "error: This DXF could not be read. It may be corrupt or incomplete. Export it again as DXF or IFC."
+          }
+        ],
+        "detail": "error: This DXF could not be read. It may be corrupt or incomplete. Export it again as DXF or IFC.",
+        "mode": "vlm",
+        "started_at": 1794691785.833942,
+        "step": "pages",
+        "readable": false,
+        "progress": 0.5,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:45+0200",
+        "reason": "error: This DXF could not be read. It may be corrupt or incomplete. Export it again as DXF or IFC."
+      },
+      "user_message": "error: This DXF could not be read. It may be corrupt or incomplete. Export it again as DXF or IFC.",
+      "preview": false,
+      "scene": false,
+      "post_load_peak_process_rss_mib": 55.5,
+      "ok": true,
+      "seconds": 0.244,
+      "peak_process_rss_mib": 55.5,
+      "peak_http_process_rss_mib": 55.5,
+      "peak_ingest_process_rss_mib": 0
+    },
+    {
+      "case": "corrupt_ifc",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/corrupt_ifc.ifc",
+      "filename": "corrupt_ifc.ifc",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/ifc_bench/duplex_arc.ifc",
+      "transform": "source truncated to first 128 bytes",
+      "expected_failure": true,
+      "http_start_peak_rss_mib": 53.3,
+      "bytes": 128,
+      "upload_http": 200,
+      "upload_seconds": 0.017,
+      "post_ingest_peak_process_rss_mib": 114.0,
+      "ingest": {
+        "status": "failed",
+        "stages": [
+          {
+            "stage": "ifc_scene",
+            "ok": false,
+            "error": "This IFC could not be read or converted. Export it again as IFC, or split the model into smaller files. Unable to parse IFC SPF header"
+          }
+        ],
+        "detail": "This IFC could not be read or converted. Export it again as IFC, or split the model into smaller files. Unable to parse IFC SPF header",
+        "mode": "vlm",
+        "started_at": 1794691786.2722828,
+        "step": "ifc_scene",
+        "readable": false,
+        "progress": 0.5,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:46+0200",
+        "reason": "This IFC could not be read or converted. Export it again as IFC, or split the model into smaller files. Unable to parse IFC SPF header"
+      },
+      "user_message": "This IFC could not be read or converted. Export it again as IFC, or split the model into smaller files. Unable to parse IFC SPF header",
+      "preview": false,
+      "scene": false,
+      "post_load_peak_process_rss_mib": 114.0,
+      "ok": true,
+      "seconds": 0.443,
+      "peak_process_rss_mib": 114.0,
+      "peak_http_process_rss_mib": 55.4,
+      "peak_ingest_process_rss_mib": 0
+    },
+    {
+      "case": "empty",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/empty.png",
+      "filename": "empty.png",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/cubicasa5k/colorful-11397.png",
+      "transform": "source truncated to zero bytes",
+      "expected_http": 400,
+      "http_start_peak_rss_mib": 53.2,
+      "bytes": 0,
+      "upload_http": 400,
+      "upload_seconds": 0.014,
+      "user_message": "File is empty. Upload a non-empty pdf, png, jpg, dxf or ifc file.",
+      "ok": true,
+      "seconds": 0.015,
+      "peak_process_rss_mib": 54.6,
+      "peak_http_process_rss_mib": 54.6,
+      "peak_ingest_process_rss_mib": null
+    },
+    {
+      "case": "ifc_over_200mb",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/over_200mb.ifc",
+      "filename": "over_200mb.ifc",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/ifc_bench/duplex_arc.ifc",
+      "transform": "sparse byte-size probe padded from real source; parser not exercised",
+      "expected_http": 413,
+      "http_start_peak_rss_mib": 53.5,
+      "bytes": 220200961,
+      "upload_http": 413,
+      "upload_seconds": 0.891,
+      "user_message": "File too large. Maximum upload size is 100 MiB (104857600 bytes). Export a smaller file or split the model.",
+      "ok": true,
+      "seconds": 0.891,
+      "peak_process_rss_mib": 950.5,
+      "peak_http_process_rss_mib": 950.5,
+      "peak_ingest_process_rss_mib": null
+    },
+    {
+      "case": "dxf_over_100mb",
+      "path": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-robust-qy9gxrkj/over_limit.dxf",
+      "filename": "over_limit.dxf",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/swiss_dwellings/site3434_bldg5310_floor23630.dxf",
+      "transform": "sparse byte-size probe padded from real source; parser not exercised",
+      "expected_http": 413,
+      "http_start_peak_rss_mib": 53.3,
+      "bytes": 105906177,
+      "upload_http": 413,
+      "upload_seconds": 0.308,
+      "user_message": "File too large. Maximum upload size is 100 MiB (104857600 bytes). Export a smaller file or split the model.",
+      "ok": true,
+      "seconds": 0.309,
+      "peak_process_rss_mib": 486.4,
+      "peak_http_process_rss_mib": 486.4,
+      "peak_ingest_process_rss_mib": null
+    },
+    {
+      "case": "reserved_unseen_ifc",
+      "path": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/opening_design/Sports_Complex/IFC Roundtrip/FreeCAD Detail/detail_Yorik_FreeCAD_materials.ifc",
+      "filename": "detail_Yorik_FreeCAD_materials.ifc",
+      "source": "data/junction-dataset-preview/data/opening_design/Sports_Complex/IFC Roundtrip/FreeCAD Detail/detail_Yorik_FreeCAD_materials.ifc",
+      "transform": "original; randomly reserved before implementation; tested last",
+      "http_start_peak_rss_mib": 53.2,
+      "bytes": 1250123,
+      "upload_http": 200,
+      "upload_seconds": 0.023,
+      "post_ingest_peak_process_rss_mib": 238.2,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "ifc_scene",
+            "ok": true,
+            "s": 0.4,
+            "peak_process_rss_mib": 181.0
+          },
+          {
+            "stage": "ifc_plans",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 181.5
+          },
+          {
+            "stage": "usdz",
+            "ok": true,
+            "s": 0.3,
+            "peak_process_rss_mib": 237.7
+          }
+        ],
+        "detail": "Some model shapes have no building object type. Counts by object type may be incomplete; check the 3D shapes or export with object classifications.",
+        "mode": "vlm",
+        "started_at": 1794691788.688954,
+        "step": "usdz",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:29:49+0200"
+      },
+      "user_message": "Some model shapes have no building object type. Counts by object type may be incomplete; check the 3D shapes or export with object classifications.",
+      "preview": true,
+      "scene": true,
+      "scene_items": 45,
+      "origin_offset_m": [
+        600.02141,
+        0.0,
+        579.10024
+      ],
+      "scene_valid": true,
+      "index_schema": "IFC2X3",
+      "preview_size": [
+        640,
+        122
+      ],
+      "post_load_peak_process_rss_mib": 238.2,
+      "counts": {
+        "proxy": 45,
+        "site": 1
+      },
+      "first_answer": {
+        "question": "How many doors are there?",
+        "text": "**I cannot verify a door count from this model.** It includes shapes without object types. [1]\n\nExport the model with object classifications, or check the highlighted shapes.",
+        "value": null,
+        "abstained": true,
+        "unclassified": true,
+        "citations": 1,
+        "boxes": 0,
+        "reasoning": {
+          "steps": [
+            {
+              "kind": "checked",
+              "title": "Missing object types",
+              "text": "The marked shapes have no building object type in the source model.",
+              "cite": 1,
+              "ok": false
+            }
+          ],
+          "confidence": {
+            "label": "Estimate",
+            "pct": 0,
+            "reason": "The source does not provide enough object classification to verify this count.",
+            "improve": "Export the model with object classifications, or inspect the highlighted shapes."
+          }
+        },
+        "cost_usd": 0
+      },
+      "ok": true,
+      "seconds": 1.288,
+      "peak_process_rss_mib": 238.2,
+      "peak_http_process_rss_mib": 71.7,
+      "peak_ingest_process_rss_mib": 237.7
+    }
+  ]
+}

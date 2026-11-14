@@ -118,7 +118,8 @@ async def doc_source(doc_id: str):
         rec["files"] = json.loads(rec["files"])
     # Normalisation changes the reader copy, never the original download.
     if doc_id.startswith("uploads__"):
-        from . import config
+        from . import artifact_store, config
+        await artifact_store.ensure_doc(doc_id)
         try:
             meta = json.loads((config.artifacts_dir() / doc_id / "doc.json").read_text())
             rec["files"] = meta.get("original_files") or rec["files"]

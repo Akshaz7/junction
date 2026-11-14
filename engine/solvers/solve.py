@@ -628,6 +628,10 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
 
     # --- compute
     if p.type == "count":
+        if not items and doc.mode == "ifc":
+            from .unclassified import count_unavailable
+            if (unavailable := count_unavailable(question, doc, kind, trace, route, t0)) is not None:
+                return unavailable
         n = len(items)
         conf = (sum(i.conf for i in items) / n if n else 0.6) if doc.mode == "planmap" else 1.0
         conf = min(conf, 0.95) if doc.mode == "planmap" else 1.0

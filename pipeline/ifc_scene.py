@@ -115,8 +115,15 @@ def quantities_of(el, scale):
             if v is None:
                 continue
             key, dim = m
-            if key not in out:
-                out[key] = round(float(v) * scale ** dim, 5)
+            # IFC area/volume units are independent of length units. A model
+            # commonly has millimetres for lengths and square metres for areas;
+            # an individual quantity can also override the project unit.
+            unit = uunit.get_property_unit(q, el.file, use_cache=True)
+            if unit is None or unit.UnitType != {1: "LENGTHUNIT", 2: "AREAUNIT", 3: "VOLUMEUNIT"}[dim]:
+                continue  # absent units are unknown, never an implied measurement
+            value = float(v) * uunit.get_unit_scale(unit)
+            if key not in out and np.isfinite(value):
+                out[key] = round(value, 5)
     # Generic aliases the solvers look for
     if "area_m2" not in out:
         a = out.get("net_floor_area_m2", out.get("gross_floor_area_m2", out.get("net_area_m2", out.get("gross_area_m2"))))
@@ -355,9 +362,14 @@ def process(ifc: Path, doc: dict, out_dir: Path):
 
     f = ifcopenshell.open(str(ifc))
     scale = uunit.calculate_unit_scale(f)
+    length_unit_known = uunit.get_project_unit(f, "LENGTHUNIT") is not None
+    warnings = [] if length_unit_known else [
+        "This IFC does not declare length units. Model sizes use the converter's default and cannot be verified."]
     targets = [e for e in list(f.by_type("IfcElement")) + list(f.by_type("IfcSpace")) + list(f.by_type("IfcSite")) if not e.is_a("IfcOpeningElement")]
     by_guid = {e.GlobalId: e for e in targets}
     kinds = {e.GlobalId: kind_of(e) for e in targets}
+    if "proxy" in kinds.values():
+        warnings.append("Some model shapes have no building object type. Counts by object type may be incomplete; check the 3D shapes or export with object classifications.")
     for n in g.nodes:  # viewers can hide rooms / pick kinds without a lookup
         if n.mesh is not None and n.name in kinds:
             n.extras = {"kind": kinds[n.name]}
@@ -390,12 +402,12 @@ def process(ifc: Path, doc: dict, out_dir: Path):
         bbox = [np.round(b[0], 4).tolist(), np.round(b[1], 4).tolist()] if b else None
         q = {}
         qsrc = {}
-        for k, v in attr_dims(e, scale).items():
+        for k, v in (attr_dims(e, scale) if length_unit_known else {}).items():
             q[k] = v; qsrc[k] = "attribute"
         for k, v in quantities_of(e, scale).items():
             q[k] = v; qsrc[k] = "qto"  # Qto wins over attribute
         k_ = kinds[gid]
-        if b is not None and src.get(gid) == "glb":  # fill gaps from geometry
+        if length_unit_known and b is not None and src.get(gid) == "glb":  # fill gaps from geometry
             ext = b[1] - b[0]
             if k_ in ("door", "window"):
                 if "width_m" not in q: q["width_m"] = round(float(max(ext[0], ext[2])), 4); qsrc["width_m"] = "bbox"
@@ -428,7 +440,7 @@ def process(ifc: Path, doc: dict, out_dir: Path):
     source_offset = np.array((g.extras or {}).get("source_origin_offset_m", [0, 0, 0]), dtype=float)
     scene = {"doc_id": doc["doc_id"], "glb": "scene.glb", "usdz": None, "units": "m", "up": "Y",
              "origin_offset_m": [round(float(x), 5) for x in off + source_offset], "storeys": storey_list,
-             "plan_image": None, "items": items,
+             "plan_image": None, "items": items, "warnings": warnings,
              "publishable": not (lic.startswith("CC-BY-ND") or lic.startswith("GPL"))}
     (out_dir / "scene.json").write_text(json.dumps(scene, indent=1))
     try:  # names, room areas, door widths for the info cards (pipeline/manifest_info.py)

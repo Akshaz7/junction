@@ -232,7 +232,10 @@ def do_dxf(dxf: Path, out: Path, px=3000):
     import ezdxf
     from PIL import ImageDraw
     from pipeline.dxf_input import drawing_layout, metres_per_unit, reference_warnings
-    doc = ezdxf.readfile(str(dxf))
+    try:
+        doc = ezdxf.readfile(str(dxf))
+    except (ezdxf.DXFError, OSError, ValueError, StopIteration, EOFError) as exc:
+        raise ValueError("This DXF could not be read. It may be corrupt or incomplete. Export it again as DXF or IFC.") from exc
     lines = dxf_lines(doc)
     x0, y0, s, W, H = dxf_frame(lines, px)
     img = Image.new("RGB", (W, H), "white")
@@ -283,7 +286,7 @@ def process(args):
         (out / "pages.json").write_text(json.dumps({"doc_id": d["doc_id"], "source": src, "pages": pages}, indent=1))
         return d["doc_id"], f"ok {src} {len(pages)}p"
     except Exception as e:  # noqa: BLE001
-        return d["doc_id"], f"error: {e!r}"
+        return d["doc_id"], f"error: {str(e) or type(e).__name__}"
 
 
 def main():
