@@ -8,7 +8,7 @@
 | Spike output | out/ (4 GLB + elements.json + logs), scripts/extract_elements.py, scripts/validate_glb.py | OK |
 | IfcConvert | tools/IfcConvert 0.8.4-e8eb5e4 | OK |
 | Stoa reference pack | refs/stoa-hero/ (copied from ~/.aside/.../artifacts/stoa-hero, 403 MB, git-ignored) | OK |
-| Scraped Stoa site text | refs/stoabuild-full-text.md | MISSING: not found on the Mac |
+| Scraped Stoa site text | refs/stoabuild-full-text.md | MISSING: not on the Mac. Fallback for the voice guide: refs/stoa-hero/02-phase-map.md + source/tour-copy-strings.en.js (style only) |
 | Keys | .env (git-ignored) | Runware only at 02:42 |
 
 ## Tool versions
