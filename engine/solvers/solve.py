@@ -531,14 +531,15 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         boxes, cites, scene = _evidence(doc, items)
         marks = _cite_marks(cites)
         if sub_name:
-            noun = sub_name + ("" if n == 1 else "es" if sub_name.endswith("s") else "ies" if sub_name.endswith("y") else "s")
-            noun = sub_name[:-1] + "ies" if (n != 1 and sub_name.endswith("y")) else noun
-            text = (f"I found **no {sub_name}s** {where}." if n == 0 else
+            def _rn(k):
+                return sub_name if k == 1 else (sub_name + "es" if sub_name.endswith(("s", "sh", "ch")) else sub_name[:-1] + "ies" if sub_name.endswith("y") and sub_name[-2:-1] not in "aeiou" else sub_name + "s")
+            noun = _rn(n)
+            text = (f"There are no {_rn(2)} {where}." if n == 0 else
                     f"There {'is' if n == 1 else 'are'} **{n} {noun}** {where}. {marks}")
             if n == 0:
                 types = sorted({str(i.props.get("room_type")) for i in doc.items if i.kind == "room" and i.props.get("room_type")})
-                text += (f" I looked at {len([i for i in doc.items if i.kind == 'room'])} rooms (types: {', '.join(types[:10]) or 'none named'}); "
-                         "none is labelled that way, which is not proof the plan has none.")
+                text += (f" I checked all {len([i for i in doc.items if i.kind == 'room'])} rooms and none is labelled that way, "
+                         "so the drawing may simply not name it.")
                 conf = min(conf, 0.5)
         elif kind_note and n:
             text = f"There {'is' if n == 1 else 'are'} **{n} {kind_note[:-1] if n == 1 else kind_note}** (spaces named as a WC or toilet) {where}. {marks}"
@@ -577,9 +578,9 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
                 return _abstain(question, doc_id, "This plan has no scale I can trust, so I cannot give areas in square metres.", trace, route, t0)
             conf = float(sc.get("confidence") or 0.3)
             if conf < 0.5:
-                scale_note = " This is approximate: the scale is estimated from the size of the doors."
+                scale_note = " This is approximate: the drawing has no printed scale, so the size is estimated from the doors."
             elif sc.get("method") in ("scalebar", "ratio-dpi", "ratio-sheet"):
-                scale_note = f" Scale: {sc.get('evidence')} ({float(sc['m_per_px']):.4f} m per pixel)."
+                scale_note = " Sized from the scale printed on the drawing."
         else:
             return _abstain(question, doc_id, f"I do not measure {p.type} of {_plural(kind, 2)} from a plan reliably yet.", trace, route, t0)
         conf = min(conf, sum(i.conf for i, _ in have) / len(have)) if have else 0.0

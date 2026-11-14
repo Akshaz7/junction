@@ -116,11 +116,15 @@ def forced_answer(question: str, doc_ids: list[str], root: Path, parsed=None, tr
         n = 0.0 if n is None else max(0.0, n)
         value = int(round(n)) if typ == "count" else round(n, 2)
         shown = f"{value}" if typ == "count" else f"{value} {UNITS[typ]}"
-        src = "no readable source on the drawing" if defaulted else f"estimated from {basis or 'the drawing'}"
-        text = f"**{shown}** ({src})."
+        if defaulted:
+            text = ("I couldn't find this on the drawing, so I won't guess a number. "
+                    "Try asking about something drawn or labelled on the plan, or upload a model (IFC) or a clearer drawing that includes it.")
+            value = None
+        else:
+            text = f"About **{shown}**. This is an estimate, not an exact count: it was read from {basis or 'the drawing'} by a model."
     else:
-        text = (text or "I could not read enough of this document to be specific; my best guess is that it does not record this directly.")
-        text += f"\n\n_Read from {basis}._" if basis else ""
+        text = (text or "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.")
+        text += f"\n\n_Based on {basis}._" if (basis and text.strip().startswith("I couldn't") is False) else ""
     trace.append({"step": "forced", "detail": f"best-effort answer from {basis or 'no evidence'}", "ms": int((time.perf_counter() - t0) * 1000), "model": calls[-1]["model"] if calls and calls[-1].get("task") == "forced_answer" else None, "cost_usd": usd})
     return {
         "answer_id": uuid.uuid4().hex, "question": question, "doc_ids": list(doc_ids),

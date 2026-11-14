@@ -126,8 +126,8 @@ def fixture_locate(question: str, doc: Doc, kind: str, t0: float | None = None) 
         parts.append(f"{k}: {vert}-{hor}" + (f", in the {room}" if room else ""))
     n = len(items)
     boxes, cites, scene = _evidence(doc, items)
-    text = (f"**{n} {_plural(kind, n)}** drawn on this floor plan, numbered on the drawing: " + "; ".join(parts) + ". "
-            + "".join(f"[{c['n']}]" for c in cites) + " Positions are read from the detected plan elements.")
+    text = (f"**{n} {_plural(kind, n)}** on this floor plan, numbered on the drawing: " + "; ".join(parts) + ". "
+            + "".join(f"[{c['n']}]" for c in cites) + " Positions are approximate.")
     res = _out(question, doc, text, [i.item_id for i in items], [], t0, trace_detail=f"{kind}: {n} detected on the plan map")
     res["evidence"]["boxes"], res["citations"], res["evidence"]["scene"] = boxes, cites, scene
     res["route"] = "planmap"

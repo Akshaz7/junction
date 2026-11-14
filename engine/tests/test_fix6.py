@@ -88,7 +88,7 @@ def test_named_room_zero_is_not_certain():
     a = answer("How many separate WC rooms are on this floor plan?", [C1])
     validate_answer(a)
     if a["answer"]["value"] == 0:
-        assert a["answer"]["confidence"] <= 0.5 and "not proof" in a["answer"]["text_md"]
+        assert a["answer"]["confidence"] <= 0.5 and "may simply not name it" in a["answer"]["text_md"]
 
 
 def test_where_are_the_toilets_on_a_plan_map_points_not_counts():

@@ -155,12 +155,12 @@ def storey_pair(question: str, doc: Doc, t0) -> dict | None:
     hi = max(score, key=score.get)
     lo = min(score, key=score.get)
     if score[hi] == score[lo]:
-        verdict = "They are equal."
+        verdict = "Both are the same."
     else:
-        verdict = f"**{hi}** has more ({fmt(score[hi])}{u} vs {fmt(score[lo])}{u}, a difference of {fmt(round(score[hi] - score[lo], 2))}{u})."
+        verdict = f"**{hi}** has more ({fmt(score[hi])}{u} against {fmt(score[lo])}{u})."
     what = f"{kind} area" if area else _noun(kind)
     trace = [_step("route", f"storey pair / {kind} / {'area' if area else 'count'} -> code, no model"), _step("count", parts)]
-    text = f"Total {what} per floor: {parts}. {verdict} {{marks}}"
+    text = f"{verdict} By floor: {parts}. {{marks}}"
     return _done(question, doc, text, score[hi] - score[lo], "m2" if area else "count", items, trace, t0=t0)
 
 
@@ -310,10 +310,12 @@ def scale_note(doc: Doc) -> str:
     m = sc.get("method")
     if m in ("scalebar", "ratio-dpi", "ratio-sheet"):
         basis = "from each room's drawn box" if any(i.props.get("area_basis") == "box" for i in doc.items if i.kind == "room") else "from each room's drawn outline"
-        return f" Scale: {sc.get('evidence')} ({sc['m_per_px']:.4f} m per pixel); areas {basis}."
+        ev = str(sc.get("evidence") or "")
+        ev = f"{ev}; " if " " in ev else ""
+        return f" Sized from the scale printed on the drawing ({ev}{basis})."
     if m == "door-prior":
-        return " Scale: estimated from door sizes (no printed scale found), so areas are approximate."
-    return f" Scale: {sc.get('evidence') or m}."
+        return " The drawing has no printed scale, so areas are estimated from door sizes and are approximate."
+    return " Sized from the drawing's own units."
 
 
 def named_rooms(question: str, doc: Doc, t0) -> dict | None:
@@ -355,6 +357,9 @@ def named_rooms(question: str, doc: Doc, t0) -> dict | None:
     trace = [_step("route", f"count / room / named '{word}' -> code, no model"), _step("filter", f"{len(hit)} rooms match {word}")]
     plural = word + ("s" if not word.endswith("s") else "")
     noun = {"classroom": "classrooms", "office": "offices", "kitchen": "kitchens", "storage": "storage rooms", "corridor": "corridors", "bathroom": "bathrooms/WCs"}.get(word, f"{word} rooms")
+    if len(hit) == 1:
+        noun = noun[:-3] + "room" if noun.endswith("rooms") else noun[:-1] if noun.endswith("s") else noun
+        noun = noun.replace("bathrooms/WCs", "bathroom/WC")
     if rx.pattern.startswith("^") and wants_area and not howmany:   # one room named on the plan
         text = f"The area of **{word}** is **{_fmt(tot)} m²**" + (f" ({len(hit)} rooms carry that name, summed)" if len(hit) > 1 else "") + ". {marks}" + scale_note(doc)
         return _done(question, doc, text, tot, "m2", hit, trace, t0=t0)
@@ -457,7 +462,7 @@ def wet_rooms(question: str, doc: Doc, t0) -> dict | None:
     split = f" ({_by_storey(doc, rooms)})" if doc.mode == "ifc" and not st and _by_storey(doc, rooms) else ""
     trace = [_step("route", "area / wet rooms -> rooms named or typed bathroom, WC, shower, sauna, laundry; sum of room areas, no model"),
              _step("filter", f"{len(rooms)} wet rooms, {len(area)} with an area")]
-    text = (f"Total wet-room area {where}: **{_fmt(tot)} m²** across **{len(rooms)} wet rooms**{split} "
+    text = (f"Total wet-room area {where}: **{_fmt(tot)} m²** across **{len(rooms)} wet {'room' if len(rooms) == 1 else 'rooms'}**{split} "
             f"(bathrooms, WCs, showers, saunas, laundry){'' if len(area) == len(rooms) else f'; {len(rooms) - len(area)} have no area on the drawing'}. {{marks}}")
     return _done(question, doc, text, tot, "m2", rooms, trace, t0=t0)
 
@@ -761,8 +766,9 @@ def takeoff(question: str, doc: Doc, t0, solve_fn) -> dict | None:
     area = total
     need = area * (1 + pct / 100)
     trace = base["trace"] + [_step("compute", f"{area:.2f} m2 x (1 + {pct:g}%) = {need:.2f} m2")]
-    txt = (f"You need about **{_fmt(need)} m²**: the {target} cover **{_fmt(area)} m²**" +
-           (f", plus **{pct:g}%** waste ({_fmt(need - area)} m²)." if pct else "."))
+    tgt = target if re.search(r"\b(rooms?|wcs?|toilets?|bath|kitchens?|bedrooms?|floors?|halls?|offices?|walls?)\b", target, re.I) else "the rooms you asked about"
+    txt = (f"You need about **{_fmt(need)} m²**. " + (f"That is {_fmt(area)} m² for {tgt}, plus {pct:g}% extra ({_fmt(need - area)} m²)." if pct else f"That is the floor area of {tgt}.")
+           + " Counted from the room areas in the model.")
     marks = "".join(f"[{c['n']}]" for c in base.get("citations") or [])
     base["answer"].update({"text_md": f"{txt} {marks}", "value": round(need, 2), "unit": "m2"})
     base["trace"] = trace
@@ -835,12 +841,12 @@ def compliance(question: str, doc: Doc, t0) -> dict | None:
     if fs:
         top = fs[:4]
         lines = "; ".join(f"{f['title']} ({advisor._short(by[f['rule_id']]) if f['rule_id'] in by else f['rule_id']}, {f['severity']})" for f in top)
-        text = (f"**Not clearly compliant on {labels}.** {len(fs)} finding{'s' if len(fs) != 1 else ''}: {lines}. Checked: {ck}. "
-                + (f"Not checkable with this model: {len(skipped)} rule{'s' if len(skipped) != 1 else ''}. " if skipped else "") + "{marks}")
+        text = (f"**Not clearly compliant on {labels}.** I found {len(fs)} issue{'s' if len(fs) != 1 else ''}: {lines}. Rules checked: {ck}. "
+                + (f"{len(skipped)} more rule{'s' if len(skipped) != 1 else ''} cannot be checked with this model. " if skipped else "") + "{marks}")
         val = len(fs)
     else:
-        text = (f"**No violation found** for {labels} by the checks that can run on this model (checked: {ck}). "
-                + (f"{len(skipped)} rule{'s' if len(skipped) != 1 else ''} could not be checked automatically, so this is not a full compliance statement. " if skipped else "")
+        text = (f"**No problems found** for {labels} in the rules I can check on this model ({ck}). "
+                + (f"{len(skipped)} other rule{'s' if len(skipped) != 1 else ''} cannot be checked automatically, so this is not a full compliance sign-off. " if skipped else "")
                 + "{marks}")
         val = 0
     res = _done(question, doc, text, val, "count", items, trace, t0=t0)
