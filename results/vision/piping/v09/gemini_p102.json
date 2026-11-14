@@ -1,0 +1,333 @@
+{
+ "model": "gemini-4-carbon",
+ "cost_usd": 0.01528,
+ "json": {
+  "pipe_labels": [
+   {
+    "size": "2\"",
+    "text": "2\"\u00f8",
+    "system": "waste",
+    "box": [
+     91,
+     294,
+     102,
+     311
+    ]
+   },
+   {
+    "size": "2\"",
+    "text": "2\"\u00f8",
+    "system": "vent",
+    "box": [
+     63,
+     328,
+     83,
+     337
+    ]
+   },
+   {
+    "size": "2\"",
+    "text": "2\"\u00f8",
+    "system": "vent",
+    "box": [
+     63,
+     355,
+     83,
+     363
+    ]
+   },
+   {
+    "size": "3\"",
+    "text": "3\"\u00f8",
+    "system": "waste",
+    "box": [
+     64,
+     378,
+     84,
+     387
+    ]
+   },
+   {
+    "size": "3\"",
+    "text": "3\"\u00f8",
+    "system": "vent",
+    "box": [
+     96,
+     396,
+     116,
+     404
+    ]
+   },
+   {
+    "size": "3\"",
+    "text": "3\"VENT UP",
+    "system": "vent",
+    "box": [
+     123,
+     435,
+     134,
+     492
+    ]
+   },
+   {
+    "size": "3\"",
+    "text": "3\"V UP",
+    "system": "vent",
+    "box": [
+     598,
+     230,
+     609,
+     268
+    ]
+   },
+   {
+    "size": "1-1/2\"",
+    "text": "1-1/2\"V FROM KS-1",
+    "system": "vent",
+    "box": [
+     593,
+     368,
+     604,
+     464
+    ]
+   },
+   {
+    "size": "1 1/2\"",
+    "text": "1 1/2\"\u00f8",
+    "system": "vent",
+    "box": [
+     646,
+     405,
+     657,
+     439
+    ]
+   },
+   {
+    "size": "1 1/2\"",
+    "text": "1 1/2\"\u00f8",
+    "system": "waste",
+    "box": [
+     671,
+     411,
+     682,
+     445
+    ]
+   },
+   {
+    "size": "2\"",
+    "text": "2\"\u00f8",
+    "system": "waste",
+    "box": [
+     668,
+     152,
+     688,
+     161
+    ]
+   },
+   {
+    "size": "3\"",
+    "text": "3\"V DN",
+    "system": "vent",
+    "box": [
+     678,
+     80,
+     688,
+     117
+    ]
+   },
+   {
+    "size": "3\"",
+    "text": "3\"\u00f8",
+    "system": "vent",
+    "box": [
+     710,
+     185,
+     721,
+     201
+    ]
+   },
+   {
+    "size": "1 1/2\"",
+    "text": "1 1/2\"\u00f8",
+    "system": "vent",
+    "box": [
+     710,
+     275,
+     721,
+     309
+    ]
+   },
+   {
+    "size": "2\"",
+    "text": "2\"\u00f8",
+    "system": "waste",
+    "box": [
+     747,
+     152,
+     768,
+     161
+    ]
+   },
+   {
+    "size": "3\"",
+    "text": "3\"VENT UP",
+    "system": "vent",
+    "box": [
+     932,
+     377,
+     942,
+     434
+    ]
+   }
+  ],
+  "fixtures": [
+   {
+    "tag": "LAV-1",
+    "type": "lavatory",
+    "box": [
+     59,
+     256,
+     77,
+     289
+    ]
+   },
+   {
+    "tag": "WC-1",
+    "type": "water closet",
+    "box": [
+     140,
+     351,
+     158,
+     384
+    ]
+   },
+   {
+    "tag": "SH-1",
+    "type": "shower",
+    "box": [
+     253,
+     256,
+     271,
+     289
+    ]
+   },
+   {
+    "tag": "SH-1",
+    "type": "shower",
+    "box": [
+     495,
+     139,
+     513,
+     172
+    ]
+   },
+   {
+    "tag": "WC-1",
+    "type": "water closet",
+    "box": [
+     571,
+     249,
+     589,
+     282
+    ]
+   },
+   {
+    "tag": "KS-1",
+    "type": "kitchen sink",
+    "box": [
+     653,
+     518,
+     671,
+     551
+    ]
+   },
+   {
+    "tag": "LAV-1",
+    "type": "lavatory",
+    "box": [
+     802,
+     198,
+     820,
+     231
+    ]
+   },
+   {
+    "tag": "WC-1",
+    "type": "water closet",
+    "box": [
+     842,
+     249,
+     860,
+     282
+    ]
+   },
+   {
+    "tag": "SH-1",
+    "type": "shower",
+    "box": [
+     917,
+     139,
+     935,
+     172
+    ]
+   }
+  ],
+  "drains": [
+   {
+    "kind": "shower drain",
+    "box": [
+     113,
+     269,
+     122,
+     276
+    ]
+   },
+   {
+    "kind": "shower drain",
+    "box": [
+     156,
+     269,
+     165,
+     277
+    ]
+   },
+   {
+    "kind": "shower drain",
+    "box": [
+     603,
+     152,
+     612,
+     160
+    ]
+   },
+   {
+    "kind": "shower drain",
+    "box": [
+     645,
+     152,
+     653,
+     160
+    ]
+   },
+   {
+    "kind": "shower drain",
+    "box": [
+     776,
+     152,
+     785,
+     160
+    ]
+   },
+   {
+    "kind": "shower drain",
+    "box": [
+     819,
+     152,
+     828,
+     160
+    ]
+   }
+  ]
+ },
+ "text": null
+}
