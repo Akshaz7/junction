@@ -199,7 +199,10 @@ def test_real_artifact_budgets(doc_id, question, exact):
     assert len(out['arithmetic'][0]['terms']) == out['based_on']['elements']
     if exact:
         assert out['margin']['value'] is not None
-        assert out['confidence']['label'] == 'Verified'
+        # Reproducing source arithmetic is distinct from independently checking
+        # the quantity. These real indices may lack a complete second reading.
+        if not out['calc']['checks']:
+            assert out['confidence']['label'] == 'Estimate'
     else:
         assert out['margin']['value'] is None
         assert out['confidence']['label'] != 'Verified'

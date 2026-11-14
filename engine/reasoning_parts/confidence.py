@@ -55,6 +55,13 @@ def _calibrated(source, unit, label, checked):
 def run(ctx: dict) -> dict:
     steps, checked = ctx['steps'], ctx.get('checked')
     exact = ctx.get('quantified_exact') is True
+    if 'xchecks' in ctx:
+        independent = ctx['xchecks']
+        # In the quantity path, reproducing the source sum alone is not an
+        # independent verification. Older nonquantity cards retain their flow.
+        exact = exact and bool(independent) and all(c['within_1pct'] for c in independent)
+        if checked is True and not independent:
+            checked = None
     source = "ifc" if ctx.get('is_ifc') else "cad" if ctx.get('from_cad') else "scan"
     source = ctx.get('quantified_source', source)
     if ctx.get('models_used') and ctx.get('route') not in ('planmap', 'index'):

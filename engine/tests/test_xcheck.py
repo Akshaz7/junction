@@ -225,3 +225,4 @@ def test_storey_regrouping_is_not_an_independent_verification():
     calc = margin.run(ctx)["calc"]
     assert not calc["checks"] and calc["sanity_checks"][0]["independent"] is False
     assert calc["sanity_checks"][0]["value"] == 10 and ctx["checked"] is None
+    assert confidence.run(ctx)["label"] == "Estimate"

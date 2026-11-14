@@ -95,14 +95,16 @@ def audit(sets, root, output, recount_cache, ifc_checks=()):
                     if rec:
                         value, model, kind = rec
                         identity = (doc_id, question, "detector / drawing recount")
-                        if identity not in seen:
-                            c = xcheck.compare("detector / drawing recount", a["value"], value, "count",
-                                               [{"doc_id": doc_id, "page": 1, "model": model, "cache": str(recount_cache), "question": question}])
-                            if c:
+                        c = xcheck.compare("detector / drawing recount", a["value"], value, "count",
+                                           [{"doc_id": doc_id, "page": 1, "model": model, "cache": str(recount_cache), "question": question}])
+                        if c:
+                            if identity not in seen:
                                 seen.add(identity)
                                 observations.append({**c, "doc_id": doc_id, "cohort": "scan", "kind": kind,
                                                      "set": str(set_path), "question_id": case["id"]})
-                                case["cached_recount"] = {"value": value, "model": model, "diff_pct": c["diff_pct"]}
+                            case["cached_recount"] = {"value": value, "model": model, "diff_pct": c["diff_pct"]}
+                            case["checks"] += 1
+                            case.pop("unavailable", None)
             except (SolverUnsupported, OSError, ValueError, KeyError, TypeError, RuntimeError) as exc:
                 case["unavailable"] = f"{type(exc).__name__}: {str(exc)[:160]}"
             cases.append(case)
