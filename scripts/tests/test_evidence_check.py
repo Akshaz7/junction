@@ -336,3 +336,34 @@ def test_selection_uses_all_available_sets_and_reserves_blind_file_last(tmp_path
     assert rows[-1]["doc_ids"] == ["generated__b"]
     assert len({r["origin"] for r in rows}) == 3
     assert info["excluded"] == {"pdf_out_of_scope": 1, "non_english": 1}
+
+
+def test_outline_comparison_uses_polygon_when_no_cached_geometry_area_exists(source):
+    path = source.root / "generated__audit/planmap-1.json"
+    pm = json.loads(path.read_text())
+    pm["scale"]["m_per_px"] = 1
+    pm["items"][0]["polygon_px"] = [[0, 0], [4, 0], [4, 3.1], [0, 3.1]]
+    path.write_text(json.dumps(pm))
+    res = good()
+    res["reasoning"]["calc"]["checks"] = [{"method": "printed / outline", "value": 12, "diff_pct": .4/12.4*100,
+                                               "agrees": True, "source": {"doc_id": "generated__audit", "page": 1, "item_id": "a"}}]
+    assert "check.diff_pct" not in codes(res, source)
+
+
+@pytest.mark.parametrize("drift", [False, True])
+def test_comparison_replay_requires_matching_artifact_hashes(source, tmp_path, drift):
+    res = good()
+    res["question"] = "What is the total room area?"
+    res["reasoning"]["calc"]["checks"] = [{"method": "printed / outline", "value": 12, "diff_pct": 0,
+                                               "agrees": True, "source": {"doc_id": "generated__audit", "page": 1, "item_id": "a"}}]
+    checker.audit(res, source)
+    row = {**res, "status": "fail", "numeric": True, "findings": [{"code": "check.diff_pct", "owner": "F-XCHECK", "severity": "error", "detail": "old overly strict comparison"}]}
+    report = {"artifact_sha256": source.fingerprints, "summary": {}, "records": [row]}
+    input_path, output = tmp_path / "before.json", tmp_path / "after.json"
+    input_path.write_text(json.dumps(report))
+    if drift:
+        with (source.root / "generated__audit/planmap-1.json").open("a") as stream:
+            stream.write("\n")
+    result = checker.recheck_comparisons(input_path, source.root, tmp_path, output)
+    assert result["comparison_recheck"]["unchanged_artifacts"] is not drift
+    assert result["records"][0]["status"] == ("uncheckable" if drift else "pass")

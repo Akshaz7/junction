@@ -573,6 +573,14 @@ def audit(res, sources):
             check_unit = unit(check.get("unit") or u)
             keys = {"m2": ("area_m2_geom", "area_m2_label", "area_m2", "net_floor_area_m2"), "m": ("length_m",), "m3": ("volume_m3",)}.get(check_unit, ())
             primaries = [v for key in keys if (v := number(props.get(key))) is not None]
+            polygon = raw.get("polygon_px") or []
+            if check_unit == "m2" and len(polygon) >= 3 and all(isinstance(p, list) and len(p) == 2 and all(number(x) is not None for x in p) for p in polygon):
+                doc_path = sources.doc(ref.get("doc_id") or default_doc)
+                pm = sources.json(doc_path / f"planmap-{ref.get('page') or 1}.json") if doc_path else {}
+                scale = number((pm.get("scale") or {}).get("m_per_px"))
+                if scale is not None and scale > 0:
+                    area_px = abs(sum(p[0] * polygon[(i+1) % len(polygon)][1] - polygon[(i+1) % len(polygon)][0] * p[1] for i, p in enumerate(polygon))) / 2
+                    primaries.append(area_px * scale ** 2)
         elif "primary_value" not in check and check.get("unit") and unit(check["unit"]) != u:
             primaries = []
         if second is not None and primary is not None:
@@ -735,6 +743,48 @@ def compact_reasoning(reasoning):
     return data
 
 
+def recheck_comparisons(input_path, artifacts, repo, output):
+    """Replay comparisons from saved answers, requiring unchanged source hashes."""
+    report = read_json(input_path)
+    sources = Sources(artifacts, repo)
+    old_hashes = report.get("artifact_sha256") or {}
+    checked = []
+    for row in report.get("records") or []:
+        if not ((row.get("reasoning") or {}).get("calc") or {}).get("checks"):
+            continue
+        res = {"doc_ids": row["doc_ids"], "question": row["question"], "answer": row["answer"], "reasoning": row["reasoning"]}
+        corrected = [f for f in audit(res, sources)["findings"] if f["code"].startswith("check.")]
+        row["findings"] = [f for f in row["findings"] if not f["code"].startswith("check.")] + corrected
+        checked.append(row)
+    changed = [path for path, digest in sources.fingerprints.items() if old_hashes.get(path) != digest]
+    if changed:
+        for row in checked:
+            row["findings"] = [f for f in row["findings"] if not f["code"].startswith("check.")]
+            row["findings"].append({"code": "check.artifact_changed", "owner": "F-XCHECK", "severity": "uncheckable",
+                                    "detail": "Comparison replay cannot establish unchanged sources: " + ", ".join(changed[:3])})
+    for row in checked:
+        row["status"] = "fail" if any(f["severity"] == "error" for f in row["findings"]) else "uncheckable" if row["findings"] else "pass"
+    report["summary"]["statuses"] = dict(Counter(r["status"] for r in report["records"]))
+    report["summary"]["failure_occurrences_by_owner"] = dict(Counter(f["owner"] for r in report["records"] for f in r["findings"]))
+    groups = defaultdict(list)
+    for row in report["records"]:
+        for f in row["findings"]:
+            groups[(f["owner"], f["code"], f["severity"])].append({"doc_ids": row["doc_ids"], "question": row["question"], "detail": f["detail"]})
+    ranked = sorted(groups.items(), key=lambda pair: (pair[0][2] != "error", -len(pair[1]), pair[0]))
+    report["failure_groups"] = [{"owner": key[0], "code": key[1], "severity": key[2], "occurrences": len(examples), "examples": examples[:3]} for key, examples in ranked[:30]]
+    cases = sorted((r for r in report["records"] if r["findings"]), key=lambda r: (-sum(f["severity"] == "error" for f in r["findings"]), r["question"]))[:30]
+    report["top_30"] = [{"doc_ids": r["doc_ids"], "question": r["question"], "owners": sorted({f["owner"] for f in r["findings"]}), "failures": r["findings"]} for r in cases]
+    report["comparison_recheck"] = {"created_at": datetime.now(UTC).isoformat(), "input": input_path.name,
+                                    "checker_sha256": CHECKER_SHA256, "answers_reused": len(checked),
+                                    "unchanged_artifacts": not changed, "changed_artifacts": changed,
+                                    "note": "Only comparison findings were recomputed. No new engine calls; no blind file retested."}
+    report.pop("interpretation", None)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(report_json(report))
+    print(json.dumps(report["summary"], sort_keys=True))
+    return report
+
+
 def run(repo, artifacts, rows, output, timeout=20):
     sys.path.insert(0, str(repo))
     os.environ.update(MODELS_FAKE="1", EXPLAIN="0", RECOUNT_CACHE="0", ANSWER_TIMEOUT_S="0")
@@ -818,12 +868,16 @@ def main():
     parser.add_argument("--defer-blind", action="store_true", help="reserve the blind document for a later final validation")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--timeout", type=float, default=20)
+    parser.add_argument("--recheck-comparisons", type=Path, help="replay saved comparisons against unchanged artifact hashes, without engine calls")
     args = parser.parse_args()
     if args.limit < 1 or args.timeout <= 0:
         parser.error("limit and timeout must be positive")
     repo = args.repo.resolve()
     artifacts = (args.artifacts or repo / "artifacts").absolute()
     output = args.output or ROOT / "results/final/EVQA" / f"run-{datetime.now().strftime('%Y%m%d-%H%M%S')}.json"
+    if args.recheck_comparisons:
+        report = recheck_comparisons(args.recheck_comparisons, artifacts, repo, output)
+        return int(any(r["status"] in ("fail", "error", "uncheckable") for r in report["records"]))
     rows, selection = select_questions(repo, artifacts, args.limit, args.seed, read_json(args.blind).get("doc_id"), args.questions)
     if args.defer_blind:
         blind = read_json(args.blind).get("doc_id")
