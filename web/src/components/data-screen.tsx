@@ -146,6 +146,19 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const [uploadError, setUploadError] = useState('')
   const lastOpened = useRef<HTMLButtonElement | null>(null)
 
+  function openUpload() { setUploadError(''); setUploadOpen(true) }
+
+  useEffect(() => {
+    function followUploadLink() {
+      if (hidden || demo || new URLSearchParams(window.location.hash.split('?')[1]).get('upload') !== '1') return
+      openUpload()
+      window.history.replaceState(window.history.state, '', '#/data')
+    }
+    followUploadLink()
+    window.addEventListener('hashchange', followUploadLink)
+    return () => window.removeEventListener('hashchange', followUploadLink)
+  }, [hidden, demo])
+
   // Reopening Data keeps the retained preview alongside navigation. Opening a
   // file explicitly starts a full-screen reading session on phones.
   useLayoutEffect(() => {
@@ -189,7 +202,7 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const selected = docs.find((doc) => doc.doc_id === selectedId) || (olderDoc?.doc_id === selectedId ? olderDoc : null)
   return <section className="data-screen" aria-label="Project documents" hidden={hidden}>
     <div className="data-screen-toolbar"><div><h2>Project documents</h2><p>The sources behind your answers.</p></div>
-      <Button variant="raised" disabled={demo} onClick={() => { setUploadError(''); setUploadOpen(true) }}><Upload size={16} />Upload</Button>
+      <Button variant="raised" disabled={demo} onClick={openUpload}><Upload size={16} />Upload</Button>
     </div>
     <UploadDialog open={uploadOpen} onClose={() => setUploadOpen(false)} onAsk={onAsk}
       onOpen={(doc) => { setOlderDoc(doc); setPreviewDocked(false); setSelectedId(doc.doc_id) }}
@@ -214,7 +227,7 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
       </nav>
       <label className={`data-folder-search ${search ? 'has-query' : ''}`}><Search size={16} /><Input type="search" aria-label="Search documents" placeholder="Search all documents" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1) }} /></label>
       <div className="data-files"><header><h2>{query ? 'Search results · all folders' : activeFolder || 'All Files'}</h2><ChevronLeft className="mobile-folder-back" size={14} /><select className="mobile-folder-select" aria-label="Document folder" value={activeFolder} onChange={(event) => { setFolder(event.target.value); setSearch(''); setPage(1) }}><option value="">All Files</option>{options.map((option) => <option key={option.path} value={option.path}>{option.label}</option>)}</select><SlidersHorizontal className="mobile-folder-filter" size={14} /><span>Files ({filtered.length})</span></header>
-        {loading ? <p className="data-empty" role="status">Loading documents…</p> : !visible.length ? <p className="data-empty">No documents found.</p> : <div className="data-file-list">{visible.map((doc) => <article key={doc.doc_id} className="data-file-row" data-doc-id={doc.doc_id} data-selected={selectedId === doc.doc_id || undefined}>
+        {loading ? <p className="data-empty" role="status">Loading documents…</p> : !visible.length ? <div className="data-empty"><p>{query ? 'No documents match' : 'No documents yet.'}</p><div className="data-empty-actions">{(query || activeFolder) && <Button variant="outline" onClick={() => { setSearch(''); setFolder(''); setPage(1) }}>{query ? 'Clear search' : 'All files'}</Button>}<Button variant="raised" disabled={demo} onClick={openUpload}>Upload</Button></div></div> : <div className="data-file-list">{visible.map((doc) => <article key={doc.doc_id} className="data-file-row" data-doc-id={doc.doc_id} data-selected={selectedId === doc.doc_id || undefined}>
           <button className="data-open-file" type="button" aria-label={`Open ${doc.title}`} aria-expanded={selectedId === doc.doc_id} onClick={(event) => { lastOpened.current = event.currentTarget; setPreviewDocked(false); setSelectedId(doc.doc_id) }}>
             <span className="file-checkbox" aria-hidden="true" /><DocumentImage key={doc.doc_id} doc={doc} /><span><h3><DocumentTitle title={doc.title} /></h3><span className="data-file-meta">{doc.folder || doc.source} · {doc.pages} {doc.pages === 1 ? 'page' : 'pages'}</span><small>{doc.licence || 'Licence not provided'} · {doc.credit || 'Credit not provided'}</small></span>
           </button><div className="data-file-facts"><span aria-label="File size">{fileSize(doc.size)}</span><time aria-label="File date" dateTime={doc.date || doc.updated_at || undefined}>{fileDate(doc.date || doc.updated_at)}</time>

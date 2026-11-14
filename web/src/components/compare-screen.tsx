@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { GitCompareArrows } from 'lucide-react'
 import { workspaceApi } from '../lib/api'
+import { UploadAction } from './workspace-navigation'
 import type { ChangeEntry, ChangeFeedEntry, Comparison, Document } from '../lib/types'
 import './compare-screen.css'
 
@@ -71,7 +72,7 @@ export function CompareScreen({ docs, demo }: { docs: Document[]; demo: boolean 
     </div>
     {error && <p className="error-message" role="alert">{error}</p>}
     {loading && <p className="tools-muted" role="status">Loading versions…</p>}
-    {!loading && !groups.length && !error && <p className="tools-muted">No drawings with more than one version yet.</p>}
+    {!loading && !groups.length && !error && <div className="cmp-empty"><p className="tools-muted">No drawings with more than one version yet.</p><UploadAction>Upload a new version</UploadAction></div>}
     {chosen && !comparison && !error && <p className="tools-muted" role="status">Loading comparison…</p>}
     {comparison && <div className="cmp-body">
       <div className={`cmp-sheets mode-${mode.replace(/ /g, '-').toLowerCase()}`} style={{ '--wipe': `${wipe}%`, aspectRatio: mode === 'Side by side' ? undefined : `${comparison.image.w}/${comparison.image.h}` } as CSSProperties}>
@@ -83,7 +84,7 @@ export function CompareScreen({ docs, demo }: { docs: Document[]; demo: boolean 
       </div>
       <aside className="cmp-readings" aria-label="Differences"><h3>{comparison.changes.length} {comparison.changes.length === 1 ? 'difference' : 'differences'}</h3>
         {comparison.changes.map((change) => <article key={change.change_id} data-change-id={change.change_id} data-active={active === change.change_id || undefined} onMouseEnter={() => setActive(change.change_id)} onMouseLeave={() => setActive(null)}><span className="cmp-number">{change.n}</span><p>{change.sentence}</p></article>)}
-        {!comparison.changes.length && <p className="tools-muted">No differences were found between these versions.</p>}
+        {!comparison.changes.length && <div className="cmp-empty"><p className="tools-muted">No differences were found between these versions.</p><a className="button button-raised button-size-default" href={`#/chat?doc=${encodeURIComponent(chosen?.summary.doc_id || chosen?.doc_b || comparison.doc_id)}`}>Ask about this drawing</a></div>}
         <small>{comparison.generated_for_demo ? 'generated for demo' : `Source: ${comparison.source}`}</small>
       </aside>
     </div>}

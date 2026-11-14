@@ -73,7 +73,7 @@ export function ChatHeaderActions({ chatId, onNew }: { chatId: string | null; on
       <header><strong>History</strong><FollowToggle /><button type="button" aria-label="Close chat history" onClick={() => { setOpen(false); historyButton.current?.focus() }}><X size={16} /></button></header>
       {loading ? <p role="status">Loading chats…</p> : error ? <p role="alert">{error}</p> : chats.length ? <ul>{chats.map((chat) => <li key={chat.id}>
         <a href={`#/chat/${encodeURIComponent(chat.id)}`} aria-current={chat.id === chatId ? 'page' : undefined} onClick={() => setOpen(false)}><span>{chat.title || 'Untitled chat'}</span><time dateTime={chat.created_at}>{overviewDate(chat.created_at)}</time></a>
-      </li>)}</ul> : <p>No saved chats yet.</p>}
+      </li>)}</ul> : <p>No saved chats yet. <Button variant="raised" onClick={() => { setOpen(false); setToast(''); onNew() }}>New chat</Button></p>}
     </section>}
     {toast && <div className="chat-action-toast" role="status">{toast}</div>}
   </div>

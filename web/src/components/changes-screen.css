@@ -7,4 +7,5 @@
 .changes-filters { display: flex; gap: 8px; padding: 0 12px 12px; }
 .changes-filters label { flex: 1; min-width: 0; font-size: var(--text-caption); color: var(--muted-foreground); }
 .changes-filters select { display: block; margin-top: 4px; width: 100%; padding: 6px; border: 1px solid var(--border); border-radius: var(--radius-control); background: var(--card); color: var(--foreground); font: inherit; }
+.changes-no-data .button { margin-top: 12px; }
 .change-row time { display: block; margin-top: 3px; font-size: var(--text-micro); color: var(--muted-foreground); }

@@ -1,6 +1,13 @@
-import { ChartNoAxesCombined, Check, ChevronDown, Database, GitCompare, House, BotMessageSquare, MoreHorizontal, Library, Inbox, Wrench } from 'lucide-react'
+import { ChartNoAxesCombined, Check, ChevronDown, Database, GitCompare, House, BotMessageSquare, MoreHorizontal, Library, Inbox, Wrench, CircleHelp } from 'lucide-react'
 import { Tooltip } from './ui/tooltip'
+import { Button } from './ui'
 import type { Route } from '../lib/router'
+import './help-navigation.css'
+
+/** Data owns the upload session, including refresh and the ready-document actions. */
+export function UploadAction({ children = 'Upload' }: { children?: string }) {
+  return <Button variant="raised" onClick={() => { window.location.hash = '/data?upload=1' }}>{children}</Button>
+}
 
 export const navigation = [
   { route: 'overview', label: 'Overview', icon: House },
@@ -14,7 +21,8 @@ export const navigation = [
 ] as const
 
 /** Pages that stay reachable by URL (Library and Tools now hold them) but have no nav entry. */
-const hiddenPages = { skills: 'Skills', automations: 'Automations', findings: 'Findings' } as const
+const hiddenPages = { skills: 'Skills', automations: 'Automations', findings: 'Findings', help: 'Help' } as const
+const morePages = [...navigation.slice(4), { route: 'help', label: 'Help', icon: CircleHelp }] as const
 export function pageLabel(route: Route): string {
   return navigation.find((item) => item.route === route)?.label ?? hiddenPages[route as keyof typeof hiddenPages]
 }
@@ -39,15 +47,18 @@ export function WorkspaceNavigation({ route }: { route: Route }) {
             <Icon size={20} /><span>{label}</span>
           </a>
         </Tooltip>)}
-        <Tooltip content="More"><a href="#/accuracy" className="rail-item" aria-label="More"><MoreHorizontal size={20} /></a></Tooltip>
+        <details className="help-more" key={route} onKeyDown={(event) => { if (event.key === 'Escape') { event.currentTarget.open = false; event.currentTarget.querySelector('summary')?.focus() } }}>
+          <summary className={`rail-item ${morePages.some((item) => item.route === route) ? 'active' : ''}`} aria-label="More"><MoreHorizontal size={20} /></summary>
+          <div className="help-more-menu">{morePages.map(({ route: destination, label, icon: Icon }) => <a key={destination} href={`#/${destination}`} aria-current={route === destination ? 'page' : undefined}><Icon size={18} /><span>{label}</span>{route === destination && <Check size={15} />}</a>)}</div>
+        </details>
       </nav>
       <div className="workspace-footer"><span className="workspace-avatar" aria-hidden="true">AK</span><span>Shared workspace<small>No account needed</small></span></div>
     </aside>
     <nav className="mobile-navigation" aria-label="Mobile navigation">
       {navigation.slice(0, 4).map(({ route: destination, label, icon: Icon }) => <a key={destination} href={`#/${destination}`} aria-current={route === destination ? 'page' : undefined}><Icon size={19} /><span>{label}</span></a>)}
       <details className="mobile-more" key={route}>
-        <summary aria-label="More pages" className={navigation.slice(4).some((item) => item.route === route) ? 'active' : ''}><MoreHorizontal size={19} /><span>More</span></summary>
-        <div className="more-menu">{navigation.slice(4).map(({ route: destination, label, icon: Icon }) => <a key={destination} href={`#/${destination}`} aria-current={route === destination ? 'page' : undefined}><Icon size={18} /><span>{label}</span>{route === destination && <Check size={15} />}</a>)}</div>
+        <summary aria-label="More pages" className={morePages.some((item) => item.route === route) ? 'active' : ''}><MoreHorizontal size={19} /><span>More</span></summary>
+        <div className="more-menu">{morePages.map(({ route: destination, label, icon: Icon }) => <a key={destination} href={`#/${destination}`} aria-current={route === destination ? 'page' : undefined}><Icon size={18} /><span>{label}</span>{route === destination && <Check size={15} />}</a>)}</div>
       </details>
     </nav>
   </>

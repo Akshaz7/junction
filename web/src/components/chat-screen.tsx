@@ -85,7 +85,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     function followLink() {
       controller?.abort()
       const link = chatLink(window.location.hash)
-      if (!link) { setRestoring(false); return }
+      const drawing = window.location.hash.startsWith('#/chat?') ? new URLSearchParams(window.location.hash.split('?')[1]).get('doc') : null
+      if (!link && !drawing) { setRestoring(false); return }
       const version = ++generation.current
       submitting.current = false
       chatId.current = null
@@ -93,6 +94,12 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       setBusy(false); setAnswers([]); setViewer(null); setError(''); lastAnswerId.current = null
       setMention(null); setToolsOpen(false); setPendingQuestion(''); setStatuses([]); setTraces([])
       setSelected([]); setRestoredDocIds(null); setDraft('')
+      if (drawing && !link) {
+        setRestoring(false)
+        setRestoredDocIds([drawing])
+        return
+      }
+      if (!link) return
       if (link.kind === 'question') {
         setRestoring(false)
         setDraft(link.question)

@@ -47,6 +47,7 @@
 .data-pagination { display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 12px; color: var(--muted-foreground); font-size: var(--text-caption); flex-wrap: wrap; }
 .data-pagination > span:first-child { margin-right: auto; }
 .data-empty { padding: 32px 18px; font-size: var(--text-body-sm); color: var(--muted-foreground); }
+.data-empty-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .data-detail { min-width: 0; min-height: 0; overflow-y: auto; border-left: 1px solid var(--border); background: var(--card); }
 .data-detail > header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); }
 .data-detail > header h2 { font-size: var(--text-body-sm); font-weight: 600; }

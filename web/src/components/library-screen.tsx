@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Clock3, Library } from 'lucide-react'
 import { SkillsScreen } from './skills-screen'
 import { AutomationsScreen } from './automations-screen'
+import { UploadAction } from './workspace-navigation'
 import type { Document } from '../lib/types'
 import './library-screen.css'
 
@@ -13,6 +14,6 @@ export function LibraryScreen({ docs }: { docs: Document[] }) {
       <button type="button" role="tab" aria-selected={tab === 'skills'} onClick={() => setTab('skills')}><Library size={15} />Skills</button>
       <button type="button" role="tab" aria-selected={tab === 'automations'} onClick={() => setTab('automations')}><Clock3 size={15} />Automations</button>
     </div>
-    <div className="library-body" role="tabpanel">{tab === 'skills' ? <SkillsScreen docs={docs} /> : <AutomationsScreen docs={docs} />}</div>
+    <div className="library-body" role="tabpanel">{tab === 'skills' ? <SkillsScreen docs={docs} /> : <>{!docs.length && <div className="library-empty"><p>Upload a drawing to create an automation.</p><UploadAction /></div>}<AutomationsScreen docs={docs} /></>}</div>
   </div>
 }

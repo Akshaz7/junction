@@ -44,6 +44,6 @@ export default defineConfig(({ mode }) => {
         '/ws': { target: 'http://localhost:8000', ws: true },
       },
     },
-    test: { include: ['src/**/*.test.ts'], environment: 'node' },
+    test: { include: ['src/**/*.test.ts', 'src/**/*.test.tsx'], environment: 'node' },
   }
 })
