@@ -1,0 +1,141 @@
+# TASKS
+
+Status values: `todo`, `doing`, `done`, `blocked`, `waiting-key`, `blocked-human`. Only the LEAD changes Status. The LEAD may add rows, never delete them or change what a row asks for. One line per row in Notes.
+
+
+**Tiers**
+- **Tier 1 (must work):** engine with boxes and sources, accuracy bench, Stoa-style chat with citations and viewer, Data screen, 3D with "Visualise it", accuracy dashboard, deployed.
+- **Tier 2 (the wow):** AR first, then fine-tuned models, live sync, mobile layout, Changes, linked codes, voice, Drive.
+- **Tier 3 (extras):** advisor, watch loop, Overview, Skills, Automations, edit mode, sponsor write-ups.
+
+**Tier gate:** the lead gives attention and merges in tier order. A worker with no open row in the current tier takes its next row with satisfied dependencies in a later tier. No worker is ever idle.
+
+**Columns:** ID / Tier / Depends / Keys needed / Task / Done test. "Keys" lists `.env` names; `-` means none. ◆ = small, self-contained row: the lead may give it to any worker with spare capacity. LONG = may run over 60 s in the background.
+
+**Fixtures:** `tests/fixtures.json` lists 10 drawings used by fast tests: 4 cubicasa5k PNG (including `colorful-11397`), 3 swiss_dwellings floors (PDF + DXF + PNG each), `ac20_arc.ifc`, `digital_hub_arc.ifc`, one `ifc_models` plan PDF.
+
+### DATA (Claude)
+| ID | Tier | Depends | Keys | Task | Done test | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| D-01 | 1 | - | - | LONG. Download the full dataset to `data/full/` with resume (`curl -C -`), unzip. Keep the preview. | `questions.jsonl` in `data/full` has over 100,000 lines. If the download fails 3 times, continue on the preview and retry each hour. | todo | |
+| D-02 | 1 | - | - | Registry: scan the dataset, write `artifacts/<doc_id>/doc.json` and `artifacts/registry.jsonl`. Parse licence and credit from each `LICENSE.md`. | Every preview file maps to a doc. `ac20_arc` licence is the KIT one. Docs with no credit are listed in `results/missing_credits.txt`. | todo | |
+| D-03 | 1 | D-02 | - | Question sets in `data/sets/`: `questions_en.jsonl` (English only), `heldout_docs.txt` (every doc with a question, plus same-stem siblings), `cubicasa_heldout_ids.txt` (dataset name `colorful-11397` maps to CubiCasa5K sample `colorful/11397`), `sample200.jsonl` (stratified by source and type, seed 42), `router_train.jsonl` and `router_test.jsonl` (80/20 split BY DRAWING). | 200 rows in the sample. No drawing is in both router files. A language check finds no Finnish row in the sample. `doc.json.heldout` is set. | todo | |
+| D-04 | 1 | D-02 | - | Write `tests/fixtures.json` and a loader helper. | The loader returns 10 existing docs. | todo | |
+| D-05 | 1 | D-02 | - | Page images for PDF, SVG, DXF (and DWG if a converter works) at a fixed DPI, plus thumbnails. Extract the PDF text layer and vector paths to `text-<n>.json` where they exist. | Every fixture has `page-1.png`. Vector PDFs in the fixtures have words with boxes. DWG failure is allowed: note it in `GOTCHAS.md`. | todo | |
+| D-06 | 1 | D-04 | - | IFC pipeline: recentred `scene.glb` (IfcConvert, GUID node names, Y up), `elements.json` v2 (5.5) with quantities from property sets and geometry, `scene.json`. Take boxes from the GLB nodes, not from a second geometry pass. Include IfcSpace in the index. | For `ac20_arc`: 77 doors, 206 windows, 121 walls, 82 spaces, 5 storeys. Every `item_id` in `scene.json` exists as a GLB node. | todo | |
+| D-07 | 1 | D-06 | - | IFC storey plans: one plan image per storey and a plan map whose `item_id`s are GlobalIds, with `bbox_px` projected from 3D. | `ac20_arc` storey "Erdgeschoss" plan map has 18 rooms. Each box lies inside the image. | todo | |
+| D-08 | 1 | D-05 | - | DXF to plan map with ezdxf: walls, doors, windows, rooms, with real units as scale. | For each swiss fixture the room and unit counts match the question answers that exist for it. | todo | |
+| D-09 | 1 | D-08 | - | `pipeline/extrude.py`: any plan map to `scene.glb` + `scene.json`. One node per wall, door, window and room floor. Defaults: wall 2.7 m, door opening 2.1 m, window sill 0.9 m and head 2.1 m. The plan image is the floor texture. | The GLB loads in trimesh. Node names include every wall, door and window `item_id`. Extents equal image size times scale within 1%. | todo | |
+| D-10 | 1 | D-06, D-09 | - | USDZ export with usd-core for every scene. Prim names are `usd_name`. | The USDZ opens with `usdchecker --arkit` (or loads in a Swift test). Every `usd_name` in `scene.json` exists as a prim. | todo | |
+| D-11 | 1 | D-05..D-10 | - | LONG. Batch runner with resume: all preview docs, then the full set. Progress in `STATE.md`. | A second run skips finished docs. Failures are listed with a reason in `results/batch_failures.jsonl`. | todo | |
+| D-12 | 2 | D-08 | - | Synthetic revisions for the Changes demo: edit 3 DXF plans (remove a wall, add a door, change a room) and render version 2. Store the true change list. Label "generated for demo". | Each revised doc has `v1`, `v2` and `truth_changes.json`. | todo | |
+| D-13 | 2 | S-04 | GOOGLE_APPLICATION_CREDENTIALS, DRIVE_FOLDER_ID | Google Drive sync: read-only poll of one folder every 30 s. New or changed files go to ingestion and raise `doc.new` or `changes.new`. | A file dropped in the folder appears in `/api/docs` within 60 s (live test). | waiting-key | |
+| D-14 | 2 | D-10 | CLOUDINARY_URL | Upload GLB, USDZ, page images and thumbnails to Cloudinary. Put URLs in `scene.json` and `doc.json`. Test whether Cloudinary converts GLB to USDZ; record the result in `GOTCHAS.md`. | URLs for the demo docs return HTTP 200. | waiting-key | |
+| D-15 | 3 | D-06 | - | ◆ Sample project documents for `ac20_arc`, labelled "generated for demo": a short specification, a door schedule built from the IFC, three meeting minutes. | Files exist in `artifacts/samples/` with the label in the first line. | todo | |
+
+### VISION (Claude)
+| ID | Tier | Depends | Keys | Task | Done test | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| V-01 | 1 | D-04 | - | Baseline segmentation of walls, doors, windows and rooms on raster plans with a pretrained open model. Candidates: the CubiCasa5K official model, a SegFormer-B0 floor-plan model, a ResNet-UNet floor-plan model. Record licence and training data in `docs/MODELS.md`. Vectorise masks to plan-map items. | Valid plan maps (schema check) for the 4 cubicasa fixtures. Time per image is recorded. | todo | |
+| V-02 | 1 | D-04 | - | Baseline symbol detection: doors, windows, toilets, sinks, showers, bathtubs. Permissive licence only. | Plan maps for the cubicasa fixtures hold fixture items with boxes. | todo | |
+| V-03 | 1 | V-01 | - | Rooms and scale: room polygons, room labels by OCR, scale from dimension text or a scale bar. If neither exists, use the door-width prior and set low confidence. Area per room. | `colorful-11397` has rooms with labels. `scale.method` and `confidence` are set on every fixture. | todo | |
+| V-04 | 1 | V-02, D-03 | - | Vision evaluation: exact-count accuracy per kind and area error against the questions, on fixtures and on `sample200`. | `results/vision/baseline.json` exists with accuracy per kind. | todo | |
+| V-05 | 2 | D-03 | - | LONG. Training data: download the official CubiCasa5K set, remove every sample in `cubicasa_heldout_ids.txt`, convert the SVG labels to masks and boxes, split train and validation. | A check proves zero overlap between training samples and held-out IDs. | todo | |
+| V-06 | 2 | V-05, V-04 | MODAL_TOKEN_ID, MODAL_TOKEN_SECRET | LONG. Fine-tune the segmentation model on Modal. GPU cap: 2 hours. | `results/vision/seg_finetuned.json` shows before and after numbers on held-out data. | waiting-key | |
+| V-07 | 2 | V-05, V-04 | MODAL_TOKEN_ID, MODAL_TOKEN_SECRET | LONG. Fine-tune the detector on Modal. GPU cap: 2 hours. | `results/vision/det_finetuned.json` shows before and after numbers on held-out data. | waiting-key | |
+| V-08 | 2 | V-06 or V-07 | - | Export to ONNX. Run on the Mac. LONG: rebuild plan maps for all raster docs with the best models. | ONNX output matches the PyTorch output on 3 fixtures. Bench on `sample200` is not worse than before. | todo | |
+| V-09 | 2 | V-04, E-01 | GEMINI_API_KEY or NVIDIA_API_KEY or RUNWARE_API_KEY | Verify step: geometry rules (a door sits in a wall; a window sits on an outer wall) plus a model check of low-confidence items on small crops. Cached. | Count accuracy on `sample200` rises or stays equal, and cost per drawing is logged. | waiting-key | |
+| V-10 | 2 | V-04 | - | Generalisation: test on swiss PNG, wikimedia, habs and finna samples. Add an abstain rule for low confidence. | `results/vision/generalisation.json` has accuracy and abstain rate per source. | todo | |
+| V-11 | 3 | V-08 | as needed | Improve loop: take the weakest kind or source from the latest results, fix it, measure again. Repeat. | Each pass adds one line to `LESSONS.md` and a new results file. | waiting-key | |
+
+### ENGINE (Claude)
+| ID | Tier | Depends | Keys | Task | Done test | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| E-01 | 1 | - | - | Model layer (5.6): `fake` provider, adapters, `models.yaml`, disk cache, cost log, budget caps, backoff. | Tests pass with `fake`. A call over the cap raises `BudgetExceeded`. A repeated call hits the cache. | todo | |
+| E-02 | 1 | D-03 | - | Question parser: rules and a synonym table give `{type, kind, scope}` with no model call. | At least 90% correct on `router_test.jsonl`. | todo | |
+| E-03 | 1 | E-02, D-06, D-07 | - | Solvers for count, area, length and volume over `elements.json` and plan maps. Build the answer object (5.7) with boxes, scene highlights, trace and cost. Numeric text from templates. | `ac20_arc`: doors 77, windows 206, walls 121. A hand-made plan map of `colorful-11397` gives 13 windows with 13 boxes. Cost of these answers is 0. | todo | |
+| E-04 | 1 | E-03 | - | Public function `engine.answer(question, doc_ids, on_event)` that emits `status` and `trace` events and returns the answer object. Abstain with a plain sentence when data is missing or confidence is low. | An event test sees `status`, then `trace`, then `answer`. A question with no data returns `abstained: true`. | todo | |
+| E-05 | 1 | E-04, D-03 | - | Bench: `python -m engine.bench --set sample200|full --tag <t> --max-usd <n>`. Scoring as in the dataset README. Results by source and type, with cost and latency per answer. Text answers are scored apart with `judge_text` and reported apart. | `results/bench/<tag>.json` and `docs/ACCURACY.md` are written. A run with `fake` models finishes in under 60 s on `sample200`. | todo | |
+| E-06 | 1 | E-05, V-04 | - | Wire the vision plan maps into the solvers. Run `sample200`. | `results/bench/t1_planmap.json` exists. Numbers are whatever they are; record them. | todo | |
+| E-07 | 1 | E-01 | NVIDIA_API_KEY (fallback RUNWARE_API_KEY) | Router fallback: questions the rules cannot parse go to a small Nemotron model through the model layer. | At least 95% correct on `router_test.jsonl` with rules plus model. Mean router cost per question is logged. | waiting-key | |
+| E-08 | 1 | E-04, D-05 | GEMINI_API_KEY (fallback RUNWARE_API_KEY) | Drawing-reading path for questions the plan map cannot answer: Gemini reads the page or crops and returns the answer with regions. Check each region against OCR or plan-map items before it becomes a citation. | A text question on a fixture returns an answer with at least one checked region. | waiting-key | |
+| E-09 | 1 | E-03 | ANTHROPIC_API_KEY (fallback RUNWARE_API_KEY) | IFC text questions in the IFC-Bench style: facts from `elements.json` go into a short written answer. Say plainly when the model lacks the data. | 10 IFC-Bench questions on `ac20_arc` run; the facts in each answer match `elements.json`. | waiting-key | |
+| E-10 | 1 | E-05..E-09 | any model key | LONG. Full bench, run 1. Then model comparison per task on `sample200` (Gemini, Nemotron, Runware-hosted models): pick the cheapest model that keeps accuracy, write it to `models.yaml`. | `results/bench/full_1.json` and `results/model_compare.json` exist. `COSTS.md` is updated. | waiting-key | |
+| E-11 | 2 | D-12, E-03 | - | Changes engine: compare two plan maps (and two page images as a fallback). Output a numbered change list with boxes and sentences in the form of 5.8. | On the 3 synthetic revisions, every true change is found. | todo | |
+| E-12 | 2 | D-07, V-03 | - | Linked information: index of tags (door tags, room names and numbers, wall types). A click on a tag returns every place it appears and the IFC properties where they exist. | A lookup of an `ac20_arc` door returns its storey, type and properties. | todo | |
+| E-13 | 2 | E-03 | - | Exit finder for "where is the fire exit on level N": outer doors, stairs, and names such as Exit, Ausgang, Notausgang, Treppe. Answer with highlights and a camera target. State that it is an inference from the model data. | The question on `ac20_arc` returns at least one item on the asked storey with a camera target. | todo | |
+| E-14 | 3 | - | - | Rule library in `engine/rules/*.yaml`. Fetch real Finnish building rules in English (accessibility, escape routes). Each rule: id, plain text, source title, section, URL, quoted snippet, translation status, check ID. A rule with no verified URL and section is not allowed. | Every rule file passes a validator: URL returns 200 and the snippet is found in the fetched page or PDF. | todo | |
+| E-15 | 3 | E-14, D-06 | - | Checks and findings: plain-code checks (door clear width, corridor width, level change with no ramp at an entrance, exits per storey). Findings carry item IDs, the rule and severity. Wording: "suggestion" unless the rule clearly fails. | Findings on `ac20_arc` each cite a rule from the library and at least one item. | todo | |
+| E-16 | 3 | E-15 | NVIDIA_API_KEY (fallback RUNWARE_API_KEY) | Advisor: after an edit event, rerun the checks and return up to 3 short option cards, each with a source. No source means no card. Material options come only from a sourced material table. | An edit that narrows a door returns a card that cites a library rule. An edit with no rule returns no card. | waiting-key | |
+| E-17 | 3 | E-14, S-04 | CONTEXT_DEV_API_KEY | Watch loop: Context.dev monitors on the rule source URLs. A change webhook adds a `changes.new` entry and reruns the findings. Read their API documentation first. | A monitor exists for each rule URL. A test webhook creates a feed entry. | waiting-key | |
+| E-18 | 3 | E-04, D-15 | any model key | Skills (saved prompts, four starters as on the start screen) and automations (a prompt on a schedule that posts a report). Report export as Markdown and PDF. | A skill runs on a chosen document. A scheduled automation writes one report. | waiting-key | |
+| E-19 | 3 | E-10 | as needed | Improve loop: take the weakest source and type cell from the latest bench, fix it, rerun `sample200`. Full bench runs 2 to 4 only when `sample200` improved. | Each pass adds one line to `LESSONS.md` and a new results file. | waiting-key | |
+
+### SERVER (Claude)
+| ID | Tier | Depends | Keys | Task | Done test | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| S-01 | 1 | - | - | Scaffold `server/`, `deploy/`, `Makefile`, Docker compose with local Postgres. `make dev` also starts the web dev server once `web/` exists. | `make dev` serves `/api/health`. `make test` runs. | todo | |
+| S-02 | 1 | S-01, D-02 | - | Database schema and migrations. Seed documents from `artifacts/registry.jsonl`. | Migrations apply on an empty database. `/api/docs` lists the preview docs by source. | todo | |
+| S-03 | 1 | S-02 | - | All tier 1 endpoints of 5.9 with the `fake` provider and a stub engine that returns contract-valid answers for the fixtures. Publish `docs/API.md` with one example request and response per endpoint. This unblocks the Codex side early. | Contract tests pass for each endpoint. A streamed question returns `status`, `trace`, `answer`. | todo | |
+| S-04 | 1 | S-03, E-04 | - | Replace the stub with the real `engine.answer`. Upload starts real ingestion. | A fixture question through the API returns the same answer as a direct engine call. | todo | |
+| S-05 | 1 | S-04, W-05, W-06, T-04 | DATABASE_URL, AIVEN_TOKEN, Vercel login | Deploy: server container to Aiven Runtime next to Aiven PostgreSQL (EU region), web to Vercel. Rate limit on. Write the URLs to `STATE.md`. | The deployed URL answers a fixture question end to end. | waiting-key | |
+| S-06 | 2 | S-03 | - | Live sync: PostgreSQL `LISTEN/NOTIFY` to WebSocket `/ws`. Events of 5.9, including `scene.highlight`. | A test with two WebSocket clients: an event sent by A reaches B in under 2 s. | todo | |
+| S-07 | 2 | S-04, E-11 | - | Changes endpoints backed by the changes engine. | `/api/changes` lists the synthetic revisions with their numbered changes. | todo | |
+| S-08 | 2 | S-04 | ELEVENLABS_API_KEY | `/api/tts` through the model layer (ElevenLabs; the client falls back to device speech when the key is missing). Speech-to-intent endpoint through Gemini. | With the key: audio is returned. Without the key: a clear `fallback` response. | waiting-key | |
+| S-09 | 3 | E-15, E-16, E-18 | - | Endpoints for findings, advisor, skills and automations. | Contract tests pass. | todo | |
+
+### WEB (Codex)
+| ID | Tier | Depends | Keys | Task | Done test | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| W-01 | 1 | - | - | Scaffold `web/` (Vite, React, TypeScript, Tailwind v4, lucide-react). Tokens from the reference pack. Until S-03 is done, use a local mock that serves the contract examples. | The dev server starts and the build passes. | todo | |
+| W-04 | 1 | W-01 | - | App shell from the reference pack: sidebar, layout, type, colours, controls. Our own wordmark. | A Playwright test finds the nav items and checks 10 CSS variables against `theme-tokens.css`. | todo | |
+| W-05 | 1 | W-04, S-03 | - | Chat screen: start screen with four starter cards, composer with `@` document picker, live status lines, answer with bold fact, citation chips, "Where it is set out", "Sources (n)", "Show thought process", cost chip, and the notice from 5.8. | A Playwright test asks a fixture question and sees the answer, the citation chips and the cost chip. | todo | |
+| W-06 | 1 | W-05 | - | Document viewer beside the chat: pan and zoom, numbered boxes, text highlight, "n of m" source navigation, licence credit line. A click on a chip opens the right page and box. | A Playwright test clicks chip 1 and sees the viewer with the box in view and the credit line. | todo | |
+| W-07 | 1 | S-03, W-04 | - | Data screen: folders by source, file list with format badges, upload. | A Playwright test opens a folder and a file. An upload of a fixture PNG creates a doc. | todo | |
+| W-08 | 1 | S-03, W-04 | - | Accuracy and cost dashboard: latest bench by source and type, before and after fine-tuning when present, cost per answer, model switcher. | The screen renders numbers that equal the API response. | todo | |
+| W-10 | 2 | S-06, W-05 | - | Live sync in the client: chats, messages and status lines update from `/ws` on every open device. | A test with two browser contexts: a message sent in A shows in B in under 2 s. | todo | |
+| W-11 | 2 | W-05, W-06 | - | Mobile layout with bottom tabs (Overview, Chat, Changes, Data, More) and the "Show on table" button that calls the bridge of 5.10. | A Playwright test at phone size sees the tabs. The bridge call fires with `doc_id` and `item_ids`. | todo | |
+| W-12 | 2 | S-07, W-06 | - | Changes screen: feed (new versions, new documents), comparison with Plain, Wipe and Overlay, change boxes, numbered change list. | A Playwright test opens a synthetic revision and sees the numbered changes and the wipe handle. | todo | |
+| W-13 | 2 | E-12, W-06 | - | Linked codes: tags on the drawing are clickable and open the related places and properties beside the plan. | A click on a door in an `ac20_arc` storey plan shows its properties. | todo | |
+| W-14 | 2 | S-08, W-05 | - | Voice in the client: play the spoken answer, with browser speech as fallback. Microphone input. | With the key: audio plays. Without the key: the fallback speaks. | todo | |
+| W-15 | 3 | W-04 | - | Overview screen: this week's changes, open findings, latest answers, bench summary. | The screen renders with real data from the API. | todo | |
+| W-16 | 3 | S-09 | - | Skills and Automations screens. | A skill can be picked from the composer. An automation can be created and shows its last report. | todo | |
+| W-17 | 3 | S-09 | - | Findings list and advisor cards. Each card shows its source. | A finding click highlights its items in 2D and 3D. | todo | |
+
+### 3D (Codex)
+| ID | Tier | Depends | Keys | Task | Done test | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| T-01 | 1 | W-01, D-06 | - | Viewer: load `scene.glb` through `scene.json`, orbit, storey filter, pick an item to get its `item_id`. | A unit test resolves 5 `item_id`s to nodes. A Playwright test (software GL) shows a non-blank canvas. | todo | |
+| T-02 | 1 | T-01 | - | Highlight API: `highlight(item_ids)` makes items glow, dims the rest, shows the same number labels as the 2D boxes, and flies the camera to the target. | A unit test checks highlight state. A screenshot differs from the unhighlighted one. | todo | |
+| T-03 | 1 | T-02, W-06 | - | 2D and 3D side by side, linked: hover or click a box and the 3D item responds, and the reverse. | A Playwright test clicks box 3 and reads highlight state for the same `item_id`. | todo | |
+| T-04 | 1 | T-02, D-09 | - | "Visualise it": a button on any answer or document. It requests the scene, shows the plan flat, raises the walls, keeps the answer highlighted. | A Playwright test presses the button on the `colorful-11397` window answer and reads 13 highlighted items. | todo | |
+| T-05 | 1 | T-01 | - | ◆ Tap to identify: a click on an item opens a card with its name, kind, storey and properties. | A click on an `ac20_arc` door shows its name and storey. | todo | |
+| T-06 | 2 | T-02, S-06 | - | Follow `scene.highlight` from the WebSocket, and send it when the user changes the highlight. | Two browser contexts stay in step. | todo | |
+| T-07 | 2 | T-01 | - | Performance for large models: mesh compression and instancing where needed. | The largest safe demo model orbits smoothly on the Mac; frame time is recorded. | todo | |
+| T-08 | 3 | T-05, E-16 | - | Edit mode: move or remove an item, change a wall material. Each edit sends an event to the advisor and shows its cards. | An edit produces an advisor request and renders a returned card. | todo | |
+| T-09 | 3 | E-15, T-02 | - | Findings pins in 3D, red or amber, with tap to explain. | A finding on `ac20_arc` shows a pin at its item. | todo | |
+| T-10 | 3 | T-01 | - | ◆ First-person walk mode in the browser. | The camera moves at eye height inside the model. | todo | |
+
+### IOS (Codex)
+| ID | Tier | Depends | Keys | Task | Done test | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| I-01 | 2 | - | - | Xcode project with XcodeGen. SwiftUI shell with a WKWebView that loads `WEB_URL` (local dev URL until deploy). | `xcodebuild` builds for the simulator. | todo | |
+| I-02 | 2 | I-01, D-10 | - | AR screen with RealityKit: find a flat surface, place `scene.usdz` (a bundled fixture scene as fallback), pinch to scale, rotate, drag, a scale slider from 1:100 to 1:1, reset. | The build succeeds. A unit test loads the fixture USDZ and finds a prim by `usd_name`. | todo | |
+| I-03 | 2 | I-02 | - | Highlight in AR: glow the answer items, dim the rest, show the number labels. | A unit test applies a highlight to named entities of the fixture scene. | todo | |
+| I-04 | 2 | I-03, W-11 | - | Bridge and live link: "Show on table" from the web view opens AR with the right doc and items. The AR screen follows `scene.highlight` from `/ws`. | A test message through the bridge handler opens the AR screen with the given `doc_id`. | todo | |
+| I-05 | 2 | I-04 | APPLE_TEAM_ID | Install on the connected iPhone and launch. If signing or the device fails, write the exact manual steps to `MORNING.md` and set `blocked-human`. | The app is installed on the device, or the manual steps are written. | waiting-key | |
+| I-06 | 2 | I-03 | - | Walk mode at 1:1: floor alignment, a small "you are here" map, and a guide arrow to the highlighted item. | The build succeeds; the guide logic has a unit test. | todo | |
+| I-07 | 3 | I-04, S-08 | - | Voice in AR: a button to ask by speech; the spoken answer plays. | The speech request reaches the chat endpoint in a test. | todo | |
+| I-08 | 3 | I-03 | - | Tap to identify in AR. | A tap on an entity returns its `item_id` and shows the card. | todo | |
+| I-09 | 3 | I-04, E-16 | - | Advisor cards in AR. | A card from the API renders in the AR overlay. | todo | |
+
+### LEAD
+| ID | Tier | Depends | Keys | Task | Done test | Status | Notes |
+|---|---|---|---|---|---|---|---|
+| X-01 | 1 | E-10 | - | README: what it is, how to run, architecture, accuracy and cost numbers from `results/`, dataset and model credits, licences, the Stoa permission line. | README exists; every number in it appears in a `results/` file. | todo | |
+| X-02 | 3 | features done | - | ◆ `docs/sponsors/`: one page per tech challenge (Gemini, Nemotron, ElevenLabs, Modal, Cloudinary, Context.dev, Aiven, Codex). What the tool does in the app, where in the code, one screenshot path. Write a page only for a tool that really runs in the app. | One file per integrated tool. | todo | |
+| X-03 | 2 | S-05 | - | `docs/DEMO.md`: the demo script (section 12) with the exact questions and documents that work best by test results, and a 2-minute video shot list. | The file names real doc IDs and questions that pass in the app. | todo | |
+| X-04 | 3 | X-01 | - | ◆ Draft the submission fields: project name, punchline, description, tech used, challenge list. | `docs/SUBMISSION.md` exists. | todo | |
+| X-05 | - | every hour | - | Update `MORNING.md` (section 13). | The file is current at 08:30. | todo | |
+
+---
