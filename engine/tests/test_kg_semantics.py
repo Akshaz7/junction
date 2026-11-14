@@ -126,3 +126,17 @@ def test_plan_hosts_and_room_boundaries_have_sources(tmp_path):
     host=next(e for e in g['edges'] if e['kind']=='hosted_by')
     assert host['confidence']<.6 and host['evidence']['wall_source']['item_id']=='w'
     assert any(e['kind']=='bounds' and e['evidence']['room_source']['item_id']=='r' for e in g['edges'])
+
+
+def test_same_as_has_one_edge_per_cross_document_pair(tmp_path):
+    for did in ('a','b','c'):
+        write(tmp_path/did/'doc.json',{'doc_id':did,'kind':'ifc'})
+        write(tmp_path/did/'elements.json',{'storeys':[{'name':'Ground floor','elevation_m':0}],
+              'building':{'building':{'name':'Building'}},'elements':[
+              {'item_id':'0AAAAAAAAAAAAAAAAAAAAA','kind':'door','storey':{'name':'Ground floor'},'quantities':{},'props':{}}]})
+    g=build({'id':'twins','docs':[{'doc_id':d,'role':'model'} for d in ('a','b','c')]},tmp_path)
+    valid(g)
+    identities=[e for e in g['edges'] if e['kind']=='same_as']
+    assert len(identities)==3
+    assert len({frozenset((e['from'],e['to'])) for e in identities})==3
+    assert sum(n['canonical'] is not None for n in g['nodes'])==2

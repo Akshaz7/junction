@@ -271,5 +271,8 @@ def build_uncached(project, root):
     except ImportError:
         enrich = None
     if enrich:
-        graph = enrich(graph, project, Path(root)) or graph
+        readable_docs = [{'doc_id': did, 'role': info.role, 'level': info.level}
+                         for did, info in b.combined.infos.items()
+                         if isinstance(read_json(Path(root) / did / 'doc.json', {}), dict)]
+        graph = enrich(graph, {**project, 'docs': readable_docs}, Path(root)) or graph
     return finalise(graph, b.counterpart_docs)

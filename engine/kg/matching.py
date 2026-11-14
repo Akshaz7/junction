@@ -12,11 +12,11 @@ from itertools import combinations
 from .schema import norm
 
 
-def confidence(method, residual_m=None):
+def confidence(method, residual_m=None, evidence=None):
     # KG-EVAL owns the optional calibration module. Uncalibrated inference is deliberately marked estimate.
     try:
         from .confidence import confidence as calibrated
-        return float(calibrated(method, residual_m))
+        return float(calibrated(method, residual_m, evidence=evidence))
     except (ImportError, TypeError, ValueError):
         return {'guid': 1., 'tag_text': .85, 'label_text': .7, 'position': .55}.get(method, .5)
 
@@ -129,7 +129,7 @@ def _position(b, a, z, anchors, linked_a, linked_z):
                 continue
             other=right[j]
             residual=math.dist(transformed[i],points[other])
-            b.edge('same_as',nid,other,'position',confidence('position',residual),
+            b.edge('same_as',nid,other,'position',confidence('position',residual, {'alignment': alignment}),
                    {'residual_m':round(residual,6),'alignment':alignment,'tolerance_m':tolerance_m,
                     'sources':[b.nodes[nid]['source'],b.nodes[other]['source']]})
             linked_a.add(nid);linked_z.add(other)
