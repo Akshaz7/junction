@@ -1,9 +1,12 @@
 """JUDGE-QA shapes: floor comparisons, conditional counts, take-off with waste, named rooms, rule checks, edit verdict."""
-import os
 import pytest
 
-os.environ.setdefault("MODELS_FAKE", "1")
 from engine.answer import answer  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _fake_models(monkeypatch):
+    monkeypatch.setenv("MODELS_FAKE", "1")
 
 AC = "ifc_bench__ac20-arc"
 C1 = "cubicasa5k__colorful-11397"
@@ -51,3 +54,15 @@ def test_rule_check_and_edit_verdict():
     assert "241/2017" in a["answer"]["text_md"]
     b = A("Remove the front door. Is the building still compliant?", AC)
     assert "Not compliant" in b["answer"]["text_md"] and b.get("advisor_cards")
+
+
+def test_rules_name_what_was_checked_never_silent():
+    need(AC), need(C1)
+    s = A("Are the stairs wide enough according to the Finnish safety rules?", AC)["answer"]
+    assert "Cannot be checked" in s["text_md"] and "1007/2017 §3" in s["text_md"]
+    h = A("Is the headroom in the doorways sufficient?", AC)["answer"]["text_md"]
+    assert "checked: 1007/2017 §14" in h
+    e = A("Does every storey have two exits as required?", AC)["answer"]["text_md"]
+    assert "848/2017 §33" in e
+    r = A("Does this plan meet the accessibility requirements?", C1)["answer"]["text_md"]
+    assert "Checks need an IFC model" in r

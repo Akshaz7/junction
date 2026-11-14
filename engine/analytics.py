@@ -268,11 +268,21 @@ def takeoff(question: str, doc: Doc, t0, solve_fn) -> dict | None:
 
 
 # ------------------------------------------------------------------ rules and compliance
-COMPLY = re.compile(r"\b(?:meet|meets|comply|complies|compliant|compliance|satisf(?:y|ies)|conform(?:s)?|pass(?:es)?|up to code|legal|allowed by|according to (?:the )?(?:rules|code))\b", re.I)
+COMPLY = re.compile(r"\b(?:(?:wide|high|tall|big|large|long|steep|safe|accessible) enough|adequate|sufficient|required|requirements?|meet|meets|comply|complies|compliant|compliance|satisf(?:y|ies)|conform(?:s)?|pass(?:es)?|up to code|legal|allowed by|according to (?:the )?(?:rules|code))\b", re.I)
 TOPIC = [
     ("fi-fire-", re.compile(r"\b(?:fire|exits?|escape|evacuat\w+|egress|848)\b", re.I), "fire safety (848/2017)"),
     ("fi-acc-", re.compile(r"\b(?:accessib\w+|wheelchair|barrier[- ]free|ramp|corridor|turning|clear width|241|disab\w+|entrance)\b", re.I), "accessibility (241/2017)"),
     ("fi-use-", re.compile(r"\b(?:stairs?|staircase|railing|barrier|guard|headroom|riser|tread|landing|1007|safety in use)\b", re.I), "safety in use (1007/2017)"),
+]
+
+
+SPECIFIC = [
+    (r"\bstairs?\b.*\b(?:wide|width)\b|\b(?:wide|width)\b.*\bstairs?\b", ("fi-use-stair-width",)),
+    (r"\b(?:riser|tread)s?\b", ("fi-use-stair-dwelling-riser-tread", "fi-use-stair-exit-riser-tread")),
+    (r"\bheadroom\b|\bclear height\b", ("fi-use-headroom",)),
+    (r"\blandings?\b", ("fi-use-door-landing",)),
+    (r"\b(?:barriers?|railings?|guards?)\b", ("fi-use-barrier-height",)),
+    (r"\bemergency[- ](?:exit )?(?:window|hatch)", ("fi-use-emergency-window",)),
 ]
 
 
@@ -283,21 +293,40 @@ def wants_compliance(question: str) -> bool:
 
 
 def compliance(question: str, doc: Doc, t0) -> dict | None:
-    if doc.mode != "ifc" or not COMPLY.search(question):
+    if not COMPLY.search(question):
         return None
     pick = [(p, label) for p, rx, label in TOPIC if rx.search(question)]
     if not pick:
         return None
+    if doc.mode != "ifc":
+        # raster / DXF plans carry widths only: say what cannot be checked instead of a silent pass
+        trace = [_step("route", "rule check / plan map -> no automatic check")]
+        text = ("**Checks need an IFC model.** This is a plan map: it has door and room positions and widths but no heights, stair or exit data, "
+                f"so I cannot check {' and '.join(l for _, l in pick)} on it. Upload or open the IFC model for a rule check.")
+        res = _done(question, doc, text, None, None, [], trace, t0=t0)
+        res["answer"]["confidence"] = 0.6
+        return res
     from engine import advisor, findings
     from engine.rules import load_rules
     prefixes = tuple(p for p, _ in pick)
     labels = " and ".join(l for _, l in pick)
+    narrow = [ids for rx, ids in SPECIFIC if re.search(rx, question, re.I)]
+    narrow_ids = tuple(i for ids in narrow for i in ids)
+    if narrow_ids:
+        prefixes = narrow_ids
     st = resolve_storey(question, doc.storeys)
     fs = [f for f in findings.run_doc(doc) if f["rule_id"].startswith(prefixes) and (not st or f.get("storey") in (None, st))]
     cov = findings.coverage(doc)
     checked = [r for r in cov["checked"] if r.startswith(prefixes)]
     skipped = [s for s in cov["not_checked"] if s["rule_id"].startswith(prefixes)]
     by = {r["id"]: r for r in load_rules()}
+    if narrow_ids and not checked and skipped:
+        why = "; ".join(dict.fromkeys(f"{advisor._short(by[s['rule_id']])}: {s['reason']}" for s in skipped if s["rule_id"] in by))
+        trace = [_step("route", f"rule check / {labels} -> cannot be checked on this model")]
+        text = f"**Cannot be checked on this model.** {why}. No pass is implied; add the missing data (or check by hand against {advisor._checked_text([s['rule_id'] for s in skipped])})."
+        res = _done(question, doc, text, None, None, [], trace, t0=t0)
+        res["answer"]["confidence"] = 0.6
+        return res
     ck = advisor._checked_text(checked)
     items = [i for i in doc.items if any(i.item_id in f["item_ids"] for f in fs)]
     trace = [_step("route", f"rule check / {labels} -> code over the model, no model"), _step("findings", f"{len(fs)} findings from {len(checked)} checks")]

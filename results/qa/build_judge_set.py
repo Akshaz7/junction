@@ -53,6 +53,12 @@ add(AC, "Remove the front door. Is the building still compliant?", "edit", must=
 add(AC, "Do all doors meet the accessibility clear width requirement?", "rule", must=["241/2017"], src="engine/rules/accessibility.yaml")
 add(AC, "How many rooms are on the Keller level?", "count", sum(1 for r in rooms if r.storey == "Keller"), src=src)
 
+add(AC, "Are the stairs wide enough according to the Finnish safety rules?", "rule", must=["1007/2017"], src="engine/rules/safety_in_use.yaml (stair width §3)")
+add(AC, "Is the headroom in the doorways sufficient?", "rule", must=["1007/2017", "14"], src="engine/rules/safety_in_use.yaml (§14)")
+add(AC, "Do the stairs meet the riser and tread requirements?", "rule", must=["1007/2017"], src="engine/rules/safety_in_use.yaml (§4)")
+add(AC, "Does every storey have two exits as required?", "rule", must=["848/2017", "33"], src="engine/rules/fire_escape.yaml (§33)")
+add(C1, "Does this plan meet the accessibility requirements?", "rule", must=["IFC"], src="plan maps have no heights/exits; expect 'checks need an IFC model'")
+
 # ---- CubiCasa 11397 / 11398
 def croom(d, t): return [r for r in items(d, "room") if r.props.get("room_type") == t]
 s1 = "artifacts/cubicasa5k__colorful-11397/planmap-1.json (scale 0.029 m/px, door-prior conf 0.3)"

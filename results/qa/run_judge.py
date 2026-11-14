@@ -44,10 +44,33 @@ def grade(q, a):
     if any(h[1] or h[2] for h in hits): return "partial"
     return "wrong"
 
+import os
+BASE = os.environ.get("JUDGE_BASE")   # e.g. https://hologram-khaki.vercel.app : ask through the deployed API (30 req/min/IP, so one at a time)
+
+
+def remote(q):
+    import httpx
+    with httpx.Client(base_url=BASE, timeout=180) as c:
+        chat = c.post("/api/chats", json={"doc_ids": [q["doc_id"]]}).json()
+        ev, ans = None, None
+        with c.stream("POST", f"/api/chats/{chat['id']}/messages", json={"content": q["question"], "doc_ids": [q["doc_id"]]}) as r:
+            for line in r.iter_lines():
+                if line.startswith("event:"):
+                    ev = line[6:].strip()
+                elif line.startswith("data:") and ev == "answer":
+                    ans = json.loads(line[5:].strip())
+                elif line.startswith("data:") and ev == "error":
+                    raise RuntimeError(line[:200])
+        time.sleep(2.2)
+        if ans is None:
+            raise RuntimeError("no answer event")
+        return ans
+
+
 def run(q):
     t0 = time.time()
     try:
-        a = answer(q["question"], [q["doc_id"]], lambda *x, **k: None)
+        a = remote(q) if BASE else answer(q["question"], [q["doc_id"]], lambda *x, **k: None)
     except Exception as e:
         return dict(q, grade="wrong", err=repr(e), secs=round(time.time() - t0, 1))
     ans = a.get("answer") or {}
@@ -56,7 +79,7 @@ def run(q):
                 cost=c.get("usd") if isinstance(c, dict) else c, abstained=bool(ans.get("abstained")),
                 n_boxes=len((a.get("evidence") or {}).get("boxes") or []), secs=round(time.time() - t0, 1))
 
-with ThreadPoolExecutor(3) as ex: res = list(ex.map(run, qs))
+with ThreadPoolExecutor(1 if BASE else 3) as ex: res = list(ex.map(run, qs))
 json.dump(res, open(f"results/qa/judge_run-{tag}.json", "w"), indent=1, ensure_ascii=False)
 from collections import Counter
 print(Counter(r["grade"] for r in res))
