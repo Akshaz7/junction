@@ -21,7 +21,8 @@ export interface EditState {
   materials: Record<string, WallMaterial>;
 }
 type Surface = Material & { color?: Color };
-type History = { undo: () => ItemEdit };
+/** `stale` entries no longer change anything (e.g. the chat already restored the item): Undo skips them. */
+type History = { undo: () => ItemEdit; stale?: () => boolean; visibility?: true };
 
 export const snapMetres = (value: number) => Math.round(value * 10) / 10;
 
@@ -61,7 +62,9 @@ export function createEditLayer(scene: LoadedScene, commands: {
     else materials.set(id, choice);
   }
 
-  const state = (): EditState => ({ undoCount: history.length,
+  const isHidden = (id: string) => commands.hidden().includes(id);
+  const live = () => history.filter((entry) => !entry.stale?.());
+  const state = (): EditState => ({ undoCount: live().length,
     moved: Object.fromEntries([...positions.keys()].map((id) => [id, scene.items.get(id)!.position.toArray()])),
     moveDelta: Object.fromEntries([...positions.entries()].map(([id, from]) => {
       const now = scene.items.get(id)!.position; return [id, [now.x - from.x, now.z - from.z]];
@@ -77,8 +80,31 @@ export function createEditLayer(scene: LoadedScene, commands: {
       history.push({ undo: () => {
         apply({ op: 'restore', item_ids: [id] });
         return { op: 'restore', item_ids: [id], detail: { undo: 'hide' } };
-      } });
+      }, stale: () => !isHidden(id), visibility: true });
       return { op: 'hide', item_ids: [id], detail: {} };
+    },
+    /** Bring back items hidden by anyone (this panel or the chat). Undo hides them again. */
+    restore(ids: readonly string[]): ItemEdit | null {
+      const back = [...new Set(ids)].filter(isHidden);
+      if (!back.length) return null;
+      apply({ op: 'restore', item_ids: back });
+      history.push({ undo: () => {
+        const again = back.filter((id) => !isHidden(id));
+        if (again.length) apply({ op: 'hide', item_ids: again });
+        return { op: 'hide', item_ids: again, detail: { undo: 'restore' } };
+      }, stale: () => back.every(isHidden), visibility: true });
+      return { op: 'restore', item_ids: back, detail: {} };
+    },
+    /** A hide that came from outside this panel (chat command, other client, saved chat state) joins the
+     * same Undo/Reset history, so a chat removal can be undone by hand. */
+    noteExternalHide(ids: readonly string[]) {
+      const gone = [...new Set(ids)];
+      if (!gone.length) return;
+      history.push({ undo: () => {
+        const back = gone.filter(isHidden);
+        if (back.length) apply({ op: 'restore', item_ids: back });
+        return { op: 'restore', item_ids: back, detail: { undo: 'hide', external: true } };
+      }, stale: () => !gone.some(isHidden), visibility: true });
     },
     /** Preview/commit a displacement in world X/Z; parent transforms stay intact. */
     move(id: string, from: Vector3, dx: number, dz: number, commit: boolean): ItemEdit | null {
@@ -109,19 +135,31 @@ export function createEditLayer(scene: LoadedScene, commands: {
       } });
       return { op: 'material', item_ids: [id], detail: { material: choice } };
     },
-    undo(): ItemEdit | null { return history.pop()?.undo() ?? null; },
+    undo(): ItemEdit | null {
+      while (history.length && history[history.length - 1].stale?.()) history.pop();
+      return history.pop()?.undo() ?? null;
+    },
+    /** Undo every move/material edit, then bring back everything hidden (by this panel or the chat). */
     reset(): ItemEdit | null {
-      if (!history.length) return null;
+      const hidden = commands.hidden();
+      if (!live().length && !hidden.length) { history.length = 0; return null; }
       const affected = new Set<string>();
-      // Restore every base material before visibility commands rebuild their
+      // Restore every base material before the visibility command rebuilds the
       // highlight layers; otherwise their saved references resurrect old swaps.
       const pending: SceneCommand[] = [];
       deferred = pending;
       try {
-        while (history.length) for (const id of history.pop()!.undo().item_ids) affected.add(id);
+        while (history.length) {
+          const entry = history.pop()!;
+          if (!entry.visibility && !entry.stale?.()) for (const id of entry.undo().item_ids) affected.add(id);
+        }
       } finally { deferred = null; }
       for (const command of pending) commands.apply(command);
-      return { op: 'reset', item_ids: [...affected], detail: { local_edits: true } };
+      if (hidden.length) {
+        commands.apply({ op: 'restore', item_ids: hidden.length <= 500 ? [...hidden] : [] });
+        for (const id of hidden) affected.add(id);
+      }
+      return { op: 'reset', item_ids: [...affected].slice(0, 200), detail: { local_edits: true } };
     },
     dispose() {
       for (const [mesh, original] of originals) mesh.material = original;

@@ -20,7 +20,8 @@ export type SceneEvent =
   | (SceneSnapshot & { type: 'scene.state'; doc_id: string; chat_id?: string });
 export interface SceneChannel extends HighlightChannel {
   onSceneEvent(callback: (event: SceneEvent) => void): () => void;
-  sendCommand(doc_id: string, command: SceneCommand): void;
+  /** With chat_id the server stores the edit in that chat's shared edit layer (chat commands use the same layer). */
+  sendCommand(doc_id: string, command: SceneCommand, chat_id?: string): void;
 }
 export interface FindingsUpdated { type: 'findings.updated'; doc_id: string; count: number }
 type LiveMessage = HighlightMessage | SceneEvent | AdvisorEvent | FindingsUpdated | { type: 'ping' };
@@ -222,8 +223,8 @@ export function createLiveHighlightClient(options: {
       connect();
       return () => { sceneListeners.delete(callback); release(); };
     },
-    sendCommand(doc_id, command) {
-      const event: SceneEvent = { ...command, type: 'scene.edit', doc_id, edit_id: crypto.randomUUID() };
+    sendCommand(doc_id, command, chat_id) {
+      const event: SceneEvent = { ...command, type: 'scene.edit', doc_id, edit_id: crypto.randomUUID(), ...(chat_id ? { chat_id } : {}) };
       deliverScene(event);
       commandQueue.push(event);
       connect(); flush();

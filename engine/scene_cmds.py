@@ -5,7 +5,8 @@
   scene_answer(question, doc, intent, state=None, t0=...) -> answer object with evidence.scene.commands
 
 Verb-led only (hide, show only, isolate, highlight, bring back, reset), so "how many ..." never lands here.
-`state` is the per-chat scene state ({hidden, highlighted, isolated}) the server may pass; it is read-only here.
+`state` is the per-chat scene state ({hidden, last_hidden?}) the server may pass; it is read-only here. It is shared:
+manual Edit-panel removals in the 3D viewer are stored in the same chat layer, so "put the door back" restores them too.
 Edits never change source data; this module only names which items an edit touches.
 """
 from __future__ import annotations
@@ -30,7 +31,9 @@ _ISOLATE = re.compile(r"\b(?:show|display|keep)\s+(?:me\s+)?only\b|\bonly\s+(?:s
 _HIDE = re.compile(r"\b(hide|remove|take away|take out|get rid of|make\b.*\binvisible|fade out|turn off|vanish|disappear|"
                    r"out of the (?:picture|view|scene|way)|delete)\b", re.I)
 _MEASURE = re.compile(r"\b(area|size|length|volume|height|width|depth|thickness|how|much|many|total|sum|average|percent|ratio|compare|difference)\b", re.I)
-_UNDO = re.compile(r"^\W*(undo|undo (?:that|it|the last (?:one|change|edit))|go back|revert|put (?:it|that) back)\W*$", re.I)
+_UNDO = re.compile(r"^\W*(?:please\s+|can you\s+|could you\s+)?(undo|undo (?:that|it|the last (?:one|change|edit|removal))|go back|revert|put (?:it|that) back|"
+                   r"(?:undo|revert|reverse) (?:my|the|your|that|this) (?:last |latest |previous |manual )?(?:edit|change|removal|remove)|"
+                   r"(?:undo|revert|reverse) what (?:i|you) (?:did|removed|just did|just removed))\W*$", re.I)
 _SHOW = re.compile(r"^\W*(?:please\s+)?(?:show|display|give)\s+(?:me\s+)?(?:all\s+)?(?:of\s+)?(?:the\s+|all\s+)?", re.I)
 _RESTORE = re.compile(r"\b(unhide|bring (?:back|.* back)|show .* again|restore|put .* back|turn .* back on)\b", re.I)
 _HIGHLIGHT = re.compile(r"\b(highlight|light up|glow|label|mark|point out|point to|flag|tag)\b", re.I)
@@ -215,13 +218,24 @@ def scene_answer(question: str, doc: Doc, intent: SceneIntent, state: dict | Non
     tg = tags(doc)
     state = state or {}
     op = intent.op
-    if op == "undo":  # restore what the chat has hidden; with no known state, reset everything
-        intent = SceneIntent("restore" if state.get("hidden") else "reset", None, [], None)
+    hidden_now = list(state.get("hidden") or [])
+    undo_ids: list[str] = []
+    if op == "undo":  # restore the latest removal still in effect (chat or manual edit); else all hidden; with no state, reset
+        undo_ids = [i for i in (state.get("last_hidden") or []) if i in hidden_now]
+        intent = SceneIntent("restore" if hidden_now else "reset", None, [], None)
         op = intent.op
     sel = [] if op == "reset" else _select(doc, intent, question, tg) if (intent.kind or intent.tags) else []
+    if op == "restore" and sel and not intent.tags and hidden_now:
+        # "put the door back": the hidden door(s), not every door. The shared state holds manual edits too.
+        gone = [i for i in sel if i.item_id in set(hidden_now)]
+        if len(gone) > 1 and intent.kind and not re.search(rf"\b(?:all|every|both|{re.escape(_noun(intent.kind, 2))})\b", question, re.I):
+            # singular ("the door"): the latest removal of that kind
+            last = set(state.get("last_hidden") or [])
+            gone = [i for i in gone if i.item_id in last] or [max(gone, key=lambda i: hidden_now.index(i.item_id))]
+        sel = gone or sel
     ids = [i.item_id for i in sel]
     if op == "restore" and not intent.kind and not intent.tags:
-        ids = list(state.get("hidden") or [])
+        ids = undo_ids or hidden_now
     trace = [{"step": "scene", "detail": f"{op} {len(ids)} item(s)", "ms": 0, "model": None, "cost_usd": 0}]
     scene = {"doc_id": doc.doc_id, "highlight_item_ids": ids if intent.op in ("highlight", "isolate") else [],
              "camera_target_item_id": ids[0] if ids and intent.op in ("highlight", "isolate") else None}
@@ -236,7 +250,12 @@ def scene_answer(question: str, doc: Doc, intent: SceneIntent, state: dict | Non
         text = "Done. **Everything hidden is visible again.**"
         cmd["item_ids"] = []
     elif intent.op == "restore" and not intent.kind and not intent.tags:
-        text = f"Done. **{len(ids)} hidden item(s) are visible again.**"
+        named = [tg[i] for i in ids if i in tg]
+        left = len([i for i in hidden_now if i not in set(ids)])
+        text = (f"Done. **{', '.join(named)} {'is' if len(ids) == 1 else 'are'} visible again.**" if named and len(named) == len(ids) <= 6
+                else f"Done. **{len(ids)} hidden item(s) are visible again.**")
+        if left:
+            text += f" {left} other hidden item(s) stay hidden."
     elif not ids:
         what = ", ".join(intent.tags) if intent.tags else _noun(intent.kind, 2)
         text, abstained, conf = f"I could not find any {what} in this document, so nothing changed.", True, 0.0

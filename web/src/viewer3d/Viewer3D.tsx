@@ -89,7 +89,10 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
   const [picked, setPicked] = useState<string | null>(null);
   const [manifest, setManifest] = useState<SceneManifest | null>(null);
   const [editing, setEditing] = useState(false);
-  const [hiddenNow, setHiddenNow] = useState(0);
+  const [hiddenIds, setHiddenIds] = useState<string[]>([]);
+  const hiddenNow = hiddenIds.length;
+  const chatRef = useRef(chat_id);
+  chatRef.current = chat_id;
   const [revisedOpen, setRevisedOpen] = useState(false);
   const [moveItem, setMoveItem] = useState<string | null>(null);
   const dragPointer = useRef<number | null>(null);
@@ -177,6 +180,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     setManifest(null);
     setEditing(false); setMoveItem(null); dragPointer.current = null;
     setEdits({ undoCount: 0, moved: {}, materials: {} });
+    setHiddenIds([]);
     setElements(new Map());
     setHasRoof(false);
     setWalking(false);
@@ -200,7 +204,11 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       viewer = createViewer(canvas);
       viewerRef.current = viewer;
       unsubscribeCutaway = viewer.onCutawayChange(setCutaway);
-      unsubscribeCommands = viewer.onCommandChange(() => setHiddenNow(viewer!.getCommandState().hidden.length));
+      // Chat and manual edits share one layer: refresh the panel (hidden list, Undo) on every change, remote ones too.
+      unsubscribeCommands = viewer.onCommandStateChange((next) => {
+        setHiddenIds(next.hidden);
+        setEdits(viewer!.getEditState());
+      });
       unsubscribeHighlight = viewer.onHighlightChange(() => {
         setHighlightState(viewer!.getLinkedHighlightState());
         const items = viewer!.scene?.manifest.items;
@@ -209,7 +217,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       unsubscribeBuild = viewer.onBuildChange(setBuild);
       unsubscribeWalk = viewer.onWalkChange((next) => setWalking(next.active));
       live = bindLiveHighlight(viewer, doc_id);
-      liveCommands = bindLiveCommands(viewer, doc_id);
+      liveCommands = bindLiveCommands(viewer, doc_id, undefined, () => chatRef.current);
       void viewer.loadScene(sceneUrl, { onProgress: (next) => { if (active) setProgress(next); } }).then((scene) => {
         if (!active) return;
         if (storey !== undefined) viewer!.setStorey(storey);
@@ -408,7 +416,8 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     <div className="viewer3d-footer">
       {state === 'ready' && build && <BuildSlider build={build} viewer={viewerRef.current} />}
       {state === 'ready' && editing && manifest && <EditPanel selected={picked} manifest={manifest} edits={edits}
-        moving={moveItem !== null} advice={advice}
+        moving={moveItem !== null} advice={advice} hidden={hiddenIds}
+        onRestore={(ids) => { cancelMove(); finishEdit(viewerRef.current?.restoreItems(ids) ?? null); }}
         onRemove={() => { cancelMove(); if (picked) { finishEdit(viewerRef.current?.removeItem(picked) ?? null); selectItem(null); } }}
         onMove={() => { cancelMove(); if (picked && moveItem !== picked) setMoveItem(picked); }}
         onMaterial={(choice) => { cancelMove(); if (picked) finishEdit(viewerRef.current?.changeMaterial(picked, choice) ?? null); }}
