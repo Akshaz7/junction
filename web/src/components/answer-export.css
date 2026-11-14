@@ -1,0 +1,62 @@
+.answer-export-button, .answer-export-dialog button, .answer-export-dialog select {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px;
+  border: 1px solid var(--border, #e7e7e7); border-radius: 6px; padding: 7px 10px;
+  color: var(--foreground, #1a1a1a); background: var(--card, #fff); font: inherit; font-size: var(--text-body-sm, .8125rem); cursor: pointer;
+}
+.answer-export-button:hover, .answer-export-dialog button:hover { background: var(--accent, #00000008); }
+.answer-export-dialog button:disabled { opacity: .5; cursor: default; }
+.answer-export-button:focus-visible, .answer-export-dialog :is(button, select, textarea):focus-visible { outline: 2px solid var(--ring, #7d7d7d); outline-offset: 2px; }
+.answer-export-dialog {
+  width: min(960px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); padding: 0; margin: auto;
+  border: 1px solid var(--border, #e7e7e7); border-radius: 12px; color: var(--foreground, #1a1a1a);
+  background: var(--card, #fff); box-shadow: var(--card-elevation); overflow: auto;
+}
+.answer-export-dialog::backdrop { background: #0007; }
+.answer-export-header { display: flex; align-items: start; justify-content: space-between; gap: 16px; padding: 18px 20px; border-bottom: 1px solid var(--border, #e7e7e7); }
+.answer-export-header h2 { margin: 0; font-size: var(--text-h2, 1.125rem); }
+.answer-export-header p { margin: 5px 0 0; color: var(--muted-foreground, #666); font-size: var(--text-body-sm, .8125rem); }
+.answer-export-toolbar { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; padding: 12px 20px; }
+.answer-export-toolbar label { display: flex; flex-direction: column; gap: 4px; margin-right: auto; font-size: var(--text-caption, .75rem); }
+.answer-export-message { display: flex; align-items: center; gap: 8px; margin: 0; padding: 10px 20px; font-size: var(--text-body-sm, .8125rem); }
+.answer-export-message[role="alert"] { color: var(--destructive-text, #a93b22); }
+.answer-export-preview { display: block; width: 100%; height: 65dvh; min-height: 240px; border: 0; border-top: 1px solid var(--border, #e7e7e7); background: #fff; }
+.answer-export-markdown { display: block; width: calc(100% - 40px); height: 140px; margin: 10px 20px; padding: 8px; border: 1px solid var(--border, #e7e7e7); border-radius: 6px; font: 12px/1.5 monospace; }
+.answer-export-spinner { animation: answer-export-spin 1s linear infinite; flex-shrink: 0; }
+@keyframes answer-export-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .answer-export-spinner { animation: none; } }
+@media (max-width: 600px) {
+  .answer-export-button, .answer-export-dialog button, .answer-export-dialog select { min-height: 44px; }
+  .answer-export-dialog { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }
+  .answer-export-header { padding: 14px; }
+  .answer-export-toolbar { padding: 10px 14px; gap: 8px; }
+  .answer-export-toolbar label { width: 100%; }
+  .answer-export-toolbar button { flex: 1; }
+}
+
+/* These rules also travel inside the standalone HTML report iframe. */
+.site-report { box-sizing: border-box; margin: 0 auto; padding: 32px; max-width: 860px; background: #fff; color: #1a1a1a; font: 14px/1.6 var(--default-font-family, "Inter", system-ui, sans-serif); overflow-wrap: anywhere; }
+.site-report * { box-sizing: border-box; }
+.site-report header { border-bottom: 2px solid var(--brand-forest, #2c412b); padding-bottom: 16px; }
+.site-report header > p:first-child { color: var(--brand-forest, #2c412b); font-weight: 700; margin: 0; }
+.site-report h1 { font-size: 28px; line-height: 1.2; margin: 8px 0 16px; }
+.site-report h2 { margin: 24px 0 6px; font-size: 18px; line-height: 1.4; }
+.site-report h3 { margin: 20px 0 8px; font-size: 15px; }
+.site-report p { margin: 8px 0; white-space: pre-wrap; }
+.site-report ul { list-style: none; padding: 0; }
+.site-report li { margin: 12px 0; }
+.site-report-note, .site-report-credit, .site-report figcaption { font-size: 12px; color: #555; }
+.site-report-credit { border-top: 1px solid #e7e7e7; padding-top: 12px; }
+.site-report figure { margin: 24px 0; break-inside: avoid; }
+.site-report img { display: block; max-width: 100%; height: auto; margin: 0 auto 10px; border: 1px solid #e7e7e7; }
+.site-report footer { margin-top: 28px; padding-top: 12px; border-top: 1px solid #e7e7e7; font-size: 12px; color: #555; }
+.site-report-entry + .site-report-entry { margin-top: 32px; border-top: 1px solid #e7e7e7; }
+@media (max-width: 600px) { .site-report { padding: 20px 16px; } }
+@media print {
+  @page { size: auto; margin: 16mm; }
+  .site-report { padding: 0; max-width: none; font-size: 10pt; }
+  .site-report h1 { font-size: 22pt; }
+  .site-report h2, .site-report h3 { break-after: avoid; }
+  .site-report p { orphans: 3; widows: 3; }
+  .site-report img { max-height: 210mm; object-fit: contain; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .site-report-entry + .site-report-entry { break-before: page; border: 0; margin: 0; }
+}
