@@ -136,6 +136,20 @@ def test_declared_missing_units_do_not_assume_metres(tmp_path):
     assert any(n["props"].get("measurement_note") for n in graph["nodes"])
 
 
+def test_context_dependent_length_unit_does_not_assume_metres(tmp_path):
+    path, *_ = ifc_file(tmp_path)
+    ifc = pytest.importorskip("ifcopenshell")
+    f = ifc.open(str(path))
+    dims = f.create_entity("IfcDimensionalExponents", 1, 0, 0, 0, 0, 0, 0)
+    custom = f.create_entity("IfcContextDependentUnit", dims, "LENGTHUNIT", "author-defined drawing unit")
+    f.by_type("IfcProject")[0].UnitsInContext.Units = [custom]
+    f.write(str(path))
+    graph = {"nodes": [], "edges": []}
+    enrich(graph, {"docs": [{"doc_id": "m", "files": {"ifc": str(path)}}]}, tmp_path)
+    assert not any(n["props"].get("length_m") or n["props"].get("ceiling_height_m") for n in graph["nodes"])
+    assert any(e["kind"] == "connects" for e in graph["edges"])
+
+
 def test_sheet_match_requires_alignment_and_one_to_one_rooms():
     a = node("room", "a", "ra", label="Office A")
     b = node("room", "b", "rb", label="Office A")

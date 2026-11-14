@@ -192,7 +192,8 @@ def _unit_scale(unit, project_scale):
         return uu.get_prefix_multiplier(unit.Prefix)
     if unit.is_a("IfcConversionBasedUnit"):
         factor = unit.ConversionFactor
-        return float(factor.ValueComponent.wrappedValue) * _unit_scale(factor.UnitComponent, 1.0)
+        component = _unit_scale(factor.UnitComponent, None)
+        return float(factor.ValueComponent.wrappedValue) * component if component is not None else None
     return None
 
 
@@ -224,12 +225,12 @@ def _measures(el, scale):
 def enrich_ifc(writer, did, path, root, deadline):
     import ifcopenshell
     import ifcopenshell.util.element as ue
-    import ifcopenshell.util.unit as uu
     f = ifcopenshell.open(str(path))
     projects = _by_type(f, "IfcProject")
     declared_units = getattr(projects[0], "UnitsInContext", None) if projects else None
-    has_length_unit = declared_units and any(getattr(u, "UnitType", None) == "LENGTHUNIT" for u in declared_units.Units)
-    scale = uu.calculate_unit_scale(f) if has_length_unit else None
+    length_units = [u for u in declared_units.Units if getattr(u, "UnitType", None) == "LENGTHUNIT"] if declared_units else []
+    scale = _unit_scale(length_units[0], None) if len(length_units) == 1 else None
+    has_length_unit = scale is not None
     # Shared spatial entity identity + its complete placement gives a declared
     # common engineering frame. Distinct models with unrelated IDs do not align.
     frames = []
