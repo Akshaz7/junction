@@ -111,7 +111,7 @@ def test_ping_pong_and_keepalive(client, monkeypatch):
 def test_unknown_client_event_ignored(client):
     with client.websocket_connect("/ws") as a, client.websocket_connect("/ws") as b:
         a.send_json({"type": "chat.message", "chat_id": "x"})  # clients may only send scene.highlight
-        assert recv(b, 0.5) is None
+        assert recv_type(b, "chat.message", 0.7) is None  # relay would deliver it; keepalives are not relays
 
 
 def test_ws_without_db_broadcasts_locally(monkeypatch):

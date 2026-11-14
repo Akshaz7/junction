@@ -380,6 +380,12 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         return _answer_obj(question, [doc_id], text, n, "count", conf, False, boxes, cites, scene, trace, route, t0)
 
     vals = [(i, _qty(i, kind, p.type)) for i in items]
+    if doc.mode == "ifc" and kind == "room" and p.type == "area" and len(items) <= 50 and any(v is None for _, v in vals):
+        from engine.solvers.glbarea import room_floor_area_m2
+        glb = Path(root) / doc_id / "scene.glb"
+        if glb.exists():
+            vals = [(i, v if v is not None else room_floor_area_m2(glb, i.item_id)) for i, v in vals]
+            trace.append(_step("area", "room floor area measured from the scene mesh (no area quantity in the model)"))
     have = [(i, v) for i, v in vals if v is not None]
     unit = UNIT[p.type]
     scale_note = ""

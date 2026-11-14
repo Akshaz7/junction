@@ -7,31 +7,26 @@ If no listener connection is up (no DB) events are broadcast to local sockets di
 import asyncio
 import contextlib
 import json
+import time
+import uuid
 
 import asyncpg
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from . import config, db
+from . import config, db, scene_edits
+from .live_labels import clean_labels  # noqa: F401  (re-exported)
 
 CHANNEL = "hologram_events"
+
+
+def channel() -> str:
+    """Channel name. A non-public search_path (isolated test schemas) gets its own channel so
+    parallel runs and the dev server sharing one database never see each other's events."""
+    import re
+    m = re.search(r"search_path(?:%3D|=)([A-Za-z0-9_]+)", config.database_url())
+    return f"{CHANNEL}_{m.group(1)}" if m and m.group(1) != "public" else CHANNEL
 PING_INTERVAL = 20.0  # seconds; keeps Aiven's proxy from cutting idle sockets
-CLIENT_EVENTS = {"scene.highlight"}  # event types clients may send
-
-
-def clean_labels(raw, item_ids: list[str]) -> dict[str, str]:
-    """Keep only labels for highlighted items: item_id -> 1-8 char string, at most len(item_ids) entries."""
-    if not isinstance(raw, dict):
-        return {}
-    ids, out = set(item_ids), {}
-    for k, v in raw.items():
-        if isinstance(v, bool) or not isinstance(v, (str, int)):
-            continue
-        v = str(v).strip()
-        if k in ids and 1 <= len(v) <= 8:
-            out[str(k)] = v
-        if len(out) >= len(item_ids):
-            break
-    return out
+CLIENT_EVENTS = {"scene.highlight", "scene.edit"}  # event types clients may send
 
 
 class Hub:
@@ -59,7 +54,7 @@ class Hub:
             conn = None
             try:
                 conn = await asyncio.wait_for(asyncpg.connect(config.database_url()), timeout=3)
-                await conn.add_listener(CHANNEL, self._on_notify)
+                await conn.add_listener(channel(), self._on_notify)
                 self._conn = conn
                 self.listening.set()
                 while not conn.is_closed():
@@ -102,11 +97,53 @@ async def publish(event: dict) -> None:
         pool = await db.get_pool()
         if pool is not None:
             try:
-                await pool.execute("select pg_notify($1, $2)", CHANNEL, json.dumps(event))
+                await pool.execute("select pg_notify($1, $2)", channel(), json.dumps(event))
                 return
             except Exception:
                 pass
     await hub.broadcast(event)
+
+
+def _chat_uuid(v):
+    try:
+        return uuid.UUID(str(v))
+    except ValueError:
+        return None
+
+
+async def record_edit(msg: dict, chat_id=None) -> dict | None:
+    """Validate, persist (when a chat is given) and publish one scene edit. Returns the event, or None
+    when invalid or already seen (same edit_id)."""
+    e = scene_edits.clean_edit(msg)
+    if e is None:
+        return None
+    cid = _chat_uuid(chat_id if chat_id is not None else msg.get("chat_id"))
+    if cid is not None:
+        pool = await db.get_pool()
+        if pool is not None:
+            try:
+                if not await scene_edits.store_edit(pool, cid, e):
+                    return None
+            except asyncpg.ForeignKeyViolationError:
+                return None
+    event = {"type": "scene.edit", "doc_id": e["doc_id"], "op": e["op"], "item_ids": e["item_ids"],
+             "edit_id": e["edit_id"], "ts": time.strftime("%Y-%m-%dT%H:%M:%S%z")}
+    if cid is not None:
+        event["chat_id"] = str(cid)
+    if e["labels"]:
+        event["labels"] = e["labels"]
+    await publish(event)
+    return event
+
+
+async def send_scene_state(ws: WebSocket, chat_id, doc_id: str | None = None) -> None:
+    """Send the current edit layer of a chat to one socket (one scene.state per doc)."""
+    cid = _chat_uuid(chat_id)
+    pool = await db.get_pool() if cid else None
+    if pool is None:
+        return
+    for st in await scene_edits.scene_state(pool, cid, doc_id):
+        await ws.send_text(json.dumps({**st, "chat_id": str(cid)}))
 
 
 @router.websocket("/ws")
@@ -116,6 +153,8 @@ async def ws_endpoint(ws: WebSocket):
     await ws.accept()
     hub.sockets.add(ws)
     try:
+        if ws.query_params.get("chat_id"):  # late joiner: current edit layer first
+            await send_scene_state(ws, ws.query_params["chat_id"], ws.query_params.get("doc_id"))
         while True:
             try:
                 raw = await asyncio.wait_for(ws.receive_text(), timeout=PING_INTERVAL)
@@ -131,6 +170,11 @@ async def ws_endpoint(ws: WebSocket):
             t = msg.get("type")
             if t == "ping":
                 await ws.send_text(json.dumps({"type": "pong"}))
+            elif t == "scene.join":
+                await send_scene_state(ws, msg.get("chat_id"), msg.get("doc_id") if isinstance(msg.get("doc_id"), str) else None)
+            elif t == "scene.edit":
+                if await record_edit(msg) is None and scene_edits.clean_edit(msg) is None:
+                    await ws.send_text(json.dumps({"type": "scene.error", "detail": "invalid scene.edit"}))
             elif t in CLIENT_EVENTS:
                 if t == "scene.highlight":
                     ids = [str(i) for i in (msg.get("item_ids") or [])][:500]

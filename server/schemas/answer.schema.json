@@ -57,7 +57,19 @@
           "properties": {
             "doc_id": {"type": "string"},
             "highlight_item_ids": {"type": "array", "items": {"type": "string"}},
-            "camera_target_item_id": {"type": ["string", "null"]}
+            "camera_target_item_id": {"type": ["string", "null"]},
+            "commands": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["op"],
+                "properties": {
+                  "op": {"enum": ["highlight", "hide", "restore", "reset", "isolate"]},
+                  "item_ids": {"type": "array", "items": {"type": "string"}},
+                  "labels": {"type": "object", "additionalProperties": {"type": "string"}}
+                }
+              }
+            }
           }
         }
       }

@@ -9,27 +9,28 @@ from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 
 from . import db, stub_engine
-from .live import publish
+from . import scene_edits
+from .live import publish, record_edit
 from .schema import validate_answer
 
 router = APIRouter(prefix="/api")
 
-# S-04 swaps this for engine.answer.
 def _real_engine(question, doc_ids, on_event):
-    from engine import answer  # lazy: absent until E-04 lands
+    from engine.answer import answer  # the function, not the engine.answer module
     return answer(question, doc_ids, on_event)
 
 
 def _pick_engine():
-    # ENGINE_IMPL=stub|real. Default: real once engine.answer exists, else stub.
+    # ENGINE_IMPL=stub|real. Default is real; the stub is only for an explicit ENGINE_IMPL=stub
+    # (or if engine.answer cannot be imported at all).
     impl = os.environ.get("ENGINE_IMPL", "").strip().lower()
     if impl == "stub":
         return stub_engine.answer
     if impl == "real":
         return _real_engine
-    import importlib
     try:
-        return _real_engine if hasattr(importlib.import_module("engine"), "answer") else stub_engine.answer
+        import engine.answer  # noqa: F401
+        return _real_engine
     except Exception:  # noqa: BLE001
         return stub_engine.answer
 
@@ -102,6 +103,17 @@ async def get_chat(chat_id: str):
     return {**_chat(c), "messages": out}
 
 
+@router.get("/chats/{chat_id}/scene-state")
+async def get_scene_state(chat_id: str, doc_id: str | None = None):
+    """Current scene edit layer of a chat: one state per doc that has edits (CONTRACT 5.11)."""
+    pool = await _pool()
+    cid = _uuid(chat_id)
+    if await pool.fetchval("select 1 from chats where id=$1", cid) is None:
+        raise HTTPException(404, "chat not found")
+    states = await scene_edits.scene_state(pool, cid, doc_id)
+    return {"chat_id": str(cid), "states": [{k: v for k, v in s.items() if k != "type"} for s in states]}
+
+
 @router.post("/chats/{chat_id}/messages")
 async def ask(chat_id: str, body: NewMessage):
     pool = await _pool()
@@ -139,6 +151,11 @@ async def ask(chat_id: str, body: NewMessage):
         await pool.execute("insert into answers (message_id, chat_id, doc_id, answer) values ($1,$2,$3,$4::jsonb)",
                            mid, cid, doc_ids[0] if doc_ids else None, json.dumps(ans))
         await publish({"type": "chat.message", "chat_id": str(cid), "message_id": str(mid), "role": "assistant"})
+        scene = ans["evidence"]["scene"]
+        for n, cmd in enumerate(scene.get("commands") or []):  # answer commands become persisted, relayed edits
+            if isinstance(cmd, dict):
+                await record_edit({**cmd, "doc_id": scene.get("doc_id") or (doc_ids[0] if doc_ids else ""),
+                                   "edit_id": f"{ans['answer_id']}-{n}"}, chat_id=cid)
         yield {"event": "answer", "data": json.dumps(ans)}
 
     return EventSourceResponse(stream())

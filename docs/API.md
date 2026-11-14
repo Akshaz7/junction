@@ -89,7 +89,10 @@ One comparison (`new_version` ids only; 404 otherwise):
 `name` is `page-<n>.png`, `page-<n>.thumb.png` or `planmap-<n>.json`; `vN` matches `v<digits>`. Other names 404; a missing file 404 `{"status":"not_built"}`.
 
 ### GET /api/bench/latest
--> `{"file": "run1.json", "data": {...}}` from the newest `results/bench/*.json|jsonl`. 404 `{"status": "no_bench"}` if none.
+-> `{"file": "fake200.json", "tag": "fake200", "data": {set, tag, fake, totals, cells}}`: the newest summary `results/bench/<tag>.json`. The `<tag>.rows.jsonl` row dumps are ignored. `?tag=<tag>` picks one (matches the file name or the `tag` field). 404 `{"status": "no_bench"}` if none or the tag is unknown.
+
+### GET /api/bench
+-> `{"benches": [{"tag", "set", "fake", "file", "mtime"}]}`, newest first (summaries only, ISO-8601 UTC `mtime`).
 
 ### GET /api/costs
 -> `{"total_usd": 0.035, "calls": 3, "by_provider": {"gemini": {"calls": 2, "usd": 0.03}}, "by_task": {"read_drawing": {"calls": 2, "usd": 0.015}}}` from `results/costs.jsonl` (fields `provider`, `task`, `cost_usd`).
@@ -123,3 +126,46 @@ Client-to-server: `{"type": "scene.highlight", "doc_id": "...", "item_ids": [...
 Mechanism: writers call `pg_notify('hologram_events', ...)`; each server process holds one LISTEN connection and fans out to its sockets
 (works across several server instances; reconnects after a drop). `changes.new` comes from a DB trigger, so any writer of `changes` fires it.
 Without a database the server broadcasts to its own sockets directly. Delivery is well under 2 s.
+
+## Scene edits (S-10, CONTRACT 5.11)
+
+An edit layer per chat: "show all windows tagged W1..Wn", "remove window W7". Edits never change source data.
+
+Client-to-server over `/ws`:
+`{"type":"scene.edit","doc_id":"...","chat_id":"<uuid, optional>","op":"highlight|hide|restore|reset|isolate","item_ids":[...],"labels":{"id":"W7"},"edit_id":"<optional, up to 64 chars>"}`.
+- `item_ids`: strings, at most 500, duplicates dropped. Required (non-empty) for `highlight`, `hide`, `isolate`; `restore` with none restores everything hidden; `reset` takes none.
+- `labels` (only for `highlight` and `isolate`): same rules as `scene.highlight` labels.
+- With `chat_id` the edit is stored (table `scene_edits`) and a repeated `edit_id` is applied once. Without it the edit is only relayed.
+- An invalid edit gets `{"type":"scene.error","detail":"invalid scene.edit"}` back to the sender only.
+
+Server-to-client (to every socket, including the sender): `{"type":"scene.edit","doc_id","chat_id"?,"op","item_ids","labels"?,"edit_id","ts"}`. Clients apply edits in arrival order.
+
+State (what the layer looks like after folding all edits of a chat, per doc):
+`{"type":"scene.state","chat_id","doc_id","hidden":[...],"highlighted":[...],"labels":{...},"isolated":[...]|null}`.
+`highlight` replaces highlighted and labels; `hide` adds to hidden and removes from highlighted, labels and isolated; `restore` removes from hidden; `isolate` sets isolated and highlighted to the ids (only these should stay visible) and unhides them; `reset` clears everything. `isolated` is an addition to the contract text: null unless `isolate` was used.
+Late joiners get it by connecting to `/ws?chat_id=<uuid>[&doc_id=...]` (sent first, one message per doc with edits; with `doc_id` always one message), or by sending `{"type":"scene.join","chat_id":"...","doc_id":"..."?}` later.
+
+`GET /api/chats/{id}/scene-state[?doc_id=]` -> `{"chat_id","states":[{doc_id,hidden,highlighted,labels,isolated}]}` (no `type` key; `states` is empty when the chat has no edits and no `doc_id` is given; 404 for an unknown chat).
+
+Answers: `evidence.scene.commands` (`[{op,item_ids,labels?}]`) is stored and relayed by the server when the answer is saved, as `scene.edit` events with `edit_id` `<answer_id>-<n>`, so clients that already apply the answer's commands should ignore a `scene.edit` whose `edit_id` they have seen.
+
+## Advisor cards (CONTRACT 5.12)
+
+`POST /api/advise` `{"doc_id", "chat_id"?, "edit"?: {"op", "item_ids"}}` -> `{"cards": [Card]}`, at most 3. 404 for an unknown document or chat, 422 for an invalid edit. The same cards are pushed over `/ws` as `{"type":"advisor.cards","doc_id","chat_id"|null,"cards":[...]}` after every call (also when empty, so clients can clear).
+Card: `{card_id, kind: warning|option|info, title (<=60), body (<=200), item_ids, source: {type: rule|material_table|document, ref, title, quote (<=200, verbatim)}}`.
+The cards come from `engine.advisor.advise(doc_id, edit, chat_id) -> list[dict]` (E-16); until it exists the answer is `{"cards": []}`. The server enforces the hard rule on what the engine returns: a card without type, ref, title and quote in its source is dropped; a `rule` card must name an id from `engine/rules/*.yaml` and quote text found in that rule (`quote`, `quote_en` or `finnish_quote`); a card with a quote over 200 characters is dropped; title and body are cut to their limits. An engine error gives no cards.
+
+## Findings, skills and automations (S-09)
+
+Findings (rule checks, engine hook `engine.findings.run(doc_id)`; until E-15 lands the run answers `{"status":"no_checks","findings":[]}`):
+- `POST /api/findings/run {doc_id}` runs the checks, replaces that document's findings, publishes `findings.updated`. Findings that cite no rule from `engine/rules/*.yaml` or name no item are dropped. Returns `{status, findings}`.
+- `GET /api/findings[?doc_id=&rule_id=&severity=]` returns `{findings:[{id, doc_id, rule_id, item_ids, severity, message, detail, rule:{id,text,source_title,section,url,quote,translation}, created_at}]}`. Severity is `info`, `suggestion` or `violation`.
+
+Skills (saved prompts; four builtin starters from the start screen cannot be deleted):
+- `GET /api/skills`, `POST /api/skills {name, prompt, description?}` (201), `DELETE /api/skills/{id}` (204, 403 for builtin).
+- `POST /api/skills/{id}/run {doc_ids}` runs the prompt through the chat engine, returns `{skill_id, prompt, answer}` (a full answer object).
+
+Automations (a prompt on a schedule; the latest run is kept as a report):
+- `GET/POST /api/automations`, `GET/PATCH/DELETE /api/automations/{id}`. Body: `{name, prompt, doc_ids, interval_minutes (default 1440), enabled}`.
+- `POST /api/automations/{id}/run` runs now. `GET /api/automations/{id}/report.md` returns the report as Markdown (404 before the first run).
+- A background loop checks every 30 s and runs due automations (`AUTOMATIONS=0` turns it off). A failed run is stored as a report with `ok: false`. Each run publishes `automation.report`.

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
 import uuid
 from pathlib import Path
@@ -25,6 +26,19 @@ MIN_CONF = 0.25
 NO_DOC = "Select a document first, then ask again."
 NOT_YET = ("I can answer counts, areas, lengths and volumes from the drawing data. "
            "This question needs written reasoning over the documents, which I cannot verify yet.")
+
+
+ASK = "Ask a question about the selected drawing."
+DOC_ID = re.compile(r"\b[a-z0-9]+(?:_[a-z0-9]+)*__[A-Za-z0-9][\w.\-]*[A-Za-z0-9_]", re.I)
+
+
+def _other_doc(question: str, doc_ids: list[str]) -> str | None:
+    """A document id named in the question that is not among the selected docs."""
+    sel = {d.lower() for d in doc_ids}
+    for m in DOC_ID.findall(question):
+        if m.lower() not in sel:
+            return m
+    return None
 
 
 def _root() -> Path:
@@ -70,6 +84,16 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
         if not doc_ids:
             add(_step("abstain", "no document selected"))
             return _abstained(question, doc_ids, NO_DOC, trace, t0)
+
+        if not (question or "").strip():
+            add(_step("abstain", "empty question"))
+            return _abstained(question, doc_ids, ASK, trace, t0)
+        other = _other_doc(question, doc_ids)
+        if other:
+            add(_step("abstain", f"question names {other}, which is not selected"))
+            sel = ", ".join(_title(d, root) for d in doc_ids)
+            return _abstained(question, doc_ids, f"The question names **{other}**, which is not among the selected documents ({sel}). "
+                              "Select that document and ask again, or ask about the selected one.", trace, t0)
 
         # 0. scene commands (hide / isolate / highlight / reset): code only, edits never touch data
         intent = parse_scene(question)

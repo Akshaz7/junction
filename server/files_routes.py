@@ -2,6 +2,7 @@
 import asyncio
 import importlib.util
 import json
+from datetime import datetime, timezone
 import re
 import sys
 import uuid
@@ -104,8 +105,10 @@ async def upload(file: UploadFile = File(...)):
         doc_id, doc["title"], kind, [fmt], doc["credit"], json.dumps(doc["files"]))
     await publish({"type": "doc.new", "doc_id": doc_id})
     if ingestion_available():
+        (d / "ingest.json").write_text(json.dumps({"status": "running", "stages": [], "detail": "queued"}))
         asyncio.create_task(_ingest(doc_id))
-        return {"doc_id": doc_id, "status": "ingesting", "detail": "poll GET /api/docs/{doc_id}/ingest; doc.new fires when ready"}
+        return {"doc_id": doc_id, "status": "ingesting",
+                "detail": "poll GET /api/docs/{doc_id}/ingest until status is not running; doc.new fires again when it ends"}
     return {"doc_id": doc_id, "status": "stored", "detail": "ingestion is not available on this server"}
 
 
@@ -203,16 +206,38 @@ async def change(change_id: str):
     return out
 
 
-@router.get("/bench/latest")
-async def bench_latest():
+def _bench_summaries() -> list[dict]:
+    """Bench summaries (results/bench/<tag>.json), newest first. *.rows.jsonl row dumps are ignored."""
     d = config.results_dir() / "bench"
-    files = [f for f in d.glob("*") if f.is_file() and f.suffix in (".json", ".jsonl")] if d.is_dir() else []
-    if not files:
-        return JSONResponse({"status": "no_bench", "detail": "no bench results yet"}, status_code=404)
-    f = max(files, key=lambda p: p.stat().st_mtime)
-    text = f.read_text()
-    body = ([json.loads(l) for l in text.splitlines() if l.strip()] if f.suffix == ".jsonl" else json.loads(text))
-    return {"file": f.name, "data": body}
+    out = []
+    for f in d.glob("*.json") if d.is_dir() else []:
+        try:
+            data = json.loads(f.read_text())
+        except (OSError, ValueError):
+            continue
+        if isinstance(data, dict):
+            out.append({"path": f, "file": f.name, "tag": str(data.get("tag") or f.stem), "stem": f.stem,
+                        "set": data.get("set"), "fake": data.get("fake"), "mtime": f.stat().st_mtime, "data": data})
+    return sorted(out, key=lambda r: r["mtime"], reverse=True)
+
+
+@router.get("/bench")
+async def bench_list():
+    return {"benches": [{"tag": r["tag"], "set": r["set"], "fake": r["fake"], "file": r["file"],
+                         "mtime": datetime.fromtimestamp(r["mtime"], timezone.utc).isoformat()}
+                        for r in _bench_summaries()]}
+
+
+@router.get("/bench/latest")
+async def bench_latest(tag: str | None = None):
+    found = _bench_summaries()
+    if tag is not None:
+        found = [r for r in found if tag in (r["tag"], r["stem"])]
+    if not found:
+        detail = f"no bench results for tag {tag!r}" if tag is not None else "no bench results yet"
+        return JSONResponse({"status": "no_bench", "detail": detail}, status_code=404)
+    r = found[0]
+    return {"file": r["file"], "tag": r["tag"], "data": r["data"]}
 
 
 @router.get("/costs")

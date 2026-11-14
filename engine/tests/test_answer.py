@@ -59,3 +59,19 @@ def test_answer_path_imports_no_heavy_packages():
             "print(bad); sys.exit(1 if bad else 0)")
     r = subprocess.run([sys.executable, "-c", code], cwd=Path(__file__).resolve().parents[2], capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr
+
+
+def test_empty_question_abstains():
+    from engine.answer import answer
+    for q in ("", "   "):
+        a = answer(q, ["cubicasa5k__high-quality-108"])
+        assert a["answer"]["abstained"] and a["citations"] == [] and a["evidence"]["boxes"] == []
+        assert "Ask a question" in a["answer"]["text_md"]
+
+
+def test_question_naming_unselected_doc_abstains():
+    from engine.answer import answer
+    a = answer("How many windows are in ifc_bench__ac20-arc? Only high-quality-108 is selected.", ["cubicasa5k__high-quality-108"])
+    assert a["answer"]["abstained"] and "ifc_bench__ac20-arc" in a["answer"]["text_md"]
+    b = answer("How many windows in ifc_bench__ac20-arc?", ["ifc_bench__ac20-arc"])
+    assert not b["answer"]["abstained"] or "not among the selected" not in b["answer"]["text_md"]

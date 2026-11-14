@@ -109,7 +109,9 @@ def test_upload(client, dirs, monkeypatch):
     assert client.post("/api/upload", files={"file": ("x.exe", b"x")}).status_code == 415
 
 
-def test_chats_and_streamed_question(client):
+def test_chats_and_streamed_question(client, monkeypatch):
+    from server import chats_routes, stub_engine
+    monkeypatch.setattr(chats_routes, "ENGINE", stub_engine.answer)  # stable numbers for the stream contract
     assert client.get("/api/chats").json() == {"chats": []}
     chat = client.post("/api/chats", json={"doc_ids": [DOC], "title": "t"}).json()
     assert chat["doc_id"] == DOC
@@ -134,9 +136,44 @@ def test_chats_and_streamed_question(client):
                        json={"content": "hi"}).status_code == 404
 
 
+def test_real_engine_answer_through_api(client, monkeypatch):
+    """Default engine is the real one: no stub marker, valid answer object, abstains without data."""
+    from server import chats_routes
+    monkeypatch.setattr(chats_routes, "ENGINE", chats_routes._real_engine)
+    chat = client.post("/api/chats", json={"doc_ids": [DOC]}).json()
+    r = client.post(f"/api/chats/{chat['id']}/messages", json={"content": "How many windows are there?"})
+    events = _sse(r.text)
+    assert events[-1][0] == "answer"
+    ans = events[-1][1]
+    validate_answer(ans)
+    assert "stub" not in json.dumps(ans["trace"]).lower()
+
+
 def test_changes_empty(client):
     assert client.get("/api/changes").json() == {"changes": []}
     assert client.get("/api/changes/00000000-0000-0000-0000-000000000000").status_code == 404
+
+
+def test_bench_summaries_only_tag_and_list(client, dirs):
+    import os
+    _, res = dirs
+    b = res / "bench"
+    assert client.get("/api/bench").json() == {"benches": []}
+    old = b / "fake200.json"
+    old.write_text(json.dumps({"set": "sample200", "tag": "fake200", "fake": True, "totals": {"n": 200}, "cells": []}))
+    new = b / "real50.json"
+    new.write_text(json.dumps({"set": "sample50", "tag": "real50", "fake": False, "totals": {"n": 50}, "cells": []}))
+    os.utime(old, (1_000_000, 1_000_000))
+    (b / "real50.rows.jsonl").write_text('{"row": 1}\n')  # newest file, must be ignored
+    r = client.get("/api/bench/latest").json()
+    assert r["file"] == "real50.json" and r["tag"] == "real50" and r["data"]["totals"] == {"n": 50}
+    one = client.get("/api/bench/latest", params={"tag": "fake200"}).json()
+    assert one["data"]["set"] == "sample200" and one["data"]["fake"] is True
+    assert client.get("/api/bench/latest", params={"tag": "nope"}).status_code == 404
+    assert client.get("/api/bench/latest", params={"tag": "real50.rows"}).status_code == 404
+    lst = client.get("/api/bench").json()["benches"]
+    assert [x["tag"] for x in lst] == ["real50", "fake200"]
+    assert lst[1]["set"] == "sample200" and lst[1]["fake"] is True and lst[0]["mtime"] > lst[1]["mtime"]
 
 
 def test_bench_and_costs(client, dirs):
@@ -190,4 +227,62 @@ def test_engine_impl_flag(monkeypatch):
     monkeypatch.setenv("ENGINE_IMPL", "real")
     assert chats_routes._pick_engine() is chats_routes._real_engine
     monkeypatch.delenv("ENGINE_IMPL")
-    assert chats_routes._pick_engine() in (stub_engine.answer, chats_routes._real_engine)
+    assert chats_routes._pick_engine() is chats_routes._real_engine  # real is the default
+    import engine.answer as ea
+    assert callable(ea.answer)
+
+
+AC20 = "ifc_bench__ac20-arc"
+
+
+def test_s04_ac20_doors_api_equals_direct_engine(client, monkeypatch):
+    """S-04 done test: the API answer is the direct engine answer (77 doors on ac20)."""
+    pytest.importorskip("engine.answer")
+    from engine.answer import answer as direct
+    from server import chats_routes, db
+    from server.seed import seed_documents
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[2]
+    monkeypatch.setenv("ARTIFACTS_DIR", str(root / "artifacts"))  # engine needs the real scene data
+    monkeypatch.setenv("RESULTS_DIR", str(root / "results"))
+    monkeypatch.setattr(chats_routes, "ENGINE", chats_routes._real_engine)
+    q = "How many doors are there?"
+    want = direct(q, [AC20], None)
+
+    async def seed():
+        pool = await db.get_pool()
+        async with pool.acquire() as conn:
+            await seed_documents(conn, [{"doc_id": AC20, "source": "ifc_bench", "title": "AC20", "kind": "ifc",
+                                         "formats": ["ifc"], "pages": 1, "files": {}}])
+    client.portal.call(seed)
+    chat = client.post("/api/chats", json={"doc_ids": [AC20]}).json()
+    r = client.post(f"/api/chats/{chat['id']}/messages", json={"content": q, "doc_ids": [AC20]})
+    got = _sse(r.text)[-1][1]
+    validate_answer(got)
+    assert got["answer"] == want["answer"]
+    assert [c for c in got["citations"]] == [c for c in want["citations"]]
+    assert "77" in json.dumps(got["answer"])
+
+
+def test_e12_linked_item_and_tag_lookup(client, monkeypatch):
+    """E-12 done test: an ac20 door resolves by item id and by tag with storey, type and properties."""
+    pytest.importorskip("engine.linked")
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[2]
+    monkeypatch.setenv("ARTIFACTS_DIR", str(root / "artifacts"))
+    from engine import linked
+    from engine.solvers.data import load_doc
+    doc = load_doc(AC20, root / "artifacts")
+    door = next(i for i in doc.items if i.kind == "door" and i.type_name and i.storey)
+    r = client.get(f"/api/docs/{AC20}/items/{door.item_id}")
+    assert r.status_code == 200
+    j = r.json()
+    assert j["item_id"] == door.item_id and j["kind"] == "door" and j["storey"] == door.storey
+    assert j["type_name"] == door.type_name and j["tag"] and isinstance(j["props"], dict) and j["props"]
+    assert j["places"] and all(p["doc_id"] == AC20 and "bbox_px" in p and "page" in p for p in j["places"])
+    t = client.get(f"/api/docs/{AC20}/tags/{j['tag']}")
+    assert t.status_code == 200 and t.json()["item_id"] == door.item_id
+    assert client.get(f"/api/docs/{AC20}/items/nope-123").status_code == 404
+    assert client.get(f"/api/docs/{AC20}/items/{j['tag']}").status_code == 404  # tags are not item ids
+    assert client.get(f"/api/docs/{AC20}/tags/ZZ999").status_code == 404
+    assert client.get("/api/docs/no_such_doc/items/x").status_code == 404
