@@ -7,7 +7,10 @@ const item = (sentence: string, bbox: [number, number, number, number] = [100, 1
 
 describe('plain-language change copy', () => {
   it('names notes and sheet references', () => {
-    expect(readChange(item('Text added: "53703".'), size).text).toBe('Note added near the top left of the sheet: "53703"')
+    expect(readChange(item('Text added: "53703".'), size).text).toBe('Callout label added near the top left of the sheet')
+    expect(readChange(item('Text added: "Existing roof joist".'), size).text).toBe('Note added near the top left of the sheet: "Existing roof joist"')
+    expect(readChange(item('Text changed from "S100 8" to "S300 4 A100 4C".'), size).small).toBe(true)
+    expect(readChange(item('Content added in this region (no text change).', [900, 100, 990, 300]), size).text).toBe('Title block updated (logo, stamp or revision list)')
     expect(readChange(item('Text removed: "9".'), size).kind).toBe('note-removed')
     expect(readChange(item('Text changed from "S100 8" to "A300 2".'), size).text).toBe('Sheet reference changed: S100/8 → A300/2')
     expect(readChange(item('Text changed from "1" to "WI Madison, | #300".'), size).text).toContain('Note edited')
@@ -26,6 +29,8 @@ describe('plain-language change copy', () => {
 
   it('writes a one-line summary', () => {
     const rows = [readChange(item('Text added: "1".'), size), readChange(item('Text changed from "1" to "2".'), size), readChange(item('Changed region (no text change).', [0, 0, 10, 10]), size)]
-    expect(summariseChanges(rows)).toBe('3 changes: 1 note edited, 1 note added, 1 small linework edit.')
+    expect(summariseChanges(rows)).toBe('Only minor edits: 3 (callout labels, linework, title block).')
+    const mixed = [readChange(item('Text added: "New stair rail".'), size), readChange(item('Changed region (no text change).', [0, 0, 10, 10]), size)]
+    expect(summariseChanges(mixed)).toBe('1 note added. Plus 1 minor edit (callout labels, linework, title block).')
   })
 })
