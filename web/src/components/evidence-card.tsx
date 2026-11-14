@@ -9,7 +9,8 @@ function hashProject() {
 
 function GraphPath({ path }: { path: NonNullable<NonNullable<Answer['reasoning']>['graph_path']> }) {
   const project = hashProject()
-  const labels = [...new Set(path.flatMap((step) => [step.from_label, step.to_label]))]
+  // Exact node ids when the answer carries them; labels remain the fallback for older answers.
+  const labels = [...new Set(path.flatMap((step) => [step.from_id || step.from_label, step.to_id || step.to_label]))]
   return <div className="evidence-path" aria-label="Links followed in the project graph">
     <h4>Links followed</h4>
     <ol>{path.map((step, index) => <li key={index}><span>{step.from_label}</span><em>{edgeVerb(step.edge_kind)}</em><span>{step.to_label}</span></li>)}</ol>
