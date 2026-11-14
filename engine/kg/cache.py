@@ -55,6 +55,9 @@ def fingerprint(project, root):
     for folder in (root / 'series', root / 'series' / 'diffs'):
         rows.extend(_stamp(p) for p in sorted(folder.glob('*.json')))
     code = [_stamp(p) for p in sorted(Path(__file__).parent.glob('*.py'))]
+    # Optional services readers and original PDF/IFC inputs also invalidate a skipped/older enrichment.
+    from .mep import cache_dependencies
+    rows.extend(_stamp(p) for p in cache_dependencies(project, root))
     payload = [project.get('id') or project.get('project_id'), project.get('name'), sorted(rows, key=str), code]
     return hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()[:24]
 

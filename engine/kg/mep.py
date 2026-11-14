@@ -50,19 +50,27 @@ class Writer:
         self.nodes = {n["id"]: n for n in graph.setdefault("nodes", [])}
         self.items = {(s.get("doc_id"), s.get("item_id")): n
                       for n in self.nodes.values() if (s := n.get("source")) and s.get("item_id")}
+        self.paged_items = {(s.get("doc_id"), s.get("item_id"), s.get("page", 1)): n
+                            for n in self.nodes.values() if (s := n.get("source")) and s.get("item_id")}
         self.edges = {(e["kind"], e["from"], e["to"]) for e in graph.setdefault("edges", [])}
         self.docs = {did: n for n in self.nodes.values() if n["kind"] == "doc" for did in n.get("doc_ids", [])}
         self.renamed = {}
 
     def node(self, kind, did, local, label, props=None, level=None, page=1, bbox=None):
         nid = node_id(kind, did, local)
-        n = self.items.get((did, local)) or self.nodes.get(nid)
+        n = self.paged_items.get((did, local, page))
+        if n is None:
+            n = self.nodes.get(nid)
+            if n and n.get("source") and n["source"].get("page", 1) != page:
+                nid += f":p{page}"
+                n = self.nodes.get(nid)
         if n is None:
             n = {"id": nid, "kind": kind, "label": label, "doc_ids": [did], "level": level,
                  "props": {}, "source": {"doc_id": did, "page": page, "item_id": local, "bbox": bbox},
                  "canonical": None, "degree": 0}
             self.nodes[nid] = n
             self.items[did, local] = n
+            self.paged_items[did, local, page] = n
             self.graph["nodes"].append(n)
         if kind in SERVICE_KINDS and n["kind"] != kind:
             # IFC2x3 often exports all terminals as generic objects in elements.json.
@@ -72,6 +80,10 @@ class Writer:
             n["id"] = nid
             n["kind"] = kind
             self.nodes[nid] = n
+        if n.get("source") is None:
+            n["source"] = {"doc_id": did, "page": page, "item_id": local, "bbox": bbox}
+            self.items[did, local] = n
+            self.paged_items[did, local, page] = n
         n.setdefault("props", {}).update(props or {})
         if level and not n.get("level"):
             n["level"] = level
@@ -118,6 +130,22 @@ def resolve_source(meta, root, fmt):
              root.parent / "data" / "junction-dataset-preview",
              root.parent / "data" / "full" / "junction-dataset"]
     return next((base / p for base in bases if (base / p).is_file()), None)
+
+
+def cache_dependencies(project, root):
+    """Include optional-reader installation and original sheet/source modifications."""
+    base = Path(__file__).resolve().parents[2]
+    paths = [base / "pipeline" / "pdf_mep.py", base / "pipeline" / "pdf_vector.py", base / "engine" / "mep.py"]
+    for doc in project.get("docs", []):
+        doc = {"doc_id": doc} if isinstance(doc, str) else doc
+        did = doc.get("doc_id")
+        if not did or Path(did).name != did or did in {".", ".."}:
+            continue
+        meta = {**read_json(Path(root) / did / "doc.json", {}), **doc}
+        for fmt in ("ifc", "pdf"):
+            if path := resolve_source(meta, root, fmt):
+                paths.append(path)
+    return paths
 
 
 def _by_type(f, cls):
@@ -290,6 +318,9 @@ def enrich_ifc(writer, did, path, root, deadline):
         if n["id"] not in assigned and isinstance(raw_system, str) and raw_system.strip():
             sn = writer.node("system", did, "property-" + hashlib.sha256(raw_system.encode()).hexdigest()[:16], raw_system,
                              {"recorded_system_label": raw_system})
+            # This group is derived from a recorded property, not an IFC object.
+            # Its service member is the citation; no fabricated item ID is cited.
+            sn["source"] = None
             writer.doc_link(sn, did)
             writer.edge("part_of_system", n, sn, "tag_text", 0.9,
                         {"rule": "recorded system-name property; membership not independently checked",
@@ -344,6 +375,14 @@ def enrich(graph, project, root, *, time_budget_s=20):
     enrich_spatial(writer)
     from engine.kg.mep_sheets import enrich_sheets
     enrich_sheets(writer, project, Path(root), deadline)
+    for doc in project.get("docs", []):
+        did = doc if isinstance(doc, str) else doc.get("doc_id")
+        if not did or Path(did).name != did or did in {".", ".."}:
+            continue
+        for path in (Path(root) / did).glob("planmap-*.json"):
+            pm = read_json(path, {})
+            if isinstance(pm, dict):
+                apply_ceiling_notes(graph, pm.get("room_ceiling_notes", []) or [])
     writer.finish()
     degree = Counter()
     for e in graph["edges"]:
@@ -351,6 +390,43 @@ def enrich(graph, project, root, *, time_budget_s=20):
     for n in graph["nodes"]:
         n["degree"] = degree[n["id"]]
     return graph
+
+
+def apply_ceiling_notes(graph, notes):
+    """Optional PDF hook; accepts explicit room-referenced, already unit-resolved notes.
+
+    notes: [{room: {doc_id, page, item_id}, ceiling_height_m: number,
+             source: {doc_id, page, item_id?, bbox?, quote}}].
+    The PDF owner supplies these notes; this module neither parses PDF text nor
+    assigns unqualified heights to nearby rooms. Conflicting values are retained.
+    """
+    attached = 0
+    for note in notes:
+        if not isinstance(note, dict):
+            continue
+        height = positive(note.get("ceiling_height_m"))
+        ref, source = note.get("room"), note.get("source")
+        if not height or not isinstance(ref, dict) or not isinstance(source, dict):
+            continue
+        if not source.get("doc_id") or not source.get("page") or not source.get("quote") or not (source.get("bbox") or source.get("item_id")):
+            continue
+        matches = [n for n in graph.get("nodes", []) if n["kind"] == "room" and
+                   all((n.get("source") or {}).get(k) == ref.get(k) for k in ("doc_id", "page", "item_id"))]
+        if len(matches) != 1:
+            continue
+        props = matches[0].setdefault("props", {})
+        evidence = {"ceiling_height_m": height, "source": source, "method": "tag_text"}
+        values = props.setdefault("ceiling_height_notes", [])
+        if evidence not in values:
+            values.append(evidence)
+            attached += 1
+        existing = props.get("ceiling_height_m")
+        if existing is None:
+            props["ceiling_height_m"] = height
+            props["ceiling_height_m_source"] = evidence
+        elif abs(existing - height) > 1e-6:
+            props["ceiling_height_note"] = "Recorded ceiling heights differ; check the cited sources."
+    return attached
 
 
 def room_services(graph, room_node_id):
