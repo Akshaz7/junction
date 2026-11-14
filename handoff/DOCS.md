@@ -1,11 +1,16 @@
-# DOCS (Codex): row X-11. API + models docs current
-Scope: docs/API.md and docs/MODELS.md only.
-1. docs/API.md: document every route that exists now in server/*_routes.py and server/app.py. Read the code, never guess. New since the last update: /api/folders, /api/docs/{id}/source, /api/docs/{id}/ingest, POST /api/changes/refresh, compare, linked items/tags, advise (ops hide/restore/move/material/undo + detail), bench list/latest, health fields (build_rev, uptime_s, models_ok), RATE_LIMIT_PER_MIN, and the upload error codes 413/415. Give each one's request, response and errors.
-2. docs/MODELS.md: list every model and provider in engine/models/models.yaml with its task chain and price, plus:
-   - datasets: CubiCasa5K (CC BY-NC-SA 4.0), FloorPlanCAD (Voxel51 mirror; its card says CC BY-NC 4.0 while the metadata says CC BY-SA 4.0, so treat it as NC), synthetic plans (generated for demo)
-   - fine-tunes: RT-DETR PekingU/rtdetr_r50vd (Apache-2.0) and the ResNet34-UNet (Yytsi weights; check train/ for the source and licence)
-   - the licence consequences for the fine-tuned weights
-   - the ifcopenshell (LGPL) and usd-core licences used in the deploy image
+# DOCS (Codex): row X-12. Final report draft (due Sun 08:30)
+Scope: docs/REPORT.md (new) only.
+Write the final hackathon report draft for Stoa's "Make Blueprints Talk" track.
+Sections:
+- what we built: the 2D → 3D → AR proof chain, live cross-device chat, uploads, Stoa-parity screens
+- how it works: plan map read once, code over the plan map, the model ladder, the zero-abstention ladder
+- accuracy: numbers ONLY from results/bench/*.json and results/vision/*.json; read them, quote the tag and file, use placeholders where a run is pending
+- visual verifiability
+- creativity
+- inference cost: $/answer from results; the cost shown in the UI
+- honesty: held-out policy, the 2% tolerance, text judging, labelled best-effort answers
+- licences
+- limits and next steps
+Keep it under 1,200 words, with plain sentences and tables where they help. Read DECISIONS.md, docs/ACCURACY.md, docs/MODELS.md and docs/DEMO.md.
 Do not commit. Append a RESULT: line.
-NEEDS: VISION/LEAD: train/manifest.json lists FloorPlanCAD only as CC BY-SA 4.0; record the Voxel51 card's conflicting CC BY-NC 4.0 narrative and conservative noncommercial treatment (documented in docs/MODELS.md).
-RESULT: X-11 PASS — docs/API.md covers all 45 declared HTTP/WS routes with requests, responses and errors; docs/MODELS.md covers 9 providers, 21 configured prices, 13 exact task chains, training/dataset terms and deploy-library licences. Local done check `.venv/bin/python /tmp/junction_docs_done.py` and `git diff --check -- docs/API.md docs/MODELS.md handoff/DOCS.md` passed; no commit.
+RESULT: X-12 PASS — wrote docs/REPORT.md (1,016 words); local Python acceptance check passed for all requested sections, local links, benchmark/vision figures and costs against source JSON, and pending-result qualifiers; no done-test command was supplied; no commit.
