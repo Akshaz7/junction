@@ -141,7 +141,7 @@ Status values: `todo`, `doing`, `done`, `blocked`, `waiting-key`, `blocked-human
 | I-06 | 2 | I-03 | - | Walk mode at 1:1: floor alignment, a small "you are here" map, and a guide arrow to the highlighted item. | The build succeeds; the guide logic has a unit test. | done | 1:1 walk toggle, mini-map, guide arrow, WalkGuide maths; 17 tests pass on simulator (LEAD ran). |
 | I-07 | 3 | I-04, S-08 | - | Voice in AR: a button to ask by speech; the spoken answer plays. | The speech request reaches the chat endpoint in a test. | done | Voice in AR: record, speech-intent or on-device transcription, chat SSE, numbered highlights, server/device speech; 35 tests (LEAD ran). |
 | I-08 | 3 | I-03 | - | Tap to identify in AR. | A tap on an entity returns its `item_id` and shows the card. | done | Tap -> item_id via ItemPicker, metadata card, selection outline; 21 tests pass on simulator (LEAD ran). |
-| I-09 | 3 | I-04, E-16 | - | Advisor cards in AR. | A card from the API renders in the AR overlay. | todo | |
+| I-09 | 3 | I-04, E-16 | - | Advisor cards in AR. | A card from the API renders in the AR overlay. | doing | IOS 04:39 against CONTRACT 3.1 fixture |
 
 ### LEAD
 | ID | Tier | Depends | Keys | Task | Done test | Status | Notes |

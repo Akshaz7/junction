@@ -56,3 +56,4 @@ Format for new lines: `YYYY-MM-DD HH:MM — decision — reason`.
 - 2026-11-14 04:07 — V-09 free pass (merge + conf<0.7 cut for door/window/toilet) is the default: held-out window 0.299→0.320, door 0.369→0.443, toilet 0.725→0.817, no kind worse. colorful-11397 itself went 12→11 windows (truth 13): demo docs will be picked by X-03 from test results, not assumed.
 - 2026-11-14 04:17 — Added scene-command feature (E-20, S-10, T-12, I-14, W-19): 'show me all the windows' → tagged W1..Wn; 'remove window W7' → hidden live in 3D/AR/2D via /ws scene.edit; edits are a per-chat layer, never changing source data — Ash's idea.
 - 2026-11-14 04:24 — CONTRACT v3: 5.11 scene commands, tags, scene.edit/scene.state events — lets IOS (I-14) and 3D (T-12) build against the contract while SERVER (S-10) and ENGINE (E-20) build their sides.
+- 2026-11-14 04:39 LEAD: CONTRACT 3.1 adds §5.12 advisor card shape so IOS (I-09) and WEB can build against fixtures before E-16 lands.

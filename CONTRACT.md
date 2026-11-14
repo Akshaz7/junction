@@ -1,4 +1,4 @@
-# CONTRACT — version 3
+# CONTRACT — version 3.1
 
 Only the LEAD edits this file. Each change bumps the version and adds one line to DECISIONS.md.
 
@@ -118,3 +118,8 @@ The iOS app shows the web app (mobile layout) in a WKWebView. The web app calls 
 - Answer object: `evidence.scene.commands`: list of `{op, item_ids, labels?}` with `op` ∈ `highlight` | `hide` | `restore` | `reset` | `isolate`. `labels` maps item_id → tag/number shown above the item.
 - WebSocket event `scene.edit`: `{type:"scene.edit", doc_id, chat_id?, op, item_ids, labels?, edit_id, ts}`. Clients apply it in order; `reset` restores everything for that doc. Server persists the per-chat edit layer and sends `{type:"scene.state", doc_id, hidden:[item_ids], highlighted:[...], labels:{...}}` to a client when it joins or calls `GET /api/chats/{id}/scene-state`.
 - Edits never change source data; counts after an edit carry a note ("with W7 hidden").
+
+### 5.12 Advisor cards (v3.1)
+`POST /api/advise` {doc_id, chat_id?, edit?: {op, item_ids}} → `{cards: [Card]}`, at most 3. Also pushed over `/ws` as event `advisor.cards` {doc_id, chat_id, cards}.
+Card: `{card_id, kind: "warning"|"option"|"info", title (≤60 chars), body (≤200 chars, voice guide 5.8), item_ids: [item_id], source: {type: "rule"|"material_table"|"document", ref (rule id / table row / doc_id+page), title, quote (≤200 chars, verbatim)}}`.
+Hard rule: no `source` → no card. Never invented. Clients show the source title and quote with the card, and highlight `item_ids` like a citation.
