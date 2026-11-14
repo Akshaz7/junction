@@ -88,3 +88,4 @@ Format for new lines: `YYYY-MM-DD HH:MM — decision — reason`.
 14:58 LEAD: deployed doc list = only docs with real data (HIDE_EMPTY_DOCS=1): ~374 docs with previews (313 with plan map/scene) loaded into hologram-pg (~700 MB); 409 docs with no plan map/text/preview hidden instead of shown blank (Ash: no feature shown that doesn't work). No-data questions refuse in <0.1 s at $0.
 15:02 Ash: no report/pitch/docs work until the product is done (report due Sun 08:30, submission 10:00). DOCS worker moved to product rows.
 15:16 Ash: rate limit raised from 30 to 120 requests/min/IP for every route (judges share one venue IP; Awais's review D-1). Set via RATE_LIMIT_PER_MIN in scripts/aiven_env.py.
+15:25 LEAD: CONTRACT 3.3 adds evidence.scene.open ("3d"|"ar") for app-feature answers (ENGINE-FIX FIX-6).

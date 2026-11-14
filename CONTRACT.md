@@ -1,4 +1,4 @@
-# CONTRACT — version 3.2
+# CONTRACT — version 3.3
 
 Only the LEAD edits this file. Each change bumps the version and adds one line to DECISIONS.md.
 
@@ -140,3 +140,6 @@ Advisor cards (5.12) gain:
 Scene commands: "front door / main door / entrance" selects the one detected entrance door; "outer / exterior / exit doors" selects all detected outer doors.
 Routes: "where is the stairs / stair core / lift / entrance (on level N)" is a code route (engine/locate.py), cost 0, route "index".
 Live sync: `/ws` also carries `chat.trace`, `chat.delta` (cumulative answer text, ≤8/s) and `chat.done`. `GET /api/chats/{id}` returns `active` (statuses, traces and text so far) for an in-flight question.
+
+### 5.14 Scene open hint (v3.3)
+- `evidence.scene.open`: optional, `"3d"` or `"ar"`. Set by app-feature answers ("show it in 3D", "show on table"). Web: `"3d"` opens Visualise it for the answer's doc; `"ar"` shows the Show-on-table hint (iOS app). Absent means no action. Additive; older clients ignore it.
