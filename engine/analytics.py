@@ -929,11 +929,12 @@ HL_CAP = 3000
 def _piping_data(doc: Doc) -> dict | None:
     """artifacts/<doc>/piping.json (written at ingest, S-38) first, then the committed results/vision/piping/<doc>.json."""
     import json
+    import os
     import sys
     from pathlib import Path
     if doc.mode != "ifc":
         return None
-    arts = getattr(sys.modules.get("engine.solvers.solve"), "ARTIFACTS", None)
+    arts = os.environ.get("ARTIFACTS_DIR") or getattr(sys.modules.get("engine.solvers.solve"), "ARTIFACTS", None)
     repo = Path(__file__).resolve().parent.parent
     for f in ([Path(arts) / doc.doc_id / "piping.json"] if arts else []) + [repo / "results/vision/piping" / f"{doc.doc_id}.json"]:
         try:
@@ -1002,6 +1003,9 @@ def piping(question: str, doc: Doc, t0) -> dict | None:
     if st:
         pipes = [p for p in pipes if p.get("storey") == st]
 
+    from engine.mep import COUNT_Q, _length_requested
+    count_objects = bool(COUNT_Q.search(ql) and not _length_requested(ql))
+
     def done(text, value, unit, ids, steps):
         ids = [i for i in dict.fromkeys(ids) if i in by_id]
         items = [by_id[i] for i in ids[:HL_CAP]]
@@ -1030,6 +1034,9 @@ def piping(question: str, doc: Doc, t0) -> dict | None:
             sizes = sorted({int(p["dn_mm"]) for p in pipes if p.get("dn_mm")})
             return done(f"**No DN{int(size)} pipes** in this model. Sizes present: {', '.join('DN' + str(x) for x in sizes)}.", 0, "count", [], ["0 matches"])
         stor = "; ".join(f"{_fmt(m)} m on {k}" for k, _n, m in _group(sel, "storey")[:6])
+        if count_objects:
+            return done(f"**{len(sel)} pipe segments of nominal diameter {int(size)}**" + (f" on {st}" if st else "") + ". [1]",
+                        len(sel), "count", [p["item_id"] for p in sel], [f"{len(sel)} matching pipes"])
         return done(f"**DN{int(size)}: {_fmt(_pipe_sum(sel))} m** in **{len(sel)} pipe segments**{f' on {st}' if st else ''} ({stor}). [1]",
                     _pipe_sum(sel), "m", [p["item_id"] for p in sel], [f"{len(sel)} DN{int(size)} pipes"])
     if re.search(r"\bsizes?\b|diameters?", ql):
@@ -1043,6 +1050,9 @@ def piping(question: str, doc: Doc, t0) -> dict | None:
         txt = "; ".join(f"{friendly_system(k)}: {_fmt(m)} m ({n} pipes)" for k, n, m in shown)
         more = f"; +{rest} smaller system{'s' if rest != 1 else ''} ({_fmt(sum(x[2] for x in g[8:]))} m)" if rest else ""
         return done(f"**{len(g)} piping systems**{f' on {st}' if st else ''}, longest first: {txt}{more}. Total {_fmt(_pipe_sum(pipes))} m. [1]", len(g), "count", [p["item_id"] for p in pipes], [f"{len(g)} systems"])
+    if count_objects:
+        return done(f"**{len(pipes)} pipe segments**" + (f" on {st}" if st else " in this model") + ". [1]",
+                    len(pipes), "count", [p["item_id"] for p in pipes], [f"{len(pipes)} pipes counted"])
     if re.search(r"by (?:storey|floor|level)|per (?:storey|floor|level)|each (?:storey|floor|level)", ql):
         g = _group(pipes, "storey")
         txt = "; ".join(f"{k}: {_fmt(m)} m ({n} pipes)" for k, n, m in g)
