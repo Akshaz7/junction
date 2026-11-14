@@ -348,6 +348,9 @@ def _run(doc_id: str, st: Status) -> str:
         ifc = REPO / doc["files"]["ifc"]
         ok = st.stage("ifc_scene", lambda: ifc_scene.process(ifc, doc, ddir))
         ok = ok and st.stage("ifc_plans", lambda: ifc_plans.process(doc_id, art))
+        if ok:
+            from engine.xcheck_ifc import ingest_lengths
+            st.stage("quantity_checks", lambda: ingest_lengths(ifc, doc_id, ddir))
         ok = ok and st.stage("usdz", lambda: _usdz(doc_id, ddir))
         if ok and _has_piping(ifc):
             def pip():

@@ -55,6 +55,13 @@ def _calibrated(source, unit, label, checked):
 def run(ctx: dict) -> dict:
     steps, checked = ctx['steps'], ctx.get('checked')
     exact = ctx.get('quantified_exact') is True
+    if 'xchecks' in ctx:
+        independent = ctx['xchecks']
+        # In the quantity path, reproducing the source sum alone is not an
+        # independent verification. Older nonquantity cards retain their flow.
+        exact = exact and bool(independent) and all(c['within_1pct'] for c in independent)
+        if checked is True and not independent:
+            checked = None
     source = "ifc" if ctx.get('is_ifc') else "cad" if ctx.get('from_cad') else "scan"
     source = ctx.get('quantified_source', source)
     if ctx.get('models_used') and ctx.get('route') not in ('planmap', 'index'):
@@ -63,7 +70,7 @@ def run(ctx: dict) -> dict:
     if exact:
         reason = "The cited source quantities reproduce the answer; the source's completeness is not verified."
     elif checked is True:
-        reason = "Two recorded readings agree; agreement does not establish an error bound."
+        reason = "Two recorded readings agree within the recorded tolerance; agreement does not establish an error bound."
     elif checked is False:
         reason = "The recorded readings disagree; check the highlighted evidence."
     else:
@@ -82,5 +89,11 @@ def run(ctx: dict) -> dict:
             improve = "Supply a known dimension and check the measured outlines."
     if not steps and ctx.get('cites'):
         steps.append({"kind": "read", "title": "Read", "text": "Used the cited drawing as the source; individual items were not identified", "cite": ctx['cites'][0].get('n'), "ok": None})
+    agreement = [c['calibration'] for c in ctx.get('xchecks', []) if c.get('calibration')]
+    if agreement:
+        observed = min(agreement, key=lambda row: row['pct'])
+        reason += f" Independent methods agreed within 5% on {observed['within_5pct']} of {observed['n']} measured comparisons; this is agreement, not answer accuracy."
+        if observed.get('documents') is not None:
+            reason += f" These comparisons cover {observed['documents']} source documents; measurements in one document can share errors."
     return {"label": label, "pct": calibration['pct'] if calibration else None, "reason": reason,
-            "improve": improve, "calibration": calibration, "_steps": steps}
+            "improve": improve, "calibration": calibration, "agreement": agreement, "_steps": steps}

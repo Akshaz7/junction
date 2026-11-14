@@ -290,6 +290,11 @@ def run(ctx):
         return result
     rnd = rounding(value, ctx["ans"].get("text_md"), unit)
     calc = arithmetic(ctx, rows, missing, value, unit, rnd) if unit in ("count", "m", "m2", "m3") else None
+    from engine import xcheck
+    independent = xcheck.run(ctx, rows, missing, calc)
+    if independent:
+        calc = independent.pop("_arithmetic", None) or calc
+        result["calc"] = independent
     if calc:
         result["arithmetic"] = [calc]
     else:
@@ -298,7 +303,7 @@ def run(ctx):
             if step.get("kind") in ("measured", "calculated"):
                 step["text"] += " Full arithmetic is unavailable: the source terms do not reconcile with this answer."
     exact = bool(calc and rows and not missing and not ctx.get("models_used") and all(_exact(d, i) for d, i, _ in rows))
-    ctx["quantified_exact"] = exact and ctx.get("checked") is not False
+    ctx["quantified_exact"] = exact and ctx.get("checked") is not False and all(c["within_1pct"] for c in ctx.get("xchecks", []))
     sources = list(dict.fromkeys(f"{d.doc_id}: source quantities" for d, _, _ in rows))
     if exact:
         margin = _budget(value, unit, rnd, "Display rounding only; the cited source quantities reproduce the answer. Source completeness, scope and construction tolerances are not bounded.", sources, scope="Source quantity and display rounding")
@@ -313,4 +318,10 @@ def run(ctx):
     else:
         margin = _unknown(unit, "This answer combines pages or sources without individual scale error budgets.", sources)
     result["margin"] = margin
+    if independent:
+        # Agreement is an observed discrepancy, never an uncertainty bound.
+        independent["margin"] = margin
+        observed = [c["calibration"] for c in independent["checks"] if c.get("calibration")]
+        if observed:
+            margin["agreement"] = observed
     return result

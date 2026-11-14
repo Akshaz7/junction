@@ -125,6 +125,8 @@ def attach(res: dict, question: str, root: Path) -> dict:
     if res.get("reasoning"):   # these routes bring their own card; the invariant still applies
         from engine.reasoning_parts.counts import enforce
         res["reasoning"] = enforce(res, res["reasoning"], question)
+        from engine.xcheck import augment_existing
+        res = augment_existing(res, question, root)
         res.pop("reasoning_hint", None)
         try:
             from engine.reasoning_parts.scaleproof import supplement

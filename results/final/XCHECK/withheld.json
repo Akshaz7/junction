@@ -1,0 +1,12 @@
+{
+  "path": "data/full/junction-dataset/data/ifc_models/resbim-364_model.ifc",
+  "selection": "SystemRandom choice from sorted data/**/*.ifc before development; contents not read until final validation",
+  "doc_id": "ifc_models__resbim-364-model",
+  "tested_at": "2026-11-15T00:23:18.309287",
+  "checks": 0,
+  "schema": "IFC4",
+  "source_sha256": "beafbff3f94d866ccce088c8429a3c20ceed65bb9212ed662f412d498c98760f",
+  "originating_system": "Autodesk - Revit 26.4.0.32 (ENG) - 26.4.0.32",
+  "elapsed_s": 0.006,
+  "outcome": "handled without crash; unavailable checks are not guessed"
+}
