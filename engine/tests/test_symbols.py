@@ -220,3 +220,18 @@ def test_no_legend_route_offers_detector_kinds(tmp_path, monkeypatch):
     monkeypatch.setattr(S, "CACHE_DIR", tmp_path / "cache")
     res = S.answer_symbols("what symbols are in the legend", ["doc2"], root)
     assert res["answer"]["abstained"] and "doors, windows" in res["answer"]["text_md"]
+
+
+def test_area_swatch_is_not_countable():
+    img = np.full((60, 140), 0, np.uint8)
+    img[:] = 255
+    cv2.rectangle(img, (5, 10), (125, 50), 0, 2)
+    for x in range(10, 125, 8):
+        cv2.line(img, (x, 12), (x + 20, 48), 0, 1)
+    ink = S.ink_mask(img)
+    assert S.symbol_weakness(ink) == S.SWATCH
+    star = np.full((60, 60), 255, np.uint8)
+    for a in range(4):
+        v = np.array([np.cos(a * np.pi / 4), np.sin(a * np.pi / 4)]) * 20
+        cv2.line(star, (int(30 - v[0]), int(30 - v[1])), (int(30 + v[0]), int(30 + v[1])), 0, 2)
+    assert S.symbol_weakness(S.ink_mask(star)) != S.SWATCH

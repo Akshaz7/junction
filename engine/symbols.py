@@ -393,6 +393,9 @@ def _crop(ink: np.ndarray, bb, pad=2) -> np.ndarray:
     return ink[max(0, y0 - pad):min(H, y1 + pad), max(0, x0 - pad):min(W, x1 + pad)]
 
 
+SWATCH = "an area swatch (hatching or shading), not a point symbol"
+
+
 def symbol_weakness(tmpl: np.ndarray) -> str | None:
     """Why this shape cannot be matched reliably (None = fine). Matching would flood the sheet with false hits."""
     h, w = tmpl.shape
@@ -401,6 +404,15 @@ def symbol_weakness(tmpl: np.ndarray) -> str | None:
     n = int(tmpl.sum())
     if n < 25:
         return "too little drawn"
+    # a framed rectangle much wider than tall (or tall than wide) is a fill swatch in the legend: it stands for an area (hatching, shading), not a point symbol
+    ys_, xs_ = np.nonzero(tmpl)
+    tt = tmpl[ys_.min():ys_.max() + 1, xs_.min():xs_.max() + 1]
+    th_, tw_ = tt.shape
+    e_ = max(2, int(0.08 * min(th_, tw_)))
+    edges = [float(v) for v in (tt[:e_].any(axis=0).mean(), tt[-e_:].any(axis=0).mean(), tt[:, :e_].any(axis=1).mean(), tt[:, -e_:].any(axis=1).mean())]
+    framed = sum(1 for v in edges if v > 0.7) >= 3
+    if (framed or float(tt.mean()) > 0.3) and max(th_, tw_) / max(min(th_, tw_), 1) >= 1.5 and min(th_, tw_) >= 14:
+        return SWATCH
     if n / (h * w) > 0.7:
         return "a solid blob"
     if max(int(tmpl.sum(axis=1).max()), int(tmpl.sum(axis=0).max())) > 0.55 * n:
@@ -662,6 +674,10 @@ def count_symbols(image_path, legend: dict | None = None, target: str | None = N
         weak_why = symbol_weakness(tmpl)
         entry_info = {"id": e["id"], "label": e["label"], "symbol_bbox": e["symbol_bbox"], "weak": weak_why}
         res["legend_used"]["entries"].append(entry_info)
+        if weak_why == SWATCH:
+            notes.append(f"\"{e['label']}\" is {weak_why}: it marks an area in the drawing, so there is nothing to count one by one")
+            res.setdefault("area_swatches", []).append(e["label"])
+            continue
         if weak_why:
             notes.append(f"\"{e['label']}\": symbol is {weak_why}, matches are only counted after a model check")
         cands = match_symbol(plan_ink, tmpl, cache)
@@ -915,7 +931,7 @@ def _legend_answer(question, doc_id, root, legends, trace, t0):
 def _count_answer(question, doc_id, root, noun, entries, legends, trace, t0):
     pages = _pages(doc_id, root)
     budget = {"calls": 0, "usd": 0.0, "models": set()}
-    agg = {"counts": {}, "boxes": [], "possible": [], "checked": {"sampled": 0, "agree": 0, "uncertain": 0, "confirmed": 0, "rejected": 0}, "notes": [], "weak": False}
+    agg = {"counts": {}, "boxes": [], "possible": [], "checked": {"sampled": 0, "agree": 0, "uncertain": 0, "confirmed": 0, "rejected": 0}, "notes": [], "weak": False, "swatch": []}
     legend_page, legend_img = entries[0][0], None
     for p in pages:
         img = root / doc_id / f"page-{p}.png"
@@ -942,6 +958,7 @@ def _count_answer(question, doc_id, root, noun, entries, legends, trace, t0):
                 agg["counts"][k] = agg["counts"].get(k, 0) + v
             for k in ("sampled", "agree", "uncertain", "confirmed", "rejected"):
                 agg["checked"][k] += r["checked"][k]
+            agg["swatch"] += [x for x in r.get("area_swatches", []) if x not in agg["swatch"]]
             agg["weak"] = agg["weak"] or any(e.get("weak") for e in r["legend_used"]["entries"])
             agg["notes"] += [n for n in r["notes"] if n not in agg["notes"]]
     boxes_in = agg["boxes"]
@@ -966,6 +983,10 @@ def _count_answer(question, doc_id, root, noun, entries, legends, trace, t0):
                       "item_ids": [b["item_id"] for b in bx], "quote": label})
     e0 = entries[0][2]
     cites.append({"n": len(cites) + 1, "doc_id": doc_id, "page": lg_page, "kind": "region", "bbox_px": list(e0["symbol_bbox"]), "item_ids": [], "quote": f"Legend: {label}"})
+    if n == 0 and agg["swatch"]:
+        txt = (f"**\"{agg['swatch'][0]}\" is an area, not a symbol.** The legend shows it as a hatched or shaded block that fills regions of the drawing, "
+               f"so there is nothing to count one by one. [{cites[-1]['n']}]\n\n- Ask for the area of a room or zone instead, or for a symbol that is drawn as a single mark.")
+        return _obj(question, doc_id, txt, None, 0.0, True, [], cites[-1:], trace, t0, cost_calls)
     if n == 0:
         txt = f"I found **no \"{label}\"** symbols on this drawing, although the legend defines one. [{cites[-1]['n']}]"
         if agg["possible"]:
