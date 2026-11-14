@@ -46,7 +46,7 @@ test('phone navigation keeps all pages reachable without horizontal overflow', a
   await expect(navigation).toBeVisible()
   for (const label of navItems.filter((item) => item !== 'Accuracy')) {
     const underMore = ['Compare', 'Library', 'Tools', 'Accuracy'].includes(label)
-    const more = navigation.getByText('More', { exact: true })
+    const more = navigation.getByLabel('More pages', { exact: true })
     if (underMore) await more.click()
     await navigation.getByRole('link', { name: label, exact: true }).click()
     await expect(page.getByRole('heading', { name: label, exact: true, level: 1 })).toBeVisible()
@@ -85,5 +85,5 @@ test('demo chat and document navigation', async ({ page }) => {
   await page.getByRole('navigation', { name: 'Workspace navigation', exact: true }).getByRole('link', { name: 'Data', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Garden room — generated for demo' })).toBeVisible()
   await page.getByRole('searchbox', { name: 'Search documents' }).fill('missing')
-  await expect(page.getByText('No documents found.')).toBeVisible()
+  await expect(page.getByText(/No documents match/)).toBeVisible()
 })

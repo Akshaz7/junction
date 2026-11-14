@@ -4,7 +4,7 @@ test.setTimeout(120_000)
 const ac20 = 'ifc_bench__ac20-arc'
 const question = 'How many windows are there?'
 
-test('the 2D plan of an IFC building shows each room name with its area; raster plans show none', async ({ page }) => {
+test('the 2D plan of an IFC building shows each room name with its area', async ({ page }) => {
   await page.goto('/#/data')
   await page.getByRole('searchbox', { name: 'Search documents' }).fill(ac20)
   await page.locator(`[data-doc-id="${ac20}"] .data-open-file`).click()
@@ -20,6 +20,6 @@ test('the 2D plan of an IFC building shows each room name with its area; raster 
   await expect(labels.first()).toBeAttached({ timeout: 20_000 })
   const text = await labels.first().textContent()
   expect(text).toMatch(/\d+\.\d m²/)
-  expect(await labels.evaluate((nodes) => getComputedStyle(nodes).fontWeight)).toBe('400')
+  expect(await labels.first().evaluate((nodes) => getComputedStyle(nodes).fontWeight)).toBe('400')
   await drawing.screenshot({ path: '../results/qa/shots/room-labels.png' })
 })

@@ -44,3 +44,5 @@ button.overview-starter { border: 0; color: var(--foreground); text-align: left;
 .overview-starter > span { order: 3; flex-basis: 100%; font-size: var(--text-caption); line-height: 1.5; color: var(--muted-foreground); }
 .overview-starter:disabled { opacity: .6; cursor: default; }
 .overview-start > p { margin-top: 12px; color: var(--muted-foreground); font-size: var(--text-body-sm); }
+.overview-building { margin: 0 0 8px; color: var(--text-muted, inherit); font-size: var(--text-body-sm); }
+.overview-rule { color: var(--text-muted, inherit); }

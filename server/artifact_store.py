@@ -53,7 +53,8 @@ def doc_files(doc_id: str, originals: bool = True) -> list[tuple[str, Path]]:
         sz = p.stat().st_size
         if total + sz > MAX_DOC_BYTES and _priority(name) > 1:
             continue
-        total += sz
+        if _priority(name) > 0:  # the original (ifc/pdf) has its own place and must not crowd out previews and 3D
+            total += sz
         kept.append((name, p))
     return kept
 

@@ -4,6 +4,7 @@ import { workspaceApi } from '../lib/api'
 import { UploadAction } from './workspace-navigation'
 import type { Document } from '../lib/types'
 import { loadRevisionComparison, RevisionSummary, type RevisionEntry, type RevisionFeedEntry, type RevisionComparison } from './changes-screen'
+import { readChange, summariseChanges } from '../lib/change-copy'
 import './compare-screen.css'
 
 type Mode = 'Side by side' | 'Wipe' | 'Overlay'
@@ -57,6 +58,8 @@ export function CompareScreen({ docs, demo }: { docs: Document[]; demo: boolean 
   const image = comparison?.image
   const versionLabel = (version: string | number | undefined) => typeof version === 'number' ? `Version ${version}` : version || 'Unknown version'
   const label = (entry: RevisionEntry) => `${versionLabel(entry.summary.version_a)} to ${versionLabel(entry.summary.version_b)}${entry.summary.n_changes == null ? '' : ` · ${entry.summary.n_changes} changes`}`
+  const readings = (comparison?.changes ?? []).map((change) => readChange(change, image ?? { w: 1, h: 1 }))
+  const reading = ({ change, text }: { change: RevisionComparison['changes'][number]; text: string }) => <article key={change.change_id} tabIndex={0} data-change-id={change.change_id} data-active={active === change.change_id || undefined} onFocus={() => setActive(change.change_id)} onBlur={() => setActive(null)} onMouseEnter={() => setActive(change.change_id)} onMouseLeave={() => setActive(null)}><span className="cmp-number">{change.n}</span><p>{text}</p></article>
   const boxes = (side: 'v1' | 'v2') => comparison?.changes.map((change) => {
     const box = change[side]?.bbox_px
     if (!box || !image) return null
@@ -87,7 +90,9 @@ export function CompareScreen({ docs, demo }: { docs: Document[]; demo: boolean 
           {mode === 'Wipe' && <input className="cmp-wipe" type="range" min="0" max="100" value={wipe} aria-label="Wipe position" onChange={(event) => setWipe(Number(event.target.value))} />}</div>}
       </div>
       <aside className="cmp-readings" aria-label="Differences"><h3>{comparison.changes.length} {comparison.changes.length === 1 ? 'difference' : 'differences'}</h3>
-        {comparison.changes.map((change) => <article key={change.change_id} tabIndex={0} data-change-id={change.change_id} data-active={active === change.change_id || undefined} onFocus={() => setActive(change.change_id)} onBlur={() => setActive(null)} onMouseEnter={() => setActive(change.change_id)} onMouseLeave={() => setActive(null)}><span className="cmp-number">{change.n}</span><p>{change.sentence}</p></article>)}
+        <p className="cmp-summary">{summariseChanges(readings)}</p>
+        {readings.filter((reading) => !reading.small).map(reading)}
+        {readings.some((entry) => entry.small) && <details className="cmp-small"><summary>Small linework edits ({readings.filter((entry) => entry.small).length})</summary>{readings.filter((entry) => entry.small).map(reading)}</details>}
         {!comparison.changes.length && <div className="cmp-empty"><p className="tools-muted">No differences were found between these versions.</p><a className="button button-raised button-size-default" href={`#/chat?doc=${encodeURIComponent(chosen?.summary.doc_id || chosen?.doc_b || comparison.doc_id)}`}>Ask about this drawing</a></div>}
         <small>{comparison.note}</small><small>{comparison.generated_for_demo ? 'generated for demo' : `Source: ${comparison.source}`}</small>
       </aside>

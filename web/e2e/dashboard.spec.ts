@@ -7,7 +7,7 @@ const usd = (value: number | null | undefined) => typeof value === 'number' && N
 
 async function expectBenchTotals(page: Page, result: BenchResult) {
   const totals = result.data.cells?.['ALL x ALL']
-  await expect(page.getByTestId('bench-accuracy')).toHaveText(percent(totals?.accuracy))
+  await expect(page.getByTestId('bench-accuracy')).toHaveText(typeof totals?.accuracy === 'number' && Number.isFinite(totals.accuracy) ? `${(totals.accuracy * 100).toFixed(2)}%` : '')
   await expect(page.getByTestId('bench-answered-accuracy')).toHaveText(percent(totals?.answered_accuracy))
   await expect(page.getByTestId('bench-cost-per-answer')).toHaveText(usd(totals?.cost_usd_per_answer))
   const scored = totals?.scored ?? (typeof totals?.n === 'number' && typeof totals.unscored === 'number' ? totals.n - totals.unscored : undefined)

@@ -28,3 +28,7 @@
 .cmp-empty { display: grid; justify-items: start; gap: 12px; }
 .cmp-number { flex: none; width: 22px; height: 22px; border-radius: 11px; background: #111; color: #fff; display: grid; place-items: center; font-size: 12px; }
 @media (max-width: 800px) { .cmp-body { grid-template-columns: minmax(0, 1fr); } .cmp-sheets.mode-side-by-side { grid-template-columns: minmax(0, 1fr); } .cmp-controls select { min-width: 0; width: 100%; } .cmp-controls label { flex: 1 1 100%; } .cmp-readings { max-height: none; } }
+.cmp-summary { margin: 0; font-size: var(--text-body-sm); color: var(--muted-foreground, inherit); }
+.cmp-small { display: grid; gap: 8px; }
+.cmp-small > summary { cursor: pointer; font-size: var(--text-body-sm); margin-bottom: 8px; }
+.cmp-small[open] > article + article { margin-top: 8px; }

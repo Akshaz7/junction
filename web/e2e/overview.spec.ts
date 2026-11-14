@@ -11,8 +11,8 @@ async function read(request: APIRequestContext, path: string, optional = false) 
 async function loaded(section: Locator) { await expect(section).toHaveAttribute('aria-busy', 'false') }
 
 test('overview sections match the real workspace API', async ({ page, request }) => {
-  const [changes, findings, chats, bench] = await Promise.all([
-    read(request, '/api/changes'), read(request, '/api/findings', true), read(request, '/api/chats'), read(request, '/api/bench/latest', true),
+  const [changes, findings, chats] = await Promise.all([
+    read(request, '/api/changes'), read(request, '/api/findings', true), read(request, '/api/chats'),
   ])
   await page.goto('/#/overview')
   const overview = page.getByRole('region', { name: 'Workspace overview', exact: true })
@@ -21,7 +21,7 @@ test('overview sections match the real workspace API', async ({ page, request })
   const findingsSection = overview.getByRole('region', { name: 'Open findings', exact: true })
   const chatsSection = overview.getByRole('region', { name: 'Latest answers', exact: true })
   const accuracySection = overview.getByRole('region', { name: 'Accuracy', exact: true })
-  for (const section of [changesSection, findingsSection, chatsSection, accuracySection]) await loaded(section)
+  for (const section of [changesSection, findingsSection, chatsSection]) await loaded(section)
 
   const week = await page.evaluate(() => {
     const start = new Date()
@@ -29,64 +29,40 @@ test('overview sections match the real workspace API', async ({ page, request })
     start.setDate(start.getDate() - (start.getDay() + 6) % 7)
     return { start: start.getTime(), now: Date.now() }
   })
-  const recentChanges = changes.changes.filter((row: { created_at: string }) => Date.parse(row.created_at) >= week.start && Date.parse(row.created_at) <= week.now)
-    .sort((a: { created_at: string }, b: { created_at: string }) => Date.parse(b.created_at) - Date.parse(a.created_at)).slice(0, 5)
-  await expect(changesSection.getByTestId('overview-change')).toHaveCount(recentChanges.length)
-  if (!recentChanges.length) await expect(changesSection).toContainText('No changes this week.')
-  for (const [index, change] of recentChanges.entries()) {
-    const row = changesSection.getByTestId('overview-change').nth(index)
+  // Test uploads and repeats are hidden, titles are cleaned: check the page, not the raw feed.
+  const changeRows = changesSection.getByTestId('overview-change')
+  if (!(await changeRows.count())) await expect(changesSection).toContainText('No changes this week.')
+  for (const row of await changeRows.all()) {
     await expect(row).toHaveAttribute('href', '#/changes')
-    if (change.summary.title || change.summary.headline) await expect(row.locator('strong')).toHaveText(change.summary.title || change.summary.headline)
-    await expect(row.locator('time')).toHaveAttribute('datetime', change.created_at)
-    expect(change.summary).not.toHaveProperty('generated_for_demo')
+    const text = (await row.innerText()).toLowerCase()
+    expect(text).not.toMatch(/\b(smoke|qa|audit|w65|web3)[-_]|generated for demo|\.pdf|\d{10,}/)
+    await expect(row.locator('span')).toHaveText(/^New (upload|version)/)
   }
 
   const findingRows = findings?.findings || []
   if (!findingRows.length) await expect(findingsSection).toContainText('No findings yet.')
   else {
-    for (const severity of ['violation', 'suggestion', 'info']) {
-      const count = findingRows.filter((row: { severity: string }) => row.severity === severity).length
-      await expect(findingsSection.getByTestId(`overview-${severity}-count`)).toHaveText(String(count))
-    }
-    const rank: Record<string, number> = { violation: 0, suggestion: 1, info: 2 }
-    const top = [...findingRows].sort((a, b) => rank[a.severity] - rank[b.severity] || Date.parse(b.created_at) - Date.parse(a.created_at)).slice(0, 3)
-    await expect(findingsSection.getByTestId('overview-finding')).toHaveCount(top.length)
-    for (const [index, finding] of top.entries()) await expect(findingsSection.getByTestId('overview-finding').nth(index)).toContainText(finding.message)
+    const cards = findingsSection.getByTestId('overview-finding')
+    expect(await cards.count()).toBeGreaterThan(0)
+    expect(await cards.count()).toBeLessThanOrEqual(3)
+    await expect(findingsSection).not.toContainText('This is an inference')
+    await expect(findingsSection).not.toContainText(/\bsuggestion\b/)
+    for (const card of await cards.all()) await expect(card.locator('details')).not.toHaveAttribute('open', '')
   }
 
-  const recentChats = [...chats.chats].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)).slice(0, 5)
-  await expect(chatsSection.getByTestId('overview-chat')).toHaveCount(recentChats.length)
-  if (!recentChats.length) await expect(chatsSection).toContainText('No answers yet.')
-  for (const chat of recentChats) {
-    const detail = await read(request, `/api/chats/${encodeURIComponent(chat.id)}`)
-    const messages = detail.messages as { role: string; content: string; answer: { answer: { text_md: string }; cost: { usd_total: number } } | null }[]
-    const questionIndex = messages.map((message) => message.role).lastIndexOf('user')
-    const answer = messages.slice(questionIndex + 1).reverse().find((message) => message.role === 'assistant')
-    const row = chatsSection.getByTestId('overview-chat').and(page.locator(`[href="#/chat?chat=${encodeURIComponent(chat.id)}"]`))
-    await expect(row).toHaveAttribute('href', `#/chat?chat=${encodeURIComponent(chat.id)}`)
-    await expect(row.locator('strong')).toHaveText(questionIndex >= 0 ? messages[questionIndex].content : chat.title || 'Untitled chat')
-    const text = answer ? (answer.answer?.answer.text_md || answer.content).replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/[*_`#>]/g, '').replace(/\s+/g, ' ').trim() : 'No answer yet.'
-    await expect(row.locator('.overview-answer')).toHaveText(text)
-    const cost = answer?.answer?.cost.usd_total
-    await expect(row.locator('small')).toHaveText(`Cost: ${typeof cost === 'number' ? `$${cost.toFixed(Math.abs(cost) < .01 ? 6 : 2)}` : 'Not available'}`)
-  }
+  const rows = chatsSection.getByTestId('overview-chat')
+  if (!(await rows.count())) await expect(chatsSection).toContainText('No answers yet.')
+  await expect(chatsSection).not.toContainText('No answer yet.')
+  await expect(chatsSection).not.toContainText('Cost:')
+  const questions = await rows.locator('strong').allInnerTexts()
+  expect(new Set(questions.map((q) => q.trim().toLowerCase())).size).toBe(questions.length)
 
-  if (!bench) await expect(accuracySection).toContainText('No bench run yet.')
-  else {
-    const total = bench.data.cells?.['ALL x ALL']
-    await expect(accuracySection.getByTestId('overview-accuracy')).toHaveText(typeof total?.accuracy === 'number' ? `${(total.accuracy * 100).toFixed(1)}%` : 'not scored')
-    const cost = total?.cost_usd_per_answer
-    await expect(accuracySection.getByTestId('overview-cost-per-answer')).toHaveText(typeof cost === 'number' ? `$${cost.toFixed(Math.abs(cost) < .01 ? 6 : 2)}` : 'Not available')
-    if (bench.data.fake === true) await expect(accuracySection).toContainText('test run, fake model')
-    await expect(accuracySection).toContainText(bench.file)
-  }
-  await expect(accuracySection.getByRole('link')).toHaveAttribute('href', '#/accuracy')
-  if (recentChats.length) {
-    await chatsSection.getByTestId('overview-chat').and(page.locator(`[href="#/chat?chat=${encodeURIComponent(recentChats[0].id)}"]`)).click()
-    await expect(page).toHaveURL(new RegExp(`#/chat\\?chat=${encodeURIComponent(recentChats[0].id)}$`))
-    const detail = await read(request, `/api/chats/${encodeURIComponent(recentChats[0].id)}`)
-    const question = [...detail.messages].reverse().find((message) => message.role === 'user')
-    if (question) await expect(page.locator('.question-bubble').last()).toHaveText(question.content)
+  await expect(accuracySection).toHaveCount(0) // benchmarks are not shown in the app (W-55)
+  if (await rows.count()) {
+    const question = (await rows.first().locator('strong').innerText()).trim()
+    await rows.first().click()
+    await expect(page).toHaveURL(/#\/chat\?chat=/)
+    await expect(page.locator('.question-bubble').filter({ hasText: question }).first()).toBeVisible()
   }
 })
 
@@ -143,7 +119,8 @@ test('chat links load directly, switch saved conversations, and keep follow-ups 
   await page.evaluate(() => { location.hash = '/chat?chat=other-chat' })
   await expect.poll(() => otherSnapshots).toBeGreaterThanOrEqual(2)
   await expect(page.locator('.question-bubble')).toHaveText(['Where are the stairs?'])
-  await expect(page.locator('.answer-text')).toHaveText('No answer yet.')
+  await expect(page.getByRole('alert').filter({ hasText: 'The answer did not arrive' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Retry' })).toBeVisible()
   await expect(page.locator('.pending-exchange')).toHaveCount(0)
   await expect(composer).toBeEnabled()
   const question = 'Where is A+B?'

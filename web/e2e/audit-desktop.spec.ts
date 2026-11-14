@@ -6,9 +6,35 @@ import { expect, test, type Page } from '@playwright/test'
  * Destructive buttons are skipped here and exercised in the end-to-end flow specs below.
  */
 test.use({ viewport: { width: 1440, height: 900 }, launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] } })
-test.setTimeout(600_000)
+test.setTimeout(process.env.AUDIT_RPM ? 7_200_000 : 600_000)
 
-const routes = ['overview', 'chat', 'compare', 'changes', 'library', 'data', 'tools', 'accuracy', 'skills', 'automations', 'findings']
+// Against the deployed site (AUDIT_RPM set) every /api request waits for its slot so the backend rate limit is never hit.
+let nextSlot = 0
+const cache = new Map<string, { status: number; headers: Record<string, string>; body: Buffer; at: number }>()
+test.beforeEach(async ({ context }) => {
+  const rpm = Number(process.env.AUDIT_RPM)
+  if (!rpm) return
+  const gap = 60_000 / rpm
+  await context.route('**/api/**', async (route) => {
+    const request = route.request(), url = request.url(), get = request.method() === 'GET'
+    const exempt = get && /\/api\/(health|docs\/[^/]+\/(files\/[^/]+|pages\/[^/]+\/image|scene|ingest))(\?|$)/.test(url)
+    if (exempt) return route.continue()
+    if (!get) cache.clear() // any write invalidates what the page may have read
+    else {
+      const hit = cache.get(url)
+      if (hit && Date.now() - hit.at < 120_000) return route.fulfill({ status: hit.status, headers: hit.headers, body: hit.body })
+    }
+    const at = Math.max(Date.now(), nextSlot); nextSlot = at + gap
+    await new Promise((r) => setTimeout(r, at - Date.now()))
+    if (!get) return route.continue()
+    const response = await route.fetch()
+    const entry = { status: response.status(), headers: response.headers(), body: await response.body(), at: Date.now() }
+    if (response.ok() && !/text\/event-stream/.test(entry.headers['content-type'] ?? '')) cache.set(url, entry)
+    await route.fulfill({ response, body: entry.body })
+  })
+})
+
+const routes = ['overview', 'chat', 'compare', 'changes', 'library', 'data', 'tools', 'skills', 'automations', 'findings']
 const destructive = /delete|remove|trash|sign out|clear all|discard/i
 const banned = /not implemented|coming soon|placeholder|lorem ipsum|todo|nothing to show yet|undefined|\[object/i
 const base = 'button:visible, a:visible, [role=menuitem]:visible, [role=tab]:visible'
@@ -17,10 +43,18 @@ const domHash = (page: Page) => page.evaluate(() => { const s = document.body.in
 async function audit(page: Page, route: string, problems: string[], seen: string[], setup?: (page: Page) => Promise<void>, scope = 'body') {
   const consoleErrors: string[] = []
   page.on('console', (m) => { if (m.type() === 'error' && !/favicon|WebSocket|ws:|Failed to load resource/i.test(m.text())) consoleErrors.push(m.text()) })
-  page.on('response', (r) => { if (r.status() >= 400 && !/favicon|\/files\/(elements|text-\d+)\.json/.test(r.url())) consoleErrors.push(`HTTP ${r.status()} ${r.url().replace(/^https?:\/\/[^/]+/, '')}`) })
+  page.on('response', (r) => { if (r.status() >= 400 && !(/favicon/.test(r.url()) || (process.env.AUDIT_ALLOW_OPTIONAL_404 && /\/files\/(elements|text-\d+)\.json|\/assets\/index-[\w-]+\.(js|css)/.test(r.url())))) consoleErrors.push(`HTTP ${r.status()} ${r.url().replace(/^https?:\/\/[^/]+/, '')}`) })
   page.on('pageerror', (e) => consoleErrors.push(String(e)))
   const selector = scope === 'body' ? base : base.split(', ').map((x) => `${scope} ${x}`).join(', ')
-  const open = async () => { await page.goto('about:blank'); await page.goto(`/#/${route}`); await page.waitForLoadState('networkidle').catch(() => {}); await page.waitForTimeout(400); if (setup) await setup(page) }
+  const open = async () => {
+    // A redeploy mid-run can serve a page whose hashed bundle is gone: reload until the shell renders.
+    for (let attempt = 0; attempt < 4; attempt++) {
+      await page.goto('about:blank'); await page.goto(`/#/${route}`)
+      if (await page.locator('.rail').first().waitFor({ state: 'visible', timeout: 10_000 }).then(() => true).catch(() => false)) break
+    }
+    await page.waitForTimeout(700)
+    if (setup) await setup(page)
+  }
   await open()
   const text = await page.locator(scope === 'body' ? 'main' : scope).first().innerText()
   if (banned.test(text)) problems.push(`${route}: placeholder text "${text.match(banned)![0]}"`)
@@ -55,7 +89,10 @@ async function audit(page: Page, route: string, problems: string[], seen: string
     if (bad) problems.push(`${who} network failure ${bad}`)
     if (!outcome && !reqs && after === before) {
       // A link to the current route is a legitimate no-op only when the href equals the current hash.
-      if (!current && !(href && href === `#/${route}`)) problems.push(`${who} did nothing`)
+      // External source links open a new tab (checked by href/target, the popup is not always reported); Fit drawing is a legitimate no-op when the page is already fitted.
+      const external = tag === 'a' && /^https?:\/\//i.test(href ?? '') && (await el.getAttribute('target')) === '_blank'
+      const alreadyFitted = /^Fit drawing$/i.test(label)
+      if (!current && !external && !alreadyFitted && !(href && href === `#/${route}`)) problems.push(`${who} did nothing`)
     }
   }
   if (consoleErrors.length) problems.push(`${route}: console errors ${[...new Set(consoleErrors)].slice(0, 3).join(' | ')}`)

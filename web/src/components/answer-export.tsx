@@ -137,5 +137,7 @@ function ExportDialog({ answer, docs, chatId, demo, onClose }: ExportAnswerButto
 /** Mount beside an answer's existing actions; no changes to the answer card are needed. */
 export function ExportAnswerButton(props: ExportAnswerButtonProps) {
   const [open, setOpen] = useState(false)
-  return <><button type="button" className="answer-export-button" onClick={() => setOpen(true)}><FileDown size={15} aria-hidden="true" /><span>Export report</span></button>{open && <ExportDialog {...props} onClose={() => setOpen(false)} />}</>
+  const trigger = useRef<HTMLButtonElement>(null)
+  const close = () => { setOpen(false); requestAnimationFrame(() => trigger.current?.focus()) }
+  return <><button ref={trigger} type="button" className="answer-export-button" onClick={() => setOpen(true)}><FileDown size={15} aria-hidden="true" /><span>Export report</span></button>{open && <ExportDialog {...props} onClose={close} />}</>
 }

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { OverviewApi, chatHref, chatPreview, findingCounts, latestChats, oneLine, overviewStarters, starterHref, topFindings, weeklyChanges, type OverviewChat, type OverviewFinding } from './overview'
+import { OverviewApi, chatHref, chatPreview, findingCounts, latestChats, oneLine, overviewStarters, starterHref, topFindings, weeklyChanges, cleanTitle, groupFindings, visibleChats, ruleName, type OverviewChat, type OverviewFinding } from './overview'
 import type { Answer, ChangeEntry } from './types'
 
 const chat = (id: string, created_at: string): OverviewChat => ({ id, title: 'A question', created_at })
-const change = (id: string, created_at: string): ChangeEntry => ({ id, created_at, type: 'new_version', doc_a: 'a', doc_b: 'b', summary: {} })
+const change = (id: string, created_at: string): ChangeEntry => ({ id, created_at, type: 'new_version', doc_a: 'a', doc_b: `doc-${id}`, summary: {} })
 const finding = (id: string, severity: OverviewFinding['severity']): OverviewFinding => ({ id, severity, doc_id: 'doc', message: 'Check this item.', created_at: '2026-11-14T10:00:00Z' })
 const transport = (responses: Record<string, [number, unknown]>, paths: string[] = []): typeof fetch => async (input) => {
   const path = String(input)
@@ -65,17 +65,17 @@ describe('overview real API', () => {
     await expect(new OverviewApi(transport({ '/api/findings': [500, {}] })).getFindings()).rejects.toThrow('(500)')
   })
 
-  it('loads messages for at most five chats and preserves an unavailable detail', async () => {
+  it('loads messages for at most ten chats (the page then shows five with answers) and preserves an unavailable detail', async () => {
     const paths: string[] = []
-    const chats = Array.from({ length: 6 }, (_, i) => chat(String(i), `2026-11-${10 + i}T10:00:00Z`))
+    const chats = Array.from({ length: 12 }, (_, i) => chat(String(i).padStart(2,'0'), `2026-11-${10 + i}T10:00:00Z`))
     const responses: Record<string, [number, unknown]> = { '/api/chats': [200, { chats }] }
     for (const row of chats) responses[`/api/chats/${row.id}`] = [200, { ...row, messages: [] }]
-    responses['/api/chats/3'] = [404, {}]
+    responses['/api/chats/03'] = [404, {}]
     const rows = await new OverviewApi(transport(responses, paths)).getChats()
-    expect(rows.map((row) => row.id)).toEqual(['5', '4', '3', '2', '1'])
-    expect(rows[2].detailUnavailable).toBe(true)
-    expect(paths).toHaveLength(6)
-    expect(paths).not.toContain('/api/chats/0')
+    expect(rows.map((row) => row.id)).toHaveLength(10)
+    expect(rows.find((row) => row.id === '03')?.detailUnavailable).toBe(true)
+    expect(paths).toHaveLength(11)
+    expect(paths).not.toContain('/api/chats/00')
   })
 
   it('uses the supplied abort signal and never substitutes data on network failure', async () => {
@@ -85,5 +85,30 @@ describe('overview real API', () => {
       throw new TypeError('offline')
     })
     await expect(api.getChanges(controller.signal)).rejects.toThrow('offline')
+  })
+})
+
+describe('overview plain-language helpers', () => {
+  it('cleans file-style titles and hides test uploads and repeats', () => {
+    expect(cleanTitle('uploads__Ground-floor-plan_p001.pdf')).toBe('Uploads  Ground floor plan'.replace('Uploads  ', ''))
+    expect(cleanTitle('web3-notes-1794666920790-generated-for-demo')).toBe('Web3 notes')
+    const now = new Date(2026, 10, 14, 12), at = new Date(2026, 10, 14, 10).toISOString()
+    const rows: ChangeEntry[] = ['qa-1', 'smoke-x', 'audit-2', 'w65-3', 'web3-4', 'Real plan', 'Real plan'].map((name, i) => ({ id: String(i), created_at: at, type: 'new_document', doc_a: null, doc_b: name, summary: { doc_id: name, title: name } }))
+    expect(weeklyChanges(rows, now).map((row) => row.summary.title)).toEqual(['Real plan'])
+  })
+
+  it('groups identical findings into one card listing the storeys, with a short rule name', () => {
+    const base = { doc_id: 'ac20', severity: 'suggestion' as const, message: 'long', created_at: '2026-11-14T10:00:00Z', rule: { source_title: 'Decree of the Ministry of the Environment on fire safety of buildings 848/2017 (English text), 33 §' } }
+    const rows: OverviewFinding[] = ['Keller', 'EG', '2. OG'].map((storey, i) => ({ ...base, id: String(i), detail: { title: `Only 1 exit found on ${storey}`, storey } }))
+    const groups = groupFindings(rows)
+    expect(groups).toHaveLength(1)
+    expect(groups[0].storeys).toEqual(['Keller', 'EG', '2. OG'])
+    expect(ruleName(rows[0])).toBe('Fire safety 848/2017 §33')
+  })
+
+  it('drops chats with no answer and repeated questions', () => {
+    const answered = (id: string, q: string): OverviewChat => ({ id, title: null, created_at: '2026-11-14T10:00:00Z', messages: [{ id: 'u', role: 'user', content: q, created_at: '', answer: null }, { id: 'a', role: 'assistant', content: 'Done.', created_at: '', answer: null }] })
+    const empty: OverviewChat = { id: 'e', title: 'x', created_at: '2026-11-14T10:00:00Z', messages: [{ id: 'u', role: 'user', content: 'Hi', created_at: '', answer: null }] }
+    expect(visibleChats([empty, answered('1', 'How many doors?'), answered('2', 'how many doors?')]).map((c) => c.id)).toEqual(['1'])
   })
 })

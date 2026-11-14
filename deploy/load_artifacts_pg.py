@@ -26,7 +26,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 KEEP = re.compile(r"^(scene\.(json|glb|usdz)|elements\.json|doc\.json|pages\.json|planmap-\d+\.json|text(-\d+)?\.json"
-                  r"|page-\d+(\.thumb)?\.png)$")
+                  r"|piping\.json|page-\d+(\.thumb)?\.png)$")
 
 
 def doc_ids(path: str) -> list[str]:

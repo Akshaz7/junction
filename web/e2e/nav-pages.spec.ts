@@ -17,7 +17,9 @@ test('Compare shows a real version pair with numbered boxes and readings', async
   const detail = await (await request.get(`${api}/api/changes/${smallest.id}`)).json() as { changes: { n: number }[] }
   const readings = screen.getByRole('complementary', { name: 'Differences' })
   await expect(readings.locator('article')).toHaveCount(detail.changes.length)
-  await expect(readings.locator('article').first().locator('.cmp-number')).toHaveText(String(detail.changes[0].n))
+  expect((await readings.locator('.cmp-number').allTextContents()).sort()).toEqual(detail.changes.map((c) => String(c.n)).sort())
+  await expect(readings).toContainText(/\d+ changes?:/)
+  await expect(readings).not.toContainText(/no text change|Changed region/)
   await expect(screen.getByRole('img', { name: 'Older version' })).toBeVisible()
   await expect(screen.getByRole('img', { name: 'Newer version' })).toBeVisible()
   await expect(screen.locator('.cmp-box').first()).toBeVisible()
@@ -52,7 +54,7 @@ test('phone: Compare, Library and Tools are reachable from More without overflow
   await page.goto('/')
   const nav = page.getByRole('navigation', { name: 'Mobile navigation', exact: true })
   for (const label of ['Compare', 'Library', 'Tools']) {
-    await nav.getByText('More', { exact: true }).click()
+    await nav.getByLabel('More pages', { exact: true }).click()
     await nav.getByRole('link', { name: label, exact: true }).click()
     await expect(page.getByRole('heading', { name: label, level: 1, exact: true })).toBeVisible()
     await page.waitForTimeout(500)
