@@ -141,8 +141,23 @@ def _evidence(doc: Doc, items: list[Item]):
             if i.bbox_px:
                 boxes.append({"item_id": i.item_id, "page": i.page, "bbox_px": i.bbox_px, "label": str(k)})
     else:
-        cites.append({"n": 1, "doc_id": doc.doc_id, "page": 1, "kind": "element", "bbox_px": None,
-                      "item_ids": [i.item_id for i in items], "quote": None})
+        # IFC: one citation per storey page that has a 2D plan (boxes numbered like the 3D/AR highlights); the rest on page 1.
+        placed = [i for i in items if i.bbox_px]
+        rest = [i for i in items if not i.bbox_px]
+        by_page: dict[int, list[Item]] = {}
+        for i in placed:
+            by_page.setdefault(i.page, []).append(i)
+        for pg, its in sorted(by_page.items()):
+            cites.append({"n": len(cites) + 1, "doc_id": doc.doc_id, "page": pg, "kind": "element",
+                          "bbox_px": [min(i.bbox_px[0] for i in its), min(i.bbox_px[1] for i in its),
+                                      max(i.bbox_px[2] for i in its), max(i.bbox_px[3] for i in its)],
+                          "item_ids": [i.item_id for i in its], "quote": None})
+        if rest or not cites:
+            cites.append({"n": len(cites) + 1, "doc_id": doc.doc_id, "page": 1, "kind": "element", "bbox_px": None,
+                          "item_ids": [i.item_id for i in rest], "quote": None})
+        for k, i in enumerate(items[:MAX_BOXES], 1):
+            if i.bbox_px:
+                boxes.append({"item_id": i.item_id, "page": i.page, "bbox_px": i.bbox_px, "label": str(k), "kind": i.kind})
     ids = [i.item_id for i in items]
     scene = {"doc_id": doc.doc_id, "highlight_item_ids": ids, "camera_target_item_id": ids[0] if ids else None}
     return boxes, cites, scene

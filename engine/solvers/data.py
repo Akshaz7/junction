@@ -61,6 +61,16 @@ def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
                  name=x.get("name"), type_name=x.get("type_name"), source="ifc", bbox_m=x.get("bbox_m"))
             for x in e["elements"]
         ]
+        # D-07 storey plans: one page per storey. Give each element its page and pixel box so answers can draw 2D boxes.
+        placed = {}
+        for p in pms:
+            m = _json(p)
+            for x in m.get("items", []):
+                if x.get("bbox_px"):
+                    placed[x["item_id"]] = (m.get("page", 1), x["bbox_px"])
+        for it in items:
+            if it.item_id in placed:
+                it.page, it.bbox_px = placed[it.item_id]
         return Doc(doc_id, "ifc", items, title, e.get("storeys") or [], meta=e.get("building") or {})
     if pms:
         items, scale = [], None
