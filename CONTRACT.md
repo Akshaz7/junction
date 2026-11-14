@@ -1,4 +1,4 @@
-# CONTRACT — version 2
+# CONTRACT — version 3
 
 Only the LEAD edits this file. Each change bumps the version and adds one line to DECISIONS.md.
 
@@ -112,3 +112,9 @@ Source: `refs/stoabuild-full-text.md`. Follow its style:
 
 ### 5.10 iOS bridge
 The iOS app shows the web app (mobile layout) in a WKWebView. The web app calls `window.webkit.messageHandlers.ar.postMessage({doc_id, item_ids})` for "Show on table". The native AR screen loads `scene.usdz`, finds prims by `usd_name`, and listens on `/ws` for `scene.highlight`.
+
+### 5.11 Scene commands and tags (v3)
+- `scene.json items[item_id].tag`: short stable tag per doc. IFC mark when present (e.g. door "T12"), else kind letter + number in reading order: W1.. windows, D1.. doors, R1.. rooms, WL1.. walls, WC1.. toilets, S1.. sinks, SH1.. showers, B1.. bathtubs. Unique within a doc.
+- Answer object: `evidence.scene.commands`: list of `{op, item_ids, labels?}` with `op` ∈ `highlight` | `hide` | `restore` | `reset` | `isolate`. `labels` maps item_id → tag/number shown above the item.
+- WebSocket event `scene.edit`: `{type:"scene.edit", doc_id, chat_id?, op, item_ids, labels?, edit_id, ts}`. Clients apply it in order; `reset` restores everything for that doc. Server persists the per-chat edit layer and sends `{type:"scene.state", doc_id, hidden:[item_ids], highlighted:[...], labels:{...}}` to a client when it joins or calls `GET /api/chats/{id}/scene-state`.
+- Edits never change source data; counts after an edit carry a note ("with W7 hidden").
