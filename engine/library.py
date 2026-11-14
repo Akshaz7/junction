@@ -62,7 +62,9 @@ def fix_typos(question: str) -> tuple[str, list[tuple[str, str]]]:
             return w
         fixes.append((w, r))
         return r.capitalize() if w[0].isupper() else r
-    return re.sub(r"[A-Za-z]{2,}", sub, question), fixes
+    # a quoted label ('Balcone', "Zimmer") is the drawing's own word, never a typo
+    parts = re.split(r"((?<![\w])'[^']+'(?!\w)|\"[^\"]+\")", question)
+    return "".join(p if i % 2 else re.sub(r"[A-Za-z]{2,}", sub, p) for i, p in enumerate(parts)), fixes
 
 
 # ------------------------------------------------------------------ library questions

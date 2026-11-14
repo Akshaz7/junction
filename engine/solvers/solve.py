@@ -18,6 +18,7 @@ from .data import Doc, Item, load_doc
 
 ROOT = Path(__file__).resolve().parents[2]
 ARTIFACTS = ROOT / "artifacts"
+ROOM_TYPE_MIN_CONF = 0.85   # unlabelled model-typed rooms below this are not counted as bedroom/kitchen/bathroom (clean calib set: 63% -> 74%)
 MIN_CONF = 0.5          # plan-map items below this are ignored
 MAX_BOXES = 300
 NUMERIC = ("count", "area", "length", "volume")
@@ -101,6 +102,36 @@ def _label_matches(it: Item, text: str) -> bool:
     t = norm(re.sub(r"\s*\([^)]*\)\s*$", "", text))
     cands = [it.label, it.name, it.type_name, it.props.get("room_type")]
     return any(c and norm(c) == t for c in cands)
+
+
+def _pt_in_poly(pt, poly) -> bool:
+    x, y = pt
+    c = False
+    n = len(poly)
+    for k in range(n):
+        x1, y1 = poly[k]
+        x2, y2 = poly[(k + 1) % n]
+        if (y1 > y) != (y2 > y) and x < (x2 - x1) * (y - y1) / (y2 - y1) + x1:
+            c = not c
+    return c
+
+
+def _rooms_holding_text(doc, rooms, sel, quoted, page, hidden) -> list:
+    """Rooms (not yet selected) with a text item matching a quoted label whose centre lies inside the room outline."""
+    have = {id(i) for i in sel}
+    txt = [t for t in doc.items if t.kind == "text" and t.bbox_px and t.conf >= MIN_CONF and (not page or t.page == page)
+           and any(_label_matches(t, q) for q in quoted)]
+    out = []
+    for r in rooms:
+        if id(r) in have or not r.polygon_px or len(r.polygon_px) < 3 or (r.q.get("area_m2") or r.props.get("area_m2_geom") or 0) < 1:
+            continue
+        if hidden and r.item_id in hidden:
+            continue
+        for t in txt:
+            if t.page == r.page and _pt_in_poly(((t.bbox_px[0] + t.bbox_px[2]) / 2, (t.bbox_px[1] + t.bbox_px[3]) / 2), r.polygon_px):
+                out.append(r)
+                break
+    return out
 
 
 def _room_id(q: str) -> str | None:
@@ -382,9 +413,14 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
                         trace, route, t0)
 
     if doc.mode == "planmap" and kind == "storey" and p.type == "count" and not page:
-        n = max(1, doc.pages)   # a plan-map page is one level; this is the number of pages read
-        trace.append(_step("count", f"{n} storey(s) = {doc.pages} plan page(s)"))
-        text = f"This drawing shows **{n} {'floor' if n == 1 else 'floors'}** (one per plan page)."
+        from engine import storeys as _storeys   # E-60: several floor plans can share one sheet
+        found = [_storeys.count_storeys([i for i in doc.items if i.page == pg]) for pg in range(1, max(1, doc.pages) + 1)]
+        n = max(1, sum(f["n"] for f in found))
+        how = {"layout": "separate floor plans on the sheet", "labels": "floor names printed on the sheet"}
+        trace.append(_step("count", f"{n} storey(s): {doc.pages} plan page(s); " + ", ".join(f"{f['n']} by {how[f['basis']]}" for f in found)))
+        extra = n > max(1, doc.pages)
+        text = (f"This drawing shows **{n} {'floor' if n == 1 else 'floors'}** "
+                + ("(separate floor plans drawn on the sheet)." if extra else "(one per plan page)."))
         return _answer_obj(question, [doc_id], text, n, "count", 0.6, False, [], [], {"doc_id": doc_id, "highlight_item_ids": [],
                            "camera_target_item_id": None}, trace, route, t0)
 
@@ -494,6 +530,11 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
             if name == "sauna":  # no room type for it in the model: only count rooms whose OCR label says so
                 return _abstain(question, doc_id, "This plan reader has no sauna room type and the label is not reliably read, so I would rather not guess.", trace, route, t0)
             items = [i for i in items if i.props.get("room_type") in types]
+            if p.type == "count":   # a type read only by the segmentation head (no OCR label) must be confident; labelled rooms always count
+                weak = [i for i in items if i.source == "det" and not i.props.get("label_room_type") and i.conf < ROOM_TYPE_MIN_CONF]
+                if weak:
+                    items = [i for i in items if i not in weak]
+                    trace.append(_step("filter", f"{len(weak)} unlabelled room(s) typed by the model below conf {ROOM_TYPE_MIN_CONF} left out"))
             subject = f"{name}s"
             sub_name = name
             trace.append(_step("filter", f"room type {sorted(types)}: {len(items)} matched"))
@@ -519,6 +560,7 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         if not sel and rid:
             sel = [i for i in items if (i.name or "").casefold() == rid.casefold() or (i.label or "").casefold() == rid.casefold()
                    or i.item_id == rid or str(i.props.get("number") or "").casefold() == rid.casefold()]
+        _room_text_counted = False
         if (doc.mode == "planmap" and p.type == "count" and quoted and not rid and not hidden
                 and re.search(r"\brooms?\s+label(?:led|ed)\b", question, re.I)):
             # ROOM_TEXT is an explicit source label, independent of whether its insertion point falls
@@ -527,8 +569,15 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
                       and i.props.get("dxf_layer", "ROOM_TEXT") == "ROOM_TEXT" and (not page or i.page == page)
                       and any(_label_matches(i, t) for t in quoted)]
             if len(labels) > len(sel):
+                _room_text_counted = True
                 sel = labels
                 trace.append(_step("filter", "counted explicit DXF ROOM_TEXT labels; room polygon attribution is incomplete"))
+        if doc.mode == "planmap" and quoted and not rid and sel and not _room_text_counted:
+            # a room whose own label was taken by another tag ("Whg. A" over "Zimmer") still holds the printed word
+            extra = _rooms_holding_text(doc, items, sel, quoted, page, hidden)
+            if extra:
+                sel = sel + extra
+                trace.append(_step("filter", f"{len(extra)} room(s) carry the label as printed text inside their outline although another tag names them"))
         if not sel and (quoted or rid) and doc.mode == "planmap" and not any(i.label for i in items):
             return _abstain(question, doc_id, "The room names on this plan have not been read, so I cannot pick out that room.",
                             trace, route, t0)

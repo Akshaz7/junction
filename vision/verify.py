@@ -252,7 +252,7 @@ def wet_count(img, room, request_id=None):
 
 # ---------------------------------------------------------------- default free pass used by build_planmaps
 CUT = {"door": 0.7, "window": 0.7, "toilet": 0.7}  # picked on calibration drawings; sink/bathtub get no cut (it lowers them on calib+held-out)
-FREE = {"dup_gap_frac": 0.006, "dup_iou": 0.3, "dup_kinds": ("door", "window", "toilet", "bathtub", "shower")}
+FREE = {"dup_gap_frac": 0.003, "dup_iou": 0.3, "dup_kinds": ("door", "window", "toilet", "bathtub", "shower")}
 
 
 def free_pass(items, W, H):
