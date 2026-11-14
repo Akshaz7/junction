@@ -115,7 +115,8 @@ final class HighlightController {
             let style = kinds[item.id].flatMap { $0.isEmpty ? nil : KindColors.style(for: $0) }
             let base = style.flatMap { $0.key == "other" ? nil : $0.label } ?? captions[item.id]
             // "Door \u{00B7} 0.90 m": the detail keeps its own case (capitalising would turn "m" into "M").
-            let caption = base.map { $0.capitalized(with: nil) + (details[item.id].map { " \u{00B7} " + $0 } ?? "") }
+            // With a detail the numbered badge already names the item ("D3"), so the caption is "D3 \u{00B7} 1.00 m".
+            let caption = details[item.id] ?? base.map { $0.capitalized(with: nil) }
             addLabel(item.label, caption: caption,
                      for: item.id, above: item.entity, style: style)
         }

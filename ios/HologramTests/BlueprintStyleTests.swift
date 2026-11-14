@@ -48,7 +48,7 @@ final class BlueprintStyleTests: XCTestCase {
         XCTAssertEqual(BlueprintStyle.labelOpacity(width: 1, distance: 100), 0)
         XCTAssertEqual(BlueprintStyle.labelOpacity(width: 0.04, distance: 0.4), 1)
         XCTAssertEqual(BlueprintStyle.labelOpacity(width: 1, distance: 8), 1)
-        let mid = BlueprintStyle.labelOpacity(width: 1, distance: 25)
+        let mid = BlueprintStyle.labelOpacity(width: 1, distance: 50)
         XCTAssertTrue(mid > 0 && mid < 1)
     }
 }

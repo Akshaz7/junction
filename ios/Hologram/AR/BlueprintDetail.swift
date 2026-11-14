@@ -75,6 +75,11 @@ final class BlueprintDetail {
         let elevations = Dictionary(policy.storeys.compactMap { s in s.name.map { ($0, s.elevation_m ?? 0) } },
                                     uniquingKeysWith: { first, _ in first })
         let floorTops = Self.floorTops(manifest: manifest, elevations: elevations)
+        let furniture: [(storey: String, box: SceneBounds)] = manifest.items.values.compactMap { item in
+            guard let kind = item.kind?.lowercased(), ["furniture", "column"].contains(kind),
+                  let storey = item.storey, let box = item.bbox_m else { return nil }
+            return (storey, box)
+        }
         var wallRects: [String: (minX: Float, maxX: Float, minZ: Float, maxZ: Float)] = [:]
         for item in manifest.items.values {
             guard let storey = item.storey, elevations[storey] != nil, let box = item.bbox_m else { continue }
@@ -85,7 +90,17 @@ final class BlueprintDetail {
                 r.minZ = min(r.minZ, box.minimum.z); r.maxZ = max(r.maxZ, box.maximum.z)
                 wallRects[storey] = r
             case "room", "space":
-                addRoom(item, box: box, storey: storey, floorY: floorTops[storey] ?? (elevations[storey] ?? 0) + 0.02)
+                var r = wallRects[storey] ?? (box.minimum.x, box.maximum.x, box.minimum.z, box.maximum.z)
+                r.minX = min(r.minX, box.minimum.x); r.maxX = max(r.maxX, box.maximum.x)
+                r.minZ = min(r.minZ, box.minimum.z); r.maxZ = max(r.maxZ, box.maximum.z)
+                wallRects[storey] = r
+                let floorY = floorTops[storey] ?? (elevations[storey] ?? 0) + 0.02
+                // Labels float above the tallest furniture inside the room so nothing cuts the text.
+                let tallest = furniture.filter { f in
+                    f.storey == storey && f.box.center.x >= box.minimum.x && f.box.center.x <= box.maximum.x
+                        && f.box.center.z >= box.minimum.z && f.box.center.z <= box.maximum.z
+                }.map { $0.box.maximum.y }.max() ?? floorY
+                addRoom(item, box: box, storey: storey, floorY: floorY, labelY: max(floorY, tallest) + 0.03)
             default: break
             }
         }
@@ -120,7 +135,7 @@ final class BlueprintDetail {
         return entity
     }
 
-    private func addRoom(_ item: SceneManifest.Item, box: SceneBounds, storey: String, floorY: Float) {
+    private func addRoom(_ item: SceneManifest.Item, box: SceneBounds, storey: String, floorY: Float, labelY: Float) {
         let extents = box.maximum - box.minimum
         let footprint = SIMD2(extents.x, extents.z)
         guard footprint.x > 0.5, footprint.y > 0.5 else { return }
@@ -136,9 +151,9 @@ final class BlueprintDetail {
         parent.addChild(plate)
         guard area >= BlueprintStyle.minLabelledArea else { return }
         let text = BlueprintStyle.roomLabel(name: name, area: area)
-        guard let label = Self.flatText(text, fitWidth: footprint.x * 0.8, fitDepth: footprint.y * 0.7,
-                                        color: UIColor(white: 0.15, alpha: 1)) else { return }
-        label.entity.position = [box.center.x, floorY + 0.03, box.center.z]
+        guard let label = Self.flatText(text, fitWidth: footprint.x * 0.72, fitDepth: footprint.y * 0.7,
+                                        color: BlueprintStyle.inkColor) else { return }
+        label.entity.position = [box.center.x, labelY, box.center.z]
         label.entity.name = "blueprint-room-label"
         parent.addChild(label.entity)
         floorLabels.append((storey, label))
@@ -151,7 +166,7 @@ final class BlueprintDetail {
         guard width > 1, depth > 1 else { return }
         let y = rect.y + 0.01
         let line = Self.flatMaterial(UIColor(white: 0.12, alpha: 1), alpha: 1)
-        let offset: Float = 0.7
+        let offset: Float = 1.4
         func bar(_ size: SIMD3<Float>, _ at: SIMD3<Float>) {
             let e = ModelEntity(mesh: .generateBox(size: size), materials: [line])
             e.position = at
@@ -165,17 +180,17 @@ final class BlueprintDetail {
         bar([0.05, 0.012, depth], [xLine, y, (rect.minZ + rect.maxZ) / 2])
         bar([0.4, 0.012, 0.05], [xLine, y, rect.minZ])
         bar([0.4, 0.012, 0.05], [xLine, y, rect.maxZ])
-        let ink = UIColor(white: 0.1, alpha: 1)
-        if let t = Self.flatText(BlueprintStyle.dimensionText(width), fitWidth: width * 0.5, fitDepth: 0.9, color: ink) {
-            t.entity.position = [(rect.minX + rect.maxX) / 2, y + 0.01, zLine + 0.5]
+        let ink = BlueprintStyle.inkColor
+        if let t = Self.flatText(BlueprintStyle.dimensionText(width), fitWidth: width * 0.5, fitDepth: 0.9, color: ink, plate: true) {
+            t.entity.position = [(rect.minX + rect.maxX) / 2, y + 0.02, zLine]
             t.entity.name = "blueprint-dimension-label"
             parent.addChild(t.entity)
             floorLabels.append((storey, t))
         }
-        if let t = Self.flatText(BlueprintStyle.dimensionText(depth), fitWidth: depth * 0.5, fitDepth: 0.9, color: ink) {
+        if let t = Self.flatText(BlueprintStyle.dimensionText(depth), fitWidth: depth * 0.5, fitDepth: 0.9, color: ink, plate: true) {
             // Reads bottom to top along the left edge.
             t.entity.orientation = simd_quatf(angle: .pi / 2, axis: [0, 1, 0]) * t.entity.orientation
-            t.entity.position = [xLine - 0.5, y + 0.01, (rect.minZ + rect.maxZ) / 2]
+            t.entity.position = [xLine, y + 0.02, (rect.minZ + rect.maxZ) / 2]
             t.entity.name = "blueprint-dimension-label"
             parent.addChild(t.entity)
             floorLabels.append((storey, t))
@@ -215,18 +230,32 @@ final class BlueprintDetail {
     }
 
     /// Text lying flat on the floor (no billboard), centred, scaled down to fit the given box.
-    private static func flatText(_ text: String, fitWidth: Float, fitDepth: Float, color: UIColor) -> FloorLabel? {
+    private static func flatText(_ text: String, fitWidth: Float, fitDepth: Float, color: UIColor, plate: Bool = false) -> FloorLabel? {
         let font = UIFont.systemFont(ofSize: 0.3, weight: .semibold)
         let mesh = MeshResource.generateText(text, extrusionDepth: 0.002, font: font, containerFrame: .zero,
                                              alignment: .center, lineBreakMode: .byWordWrapping)
         let extents = mesh.bounds.extents
         guard extents.x > 0, extents.y > 0 else { return nil }
         let fit = min(1, fitWidth / extents.x, fitDepth / extents.y)
-        guard fit >= 0.3 else { return nil }
+        guard fit >= 0.2 else { return nil }
         let model = ModelEntity(mesh: mesh, materials: [UnlitMaterial(color: color)])
         // Centre the text on its own origin, then lay it flat so the top of the text points to -z.
         model.position = [-mesh.bounds.center.x, -mesh.bounds.center.y, 0]
         let holder = Entity()
+        // Subtle light halo: four offset copies in paper white behind the ink.
+        let halo = UnlitMaterial(color: BlueprintStyle.paperColor.withAlphaComponent(0.9))
+        for (dx, dy) in [(0.012, 0.0), (-0.012, 0.0), (0.0, 0.012), (0.0, -0.012)] as [(Float, Float)] {
+            let h = ModelEntity(mesh: mesh, materials: [halo])
+            h.position = [-mesh.bounds.center.x + dx, -mesh.bounds.center.y + dy, -0.004]
+            holder.addChild(h)
+        }
+        if plate {
+            // Paper patch behind a dimension value so the number sits centred on its line.
+            let patch = ModelEntity(mesh: .generateBox(size: [extents.x + 0.4, extents.y + 0.3, 0.004]),
+                                    materials: [UnlitMaterial(color: BlueprintStyle.paperColor)])
+            patch.position = [0, 0, -0.01]
+            holder.addChild(patch)
+        }
         holder.addChild(model)
         holder.orientation = simd_quatf(angle: -.pi / 2, axis: [1, 0, 0])
         holder.scale = SIMD3(repeating: fit)

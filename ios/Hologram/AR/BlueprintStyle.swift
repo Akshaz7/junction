@@ -27,6 +27,10 @@ enum BlueprintStyle {
         }
     }
 
+    /// Web app text token (HologramStyle.ink) and the light paper colour used for halos and dimension patches.
+    static let inkColor = HologramStyle.ink
+    static let paperColor = UIColor(red: 0.98, green: 0.97, blue: 0.95, alpha: 1)
+
     static let wallCapColor = UIColor(red: 0.20, green: 0.19, blue: 0.18, alpha: 1)
 
     enum RoomType { case wet, circulation, work, other }
@@ -100,7 +104,7 @@ enum BlueprintStyle {
     static func labelOpacity(width: Float, distance: Float) -> Float {
         guard distance > 0.01, width > 0 else { return 0 }
         let angular = width / distance
-        return min(max((angular - 0.03) / 0.03, 0), 1)
+        return min(max((angular - 0.012) / 0.02, 0), 1)
     }
 
     private static func propertyText(_ property: SceneProperty) -> String? {
