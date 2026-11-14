@@ -11,6 +11,8 @@ final class ARSceneController: ObservableObject {
     @Published private(set) var attribution: SceneAttribution?
     @Published private(set) var sceneIdentity = SceneIdentity(requestedDocID: nil, manifest: nil)
     @Published var demoDocID: String? = nil
+    /// True only when the last load threw; the scene menu shows "Scene unavailable" just then.
+    @Published private(set) var loadFailed = false
     @Published private(set) var isLoaded = false
     @Published private(set) var isPlaced = false
     @Published private(set) var scale: Float = 0.01
@@ -154,6 +156,7 @@ final class ARSceneController: ObservableObject {
         cancelVisibilityTransitions()
         highlightController?.clear()
         isLoaded = false
+        loadFailed = false
         isFixture = false
         isBundledDemo = false
         attribution = nil
@@ -233,6 +236,7 @@ final class ARSceneController: ObservableObject {
         } catch is CancellationError {
             return
         } catch {
+            loadFailed = true
             status = "Unable to load model. \(error.localizedDescription)"
         }
     }

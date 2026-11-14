@@ -28,6 +28,8 @@ struct ARScreen: View {
                            onShow: { card in selectAdvisorCard(card) })
             VStack(spacing: 10) {
                 topBar
+                // Own row below Done + logo so the long scene name never runs under the lockup.
+                HStack { Spacer(); sceneMenu }
                 placementPill
                 kindLegend
                 spotlightCaption
@@ -110,7 +112,11 @@ struct ARScreen: View {
     }
 
     private var sceneName: String {
-        controller.sceneIdentity.title
+        // While loading show the building's name if known, else "Loading…"; "Scene unavailable" only after a failure.
+        if controller.manifest == nil && !controller.loadFailed {
+            return DemoScenes.all.first { $0.id == requestedDocID }?.title ?? "Loading…"
+        }
+        return controller.sceneIdentity.title
     }
 
     private var isPlacing: Bool { controller.isLoaded && !controller.isPlaced }
@@ -122,7 +128,6 @@ struct ARScreen: View {
             }
             .accessibilityIdentifier("ar-done")
             Spacer()
-            sceneMenu
         }
         .overlay(alignment: .top) { StoaProLockup() }
     }
