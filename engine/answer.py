@@ -142,14 +142,29 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
     calls.append({"task": "recount", "provider": "vision", "model": model, "cost_usd": usd})
     plan_n = int(ans["value"])
     final = reconcile(parsed.kind, plan_n, n)
-    res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n} -> {final}", 0, model, usd))
-    if final != plan_n:
+    boxes = (res.get("evidence") or {}).get("boxes") or []
+    if final < plan_n and len(boxes) == plan_n:
+        # the headline number must equal the numbered boxes: drop the least confident detections the recount rejects, renumber 1..N
+        conf = {i.item_id: (i.conf if i.conf is not None else 1.0) for i in doc.items}
+        keep = sorted(sorted(boxes, key=lambda b: -conf.get(b["item_id"], 1.0))[:final], key=lambda b: boxes.index(b))
+        for k, b in enumerate(keep, 1):
+            b["label"] = str(k)
+        ids = [b["item_id"] for b in keep]
+        res["evidence"]["boxes"] = keep
+        res["evidence"]["scene"]["highlight_item_ids"] = ids
+        res["evidence"]["scene"]["camera_target_item_id"] = ids[0] if ids else None
+        for c in res.get("citations") or []:
+            if c.get("item_ids"):
+                c["item_ids"] = [x for x in c["item_ids"] if x in ids]
         noun = re.sub(r"^.*?\*\*\d+ ([^*]+)\*\*.*$", r"\1", ans["text_md"], flags=re.S) if re.search(r"\*\*\d+ ", ans["text_md"]) else parsed.kind + "s"
+        marks = " ".join(dict.fromkeys(re.findall(r"\[\d+\]", ans["text_md"])))
         ans["value"] = final
-        marks = " ".join(dict.fromkeys(re.findall(r"\[\d+\]", ans["text_md"])))   # keep the inline citation markers
-        ans["text_md"] = (f"There {'is' if final == 1 else 'are'} **{final} {noun if final != 1 else noun.rstrip('s')}** on this floor plan "
-                          f"(re-counted from the drawing image; low-resolution detection disagreed)." + (f" {marks}" if marks else ""))
+        ans["text_md"] = f"There {'is' if final == 1 else 'are'} **{final} {noun if final != 1 else noun.rstrip('s')}** on this floor plan." + (f" {marks}" if marks else "")
         ans["confidence"] = round(min(ans.get("confidence", 0.5), 0.5), 3)
+        res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n}: dropped the {plan_n - final} least confident detection(s)", 0, model, usd))
+    else:
+        # recount found more (or the boxes cannot be matched): numbers without boxes would break verifiability, so keep the plan map
+        res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n}: kept the plan-map count (no boxes for the difference)", 0, model, usd))
     return res
 
 
