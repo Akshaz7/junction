@@ -192,6 +192,7 @@ def _qty(it: Item, kind: str, t: str) -> float | None:
     return None
 
 
+EXT_RE = re.compile(r"\b(exterior|external|outer|outside|outdoor|interior|internal|inner|inside|perimeter)\b", re.I)
 OUTDOOR_RE = re.compile(r"balcon|balkon|terras|loggia|veranda|garden|outdoor|garten|sitzplatz", re.I)
 
 
@@ -245,6 +246,38 @@ def _apt_area(question, doc, unit, poly, trace, route, t0):
     return _answer_obj(question, [doc.doc_id], text, round(total, 4), "m²", 0.9, False, boxes, cites, scene, trace, "planmap", t0)
 
 
+FIXTURE_RX = {
+    "toilet": re.compile(r"\b(wcs?|toilet\w*|lavator\w+|urinal\w*|aborte?|water closet)\b|toilet", re.I),
+    "sink": re.compile(r"\b(sink|basin|wash ?basin|waschbecken|waschtisch|lavabo|spüle|spuele)\b|waschbecken|waschtisch", re.I),
+    "shower": re.compile(r"\b(shower|dusche)\w*", re.I),
+    "bathtub": re.compile(r"\b(bath ?tub|badewanne|wanne)\b", re.I),
+}
+FIXTURE_CLASSES = {"terminal", "sanitary", "furniture", "equipment", "proxy", "mep_other", "other"}
+ROOM_FIXTURE = {"toilet": re.compile(r"\b(wcs?|toilet\w*|lavator\w+|aborte?|restrooms?|washrooms?|water closet)\b|toilet", re.I)}
+
+
+def _room_text(i: Item) -> str:
+    return " ".join(str(x) for x in (i.props.get("long_name"), i.type_name, i.name) if x)
+
+
+def ifc_fixtures(doc: Doc, kind: str):
+    """Sanitary fixtures in an IFC model, found generically: fixture elements first (IfcSanitaryTerminal and other
+    terminals/furnishings whose name or type says so, any language), else the rooms named like a WC (long name or type)."""
+    rx = FIXTURE_RX[kind]
+    fx = [i for i in doc.items if i.kind in FIXTURE_CLASSES and i.kind != "room" and rx.search(" ".join(str(x) for x in (i.name, i.type_name) if x))]
+    if kind == "toilet":
+        fx = [i for i in fx if not re.search(r"sink|basin|waschbecken|waschtisch|shower|dusche", " ".join(str(x) for x in (i.name, i.type_name) if x), re.I)]
+    if fx:
+        return fx, ""
+    rrx = ROOM_FIXTURE.get(kind)
+    if rrx is not None:
+        rooms = [i for i in doc.items if i.kind == "room" and rrx.search(_room_text(i))
+                 and not re.search(r"bathroom|bad\b|badezimmer|dusche", _room_text(i), re.I)]
+        if rooms:
+            return rooms, "toilet rooms"
+    return [], ""
+
+
 def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path | str = ARTIFACTS,
           page: int | None = None, hidden: dict[str, str] | None = None) -> dict:
     """hidden: {item_id: tag} the chat has hidden in the scene; they are left out and the answer says so."""
@@ -275,9 +308,14 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
                            "camera_target_item_id": None}, trace, route, t0)
 
     kinds = {kind}
+    kind_note = ""
     if kind in ("shower", "bathtub") and re.search(r"\bshowers?\b", question, re.I) and re.search(r"\bbath ?tubs?\b", question, re.I):
         kinds = {"shower", "bathtub"}   # "showers and bathtubs in total"
     items = [i for i in doc.items if i.kind in kinds]
+    if doc.mode == "ifc" and kind in FIXTURE_RX and not items:
+        items, how = ifc_fixtures(doc, kind)
+        if how:
+            kind_note = how
     if doc.mode == "planmap":
         if page:
             items = [i for i in items if i.page == page]
@@ -306,6 +344,21 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
             items = [i for i in items if i.storey == st]
             where = f"on **{st}**"
             trace.append(_step("scope", f"storey = {st}: {len(items)} left"))
+
+    # --- exterior / interior (IFC only): IsExternal property, else EXTERNAL space boundaries (flag set by pipeline.ifc_props)
+    if doc.mode == "ifc" and kind in ("wall", "door", "window"):
+        m = EXT_RE.search(question)
+        if m:
+            want_ext = m.group(1).lower() in ("exterior", "external", "outer", "outside", "outdoor", "perimeter")
+            flagged = [i for i in items if i.props.get("is_external") is not None]
+            if not flagged:
+                return _abstain(question, doc_id, f"The model does not say which {_plural(kind, 2)} are exterior or interior, so I cannot separate them.",
+                                trace, route, t0)
+            items = [i for i in flagged if bool(i.props["is_external"]) == want_ext]
+            lab = "exterior" if want_ext else "interior"
+            how = " (from the model's space boundaries)" if any(i.props.get("is_external_source") == "space_boundary" for i in items) else ""
+            where = f"{where}, {lab} only{how}"
+            trace.append(_step("scope", f"{lab} {kind}s: {len(items)} left"))
 
     # --- room / label filters
     subject = None
@@ -372,6 +425,8 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
             noun = sub_name[:-1] + "ies" if (n != 1 and sub_name.endswith("y")) else noun
             text = (f"I found **no {sub_name}s** {where}." if n == 0 else
                     f"There {'is' if n == 1 else 'are'} **{n} {noun}** {where}. {marks}")
+        elif kind_note and n:
+            text = f"There {'is' if n == 1 else 'are'} **{n} {kind_note[:-1] if n == 1 else kind_note}** (spaces named as a WC or toilet) {where}. {marks}"
         elif n == 0:
             text = f"I found **no {_plural(kind, 2)}** {where}." if not subject else f"I found **no {_plural(kind, 2)}** matching {subject} {where}."
         else:
