@@ -169,6 +169,31 @@ def _extrude(doc_id: str, ddir: Path, page: int):
     extrude.process(doc_id, ddir, page)
 
 
+def _has_piping(ifc_path: Path) -> bool:
+    """Cheap byte scan: does the IFC contain pipe or flow segments?"""
+    tail = b""
+    with open(ifc_path, "rb") as f:
+        while chunk := f.read(8 << 20):
+            blob = (tail + chunk).upper()
+            if b"IFCPIPESEGMENT(" in blob or b"IFCFLOWSEGMENT(" in blob:
+                return True
+            tail = chunk[-32:]
+    return False
+
+
+def _piping(doc_id: str, ddir: Path, ifc_path: Path):
+    """Plumbing IFC: pipe sizes, lengths and drains into artifacts/<doc>/piping.json (read by the engine's piping intent)."""
+    import sys as _sys
+    _sys.path.insert(0, str(REPO))
+    from vision import piping
+    res = piping.extract(doc_id, ifc_path, ddir / "elements.json")
+    if not (res["pipes"] or res["drains"]):
+        return
+    tmp = ddir / "piping.json.tmp"
+    tmp.write_text(json.dumps(res))
+    tmp.replace(ddir / "piping.json")
+
+
 def _usdz(doc_id: str, ddir: Path):
     import importlib.util as u
     if not u.find_spec("pxr"):
@@ -252,6 +277,13 @@ def _run(doc_id: str, st: Status) -> str:
         ok = st.stage("ifc_scene", lambda: ifc_scene.process(ifc, doc, ddir))
         ok = ok and st.stage("ifc_plans", lambda: ifc_plans.process(doc_id, art))
         ok = ok and st.stage("usdz", lambda: _usdz(doc_id, ddir))
+        if ok and _has_piping(ifc):
+            def pip():
+                try:
+                    _piping(doc_id, ddir, ifc)
+                except Exception as e:  # noqa: BLE001  optional extra: never fail the ingest over it
+                    st.stages[-1]["note"] = f"piping skipped: {e}"[:200]
+            st.stage("piping", pip)
     else:
         from pipeline import pages
         if light:
