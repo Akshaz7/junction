@@ -260,6 +260,14 @@ def _guarded(question, doc_ids, on_event, scene_state, history):
 
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None) -> dict:
+    # F-CHANGES: revision questions are a complete code route, including evidence.
+    from engine.revision_compare import comparison_answer
+    comparison = comparison_answer(question, doc_ids, _root())
+    if comparison is not None:
+        if on_event:
+            for entry in comparison["trace"]:
+                on_event("trace", entry)
+        return comparison
     # thread memory (engine/context.py): every route below sees the resolved, standalone question and document selection
     original, step = question, None
     try:  # keyboard mash or nonsense: say so, never reuse the previous answer
@@ -529,6 +537,15 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
         # X11: explicit totals across several selected documents are summed from one solver result per document
         if len(doc_ids) >= 2:
             try:
+                from engine.projects import multidoc as _md
+                if (res := _md.answer(question, doc_ids, root, t0)) is not None:
+                    for s_ in res.get("trace", []):
+                        add(s_)
+                    res["trace"] = trace
+                    return res
+            except Exception:  # never break the answer path
+                pass
+            try:
                 from engine import analytics as _an
                 if (res := _an.multi_doc_total(question, doc_ids, root, t0)) is not None:
                     for s_ in res.get("trace", []):
@@ -542,6 +559,13 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
         try:
             from engine import sheetqa
             if len(doc_ids) >= 1 and sheetqa.is_sheet(doc_ids[0], root) and (res := sheetqa.answer(question, doc_ids, root, t0)) is not None:
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                return res
+            # F-SCANSYM: legend questions and "how many <legend symbol>" on raster drawings, counted by template match + model check
+            from engine import symbols as _symbols
+            if (res := _symbols.answer_symbols(question, doc_ids, root, t0)) is not None:
                 for s_ in res["trace"]:
                     add(s_)
                 res["trace"] = trace

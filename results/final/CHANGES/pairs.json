@@ -1,0 +1,519 @@
+{
+  "reserved_unseen_doc": "ifc_models__resbim-295-model",
+  "selection": "Random non-heldout document reserved in the paused run, inspected only during final validation.",
+  "validated_at": "2026-11-14T23:11:29.764214+02:00",
+  "pairs": [
+    {
+      "name": "DigitalHub heating v1 to v2",
+      "origin": "RWTH DigitalHub, heating revisions",
+      "doc_a": "ifc_models__rwth-digitalhub-fm-hzg-digitalhub-v1",
+      "doc_b": "ifc_models__rwth-digitalhub-digitalhub-fm-hzg-v2",
+      "schemas": [
+        "IFC4",
+        "IFC4"
+      ],
+      "source_files": [
+        {
+          "ifc": "data/ifc_models/rwth-digitalhub_fm-hzg-digitalhub-v1.ifc"
+        },
+        {
+          "ifc": "data/ifc_models/rwth-digitalhub_digitalhub-fm-hzg-v2.ifc"
+        }
+      ],
+      "status": "ready",
+      "summary": {
+        "total": 1235,
+        "added": 216,
+        "removed": 128,
+        "moved": 4,
+        "resized": 41,
+        "property_changed": 846,
+        "by_kind": {
+          "equipment": {
+            "total": 2,
+            "added": 0,
+            "removed": 0,
+            "moved": 0,
+            "resized": 1,
+            "property_changed": 1
+          },
+          "mep_other": {
+            "total": 2,
+            "added": 0,
+            "removed": 0,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 2
+          },
+          "pipe": {
+            "total": 286,
+            "added": 121,
+            "removed": 74,
+            "moved": 3,
+            "resized": 29,
+            "property_changed": 59
+          },
+          "pipe_fitting": {
+            "total": 792,
+            "added": 72,
+            "removed": 41,
+            "moved": 0,
+            "resized": 8,
+            "property_changed": 671
+          },
+          "pump": {
+            "total": 11,
+            "added": 4,
+            "removed": 5,
+            "moved": 0,
+            "resized": 1,
+            "property_changed": 1
+          },
+          "site": {
+            "total": 2,
+            "added": 1,
+            "removed": 1,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 0
+          },
+          "tank": {
+            "total": 2,
+            "added": 0,
+            "removed": 0,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 2
+          },
+          "terminal": {
+            "total": 63,
+            "added": 0,
+            "removed": 0,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 63
+          },
+          "valve": {
+            "total": 75,
+            "added": 18,
+            "removed": 7,
+            "moved": 1,
+            "resized": 2,
+            "property_changed": 47
+          }
+        },
+        "by_storey": {
+          "B01_OKFB": {
+            "total": 79,
+            "added": 0,
+            "removed": 79,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 0
+          },
+          "B01_OKRD": {
+            "total": 330,
+            "added": 177,
+            "removed": 0,
+            "moved": 4,
+            "resized": 24,
+            "property_changed": 125
+          },
+          "E00_OKRD": {
+            "total": 433,
+            "added": 31,
+            "removed": 38,
+            "moved": 0,
+            "resized": 14,
+            "property_changed": 350
+          },
+          "E01_OKRD": {
+            "total": 391,
+            "added": 7,
+            "removed": 10,
+            "moved": 0,
+            "resized": 3,
+            "property_changed": 371
+          },
+          "Storey not recorded": {
+            "total": 2,
+            "added": 1,
+            "removed": 1,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 0
+          }
+        },
+        "affected_items": 1203
+      },
+      "inventories": [
+        1708,
+        1796
+      ],
+      "matched_items": 1580,
+      "warnings": [],
+      "validation": "All citations resolve to source item identities; reverse direction and unchanged controls pass. Counts describe indexed differences, not a manually labelled accuracy score."
+    },
+    {
+      "name": "DigitalHub ventilation v1 to v2",
+      "origin": "RWTH DigitalHub, ventilation revisions",
+      "doc_a": "ifc_models__rwth-digitalhub-fm-lft-digitalhub-v1",
+      "doc_b": "ifc_models__rwth-digitalhub-digitalhub-fm-lft-v2",
+      "schemas": [
+        "IFC4",
+        "IFC4"
+      ],
+      "source_files": [
+        {
+          "ifc": "data/ifc_models/rwth-digitalhub_fm-lft-digitalhub-v1.ifc"
+        },
+        {
+          "ifc": "data/ifc_models/rwth-digitalhub_digitalhub-fm-lft-v2.ifc"
+        }
+      ],
+      "status": "ready",
+      "summary": {
+        "total": 776,
+        "added": 9,
+        "removed": 8,
+        "moved": 0,
+        "resized": 4,
+        "property_changed": 755,
+        "by_kind": {
+          "air_terminal": {
+            "total": 149,
+            "added": 0,
+            "removed": 0,
+            "moved": 0,
+            "resized": 1,
+            "property_changed": 148
+          },
+          "damper": {
+            "total": 18,
+            "added": 0,
+            "removed": 0,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 18
+          },
+          "duct": {
+            "total": 57,
+            "added": 7,
+            "removed": 6,
+            "moved": 0,
+            "resized": 3,
+            "property_changed": 41
+          },
+          "duct_fitting": {
+            "total": 539,
+            "added": 1,
+            "removed": 1,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 537
+          },
+          "equipment": {
+            "total": 4,
+            "added": 0,
+            "removed": 0,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 4
+          },
+          "fan": {
+            "total": 2,
+            "added": 0,
+            "removed": 0,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 2
+          },
+          "mep_other": {
+            "total": 5,
+            "added": 0,
+            "removed": 0,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 5
+          },
+          "site": {
+            "total": 2,
+            "added": 1,
+            "removed": 1,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 0
+          }
+        },
+        "by_storey": {
+          "B01_OKFB": {
+            "total": 7,
+            "added": 0,
+            "removed": 7,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 0
+          },
+          "B01_OKRD": {
+            "total": 103,
+            "added": 8,
+            "removed": 0,
+            "moved": 0,
+            "resized": 1,
+            "property_changed": 94
+          },
+          "E00_OKRD": {
+            "total": 341,
+            "added": 0,
+            "removed": 0,
+            "moved": 0,
+            "resized": 1,
+            "property_changed": 340
+          },
+          "E01_OKRD": {
+            "total": 323,
+            "added": 0,
+            "removed": 0,
+            "moved": 0,
+            "resized": 2,
+            "property_changed": 321
+          },
+          "Storey not recorded": {
+            "total": 2,
+            "added": 1,
+            "removed": 1,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 0
+          }
+        },
+        "affected_items": 774
+      },
+      "inventories": [
+        1310,
+        1311
+      ],
+      "matched_items": 1302,
+      "warnings": [],
+      "validation": "All citations resolve to source item identities; reverse direction and unchanged controls pass. Counts describe indexed differences, not a manually labelled accuracy score."
+    },
+    {
+      "name": "Facilities Building transfer to working model",
+      "origin": "OpeningDesign Facilities Building, dated transfer versus working model; working model chronology is not independently verified",
+      "doc_a": "opening_design__facilities-building-transfer-20181108-to-structure-mbm-for-pricing-1810-s-park",
+      "doc_b": "opening_design__facilities-building-models-cad-bim-ifc-1810-s-park",
+      "schemas": [
+        "IFC2X3",
+        "IFC2X3"
+      ],
+      "source_files": [
+        {
+          "ifc": "data/opening_design/Facilities_Building/Transfer/20181108 - to structure & MBM - for pricing/1810 S Park.ifc"
+        },
+        {
+          "ifc": "data/opening_design/Facilities_Building/Models & CAD/BIM/IFC/1810 S Park.ifc"
+        }
+      ],
+      "status": "ready",
+      "summary": {
+        "total": 715,
+        "added": 113,
+        "removed": 82,
+        "moved": 187,
+        "resized": 187,
+        "property_changed": 146,
+        "by_kind": {
+          "beam": {
+            "total": 117,
+            "added": 8,
+            "removed": 7,
+            "moved": 34,
+            "resized": 34,
+            "property_changed": 34
+          },
+          "column": {
+            "total": 93,
+            "added": 9,
+            "removed": 24,
+            "moved": 20,
+            "resized": 20,
+            "property_changed": 20
+          },
+          "door": {
+            "total": 34,
+            "added": 7,
+            "removed": 7,
+            "moved": 10,
+            "resized": 10,
+            "property_changed": 0
+          },
+          "footing": {
+            "total": 75,
+            "added": 5,
+            "removed": 10,
+            "moved": 23,
+            "resized": 23,
+            "property_changed": 14
+          },
+          "member": {
+            "total": 2,
+            "added": 0,
+            "removed": 2,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 0
+          },
+          "other": {
+            "total": 2,
+            "added": 0,
+            "removed": 0,
+            "moved": 1,
+            "resized": 1,
+            "property_changed": 0
+          },
+          "proxy": {
+            "total": 54,
+            "added": 38,
+            "removed": 1,
+            "moved": 7,
+            "resized": 7,
+            "property_changed": 1
+          },
+          "railing": {
+            "total": 14,
+            "added": 1,
+            "removed": 1,
+            "moved": 6,
+            "resized": 6,
+            "property_changed": 0
+          },
+          "roof": {
+            "total": 4,
+            "added": 0,
+            "removed": 0,
+            "moved": 2,
+            "resized": 2,
+            "property_changed": 0
+          },
+          "site": {
+            "total": 2,
+            "added": 1,
+            "removed": 1,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 0
+          },
+          "slab": {
+            "total": 97,
+            "added": 12,
+            "removed": 6,
+            "moved": 28,
+            "resized": 28,
+            "property_changed": 23
+          },
+          "stairs": {
+            "total": 12,
+            "added": 4,
+            "removed": 4,
+            "moved": 2,
+            "resized": 2,
+            "property_changed": 0
+          },
+          "terminal": {
+            "total": 4,
+            "added": 4,
+            "removed": 0,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 0
+          },
+          "wall": {
+            "total": 205,
+            "added": 24,
+            "removed": 19,
+            "moved": 54,
+            "resized": 54,
+            "property_changed": 54
+          }
+        },
+        "by_storey": {
+          "1ST FLOOR": {
+            "total": 620,
+            "added": 111,
+            "removed": 80,
+            "moved": 153,
+            "resized": 153,
+            "property_changed": 123
+          },
+          "MEZZANINE": {
+            "total": 93,
+            "added": 1,
+            "removed": 1,
+            "moved": 34,
+            "resized": 34,
+            "property_changed": 23
+          },
+          "Storey not recorded": {
+            "total": 2,
+            "added": 1,
+            "removed": 1,
+            "moved": 0,
+            "resized": 0,
+            "property_changed": 0
+          }
+        },
+        "affected_items": 382
+      },
+      "inventories": [
+        269,
+        300
+      ],
+      "matched_items": 187,
+      "warnings": [],
+      "validation": "All citations resolve to source item identities; reverse direction and unchanged controls pass. Counts describe indexed differences, not a manually labelled accuracy score."
+    }
+  ],
+  "final_only_controls": [
+    {
+      "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+      "origin": "swiss_dwellings",
+      "test": "Unchanged original plan map compared with itself",
+      "status": "ready",
+      "items": 185,
+      "changes": 0,
+      "warnings": []
+    },
+    {
+      "doc_id": "cubicasa5k__colorful-10052",
+      "origin": "cubicasa5k",
+      "test": "Unchanged original plan map compared with itself",
+      "status": "partial",
+      "items": 34,
+      "changes": 0,
+      "warnings": [
+        "Items below 50% detection confidence were excluded; check the source drawings for omissions."
+      ]
+    }
+  ],
+  "unseen_validation": {
+    "doc_id": "ifc_models__resbim-295-model",
+    "origin": "ifc_models",
+    "schema": "IFC4",
+    "heldout": false,
+    "items": 31,
+    "selection": "Random non-heldout document reserved in the paused run, inspected only during final validation.",
+    "unchanged_changes": 0,
+    "status": "ready",
+    "warnings": [],
+    "generated_perturbation": {
+      "label": "generated for demo",
+      "operation": "Move one indexed bounding box by 0.1 m on world X, in memory only",
+      "detected_changes": 1,
+      "type": "moved",
+      "distance_m": 0.1
+    }
+  },
+  "pdf_planmap_pairs": 0,
+  "pdf_note": "No dated artifact series has nonempty planmap-1.json in both versions. PDF comparisons and saved design versions remain Awais-owned; no PDF ingestion was changed.",
+  "interpretation": "IFC comparisons use normalized metre indexes and restored source offsets. Exported rotations or coordinate-system changes can change bounding boxes. Drawing matching supports uniform scale and translation, not rotation or sheet reordering."
+}

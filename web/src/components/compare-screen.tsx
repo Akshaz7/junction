@@ -5,10 +5,20 @@ import { UploadAction } from './workspace-navigation'
 import type { Document } from '../lib/types'
 import { loadRevisionComparison, RevisionSummary, type RevisionEntry, type RevisionFeedEntry, type RevisionComparison } from './changes-screen'
 import { readChange, summariseChanges } from '../lib/change-copy'
-import { ownsId, pairId, pairOf, versionOptions } from '../lib/design-versions'
+import { latestEditedPair, ownsId, pairId, pairOf, versionOptions } from '../lib/design-versions'
+import { VisualisePanel } from '../viewer3d/VisualiseIt'
 import './compare-screen.css'
 
 type Mode = 'Side by side' | 'Wipe' | 'Overlay'
+const actionWords = { removed: 'removed', added: 'added back', moved: 'moved', material: 'material' } as const
+
+/** 3D labels for the changed items: the reading number when on this page, and what happened (removed / moved / …). */
+export function changeLabels(comparison: Pick<RevisionComparison, 'changes' | 'item_ids'>): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const c of comparison.changes) if (c.item_id) out[c.item_id] = `${c.n} ${c.action ? actionWords[c.action] : c.type}${c.tag ? ` · ${c.tag}` : ''}`
+  for (const id of comparison.item_ids ?? []) out[id] ??= 'changed'
+  return out
+}
 const modes: Mode[] = ['Side by side', 'Wipe', 'Overlay']
 
 /** Compare any two versions of a drawing: real revision series and designs saved from 3D edits. Numbered boxes match the numbered readings. */
@@ -23,6 +33,7 @@ export function CompareScreen({ docs, demo }: { docs: Document[]; demo: boolean 
   const [wipe, setWipe] = useState(50)
   const [active, setActive] = useState<string | null>(null)
   const [page, setPage] = useState<number | null>(null)
+  const [show3d, setShow3d] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -45,6 +56,8 @@ export function CompareScreen({ docs, demo }: { docs: Document[]; demo: boolean 
     for (const group of map.values()) group.steps.sort((a, b) => (Date.parse(a.created_at) || 0) - (Date.parse(b.created_at) || 0))
     return [...map.values()].sort((a, b) => a.title.localeCompare(b.title))
   }, [feed, docs]) // eslint-disable-line react-hooks/exhaustive-deps
+  // With nothing picked yet, open the most recently saved edited design (latest version vs the original).
+  useEffect(() => { if (!step && !series) { const latest = latestEditedPair(feed.filter((entry): entry is RevisionEntry => entry.type === 'new_version')); if (latest) setStep(latest) } }, [feed]) // eslint-disable-line react-hooks/exhaustive-deps
   const group = groups.find((entry) => entry.key === series) ?? groups.find((entry) => ownsId(entry.steps, step)) ?? groups.find((entry) => /A100 - DEMOLITION/i.test(entry.title)) ?? groups[0]
   // Any two versions of the drawing can be compared when the feed numbers them; otherwise the fixed pairs.
   const versions = group ? versionOptions(group.steps) : []
@@ -54,7 +67,7 @@ export function CompareScreen({ docs, demo }: { docs: Document[]; demo: boolean 
   const compareId = free ? step : chosen?.id
   const pick = (a: number, b: number | undefined) => { const id = b == null ? null : pairId(group!.steps, a, b); if (id) setStep(id) }
 
-  useEffect(() => { setPage(null) }, [compareId])
+  useEffect(() => { setPage(null); setShow3d(false) }, [compareId])
   useEffect(() => {
     setComparison(null); setActive(null); setWipe(50)
     if (!compareId) return
@@ -106,11 +119,14 @@ export function CompareScreen({ docs, demo }: { docs: Document[]; demo: boolean 
       </div>
       <aside className="cmp-readings" aria-label="Differences"><h3>{mainCount ? `${mainCount} ${mainCount === 1 ? 'change' : 'changes'} to look at` : 'Only minor edits'}</h3>
         <p className="cmp-summary">{summariseChanges(readings)}</p>
+        {!!comparison.item_ids?.length && comparison.doc_id && <button type="button" className="button button-raised button-size-default" onClick={() => setShow3d(true)}>Show in 3D ({comparison.item_ids.length} {comparison.item_ids.length === 1 ? 'item' : 'items'})</button>}
         {readings.filter((reading) => !reading.small).map(reading)}
         {readings.some((entry) => entry.small) && <details className="cmp-small"><summary>Minor edits ({readings.filter((entry) => entry.small).length})</summary>{readings.filter((entry) => entry.small).map(reading)}</details>}
         {!comparison.changes.length && <div className="cmp-empty"><p className="tools-muted">No differences were found between these versions.</p><a className="button button-raised button-size-default" href={`#/chat?doc=${encodeURIComponent((chosen ?? group?.steps[0])?.summary.doc_id || (chosen ?? group?.steps[0])?.doc_b || comparison.doc_id)}`}>Ask about this drawing</a></div>}
         <small>{comparison.edited ? 'Compared item by item from the saved 3D edits. No AI was used. Edited versions are generated from 3D edits, not issued drawings.' : 'Found automatically by comparing the two sheets line by line. No AI was used.'}{comparison.generated_for_demo ? ' · generated for demo' : ''}</small>
       </aside>
     </div>}
+    {show3d && comparison?.doc_id && comparison.item_ids?.length && <VisualisePanel docId={comparison.doc_id} highlight={comparison.item_ids}
+      labels={changeLabels(comparison)} cameraTargetItemId={comparison.item_ids[0]} onClose={() => setShow3d(false)} />}
   </section>
 }
