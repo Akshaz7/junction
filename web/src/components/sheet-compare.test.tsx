@@ -29,7 +29,7 @@ it('seam slider answers the keyboard and reports its value', async () => {
 
 it('draws one numbered box per placed change and one card per change; missing boxes still get a card', async () => {
   await act(async () => root.render(<SheetCompare {...props} />))
-  expect(host.querySelectorAll('.sc-box')).toHaveLength(2)
+  expect(host.querySelectorAll('.sc-box')).toHaveLength(1)  // the minor edit's box waits for its list
   expect(host.querySelectorAll('article.sc-card')).toHaveLength(3)
   expect(host.querySelector('.cmp-small')).not.toBeNull()
 })
@@ -44,4 +44,21 @@ it('export page lists every change with its number and text, escaped', () => {
   expect(html).toContain('Plan &lt;A&gt;')
   expect(html).toContain('&amp;')
   expect(html).not.toContain('<b>')
+})
+
+it('minor-edit boxes appear while their list is open or one is hovered; a minor-only pair shows all', async () => {
+  await act(async () => root.render(<SheetCompare {...props} />))
+  const box = () => host.querySelector('.sc-box[data-change-id="c"]')
+  expect(box()).toBeNull()
+  const card = host.querySelector<HTMLElement>('article.sc-card[data-change-id="c"]')!
+  await act(async () => { card.dispatchEvent(new MouseEvent('mouseover', { bubbles: true })) })
+  expect(box()).not.toBeNull()
+  await act(async () => { card.dispatchEvent(new MouseEvent('mouseout', { bubbles: true })) })
+  expect(box()).toBeNull()
+  const details = host.querySelector<HTMLDetailsElement>('details.cmp-small')!
+  await act(async () => { details.open = true; details.dispatchEvent(new Event('toggle')) })
+  expect(box()).not.toBeNull()
+  const onlyMinor = changes.filter((c) => c.small)
+  await act(async () => root.render(<SheetCompare {...props} changes={onlyMinor} />))
+  expect(host.querySelectorAll('.sc-box')).toHaveLength(1)
 })

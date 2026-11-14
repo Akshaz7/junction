@@ -74,6 +74,8 @@ export function SheetCompare({ prev, curr, size, changes, initialMode = 'Wipe', 
   const [seam, setSeam] = useState(initialMode === 'Wipe' ? OPEN_SEAM_FROM : OPEN_SEAM_TO)
   const [moving, setMoving] = useState(false)
   const [focused, setFocused] = useState<string | null>(null)
+  const [minorOpen, setMinorOpen] = useState(false)
+  const [hovered, setHovered] = useState<string | null>(null)
   const [hint, setHint] = useState(false)
   const [status, setStatus] = useState<Record<string, 'ok' | 'error'>>({})
   const [panning, setPanning] = useState(false)
@@ -145,7 +147,7 @@ export function SheetCompare({ prev, curr, size, changes, initialMode = 'Wipe', 
     else if (!id) animateTo(FIT_VIEW)
   }, [animateTo, changes, fit, onFocusChange, size, viewport])
   // A new set of changes (another pair of versions) starts fresh.
-  useEffect(() => { setFocused(null); setView(FIT_VIEW) }, [changes])
+  useEffect(() => { setFocused(null); setHovered(null); setView(FIT_VIEW) }, [changes])
   useEffect(() => {
     if (!focused) return
     const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') focusChange(null) }
@@ -248,10 +250,13 @@ export function SheetCompare({ prev, curr, size, changes, initialMode = 'Wipe', 
   </div>
   const main = changes.filter((c) => !c.small), minor = changes.filter((c) => c.small)
   const counts = { added: changes.filter((c) => c.kind === 'added').length, removed: changes.filter((c) => c.kind === 'removed').length, edited: changes.filter((c) => c.kind === 'edited').length }
+  // Minor edits stay off the sheet until their list is open or one is hovered/focused; a pair with only minor edits shows them all.
+  const boxShown = (c: SheetChange) => !c.small || main.length === 0 || minorOpen || c.id === focused || c.id === hovered
   const bothFailed = prevState === 'error' && currState === 'error'
   const shownBoxes = boxes && sizeOk && fit.w > 0 && !bothFailed
 
   const card = (c: SheetChange, compact = false) => <article key={c.id} className={`sc-card ${c.kind}${compact ? ' compact' : ''}`} data-change-id={c.id} data-active={c.id === focused || undefined} role="button" tabIndex={0} aria-pressed={c.id === focused}
+    onMouseEnter={() => setHovered(c.id)} onMouseLeave={() => setHovered((old) => old === c.id ? null : old)}
     onClick={() => focusChange(c.id === focused ? null : c.id)}
     onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); focusChange(c.id === focused ? null : c.id) } }}>
     <span className="reading-number">{c.n}</span>
@@ -294,7 +299,7 @@ export function SheetCompare({ prev, curr, size, changes, initialMode = 'Wipe', 
           </div>
         </>}
         {shownBoxes && <div className="sc-boxes">{changes.map((c) => {
-          if (!usableBox(c.bbox, size)) return null
+          if (!usableBox(c.bbox, size) || !boxShown(c)) return null
           const r = boxRect(c.bbox, size, view, fit, viewport)
           return <button type="button" key={c.id} className={`sc-box change-region ${c.kind}`} data-change-id={c.id} data-active={c.id === focused || undefined} aria-pressed={c.id === focused}
             aria-label={`Change ${c.n} (${kindWord[c.kind]}): ${c.text}`} style={{ left: r.left, top: r.top, width: r.width, height: r.height }}
@@ -324,7 +329,7 @@ export function SheetCompare({ prev, curr, size, changes, initialMode = 'Wipe', 
           {summary && <div className="changes-plain-summary">{summary}</div>}
           {changes.length > 0 && <p className="sc-key" aria-label="Box colours"><i className="added" />{counts.added} added<i className="removed" />{counts.removed} removed<i className="edited" />{counts.edited} edited</p>}
           {main.map((c) => card(c))}
-          {minor.length > 0 && <details className="cmp-small" open={main.length === 0 || undefined}><summary>Minor edits ({minor.length})</summary>{minor.map((c) => card(c, main.length > 0))}</details>}
+          {minor.length > 0 && <details className="cmp-small" open={main.length === 0 || minorOpen || undefined} onToggle={(event) => setMinorOpen(event.currentTarget.open)}><summary>Minor edits ({minor.length})</summary>{minor.map((c) => card(c, main.length > 0))}</details>}
           {!changes.length && <p className="sc-empty" role="status">{emptyText}</p>}
         </div>
       </aside>
