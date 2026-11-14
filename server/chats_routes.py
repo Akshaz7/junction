@@ -15,9 +15,16 @@ from .schema import validate_answer
 
 router = APIRouter(prefix="/api")
 
-def _real_engine(question, doc_ids, on_event):
+def _real_engine(question, doc_ids, on_event, scene_state=None):
     from engine.answer import answer  # the function, not the engine.answer module
-    return answer(question, doc_ids, on_event)
+    return answer(question, doc_ids, on_event, scene_state=scene_state)
+
+
+def _run_engine(question, doc_ids, on_event, scene_state=None):
+    # E-20: hidden items from this chat's scene edits shape later answers ("how many windows" after "remove W7").
+    if scene_state and ENGINE is _real_engine:
+        return ENGINE(question, doc_ids, on_event, scene_state=scene_state)
+    return ENGINE(question, doc_ids, on_event)
 
 
 def _pick_engine():
@@ -126,6 +133,15 @@ async def ask(chat_id: str, body: NewMessage):
         "insert into messages (chat_id, role, content) values ($1,'user',$2) returning id", cid, body.content)
     await publish({"type": "chat.message", "chat_id": str(cid), "message_id": str(umid), "role": "user"})
 
+    hidden: list[str] = []
+    try:
+        for st in await scene_edits.scene_state(pool, cid):
+            if not doc_ids or st.get("doc_id") in doc_ids:
+                hidden.extend(st.get("hidden") or [])
+    except Exception:  # noqa: BLE001 — scene state is optional context, never block the answer
+        hidden = []
+    sstate = {"hidden": hidden} if hidden else None
+
     async def stream():
         loop = asyncio.get_running_loop()
         q: asyncio.Queue = asyncio.Queue()
@@ -133,7 +149,7 @@ async def ask(chat_id: str, body: NewMessage):
         def on_event(kind, payload):
             loop.call_soon_threadsafe(q.put_nowait, (kind, payload))
 
-        task = asyncio.create_task(asyncio.to_thread(ENGINE, body.content, doc_ids, on_event))
+        task = asyncio.create_task(asyncio.to_thread(_run_engine, body.content, doc_ids, on_event, sstate))
         task.add_done_callback(lambda _: loop.call_soon_threadsafe(q.put_nowait, None))
         while (item := await q.get()) is not None:
             if item[0] == "status":

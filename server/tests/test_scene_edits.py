@@ -129,3 +129,17 @@ def test_answer_commands_become_persisted_edits(client, chat, monkeypatch):
         assert ops == ["highlight", "hide"]
     st = client.get(f"/api/chats/{cid}/scene-state").json()["states"][0]
     assert st["hidden"] == ["window-002"] and st["labels"] == {"window-001": "W1"}
+
+
+def test_run_engine_passes_hidden_items_to_real_engine(monkeypatch):
+    """E-20: later answers in a chat see the chat's hidden items."""
+    from server import chats_routes
+    seen = {}
+
+    def fake_real(q, d, cb, scene_state=None):
+        seen["s"] = scene_state
+        return {}
+    monkeypatch.setattr(chats_routes, "_real_engine", fake_real)
+    monkeypatch.setattr(chats_routes, "ENGINE", fake_real)
+    chats_routes._run_engine("How many windows?", ["d"], None, {"hidden": ["w7"]})
+    assert seen["s"] == {"hidden": ["w7"]}
