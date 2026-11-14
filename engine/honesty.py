@@ -14,9 +14,20 @@ from pathlib import Path
 from engine.solvers.data import Doc, Item, load_doc, load_sheet_parent
 
 FIRE = re.compile(r"fire[ -]rat\w*|fire resistance|feuerwiderstand|paloluokka|brandklass", re.I)
-LENGTH = re.compile(r"\blength\b|\bhow long\b|\b(?:linear|running)\s+(?:metres?|meters?|feet)\b|\bmetres?\b|\bmeters?\b", re.I)
+LENGTH = re.compile(r"\blengths?\b|\bhow long\b|\b(?:linear|running)\s+(?:metres?|meters?|feet)\b|\bmetres?\b|\bmeters?\b", re.I)
 DUCT = re.compile(r"\bducts?\b|\bductwork\b|\bventilation (?:runs?|lines?)\b|\bilmanvaihtokanav\w*|\blüftungskan\w*|\bventilationskanal\w*", re.I)
 PIPE = re.compile(r"\bpipes?\b|\bpiping\b|\bpipework\b", re.I)
+
+
+def requests_length(question):
+    from engine.analytics import BASEQ
+    from engine.router.parser import parse
+    if BASEQ.search(question):
+        return True
+    parsed = parse(question)
+    if parsed.type == "count" and not re.search(r"\bhow many\s+(?:(?:linear|running)\s+)?(?:metres?|meters?|feet|m)\b", question, re.I):
+        return False  # e.g. count ducts longer than 3 metres, not their length
+    return parsed.type == "length" or bool(LENGTH.search(question) and (DUCT.search(question) or PIPE.search(question) or re.search(r"\bDN\s*\d+\b", question, re.I)))
 
 
 def positive(value):
@@ -84,7 +95,7 @@ def pdf_mep_lengths(doc_id: str, root: Path) -> list[dict]:
 
 def plan_services_length(question, doc, root, t0=None):
     """Measure the requested service, never substitute pipes for ducts."""
-    if not LENGTH.search(question) or not (DUCT.search(question) or PIPE.search(question)):
+    if not requests_length(question) or not (DUCT.search(question) or PIPE.search(question)):
         return None
     if doc.mode == "ifc":
         return None  # engine.mep owns IFC systems, units and stored quantities.
@@ -174,17 +185,16 @@ def before(question, doc_ids, root, t0=None, *, hidden=()):
             return unavailable(question, doc_ids, "**Floor area cannot be measured from this sheet.** No room boundaries or room-area table are recorded; an equipment drawing or site outline is not a floor plan.", t0, doc=doc)
     if doc:
         return plan_services_length(question, doc, root, t0)
-    if LENGTH.search(question) and (DUCT.search(question) or PIPE.search(question)):
+    if requests_length(question) and (DUCT.search(question) or PIPE.search(question)):
         return plan_services_length(question, Doc(did, "planmap", []), root, t0)
     return None
 
 
 def validate_result(res, question):
     """A length request cannot return a count, even from a model fallback."""
-    from engine.analytics import BASEQ
     ans = res.get("answer") or {}
     value = ans.get("value")
-    length_request = bool((LENGTH.search(question) and (DUCT.search(question) or PIPE.search(question))) or BASEQ.search(question))
+    length_request = requests_length(question)
     if length_request and value is not None and str(ans.get("unit") or "").lower() not in {"m", "metre", "metres", "meter", "meters", "ft", "feet", "mm", "cm"}:
         replacement = unavailable(question, res.get("doc_ids") or [], "**Length is unavailable from the drawing data.** An object count is not a measured length.")
         replacement["trace"] = [*res.get("trace", []), *replacement["trace"]]

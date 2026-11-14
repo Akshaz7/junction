@@ -872,6 +872,11 @@ def answer(question, doc_ids, root, t0=None, hidden=None):
         elif doc and doc.mode == "planmap":
             measured = estimate_planmaps(did, root, question)
         else:
+            metadata_path = Path(root) / did / "doc.json"
+            metadata = json.loads(metadata_path.read_text()) if metadata_path.exists() else {}
+            if metadata.get("kind") in {"raster", "pdf", "dxf", "dwg", "svg"}:
+                report["source"] = "2D plan estimate"
+                return finish("**Wall surface area cannot be measured from this sheet.** No usable scaled wall lengths are recorded; floor area cannot establish wall surface area.")
             return finish("**Wall surface area cannot be verified from this data.** The original IFC body geometry, or a scaled wall plan with heights, is needed; floor area is not wall area.")
     except Exception as exc:  # noqa: BLE001 — IFC backends also have their own exception classes
         trace.append(_step("wallarea", f"wall measurement unavailable: {type(exc).__name__}"))

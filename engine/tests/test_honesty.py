@@ -90,11 +90,15 @@ def test_polygon_baseboard_uses_outline_and_measured_door_width():
     assert "minus 1 door" in result["answer"]["text_md"]
 
 
-@pytest.mark.parametrize("q", [BASE, SERVICES, "What is the duct length in metres?", "What is the pipe length in metres?"])
+@pytest.mark.parametrize("q", [BASE, SERVICES, "What is the duct length in metres?", "What is the pipe length in metres?", "DN9999 length", "total duct lengths"])
 def test_length_count_mismatch_is_rejected(q):
     result = honesty.unavailable(q, ["test"], "temporary")
     result["answer"].update(value=235, unit="count", abstained=False)
     assert honesty.validate_result(result, q)["answer"]["abstained"]
+
+
+def test_count_with_a_length_filter_still_requests_a_count():
+    assert not honesty.requests_length("How many ducts are longer than 3 metres?")
 
 
 def test_duct_length_routes_to_ducts_not_pipes(tmp_path):
@@ -170,6 +174,10 @@ def test_no_wall_geometry_gets_sheet_wording(tmp_path):
     res = answer(WALL, [d.name])
     assert res["answer"]["abstained"] and "from this sheet" in res["answer"]["text_md"]
     assert "IFC" not in res["answer"]["text_md"]
+    (d / "planmap-1.json").unlink()  # site scan with no plan map, as in the HABS case
+    missing = answer(WALL, [d.name])
+    assert missing["answer"]["abstained"] and "from this sheet" in missing["answer"]["text_md"]
+    assert "IFC" not in missing["reasoning"]["confidence"]["improve"]
 
 
 def test_explanation_cannot_append_a_typical_fire_rating():
@@ -182,3 +190,48 @@ def test_failed_ingest_reports_the_actual_limit_instead_of_guessing(tmp_path):
     (d / "ingest.json").write_text(json.dumps({"status": "failed", "detail": "This server converts IFC files up to 15 MB."}))
     res = answer(FLOOR, [d.name])
     assert res["answer"]["abstained"] and "15 MB" in res["answer"]["text_md"]
+
+
+@pytest.mark.parametrize("schema", ["IFC2X3", "IFC4", "IFC4X3"])
+@pytest.mark.parametrize("unit", ["metre", "foot"])
+@pytest.mark.parametrize("source", ["layers", "qto"])
+def test_original_ifc_thickness_units_and_schemas(tmp_path, schema, unit, source):
+    """Tiny IFC generated for demo: no source geometry or model calls."""
+    import ifcopenshell
+    from engine.slab_quantities import with_source_thickness
+    model = ifcopenshell.file(schema=schema)
+    metre = model.create_entity("IfcSIUnit", UnitType="LENGTHUNIT", Name="METRE")
+    if unit == "foot":
+        dims = model.create_entity("IfcDimensionalExponents", 1, 0, 0, 0, 0, 0, 0)
+        factor = model.create_entity("IfcMeasureWithUnit", model.create_entity("IfcLengthMeasure", .3048), metre)
+        length_unit = model.create_entity("IfcConversionBasedUnit", dims, "LENGTHUNIT", "FOOT", factor)
+        scale = .3048
+    else:
+        length_unit, scale = metre, 1.
+    units = model.create_entity("IfcUnitAssignment", [length_unit])
+    model.create_entity("IfcProject", GlobalId=ifcopenshell.guid.new(), UnitsInContext=units)
+    gid = ifcopenshell.guid.new()
+    slab = model.create_entity("IfcSlab", GlobalId=gid, Name="generated for demo")
+    if source == "layers":
+        material = model.create_entity("IfcMaterial", Name="generated for demo")
+        layers = [model.create_entity("IfcMaterialLayer", Material=material, LayerThickness=value / scale) for value in (.2, .05)]
+        layer_set = model.create_entity("IfcMaterialLayerSet", MaterialLayers=layers)
+        model.create_entity("IfcRelAssociatesMaterial", GlobalId=ifcopenshell.guid.new(), RelatedObjects=[slab], RelatingMaterial=layer_set)
+    else:
+        depth = model.create_entity("IfcQuantityLength", Name="Depth", LengthValue=.25 / scale)
+        qto = model.create_entity("IfcElementQuantity", GlobalId=ifcopenshell.guid.new(), Name="Qto_SlabBaseQuantities", Quantities=[depth])
+        model.create_entity("IfcRelDefinesByProperties", GlobalId=ifcopenshell.guid.new(), RelatedObjects=[slab], RelatingPropertyDefinition=qto)
+    d = tmp_path / "test"; d.mkdir()
+    model.write(str(d / "source.ifc"))
+    original = Doc("test", "ifc", [Item(gid, "slab", q={"area_m2": 10}, props={"ifc_class": "IfcSlab"})])
+    enriched = with_source_thickness(original, tmp_path)
+    assert enriched.items[0].q["thickness_m"] == pytest.approx(.25)
+    assert "thickness_m" not in original.items[0].q  # never mutate shared source/index
+    assert analytics.slab_by_type(SLAB, enriched, time.perf_counter())["answer"]["value"] == 10
+
+
+def test_overlapping_room_polygons_are_not_separate_perimeters():
+    rooms = [Item(str(n), "room", bbox_px=[x, 0, x+200, 200], polygon_px=[[x, 0], [x+200, 0], [x+200, 200], [x, 200]]) for n, x in enumerate((0, 100))]
+    doc = Doc("test", "planmap", rooms, scale={"m_per_px": .01, "method": "dimension"})
+    result = analytics.baseboard(BASE, doc, time.perf_counter())
+    assert result["answer"]["abstained"] and "overlap" in result["answer"]["text_md"]
