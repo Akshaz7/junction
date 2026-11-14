@@ -12,6 +12,8 @@ What is indexed (all lexical, BM25):
   page chunks:         PDF / DXF text layer (text-N.json), one chunk per page.
 Passages with positions are NOT stored: engine.project_answer re-reads text-N.json for the top pages only.
 Index file: <artifacts>/index/project_index.pkl (git-ignored with artifacts/).
+Deployment builds the baked files with `python -m engine.project_index build` in deploy/Dockerfile.
+load_index also discovers dataset documents restored from PostgreSQL after that build (not just uploads).
 """
 from __future__ import annotations
 
@@ -28,14 +30,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = ROOT / "artifacts"
-VERSION = 2
+VERSION = 3
 
 STOP = set("""a an the of in on at to for from by with without and or but not is are was were be been being do does did
 this that these those it its as if then than so such into onto over under about across per each any all some which what
 who whom where when why how many much more most less least there here have has had can could should would will shall may
 might must i we you they he she me my our your their show shown shows list find tell give get please also just only
 document documents drawing drawings plan plans sheet sheets file files project model models building buildings
-number amount total mention mentions mentioned say says contain contains containing present""".split())
+number amount total mention mentions mentioned say says contain contains containing present include includes including""".split())
 # words that carry the question but little meaning for retrieval
 WEAK = {"floor", "level", "storey", "story", "room", "rooms"}
 
@@ -44,7 +46,7 @@ SYN = {  # query-time expansion (weight 0.6); room names in several languages
     "wc": "toilet lavatory restroom washroom",
     "restroom": "toilet wc washroom lavatory",
     "bathroom": "bath bad bain bagno baño kylpyhuone badezimmer shower",
-    "kitchen": "küche cuisine keittiö cucina kitchenette",
+    "kitchen": "küche kök cuisine keittiö cucina kitchenette",
     "bedroom": "schlafzimmer chambre makuuhuone camera",
     "stair": "staircase stairs treppenhaus stairwell",
     "staircase": "stair stairs stairwell",
@@ -52,6 +54,9 @@ SYN = {  # query-time expansion (weight 0.6); room names in several languages
     "door": "doors",
     "ei": "fire-rated fire-resistance rated",
 }
+for _group in ("kitchen küche kök keittiö", "toilet wc lavatory restroom washroom", "schedule table"):
+    for _term in _group.split():
+        SYN[_term] = " ".join(dict.fromkeys((SYN.get(_term, "") + " " + _group).split()))
 
 DISCIPLINE = [("architectural", r"(^|[-_ ])(arc|arch|architecture|architectural)([-_ .]|$)"),
               ("structural", r"(^|[-_ ])(str|struc|structural|structure)([-_ .]|$)"),
@@ -119,17 +124,19 @@ def discipline_of(doc_id: str, meta: dict) -> str:
     return ", ".join(name for name, rx in DISCIPLINE if re.search(rx, s))
 
 
-def build_chunks(doc_id: str, root: Path) -> tuple[dict, list[tuple[int, int, dict]], set[str]] | None:
+def build_chunks(doc_id: str, root: Path, metadata: dict | None = None) -> tuple[dict, list[tuple[int, int, dict]], set[str]] | None:
     """-> (summary, [(page, n_tokens, term_counts)], names) for one document dir, or None if it is missing."""
     d = Path(root) / doc_id
-    if not d.is_dir():
+    if not d.is_dir() and not metadata:
         return None
-    meta = _json(d / "doc.json") or {"doc_id": doc_id}
+    meta = {**(metadata or {}), **(_json(d / "doc.json") or {})}
     src = meta.get("source") or doc_id.split("__", 1)[0]
     disc = discipline_of(doc_id, meta)
     summary: dict = {"doc_id": doc_id, "title": meta.get("title") or doc_id, "source": src, "kind": meta.get("kind"),
                      "pages": meta.get("pages") or 1, "discipline": disc,
-                     "title_toks": sorted(set(tokenize(meta.get("title") or "")))[:12]}
+                     "title_toks": sorted(set(tokenize(meta.get("title") or "")))[:12],
+                     "generated_for_demo": bool(meta.get("generated_for_demo")) or bool(re.search(
+                         r"generated[\s_-]+for[\s_-]+demo", doc_id + " " + str(meta.get("title") or ""), re.I))}
     m = Counter()
     _add(m, summary["title"], 3)
     _add(m, doc_id.split("__", 1)[-1], 2)
@@ -139,19 +146,21 @@ def build_chunks(doc_id: str, root: Path) -> tuple[dict, list[tuple[int, int, di
     for v in (meta.get("files") or {}).values():
         _add(m, Path(str(v)).stem, 2)
 
+    page_terms: dict[int, Counter] = defaultdict(Counter)
     e = _json(d / "elements.json")
-    if e and e.get("elements"):
-        storeys = [s.get("name") for s in e.get("storeys") or [] if s.get("name")]
+    elements = e if isinstance(e, list) else (e or {}).get("elements", [])
+    if elements:
+        storeys = [s.get("name") for s in (e.get("storeys") or [] if isinstance(e, dict) else []) if s.get("name")]
         summary["storeys"] = storeys[:30]
         kinds, rooms, types = Counter(), Counter(), Counter()
-        for x in e["elements"]:
-            k = x.get("kind") or "other"
+        for x in elements:
+            k = x.get("kind") or ("room" if x.get("ifc_class") == "IfcSpace" else "other")
             kinds[k] += 1
             pr = x.get("props") or {}
             if k == "room":
-                nm = pr.get("long_name") or x.get("type_name") or x.get("name")
-                if nm:
-                    rooms[str(nm)] += 1
+                for nm in (pr.get("long_name"), pr.get("LongName"), x.get("LongName"), x.get("long_name"), x.get("type_name"), x.get("name")):
+                    if nm:
+                        rooms[str(nm)] += 1
             elif x.get("type_name") and k in ("door", "window", "stairs", "wall", "slab", "column"):
                 types[str(x["type_name"])] += 1
         for s in storeys:
@@ -163,36 +172,43 @@ def build_chunks(doc_id: str, root: Path) -> tuple[dict, list[tuple[int, int, di
         for nm, _ in types.most_common(60):
             _add(m, nm, 1)
         summary.update({"rooms": [n for n, _ in rooms.most_common(25)], "counts": dict(kinds.most_common(12)), "mode": "ifc"})
-    else:
-        pms = sorted(d.glob("planmap-[0-9]*.json"), key=lambda p: int(p.stem.split("-")[1]))
-        if pms:
-            kinds, labels, rtypes = Counter(), Counter(), Counter()
-            for p in pms:
-                pm = _json(p) or {}
-                for x in pm.get("items") or []:
-                    kinds[x.get("kind") or "other"] += 1
-                    if x.get("label") and x.get("kind") in ("room", "text", "other"):
-                        labels[str(x["label"])[:60]] += 1
-                    rt = (x.get("props") or {}).get("room_type")
-                    if x.get("kind") == "room" and rt:
-                        rtypes[str(rt)] += 1
-            for k in kinds:
-                _add(m, k, 1)
-            for lab in labels:
-                _add(m, lab, 1)
-            for rt in rtypes:
-                _add(m, rt, 2)
-            summary.update({"rooms": [n for n, _ in (rtypes + labels).most_common(25)], "counts": dict(kinds.most_common(12)),
-                            "mode": "planmap"})
-    chunks = [(0, sum(m.values()), dict(m))]
+    # IFCs can also have plan maps: retain their labels and actual page numbers.
+    pms = sorted(d.glob("planmap-[0-9]*.json"), key=lambda p: int(p.stem.split("-")[1]))
+    kinds, labels, rtypes = Counter(), Counter(), Counter()
+    for p in pms:
+        pm = _json(p) or {}
+        c = page_terms[int(pm.get("page") or p.stem.split("-")[1])]
+        for x in pm.get("items") or []:
+            k = x.get("kind") or "other"
+            kinds[k] += 1
+            _add(c, k)
+            if x.get("label") and k in ("room", "text", "other"):
+                labels[str(x["label"])] += 1
+                _add(c, x["label"])
+            rt = (x.get("props") or {}).get("room_type")
+            if k == "room" and rt:
+                rtypes[str(rt)] += 1
+                _add(c, rt, 2)
+    for k in kinds:
+        _add(m, k)
+    for lab in labels:
+        _add(m, lab)
+    for rt in rtypes:
+        _add(m, rt, 2)
+    if pms and not elements:
+        summary.update({"rooms": [n for n, _ in (rtypes + labels).most_common(25)], "counts": dict(kinds.most_common(12)), "mode": "planmap"})
     for tp in sorted(d.glob("text-[0-9]*.json"), key=lambda p: int(p.stem.split("-")[1])):
         t = _json(tp) or {}
-        c = Counter()
+        c = page_terms[int(t.get("page") or tp.stem.split("-")[1])]
         for w in t.get("words") or []:
             _add(c, w.get("text"))
-        if c:
-            chunks.append((int(t.get("page") or tp.stem.split("-")[1]), sum(c.values()), dict(c)))
-    summary["text_pages"] = [p for p, _, _ in chunks if p > 0]
+        _add(c, t.get("text"))
+        # A table/list on a schedule sheet is schedule evidence. Arbitrary lists elsewhere are not.
+        if "schedule" in m and ("table" in c or "list" in str(t).casefold()):
+            _add(c, "schedule")
+    chunks = [(0, sum(m.values()), dict(m)), *[(p, sum(c.values()), dict(c)) for p, c in sorted(page_terms.items()) if c]]
+    summary["text_pages"] = [int(p.stem.split("-")[1]) for p in d.glob("text-[0-9]*.json")]
+    summary["indexed_pages"] = [p for p, _, _ in chunks if p > 0]
     return summary, chunks, _names_for(doc_id, meta)
 
 
@@ -288,6 +304,7 @@ class Index:
                     got[key].add(t)
         best: dict[str, dict] = {}
         qset = set(base)
+        syn_of = {t: {st for s_ in SYN.get(t, "").split() for st in tokenize(s_)} for t in base}   # a synonym hit covers its base term
         for key, sc in scores.items():
             did, page = key
             dm = self.docs.get(did, {})
@@ -302,7 +319,7 @@ class Index:
             cur = best.get(bk)
             if cur is None or sc > cur["score"]:
                 matched = got[key]
-                cov = sum(self.idf(t) for t in matched if t in base) / mass_total
+                cov = sum(self.idf(t) for t in base if t in matched or (syn_of.get(t) and syn_of[t] & matched)) / mass_total
                 best[bk] = {"doc_id": did, "page": page, "score": round(sc, 4), "coverage": round(cov, 3), "matched": sorted(matched)}
         return sorted(best.values(), key=lambda h: -h["score"])[:k]
 

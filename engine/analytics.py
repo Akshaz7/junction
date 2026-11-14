@@ -110,6 +110,126 @@ def total_and_storey(question: str, doc: Doc, t0) -> dict | None:
     return _done(question, doc, text, len(items), "count", on or items, trace, t0=t0)
 
 
+
+# ------------------------------------------------------------------ named storey pairs, kind pairs, exact sizes
+ORD_RE = re.compile(r"\b(ground|first|1st|second|2nd|third|3rd|fourth|4th|fifth)\b(?=[^.?]*\b(?:floors?|levels?|storeys?|stories)\b)|\b(basement|cellar|top floor)\b", re.I)
+CMP = re.compile(r"\b(compare|comparison|versus|vs\.?|difference|differ|more|fewer|less|than|against|between)\b", re.I)
+
+
+def _storeys_named(question: str, doc: Doc) -> list[str]:
+    found: list[tuple[int, str]] = []
+    ql = question.lower()
+    for s in doc.storeys:
+        i = ql.find(s["name"].lower())
+        if i >= 0:
+            found.append((i, s["name"]))
+    for m in ORD_RE.finditer(question):
+        txt = m.group(0).lower()
+        nm = resolve_storey(txt if " " in txt else txt + " floor", doc.storeys)
+        if nm:
+            found.append((m.start(), nm))
+    out: list[str] = []
+    for _, nm in sorted(found):
+        if nm not in out:
+            out.append(nm)
+    return out
+
+
+def storey_pair(question: str, doc: Doc, t0) -> dict | None:
+    """"compare doors on the 1st vs 2nd floor": one count per named storey, with the difference."""
+    if doc.mode != "ifc" or len(doc.storeys) < 2 or not CMP.search(question):
+        return None
+    names = _storeys_named(question, doc)
+    if len(names) < 2:
+        return None
+    area = bool(AREAQ.search(question))
+    kind = _kind(re.sub(r"\b(?:floors?|storeys?|stories|levels?)\b", " ", question.lower())) or ("room" if area else None)
+    if kind is None or kind == "storey":
+        return None
+    items = [i for i in _of_kind(doc, kind) if i.storey in names]
+    score = {n: (round(sum(v for v in (_qty(i, kind, "area") for i in items if i.storey == n) if v), 2) if area
+                 else sum(1 for i in items if i.storey == n)) for n in names}
+    u = " m²" if area else ""
+    fmt = (lambda v: _fmt(v)) if area else (lambda v: str(v))
+    parts = "; ".join(f"**{n}**: {fmt(score[n])}{u}" for n in names)
+    hi = max(score, key=score.get)
+    lo = min(score, key=score.get)
+    if score[hi] == score[lo]:
+        verdict = "They are equal."
+    else:
+        verdict = f"**{hi}** has more ({fmt(score[hi])}{u} vs {fmt(score[lo])}{u}, a difference of {fmt(round(score[hi] - score[lo], 2))}{u})."
+    what = f"{kind} area" if area else _noun(kind)
+    trace = [_step("route", f"storey pair / {kind} / {'area' if area else 'count'} -> code, no model"), _step("count", parts)]
+    text = f"Total {what} per floor: {parts}. {verdict} {{marks}}"
+    return _done(question, doc, text, score[hi] - score[lo], "m2" if area else "count", items, trace, t0=t0)
+
+
+KIND_SPLIT = re.compile(r"\s+(?:or|than|vs\.?|versus|and)\s+", re.I)
+
+
+def kind_compare(question: str, doc: Doc, t0) -> dict | None:
+    """"are there more windows or doors": count both kinds, say which is more."""
+    ql = question.lower()
+    if not re.search(r"\b(more|fewer|less|compare|comparison|versus|vs)\b", ql) or re.search(r"\b(floor|storey|level)s?\b", ql):
+        return None
+    if re.search(r"\bhow many\b.*\band\b", ql) and not re.search(r"\bmore|fewer|less\b", ql):
+        return None
+    body = re.sub(r"\b(are there|is there|there are|which|what|has|have|does|do|the|this|plan|floor|building|model|drawing|compare|comparison|of|more|fewer|less|many|between|number)\b", " ", ql)
+    sides = [x for x in KIND_SPLIT.split(body) if x.strip()]
+    kinds: list[str] = []
+    for side in sides:
+        k = _kind(side)
+        if k and k not in kinds and k != "storey":
+            kinds.append(k)
+    if len(kinds) != 2:
+        return None
+    counts = {k: _of_kind(doc, k) for k in kinds}
+    a, b = kinds
+    na, nb = len(counts[a]), len(counts[b])
+    if not (na or nb):
+        return None
+    if na == nb:
+        verdict = f"There are equally many: **{na}** of each."
+    else:
+        hi, lo = (a, b) if na > nb else (b, a)
+        verdict = f"There are more **{_noun(hi)}**: **{max(na, nb)}** {_noun(hi)} vs **{min(na, nb)}** {_noun(lo)}."
+    trace = [_step("route", f"kind comparison / {a} vs {b} -> code, no model"), _step("count", f"{na} {_noun(a)}, {nb} {_noun(b)}")]
+    return _done(question, doc, f"{verdict} {{marks}}", abs(na - nb), "count", counts[a] + counts[b], trace, t0=t0)
+
+
+EXACT = re.compile(r"\bhow many\s+(?:of the\s+)?(?:\w+\s+)?(doors?|windows?)\b.*?\b(?:are|is|have|with|measuring|measure)?\s*(?:a\s+)?(?:width|height|clear width)?\s*(?:of\s+)?(?:exactly\s+|about\s+|around\s+)?(\d+(?:[.,]\d+)?)\s*(mm|cm|m|metres?|meters?)\s*(wide|high|tall|in width|in height)\b", re.I)
+
+
+def exact_size(question: str, doc: Doc, t0) -> dict | None:
+    """"how many doors are 1.8 m wide": equality within 2.5 cm (a bare size is a match, not a threshold)."""
+    m = EXACT.search(question)
+    if not m or COND.search(question):
+        return None
+    kind = "door" if m.group(1).lower().startswith("door") else "window"
+    val = float(m.group(2).replace(",", "."))
+    unit = m.group(3).lower()
+    metres = val / 1000 if unit == "mm" else val / 100 if unit == "cm" else val
+    height = m.group(4).lower() in ("high", "tall", "in height")
+    key = "height_m" if height else "width_m"
+    items = _of_kind(doc, kind)
+    st = resolve_storey(question, doc.storeys) if doc.mode == "ifc" else None
+    if st:
+        items = [i for i in items if i.storey == st]
+    known = [(i, i.q.get(key)) for i in items if i.q.get(key) is not None]
+    if not known:
+        return None
+    tol = 0.025
+    hit = [i for i, v in known if abs(float(v) - metres) <= tol]
+    vals = sorted({round(float(v), 2) for _, v in known})
+    where = f"on **{st}**" if st else ("in this model" if doc.mode == "ifc" else "on this floor plan")
+    skipped = len(items) - len(known)
+    note = f" ({skipped} {_noun(kind, skipped)} have no {'height' if height else 'width'} in the data.)" if skipped else ""
+    dist = (" Sizes in the model: " + ", ".join(f"{v:g} m" for v in vals) + ".") if 1 < len(vals) <= 8 else ""
+    trace = [_step("route", f"count / {kind} / exactly {val:g}{unit} {'high' if height else 'wide'} -> code, no model"), _step("filter", f"{len(hit)} of {len(known)}")]
+    text = f"**{len(hit)} {_noun(kind, len(hit))}** {where} {'is' if len(hit) == 1 else 'are'} **{val:g} {unit}** {'high' if height else 'wide'} (within 2.5 cm).{dist}{note} {{marks}}"
+    return _done(question, doc, text, len(hit), "count", hit, trace, t0=t0)
+
+
 # ------------------------------------------------------------------ conditional counts
 COND = re.compile(
     r"\bhow many\s+(?:of the\s+)?(?:\w+\s+)?(doors?|windows?)\b.*?\b"
@@ -356,7 +476,9 @@ def superlative_room(question: str, doc: Doc, t0) -> dict | None:
     ql = question.lower()
     if doc.mode != "planmap" or not SUPER.search(ql) or not re.search(r"\b(room|space)s?\b", ql) or re.search(r"\bhow many\b|\bwindow|\bdoor", ql):
         return None
-    rooms = [(r, _qty(r, "room", "area")) for r in _of_kind(doc, "room")]
+    outdoor = re.compile(r"terrace|terrassi|balcon|parveke|outdoor|patio|garden|yard|deck|porch|veranda", re.I)
+    rooms = [(r, _qty(r, "room", "area")) for r in _of_kind(doc, "room")
+             if not outdoor.search(f"{r.label or ''} {r.props.get('room_type') or ''}") or re.search(r"\boutdoor|terrace|balcon", ql)]
     rooms = sorted([(r, v) for r, v in rooms if v], key=lambda t: -t[1])
     if not rooms:
         return None
@@ -364,18 +486,19 @@ def superlative_room(question: str, doc: Doc, t0) -> dict | None:
     if small:
         rooms.reverse()
     r, v = rooms[0]
-    nm = r.label or (r.props.get("room_type") or "room")
-    nxt = "; ".join(f"{(x.label or x.props.get('room_type') or x.item_id)} {_fmt(y)} m²" for x, y in rooms[1:4])
+    rt = r.props.get("room_type") or "room"
+    nm = r.label or f"{rt} room"
+    nxt = "; ".join(f"{(x.label or (str(x.props.get('room_type') or 'room') + ' room'))} {_fmt(y)} m²" for x, y in rooms[1:4])
     sc = doc.scale or {}
     est = " The scale is estimated from door sizes, so areas are approximate." if (sc.get("confidence") or 1) < 0.5 else ""
     trace = [_step("route", "largest room / plan map -> code, no model"), _step("compare", f"{len(rooms)} rooms ranked by area")]
-    text = f"The {'smallest' if small else 'largest'} room is **{nm}** ({r.props.get('room_type') or 'room'}) at **{_fmt(v)} m²**. Next: {nxt}.{est} {{marks}}"
+    text = f"The {'smallest' if small else 'largest'} room is **{nm}**{'' if not r.label else ' (' + rt + ')'} at **{_fmt(v)} m²**. Next: {nxt}.{est} {{marks}}"
     return _done(question, doc, text, v, "m2", [r], trace, t0=t0)
 
 
 def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
     """First handler that recognises the shape wins; every handler may return None."""
-    for fn in (storey_compare, total_and_storey, cond_count, compliance, superlative_room):
+    for fn in (storey_pair, storey_compare, total_and_storey, cond_count, exact_size, kind_compare, compliance, superlative_room):
         res = fn(question, doc, t0)
         if res is not None:
             return res

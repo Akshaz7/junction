@@ -65,7 +65,7 @@ s1 = "artifacts/cubicasa5k__colorful-11397/planmap-1.json (scale 0.029 m/px, doo
 add(C1, "How many windows and doors are there?", "count_multi", must=["11 windows", "11 doors"], src=s1)
 add(C1, "How many bedrooms are there and what is their combined floor area?", "takeoff", must=["3", str(round(sum(area(r) for r in croom(C1,'bedroom')),1))], tol=0.05, src=s1)
 add(C1, "How many m2 of flooring for the living room and kitchen with 10% extra?", "takeoff", round((sum(area(r) for r in croom(C1,'living')+croom(C1,'kitchen')))*1.1,1), tol=0.05, src=s1)
-add(C1, "What is the biggest room in this plan?", "compare", must=["terrace"], src=s1)
+add(C1, "What is the biggest room in this plan?", "compare", must=["living"], src=s1, note="outdoor spaces (terrace, balcony) are not rooms; living 21.6 m2 is the largest indoor room")
 add(C1, "Where is the entrance door?", "where", must=["door"], src=s1+" (entrance = door touching exterior extent)")
 add(C1, "If I remove the front door, is there still an exit?", "edit", must=["exit"], src=s1)
 s2 = "artifacts/cubicasa5k__colorful-11398/planmap-1.json (scale 0.0143 m/px, door-prior conf 0.3)"
@@ -101,6 +101,15 @@ add(CTR, "What is the area of the fitness room?", "text", must=["210"], src=c)
 add(CTR, "Who is the architect on this project?", "text", must=["OpeningDesign"], src=c)
 add(CTR, "Who is the general contractor?", "text", must=["Royal"], src=c)
 add(CTR, "What occupancy classification is the basement parking garage?", "text", must=["S-2"], src=c)
+
+# ---- QA-LIVE (14 Nov 14:39) regressions: exact sizes, named-storey and kind comparisons, take-off without waste, largest room
+live = "results/qa/live-1439.md"
+add(AC, "How many doors are 1.8 m wide?", "count_cond", sum(1 for i in items(AC, "door") if abs((i.q.get("width_m") or 0) - 1.8) <= 0.025), src=src + " (width_m == 1.8 within 2.5 cm)")
+add(AC, "Compare doors on the 1st vs 2nd floor", "compare", must=[str(ac_d["1. Obergeschoss"]), str(ac_d["2. Obergeschoss"]), "1. Obergeschoss", "2. Obergeschoss"], src=src)
+add(AC, "How many m2 of floor tiles do I need for all the WCs?", "takeoff", wc_area, tol=0.02, src=src, note="area, not a count of WCs")
+nw, nd = len(items(C1, "window")), len(items(C1, "door"))
+add(C1, "Are there more windows or doors?", "compare", must=([str(nw), str(nd)] + (["equally"] if nw == nd else ["windows" if nw > nd else "doors"])), src=s1, note=f"{nw} windows, {nd} doors")
+add(C1, "What is the largest room?", "compare", must=["living"], src=s1, note="terrace and balcony are outdoor spaces; living 21.6 m2 is the largest indoor room")
 
 with open("results/qa/judge_questions.jsonl", "w") as f:
     for q in Q: f.write(json.dumps(q, ensure_ascii=False) + "\n")

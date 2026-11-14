@@ -29,6 +29,8 @@ SMALL_TALK = re.compile(
 GENERAL = re.compile(r"^\s*(what (is|are|does|do)|how (do|does|to|should|can)|why|explain|define|tell me about)\b", re.I)
 PROJECT_CUE = re.compile(r"\b(our|this project|the project|in the|on the|on sheet|on level|floor plan|drawing|model|schedule|section|"
                          r"elevation|ifc|room \d|door \d|level \d)\b", re.I)
+STRONG_CUE = re.compile(r"\b(our|this project|the project|this (?:drawing|plan|model|sheet|building)|on sheet|on level|ifc|room \d|door \d|level \d)\b", re.I)
+JUNK_DOC = re.compile(r"upload-fixture|generated-for-demo|^qa-|cross-device", re.I)   # test leftovers never answer a project question
 NUMERIC = re.compile(r"\b(how many|how much|count|number of|total|area|length|volume|square|m2|m²)\b", re.I)
 MIN_COVERAGE = 0.5
 MAX_PASSAGES = 5
@@ -259,7 +261,7 @@ def project_answer(question: str, history, on_event, trace: list, t0: float, roo
         if m in ix.docs and m not in named:
             named.append(m)
     boost = {"uploads": 1.3}
-    hits = ix.search(question, 10, boost)
+    hits = [h for h in ix.search(question, 14, boost) if not JUNK_DOC.search(h["doc_id"]) or h["doc_id"] in named][:10]
     add(_step("search", f"{len(ix.docs)} documents searched for '{terms}': " + (
         ", ".join(f"{ix.docs[h['doc_id']]['title'][:40]} (p.{h['page']})" if h["page"] else ix.docs[h["doc_id"]]["title"][:40] for h in hits[:3])
         or "no match") + (f"; named: {', '.join(named[:3])}" if named else ""), int((time.perf_counter() - ts) * 1000)))
@@ -326,7 +328,7 @@ def project_answer(question: str, history, on_event, trace: list, t0: float, roo
     # 4. passages
     top = hits[0] if hits else None
     if not top or top["coverage"] < MIN_COVERAGE:
-        if GENERAL.match(question) and not PROJECT_CUE.search(question) and not named:
+        if GENERAL.match(question) and not STRONG_CUE.search(question) and not named:
             return None            # general know-how: the chat path answers it, labelled as general guidance
         add(_step("abstain", "nothing in the project documents matches"))
         txt = (f"I searched {len(ix.docs):,} project documents for **{terms}** and none of them covers it, so I cannot answer from the project. "

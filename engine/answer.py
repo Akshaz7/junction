@@ -215,6 +215,13 @@ def ensure_markers(res: dict) -> dict:
     ans = res.get("answer") or {}
     cites = res.get("citations") or []
     t = ans.get("text_md") or ""
+    boxes = (res.get("evidence") or {}).get("boxes") or []
+    if not cites and boxes and t and not ans.get("abstained"):   # recount / forced paths can draw boxes without a citation: make one
+        xs = [b["bbox_px"] for b in boxes if b.get("bbox_px")]
+        cites = [{"n": 1, "doc_id": (res.get("doc_ids") or [""])[0], "page": boxes[0].get("page", 1), "kind": "region",
+                  "bbox_px": [min(b[0] for b in xs), min(b[1] for b in xs), max(b[2] for b in xs), max(b[3] for b in xs)] if xs else None,
+                  "item_ids": [b["item_id"] for b in boxes if b.get("item_id")], "quote": None}]
+        res["citations"] = cites
     if cites and t and not ans.get("abstained") and not re.search(r"\[\d+\]", t):
         ans["text_md"] = t.rstrip() + " " + " ".join(f"[{c['n']}]" for c in cites[:5] if isinstance(c, dict) and "n" in c)
     return res

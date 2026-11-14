@@ -5,8 +5,58 @@ question text, answer is a bare integer. Reconciliation with the plan-map count 
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import os
+import re
+import threading
 from pathlib import Path
+
+# The same question on the same drawing must give the same count: model results are cached by (image bytes, kind, question, model pin),
+# in memory and in <RESULTS_DIR>/recount_cache.json (best effort). RECOUNT_CACHE=0 turns it off.
+_CACHE: dict = {}
+_LOCK = threading.Lock()
+_LOADED = False
+
+
+def _cache_file() -> Path:
+    return Path(os.environ.get("RESULTS_DIR") or "/tmp/hologram") / "recount_cache.json"
+
+
+def _cache_key(tag: str, image: Path, kind, question: str = "") -> str:
+    h = hashlib.sha1(Path(image).read_bytes()).hexdigest()[:16]
+    q = re.sub(r"\W+", " ", (question or "").lower()).strip()
+    pin = os.environ.get("RECOUNT_ONLY", "") + "|" + os.environ.get("RECOUNT_BOX_ONLY", "") + "|" + os.environ.get("MODELS_FAKE", "")
+    return "|".join([tag, h, str(kind), q, pin])
+
+
+def _cache_get(key: str):
+    global _LOADED
+    if os.environ.get("RECOUNT_CACHE") == "0":
+        return None
+    with _LOCK:
+        if not _LOADED:
+            _LOADED = True
+            try:
+                _CACHE.update(json.loads(_cache_file().read_text()))
+            except Exception:  # noqa: BLE001
+                pass
+        return _CACHE.get(key)
+
+
+def _cache_put(key: str, value) -> None:
+    if os.environ.get("RECOUNT_CACHE") == "0":
+        return
+    with _LOCK:
+        _CACHE[key] = value
+        try:
+            f = _cache_file()
+            f.parent.mkdir(parents=True, exist_ok=True)
+            tmp = f.with_suffix(".tmp")
+            tmp.write_text(json.dumps(_CACHE))
+            tmp.replace(f)
+        except Exception:  # noqa: BLE001
+            pass
 
 SCHEMA = {"type": "object", "required": ["count"], "additionalProperties": False, "properties": {"count": {"type": "integer", "minimum": 0}}}
 HINTS = {
@@ -22,7 +72,21 @@ PROMPT = ("You are looking at a floor plan. Count carefully, one object at a tim
 
 
 def recount(question: str, image: Path, kind: str | None = None) -> tuple[int | None, float, str]:
-    """-> (count or None when no model is reachable, usd, model)."""
+    """-> (count or None when no model is reachable, usd, model). Cached: the same drawing and question always give the same count."""
+    try:
+        key = _cache_key("count", image, kind, question)
+        hit = _cache_get(key)
+        if hit is not None:
+            return int(hit[0]), 0.0, "cache:" + str(hit[1])
+    except Exception:  # noqa: BLE001
+        key = None
+    n, usd, model = _recount_model(question, image, kind)
+    if key and n is not None:
+        _cache_put(key, [n, model])
+    return n, usd, model
+
+
+def _recount_model(question: str, image: Path, kind: str | None = None) -> tuple[int | None, float, str]:
     try:
         from engine.models import call
         ov = os.environ.get("RECOUNT_ONLY", "")   # "provider|model": pin one model (calibration of stronger models)
@@ -61,7 +125,21 @@ BOX_MODEL = os.environ.get("RECOUNT_BOX_ONLY", "runware|google:gemini@3.5-flash"
 
 
 def detect(image: Path, kind: str) -> tuple[list[list[int]] | None, float, str]:
-    """-> (pixel boxes [x0,y0,x1,y1] that pass the size checks, usd, model); None when no model is reachable."""
+    """-> (pixel boxes [x0,y0,x1,y1] that pass the size checks, usd, model); None when no model is reachable. Cached like recount()."""
+    try:
+        key = _cache_key("boxes", image, kind)
+        hit = _cache_get(key)
+        if hit is not None:
+            return [list(b) for b in hit[0]], 0.0, "cache:" + str(hit[1])
+    except Exception:  # noqa: BLE001
+        key = None
+    out, usd, model = _detect_model(image, kind)
+    if key and out is not None:
+        _cache_put(key, [out, model])
+    return out, usd, model
+
+
+def _detect_model(image: Path, kind: str) -> tuple[list[list[int]] | None, float, str]:
     try:
         from PIL import Image as _I
         from engine.models import call

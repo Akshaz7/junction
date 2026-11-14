@@ -45,7 +45,7 @@ def test_takeoff_with_waste_and_multi_target():
 def test_named_rooms_and_planmap_superlative():
     need(SW), need(C1)
     assert A("How many Zimmer rooms are there and what is their total area?", SW)["answer"]["value"] == 9
-    assert "TERASSI" in A("What is the biggest room in this plan?", C1)["answer"]["text_md"]
+    assert "living" in A("What is the biggest room in this plan?", C1)["answer"]["text_md"]   # terrace and balcony are outdoor, not rooms
 
 
 def test_rule_check_and_edit_verdict():
