@@ -1,0 +1,5 @@
+.library-screen { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.library-tabs { display: flex; gap: 4px; padding: 8px 16px 0; border-bottom: 1px solid var(--border); }
+.library-tabs button { display: inline-flex; align-items: center; gap: 6px; font: inherit; color: var(--muted-foreground); background: transparent; border: 0; border-bottom: 2px solid transparent; padding: 8px 12px; cursor: pointer; }
+.library-tabs button[aria-selected='true'] { color: var(--foreground); border-bottom-color: var(--primary); }
+.library-body { display: flex; flex-direction: column; min-height: 0; flex: 1; overflow: auto; }

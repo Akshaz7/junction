@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 
-export const routes = ['overview', 'chat', 'changes', 'data', 'accuracy', 'skills', 'automations', 'findings'] as const
+export const routes = ['overview', 'chat', 'changes', 'data', 'accuracy', 'skills', 'automations', 'findings', 'compare', 'library', 'tools'] as const
 export type Route = typeof routes[number]
 
 function currentRoute(): Route {

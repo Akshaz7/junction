@@ -64,7 +64,7 @@ export interface ChangeEntry {
   doc_a: string | null
   doc_b: string
   created_at: string
-  summary: { doc_id?: string; title?: string; n_changes?: number; headline?: string; generated_for_demo?: boolean; source?: string }
+  summary: { doc_id?: string; title?: string; n_changes?: number; headline?: string; generated_for_demo?: boolean; source?: string; series_id?: string; version_a?: number; version_b?: number }
 }
 
 export interface RuleChangeEntry {

@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import { handleMockRequest } from '../src/mock/handler'
 
-const navItems = ['Overview', 'Chat', 'Changes', 'Data', 'Accuracy', 'Skills', 'Automations']
+const navItems = ['Overview', 'Chat', 'Changes', 'Data', 'Compare', 'Library', 'Tools', 'Accuracy']
 
 test('workspace shell exposes every route and restores it on reload', async ({ page }) => {
   await page.goto('/')
@@ -10,7 +10,7 @@ test('workspace shell exposes every route and restores it on reload', async ({ p
   const navigation = page.getByRole('navigation', { name: 'Workspace navigation', exact: true })
   await expect(page.getByRole('link', { name: 'Hologram home' })).toHaveText('Hologram')
   await expect(page.getByRole('combobox', { name: 'Project', exact: true }).filter({ visible: true })).toHaveValue('demo')
-  for (const label of navItems) {
+  for (const label of navItems.filter((item) => item !== 'Accuracy')) {
     const link = navigation.getByRole('link', { name: label, exact: true })
     await expect(link).toBeVisible()
     await link.click()
@@ -19,9 +19,9 @@ test('workspace shell exposes every route and restores it on reload', async ({ p
     await expect(page).toHaveURL(new RegExp(`#/${label.toLowerCase()}$`))
   }
   await page.reload()
-  await expect(page.getByRole('heading', { name: 'Automations', exact: true, level: 1 })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Tools', exact: true, level: 1 })).toBeVisible()
   await page.goBack()
-  await expect(page.getByRole('heading', { name: 'Skills', exact: true, level: 1 })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Library', exact: true, level: 1 })).toBeVisible()
 })
 
 test('ten root CSS variables equal the supplied reference tokens', async ({ page }) => {
@@ -47,7 +47,7 @@ test('phone navigation keeps all pages reachable without horizontal overflow', a
   await expect(navigation).toBeVisible()
   await expect(page.getByRole('combobox', { name: 'Project', exact: true }).filter({ visible: true })).toHaveValue('demo')
   for (const label of navItems) {
-    const underMore = ['Accuracy', 'Skills', 'Automations'].includes(label)
+    const underMore = ['Compare', 'Library', 'Tools', 'Accuracy'].includes(label)
     const more = navigation.getByText('More', { exact: true })
     if (underMore) await more.click()
     await navigation.getByRole('link', { name: label, exact: true }).click()
