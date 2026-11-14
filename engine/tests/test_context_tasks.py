@@ -161,3 +161,13 @@ def test_forced_answer_on_attached_drawing_sends_the_image(root, mock):
     fc = [c for c in mock.calls if c["task"] == "forced_answer"]
     assert fc and fc[0]["images"] and str(fc[0]["images"][0]).endswith("page-1.png")
     assert a["route"] == "hybrid" and "title" not in a["answer"]["text_md"] and "drawing image" in a["answer"]["text_md"]
+
+
+def test_progress_block_only_states_what_ran():
+    from engine.tasks import _progress
+    from engine.tasks.evidence import Evidence
+    ev = Evidence(); ev.docs_searched = 25; ev.scope = "AC20: not part of a version series"; ev.gaps = ["a", "b"]
+    ev.add(doc_id="d", page=1, kind="text", title="t", text="x")
+    t = _progress("meeting", ev, 3.2)
+    assert "1 evidence item(s) from 25 document(s)" in t and "Evidence gaps noted: 2." in t and "Drafting the agenda… 3 s" in t
+    assert "exit" not in t.lower()

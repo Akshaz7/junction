@@ -119,6 +119,23 @@ def _gaps_present(text: str) -> bool:
     return bool(re.search(r"evidence gaps?|missing information|not documented|no evidence|not found in the documents", text, re.I))
 
 
+DRAFTING = {"claim": "claim", "meeting": "agenda", "phase": "phase plan", "contract": "contract review"}
+
+
+def _progress(name: str, ev: Evidence, elapsed: float) -> str:
+    """Visible progress while the model has not produced text yet. Every line comes from what actually ran."""
+    scope = re.sub(r"\s+", " ", ev.scope or "").strip()
+    lines = [f"**{LABEL[name]}**", "",
+             f"Read the project: {len(ev.items)} evidence item(s) from {ev.docs_searched:,} document(s) searched."]
+    if scope:
+        lines.append(f"Scope: {scope[:170]}{'…' if len(scope) > 170 else ''}")
+    if ev.images:
+        lines.append(f"Attached {len(ev.images)} drawing image(s) for the writer.")
+    lines.append(f"Evidence gaps noted: {len(ev.gaps)}." if ev.gaps else "No evidence gaps found by the automatic check.")
+    lines.append(f"Drafting the {DRAFTING[name]}… {elapsed:.0f} s")
+    return "\n\n".join(lines)
+
+
 def run_task(name: str, question: str, doc_ids: list[str], history, on_event, trace: list, t0: float, root: Path, calls: list | None = None) -> dict:
     from engine import models as M
     calls = calls if calls is not None else []
@@ -142,12 +159,33 @@ def run_task(name: str, question: str, doc_ids: list[str], history, on_event, tr
         return _finish(question, doc_ids, txt, ev, [], trace, t0, calls, conf=0.3)
 
     emit("status", {"text": f"Writing the {LABEL[name].lower()}…"})
-    emit("answer.delta", {"text": f"**{LABEL[name]}**\n\n_Writing from {len(ev.items)} evidence item(s)…_"})
+    emit("answer.delta", {"text": _progress(name, ev, 0)})
     text, meta = None, None
     ts = time.perf_counter()
+    import threading
+    from engine.models import providers as P
+    real = threading.Event()
+    inner = P.DELTA_SINK.get()
+
+    def sink(txt):   # the model's first text ends the progress block; everything after streams as before
+        real.set()
+        if inner:
+            inner(txt)
+
+    def tick():      # elapsed seconds only: the one thing that changes while the model has not answered yet
+        while not real.wait(1.5):
+            if real.is_set():
+                break
+            emit("answer.delta", {"text": _progress(name, ev, time.perf_counter() - ts)})
+    threading.Thread(target=tick, daemon=True).start()
+    _tok = P.DELTA_SINK.set(sink if inner else None)
     try:
         msgs = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": _prompt(name, question, ev)}]
-        r = M.call("task_write", msgs, images=ev.images[:2] or None)
+        try:
+            r = M.call("task_write", msgs, images=ev.images[:2] or None)
+        finally:
+            real.set()
+            P.DELTA_SINK.reset(_tok)
         meta = {"task": "task_write", "provider": r.provider, "model": r.model, "cost_usd": r.cost_usd}
         calls.append(meta)
         text = (r.text or "").strip()
