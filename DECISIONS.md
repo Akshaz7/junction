@@ -44,3 +44,4 @@ Format for new lines: `YYYY-MM-DD HH:MM — decision — reason`.
 - 2026-11-14 03:31 — SERVER may edit engine/models/providers.py and the tts section of models.yaml to add an ElevenLabs adapter for S-08 (ENGINE is busy on solvers; LEAD-authorised cross-folder change).
 - 2026-11-14 03:33 — I-04 starts before W-11: the native bridge handler and the /ws scene.highlight listener don't need the web button; done test uses a test bridge message.
 - 2026-11-14 03:37 — T-04's '13 highlighted items' depends on vision accuracy (VISION's colorful-11397 plan map has 12 windows today). T-04 passes when every answer item that exists in the extruded scene is highlighted with matching labels; the literal 13 is re-checked when the plan map reaches 13 (tracked in V-11/E-19).
+- 2026-11-14 03:49 — 3D and AR open in a cutaway view by default (roof and storeys above the answer's storey hidden, "Show roof" toggle). Rows T-11, I-10 added — Ash: roofs hide the answer items.
