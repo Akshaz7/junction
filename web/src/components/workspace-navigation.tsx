@@ -1,0 +1,46 @@
+import { ChartNoAxesCombined, Check, ChevronDown, Clock3, FolderOpen, GitCompareArrows, House, MessageSquare, MoreHorizontal, WandSparkles } from 'lucide-react'
+import { Tooltip } from './ui/tooltip'
+import type { Route } from '../lib/router'
+
+export const navigation = [
+  { route: 'overview', label: 'Overview', icon: House },
+  { route: 'chat', label: 'Chat', icon: MessageSquare },
+  { route: 'changes', label: 'Changes', icon: GitCompareArrows },
+  { route: 'data', label: 'Data', icon: FolderOpen },
+  { route: 'accuracy', label: 'Accuracy', icon: ChartNoAxesCombined },
+  { route: 'skills', label: 'Skills', icon: WandSparkles },
+  { route: 'automations', label: 'Automations', icon: Clock3 },
+] as const
+
+export function ProjectSwitcher() {
+  return <label className="project-switcher">
+    <span className="project-mark" aria-hidden="true">D</span>
+    <span className="sr-only">Project</span>
+    <select aria-label="Project" defaultValue="demo"><option value="demo">Demo workspace</option></select>
+    <ChevronDown size={14} aria-hidden="true" />
+  </label>
+}
+
+export function WorkspaceNavigation({ route }: { route: Route }) {
+  return <>
+    <aside className="rail" aria-label="Workspace sidebar">
+      <a href="#/overview" className="brand-mark" aria-label="Hologram home">Hologram</a>
+      <ProjectSwitcher />
+      <nav aria-label="Workspace navigation">
+        {navigation.map(({ route: destination, label, icon: Icon }) => <Tooltip content={label} key={destination}>
+          <a href={`#/${destination}`} className={`rail-item ${route === destination ? 'active' : ''}`} aria-label={label} aria-current={route === destination ? 'page' : undefined}>
+            <Icon size={20} /><span>{label}</span>
+          </a>
+        </Tooltip>)}
+      </nav>
+      <div className="workspace-footer"><span className="workspace-avatar" aria-hidden="true">H</span><span>Shared workspace<small>No account needed</small></span></div>
+    </aside>
+    <nav className="mobile-navigation" aria-label="Mobile navigation">
+      {navigation.slice(0, 4).map(({ route: destination, label, icon: Icon }) => <a key={destination} href={`#/${destination}`} aria-current={route === destination ? 'page' : undefined}><Icon size={19} /><span>{label}</span></a>)}
+      <details className="mobile-more" key={route}>
+        <summary aria-label="More pages" className={navigation.slice(4).some((item) => item.route === route) ? 'active' : ''}><MoreHorizontal size={19} /><span>More</span></summary>
+        <div className="more-menu">{navigation.slice(4).map(({ route: destination, label, icon: Icon }) => <a key={destination} href={`#/${destination}`} aria-current={route === destination ? 'page' : undefined}><Icon size={18} /><span>{label}</span>{route === destination && <Check size={15} />}</a>)}</div>
+      </details>
+    </nav>
+  </>
+}

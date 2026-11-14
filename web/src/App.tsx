@@ -1,7 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { ArrowRight, ArrowUp, ChevronDown, FileText, FolderOpen, Layers3, MessageSquare, Plus, Search, Sparkles } from 'lucide-react'
-import { Button } from './components/ui/button'
+import { ArrowRight, ArrowUp, ChevronDown, FileText, FolderOpen, Layers3, Plus, Search, Sparkles } from 'lucide-react'
+import { Badge, Button, Input } from './components/ui'
+import { ProjectSwitcher, WorkspaceNavigation, navigation } from './components/workspace-navigation'
+import { PlaceholderPage } from './components/placeholder-page'
 import { askQuestion, getDocuments, useMock } from './lib/api'
+import { navigate, useRoute } from './lib/router'
 import type { Answer, Document } from './lib/types'
 
 const starter = 'How many windows are in the sample plan?'
@@ -12,7 +15,7 @@ function AnswerText({ text }: { text: string }) {
 }
 
 export default function App() {
-  const [view, setView] = useState<'chat' | 'data'>('chat')
+  const view = useRoute()
   const [docs, setDocs] = useState<Document[]>([])
   const [loadingDocs, setLoadingDocs] = useState(true)
   const [draft, setDraft] = useState('')
@@ -54,23 +57,16 @@ export default function App() {
   }
 
   return <div className="app-shell">
-    <aside className="rail" aria-label="Workspace navigation">
-      <a href="#" className="brand-mark" aria-label="Hologram home" onClick={() => setView('chat')}><Layers3 size={25} /></a>
-      <div className="project-mark" title="Demo workspace">H</div>
-      <nav>
-        <button className={`rail-item ${view === 'chat' ? 'active' : ''}`} onClick={() => setView('chat')} aria-label="Chat" aria-current={view === 'chat' ? 'page' : undefined}><MessageSquare size={20} /><span>Chat</span></button>
-        <button className={`rail-item ${view === 'data' ? 'active' : ''}`} onClick={() => setView('data')} aria-label="Data" aria-current={view === 'data' ? 'page' : undefined}><FolderOpen size={20} /><span>Data</span></button>
-      </nav>
-      <div className="workspace-avatar" title="Shared workspace">H</div>
-    </aside>
+    <a href="#main-content" className="skip-link" onClick={(event) => { event.preventDefault(); document.getElementById('main-content')?.focus() }}>Skip to content</a>
+    <WorkspaceNavigation route={view} />
 
-    <main className="workspace">
+    <main className="workspace" id="main-content" tabIndex={-1}>
       <header className="topbar">
-        <div className="project-title"><span className="wordmark">Hologram</span><span className="topbar-divider" /><span className="workspace-name">Demo workspace</span></div>
-        <span className="mode-label">{useMock ? 'Local demo' : 'Connected workspace'}</span>
+        <div className="project-title"><span className="wordmark">Hologram</span><span className="topbar-divider" /><span className="workspace-name">Demo workspace</span><div className="mobile-project"><ProjectSwitcher /></div></div>
+        <Badge variant={useMock ? 'neutral' : 'success'}>{useMock ? 'Local demo' : 'Connected workspace'}</Badge>
       </header>
       <div className="pagebar">
-        <h1>{view === 'chat' ? 'Chat' : 'Data'}</h1>
+        <h1>{navigation.find((item) => item.route === view)!.label}</h1>
         {view === 'chat' && <Button variant="raised" disabled={busy} onClick={() => { setAnswers([]); setDraft(''); setError('') }}><Plus size={16} />New chat</Button>}
       </div>
 
@@ -112,12 +108,12 @@ export default function App() {
           </form>
           <p className="composer-disclaimer">AI can make mistakes. Verify important information.</p>
         </div>
-      </section> : <section className="data-page" aria-label="Project documents">
-        <div className="data-header"><div><h2>Project documents</h2><p>The sources behind your answers.</p></div><label className="search-field"><Search size={16} /><input type="search" aria-label="Search documents" placeholder="Search documents" value={search} onChange={(event) => setSearch(event.target.value)} /></label></div>
+      </section> : view === 'data' ? <section className="data-page" aria-label="Project documents">
+        <div className="data-header"><div><h2>Project documents</h2><p>The sources behind your answers.</p></div><label className="search-field"><Search size={16} /><Input type="search" aria-label="Search documents" placeholder="Search documents" value={search} onChange={(event) => setSearch(event.target.value)} /></label></div>
         {error && <p className="error-message" role="alert">{error}</p>}
-        {loadingDocs ? <p role="status">Loading documents…</p> : <div className="document-list">{docs.filter((doc) => doc.title.toLowerCase().includes(search.toLowerCase())).map((doc) => <article className="document-row" key={doc.doc_id}><span className="file-icon"><FileText size={22} /></span><div><h3>{doc.title}</h3><p>{doc.source} · {doc.formats.join(', ').toUpperCase()} · {doc.pages} {doc.pages === 1 ? 'page' : 'pages'}</p><small>{doc.credit} · {doc.licence}</small></div><Button variant="raised" onClick={() => setView('chat')}>Ask about it<ArrowRight size={15} /></Button></article>)}</div>}
+        {loadingDocs ? <p role="status">Loading documents…</p> : <div className="document-list">{docs.filter((doc) => doc.title.toLowerCase().includes(search.toLowerCase())).map((doc) => <article className="document-row" key={doc.doc_id}><span className="file-icon"><FileText size={22} /></span><div><h3>{doc.title}</h3><p>{doc.source} · {doc.formats.join(', ').toUpperCase()} · {doc.pages} {doc.pages === 1 ? 'page' : 'pages'}</p><small>{doc.credit} · {doc.licence}</small></div><Button variant="raised" onClick={() => navigate('chat')}>Ask about it<ArrowRight size={15} /></Button></article>)}</div>}
         {!loadingDocs && !docs.filter((doc) => doc.title.toLowerCase().includes(search.toLowerCase())).length && <p className="empty-state">No documents found.</p>}
-      </section>}
+      </section> : <PlaceholderPage route={view} />}
     </main>
   </div>
 }

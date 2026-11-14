@@ -1,14 +1,16 @@
 # Handoff: WEB (Codex worker)
 
-Row ID: W-01 (attempt 1)
-Task: Scaffold `web/` with Vite + React + TypeScript + Tailwind v4 + lucide-react. Use the design tokens from `refs/stoa-hero/theme-tokens.css` (copy the CSS variables into `web/src/styles/tokens.css`; the variables are design values, not code). Read `refs/stoa-hero/01-design-tokens-and-shell.md` and `refs/stoa-hero/03-build-guide.md` for the type scale and components. Until the backend endpoints exist (row S-03), add a tiny local mock in `web/src/mock/` that serves contract-shaped example data for `GET /api/docs` and a `POST /api/chats/{id}/messages` answer (CONTRACT.md 5.7 and 5.9). Add `npm` scripts: `dev`, `build`, `test` (vitest), `test:e2e` (Playwright, headless). Put the Vite dev proxy `/api` and `/ws` -> `http://localhost:8000`. Leave an empty folder `web/src/viewer3d/` with a `README.md` saying it belongs to the 3D worker.
-Rules: use our own wordmark "Hologram", never Stoa's logo. Never copy code from `refs/stoa-hero/source/`. Node is v26. Only edit `web/` (not `web/src/viewer3d/` beyond that README).
-Input files: refs/stoa-hero/theme-tokens.css, refs/stoa-hero/01-design-tokens-and-shell.md, refs/stoa-hero/03-build-guide.md, CONTRACT.md
-Contract sections to read: 5.7, 5.8, 5.9
-Done test command: `cd web && npm ci && npm run build && (timeout 40 npm run dev -- --port 5173 --strictPort > /tmp/w01dev.log 2>&1 &) ; sleep 8; curl -sf http://localhost:5173/ | grep -q '<div id="root"'`
-Last failed attempt (if any): none
+Row ID: W-04 (attempt 2)
+Task: App shell following the reference pack: sidebar, layout, type, colours, controls. Study `refs/stoa-hero/00-hero-reference.png`, `01-desktop-contact-sheet.png`, `01-phone-contact-sheet.png`, `01-design-tokens-and-shell.md`, `03-build-guide.md` (component map, Button variants, type scale, spacing) and a few frames in `refs/stoa-hero/desktop-frames/`. Build: left sidebar with our own wordmark "Hologram" (text wordmark, no Stoa logo), nav items Overview, Chat, Changes, Data, Accuracy, Skills, Automations, a project switcher showing "Demo workspace", main content area with a router (react-router or a tiny hash router) and placeholder pages for each nav item. Reusable components in `web/src/components/ui/` (Button with the variants from the build guide, Card, Badge, Chip, Input, Tooltip) using the CSS variables from `web/src/styles/tokens.css`. Fonts as named in the build guide (Google Fonts only). The UI copy follows `refs/stoabuild-full-text.md` in tone. Never copy code from `refs/stoa-hero/source/`.
+Playwright cannot launch Chrome inside your sandbox: write the e2e test, make sure it type-checks, and the LEAD runs it.
+Input files: as above; CONTRACT.md 5.8
+Done test (LEAD runs): `cd web && npm run build && npx playwright test e2e/shell.spec.ts` — the test finds all nav items and checks 10 CSS variables on :root against `refs/stoa-hero/theme-tokens.css` values.
+Last failed attempt (if any): attempt 1 — LEAD ran `npx playwright test e2e/shell.spec.ts`: 3 passed, 1 failed:
+  e2e/shell.spec.ts:42 "phone navigation keeps all pages reachable without horizontal overflow"
+  Error: expect(locator).toHaveAttribute('aria-current','page') — element not found: getByRole('navigation', { name: 'Mobile navigation' }).getByRole('link', { name: 'Accuracy' })
+At phone width the mobile navigation has no "Accuracy" link. Per the plan (W-11) the phone bottom tabs are Overview, Chat, Changes, Data, More — put Accuracy, Skills, Automations under "More" and make the test follow that (open More, then the link), or include them in the mobile nav. Keep all pages reachable on phone with no horizontal overflow. The LEAD will re-run all 4 tests.
 
 ---
 <!-- Worker appends RESULT: or NEEDS: lines below. -->
-
-RESULT: W-01 scaffold complete; supplied done test passed on local run 2 after adding three/@types/three for concurrent T-00 files; npm test passed all 9 tests; GET docs and POST SSE mocks checked; Playwright configured but browser verification incomplete (local Chrome launch aborted SIGABRT/EPERM); no commits.
+RESULT: W-04 implemented seven hash routes, responsive Hologram sidebar/mobile navigation, Demo workspace selector, Google Fonts Inter, and Button/Card/Badge/Chip/Input/Tooltip; npm run build and npm test pass (9 tests), and all 4 shell Playwright tests are discovered and type-checked; browser execution remains with LEAD per handoff.
+RESULT: W-04 attempt 2 corrected the phone Playwright flow to reopen More after navigation before checking Accuracy/Skills/Automations active links; checks route URLs, menu closure, and overflow on every page with More open and closed. npm run build passes (including e2e type-check); all 4 shell tests discovered via scripts/heavy.sh. LEAD must run browser tests per handoff.
