@@ -523,14 +523,14 @@ def _pairs(S, dmin, dmax, ang_tol=math.radians(2.0), min_ov=0.5):
         free = h - l
         for cl, ch in covered:
             free -= max(0.0, min(h, ch) - max(l, cl))
-        if free > 0.5 * (h - l):
+        if free > 0.35 * (h - l):
             acc.add((i, j))
             nb[i] += 1
             covered.append((l, h))
     out = []
     for k in range(len(qi)):
         i, j = int(qi[k]), int(qj[k])
-        if i < j and (i, j) in acc and (j, i) in acc:
+        if i < j and ((i, j) in acc or (j, i) in acc):
             out.append((i, j, abs(float(d[k])), float(d[k]), float(lo[k]), float(hi[k])))
     return out, nb
 
@@ -867,6 +867,13 @@ def walls(page: dict) -> list:
             harea = np.array([h_.area for h_ in halves])
             dens_h = cnt / np.maximum(harea, 1e-6)
             hatched = np.minimum(dens_h[0::2], dens_h[1::2]) >= 0.1
+            # looser: marks per unit length (round-1 rule) for strips no wider than the page's typical hatched
+            # wall (exterior walls whose poche is sparse on one side, e.g. next to glazing)
+            if hatched.any():
+                dd = np.array([r[3] for r in oq])
+                t_ref = float(np.median(dd[hatched]))
+                loose = ((cnt[0::2] + cnt[1::2]) / np.maximum(qlen, 1e-6) >= 0.3) & (dd <= 1.3 * t_ref)
+                hatched = hatched | loose
             hl = float(qlen[hatched].sum())
             page_hatches = hl > 0.25 * float(qlen.sum()) and hl > 300
             if page_hatches:
@@ -874,7 +881,11 @@ def walls(page: dict) -> list:
                 hatched = np.ones(len(oq), bool)
         # fixtures / casework (un-hatched strips only): a small light-filled shape covering the strip, or
         # fixture symbols (burners, basins, bowls) inside it
-        light = [poly for poly, g, oid in shapes if g > 0.5 and poly.area < 0.01 * page_area]
+        _lg = [(poly, g) for poly, g, oid in shapes if g > 0.5 and poly.area < 0.01 * page_area]
+        light = [p_ for p_, _ in _lg]
+        white = {k for k, (_, g) in enumerate(_lg) if g >= 0.97}  # white fills: room/mask backgrounds, not slabs
+        _tw = [r[3] for r in pieces] or [r[3] for r, h_ in zip(oq, hatched) if h_]
+        t_wall = float(np.median(_tw)) if _tw else None
         if oq and (light or ctree is not None):
             ltree = STRtree(light) if light else None
             keep = []
@@ -882,8 +893,11 @@ def walls(page: dict) -> list:
                 q = r[0]
                 if not h_:
                     if ltree is not None:
-                        cov = sum(light[k].intersection(q).area for k in ltree.query(q).tolist())
+                        hits = ltree.query(q).tolist()
+                        cov = sum(light[k].intersection(q).area for k in hits)
                         if cov >= 0.5 * q.area:
+                            if _is_parapet(r, light, hits, ctree, t_wall, white):
+                                keep.append((q, r[1], r[2], r[3], "parapet"))
                             continue
                     if ctree is not None and len(ctree.query(q, predicate="contains")):
                         continue
@@ -891,7 +905,7 @@ def walls(page: dict) -> list:
             oq = keep
         # thickness floor from the page's own walls: strips much thinner than its walls are face/dimension
         # line pairs or hatch bands (the "fins")
-        ref = [(r[3], r[0].area) for r in (oq if page_hatches or not pieces else pieces)]
+        ref = [(r[3], r[0].area) for r in (oq if page_hatches or not pieces else pieces) if r[4] != "parapet"]
         if ref:
             ref.sort()
             half, acc = sum(a_ for _, a_ in ref) / 2, 0.0
@@ -899,7 +913,11 @@ def walls(page: dict) -> list:
                 acc += a_
                 if acc >= half:
                     break
-            oq = [r for r in oq if r[3] >= max(1.0, 0.4 * t0)]
+            lt = STRtree(light) if light else None
+            oq = [r if r[3] >= max(1.0, 0.4 * t0) or r[4] == "parapet" else (r[0], r[1], r[2], r[3], "parapet")
+                  for r in oq
+                  if r[3] >= max(1.0, 0.4 * t0) or r[4] == "parapet"
+                  or (lt is not None and _is_parapet(r, light, lt.query(r[0].buffer(2 * r[3] + 1)).tolist(), ctree, t_wall, white))]
         oq.sort(key=lambda r: -r[3])  # widest valid pair first: inner hatch bands of a wall then overlap it
         stroke_pieces += oq
         for x0, y0, x1, y1, w, g, L, ang in S[thick]:
@@ -922,7 +940,32 @@ def walls(page: dict) -> list:
         out.append({"polygon": [[round(float(x), 3), round(float(y), 3)] for x, y in rect],
                     "centerline": [[round(float(x0), 3), round(float(y0), 3)], [round(float(x1), 3), round(float(y1), 3)]],
                     "thickness_pt": round(float(t), 3), "style": style})
+        if style == "parapet":
+            out[-1]["height_m"] = 1.0  # balcony / terrace parapet: low wall
     return out
+
+
+def _is_parapet(r, light, hits, ctree, t_wall=None, white=frozenset()):
+    """A thin strip running along the edge of a large light-filled slab with no fixture symbols in it
+    (balcony / terrace / loggia floor), or itself drawn as a thin light-filled bar much thinner than the page's
+    walls: a parapet, kept as a low wall."""
+    q, d = r[0], r[3]
+    if t_wall and d <= 0.6 * t_wall:
+        for k in hits:
+            L = light[k]
+            tl = _thickness(L)
+            if 0.7 * d <= tl <= 1.3 * d and L.area >= 10 * d * d and L.intersection(q).area >= 0.8 * q.area \
+                    and not (ctree is not None and len(ctree.query(L, predicate="contains"))):
+                return True
+    for k in hits:
+        L = light[k]
+        if k in white or _thickness(L) < 6 * d or L.area < 400:
+            continue
+        if ctree is not None and len(ctree.query(L, predicate="contains")):
+            continue  # bath tub, shower tray, counter
+        if L.exterior.buffer(1.5 * d + 0.5).contains(q):
+            return True
+    return False
 
 
 def _accept(cands, accepted, max_overlap=0.3):

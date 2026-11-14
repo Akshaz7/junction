@@ -35,7 +35,8 @@ def test_perfect_match_scores_high():
     q = pdf_quality.assess(_page(w), _pm(w, area=20.0, printed=20.2), n_boot=50, raw_walls=raw)
     assert q["components"]["walls"]["precision"] > 0.95 and q["components"]["walls"]["recall"] > 0.95
     assert q["components"]["walls"]["closed_exterior"]
-    assert q["label"] == "high" and q["ci95"][0] <= q["score"] <= q["ci95"][1]
+    assert q["score"] >= 0.85 and q["ci95"][0] <= q["score"] <= q["ci95"][1]
+    assert q["label"] == "medium" and "fewer than 3 openings to check" in q["label_capped_by"]  # no openings: capped
     assert q["summary"].startswith("3D matches the drawing:")
 
 
@@ -54,3 +55,20 @@ def test_no_scale_does_not_crash():
     pm["scale"] = {"m_per_pt": None, "method": None}
     q = pdf_quality.assess(_page(w), pm, n_boot=5, raw_walls=[])
     assert 0.0 <= q["score"] <= 1.0
+
+
+def test_no_printed_areas_widens_ci_and_caps_label():
+    w = _box_walls()
+    raw = [{"polygon": p} for p in w]
+    a = pdf_quality.assess(_page(w), _pm(w, area=20.0, printed=20.2), n_boot=100, raw_walls=raw)
+    b = pdf_quality.assess(_page(w), _pm(w, area=20.0, printed=None), n_boot=100, raw_walls=raw)
+    assert (b["ci95"][1] - b["ci95"][0]) > (a["ci95"][1] - a["ci95"][0])
+    assert "no printed room areas" in b["label_capped_by"] and b["label"] != "high"
+
+
+def test_extra_wall_lowers_precision():
+    w = _box_walls()
+    raw = [{"polygon": p} for p in w]
+    extra = w + [_rect(60, 60, 140, 67)]  # a wall the drawing does not have
+    q = pdf_quality.assess(_page(w), _pm(extra, area=20.0, printed=20.2), n_boot=10, raw_walls=raw)
+    assert q["components"]["walls"]["precision"] < 0.95

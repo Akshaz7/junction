@@ -147,7 +147,8 @@ def ink_walls(pdf_path, page, g, mpt):
     a = a.copy()
     for w in page.get("words", []):  # blank text (room names, dimensions, areas)
         b = w["bbox"]
-        a[max(0, int(b[1] * kr) - 1):int(b[3] * kr) + 2, max(0, int(b[0] * kr) - 1):int(b[2] * kr) + 2] = 255
+        m = int(round(0.25 * (b[3] - b[1]) * kr)) + 1  # glyph overshoot, underlines, superscripts (m², ft²)
+        a[max(0, int(b[1] * kr) - m):int(b[3] * kr) + m + 1, max(0, int(b[0] * kr) - m):int(b[2] * kr) + m + 1] = 255
     x0, y0 = int(round(g.x0 * kr)), int(round(g.y0 * kr))
     h, w = 2 * g.h, 2 * g.w
     crop = np.full((h, w), 255, a.dtype)
@@ -194,8 +195,8 @@ def _wall_part(page, pm, raw_walls, mpt, to_pt, pdf_path=None):
         E, src = g.raster(ev), "vector paths (raw walls + dark fills)"
     F = g.raster(wall_pt)
     O = g.raster(open_pt)
-    dE, dF = _dil(E, 1), _dil(F, 1)
-    fm, em = F & dE, E & dF  # final px on evidence / evidence px covered
+    dE, dF = _dil(E, 1), _dil(F | O, 1)
+    fm, em = F & dE, E & dF  # final wall px on ink / ink px reproduced by the 3D envelope (walls + doors/windows)
     r_gap = max(2, int(round(1.0 / CELL_M)))  # closes gaps < 2 m (doors, windows drawn as thin lines)
     outer_E = _close_fill(E, r_gap)
     outline = outer_E & _dil(~outer_E, 1)
@@ -231,7 +232,11 @@ def _wall_stats(c):
             "score": round(0.6 * f1 + 0.4 * oc, 4)}
 
 
-def _room_part(pm):
+ROOM_NO_PRINTED_U = 0.10  # +/- uniform term added to the room score per bootstrap draw when nothing is printed:
+                          # printed areas are the only independent area check, without them area accuracy is unknown
+
+
+def _room_part(pm, to_pt=None, W=None):
     rooms = _items(pm, "room")
     if not rooms:
         return None
@@ -241,16 +246,46 @@ def _room_part(pm):
         q = r.get("q") or {}
         a, pr = q.get("area_m2"), q.get("area_m2_printed")
         errs.append(abs(a / pr - 1) if a and pr else np.nan)
-    errs = np.array(errs)
-    return {"has": has, "errs": errs}
+    px = np.zeros(len(rooms))
+    leak = np.zeros(len(rooms))
+    interior = 0.0
+    if W is not None and to_pt is not None:
+        from scipy import ndimage
+        E, F, O, _ = W["masks"]
+        outer = W["outer"]
+        core = ndimage.binary_erosion(E | F, iterations=2)  # inside a wall, past a 10 cm tolerance
+        bad = ~outer | core
+        interior = float((outer & ~(E | F)).sum())
+        for k, r in enumerate(rooms):
+            if r.get("polygon_px"):
+                m = W["grid"].raster([to_pt(r["polygon_px"])])
+                px[k], leak[k] = m.sum(), (m & bad).sum()
+    return {"has": has, "errs": np.array(errs), "px": px, "leak": leak, "interior": interior}
 
 
-def _room_score(has, errs):
-    frac = float(has.mean()) if len(has) else 0.0
+def _room_terms(R, ix=None):
+    ix = np.arange(len(R["has"])) if ix is None else ix
+    has, errs, px, leak = R["has"][ix], R["errs"][ix], R["px"][ix], R["leak"][ix]
+    cov = float(has.mean()) if len(has) else 0.0
+    t = {"coverage": cov}
+    if R["interior"] > 0:
+        rc = float(px.sum()) / R["interior"]
+        t["closure"] = min(rc, 1 / rc) if rc > 0 else 0.0
+        t["leak_fraction"] = float(leak.sum() / px.sum()) if px.sum() else 1.0
+        t["leak_score"] = max(0.0, 1 - 3 * t["leak_fraction"])
     e = errs[~np.isnan(errs)]
     if len(e):
-        return 0.4 * frac + 0.6 * float(np.clip(1 - e / AREA_ERR_ZERO, 0, 1).mean())
-    return min(frac, 0.85)
+        t["area"] = float(np.clip(1 - e / AREA_ERR_ZERO, 0, 1).mean())
+    return t
+
+
+def _room_score_t(t):
+    geo = [t[k] for k in ("closure", "leak_score") if k in t]
+    if "area" in t:
+        return 0.3 * t["coverage"] + 0.4 * t["area"] + (0.15 * sum(geo) if len(geo) == 2 else 0.3 * t["area"])
+    if len(geo) == 2:
+        return 0.4 * t["coverage"] + 0.3 * geo[0] + 0.3 * geo[1]
+    return 0.5 * t["coverage"]  # nothing to check the rooms against
 
 
 def _scale_part(pm):
@@ -310,7 +345,8 @@ def _open_score(arcs, win):
     return sum(parts) / len(parts) if parts else None
 
 
-def assess(page: dict, planmap: dict, *, n_boot: int = 200, seed: int = 0, raw_walls: list | None = None) -> dict:
+def assess(page: dict, planmap: dict, *, n_boot: int = 200, seed: int = 0, raw_walls: list | None = None,
+           pdf_path=None, page_index: int = 0) -> dict:
     """Accuracy score (0..1) with a 95% bootstrap CI for planmap vs the PDF page it came from.
     raw_walls: pdf_vector.walls(page) if the caller already has it (computed here otherwise)."""
     mpt = float((planmap.get("scale") or {}).get("m_per_pt") or 0)
@@ -321,8 +357,10 @@ def assess(page: dict, planmap: dict, *, n_boot: int = 200, seed: int = 0, raw_w
             raw_walls = pdf_vector.walls(page)
         except Exception:
             raw_walls = []
-    W = _wall_part(page, planmap, raw_walls, mpt, to_pt) if mpt > 0 else None
-    R = _room_part(planmap)
+    if pdf_path is not None:
+        page = {**page, "page_index": page_index}
+    W = _wall_part(page, planmap, raw_walls, mpt, to_pt, pdf_path) if mpt > 0 else None
+    R = _room_part(planmap, to_pt, W)
     S = _scale_part(planmap)
     O = _opening_part(page, planmap, mpt, to_pt, W["masks"] if W else None, W["grid"] if W else None) if mpt > 0 else None
 
@@ -333,7 +371,9 @@ def assess(page: dict, planmap: dict, *, n_boot: int = 200, seed: int = 0, raw_w
         return sum(WEIGHTS[k] * v for k, v in avail.items()) / tot if tot else 0.0
 
     ws = W["stats"]["score"] if W else 0.0
-    rs = _room_score(R["has"], R["errs"]) if R else 0.0
+    RT = _room_terms(R) if R else {}
+    rs = _room_score_t(RT) if R else 0.0
+    no_printed = not R or not (~np.isnan(R["errs"])).any()
     os_ = _open_score(O["arcs"], O["win"]) if O else None
     score = overall(ws, rs, os_)
     rng = np.random.default_rng(seed)
@@ -343,7 +383,9 @@ def assess(page: dict, planmap: dict, *, n_boot: int = 200, seed: int = 0, raw_w
             if W and len(W["tiles"]) else ws
         if R:
             ix = rng.integers(0, len(R["has"]), len(R["has"]))
-            br = _room_score(R["has"][ix], R["errs"][ix])
+            br = _room_score_t(_room_terms(R, ix))
+            if no_printed:
+                br = float(np.clip(br + rng.uniform(-ROOM_NO_PRINTED_U, ROOM_NO_PRINTED_U), 0, 1))
         else:
             br = rs
         bo = os_
@@ -361,7 +403,8 @@ def assess(page: dict, planmap: dict, *, n_boot: int = 200, seed: int = 0, raw_w
                      "polygon_fraction": round(float(R["has"].mean()), 4), "n_printed": int(len(e)),
                      "area_rel_err_median": round(float(np.median(e)), 4) if len(e) else None,
                      "area_rel_err_p90": round(float(np.percentile(e, 90)), 4) if len(e) else None,
-                     "score": round(rs, 4)}
+                     **{k: round(v, 4) for k, v in RT.items() if k != "area"}, "score": round(rs, 4),
+                     "no_printed_areas_uncertainty": ROOM_NO_PRINTED_U if no_printed else 0.0}
         if len(e) >= 2:
             meds = [float(np.median(e[rng.integers(0, len(e), len(e))])) for _ in range(n_boot)]
             rooms_out["area_rel_err_median_ci95"] = [round(float(np.percentile(meds, 2.5)), 4),
@@ -373,7 +416,14 @@ def assess(page: dict, planmap: dict, *, n_boot: int = 200, seed: int = 0, raw_w
                     "windows": int(len(O["win"])), "windows_on_wall": int(O["win"].sum()),
                     "window_on_wall_fraction": round(float(O["win"].mean()), 4) if len(O["win"]) else None,
                     "score": None if os_ is None else round(os_, 4)}
-    out = {"score": round(score, 4), "ci95": [round(lo, 4), round(hi, 4)], "label": _label(score),
+    label, cap = _label(score), []
+    if no_printed:
+        cap.append("no printed room areas")
+    if not O or (len(O["arcs"]) + len(O["win"])) < 3:
+        cap.append("fewer than 3 openings to check")
+    if cap and label == "high":
+        label = "medium"
+    out = {"score": round(score, 4), "ci95": [round(lo, 4), round(hi, 4)], "label": label, "label_capped_by": cap,
            "weights": dict(WEIGHTS), "n_boot": n_boot,
            "components": {"walls": W["stats"] if W else None, "rooms": rooms_out, "scale": S, "openings": open_out},
            "method": "no ground truth: plan map vs the PDF's own evidence (wall fills/outlines raster at 5 cm/px, "
@@ -434,7 +484,8 @@ def assess_with_overlay(page, planmap, out_png, **kw):
     if raw is None:
         from pipeline import pdf_vector
         raw = pdf_vector.walls(page)
-    W = _wall_part(page, planmap, raw, mpt, to_pt)
+    pg = {**page, "page_index": kw.get("page_index", 0)}
+    W = _wall_part(pg, planmap, raw, mpt, to_pt, kw.get("pdf_path"))
     if W:
         overlay(W["masks"], q["summary"], out_png)
     return q
