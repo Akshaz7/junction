@@ -32,9 +32,9 @@ def _has(q, value):
 
 
 def _level(q):
-    from engine.projects.roles import level_ordinal
-    m = re.search(r"\b(?:level|floor|storey|story)\s+(-?\d+(?:st|nd|rd|th)?)\b|\b(?:ground|first|second|third|basement)\s+(?:floor|level)\b", q, re.I)
-    return level_ordinal(m[0]) if m else None
+    from engine.projects.roles import level_from_text, level_ordinal
+    # Require a level phrase: a room number such as 205 is not a storey.
+    return level_ordinal(level_from_text(q))
 
 
 def _on_level(node, wanted):
@@ -52,15 +52,20 @@ def _label(node):
 
 def _resolve(q, graph, kind=None):
     nodes, _, _ = index(graph)
+    scoped_docs = {did for n in nodes.values() if n.get("kind") == "doc" and _has(q, n.get("label"))
+                   for did in n.get("doc_ids", [])}
     candidates = []
     for n in nodes.values():
         if n.get("kind") not in KIND_WORDS or (kind and n.get("kind") != kind) or not _on_level(n, _level(q)):
             continue
+        if scoped_docs and not scoped_docs.intersection(n.get("doc_ids") or []):
+            continue
         p = n.get("props") or {}
         names = [n.get("label"), p.get("tag"), p.get("name"), p.get("number"), p.get("mark"), p.get("room_number")]
-        scores = [len(fold(v)) for v in names if v is not None and fold(v) not in KIND_WORDS and _has(q, v)]
+        scores = [len(v) for v in {fold(v) for v in names if v is not None}
+                  if v not in KIND_WORDS and _has(q, v)]
         if scores:
-            candidates.append((max(scores), n))
+            candidates.append((sum(scores), n))
     if not candidates:
         return None, "I cannot identify that item in this project's graph. Use its room number or drawing tag."
     best = max(s for s, _ in candidates)

@@ -52,8 +52,15 @@ def _no_data_answer(question, doc_ids, on_event=None):
         return None
 
 
-def _run_engine(question, doc_ids, on_event, scene_state=None, history=None, catalogue=None):
+def _run_engine(question, doc_ids, on_event, scene_state=None, history=None, catalogue=None, project=None):
     if ENGINE is _real_engine:
+        if project is not None:
+            from engine.kg_answer import answer as graph_answer
+            quick = graph_answer(question, project, config.artifacts_dir())
+            if quick is not None:
+                for step in quick.get("trace", []):
+                    on_event("trace", step)
+                return quick
         from engine.library import CATALOGUE, drawing_selection_answer, library_answer, library_search_answer, sheet_count_answer
         token = CATALOGUE.set(catalogue)
         try:
@@ -253,11 +260,13 @@ async def ask(chat_id: str, body: NewMessage):
     if c is None:
         raise HTTPException(404, "chat not found")
     doc_ids = body.doc_ids if body.doc_ids is not None else ([c["doc_id"]] if c["doc_id"] else [])
-    if body.doc_ids is None and not doc_ids:   # a project chat with no explicit selection asks all the project's documents
+    project = None
+    if not doc_ids:   # a project chat with no explicit selection asks all the project's documents
         pid = await pool.fetchval("select project_id from chats where id=$1", cid)
         if isinstance(pid, uuid.UUID):
-            from .projects_routes import project_doc_ids
-            doc_ids = await project_doc_ids(pool, pid) or []
+            from .projects_routes import _project
+            project = await _project(pool, pid, refresh=False)
+            doc_ids = [d["doc_id"] for d in project["docs"]]
     if doc_ids:
         from .changes_source import visible_doc_ids
         listed = await visible_doc_ids(pool)
@@ -331,7 +340,7 @@ async def ask(chat_id: str, body: NewMessage):
                 except RuntimeError:  # a disconnected request's loop may already be closed
                     pass
 
-        task = asyncio.create_task(asyncio.to_thread(_run_engine, body.content, doc_ids, on_event, sstate, history, catalogue))
+        task = asyncio.create_task(asyncio.to_thread(_run_engine, body.content, doc_ids, on_event, sstate, history, catalogue, project))
         task.add_done_callback(lambda _: q.put_nowait(None) if accepting else None)
         deadline = time.monotonic() + partial_deadline()
         last_delta = 0.0
