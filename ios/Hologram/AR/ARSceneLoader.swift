@@ -6,12 +6,17 @@ enum ARSceneLoader {
     struct LoadedScene {
         let entity: Entity
         let isFixture: Bool
+        let manifest: SceneManifest?
     }
 
-    static func load(url: URL?) async throws -> LoadedScene {
+    static func load(url: URL?, manifestURL: URL? = nil) async throws -> LoadedScene {
         if let url {
             do {
-                return LoadedScene(entity: try await loadEntity(from: url), isFixture: false)
+                let entity = try await loadEntity(from: url)
+                let metadataURL = manifestURL ?? url.deletingLastPathComponent().appendingPathComponent("scene.json")
+                let manifest = try? await loadManifest(from: metadataURL)
+                try Task.checkCancellation()
+                return LoadedScene(entity: entity, isFixture: false, manifest: manifest)
             } catch {
                 try Task.checkCancellation()
                 // A missing or unavailable remote model still permits the offline demo.
@@ -20,7 +25,26 @@ enum ARSceneLoader {
         guard let fixtureURL = Bundle.main.url(forResource: "fixture", withExtension: "usdz") else {
             throw LoaderError.missingFixture
         }
-        return LoadedScene(entity: try await Entity(contentsOf: fixtureURL), isFixture: true)
+        let manifestURL = Bundle.main.url(forResource: "fixture.scene", withExtension: "json")
+        let manifest = try manifestURL.map { try Data(contentsOf: $0) }
+            .map { try JSONDecoder().decode(SceneManifest.self, from: $0) }
+        return LoadedScene(entity: try await Entity(contentsOf: fixtureURL), isFixture: true, manifest: manifest)
+    }
+
+    private static func loadManifest(from url: URL) async throws -> SceneManifest {
+        let data: Data
+        if url.isFileURL {
+            data = try Data(contentsOf: url)
+        } else {
+            var request = URLRequest(url: url)
+            request.timeoutInterval = 15
+            let (download, response) = try await URLSession.shared.data(for: request)
+            guard let response = response as? HTTPURLResponse, (200..<300).contains(response.statusCode) else {
+                throw LoaderError.downloadFailed
+            }
+            data = download
+        }
+        return try JSONDecoder().decode(SceneManifest.self, from: data)
     }
 
     private static func loadEntity(from url: URL) async throws -> Entity {

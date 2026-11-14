@@ -10,11 +10,22 @@ final class ARSceneController: ObservableObject {
     @Published private(set) var isLoaded = false
     @Published private(set) var isPlaced = false
     @Published private(set) var scale: Float = 0.01
+    @Published private(set) var isWalking = false
+    @Published private(set) var manifest: SceneManifest?
+    @Published private(set) var highlightedItemIDs: [String] = []
+    @Published private(set) var cameraInModel: simd_float4x4?
+    @Published private(set) var guide: WalkGuide?
+    @Published private(set) var targetItemID: String?
 
     private(set) var sceneIndex: SceneIndex?
     private(set) var highlightController: HighlightController?
     private weak var arView: ARView?
     private var model: ModelEntity?
+    private var content: Entity?
+    private var originalContentTransform = Transform()
+    private var tableFloor: Float = 0
+    private var tableScale: Float = 0.01
+    private var lastGuideUpdate: TimeInterval = 0
     private var anchor: AnchorEntity?
     private var updateSubscription: (any Cancellable)?
     private var gestureRecognizers: [UIGestureRecognizer] = []
@@ -33,18 +44,24 @@ final class ARSceneController: ObservableObject {
         view.session.run(configuration)
         updateSubscription = view.scene.subscribe(to: SceneEvents.Update.self) { [weak self] _ in
             self?.syncGestureScale()
+            self?.updateWalkGuide()
         }
     }
 
-    func load(url: URL?) async {
+    func load(url: URL?, manifestURL: URL? = nil, itemIDs: [String] = [],
+              cameraTargetItemID: String? = nil) async {
         guard isSupported else { return }
         do {
-            let loaded = try await ARSceneLoader.load(url: url)
+            let loaded = try await ARSceneLoader.load(url: url, manifestURL: manifestURL)
             try Task.checkCancellation()
             let content = loaded.entity
+            self.content = content
+            originalContentTransform = content.transform
+            manifest = loaded.manifest
             sceneIndex = SceneIndex(root: content)
             highlightController = HighlightController(root: content)
             let bounds = content.visualBounds(relativeTo: nil)
+            tableFloor = bounds.min.y
             // Keep the loaded prim hierarchy intact, with its bottom on the surface.
             content.position.y -= bounds.min.y
             let container = ModelEntity()
@@ -58,6 +75,7 @@ final class ARSceneController: ObservableObject {
             model = container
             isFixture = loaded.isFixture
             isLoaded = true
+            setHighlights(itemIDs, cameraTargetItemID: cameraTargetItemID)
             status = "Move your device to find a flat surface, then tap to place."
         } catch is CancellationError {
             return
@@ -70,18 +88,25 @@ final class ARSceneController: ObservableObject {
         guard !isPlaced, let view = arView, let model,
               let hit = view.raycast(from: point, allowing: .existingPlaneGeometry,
                                      alignment: .horizontal).first else { return }
-        let anchor = AnchorEntity(world: hit.worldTransform)
+        if isWalking {
+            guard let plane = hit.anchor as? ARPlaneAnchor, plane.classification == .floor else {
+                status = "Move your device to detect the floor, then tap the floor to start walking."
+                return
+            }
+        }
+        // Keep scene Y vertical even if the estimated plane is slightly tilted.
+        let anchor = AnchorEntity(world: hit.worldTransform.columns.3.xyz)
         anchor.addChild(model)
         view.scene.addAnchor(anchor)
         self.anchor = anchor
-        gestureRecognizers = view.installGestures([.translation, .rotation, .scale], for: model)
-            .map { $0 as UIGestureRecognizer }
+        if !isWalking { installTableGestures(on: view, model: model) }
         isPlaced = true
-        status = "Pinch to scale, rotate with two fingers, or drag to move."
+        status = isWalking ? "Walk at 1:1. Select an item on the map to guide you."
+            : "Pinch to scale, rotate with two fingers, or drag to move."
     }
 
     func setScale(_ value: Float) {
-        let clamped = min(max(value, 0.01), 1)
+        let clamped: Float = isWalking ? 1 : min(max(value, 0.01), 1)
         model?.scale = SIMD3(repeating: clamped)
         if abs(scale - clamped) > 0.00001 { scale = clamped }
     }
@@ -91,15 +116,70 @@ final class ARSceneController: ObservableObject {
         setScale(model.scale.x)
     }
 
+    func setWalking(_ walking: Bool) {
+        guard walking != isWalking else { return }
+        if walking { tableScale = scale }
+        isWalking = walking
+        // A table hit is not a floor hit. Require fresh floor placement on entry.
+        resetPlacement()
+        setScale(walking ? 1 : tableScale)
+        content?.transform = originalContentTransform
+        content?.position.y -= walking ? (manifest?.floorElevation ?? 0) : tableFloor
+        status = walking ? "Move your device to detect the floor, then tap the floor to start walking."
+            : "Tap a detected flat surface to place the model."
+    }
+
+    func setHighlights(_ itemIDs: [String], cameraTargetItemID: String? = nil) {
+        highlightedItemIDs = itemIDs
+        highlightController?.highlight(itemIDs: itemIDs)
+        targetItemID = ([cameraTargetItemID].compactMap { $0 } + itemIDs)
+            .first { manifest?.items[$0]?.bbox_m != nil }
+        guide = nil
+        lastGuideUpdate = 0
+        updateWalkGuide()
+    }
+
+    func selectTarget(_ itemID: String) {
+        setHighlights([itemID], cameraTargetItemID: itemID)
+    }
+
+    private func updateWalkGuide() {
+        guard isWalking, isPlaced, let frame = arView?.session.currentFrame, let content,
+              frame.timestamp - lastGuideUpdate >= 0.1 else { return }
+        lastGuideUpdate = frame.timestamp
+        guard case .normal = frame.camera.trackingState else {
+            cameraInModel = nil
+            guide = nil
+            return
+        }
+        // Invert the entire hierarchy, including floor offset and placement translation.
+        let camera = simd_inverse(content.transformMatrix(relativeTo: nil)) * frame.camera.transform
+        cameraInModel = camera
+        if let targetItemID, let bounds = manifest?.items[targetItemID]?.bbox_m {
+            guide = WalkGuide(cameraTransform: camera, target: bounds.center)
+        } else {
+            guide = nil
+        }
+    }
+
     func reset() {
+        resetPlacement()
+        if !isWalking { tableScale = 0.01 }
+        setScale(isWalking ? 1 : tableScale)
+        status = isWalking ? "Tap a detected floor to place the model again."
+            : "Tap a detected flat surface to place the model again."
+    }
+
+    private func resetPlacement() {
         removeGestures()
         model?.removeFromParent()
         if let anchor { arView?.scene.removeAnchor(anchor) }
         anchor = nil
-        model?.transform = Transform(scale: SIMD3(repeating: 0.01))
-        scale = 0.01
+        model?.transform = Transform(scale: SIMD3(repeating: scale))
         isPlaced = false
-        status = "Tap a detected flat surface to place the model again."
+        cameraInModel = nil
+        guide = nil
+        lastGuideUpdate = 0
     }
 
     func detach() {
@@ -112,10 +192,19 @@ final class ARSceneController: ObservableObject {
         arView = nil
     }
 
+    private func installTableGestures(on view: ARView, model: ModelEntity) {
+        gestureRecognizers = view.installGestures([.translation, .rotation, .scale], for: model)
+            .map { $0 as UIGestureRecognizer }
+    }
+
     private func removeGestures() {
         for gesture in gestureRecognizers { arView?.removeGestureRecognizer(gesture) }
         gestureRecognizers.removeAll()
     }
+}
+
+private extension SIMD4 where Scalar == Float {
+    var xyz: SIMD3<Float> { SIMD3(x, y, z) }
 }
 
 struct ARSceneView: UIViewRepresentable {

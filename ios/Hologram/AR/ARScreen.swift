@@ -2,6 +2,9 @@ import SwiftUI
 
 struct ARScreen: View {
     var sceneURL: URL? = nil
+    var manifestURL: URL? = nil
+    var highlightedItemIDs: [String] = []
+    var cameraTargetItemID: String? = nil
     @StateObject private var controller = ARSceneController()
     @Environment(\.dismiss) private var dismiss
 
@@ -10,11 +13,25 @@ struct ARScreen: View {
             ARSceneView(controller: controller).ignoresSafeArea()
             VStack(spacing: 16) {
                 HStack {
-                    Text("Show on table").font(.headline)
+                    Text(controller.isWalking ? "Walk at 1:1" : "Show on table").font(.headline)
                     Spacer()
                     Button("Done") { dismiss() }
                 }
                 .padding().background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+                if controller.isWalking {
+                    HStack {
+                        if let manifest = controller.manifest {
+                            WalkMiniMap(manifest: manifest, cameraTransform: controller.cameraInModel,
+                                        highlightedItemIDs: controller.highlightedItemIDs,
+                                        guide: controller.guide, targetItemID: controller.targetItemID,
+                                        onSelectItem: controller.selectTarget)
+                        } else {
+                            Text("Scene map unavailable.").font(.caption).padding()
+                                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+                        }
+                        Spacer()
+                    }
+                }
                 Spacer()
                 VStack(alignment: .leading, spacing: 12) {
                     if controller.isFixture {
@@ -23,6 +40,10 @@ struct ARScreen: View {
                     }
                     Text(controller.status).font(.callout)
                         .accessibilityIdentifier("ar-status")
+                    Toggle("Walk", isOn: Binding(get: { controller.isWalking },
+                                                 set: { controller.setWalking($0) }))
+                        .disabled(!controller.isLoaded)
+                        .accessibilityIdentifier("walk-toggle")
                     HStack {
                         Text("Scale")
                         Spacer()
@@ -34,7 +55,7 @@ struct ARScreen: View {
                     ), in: -2...0)
                     .accessibilityLabel("Model scale")
                     .accessibilityValue(controller.scaleLabel)
-                    .disabled(!controller.isLoaded)
+                    .disabled(!controller.isLoaded || controller.isWalking)
                     HStack {
                         Text("1:100")
                         Spacer()
@@ -46,6 +67,15 @@ struct ARScreen: View {
                 .padding().background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
             }.padding()
         }
-        .task { await controller.load(url: sceneURL) }
+        .task {
+            await controller.load(url: sceneURL, manifestURL: manifestURL,
+                                  itemIDs: highlightedItemIDs, cameraTargetItemID: cameraTargetItemID)
+        }
+        .onChange(of: highlightedItemIDs) { _, items in
+            controller.setHighlights(items, cameraTargetItemID: cameraTargetItemID)
+        }
+        .onChange(of: cameraTargetItemID) { _, target in
+            controller.setHighlights(highlightedItemIDs, cameraTargetItemID: target)
+        }
     }
 }
