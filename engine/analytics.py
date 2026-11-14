@@ -51,19 +51,31 @@ def _done(question, doc, text, value, unit, items, trace, route="analytics", t0=
     boxes, cites, scene = _evidence(doc, items)
     route = "index" if doc.mode == "ifc" else "planmap"  # answer.schema.json route enum has no "analytics"
     marks = "".join(f"[{c['n']}]" for c in cites)
+    if doc.mode == "planmap" and unit == "m²":
+        unit = "m2"
     return _answer_obj(question, [doc.doc_id], scrub(text.replace("{marks}", marks)), value, unit, 1.0 if doc.mode == "ifc" else 0.85, False,
                        boxes, cites, scene, trace, route, t0 or time.perf_counter())
 
 
 def filtered_question(question: str, doc: Doc, t0) -> dict | None:
     """Apply named rooms, area bounds, thickness and misspelled floor counts before broad totals."""
-    if doc.mode != "ifc":
-        return None
     from engine.solvers.filters import room_filter, room_name, missing_room_text, storey_requested
+    if doc.mode != "ifc":
+        # Quoted/labelled room lookups also recover text labels from within a
+        # polygon when another label names it. Preserve that existing path.
+        from engine.solvers.solve import _quoted
+        if _quoted(question) or re.search(r"\blabel(?:led|ed)\b", question, re.I):
+            return None
+        # Keep established detector count calibration. Named areas and explicit
+        # area bounds still need their full room filter on raster/CAD plans.
+        if re.search(r"\bhow many\b", question, re.I) and not re.search(r"\b(?:larger|smaller|bigger|between|over|under|at least|at most)\b", question, re.I):
+            return None
+        if not re.search(r"\b(?:area|size|how big|how large|m2|m²)\b", question, re.I):
+            return None
     from engine.solvers.solve import _abstain
     st = resolve_storey(question, doc.storeys)
     trace = [_step("route", "explicit filters -> code over IFC quantities, no model")]
-    if storey_requested(question) and st is None:
+    if doc.mode == "ifc" and storey_requested(question) and st is None:
         return _done(question, doc, "No matching floor was found. Storeys present: "
                      + ", ".join(s["name"] for s in doc.storeys) + ".", None, None, [], trace, t0=t0)
     q = question.lower()
@@ -95,6 +107,8 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
         return None
     rooms = _of_kind(doc, "room")
     selected = room_filter(question, rooms)
+    if doc.mode == "planmap" and (not selected or not selected[1]):
+        return None  # the map may not contain a printed name; allow the sheet reader to inspect it.
     bounds = re.search(r"\bbetween\s+(\d+(?:\.\d+)?)\s+and\s+(\d+(?:\.\d+)?)\s*(?:m2|m²|square met(?:er|re)s)\b", q)
     limit = re.search(r"\b(larger|bigger|smaller|greater|less|more|at least|at most|over|under|above|below)\s*(?:than\s+)?(\d+(?:\.\d+)?)\s*(?:m2|m²|square met(?:er|re)s)\b", q)
     area_q = bool(AREAQ.search(q) or re.search(r"\bhow (?:big|large)\b", q))
@@ -111,6 +125,9 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
         return _done(question, doc, missing_room_text(target, rooms)
                      + (f" Storey filter: {st}." if st else ""), None, None, [], trace, t0=t0)
     vals = [(r, _qty(r, "room", "area")) for r in hit]
+    if doc.mode == "planmap" and (not doc.scale or doc.scale.get("method") in (None, "none")):
+        if not all(r.props.get("area_m2_label") is not None for r in hit):
+            return _done(question, doc, "The matching rooms have no trusted drawing scale or printed area, so I cannot state an area.", None, None, hit, trace, t0=t0)
     if bounds or limit:
         known = [(r, v) for r, v in vals if v is not None]
         if not known:
@@ -130,7 +147,7 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
         hit = [r for r, _ in vals]
     else:
         condition = ""
-    where = f"on **{st}**" if st else "in this model"
+    where = f"on **{st}**" if st else ("in this model" if doc.mode == "ifc" else "on this floor plan")
     noun = target if len(hit) == 1 else (target + "s" if not target.endswith("s") else target)
     trace.append(_step("filter", f"{target}; {st or 'all storeys'}; {condition or 'no area bound'}: {len(hit)} matches"))
     if not hit:
@@ -138,7 +155,10 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
     have = [(r, v) for r, v in vals if v is not None]
     total = sum(v for _, v in have)
     # Keep the model's useful precision for individually named rooms.
-    per = "; ".join(f"{room_name(r)} ({r.name}, {r.storey}): {v:.2f} m²" for r, v in have[:10])
+    def listed(r, v):
+        position = ", ".join(str(x) for x in (r.name if doc.mode == "ifc" else None, r.storey) if x and str(x) != room_name(r))
+        return f"{room_name(r)}" + (f" ({position})" if position else "") + f": {v:.2f} m²"
+    per = "; ".join(listed(r, v) for r, v in have[:10])
     combined = bool(re.search(r"\b(?:total|combined|sum|together|all)\b", q))
     if count_q:
         text = f"**{len(hit)} {noun}** {where}" + (f" {condition}" if condition else "") + "."
@@ -147,6 +167,11 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
         text += (f" {per}." if have and (bounds or limit or area_q) else "") + " {marks}"
         return _done(question, doc, text, len(hit), "count", hit, trace, t0=t0)
     if not have:
+        if doc.mode == "planmap":
+            res = _done(question, doc, f"The matching {noun} have no usable area recorded; missing measurements are not zero.", None, "m2", hit, trace, t0=t0)
+            res["needs_drawing_read"] = True
+            res["answer"]["confidence"] = .3
+            return res
         return _abstain(question, doc.doc_id, f"The matching {noun} have no area recorded.", trace, "index", t0)
     if len(hit) > 1 and not combined:
         areas = [v for _, v in have]
@@ -155,7 +180,12 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
         return _done(question, doc, text, None, "m²", hit, trace, t0=t0)
     if len(have) != len(hit):
         return _abstain(question, doc.doc_id, "Some matching rooms have no area recorded, so I cannot give their combined area.", trace, "index", t0)
-    text = (f"The {'combined area' if len(hit) > 1 else 'area'} of **{target}** {where} is **{total:.2f} m²**. {per}. {{marks}}")
+    if doc.mode == "planmap" and len(hit) == 1:
+        text = f"The area of the **{target}** is **{total:.2f} m²**. {{marks}}" + scale_note(doc)
+    else:
+        text = (f"The {'combined area' if len(hit) > 1 else 'area'} of **{target}** {where} is **{total:.2f} m²**. {per}. {{marks}}")
+        if doc.mode == "planmap":
+            text += scale_note(doc)
     return _done(question, doc, text, round(total, 4), "m²", hit, trace, t0=t0)
 
 
@@ -631,7 +661,13 @@ def named_rooms(question: str, doc: Doc, t0) -> dict | None:
     if not hit:
         return None
     vals = [_qty(r, "room", "area") for r in hit]
-    tot = round(sum(v for v in vals if v), 2)
+    if wants_area and not howmany and any(v is None for v in vals):
+        res = _done(question, doc, f"**The area of {word} is not recorded for every matching room.** A readable printed area or scaled outline is needed; missing quantities are not zero.",
+                    None, "m2", hit, [_step("route", "named room area: incomplete measurements")], t0=t0)
+        res["answer"]["confidence"] = .3
+        res["needs_drawing_read"] = True
+        return res
+    tot = round(sum(v for v in vals if v is not None), 2)
     where = f"on **{st}**" if st else ("in this model" if doc.mode == "ifc" else "on this floor plan")
     trace = [_step("route", f"count / room / named '{word}' -> code, no model"), _step("filter", f"{len(hit)} rooms match {word}")]
     plural = word + ("s" if not word.endswith("s") else "")
