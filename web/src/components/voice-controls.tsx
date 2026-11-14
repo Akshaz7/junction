@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { LoaderCircle, Mic, Square, Volume2 } from 'lucide-react'
-import { recordQuestion, speakAnswer, type MicState, type QuestionRecorder, type SpeechController, type SpeechStatus } from '../lib/voice'
+import { recordQuestion, speakAnswer, type MicState, type QuestionRecorder, type SpeechController, type SpeechStatus, voiceInputSupported } from '../lib/voice'
 import './voice-controls.css'
 
 export function SpeakButton({ text, disabled = false }: { text: string; disabled?: boolean }) {
@@ -46,13 +46,16 @@ export function SpeakButton({ text, disabled = false }: { text: string; disabled
   </span>
 }
 
-export function MicButton({ onText, disabled = false }: { onText: (text: string) => void; disabled?: boolean }) {
+export function MicButton({ onText, onInterim, disabled = false }: { onText: (text: string) => void; onInterim?: (text: string) => void; disabled?: boolean }) {
   const [state, setState] = useState<MicState>('idle')
   const [error, setError] = useState('')
   const control = useRef<QuestionRecorder | null>(null)
   const onTextRef = useRef(onText)
   const hintId = useId()
   onTextRef.current = onText
+  const onInterimRef = useRef(onInterim)
+  onInterimRef.current = onInterim
+  const supported = voiceInputSupported()
   useEffect(() => () => { control.current?.cancel(); control.current = null }, [disabled])
   useEffect(() => { setState('idle'); setError('') }, [disabled])
   const active = state !== 'idle'
@@ -62,14 +65,16 @@ export function MicButton({ onText, disabled = false }: { onText: (text: string)
     control.current?.cancel()
     setError('')
     control.current = recordQuestion({
-      onText: (text) => onTextRef.current(text), onState: setState, onError: setError,
+      onText: (text) => onTextRef.current(text), onInterim: (text) => onInterimRef.current?.(text), onState: setState, onError: setError,
     })
   }
+  if (!supported) return null
+  const listening = state === 'recording' || state === 'recognizing'
   return <span className="voice-control">
-    <button type="button" className="voice-button" aria-label="Speak a question" aria-pressed={active}
+    <button type="button" className={`voice-button${listening ? ' listening' : ''}`} aria-label="Speak a question" aria-pressed={active}
       aria-describedby={hint ? hintId : undefined} disabled={disabled} onClick={toggle}>
       {state === 'transcribing' ? <LoaderCircle size={16} aria-hidden="true" /> : active ? <Square size={14} aria-hidden="true" /> : <Mic size={16} aria-hidden="true" />}
     </button>
-    <span id={hintId} className="voice-hint" role="status">{hint}</span>
+    <span id={hintId} className="voice-hint" role="status" data-tone={error ? 'error' : undefined}>{hint}</span>
   </span>
 }

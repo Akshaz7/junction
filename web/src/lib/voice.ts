@@ -119,11 +119,20 @@ type SpeechWindow = Window & {
   SpeechRecognition?: new () => Recognition
   webkitSpeechRecognition?: new () => Recognition
 }
+/** False when this browser can neither record audio nor recognise speech: the mic button is then not shown. */
+export function voiceInputSupported(): boolean {
+  if (typeof window === 'undefined') return false
+  const browser = window as SpeechWindow
+  return !!((globalThis.MediaRecorder && navigator.mediaDevices?.getUserMedia) || browser.SpeechRecognition || browser.webkitSpeechRecognition)
+}
+export const MIC_DENIED = 'Microphone access was denied. Allow it in your browser settings, or type your question.'
 export const VOICE_UNAVAILABLE = 'Voice input is not available in this browser'
 
 /** Recording is bounded to 30 seconds and 5 MB, matching the upload endpoint. */
 export function recordQuestion(callbacks: {
   onText: (text: string) => void
+  /** Words heard so far (device recognition only). */
+  onInterim?: (text: string) => void
   onState: (state: MicState) => void
   onError: (message: string) => void
 }): QuestionRecorder {
@@ -157,15 +166,18 @@ export function recordQuestion(callbacks: {
       recognition = new Constructor()
       recognition.lang = 'en-US'
       recognition.continuous = false
-      recognition.interimResults = false
+      recognition.interimResults = true
       recognition.onresult = (event) => {
         if (cancelled) return
         const words: string[] = []
+        const heard: string[] = []
         for (let i = event.resultIndex; i < event.results.length; i++) {
           if (event.results[i].isFinal) words.push(event.results[i][0].transcript)
+          else heard.push(event.results[i][0].transcript)
         }
         const text = words.join(' ').trim()
         if (text) callbacks.onText(text)
+        else if (heard.length) callbacks.onInterim?.(heard.join(' ').trim())
       }
       recognition.onerror = () => fail('Could not hear your question. Please try again or type it.')
       recognition.onend = () => { clearTimeout(timer); if (!cancelled) callbacks.onState('idle') }
@@ -219,7 +231,12 @@ export function recordQuestion(callbacks: {
       recorder.start(1000)
       callbacks.onState('recording')
       timer = setTimeout(() => controller.stop(), 30_000)
-    } catch { release(); browserRecognition() }
+    } catch (err) {
+      release()
+      const name = err instanceof DOMException ? err.name : ''
+      if (name === 'NotAllowedError' || name === 'SecurityError') { fail(MIC_DENIED); return }
+      browserRecognition()
+    }
   }
   const controller: QuestionRecorder = {
     stop() {

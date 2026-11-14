@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { ArrowUp, AtSign, CalendarClock, FileSearch, FileText, FolderOpen, HardHat, Plus, Scale, X } from 'lucide-react'
 import { Button } from './ui'
 import { AnswerCard } from './answer-card'
+import { isKnownChat, rememberChat } from '../lib/known-chats'
 import { NO_ANSWER_MESSAGE } from '../lib/answer-text'
 import { DocumentViewer, useViewerSheet } from './document-viewer'
 import { workspaceApi } from '../lib/api'
@@ -53,6 +54,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const chatId = useRef<string | null>(null)
   const [liveChatId, setLiveChatId] = useState<string | null>(null)
   useEffect(() => { onChatChange(liveChatId) }, [liveChatId, onChatChange])
+  // Created here, opened from History or a shared link: this browser may follow it from now on.
+  useEffect(() => { if (liveChatId) rememberChat(liveChatId) }, [liveChatId])
   const submitting = useRef(false)
   const textarea = useRef<HTMLTextAreaElement>(null)
   const conversation = useRef<HTMLDivElement>(null)
@@ -186,6 +189,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     return chatLive.subscribe((event) => {
       if (event.type !== 'chat.message' || event.role !== 'user' || submitting.current) return
       if (event.chat_id === chatId.current) return
+      // Strangers' chats never raise the notice: only with Follow on, and only for chats this browser knows.
+      if (!followingRef.current || !isKnownChat(event.chat_id)) return
       if (followingRef.current) { window.location.hash = `#/chat?chat=${encodeURIComponent(event.chat_id)}`; return }
       setIncoming({ chatId: event.chat_id, question: event.text ?? 'New question' })
     })
@@ -273,6 +278,16 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     requestAnimationFrame(() => textarea.current?.setSelectionRange(caret, caret))
   }
 
+  /** Stoa starter cards fill the composer; the person edits and sends. */
+  function fillComposer(text: string) {
+    setDraft(text); setMention(null)
+    requestAnimationFrame(() => {
+      const box = textarea.current
+      if (!box) return
+      box.focus(); box.setSelectionRange(text.length, text.length)
+    })
+  }
+
   async function ask(question: string, documentIds?: string[]) {
     if (!question.trim() || submitting.current || restoring || !docs.length) return
     const version = generation.current
@@ -350,9 +365,9 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     <section className="chat-page" aria-label="Drawing questions" inert={!!viewer && sheet}>
     <div ref={conversation} className={`conversation ${answers.length || busy ? 'has-answers' : ''}`}>
       {restoring && <p className="chat-loading" role="status">Loading chat…</p>}
-      {!answers.length && !busy && !restoring && <div className="welcome">
+      {!answers.length && !busy && !restoring && !failed && <div className="welcome">
         <h2>Where shall we start?</h2>
-        <div className="starter-grid">{starters.map(({ title, label, question, icon: Icon }) => <button key={title} aria-label={label} className="starter-card" disabled={loadingDocs || !docs.length} onClick={() => void ask(question)}>
+        <div className="starter-grid">{starters.map(({ title, label, question, icon: Icon }) => <button key={title} aria-label={label} className="starter-card" disabled={loadingDocs || !docs.length} onClick={() => fillComposer(question)}>
           <Icon size={20} /><strong>{title}</strong>
         </button>)}</div>
         {demo && <p className="demo-note">Offline sample content generated for demo</p>}
@@ -422,7 +437,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
           <p className="picker-heading">Skills</p>
           <SkillPicker disabled={busy || restoring || hidden} onPick={(prompt) => { setDraft(prompt); setMention(null); setToolsOpen(false); textarea.current?.focus() }} />
         </div>}
-        <div className="composer-actions"><button ref={toolsButton} className="document-context" aria-label="Add to question" aria-haspopup="dialog" aria-expanded={toolsOpen} aria-controls={toolsOpen ? 'composer-tools' : undefined} title="Add documents or skills" type="button" disabled={busy || restoring || hidden} onClick={() => { setMention(null); setToolsOpen((open) => !open) }}><Plus size={16} /></button><MicButton disabled={busy || restoring || hidden} onText={(text) => { setDraft(text); setMention(null); textarea.current?.focus() }} />
+        <div className="composer-actions"><button ref={toolsButton} className="document-context" aria-label="Add to question" aria-haspopup="dialog" aria-expanded={toolsOpen} aria-controls={toolsOpen ? 'composer-tools' : undefined} title="Add documents or skills" type="button" disabled={busy || restoring || hidden} onClick={() => { setMention(null); setToolsOpen((open) => !open) }}><Plus size={16} /></button><MicButton disabled={busy || restoring || hidden} onInterim={(text) => setDraft(text)} onText={(text) => { setDraft(text); setMention(null); textarea.current?.focus() }} />
           <Button type="submit" variant="primary" className="send-button" aria-label="Send question" disabled={!draft.trim() || busy || restoring || !docs.length || !!mention}><ArrowUp size={18} /></Button>
         </div>
       </form>

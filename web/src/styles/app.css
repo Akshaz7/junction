@@ -552,7 +552,9 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
   .chat-page { min-height: 0; }
   .welcome { top: 250px; width: calc(100% - 32px); }
   .welcome h2 { font-size: 18px; line-height: 26px; letter-spacing: -.017em; }
-  .starter-grid { display: none; }
+  .starter-grid { display: flex; justify-content: flex-start; overflow-x: auto; scroll-snap-type: x proximity; gap: 8px; margin: 20px -16px 0; padding: 2px 16px 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .starter-grid::-webkit-scrollbar { display: none; }
+  .starter-grid .starter-card { flex: 0 0 148px; width: 148px; height: 92px; scroll-snap-align: start; }
   .conversation { padding: 0 16px 20px; }
   .composer-area, .has-viewer .composer-area { width: calc(100% - 32px); margin-bottom: 10px; }
   .composer { height: 96px; padding: 16px 20px 10px; border: 1px solid var(--border); }
@@ -844,3 +846,10 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 .status-trail { list-style: none; margin: 0 0 6px; padding: 0; color: var(--muted-foreground); font-size: 13px; }
 .status-trail li::before { content: '\2713'; margin-right: 8px; }
 .failed-exchange .error-message { margin-top: 0; }
+
+/* Mic: listening state. */
+.voice-button.listening { color: var(--destructive, #c0392b); position: relative; }
+.voice-button.listening::after { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 2px solid currentColor; animation: voice-pulse 1.2s ease-out infinite; }
+@keyframes voice-pulse { from { transform: scale(.8); opacity: .8; } to { transform: scale(1.5); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .voice-button.listening::after { animation: none; opacity: .5; } }
+.voice-hint[data-tone="error"] { color: var(--destructive, #c0392b); }

@@ -6,7 +6,18 @@ import { demoDocument } from '../mock/handler'
 
 const api = vi.hoisted(() => ({ createChat: vi.fn(), askQuestion: vi.fn(), getChat: vi.fn() }))
 vi.mock('../lib/api', async (original) => ({ ...(await original<typeof import('../lib/api')>()), workspaceApi: { ...api, isDemo: false } }))
+const live = vi.hoisted(() => ({ listeners: new Set<(event: unknown) => void>() }))
+vi.mock('../lib/chat-live', () => ({ chatLive: { subscribe: (fn: (event: unknown) => void) => { live.listeners.add(fn); return () => live.listeners.delete(fn) } } }))
 import { ChatScreen } from './chat-screen'
+import { rememberChat } from '../lib/known-chats'
+import { setFollow } from '../lib/chat-follow'
+
+function fakeStorage() {
+  const data = new Map<string, string>()
+  Object.defineProperty(window, 'localStorage', { configurable: true, value: {
+    getItem: (k: string) => data.get(k) ?? null, setItem: (k: string, v: string) => { data.set(k, String(v)) },
+    removeItem: (k: string) => { data.delete(k) }, clear: () => data.clear() } })
+}
 
 let host: HTMLDivElement
 let root: Root
@@ -15,6 +26,7 @@ beforeEach(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true })
   window.history.replaceState(null, '', '#/chat')
   vi.stubGlobal('matchMedia', (query: string) => ({ matches: false, media: query, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} }))
+  fakeStorage(); live.listeners.clear()
   api.createChat.mockReset().mockResolvedValue('chat-1')
   api.askQuestion.mockReset()
   host = document.createElement('div'); document.body.append(host); root = createRoot(host)
@@ -59,4 +71,50 @@ it('shows the steps of a long task as they arrive', async () => {
   expect(pending.querySelector('.status-trail')!.textContent).toContain('Gathering evidence for: claim draft')
   expect(pending.querySelector('[role="status"]')!.textContent).toContain('Writing the claim draft')
   await act(async () => finish(new Error('stop') as never))
+})
+
+
+it('a starter card fills the composer with the cursor at the end and does not send', async () => {
+  await mount()
+  await act(async () => host.querySelector<HTMLButtonElement>('.starter-card')!.click())
+  await act(async () => { await new Promise((resolve) => requestAnimationFrame(() => resolve(null))) })
+  const box = host.querySelector<HTMLTextAreaElement>('#question')!
+  expect(box.value).toBe('How many windows are there?')
+  expect(box.selectionStart).toBe(box.value.length)
+  expect(api.askQuestion).not.toHaveBeenCalled()
+  expect(api.createChat).not.toHaveBeenCalled()
+})
+
+it('hides the empty state once a send has failed', async () => {
+  api.askQuestion.mockRejectedValueOnce(new Error('boom'))
+  await mount()
+  expect(host.querySelector('.welcome')).not.toBeNull()
+  await send('Hello there')
+  expect(host.querySelector('.welcome')).toBeNull()
+})
+
+function emitQuestion(chatId: string) {
+  for (const fn of live.listeners) fn({ type: 'chat.message', chat_id: chatId, message_id: 'm', role: 'user', text: 'Hello from the laptop' })
+}
+
+it('a stranger chat never raises the another-device notice or opens, even with Follow on', async () => {
+  await mount()
+  await act(async () => setFollow(true))
+  window.location.hash = '#/chat'
+  await act(async () => emitQuestion('strangers-chat'))
+  expect(window.location.hash).toBe('#/chat')
+  expect(document.querySelector('[data-testid="follow-banner"]')).toBeNull()
+})
+
+it('a known chat opens with Follow on, and nothing happens with Follow off', async () => {
+  await mount()
+  rememberChat('laptop-chat')
+  await act(async () => setFollow(false))
+  window.location.hash = '#/chat'
+  await act(async () => emitQuestion('laptop-chat'))
+  expect(window.location.hash).toBe('#/chat')
+  expect(document.querySelector('[data-testid="follow-banner"]')).toBeNull()
+  await act(async () => setFollow(true))
+  await act(async () => emitQuestion('laptop-chat'))
+  expect(window.location.hash).toBe('#/chat?chat=laptop-chat')
 })
