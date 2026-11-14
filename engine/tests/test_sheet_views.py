@@ -273,3 +273,9 @@ def test_scale_reader_exposes_unassigned_printed_labels(tmp_path):
     d = store(tmp_path, pm)
     result = Session([d.name], tmp_path).t_scale('d1')
     assert 'printed scale 1:100' in result and 'physical calibration' in result
+
+
+def test_floor_area_text_is_not_a_finnish_view_title():
+    assert view_type('Kerrosala 120 m2') == 'unknown'
+    assert view_type('2. KERROS') == 'plan'
+    assert view_type('ULLAKKOKERROS') == 'plan'

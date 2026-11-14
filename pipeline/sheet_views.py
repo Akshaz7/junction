@@ -25,7 +25,7 @@ def view_type(title):
         'elevation': r'\b(?:elevations?|julkisivu\w*|fasad\w*|ansicht\w*|aufri\w*)\b',
         'section': r'\b(?:sections?|leikkaus\w*|sektion\w*|schnitt\w*|genomskarning)\b',
         'detail': r'\b(?:details?|detalj\w*|yksityiskohta\w*)\b',
-        'plan': r'\b(?:plans?|pohjapiir\w*|pohjakaava\w*|pohja|grundriss\w*|grundplan\w*|kerros\w*|kellarikerros|vaningsplan\w*|bottenplan)\b',
+        'plan': r'\b(?:plans?|pohjapiir\w*|pohjakaava\w*|pohja|grundriss\w*|grundplan\w*|kerros|kellarikerros|ullakkokerros|vaningsplan\w*|bottenplan)\b',
     }
     hits = [kind for kind, rx in patterns.items() if re.search(rx, text)]
     if 'site' in hits:
