@@ -35,7 +35,7 @@ export async function buildViewerTarget(docId: string, itemIds: string[], signal
 }
 
 /** Opens a file, or specific items of a file, in the app's viewer as a side panel (full screen on a phone). */
-export function useProjectViewer(): { open: (docId: string, itemIds?: string[]) => void; busy: string | null; error: string; node: ReactNode } {
+export function useProjectViewer(): { open: (docId: string, itemIds?: string[], mode?: '2d' | '3d') => void; busy: string | null; error: string; node: ReactNode } {
   const [target, setTarget] = useState<ViewerTarget | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState('')
@@ -43,11 +43,11 @@ export function useProjectViewer(): { open: (docId: string, itemIds?: string[]) 
   const counter = useRef(0)
   const controller = useRef<AbortController | null>(null)
   useEffect(() => () => controller.current?.abort(), [])
-  const open = useCallback((docId: string, itemIds: string[] = []) => {
+  const open = useCallback((docId: string, itemIds: string[] = [], mode?: '2d' | '3d') => {
     controller.current?.abort()
     const next = controller.current = new AbortController()
     setBusy(docId); setError('')
-    buildViewerTarget(docId, itemIds, next.signal).then((built) => { if (!next.signal.aborted) setTarget({ ...built, request: ++counter.current }) })
+    buildViewerTarget(docId, itemIds, next.signal).then((built) => { if (!next.signal.aborted) setTarget({ ...built, mode: mode ?? built.mode, request: ++counter.current }) })
       .catch((err: unknown) => { if (!next.signal.aborted) setError(err instanceof Error ? err.message : 'This file could not be opened.') })
       .finally(() => { if (!next.signal.aborted) setBusy(null) })
   }, [])
