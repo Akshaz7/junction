@@ -303,7 +303,8 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
         pass
     try:   # E-77: exact code answers explained in plain words (numbers unchanged; falls back to the code text)
         from engine.explain import explain
-        res = explain(res, question, _root())
+        if not any(s.get("step") == "props" for s in res.get("trace", [])):
+            res = explain(res, question, _root())
     except Exception:  # noqa: BLE001
         pass
     try:   # X20-X23/D01: feet, acres, unit prices on top of the metric answer (engine/units.py; value unchanged)
@@ -313,7 +314,8 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
         pass
     try:   # E-79: "How we know" steps + confidence label, built by code from the cited elements
         from engine import reasoning
-        res = reasoning.attach(res, question, _root())
+        if not any(s.get("step") == "props" for s in res.get("trace", [])):
+            res = reasoning.attach(res, question, _root())
     except Exception:  # noqa: BLE001
         pass
     try:   # bullets need a blank line before them to render as a list
@@ -476,6 +478,13 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             sel = ", ".join(_title(d, root) for d in doc_ids)
             return _abstained(question, doc_ids, f"The question names **{other}**, which is not among the selected documents ({sel}). "
                               "Select that document and ask again, or ask about the selected one.", trace, t0)
+
+        from engine import props  # F-PROPS: exact properties before broad counts and the reader
+        if (res := props.answer(question, doc_ids, root, t0)) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
+            return res
 
         if not os.environ.get("COMPLEX_Q_OFF"):    # E-59: multi-condition questions, every condition applied or named
             from engine import complex_q
