@@ -497,7 +497,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         <div className="question-bubble">{pendingQuestion}</div>
         {statuses.length > 1 && <ul className="status-trail" aria-label="Steps so far">{statuses.slice(0, -1).map((text, index) => <li key={`${index}-${text}`}>{text}</li>)}</ul>}
         <div className="status-lines" role="status" aria-live="polite"><span className="thinking-mark" aria-hidden="true">S</span><ThinkingText text={statuses.at(-1) || 'Thinking…'} /></div>
-        {!!streamText && <p className="answer-text streaming-text" data-testid="streaming-answer">{streamText.replace(/\*\*/g, '')}</p>}
+        {!!streamText && <p className="answer-text streaming-text" data-testid="streaming-answer">{streamText.replace(/\*\*/g, '').replace(/(^|\s)_([^_\n]+)_(?=\s|$)/g, '$1$2')}</p>}
         {!!traces.length && <details className="answer-detail"><summary>Show thought process</summary>{traces.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>}
       </div>}
     </div>

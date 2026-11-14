@@ -77,7 +77,7 @@ export function ArHint() {
 /** One plain sentence on how the answer was produced: code over the read data, or which AI models looked at the drawing. */
 export function howAnswered(answer: Answer): string {
   const models = [...new Set(answer.cost.calls.map((call) => String((call as { model?: string }).model || '')).filter(Boolean))]
-    .map((m) => m.replace(/^.*[/:]/, '').replace(/@/g, ' ').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()))
+    .map((m) => m.replace(/^.*[/:]/, '').replace(/@/g, ' ').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()).replace(/(\d) (\d)/g, '$1.$2'))
   if (!models.length) return answer.route === 'planmap'
     ? 'How: worked out by code from the walls, doors, windows and rooms our vision models found when this drawing was read. No AI was asked this question.'
     : 'How: worked out by code from the data inside the file (model elements and printed text). No AI model was used.'
