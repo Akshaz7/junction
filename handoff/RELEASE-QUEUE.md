@@ -5,6 +5,9 @@ Updated Sat 14 Nov 2026 ~23:50 EET.
 - 9d244d2 (backend + web prod + staging): awais/shared-edits, awais/compare-versions, final/mistakes, final/3d (partial) merged onto 60efc46. sample200 bench rel3-shared 156/200, zero row changes vs rel2-2206.
   Conflict decisions: engine/scene_cmds undo uses the edit-log path (F-3D) when state has `edits`, Awais last_hidden path otherwise; viewer keeps main recordCommand for isolation + Awais noteExternalHide for hides; server passes edits+hidden+last_hidden.
 
+- 1aefe85 (backend; web unchanged): rebuilt scenes for 306 non-IFC docs (PG + baked demo_artifacts), P-21 infill verified on prod (22/24 infill nodes, screenshot of colorful-11397).
+- f76bb92 batch 2 (building): awais/compare-versions X-34b, F-CHANGES (applied as patch on Awais), F-MEP, F-SCANSYM, F-PROJ-ENGINE (migration renumbered 007_projects), F-PROJ-UI. Bench rel4 156/200. Aiven build of f76bb92 failed on a transient registry push error; redeployed under a new rev.
+
 ## In progress
 - Scene GLB rebuild (P-21 infill) of all 306 deployed non-IFC docs via scripts/rebuild_scenes.py; backups in /Users/akshatthapa/Workspace/scene-backup. Then load to PG (deploy/load_artifacts_pg.py --force) and refresh deploy/demo_artifacts.
 
