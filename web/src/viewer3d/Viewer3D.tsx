@@ -16,7 +16,7 @@ import { setHover, setSelected, useLinkedItem } from './link';
 import type { LoadProgress } from './loadGLTF';
 import type { WalkState } from './walk';
 import { WalkJoystick } from './WalkJoystick';
-import { EditPanel, useEditAdvisor } from './EditPanel';
+import { EditPanel, useEditAdvisor, type SaveVersionControl } from './EditPanel';
 import { editSnapshot, hasEdits as snapshotHasEdits, saveDesignVersion, savedMessage } from '../lib/design-versions';
 import type { EditState, ItemEdit } from './edits';
 import { RevisedPlanDialog } from './RevisedPlanDialog';
@@ -357,6 +357,10 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     setPicked(null);
   }
 
+  const saveControl: SaveVersionControl = {
+    canSave: hiddenNow > 0 || Object.keys(edits.moveDelta ?? {}).length > 0 || Object.keys(edits.materials).length > 0,
+    busy: saved.busy, message: saved.message, href: saved.href, onSave: () => { cancelMove(); void saveVersion(); },
+  };
   return <section className="viewer3d" aria-label="3D viewer" data-state={state}
     data-highlighted-item-ids={JSON.stringify(highlightState.highlighted)}
     data-linked-selected={highlightState.highlighted.includes(linked.selected ?? '') ? linked.selected : ''}
@@ -447,8 +451,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       {state === 'ready' && editing && manifest && <EditPanel selected={picked} manifest={manifest} edits={edits}
         moving={moveItem !== null} advice={advice} hidden={hiddenIds}
         onRestore={(ids) => { cancelMove(); finishEdit(viewerRef.current?.restoreItems(ids) ?? null); }}
-        save={{ canSave: hiddenNow > 0 || Object.keys(edits.moveDelta ?? {}).length > 0 || Object.keys(edits.materials).length > 0,
-          busy: saved.busy, message: saved.message, href: saved.href, onSave: () => { cancelMove(); void saveVersion(); } }}
+        save={saveControl}
         onRemove={() => { cancelMove(); if (picked) { finishEdit(viewerRef.current?.removeItem(picked) ?? null); selectItem(null); } }}
         onMove={() => { cancelMove(); if (picked && moveItem !== picked) setMoveItem(picked); }}
         onMaterial={(choice) => { cancelMove(); if (picked) finishEdit(viewerRef.current?.changeMaterial(picked, choice) ?? null); }}
@@ -463,7 +466,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     </div>
   {revisedOpen && (doc_id ?? manifest?.doc_id) && viewerRef.current && <RevisedPlanDialog docId={(doc_id ?? manifest?.doc_id)!} manifest={manifest}
     removed={viewerRef.current.getCommandState().hidden} moved={viewerRef.current.getEditState().moveDelta ?? {}}
-    onClose={() => setRevisedOpen(false)} />}
+    save={saveControl} onClose={() => setRevisedOpen(false)} />}
   </section>;
 }
 

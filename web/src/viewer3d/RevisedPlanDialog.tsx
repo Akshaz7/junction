@@ -3,13 +3,16 @@ import { workspaceApi } from '../lib/api';
 import { planRevision, type RevisionItem, type RevisionPlan } from '../lib/revised-plan';
 import { renderRevised, REVISED_TITLE } from '../lib/revised-plan-canvas';
 import type { SceneManifest } from './scene';
+import type { SaveVersionControl } from './EditPanel';
 
 interface PageData { page: number; size: { w: number; h: number }; items: RevisionItem[]; mPerPx: number | null }
 type Mode = 'revised' | 'original' | 'wipe';
 
-export function RevisedPlanDialog({ docId, manifest, removed, moved, onClose }: {
+export function RevisedPlanDialog({ docId, manifest, removed, moved, save, onClose }: {
   docId: string; manifest: SceneManifest | null; removed: readonly string[];
-  moved: Record<string, [number, number]>; onClose: () => void;
+  moved: Record<string, [number, number]>;
+  /** Same "Save as new version" control as the Edit panel. */
+  save?: SaveVersionControl; onClose: () => void;
 }) {
   const [pages, setPages] = useState<PageData[] | null>(null);
   const [error, setError] = useState('');
@@ -95,8 +98,11 @@ export function RevisedPlanDialog({ docId, manifest, removed, moved, onClose }: 
       <div className="revised-plan-head">
         <h2>{REVISED_TITLE}</h2>
         <button type="button" onClick={download} disabled={!image || !plan}>Download PNG</button>
+        {save && <button type="button" onClick={save.onSave} disabled={!save.canSave || save.busy}
+          title="Keep this edited design as a new version of the document. The original is not changed.">{save.busy ? 'Saving…' : 'Save as new version'}</button>}
         <button type="button" onClick={onClose} aria-label="Close revised plan">Close</button>
       </div>
+      {save?.message && <p role="status" className="revised-plan-saved">{save.message}{save.href && <> <a href={save.href}>Compare with the original</a></>}</p>}
       <div className="revised-plan-bar">
         {(['revised', 'original', 'wipe'] as Mode[]).map((m) => <button key={m} type="button" aria-pressed={mode === m}
           onClick={() => setMode(m)}>{m === 'revised' ? 'Revised' : m === 'original' ? 'Original' : 'Wipe'}</button>)}
