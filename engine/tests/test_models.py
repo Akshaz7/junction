@@ -160,7 +160,9 @@ def test_chain_skips_missing_keys(env, monkeypatch):
 def test_chain_skips_to_runware_when_only_runware(env, monkeypatch):
     monkeypatch.setenv("RUNWARE_API_KEY", "k")
     monkeypatch.setattr(P, "_post", lambda *a, **k: rw())
-    assert call("write_answer", "q").provider == "runware"
+    assert call("route", "q").provider == "runware"   # route's chain has only Runware among keyed providers
+    monkeypatch.setattr(P, "_post", lambda *a, **k: httpx.Response(200, json={"content": [{"type": "text", "text": "hi"}], "usage": {}}))
+    assert call("write_answer", "q").provider == "runware_claude"   # Claude via Runware leads write_answer and chat
 
 
 def test_no_usable_provider_raises(env, monkeypatch):
