@@ -94,7 +94,8 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
         items = [
             Item(item_id=x["item_id"], kind=x.get("kind") or "other", page=1,
                  storey=(x.get("storey") or {}).get("name"), q=x.get("quantities") or {},
-                 props={**(x.get("props") or {}), "ifc_class": x.get("ifc_class"), "predefined_type": x.get("predefined_type")},
+                 props={**(x.get("props") or {}), "ifc_class": x.get("ifc_class"), "predefined_type": x.get("predefined_type"),
+                        "quantity_source": x.get("quantity_source") or {}},
                  name=x.get("name"), type_name=x.get("type_name"), source="ifc", bbox_m=x.get("bbox_m"))
             for x in e["elements"]
         ]
@@ -126,7 +127,7 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
                     if pr.get(ak) is not None:
                         q["area_m2"] = pr[ak]
                         break
-                for k in ("width_m", "height_m", "length_m"):
+                for k in ("width_m", "height_m", "length_m", "perimeter_m", "net_skirting_length_m", "thickness_m", "depth_m"):
                     if pr.get(k) is not None:
                         q[k] = pr[k]
                 items.append(Item(item_id=x["item_id"], kind=x["kind"], label=x.get("label"), page=m.get("page", 1),

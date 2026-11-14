@@ -305,6 +305,8 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
     except Exception:  # noqa: BLE001
         pass
     res = ensure_markers(_guarded(question, doc_ids, on_event, scene_state, history))
+    from engine.honesty import validate_result
+    res = validate_result(res, question)
     try:   # E-61: implausible raster areas and sparse uploaded plans (engine/rastersanity.py)
         if len(doc_ids) == 1:
             from engine import rastersanity
@@ -350,31 +352,14 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
 
 def _answer_forced(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None) -> dict:
-    """Code -> vision recount -> reader -> forced best-effort answer. Never abstains on a selected document (FORCE_ANSWER=0 restores abstaining)."""
+    """Code -> vision recount -> reader. Missing evidence remains an abstention."""
     from engine.models import providers as _P
     _tok = _P.DELTA_SINK.set((lambda t: on_event("answer.delta", {"text": t})) if on_event else None)  # answer-text streaming
     try:
         res = _answer_core(question, doc_ids, on_event, scene_state=scene_state, history=history)
     finally:
         _P.DELTA_SINK.reset(_tok)
-    if (os.environ.get("FORCE_ANSWER", "1") == "0" or not doc_ids or not (question or "").strip() or not res["answer"].get("abstained")
-            or any(s.get("step") == "unclassified" for s in res.get("trace", []))
-            or parse_scene(question) is not None or _other_doc(question, doc_ids)):
-        return res
-    _t = res["answer"].get("text_md", "")
-    if ("does not record" in _t or _t.lstrip("*").startswith(("No beam", "No pipe or MEP"))) and parse(question).type not in ("count", "area", "length", "volume"):
-        res["answer"].update({"abstained": False, "confidence": 0.5})   # a checked statement that the model lacks this data is an answer
-        return res
-    try:
-        from engine.forced import forced_answer
-        (on_event or (lambda k, p: None))("status", {"text": "Estimating from the drawing…"})
-        trace = list(res.get("trace") or [])
-        calls = list((res.get("cost") or {}).get("calls") or [])
-        f = forced_answer(question, doc_ids, _root(), parse(question), trace, calls)
-        f["latency_ms"] = res.get("latency_ms", 0) + f["latency_ms"]
-        return f
-    except Exception:  # noqa: BLE001
-        return res
+    return res
 
 
 _TYPOS = [(r"\bflor\b", "floor"), (r"\bflors\b", "floors"), (r"\bmny\b", "many"), (r"\bpeple\b|\bpeopel\b|\bpepole\b", "people"),
@@ -495,6 +480,13 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             sel = ", ".join(_title(d, root) for d in doc_ids)
             return _abstained(question, doc_ids, f"The question names **{other}**, which is not among the selected documents ({sel}). "
                               "Select that document and ask again, or ask about the selected one.", trace, t0)
+
+        from engine.honesty import before as evidence_gate
+        if (res := evidence_gate(question, doc_ids, root, t0, hidden=(scene_state or {}).get("hidden") or ())) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
+            return res
 
         if not os.environ.get("MISTAKES_OFF"):    # F-MISTAKES: "are there any mistakes?" is answered by code checks
             from engine import mistakes

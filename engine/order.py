@@ -172,6 +172,10 @@ def _skirting(rooms, items, doc, root):
 
 def _skirting_geometry(rooms, items, doc, root):
     """Geometric best effort, labelled as such; uses outlines before rectangles."""
+    if doc.mode != "ifc":
+        from engine.honesty import room_boundary_problem
+        if problem := room_boundary_problem(rooms):
+            return None, [], problem
     from engine.analytics import DOOR_BAND, _foot
     total, used, rectangular = 0.0, [], False
     for r in rooms:

@@ -88,6 +88,11 @@ def _ok(orig: str, new: str) -> bool:
     new_nums = {n.replace(",", "") for n in _NUM.findall(re.sub(r"\[\d+\]", "", new))}
     if any(n.replace(",", "") not in new_nums for n in nums):
         return False
+    # Explanations may preserve/format facts, never introduce new measurements
+    # or speculative code ratings alongside an otherwise correct headline.
+    allowed = {n.replace(",", "") for n in _NUM.findall(re.sub(r"\[\d+\]", "", orig))}
+    if not new_nums <= allowed:
+        return False
     marks = set(re.findall(r"\[\d+\]", orig))
     return marks <= set(re.findall(r"\[\d+\]", new))
 

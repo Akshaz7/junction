@@ -887,7 +887,15 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
             return _answer_obj(question, [doc.doc_id], text, 0, "m", 0.7, False, [], [], {"doc_id": doc.doc_id, "highlight_item_ids": [], "camera_target_item_id": None},
                                trace, "index" if ifc else "planmap", t0 or time.perf_counter())
     if not rooms:
-        return None
+        from engine.honesty import unavailable
+        return unavailable(question, [doc.doc_id], "**Baseboard length cannot be measured from this sheet.** No usable room outlines are recorded.", t0, doc=doc)
+    if not ifc and any(not r.polygon_px or len(r.polygon_px) < 3 for r in rooms):
+        from engine.honesty import unavailable
+        return unavailable(question, [doc.doc_id], "**Baseboard length cannot be measured reliably from this sheet.** Room detection boxes are not wall boundaries and can overlap; measured room outlines are needed.", t0, doc=doc, items=rooms)
+    if not ifc:
+        from engine.honesty import room_boundary_problem, unavailable
+        if problem := room_boundary_problem(rooms):
+            return unavailable(question, [doc.doc_id], "**Baseboard length is unavailable.** " + problem, t0, doc=doc, items=rooms)
     doors = [d for d in _of_kind(doc, "door") if _foot(d, ifc)]
     band = DOOR_BAND if ifc else DOOR_BAND / scale
     rows = []
@@ -898,7 +906,12 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
         if not k:
             continue
         band = DOOR_BAND / k
-        per = 2 * ((x1 - x0) + (y1 - y0)) * k
+        import math
+        poly = r.polygon_px if not ifc else None
+        if not poly:
+            poly = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]
+        edges = list(zip(poly, poly[1:] + poly[:1]))
+        per = sum(math.dist(a, b) for a, b in edges) * k
         opening, n = 0.0, 0
         for d in doors:
             if not ifc and (d.page != r.page or item_scale(d, doc.scale) != item_scale(r, doc.scale)):
@@ -907,12 +920,15 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
                 continue
             f = _foot(d, ifc)
             cx, cy = (f[0] + f[2]) / 2, (f[1] + f[3]) / 2
-            inside = x0 - band <= cx <= x1 + band and y0 - band <= cy <= y1 + band
-            core = x0 + band * 0.4 < cx < x1 - band * 0.4 and y0 + band * 0.4 < cy < y1 - band * 0.4
-            if inside and not core:
-                w = d.q.get("width_m") if ifc else None
+            def distance(a, b):
+                vx, vy = b[0] - a[0], b[1] - a[1]
+                den = vx * vx + vy * vy
+                t = max(0., min(1., ((cx - a[0]) * vx + (cy - a[1]) * vy) / den)) if den else 0.
+                return math.dist((cx, cy), (a[0] + t * vx, a[1] + t * vy))
+            if min(distance(a, b) for a, b in edges) <= band:
+                w = d.q.get("width_m") or d.props.get("width_m")
                 w = float(w) if w else max(f[2] - f[0], f[3] - f[1]) * k
-                opening += min(w, 3.0)
+                opening += w
                 n += 1
         rows.append((r, per, opening, n, max(per - opening, 0.0)))
     if not rows:
@@ -931,16 +947,17 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
         lines.append(f"- {(_room_label(r) or 'room')[:36]}{f' ({r.storey})' if ifc and not st else ''}: {_fmt(net)} m (outline {_fmt(per)} m, minus {n} door{'s' if n != 1 else ''} {_fmt(op)} m){tag}")
     more = f"\n- … and {len(rows) - 25} more rooms (all numbered on the drawing)" if len(rows) > 25 else ""
     what = (f"{word} room{'s' if len(rows) != 1 else ''}" if not word.endswith("room") else f"{word}{'s' if len(rows) != 1 else ''}") if word else "rooms"
-    how = ("from each room's footprint rectangle minus the IfcDoor widths in its walls" if ifc else
-           ("from each room's drawn box at its view's scale minus detected door widths" if any("measurement_scale" in r.props for r in rooms) else
-            (f"from each room's drawn box at the drawing's scale ({scale:.4f} m/px, {doc.scale.get('method')}) minus detected door widths" if not guessed else "from each room's drawn box minus the detected door widths")))
+    how = ("estimated from each room's footprint rectangle minus the recorded door widths" if ifc else
+           ("from each room's polygon at its view's scale minus detected door widths" if any("measurement_scale" in r.props for r in rooms) else
+            (f"from each room's polygon at the drawing's scale ({scale:.4f} m/px, {doc.scale.get('method')}) minus detected door widths" if not guessed else "from each room's polygon minus the detected door widths")))
     head = (f"**Baseboard: {_fmt(total)} linear metres** for {len(rows)} {what}{f' on **{st}**' if st else ''}, {how}. "
-            "Rooms are treated as rectangles and wall openings other than doors are not deducted, so L-shaped rooms are approximate.")
+            + ("IFC room boxes approximate the room outlines. " if ifc else "")
+            + "Shared partitions have a finish on each room side; open zones need separate verified boundaries.")
     trace = [_step("route", "baseboard -> room outline minus door openings, code, no model"), _step("filter", f"{len(rows)} rooms, {len(doors)} doors considered")]
     cav = ("\n\nLengths are estimated from door sizes because no printed scale was found, so treat them as approximate." if guessed else "")
     if len(rows) < len(rooms):
         cav += f" {len(rooms) - len(rows)} rooms have no verified view scale and are excluded."
-    return _answer_obj(question, [doc.doc_id], head + "\n" + "\n".join(lines) + more + cav, total, "m", 0.4 if guessed else 0.8, False, boxes, cites, scene, trace,
+    return _answer_obj(question, [doc.doc_id], head + "\n" + "\n".join(lines) + more + cav, total, "m", 0.4 if guessed or ifc else 0.8, False, boxes, cites, scene, trace,
                        "index" if ifc else "planmap", t0 or time.perf_counter())
 
 
@@ -1358,21 +1375,8 @@ REBAR_KEY = re.compile(r"rebar|reinforc|bewehr|raudoit", re.I)
 
 
 def _slab_thickness(it: Item) -> tuple[float | None, str]:
-    """(metres, source): quantity set, then a thickness property, then the box height. The source is always named."""
-    w = it.q.get("width_m") or it.q.get("thickness_m")
-    if w and float(w) > 0:
-        return float(w), "quantity"
-    for k, v in it.props.items():
-        if re.search(r"thick|dicke", str(k), re.I):
-            try:
-                return float(v), "property"
-            except (TypeError, ValueError):
-                pass
-    if it.bbox_m:
-        h = it.bbox_m[1][1] - it.bbox_m[0][1]
-        if h > 0:
-            return round(h, 3), "bbox"
-    return None, "none"
+    from engine.slab_quantities import thickness
+    return thickness(it)
 
 
 def _slab_area(it: Item) -> tuple[float | None, bool]:
@@ -1397,7 +1401,8 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
         return None
     slabs = [i for i in doc.items if i.kind == "slab" and i.props.get("ifc_class") == "IfcSlab"]
     if not slabs:
-        return None
+        from engine.honesty import unavailable
+        return unavailable(question, [doc.doc_id], "**No slab quantities are recorded in this model.** Floor areas cannot substitute for slab areas by thickness.", t0, doc=doc)
     from engine.solvers.solve import MAX_BOXES, _reading_order
     want = None
     m = SLAB_MM.search(question)
@@ -1413,14 +1418,17 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
             continue
         approx += est
         src_used.add(src)
-        mm = int(round(t * 1000 / 5.0) * 5)
+        mm = round(t * 1000, 3)
         tn = it.type_name or it.props.get("material") or "Unnamed slab type"
         groups.setdefault((tn, mm), []).append((it, a))
     avail = sorted({k[1] for k in groups})
     if want is not None:
-        groups = {k: v for k, v in groups.items() if abs(k[1] - want) <= 5}
+        groups = {k: v for k, v in groups.items() if abs(k[1] - want) <= .001}
     if not groups:
-        text = (f"No **{int(want)} mm** slab in this model" + (f"; the slab thicknesses present are {', '.join(f'{m} mm' for m in avail[:8])}." if avail else ".")
+        if not avail:
+            from engine.honesty import unavailable
+            return unavailable(question, [doc.doc_id], "**Slab area by thickness is unavailable.** Slabs have no recorded thickness and area; bounding-box height is not a slab thickness.", t0, doc=doc, items=slabs)
+        text = (f"No **{int(want)} mm** slab in this model" + (f"; the slab thicknesses present are {', '.join(f'{m:g} mm' for m in avail[:8])}." if avail else ".")
                 if want is not None else "No slab in this model has a thickness and an area.")
         return _done(question, doc, text, 0, "m2", [], [_step("route", "slab area by type -> IfcSlab grouped by type and thickness, no model")], t0=t0)
     items_all = [it for v in groups.values() for it, _a in v]
@@ -1430,9 +1438,9 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
     for (tn, mm), v in rows:
         ns = sorted(order[i.item_id] for i, _a in v if order[i.item_id] <= MAX_BOXES)
         marks = ", ".join(f"[{n}]" for n in ns[:6]) + (f" +{len(ns) - 6}" if len(ns) > 6 else "")
-        lines.append(f"| {clean_type_name(tn, False)} | {mm} mm | {len(v)} | {_fmt(sum(a for _i, a in v))} m² | {marks} |")
+        lines.append(f"| {clean_type_name(tn, False)} | {mm:g} mm | {len(v)} | {_fmt(sum(a for _i, a in v))} m² | {marks} |")
     tot = round(sum(a for v in groups.values() for _i, a in v), 2)
-    srcname = {"quantity": "the model's thickness quantity", "property": "a thickness property", "bbox": "the box height (no thickness in the model)"}
+    srcname = {"quantity": "the model's thickness quantity", "property": "a thickness property", "layers": "the material layer thicknesses"}
     thick_src = " and ".join(srcname[s] for s in sorted(src_used))
     rebar = [i for i in doc.items if "Reinforc" in str(i.props.get("ifc_class") or "") or any(REBAR_KEY.search(str(k)) for k in i.props)]
     if rebar:
@@ -1440,11 +1448,19 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
     else:
         bars = "Reinforcement: **the model has no reinforcement data** (no IfcReinforcingBar and no rebar properties), so bars cannot be reported."
     head = (f"**{int(want)} mm slab:** " if want is not None else "**Slab area by type and thickness:** ") + f"**{_fmt(tot)} m²** in **{len(items_all)} slabs**, {len(groups)} type-and-thickness group{'s' if len(groups) != 1 else ''}."
+    missing = len(slabs) - sum(1 for it in slabs if _slab_thickness(it)[0] is not None and _slab_area(it)[0] is not None)
     foot = f"Thickness from {thick_src}." + (f" {approx} slab areas are the box footprint (upper bound), because the model has no usable area quantity for them." if approx else "")
+    if missing:
+        foot += f" {missing} slabs lack thickness or area and are excluded; this is a measured subtotal."
     text = "\n\n".join([head, "\n".join(lines), foot, bars])
     trace = [_step("route", "slab area by type -> IfcSlab grouped by type name and thickness, area summed per group, no model"),
              _step("filter", f"{len(slabs)} slabs, {len(items_all)} with thickness and area; thickness from {thick_src}")]
-    return _done(question, doc, text, tot, "m2", items_all, trace, t0=t0)
+    result = _done(question, doc, text, tot, "m2", items_all, trace, t0=t0)
+    if approx or missing:
+        result["answer"]["confidence"] = .5
+        result["reasoning"] = {"steps": [{"kind": "calculated", "title": "Calculated", "text": foot, "cite": 1, "ok": None}],
+                               "confidence": {"label": "Estimate", "pct": 50, "reason": foot, "improve": "Provide complete slab thickness and area quantities."}}
+    return result
 
 
 def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
@@ -1521,22 +1537,17 @@ PIPE_PLAN = re.compile(r"\b(pipes?|piping|pipework|plumbing|drains?|drainage|sew
 
 
 def plan_slab_pipe(question: str, doc: Doc, t0) -> dict | None:
-    """Judge categories on a floor-plan image: slab area = floor outline; piping = not drawn. Plain about what a plan cannot hold."""
+    """Never substitute architectural room areas for structural quantities."""
     if doc.mode != "planmap":
         return None
     nop = {"doc_id": doc.doc_id, "highlight_item_ids": [], "camera_target_item_id": None}
     if SLABQ.search(question):
-        rooms = [(r, _qty(r, "room", "area")) for r in _of_kind(doc, "room") if not _OUTDOOR.search(f"{r.label or ''} {r.props.get('room_type') or ''}")]
-        rooms = [(r, v) for r, v in rooms if v]
-        if not rooms:
-            return None
-        tot = round(sum(v for _, v in rooms), 2)
-        trace = [_step("route", "slab on a plan image -> floor outline area, no model")]
-        text = (f"The floor slab covers about **{_fmt(tot)} m²**, taken from the floor outline (the **{len(rooms)} rooms** found on the drawing added up). "
-                "A floor plan does not show slab types, thicknesses or reinforcement bars: those need a structural sheet or an IFC model. {marks}" + scale_note(doc))
-        return _done(question, doc, text, tot, "m2", [r for r, _ in rooms], trace, t0=t0)
+        from engine.honesty import unavailable
+        return unavailable(question, [doc.doc_id], "**Slab area by thickness is not recorded in this drawing.** Room floor areas do not establish slab thicknesses or slab areas.", t0, doc=doc)
     if PIPE_PLAN.search(question):
-        text = ("**No piping is drawn on this floor plan.** Pipe sizes are read from plumbing sheets, and pipe lengths from MEP models. "
-                "Upload a plumbing sheet or an IFC plumbing model and ask again.")
-        return _answer_obj(question, [doc.doc_id], text, None, "m", 0.7, False, [], [], nop, [_step("route", "piping on a plan image -> not drawn, no model")], "planmap", t0 or time.perf_counter())
+        from engine.honesty import plan_services_length, unavailable
+        import os
+        from pathlib import Path
+        measured = plan_services_length(question, doc, Path(os.environ.get("ARTIFACTS_DIR") or "artifacts"), t0)
+        return measured or unavailable(question, [doc.doc_id], "**Pipe measurements are not indexed for this sheet.** This does not establish that no piping is drawn.", t0, doc=doc)
     return None

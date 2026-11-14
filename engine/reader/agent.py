@@ -35,7 +35,7 @@ Tools (doc is d1, d2...; page numbers start at 1; pixel boxes are page-image pix
 - ifc {doc, kind?, ifc_class?, storey?, name?, external?}: elements of an IFC model with totals.
 - compute {expr}: exact arithmetic. Use it for every sum, area or allowance instead of mental maths.
 Rules: every fact and number in the answer must come from an observation; cite the ids that show it. Never invent codes, ratings or sources.
-If the drawings do not contain the answer (for example a rule that lives in a building code), say so and cite what they do show.
+If the drawings do not contain the answer (for example a rule that lives in a building code), say so and stop. Never add typical values, code requirements, or unrelated guidance to a missing-data answer.
 Be quick: prefer one precise call over many. Stop as soon as the evidence is enough."""
 
 
@@ -198,9 +198,7 @@ def _build(question, doc_ids, sess: Session, fin: dict, trace, calls, t0, forced
                 seen_ids.add(i)
     if abstained:
         why = forced_abstain or "no verifiable evidence" if not refs else (forced_abstain or "the drawings do not settle it")
-        text = (text or "I could not find this in the selected drawings.")
-        if not refs:
-            text = "I could not verify an answer from the drawing text, tables or plan data. " + (f"What I found: {text}" if text else "")
+        text = "**I could not verify the requested information from the selected drawings.**"
         trace.append({"step": "abstain", "detail": why, "ms": 0, "model": None, "cost_usd": 0})
         value, conf, cites, boxes, ids = None, 0.0, [], [], []
         if refs:
