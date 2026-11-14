@@ -327,6 +327,7 @@ h1, h2, h3, p { margin: 0; }
 .exchange { width: min(768px, 100%); max-width: 768px; margin: 64px auto 38px; animation: product-rise .55s var(--ease-settle-wide) both; }
 .question-bubble { max-width: 85%; margin-bottom: 16px; padding: 16px; border-radius: 12px 12px 6px 12px; font-size: 15px; font-weight: 500; line-height: 24px; }
 .thought-process { margin-top: 0; margin-bottom: 8px; }
+.answer-how { margin: 6px 0 0; font-size: 12.5px; line-height: 18px; color: var(--muted-foreground, #6b7280); }
 .answer-detail { font-size: 12px; color: var(--muted-foreground); }
 .answer-detail summary { list-style: none; display: flex; gap: 4px; align-items: center; }
 .answer-detail summary::-webkit-details-marker { display: none; }

@@ -208,6 +208,9 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
         if not entries:
             res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n}: vision drew no boxes, kept the plan map", 0, model, usd))
             return res
+        if len(entries) != final:   # the headline number always equals the numbered boxes; keep the measured recount number honest
+            res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n}: vision drew {len(entries)} box(es), not {final}, kept the plan map", 0, model, usd))
+            return res
         _set_boxes(res, parsed, entries, f"plan map {plan_n}, drawing re-read {n}: replaced by {len(entries)} vision-drawn box(es) ({m2})")
     return res
 
@@ -297,6 +300,16 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
             if _doc is not None:
                 res = rastersanity.guard(res, question, _doc)
     except Exception:  # noqa: BLE001 — a sanity note must never break an answer
+        pass
+    try:   # E-77: exact code answers explained in plain words (numbers unchanged; falls back to the code text)
+        from engine.explain import explain
+        res = explain(res, question, _root())
+    except Exception:  # noqa: BLE001
+        pass
+    try:   # X20-X23/D01: feet, acres, unit prices on top of the metric answer (engine/units.py; value unchanged)
+        from engine import units
+        res = units.convert(res, question)
+    except Exception:  # noqa: BLE001
         pass
     res["question"] = original   # the user's own words are what is stored and shown; the resolved question stays in the trace
     if step is not None:

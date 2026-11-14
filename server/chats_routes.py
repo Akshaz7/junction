@@ -36,7 +36,7 @@ def _no_data_answer(question, doc_ids, on_event=None):
         root = Path(config.artifacts_dir())
         for d in doc_ids:
             dd = root / d
-            if load_doc(d, root) or load_sheet_parent(d, root) or any(dd.glob("text*.json")):
+            if load_doc(d, root) or load_sheet_parent(d, root) or any(dd.glob("text*.json")) or any(dd.glob("page-*.png")):   # a page image: the drawing reader can still answer
                 return None
         running = any(json.loads((root / d / "ingest.json").read_text()).get("status") == "running"
                       for d in doc_ids if (root / d / "ingest.json").is_file())

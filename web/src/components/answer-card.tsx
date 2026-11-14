@@ -74,6 +74,16 @@ export function ArHint() {
   </div>
 }
 
+/** One plain sentence on how the answer was produced: code over the read data, or which AI models looked at the drawing. */
+export function howAnswered(answer: Answer): string {
+  const models = [...new Set(answer.cost.calls.map((call) => String((call as { model?: string }).model || '')).filter(Boolean))]
+    .map((m) => m.replace(/^.*[/:]/, '').replace(/@/g, ' ').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()))
+  if (!models.length) return answer.route === 'planmap'
+    ? 'How: worked out by code from the walls, doors, windows and rooms our vision models found when this drawing was read. No AI was asked this question.'
+    : 'How: worked out by code from the data inside the file (model elements and printed text). No AI model was used.'
+  return `How: ${models.slice(0, 3).join(', ')} read the drawing; the result was checked against what the file contains, and every numbered box is shown so you can verify it.`
+}
+
 export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation, onVisualise, edits, busy, onUndo, onOpenItem, chatId, onAsk }: {
   answer: Answer; docs: Document[]; demo: boolean; activeCitation?: Citation; onOpenCitation: (citation: Citation) => void
   /** Open the viewer straight in 3D. */
@@ -107,6 +117,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
     <div className="question-bubble">{answer.question}</div>
     <details className="answer-detail thought-process"><summary>Show thought process</summary>{answer.trace.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>
     <AnswerBody answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} />
+    {!generated && <p className="answer-how" data-testid="answer-how">{howAnswered(answer)}</p>}
     {!!docChips.length && <div className="answer-docs" aria-label="Documents used" data-testid="answer-docs">{docChips.map(({ docId, title, first }) => first
       ? <button type="button" key={docId} className="source-file-chip answer-doc-chip" aria-label={`Open document ${title}`} onClick={() => onOpenCitation(first)}><FileText size={14} /><span>{title}</span></button>
       : <span key={docId} className="source-file-chip answer-doc-chip"><FileText size={14} /><span>{title}</span></span>)}</div>}

@@ -81,15 +81,12 @@ def test_hidden_listing_lazy_restore_and_fast_refusal(env, monkeypatch):
         # Hidden documents cannot be selected for a question.
         chat = c.post("/api/chats", json={"doc_ids": ["src_a__empty"]}).json()
         assert c.post(f"/api/chats/{chat['id']}/messages", json={"content": "How many doors?"}).status_code == 404
-        # With empty documents listed locally, the fast, free refusal still applies.
+        # With empty documents listed locally, a page image is still handed to the drawing reader (FIX-14: never refuse while a page exists).
         monkeypatch.setenv("HIDE_EMPTY_DOCS", "0")
-        t = time.time()
         r = c.post(f"/api/chats/{chat['id']}/messages", json={"content": "How many doors are there?"})
-        assert time.time() - t < 1.0
         ans = [json.loads(line[5:]) for line in r.text.splitlines() if line.startswith("data:") and '"answer_id"' in line][-1]
-        assert ans["answer"]["abstained"] is True
-        assert ans["cost"]["usd_total"] == 0
-        assert "no readable drawing data" in ans["answer"]["text_md"]
+        assert ans["answer"]["text_md"]
+        assert not any(s.get("detail", "").startswith("no data for the selected document") for s in ans["trace"])
         # and a doc with data still answers from the plan map
         chat = c.post("/api/chats", json={"doc_ids": ["src_a__baked"]}).json()
         r = c.post(f"/api/chats/{chat['id']}/messages", json={"content": "How many doors are there?"})

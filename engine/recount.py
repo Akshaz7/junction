@@ -26,7 +26,7 @@ def _cache_file() -> Path:
 def _cache_key(tag: str, image: Path, kind, question: str = "") -> str:
     h = hashlib.sha1(Path(image).read_bytes()).hexdigest()[:16]
     q = re.sub(r"\W+", " ", (question or "").lower()).strip()
-    pin = os.environ.get("RECOUNT_ONLY", "") + "|" + os.environ.get("RECOUNT_BOX_ONLY", "") + "|" + os.environ.get("MODELS_FAKE", "")
+    pin = hashlib.sha1(json.dumps(HINTS, sort_keys=True).encode()).hexdigest()[:6] + os.environ.get("RECOUNT_ONLY", "") + "|" + os.environ.get("RECOUNT_BOX_ONLY", "") + "|" + os.environ.get("MODELS_FAKE", "")
     return "|".join([tag, h, str(kind), q, pin])
 
 
@@ -61,7 +61,8 @@ def _cache_put(key: str, value) -> None:
 SCHEMA = {"type": "object", "required": ["count"], "additionalProperties": False, "properties": {"count": {"type": "integer", "minimum": 0}}}
 HINTS = {
     "window": "Windows are thin double or triple lines set in an outer wall, or glazed wall segments; count each separate window opening once.",
-    "door": "Doors are drawn with a swing arc or a door leaf in a wall gap; count doors with a leaf, not empty openings.",
+    "door": ("Count a door only when you can see its door leaf: a swing arc with the leaf line drawn in a wall gap. Do not count empty openings "
+             "without a leaf, window symbols, or dimension ticks."),
     "toilet": "A toilet bowl is a small oval or keyhole shape with a cistern, usually in a WC or bathroom.",
     "sink": "Sinks and wash basins are small rectangles or ovals with a tap mark in kitchens and bathrooms; a double-bowl sink counts as one.",
     "shower_bathtub": "Count each bathtub (long rounded rectangle) and each shower tray (square with a drain or corner diagonal).",
@@ -98,16 +99,23 @@ def _recount_model(question: str, image: Path, kind: str | None = None) -> tuple
         return None, 0.0, ""
 
 
-# Reconciliation, picked on the 156 clean calibration drawings (results/recount_calib.json), never on held-out ones:
-#   shower/bathtub: plan map 11.5 % vs vision 65.4 %  -> vision
-#   window 31.4 -> min 35.9; door 33.3 -> min 37.8; sink 23.1 -> min 26.3; toilet 77.6 -> min 79.5 (vision alone is worse than the plan map)
+# Reconciliation, picked on the 156 clean calibration drawings (results/vision/recount_plain.json + calib_counts_after.json,
+# vision/pick_reconcile.py), never on held-out ones. Exact-count accuracy, plan map / vision / chosen rule:
+#   door (sharp prompt, 51-drawing subset, 2-fold .46/.52 vs plan .35/.44): recount only when |recount - plan| > 1: .49 vs plan .39
+#   shower+bathtub .12 / .77 / max .78   window .44 / .49 / max .50   toilet .83 / .87 / max .875   door .45 / .43 / plan (min) .45
+#   sink .30 / .21 / min .32 (vision overcounts sinks; the plan map is the better of the two)
+# The window and toilet picks are small gains (2-fold split: window .50 / .40, toilet .87 / .87), the shower pick is large.
 KIND_OF = {"window": "window", "door": "door", "toilet": "toilet", "sink": "sink", "shower": "shower_bathtub", "bathtub": "shower_bathtub"}
+TAKE_MAX = {"shower_bathtub", "toilet"}   # window max was +6 pts on one calib fold, -4 on the other and -1 on sample200: kept on min
 
 
 def reconcile(kind: str, plan_n: int, vision_n: int | None) -> int:
     if vision_n is None:
         return plan_n
-    return vision_n if KIND_OF.get(kind, kind) == "shower_bathtub" else min(plan_n, vision_n)
+    k = KIND_OF.get(kind, kind)
+    if k == "door":   # sharper door prompt (swing-arc leaf): trust the recount only when it disagrees by 2 or more
+        return vision_n if abs(vision_n - plan_n) > 1 else plan_n
+    return max(plan_n, vision_n) if k in TAKE_MAX else min(plan_n, vision_n)
 
 
 # ---------------------------------------------------------------- boxes (so a higher vision count can be drawn and verified)

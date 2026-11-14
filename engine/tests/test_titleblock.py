@@ -138,6 +138,7 @@ def test_answer_integration_precedes_model_router(tmp_path, monkeypatch):
     write_doc(tmp_path, [line('Project: Harbor Library', 710, 650)])
     monkeypatch.setenv('ARTIFACTS_DIR', str(tmp_path))
     monkeypatch.delenv('MODELS_FAKE', raising=False)
+    monkeypatch.setenv('EXPLAIN', '0')   # the optional plain-words explanation (E-77) is a separate, later step
     monkeypatch.setattr(engine.models, 'call', lambda *a, **k: pytest.fail('code route called model'))
     a = answer('What is the project name?', [DOC])
     assert a['answer']['text_md'].startswith('**Harbor Library**')
