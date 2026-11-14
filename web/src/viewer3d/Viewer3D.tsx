@@ -233,7 +233,9 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
   useEffect(() => {
     if (state !== 'ready' || highlightRequest === undefined || commands?.length) return;
     const [ids, options] = JSON.parse(highlightRequest) as [string[], HighlightOptions];
-    viewerRef.current?.highlight(ids, { ...options, cinematic: true });
+    const viewer = viewerRef.current;
+    const swap = (viewer?.getHighlightState().highlighted.length ?? 0) > 0 && ids.length > 0;
+    viewer?.highlight(ids, swap ? { ...options, keepCamera: true } : { ...options, cinematic: true });
   }, [state, highlightRequest, commandRequest, sceneUrl]);
 
   useEffect(() => {

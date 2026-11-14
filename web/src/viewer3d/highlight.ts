@@ -11,6 +11,8 @@ export interface HighlightOptions {
   dimOthers?: boolean;
   /** Play the reveal (orbit, dim, one-by-one pulse) when this is a new answer in an open view. */
   cinematic?: boolean;
+  /** FIX-2: this answer replaces a lit one in an open view; swap in place, no orbit, no fly. */
+  keepCamera?: boolean;
 }
 
 export interface HighlightState {
