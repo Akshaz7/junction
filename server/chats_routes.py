@@ -172,8 +172,15 @@ async def ask(chat_id: str, body: NewMessage):
     from . import artifact_store
     for _d in doc_ids:  # uploaded docs: files may only be in PostgreSQL after a container restart
         await artifact_store.ensure_doc(_d)
-    history = [{"role": r["role"], "content": r["content"]} for r in reversed(await pool.fetch(
-        "select role, content from messages where chat_id=$1 order by created_at desc limit 10", cid))]
+    def _ids(v):   # answers.answer->'doc_ids' (jsonb text) of an assistant turn: thread memory resolves "this one" / "and doors?" with it
+        try:
+            v = json.loads(v) if isinstance(v, str) else v
+            return [d for d in v if isinstance(d, str)] if isinstance(v, list) else []
+        except ValueError:
+            return []
+    history = [{"role": r["role"], "content": r["content"], "doc_ids": _ids(r["doc_ids"])} for r in reversed(await pool.fetch(
+        "select m.role, m.content, (select a.answer->'doc_ids' from answers a where a.message_id=m.id limit 1) as doc_ids "
+        "from messages m where m.chat_id=$1 order by m.created_at desc limit 10", cid))]
     umid = await pool.fetchval(
         "insert into messages (chat_id, role, content) values ($1,'user',$2) returning id", cid, body.content)
     ACTIVE[str(cid)] = {"question": body.content, "statuses": ["Thinking…"], "traces": []}

@@ -14,13 +14,15 @@ from pathlib import Path
 
 NUM_SCHEMA = {"type": "object", "required": ["value"], "additionalProperties": False, "properties": {"value": {"type": "number"}}}
 TXT_SCHEMA = {"type": "object", "required": ["answer"], "additionalProperties": False, "properties": {"answer": {"type": "string"}}}
+NO_IMAGE = re.compile(r"(does not|doesn't|did not|no)\s+(contain|include|provide|have|attach|image|see)[^.]{0,40}\b(image|drawing|picture|photo|attachment)\b|"
+                      r"\bno (image|drawing) (was |is |has been )?(provided|attached|included)", re.I)
 UNITS = {"area": "m²", "length": "m", "volume": "m³", "count": "count"}
 
 
 def _context(doc_id: str, root: Path, question: str) -> tuple[str, Path | None, str]:
     """-> (text context, page image, basis phrase)"""
     d = Path(root) / doc_id
-    img = next((p for p in (d / "page-1.png",) if p.exists()), None)
+    img = next((p for p in (d / "page-1.png", d / "page-1.jpg", d / "page-1.thumb.png", *sorted(d.glob("page-*.png"))) if p.exists()), None)
     bits, basis = [], []
     try:
         meta = json.loads((d / "doc.json").read_text())
@@ -73,8 +75,10 @@ def forced_answer(question: str, doc_ids: list[str], root: Path, parsed=None, tr
     typ = getattr(parsed, "type", None)
     numeric = typ in UNITS
     value, text, usd = None, "", 0.0
-    prompt = ("Answer the question about a building drawing or model as best you can from the evidence below. You must give an answer: "
-              "if unsure, give your best estimate. " + ("Reply JSON {\"value\": <number>}. " + ("Whole number." if typ == "count" else f"Unit {UNITS.get(typ)}.")
+    prompt = ("Answer the question about a building drawing or model as best you can from the evidence below. "
+              + ("The drawing image is attached to this message: look at it and answer from what you see. Never say that no image was provided. "
+                 if img is not None else "")
+              + "You must give an answer: if unsure, give your best estimate. " + ("Reply JSON {\"value\": <number>}. " + ("Whole number." if typ == "count" else f"Unit {UNITS.get(typ)}.")
               if numeric else "Reply JSON {\"answer\": <1-4 sentences, specific, key fact first>}. ")
               + f"\n\n{ctx}\n\nQuestion: {question}")
     n = None
@@ -91,6 +95,14 @@ def forced_answer(question: str, doc_ids: list[str], root: Path, parsed=None, tr
         usd = r.cost_usd
         calls.append({"task": "forced_answer", "provider": r.provider, "model": r.model, "cost_usd": r.cost_usd})
         j = r.json if isinstance(r.json, dict) else {}
+        if img is not None and not numeric and NO_IMAGE.search(str(j.get("answer") or "")):   # the model claims it got no image: ask once more, plainly
+            r = call("forced_answer", [{"role": "user", "content": prompt + "\n\nThe image IS attached. Describe what is on the drawing that answers the question."}],
+                     images=[img], schema=TXT_SCHEMA)
+            usd += r.cost_usd
+            calls.append({"task": "forced_answer", "provider": r.provider, "model": r.model, "cost_usd": r.cost_usd})
+            j = r.json if isinstance(r.json, dict) else {}
+            if NO_IMAGE.search(str(j.get("answer") or "")):
+                j = {}
         if numeric and isinstance(j.get("value"), (int, float)):
             n = float(j["value"])
         elif not numeric and (j.get("answer") or "").strip():
@@ -108,7 +120,7 @@ def forced_answer(question: str, doc_ids: list[str], root: Path, parsed=None, tr
         text = f"**{shown}** (low confidence: {src})."
     else:
         text = (text or "I could not read enough of this document to be specific; my best guess is that it does not record this directly.")
-        text += f"\n\n_Low confidence: a best-effort reading of {basis or 'the document title'}, not checked against the data._"
+        text += f"\n\n_Low confidence: read from {basis}, not checked against the data._" if basis else "\n\n_Low confidence: nothing readable was found in this document._"
     trace.append({"step": "forced", "detail": f"best-effort answer from {basis or 'no evidence'}", "ms": int((time.perf_counter() - t0) * 1000), "model": calls[-1]["model"] if calls and calls[-1].get("task") == "forced_answer" else None, "cost_usd": usd})
     return {
         "answer_id": uuid.uuid4().hex, "question": question, "doc_ids": list(doc_ids),

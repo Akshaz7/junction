@@ -183,7 +183,13 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
         return res
     conf = {i.item_id: (i.conf if i.conf is not None else 1.0) for i in doc.items}
     if final < plan_n:
-        keep = sorted(sorted(boxes, key=lambda b: -conf.get(b["item_id"], 1.0))[:final], key=lambda b: boxes.index(b))
+        ranked = sorted(boxes, key=lambda b: -conf.get(b["item_id"], 1.0))
+        keep = sorted(ranked[:final], key=lambda b: boxes.index(b))
+        # only override when clearly better: a drop of one needs a clearly weak box to drop (calibration: every right drop-by-one had a
+        # box at conf <= 0.56; the wrong ones had all boxes >= 0.8)
+        if plan_n - final == 1 and conf.get(ranked[-1]["item_id"], 1.0) >= 0.7:
+            res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n}: every detection is confident, kept the plan map", 0, model, usd))
+            return res
         _set_boxes(res, parsed, [(b["item_id"], b["bbox_px"]) for b in keep],
                    f"plan map {plan_n}, drawing re-read {n}: dropped the {plan_n - final} least confident detection(s)")
     elif final > plan_n:
@@ -195,10 +201,12 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
         if new is None:
             res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n}: no boxes from vision, kept the plan map", 0, model, usd))
             return res
-        merged = merge_boxes([b["bbox_px"] for b in boxes], new)
-        added = merged[len(boxes):][: max(0, final - plan_n)]
-        entries = [(b["item_id"], b["bbox_px"]) for b in boxes] + [(f"vision-{kk}-{k:02d}", bb) for k, bb in enumerate(added, 1)]
-        _set_boxes(res, parsed, entries, f"plan map {plan_n}, drawing re-read {n}: added {len(added)} vision-drawn box(es) ({m2})")
+        # calibration: vision's own boxes alone beat plan-map + vision merged (results/box_*.json); the plan-map boxes for this kind are the ones that undercount
+        entries = [(f"vision-{kk}-{k:02d}", bb) for k, bb in enumerate(new, 1)]
+        if not entries:
+            res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n}: vision drew no boxes, kept the plan map", 0, model, usd))
+            return res
+        _set_boxes(res, parsed, entries, f"plan map {plan_n}, drawing re-read {n}: replaced by {len(entries)} vision-drawn box(es) ({m2})")
     return res
 
 

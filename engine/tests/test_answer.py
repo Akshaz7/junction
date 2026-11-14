@@ -143,7 +143,9 @@ def test_recount_keeps_boxes_in_step_with_the_number(monkeypatch):
     if not (Path(ARTIFACTS) / doc / "page-1.png").exists():
         pytest.skip("real artifacts not present")
     monkeypatch.setenv("ARTIFACTS_DIR", str(ARTIFACTS))
-    for vision, want in [(8, 8), (10, 10), (15, None)]:
+    monkeypatch.setattr(RC, "detect", lambda img, kind: ([[5, 5, 60, 25], [900, 900, 960, 925]], 0.0, "m"))   # two extra boxes drawn by vision
+    # a drop of one is only taken when a box is clearly weak (want 0 = either outcome, still consistent)
+    for vision, want in [(8, 8), (9, 9), (10, 0), (15, 11)]:
         monkeypatch.setattr(RC, "recount", lambda q, img, kind=None, v=vision: (v, 0.0, "m"))
         a = answer("How many windows are there?", [doc])
         n = len(a["evidence"]["boxes"])

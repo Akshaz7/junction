@@ -22,7 +22,7 @@ TIMEOUT_S = 120.0
 # STREAM_NOW only for STREAM_TASKS, and the anthropic adapter then streams. Never part of the cache key.
 DELTA_SINK: contextvars.ContextVar = contextvars.ContextVar("delta_sink", default=None)
 STREAM_NOW: contextvars.ContextVar = contextvars.ContextVar("stream_now", default=None)
-STREAM_TASKS = {"write_answer", "chat"}
+STREAM_TASKS = {"write_answer", "chat", "chat_long", "task_write"}
 
 
 class ProviderError(Exception):
@@ -203,6 +203,8 @@ def openai_compat(cfg, model, messages, images, schema, params, key) -> Provider
     body: dict[str, Any] = {"model": model, "messages": out, "max_tokens": params.get("max_tokens", 1024), "stream": False}
     if params.get("temperature") is not None:
         body["temperature"] = params["temperature"]
+    if cfg.get("extra_body"):  # provider-level defaults (Runware Gemini 4: reasoning_effort low, else hidden thinking eats max_tokens)
+        body.update(cfg["extra_body"])
     if params.get("extra_body"):  # e.g. Nemotron chat_template_kwargs
         body.update(params["extra_body"])
     resp = _post(
@@ -468,6 +470,7 @@ ADAPTERS: dict[str, Callable] = {
     "gemini": gemini,
     "nvidia": openai_compat,
     "verda": openai_compat,
+    "runware_oai": openai_compat,
     "featherless": openai_compat,
     "anthropic": anthropic,
     "runware_claude": anthropic,

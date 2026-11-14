@@ -7,6 +7,8 @@ and pointing the user at the document that can answer a project-specific questio
 """
 from __future__ import annotations
 
+import re
+
 SYSTEM_PROMPT = """You are Hologram, an assistant for people who build: site managers, contractors, architects, \
 quantity surveyors and engineers. You answer questions about a project's construction drawings and building \
 information models (floor plans, sections, IFC models, schedules).
@@ -31,6 +33,7 @@ NO_DOC_HINT = ("\n\nNo project document is selected in this message. Do not stat
                "If the question needs the drawings, explain what you would read from them and how to select one.")
 
 MAX_HISTORY = 10
+LONGFORM = re.compile(r"\b(draft|write|compose|outline|plan|prepare|agenda|checklist|letter|email|memo|report|summari[sz]e|review)\b", re.I)
 
 
 def with_system(messages, extra: str = "") -> list[dict]:
@@ -46,4 +49,5 @@ def chat(question: str, history: list[dict] | None = None):
     turns = [{"role": h["role"], "content": str(h["content"])[:2000]}
              for h in (history or [])[-MAX_HISTORY:]
              if h.get("role") in ("user", "assistant") and str(h.get("content") or "").strip()]
-    return call("chat", with_system([*turns, {"role": "user", "content": question}], NO_DOC_HINT))
+    task = "chat_long" if LONGFORM.search(question or "") else "chat"   # long-form writing goes to Opus 5.5
+    return call(task, with_system([*turns, {"role": "user", "content": question}], NO_DOC_HINT))

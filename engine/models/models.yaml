@@ -10,6 +10,7 @@ providers:
   anthropic: {env: ANTHROPIC_API_KEY,  base_url: "https://api.anthropic.com/v1", version: "2026-10-21"}
   runware:   {env: RUNWARE_API_KEY,    base_url: "https://api.runware.ai/v1"}
   runware_claude: {env: RUNWARE_API_KEY, base_url: "https://api.runware.ai/v1", bearer: true, version: "2026-10-21"}   # Anthropic Messages format via Runware (Claude 5.x family)
+  runware_oai: {env: RUNWARE_API_KEY, base_url: "https://api.runware.ai/v1", extra_body: {reasoning_effort: low}}   # OpenAI chat/completions format via Runware (Gemini 4)
   verda:     {env: VERDA_INFERENCE_KEY, base_url: "https://containers.datacrunch.io/nemotron-3-5-super-vl-b300/v1"}
   featherless: {env: FEATHERLESS_API_KEY, base_url: "https://api.featherless.ai/v1"}
   # voice_id = "River - Relaxed, Neutral, Informative" (premade voice; listed by GET /v1/voices on 2026-11-14)
@@ -31,6 +32,9 @@ prices:
     # https://platform.claude.com/docs/en/about-claude/pricing (Haiku 5.5: $0.50/$2.50 applies over 100k prompt tokens; table uses <=100k rate)
     claude-sonnet-5-5: {in: 2.00, out: 10.00}
     claude-haiku-5-5:  {in: 0.10, out: 0.50}
+  runware_oai:   # input $/M from Runware's listing (lead, 2026-11-14); output price not published: assumed 5x input, UNVERIFIED
+    gemini-4-hydrogen: {in: 1.50, out: 7.50}
+    gemini-4-carbon:   {in: 2.00, out: 10.00}
   runware_claude:   # input $/M from Runware's model listing (Ash, 2026-11-14); output = 5x input like Anthropic's own table: UNVERIFIED for opus-5.5 / fable-5.2 / opus-5
     claude-haiku-5-5:  {in: 0.10, out: 0.50}
     claude-sonnet-5-5: {in: 2.00, out: 10.00}
