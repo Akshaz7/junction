@@ -55,6 +55,11 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
     """Apply named rooms, area bounds, thickness and misspelled floor counts before broad totals."""
     from engine.solvers.filters import room_filter, room_name, missing_room_text, storey_requested
     if doc.mode != "ifc":
+        # Quoted/labelled room lookups also recover text labels from within a
+        # polygon when another label names it. Preserve that existing path.
+        from engine.solvers.solve import _quoted
+        if _quoted(question) or re.search(r"\blabel(?:led|ed)\b", question, re.I):
+            return None
         # Keep established detector count calibration. Named areas and explicit
         # area bounds still need their full room filter on raster/CAD plans.
         if re.search(r"\bhow many\b", question, re.I) and not re.search(r"\b(?:larger|smaller|bigger|between|over|under|at least|at most)\b", question, re.I):

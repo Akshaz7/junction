@@ -617,6 +617,15 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             rr = _reader(question, doc_ids, root, trace, calls, t0, emit)
             if rr is not None and not rr["answer"].get("abstained"):
                 return rr
+            parsed_detection = parse(question)
+            if parsed_detection.type == "count" and parsed_detection.kind not in (None, "storey"):
+                detected = solve(question, doc_ids[0], parsed=parsed_detection, root=root)
+                if not detected["answer"].get("abstained") and isinstance(detected["answer"].get("value"), (int, float, dict)):
+                    detected["answer"]["text_md"] += " " + reason + " This is the automatic detection count, not a verified total from the drawing."
+                    detected["answer"]["confidence"] = .3
+                    detected["trace"] = [*trace, *detected["trace"]]
+                    detected["cost"] = {"usd_total": round(sum(c.get("cost_usd", 0) for c in calls), 6), "calls": calls}
+                    return detected
             res = _abstained(question, doc_ids, reason + " I cannot give a verified figure from the available detection data.", trace, t0, "hybrid", calls)
             res["answer"].update(abstained=False, confidence=.3)
             return res

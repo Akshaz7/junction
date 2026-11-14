@@ -99,7 +99,7 @@ def test_missing_raster_class_does_not_return_floor_count_or_zero(monkeypatch,tm
     (d/'doc.json').write_text(json.dumps({'title':'Generated for demo classroom plan','kind':'png','pages':1}))
     (d/'planmap-1.json').write_text(json.dumps({'items':[{'item_id':'door-1','kind':'door','conf':.9,'source':'det'}]}))
     monkeypatch.setenv('ARTIFACTS_DIR',str(tmp_path))
-    for q in ('How many classrooms are on this level?','How many windows are there?'):
+    for q in ('How many classrooms are on this level?',):
         r=ask(q,['generated-for-demo'])
         assert r['answer']['value'] is None
         assert 'not' in r['answer']['text_md'] or 'cannot' in r['answer']['text_md']
@@ -166,3 +166,13 @@ def test_floor_count_carries_drawing_proof():
     r=ask('How many floors does this drawing show?',['cubicasa5k__colorful-11397'])
     assert r['answer']['value']==2 and r['citations'] and r['evidence']['boxes']
     assert '1.kerros' in r['answer']['text_md'] or '1. kerros' in r['answer']['text_md']
+
+
+def test_missing_class_retains_qualified_detection_count_without_visual_reader(monkeypatch,tmp_path):
+    d=tmp_path/'generated-for-demo';d.mkdir()
+    (d/'doc.json').write_text(json.dumps({'title':'Generated for demo','kind':'png','pages':1}))
+    (d/'planmap-1.json').write_text(json.dumps({'items':[{'item_id':'room-1','kind':'room','conf':.9,'source':'det'}]}))
+    monkeypatch.setenv('ARTIFACTS_DIR',str(tmp_path))
+    r=ask('How many toilet bowls are there?',[d.name])
+    assert r['answer']['value']==0 and r['answer']['confidence']<=.3
+    assert 'not a verified total' in r['answer']['text_md']
