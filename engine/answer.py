@@ -340,6 +340,8 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
     # F-CALC: final operands must follow recounts, conversions and evidence margins.
     from engine import calc
     res = calc.attach(res, question, _root())
+    from engine import scan_calc
+    res = scan_calc.attach(res, question, _root())
     try:   # bullets need a blank line before them to render as a list
         _t = res["answer"].get("text_md") or ""
         res["answer"]["text_md"] = re.sub(r"(?m)^(?!- |\* |\||#)(\S[^\n]*)\n(- )", r"\1\n\n\2", _t)

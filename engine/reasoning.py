@@ -104,7 +104,16 @@ def build(res: dict, question: str, root: Path) -> dict | None:
     from engine.reasoning_parts import margin
     quantitative = margin.run(ctx)
     from engine.reasoning_parts import scaleproof
-    quantitative.update(scaleproof.run(ctx, quantitative))
+    scale_extra = scaleproof.run(ctx, quantitative)
+    if quantitative.get("calc") and scale_extra.get("calc"):
+        prior = quantitative['calc']
+        for key in ('checks', 'item_checks', 'sanity_checks', 'unavailable'):
+            for entry in prior.get(key) or []:
+                if entry not in scale_extra['calc'].setdefault(key, []):
+                    scale_extra['calc'][key].append(entry)
+        if 'reconciled' in prior:
+            scale_extra['calc']['reconciled'] = prior['reconciled']
+    quantitative.update(scale_extra)
     c = _confidence.run(ctx)
     steps = c.pop("_steps", ctx["steps"])
     hint = res.get("reasoning_hint")   # F-MEP: engine/mep.py supplies its own Found / Measured / Checked lines and an optional confidence cap

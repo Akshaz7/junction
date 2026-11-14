@@ -208,9 +208,33 @@ def transform(res, calc, label, operation, operands, expr, value=None, unit=None
 
 
 def evaluate(operation, values):
+    if operation == 'reader_compute':
+        from engine.reader.tools import safe_eval
+        return safe_eval(values[0]) if len(values) == 1 and isinstance(values[0], str) else None
     if not all(number(v) for v in values):
         return None
+    if operation in ('polyline', 'polyline_closed', 'polygon_area'):
+        if len(values) < 4 or len(values) % 2: return None
+        from engine.reader.geom import polygon_area, polyline_length
+        points = list(zip(values[::2], values[1::2]))
+        return polygon_area(points) if operation == 'polygon_area' else polyline_length(points, operation == 'polyline_closed')
     if operation == "sum": return math.fsum(values)
+    if operation == "median":
+        from statistics import median
+        return median(values) if values else None
+    if operation == "component_area": return values[0] * (values[1] / values[2]) ** 2 if len(values) == 3 and values[2] else None
+    if operation in ("door_scale", "door_scale_spread"):
+        from statistics import median
+        if len(values) < 3 or any(v <= 0 for v in values): return None
+        scale = values[0] / median(values[1:])
+        return scale if operation == "door_scale" else max(abs((values[0] / v) / scale - 1) for v in values[1:]) * 100
+    if operation == "accuracy_pct": return round(values[0] / values[1] * 100) if len(values) == 2 and values[1] else None
+    if operation == 'ratio_dpi': return values[0] * values[2] / (values[1] * (values[3] if len(values) == 4 else 1)) if len(values) in (3, 4) and values[1] and (len(values) == 3 or values[3]) else None
+    if operation == 'ratio_sheet': return math.prod(values[:3]) / values[3] if len(values) == 4 and values[3] else None
+    if operation == 'dimension_scale': return values[0] * values[1] / values[2] if len(values) == 3 and values[2] else None
+    if operation == 'bar_scale': return (values[-3] - values[0]) * values[-1] / values[-2] if len(values) >= 4 and values[-2] else None
+    if operation == 'inverse': return 1 / values[0] if len(values) == 1 and values[0] else None
+    if operation == 'dxf_scale': return values[0] / abs(values[1]) if len(values) == 2 and values[1] else None
     if operation in ("multiply", "convert"): return math.prod(values)
     if operation == "divide": return values[0] / values[1] if len(values) == 2 and values[1] else None
     if operation == "subtract": return values[0] - math.fsum(values[1:]) if values else None
@@ -441,6 +465,14 @@ def _attach(res, question, root):
     calc = res.pop("_calc", None)
     if not calc or calc.get("result", {}).get("value") != value:
         calc = _default(res, question, root)
+    if value is None and calc.get('rows'):
+        # Sanity guards can intentionally withdraw a scalar after a route has
+        # measured individual regions. Keep that arithmetic as context without
+        # presenting the source sum as an answer the guard rejected.
+        reason = next((t.get('detail') for t in res.get('trace', []) if t.get('step') == 'sanity'),
+                      'The answer reports source rows without a scalar total.')
+        calc['result'].update(mode='per-element', rounded_as='No scalar total reported', reason=reason)
+        calc['row_note'] = 'These source measurements are context only. ' + reason
     _measurement_steps(calc, root)
     if number(value) and res.get("route") in ("hybrid", "vlm") and any(s.get("model") and s.get("step") not in ("explain", "context", "typos") for s in res.get("trace", [])):
         cited = (res.get("citations") or [{}])[0]
@@ -450,6 +482,14 @@ def _attach(res, question, root):
                                   "The source rows above show what can be checked independently; unresolved differences stay marked incomplete.", "source"))
     reasoning = res.setdefault("reasoning", {"steps": [], "confidence": {"label": "Estimate", "pct": None,
                                                                             "reason": "Calculation sources have not been independently verified."}})
+    # The independent-check and scale builders run before final arithmetic.
+    # Keep their provenance when the route's exact seed replaces their sum.
+    prior = reasoning.get("calc") or {}
+    for key in ("checks", "item_checks", "sanity_checks", "unavailable"):
+        for entry in prior.get(key) or []:
+            if entry not in calc.setdefault(key, []): calc[key].append(copy.deepcopy(entry))
+    if prior.get("scale_proof"):
+        calc["scale_proof"] = copy.deepcopy(prior["scale_proof"])
     calc["margin"] = copy.deepcopy(reasoning.get("margin") or {"value": None, "unit": unit_name(ans.get("unit")), "pct": None,
                                                                  "why": "No measured error budget was recorded.", "sources": []})
     extras = res.pop("_calc_extras", [])

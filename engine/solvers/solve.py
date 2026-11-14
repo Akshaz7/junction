@@ -495,6 +495,8 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         low = [i for i in items if i.conf < MIN_CONF]
         items = [i for i in items if i.conf >= MIN_CONF]
         trace.append(_step("load", f"plan map: {len(items)} {kind} items (conf >= {MIN_CONF}; {len(low)} below ignored)"))
+        trace[-1]['data'] = {'method': 'score_filter', 'kind': kind, 'score_threshold': MIN_CONF,
+                             'before': len(items) + len(low), 'retained': len(items), 'rejected': len(low)}
     else:
         trace.append(_step("load", f"{len(items)} {kind} elements of {len(doc.items)} in the model"))
 
