@@ -1,0 +1,22 @@
+{
+  "captured_utc": "2026-11-14T20:16:17.756254+00:00",
+  "branch_tips": {
+    "final/3d": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+    "final/changes": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+    "final/e2e": "60efc46c0671dbd10026f2351d4720b15836d1ce",
+    "final/evidence2": "60efc46c0671dbd10026f2351d4720b15836d1ce",
+    "final/mep": "d1fa4c6ff1c653f0a2bab0ae5044da04c95d3a37",
+    "final/mistakes": "e61c1b40e0f8add3a93fc69dce7ff8b5b03cb2ac",
+    "final/order": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+    "final/perf": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+    "final/proj-engine": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+    "final/proj-ui": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+    "final/props": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+    "final/qa": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+    "final/qa2": "60efc46c0671dbd10026f2351d4720b15836d1ce",
+    "final/robust": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+    "final/scales": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+    "final/scansym": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+    "final/wallarea": "60efc46c0671dbd10026f2351d4720b15836d1ce"
+  }
+}
