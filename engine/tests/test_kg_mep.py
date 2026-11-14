@@ -99,6 +99,43 @@ def test_no_cross_doc_spatial_join_without_registration():
     assert graph["edges"] == []
 
 
+def test_cross_document_room_link_uses_shared_declared_frame():
+    room = node("room", "arch", "r", [[0, 0, 0], [5, 3, 5]], level="Ground floor")
+    terminal = node("terminal", "services", "t", [[1, 2, 1], [2, 2.2, 2]], level="00")
+    frame = {"building_guid": "shared-building", "project_guid": "shared-project",
+             "matrix_z_up_m": [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]}
+    graph = {"nodes": [room, terminal], "edges": [], "mep": {"frames": {"arch": [frame], "services": [frame]}}}
+    enrich_spatial(Writer(graph))
+    assert {e["kind"] for e in graph["edges"]} == {"serves", "in_room"}
+    assert all(e["evidence"]["alignment"]["anchor_method"] == "declared shared IFC building frame" for e in graph["edges"])
+    assert all(e["confidence"] < .6 for e in graph["edges"])
+
+
+def test_renamed_terminal_keeps_all_core_edges_valid(tmp_path):
+    path, _, _, terminal_id = ifc_file(tmp_path)
+    t = node("fixture", "m", terminal_id)
+    doc = {"id": "doc:m:root", "kind": "doc", "doc_ids": ["m"], "props": {}}
+    graph = {"nodes": [doc, t], "edges": [{"id": "core-source", "kind": "contains", "from": doc["id"],
+              "to": t["id"], "method": "rule", "confidence": 1, "evidence": {}, "doc_ids": ["m"]}]}
+    enrich(graph, {"docs": [{"doc_id": "m", "files": {"ifc": str(path)}}]}, tmp_path)
+    assert t["kind"] == "terminal" and t["id"].startswith("terminal:")
+    assert graph["edges"][0]["to"] == t["id"]
+    node_ids = {n["id"] for n in graph["nodes"]}
+    assert all(e["from"] in node_ids and e["to"] in node_ids for e in graph["edges"])
+
+
+def test_declared_missing_units_do_not_assume_metres(tmp_path):
+    path, *_ = ifc_file(tmp_path)
+    ifc = pytest.importorskip("ifcopenshell")
+    f = ifc.open(str(path))
+    f.by_type("IfcProject")[0].UnitsInContext = None
+    f.write(str(path))
+    graph = {"nodes": [], "edges": []}
+    enrich(graph, {"docs": [{"doc_id": "m", "files": {"ifc": str(path)}}]}, tmp_path)
+    assert not any(n["props"].get("length_m") or n["props"].get("ceiling_height_m") for n in graph["nodes"])
+    assert any(n["props"].get("measurement_note") for n in graph["nodes"])
+
+
 def test_sheet_match_requires_alignment_and_one_to_one_rooms():
     a = node("room", "a", "ra", label="Office A")
     b = node("room", "b", "rb", label="Office A")
@@ -152,3 +189,39 @@ def test_enrich_is_idempotent(tmp_path):
     counts = (len(graph["nodes"]), len(graph["edges"]))
     enrich(graph, project, tmp_path)
     assert (len(graph["nodes"]), len(graph["edges"])) == counts
+
+
+def test_optional_pdf_adapter_clips_lengths_and_cites_original_sheet(tmp_path, monkeypatch):
+    """Generated-for-demo vector results stand in for Awais's read-only API."""
+    import sys
+    import time
+    from types import SimpleNamespace
+    from engine.kg.mep_sheets import enrich_sheets
+    for did in ("arch", "services"):
+        folder = tmp_path / did
+        folder.mkdir()
+        (folder / "source.pdf").write_bytes(b"generated for demo; API stub owns parsing")
+        pm = {"page": 1, "image": {"w": 100, "h": 100},
+              "scale": {"m_per_px": .01, "method": "dimension", "confidence": 1},
+              "items": [{"item_id": "room", "bbox_px": [10, 10, 30, 30],
+                         "polygon_px": [[10, 10], [30, 10], [30, 30], [10, 30]]}]}
+        (folder / "planmap-1.json").write_text(json.dumps(pm))
+    T = {"s": 1, "R": [[1, 0], [0, 1]], "t": [0, 0], "matches": 5, "residual": .1}
+    api = SimpleNamespace(load=lambda *args, **kw: {"W_pt": 100, "H_pt": 100},
+                          align=lambda *args: T, split_mep=lambda *args, **kw: {"mep": [True]},
+                          ducts=lambda *args: [{"start_pt": [0, 20], "end_pt": [40, 20], "width_m": .05}],
+                          terminals=lambda *args: [{"center_pt": [20, 20], "size_pt": 2, "airflow_ls": 5}])
+    monkeypatch.setitem(sys.modules, "pipeline.pdf_mep", api)
+    graph = {"nodes": [node("room", "arch", "room", label="Office"),
+                       node("room", "services", "room", label="Office")], "edges": []}
+    project = {"docs": [{"doc_id": "arch", "title": "Architectural plan", "files": {"pdf": "source.pdf"}},
+                         {"doc_id": "services", "title": "Ventilation", "files": {"pdf": "source.pdf"}}]}
+    enrich_sheets(Writer(graph), project, tmp_path, time.monotonic() + 10)
+    assert len([e for e in graph["edges"] if e["kind"] == "same_as"]) == 1
+    result = room_services(graph, "room:arch:room")
+    assert result["count_by_kind"] == {"duct": 1, "terminal": 1}
+    assert result["length_m_by_kind"]["duct"] == pytest.approx(.2)
+    duct = next(s for s in result["services"] if s["node"]["kind"] == "duct")
+    assert duct["element_length_m"] == pytest.approx(.4)
+    assert duct["source"]["doc_id"] == "services" and duct["source"]["bbox"][1] < duct["source"]["bbox"][3]
+    assert all(s["confidence"] < .6 for s in result["services"])

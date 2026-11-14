@@ -6,7 +6,7 @@ import re
 from collections import defaultdict
 from itertools import combinations, pairwise
 
-from .build import read_json
+from .build import read_dict, read_json
 from .schema import norm
 
 
@@ -55,14 +55,14 @@ def _words(b,did):
     """Existing text only; no PDF ingestion/rendering or OCR. Returns page, text, bbox records."""
     folder=b.root/did
     for p in sorted(folder.glob('text-[0-9]*.json')):
-        d=read_json(p,{}) or {}
-        page=d.get('page') or int(p.stem.split('-')[-1])
+        d=read_dict(p)
+        page=int(p.stem.split('-')[-1])
         for w in d.get('words') or []:
             if isinstance(w,dict) and str(w.get('text') or '').strip():
                 yield int(page),str(w['text']),w.get('bbox_px')
         if d.get('text'):
             yield int(page),str(d['text']),None
-    d=read_json(folder/'text.json',{}) or {}
+    d=read_dict(folder/'text.json')
     if isinstance(d,dict):
         for p in d.get('pages') or []:
             for w in p.get('words') or []:
@@ -73,7 +73,7 @@ def _words(b,did):
         if path.is_file() and path.stat().st_size <= 2*1024*1024:
             yield 1,path.read_text(encoding='utf-8',errors='replace'),None
     # Uploaded text/schedules may only have their original registry path.
-    meta=read_json(folder/'doc.json',{}) or {}
+    meta=read_dict(folder/'doc.json')
     for fmt,rel in (meta.get('files') or {}).items():
         if fmt.lower() not in ('txt','text','csv','md','tsv'):
             continue
@@ -157,7 +157,7 @@ def _changes(b,diff,local):
 
 def revisions_and_issues(b):
     for path in sorted((b.root/'series').glob('*.json')):
-        s=read_json(path,{}) or {}
+        s=read_dict(path)
         if s.get('generated_for_demo'):
             continue
         versions=s.get('versions') or []
@@ -167,7 +167,7 @@ def revisions_and_issues(b):
                 b.edge('revision_of',b.doc_nodes[dz],b.doc_nodes[da],'revision_compare',1,
                        {'series_id':s.get('series_id'),'versions':[prev,cur]})
     for path in sorted((b.root/'series'/'diffs').glob('*.json')):
-        _changes(b,read_json(path,{}) or {},path.stem)
+        _changes(b,read_dict(path),path.stem)
     seen=set()
     for did in b.doc_nodes:
         for filename in ('changes.json','revision.json','comparison.json'):
