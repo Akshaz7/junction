@@ -62,7 +62,7 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
         {view === 'chat' && <ChatHeaderActions chatId={activeChatId} onNew={() => { navigate('chat'); setChatKey((previous) => previous + 1); setContextDocument(null); setActiveChatId(null) }} />}
       </div>
       {error && (view === 'chat' || view === 'data') && <p className="error-message document-error" role="alert">{error}</p>}
-      <ChatScreen onChatChange={setActiveChatId} key={chatKey} docs={docs} loadingDocs={loadingDocs} demo={demo} contextDocument={contextDocument} hidden={view !== 'chat'} onOpenCitation={onOpenCitation} />
+      <ChatScreen onChatChange={setActiveChatId} key={chatKey} docs={docs} loadingDocs={loadingDocs} demo={demo} contextDocument={contextDocument} hidden={view !== 'chat'} onRefresh={refreshDocuments} onOpenCitation={onOpenCitation} />
       <DataScreen docs={docs} loading={loadingDocs} demo={demo} hidden={view !== 'data'} onRefresh={refreshDocuments} onAsk={(doc) => {
         setContextDocument(doc)
         setChatKey((previous) => previous + 1)

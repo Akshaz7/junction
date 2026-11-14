@@ -1,7 +1,7 @@
 import { askUntilReadable, STILL_READING_STATUS } from '../lib/still-reading'
 import { sceneOpen, sceneOpenCitation } from '../lib/scene-open'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { ArrowUp, AtSign, CalendarClock, FileSearch, FileText, FolderOpen, HardHat, Plus, Scale, X } from 'lucide-react'
+import { ArrowUp, AtSign, CalendarClock, FileSearch, FileText, FolderOpen, HardHat, Paperclip, Plus, Scale, Upload, X } from 'lucide-react'
 import { Button } from './ui'
 import { AnswerCard } from './answer-card'
 import { rememberChat } from '../lib/known-chats'
@@ -21,6 +21,8 @@ import { SkillPicker } from './skills-screen'
 import { FollowBanner, useFollow } from './follow-banner'
 import { getFollow } from '../lib/chat-follow'
 import './follow-banner.css'
+import { UploadDialog } from './upload-dialog'
+import { isFileDrag, pickDroppedFile } from '../lib/file-drag'
 
 const starters = [
   { title: 'Count on a plan', label: 'Count something on a plan', question: 'How many windows are there?', icon: Scale },
@@ -31,9 +33,10 @@ const starters = [
 
 type Mention = { start: number; end: number; query: string }
 
-export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, onOpenCitation, onChatChange }: {
+export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, onOpenCitation, onChatChange, onRefresh }: {
   docs: Document[]; loadingDocs: boolean; demo: boolean; contextDocument: Document | null; hidden: boolean
   onChatChange: (id: string | null) => void
+  onRefresh?: () => Promise<void>
   onOpenCitation: (citation: Citation) => void
 }) {
   const [draft, setDraft] = useState('')
@@ -55,6 +58,10 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const [needDoc, setNeedDoc] = useState(false)
   const blocked = useRef('')
   const [toolsOpen, setToolsOpen] = useState(false)
+  const [uploadOpen, setUploadOpen] = useState(false)
+  const [droppedFile, setDroppedFile] = useState<File | null>(null)
+  const [fileOver, setFileOver] = useState(false)
+  const dragDepth = useRef(0)
   const [activeOption, setActiveOption] = useState(0)
   const [viewer, setViewer] = useState<{ answer: Answer; citation: Citation; request: number; mode?: '2d' | '3d' } | null>(null)
   const [split, setSplit] = useState(48)
@@ -307,6 +314,41 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     setActiveOption(0)
   }
 
+  function attachDocument(doc: Document) {
+    setSelected((previous) => previous.some((item) => item.doc_id === doc.doc_id) ? previous : [...previous, doc])
+    setNeedDoc(false)
+  }
+
+  function openUpload(file: File | null = null) {
+    setDroppedFile(file); setToolsOpen(false); setMention(null); setUploadOpen(true)
+  }
+
+  const canDrop = !busy && !restoring && !hidden && !demo
+  const dropHandlers = {
+    onDragEnter: (event: React.DragEvent) => {
+      if (!canDrop || !isFileDrag(event.dataTransfer)) return
+      event.preventDefault(); dragDepth.current++; setFileOver(true)
+    },
+    onDragOver: (event: React.DragEvent) => {
+      if (!canDrop || !isFileDrag(event.dataTransfer)) return
+      event.preventDefault(); event.dataTransfer.dropEffect = 'copy'
+    },
+    onDragLeave: (event: React.DragEvent) => {
+      if (!isFileDrag(event.dataTransfer)) return
+      dragDepth.current = Math.max(0, dragDepth.current - 1)
+      if (!dragDepth.current) setFileOver(false)
+    },
+    onDrop: (event: React.DragEvent) => {
+      if (!isFileDrag(event.dataTransfer)) return
+      event.preventDefault(); dragDepth.current = 0; setFileOver(false)
+      if (!canDrop) return
+      const picked = pickDroppedFile(event.dataTransfer.files)
+      if (!picked) return
+      if ('error' in picked) { setError(picked.error); return }
+      setError(''); openUpload(picked.file)
+    },
+  }
+
   function chooseDocument(doc: Document) {
     if (!mention) return
     setSelected((previous) => [...previous, doc])
@@ -421,7 +463,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
 
   return <><FollowBanner incoming={incoming} onOpen={openIncoming} onDismiss={() => setIncoming(null)} />
   <div ref={splitContainer} className={`chat-workspace ${viewer ? 'has-viewer' : ''}`} hidden={hidden} style={{ '--chat-split': `${split}%` } as CSSProperties}>
-    <section className="chat-page" aria-label="Drawing questions">
+    <section className="chat-page" aria-label="Drawing questions" data-file-over={fileOver || undefined} {...dropHandlers}>
+    {fileOver && <div className="composer-drop-overlay" data-testid="composer-drop-overlay" aria-hidden="true"><Upload size={28} /><strong>Drop to upload and ask about it</strong><span>PDF, PNG, JPG, DXF or IFC</span></div>}
     <div ref={conversation} inert={!!viewer && sheet} className={`conversation ${answers.length || busy ? 'has-answers' : ''}`}>
       {restoring && <p className="chat-loading" role="status">Loading chat…</p>}
       {!answers.length && !busy && !restoring && !failed && <div className="welcome">
@@ -497,6 +540,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
           {!matches.length && <p className="picker-empty">{loadingDocs ? 'Loading documents…' : 'No matching documents.'}</p>}
         </div>}
         {toolsOpen && <div className="composer-tools" ref={tools} id="composer-tools" role="dialog" aria-label="Add to question">
+          <button type="button" className="composer-document-option" disabled={demo} onClick={() => openUpload()}><Upload size={16} />Upload a drawing<small>PDF, PNG, JPG, DXF, IFC</small></button>
           <button type="button" className="composer-document-option" disabled={loadingDocs || !docs.length} onClick={() => {
             const next = draft + (draft && !/\s$/.test(draft) ? ' @' : '@')
             setToolsOpen(false); setDraft(next); updateMention(next, next.length); textarea.current?.focus()
@@ -504,12 +548,16 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
           <p className="picker-heading">Skills</p>
           <SkillPicker disabled={busy || restoring || hidden} onPick={(prompt) => { setDraft(prompt); setMention(null); setToolsOpen(false); textarea.current?.focus() }} />
         </div>}
-        <div className="composer-actions"><button ref={toolsButton} className="document-context" aria-label="Add to question" aria-haspopup="dialog" aria-expanded={toolsOpen} aria-controls={toolsOpen ? 'composer-tools' : undefined} title="Add documents or skills" type="button" disabled={busy || restoring || hidden} onClick={() => { setMention(null); setToolsOpen((open) => !open) }}><Plus size={16} /></button><MicButton disabled={busy || restoring || hidden} onInterim={(text) => setDraft(text)} onText={(text) => { setDraft(text); setMention(null); textarea.current?.focus() }} />
+        <div className="composer-actions"><button ref={toolsButton} className="document-context" aria-label="Add to question" aria-haspopup="dialog" aria-expanded={toolsOpen} aria-controls={toolsOpen ? 'composer-tools' : undefined} title="Add documents or skills" type="button" disabled={busy || restoring || hidden} onClick={() => { setMention(null); setToolsOpen((open) => !open) }}><Plus size={16} /></button><button className="document-context composer-upload" aria-label="Upload a drawing" title="Upload a drawing" type="button" disabled={busy || restoring || hidden || demo} onClick={() => openUpload()}><Paperclip size={16} /></button><MicButton disabled={busy || restoring || hidden} onInterim={(text) => setDraft(text)} onText={(text) => { setDraft(text); setMention(null); textarea.current?.focus() }} />
           <Button type="submit" variant="primary" className="send-button" aria-label="Send question" disabled={!draft.trim() || busy || restoring || !docs.length || !!mention}><ArrowUp size={18} /></Button>
         </div>
       </form>
       <p className="composer-disclaimer">AI can make mistakes. Verify important information.</p>
     </div>
+    <UploadDialog open={uploadOpen} initialFile={droppedFile} onClose={() => { setUploadOpen(false); setDroppedFile(null) }}
+      onAsk={(doc) => { attachDocument(doc); textarea.current?.focus() }}
+      onOpen={(doc) => attachDocument(doc)}
+      onReady={(doc) => { attachDocument(doc); void onRefresh?.().catch(() => undefined) }} />
     </section>
     {viewer && <>
       <div className="viewer-split-handle" role="separator" aria-label="Resize chat and drawing" aria-orientation="vertical" aria-valuemin={35} aria-valuemax={65} aria-valuenow={Math.round(split)} tabIndex={0}

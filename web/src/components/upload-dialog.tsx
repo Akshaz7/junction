@@ -15,6 +15,8 @@ export type UploadDialogProps = {
   /** Mounting screen selects this document and opens its viewer. */
   onOpen: (document: Document) => void
   onReady?: (document: Document) => void
+  /** A file already chosen (for example dropped on the chat composer): upload starts on open. */
+  initialFile?: File | null
 }
 
 /** Mount beside the upload trigger; navigation stays with the owning screen. */
@@ -22,7 +24,7 @@ export function UploadDialog(props: UploadDialogProps) {
   return props.open ? createPortal(<UploadSession {...props} />, document.body) : null
 }
 
-function UploadSession({ onClose, onAsk, onOpen, onReady }: UploadDialogProps) {
+function UploadSession({ onClose, onAsk, onOpen, onReady, initialFile }: UploadDialogProps) {
   const [state, dispatch] = useReducer(uploadReducer, { status: 'idle' })
   const [dragging, setDragging] = useState(false)
   const dialog = useRef<HTMLDialogElement>(null)
@@ -51,6 +53,14 @@ function UploadSession({ onClose, onAsk, onOpen, onReady }: UploadDialogProps) {
       onReady?.(state.document)
     }
   }, [state, onReady])
+
+  const initial = useRef(initialFile)
+  useEffect(() => {
+    const file = initial.current
+    initial.current = null
+    if (file) void start(file)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function close() { request.current?.abort(); onClose() }
 

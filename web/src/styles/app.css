@@ -928,3 +928,9 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 
 /* W-77: phone touch target for source chips */
 @media (max-width:640px){ .source-file-chip{min-height:44px;display:inline-flex;align-items:center} }
+
+/* Composer upload: paperclip, tools entry and the drop overlay. */
+.composer-document-option small { margin-left: auto; color: var(--muted-foreground); font-size: var(--text-caption); }
+.composer-upload:disabled { opacity: .5; }
+.composer-drop-overlay { position: absolute; inset: 8px; z-index: 20; display: grid; place-content: center; justify-items: center; gap: 6px; border: 2px dashed var(--foreground); border-radius: var(--radius-popover); background: color-mix(in srgb, var(--card) 92%, transparent); color: var(--foreground); text-align: center; pointer-events: none; }
+.composer-drop-overlay span { color: var(--muted-foreground); font-size: var(--text-caption); }
