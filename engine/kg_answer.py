@@ -14,7 +14,7 @@ from pathlib import Path
 
 from engine.kg_impact import confidence, impact, index, number, paths
 
-AGREEMENT = re.compile(r"\b(?:agree|agreement|cross[- ]?check|mismatch|discrepanc\w*|consistent)\b", re.I)
+AGREEMENT = re.compile(r"\b(?:agree|agreement|cross[- ]?check|mismatch|discrepanc\w*|consistent|matches?)\b", re.I)
 APPEARANCE = re.compile(r"\bwhere else\b|\b(?:other|which) (?:files|sheets|drawings|documents)\b.*\b(?:show|appear|contain|refer)\w*", re.I)
 CONNECTION = re.compile(r"\b(?:what|which|how)\b.*\b(?:connected|connections?|linked)\b", re.I)
 IMPACT = re.compile(r"\bif\b.*\b(?:ceiling|wall|door|window|duct|pipe)\b.*\b(?:drop\w*|lower\w*|rais\w*|mov\w*|remov\w*|delet\w*)\b", re.I)
@@ -206,6 +206,10 @@ def _comparison_sources(graph, endpoints, kind):
 
 def _agree(q, project, graph, t0):
     nodes, _, _ = index(graph)
+    doc_nodes = [n for n in nodes.values() if n.get("kind") == "doc"]
+    roles = {did: (n.get("props") or {}).get("role") for n in doc_nodes for did in n.get("doc_ids", [])}
+    named_docs = {did for n in doc_nodes if _has(q, n.get("label")) for did in n.get("doc_ids", [])}
+    plan_model = bool(re.search(r"\bplans?\b", q, re.I) and re.search(r"\bmodels?\b", q, re.I))
     kind = next((k for k, rx in KIND_WORDS.items() if re.search(rf"\b(?:{rx})\b", q, re.I)), None)
     want = _level(q)
     matches = []
@@ -213,6 +217,15 @@ def _agree(q, project, graph, t0):
         if e.get("kind") not in ("agrees", "differs") or e.get("from") not in nodes or e.get("to") not in nodes:
             continue
         a, b = nodes[e["from"]], nodes[e["to"]]
+        dids = set(a.get("doc_ids") or []) | set(b.get("doc_ids") or [])
+        if len(dids) < 2:
+            continue
+        if named_docs and not named_docs.issubset(dids):
+            continue
+        if plan_model and roles:
+            pair_roles = {roles.get(d) for d in dids}
+            if "model" not in pair_roles or not pair_roles.intersection({"plan", "scan"}):
+                continue
         if kind and _comparison_kind(e, a, b) != kind:
             continue
         if want is not None and not (_on_level(a, want) or _on_level(b, want)):
@@ -240,21 +253,25 @@ def _agree(q, project, graph, t0):
         m["citations"] = sorted({c for nid in m["node_ids"] for c in marks[nid]})
         m["doc_ids"] = sorted({c["doc_id"] for c in cites if c["n"] in m["citations"]})
     bullets = [f"{agree} of {len(matches)} recorded checks agree; {len(mismatches)} differ."]
-    if mismatches:
-        m = mismatches[0]
-        ev = m["evidence"]
-        vals = ev.get("values")
-        if vals is None:
-            vals = [ev.get("from_value", ev.get("a")), ev.get("to_value", ev.get("b"))]
-        if isinstance(vals, dict):
-            vals = list(vals.values())
-        values = " versus ".join(str(v) for v in vals) if isinstance(vals, list) and vals and all(number(v) is not None for v in vals) else "values differ"
-        bullets.append(f"{m['from_label']} / {m['to_label']}: {values}." + "".join(f"[{n}]" for n in m["citations"]))
     bullets.append("Agreement covers recorded checks only; equal counts do not prove every item matches.")
     bullets.append("Unlinked items have not been verified against another file.")
-    return _result(q, project, graph, t0, f"{pct:g}% of the recorded cross-file checks agree.", bullets, sources,
-                   [[e["id"]] for e in matches], {"shape": "agreement", "checks": len(matches), "agree": agree,
-                   "mismatches": mismatches}, pct, "%")
+    result = _result(q, project, graph, t0, f"{pct:g}% of the recorded cross-file checks agree.", bullets, sources,
+                     [[e["id"]] for e in matches], {"shape": "agreement", "checks": len(matches), "agree": agree,
+                     "mismatches": mismatches}, pct, "%")
+    if mismatches:
+        rows = ["| Mismatch | Recorded values | Sources |", "|---|---|---|"]
+        for m in mismatches:
+            ev = m["evidence"]
+            vals = ev.get("values")
+            if vals is None:
+                vals = [ev.get("from_value", ev.get("a")), ev.get("to_value", ev.get("b"))]
+            if isinstance(vals, dict):
+                vals = list(vals.values())
+            values = " versus ".join(str(v) for v in vals) if isinstance(vals, list) and vals and all(number(v) is not None for v in vals) else "See the source values"
+            labels = f"{m['from_label']} / {m['to_label']}".replace("|", " ").replace("\n", " ")
+            rows.append(f"| {labels} | {values} | " + "".join(f"[{n}]" for n in m["citations"]) + " |")
+        result["answer"]["text_md"] += "\n\n" + "\n".join(rows)
+    return result
 
 
 def _related(q, project, graph, t0, appearances):
