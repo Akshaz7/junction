@@ -277,11 +277,18 @@ async def ask(chat_id: str, body: NewMessage):
         await publish({"type": "chat.message", "chat_id": str(cid), "message_id": str(umid), "role": "user",
                        "text": body.content[:300]})
 
+        hidden: list[str] = []
+        sstate = None
         try:  # shared edit layer: chat commands and manual Edit-panel removals of this chat
-            sstate = await scene_edits.chat_context(pool, cid, doc_ids)
+            edits = [e for e in await scene_edits.load_edits(pool, cid)
+                     if not doc_ids or e["doc_id"] in doc_ids]
+            states = scene_edits.fold(edits)
+            if edits:
+                hidden = list(dict.fromkeys(i for st in states.values() for i in st["hidden"]))
+                sstate = {"hidden": hidden, "edits": edits,
+                          "last_hidden": scene_edits.last_hidden(edits, doc_ids)}
         except Exception:  # noqa: BLE001 — scene state is optional context, never block the answer
             sstate = None
-        hidden: list[str] = list((sstate or {}).get("hidden") or [])
 
         catalogue = None
         if ENGINE is _real_engine:

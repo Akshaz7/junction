@@ -170,3 +170,18 @@ def test_can_we_remove_is_a_preview_without_commands():
 def test_highlight_wording_plain():
     t = answer("highlight all the windows", [DOC])["answer"]["text_md"]
     assert t.startswith("Highlighted 13 windows on the drawing.")
+
+
+@pytest.mark.parametrize('question', ['undo', 'undo that', 'is it still compliant?', 'clear highlights'])
+def test_scene_control_followups_never_become_a_previous_count(monkeypatch, question):
+    from engine.context import resolve
+    def unexpected_call(*args, **kwargs):
+        raise AssertionError('Scene controls must not call the history rewrite model')
+    monkeypatch.setattr('engine.models.call', unexpected_call)
+    history = [
+        {'role': 'user', 'content': 'How many windows are there?', 'doc_ids': [DOC]},
+        {'role': 'assistant', 'content': 'The previous count is shown on the drawing.', 'doc_ids': [DOC]},
+    ]
+    result = resolve(question, [DOC], history, FIX)
+    assert result.question == question and not result.rewritten
+    assert result.info['source'] == 'none'

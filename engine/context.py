@@ -106,6 +106,10 @@ def _kinds(text: str) -> set[str]:
 def stands_alone(question: str) -> bool:
     """A full question the rules already understand (it names its own kind, nothing refers back): never rewritten."""
     q = (question or "").strip()
+    from engine.scene_cmds import parse_scene
+    intent = parse_scene(q)
+    if intent and (intent.op in ("undo", "check") or (intent.op == "highlight" and not intent.kind and not intent.tags)):
+        return True
     if not q or ELLIPSIS_START.match(q) or STRONG.search(q):
         return False
     # "Remove the front door. Is it still compliant?": a scene command that names its own object; the trailing "it" is
