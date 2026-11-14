@@ -1,0 +1,79 @@
+{
+  "at": "2026-11-14T12:46:23.398591+00:00",
+  "scope": "Local current working tree, simulated container with original PDFs supplied; not deployed acceptance evidence",
+  "passed": true,
+  "checks": [
+    {
+      "check": "source route with packaged original and no dataset root",
+      "doc_id": "opening_design__vacation-rental-transfer-20170503-issue-for-permit-s400-bracing-elevation",
+      "result": "PASS",
+      "latency_ms": 17.5
+    },
+    {
+      "check": "source route with packaged original and no dataset root",
+      "doc_id": "opening_design__vacation-rental-transfer-20170517-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s400",
+      "result": "PASS",
+      "latency_ms": 10.4
+    },
+    {
+      "check": "source route with packaged original and no dataset root",
+      "doc_id": "opening_design__vacation-rental-transfer-20170518-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s400",
+      "result": "PASS",
+      "latency_ms": 10.9
+    },
+    {
+      "check": "source route with packaged original and no dataset root",
+      "doc_id": "opening_design__vacation-rental-transfer-20170519-issue-for-bid-permit-the-downtowner-arch-exterior-details-sheet-s400-bracing-elevation",
+      "result": "PASS",
+      "latency_ms": 8.0
+    },
+    {
+      "check": "source route with packaged original and no dataset root",
+      "doc_id": "opening_design__vacation-rental-transfer-20170503-issue-for-permit-s401-bracing-details",
+      "result": "PASS",
+      "latency_ms": 7.9
+    },
+    {
+      "check": "source route with packaged original and no dataset root",
+      "doc_id": "opening_design__vacation-rental-transfer-20170517-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s401",
+      "result": "PASS",
+      "latency_ms": 7.7
+    },
+    {
+      "check": "source route with packaged original and no dataset root",
+      "doc_id": "opening_design__vacation-rental-transfer-20170518-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s401",
+      "result": "PASS",
+      "latency_ms": 7.1
+    },
+    {
+      "check": "source route with packaged original and no dataset root",
+      "doc_id": "opening_design__vacation-rental-transfer-20170519-issue-for-bid-permit-the-downtowner-arch-exterior-details-sheet-s401-bracing-details",
+      "result": "PASS",
+      "latency_ms": 7.2
+    },
+    {
+      "check": "source route with packaged original and no dataset root",
+      "doc_id": "opening_design__vacation-rental-transfer-20170410-submitted-to-state-for-early-start-and-footing-and-foundation-the-downtowner-sheet-a100-demolition-plans",
+      "result": "PASS",
+      "latency_ms": 8.8
+    },
+    {
+      "check": "source route with packaged original and no dataset root",
+      "doc_id": "opening_design__vacation-rental-transfer-20170503-issue-for-permit-a100-demolition-plans",
+      "result": "PASS",
+      "latency_ms": 9.0
+    },
+    {
+      "check": "server attaches real advisor cards to front-door edit on packaged IFC",
+      "doc_id": "ifc_bench__ac20-arc",
+      "result": "PASS",
+      "advisor_card_count": 3,
+      "source_refs": [
+        "fi-fire-exits-per-storey",
+        "fi-fire-exits-per-storey",
+        "fi-fire-exits-per-storey"
+      ],
+      "latency_ms": 124.8
+    }
+  ]
+}

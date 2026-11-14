@@ -1,0 +1,1001 @@
+{
+  "base_url": "https://obviously-present-piglet.eur-1.aiven.app",
+  "started_at": "2026-11-14T12:42:32.773678+00:00",
+  "finished_at": "2026-11-14T12:51:20.714715+00:00",
+  "elapsed_s": 527.9,
+  "expected_build_rev": "5373f60",
+  "passed": false,
+  "failures": 11,
+  "interrupted": false,
+  "created": [
+    {
+      "kind": "upload",
+      "id": "uploads__smoke-124408-93cb8c-generated-for-demo-c08af8",
+      "deleted": false,
+      "reason": "no delete API"
+    },
+    {
+      "kind": "chat",
+      "id": "f7aff2c9-f127-4686-b341-5cf1bc3205d9",
+      "deleted": false,
+      "reason": "no delete API"
+    },
+    {
+      "kind": "skill",
+      "id": "3c8757d3-d0a1-4d08-a4de-e8b7eb5f1508",
+      "deleted": true
+    },
+    {
+      "kind": "automation",
+      "id": "79b78dc4-8277-4911-b136-255958ef11fb",
+      "deleted": true
+    },
+    {
+      "kind": "chat",
+      "id": "241d0263-7377-4842-8a1a-0ab3b915321c",
+      "deleted": false,
+      "reason": "no delete API"
+    }
+  ],
+  "notes": [
+    "Comparison is GET /api/changes/{change_id}; server has no separate /api/compare route.",
+    "Documented not_built/no_bench/device/no_key fallbacks are shape-checked and noted, not full feature coverage.",
+    "No chat or uploaded-document delete API exists; created IDs are recorded for the lead.",
+    "Build changed from 5373f60 to 0a945e5 during this pass; this is not stable-deployment acceptance evidence.",
+    "HTTP 429 retries are recorded per check; latency includes Retry-After waits. All rate-limited operations eventually passed.",
+    "All 10 real revision details and PNGs passed; all 10 original source PDFs returned 404. The front-door hide/advisor check passed.",
+    "Local current-tree packaging and advisor proof: results/smoke/local-source-advisor.json (11 PASS). Required deploy/ changes are outside the S-18 edit scope."
+  ],
+  "checks": [
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200,
+      "latency_ms": 291.2,
+      "ok": true,
+      "content_type": "application/json",
+      "build_rev": "5373f60",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs",
+      "status": 200,
+      "latency_ms": 61867.3,
+      "ok": true,
+      "retries": [
+        {
+          "status": 429,
+          "wait_s": 60.0
+        }
+      ],
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/folders",
+      "status": 200,
+      "latency_ms": 350.3,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc",
+      "status": 200,
+      "latency_ms": 244.4,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/source",
+      "status": 404,
+      "latency_ms": 282.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "documented fallback: not_built",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/pages/1/image",
+      "status": 200,
+      "latency_ms": 325.7,
+      "ok": true,
+      "content_type": "image/png",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/pages/1.png",
+      "status": 200,
+      "latency_ms": 328.0,
+      "ok": true,
+      "content_type": "image/png",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/planmap/1",
+      "status": 200,
+      "latency_ms": 406.2,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/scene",
+      "status": 200,
+      "latency_ms": 1738.9,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/files/scene.glb",
+      "status": 200,
+      "latency_ms": 1515.5,
+      "ok": true,
+      "content_type": "application/octet-stream",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/files/scene.usdz",
+      "status": 200,
+      "latency_ms": 1400.0,
+      "ok": true,
+      "content_type": "application/octet-stream",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/files/scene.json",
+      "status": 200,
+      "latency_ms": 522.0,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/files/elements.json",
+      "status": 200,
+      "latency_ms": 648.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/files/page-1.thumb.png",
+      "status": 200,
+      "latency_ms": 873.1,
+      "ok": true,
+      "content_type": "image/png",
+      "check": "shape/signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/ingest",
+      "status": 200,
+      "latency_ms": 313.9,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/upload",
+      "status": 200,
+      "latency_ms": 275.9,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/uploads__smoke-124408-93cb8c-generated-for-demo-c08af8",
+      "status": 200,
+      "latency_ms": 257.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/uploads__smoke-124408-93cb8c-generated-for-demo-c08af8/ingest",
+      "status": 200,
+      "latency_ms": 243.0,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chats",
+      "status": 200,
+      "latency_ms": 1561.2,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats",
+      "status": 200,
+      "latency_ms": 60604.2,
+      "ok": true,
+      "retries": [
+        {
+          "status": 429,
+          "wait_s": 60.0
+        }
+      ],
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chats/f7aff2c9-f127-4686-b341-5cf1bc3205d9",
+      "status": 200,
+      "latency_ms": 444.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chats/f7aff2c9-f127-4686-b341-5cf1bc3205d9/scene-state",
+      "status": 200,
+      "latency_ms": 707.9,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/f7aff2c9-f127-4686-b341-5cf1bc3205d9/messages",
+      "status": 200,
+      "latency_ms": 536.4,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/chats/f7aff2c9-f127-4686-b341-5cf1bc3205d9",
+      "status": 200,
+      "latency_ms": 285.1,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/changes",
+      "status": 200,
+      "latency_ms": 460.1,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/changes/refresh",
+      "status": 200,
+      "latency_ms": 407.0,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/changes/ser%3Avacation-rental--s400-9872c2%3A3",
+      "status": 200,
+      "latency_ms": 237.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/changes/ser%3Avacation-rental--s400-9872c2%3A3?page=1",
+      "status": 200,
+      "latency_ms": 416.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/skills",
+      "status": 200,
+      "latency_ms": 370.7,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/skills",
+      "status": 201,
+      "latency_ms": 305.6,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/skills/3c8757d3-d0a1-4d08-a4de-e8b7eb5f1508/run",
+      "status": 200,
+      "latency_ms": 529.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations",
+      "status": 200,
+      "latency_ms": 1222.3,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/automations",
+      "status": 201,
+      "latency_ms": 716.0,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations/79b78dc4-8277-4911-b136-255958ef11fb",
+      "status": 200,
+      "latency_ms": 241.6,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/automations/79b78dc4-8277-4911-b136-255958ef11fb",
+      "status": 200,
+      "latency_ms": 249.3,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/automations/79b78dc4-8277-4911-b136-255958ef11fb/run",
+      "status": 200,
+      "latency_ms": 658.2,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations/79b78dc4-8277-4911-b136-255958ef11fb/report.md",
+      "status": 200,
+      "latency_ms": 597.5,
+      "ok": true,
+      "content_type": "text/markdown; charset=utf-8",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations/79b78dc4-8277-4911-b136-255958ef11fb/report.pdf",
+      "status": 200,
+      "latency_ms": 60708.3,
+      "ok": true,
+      "retries": [
+        {
+          "status": 429,
+          "wait_s": 60.0
+        }
+      ],
+      "content_type": "application/pdf",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/automations/79b78dc4-8277-4911-b136-255958ef11fb",
+      "status": 204,
+      "latency_ms": 297.4,
+      "ok": true,
+      "content_type": "",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/automations/79b78dc4-8277-4911-b136-255958ef11fb",
+      "status": 404,
+      "latency_ms": 417.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/skills/3c8757d3-d0a1-4d08-a4de-e8b7eb5f1508",
+      "status": 204,
+      "latency_ms": 960.1,
+      "ok": true,
+      "content_type": "",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/skills",
+      "status": 200,
+      "latency_ms": 260.6,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/findings/run",
+      "status": 200,
+      "latency_ms": 1202.6,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/findings?doc_id=ifc_bench__ac20-arc",
+      "status": 200,
+      "latency_ms": 269.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/advise",
+      "status": 200,
+      "latency_ms": 1613.3,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/items/3qloCPnZDEQBom1ZjBlwJP",
+      "status": 200,
+      "latency_ms": 339.7,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/ifc_bench__ac20-arc/tags/D8",
+      "status": 200,
+      "latency_ms": 405.9,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/bench",
+      "status": 200,
+      "latency_ms": 120927.7,
+      "ok": true,
+      "retries": [
+        {
+          "status": 429,
+          "wait_s": 60.0
+        },
+        {
+          "status": 429,
+          "wait_s": 60.0
+        }
+      ],
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/bench/latest",
+      "status": 404,
+      "latency_ms": 236.6,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "documented fallback: no_bench",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/costs",
+      "status": 200,
+      "latency_ms": 215.1,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/tts",
+      "status": 200,
+      "latency_ms": 356.1,
+      "ok": true,
+      "content_type": "audio/mpeg",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/speech-intent",
+      "status": 200,
+      "latency_ms": 559.2,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "documented fallback: device",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/watch/monitors",
+      "status": 200,
+      "latency_ms": 384.0,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/watch/sync",
+      "status": 200,
+      "latency_ms": 341.7,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "documented fallback: no_key",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/watch/webhook",
+      "status": 503,
+      "latency_ms": 228.3,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "WS",
+      "path": "/ws",
+      "status": 101,
+      "latency_ms": 585.2,
+      "ok": true,
+      "check": "WebSocket upgrade and JSON pong",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170503-issue-for-permit-s400-bracing-elevation",
+      "status": 200,
+      "latency_ms": 214.3,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "S-16 vacation-rental--s400-9872c2 revision 1/4",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170503-issue-for-permit-s400-bracing-elevation/source",
+      "status": 404,
+      "latency_ms": 243.8,
+      "ok": false,
+      "content_type": "application/json",
+      "check": "unexpected HTTP status",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170503-issue-for-permit-s400-bracing-elevation/pages/1.png",
+      "status": 200,
+      "latency_ms": 614.8,
+      "ok": true,
+      "content_type": "image/png",
+      "bytes": 1208122,
+      "check": "revision page PNG signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170517-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s400",
+      "status": 200,
+      "latency_ms": 247.4,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "S-16 vacation-rental--s400-9872c2 revision 2/4",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170517-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s400/source",
+      "status": 404,
+      "latency_ms": 222.9,
+      "ok": false,
+      "content_type": "application/json",
+      "check": "unexpected HTTP status",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170517-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s400/pages/1.png",
+      "status": 200,
+      "latency_ms": 7275.6,
+      "ok": true,
+      "content_type": "image/png",
+      "bytes": 2340261,
+      "check": "revision page PNG signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170518-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s400",
+      "status": 200,
+      "latency_ms": 312.8,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "S-16 vacation-rental--s400-9872c2 revision 3/4",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170518-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s400/source",
+      "status": 404,
+      "latency_ms": 220.5,
+      "ok": false,
+      "content_type": "application/json",
+      "check": "unexpected HTTP status",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170518-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s400/pages/1.png",
+      "status": 200,
+      "latency_ms": 714.9,
+      "ok": true,
+      "content_type": "image/png",
+      "bytes": 2275759,
+      "check": "revision page PNG signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170519-issue-for-bid-permit-the-downtowner-arch-exterior-details-sheet-s400-bracing-elevation",
+      "status": 200,
+      "latency_ms": 218.6,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "S-16 vacation-rental--s400-9872c2 revision 4/4",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170519-issue-for-bid-permit-the-downtowner-arch-exterior-details-sheet-s400-bracing-elevation/source",
+      "status": 404,
+      "latency_ms": 257.1,
+      "ok": false,
+      "content_type": "application/json",
+      "check": "unexpected HTTP status",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170519-issue-for-bid-permit-the-downtowner-arch-exterior-details-sheet-s400-bracing-elevation/pages/1.png",
+      "status": 200,
+      "latency_ms": 688.6,
+      "ok": true,
+      "content_type": "image/png",
+      "bytes": 2109393,
+      "check": "revision page PNG signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170503-issue-for-permit-s401-bracing-details",
+      "status": 200,
+      "latency_ms": 211.4,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "S-16 vacation-rental--s401-9b69ee revision 1/4",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170503-issue-for-permit-s401-bracing-details/source",
+      "status": 404,
+      "latency_ms": 255.3,
+      "ok": false,
+      "content_type": "application/json",
+      "check": "unexpected HTTP status",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170503-issue-for-permit-s401-bracing-details/pages/1.png",
+      "status": 200,
+      "latency_ms": 614.7,
+      "ok": true,
+      "content_type": "image/png",
+      "bytes": 1548715,
+      "check": "revision page PNG signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170517-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s401",
+      "status": 200,
+      "latency_ms": 229.2,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "S-16 vacation-rental--s401-9b69ee revision 2/4",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170517-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s401/source",
+      "status": 404,
+      "latency_ms": 214.7,
+      "ok": false,
+      "content_type": "application/json",
+      "check": "unexpected HTTP status",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170517-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s401/pages/1.png",
+      "status": 200,
+      "latency_ms": 781.8,
+      "ok": true,
+      "content_type": "image/png",
+      "bytes": 2283032,
+      "check": "revision page PNG signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170518-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s401",
+      "status": 200,
+      "latency_ms": 231.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "S-16 vacation-rental--s401-9b69ee revision 3/4",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170518-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s401/source",
+      "status": 404,
+      "latency_ms": 225.2,
+      "ok": false,
+      "content_type": "application/json",
+      "check": "unexpected HTTP status",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170518-for-permit-structural-review-from-regis-the-downtowner-arch-exterior-details-s401/pages/1.png",
+      "status": 200,
+      "latency_ms": 757.1,
+      "ok": true,
+      "content_type": "image/png",
+      "bytes": 2453284,
+      "check": "revision page PNG signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170519-issue-for-bid-permit-the-downtowner-arch-exterior-details-sheet-s401-bracing-details",
+      "status": 200,
+      "latency_ms": 223.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "S-16 vacation-rental--s401-9b69ee revision 4/4",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170519-issue-for-bid-permit-the-downtowner-arch-exterior-details-sheet-s401-bracing-details/source",
+      "status": 404,
+      "latency_ms": 231.3,
+      "ok": false,
+      "content_type": "application/json",
+      "check": "unexpected HTTP status",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170519-issue-for-bid-permit-the-downtowner-arch-exterior-details-sheet-s401-bracing-details/pages/1.png",
+      "status": 200,
+      "latency_ms": 803.9,
+      "ok": true,
+      "content_type": "image/png",
+      "bytes": 2270781,
+      "check": "revision page PNG signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170410-submitted-to-state-for-early-start-and-footing-and-foundation-the-downtowner-sheet-a100-demolition-plans",
+      "status": 200,
+      "latency_ms": 223.3,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "S-16 vacation-rental--a100-8f1f68 revision 1/2",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170410-submitted-to-state-for-early-start-and-footing-and-foundation-the-downtowner-sheet-a100-demolition-plans/source",
+      "status": 404,
+      "latency_ms": 211.8,
+      "ok": false,
+      "content_type": "application/json",
+      "check": "unexpected HTTP status",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170410-submitted-to-state-for-early-start-and-footing-and-foundation-the-downtowner-sheet-a100-demolition-plans/pages/1.png",
+      "status": 200,
+      "latency_ms": 1037.2,
+      "ok": true,
+      "content_type": "image/png",
+      "bytes": 3879655,
+      "check": "revision page PNG signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170503-issue-for-permit-a100-demolition-plans",
+      "status": 200,
+      "latency_ms": 260.6,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "S-16 vacation-rental--a100-8f1f68 revision 2/2",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170503-issue-for-permit-a100-demolition-plans/source",
+      "status": 404,
+      "latency_ms": 227.0,
+      "ok": false,
+      "content_type": "application/json",
+      "check": "unexpected HTTP status",
+      "result": "FAIL"
+    },
+    {
+      "method": "GET",
+      "path": "/api/docs/opening_design__vacation-rental-transfer-20170503-issue-for-permit-a100-demolition-plans/pages/1.png",
+      "status": 200,
+      "latency_ms": 1012.7,
+      "ok": true,
+      "content_type": "image/png",
+      "bytes": 4190779,
+      "check": "revision page PNG signature OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats",
+      "status": 200,
+      "latency_ms": 205.5,
+      "ok": true,
+      "content_type": "application/json",
+      "check": "shape OK",
+      "result": "PASS"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chats/241d0263-7377-4842-8a1a-0ab3b915321c/messages",
+      "status": 200,
+      "latency_ms": 3211.4,
+      "ok": true,
+      "content_type": "text/event-stream; charset=utf-8",
+      "advisor_card_count": 3,
+      "advisor_sources": [
+        {
+          "type": "rule",
+          "ref": "fi-fire-exits-per-storey",
+          "title": "Decree of the Ministry of the Environment on fire safety of buildings 848/2017 (English text notified via EU TRIS 2017/0221/FIN), 33 \u00a7",
+          "quote": "Each evacuation area of a building where people are staying or working besides temporarily shall be provided with a number of independent, separate and appropriately located exits that are at least"
+        },
+        {
+          "type": "rule",
+          "ref": "fi-fire-exits-per-storey",
+          "title": "Decree of the Ministry of the Environment on fire safety of buildings 848/2017 (English text notified via EU TRIS 2017/0221/FIN), 33 \u00a7",
+          "quote": "Each evacuation area of a building where people are staying or working besides temporarily shall be provided with a number of independent, separate and appropriately located exits that are at least"
+        },
+        {
+          "type": "rule",
+          "ref": "fi-fire-exits-per-storey",
+          "title": "Decree of the Ministry of the Environment on fire safety of buildings 848/2017 (English text notified via EU TRIS 2017/0221/FIN), 33 \u00a7",
+          "quote": "Each evacuation area of a building where people are staying or working besides temporarily shall be provided with a number of independent, separate and appropriately located exits that are at least"
+        }
+      ],
+      "check": "front door hidden; sourced advisor card cites 848/2017 \u00a733",
+      "result": "PASS"
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200,
+      "latency_ms": 239.7,
+      "ok": false,
+      "content_type": "application/json",
+      "build_rev": "0a945e5",
+      "check": "unexpected deployed build revision",
+      "result": "FAIL"
+    }
+  ]
+}

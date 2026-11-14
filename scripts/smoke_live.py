@@ -18,6 +18,7 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import socket
 import ssl
 import struct
@@ -42,6 +43,7 @@ PLAN = [
     ("GET", "/api/docs/{doc_id}", "document detail"),
     ("GET", "/api/docs/{doc_id}/source", "source bytes or documented not_built"),
     ("GET", "/api/docs/{doc_id}/pages/{n}/image", "PNG signature or not_built"),
+    ("GET", "/api/docs/{doc_id}/pages/{n}.png", "PNG alias, including older revisions"),
     ("GET", "/api/docs/{doc_id}/planmap/{n}", "plan map or not_built"),
     ("GET", "/api/docs/{doc_id}/scene", "scene manifest or not_built"),
     ("GET", "/api/docs/{doc_id}/files/{name}", "scene.glb, scene.usdz, scene.json, elements.json, page-1.thumb.png"),
@@ -133,6 +135,8 @@ def answer(value):
     fields(value["evidence"], boxes=list, scene=dict)
     fields(value["evidence"]["scene"], doc_id=str, highlight_item_ids=list)
     fields(value["cost"], usd_total=(int, float), calls=list)
+    require(not any(isinstance(t, dict) and t.get("step") == "error" for t in value["trace"]),
+            "answer contains engine error trace")
     return value
 
 
@@ -274,12 +278,16 @@ class WebSocket:
 
 
 class Smoke:
-    def __init__(self, base, timeout):
+    def __init__(self, base, timeout, *, expected_build=None, report_path=None, s18=False):
         self.base, self.timeout = base.rstrip("/"), timeout
+        self.expected_build, self.report_path, self.s18 = expected_build, report_path, s18
+        self.started_at = datetime.now(timezone.utc).isoformat()
+        self.started = time.monotonic()
         self.rows, self.created, self.notes = [], [], [
             "Comparison is GET /api/changes/{change_id}; server has no separate /api/compare route.",
             "Documented not_built/no_bench/device/no_key fallbacks are shape-checked and noted, not full feature coverage.",
             "No chat or uploaded-document delete API exists; created IDs are recorded for the lead.",
+            "HTTP 429 retries are recorded per check; latency includes Retry-After waits. A check passes only after its response validator passes.",
         ]
         self.next_request = 0.0
         self.context = {"n": "1", "name": "scene.glb"}
@@ -318,17 +326,31 @@ class Smoke:
                 data, headers["Content-Type"] = multipart(*upload)
             if sse:
                 headers["Accept"] = "text/event-stream"
-            try:
-                response = urlopen(Request(self.base + path, data=data, headers=headers, method=method), timeout=self.timeout)
-            except HTTPError as exc:
-                response = exc
+            for attempt in range(3):
+                try:
+                    response = urlopen(Request(self.base + path, data=data, headers=headers, method=method), timeout=self.timeout)
+                except HTTPError as exc:
+                    response = exc
+                if response.status != 429 or attempt == 2:
+                    break
+                # The deployed quota is shared with browser/e2e traffic. A 429
+                # rejects the operation before it runs, so writes are safe to retry.
+                try:
+                    delay = max(1.0, min(60.0, float(response.headers.get("Retry-After", "60"))))
+                except ValueError:
+                    delay = 60.0
+                row.setdefault("retries", []).append({"status": 429, "wait_s": delay})
+                response.close()
+                print(f"WAIT {method} {path}: HTTP 429; retry in {delay:g}s", flush=True)
+                time.sleep(delay)
+                self.pace()
             with response:
                 row["status"] = response.status
                 row["content_type"] = response.headers.get("Content-Type", "")
                 require(response.status in allowed, "unexpected HTTP status")
                 if sse:
                     require("text/event-stream" in row["content_type"], "expected SSE content type")
-                    value = self.events(response, started)
+                    value = self.events(response, time.monotonic())
                 else:
                     raw = response.read(32 * 1024 * 1024 + 1)
                     require(len(raw) <= 32 * 1024 * 1024, "response exceeds 32 MiB smoke limit")
@@ -344,6 +366,7 @@ class Smoke:
             return value
         finally:
             row["latency_ms"] = round((time.monotonic() - started) * 1000, 1)
+            row["result"] = "PASS" if row["ok"] else "FAIL"
             self.rows.append(row)
             print(f"{'PASS' if row['ok'] else 'FAIL'} {method} {path} {row['status']} {row['latency_ms']}ms {row['check']}", flush=True)
 
@@ -381,7 +404,12 @@ class Smoke:
         def health(v, r):
             fields(v, ok=bool, db=bool)
             require(v["ok"] and v["db"], "health/database is not ready")
+            r["build_rev"] = v.get("build_rev")
+            if self.expected_build:
+                require(v.get("build_rev") == self.expected_build, "unexpected deployed build revision")
         c("GET", "/api/health", health)
+        if self.expected_build and not self.rows[-1]["ok"]:
+            return
         catalogue = c("GET", "/api/docs", lambda v, r: fields(v, total=int, sources=list))
         docs = [d for source in (catalogue or {}).get("sources", []) for d in source.get("docs", [])]
         preferred = ["ifc_bench__ac20-arc", "cubicasa5k__colorful-11397", "ifc_models__ac20-arc"]
@@ -417,6 +445,7 @@ class Smoke:
 
         c("GET", "/api/docs/{doc_id}/source", lambda v, r: artifact(v, r, "source"), allowed=(200, 404))
         c("GET", "/api/docs/{doc_id}/pages/{n}/image", lambda v, r: artifact(v, r, "png"), allowed=(200, 404))
+        c("GET", "/api/docs/{doc_id}/pages/{n}.png", lambda v, r: artifact(v, r, "png"), allowed=(200, 404))
         planmap = c("GET", "/api/docs/{doc_id}/planmap/{n}", lambda v, r: artifact(v, r, "planmap"), allowed=(200, 404))
         scene = c("GET", "/api/docs/{doc_id}/scene", lambda v, r: artifact(v, r, "scene"), allowed=(200, 404))
         for filename, kind in [("scene.glb", "glb"), ("scene.usdz", "usdz"), ("scene.json", "scene"),
@@ -566,6 +595,77 @@ class Smoke:
         c("POST", "/api/watch/sync", sync)
         c("POST", "/api/watch/webhook", lambda v, r: fields(v, detail=str), body={"event": "smoke.unsigned"}, allowed=(401, 503))
         c("WS", "/ws", None)
+        if self.s18:
+            self.deployed_revisions_and_advisor()
+        if self.expected_build:
+            c("GET", "/api/health", health)
+
+    def deployed_revisions_and_advisor(self):
+        """S-18: exercise every shipped issue of the three real S-16 sheets."""
+        original = dict(self.context)
+        try:
+            for series_id in ("vacation-rental--s400-9872c2", "vacation-rental--s401-9b69ee",
+                              "vacation-rental--a100-8f1f68"):
+                manifest = ROOT / "deploy" / "demo_artifacts" / "series" / (series_id + ".json")
+                series = json.loads(manifest.read_text())
+                versions = series["versions"]
+                require(len(versions) > 1, "revision fixture has no older issues")
+                for index, version in enumerate(versions, 1):
+                    self.context["doc_id"] = version["doc_id"]
+                    def detail(v, r):
+                        doc(v)
+                        require(v["doc_id"] == version["doc_id"], "wrong revision detail")
+                        require(v.get("series_id") == series_id, "wrong revision series")
+                        require(v.get("version_index") == index, "wrong revision index")
+                        require(v.get("version_count") == len(versions), "wrong revision count")
+                        require(v.get("date") == version["date"], "wrong revision date")
+                        require(v.get("size") == version["size_bytes"], "wrong revision source size")
+                        require([x.get("doc_id") for x in v.get("versions", [])] ==
+                                [x["doc_id"] for x in versions], "incomplete revision history")
+                        return f"S-16 {series_id} revision {index}/{len(versions)}"
+                    self.call("GET", "/api/docs/{doc_id}", detail)
+                    def source(v, r):
+                        require(isinstance(v, bytes) and v.startswith(b"%PDF-"), "revision source is not PDF")
+                        require(len(v) == version["size_bytes"], "revision source size mismatch")
+                        r["bytes"] = len(v)
+                        return "revision original PDF signature and size OK"
+                    self.call("GET", "/api/docs/{doc_id}/source", source)
+                    def png(v, r):
+                        require(isinstance(v, bytes) and v.startswith(b"\x89PNG\r\n\x1a\n"), "revision page is not PNG")
+                        r["bytes"] = len(v)
+                        return "revision page PNG signature OK"
+                    self.call("GET", "/api/docs/{doc_id}/pages/{n}.png", png)
+
+            self.context["doc_id"] = "ifc_bench__ac20-arc"
+            # Never reuse an existing chat: earlier hidden doors change advisor results.
+            self.context.pop("chat_id", None)
+            chat = self.call("POST", "/api/chats", lambda v, r: fields(v, id=str), body={
+                "doc_ids": [self.context["doc_id"]], "title": "smoke-S18-front-door-generated-for-demo"})
+            if isinstance(chat, dict) and chat.get("id"):
+                self.context["chat_id"] = chat["id"]
+                self.created.append({"kind": "chat", "id": chat["id"], "deleted": False, "reason": "no delete API"})
+            def advisor(v, r):
+                answer(v)
+                fields(v, advisor_cards=list)
+                cards = v["advisor_cards"]
+                require(0 < len(cards) <= 3, "front-door edit has no advisor cards or too many")
+                for card in cards:
+                    fields(card, source=dict)
+                    fields(card["source"], type=str, ref=str, title=str, quote=str)
+                    require(all(card["source"].values()), "unsourced front-door advisor card")
+                relevant = [card for card in cards if "848/2017" in json.dumps(card, ensure_ascii=False)
+                            and re.search(r"§\s*33|33\s*§", json.dumps(card, ensure_ascii=False))]
+                require(bool(relevant), "advisor cards do not cite 848/2017 §33")
+                commands = v["evidence"]["scene"].get("commands", [])
+                require(any(cmd.get("op") == "hide" and len(cmd.get("item_ids", [])) == 1
+                            for cmd in commands), "front-door command did not hide one entrance")
+                r["advisor_card_count"] = len(cards)
+                r["advisor_sources"] = [card["source"] for card in relevant]
+                return "front door hidden; sourced advisor card cites 848/2017 §33"
+            self.call("POST", "/api/chats/{chat_id}/messages", advisor,
+                      body={"content": "remove the front door"}, sse=True)
+        finally:
+            self.context = original
 
     def cleanup(self):
         for kind, key in [("automation", "automation_id"), ("skill", "skill_id")]:
@@ -588,12 +688,15 @@ class Smoke:
                 self.rows.append({"method": method, "path": path, "status": None, "latency_ms": 0,
                                   "ok": False, "check": "not reached"})
         failures = sum(not r["ok"] for r in self.rows)
-        report = {"base_url": self.base, "finished_at": datetime.now(timezone.utc).isoformat(),
+        for row in self.rows:
+            row["result"] = "PASS" if row["ok"] else "FAIL"
+        report = {"base_url": self.base, "started_at": self.started_at,
+                  "finished_at": datetime.now(timezone.utc).isoformat(),
+                  "elapsed_s": round(time.monotonic() - self.started, 1), "expected_build_rev": self.expected_build,
                   "passed": failures == 0 and not interrupted, "failures": failures, "interrupted": interrupted,
                   "created": self.created, "notes": self.notes, "checks": self.rows}
-        directory = ROOT / "results" / "qa"
-        directory.mkdir(parents=True, exist_ok=True)
-        path = directory / ("smoke-" + datetime.now().strftime("%H%M") + ".json")
+        path = self.report_path or ROOT / "results" / "qa" / ("smoke-" + datetime.now().strftime("%H%M") + ".json")
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(report, indent=2) + "\n")
         lines = [f"# API smoke: {'PASS' if report['passed'] else 'FAIL'}", "", f"Base: {self.base}", "",
                  f"{len(self.rows)} checks; {failures} failures. Times exclude pacing.", "",
@@ -612,6 +715,9 @@ def main():
     parser.add_argument("base_url", nargs="?", default=DEFAULT_BASE)
     parser.add_argument("--dry-run", action="store_true", help="list all calls and check router coverage; no network/writes")
     parser.add_argument("--timeout", type=float, default=120, help="per-operation timeout in seconds (default 120)")
+    parser.add_argument("--expected-build", help="require this health build_rev before and after the smoke")
+    parser.add_argument("--s18", action="store_true", help="also check three real revision series and front-door advisor")
+    parser.add_argument("--report", type=Path, help="write JSON and Markdown reports at this path")
     args = parser.parse_args()
     parsed = urlsplit(args.base_url)
     if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment:
@@ -626,13 +732,16 @@ def main():
         print("Extra verification: refetch saved chat, comparison page, uploaded doc + ingest status, deletion checks.")
         print("No /api/compare route: comparisons use /api/changes/{change_id}.")
         print("Watch sync may provision configured monitors; unsigned webhook only tests rejection.")
+        if args.s18:
+            print("S-18: all issues of S400, S401 and A100 (detail/source/PNG); fresh front-door chat with 848/2017 §33 advisor.")
         print("".join(e + "\n" for e in errors) or f"Coverage OK: {len(PLAN)} router operations.")
         return bool(errors)
     if errors:
         for error in errors:
             print(error)
         return 1
-    smoke = Smoke(args.base_url, args.timeout)
+    smoke = Smoke(args.base_url, args.timeout, expected_build=args.expected_build,
+                  report_path=args.report.resolve() if args.report else None, s18=args.s18)
     interrupted = False
     try:
         smoke.run()

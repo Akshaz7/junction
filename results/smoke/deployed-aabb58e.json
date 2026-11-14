@@ -935,5 +935,17 @@
       "check": "unexpected deployed build revision",
       "result": "FAIL"
     }
-  ]
+  ],
+  "diagnostics": {
+    "front_door_chat_id": "c60d7671-d8e7-41b0-a763-1fd2d5535d0f",
+    "saved_answer_abstained": true,
+    "trace_steps": [
+      "error"
+    ],
+    "error_classification": "ModuleNotFoundError",
+    "missing_module_prefix": "engine.tasks",
+    "scene_commands_absent": true,
+    "advisor_card_count": 0,
+    "scope": "Saved answer from the mixed-deployment attempt; classified without recording raw exception text"
+  }
 }
