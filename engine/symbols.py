@@ -383,6 +383,13 @@ def find_legend(image_path, words=None, ink=None) -> dict:
         for e in ents:
             e["block"] = len(out["regions"]) - 1
         out["entries"].extend(ents)
+    if out["titled"]:
+        # a block under a LEGEND heading is authoritative: untitled look-alikes on the same sheet (room labels, revision lists) are dropped
+        keep_blocks = sorted({e["block"] for e in out["entries"] if e["titled"]})
+        out["entries"] = [e for e in out["entries"] if e["titled"]]
+        out["regions"] = [out["regions"][b] for b in keep_blocks]
+        for e in out["entries"]:
+            e["block"] = keep_blocks.index(e["block"])
     for k, e in enumerate(out["entries"]):
         e["id"] = k
     return out
