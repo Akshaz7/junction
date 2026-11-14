@@ -4,7 +4,9 @@ Junction 2026 · Team RS3 · Stoa challenge: **Make Blueprints Talk**
 
 “We rebuilt Stoa's product in two days. Then we built the part that does not exist yet.” — [project brief](CLAUDE.md)
 
-Hologram answers English questions about construction drawings and BIM models with visible proof. The same numbered items connect **2D drawing boxes**, **3D highlights** through “Visualise it”, and **AR on an iPhone** through “Show on table”. A drawing is read once into a structured **plan map**; most subsequent answers use plain code over that map rather than another model call. Missing or unreliable evidence should produce an abstention. See [CONTRACT.md](CONTRACT.md) for the answer format and shared item IDs.
+Hologram answers English questions about construction drawings and BIM models with visible proof. The same numbered items connect **2D drawing boxes**, **3D highlights** through “Visualise it”, and **AR on an iPhone** through “Show on table”. A drawing is read into a structured **plan map** so supported counts and measurements can use code; models handle questions needing interpretation. Answers must make missing evidence and uncertainty explicit. See [CONTRACT.md](CONTRACT.md) for the answer format and shared item IDs.
+
+Open the [live app](https://hologram-khaki.vercel.app/), upload a drawing through **Data → Upload**, then ask and inspect its citations. The judging flow continues from laptop proof to the same phone chat, table AR, and a spoken question returning to the laptop. The [demo script](docs/DEMO.md) gives exact clicks, two-minute and five-minute takes, backup questions, and device checks still required for the AR build-up and voice animation. The [submission checklist](docs/SUBMISSION.md) tracks links, video, report and licences for Sunday 15 November at 10:00 EET. Recorded accuracy and cost evidence are in [docs/ACCURACY.md](docs/ACCURACY.md); final metrics remain pending until tied to a selected result run.
 
 ## Run locally
 

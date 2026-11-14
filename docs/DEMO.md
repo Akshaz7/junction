@@ -1,156 +1,97 @@
-# Demo script: Hologram
+# Hologram judging demo — X-10
 
-Evidence: [candidate results](../results/demo_candidates.json), captured against the running local API on 2026-11-14. Tested 28 English candidates and 10 repeat questions, 38 questions total, sequentially with request pacing. All repeated answers matched their original text and values. This is a curated demo selection, not an accuracy estimate or a training result.
+“We rebuilt Stoa's product in two days. Then we built the part that does not exist yet.”
 
-The raster path is gold-correct and has usable evidence. Scene files and API edits work. Browser animation, cross-device delivery and physical AR remain untested here. The fire-exit response is explicitly an inference. The sourced advisor card and web-to-native bridge remain pending.
+Follow the judge's question first. Prepared questions below are backups selected from [recorded candidates](../results/demo_candidates.json), not a representative accuracy sample. This script specifies the intended live take; it does not certify physical-device rehearsal. Check build-up and spinning, sequential highlights on the installed build before promising those effects.
 
-## Before the recording
+## Prepare the stage
 
-Use the LEAD-refreshed stable build at `http://localhost:4173/#/data`, with its API connected to `http://localhost:8000`. Require **Connected workspace**; a generated fallback answer is not evidence of a real API result. Do not record the working-tree dev build while another worker edits it. The iPhone must use reachable web/API addresses on the same workspace; its localhost is not the Mac.
+- Laptop: open the [live app](https://hologram-khaki.vercel.app/#/data). Verify **Connected workspace** and [API health](https://obviously-present-piglet.eur-1.aiven.app/api/health). Aiven Runtime is the configured target ([rewrite](../web/vercel.json), latest [decisions](../DECISIONS.md)). The older [deployed check](../results/e2e/deployed-check.md) tested the Vercel API fallback; it does not prove today's WebSocket/AR behavior.
+- Install and launch the normal iPhone app with matching deployed web/API URLs using [device instructions](../ios/README.md). Grant camera, microphone and speech permissions beforehand. **Show on table** needs the native app; Safari has no native bridge. Use a charged, unlocked phone and a well-lit, textured table.
+- On both devices open **History** and enable **Follow other devices** where available. Create/open the demo chat, then open that exact chat on the phone. Match its `#/chat?chat=<chat_id>` route and document. Keep the laptop chat visible during AR.
+- Prepare `cubicasa5k__high-quality-108`, backup `cubicasa5k__colorful-7513`, and `ifc_bench__ac20-arc` (search **AC20**). Check page, scene, matching labels and USDZ load. Reset prior hide/isolate edits. Preserve source credits; CubiCasa5K is CC BY-NC-SA, not an MIT asset.
+- Rehearse a fresh laptop turn arriving on the phone, table placement, the 2D-plan build-up, voice door spin/sequential highlights, and that voice turn returning to the same laptop chat. `[PENDING: installed build, rehearsal time, chat_id and physical-device recording]`. Use Plan B for any failed gate.
+- Download the two-minute video and physical-iPhone clip onto the laptop: `[PENDING: local video paths and share URLs]`. Caption playback **Recorded on iPhone**. Keep the backup question table open.
+- Prepare offline AR_DEMO before judging if needed: `AR_DEMO=1 bash ios/scripts/install_on_device.sh`. It opens bundled AC20 independently of the web chat. Restore the normal build for the primary take with `AR_DEMO=0 bash ios/scripts/install_on_device.sh`. The installer uses the heavy-job wrapper. Offline placement still needs a real iPhone; voice/API calls and chat sync need connectivity.
 
-Primary raster: **high_quality-108**, `cubicasa5k__high-quality-108`. Backup raster: **colorful-7513**, `cubicasa5k__colorful-7513`. The toilet/sink alternatives on colorful-11397 are suitable only for 2D; their evidence IDs are missing from the current scene. IFC building: **AC20**, `ifc_bench__ac20-arc`. Retain the drawing credit and licence footer; the raster drawings are CubiCasa5K evaluation data. No generated project documents are used in this selection. If the native fixture appears, retain **generated for demo** and do not present it as AC20.
+Network Plan B: use the LEAD's stable LAN preview at `http://<Mac-LAN-IP>:4173` and API at `http://<Mac-LAN-IP>:8000` on both devices ([network setup](../ios/README.md)). The phone cannot use Mac localhost. Reopen the same LAN chat after switching workspaces. Provider-dependent ingestion still needs connectivity.
 
-A saved API rehearsal is available at `http://localhost:4173/#/chat?chat=312243d0-12fc-462a-80ff-4973def7aaa3` if the current build supports saved-chat links. Use fresh questions for the live take; a saved response does not demonstrate a live status stream.
+## Exact click path and Plan B
 
-## The eight steps
+The [brief](MASTER_PROMPT.md) weights four criteria equally: **A** accuracy, **V** visual verifiability, **C** creativity, **L** low inference cost. Every row maps its proof to those criteria.
 
-### 1. Open the workspace and select the drawing
+| Step | Live action and narration | Plan B | Criteria / evidence |
+| --- | --- | --- | --- |
+| 1. Select | Laptop **Data → Upload → choose the judge's drawing**; follow the upload route below. Prepared take: **Data → Search documents → high_quality-108 → Ask about it**. Check the document chip. Say the opening pitch, then “Ask your question about this drawing.” | Explicitly switch to prepared high_quality-108, then colorful-7513 if needed. For API failure use the captioned recording. | A/V: actual source visible; C: judge selects input; L: reading happens during ingestion. |
+| 2. Ask | Enter the judge's English question → **Send question**. Backup: “How many windows are shown on this floor plan?” Show **Thinking…**, document status, then the bold answer/citation. Say “Let's check the items behind that answer.” | Use a backup on its named document. If wrong or unsupported, expose the evidence and say so. A saved answer demonstrates history, not a live stream. | A: compare to source; V: citation; C: natural question; L: actual answer cost/trace. |
+| 3. 2D proof | Inline citation → **Fit drawing** → select a numbered box. Open **Sources** and **Show thought process** if time permits. Say “Each number points to an item you can inspect.” C01 recorded 7 boxes; check today's output. | C28 recorded 5 window boxes. If viewer fails, show recorded proof and identify it as recorded. Never substitute prepared proof for the judge's drawing. | A/V: inspect counted items; C: linked evidence; L: trace identifies code/model work. |
+| 4. 3D | In the drawing viewer click **Visualise it** → wait for model → orbit matching numbered highlights. Keep the cutaway open enough to see them. Say “The evidence keeps the same identity in 3D.” | Try C28's scene. If scene unavailable, keep 2D proof and name the separate document in the recorded 3D segment. | A/V: same IDs and labels; C: spatial view; L: reuse map/scene. |
+| 5. Phone | Keep laptop chat open. In native phone app **History → same chat** (or exact saved route). Confirm the fresh question and answer arrived without retyping. Say “This is the same conversation on the phone.” | If Follow misses it, open manually. Reload can recover history, but is not live-delivery proof. For disconnection use the recorded dual-screen segment. | A: same document/turn; V: both screens in frame; C: shared workspace; L: reuse stored answer. |
+| 6. Table AR | Phone citation → drawing → **Show on table** → scan table → **Place model**. Film 2D plan, then walls, doors and stairs rising where the model contains them. Verify answer items glow. Say “Now the drawing becomes a building on the table.” | Missing button: confirm native app and scene availability, then use physical-iPhone clip. Network failure: prepared offline AR_DEMO AC20, explicitly a separate bundled scene. Placement failure: textured surface or **Reset placement**, then clip. If reveal absent, show placement only and say the reveal is pending. | A: requested title/IDs; V: placement/highlights; C: plan-to-AR reveal; L: reuse USDZ. |
+| 7. Voice | Native AR **Ask by voice** → say **“show me the doors”** → **Send voice question**. Hold steady for spin and sequential highlight entrance. Show transcript, answer and door tags. Say “I can ask while looking at the building.” | Retry once after permission check. If voice fails, close AR, type command in same phone chat, reopen **Show on table**. If animation absent, show actual highlights or captioned clip. Offline bundled selection does not prove voice processing. | A: transcript/targets; V: tags/highlights; C: spatial voice; L: show actual cost, never promise free voice. |
+| 8. Laptop return | Show that spoken question and answer appearing in the same laptop chat, plus matching model selection. Say “The voice turn is now in the shared chat.” Close: “One question, visible proof, carried from drawing to model to table.” | If a separate chat was created, use incoming-question banner **Open**, or **History → Voice in AR**, and state the difference. Refresh proves persistence only. Failed live delivery: captioned recorded segment. | A/V: same transcript and answer on both screens; C: bidirectional continuation; L: reuse stored answer. |
 
-Click **Data** → **Search documents**, type `high_quality-108` → open **high_quality-108** → **Ask about it**. Check that its document chip is selected in the composer. The exact question prepared for this step is C01: “How many windows are shown on this floor plan?” Submit it in the next step.
+Answer evidence uses numbers; scene commands can use tags such as D1/W3. Do not call a command tag a citation number. Native AR entered without the originating chat can create **Voice in AR**; retain `chat_id` through **Show on table** for the primary take.
 
-Backup: select **colorful-7513** through the same path and prepare C28: “How many windows are shown on this floor plan?”
+## Upload your own drawing — priority judge-led route
 
-Say: “Hologram brings drawing questions and their sources into a shared workspace.”
+Use the judge's original source and question, including complex questions. Do not promise a prepared answer, cost or response time for an unseen file.
 
-### 2. Ask the gold-correct raster count
+| Stage | Exact action / check | Plan B | Criteria |
+| --- | --- | --- | --- |
+| Select | **Data → Upload → file picker**, or drop one file in Data. Prefer original PDF, PNG/JPG, DXF or IFC. UI also accepts SVG, TIFF and DWG; accepted extension alone does not prove processing support. Observe displayed size limit. | Use an available PDF/image export for unsupported or stored-only formats; otherwise explicitly switch to a prepared source. Never fabricate a conversion. | A/V: original inspectable input; C: unseen drawing; L: one ingestion. |
+| Ingest | **Uploading… → Processing document… → Ready to use**, checking stages under **Uploads**. Open the resulting document. Partial/stored/failed status is not full readiness. | Explain unavailable stages; use a supported export or prepared example. Retain the error; show an ingestion recording if available. Explain the plan map while waiting. | A: explicit readiness; V: preview; C: live ingestion; L: separate extraction cost. |
+| Ask | Uploaded document → **Ask about it** → check chip → judge's question. For cross-document questions attach every intended source before sending and inspect each citation. | Narrow question/scope openly if unsupported. Say when evidence does not hold the answer; retain uncertainty in best-effort responses. Backups apply only to their named documents. | A: source scope/limits; V: cited sources; C: judge's question; L: actual trace/cost. |
+| Continue | Citation → **Fit drawing → Visualise it**, then steps 5–8 with this upload's chat/scene. Check scene and USDZ availability before promising AR. | Page-only upload supports 2D proof. Name any separate prepared scene or recording used for 3D/AR. | A/V: same IDs, no silent substitution; C: unseen plan into AR when available; L: reuse artifacts. |
 
-In **Ask about your drawings**, paste C01: “How many windows are shown on this floor plan?” → **Send question**. Show **Thinking…** and **Exploring document: high_quality-108** if visible; the fast response may make these brief. Expected text: **There are 7 windows on this floor plan.** Citation follows the sentence. Original engine latency: 3 ms; answer cost: $0.0000. These are recorded engine measurements, not promised end-to-end timing.
+[Upload results](../results/upload_live.json) record test-container ingestion and follow-up answers, not guaranteed production timings or unseen-input accuracy. Keep scale uncertainty visible when dimensions come from a door-width prior.
 
-Backup C28 on `cubicasa5k__colorful-7513`: “How many windows are shown on this floor plan?” → **5 windows**, 5 boxes, $0.0000, recorded engine latency 1 ms. This answer repeated identically. C02 is a further 2D-only alternative: **2 toilets** on colorful-11397. Do not use that drawing's window question: C08 disagrees with gold.
+## Two-minute version / video shot list
 
-Say: “The count comes with the items that produced it.”
+These are editorial budgets, not measured timings. Start with selected prepared drawing and both devices in the same chat; record fresh turns. Trim optional narration if waiting exceeds its slot; caption edited waits.
 
-### 3. Check the numbered drawing evidence and cost
+| Time | Shot / action | Line and criteria |
+| --- | --- | --- |
+| 0:00–0:12 | Laptop and phone, source visible. | Exact opening pitch. A/V/C/L: inspectable evidence reused across views. |
+| 0:12–0:32 | Judge asks or send C01; status, bold answer, cost. | “Let's check the items behind that answer.” A/V/C/L. |
+| 0:32–0:48 | Citation → **Fit drawing**, numbered boxes. | “Each number points to an item you can inspect.” A/V. |
+| 0:48–1:03 | **Visualise it**, orbit same highlights. | “The evidence keeps the same identity in 3D.” A/V/C/L. |
+| 1:03–1:15 | Phone receives fresh turn; laptop stays in shot. | “This is the same conversation on the phone.” A/V/C/L. |
+| 1:15–1:35 | **Show on table → Place model**, plan/build-up. | “Now the drawing becomes a building on the table.” A/V/C/L; only rehearsed effects. |
+| 1:35–1:51 | Voice “show me the doors”, send, hold for spin/highlights. | Show transcript and targets. A/V/C; actual voice cost for L. |
+| 1:51–2:00 | Laptop returned voice turn; app/source end card. | “One question, visible proof, carried from drawing to model to table.” A/V/C/L. |
 
-Keep the C01 answer; no new question is needed. Click its inline citation chip → **Fit drawing** → click a numbered box → **Next source** to inspect another. Expected: 7 numbered evidence boxes, all inside the page and all mapped to scene items. Show **Where it is set out**, **Sources**, **Show thought process**, and hover/focus the cost chip, displayed as `$0.0000`. The API trace records a plan-map route.
+If a judge brings a file during this slot, start upload immediately. If it is not ready, state that and use the named prepared example; never imply its answer came from their file.
 
-Backup: use C28, “How many windows are shown on this floor plan?”, on `cubicasa5k__colorful-7513`; open its citation to check the 5 window boxes. C02 and C03 remain gold-correct toilet/sink alternatives for 2D only.
+## Five-minute version
 
-Say: “Each numbered box lets you check the answer against the drawing.”
+| Time | Action | Criteria / recovery |
+| --- | --- | --- |
+| 0:00–0:35 | Pitch; **Data → Upload**, judge's file and progress. | A/V/C/L: original unseen source and reading stage; upload Plan B. |
+| 0:35–1:20 | Readiness → **Ask about it**, judge's question; source chips and limits. | A/V/C/L: scope, route and cost; name prepared example if processing continues. |
+| 1:20–2:00 | Citation → **Fit drawing**, boxes/**Sources** → **Visualise it**. | A/V/C/L: same IDs and reused scene; steps 3–4 Plan B. |
+| 2:00–2:25 | Same fresh chat turn on phone. | A/V/C/L: both screens and reused answer; step 5 Plan B. |
+| 2:25–3:05 | **Show on table → Place model**, 2D-plan build-up. | A/V/C/L: same scene and highlights; step 6 Plan B. |
+| 3:05–3:40 | Voice doors, spin/sequential highlights, laptop return. | A/V/C/L: transcript, targets, persistence; steps 7–8 Plan B. |
+| 3:40–4:25 | Optional **Data → AC20 → Ask about it**, C13 narrowest door → citation → **Visualise it**. Spend this slot completing upload proof if needed. | A/V/C/L: IFC property/element, code route; C13 recording if unavailable. |
+| 4:25–5:00 | **Accuracy** or recorded report; distinguish numeric/text scores and ingestion/answer cost. Closing line. | A/V/C/L: measured limits and cost; use linked report if dashboard unavailable. |
 
-### 4. Raise the same plan into 3D
+Optional longer IFC take: C16 “Where is the fire exit on level 2?” → citation → **Visualise it → Storey → 2. Obergeschoss**. Its recorded stair result explicitly says it is an inference, **not a marked fire exit**. Retain that qualification; it is not verified egress advice. **Walk at 1:1** is an optional physical-device-rehearsed extension outside the timed core.
 
-Keep the C01 question and drawing panel. Click **Visualise it** in the drawing viewer → wait for **3D view ready** → drag to orbit. Check that the same window item IDs carry their numbered labels and highlights. The scene manifest, GLB and USDZ all returned successfully; matching box-to-scene IDs were checked. The visible animation and highlights still need the LEAD's browser rehearsal.
+## Backup questions and measured claims
 
-Backup: ask C28, “How many windows are shown on this floor plan?”, on `cubicasa5k__colorful-7513` → citation → **Visualise it**. All 5 evidence items exist in its scene; the manifest, page image, GLB and USDZ were reachable. C02/C03 fixture evidence is absent from the current scenes and cannot demonstrate matching 3D highlights.
+Expected values below come from [demo_candidates.json](../results/demo_candidates.json). Re-ask on the installed build before judging; artifacts/behavior may have changed.
 
-Say: “The same items carry through from drawing evidence into the model.”
+| Candidate / document | Exact question | Recorded result / limits |
+| --- | --- | --- |
+| C01 · `cubicasa5k__high-quality-108` | How many windows are shown on this floor plan? | 7 windows, 7 boxes, matching scene IDs; answer model cost $0. |
+| C28 · `cubicasa5k__colorful-7513` | How many windows are shown on this floor plan? | 5 windows, 5 boxes, matching scene IDs; answer model cost $0. |
+| C13 · `ifc_bench__ac20-arc` | What is the narrowest door width used here? | 1 m, Tür-014; IFC element citation, not raster boxes. |
+| C23 · `ifc_bench__ac20-arc` | show only the doors | Isolates 77 doors; command/artifact check, not physical AR proof. |
+| C19/C20/C21 · `ifc_bench__ac20-arc` | show me all the windows → remove W3 → restore W3 | Highlight/hide/restore persisted per chat. Reset afterwards. |
 
-### 5. Continue on the iPhone and show it on a table — pending bridge/device rehearsal
+“show me the doors” is the required voice phrase, without an exact-phrase physical-device result in this candidate capture; do not assign it C23's test status. Avoid colorful-11397's window count and toilet/sink 3D path: the capture reports a window gold mismatch and missing toilet/sink scene IDs.
 
-Chosen question remains C01: “How many windows are shown on this floor plan?” on `cubicasa5k__high-quality-108`. Open the same saved chat in the iPhone web shell; confirm the actual question and answer before filming. Once the answer's native bridge action is wired: citation/drawing → **Show on table** → scan a horizontal surface → place the model → verify the matching highlights. This bridge action is absent from the checked web source, so this sequence is pending, not a tested claim.
+[ACCURACY.md](ACCURACY.md) uses [sample200-r10](../results/bench/sample200-r10.json): **124/187 numeric correct (66.3%)**, including **16 numeric abstentions** as unsuccessful; **13 text questions** are reported separately. This is a recorded sample, not the final latest-engine score. The run records **$0 total model cost**, excluding prior map extraction and hosting; it does not promise free voice/uploads. A solver can be exact over a map that contains reading errors.
 
-Concrete fallback: native toolbar **Show on table** → **Demo scenes** → **AC20 · IFC building**. This selects `ifc_bench__ac20-arc`; the toolbar initially opens a fixture, not the selected web document. Use backup C13, “What is the narrowest door width used here?”, on AC20. Its gold-correct door evidence exists in the scene. Rehearse live highlighting after opening AR. Without it, show only the scene placement and describe it as a separate native view, not synchronized proof. The selected raster plans are not in the native bundled picker and need the bridge/API path. Do not present a simulator capture as physical AR.
-
-Say after a successful bridge rehearsal: “The same drawing evidence is now placed on the table.” If using the picker fallback: “This native view places the selected demo scene on the table.”
-
-### 6. Locate an IFC stair with an explicit inference qualification
-
-Desktop: **Data** → search `AC20` → **AC20** → **Ask about it** → send C16: “Where is the fire exit on level 2?” Expected: **No outer door on 2. Obergeschoss**; 1 stair to other levels (**Treppe-2-OG**). The answer continues: **This is an inference from the model data (outer doors and stairs), not a marked fire exit.** Preserve that sentence in the take. Its scene target is the stair item `0xQhptVzf44Qzhs9jMEILa`, corroborated in the IFC element file.
-
-Citation → **Visualise it** → **Storey** → **2. Obergeschoss**. Verify camera focus on that target during browser rehearsal. On the physical iPhone choose **AC20 · IFC building**, move to the matching storey with **Higher storey**, and turn on **Walk** for life-size navigation. Camera flight, live target delivery and walking are pending device/browser checks; the API alone does not prove them.
-
-Gold-correct backup C13 on the same IFC: “What is the narrowest door width used here?” → **1 m**, the named single-swing door, and 1 scene item. Open the citation → **Visualise it** to identify that element. C17 is an alternate ground-floor exit inference, with the same qualification; no tested candidate proves a marked fire exit.
-
-Say: “The model points to this stair, while explicitly saying it has no marked fire-exit proof.”
-
-### 7. Show measured accuracy and spend
-
-The step's reference question is C01, “How many windows are shown on this floor plan?”; keep its recorded cost chip if returning to chat. Click **Accuracy** → **Run** → `sample200-r2` → **Accuracy by source and question type** → **Before / after fine-tuning** → **Model costs**. This named run is pinned so a newer in-progress result cannot silently change the narration.
-
-From [sample200-r2](../results/bench/sample200-r2.json): 48 correct out of 187 scored questions, headline **25.7%**; 13 text questions are unscored. Abstentions count in the accuracy denominator. The run's total spend is **$0.000455**. The chosen raster answer cost $0.0000; do not generalize that to every answer or confuse the curated questions with this broader run.
-
-There is no matched baseline/fine-tuned pair in the checked run list. Show **No fine-tuned run yet.** Do not narrate an improvement. Backup question C10 on `ifc_bench__ac20-arc`: “Which door types are installed in this building with quantities?” → the gold-matching door-type breakdown; if the dashboard cannot load, show its recorded answer and the linked results file with that limitation. Candidate C13 is another recorded IFC example.
-
-Say: “The dashboard separates measured accuracy, abstentions, unscored text and model spend.”
-
-### 8. Edit by stable tag; sourced advisor card remains pending
-
-**Data** → search `AC20` → **AC20** → **Ask about it**. Keep an AC20 **Visualise it** view open in another desktop window, so the composer remains available. In the same chat send C19: “show me all the windows” → wait for window labels → send C20: “remove W3”. Expected API responses: **Highlighted 206 windows.** then **Window W3 is hidden. 205 of 206 windows remain visible.** The same-chat rehearsal persisted the W3 item as hidden. These commands are already supported by the tested API; they are not pending E-20.
-
-Restore with C21: “restore W3” → **206 of 206 windows are visible.** Then C22: “reset” to clear the edit layer and highlights. Restoration clears hidden state; it does not automatically put W3 back into the highlighted set. Check visible removal, restoration and label delivery in the browser before recording them.
-
-Backup C23 on AC20: “show only the doors” → **Showing only 77 doors.** The command contains the matching door items. Use “reset” to restore the view.
-
-`POST /api/advise` after the W3 hide returned an empty cards list. **A sourced advisor card is pending.** Do not replace it with an invented card, remove a ramp with no tested rule, or claim the source model was changed. Once available, film a real card's source title and verbatim quote before describing it as advice.
-
-Say: “A stable tag hides an item in the viewing layer; the original model stays intact.”
-
-## Two-minute video shot list
-
-Time ranges are an editorial plan, not measured performance. Pending shots may only be used after real rehearsal; use the stated alternative otherwise.
-
-| Time | Shot and narration cue |
-|---|---|
-| 00:00–00:10 | Workspace → Data → selected high_quality-108, with credit visible. Introduce drawing questions with sources. |
-| 00:10–00:30 | Send C01 live; capture the bold count, citation and cost. Do not stretch a fast status line into a false wait. |
-| 00:30–00:45 | Citation → Fit drawing → numbered window boxes → source controls. |
-| 00:45–01:00 | Visualise it; capture the real rise and matching highlights after browser rehearsal. |
-| 01:00–01:15 | Real iPhone table placement only after device rehearsal; otherwise show the native picker separately or continue the desktop scene, with the limitation on screen. |
-| 01:15–01:35 | AC20 C16 → stair focus; keep the inference qualification visible. Use C13 if focus is unavailable. Include life-size walking only if physically rehearsed. |
-| 01:35–01:50 | Accuracy → pinned sample200-r2 → source/type table → spend; show that fine-tuned comparison is unavailable. |
-| 01:50–02:00 | AC20 C19 → C20 and visible W3 hide after browser rehearsal. If no sourced card exists, finish on the real edit; label advisor pending. |
-
-## Candidate selection ledger
-
-Each step has candidate pairs below; repeated IDs deliberately reuse one tested pair to keep the drawing and evidence continuous. Dashboard candidates are reference-answer questions, since opening a dashboard does not itself ask a document question. Full texts, gold answers, events, costs, timings, evidence IDs and replay responses are in [demo_candidates.json](../results/demo_candidates.json).
-
-| Step | Tested candidates | Chosen | Backup | Qualification |
-|---|---|---|---|---|
-| 1 | C01, C28, C02 | C01 | C28 | API verified; shell/click path read from UI source, not browser rehearsed |
-| 2 | C01, C28, C02, C08, C09, C27 | C01 | C28 | API verified against numeric dataset gold |
-| 3 | C01, C28, C02, C03, C05, C06 | C01 | C28 | Selected window boxes have scene membership and bounds verified; fixture alternatives are 2D only; browser display not rehearsed |
-| 4 | C01, C28, C27, C13 | C01 | C28 | C01/C28 evidence IDs and scene assets verified; C27 rejected for incorrect count; rendered animation/highlights not rehearsed |
-| 5 | C01, C28, C13 | C01 | C13 | Bridge/device pending; native bundled AC20 plus C13 is the separate fallback; fixture-count candidates cannot demonstrate scene highlighting |
-| 6 | C16, C17, C18, C13 | C16 | C13 | Qualified model inference only; no marked-fire-exit gold; camera/AR navigation not rehearsed |
-| 7 | C01, C10, C13 | C01 | C10 | Dashboard APIs verified; no fine-tuned comparison run available |
-| 8 | C19, C20, C21, C22, C23 | C19 | C23 | Commands and persisted scene state verified; sourced advisor card pending (cards empty) |
-
-Document aliases below are exact IDs: A = `cubicasa5k__high-quality-108`; B = `cubicasa5k__colorful-11397`; C = `cubicasa5k__colorful-11400`; D = `cubicasa5k__colorful-11960`; I = `ifc_bench__ac20-arc`; S = `swiss_dwellings__site1000-bldg2082-floor9385`; E = `cubicasa5k__colorful-6327`; F = `cubicasa5k__colorful-7513`.
-
-| ID | Doc | Exact question | Correct? | Boxes / evidence items | Engine ms | USD |
-|---|---|---|---|---|---|---|
-| C01 | A | How many windows are shown on this floor plan? | Yes | 7 / 7 | 3 | 0.000000 |
-| C02 | B | How many toilet bowls (WC seats) are drawn on this floor plan? | Yes | 2 / 2 | 0 | 0.000000 |
-| C03 | B | How many sinks and wash basins (kitchen and bathroom combined; a double-bowl sink counts as one) are drawn on this floor plan? | Yes | 3 / 3 | 1 | 0.000000 |
-| C04 | A | How many bedrooms (makuuhuone, usually marked MH) are on this floor plan? | No | 13 / 13 | 3 | 0.000000 |
-| C05 | C | How many toilet bowls (WC seats) are drawn on this floor plan? | Yes | 2 / 2 | 3 | 0.000000 |
-| C06 | C | How many sinks and wash basins (kitchen and bathroom combined; a double-bowl sink counts as one) are drawn on this floor plan? | Yes | 3 / 3 | 2 | 0.000000 |
-| C07 | D | How many toilet bowls (WC seats) are drawn on this floor plan? | Yes | 1 / 1 | 1 | 0.000000 |
-| C08 | B | How many windows are shown on this floor plan? | No | 11 / 11 | 1 | 0.000000 |
-| C09 | A | How many sinks and wash basins (kitchen and bathroom combined; a double-bowl sink counts as one) are drawn on this floor plan? | No | 3 / 3 | 2 | 0.000000 |
-| C10 | I | Which door types are installed in this building with quantities? | Yes | 0 / 77 | 7 | 0.000000 |
-| C11 | I | Which window types are present in the building and how many of each? | Yes | 0 / 206 | 3110 | 0.001020 |
-| C12 | I | Which room in the building is the largest? | No | 0 / 1 | 10 | 0.000000 |
-| C13 | I | What is the narrowest door width used here? | Yes | 0 / 1 | 8 | 0.000000 |
-| C14 | I | What are the heights of each level? | No | 0 / 0 | 2762 | 0.002148 |
-| C15 | I | What software and ifc standards were used to create this model? | No | 0 / 0 | 4 | 0.000000 |
-| C16 | I | Where is the fire exit on level 2? | Unverified inference | 0 / 1 | 10 | 0.000000 |
-| C17 | I | Where is the fire exit on the ground floor? | Unverified inference | 0 / 2 | 10 | 0.000000 |
-| C18 | I | Where are the exits on 1. Obergeschoss? | Unverified inference | 0 / 1 | 3 | 0.000000 |
-| C19 | I | show me all the windows | Yes | 0 / 206 | 4 | 0.000000 |
-| C20 | I | remove W3 | Yes | 0 / 1 | 6 | 0.000000 |
-| C21 | I | restore W3 | Yes | 0 / 1 | 3 | 0.000000 |
-| C22 | I | reset | Yes | 0 / 0 | 3 | 0.000000 |
-| C23 | I | show only the doors | Yes | 0 / 77 | 9 | 0.000000 |
-| C24 | S | How many rooms labelled 'Küche' are there on this floor? | Yes | 4 / 4 | 4 | 0.000000 |
-| C25 | S | How many toilets (WC) are drawn on this floor plan? | No | 0 / 0 | 2 | 0.000000 |
-| C26 | S | What is the net floor area of room 2.10 ('Zimmer') in m²? | No | 0 / 0 | 4 | 0.000000 |
-| C27 | E | How many windows are shown on this floor plan? | No | 3 / 3 | 4 | 0.000000 |
-| C28 | F | How many windows are shown on this floor plan? | Yes | 5 / 5 | 1 | 0.000000 |
-
-Do not substitute C04 (bedroom scope answered as all rooms), C08/C09/C27 (wrong counts), C12 (room-function disagreement with gold), C14 (incomplete heights), C15 (metadata abstention), or C25/C26 (missing fixture/area data). C24 is a correct alternative labelled-room count on the Swiss PDF, but the raster path above provides clearer continuity into the tested scenes. C02/C03/C05/C06/C07 have correct 2D counts but lack matching fixture items in their current scenes.
-
-## LEAD acceptance
-
-Re-ask the chosen questions against the intended demo server and compare answer facts and evidence IDs with the JSON. Confirm the actual citation, rise, live edit and device views in the stable app. The repeat API questions already matched locally; WEB2 did not run the LEAD's final app/device acceptance. Pending features are explicitly marked above.
+Pending claims: `[PENDING: final benchmark tag/accuracy]`, `[PENDING: matched fine-tuning comparison, if any]`, `[PENDING: current live-sync timing]`, `[PENDING: physical AR build-up/spin rehearsal]`, `[PENDING: judge-upload ingestion and answer spend]`. Quote no gain, universal zero-abstention result or latency without evidence. See [submission checklist](SUBMISSION.md).
