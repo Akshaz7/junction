@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useId, useRef, useState, type PointerEvent } from 'react';
-import { documentFileUrl, documentSceneUrl, SceneLoadError, storeyName, type SceneManifest } from './scene';
-import { buildItemDetails, indexElements, type IFCElement } from './identify';
+import { documentSceneUrl, SceneLoadError, type SceneManifest } from './scene';
+import { buildItemDetails, type IFCElement } from './identify';
 import { ItemDetailsCard } from './ItemDetailsCard';
 import { createViewer, type Viewer } from './viewer';
 import type { HighlightOptions } from './highlight';
 import type { RiseState } from './rise';
 import { bindLiveHighlight } from './liveViewerHighlight';
+import { cutawayStoreys, isRoof, type CutawayState } from './cutaway';
 import './viewer3d.css';
 
 interface ViewerOptions {
   onPick?: (item_id: string) => void;
-  /** Null shows all storeys. Changes to this prop update the dropdown and model. */
+  /** Defaults to a cutaway at the ground storey. Null explicitly shows all storeys. */
   storey?: string | null;
   highlightItemIds?: readonly string[];
   highlightOptions?: HighlightOptions;
@@ -26,20 +27,24 @@ export type Viewer3DProps = ViewerOptions & (
   { doc_id: string; sceneUrl?: never } | { sceneUrl: string; doc_id?: never }
 );
 
-export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, highlightItemIds, highlightOptions, onReady, visualise = false, onRiseStateChange, onError }: Viewer3DProps) {
+export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highlightItemIds, highlightOptions, onReady, visualise = false, onRiseStateChange, onError }: Viewer3DProps) {
   const sceneUrl = doc_id !== undefined ? documentSceneUrl(doc_id) : sourceUrl!;
+  // Answer objects may be recreated on parent renders. Only new evidence should
+  // replace a live selection; equivalent arrays/maps must leave it in place.
+  const highlightRequest = highlightItemIds === undefined ? undefined
+    : JSON.stringify([highlightItemIds, highlightOptions ?? {}]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
   const onReadyRef = useRef(onReady);
   const riseStateRef = useRef(onRiseStateChange);
   const onErrorRef = useRef(onError);
   const pointerStart = useRef<{ id: number; x: number; y: number } | null>(null);
-  const [selectedStorey, setSelectedStorey] = useState<string | null>(storey);
+  const [cutaway, setCutaway] = useState<CutawayState>({ activeStorey: null, showRoof: false, hiddenCount: 0 });
+  const [hasRoof, setHasRoof] = useState(false);
   const [storeys, setStoreys] = useState<string[]>([]);
   const [picked, setPicked] = useState<string | null>(null);
   const [manifest, setManifest] = useState<SceneManifest | null>(null);
   const [elements, setElements] = useState<Map<string, IFCElement>>(new Map());
-  const [elementsLoading, setElementsLoading] = useState(false);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState('');
   const selectId = useId();
@@ -52,7 +57,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, h
   useEffect(() => { onErrorRef.current = onError; }, [onError]);
 
   useEffect(() => {
-    setSelectedStorey(storey);
+    if (storey !== undefined) viewerRef.current?.setStorey(storey);
   }, [storey]);
 
   useEffect(() => {
@@ -61,11 +66,14 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, h
     let active = true;
     let viewer: Viewer | null = null;
     let live: ReturnType<typeof bindLiveHighlight> | undefined;
+    let unsubscribeCutaway: (() => void) | undefined;
     setState('loading');
     setError('');
     setStoreys([]);
     setPicked(null);
     setManifest(null);
+    setElements(new Map());
+    setHasRoof(false);
     pointerStart.current = null;
 
     function fail(reason: unknown) {
@@ -81,15 +89,16 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, h
     try {
       viewer = createViewer(canvas);
       viewerRef.current = viewer;
+      unsubscribeCutaway = viewer.onCutawayChange(setCutaway);
       live = bindLiveHighlight(viewer, doc_id);
       void viewer.loadScene(sceneUrl).then((scene) => {
         if (!active) return;
+        if (storey !== undefined) viewer!.setStorey(storey);
         live?.sceneReady();
-        const names = [
-          ...scene.manifest.storeys.map(storeyName),
-          ...Object.values(scene.manifest.items).map((item) => storeyName(item.storey)),
-        ].filter((name): name is string => name !== null);
-        setStoreys([...new Set(names)]);
+        setCutaway(viewer!.getCutawayState());
+        setStoreys(cutawayStoreys(scene.manifest).map((entry) => entry.name));
+        setHasRoof(Object.entries(scene.manifest.items).some(([id, item]) => isRoof(item.kind, scene.elements?.get(id))));
+        setElements(scene.elements ?? new Map());
         setManifest(scene.manifest);
         setState('ready');
         onReadyRef.current?.(viewer!);
@@ -100,6 +109,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, h
 
     return () => {
       active = false;
+      unsubscribeCutaway?.();
       live?.dispose();
       viewer?.dispose();
       if (viewerRef.current === viewer) viewerRef.current = null;
@@ -107,32 +117,10 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, h
   }, [sceneUrl]);
 
   useEffect(() => {
-    const url = documentFileUrl(sceneUrl, 'elements.json');
-    const controller = new AbortController();
-    let active = true;
-    setElements(new Map());
-    setElementsLoading(url !== null);
-    if (url) {
-      void fetch(url, { signal: controller.signal }).then(async (response) => {
-        if (!response.ok) throw new Error('Additional IFC properties unavailable');
-        const index = indexElements(await response.json());
-        if (active) setElements(index);
-      }).catch(() => {
-        // A missing optional index must not prevent identification from scene.json.
-      }).finally(() => { if (active) setElementsLoading(false); });
-    }
-    return () => { active = false; controller.abort(); };
-  }, [sceneUrl]);
-
-  useEffect(() => {
-    viewerRef.current?.setStorey(selectedStorey);
-    setPicked(null);
-  }, [selectedStorey, sceneUrl]);
-
-  useEffect(() => {
-    if (state !== 'ready' || highlightItemIds === undefined) return;
-    viewerRef.current?.highlight(highlightItemIds, highlightOptions);
-  }, [state, highlightItemIds, highlightOptions, sceneUrl]);
+    if (state !== 'ready' || highlightRequest === undefined) return;
+    const [ids, options] = JSON.parse(highlightRequest) as [string[], HighlightOptions];
+    viewerRef.current?.highlight(ids, options);
+  }, [state, highlightRequest, sceneUrl]);
 
   useEffect(() => {
     if (state === 'ready' && visualise) {
@@ -151,16 +139,29 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, h
     if (itemId !== null) onPick?.(itemId);
   }
 
-  return <section className="viewer3d" aria-label="3D viewer" data-state={state}>
+  const storeyIndex = storeys.indexOf(cutaway.activeStorey ?? '');
+  function selectStorey(name: string | null) {
+    viewerRef.current?.setStorey(name);
+    setPicked(null);
+  }
+
+  return <section className="viewer3d" aria-label="3D viewer" data-state={state}
+    data-active-storey={cutaway.activeStorey ?? ''} data-show-roof={cutaway.showRoof} data-hidden-count={cutaway.hiddenCount}>
     <div className="viewer3d-toolbar">
       <label htmlFor={selectId}>Storey</label>
-      <select id={selectId} value={selectedStorey ?? ''} disabled={state !== 'ready'}
-        onChange={(event) => setSelectedStorey(event.target.value || null)}>
+      <button type="button" aria-label="Previous storey" disabled={state !== 'ready' || storeyIndex <= 0}
+        onClick={() => selectStorey(storeys[storeyIndex - 1])}>−</button>
+      <select id={selectId} value={cutaway.activeStorey ?? ''} disabled={state !== 'ready'}
+        onChange={(event) => selectStorey(event.target.value || null)}>
         <option value="">All storeys</option>
-        {selectedStorey !== null && !storeys.includes(selectedStorey)
-          && <option value={selectedStorey}>{selectedStorey}</option>}
         {storeys.map((name) => <option key={name} value={name}>{name}</option>)}
       </select>
+      <button type="button" aria-label="Next storey" disabled={state !== 'ready' || storeyIndex >= storeys.length - 1}
+        onClick={() => selectStorey(storeys[storeyIndex + 1])}>+</button>
+      {hasRoof && <label className="viewer3d-roof-toggle">
+        <input type="checkbox" checked={cutaway.showRoof}
+          onChange={(event) => viewerRef.current?.setShowRoof(event.target.checked)} /> Show roof
+      </label>}
     </div>
     <div className="viewer3d-stage" aria-busy={state === 'loading'}>
       <canvas ref={canvasRef} aria-label="3D building model" aria-describedby={helpId}
@@ -172,7 +173,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, h
       {state === 'loading' && <p className="viewer3d-message" role="status">Loading 3D scene…</p>}
       {state === 'error' && <p className="viewer3d-message" role="alert">{error}</p>}
       {state === 'ready' && details && <ItemDetailsCard key={details.item_id} details={details}
-        loading={elementsLoading} onClose={closeDetails}
+        loading={false} onClose={closeDetails}
         onHighlight={() => viewerRef.current?.highlight([details.item_id])} />}
     </div>
     <div className="viewer3d-footer">

@@ -8,8 +8,9 @@ import {
   createHighlightController, itemBounds, readHighlightColor, type HighlightOptions, type HighlightState,
 } from './highlight';
 import {
-  disposeScene, itemIdForObject, loadScene, setStorey, type LoadedScene,
+  disposeScene, itemIdForObject, loadScene, type LoadedScene,
 } from './scene';
+import { createCutawayController, type CutawayState } from './cutaway';
 import { createRiseAnimation, scheduleRiseTransitions, type RisePhase, type RiseState } from './rise';
 
 export interface Viewer {
@@ -21,6 +22,9 @@ export interface Viewer {
   /** Transfers ownership; replaced scenes and the active scene are disposed by the viewer. */
   setScene(scene: LoadedScene): void;
   setStorey(name: string | null): void;
+  setShowRoof(show: boolean): void;
+  getCutawayState(): CutawayState;
+  onCutawayChange(callback: (state: CutawayState) => void): () => void;
   highlight(item_ids: readonly string[], options?: HighlightOptions): void;
   clearHighlight(): void;
   getHighlightState(): HighlightState;
@@ -51,7 +55,11 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   world.add(light);
 
   let active: LoadedScene | null = null;
-  let storey: string | null = null;
+  let cutaway: ReturnType<typeof createCutawayController> | null = null;
+  const cutawayListeners = new Set<(state: CutawayState) => void>();
+  function notifyCutaway(): void {
+    if (cutaway) for (const listener of cutawayListeners) listener(cutaway.getState());
+  }
   let disposed = false;
   let loadVersion = 0;
   let highlights: ReturnType<typeof createHighlightController> | null = null;
@@ -117,6 +125,8 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   function highlight(ids: readonly string[], options: HighlightOptions = {}): void {
     clearHighlight();
     if (disposed || !active || !highlights) return;
+    cutaway?.followHighlight(ids, options.cameraTargetItemId);
+    notifyCutaway();
     // Compute labels using full geometry: a flat node has a singular world matrix.
     rise?.animation.restore();
     const accent = readHighlightColor(canvas);
@@ -233,10 +243,11 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       disposeScene(active);
     }
     active = scene;
+    cutaway = createCutawayController(scene);
     highlights = createHighlightController(scene);
     world.add(scene.root);
     fit(scene);
-    setStorey(scene, storey);
+    notifyCutaway();
   }
 
   const observer = new ResizeObserver(resize);
@@ -282,8 +293,14 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       attach(scene);
     },
     setStorey(name) {
-      storey = name;
-      if (active) setStorey(active, name);
+      cutaway?.setStorey(name);
+      notifyCutaway();
+    },
+    setShowRoof(show) { cutaway?.setShowRoof(show); notifyCutaway(); },
+    getCutawayState() { return cutaway?.getState() ?? { activeStorey: null, showRoof: false, hiddenCount: 0 }; },
+    onCutawayChange(callback) {
+      cutawayListeners.add(callback);
+      return () => { cutawayListeners.delete(callback); };
     },
     highlight,
     clearHighlight() { clearHighlight(); notifyHighlight(); },
@@ -314,6 +331,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       if (disposed) return;
       disposed = true;
       highlightListeners.clear();
+      cutawayListeners.clear();
       loadVersion++;
       cancelAnimationFrame(frame);
       observer.disconnect();

@@ -1,5 +1,6 @@
 import { Object3D, Texture, type Material, type Mesh } from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { indexElements, type IFCElement } from './identify';
 
 export type Vec3 = [number, number, number];
 export type Storey = string | { name: string; elevation_m?: number };
@@ -27,6 +28,7 @@ export interface SceneManifest {
 }
 
 export interface LoadedScene {
+  elements?: Map<string, IFCElement>;
   manifest: SceneManifest;
   root: Object3D;
   items: Map<string, Object3D>;
@@ -103,10 +105,14 @@ export async function loadScene(manifestUrl: string | URL): Promise<LoadedScene>
   const asset = manifest.glb;
   const glb = typeof asset === 'string' ? asset : asset?.url || asset?.path || asset?.local_path;
   if (!glb) throw new Error('Scene manifest has no GLB path or URL');
-  const gltf = await new GLTFLoader().loadAsync(
-    documentFileUrl(url, 'scene.glb') ?? new URL(glb, response.url || url).href,
-  );
-  return createScene(manifest, gltf);
+  const elementsUrl = documentFileUrl(url, 'elements.json');
+  const [gltf, elements] = await Promise.all([
+    new GLTFLoader().loadAsync(documentFileUrl(url, 'scene.glb') ?? new URL(glb, response.url || url).href),
+    elementsUrl ? fetch(elementsUrl).then(async (result) => result.ok
+      ? indexElements(await result.json()) : new Map<string, IFCElement>()).catch(() => new Map<string, IFCElement>())
+      : Promise.resolve(new Map<string, IFCElement>()),
+  ]);
+  return { ...createScene(manifest, gltf), elements };
 }
 
 /** Null restores each item's original visibility. Unassigned items hide for a named storey. */

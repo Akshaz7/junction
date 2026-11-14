@@ -1,4 +1,5 @@
 export { createViewer, type Viewer } from './viewer';
+export { type CutawayState } from './cutaway';
 export { type HighlightOptions, type HighlightState } from './highlight';
 export { Viewer3D, type Viewer3DProps } from './Viewer3D';
 export { ViewerTestPage } from './ViewerTestPage';

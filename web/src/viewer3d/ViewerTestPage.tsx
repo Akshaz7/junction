@@ -25,8 +25,8 @@ export function ViewerTestPage() {
   }, [viewer]);
 
   useEffect(() => {
-    const target = window as typeof window & { visualise3dTest?: Pick<Viewer, 'getHighlightState'> };
-    if (visualiseViewer) target.visualise3dTest = { getHighlightState: () => visualiseViewer.getHighlightState() };
+    const target = window as typeof window & { visualise3dTest?: Viewer };
+    if (visualiseViewer) target.visualise3dTest = visualiseViewer;
     return () => { delete target.visualise3dTest; };
   }, [visualiseViewer]);
 

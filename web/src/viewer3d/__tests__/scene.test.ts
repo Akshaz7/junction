@@ -126,4 +126,29 @@ describe('Digital Hub scene (real GLB, no WebGL)', () => {
       .toBe('https://example.test/api/docs/test/files/elements.json');
     expect(documentFileUrl('https://example.test/fixtures/scene.json', 'elements.json')).toBeNull();
   });
+
+  it('loads optional IFC metadata before returning a scene so roof slabs can be hidden on the first frame', async () => {
+    const roof = { item_id: 'roof-slab', ifc_class: 'IfcSlab', predefined_type: 'ROOF' };
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async (url: string | URL) => ({
+      ok: true, json: async () => String(url).endsWith('elements.json') ? { elements: [roof] } : manifest,
+    })));
+    vi.spyOn(GLTFLoader.prototype, 'loadAsync').mockResolvedValue({
+      scene: new Group(), parser: { associations: new Map(), json: {} },
+    } as unknown as GLTF);
+    const scene = await loadScene('https://example.test/api/docs/ac20/scene');
+    expect(scene.elements?.get('roof-slab')).toEqual(roof);
+  });
+
+  it('still loads scene geometry when the optional element endpoint is unavailable', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async (url: string | URL) => {
+      if (String(url).endsWith('elements.json')) throw new Error('offline');
+      return { ok: true, json: async () => manifest };
+    }));
+    vi.spyOn(GLTFLoader.prototype, 'loadAsync').mockResolvedValue({
+      scene: new Group(), parser: { associations: new Map(), json: {} },
+    } as unknown as GLTF);
+    const scene = await loadScene('https://example.test/api/docs/ac20/scene');
+    expect(scene.elements?.size).toBe(0);
+    expect(scene.manifest).toEqual(manifest);
+  });
 });

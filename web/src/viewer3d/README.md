@@ -10,14 +10,18 @@ import { Viewer3D } from './viewer3d';
 
 <Viewer3D
   doc_id={docId}
-  storey={null}
   onPick={(item_id) => console.log(item_id)}
 />
 ```
 
 Give its parent a height (the component has a 420px minimum). `storey` defaults to
-all storeys; changes to the prop update the filter, and the dropdown can also be
-used directly. Clicks report the contract item ID; dragging only orbits.
+the lowest storey with a nonnegative elevation. Roofs and higher storeys are hidden.
+The dropdown and previous/next buttons move the cutaway; `storey={null}` explicitly
+shows all storeys. “Show roof” reveals roof geometry even above the selected storey,
+while other higher-storey items stay hidden. Roofless extruded plans have no roof
+control. Roof classification uses manifest `kind` and the optional IFC element
+index (including `IfcSlab` with predefined type `ROOF` and roof coverings).
+Clicks report the contract item ID; dragging only orbits.
 Changing `sceneUrl` disposes the previous viewer and ignores stale scene loads.
 `doc_id` loads `/api/docs/{doc_id}/scene` and resolves geometry through
 `/api/docs/{doc_id}/files/scene.glb`, ignoring filesystem paths in the manifest.
@@ -53,7 +57,12 @@ returns an unsubscribe function. Internal scene disposal does not publish a clea
 Missing IDs are ignored; labels default to sequential numbers when omitted.
 An empty selection clears the highlight. State reports resolved item IDs,
 the number of other resolved items (including hidden storeys), and label strings.
-Highlighting preserves the storey filter. Keep React option references stable
+Highlighting selects the camera target's storey, otherwise the first highlighted
+item's storey. Roof answers also reveal their roof geometry. These changes apply
+to live updates and VisualisePanel too. `getCutawayState()` exposes `activeStorey`,
+`showRoof`, and the number of hidden resolved items; `onCutawayChange(callback)`
+observes updates. `setShowRoof(boolean)` controls the roof imperatively.
+Keep React option references stable
 when possible so unrelated renders do not restart the camera flight.
 
 Selected materials emit the runtime `--mode-accent` token (fallback `#166ed1`);
@@ -155,3 +164,8 @@ nine seconds with named failures and timing logs. Both contexts close with
 `Promise.allSettled` even on failure. The two-second sync assertions stay strict.
 When using `scripts/test_snapshot.sh`, include `web/public/fixtures` alongside
 `web/src/viewer3d` and the `viewer3d-*.spec.ts` files so the light assets are copied.
+
+T-11 adds `e2e/viewer3d-cutaway.spec.ts`: real AC20 API metadata, initial ground
+cutaway, roof visibility, storey stepping, highlight selection and live propagation
+to VisualisePanel. A second case checks the light roofless extrusion. LEAD runs
+this and the other viewer3d specs on the stable snapshot outside the sandbox.
