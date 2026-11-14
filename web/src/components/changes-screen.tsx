@@ -8,6 +8,7 @@ import type { FileDocument } from './data-screen'
 import type { ChangeEntry, RuleChangeEntry, Comparison } from '../lib/types'
 import { ruleChangeCard } from '../lib/rule-change'
 import './changes-screen.css'
+import { VersionPairCompare } from './changes-screen.pair'
 
 export type RevisionEntry = Omit<ChangeEntry, 'summary'> & {
   summary: Omit<ChangeEntry['summary'], 'n_changes' | 'version_a' | 'version_b'> & {
@@ -48,6 +49,7 @@ export function RevisionSummary({ comparison }: { comparison: RevisionComparison
 }
 
 export function ChangesScreen({ docs, demo }: { docs: FileDocument[]; demo: boolean }) {
+  const [pairOpen, setPairOpen] = useState(false)
   const [feed, setFeed] = useState<RevisionFeedEntry[]>([])
   const [selected, setSelected] = useState<RevisionEntry | null>(null)
   const [comparison, setComparison] = useState<RevisionComparison | null>(null)
@@ -121,7 +123,8 @@ export function ChangesScreen({ docs, demo }: { docs: FileDocument[]; demo: bool
     setTimeout(() => URL.revokeObjectURL(url), 1000)
   }
 
-  return <section className={`changes-screen ${selected ? 'has-comparison' : ''}`} aria-label="Drawing changes">
+  return <section className={`changes-screen ${selected ? 'has-comparison' : ''} ${pairOpen ? 'has-pair-result' : ''}`} aria-label="Drawing changes">
+    <VersionPairCompare docs={docs} onOpen={setPairOpen} />
     <div className="changes-refresh"><span>{loading ? 'Checking…' : checkedAt ? `Checked at ${checkedAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}` : 'Not checked'}</span><Button variant="raised" aria-label="Refresh changes" disabled={loading} onClick={() => setRefresh((n) => n + 1)}><RotateCw size={16} /><span>Refresh</span></Button></div>
     <div className="changes-list">
       <div className="changes-search"><label className="search-field"><Search size={14} /><input type="search" aria-label="Search changes" placeholder="Search changes..." value={search} onChange={(event) => setSearch(event.target.value)} /></label><Button variant="outline" size="icon" aria-label="Clear change filters" disabled={!search && !typeFilter && !folderFilter && !disciplineFilter} onClick={() => { setSearch(''); setTypeFilter(''); setFolderFilter(''); setDisciplineFilter('') }}><SlidersHorizontal size={16} /></Button></div>
@@ -151,7 +154,7 @@ export function ChangesScreen({ docs, demo }: { docs: FileDocument[]; demo: bool
     </div>
     <div className="changes-detail">
       {error && <p className="error-message" role="alert">{error}</p>}
-      {!selected ? <div className="changes-nothing"><span><Inbox size={24} /></span><h2>Nothing open</h2><p>Pick a change from the list to read what moved.</p></div> : <>
+      {!selected ? <div className="changes-nothing"><span><Inbox size={24} /></span><h2>Compare two versions</h2><p>Choose version A and B above, or open a revision from the list.</p></div> : <>
         <button className="all-changes" type="button" onClick={() => setSelected(null)}><ArrowLeft size={16} />All changes</button>
         <header className="comparison-header"><div><h2>{title(selected)}</h2><p>/{documentFor(selected)?.folder || documentFor(selected)?.source || 'Drawings'}</p><div className="comparison-versions"><span className="version-tag">{selected.type === 'new_document' ? 'New document' : 'New version'}</span>{comparison && <><FileText size={13} />{comparison.v1.label}<ArrowRight size={12} /><FileText size={13} />{comparison.v2.label}</>}</div></div><dl><div><dt>Uploaded</dt><dd>{new Date(selected.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</dd></div><div><dt>Discipline</dt><dd>{disciplineOf(selected) || 'Unspecified'}</dd></div><div><dt>Source</dt><dd>{comparison?.generated_for_demo ? 'generated for demo' : comparison?.source || 'Project documents'}</dd></div></dl></header>
         {selected.type === 'new_version' && <a className="open-compare" href={`#/compare?change=${encodeURIComponent(selected.id)}`}>Open in Compare</a>}

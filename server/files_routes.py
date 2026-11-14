@@ -309,6 +309,32 @@ async def changes_refresh():
     return await _feed(pool)
 
 
+@router.post("/changes/compare")
+async def compare_versions(request: Request):
+    """Compare any two listed versions, including freshly ingested uploads."""
+    from engine.revision_compare import compare_documents
+    from . import changes_source as cs
+    try:
+        body = await request.json()
+    except ValueError:
+        raise HTTPException(400, "Choose version A and version B.")
+    if not isinstance(body, dict):
+        raise HTTPException(400, "Choose version A and version B.")
+    a, b = body.get("doc_a"), body.get("doc_b")
+    if any(not isinstance(d, str) or not SAFE_ID.fullmatch(d) or d in (".", "..") for d in (a, b)):
+        raise HTTPException(400, "Choose valid documents for version A and version B.")
+    if a == b:
+        raise HTTPException(400, "Choose two different versions.")
+    pool = await db.get_pool()
+    if pool is None:
+        raise HTTPException(503, "database unavailable")
+    if not await cs.visible_pair(pool, a, b):
+        raise HTTPException(404, "One of these versions is not available.")
+    await artifact_store.ensure_doc(a)
+    await artifact_store.ensure_doc(b)
+    return await asyncio.to_thread(compare_documents, a, b, config.artifacts_dir())
+
+
 @router.get("/changes/{change_id}")
 async def change(change_id: str, page: int | None = None):
     from . import changes_source as cs

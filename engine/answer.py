@@ -260,6 +260,14 @@ def _guarded(question, doc_ids, on_event, scene_state, history):
 
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None) -> dict:
+    # F-CHANGES: revision questions are a complete code route, including evidence.
+    from engine.revision_compare import comparison_answer
+    comparison = comparison_answer(question, doc_ids, _root())
+    if comparison is not None:
+        if on_event:
+            for entry in comparison["trace"]:
+                on_event("trace", entry)
+        return comparison
     # thread memory (engine/context.py): every route below sees the resolved, standalone question and document selection
     original, step = question, None
     try:  # keyboard mash or nonsense: say so, never reuse the previous answer
