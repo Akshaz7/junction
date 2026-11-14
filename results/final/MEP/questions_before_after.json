@@ -1,0 +1,3692 @@
+[
+ {
+  "doc": "ifc_bench__4351-arc",
+  "q": "What is the percentage of wall volume that is load-bearing, including the volume breakdown?",
+  "ref": "Percentage of load-bearing walls by volume:\n- Load-bearing walls: 31.5 cu m (5.1% of total wall volume)\n- Total wall volume: 623.3 cu m",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**4 of 43 walls are load-bearing**.\n- Not load-bearing: 39 [1]",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__4351-arc",
+  "q": "What is the total volume of concrete used?",
+  "ref": "The concrete volume is 668.07 cu m.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__4351-arc",
+  "q": "What is the total volume of concrete used in walls?",
+  "ref": "Four walls are explicitly identified as Basic Wall:Foundation - 12\" Concrete. Their stored volumes total 1,111.835 cu ft (31.484 cu m). The model does not separately store constituent concrete volumes for other composite wall assemblies.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__4351-arc",
+  "q": "What is the total volume of concrete used in floor slabs?",
+  "ref": "The concrete volume is 273.91 cu m.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**No concrete columns and beams and footings and slabs and walls found**: none of the 49 columns and beams and footings and slabs and walls names concrete as its material.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__4351-arc",
+  "q": "What is the total volume of concrete used in foundation?",
+  "ref": "The concrete volume is 153.75 cu m.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no footings**.\n- Its structural-type elements are: 43 walls, 7 stairss, 6 slabs, 4 structural members.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__4351-arc",
+  "q": "What is the structural concept of the building?",
+  "ref": "Information is not explicitly available in the BIM model, However, the structure is probably based on load-bearing wall system.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__4351-arc",
+  "q": "What electrical components are in this building and their counts?",
+  "ref": "The list of all electrical components present in the building are:\n1. Duplex Receptacle - Standard (113 items)\n2. Recessed Lighting Fixture - 2'x2'(2 Lamp) - 120V (101 items)\n3. Duplex Receptacle - GFCI (12 items)\n4. Lighting Switch - Three Way (8 items)\n5. Lighting Switch - Single Pole (4 items)\n6.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**119 service components in 1 system type**.\n- Electrical: 119 components (119 light fittings) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.15
+  }
+ },
+ {
+  "doc": "ifc_bench__4351-arc",
+  "q": "What are the specific MEP system names and their corresponding types present in the building?",
+  "ref": "The MEP systems present in the building are:\n\nSystem Names:\n- Default Return Air (micky)\n- Default Supply Air (Pyro)\n- Default Supply Air (Queen)\n- Default Supply Air (micky)\n\nSystem Types:\n- Return Air\n- Supply Air",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**155 service components in 2 system types**.\n- Electrical: 119 components (119 light fittings)\n- Ventilation: 36 components (36 air terminals (diffusers and grilles))\n- 4 separately named circuits or loops are defined in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__4351-arc",
+  "q": "What is the total length of water supply piping in the building?",
+  "ref": "Information not available in the BIM model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**No pipes** are modelled.\n- This model's service elements are: 119 light fittings, 36 air terminals (diffusers and grilles).",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__4351-arc",
+  "q": "What plumbing fixtures are in this building and their respective counts?",
+  "ref": "The list of all plumbing fixtures present in the building are:\n1. Toilet-Domestic-3D (9 items)\n2. Sink Vanity-Round: 19\" x 19\" (6 items)\n3. Urinal-Wall-3D (4 items)\n4. Sink Kitchen-Double: 42\" x 21\" (2 items)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no plumbing fixtures**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 122 proxys, 119 light fittings, 43 walls, 36 air terminals (diffusers and grilles).\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "How many of the walls are load-bearing compared with non-load-bearing?",
+  "ref": "Load-bearing classification data is not available in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**The model does not say which walls are load-bearing**: none of its 121 walls carries a load-bearing property. This is not guessed.\n- Ask the structural engineer for the structural model.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "Which sanitary fixtures are available in this building?",
+  "ref": "No Sanitary fixtures were found in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no plumbing fixtures**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 253 furnitures, 206 windows, 121 walls, 77 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "Which structural components exist in this building?",
+  "ref": "Structural Elements Summary:\n   - Beams: 0 elements\n   - Columns: 2 elements\n   - Floor slabs: 5 elements\n   - Roof slabs: 21 elements\n   - Foundations: 0 elements\n   - Structural members: 0 elements\n   - Structural connections: 0 elements\n\n   Total Structural Elements: 28",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2 structural elements**: 2 columns.\n- Columns: 2 in 1 type (Stahlbeton 2747937872 D200: 2) [1]",
+   "num_overlap": 0.2
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "Which beams are used in the building?",
+  "ref": "No beam elements found in the model. This may indicate a flat slab construction system or wall-bearing structure.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no beams**.\n- Its structural-type elements are: 121 walls, 26 slabs, 4 stairss, 2 columns.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "Which column types are present here and how many of each?",
+  "ref": "Total Columns: 2\n\n   Column Types and Quantities:\n   - Stahlbeton 2747937872 D200: 2 columns (100.0%)\n\n   Column Materials (from type names):\n   - Steel: 2 columns",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2 columns in 1 type**.\n- Stahlbeton 2747937872 D200: 2 (100%), diameter 200 mm, Stahlbeton 2747937872 [1]",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "What are the sizes of the columns?",
+  "ref": "Column Dimensions by Type:\n   - Stahlbeton 2747937872 D200: \u00d8200mm (circular column) (2 columns)\n\n   Column Shape Distribution:\n   - Circular columns: 2",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1 column size** across 2 columns.\n- diameter 200 mm: 2 (100%) [1]",
+   "num_overlap": 0.67
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "Which MEP systems are installed in this building?",
+  "ref": "No explicit MEP systems found in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 253 furnitures, 206 windows, 121 walls, 77 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "What types of pipes are used in the building?",
+  "ref": "No Pipe segments or Pipe fittings were found in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no pipes**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 253 furnitures, 206 windows, 121 walls, 77 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__ac20-arc",
+  "q": "Which heating systems are included in this building?",
+  "ref": "No explicit heating system components found.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 253 furnitures, 206 windows, 121 walls, 77 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__dental-clinic-str",
+  "q": "Could you provide a breakdown of all steel column types in the structural model, including their dimensions?",
+  "ref": "The structural model contains two types of steel wide flange columns with the following dimensions:\n\n**W150X22.5 Columns:**\n- Depth: 152 mm\n- Width: 152 mm\n- Web thickness: 5.8 mm\n- Flange thickness: 6.6 mm\n\n**W250X67 Columns:**\n- Depth: 257 mm\n- Width: 204 mm\n- Web thickness: 8.9 mm\n- Flange thickn",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**4 column sizes** across 195 columns.\n- size not recorded: 159 (82%)\n- 400 x 400 mm: 32 (16%)\n- 316 x 400 mm: 3 (2%)\n- 316 x 316 mm: 1 (1%) [1][2][3][4]",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__dental-clinic-str",
+  "q": "What is the structural concept of the building?",
+  "ref": "The structural concept of the building is a steel frame with concrete slabs.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__dental-clinic-str",
+  "q": "What is the volume of concrete required for the foundation?",
+  "ref": "The volume of concrete required for the foundation is 167.61 m\u00b3.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**No concrete footings found**: none of the 96 footings names concrete as its material.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "How many walls are load-bearing compared with non-load-bearing?",
+  "ref": "Wall Load-Bearing Classification:\n    - Load-bearing walls: 0 (0.0%)\n    - Non-load-bearing walls: 178 (100.0%)\n    - Total classified: 178 of 178 walls",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**0 of 178 walls are load-bearing**.\n- Not load-bearing: 178\n- Wall volume: 0.00 m\u00b3 load-bearing, 1,172.0 m\u00b3 not [1]",
+   "num_overlap": 0.67
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What is the structural system applied in this building, including element counts?",
+  "ref": "Structural System: Reinforced Concrete Frame Construction\n\n   Structural Elements:\n   - Beams: 14 elements\n   - Columns: 62 elements\n   - Slabs: 23 elements\n   - Members: 80 elements\n   - Roof Elements: 3 elements\n   - Plates: 25 elements\n\n   Total Structural Elements: 207",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**156 structural elements**: 80 structural members, 62 columns, 14 beams.\n- Structural members: 80 in 5 types (60 x 120: 54; Standard 100-30-25: 14)\n- Columns: 62 in 2 types (STB 250 x 400: 32; STB 250 x 250: 30)\n- Beams: 14 in 1 type (STB 250 x 500: 14) [1][2][3]",
+   "num_overlap": 0.71
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Which beam types are present in the building, with quantities?",
+  "ref": "Total Beams: 14\n   \n   Beam Types:\n   - STB Tr\u00e4ger - rechteckig:STB 250 x 500: 14 beams (100.0%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**14 beams in 1 type**.\n- STB 250 x 500: 14 (100%), STB 250 x 500, Ortbeton - bewehrt [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Which columns are used in the building, showing distribution by type?",
+  "ref": "Total Columns: 62\n\n   Column Types:\n   - STB St\u00fctze - rechteckig:STB 250 x 400: 32 columns (51.6%)\n   - STB St\u00fctze - rechteckig:STB 250 x 250: 30 columns (48.4%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**62 columns in 2 types**.\n- STB 250 x 400: 32 (52%), STB 250 x 400, Ortbeton - bewehrt\n- STB 250 x 250: 30 (48%), STB 250 x 250, Ortbeton - bewehrt [1][2]",
+   "num_overlap": 0.71
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What materials are used for the structural system?",
+  "ref": "Structural Materials Used:\n   - Leichtbeton - Mauerwerk\n   - Metall - Edelstahl geb\u00fcrstet\n   - Metall - Edelstahl satiniert\n   - Metall - Zink\n   - Ortbeton - bewehrt\n   - Ortbeton - bewehrt Verputzt",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**3 materials for the columns and beams and structural members and footings**.\n- Ortbeton - bewehrt: 76 (49%)\n- Kunststoff - grau 70-70-70: 72 (46%)\n- Metall - Edelstahl geb\u00fcrstet: 8 (5%) [1][2][3]",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What are the spans and sizes of the beams?",
+  "ref": "Information not available in BIM model\n   Beam span and sizing information requires structural analysis data",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What type of structural system is used in the building, and how is the structural grid determined?",
+  "ref": "Based on the structural elements available in the model, the structural system is most probably flat slab structures with reinforced concrete columns and slabs. Therefore, the structural grid can be derived based on the placement of columns.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What are the load-bearing structural elements in the building, including their quantities, and what is the typical load path for vertical loads?",
+  "ref": "Load Bearing Elements:\n- Load bearing beams: 14/14\n- Load bearing columns: 62/62\n- Total load bearing elements: 76\n\nLoad Path:\nTypical reinforced concrete frame load path:\nVertical loads transfer: Slabs \u2192 Beams \u2192 Columns \u2192 Foundations",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What is the total concrete volume used structurally, with breakdown by element type?",
+  "ref": "Total Structural Concrete Volume: 1641.47 cu m\n    Elements with volume data: 94\n    \n    Volume by Element Type:\n    - Beams: 10.76 cu m\n    - Columns: 18.52 cu m\n    - Slabs: 1612.18 cu m",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What are the dimensions of the columns, with distribution by size?",
+  "ref": "Column Dimensions:\n- 250 x 400 mm: 32 columns (51.6%)\n- STB St\u00fctze - rechteckig:STB 250 x 250: 30 columns (48.4%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2 column sizes** across 62 columns.\n- STB 250 x 400: 32 (52%)\n- STB 250 x 250: 30 (48%) [1][2]",
+   "num_overlap": 0.67
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Which types of structural members are present, showing quantity breakdown?",
+  "ref": "Total Members: 80\n    \n    Member Types:\n    - Rechteckiger Pfosten:60 x 120: 54 members (67.5%)\n    - Rechteckiger Pfosten:Standard 100-30-25: 14 members (17.5%)\n    - Stair Stringer: 8 members (10.0%)\n    - Rechteckiger Pfosten:Standard L 100-30-25: 2 members (2.5%)\n    - Rechteckiger Pfosten:Stan",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**80 structural members in 5 types**.\n- 60 x 120: 54 (68%), 60 x 120, Kunststoff - grau 70-70-70\n- Standard 100-30-25: 14 (18%), Standard 100-30-25, Kunststoff - grau 70-70-70\n- Metall 10 x 260: 8 (10%), Metall 10 x 260, Metall - Edelstahl geb\u00fcrstet\n- Standard L 100-30-25: 2 (2%), Standard L 100-30-25, Kunststoff - grau 70-70-70\n- Standard R 100-30-25: 2 (2%), Standard R 100-30-25, Kunststoff - gr",
+   "num_overlap": 0.79
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Which roof structural components are used, with type distribution?",
+  "ref": "Total Roof Elements: 3\n    \n    Roof Element Types:\n    - Roof Glazing System: 2 elements (66.7%)\n    - Basisdach:Flachdachaufbau begr\u00fcnt 320: 1 elements (33.3%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**156 structural elements**: 80 structural members, 62 columns, 14 beams.\n- Structural members: 80 in 5 types (60 x 120: 54; Standard 100-30-25: 14)\n- Columns: 62 in 2 types (STB 250 x 400: 32; STB 250 x 250: 30)\n- Beams: 14 in 1 type (STB 250 x 500: 14) [1][2][3]",
+   "num_overlap": 0.5
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Could you provide a comprehensive assessment of the building's structural system efficiency, including the system type, element ratios, building characteristics, and overall efficiency rating?",
+  "ref": "Structural efficiency should be determined through detailed structural analysis. However, based on the data available in this model, the efficiency of the structural system can be summarized as follows:\n    \n    System Type: Reinforced Concrete Frame\n    - Efficient for mid-rise construction\n    - G",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Could you provide a detailed breakdown of all MEP systems present in this building, including their components and a quantitative summary of systems by category?",
+  "ref": "MEP Systems Present:\n\nHeating System:\n- Heat pump-based heating with radiators\n- Copper piping distribution network\n- Temperature sensors and circulation pumps\n\nPlumbing System:\n- Hot water distribution (16 zones)\n- Cold water supply\n- Wastewater collection\n- Rainwater drainage\n\nVentilation System:\n",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 proxys, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "How many MEP components are there by system type?",
+  "ref": "Total MEP Components: 4112\n   \n   Components by System Type:\n   - Heating: 1795 components\n     * Radiators: 63\n     * Pipe segments: 914\n     * Pipe fittings: 743\n     * Valves: 65\n     * Pumps: 5\n     * Tanks: 2\n     * Sensors: 2\n     * Heat pump equipment: 1\n   - Plumbing: 1010 components\n     * ",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 proxys, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What is the overall distribution of MEP terminals in the building, including total counts, average per space, and breakdown by type?",
+  "ref": "MEP Terminal Distribution:\n   - Total terminals: 283\n   - Total spaces: 64 (from architecture)\n   - Average terminals per space: 4.4\n   \n   Terminal Types:\n   - Heating terminals (radiators): 63\n   - Plumbing terminals (fixtures): 72\n   - Ventilation terminals (diffusers): 148",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 proxys, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.17
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Could you provide a breakdown of the MEP systems serving Level B01_OKRD, including the number of major components for each system type, along with the primary functions of this level?",
+  "ref": "B01_OKRD (Basement Level) MEP Systems:\n   - Heating system: 0 major components\n   - Plumbing system: 0 major components\n   - Ventilation system: 0 major components\n   \n   Primary Functions:\n   - Technical equipment rooms\n   - Main utility distribution\n   - Heat pump and mechanical equipment",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 proxys, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Could you provide a breakdown of the MEP systems serving Level E00_OKRD, including component counts for each system type, along with the primary functions of this level?",
+  "ref": "E00_OKRD (Ground Level) MEP Systems:\n   - Heating system: 0 major components\n   - Plumbing system: 0 major components\n   - Ventilation system: 0 major components\n   \n   Primary Functions:\n   - Occupied spaces conditioning\n   - Public restroom facilities\n   - Main air handling equipment",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 proxys, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What MEP systems serve Level E01_OKRD, and what are their primary functions?",
+  "ref": "E01_OKRD (First Level) MEP Systems:\n   - Heating system: 0 major components\n   - Plumbing system: 0 major components\n   - Ventilation system: 0 major components\n   \n   Primary Functions:\n   - Office space conditioning\n   - Individual room controls\n   - Zone-specific air distribution",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 proxys, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What electrical loads are present in the building, broken down by equipment type?",
+  "ref": "Electrical distribution equipment not found in MEP files.\nThis information would typically be in a dedicated electrical IFC file.\n\nHowever, electrical loads are present from:\n- Water heaters: 16 units (instantaneous type)\n- Heat pump equipment: 1 units\n- Circulation pumps: 5 units\n- Ventilation fans",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 proxys, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What are the electrical loads by system type?",
+  "ref": "Electrical Loads by System Type:\n   - Hot Water System: 48.0 kW\n     * 16 instantaneous water heaters at 3 kW each\n   - Heat Pump System: 15.0 kW (estimated)\n     * 1 heat pump unit\n   - Circulation Pumps: 3.8 kW (estimated)\n     * 5 heating circulation pumps\n   - Ventilation Fans: 4.0 kW (estimated",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 proxys, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What are the voltage levels used in the electrical system?",
+  "ref": "Specific voltage levels not available in MEP files.\n    Standard German building voltages likely used:\n    - 230V single-phase for small equipment\n    - 400V three-phase for larger mechanical equipment\n    - Low voltage control systems for building automation",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 proxys, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What lighting systems are installed?",
+  "ref": "Lighting systems not found in model files.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no light fittings**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 proxys, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What maintenance requirements exist for MEP systems?",
+  "ref": "No explicit maintenance requirements are available in the models.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 proxys, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "What is the total length of pipes and ducts in the building, broken down by type (heating pipes, plumbing pipes, and ventilation ducts)?",
+  "ref": "Total Distribution System Lengths:\n- Heating pipes: 1207377.1 m (914 segments)\n- Plumbing pipes: 301106.0 m (504 segments)\n- Ventilation ducts: 88788.6 m (595 segments)\n\nTotal MEP Distribution: 1597271.7 m\nTotal Distribution Components: 2013",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no pipes and ducts**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 178 walls, 150 proxys, 80 structural members, 64 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-heating",
+  "q": "Which component types comprise the heating system and how many of each?",
+  "ref": "Heating System Components:\n   - Pipe Segments (914)\n   - Pipe Fittings (743)\n   - Valves (65)\n   - Space Heaters/Radiators (63)\n   - Pumps (5)\n   - Tanks (2)\n   - Temperature Sensors (2)\n   - Unitary Equipment (1)\n\n   Total Heating Components: 1795",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1,795 service components in 1 system type**.\n- Heating: 1,795 components (914 pipes, 743 pipe fittings, 65 valves and controls, 1,207.4 m of runs)\n- 42 separately named circuits or loops are defined in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.62
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-heating",
+  "q": "What is the total length of pipe used in the heating system, and how is this distributed by building level?",
+  "ref": "Total Pipe Length: 1207377.10 m\n\n   Pipe Length by Building Level:\n   - Unknown Level: 1207377.10 m (100.0%)",
+  "before": {
+   "route": "code",
+   "text": "**42 piping systems**, longest first: Heating water (H_WP_RL): 41.4 m (16 pipes); Heating water (H_Transport_RL_0): 40.0 m (18 pipes); Heating water (H_WP_VL): 39.5 m (6 pipes); Heating water (H_Transport_VL_0): 38.9 m (17 pipes); Heating water (H_Transport_RL_13): 38.6 m (42 pipes); Heating water (H_Transport_VL_13): 38.5 m (23 pipes); Heating water (H_Transport_VL_8): 37.9 m (23 pipes); Heating ",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1,207.4 m of pipes** in **914 runs**.\n- By system: heating: 1,207.4 m (914 runs) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-heating",
+  "q": "Which pipe types are used in this building with quantities?",
+  "ref": "Pipe Types Used:\n   - Copper (Unknown Diameter): 914 segments, 1207377.10 m total length",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1 type of pipes**, 914 elements in total.\n- Kupfer - Hartgel\u00f6tet: 914 (100%), sizes DN15 (538), DN10 (85), DN20 (71), Kupfer - DIN EN 1057 [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.5
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-heating",
+  "q": "Which pipe fitting types are used in this building including the number of each, and how are they distributed across the different building levels?",
+  "ref": "Pipe Fitting Types:\n   - Elbow Fitting: 582 fittings (78.3%)\n   - Tee Fitting: 108 fittings (14.5%)\n   - Transition Fitting: 44 fittings (5.9%)\n   - Rundrohr-Verteiler 5-fach: 4 fittings (0.5%)\n   - Rundrohr-Verteiler 5-fach_r\u00fccklauf: 4 fittings (0.5%)\n   - Verteiler - DN 35-200 - liNear Neutrale Ba",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**6 types of pipes and fittings**, 1,657 elements in total.\n- Kupfer - Hartgel\u00f6tet: 914 (55%), sizes DN15 (538), DN10 (85), DN20 (71), Kupfer - DIN EN 1057\n- Bogen Kupfer (Standard): 582 (35%)\n- T-St\u00fcck Kupfer (Standard): 108 (7%)\n- \u00dcbergang Kupfer (Standard): 44 (3%)\n- Verteiler 8 Abg\u00e4nge: 8 (0%)\n- Verteiler - DN 35-200 - liNear Neutrale Bauteile #no5n2n3# (Standard): 1 (0%)\n- Kinds: 914 pipes, 7",
+   "num_overlap": 0.39
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-heating",
+  "q": "What are the different types of valves used in this building, how many of each type are there, and how are they distributed across the building levels?",
+  "ref": "Valve Types and Quantities:\n   - Kugelhahn DN 10 - 50 - Gewinde: 32 valves (49.2%)\n   - Shut-off Valve: 11 valves (16.9%)\n   - Absperrklappe Hebel - Flansch: 11 valves (16.9%)\n   - R\u00fcckschlagklappe allgemein - Flansch: 5 valves (7.7%)\n   - 3-Wege-Ventil - DN 15 - 50: 4 valves (6.2%)\n   - Cap Valve: ",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**65 valves and controls** in this model.\n- By level: B01_OKRD: 25; E01_OKRD: 20; E00_OKRD: 20\n- By type: DN 15 1/2\": 20 (31%); DN 20 3/4\": 12 (18%); Absperrventil allgemein - Flansch (Standard): 11 (17%); Absperrklappe Hebel - Flansch (Standard): 11 (17%); R\u00fcckschlagklappe allgemein - Flansch (Standard): 5 (8%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.5
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-heating",
+  "q": "Which heating sensor types are used in this building with their quantities, and how are they distributed by building level?",
+  "ref": "Heating Sensor Types:\n- Temperature Sensor: 2 sensors (100.0%)\n\nSensors by Building Level:\n- Ebene: B01_OKFB: 2 sensors\n  - Temperature Sensor: 2",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1 type of sensors and detectors**, 2 elements in total.\n- Temperaturf\u00fchler: 2 (100%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-heating",
+  "q": "What are the radiator types used in this building with their counts, and how are they distributed by building level?",
+  "ref": "Radiator Types:\n- Panel Radiator: 63 radiators (100.0%)\n\nRadiators by Building Level:\n- Ebene: E00_OKFB: 29 radiators\n  - Panel Radiator: 29\n- Ebene: E01_OKFB: 34 radiators\n  - Panel Radiator: 34",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1 type of radiators and heaters**, 63 elements in total.\n- Rechts: 63 (100%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.5
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-heating",
+  "q": "What are the different types of pumps used in this building, their quantities and percentages, and how are they distributed by building level?",
+  "ref": "Pump Types:\n- Inline Pump: 4 pumps (80.0%)\n- Double Pump: 1 pump (20.0%)\n\nPumps by Building Level:\nEbene: B01_OKFB: 5 pumps\n- Double Pump: 1\n- Inline Pump: 4",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**4 types of pumps**, 5 elements in total.\n- DN 40: 2 (40%)\n- DN 50: 1 (20%)\n- DN 25: 1 (20%)\n- DN 65: 1 (20%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.8
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-heating",
+  "q": "What is the total heating capacity of all radiators?",
+  "ref": "Heating capacity information not available in this model",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**1 type of radiators and heaters**, 63 elements in total.\n- Rechts: 63 (100%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-heating",
+  "q": "What heating systems are present in this building, and what is the count of systems by category?",
+  "ref": "Heating Systems: 42 systems\n\nSystem Categories:\n- Transport Systems: 38 systems\n- Heat Pump Systems: 2 systems\n- Heat Exchange Systems: 2 systems",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1,795 service components in 1 system type**.\n- Heating: 1,795 components (914 pipes, 743 pipe fittings, 65 valves and controls, 1,207.4 m of runs)\n- 42 separately named circuits or loops are defined in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.33
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-plumbing",
+  "q": "What component types comprise the plumbing system and their respective counts?",
+  "ref": "Plumbing System Components:\n   - Pipe Segments (504)\n   - Pipe Fittings (411)\n   - Sanitary Terminals (72)\n   - Instantaneous Water Heaters (16)\n   - Valves (3)\n   - Waste Terminals (2)\n   - Water Filters (1)\n   - Flow Meters (1)\n\n   Total Plumbing Components: 1010",
+  "before": {
+   "route": "code",
+   "text": "**19 piping systems**, longest first: Waste water (S_Schmutzwasser): 120.5 m (199 pipes); Potable cold (S_PWC): 111.8 m (214 pipes); Rainwater (S_Regenwasser): 64.9 m (15 pipes); Potable hot (S_PWH_11): 0.38 m (5 pipes); Potable hot (S_PWH_2): 0.30 m (5 pipes); Potable hot (S_PWH_8): 0.29 m (5 pipes); Potable hot (S_PWH_1): 0.28 m (5 pipes); Potable hot (S_PWH_3): 0.28 m (5 pipes); +11 smaller sys",
+   "num_overlap": 0.38
+  },
+  "after": {
+   "route": "code",
+   "text": "**1,010 service components in 5 system types**.\n- Cold water: 412 components (214 pipes, 177 pipe fittings, 16 toilets, 111.8 m of runs)\n- Waste water: 398 components (199 pipes, 161 pipe fittings, 22 toilets, 120.5 m of runs)\n- Hot water: 152 components (76 pipes, 60 pipe fittings, 16 air handling units, 3.90 m of runs)\n- Rainwater: 30 components (15 pipes, 13 pipe fittings, 2 drains, 64.9 m of r",
+   "num_overlap": 0.62
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-plumbing",
+  "q": "What is the total length of pipe used in the plumbing system, and how is this distributed by building level?",
+  "ref": "Total Pipe Length: 301106.02 m\n\n   Pipe Length by Building Level:\n   - Unknown Level: 301106.02 m (100.0%)",
+  "before": {
+   "route": "code",
+   "text": "**19 piping systems**, longest first: Waste water (S_Schmutzwasser): 120.5 m (199 pipes); Potable cold (S_PWC): 111.8 m (214 pipes); Rainwater (S_Regenwasser): 64.9 m (15 pipes); Potable hot (S_PWH_11): 0.38 m (5 pipes); Potable hot (S_PWH_2): 0.30 m (5 pipes); Potable hot (S_PWH_8): 0.29 m (5 pipes); Potable hot (S_PWH_1): 0.28 m (5 pipes); Potable hot (S_PWH_3): 0.28 m (5 pipes); +11 smaller sys",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**301.1 m of pipes** in **504 runs**.\n- By system: waste water: 120.5 m (199 runs); cold water: 111.8 m (214 runs); rainwater: 64.9 m (15 runs); hot water: 3.90 m (76 runs) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-plumbing",
+  "q": "What pipe types are used in this building and their respective counts?",
+  "ref": "Pipe Types Used:\n   - Edelstahl - Pressfitting: 294 segments, 115774.34 m total length\n   - Kupfer - Pressfittings: 2 segments, 63.00 m total length\n   - Wastewater HT Pipe: 208 segments, 185268.67 m total length",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**3 types of pipes**, 504 elements in total.\n- Edelstahl - Pressfitting: 294 (58%), sizes DN12 (253), DN25 (21), DN15 (8), Edelstahlrohr f\u00fcr Pressfittings - DIN\n- Abwasser HT: 208 (41%), sizes DN100 (108), DN40 (34), DN50 (31), HT - DIN EN 1519\n- Kupfer - Pressfittings: 2 (0%), sizes DN12 (2), Kupfer - DIN EN 1057 [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.5
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-plumbing",
+  "q": "What pipe fitting types are used in this building, their respective counts, and how are they distributed across each building level?",
+  "ref": "Pipe Fitting Types - Overall Summary:\n- Bogen Edelstahl - Press: 166 fittings (40.4%)\n- HT Elbow Fitting: 103 fittings (25.1%)\n- T-St\u00fcck Edelstahl - Press: 53 fittings (12.9%)\n- HT Tee Fitting: 52 fittings (12.7%)\n- \u00dcbergang Edelstahl - Press: 22 fittings (5.4%)\n- Enddeckel HT: 10 fittings (2.4%)\n- ",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**10 types of pipes and fittings**, 915 elements in total.\n- Edelstahl - Pressfitting: 294 (32%), sizes DN12 (253), DN25 (21), DN15 (8), Edelstahlrohr f\u00fcr Pressfittings - DIN\n- Abwasser HT: 208 (23%), sizes DN100 (108), DN40 (34), DN50 (31), HT - DIN EN 1519\n- Bogen Edelstahl - Press (Standard): 166 (18%)\n- Bogen HT (Standard): 103 (11%)\n- T-St\u00fcck Edelstahl - Press (Standard): 53 (6%)\n- T-St\u00fcck HT",
+   "num_overlap": 0.42
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-plumbing",
+  "q": "What valve types are used in this building, their respective counts, and how are they distributed by building level?",
+  "ref": "Valve Types:\n   - Backflow Preventer: 1 valve (33.3%)\n   - Angle Seat Valve: 1 valve (33.3%)\n   - Pressure Reducing Valve: 1 valve (33.3%)\n\n   Valves by Building Level:\n   Ebene: B01_OKFB: 3 valves\n     - Angle Seat Valve: 1\n     - Backflow Preventer: 1\n     - Pressure Reducing Valve: 1",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**4 types of valves and controls**, 4 elements in total.\n- Wasserz\u00e4hler Absperrung - Gewinde (Standard): 1 (25%)\n- DN 25 1\": 1 (25%)\n- ND 25: 1 (25%)\n- DN 25: 1 (25%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.67
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-plumbing",
+  "q": "What plumbing systems are present in this building, including their counts by system type and system category?",
+  "ref": "Plumbing Systems: 19 systems\n\nSystem Types:\n- Hot Water Distribution (PWH): 16 systems\n- Cold Water Distribution (PWC): 1 systems\n- Wastewater Collection: 1 systems\n- Rainwater Collection: 1 systems\n\nSystem Categories:\n- Hot Water Distribution: 16 zones\n- Cold Water Supply: 1 system\n- Wastewater Col",
+  "before": {
+   "route": "code",
+   "text": "**19 piping systems**, longest first: Waste water (S_Schmutzwasser): 120.5 m (199 pipes); Potable cold (S_PWC): 111.8 m (214 pipes); Rainwater (S_Regenwasser): 64.9 m (15 pipes); Potable hot (S_PWH_11): 0.38 m (5 pipes); Potable hot (S_PWH_2): 0.30 m (5 pipes); Potable hot (S_PWH_8): 0.29 m (5 pipes); Potable hot (S_PWH_1): 0.28 m (5 pipes); Potable hot (S_PWH_3): 0.28 m (5 pipes); +11 smaller sys",
+   "num_overlap": 0.67
+  },
+  "after": {
+   "route": "code",
+   "text": "**1,010 service components in 5 system types**.\n- Cold water: 412 components (214 pipes, 177 pipe fittings, 16 toilets, 111.8 m of runs)\n- Waste water: 398 components (199 pipes, 161 pipe fittings, 22 toilets, 120.5 m of runs)\n- Hot water: 152 components (76 pipes, 60 pipe fittings, 16 air handling units, 3.90 m of runs)\n- Rainwater: 30 components (15 pipes, 13 pipe fittings, 2 drains, 64.9 m of r",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-plumbing",
+  "q": "Could you provide a comprehensive breakdown of the electrical load for water heaters, including the total load, average per unit, number of units with load data, and the load distribution by building level?",
+  "ref": "Total Water Heater Load: 48.0 kW\nAverage per Unit: 3000 W\nWater heaters with load data: 16/16\n\nElectrical Load by Building Level:\n- Ebene: E00_OKFB: 30.0 kW (62.5%)\n- Ebene: E01_OKFB: 18.0 kW (37.5%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**No radiators and heaters** are modelled.\n- This model's service elements are: 504 pipes, 411 pipe fittings, 44 toilets, 28 washbasins and sinks.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-plumbing",
+  "q": "What plumbing fixture data is available for the building, organized by storey level?",
+  "ref": "Plumbing fixture distribution by space type is not available in this model, however, plumbing fixtures data for each building storey are available:\n\n- Total sanitary terminals: 72\n- Total water heaters: 16\n- Average terminals per level: 24.0\n- Average water heaters per level: 5.3\n\nNote: Detailed spa",
+  "before": {
+   "route": "code",
+   "text": "**301.1 m of pipe** by storey: B01_OKRD: 150.3 m (56 pipes); E00_OKRD: 99.0 m (277 pipes); E01_OKRD: 51.8 m (171 pipes). [1] Shown in 3D: the piping model has no 2D plan, so the same pipes glow in the 3D view.",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**74 plumbing fixtures** in this model.\n- By level: E00_OKRD: 46; E01_OKRD: 28\n- By type: Viega Eco Plus- WC-Element f\u00fcr wandh\u00e4ngendes WC Viega 704070 #6bfeid6# (Standard): 16 (22%); 35 x 60cm: 16 (22%); Viega Eco-Waschtisch-Element, 1130x490 Viega 670986 #33o1lvo# (Standard): 12 (16%); 60 x 60cm: 12 (16%); Urinal UP Drucksp\u00fcler (Standard): 6 (8%)\n- Kinds: 44 toilets, 28 washbasins and sinks, 2 dr",
+   "num_overlap": 0.5
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-plumbing",
+  "q": "How many plumbing fixtures serve each building storey?",
+  "ref": "Plumbing Fixtures by Building Storey:\n    Ebene: E00_OKFB: 56 fixtures (62.2%)\n      - Sanitary terminals: 46\n      - Water heaters: 10\n    Ebene: E01_OKFB: 32 fixtures (35.6%)\n      - Sanitary terminals: 26\n      - Water heaters: 6\n    Ebene: E02_OKDach: 2 fixtures (2.2%)\n      - Sanitary terminals",
+  "before": {
+   "route": "code",
+   "text": "**301.1 m of pipe** in **504 segments**; longest sizes: DN100 82.0 m, DN25 52.7 m, DN150 49.9 m, DN12 49.5 m. [1] Shown in 3D: the piping model has no 2D plan, so the same pipes glow in the 3D view.",
+   "num_overlap": 0.15
+  },
+  "after": {
+   "route": "code",
+   "text": "**74 plumbing fixtures** in this model.\n- By level: E00_OKRD: 46; E01_OKRD: 28\n- By type: Viega Eco Plus- WC-Element f\u00fcr wandh\u00e4ngendes WC Viega 704070 #6bfeid6# (Standard): 16 (22%); 35 x 60cm: 16 (22%); Viega Eco-Waschtisch-Element, 1130x490 Viega 670986 #33o1lvo# (Standard): 12 (16%); 60 x 60cm: 12 (16%); Urinal UP Drucksp\u00fcler (Standard): 6 (8%)\n- Kinds: 44 toilets, 28 washbasins and sinks, 2 dr",
+   "num_overlap": 0.38
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-ventilation",
+  "q": "What component types comprise the ventilation system and their respective counts?",
+  "ref": "Ventilation System Components:\n   - Duct Segments (595)\n   - Duct Fittings (538)\n   - Air Terminals (148)\n   - Dampers (18)\n   - Fans (2)\n   - Coils (2)\n   - Air Filters (2)\n   - Duct Silencers (2)\n   - Heat Recovery Units (1)\n   - Humidifiers (1)\n   - Interceptors (1)\n\n   Total Ventilation Componen",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1,304 service components in 1 system type**.\n- Ventilation: 1,304 components (595 ducts, 540 duct fittings, 148 air terminals (diffusers and grilles), 838.4 m of runs)\n- 4 separately named circuits or loops are defined in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.43
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-ventilation",
+  "q": "What is the total length of ductwork used in the ventilation system and the breakdown by building level?",
+  "ref": "Total Ductwork Length: 88788.58 m\n\n   Ductwork Length by Building Level:\n   - B01_OKFB: 7597.95 m (8.6%)\n   - E00_OKFB: 1508.64 m (1.7%)\n   - E01_OKFB: 567.50 m (0.6%)\n   - E01_UKAHD: 43329.37 m (48.8%)\n   - E02_OKRD: 157.33 m (0.2%)\n   - E02_UKAHD: 35613.20 m (40.1%)\n   - E02_UKRD: 14.59 m (0.0%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**838.4 m of ducts** in **595 runs**.\n- By system: ventilation: 838.4 m (595 runs) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.06
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-ventilation",
+  "q": "What duct types are used in this building and their respective counts?",
+  "ref": "Duct Types Used:\n   - Rectangular Duct 150/150 (Exhaust Air): 83 segments, 11673.71 m total length\n   - Rectangular Duct 150/150 (Supply Air): 56 segments, 19301.76 m total length\n   - Rectangular Duct 150/400 (Exhaust Air): 1 segments, 225.20 m total length\n   - Rectangular Duct 175/175 (Exhaust Ai",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2 types of ducts**, 595 elements in total.\n- Bogen - Stutzen: 548 (92%), sizes diameter 125 mm (142), 150 x 150 mm (139), 200 x 200 mm (58)\n- Bogen - T-St\u00fcck: 47 (8%), sizes 850 x 850 mm (24), 945 x 945 mm (16), 650 x 650 mm (3) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.09
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-ventilation",
+  "q": "What duct fitting types are used in this building with their respective counts, and how are these fittings distributed across each building level?",
+  "ref": "Duct Fitting Types:\n   - Rectangular Transition: 291 fittings (54.1%)\n   - Kanalteilstutzen rechteck SU: 88 fittings (16.4%)\n   - Rectangular Elbow: 83 fittings (15.4%)\n   - Rectangular Tee: 39 fittings (7.2%)\n   - Sattelstutzen rund: 18 fittings (3.3%)\n   - \u00dcbergang rund kurz: 14 fittings (2.6%)\n  ",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**11 types of ducts and fittings**, 1,135 elements in total.\n- Bogen - Stutzen: 548 (48%), sizes diameter 125 mm (142), 150 x 150 mm (139), 200 x 200 mm (58)\n- \u00dcbergang rechteck UA (Standard): 164 (14%)\n- \u00dcbergang rechteck rund Flansch RS (Standard): 127 (11%)\n- Kanalteilstutzen rechteck SU (Standard): 88 (8%)\n- Bogen rechteck BS (Standard): 83 (7%)\n- Bogen - T-St\u00fcck: 47 (4%), sizes 850 x 850 mm (",
+   "num_overlap": 0.37
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-ventilation",
+  "q": "What ventilation systems are present in this building and their counts by system type?",
+  "ref": "Ventilation Systems: 4 systems\n    System Types:\n    - Discharge Air (Fortluft): 1 system\n    - Supply Air (Zuluft): 1 system\n    - Exhaust Air (Abluft): 1 system\n    - V_Aussenluft: 1 system\n    \n    System Functions:\n    - Discharge Air: Treated exhaust air discharge to outside\n    - Supply Air: F",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1,304 service components in 1 system type**.\n- Ventilation: 1,304 components (595 ducts, 540 duct fittings, 148 air terminals (diffusers and grilles), 838.4 m of runs)\n- 4 separately named circuits or loops are defined in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-ventilation",
+  "q": "What is the total cross-sectional area of ductwork in the building, including the average per duct, the count of ducts with area data, and a breakdown of the area by building level?",
+  "ref": "Total Duct Cross-Sectional Area: 1133.891 sq m\nAverage per Duct: 1.906 sq m\nDucts with area data: 595/595\n\nDuct Area by Building Level:\n- B01_OKFB: 347.279 sq m (30.6%)\n- E00_OKFB: 1.520 sq m (0.1%)\n- E01_OKFB: 0.219 sq m (0.0%)\n- E01_UKAHD: 352.868 sq m (31.1%)\n- E02_OKRD: 66.185 sq m (5.8%)\n- E02_",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**39 sizes of ducts**: diameter 125 mm: 142 (7.13 m), 150 x 150 mm: 139 (152.6 m), diameter 150 mm: 18 (24.0 m), 150 x 400 mm: 1 (0.40 m), 175 x 175 mm: 6 (15.3 m), 200 x 200 mm: 58 (85.6 m) and 8 more.\n- 200 x 350 mm: 1 (0.35 m), 200 x 250 mm: 1 (0.25 m), 225 x 225 mm: 9 (37.2 m), 250 x 250 mm: 19 (48.4 m), 250 x 400 mm: 1 (0.40 m), 275 x 275 mm: 19 (53.3 m), 300 x 300 mm: 13 (38.3 m), 300 x 400 ",
+   "num_overlap": 0.16
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-arc",
+  "q": "What are the different wall types in room A203 and what are their load-bearing characteristics?",
+  "ref": "Room A203 has three wall types:\n- Non-load-bearing interior partitions,\n- A CMU party wall with potential structural function, and\n- A likely load-bearing exterior brick wall.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**7 of 57 walls are load-bearing**.\n- Not load-bearing: 50 [1]",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-arc",
+  "q": "What information is available about the ground floor slab, including its dimensions and concrete specification?",
+  "ref": "The ground floor slab is 127 mm thick and covers 64.78 sqm as an interior slab on grade. The concrete specification is not provided in the model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**No concrete columns and beams and footings and slabs and walls found**: none of the 35 columns and beams and footings and slabs and walls names concrete as its material.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-arc",
+  "q": "Are there any steel beams spanning the living room of Duplex B?",
+  "ref": "No, there are no steel beams spanning the living room of Duplex B.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**8 beams in 2 types**.\n- W410X60: W410X60: 6 (75%), Metal - Steel - 345 MPa\n- W310X60: W310X60: 2 (25%), Metal - Steel - 345 MPa [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-arc",
+  "q": "Which walls are the main structural ones?",
+  "ref": "Note: The information is not available directly in the BIM model, so an exact answer is not possible.\n\nBased on the properties of the walls found in the building, the following structural walls are likely to be the main ones:\n- Exterior brick-on-block walls\n- Concrete foundation walls",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**19 structural elements**: 8 beams, 7 footings, 4 structural members.\n- Beams: 8 in 2 types (W410X60: W410X60: 6; W310X60: W310X60: 2)\n- Footings: 7 in 1 type (Bearing Footing - 900 x 300: 7)\n- Structural members: 4 in 1 type (Residential - 200mm Max Riser 250mm Tread: 4) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-arc",
+  "q": "What is the volume of concrete required for the foundation?",
+  "ref": "The information is not directly available in the BIM model and cannot be exactly calculated. However, the estimated volume of concrete required for the foundation is around 16.528 cubic meters.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**No concrete footings found**: none of the 7 footings names concrete as its material.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-arc",
+  "q": "What is the estimated embodied carbon of the structural elements, including a detailed breakdown by material type, the methodology and assumptions used in the calculation?",
+  "ref": "The information is not available in the BIM model and cannot be exactly calculated. However, we can estimate the embodied carbon of the structural elements in the BIM model to be around 466,787 kgCO2e.\n\nImportant Note about GWP Values: The Global Warming Potential (GWP) values of the individual mate",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-mep",
+  "q": "What is the total length of water supply piping in the building?",
+  "ref": "The total length of water supply piping in the building is 71.88 m (145 pipe segments: 45.83 m cold water and 26.04 m hot water).",
+  "before": {
+   "route": "code",
+   "text": "**304.0 m of pipe** in **407 segments**; longest sizes: DN25 230.7 m, DN40 48.8 m, DN15 21.1 m, DN6 1.45 m. [1] Shown in 3D: the piping model has no 2D plan, so the same pipes glow in the 3D view.",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**151.2 m of pipes** in **233 runs**.\n- By system: waste water: 50.8 m (74 runs); cold water: 45.9 m (74 runs); rainwater: 28.5 m (14 runs); hot water: 26.1 m (71 runs) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-mep",
+  "q": "Where are the main electrical panels located?",
+  "ref": "The main electrical panels are located in rooms A101 and B101.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no distribution boards**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 407 pipes, 356 pipe fittings, 61 terminals, 28 light fittings.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-mep",
+  "q": "How many radiator are there in room A202?",
+  "ref": "There is no room A-202, but there is a room A202-M, which has one radiator.",
+  "before": {
+   "route": "code",
+   "text": "**1 Room** in this model. [1]",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1 Room** in this model. [1]",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-mep",
+  "q": "What are the specifications of the hot water heating equipment in the model?",
+  "ref": "There is no water tank in the model. However, there is a hot water boiler with a heat output of 147 KW and a water flow rate of 0.51 m\u00b3/s.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**338 service components in 1 system type**.\n- Heating: 338 components (164 pipes, 152 pipe fittings, 14 heat exchangers, 133.3 m of runs)\n- 6 separately named circuits or loops are defined in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-mep",
+  "q": "What type of heating system is used in the bathrooms?",
+  "ref": "The bathrooms are heated using wall-mounted hydronic radiators that are connected to a central boiler system.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**338 service components in 1 system type**.\n- Heating: 338 components (164 pipes, 152 pipe fittings, 14 heat exchangers, 133.3 m of runs)\n- 6 separately named circuits or loops are defined in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-mep",
+  "q": "Where are the main utility shut-off valves located?",
+  "ref": "The main utility shut-off valves are located in rooms A205 and B205.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2 types of valves and controls**, 8 elements in total.\n- 50 mm: 4 (50%), Material\n- 25 mm: 4 (50%), Material [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-mep",
+  "q": "Could you provide a categorized breakdown of the technical elements in the building that typically require regular maintenance, organized by system type?",
+  "ref": "The information is not directly available in the BIM model.\n\nHowever, we can identify several technical elements that usually need regular maintenance:\n\n**HVAC Equipment:**\n- Boilers: Located in rooms A205 and B205\n- Fans: Two units in room R301\n- Pumps: Circulator pumps in rooms A205 and B205\n- Rad",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__duplex-mep",
+  "q": "How many light fixtures are specified in the model, and what is the breakdown by type?",
+  "ref": "The model specifies 14 light fixtures, comprising 8 pendant lights and 6 sconce lights.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**28 light fittings** in this model.\n- By level: Level 1: 14; Level 2: 14\n- By type: Single Pole: 14 (50%); 150W - 120V: 8 (29%); 100W - 120V: 6 (21%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-hotel-1-arc",
+  "q": "What percentage of walls are load-bearing vs non-load-bearing?",
+  "ref": "Load-Bearing Analysis (Total: 53 walls):\n   - Load-bearing walls: 25 (47.2%)\n   - Non-load-bearing walls: 28 (52.8%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**25 of 53 walls are load-bearing**.\n- Not load-bearing: 28 [1][2]",
+   "num_overlap": 0.6
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-hotel-1-arc",
+  "q": "Could you provide a breakdown of the sanitary equipment in this building by type, along with a detailed list of all fixtures?",
+  "ref": "Sanitary Equipment (Total: 10 fixtures):\n\nSummary by Type:\n- Sink: 5\n- Urinal: 3\n- Toilet: 2\n\nDetailed List:\n- M_Toilet-Domestic-3D:M_Toilet-Domestic-3D\n- M_Toilet-Domestic-3D:M_Toilet-Domestic-3D\n- M_Sink - Corner Floor:610 mm\n- M_Sink - Corner Floor:610 mm\n- M_Sink - Corner Floor:610 mm\n- M_Sink -",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**5 service components in 1 system type**.\n- Plumbing: 5 components (5 toilets) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.29
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-hotel-1-arc",
+  "q": "What structural elements are in this building, grouped by type with their counts?",
+  "ref": "Structural Elements:\n   - Beams: 117\n   - Columns: 39\n   - Slabs: 49\n   - Members: 82\n   - Plates: 29",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**238 structural elements**: 117 beams, 82 structural members, 39 columns.\n- Beams: 117 in 1 type (200 x 400mm: 117)\n- Structural members: 82 in 2 types (65 x 125mm rectangular: 50; Stringer - 6mm Plate: 32)\n- Columns: 39 in 1 type (200*200 mm: 39) [1][2][3]",
+   "num_overlap": 0.6
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-hotel-1-arc",
+  "q": "What beam types are used in this building, and what are their quantities?",
+  "ref": "Beam Types (Total: 117 beams):\n   - M_Concrete-Rectangular Beam:200 x 400mm: 117",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**117 beams in 1 type**.\n- 200 x 400mm: 117 (100%), 200 x 400mm, Concrete, Cast-in-Place gray [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-hotel-1-arc",
+  "q": "What column types are used in this building, with their quantities?",
+  "ref": "Column Types (Total: 39 columns):\n   - M_Concrete-Rectangular-Column:200*200 mm: 39",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**39 columns in 1 type**.\n- 200*200 mm: 39 (100%), 200*200 mm, Concrete, Cast-in-Place gray [1][2]",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-hotel-1-arc",
+  "q": "What are the column dimensions?",
+  "ref": "Column Dimensions:\n- M_Concrete-Rectangular-Column: 200mm x 200mm (Square)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2 column sizes** across 39 columns.\n- 200*200 mm: 36 (92%)\n- 200 x 200 mm: 3 (8%) [1][2]",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-hotel-1-arc",
+  "q": "How many MEP components are there by system type?",
+  "ref": "MEP Components by System Type:\n   - Plumbing Fixtures: 10\n   - Lighting Fixtures: 29\n\n   Total Identified MEP Components: 39",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**39 service components in 3 system types**.\n- Electrical: 29 components (29 light fittings)\n- Plumbing: 5 components (5 toilets)\n- System not stated: 5 components (5 terminals) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.67
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-hotel-1-arc",
+  "q": "What heating systems are installed?",
+  "ref": "No heating-specific MEP elements (boilers, radiators, heating coils) are defined.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no heating elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 214 proxys, 117 beams, 93 furnitures, 82 structural members.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-hotel-1-arc",
+  "q": "What lighting fixtures are present in this building, and how many of each type are installed?",
+  "ref": "Electrical components identified:\n   - Lighting Fixtures: 29\n\n   Lighting Fixture Types:\n     \u2022 Lighting_Fixtures_LP_Sgl:250_Watt_Halogen: 18\n     \u2022 Lighting_Fixtures_Street_Luminaries_Sgl:250_Watt_Halogen: 7\n     \u2022 Lighting_Fixtures_LP_Dbl:5000mm_Height: 4",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**29 light fittings** in this model.\n- By type: 250_Watt_Halogen: 25 (86%); 5000mm_Height: 4 (14%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.67
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-hotel-1-arc",
+  "q": "List all lighting fixture types and their respective quantities on the ground floor.",
+  "ref": "Lighting Fixtures by Floor (Total: 29 fixtures):\n\n   GROUND FLOOR: 29 fixtures\n     \u2022 Lighting_Fixtures_LP_Sgl:250_Watt_Halogen: 18\n     \u2022 Lighting_Fixtures_Street_Luminaries_Sgl:250_Watt_Halogen: 7\n     \u2022 Lighting_Fixtures_LP_Dbl:5000mm_Height: 4",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2 types of light fittings** on GROUND FLOOR, 29 elements in total.\n- 250_Watt_Halogen: 25 (86%)\n- 5000mm_Height: 4 (14%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.67
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-office-building-1-arc",
+  "q": "What proportion of walls are load-bearing?",
+  "ref": "Load-Bearing Wall Analysis:\n   - Load-bearing walls: 14\n   - Non-load-bearing walls: 50\n   - Load-bearing percentage: 21.9%",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**14 of 64 walls are load-bearing**.\n- Not load-bearing: 50\n- Wall volume: 867.4 m\u00b3 load-bearing, 52.2 m\u00b3 not [1]",
+   "num_overlap": 0.67
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-office-building-1-arc",
+  "q": "Can you provide an analysis of the building's structural system, including the likely structural type, a breakdown of structural components with their quantities, and the materials used?",
+  "ref": "Structural System Assessment:\nThe structural system is not directly understandable from the data stored in the model, but a likely option for the primary structural system could be a Frame structure.\n\nStructural Components:\n- Columns: 34\n- Beams: 8\n- Floor slabs: 18\n\nStructural Material:\nReinforced ",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**3 materials for the columns and beams and structural members and footings**.\n- Metall - verzinkt: 804 (92%)\n- StB - Fertigbeton: 42 (5%)\n- Metall - lackiert, grau: 24 (3%) [1][2][3][4][5]",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-office-building-1-arc",
+  "q": "What are the different column types present in this building, including their quantities and specifications?",
+  "ref": "Column Types in Building:\n   Total columns: 34\n\n   Column types:\n   - STB St\u00fctze - rund:STB d=20: 20 columns\n     Diameter: 20 cm (0.20 m)\n   - STB St\u00fctze - rund:STB d=25: 8 columns\n     Diameter: 25 cm (0.25 m)\n   - STB St\u00fctze - rund:STB d=30: 6 columns\n     Diameter: 30 cm (0.30 m)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**34 columns in 3 types**.\n- STB d=20: 20 (59%), STB d=20, StB - Fertigbeton\n- STB d=25: 8 (24%), STB d=25, StB - Fertigbeton\n- STB d=30: 6 (18%), STB d=30, StB - Fertigbeton [1][2][3][4]",
+   "num_overlap": 0.75
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-office-building-1-arc",
+  "q": "What is the total concrete volume used in slabs, columns and beams?",
+  "ref": "Total Concrete Volume:\n   - Floor slabs: 261.62 cu m (18 elements)\n   - Columns: 7.80 cu m (34 elements)\n   - Beams: 24.55 cu m (8 elements)\n\n   TOTAL CONCRETE VOLUME: 293.97 cu m",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**32.3 m\u00b3 of concrete columns and beams** (42 elements).\n- By element: beams: 24.6 m\u00b3 (8); columns: 7.80 m\u00b3 (34) [1][2][3][4][5]",
+   "num_overlap": 0.57
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-office-building-1-arc",
+  "q": "Are light fixtures included in this building model?",
+  "ref": "Light fixtures are not included in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-office-building-2-arc",
+  "q": "What is the proportion of load-bearing walls in the building, including the total number of walls, the count of load-bearing walls, and the breakdown of load-bearing wall types?",
+  "ref": "Load-Bearing Wall ratio:\n\n   - Total walls: 105\n   - Load-bearing walls: 54\n   - Proportion of load-bearing walls: 51.4%\n\n   Load-bearing wall types:\n   - Basic Wall:STB 250: 54 wall(s)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**54 of 105 walls are load-bearing**.\n- Not load-bearing: 51\n- Wall volume: 534.0 m\u00b3 load-bearing, 82.1 m\u00b3 not [1][2][3]",
+   "num_overlap": 0.5
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-office-building-2-arc",
+  "q": "What MEP components are used in this model, grouped by the MEP system they belong to?",
+  "ref": "MEP Components by System:\n   Total MEP components: 40\n\n   Plumbing - Sanitary Fixtures:\n   - Total components: 20\n   - Component types:\n     \u2022 WC 03:WC\n\n   Plumbing - Washbasins:\n   - Total components: 20\n   - Component types:\n     \u2022 Waschbecken m. Griffen barrierefrei:600 x 450: 10\n     \u2022 Waschbeck",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**40 service components in 1 system type**.\n- Plumbing: 40 components (20 toilets, 20 washbasins and sinks) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.38
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-office-building-2-arc",
+  "q": "Which column types are present in this building, and how many of each type are there?",
+  "ref": "Column Types in Building:\n   Total columns: 44\n\n   Column types:\n   - STB St\u00fctze - rund:STB \u00f8200: 26 column(s)\n     Circular column, diameter: 200 mm\n   - STB St\u00fctze - rechteckig:STB 200 x 200: 12 column(s)\n     Rectangular column, dimensions: 200 mm \u00d7 200 mm\n   - STB St\u00fctze - rund:STB \u00f8250: 6 colum",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**44 columns in 3 types**.\n- STB \u00f8200: 26 (59%), STB \u00f8200, Ortbeton - bewehrt Verputzt\n- STB 200 x 200: 12 (27%), STB 200 x 200, Ortbeton - bewehrt Verputzt\n- STB \u00f8250: 6 (14%), STB \u00f8250, Ortbeton - bewehrt Verputzt [1][2]",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-office-building-3-arc",
+  "q": "What proportion of walls are load-bearing, including the total count and breakdown of load-bearing walls by type?",
+  "ref": "Load-Bearing Wall Analysis:\n   - Total walls: 223\n   - Load-bearing walls: 98 (43.9%)\n   - Non-load-bearing walls: 125 (56.1%)\n\n   Load-bearing wall types:\n   - Basiswand:STB 30.0: 58 wall(s)\n   - Basiswand:STB 25.0: 30 wall(s)\n   - Basiswand:STB 20.0: 10 wall(s)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**98 of 223 walls are load-bearing**.\n- Not load-bearing: 125 [1][2][3][4][5]",
+   "num_overlap": 0.3
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-office-building-3-arc",
+  "q": "What MEP components are used in this model, grouped by the MEP system they belong to, and how are these components distributed across the floors?",
+  "ref": "MEP Components by System:\n   Total MEP components: 115\n\n   Sanitary/Plumbing System (65 components):\n   - WC 02:WC: 30 unit(s)\n   - Urinal 02:Urinal: 25 unit(s)\n   - Waschtisch-Kombi-Doppel WB mit Spiegelk\u00e4sten:1300 x 580 x 860: 10 unit(s)\n\n   Ventilation/HVAC System: No components found\n\n   Bathroo",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**115 service components in 2 system types**.\n- Plumbing: 65 components (55 toilets, 10 washbasins and sinks)\n- System not stated: 50 components (50 terminals)\n- 50 components have no system recorded in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.37
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-office-building-3-arc",
+  "q": "Which column types are present in this building, including their dimensions and quantities?",
+  "ref": "Column Types in Building:\n   Total columns: 20\n\n   Column types with dimensions:\n   - STB St\u00fctze - rund:STB d=30: 12 column(s)\n     Diameter: 30 cm (0.30 m)\n   - STB St\u00fctze - rund:STB d=25: 4 column(s)\n     Diameter: 25 cm (0.25 m)\n   - STB St\u00fctze - rund:STB d=20: 4 column(s)\n     Diameter: 20 cm (0",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**3 column sizes** across 20 columns.\n- STB d=30: 12 (60%)\n- STB d=25: 4 (20%)\n- STB d=20: 4 (20%) [1][2][3][4]",
+   "num_overlap": 0.71
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-residential-building-1-arc",
+  "q": "Could you provide a breakdown of the walls by load-bearing status, including the counts and the proportion of load-bearing walls?",
+  "ref": "Load-Bearing Wall Analysis:\n   - Load-bearing walls: 48\n   - Non-load-bearing walls: 56\n   - Proportion load-bearing: 46.2%",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**48 of 104 walls are load-bearing**.\n- Not load-bearing: 56 [1][2][3]",
+   "num_overlap": 0.67
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-residential-building-1-arc",
+  "q": "What are the possible structural systems of this building, given the available model data?",
+  "ref": "The structural system is not directly understandable from the data stored in the model. The primary system could be:\n- Frame structure\n- Load-bearing wall system",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**218 structural elements**: 185 structural members, 28 columns, 5 beams.\n- Structural members: 185 in 2 types (6 x 12: 183; Wange - Farbe - 10 mm Breite: 2)\n- Columns: 28 in 3 types (STB 25 x 25: 11; STB d=25: 11)\n- Beams: 5 in 3 types (STB 25 x 50: 2; HE 300 A Baustahl - S 235: 2) [1][2][3]",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__fantasy-residential-building-1-arc",
+  "q": "What are the different types of columns in this building and how many of each type are present?",
+  "ref": "Column Types in Building:\n   - Total columns: 28\n\n   Column types:\n   - STB St\u00fctze - rechteckig:STB 25 x 25: 11 columns\n   - STB St\u00fctze - rund:STB d=25: 11 columns\n   - STB St\u00fctze - rund:STB d=30: 6 columns",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**28 columns in 3 types**.\n- STB 25 x 25: 11 (39%), STB 25 x 25, StB - Ortbeton\n- STB d=25: 11 (39%), STB d=25, StB - Ortbeton\n- STB d=30: 6 (21%), STB d=30, StB - Ortbeton [1][2]",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__fzk-house-arc",
+  "q": "What percentage of walls are load-bearing versus non-load-bearing?",
+  "ref": "Load-bearing classification fields exist but are not populated.\nAll walls have 'Tragende Funktion' property set to 'Nicht definiert' (Not defined).",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**The model does not say which walls are load-bearing**: none of its 13 walls carries a load-bearing property. This is not guessed.\n- Ask the structural engineer for the structural model.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__fzk-house-arc",
+  "q": "Which sanitary fixtures and equipment are present in the building?",
+  "ref": "No sanitary equipment found in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no plumbing fixtures**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 42 structural members, 13 walls, 11 windows, 5 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__fzk-house-arc",
+  "q": "What are the main structural elements in this building, grouped by type with their counts?",
+  "ref": "Structural Elements Summary:\n   - Beams: 4 elements\n   - Columns: 0 elements\n   - Members (roof structure): 42 elements\n   - Slabs: 4 elements\n     - Floor slabs: 1\n     - Roof slabs: 2\n     - Base/foundation slabs: 1\n   - Foundations: 0 elements\n\n   Total Structural Elements: 50",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**46 structural elements**: 42 structural members, 4 beams.\n- Structural members: 42 in 42 types (Sparren-1: 1; Sparren-2: 1)\n- Beams: 4 in 4 types (Radial Gradient Fill 1515460218 200 x 240: 1; Pfette-2-1: 1) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.67
+  }
+ },
+ {
+  "doc": "ifc_bench__fzk-house-arc",
+  "q": "Which beam types are used in the structure, with their quantities and properties?",
+  "ref": "Total Beams: 4\n\n   Beam Types and Quantities:\n   - Unterzug-1: 1 beams\n   - Pfette-2-1: 1 beams\n   - Pfette-1-1: 1 beams\n   - First: 1 beams\n\n   Beam Details:\n\n   Beam: Unterzug-1\n   - Level: Erdgeschoss\n   - Length: 4.08 m\n   - Width: 0.20 m\n   - Depth: 0.24 m\n   - CrossSectionArea: 0.048 m\u00b2\n   - M",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**4 beams in 4 types**.\n- Radial Gradient Fill 1515460218 200 x 240: 1 (25%), 200 x 240 mm, Radial Gradient Fill 1515460218\n- Pfette-2-1: 1 (25%), Solid\n- Pfette-1-1: 1 (25%), Solid\n- First: 1 (25%), Solid [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.57
+  }
+ },
+ {
+  "doc": "ifc_bench__fzk-house-arc",
+  "q": "Which column types are present in the building?",
+  "ref": "No columns found in this building model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no columns**.\n- Its structural-type elements are: 42 structural members, 13 walls, 4 beams, 4 slabs.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__fzk-house-arc",
+  "q": "Which roof structural components are employed, including slabs, members, and beams?",
+  "ref": "Roof Structural Elements:\n   - Roof Slabs: 2\n     - Dach-1: 82.6 m\u00b2, 200mm thick\n     - Dach-2: 82.6 m\u00b2, 200mm thick\n   - Total Roof Area: 165.1 m\u00b2\n   - Total Roof Volume: 33.02 cu m\n\n   - Roof Structural Members: 42\n   Roof Member Types:\n     - Sparren: 42 members\n\n   - Roof Beams: 3\n     - Pfette-",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**46 structural elements**: 42 structural members, 4 beams.\n- Structural members: 42 in 42 types (Sparren-1: 1; Sparren-2: 1)\n- Beams: 4 in 4 types (Radial Gradient Fill 1515460218 200 x 240: 1; Pfette-2-1: 1) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.62
+  }
+ },
+ {
+  "doc": "ifc_bench__fzk-house-arc",
+  "q": "Which MEP systems are installed in this building?",
+  "ref": "No MEP systems found in this building model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 42 structural members, 13 walls, 11 windows, 5 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__fzk-house-arc",
+  "q": "What types of piping are used throughout the building?",
+  "ref": "No piping systems found in this building model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no pipes**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 42 structural members, 13 walls, 11 windows, 5 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__fzk-house-arc",
+  "q": "Which heating systems are installed?",
+  "ref": "No heating systems found in this architectural model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 42 structural members, 13 walls, 11 windows, 5 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__fzk-house-arc",
+  "q": "What electrical components are present in the building?",
+  "ref": "No electrical components found in this architectural model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 42 structural members, 13 walls, 11 windows, 5 doors.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What percentage of walls are load-bearing vs non-load-bearing?",
+  "ref": "Load-bearing classification data is not available in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**The model does not say which walls are load-bearing**: none of its 849 walls carries a load-bearing property. This is not guessed.\n- Ask the structural engineer for the structural model.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What structural elements are in this building, grouped by type with their counts?",
+  "ref": "Structural Elements Summary:\n   - Beams: 86 elements\n   - Columns: 208 elements\n   - Floor slabs: 285 elements\n   - Roof slabs: 78 elements\n   - Total structural slabs: 363 elements\n   - Foundations: 0 elements\n   - Structural members: 0 elements\n\n   Total Structural Elements: 657",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**294 structural elements**: 208 columns, 86 beams.\n- Columns: 208 in 7 types (BS04: 142; BS02: 38)\n- Beams: 86 in 9 types (NO_VF HUP 100x100x6.3: 28; type not named: 23) [1][2][3][4][5][6]",
+   "num_overlap": 0.29
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What beam types are used in this building, with their quantities and percentages?",
+  "ref": "Total Beams: 86\n\n   Beam Types and Quantities:\n   - NO_VF HUP 100x100x6.3: 28 beams (32.6%)\n   - Unnamed Beam: 23 beams (26.7%)\n   - NO_THQ350x390: 9 beams (10.5%)\n   - NO_VF HUP 150x100x6.3: 8 beams (9.3%)\n   - NO_THQ350x270: 6 beams (7.0%)\n   - NO_THQ200x265_Ensidig: 4 beams (4.7%)\n   - Bjelke-01:",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**86 beams in 9 types**.\n- NO_VF HUP 100x100x6.3: 28 (33%)\n- type not named: 23 (27%)\n- NO_THQ350x390: 9 (10%)\n- NO_VF HUP 150x100x6.3: 8 (9%)\n- NO_THQ350x270: 6 (7%)\n- NO_THQ200x265_Ensidig: 4 (5%)\n- Bjelke-01: 3 (3%), Betong b\u00e6rende\n- NO_THQ350x390_ensidig: 3 (3%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.7
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What column types are used in this building, with their quantities and percentages?",
+  "ref": "Total Columns: 208\n\n   Column Types and Quantities:\n   - BS04: 142 columns (68.3%)\n   - BS02: 38 columns (18.3%)\n   - Unnamed Column: 11 columns (5.3%)\n   - BS04 ARK: 8 columns (3.8%)\n   - BS-skive: 6 columns (2.9%)\n   - NO_VF HUP 40x40x4.0: 2 columns (1.0%)\n   - BS-skive ARK: 1 columns (0.5%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**208 columns in 7 types**.\n- BS04: 142 (68%), Betong b\u00e6rende\n- BS02: 38 (18%), Betong b\u00e6rende\n- type not named: 11 (5%)\n- BS04 ARK: 8 (4%), Betong b\u00e6rende\n- BS-skive: 6 (3%), Betong b\u00e6rende\n- NO_VF HUP 40x40x4.0: 2 (1%)\n- BS-skive ARK: 1 (0%), Betong b\u00e6rende [1][2][3][4][5]",
+   "num_overlap": 0.62
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "Could you provide a breakdown of each column type, including the number of elements and their respective dimensions?",
+  "ref": "Column Dimensions by Type:\n\n   BS-skive: 6 column(s)\n     - 1000\u00d7200mm\n\n   BS-skive ARK: 1 column(s)\n     - 1000\u00d7200mm\n\n   BS02: 38 column(s)\n     - \u00d8200mm (R=100mm) (8 columns)\n     - \u00d8350mm (R=175mm) (30 columns)\n\n   BS04: 142 column(s)\n     - 430\u00d7350mm (2 columns)\n     - \u00d8350mm (R=175mm) (3 colum",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2 column sizes** across 208 columns.\n- size not recorded: 206 (99%)\n- 40 x 40 mm: 2 (1%) [1][2][3][4][5]",
+   "num_overlap": 0.2
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What MEP systems are present in this building?",
+  "ref": "69 IfcFlowTerminal elements belonging to plumbing system are found.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What kind of pipes are used in this building?",
+  "ref": "No Pipe Segment or Pipe Fitting elements found in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What is the total length of piping used in this building?",
+  "ref": "No Pipe Segment or Pipe Fitting elements found in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "How many MEP components are there by system type?",
+  "ref": "MEP Components by System Type:\n   - Plumbing:\n      - IfcFlowTerminal: 69 components",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What heating systems are installed?",
+  "ref": "No Heating system found in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__hitos-arc",
+  "q": "What electrical components are present in this building?",
+  "ref": "No Electrical components found in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__molio-arc",
+  "q": "What percentage of walls are load-bearing versus non-load-bearing?",
+  "ref": "Wall Structural Function Distribution:\n   - Load-Bearing Walls: 126 (66.7%)\n   - Non-Load-Bearing Walls: 61 (32.3%)\n   - Undefined Function: 2 (1.1%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**126 of 187 walls are load-bearing**.\n- Not load-bearing: 61\n- 2 walls carry no load-bearing property and are not counted. [1][2][3][4][5][6][7][8][9]",
+   "num_overlap": 0.5
+  }
+ },
+ {
+  "doc": "ifc_bench__molio-arc",
+  "q": "Which sanitary fixtures are available in the building?",
+  "ref": "Total Sanitary Equipment: 42 fixtures\n\nSanitary Equipment Types:\n- WC 25: 21 fixtures\n- Basin 25: 21 fixtures\n\nSanitary Equipment by Space:\nRum nr. K05, Unknown (K\u00e6lder):\n- WC 25\n- Basin 25\nRum nr. K06, Toilet (K\u00e6lder):\n- WC 25\n- Basin 25\nRum nr. K07, Toilet (K\u00e6lder):\n- WC 25\n- Basin 25\nRum nr. S08,",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__molio-arc",
+  "q": "What structural elements are present in this building, grouped by type with their counts?",
+  "ref": "Structural Elements Present: 25 total elements\n   - Beams: 7 elements\n     \u2022 Material: GENERISK - STRUKTUREL\n   - Columns: 14 elements\n     \u2022 Material: GENERISK - STRUKTUREL\n   - Footings: 4 elements\n     \u2022 Material: Beton - Insitu Udfyldning\n\n   Primary Structural Materials:\n   - Beton - Insitu Udf",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**25 structural elements**: 14 columns, 7 beams, 4 footings.\n- Columns: 14 in 1 type (GENERISK - STRUKTUREL 300 x 300: 14)\n- Beams: 7 in 1 type (GENERISK - STRUKTUREL 300 x 400: 7)\n- Footings: 4 in 1 type ([L]BB: 4) [1][2][3][4][5][6][7][8]",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__molio-arc",
+  "q": "Which types of beams are used in the building, with their quantities?",
+  "ref": "Total beams: 7. All use the assigned type GENERISK - STRUKTUREL 300 x 400 (one each on K\u00e6lder, Grundplan, 1. Sal, 2. Sal, 3. Sal, 4. Sal, and 5. Sal).",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**7 beams in 1 type**.\n- GENERISK - STRUKTUREL 300 x 400: 7 (100%), GENERISK - STRUKTUREL [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.62
+  }
+ },
+ {
+  "doc": "ifc_bench__molio-arc",
+  "q": "Which column types are present in the building, including their quantities?",
+  "ref": "Total columns: 14. All use the assigned type GENERISK - STRUKTUREL 300 x 300 (two each on K\u00e6lder, Grundplan, 1. Sal, 2. Sal, 3. Sal, 4. Sal, and 5. Sal).",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**14 columns in 1 type**.\n- GENERISK - STRUKTUREL 300 x 300: 14 (100%), GENERISK - STRUKTUREL [1][2][3][4][5][6][7]",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__molio-arc",
+  "q": "What are the column dimensions?",
+  "ref": "All 14 columns use the assigned type GENERISK - STRUKTUREL 300 x 300, with a 0.30 m \u00d7 0.30 m cross-section.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1 column size** across 14 columns.\n- 300 x 300 mm: 14 (100%) [1][2][3][4][5][6][7]",
+   "num_overlap": 0.67
+  }
+ },
+ {
+  "doc": "ifc_bench__molio-arc",
+  "q": "Which roof structural components are employed?",
+  "ref": "Total Roof Elements: 2\n   \n- _DK Tag fladt beton\n     \u2022 Membran - Vandt\u00e6t\n     \u2022 Isolering - Polystyren H\u00e5rd\n     \u2022 Beton - Armeret Prefab\n   \n- _DK Tag fladt built-up\n     \u2022 Membran - Vandt\u00e6t\n     \u2022 Krydsfiner\n     \u2022 Luft - Udvendig\n     \u2022 Isolering - Mineraluld H\u00e5rd\n     \u2022 Isolering - Mineraluld H",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**25 structural elements**: 14 columns, 7 beams, 4 footings.\n- Columns: 14 in 1 type (GENERISK - STRUKTUREL 300 x 300: 14)\n- Beams: 7 in 1 type (GENERISK - STRUKTUREL 300 x 400: 7)\n- Footings: 4 in 1 type ([L]BB: 4) [1][2][3][4][5][6][7][8]",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__molio-arc",
+  "q": "Which MEP systems are installed in this building?",
+  "ref": "Total modeled MEP-related distribution elements: 48\n- Sanitary/plumbing fixtures (IfcFlowTerminal): 42\n  - WC 25: 21\n  - Basin 25: 21\n- Kitchen equipment (IfcDistributionControlElement): 6\n  - Dishwasher Built-in 25: 5\n  - Refrigerator 25: 1\nIfcDistributionPort connection points are not counted as c",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__molio-arc",
+  "q": "What types of pipes are used throughout the building?",
+  "ref": "Piping information is not available in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__molio-arc",
+  "q": "What is the total length of piping in the building?",
+  "ref": "Piping length data is not available in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__molio-arc",
+  "q": "How many MEP components exist by system type?",
+  "ref": "MEP-related components by modeled system type (48 total):\n- Sanitary/plumbing: 42 components (87.5%)\n- Kitchen equipment: 6 components (12.5%)\nIfcDistributionPort connection points are not counted as components.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__molio-arc",
+  "q": "How many MEP terminals serve each space?",
+  "ref": "MEP Terminals per Space:\n   Rum nr. 110: 2 terminals\n   - WC 25\n   - Basin 25\n   Rum nr. 111: 2 terminals\n   - WC 25\n   - Basin 25\n   Rum nr. 112: 2 terminals\n   - WC 25\n   - Basin 25\n   Rum nr. 209: 2 terminals\n   - WC 25\n   - Basin 25\n   Rum nr. 210: 2 terminals\n   - WC 25\n   - Basin 25\n   Rum nr.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__molio-arc",
+  "q": "Which heating systems are installed?",
+  "ref": "Heating system information is not available in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__molio-arc",
+  "q": "What electrical components are present in this building?",
+  "ref": "Electrical system information is not available in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-arc",
+  "q": "Could you provide a breakdown of all walls by load-bearing classification, including counts and percentages for load-bearing, non-load-bearing, and unclassified walls?",
+  "ref": "Wall Load-Bearing Classification:\n   - Load-bearing walls: 2 (0.0%)\n   - Non-load-bearing walls: 7424 (100.0%)\n   - Unclassified walls: 0 (0.0%)\n   - Total walls: 7426\n\nNote: Nearly all walls inside the architecture ifc file are non-load-bearing. The load-bearing walls are modelled in the structural",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2 of 7,426 walls are load-bearing**.\n- Not load-bearing: 7,424 [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.6
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-arc",
+  "q": "What beam types are used in this building, including their quantities?",
+  "ref": "Total Beams: 41\n\n   Beam Types:\n   - 31-dd-onderdorpel beganegrond: 27 beams (65.9%)\n   - 24_Beam_DD_schalmgat afwerking: 14 beams (34.1%)\n\n   Beam Materials:\n   - DD prefabbeton",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**41 beams in 2 types**.\n- 31-dd-onderdorpel pui begr 230 x 75: 27 (66%), DD prefabbeton\n- DD prefabbeton: 14 (34%), DD prefabbeton [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.57
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-electrical",
+  "q": "What electrical components are present in this building, grouped by type with their counts?",
+  "ref": "Electrical System Overview:\n   Total Electrical Components: 19,495\n   Electrical Circuits: 50 independent circuits\n   Distribution Boards: 105 Hager distribution panels\n\n   Electrical Components by Category:\n   - Electrical Fixtures: 7,589 components (38.9%)\n   - Conduits: 7,252 components (37.2%)\n ",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**14,971 service components in 1 system type**.\n- Electrical: 14,971 components (7,277 cable trays, 5,923 cable tray fittings, 1,490 light fittings, 11,460.0 m of runs)\n- 50 separately named circuits or loops are defined in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.11
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-electrical",
+  "q": "Could you provide a comprehensive breakdown of all lighting components installed in the building, including both lighting fixtures and lighting devices with their quantities and distribution by type?",
+  "ref": "Total Lighting Components: 2,450\n   - Lighting Fixtures: 1,490 units\n   - Lighting Devices: 960 units\n\n   Lighting Fixture Types:\n   - E_111502_FB_MEPcontent:Recessed: 1216 fixtures (81.6%)\n   - LED2400:L: 141 fixtures (9.5%)\n   - E_E00172_FB_MEPcontent:Default: 89 fixtures (6.0%)\n   - BE_E Armatuur",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**9 types of light fittings**, 1,490 elements in total.\n- Recessed: 1,216 (82%)\n- L: 141 (9%)\n- Default: 89 (6%)\n- B: 17 (1%)\n- E: 16 (1%)\n- Anv: 3 (0%)\n- A: 3 (0%)\n- C: 3 (0%)\n- +1 more types (2 elements) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.26
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-electrical",
+  "q": "What electrical receptacles are installed, with their quantities?",
+  "ref": "Electrical Receptacles Analysis:\n   Total Electrical Fixtures: 7,589\n   Identified Receptacles: 101\n\n   Receptacle Types:\n   - E_Socket_1F with Earth 1_F_MEPcontent:Recessed: 101 units",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no sockets and outlets**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 7,277 cable trays, 6,089 mep others, 4,063 proxys, 1,490 light fittings.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-electrical",
+  "q": "What electrical switches are installed, along with their counts?",
+  "ref": "Electrical Switches Analysis:\n   Identified Switches: 109\n\n   Switch Types:\n   - E_E00078_FR_MEPcontent:Default-lichtpunt asp: 109 units",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no switches**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 7,277 cable trays, 6,089 mep others, 4,063 proxys, 1,490 light fittings.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-electrical",
+  "q": "What electrical distribution equipment is installed, including quantities?",
+  "ref": "Electrical Distribution Equipment:\n   Total Distribution Boards: 105\n\n   Distribution Board Types:\n   - E_Distribution Board_F_MEPcontent_Hager_Vision_INT-EN:VKA2: 30 boards (28.6%)\n   - E_Distribution Board_F_MEPcontent_Hager_Vision_INT-EN:VKD2: 14 boards (13.3%)\n   - E_Distribution Board_F_MEPcont",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**14,971 service components in 1 system type**.\n- Electrical: 14,971 components (7,277 cable trays, 5,923 cable tray fittings, 1,490 light fittings, 11,460.0 m of runs)\n- 50 separately named circuits or loops are defined in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.18
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-electrical",
+  "q": "Could you provide a detailed breakdown of the cable routing systems used in this building, including the quantities of each component type and their materials?",
+  "ref": "Cable Insulation and Routing Systems:\n   Total Cable Management Components: 8,603\n\n   Cable Routing Systems:\n   - Conduits: 7,252 segments\n   - Conduit fittings: 1,309 fittings\n   - Cable trays: 25 segments\n   - Cable tray fittings: 17 fittings\n\n   Conduit System Details:\n   - Conduit materials: PVC",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**3 types of cable trays**, 7,277 elements in total.\n- E6132_Elektrabuis_PVC: 6,748 (93%)\n- E6132_Elektrabuis slagvast (hostaliet): 504 (7%)\n- S4Rx_Generic_CableTray: 25 (0%), sizes 300 x 60 mm (10), 400 x 60 mm (9), 200 x 60 mm (4) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.2
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-electrical",
+  "q": "Could you provide a comprehensive analysis of the flexible cable pipe usage in this building, including total quantities, lengths, proportions, and a breakdown by component types?",
+  "ref": "Flexible Cable Pipe Analysis:\n   - Total flexible components: 176\n   - Flexible segments: 112\n   - Flexible fittings: 64\n   - Total flexible conduit length: 124,451 mm\n   - Total flexible conduit length: 124.5 meters\n   - Flexible conduit proportion: 1.1% of total conduit\n\n   Flexible Component Type",
+  "before": {
+   "route": "code",
+   "text": "**124.5 m of pipe** in **112 segments**; longest sizes: DN80 53.5 m, DN90 42.2 m, DN50 28.7 m. [1] Shown in 3D: the piping model has no 2D plan, so the same pipes glow in the 3D view.",
+   "num_overlap": 0.33
+  },
+  "after": {
+   "route": "code",
+   "text": "**4 types of pipes and cable trays**, 7,389 elements in total.\n- E6132_Elektrabuis_PVC: 6,748 (91%)\n- E6132_Elektrabuis slagvast (hostaliet): 504 (7%)\n- Onbepaald Flexibel_PVC_flexibel: 112 (2%), sizes DN80 (51), DN90 (40), DN50 (21)\n- S4Rx_Generic_CableTray: 25 (0%), sizes 300 x 60 mm (10), 400 x 60 mm (9), 200 x 60 mm (4)\n- Kinds: 7,277 cable trays, 112 pipes [1] Shown in 3D: the same items glow",
+   "num_overlap": 0.17
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-electrical",
+  "q": "What is the distribution of flexible pipes by building level, including the quantity found at each level?",
+  "ref": "Based on the IFC model analysis, flexible pipes are identified by the ObjectType 'Pipe Types:Onbepaald Flexibel_PVC_flexibel'. Here is the distribution by building level:\n\n  - -1 Fundering: 5 flexible pipes\n  - 00 begane grond: 101 flexible pipes\n  - 02 tweede verdieping: 6 flexible pipes\n\nTotal fle",
+  "before": {
+   "route": "code",
+   "text": "**124.5 m of pipe** by storey: 00 begane grond: 112.8 m (101 pipes); 02 tweede verdieping: 9.00 m (6 pipes); -1 Fundering: 2.65 m (5 pipes). [1] Shown in 3D: the piping model has no 2D plan, so the same pipes glow in the 3D view.",
+   "num_overlap": 0.7
+  },
+  "after": {
+   "route": "code",
+   "text": "**112 pipes** in this model.\n- By level: 00 begane grond: 101; 02 tweede verdieping: 6; -1 Fundering: 5 [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.8
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-electrical",
+  "q": "What cable tray systems are used, including their quantities?",
+  "ref": "Cable Tray System Analysis:\n   - Cable tray segments: 25 units\n   - Cable tray fittings: 17 fittings\n   - Total cable tray components: 42 units\n\n   Cable Tray Types:\n   - Cable Tray with Fittings:S4Rx_Generic_CableTray: 25 segments",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**3 types of cable trays**, 7,277 elements in total.\n- E6132_Elektrabuis_PVC: 6,748 (93%)\n- E6132_Elektrabuis slagvast (hostaliet): 504 (7%)\n- S4Rx_Generic_CableTray: 25 (0%), sizes 300 x 60 mm (10), 400 x 60 mm (9), 200 x 60 mm (4) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.5
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-electrical",
+  "q": "What is the distribution of electrical system components by building level?",
+  "ref": "Electrical System Components Distribution by Level:\n   Total elements analyzed: 19,495\n   Elements with level data: 19,495\n\n   Distribution by Building Level:\n\n   -1 Fundering: 61 components (0.3% of building)\n     - Conduits: 38 (62.3%)\n     - Conduit Fittings: 16 (26.2%)\n     - Pipes: 5 (8.2%)\n   ",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**14,971 service components in 1 system type**.\n- Electrical: 14,971 components (7,277 cable trays, 5,923 cable tray fittings, 1,490 light fittings, 11,460.0 m of runs)\n- 50 separately named circuits or loops are defined in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.02
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-electrical",
+  "q": "What is the electrical equipment distribution in level 1?",
+  "ref": "Electrical Equipment Distribution in level 1:\n\n   01 eerste verdieping: 2140 components (11.0% of building)\n     - Conduits: 1019 (47.6%)\n     - Electrical Fixtures: 682 (31.9%)\n     - Conduit Fittings: 166 (7.8%)\n     - Lighting Fixtures: 127 (5.9%)\n     - Lighting Devices: 84 (3.9%)\n     - Data De",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1,731 service components in 1 system type** on 01 eerste verdieping.\n- Electrical: 1,731 components (1,019 cable trays, 575 cable tray fittings, 127 light fittings, 1,537.9 m of runs) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.18
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-plumbing",
+  "q": "What types of plumbing sub-systems are defined, and how many instances of each type exist?",
+  "ref": "Plumbing Sub-Systems Overview:\n   Total Plumbing Systems: 1,179\n\n   Sub-Systems by Type:\n   - General Plumbing: 879 systems (74.6%)\n   - Water Supply: 300 systems (25.4%)\n\n   Sub-System Breakdown:\n   - Primary system: General plumbing infrastructure (879 systems)\n   - Water supply distribution: 300 ",
+  "before": {
+   "route": "code",
+   "text": "**652 piping systems**, longest first: M531 126: 410.1 m (486 pipes); M5325 7: 322.7 m (344 pipes); M521 76: 252.9 m (145 pipes); M5327 3: 219.1 m (47 pipes); M521 4: 121.1 m (90 pipes); M521 1: 94.6 m (66 pipes); M521 3: 81.8 m (50 pipes); VWA STL G2: 76.0 m (91 pipes); +644 smaller systems (6,319.5 m). Total 7,898.0 m. [1] Shown in 3D: the piping model has no 2D plan, so the same pipes glow in t",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**5,917 service components in 5 system types**.\n- Waste water: 3,336 components (3,096 pipes, 204 drains, 30 pipe fittings, 1,982.8 m of runs)\n- Hot water: 1,321 components (587 pipes, 532 pipe fittings, 202 valves and controls, 630.9 m of runs)\n- Rainwater: 783 components (409 pipes, 364 pipe fittings, 6 valves and controls, 441.3 m of runs)\n- Cold water: 476 components (358 pipe fittings, 104 va",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-plumbing",
+  "q": "Could you provide a breakdown of the plumbing system components by category, including the quantities and percentage distribution of each type?",
+  "ref": "Plumbing System Components:\n   Total Plumbing Components: 22,594\n\n   Components by Category:\n   - Pipes: 10,957 components (48.5%)\n   - Pipe Fittings: 9,827 components (43.5%)\n   - Plumbing Fixtures: 948 components (4.2%)\n   - Pipe Accessories: 859 components (3.8%)\n   - Mechanical Equipment: 3 comp",
+  "before": {
+   "route": "code",
+   "text": "**652 piping systems**, longest first: M531 126: 410.1 m (486 pipes); M5325 7: 322.7 m (344 pipes); M521 76: 252.9 m (145 pipes); M5327 3: 219.1 m (47 pipes); M521 4: 121.1 m (90 pipes); M521 1: 94.6 m (66 pipes); M521 3: 81.8 m (50 pipes); VWA STL G2: 76.0 m (91 pipes); +644 smaller systems (6,319.5 m). Total 7,898.0 m. [1] Shown in 3D: the piping model has no 2D plan, so the same pipes glow in t",
+   "num_overlap": 0.13
+  },
+  "after": {
+   "route": "code",
+   "text": "**5,917 service components in 5 system types**.\n- Waste water: 3,336 components (3,096 pipes, 204 drains, 30 pipe fittings, 1,982.8 m of runs)\n- Hot water: 1,321 components (587 pipes, 532 pipe fittings, 202 valves and controls, 630.9 m of runs)\n- Rainwater: 783 components (409 pipes, 364 pipe fittings, 6 valves and controls, 441.3 m of runs)\n- Cold water: 476 components (358 pipe fittings, 104 va",
+   "num_overlap": 0.13
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-plumbing",
+  "q": "Could you provide a comprehensive breakdown of the pipes used in this building, including the total count, specific pipe types with quantities, material types with quantities, and applications with quantities?",
+  "ref": "Specific Pipe Types Used:\n   Total Pipe Segments: 10,957\n\n   Pipe Types by Specification:\n   - Pipe Types:Uponor MLCP_Leiding wit 100m: 5,115 segments (46.7%)\n   - Pipe Types:DYKA PP Binnenriolering_Afvoerbuis 5m: 3,172 segments (28.9%)\n   - Pipe Types:Koper_Koper: 863 segments (7.9%)\n   - Pipe Type",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**15 types of pipes**, 10,957 elements in total.\n- Uponor MLCP_Leiding wit 100m: 5,115 (47%), sizes DN15 (3,847), DN20 (1,268)\n- DYKA PP Binnenriolering_Afvoerbuis 5m: 3,172 (29%), sizes DN50 (1,357), DN80 (1,319), DN40 (289)\n- Koper_Koper: 863 (8%), sizes DN15 (438), DN20 (212), DN28 (134)\n- DYKA PE Binnenriolering_PE: 679 (6%), sizes DN90 (339), DN100 (245), DN125 (45)\n- Uponor MLCP_Buis MLCP Th",
+   "num_overlap": 0.49
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-plumbing",
+  "q": "What is the total count of plumbing pumps installed, and what are the details of each pump type?",
+  "ref": "Plumbing Pumps:\nTotal Pumping Equipment: 1\n\nPump Details:\n- Type: M_Pump_Booster_MEPcontent_Duijvelaar_Pompen_HU3_DPC_DOL_DPVE10[1]:10_2:1933453",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no pumps**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 10,957 pipes, 10,558 pipe fittings, 859 valves and controls, 211 terminals.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-plumbing",
+  "q": "Could you provide a comprehensive analysis of the pipe lengths in the plumbing system, including total length, segment counts, and distribution metrics?",
+  "ref": "Pipe Length Analysis:\n   - Total pipe segments: 10,957\n   - Segments with length data: 10,957\n   - Total pipe length: 7,898 meters\n\n   Length Distribution:\n   - Average segment length: 0.72 meters\n   - Average pipe per floor: 415.7 meters",
+  "before": {
+   "route": "code",
+   "text": "**652 piping systems**, longest first: M531 126: 410.1 m (486 pipes); M5325 7: 322.7 m (344 pipes); M521 76: 252.9 m (145 pipes); M5327 3: 219.1 m (47 pipes); M521 4: 121.1 m (90 pipes); M521 1: 94.6 m (66 pipes); M521 3: 81.8 m (50 pipes); VWA STL G2: 76.0 m (91 pipes); +644 smaller systems (6,319.5 m). Total 7,898.0 m. [1] Shown in 3D: the piping model has no 2D plan, so the same pipes glow in t",
+   "num_overlap": 0.25
+  },
+  "after": {
+   "route": "code",
+   "text": "**3,057.5 m of pipes** in **4,106 runs**.\n- By system: waste water: 1,982.8 m (3,096 runs); hot water: 630.9 m (587 runs); rainwater: 441.3 m (409 runs); cold water: 2.44 m (14 runs) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-plumbing",
+  "q": "What different types of valves are used in this building, along with their quantities?",
+  "ref": "Valve Types in Building:\n   Total Flow Control Devices: 859\n\n   Specific Valve Types:\n   - SA_DYKA PVC Binnenriolering, Universeel sifon wit, 50-50_MEPcontent:SA_DYKA PVC Binnenriolering, Universeel sifon wit, 50-50_MEPcontent: 211 units (24.6%)\n   - M_Meter_Water_MEPcontent_Unspecified:Generic Wate",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**10 types of valves and controls**, 859 elements in total.\n- SA_DYKA PVC Binnenriolering, Universeel sifon wit, 50-50_MEPcontent: 211 (25%)\n- Generic Water Meter: 206 (24%)\n- binnendraad DN25: 105 (12%)\n- binnendraad DN25 (1\"): 105 (12%)\n- M_Onbepaald Appendages, Kogelkraan met dubbele wartel Kogelkraan PN16, 25-25_MEPcontent: 104 (12%)\n- knelkoppeling \u00d815: 101 (12%)\n- std: 16 (2%)\n- knelkoppelin",
+   "num_overlap": 0.42
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-plumbing",
+  "q": "What different types of pipes are used in this building, including their quantities?",
+  "ref": "Detailed Pipe Types in Building:\n   Total Pipe Segments: 10,957\n\n   Complete Pipe Type Specifications:\n   - Pipe Types:Uponor MLCP_Leiding wit 100m: 5,115 segments (46.7%)\n   - Pipe Types:DYKA PP Binnenriolering_Afvoerbuis 5m: 3,172 segments (28.9%)\n   - Pipe Types:Koper_Koper: 863 segments (7.9%)\n ",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**15 types of pipes**, 10,957 elements in total.\n- Uponor MLCP_Leiding wit 100m: 5,115 (47%), sizes DN15 (3,847), DN20 (1,268)\n- DYKA PP Binnenriolering_Afvoerbuis 5m: 3,172 (29%), sizes DN50 (1,357), DN80 (1,319), DN40 (289)\n- Koper_Koper: 863 (8%), sizes DN15 (438), DN20 (212), DN28 (134)\n- DYKA PE Binnenriolering_PE: 679 (6%), sizes DN90 (339), DN100 (245), DN125 (45)\n- Uponor MLCP_Buis MLCP Th",
+   "num_overlap": 0.6
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-plumbing",
+  "q": "What different types of pipe fittings are used in this building, with their quantities?",
+  "ref": "Pipe Fitting Types:\n   Total Pipe Fittings: 10,558\n\n   Fitting Types by Component:\n   - Bends/Elbows: 6,340 units (60.0%)\n   - Tees: 1,874 units (17.7%)\n   - Other Fittings: 1,081 units (10.2%)\n   - Reducers: 1,047 units (9.9%)\n   - Couplings: 216 units (2.0%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**90 types of pipes and fittings**, 21,515 elements in total.\n- Uponor MLCP_Leiding wit 100m: 5,115 (24%), sizes DN15 (3,847), DN20 (1,268)\n- DYKA PP Binnenriolering_Afvoerbuis 5m: 3,172 (15%), sizes DN50 (1,357), DN80 (1,319), DN40 (289)\n- M_Bend_Circular Bendable_Uponor MLCP_MLC white roll 100 m: 2,380 (11%)\n- M_Bend_Composite 2x45_DYKA PP Binnenriolering_2S-1S: 1,008 (5%)\n- M_Tee_Circular_Upono",
+   "num_overlap": 0.18
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-plumbing",
+  "q": "What pipe fitting types and quantities are installed?",
+  "ref": "Pipe Fitting Installation Details:\n   Total Fitting Quantity: 10,558 units\n\n   Fitting Types and Quantities:\n   - MLCP System Fittings: 4,545 units (43.0%)\n   - DYKA PP Drainage Fittings: 3,215 units (30.5%)\n   - Standard Plumbing Fittings: 1,368 units (13.0%)\n   - Copper Water Supply Fittings: 743 ",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**90 types of pipes and fittings**, 21,515 elements in total.\n- Uponor MLCP_Leiding wit 100m: 5,115 (24%), sizes DN15 (3,847), DN20 (1,268)\n- DYKA PP Binnenriolering_Afvoerbuis 5m: 3,172 (15%), sizes DN50 (1,357), DN80 (1,319), DN40 (289)\n- M_Bend_Circular Bendable_Uponor MLCP_MLC white roll 100 m: 2,380 (11%)\n- M_Bend_Composite 2x45_DYKA PP Binnenriolering_2S-1S: 1,008 (5%)\n- M_Tee_Circular_Upono",
+   "num_overlap": 0.09
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-plumbing",
+  "q": "What water heating systems are installed in the building, and what are their quantities?",
+  "ref": "Water Heating Systems:\n   Total Water Heating Equipment: 2\n\n   Specific Heating System Types:\n   - Ruimtebeslag:Boiler: 2 units",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2 service components in 1 system type**.\n- Heating: 2 components (2 boilers and heat sources) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-plumbing",
+  "q": "What electrical load information is available for water heaters, including any typical specifications?",
+  "ref": "Note: Electrical load specifications not available in plumbing IFC file.\nEstimated range: Typical residential boilers 3-6 kW per unit",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no radiators and heaters**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 10,957 pipes, 10,558 pipe fittings, 859 valves and controls, 211 terminals.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-plumbing",
+  "q": "What pumps are used in the system, including their quantities?",
+  "ref": "Pump Systems in Building:\n   Total Pumps: 1\n\n   Specific Pump Types:\n   - M_Pump_Booster_MEPcontent_Duijvelaar_Pompen_HU3_DPC_DOL_DPVE10[1]:10_2: 1 units",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1 type of pumps**, 1 elements in total.\n- type not named: 1 (100%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.5
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-plumbing",
+  "q": "What measuring equipment is used in the plumbing system, with their quantities?",
+  "ref": "Measuring Equipment in Plumbing System:\n   Total Measuring Devices: 206\n\n   Specific Measuring Equipment Types:\n   - M_Meter_Water_MEPcontent_Unspecified:Generic Water Meter: 105 units (51.0%)\n   - M_Meter_Water_MEPcontent_Unspecified1:Generic Water Meter: 101 units (49.0%)",
+  "before": {
+   "route": "code",
+   "text": "**652 piping systems**, longest first: M531 126: 410.1 m (486 pipes); M5325 7: 322.7 m (344 pipes); M521 76: 252.9 m (145 pipes); M5327 3: 219.1 m (47 pipes); M521 4: 121.1 m (90 pipes); M521 1: 94.6 m (66 pipes); M521 3: 81.8 m (50 pipes); VWA STL G2: 76.0 m (91 pipes); +644 smaller systems (6,319.5 m). Total 7,898.0 m. [1] Shown in 3D: the piping model has no 2D plan, so the same pipes glow in t",
+   "num_overlap": 0.17
+  },
+  "after": {
+   "route": "code",
+   "text": "**5,917 service components in 5 system types**.\n- Waste water: 3,336 components (3,096 pipes, 204 drains, 30 pipe fittings, 1,982.8 m of runs)\n- Hot water: 1,321 components (587 pipes, 532 pipe fittings, 202 valves and controls, 630.9 m of runs)\n- Rainwater: 783 components (409 pipes, 364 pipe fittings, 6 valves and controls, 441.3 m of runs)\n- Cold water: 476 components (358 pipe fittings, 104 va",
+   "num_overlap": 0.17
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-plumbing",
+  "q": "What types of pipe accessories are used in this building, including their quantities?",
+  "ref": "Pipe Accessories in Building:\n   Total Pipe Accessories: 859\n\n   Specific Accessory Types:\n   - SA_DYKA PVC Binnenriolering, Universeel sifon wit, 50-50_MEPcontent:SA_DYKA PVC Binnenriolering, Universeel sifon wit, 50-50_MEPcontent: 211 units (24.6%)\n   - M_Meter_Water_MEPcontent_Unspecified:Generic",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**15 types of pipes**, 10,957 elements in total.\n- Uponor MLCP_Leiding wit 100m: 5,115 (47%), sizes DN15 (3,847), DN20 (1,268)\n- DYKA PP Binnenriolering_Afvoerbuis 5m: 3,172 (29%), sizes DN50 (1,357), DN80 (1,319), DN40 (289)\n- Koper_Koper: 863 (8%), sizes DN15 (438), DN20 (212), DN28 (134)\n- DYKA PE Binnenriolering_PE: 679 (6%), sizes DN90 (339), DN100 (245), DN125 (45)\n- Uponor MLCP_Buis MLCP Th",
+   "num_overlap": 0.22
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-plumbing",
+  "q": "What is the breakdown of pipe materials in the building, including the quantities and percentages of each type?",
+  "ref": "Pipe Material Composition:\n\n   Materials Used:\n   - MLCP (Multi-Layer Composite): 5,904 segments (53.9%)\n   - PE (Polyethylene): 3,866 segments (35.3%)\n   - Copper: 863 segments (7.9%)\n   - PVC: 270 segments (2.5%)\n   - Steel: 38 segments (0.3%)\n   - Unspecified: 16 segments (0.1%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**15 types of pipes**, 10,957 elements in total.\n- Uponor MLCP_Leiding wit 100m: 5,115 (47%), sizes DN15 (3,847), DN20 (1,268)\n- DYKA PP Binnenriolering_Afvoerbuis 5m: 3,172 (29%), sizes DN50 (1,357), DN80 (1,319), DN40 (289)\n- Koper_Koper: 863 (8%), sizes DN15 (438), DN20 (212), DN28 (134)\n- DYKA PE Binnenriolering_PE: 679 (6%), sizes DN90 (339), DN100 (245), DN125 (45)\n- Uponor MLCP_Buis MLCP Th",
+   "num_overlap": 0.17
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-plumbing",
+  "q": "Could you provide a comprehensive analysis of the plumbing distribution network connectivity, including the connectivity rate and network integration metrics?",
+  "ref": "Plumbing Network Connectivity:\n   - Total distribution ports: 47,458\n   - Connected ports: 45,180\n   - Network connectivity rate: 95.2%\n\n   Network Integration Analysis:\n   - Total plumbing components: 22,594\n   - Average ports per component: 2.1\n   - System integration level: High (95.2%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**5,917 service components in 5 system types**.\n- Waste water: 3,336 components (3,096 pipes, 204 drains, 30 pipe fittings, 1,982.8 m of runs)\n- Hot water: 1,321 components (587 pipes, 532 pipe fittings, 202 valves and controls, 630.9 m of runs)\n- Rainwater: 783 components (409 pipes, 364 pipe fittings, 6 valves and controls, 441.3 m of runs)\n- Cold water: 476 components (358 pipe fittings, 104 va",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-str",
+  "q": "Could you provide a detailed breakdown of the building's structural system, including the quantities of each component type for both the superstructure and foundation systems?",
+  "ref": "Structural System Analysis:\n   Building: 19-story residential structure\n   Primary System: Reinforced concrete structure with a flat slab\u2013column system for gravity loads, and reinforced concrete shear walls for lateral stability. Along with a deep foundation system.\n\n   Structural Framework:\n   - Ma",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**252 footings in 36 types**.\n- Type 6_A-1: 86 (34%), diameter 600 mm, f2_beton ihwg_C30/37\n- Type 6_A-3: 32 (13%), diameter 600 mm, f2_beton ihwg_C30/37\n- fundbalk 700x700 C30/37: 21 (8%), fundbalk 700x700 C30/37, f2_beton ihwg_C30/37\n- Type 6_A-4: 15 (6%), diameter 600 mm, f2_beton ihwg_C30/37\n- fundbalk 1000x600 (C30/37): 13 (5%), fundbalk 1000x600 (C30/37), f2_beton ihwg_C30/37\n- opstorting b=",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-str",
+  "q": "What column types are used in this building, including their quantities?",
+  "ref": "Column System Overview:\n   Total Columns: 387\n\n   Specific Column Types:\n   - 28_SC_AT_kolom koker_gen:kolom_gen_K80x80x3,6: 168 units (43.4%)\n   - 28_SC_AT_kolom vierkant prefab:kolom vierkant_gen_lxb 220x875: 60 units (15.5%)\n   - 28_SC_AT_kolom vierkant prefab:kolom vierkant_gen_lxb 220x1118: 50 ",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**387 columns in 20 types**.\n- kolom_gen_K80x80x3,6: 168 (43%), kolom_gen_K80x80x3,6, h2_staal_ S275\n- kolom vierkant_gen_lxb 220x875: 60 (16%), 220 x 875 mm, f2_beton prefab_C45/55\n- kolom vierkant_gen_lxb 220x1118: 50 (13%), 220 x 1118 mm, f2_beton prefab_C45/55\n- kolom vierkant_gen_lxb 150x1118: 20 (5%), 150 x 1118 mm, f2_beton prefab_C45/55\n- kolom vierkant_gen_lxb 220x824: 18 (5%), 220 x 824 ",
+   "num_overlap": 0.46
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-str",
+  "q": "What footing types are used in this building, along with their quantities?",
+  "ref": "Footing System Overview:\n   Total Footings: 106\n\n   Specific Footing Types:\n   - 16_SFO_AT_balk vierkant beton:fundbalk 700x700 C30/37: 21 units (19.8%)\n   - 16_SFO_AT_balk vierkant beton:fundbalk 1000x600 (C30/37): 13 units (12.3%)\n   - 16_SFO_AT_balk vierkant beton.:opstorting b=400_(C30/37): 12 u",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**252 footings in 36 types**.\n- Type 6_A-1: 86 (34%), diameter 600 mm, f2_beton ihwg_C30/37\n- Type 6_A-3: 32 (13%), diameter 600 mm, f2_beton ihwg_C30/37\n- fundbalk 700x700 C30/37: 21 (8%), fundbalk 700x700 C30/37, f2_beton ihwg_C30/37\n- Type 6_A-4: 15 (6%), diameter 600 mm, f2_beton ihwg_C30/37\n- fundbalk 1000x600 (C30/37): 13 (5%), fundbalk 1000x600 (C30/37), f2_beton ihwg_C30/37\n- opstorting b=",
+   "num_overlap": 0.36
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-str",
+  "q": "What structural wall types are used in this building, including their quantities?",
+  "ref": "Structural Wall System:\n   Total Structural Walls: 299\n\n   Specific Wall Types:\n   - Basic Wall:22_WA_AT_ihw beton_225 (C25/30): 81 units (27.1%)\n   - Basic Wall:22_WA_AT_prefab beton_250: 68 units (22.7%)\n   - Basic Wall:22_WA_AT_ihw beton_250 (C25/30): 36 units (12.0%)\n   - Basic Wall:22_WA_AT_ihw",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**993 structural elements**: 387 columns, 354 beams, 252 footings.\n- Columns: 387 in 20 types (kolom_gen_K80x80x3,6: 168; kolom vierkant_gen_lxb 220x875: 60)\n- Beams: 354 in 16 types (balk_gen_L200x200x20: 191; Z-staal_H=240: 45)\n- Footings: 252 in 36 types (Type 6_A-1: 86; Type 6_A-3: 32) [1][2][3][4][5][6][7][8][9][10][11][12][13][14][15][16][17][18][19]",
+   "num_overlap": 0.41
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-str",
+  "q": "What are the different wall thicknesses used in the structural walls, and how many walls have each thickness?",
+  "ref": "Structural Wall Thicknesses:\n   - 510mm: 1 wall\n   - 500mm: 1 wall\n   - 400mm: 2 wall\n   - 300mm: 14 walls\n   - 250mm: 133 walls\n   - 225mm: 132 walls\n   - 200mm: 16 walls",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**993 structural elements**: 387 columns, 354 beams, 252 footings.\n- Columns: 387 in 20 types (kolom_gen_K80x80x3,6: 168; kolom vierkant_gen_lxb 220x875: 60)\n- Beams: 354 in 16 types (balk_gen_L200x200x20: 191; Z-staal_H=240: 45)\n- Footings: 252 in 36 types (Type 6_A-1: 86; Type 6_A-3: 32) [1][2][3][4][5][6][7][8][9][10][11][12][13][14][15][16][17][18][19]",
+   "num_overlap": 0.38
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-str",
+  "q": "What beam types are used in this building, with their quantities?",
+  "ref": "Beam System Overview:\n   Total Beams: 354\n\n   Specific Beam Types:\n   - 28_SF_AT_balk hoeklijn_gen:balk_gen_L200x200x20: 191 units (54.0%)\n   - 300_28_AT_balk_Z_profiel:Z-staal_H=240: 45 units (12.7%)\n   - 300_28_AT_balk_Z_profiel:Z-staal_H=220: 44 units (12.4%)\n   - 28_SF_AT_balk hoeklijn:balk_gen_",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**354 beams in 16 types**.\n- balk_gen_L200x200x20: 191 (54%), 200 x 200 mm, h2_staal_ S235\n- Z-staal_H=240: 45 (13%), h2_staal_ S235\n- Z-staal_H=220: 44 (12%), h2_staal_ S235\n- balk_gen_L150x150x12: 34 (10%), 150 x 150 mm, h2_staal_ S235\n- balk_gen_K120x120x8: 10 (3%), balk_gen_K120x120x8, h2_staal_ S275\n- balk vierkant_gen_250x710 (C25/30): 8 (2%), 250 x 450 mm, f2_beton ihwg_C25/30\n- balk HE_gen",
+   "num_overlap": 0.5
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-str",
+  "q": "What is the total concrete volume used in this building, and how is it distributed across different structural elements?",
+  "ref": "Concrete Quantity Analysis:\n   Total Concrete Volume: 7505.98 cu m\n\n   Concrete Distribution by Element:\n   - Slabs: 4613.27 m\u00b3 (75.2%)\n   - Walls: 1367.59 m\u00b3 (22.3%)\n   - Columns: 136.77 m\u00b3 (2.2%)\n   - Beams: 20.76 m\u00b3 (0.3%)\n\n   Note:\n   These volumes are gross estimates assuming pure concrete. Act",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**No concrete columns and beams and structural members and footings found**: none of the 993 columns and beams and structural members and footings names concrete as its material.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-str",
+  "q": "What is the total length of steel beams used in this building, broken down by each beam type?",
+  "ref": "Steel Beam Quantity Analysis:\n   Total steel beam length: 390.02 meters\n\n   Steel Beam Types by Length:\n   - 28_SF_AT_balk HE:balk HE_gen_HEA400: 131.28 m (33.7%)\n   - 28_SF_AT_balk HE:balk HE_gen_HEA320_gerberen_togen: 65.64 m (16.8%)\n   - 28_SF_AT_balk hoeklijn_gen:balk_gen_L200x200x20: 52.60 m (1",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**354 beams in 16 types**.\n- balk_gen_L200x200x20: 191 (54%), 200 x 200 mm, h2_staal_ S235\n- Z-staal_H=240: 45 (13%), h2_staal_ S235\n- Z-staal_H=220: 44 (12%), h2_staal_ S235\n- balk_gen_L150x150x12: 34 (10%), 150 x 150 mm, h2_staal_ S235\n- balk_gen_K120x120x8: 10 (3%), balk_gen_K120x120x8, h2_staal_ S275\n- balk vierkant_gen_250x710 (C25/30): 8 (2%), 250 x 450 mm, f2_beton ihwg_C25/30\n- balk HE_gen",
+   "num_overlap": 0.36
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-ventilation",
+  "q": "What HVAC systems are present in this building, with a breakdown of ventilation systems by type and quantity?",
+  "ref": "Ventilation Systems Overview:\n   Total HVAC Systems: 863\n\n   Ventilation Systems by Type:\n   - General HVAC: 763 systems (88.4%)\n   - Supply Air: 100 systems (11.6%)\n\n   System Architecture:\n   - Air distribution systems: 100 supply air systems\n   - Hydronic systems: 0 heating/cooling systems\n   - G",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**4,909 service components in 1 system type**.\n- Ventilation: 4,909 components (2,189 ducts, 2,056 duct fittings, 526 air terminals (diffusers and grilles), 2,558.3 m of runs)\n- 308 separately named circuits or loops are defined in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-ventilation",
+  "q": "What are the components of the HVAC ventilation system, including both a detailed breakdown by category and the major component groups?",
+  "ref": "HVAC Ventilation System Components:\n   Total Components: 11,948\n\n   Components by Category:\n   - Pipe Fittings: 3,447 components (28.9%)\n   - Pipes: 3,045 components (25.5%)\n   - Ducts: 2,052 components (17.2%)\n   - Duct Fittings: 1,962 components (16.4%)\n   - Pipe Accessories: 424 components (3.5%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**4,909 service components in 1 system type**.\n- Ventilation: 4,909 components (2,189 ducts, 2,056 duct fittings, 526 air terminals (diffusers and grilles), 2,558.3 m of runs)\n- 308 separately named circuits or loops are defined in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.04
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-ventilation",
+  "q": "What is the complete overview of the heating systems installation, including system types, total component counts, and distribution network details?",
+  "ref": "Heating Systems Overview:\n   Total components connected to the heating system: 100\n\n   Heating System Types:\n   - Hydronic heating systems: 0 systems\n   - Heat recovery ventilation: 1 units\n\n   Heating Distribution:\n   - Hydronic distribution network: 3045 pipe segments\n   - Air-based heat distribut",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**100 service components in 1 system type**.\n- Heating: 100 components (100 pipe fittings)\n- 100 separately named circuits or loops are defined in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.5
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-ventilation",
+  "q": "Could you provide a comprehensive analysis of the ductwork in the ventilation system, including total length, segment counts, and distribution by building levels?",
+  "ref": "Ductwork Length Analysis:\n   - Total duct segments: 2,052\n   - Segments with length data: 2,052\n   - Total ductwork length: 2,442 meters\n\n   Ductwork Distribution:\n   - Building levels: 19 floors\n   - Average ductwork per floor: 128.6 meters",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2,558.3 m of ducts** in **2,189 runs**.\n- By system: ventilation: 2,558.3 m (2,189 runs)\n- Size recorded for 137 of 2,189 runs; the rest are listed as size not recorded. [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-ventilation",
+  "q": "What different types of ducts are used in this building, showing counts by shape and material?",
+  "ref": "Duct Types in Building:\n   Total Duct Segments: 2,052\n\n   Duct Types by Shape:\n   - Round Ducts: 1,885 segments (91.9%)\n   - Rectangular Ducts: 167 segments (8.1%)\n\n   Duct Materials:\n   - Unspecified: 1,576 segments (76.8%)\n   - Galvanized Steel: 476 segments (23.2%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**10 types of ducts**, 2,189 elements in total.\n- Luchtkanaal Ovaal - rondebocht - t-stuk: 782 (36%)\n- DYKA AIR_rond - 4,0m: 776 (35%)\n- Luka rond - verzinkt staal ( zadel \u25cf - \u2588 ): 295 (13%)\n- S4Rx_Generic_Round: 137 (6%), sizes diameter 125 mm (130), diameter 80 mm (6), diameter 100 mm (1)\n- Luka rechthoekig - verzinkt staal (zadel): 129 (6%)\n- LUKA_Verzinkt zaaglengte: 36 (2%)\n- Luka instort rec",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-ventilation",
+  "q": "What are the different duct types used in this building, broken down by specifications?",
+  "ref": "Duct Types in Building:\n   Total Duct Segments: 2,052\n\n   Specific Duct Types:\n   - Oval Duct:Luchtkanaal Ovaal - rondebocht - t-stuk: 782 segments (38.1%)\n   - Round Duct:DYKA AIR_rond - 4,0m: 776 segments (37.8%)\n   - Round Duct:Luka rond - verzinkt staal ( zadel \u25cf - \u2588 ): 295 segments (14.4%)\n   -",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**10 types of ducts**, 2,189 elements in total.\n- Luchtkanaal Ovaal - rondebocht - t-stuk: 782 (36%)\n- DYKA AIR_rond - 4,0m: 776 (35%)\n- Luka rond - verzinkt staal ( zadel \u25cf - \u2588 ): 295 (13%)\n- S4Rx_Generic_Round: 137 (6%), sizes diameter 125 mm (130), diameter 80 mm (6), diameter 100 mm (1)\n- Luka rechthoekig - verzinkt staal (zadel): 129 (6%)\n- LUKA_Verzinkt zaaglengte: 36 (2%)\n- Luka instort rec",
+   "num_overlap": 0.39
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-ventilation",
+  "q": "What are the duct fitting types and their respective quantities?",
+  "ref": "Detailed Duct Fitting Analysis:\n   Total Fitting Quantity: 5,503 units\n\n   Fitting Types and Quantities:\n   - Standard Fittings: 3,331 units (60.5%)\n   - DYKA System Fittings: 1,375 units (25.0%)\n   - Galvanized Steel Fittings: 538 units (9.8%)\n   - Victaulic System Fittings: 244 units (4.4%)\n   - L",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**70 types of ducts and fittings**, 7,692 elements in total.\n- M_Bend_Circular_Geberit Mapress C-staal_2S: 1,381 (18%)\n- M_Reducer_Circular_Geberit Mapress C-staal_1S: 1,308 (17%)\n- Luchtkanaal Ovaal - rondebocht - t-stuk: 782 (10%)\n- DYKA AIR_rond - 4,0m: 776 (10%)\n- M_Tee_Circular_Geberit Mapress C-staal_3S: 424 (6%)\n- H70 195-125: 359 (5%)\n- verzinkt_staal: 317 (4%)\n- Luka rond - verzinkt staal",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-ventilation",
+  "q": "Could you provide a comprehensive analysis of the hydronic pipe network, including total pipe length, segment counts, and distribution statistics?",
+  "ref": "Hydronic Pipe Network Analysis:\n   - Total pipe segments: 3,045\n   - Segments with length data: 3,045\n   - Total pipe length: 2,075 meters\n\n   Pipe Network Distribution:\n   - Average pipe per floor: 109.2 meters\n   - Average segment length: 0.68 meters",
+  "before": {
+   "route": "code",
+   "text": "**2,075.1 m of pipe** in **3045 segments**; longest sizes: DN20 557.2 m, DN32 389.4 m, DN40 375.6 m, DN50 316.8 m. [1] Shown in 3D: the piping model has no 2D plan, so the same pipes glow in the 3D view.",
+   "num_overlap": 0.25
+  },
+  "after": {
+   "route": "code",
+   "text": "**No pipes** are modelled.\n- This model's service elements are: 3,447 pipe fittings, 3,045 pipes, 2,189 ducts, 2,056 duct fittings.",
+   "num_overlap": 0.25
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-ventilation",
+  "q": "What measuring equipment is present in the ventilation system, with quantities by type?",
+  "ref": "Measuring Equipment in Ventilation System:\n   Total Measuring Devices: 106\n\n   Specific Measuring Equipment Types:\n   - M_Meter_Energy_MEPcontent_Sensus_PolluStat E_NL-EN:3/4''_0.6_110: 105 units (99.1%)\n   - M_Meter_Water_MEPcontent_Unspecified:Generic Water Meter: 1 units (0.9%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**4,909 service components in 1 system type**.\n- Ventilation: 4,909 components (2,189 ducts, 2,056 duct fittings, 526 air terminals (diffusers and grilles), 2,558.3 m of runs)\n- 308 separately named circuits or loops are defined in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.22
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-ventilation",
+  "q": "What insulation types are used in the ventilation system, showing coverage distribution?",
+  "ref": "Insulation Systems in Ventilation:\n   Total Insulation Coverings: 86\n\n   Specific Insulation Types:\n   - Duct Insulation:Default: 64 coverings (74.4%)\n   - Pipe Insulation:Default: 18 coverings (20.9%)\n   - Duct Lining:Default: 4 coverings (4.7%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**4,909 service components in 1 system type**.\n- Ventilation: 4,909 components (2,189 ducts, 2,056 duct fittings, 526 air terminals (diffusers and grilles), 2,558.3 m of runs)\n- 308 separately named circuits or loops are defined in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-ventilation",
+  "q": "What are the specific types of duct accessories used in this building, including their quantities and percentages, and what are the general functional categories of these accessories?",
+  "ref": "Duct Accessories in Building:\n   Total Duct Accessories: 246\n\n   Specific Accessory Types with Quantities:\n   - VE_Fire Damper_Round_MEPcontent:RF Technologies, Vlinderklep SC+60, 160-160: 111 units (45.1%)\n   - NLRS_57_DUA_FB_rond inspectiedeksel VID_Velu:100: 94 units (38.2%)\n   - VE_Fire Damper_R",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**10 types of ducts**, 2,189 elements in total.\n- Luchtkanaal Ovaal - rondebocht - t-stuk: 782 (36%)\n- DYKA AIR_rond - 4,0m: 776 (35%)\n- Luka rond - verzinkt staal ( zadel \u25cf - \u2588 ): 295 (13%)\n- S4Rx_Generic_Round: 137 (6%), sizes diameter 125 mm (130), diameter 80 mm (6), diameter 100 mm (1)\n- Luka rechthoekig - verzinkt staal (zadel): 129 (6%)\n- LUKA_Verzinkt zaaglengte: 36 (2%)\n- Luka instort rec",
+   "num_overlap": 0.08
+  }
+ },
+ {
+  "doc": "ifc_bench__sixty5-ventilation",
+  "q": "Could you provide a comprehensive analysis of the ventilation distribution network connectivity, including total ports, connected ports, connectivity rate, and network integration metrics?",
+  "ref": "Ventilation Network Connectivity:\n   - Total distribution ports: 25,434\n   - Connected ports: 21,618\n   - Network connectivity rate: 85.0%\n\n   Network Integration Analysis:\n   - Total HVAC components: 11,948\n   - Average ports per component: 2.1",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**4,909 service components in 1 system type**.\n- Ventilation: 4,909 components (2,189 ducts, 2,056 duct fittings, 526 air terminals (diffusers and grilles), 2,558.3 m of runs)\n- 308 separately named circuits or loops are defined in the model [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__smiley-west-arc",
+  "q": "What are the load-bearing wall types, their quantities, and material compositions?",
+  "ref": "Total Load-Bearing Walls: 181\n\n   Load-Bearing Wall Types:\n   - Beton-W\u00e4rmeschutz 250: 65 walls (36%)\n     Materials:\n       \u2022 Isolierung, hart 275646950 (0.100m)\n       \u2022 Beton, tragend 268571148 (0.150m)\n   - Kalksandstein 268899148 200: 46 walls (25%)\n     Materials:\n       \u2022 Kalksandstein 268899",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**181 of 262 walls are load-bearing**.\n- Not load-bearing: 81\n- Wall volume: 560.8 m\u00b3 load-bearing, 39.5 m\u00b3 not\n- 19 walls carry no load-bearing property and are not counted. [1][2][3][4]",
+   "num_overlap": 0.06
+  }
+ },
+ {
+  "doc": "ifc_bench__smiley-west-arc",
+  "q": "What are the non-load-bearing wall types, their quantities, and material compositions?",
+  "ref": "Total Non-Load-Bearing Walls: 100\n\n   Non-Load-Bearing Wall Types:\n   - Gips 275646950 100: 70 walls (70%)\n     Materials:\n       \u2022 Gips 275646950 (0.100m)\n   - Kalksandstein 268899148 200: 18 walls (18%)\n     Materials:\n       \u2022 Kalksandstein 268899148 (0.200m)\n   - Holzrahmen_Wand 11: 11 walls (11",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**181 of 262 walls are load-bearing**.\n- Not load-bearing: 81\n- Wall volume: 560.8 m\u00b3 load-bearing, 39.5 m\u00b3 not\n- 19 walls carry no load-bearing property and are not counted. [1][2][3][4]",
+   "num_overlap": 0.08
+  }
+ },
+ {
+  "doc": "ifc_bench__smiley-west-arc",
+  "q": "What is the structural system of the building?",
+  "ref": "Structural System information is not explicitly available within the model. Based on available information, the structural system appears to be based on load-bearing wall construction.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**30 structural elements**: 20 columns, 10 beams.\n- Columns: 20 in 1 type (Stahl 269029580 D100: 20)\n- Beams: 10 in 1 type (I-SW-Eingang 100 x 150: 10) [1][2]",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__smiley-west-arc",
+  "q": "Which structural elements are present in this building, with counts by element type?",
+  "ref": "Structural Elements found:\n   - Beams: 10 elements\n   - Columns: 20 elements\n   - Slabs: 120 elements\n   - Walls: 200 elements\n\n   Total Structural Elements: 350",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**30 structural elements**: 20 columns, 10 beams.\n- Columns: 20 in 1 type (Stahl 269029580 D100: 20)\n- Beams: 10 in 1 type (I-SW-Eingang 100 x 150: 10) [1][2]",
+   "num_overlap": 0.4
+  }
+ },
+ {
+  "doc": "ifc_bench__smiley-west-arc",
+  "q": "Which types of beams are used, and how many of each?",
+  "ref": "Beam Types:\n   - I-SW-Eingang 100 x 150: 10 beams (100%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**10 beams in 1 type**.\n- I-SW-Eingang 100 x 150: 10 (100%), I-SW-Eingang, Massiv 2813929878 [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__smiley-west-arc",
+  "q": "Which types of columns are present in this building, with their quantities?",
+  "ref": "Column Types:\n   - Stahl 269029580 D100: 20 columns (100%)",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**20 columns in 1 type**.\n- Stahl 269029580 D100: 20 (100%), diameter 100 mm, Stahl 269029580 [1]",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_bench__smiley-west-arc",
+  "q": "Which MEP systems are installed in the building?",
+  "ref": "Information not available in the BIM model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 281 walls, 170 doors, 120 railings, 120 slabs.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__smiley-west-arc",
+  "q": "Which lighting systems are implemented?",
+  "ref": "Information not available in the BIM model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no light fittings**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 281 walls, 170 doors, 120 railings, 120 slabs.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__smiley-west-arc",
+  "q": "What components make up the heating system?",
+  "ref": "Heating system information not available in this model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 281 walls, 170 doors, 120 railings, 120 slabs.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__smiley-west-arc",
+  "q": "Which electrical systems are installed?",
+  "ref": "Information not available in the BIM model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 281 walls, 170 doors, 120 railings, 120 slabs.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__smiley-west-arc",
+  "q": "Which plumbing systems are installed?",
+  "ref": "Information not available in the BIM model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 281 walls, 170 doors, 120 railings, 120 slabs.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__smiley-west-arc",
+  "q": "What is the building's electrical load?",
+  "ref": "Information not available in the BIM model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 281 walls, 170 doors, 120 railings, 120 slabs.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_bench__smiley-west-arc",
+  "q": "What are the specified ventilation requirements?",
+  "ref": "Information not available in the BIM model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "code",
+   "text": "**This model has no building-services (MEP) elements**: no pipes, ducts, cables, fixtures or service equipment were found in it.\n- It contains: 281 walls, 170 doors, 120 railings, 120 slabs.\n- To answer this, upload the plumbing, ventilation or electrical model of the same building.",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-duplex-duplex-a-20110907",
+  "q": "How many beams are there in the model 'Duplex Apartment - architectural'?",
+  "ref": "8",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**8 beams** in this model.\n- By level: Level 1: 4; Level 2: 4\n- By type: W410X60: W410X60: 6; W310X60: W310X60: 2 [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-duplex-duplex-mep-20110907",
+  "q": "How many rooms (spaces) are there in the model 'Duplex Apartment - MEP'?",
+  "ref": "42",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**926 service components in 10 system types**.\n- Heating: 338 components (164 pipes, 152 pipe fittings, 14 heat exchangers, 133.3 m of runs)\n- Cold water: 149 components (74 pipes, 71 pipe fittings, 4 valves and controls, 45.9 m of runs)\n- Hot water: 138 components (71 pipes, 67 pipe fittings, 26.1 m of runs)\n- Waste water: 134 components (74 pipes, 44 pipe fittings, 6 washbasins and sinks, 50.8 m",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-duplex-duplex-mep-20110907",
+  "q": "How many sanitary fixtures are there in the model 'Duplex Apartment - MEP'?",
+  "ref": "16",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**16 plumbing fixtures** in this model.\n- By level: Level 1: 8; Level 2: 8\n- By type: Private - 6.1 Lpf: 4 (25%); 650 mmx485 mm - Private: 4 (25%); 865 mmx815 mm - Private: 2 (12%); 535 mmx485 mm - Private: 2 (12%); 455 mmx455 mm - Private: 2 (12%)\n- Kinds: 6 washbasins and sinks, 4 toilets, 2 showers, 2 plumbing fixtures, 2 bathtubs [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-duplex-duplex-mep-20110907",
+  "q": "How many light fixtures are there in the model 'Duplex Apartment - MEP'?",
+  "ref": "28",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**28 light fittings** in this model.\n- By level: Level 1: 14; Level 2: 14\n- By type: Single Pole: 14 (50%); 150W - 120V: 8 (29%); 100W - 120V: 6 (21%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-duplex-duplex-electrical-20121207",
+  "q": "How many rooms (spaces) are there in the model 'Duplex Apartment - electrical'?",
+  "ref": "1",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**75 service components in 1 system type**.\n- Electrical: 75 components (47 sockets and outlets, 28 light fittings) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-duplex-duplex-electrical-20121207",
+  "q": "How many light fixtures are there in the model 'Duplex Apartment - electrical'?",
+  "ref": "28",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**28 light fittings** in this model.\n- By level: Level 2: 16; Level 1: 12\n- By type: Single Pole: 14 (50%); 150W - 120V: 8 (29%); 100W - 120V: 6 (21%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-duplex-duplex-plumbing-20121113",
+  "q": "How many rooms (spaces) are there in the model 'Duplex Apartment - plumbing'?",
+  "ref": "1",
+  "before": {
+   "route": "code",
+   "text": "**151.4 m of pipe** in **231 segments**; longest sizes: DN25 78.5 m, DN40 48.4 m, DN15 18.4 m, DN6 3.25 m. [1] Shown in 3D: the piping model has no 2D plan, so the same pipes glow in the 3D view.",
+   "num_overlap": 1.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**490 service components in 4 system types**.\n- Hot water: 179 components (85 pipe fittings, 80 pipes, 14 valves and controls, 26.9 m of runs)\n- Cold water: 161 components (84 pipe fittings, 75 pipes, 2 valves and controls, 45.8 m of runs)\n- Waste water: 122 components (62 pipes, 44 pipe fittings, 6 washbasins and sinks, 50.2 m of runs)\n- Rainwater: 28 components (14 pipe fittings, 14 pipes, 28.5 ",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-duplex-duplex-plumbing-20121113",
+  "q": "How many sanitary fixtures are there in the model 'Duplex Apartment - plumbing'?",
+  "ref": "16",
+  "before": {
+   "route": "code",
+   "text": "**151.4 m of pipe** in **231 segments**; longest sizes: DN25 78.5 m, DN40 48.4 m, DN15 18.4 m, DN6 3.25 m. [1] Shown in 3D: the piping model has no 2D plan, so the same pipes glow in the 3D view.",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**16 plumbing fixtures** in this model.\n- By level: Level 1: 8; Level 2: 8\n- By type: Private - 6.1 Lpf: 4 (25%); 650 mmx485 mm - Private: 4 (25%); 865 mmx815 mm - Private: 2 (12%); 535 mmx485 mm - Private: 2 (12%); 455 mmx455 mm - Private: 2 (12%)\n- Kinds: 6 washbasins and sinks, 4 toilets, 2 showers, 2 plumbing fixtures, 2 bathtubs [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-clinic-clinic-architectural",
+  "q": "How many sanitary fixtures are there in the model 'Medical-Dental Clinic - architectural'?",
+  "ref": "101",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**101 plumbing fixtures** in this model.\n- By level: First Floor: 64; Second Floor: 37\n- By type: type not named: 44 (44%); Semi-Recessed: 22 (22%); Mirror 600mm x 900mm: 22 (22%); 305 x 215 x 813mm: 10 (10%); 17\" Depth x 18 1/2\" Width: 3 (3%)\n- Kinds: 98 plumbing fixtures, 3 showers [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-clinic-clinic-architectural",
+  "q": "What is the net floor area of the room 'ELECTRICAL (2B13)' on 'Second Floor', in m\u00b2?",
+  "ref": "8.9",
+  "before": {
+   "route": "code",
+   "text": "No room matching **room electrical 2b13** was found in this model. Room names/types present: 1ST SGT, ADMIN, ADMIN OFFICE, ADMIN WORK STATN., ADP EQUIP SPACE, APPMTS, AUDIO, BEE EQUIP. STORAGE, BEE TECH, BENCHSTOCK STORAGE, BIOMED MAINT. ADMIN., BLOOD DRAW, BMET WORK STATION, CENT. STO., CENTRAL ISSUE, CENTRAL MECH. RM., CENTRAL WAITING, CERAMIC LAB, CHIEF AERO MED., CHIEF LOG OFFICE, CL. UTL. / K",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "No room matching **room electrical 2b13** was found in this model. Room names/types present: 1ST SGT, ADMIN, ADMIN OFFICE, ADMIN WORK STATN., ADP EQUIP SPACE, APPMTS, AUDIO, BEE EQUIP. STORAGE, BEE TECH, BENCHSTOCK STORAGE, BIOMED MAINT. ADMIN., BLOOD DRAW, BMET WORK STATION, CENT. STO., CENTRAL ISSUE, CENTRAL MECH. RM., CENTRAL WAITING, CERAMIC LAB, CHIEF AERO MED., CHIEF LOG OFFICE, CL. UTL. / K",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-clinic-clinic-architectural",
+  "q": "What is the net floor area of the room 'ELECTRICAL (2C18)' on 'Second Floor', in m\u00b2?",
+  "ref": "9.08",
+  "before": {
+   "route": "code",
+   "text": "No room matching **room electrical 2c18** was found in this model. Room names/types present: 1ST SGT, ADMIN, ADMIN OFFICE, ADMIN WORK STATN., ADP EQUIP SPACE, APPMTS, AUDIO, BEE EQUIP. STORAGE, BEE TECH, BENCHSTOCK STORAGE, BIOMED MAINT. ADMIN., BLOOD DRAW, BMET WORK STATION, CENT. STO., CENTRAL ISSUE, CENTRAL MECH. RM., CENTRAL WAITING, CERAMIC LAB, CHIEF AERO MED., CHIEF LOG OFFICE, CL. UTL. / K",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "No room matching **room electrical 2c18** was found in this model. Room names/types present: 1ST SGT, ADMIN, ADMIN OFFICE, ADMIN WORK STATN., ADP EQUIP SPACE, APPMTS, AUDIO, BEE EQUIP. STORAGE, BEE TECH, BENCHSTOCK STORAGE, BIOMED MAINT. ADMIN., BLOOD DRAW, BMET WORK STATION, CENT. STO., CENTRAL ISSUE, CENTRAL MECH. RM., CENTRAL WAITING, CERAMIC LAB, CHIEF AERO MED., CHIEF LOG OFFICE, CL. UTL. / K",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-clinic-clinic-structural",
+  "q": "How many walls are there in the model 'Medical-Dental Clinic - structural'?",
+  "ref": "26",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1,029 structural elements**: 738 beams, 195 columns, 96 footings.\n- Beams: 738 in 3 types (14K1: 14K1: 456; W460X60: W460X60: 277)\n- Columns: 195 in 3 types (W250X67: 129; 400 x 400mm: 36)\n- Footings: 96 in 4 types (2000 x 2000 x 300mm: 2000 x 2000 x 300mm: 71; Bearing Footing - 900 x 300: 20) [1][2][3][4][5]",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-clinic-clinic-structural",
+  "q": "How many columns are there in the model 'Medical-Dental Clinic - structural'?",
+  "ref": "195",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**195 columns** in this model.\n- By level: TOF Footing: 111; Second Floor: 68; Roof - Main: 10; First Floor: 6\n- By type: W250X67: 129 (66%); 400 x 400mm: 36 (18%); W150X22.5: 30 (15%) [1][2][3][4]",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-clinic-clinic-structural",
+  "q": "How many beams are there in the model 'Medical-Dental Clinic - structural'?",
+  "ref": "738",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**738 beams** in this model.\n- By level: First Floor: 415; Second Floor: 315; Roof - Main: 8\n- By type: 14K1: 14K1: 456 (62%); W460X60: W460X60: 277 (38%); 10K1: 10K1: 5 (1%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-clinic-clinic-structural",
+  "q": "How many stairs are there in the model 'Medical-Dental Clinic - structural'?",
+  "ref": "1",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1,029 structural elements**: 738 beams, 195 columns, 96 footings.\n- Beams: 738 in 3 types (14K1: 14K1: 456; W460X60: W460X60: 277)\n- Columns: 195 in 3 types (W250X67: 129; 400 x 400mm: 36)\n- Footings: 96 in 4 types (2000 x 2000 x 300mm: 2000 x 2000 x 300mm: 71; Bearing Footing - 900 x 300: 20) [1][2][3][4][5]",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-clinic-clinic-plumbing",
+  "q": "How many sanitary fixtures are there in the model 'Medical-Dental Clinic - plumbing'?",
+  "ref": "119",
+  "before": {
+   "route": "code",
+   "text": "**3,246.9 m of pipe** in **2893 segments**; longest sizes: DN15 791.6 m, DN100 525.0 m, DN20 417.4 m, DN50 390.2 m. [1] Shown in 3D: the piping model has no 2D plan, so the same pipes glow in the 3D view.",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**119 plumbing fixtures** in this model.\n- By level: Level 1: 74; Level 2: 45\n- By type: 535 mmx485 mm - Public: 42 (35%); 455 mmx455 mm - Private: 36 (30%); Public - 6.1 Lpf: 24 (20%); 510 mmx455 mm: 6 (5%); Standard: 4 (3%)\n- Kinds: 47 plumbing fixtures, 42 washbasins and sinks, 27 toilets, 3 showers [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-clinic-clinic-electrical",
+  "q": "How many rooms (spaces) are there in the model 'Medical-Dental Clinic - electrical'?",
+  "ref": "266",
+  "before": {
+   "route": "code",
+   "text": "**2 ELECTRICALs** in this model. [1]",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2 ELECTRICALs** in this model. [1]",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-clinic-clinic-electrical",
+  "q": "How many light fixtures are there in the model 'Medical-Dental Clinic - electrical'?",
+  "ref": "1120",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1,120 light fittings** in this model.\n- By level: Level 1: 628; Level 2: 492\n- By type: B1 - 0610x1219mm: 252 (22%); Single Pole: 232 (21%); B3 - 610x610mm: 96 (9%); B3B - 610x610mm: 54 (5%); SB - 102mm Diameter: 48 (4%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3",
+  "q": "How many columns are there in the model 'Chesapeake Bay Bridge-Tunnel IFC 4.3 test model'?",
+  "ref": "1195",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**1,195 columns** in this model.\n- By type: CBBT 30-Foot Tapered Galvanized Marine Highway Light Pole Standard Type: 657 (55%); CBBT High-Level Navigation Bridge Twin-Column Pier Stem Type: 402 (34%); VDOT Breakaway Galvanized Steel Roadside Sign Post Type: 100 (8%); CBBT Overhead Sign Gantry Vertical Tubular Steel Support Column Type: 36 (3%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3",
+  "q": "How many beams are there in the model 'Chesapeake Bay Bridge-Tunnel IFC 4.3 test model'?",
+  "ref": "2221",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**2,221 beams** in this model.\n- By type: CBBT Prestressed Box/I-Girder Superstructure Type: 1,250 (56%); CBBT Precast Marine Pile Bent Cap Type (10.6m x 1.85m x 1.35m): 695 (31%); CBBT High-Level Marine Plate Girder Type: 248 (11%); CBBT Overhead Sign Gantry Box-Truss Horizontal Crossbeam Type: 28 (1%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3",
+  "q": "How many light fixtures are there in the model 'Chesapeake Bay Bridge-Tunnel IFC 4.3 test model'?",
+  "ref": "783",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**797 light fittings** in this model.\n- By type: CBBT 250W Marine LED Cobra-Head Roadway Luminaire & Mast Arm Type: 783 (98%); CBBT Overhead LED Lane-Control Signal (LCS) Matrix Type: 14 (2%)\n- By system: ventilation: 783 (98%); electrical: 14 (2%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__rwth-digitalhub-digitalhub-fm-san-v2",
+  "q": "How many sanitary fixtures are there in the model 'DigitalHub v2 - Fachmodell Sanit\u00e4r'?",
+  "ref": "72",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**74 plumbing fixtures** in this model.\n- By level: E00_OKRD: 46; E01_OKRD: 28\n- By type: Viega Eco Plus- WC-Element f\u00fcr wandh\u00e4ngendes WC Viega 704070 #6bfeid6# (Standard): 16 (22%); 35 x 60cm: 16 (22%); Viega Eco-Waschtisch-Element, 1130x490 Viega 670986 #33o1lvo# (Standard): 12 (16%); 60 x 60cm: 12 (16%); Urinal UP Drucksp\u00fcler (Standard): 6 (8%)\n- Kinds: 44 toilets, 28 washbasins and sinks, 2 dr",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__rwth-digitalhub-fm-arc-digitalhub-v1",
+  "q": "How many columns are there in the model 'DigitalHub v1 - Fachmodell Architektur'?",
+  "ref": "62",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**62 columns** in this model.\n- By level: E01_OKRD: 32; E00_OKRD: 30\n- By type: STB 250 x 400: 32 (52%); STB 250 x 250: 30 (48%) [1][2]",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__rwth-digitalhub-fm-arc-digitalhub-v1",
+  "q": "How many beams are there in the model 'DigitalHub v1 - Fachmodell Architektur'?",
+  "ref": "14",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**14 beams** in this model.\n- By level: E01_OKRD: 8; E00_OKRD: 6\n- By type: STB 250 x 500: 14 (100%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__rwth-digitalhub-fm-arc-digitalhub-with-sb-v1",
+  "q": "How many columns are there in the model 'DigitalHub v1 - Architektur mit Space Boundaries (IFC2SB)'?",
+  "ref": "62",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**62 columns** in this model.\n- By level: E01_OKRD: 32; E00_OKRD: 30\n- By type: STB 250 x 400: 32 (52%); STB 250 x 250: 30 (48%) [1][2]",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__rwth-digitalhub-fm-arc-digitalhub-with-sb-v1",
+  "q": "How many beams are there in the model 'DigitalHub v1 - Architektur mit Space Boundaries (IFC2SB)'?",
+  "ref": "14",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**14 beams** in this model.\n- By level: E01_OKRD: 8; E00_OKRD: 6\n- By type: STB 250 x 500: 14 (100%) [1] Shown in 3D: the same items glow in the 3D view.",
+   "num_overlap": 1.0
+  }
+ },
+ {
+  "doc": "ifc_models__rwth-digitalhub-fm-san-digitalhub-v1",
+  "q": "How many sanitary fixtures are there in the model 'DigitalHub v1 - Fachmodell Sanit\u00e4r'?",
+  "ref": "72",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "**74 plumbing fixtures** in this model.\n- By level: E00_OKRD: 46; E01_OKRD: 28\n- By type: Viega Eco Plus- WC-Element f\u00fcr wandh\u00e4ngendes WC Viega 704070 #6bfeid6# (Standard): 16 (22%); 35 x 60cm: 16 (22%); Viega Eco-Waschtisch-Element, 1130x490 Viega 670986 #33o1lvo# (Standard): 12 (16%); 60 x 60cm: 12 (16%); Urinal UP Drucksp\u00fcler (Standard): 6 (8%)\n- Kinds: 44 toilets, 28 washbasins and sinks, 2 dr",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+  "q": "What is the net floor area of the room 'VENTILATSIOONIRUUM (503)' on '5.korrus', in m\u00b2?",
+  "ref": "58.88",
+  "before": {
+   "route": "code",
+   "text": "No room matching **room ventilatsiooniruum 503** was found in this model. Room names/types present: ABIRUUM, ARVUTIKLASS, EL.KILP, ELUTUBA+K\u00d6\u00d6K, ESIK, FUAJEE-TREPIKODA, HOOLDUST\u00d6\u00d6TAJAD, HUMANITAARRUUM, ILU- JA HEAOLUTEENUSED, INVA-WC, KORIDOR, KORISTUSRUUM, LIFT, LIIKUMISVAHENDID, MAGAMISTUBA, PERSONALI PUHKERUUM, PESUKODA, RINGIRUUM, SERVER, SOOJUSS\u00d5LM, SOTS.T\u00d6\u00d6TAJA, TREPIKODA, TUALETTRUUM, VALVE",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "No room matching **room ventilatsiooniruum 503** was found in this model. Room names/types present: ABIRUUM, ARVUTIKLASS, EL.KILP, ELUTUBA+K\u00d6\u00d6K, ESIK, FUAJEE-TREPIKODA, HOOLDUST\u00d6\u00d6TAJAD, HUMANITAARRUUM, ILU- JA HEAOLUTEENUSED, INVA-WC, KORIDOR, KORISTUSRUUM, LIFT, LIIKUMISVAHENDID, MAGAMISTUBA, PERSONALI PUHKERUUM, PESUKODA, RINGIRUUM, SERVER, SOOJUSS\u00d5LM, SOTS.T\u00d6\u00d6TAJA, TREPIKODA, TUALETTRUUM, VALVE",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_bench__digital-hub-arc",
+  "q": "Are electrical distribution equipment capacities available?",
+  "ref": "Electrical panel capacities not available in the BIM model. This model appears to be an architectural model.",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": null
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+  "q": "How many columns are shown on the floor plan of '1.korrus'?",
+  "ref": "37",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+  "q": "What is the net floor area of the room 'VALVERUUM (102)' on '1.korrus', in m\u00b2?",
+  "ref": "10.32",
+  "before": {
+   "route": "code",
+   "text": "No room matching **room valveruum 102** was found in this model. Room names/types present: ABIRUUM, ARVUTIKLASS, EL.KILP, ELUTUBA+K\u00d6\u00d6K, ESIK, FUAJEE-TREPIKODA, HOOLDUST\u00d6\u00d6TAJAD, HUMANITAARRUUM, ILU- JA HEAOLUTEENUSED, INVA-WC, KORIDOR, KORISTUSRUUM, LIFT, LIIKUMISVAHENDID, MAGAMISTUBA, PERSONALI PUHKERUUM, PESUKODA, RINGIRUUM, SERVER, SOOJUSS\u00d5LM, SOTS.T\u00d6\u00d6TAJA, TREPIKODA, TUALETTRUUM, VALVERUUM, VEE",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "No room matching **room valveruum 102** was found in this model. Room names/types present: ABIRUUM, ARVUTIKLASS, EL.KILP, ELUTUBA+K\u00d6\u00d6K, ESIK, FUAJEE-TREPIKODA, HOOLDUST\u00d6\u00d6TAJAD, HUMANITAARRUUM, ILU- JA HEAOLUTEENUSED, INVA-WC, KORIDOR, KORISTUSRUUM, LIFT, LIIKUMISVAHENDID, MAGAMISTUBA, PERSONALI PUHKERUUM, PESUKODA, RINGIRUUM, SERVER, SOOJUSS\u00d5LM, SOTS.T\u00d6\u00d6TAJA, TREPIKODA, TUALETTRUUM, VALVERUUM, VEE",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+  "q": "Kui suur on ruumi \u201eVALVERUUM (102)\u201c netop\u00f5randapind korrusel \u201e1.korrus\u201c (m\u00b2)?",
+  "ref": "10.32",
+  "before": {
+   "route": "code",
+   "text": "The matching VALVERUUM have no area recorded.",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "The matching VALVERUUM have no area recorded.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+  "q": "Kui suur on ruumi \u201eVENTILATSIOONIRUUM (503)\u201c netop\u00f5randapind korrusel \u201e5.korrus\u201c (m\u00b2)?",
+  "ref": "58.88",
+  "before": {
+   "route": "code",
+   "text": "The matching VENTILATSIOONIRUUM have no area recorded.",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "code",
+   "text": "The matching VENTILATSIOONIRUUM have no area recorded.",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-molio-molio-with-uris",
+  "q": "How many columns are shown on the floor plan of 'Grundplan'?",
+  "ref": "2",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-molio-molio-with-uris",
+  "q": "How many columns are shown on the floor plan of '1. Sal'?",
+  "ref": "2",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-molio-molio-with-uris",
+  "q": "How many columns are shown on the floor plan of '2. Sal'?",
+  "ref": "2",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-molio-molio-with-uris",
+  "q": "How many columns are shown on the floor plan of '3. Sal'?",
+  "ref": "2",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-molio-molio-with-uris",
+  "q": "How many columns are shown on the floor plan of '4. Sal'?",
+  "ref": "2",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ },
+ {
+  "doc": "ifc_models__bsc-molio-molio-with-uris",
+  "q": "How many columns are shown on the floor plan of '5. Sal'?",
+  "ref": "2",
+  "before": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  },
+  "after": {
+   "route": "reader",
+   "text": "",
+   "num_overlap": 0.0
+  }
+ }
+]

@@ -66,7 +66,7 @@ KEYWORD_KIND = [
     (r"shower|dusche|suihku|dusch|douche", "shower"), (r"bath ?tub|\bbath\b|badewanne|kylpyamme|badkar|\bbad\b", "bath"), (r"floor drain|\bdrain\b|gully|bodenablauf|lattiakaivo|rainwater outlet|afvoer", "drain"),
     (r"luminaire|light fix|lighting|\blight\b|\blamp|leuchte|valaisin|belysning|armatuur|downlight|spotlight|fluorescent|\bled\b", "light"),
     (r"socket|outlet|receptacle|steckdose|pistorasia|stikkontakt|stopcontact|power point", "socket"), (r"\bswitch|schalter|kytkin|strömbrytare|schakelaar|dimmer", "switch"),
-    (r"distribution board|switchboard|panelboard|electrical panel|verteiler|keskus|schaltschrank|elcentral|groepenkast|switchgear|\bpanel\b", "board"),
+    (r"distribution board|switchboard|panelboard|electrical panel|verteiler|keskus|schaltschrank|elcentral|groepenkast|switchgear", "board"),
     (r"\bvalve|ventiil|\bventil\b|absperr|kugelhahn|afsluiter|\bcock\b|\bhahn\b|\bfaucet|\btap\b|\bmixer\b|armatur", "valve"),
     (r"\bpump|pumpe|pumppu|\bpomp\b", "pump"), (r"\bfan\b|ventilator|puhallin|fläkt|\bblower", "fan"), (r"radiator|heizk[oö]rper|patteri|konvektor|convector|panel radiator|\bheater", "radiator"),
     (r"diffuser|grille|\bgrill\b|luftdurchlass|tuloilma|poistoilma|supply air terminal|air terminal|anemostat|\bregister\b|louver|louvre", "air_terminal"),
@@ -77,7 +77,7 @@ KEYWORD_KIND = [
     (r"\btank\b|cylinder|storage|expansion vessel|accumulator|boiler tank", "tank"), (r"heat exchanger|w[äa]rme[üu]bertrager|lämmönsiirrin|coil", "heat_exchanger"),
     (r"transformer|trafo|muuntaja", "transformer"),
 ]
-STRUCT_CLASS_KIND = {"IfcColumn": "column", "IfcBeam": "beam", "IfcMember": "member", "IfcFooting": "footing", "IfcPile": "pile", "IfcReinforcingBar": "rebar",
+STRUCT_CLASS_KIND = {"IfcSlab": "slab", "IfcWall": "wall", "IfcColumn": "column", "IfcBeam": "beam", "IfcMember": "member", "IfcFooting": "footing", "IfcPile": "pile", "IfcReinforcingBar": "rebar",
                      "IfcReinforcingMesh": "rebar", "IfcTendon": "rebar", "IfcTendonAnchor": "rebar"}
 SERVICE_DOMAINS = ("plumbing", "heating", "cooling", "ventilation", "fire protection", "gas", "electrical", "controls and alarms")
 
@@ -112,8 +112,12 @@ STEEL = re.compile(r"steel|stahl|st[åa]l|teräs|staal|\bhe[abm]? ?\d+|\bipe ?\d
 WOOD = re.compile(r"timber|wood|holz|puu|tr[äa]|hout|glulam|lvl|clt", re.I)
 
 
+PLAIN_PLURAL = {"proxy": ("generic object", "generic objects"), "furniture": ("furniture item", "furniture items"), "stairs": ("staircase", "staircases"), "covering": ("covering", "coverings"),
+                "railing": ("railing", "railings"), "site": ("site", "sites"), "roof": ("roof", "roofs")}
+
+
 def plural(kind: str, n: int = 2) -> str:
-    s, p = KIND_WORDS.get(kind, (kind.replace("_", " "), kind.replace("_", " ") + "s"))
+    s, p = KIND_WORDS.get(kind) or PLAIN_PLURAL.get(kind) or (kind.replace("_", " "), kind.replace("_", " ") + "s")
     return s if n == 1 else p
 
 
@@ -204,7 +208,7 @@ def size_from_name(*texts):
     """"STB 250 x 400", "HUP 100x100x6.3", "D200", "d=30", "Ø300" in a type name -> (label, w_mm, h_mm); a name is only a fallback when no profile is stored."""
     for t in texts:
         t = str(t or "")
-        m = re.search(r"(\d{2,4}(?:[.,]\d+)?)\s*[x×*]\s*(\d{2,4}(?:[.,]\d+)?)(?:\s*[x×*]\s*(\d{1,3}(?:[.,]\d+)?))?", t)
+        m = re.search(r"(?<![A-Za-z0-9.,])(\d{2,4}(?:[.,]\d+)?)\s*[x×*]\s*(\d{2,4}(?:[.,]\d+)?)(?:\s*[x×*]\s*(\d{1,3}(?:[.,]\d+)?))?", t)
         if m:
             a, b = float(m.group(1).replace(",", ".")), float(m.group(2).replace(",", "."))
             return (f"{_mm(a)} x {_mm(b)} mm", a, b) if min(a, b) >= 10 else None
@@ -229,7 +233,19 @@ def _unique(f, classes):
     return list(seen.values())
 
 
+FITTING_WORDS = re.compile(r"\b(?:elbow|bend|tee|t-st[üu]cke?|bogen|kn[ie]e|kniest[üu]ck|abzweig\w*|[üu]bergang\w*|transition|reducer|reduktion|coupling|muffe|union|cross|kreuz\w*|stutzen|nipple|endkappe|kulma|haara\w*|supistus|y-?st[üu]ck|wye|offset|takeoff|take-off|saddle|flange|flansch|bushing|verteiler)\b", re.I)
+
+
 def _classify(el, t, ps) -> str:
+    k = _classify0(el, t, ps)
+    if k in ("pipe", "duct", "cable_tray", "conduit"):
+        hay = " ".join(str(w or "") for w in (el.Name, getattr(el, "ObjectType", None), t.Name if t is not None else None))
+        if FITTING_WORDS.search(hay):
+            return {"pipe": "pipe_fitting", "duct": "duct_fitting"}.get(k, "cable_fitting")
+    return k
+
+
+def _classify0(el, t, ps) -> str:
     cls = el.is_a()
     k = CLASS_KIND.get(cls)
     words = (el.Name, getattr(el, "ObjectType", None), t.Name if t is not None else None, _first(ps, ("Family", "Family and Type", "Familie", "Reference", "Description")))
@@ -268,6 +284,95 @@ def _classify(el, t, ps) -> str:
     return GENERIC_BY_CLASS.get(cls, "device")
 
 
+PROXY_SAFE = {"socket", "light", "switch", "board", "toilet", "basin", "shower", "bath", "sprinkler", "sensor", "alarm"}
+
+
+def _proxy_kind(el, UE):
+    """Generic objects are only counted as services when their own name says what they are (receptacle, luminaire, toilet, sprinkler ...)."""
+    t = UE.get_type(el)
+    k = _kind_from_words(el.Name, getattr(el, "ObjectType", None), t.Name if t is not None else None)
+    return k if k in PROXY_SAFE else None
+
+
+def material_layers(el, UE):
+    """[(material name, layer thickness or None)] from the element's own material, else its type's."""
+    for obj in (el, UE.get_type(el)):
+        if obj is None:
+            continue
+        for rel in getattr(obj, "HasAssociations", None) or []:
+            if not rel.is_a("IfcRelAssociatesMaterial"):
+                continue
+            m = rel.RelatingMaterial
+            if m.is_a("IfcMaterialLayerSetUsage"):
+                m = m.ForLayerSet
+            if m.is_a("IfcMaterialProfileSetUsage"):
+                m = m.ForProfileSet
+            if m.is_a("IfcMaterialLayerSet"):
+                return [(l.Material.Name if l.Material else "", float(l.LayerThickness or 0)) for l in m.MaterialLayers]
+            if m.is_a("IfcMaterialProfileSet"):
+                return [(p.Material.Name if p.Material else "", None) for p in m.MaterialProfiles]
+            if m.is_a("IfcMaterialConstituentSet"):
+                return [(c.Material.Name if c.Material else "", None) for c in m.MaterialConstituents]
+            if m.is_a("IfcMaterialList"):
+                return [(x.Name, None) for x in m.Materials]
+            if m.is_a("IfcMaterial"):
+                return [(m.Name, None)]
+    return []
+
+
+def concrete_share(el, t, ps):
+    """(material text, share of the element that is concrete or None when the model does not say). Layer thickness weights layered walls and slabs."""
+    try:
+        layers = [(n or "", th) for n, th in material_layers(el, __import__("ifcopenshell.util.element", fromlist=["x"]))]
+    except Exception:  # noqa: BLE001
+        layers = []
+    if not layers:
+        txt = _first(ps, MAT_KEYS)
+        if isinstance(txt, str) and txt.strip():
+            layers = [(txt, None)]
+    names = [n for n, _ in layers if n]
+    if not names:
+        return None, None
+    text = "; ".join(dict.fromkeys(names))[:120]
+    isc = [bool(CONCRETE.search(n)) for n, _ in layers]
+    ths = [th for _, th in layers]
+    if all(isc):
+        return text, 1.0
+    if not any(isc):
+        return text, 0.0
+    if all(th for th in ths):
+        return text, round(sum(th for th, c in zip(ths, isc) if c) / sum(ths), 3)
+    return text, None
+
+
+def volume_m3(el, f, UE, vscale):
+    """The model's own volume in m3: quantity take-off first, else a property typed as a volume (so the unit comes from the file, never from the name)."""
+    try:
+        q = UE.get_psets(el, qtos_only=True)
+        for key in ("NetVolume", "GrossVolume"):
+            for d in q.values():
+                v = d.get(key)
+                if isinstance(v, (int, float)) and v > 0:
+                    return round(float(v) * vscale, 4)
+        for d in q.values():
+            for kk, v in d.items():
+                if "volume" in kk.lower() and isinstance(v, (int, float)) and v > 0:
+                    return round(float(v) * vscale, 4)
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        for ps in (getattr(el, "IsDefinedBy", None) or []):
+            if not ps.is_a("IfcRelDefinesByProperties") or not ps.RelatingPropertyDefinition.is_a("IfcPropertySet"):
+                continue
+            for pr in ps.RelatingPropertyDefinition.HasProperties:
+                nv = getattr(pr, "NominalValue", None)
+                if nv is not None and nv.is_a("IfcVolumeMeasure") and "volume" in str(pr.Name).lower() and float(nv.wrappedValue) > 0:
+                    return round(float(nv.wrappedValue) * vscale, 4)
+    except Exception:  # noqa: BLE001
+        pass
+    return None
+
+
 def build(doc_id: str, ifc_path, elements_json=None) -> dict:
     """Read the IFC once: one compact row per distribution (services) and structural element."""
     import ifcopenshell
@@ -288,6 +393,7 @@ def build(doc_id: str, ifc_path, elements_json=None) -> dict:
             for o in rel.RelatedObjects:
                 systems.setdefault(o.GlobalId, sysent.Name)
     dist = _unique(f, ["IfcDistributionElement"])
+    dist += [e for e in _unique(f, ["IfcBuildingElementProxy"]) if _proxy_kind(e, UE) is not None]
     meta = {}
     for el in dist:
         ps = UE.get_psets(el)
@@ -295,7 +401,7 @@ def build(doc_id: str, ifc_path, elements_json=None) -> dict:
         if t is not None:
             for k, v in UE.get_psets(t).items():
                 ps.setdefault(k, v)
-        meta[el.GlobalId] = (el, t, ps, _classify(el, t, ps))
+        meta[el.GlobalId] = (el, t, ps, _proxy_kind(el, UE) if el.is_a("IfcBuildingElementProxy") else _classify(el, t, ps))
     lin = [m[0] for m in meta.values() if m[3] in LINEAR]
     lrows, calib = P.build_rows(f, lin, "seg", geo, scale, UE) if lin else ([], {})
     by_lin = {r["item_id"]: r for r in lrows}
@@ -373,6 +479,7 @@ def build(doc_id: str, ifc_path, elements_json=None) -> dict:
                 n_checked += 1
                 n_agree += abs(ex - r["length_m"]) <= 0.03 * max(ex, r["length_m"]) + 0.01
     struct = []
+    vscale = UU.calculate_unit_scale(f, "VOLUMEUNIT") or scale ** 3
     for cls, k in STRUCT_CLASS_KIND.items():
         try:
             ents = f.by_type(cls)
@@ -385,7 +492,8 @@ def build(doc_id: str, ifc_path, elements_json=None) -> dict:
             ps = UE.get_psets(el)
             tname = clean_type(t.Name if t is not None else (getattr(el, "ObjectType", None) or el.Name))
             sz = profile_size(el, scale) or (profile_size(t, scale) if t is not None and getattr(t, "RepresentationMaps", None) is None else None) or size_from_name(tname, el.Name)
-            row = {"id": el.GlobalId, "c": cls, "k": k, "t": tname, "st": (geo.get(el.GlobalId, {}).get("storey") or {}).get("name"),
+            mt, cf = concrete_share(el, t, ps)
+            row = {"id": el.GlobalId, "c": cls, "k": k, "t": tname, "v": volume_m3(el, f, UE, vscale), "mt": mt, "cf": cf, "st": (geo.get(el.GlobalId, {}).get("storey") or {}).get("name"),
                    "m": (lambda v: v if isinstance(v, str) and len(v) < 60 else None)(_first(ps, MAT_KEYS))}
             if sz:
                 row["sz"] = sz[0]
@@ -498,7 +606,11 @@ GROUP_SUBJECTS = {  # words naming a whole group of kinds (or a whole trade)
     "light": {"light"}, "fitting": {"pipe_fitting", "duct_fitting", "cable_fitting", "fitting"}, "valve": {"valve"},
     "air_terminal": {"air_terminal"}, "sensor": {"sensor", "alarm"}, "alarm": {"alarm", "sensor"}, "board": {"board", "transformer"},
 }
+TRADE_DOMAINS = {"plumbing": {"waste water", "hot water", "cold water", "rainwater", "plumbing vent", "plumbing"}, "water supply": {"hot water", "cold water"}, "hot water": {"hot water"}, "cold water": {"cold water"},
+                 "waste water": {"waste water", "plumbing vent"}, "rainwater": {"rainwater"}}
 TRADES = [
+    ("water supply", r"\bwater supply\b|\bdomestic water\b|\bpotable\b|\bdrinking water\b|\bsupply water\b"), ("hot water", r"\bhot water\b|\bwarm water\b|\bdhw\b"), ("cold water", r"\bcold water\b"),
+    ("waste water", r"\bwaste ?water\b|\bsewage\b|\bsewer\b|\bsanitary (?:pipes?|piping|drain\w*|system)\b|\bsoil pipes?\b|\bwaste pipes?\b"), ("rainwater", r"\brain ?water\b|\bstorm ?water\b|\bstorm drain\w*\b"),
     ("electrical", r"\belectric\w*\b|\bpower\b|\bcabling\b|\bwiring\b"), ("plumbing", r"\bplumbing\b|\bwater (?:supply|system)\b|\bsanitary\b|\bdrainage\b|\bsewage\b"),
     ("heating", r"\bheating\b|\bhydronic\b"), ("cooling", r"\bcooling\b|\bchilled\b|\bair[- ]conditioning\b"), ("ventilation", r"\bventilation\b|\bsupply air\b|\bexhaust air\b|\bhvac\b|\bair handling\b"),
     ("fire protection", r"\bfire (?:protection|suppression|fighting|safety|alarm)\b|\bsprinkler"), ("gas", r"\bgas (?:system|supply|pipes?|piping)\b|\bnatural gas\b"),
@@ -512,7 +624,7 @@ LENGTH_Q = re.compile(r"\blength\b|\bhow long\b|\bmetres?\b|\bmeters?\b|\bmetre?
 COUNT_Q = re.compile(r"\bhow many\b|\bnumber of\b|\bcount\b|\btotal number\b|\bquantit(?:y|ies)\b", re.I)
 TYPES_Q = re.compile(r"\btypes?\b|\bkinds?\b|\bvarieties\b|\bcategories\b|\bwhich (?:\w+ ){0,3}(?:are|is) (?:used|present|installed|included|available|in)\b|\bwhat (?:\w+ ){0,3}(?:are|is) (?:used|present|installed|there|in)\b|\bby type\b", re.I)
 SYSTEMS_Q = re.compile(r"\bsystems?\b|\bby system\b|\bsystem types?\b|\bserv(?:e|es|ing|ed)\b|\bnetworks?\b|\bcircuits?\b", re.I)
-SIZES_Q = re.compile(r"\bsizes?\b|\bdiameters?\b|\bdimensions?\b|\bwidths?\b|\bdn ?\d+\b|\bspans?\b|\bhow (?:big|large|wide|thick|tall)\b|\bcross[- ]section", re.I)
+SIZES_Q = re.compile(r"\bsizes?\b|\bdiameters?\b|\bdimensions?\b|\bwidths?\b|\bdn ?\d+\b|\bspans?\b|\bhow (?:big|large|wide|thick|tall)\b", re.I)
 VOLUME_Q = re.compile(r"\bvolumes?\b|\bconcrete\b|\bm3\b|\bm³\b|\bcubic\b", re.I)
 MATERIAL_Q = re.compile(r"\bmaterials?\b|\bmade of\b|\bmade from\b", re.I)
 BYLEVEL_Q = re.compile(r"\bby (?:level|floor|storey|story)\b|\bper (?:level|floor|storey|story)\b|\beach (?:level|floor|storey|story)\b|\bdistributed (?:across|over|between)\b|\bacross (?:the )?(?:floors|levels|storeys)\b", re.I)
@@ -535,6 +647,11 @@ def _kinds_of(subj: list[str]) -> set[str]:
 
 
 # ------------------------------------------------------------------ answers
+def _join(words) -> str:
+    w = [x for x in words if x]
+    return w[0] if len(w) == 1 else (", ".join(w[:-1]) + " and " + w[-1] if w else "")
+
+
 def _n(v: float) -> str:
     return f"{v:,.1f}" if abs(v) >= 10 else f"{v:,.2f}"
 
@@ -646,14 +763,19 @@ def no_services(c: _Ctx, what: str = "building-services (MEP) elements") -> dict
 
 
 # ---- services
+def _in_trade(r: dict, trade: str) -> bool:
+    if trade in TRADE_DOMAINS:
+        return r.get("d") in TRADE_DOMAINS[trade] or (trade == "plumbing" and r["k"] in ("toilet", "basin", "shower", "bath", "fixture", "drain"))
+    return r.get("d") == trade or (trade == "electrical" and r["k"] in ("cable_tray", "cable", "light", "socket", "switch", "board", "transformer", "cable_fitting", "conduit"))
+
+
 def _services_for(c: _Ctx, subj: list[str], trade: str | None):
     rows = c.idx["services"]
     if subj:
         ks = _kinds_of(subj)
         rows = [r for r in rows if r["k"] in ks]
     if trade:
-        rows = [r for r in rows if r.get("d") == trade or (trade == "plumbing" and r.get("d") in ("waste water", "hot water", "cold water", "rainwater", "plumbing vent", "plumbing"))
-                or (trade == "electrical" and r["k"] in ("cable_tray", "cable", "light", "socket", "switch", "board", "transformer", "cable_fitting", "conduit"))]
+        rows = [r for r in rows if _in_trade(r, trade)]
     return rows
 
 
@@ -703,7 +825,7 @@ def _types_answer(c: _Ctx, subj: list[str], trade: str | None) -> dict:
     if err:
         return _finish(c, f"**{err}**", None, None, [], ["level not found"])
     rows = rows2
-    word = " and ".join(plural(s) for s in subj) if subj else "service elements"
+    word = _join([plural(s) for s in subj]) if subj else "service elements"
     if not rows:
         return no_services(c, f"{word}") if not c.idx["services"] or not st else _finish(c, f"**No {word} on {st}.**", 0, "count", [], ["0 matches"])
     cnt = Counter(r["t"] for r in rows)
@@ -735,7 +857,7 @@ def _count_answer(c: _Ctx, subj: list[str], trade: str | None) -> dict:
     st, rows, err = _storey_filter(c, rows)
     if err:
         return _finish(c, f"**{err}**", None, None, [], ["level not found"])
-    word = " and ".join(plural(s, 2) for s in subj) if subj else (f"{trade} elements" if trade else "service elements")
+    word = _join([plural(s, 2) for s in subj]) if subj else (f"{trade} elements" if trade else "service elements")
     if not rows:
         if not allr:
             return no_services(c, f"{word}" if subj or trade else "building-services (MEP) elements")
@@ -769,11 +891,11 @@ def _length_answer(c: _Ctx, subj: list[str], trade: str | None) -> dict:
     ks = _kinds_of(lin_kinds) & LINEAR | _kinds_of(lin_kinds)
     rows = [r for r in c.idx["services"] if r["k"] in ks and r["k"] in LINEAR]
     if trade:
-        rows = [r for r in rows if r.get("d") == trade or (trade == "plumbing" and r.get("d") in ("waste water", "hot water", "cold water", "rainwater", "plumbing vent"))]
+        rows = [r for r in rows if _in_trade(r, trade)]
     st, rows, err = _storey_filter(c, rows)
     if err:
         return _finish(c, f"**{err}**", None, None, [], ["level not found"])
-    word = " and ".join(plural(s) for s in lin_kinds if s != "conduit") if subj else "pipes, ducts and cable trays"
+    word = _join([plural(s) for s in lin_kinds if s != "conduit"]) if subj else "pipes, ducts and cable trays"
     if not rows:
         if not c.idx["services"]:
             return no_services(c, word)
@@ -786,7 +908,7 @@ def _length_answer(c: _Ctx, subj: list[str], trade: str | None) -> dict:
         by_kind[r["k"]] += r["L"]
     bullets = []
     ql = c.ql
-    group = "system" if re.search(r"\bsystem|\bby type\b|heating|plumbing|ventilation", ql) else ("level" if BYLEVEL_Q.search(ql) or re.search(r"\blevel|floor|storey", ql) and not st else ("size" if re.search(r"\bsize|diameter", ql) else "system"))
+    group = "level" if (BYLEVEL_Q.search(ql) or re.search(r"\bdistributed\b|\blevels?\b|\bfloors?\b|\bstoreys?\b", ql)) and not st else ("size" if re.search(r"\bsizes?\b|\bdiameters?\b", ql) else "system")
     if group == "system":
         g = defaultdict(lambda: [0, 0.0])
         for r in have:
@@ -833,7 +955,7 @@ def _sizes_answer(c: _Ctx, subj: list[str], trade: str | None) -> dict:
     st, rows, err = _storey_filter(c, rows)
     if err:
         return _finish(c, f"**{err}**", None, None, [], ["level not found"])
-    word = " and ".join(plural(s) for s in subj) if subj else "pipes, ducts and cable trays"
+    word = _join([plural(s) for s in subj]) if subj else "pipes, ducts and cable trays"
     if not rows:
         return no_services(c, word)
     sized = [r for r in rows if _size_label(r)]
@@ -864,7 +986,8 @@ def _struct_items(c: _Ctx, kind: str):
     idx_rows = {r["id"]: r for r in (c.idx or {}).get("structure", [])} if c.idx else {}
     its = [i for i in c.doc.items if i.kind == kind or (kind == "footing" and i.props.get("ifc_class") in ("IfcFooting", "IfcPile")) or (kind == "member" and i.kind == "member")]
     if kind == "footing":
-        its = [i for i in c.doc.items if i.kind in ("footing", "pile") or i.props.get("ifc_class") in ("IfcFooting", "IfcPile")]
+        its = [i for i in c.doc.items if i.kind in ("footing", "pile") or i.props.get("ifc_class") in ("IfcFooting", "IfcPile")
+               or (i.kind in ("wall", "slab", "proxy") and re.search(r"foundation|footing|fundament|perustus|grundmauer|\bpfahl|\bpile\b", f"{i.type_name or ''} {i.name or ''}", re.I))]
     return [(i, idx_rows.get(i.item_id)) for i in its]
 
 
@@ -893,7 +1016,7 @@ def _struct_answer(c: _Ctx, kinds: list[str], want: str) -> dict | None:
         pairs = [p for p in pairs if p[1].storey == st]
     elif storey_requested(c.q):
         return None
-    word = " and ".join(plural(k) for k in kinds)
+    word = _join([plural(k) for k in kinds])
     if not pairs:
         have = Counter(i.kind for i in c.doc.items if i.kind in ("column", "beam", "slab", "wall", "member", "footing", "roof", "stairs"))
         what = ", ".join(f"{_int(v)} {plural(k, v)}" for k, v in have.most_common(4))
@@ -947,35 +1070,49 @@ def _struct_answer(c: _Ctx, kinds: list[str], want: str) -> dict | None:
             lines.append(f"- {t}: {_int(v)} ({_share(v, n)}){ex}")
         return _finish(c, head + ".\n" + "\n".join(lines) + " {marks}", len(ty), "count", ids, [f"{len(ty)} types over {n} elements"], found=f"{_int(n)} {word}, grouped by type")
     # volume
-    vols = [(k, i, r, _vol(i)) for k, i, r in pairs]
-    have = [v for v in vols if v[3]]
     conc_only = bool(CONCRETE.search(c.ql))
-    sel = [v for v in have if CONCRETE.search(f"{_mat_of(v[1], v[2]) or ''} {v[1].type_name or ''} {v[1].name or ''}")] if conc_only else have
-    unknown_mat = [v for v in have if not (_mat_of(v[1], v[2]) or CONCRETE.search(f"{v[1].type_name or ''} {v[1].name or ''}"))] if conc_only else []
-    if conc_only and not sel:
-        if unknown_mat and len(unknown_mat) == len(have):
-            sel = have
-            note = "The model does not state the material, so this is the total volume of all of them, not proven to be concrete."
-        else:
-            return _finish(c, f"**No concrete {word} found**: none of the {_int(n)} {word} names concrete as its material.", 0, "m3", [], ["0 concrete elements"], found=f"{_int(n)} {word}; none is concrete")
-    else:
+    vols = []
+    for k, i, r in pairs:
+        v = (r or {}).get("v") or _vol(i)
+        cf = (r or {}).get("cf")
+        if cf is None and r is None:
+            cf = 1.0 if CONCRETE.search(f"{(i.props or {}).get('material') or ''} {i.type_name or ''} {i.name or ''}") else None
+        vols.append((k, i, r, v, cf))
+    have = [x for x in vols if x[3]]
+    layered = False
+    if conc_only:
+        sel = [(k, i, r, v * cf) for k, i, r, v, cf in have if cf]
+        layered = any(0 < (cf or 0) < 1 for *_, cf in have)
+        unk = [x for x in have if x[4] is None]
+        if not sel:
+            if unk and len(unk) == len(have):
+                return _finish(c, f"**The model does not state the material of its {word}**, so the concrete volume cannot be given. Their total volume is {_n(sum(x[3] for x in have))} m³ (material not stated).", None, None,
+                               [x[1].item_id for x in have], ["material not stated"], found=f"{_int(n)} {word}; no material is recorded")
+            return _finish(c, f"**No concrete {word} found**: none of the {_int(n)} {word} names concrete as a material.", 0, "m3", [], ["0 concrete elements"], found=f"{_int(n)} {word}; none is concrete")
         note = ""
-    tot = sum(v[3] for v in sel)
+    else:
+        sel = [(k, i, r, v) for k, i, r, v, cf in have]
+        note = ""
+    tot = sum(x[3] for x in sel)
     by = defaultdict(lambda: [0, 0.0])
     for k, i, r, v in sel:
         by[k][0] += 1; by[k][1] += v
-    head = f"**{_n(tot)} m³ of {'concrete ' if conc_only and not note else ''}{word}**" + (f" on {st}" if st else "") + f" ({_int(len(sel))} elements)"
-    lines = ["- By element: " + "; ".join(f"{plural(k)}: {_n(v[1])} m³ ({_int(v[0])})" for k, v in sorted(by.items(), key=lambda kv: -kv[1][1]))]
-    if note:
-        lines.append(f"- {note}")
+    head = f"**{_n(tot)} m³ of {'concrete in the ' if conc_only else ''}{word}**" + (f" on {st}" if st else "") + f" ({_int(len(sel))} elements)"
+    lines = ["- By element: " + "; ".join(f"{plural(k)}: {_n(v[1])} m³ ({_int(v[0])})" for k, v in sorted(by.items(), key=lambda kv: -kv[1][1]))] if len(by) > 1 else []
     miss = n - len(have)
     if miss:
         lines.append(f"- {_int(miss)} of {_int(n)} {word} have no volume in the model and are not included.")
-    cap = 85 if miss > 0.1 * n or note else None
-    return _finish(c, head + ".\n" + "\n".join(lines) + " {marks}", round(tot, 3), "m3", [v[1].item_id for v in sel], [f"{len(sel)} volumes summed"],
-                   found=f"{_int(n)} {word}{f' on {st}' if st else ''}", measured=f"Added the stored net volume of {_int(len(sel))} elements: {_n(tot)} m³",
-                   cap_pct=cap, cap_reason=("Volumes are the model's own; " + ("material is not stated" if note else f"{miss} elements have no volume") + ".") if cap else None,
-                   improve="Ask for a model with quantity take-off (volumes) and materials." if cap else None)
+    if conc_only:
+        unk_n = len([x for x in have if x[4] is None])
+        if unk_n:
+            lines.append(f"- {_int(unk_n)} elements name no clear material and are not counted as concrete.")
+        if layered:
+            lines.append("- Layered elements count only their concrete layers (by layer thickness).")
+    cap = 88 if (miss > 0.1 * n or layered or (conc_only and any(x[4] is None for x in have))) else None
+    return _finish(c, head + ".\n" + "\n".join(lines) + " {marks}", round(tot, 3), "m3", [x[1].item_id for x in sel], [f"{len(sel)} volumes summed"],
+                   found=f"{_int(n)} {word}{f' on {st}' if st else ''}", measured=f"Added the model's own volume of {_int(len(sel))} elements: {_n(tot)} m³",
+                   cap_pct=cap, cap_reason=("Volumes are the model's own; some elements have no volume, no clear material, or are layered." if cap else None),
+                   improve="Ask for a model with quantity take-off (volumes) and named materials." if cap else None)
 
 
 def _loadbearing_walls(c: _Ctx) -> dict | None:
@@ -1018,6 +1155,8 @@ def answer(question: str, doc, t0) -> dict | None:
     if not asks:
         return None
     if re.search(r"\b(?:remove|delete|hide|isolate|highlight|add|move|resize|change)\b", ql):
+        return None
+    if re.search(r"\b(?:capacit\w*|loads?|kw|kwh|watts?|power rating|flow rates?|pressure|voltage|specifications?|maintenance|cost|price|energy|efficien\w*|concept|span|spans|spanning|grid|inferred|estimate|compliant|compliance|code|rooms?|apartment|unit [a-z]?\d+|duplex [ab]|located|location|wattage|ampere\w*|cross[- ]sectional|area|u-?value|thermal)\b", ql):
         return None
     mep_q = bool(subj or generic or trade) and not (ssub and not (subj or generic))
     # ---- structure first when a structural word leads
