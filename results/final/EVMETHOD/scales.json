@@ -1,0 +1,1441 @@
+{
+  "summary": {
+    "sample_pages": 37,
+    "sampling": "Seeded random sample, up to 12 source documents per input family; one page per document; no new OCR/model calls",
+    "population_by_family": {
+      "ifc": 574,
+      "dxf": 1042,
+      "raster": 4901,
+      "pdf": 1
+    },
+    "available_by_rung": {
+      "ifc": 12,
+      "door-prior": 36,
+      "ratio-dpi": 13,
+      "dxf_units_fit": 12,
+      "dimension": 1
+    },
+    "chosen_by_rung": {
+      "ifc": 12,
+      "dxf_units_fit": 12,
+      "door-prior": 11,
+      "unknown": 1,
+      "ratio-dpi": 1
+    },
+    "native_comparisons": 24,
+    "within_1pct": 24,
+    "max_diff_pct": 0.002855461909115256,
+    "ifc_dxf_twins": [],
+    "limitations": [
+      "Candidate availability reflects cached operands, not everything a fresh drawing reader could extract.",
+      "No unrecorded dimensions, OCR, native geometry or physical error bounds were invented.",
+      "Independent scale accuracy requires matching surveyed/native twins; same-source agreement is not that accuracy."
+    ],
+    "rung_availability": {
+      "native IFC projection": {
+        "pages": 12,
+        "pct_of_sample": 32.432432432432435
+      },
+      "native CAD units/registration": {
+        "pages": 12,
+        "pct_of_sample": 32.432432432432435
+      },
+      "matched printed dimensions": {
+        "pages": 1,
+        "pct_of_sample": 2.7027027027027026
+      },
+      "printed ratio + DPI": {
+        "pages": 13,
+        "pct_of_sample": 35.13513513513514
+      },
+      "printed ratio + full paper size": {
+        "pages": 0,
+        "pct_of_sample": 0.0
+      },
+      "scale bar": {
+        "pages": 0,
+        "pct_of_sample": 0.0
+      },
+      "recorded known-size object": {
+        "pages": 0,
+        "pct_of_sample": 0.0
+      },
+      "door-width prior": {
+        "pages": 36,
+        "pct_of_sample": 97.29729729729729
+      }
+    }
+  },
+  "pages": [
+    {
+      "doc_id": "ifc_models__resbim-338-model",
+      "input": "ifc",
+      "available": [
+        "door-prior",
+        "ifc"
+      ],
+      "chosen": {
+        "id": "ifc",
+        "label": "IFC model projection in metres",
+        "why_chosen": "Highest available evidence rank (0); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.010613207547169812,
+            "unit": "m/px",
+            "diff_pct": 15.094339622641506,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.0125,
+      "native_comparison": {
+        "method": "IFC-generated plan projection, 1 / ppm",
+        "value": 0.0125,
+        "diff_pct": 0.0,
+        "limitation": "Same-source projection arithmetic; not an independent geometric truth."
+      }
+    },
+    {
+      "doc_id": "ifc_models__bimspeed-vitoria-ald26-project",
+      "input": "ifc",
+      "available": [
+        "door-prior",
+        "ifc"
+      ],
+      "chosen": {
+        "id": "ifc",
+        "label": "IFC model projection in metres",
+        "why_chosen": "Highest available evidence rank (0); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.00448207171314741,
+            "unit": "m/px",
+            "diff_pct": 64.14342629482073,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.0125,
+      "native_comparison": {
+        "method": "IFC-generated plan projection, 1 / ppm",
+        "value": 0.0125,
+        "diff_pct": 0.0,
+        "limitation": "Same-source projection arithmetic; not an independent geometric truth."
+      }
+    },
+    {
+      "doc_id": "ifc_models__resbim-50-model",
+      "input": "ifc",
+      "available": [
+        "door-prior",
+        "ifc"
+      ],
+      "chosen": {
+        "id": "ifc",
+        "label": "IFC model projection in metres",
+        "why_chosen": "Highest available evidence rank (0); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.01147959183673469,
+            "unit": "m/px",
+            "diff_pct": 8.16326530612249,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.0125,
+      "native_comparison": {
+        "method": "IFC-generated plan projection, 1 / ppm",
+        "value": 0.0125,
+        "diff_pct": 0.0,
+        "limitation": "Same-source projection arithmetic; not an independent geometric truth."
+      }
+    },
+    {
+      "doc_id": "ifc_models__resbim-209-model",
+      "input": "ifc",
+      "available": [
+        "door-prior",
+        "ifc"
+      ],
+      "chosen": {
+        "id": "ifc",
+        "label": "IFC model projection in metres",
+        "why_chosen": "Highest available evidence rank (0); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.01147959183673469,
+            "unit": "m/px",
+            "diff_pct": 8.16326530612249,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.0125,
+      "native_comparison": {
+        "method": "IFC-generated plan projection, 1 / ppm",
+        "value": 0.0125,
+        "diff_pct": 0.0,
+        "limitation": "Same-source projection arithmetic; not an independent geometric truth."
+      }
+    },
+    {
+      "doc_id": "ifc_models__resbim-385-model",
+      "input": "ifc",
+      "available": [
+        "door-prior",
+        "ifc"
+      ],
+      "chosen": {
+        "id": "ifc",
+        "label": "IFC model projection in metres",
+        "why_chosen": "Highest available evidence rank (0); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.01041666666666667,
+            "unit": "m/px",
+            "diff_pct": 16.66666666666665,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.0125,
+      "native_comparison": {
+        "method": "IFC-generated plan projection, 1 / ppm",
+        "value": 0.0125,
+        "diff_pct": 0.0,
+        "limitation": "Same-source projection arithmetic; not an independent geometric truth."
+      }
+    },
+    {
+      "doc_id": "ifc_models__resbim-223-model",
+      "input": "ifc",
+      "available": [
+        "door-prior",
+        "ifc"
+      ],
+      "chosen": {
+        "id": "ifc",
+        "label": "IFC model projection in metres",
+        "why_chosen": "Highest available evidence rank (0); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.012784090909090908,
+            "unit": "m/px",
+            "diff_pct": 2.2222222222222094,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": false,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.0125,
+      "native_comparison": {
+        "method": "IFC-generated plan projection, 1 / ppm",
+        "value": 0.0125,
+        "diff_pct": 0.0,
+        "limitation": "Same-source projection arithmetic; not an independent geometric truth."
+      }
+    },
+    {
+      "doc_id": "ifc_models__resbim-479-model",
+      "input": "ifc",
+      "available": [
+        "door-prior",
+        "ifc"
+      ],
+      "chosen": {
+        "id": "ifc",
+        "label": "IFC model projection in metres",
+        "why_chosen": "Highest available evidence rank (0); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.01147959183673469,
+            "unit": "m/px",
+            "diff_pct": 8.16326530612249,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.0125,
+      "native_comparison": {
+        "method": "IFC-generated plan projection, 1 / ppm",
+        "value": 0.0125,
+        "diff_pct": 0.0,
+        "limitation": "Same-source projection arithmetic; not an independent geometric truth."
+      }
+    },
+    {
+      "doc_id": "ifc_models__resbim-237-model",
+      "input": "ifc",
+      "available": [
+        "door-prior",
+        "ifc"
+      ],
+      "chosen": {
+        "id": "ifc",
+        "label": "IFC model projection in metres",
+        "why_chosen": "Highest available evidence rank (0); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.010416666666666663,
+            "unit": "m/px",
+            "diff_pct": 16.666666666666703,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.0125,
+      "native_comparison": {
+        "method": "IFC-generated plan projection, 1 / ppm",
+        "value": 0.0125,
+        "diff_pct": 0.0,
+        "limitation": "Same-source projection arithmetic; not an independent geometric truth."
+      }
+    },
+    {
+      "doc_id": "ifc_models__resbim-148-model",
+      "input": "ifc",
+      "available": [
+        "door-prior",
+        "ifc"
+      ],
+      "chosen": {
+        "id": "ifc",
+        "label": "IFC model projection in metres",
+        "why_chosen": "Highest available evidence rank (0); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.011479591836734686,
+            "unit": "m/px",
+            "diff_pct": 8.163265306122518,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.0125,
+      "native_comparison": {
+        "method": "IFC-generated plan projection, 1 / ppm",
+        "value": 0.0125,
+        "diff_pct": 0.0,
+        "limitation": "Same-source projection arithmetic; not an independent geometric truth."
+      }
+    },
+    {
+      "doc_id": "ifc_models__resbim-102-model",
+      "input": "ifc",
+      "available": [
+        "door-prior",
+        "ifc"
+      ],
+      "chosen": {
+        "id": "ifc",
+        "label": "IFC model projection in metres",
+        "why_chosen": "Highest available evidence rank (0); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.010416666666666666,
+            "unit": "m/px",
+            "diff_pct": 16.666666666666675,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.0125,
+      "native_comparison": {
+        "method": "IFC-generated plan projection, 1 / ppm",
+        "value": 0.0125,
+        "diff_pct": 0.0,
+        "limitation": "Same-source projection arithmetic; not an independent geometric truth."
+      }
+    },
+    {
+      "doc_id": "ifc_models__resbim-281-model",
+      "input": "ifc",
+      "available": [
+        "door-prior",
+        "ifc"
+      ],
+      "chosen": {
+        "id": "ifc",
+        "label": "IFC model projection in metres",
+        "why_chosen": "Highest available evidence rank (0); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.01147959183673469,
+            "unit": "m/px",
+            "diff_pct": 8.16326530612249,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.0125,
+      "native_comparison": {
+        "method": "IFC-generated plan projection, 1 / ppm",
+        "value": 0.0125,
+        "diff_pct": 0.0,
+        "limitation": "Same-source projection arithmetic; not an independent geometric truth."
+      }
+    },
+    {
+      "doc_id": "ifc_models__resbim-88-model",
+      "input": "ifc",
+      "available": [
+        "door-prior",
+        "ifc"
+      ],
+      "chosen": {
+        "id": "ifc",
+        "label": "IFC model projection in metres",
+        "why_chosen": "Highest available evidence rank (0); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.011479591836734698,
+            "unit": "m/px",
+            "diff_pct": 8.163265306122423,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.0125,
+      "native_comparison": {
+        "method": "IFC-generated plan projection, 1 / ppm",
+        "value": 0.0125,
+        "diff_pct": 0.0,
+        "limitation": "Same-source projection arithmetic; not an independent geometric truth."
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site2155-bldg3005-floor13704",
+      "input": "dxf",
+      "available": [
+        "door-prior",
+        "dxf_units_fit",
+        "ratio-dpi"
+      ],
+      "chosen": {
+        "id": "dxf_units_fit",
+        "label": "Declared CAD units and page registration",
+        "why_chosen": "Highest available evidence rank (0.5); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact.",
+        "alternatives": [
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "door-prior",
+            "value": 0.01691729323308273,
+            "unit": "m/px",
+            "diff_pct": 0.09275832349418307,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": false,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.016933,
+      "native_comparison": {
+        "method": "original DXF INSUNITS / recorded registration magnitude",
+        "value": 0.0169332364583551,
+        "diff_pct": 0.0013964155977070198,
+        "limitation": "Checks unit conversion and recorded registration; not independent physical verification of the drawing."
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site174-bldg358-floor1470",
+      "input": "dxf",
+      "available": [
+        "door-prior",
+        "dxf_units_fit",
+        "ratio-dpi"
+      ],
+      "chosen": {
+        "id": "dxf_units_fit",
+        "label": "Declared CAD units and page registration",
+        "why_chosen": "Highest available evidence rank (0.5); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact.",
+        "alternatives": [
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.0039368528798049895,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.0039368528798049895,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.0039368528798049895,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "door-prior",
+            "value": 0.01615798922800717,
+            "unit": "m/px",
+            "diff_pct": 4.582560363722873,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": false,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.016934,
+      "native_comparison": {
+        "method": "original DXF INSUNITS / recorded registration magnitude",
+        "value": 0.016933800137793532,
+        "diff_pct": 0.0011802421546519065,
+        "limitation": "Checks unit conversion and recorded registration; not independent physical verification of the drawing."
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site11680-bldg18228-floor48799",
+      "input": "dxf",
+      "available": [
+        "door-prior",
+        "dxf_units_fit",
+        "ratio-dpi"
+      ],
+      "chosen": {
+        "id": "dxf_units_fit",
+        "label": "Declared CAD units and page registration",
+        "why_chosen": "Highest available evidence rank (0.5); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact.",
+        "alternatives": [
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "door-prior",
+            "value": 0.01902748414376321,
+            "unit": "m/px",
+            "diff_pct": 11.007677777777763,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.016933,
+      "native_comparison": {
+        "method": "original DXF INSUNITS / recorded registration magnitude",
+        "value": 0.016933353270365423,
+        "diff_pct": 0.002086239859182636,
+        "limitation": "Checks unit conversion and recorded registration; not independent physical verification of the drawing."
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site97-bldg52-floor202",
+      "input": "dxf",
+      "available": [
+        "door-prior",
+        "dxf_units_fit",
+        "ratio-dpi"
+      ],
+      "chosen": {
+        "id": "dxf_units_fit",
+        "label": "Declared CAD units and page registration",
+        "why_chosen": "Highest available evidence rank (0.5); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact.",
+        "alternatives": [
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "door-prior",
+            "value": 0.017964071856287418,
+            "unit": "m/px",
+            "diff_pct": 5.739633333333293,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.016933,
+      "native_comparison": {
+        "method": "original DXF INSUNITS / recorded registration magnitude",
+        "value": 0.01693320029239709,
+        "diff_pct": 0.0011828384099454121,
+        "limitation": "Checks unit conversion and recorded registration; not independent physical verification of the drawing."
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site185-bldg372-floor1497",
+      "input": "dxf",
+      "available": [
+        "door-prior",
+        "dxf_units_fit",
+        "ratio-dpi"
+      ],
+      "chosen": {
+        "id": "dxf_units_fit",
+        "label": "Declared CAD units and page registration",
+        "why_chosen": "Highest available evidence rank (0.5); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact.",
+        "alternatives": [
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.0039368528798049895,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.0039368528798049895,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.0039368528798049895,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "door-prior",
+            "value": 0.016666666666666666,
+            "unit": "m/px",
+            "diff_pct": 1.5786780048029685,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": false,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.016934,
+      "native_comparison": {
+        "method": "original DXF INSUNITS / recorded registration magnitude",
+        "value": 0.01693378348888432,
+        "diff_pct": 0.0012785586139236317,
+        "limitation": "Checks unit conversion and recorded registration; not independent physical verification of the drawing."
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site4065-bldg6447-floor26400",
+      "input": "dxf",
+      "available": [
+        "door-prior",
+        "dxf_units_fit",
+        "ratio-dpi"
+      ],
+      "chosen": {
+        "id": "dxf_units_fit",
+        "label": "Declared CAD units and page registration",
+        "why_chosen": "Highest available evidence rank (0.5); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact.",
+        "alternatives": [
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.0039368528798049895,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.0039368528798049895,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.0039368528798049895,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "door-prior",
+            "value": 0.019334049409237376,
+            "unit": "m/px",
+            "diff_pct": 12.413588888888867,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.016934,
+      "native_comparison": {
+        "method": "original DXF INSUNITS / recorded registration magnitude",
+        "value": 0.01693351645608031,
+        "diff_pct": 0.002855461909115256,
+        "limitation": "Checks unit conversion and recorded registration; not independent physical verification of the drawing."
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site412-bldg1050-floor4569",
+      "input": "dxf",
+      "available": [
+        "door-prior",
+        "dxf_units_fit",
+        "ratio-dpi"
+      ],
+      "chosen": {
+        "id": "dxf_units_fit",
+        "label": "Declared CAD units and page registration",
+        "why_chosen": "Highest available evidence rank (0.5); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact.",
+        "alternatives": [
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "door-prior",
+            "value": 0.018145161290322592,
+            "unit": "m/px",
+            "diff_pct": 6.680355555555614,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.016933,
+      "native_comparison": {
+        "method": "original DXF INSUNITS / recorded registration magnitude",
+        "value": 0.016933407011915227,
+        "diff_pct": 0.0024036032142866147,
+        "limitation": "Checks unit conversion and recorded registration; not independent physical verification of the drawing."
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site1603-bldg2796-floor50802",
+      "input": "dxf",
+      "available": [
+        "door-prior",
+        "dxf_units_fit",
+        "ratio-dpi"
+      ],
+      "chosen": {
+        "id": "dxf_units_fit",
+        "label": "Declared CAD units and page registration",
+        "why_chosen": "Highest available evidence rank (0.5); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact.",
+        "alternatives": [
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.0039368528798049895,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.0039368528798049895,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.0039368528798049895,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "door-prior",
+            "value": 0.019480519480519463,
+            "unit": "m/px",
+            "diff_pct": 13.072133333333246,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.016934,
+      "native_comparison": {
+        "method": "original DXF INSUNITS / recorded registration magnitude",
+        "value": 0.016933700441111213,
+        "diff_pct": 0.0017689789109965718,
+        "limitation": "Checks unit conversion and recorded registration; not independent physical verification of the drawing."
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site502-bldg1194-floor5324",
+      "input": "dxf",
+      "available": [
+        "door-prior",
+        "dxf_units_fit",
+        "ratio-dpi"
+      ],
+      "chosen": {
+        "id": "dxf_units_fit",
+        "label": "Declared CAD units and page registration",
+        "why_chosen": "Highest available evidence rank (0.5); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact.",
+        "alternatives": [
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "door-prior",
+            "value": 0.018072289156626523,
+            "unit": "m/px",
+            "diff_pct": 6.304066666666752,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.016933,
+      "native_comparison": {
+        "method": "original DXF INSUNITS / recorded registration magnitude",
+        "value": 0.016933324735997287,
+        "diff_pct": 0.0019177332411074164,
+        "limitation": "Checks unit conversion and recorded registration; not independent physical verification of the drawing."
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site863-bldg1828-floor8117",
+      "input": "dxf",
+      "available": [
+        "door-prior",
+        "dxf_units_fit",
+        "ratio-dpi"
+      ],
+      "chosen": {
+        "id": "dxf_units_fit",
+        "label": "Declared CAD units and page registration",
+        "why_chosen": "Highest available evidence rank (0.5); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact.",
+        "alternatives": [
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "door-prior",
+            "value": 0.01605709188224799,
+            "unit": "m/px",
+            "diff_pct": 5.172787561282768,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.016933,
+      "native_comparison": {
+        "method": "original DXF INSUNITS / recorded registration magnitude",
+        "value": 0.016933431780961638,
+        "diff_pct": 0.0025498727441841773,
+        "limitation": "Checks unit conversion and recorded registration; not independent physical verification of the drawing."
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site531-bldg1217-floor5408",
+      "input": "dxf",
+      "available": [
+        "door-prior",
+        "dxf_units_fit",
+        "ratio-dpi"
+      ],
+      "chosen": {
+        "id": "dxf_units_fit",
+        "label": "Declared CAD units and page registration",
+        "why_chosen": "Highest available evidence rank (0.5); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact.",
+        "alternatives": [
+          {
+            "id": "ratio-dpi",
+            "value": 0.03386666666666667,
+            "unit": "m/px",
+            "diff_pct": 0.0009842422810740655,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.03386666666666667,
+            "unit": "m/px",
+            "diff_pct": 0.0009842422810740655,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.03386666666666667,
+            "unit": "m/px",
+            "diff_pct": 0.0009842422810740655,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "door-prior",
+            "value": 0.03896103896103873,
+            "unit": "m/px",
+            "diff_pct": 13.074699999999483,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.033867,
+      "native_comparison": {
+        "method": "original DXF INSUNITS / recorded registration magnitude",
+        "value": 0.03386689566653665,
+        "diff_pct": 0.0003080682178757584,
+        "limitation": "Checks unit conversion and recorded registration; not independent physical verification of the drawing."
+      }
+    },
+    {
+      "doc_id": "swiss_dwellings__site2112-bldg2975-floor13764",
+      "input": "dxf",
+      "available": [
+        "door-prior",
+        "dxf_units_fit",
+        "ratio-dpi"
+      ],
+      "chosen": {
+        "id": "dxf_units_fit",
+        "label": "Declared CAD units and page registration",
+        "why_chosen": "Highest available evidence rank (0.5); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact.",
+        "alternatives": [
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.016933333333333335,
+            "unit": "m/px",
+            "diff_pct": 0.001968503937016672,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "door-prior",
+            "value": 0.018947368421052633,
+            "unit": "m/px",
+            "diff_pct": 10.631388888888894,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.016933,
+      "native_comparison": {
+        "method": "original DXF INSUNITS / recorded registration magnitude",
+        "value": 0.01693333473597617,
+        "diff_pct": 0.0019767870971029947,
+        "limitation": "Checks unit conversion and recorded registration; not independent physical verification of the drawing."
+      }
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-8734",
+      "input": "raster",
+      "available": [
+        "door-prior"
+      ],
+      "chosen": {
+        "id": "door-prior",
+        "label": "Assumed door-width prior",
+        "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.027272727272727275,
+            "unit": "m/px",
+            "diff_pct": 1.4925373134328441,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": false,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.026865671641791045
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-11186",
+      "input": "raster",
+      "available": [
+        "door-prior"
+      ],
+      "chosen": {
+        "id": "door-prior",
+        "label": "Assumed door-width prior",
+        "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+        "alternatives": [],
+        "disagreement": false,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.012
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-4619",
+      "input": "raster",
+      "available": [
+        "door-prior"
+      ],
+      "chosen": {
+        "id": "door-prior",
+        "label": "Assumed door-width prior",
+        "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.028125,
+            "unit": "m/px",
+            "diff_pct": 1.5384615384615379,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": false,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.027692307692307693
+    },
+    {
+      "doc_id": "cubicasa5k__colorful-12872",
+      "input": "raster",
+      "available": [
+        "door-prior"
+      ],
+      "chosen": {
+        "id": "door-prior",
+        "label": "Assumed door-width prior",
+        "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+        "alternatives": [],
+        "disagreement": false,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.026470588235294117
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-1691",
+      "input": "raster",
+      "available": [
+        "door-prior"
+      ],
+      "chosen": {
+        "id": "door-prior",
+        "label": "Assumed door-width prior",
+        "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.015517241379310345,
+            "unit": "m/px",
+            "diff_pct": 11.450381679389313,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.013740458015267175
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-913",
+      "input": "raster",
+      "available": [],
+      "chosen": {
+        "id": "unknown",
+        "label": "No supported physical scale",
+        "why_chosen": "No candidate with a positive scale and recorded operands is available.",
+        "alternatives": []
+      },
+      "m_per_px": null
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-13434",
+      "input": "raster",
+      "available": [
+        "door-prior"
+      ],
+      "chosen": {
+        "id": "door-prior",
+        "label": "Assumed door-width prior",
+        "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.010778443113772455,
+            "unit": "m/px",
+            "diff_pct": 0.5952380952380971,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": false,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.010714285714285714
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-14189",
+      "input": "raster",
+      "available": [
+        "door-prior"
+      ],
+      "chosen": {
+        "id": "door-prior",
+        "label": "Assumed door-width prior",
+        "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+        "alternatives": [],
+        "disagreement": false,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.014516129032258065
+    },
+    {
+      "doc_id": "uploads__upload-fixture-1794621617202-4a4473",
+      "input": "raster",
+      "available": [
+        "door-prior"
+      ],
+      "chosen": {
+        "id": "door-prior",
+        "label": "Assumed door-width prior",
+        "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+        "alternatives": [],
+        "disagreement": false,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.02903225806451613
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-1511",
+      "input": "raster",
+      "available": [
+        "door-prior"
+      ],
+      "chosen": {
+        "id": "door-prior",
+        "label": "Assumed door-width prior",
+        "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "door-prior",
+            "value": 0.0375,
+            "unit": "m/px",
+            "diff_pct": 5.882352941176468,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.03529411764705882
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-20097",
+      "input": "raster",
+      "available": [
+        "dimension",
+        "door-prior"
+      ],
+      "chosen": {
+        "id": "door-prior",
+        "label": "Assumed door-width prior",
+        "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "dimension",
+            "value": 0.026407858848091135,
+            "unit": "m/px",
+            "diff_pct": 12.613426140790017,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.023076923076923078
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-14195",
+      "input": "raster",
+      "available": [
+        "door-prior"
+      ],
+      "chosen": {
+        "id": "door-prior",
+        "label": "Assumed door-width prior",
+        "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+        "alternatives": [],
+        "disagreement": false,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.016666666666666666
+    },
+    {
+      "doc_id": "uploads__5-vector-pdf-swiss-apartment-floor-4b235c",
+      "input": "pdf",
+      "available": [
+        "door-prior",
+        "ratio-dpi"
+      ],
+      "chosen": {
+        "id": "ratio-dpi",
+        "label": "Printed ratio and recorded render resolution",
+        "why_chosen": "Highest available evidence rank (1); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "ratio-dpi",
+            "value": 0.03386666666666667,
+            "unit": "m/px",
+            "diff_pct": 0.0,
+            "independent": false,
+            "rejected_because": "Same evidence/value; duplicate reading."
+          },
+          {
+            "id": "ratio-dpi",
+            "value": 0.03386666666666667,
+            "unit": "m/px",
+            "diff_pct": 0.0,
+            "independent": false,
+            "rejected_because": "Same evidence/value; duplicate reading."
+          },
+          {
+            "id": "door-prior",
+            "value": 0.027863777089783322,
+            "unit": "m/px",
+            "diff_pct": 17.7250676482776,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          },
+          {
+            "id": "door-prior",
+            "value": 0.027864,
+            "unit": "m/px",
+            "diff_pct": 17.724409448818903,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank."
+          }
+        ],
+        "disagreement": true,
+        "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+      },
+      "m_per_px": 0.03386666666666667
+    }
+  ],
+  "implementation_sha256": {
+    "engine/method_inventory.py": "2bc9851d9af6c2d63a4fd7b5de8388ef3a2810c87484862632fdd84483cd4152",
+    "engine/method_lengths.py": "6ca8ae7ed8aded7dfcae7e1da13cdbd562c690f03dc536c33ef1c57c0923b06a",
+    "engine/method_multidoc.py": "c3d6fe6c3802d8e28e8d74c114ffcbe5dcb16cf6572e2674bcad696d0f1f5a04",
+    "engine/method_properties.py": "f30c833df8914de5e798585dc0529ae419ffc8d90c371508eadac2cd0480995d",
+    "engine/method_rescale.py": "2edd05325967a5739317bb889df47151848cee8ef46117a09a18a2530eb540fe",
+    "engine/method_trace.py": "c29bb36bb59f7d314f05a995d8a879c43ec9d814407a9aeb90758e66c81a1be8",
+    "engine/scale_policy.py": "a428ad4e49ca89611ca38f490589d7b2bd77d60d62755c75c6f3ac7668632dde"
+  }
+}

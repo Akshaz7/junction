@@ -92,6 +92,14 @@ def row(doc, item, value, unit, **values):
                      {KEYS.get(unit_name(unit), unit_name(unit)): value, **values}, source(doc, item)))
 
 
+def polygon_area_step(id, polygon, source_ref):
+    inputs = [input_value(f"vertex {i + 1} {axis}", point[j], "px", {**source_ref, "field": f"polygon_px[{i}][{j}]"})
+              for i, point in enumerate(polygon) for j, axis in enumerate(("x", "y"))]
+    value = evaluate("shoelace", [i["value"] for i in inputs])
+    return step(id, "Polygon area by shoelace", "0.5 × abs(Σ(x[i] × y[i+1] − x[i+1] × y[i])); last vertex joins first",
+                value, "px2", inputs, "Uses every recorded outline vertex; no bounding rectangle is substituted.", "shoelace")
+
+
 def places(value):
     return max(0, -Decimal(str(value)).as_tuple().exponent)
 
@@ -167,8 +175,10 @@ def record_items(res, doc, pairs, unit=None, formula="total = Σ(source quantiti
             area_px = _shoelace(item.polygon_px)
             if number(scale) and close(area_px * scale * scale, value, .005):
                 sid = f"measure-{idx}"
+                steps.append(polygon_area_step(sid + "-shoelace", item.polygon_px, sref))
+                area_px = steps[-1]["value"]
                 steps.append(step(sid, "Scale room outline", "outline area in px² × scale × scale", area_px * scale * scale, unit,
-                                  [input_value("outline area (shoelace)", area_px, "px2", {**sref, "field": "polygon_px"}),
+                                  [input_value("outline area (shoelace)", area_px, "px2", step_source(sid + "-shoelace")),
                                    input_value("metres per pixel", scale, "m/px", {**sref, "kind": "scale", "item_id": None, "field": "scale.m_per_px"}),
                                    input_value("metres per pixel", scale, "m/px", {**sref, "kind": "scale", "item_id": None, "field": "scale.m_per_px"})],
                                   note="Stored area may already be rounded; the row retains that stored value.", operation="multiply"))
@@ -282,8 +292,14 @@ def _measurement_steps(calc, root):
                                                     "source": ref})
         if not close(measured, value, .005): continue
         sid = f"outline-{index}"
+        area_ref = {**ref, "field": "props.area_px / polygon_px"}
+        if poly:
+            outline = polygon_area_step(sid + "-shoelace", poly, ref)
+            if close(outline["value"], px):
+                extra.append(outline)
+                area_ref = step_source(outline["id"])
         extra.append(step(sid, "Outline area and scale", "outline area × metres per pixel × metres per pixel", measured, "m2",
-                          [input_value("outline area (shoelace)", px, "px2", {**ref, "field": "props.area_px / polygon_px"}),
+                          [input_value("outline area (shoelace)", px, "px2", area_ref),
                            input_value("page scale", scale, "m/px", {**ref, "kind": "scale", "item_id": None, "field": "scale.m_per_px"}),
                            input_value("page scale", scale, "m/px", {**ref, "kind": "scale", "item_id": None, "field": "scale.m_per_px"})],
                           f"Page scale method: {(pm.get('scale') or {}).get('method')}; cached area may already be rounded. Scale confidence is not an error bound.", "multiply"))
