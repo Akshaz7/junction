@@ -338,6 +338,9 @@ def _attach(res, question, root):
         note = 'Answer accuracy percentage: no matching measured calibration. A fixed vision heuristic is not used.'
         if note not in existing['unavailable']:
             existing['unavailable'].append(note)
+    card['calc'] = existing
+    from engine.scan_presentation import attach as prioritize
+    prioritize(res, question)
     issues = validate(existing, root)
     existing['issues'], existing['status'] = issues, 'incomplete' if issues else 'complete'
     card['calc'] = existing
