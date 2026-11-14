@@ -37,6 +37,8 @@ export type SheetCompareProps = {
   emptyText?: string
   /** Fires when the focused change changes (card or box click, Escape). */
   onFocusChange?: (id: string | null) => void
+  /** Hide the Plain/Wipe/Overlay switch when the host screen already has its own mode control. */
+  hideModes?: boolean
 }
 
 const kindWord = { added: 'added', removed: 'removed', edited: 'edited' } as const
@@ -60,7 +62,7 @@ function Thumb({ src, bbox, size, label }: { src: string | null; bbox: Bbox | nu
   </div>
 }
 
-export function SheetCompare({ prev, curr, size, changes, initialMode = 'Wipe', showHint = true, onHintDone, summary, exportName = 'changes', emptyText = 'No differences were found between these versions.', onFocusChange }: SheetCompareProps) {
+export function SheetCompare({ prev, curr, size, changes, initialMode = 'Wipe', showHint = true, onHintDone, summary, exportName = 'changes', emptyText = 'No differences were found between these versions.', onFocusChange, hideModes = false }: SheetCompareProps) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '')
   const canvas = useRef<HTMLDivElement>(null)
   const root = useRef<HTMLDivElement>(null)
@@ -259,7 +261,7 @@ export function SheetCompare({ prev, curr, size, changes, initialMode = 'Wipe', 
 
   return <div ref={root} className="comparison-box sheet-compare" aria-label="Compare revisions" data-mode={mode} onKeyDown={onRootKey}>
     <div className="comparison-toolbar">
-      <div className="compare-segments" role="group" aria-label="Comparison mode">{(['Plain', 'Wipe', 'Overlay'] as const).map((item) => <button type="button" key={item} aria-pressed={mode === item} onClick={() => { dismissHint(); setMode(item) }}>{item}</button>)}</div>
+      {!hideModes && <div className="compare-segments" role="group" aria-label="Comparison mode">{(['Plain', 'Wipe', 'Overlay'] as const).map((item) => <button type="button" key={item} aria-pressed={mode === item} onClick={() => { dismissHint(); setMode(item) }}>{item}</button>)}</div>}
       <label className="change-boxes"><input type="checkbox" checked={boxes} onChange={(event) => setBoxes(event.target.checked)} /><span aria-hidden>{boxes && <Check size={12} strokeWidth={3} />}</span>Change boxes</label>
       {mode === 'Overlay' && <label className="sc-opacity"><span>Latest</span><input type="range" min="0" max="100" value={opacity} aria-label="Overlay opacity" onChange={(event) => setOpacity(Number(event.target.value))} /><output>{opacity}%</output></label>}
       <span className="toolbar-spacer" />
