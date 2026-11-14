@@ -67,7 +67,7 @@ def doc_dir(doc_id):
 async def pool_required():
     pool = await db.get_pool()
     if pool is None:
-        raise HTTPException(503, 'Notes and labels need a database connection. Try again shortly.')
+        raise HTTPException(503, 'Saved notes and labels are temporarily unavailable. Try again shortly.')
     return pool
 
 
@@ -104,9 +104,10 @@ def page_context(path, page, signature):
         except (OSError, ValueError):
             return default
     text = read(f'text-{page}.json', {})
-    words = text if isinstance(text, list) else text.get('words', text.get('items', []))
+    words = text if isinstance(text, list) else text.get('words', text.get('items', [])) if isinstance(text, dict) else []
+    words = [w for w in words if isinstance(w, dict) and isinstance(w.get('text'), str) and isinstance(w.get('bbox_px'), (list, tuple)) and len(w['bbox_px']) == 4] if isinstance(words, list) else []
     plan = read(f'planmap-{page}.json', {})
-    rooms = [i for i in plan.get('items', []) if i.get('kind') == 'room']
+    rooms = [i for i in plan.get('items', []) if isinstance(i, dict) and i.get('kind') == 'room'] if isinstance(plan, dict) else []
     legend = find_legend(d / f'page-{page}.png', words=words) if words else {}
     return {'suggestions': list(dict.fromkeys(e['label'] for e in legend.get('entries', []))), 'rooms': rooms}
 
@@ -212,5 +213,9 @@ async def delete_pin(doc_id: str, pin_id: str):
 async def answer_taught(pool, question, doc_ids):
     if not doc_ids or not re.search(r'\b(how many|count|number of)\b', question, re.I):
         return None
-    rows = await pool.fetch('select * from taught_symbols where doc_id=any($1::text[]) order by created_at', doc_ids)
+    from asyncpg import UndefinedTableError
+    try:
+        rows = await pool.fetch('select * from taught_symbols where doc_id=any($1::text[]) order by created_at', doc_ids)
+    except UndefinedTableError:  # Rolling deploy: ordinary answers still work until migration lands.
+        return None
     return taught_answer(question, doc_ids, [record(r) for r in rows])

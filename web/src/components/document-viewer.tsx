@@ -2,7 +2,7 @@ import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSP
 import { ChevronLeft, ChevronRight, Download, FileSymlink, FileText, Highlighter, Maximize2, Minus, PenLine, Plus, Search, X } from 'lucide-react'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document } from '../lib/types'
-import { fitPage, focusBoxWithin, zoomAt, type PageTransform, type Point, type Size } from '../lib/page-transform'
+import { fitPage, focusBox, focusBoxWithin, zoomAt, type PageTransform, type Point, type Size } from '../lib/page-transform'
 import { viewerEvidence } from '../lib/viewer-evidence'
 import { Button } from './ui'
 import { setHover, setSelected, useLinkedItem } from '../viewer3d'
@@ -21,6 +21,7 @@ import { findSheetText, loadSheetText, type SheetText } from './viewer-tools/she
 import { RoomLabels } from './viewer-tools/room-labels'
 import { SpecPanel } from './viewer-tools/spec-panel'
 import { downloadSource } from './viewer-tools/download-source'
+import { SymbolMarkupLayer, SymbolMarkupPanel, SymbolMarkupTools, useSymbolMarkup } from './viewer-tools/symbol-markup'
 import { useDrawingHighlights } from '../viewer3d/useDrawingHighlights'
 
 export function useViewerSheet() {
@@ -70,6 +71,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   const drawingPointer = useRef<number | null>(null)
   const draftRef = useRef<Annotation | null>(null)
   const annotations = useAnnotations(citation.doc_id, citation.page)
+  const markup = useSymbolMarkup(citation.doc_id, citation.page)
   const [searchOpen, setSearchOpen] = useState(false)
   const searchTrigger = useRef<HTMLButtonElement>(null)
   const titleId = useId()
@@ -325,7 +327,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   return <aside ref={panel} className={`document-viewer ${sheet ? 'viewer-sheet' : ''}`} role={sheet ? 'dialog' : 'region'} aria-modal={sheet || undefined} aria-label={sheet ? undefined : "Drawing viewer"} aria-labelledby={sheet ? titleId : undefined}
     onKeyDown={(event) => {
       if (mode === '3d' && event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); changeMode('2d'); return }
-      if (event.key === 'Escape') { event.stopPropagation(); if (searchOpen) closeSearch(); else if (tool !== 'pan') chooseTool('pan'); else if (selectedItem) closeItem(); else onClose() }
+      if (event.key === 'Escape') { event.stopPropagation(); if (markup.selection || markup.mode) markup.cancel(); else if (markup.open) markup.close(); else if (searchOpen) closeSearch(); else if (tool !== 'pan') chooseTool('pan'); else if (selectedItem) closeItem(); else onClose() }
       if (sheet && event.key === 'Tab') {
         const controls = Array.from(panel.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), a[href], [tabindex="0"]') ?? []).filter((node) => node.getClientRects().length)
         if (!controls?.length) return
@@ -351,9 +353,10 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       <span className="toolbar-spacer" />
       <Button variant="ghost" size="xs" onClick={highlights.clear}>Clear highlights</Button>
       <div className="viewer-markup-tools">
+        <SymbolMarkupTools markup={markup} disabled={!image} onActivate={() => { setTool('pan'); setSelectedItem(null); setSpecOpen(false) }} />
         <Button variant="ghost" size="icon-sm" aria-label="Search sheet" aria-expanded={searchOpen} aria-controls="viewer-sheet-search" onClick={(event) => { searchTrigger.current = event.currentTarget; if (searchOpen) closeSearch(); else setSearchOpen(true) }}><Search size={16} /></Button>
-        <Button variant="ghost" size="icon-sm" aria-label="Highlight marker" aria-pressed={tool === 'marker'} disabled={!image} onClick={() => chooseTool('marker')}><Highlighter size={16} /></Button>
-        <Button variant="ghost" size="icon-sm" aria-label="Pen annotations" aria-pressed={tool === 'pen'} disabled={!image} onClick={() => chooseTool('pen')}><PenLine size={16} /></Button>
+        <Button variant="ghost" size="icon-sm" aria-label="Highlight marker" aria-pressed={tool === 'marker'} disabled={!image} onClick={() => { markup.cancel(); chooseTool('marker') }}><Highlighter size={16} /></Button>
+        <Button variant="ghost" size="icon-sm" aria-label="Pen annotations" aria-pressed={tool === 'pen'} disabled={!image} onClick={() => { markup.cancel(); chooseTool('pen') }}><PenLine size={16} /></Button>
       </div>
       <Button className="viewer-download" variant="ghost" size="icon-sm" aria-label="Download original source" disabled={downloading} onClick={() => void download()}><Download size={16} /></Button>
       <span className="viewer-toolbar-divider" />
@@ -467,11 +470,13 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
           </g>)}
           <AnnotationLayer marks={annotations.marks} draft={draft} />
         </svg>}
+        {image && shownPage === citation.page && <SymbolMarkupLayer markup={markup} image={image} scale={view.scale} />}
       </div>}
       {!highlights.cleared && image && shownPage === citation.page && regions.some((region) => !region.text) && <KindLegend className="kind-legend-2d" kinds={regions.filter((region) => !region.text).map((region) => region.kind)} totals={totalKinds} />}
       {error ? <div className="viewer-message"><p role="alert">{error}</p><Button variant="raised" onClick={() => setRetry(retry + 1)}>Try again</Button></div>
         : !image && <p className="viewer-message" role="status">Loading drawing…</p>}
     </div>
+    {markup.open && <SymbolMarkupPanel markup={markup} page={citation.page} onFocus={(box) => { if (image) setView(focusBox(box, viewport, Math.max(fittedScale, Math.min(4, viewport.width / Math.max(128, (box[2] - box[0]) * 6), viewport.height / Math.max(128, (box[3] - box[1]) * 6))))) }} />}
     {specOpen && specCitation && <SpecPanel citation={specCitation} title={doc?.title ?? citation.doc_id} text={sheetText} onClose={() => setSpecOpen(false)} />}
     {selectedItem && <ItemPanel docId={selectedItem.docId} itemId={selectedItem.itemId} sheet={sheet} onClose={closeItem} onOpenPlace={(location, item) => {
       setPlace({ location, item }); setActive(0); setSelected(item.item_id, '2d')

@@ -63,8 +63,16 @@ def taught_answer(question, doc_ids, symbols):
     if not re.search(r'\b(how many|count|number of)\b', question, re.I):
         return None
     qt = _tokens(question)
-    chosen = [s for s in symbols if s['doc_id'] in doc_ids and _tokens(s['name']) and _tokens(s['name']) <= qt]
+    page_match = re.search(r'\bpage\s+(\d+)\b', question, re.I)
+    chosen = [s for s in symbols if s['doc_id'] in doc_ids and _tokens(s['name']) and _tokens(s['name']) <= qt
+              and (not page_match or s['page'] == int(page_match[1]))]
     if not chosen:
+        return None
+    # A room, size, discipline or other qualifier needs its own solver; never ignore it.
+    stop = _tokens('how many count number of are there in on this the drawing sheet document total please page')
+    if page_match:
+        stop.add(page_match[1])
+    if qt - _tokens(chosen[0]['name']) - stop:
         return None
     # Ambiguous/overlapping teachings must not be silently added together.
     names = {s['name'].casefold() for s in chosen}

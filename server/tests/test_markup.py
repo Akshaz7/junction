@@ -69,3 +69,28 @@ def test_invalid_requests(client):
     assert client.get(base + '?page=0').status_code == 400
     assert client.post(base + '/pins', json={'x': 1, 'y': 1, 'note': ' '}).status_code == 422
     assert client.get('/api/docs/missing/markup').status_code == 404
+
+
+def test_actual_chat_stream_uses_saved_reviewed_boxes(client, monkeypatch):
+    async def seed():
+        c = await asyncpg.connect(config.database_url())
+        await c.execute("insert into documents(doc_id,source,title,kind) values('unseen-sheet','test','Real sheet fixture','raster')")
+        await c.close()
+    asyncio.run(seed())
+    from server import chats_routes
+    monkeypatch.setattr(chats_routes, 'ENGINE', chats_routes._real_engine)
+    def unexpected(*args, **kw): raise AssertionError('Taught-symbol count must not call a model or ordinary solver')
+    monkeypatch.setattr(chats_routes, '_run_engine', unexpected)
+    base = '/api/docs/unseen-sheet/markup'
+    s = client.post(base + '/symbols', json={'name': 'Supply air terminals', 'box': [10,10,20,20]}).json()
+    client.patch(base + '/symbols/' + s['id'], json={'statuses': {'1': 'confirmed', '2': 'rejected'}})
+    chat = client.post('/api/chats', json={'doc_id': 'unseen-sheet'}).json()
+    r = client.post('/api/chats/' + chat['id'] + '/messages', json={'content': 'How many supply air terminals?', 'doc_ids': ['unseen-sheet']})
+    assert r.status_code == 200, r.text
+    assert 'event: answer' in r.text, r.text
+    data = next(json.loads(line[6:]) for line in r.text.splitlines() if line.startswith('data: ') and 'answer_id' in line)
+    assert data['answer']['value'] == 1
+    assert data['reasoning']['confidence']['label'] == 'Cross-checked'
+    assert data['citations'][0]['bbox_px'] == [10,10,20,20]
+    saved = client.get('/api/chats/' + chat['id']).json()
+    assert saved['messages'][-1]['answer']['answer_id'] == data['answer_id']

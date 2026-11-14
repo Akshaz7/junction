@@ -51,3 +51,11 @@ def test_zero_matches_never_claim_verified():
 def test_evidence_uses_selected_sheet_not_first_attachment():
     a = taught_answer('Count supply air terminal', ['unrelated', 'any-sheet'], [symbol()])
     assert a['evidence']['scene']['doc_id'] == 'any-sheet'
+
+
+def test_never_ignore_scope_or_additional_request():
+    assert taught_answer('How many supply air terminals in the kitchen?', ['any-sheet'], [symbol()]) is None
+    assert taught_answer('Count supply air terminals and doors', ['any-sheet'], [symbol()]) is None
+    a = taught_answer('How many supply air terminals on page 2?', ['any-sheet'], [symbol(page=1), symbol(page=2)])
+    assert a['answer']['value'] == 2
+    assert {c['page'] for c in a['citations']} == {2}
