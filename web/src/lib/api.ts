@@ -163,10 +163,10 @@ export class WorkspaceApi {
     return data.sources.flatMap((source) => source.docs)
   }
 
-  async createChat(docIds: string[], title: string): Promise<string> {
+  async createChat(docIds: string[], title: string, projectId?: string | null): Promise<string> {
     const response = await this.request('/api/chats', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ doc_ids: docIds, title }),
+      body: JSON.stringify({ doc_ids: docIds, title, ...(projectId ? { project_id: projectId } : {}) }),
     })
     const chat = await response.json() as { id: string }
     return chat.id
