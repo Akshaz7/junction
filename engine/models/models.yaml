@@ -1,0 +1,92 @@
+# Model layer config (CONTRACT 5.6). Every ID below was confirmed against the
+# provider's docs/catalog on 2026-11-14; sources are listed per entry.
+# `prices` are USD per 1M tokens (conservative: the higher published tier).
+# Runware reports the real cost per request (includeCost), which overrides the table.
+
+providers:
+  fake:      {env: null}
+  gemini:    {env: GEMINI_API_KEY,     base_url: "https://generativelanguage.googleapis.com/v1beta"}
+  nvidia:    {env: NVIDIA_API_KEY,     base_url: "https://integrate.api.nvidia.com/v1"}
+  anthropic: {env: ANTHROPIC_API_KEY,  base_url: "https://api.anthropic.com/v1", version: "2026-10-21"}
+  runware:   {env: RUNWARE_API_KEY,    base_url: "https://api.runware.ai/v1"}
+  featherless: {env: FEATHERLESS_API_KEY, base_url: "https://api.featherless.ai/v1"}
+
+prices:
+  gemini:
+    # https://ai.google.dev/gemini-api/docs/pricing (3.8 Flash: promo $0.75/$3.75 until 2026-12-31, then $1.50/$7.50)
+    gemini-3.8-flash:      {in: 1.50, out: 7.50}
+    # https://ai.google.dev/gemini-api/docs/pricing
+    gemini-3.5-flash-lite: {in: 0.30, out: 2.50}
+  nvidia:      # build.nvidia.com free tier: no USD cost
+    nvidia/nemotron-3.5-lightning-30b-a3b: {in: 0, out: 0}
+    nvidia/nemotron-3-super-120b-a12b:     {in: 0, out: 0}
+    nvidia/nemotron-3.5-super-vl-120b-a12b: {in: 0, out: 0}
+  anthropic:
+    # https://platform.claude.com/docs/en/about-claude/pricing (Haiku 5.5: $0.50/$2.50 applies over 100k prompt tokens; table uses <=100k rate)
+    claude-sonnet-5-5: {in: 2.00, out: 10.00}
+    claude-haiku-5-5:  {in: 0.10, out: 0.50}
+  featherless:
+    # https://api.featherless.ai/v1/models (pricing field)
+    Qwen/Qwen3-VL-30B-A3B-Instruct:      {in: 0.15,  out: 0.50}
+    Qwen/Qwen3-Next-80B-A3B-Instruct:    {in: 0.125, out: 1.15}
+  runware:     # https://runware.ai/docs/models/<id>/schema.json -> info["x-pricing"]; real cost comes back per request
+    "google:gemini@3.5-flash":        {in: 1.50, out: 9.00}
+    "google:gemini@3.1-flash-lite":   {in: 0.25, out: 1.50}
+    "anthropic:claude@sonnet-4.6":    {in: 3.00, out: 15.00}
+    "anthropic:claude@haiku-4.5":     {in: 1.00, out: 5.00}
+    "fishaudio:s2.1@pro":             {in: 0, out: 0}   # billed per UTF-8 byte ($0.000015); cost from response
+
+tasks:
+  route:
+    provider: gemini
+    model: gemini-3.5-flash-lite
+    max_tokens: 512
+    fallback:
+      - {provider: nvidia,  model: nvidia/nemotron-3.5-lightning-30b-a3b}
+      - {provider: runware, model: "google:gemini@3.1-flash-lite"}
+  read_drawing:
+    provider: gemini
+    model: gemini-3.8-flash
+    max_tokens: 8192
+    fallback:
+      - {provider: featherless, model: Qwen/Qwen3-VL-30B-A3B-Instruct}
+      - {provider: runware,     model: "google:gemini@3.5-flash"}
+  verify_item:
+    provider: gemini
+    model: gemini-3.5-flash-lite
+    max_tokens: 512
+    fallback:
+      - {provider: nvidia,  model: nvidia/nemotron-3.5-super-vl-120b-a12b}
+      - {provider: runware, model: "google:gemini@3.1-flash-lite"}
+  write_answer:
+    provider: anthropic
+    model: claude-sonnet-5-5
+    max_tokens: 1024
+    fallback:
+      - {provider: gemini,  model: gemini-3.8-flash}
+      - {provider: runware, model: "anthropic:claude@sonnet-4.6"}
+  judge_text:
+    provider: anthropic
+    model: claude-haiku-5-5
+    max_tokens: 512
+    fallback:
+      - {provider: nvidia,  model: nvidia/nemotron-3.5-lightning-30b-a3b}
+      - {provider: runware, model: "anthropic:claude@haiku-4.5"}
+  advise:
+    provider: nvidia
+    model: nvidia/nemotron-3-super-120b-a12b
+    max_tokens: 1024
+    fallback:
+      - {provider: anthropic, model: claude-sonnet-5-5}
+      - {provider: runware,   model: "anthropic:claude@sonnet-4.6"}
+  speech_intent:
+    provider: gemini
+    model: gemini-3.5-flash-lite
+    max_tokens: 256
+    fallback:
+      - {provider: nvidia,  model: nvidia/nemotron-3.5-lightning-30b-a3b}
+      - {provider: runware, model: "google:gemini@3.1-flash-lite"}
+  tts:
+    provider: runware
+    model: "fishaudio:s2.1@pro"
+    fallback: []
