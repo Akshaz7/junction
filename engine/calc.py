@@ -163,7 +163,7 @@ def record_items(res, doc, pairs, unit=None, formula="total = Σ(source quantiti
         if doc.mode == "planmap" and unit == "m2" and item.polygon_px:
             from engine.reasoning import _shoelace
             # Use the page's own scale. Refined quantities are checked against it.
-            scale = (doc.scale or {}).get("m_per_px")
+            scale = ((doc.meta.get("page_scales") or {}).get(item.page) or doc.scale or {}).get("m_per_px")
             area_px = _shoelace(item.polygon_px)
             if number(scale) and close(area_px * scale * scale, value, .005):
                 sid = f"measure-{idx}"
@@ -220,6 +220,16 @@ def evaluate(operation, values):
     if operation == "ceil": return math.ceil(values[0]) if len(values) == 1 else None
     if operation == "max_zero": return max(0, values[0]) if len(values) == 1 else None
     if operation == "min": return min(values) if values else None
+    if operation == "abs": return abs(values[0]) if len(values) == 1 else None
+    if operation == "median":
+        from statistics import median
+        return median(values) if values else None
+    if operation in ("polygon_perimeter", "shoelace"):
+        if len(values) < 6 or len(values) % 2: return None
+        points = list(zip(values[::2], values[1::2]))
+        edges = list(zip(points, points[1:] + points[:1]))
+        return (math.fsum(math.dist(a, b) for a, b in edges) if operation == "polygon_perimeter" else
+                abs(math.fsum(a[0] * b[1] - b[0] * a[1] for a, b in edges)) / 2)
     if operation == "source": return values[0] if len(values) == 1 else None
     return None
 
@@ -489,7 +499,9 @@ def _attach(res, question, root):
 def attach(res, question, root):
     """Malformed/missing source data must never turn an answer into a crash."""
     try:
-        return _attach(res, question, root)
+        res = _attach(res, question, root)
+        from engine.method_trace import attach as attach_method
+        return attach_method(res, question, root)
     except (ArithmeticError, ValueError, TypeError, KeyError, OSError) as exc:
         for key in ("_calc", "_calc_models", "_calc_extras"):
             res.pop(key, None)

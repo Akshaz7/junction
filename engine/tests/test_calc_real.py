@@ -18,6 +18,10 @@ def test_real_calculation(route, docs, question, monkeypatch):
     res = answer(question, docs)
     c = res.get("reasoning", {}).get("calc")
     v = res["answer"]["value"]
+    if v is None and c and c.get("status") == "source-only":
+        assert route in ("ifc/filtered-area", "ifc/unit-price")
+        assert c["method"] and validate(c, root) == []
+        return
     if v is None and not c:
         # These two questions currently return missing/ambiguous evidence, not a number.
         assert route in ("ifc/filtered-area", "ifc/unit-price")
