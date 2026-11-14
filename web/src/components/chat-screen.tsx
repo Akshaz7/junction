@@ -498,6 +498,10 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         {statuses.length > 1 && <ul className="status-trail" aria-label="Steps so far">{statuses.slice(0, -1).map((text, index) => <li key={`${index}-${text}`}>{text}</li>)}</ul>}
         <div className="status-lines" role="status" aria-live="polite"><span className="thinking-mark" aria-hidden="true">S</span><ThinkingText text={statuses.at(-1) || 'Thinking…'} /></div>
         {!!streamText && <p className="answer-text streaming-text" data-testid="streaming-answer">{streamText.replace(/\*\*/g, '').replace(/(^|\s)_([^_\n]+)_(?=\s|$)/g, '$1$2')}</p>}
+        <div className="answer-skeleton" data-testid="answer-skeleton" aria-hidden="true">
+          {streamText.length < 60 && <><span className="skeleton-line" style={{ width: '62%' }} /><span className="skeleton-line" style={{ width: '88%' }} /><span className="skeleton-line" style={{ width: '74%' }} /></>}
+          <div className="skeleton-card"><span className="skeleton-line" style={{ width: '22%' }} /><span className="skeleton-line" style={{ width: '80%' }} /><span className="skeleton-line" style={{ width: '56%' }} /></div>
+        </div>
         {!!traces.length && <details className="answer-detail"><summary>Show thought process</summary>{traces.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>}
       </div>}
     </div>

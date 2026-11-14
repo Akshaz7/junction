@@ -1,0 +1,18 @@
+.evidence-card { margin: 12px 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius, 8px); background: var(--card); font-size: var(--text-body); line-height: var(--text-body--line-height); color: var(--foreground); }
+.evidence-heading { margin: 0 0 8px; font-size: var(--text-caption); font-weight: 600; color: var(--muted-foreground); }
+.evidence-steps { list-style: none; margin: 0; padding: 0; }
+.evidence-step { position: relative; }
+.evidence-step:not(:last-child)::before { content: ''; position: absolute; left: 9px; top: 22px; bottom: 0; width: 1px; background: var(--border); }
+.evidence-row { display: flex; gap: 10px; align-items: flex-start; width: 100%; padding: 2px 0 6px; border: 0; background: none; font: inherit; color: inherit; text-align: left; }
+.evidence-row.is-clickable { cursor: pointer; }
+.evidence-row.is-clickable:hover .evidence-text, .evidence-row.is-clickable:focus-visible .evidence-text { text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 3px; }
+.evidence-dot { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--border); background: var(--card); color: var(--muted-foreground); font-size: var(--text-caption); font-variant-numeric: tabular-nums; position: relative; z-index: 1; }
+.evidence-text { min-width: 0; overflow-wrap: anywhere; }
+.evidence-text strong { font-weight: 600; }
+.evidence-ok, .evidence-differs { margin-left: 6px; padding: 1px 6px; border-radius: 5px; background: var(--ink-well); font-size: var(--text-caption); color: var(--muted-foreground); }
+.evidence-differs { color: var(--warning); }
+.evidence-confidence { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 6px; padding-top: 10px; border-top: 1px solid var(--border); }
+.evidence-pill { border-radius: 5px; padding: 2px 6px; background: var(--ink-well); font-size: var(--text-caption); font-weight: 600; white-space: nowrap; }
+.evidence-pill.is-estimate { color: var(--warning); }
+.evidence-reason, .evidence-improve { font-size: var(--text-body-sm); color: var(--muted-foreground); }
+.evidence-improve { margin: 6px 0 0; }
