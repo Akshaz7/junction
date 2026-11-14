@@ -1,0 +1,16 @@
+{
+ "doc_id": "cubicasa5k__high-quality-architectural-10321",
+ "source": "cubicasa5k",
+ "formats": [
+  "png"
+ ],
+ "kind": "raster",
+ "title": "high_quality_architectural-10321",
+ "pages": 1,
+ "licence": "CC-BY-NC-SA-4.0",
+ "credit": "CubiCasa5K, (c) 2019 CubiCasa. Kalervo, Ylioinas, Häikiö, Karhu, Kannala: 'CubiCasa5K: A Dataset and an Improved Multi-Task Model for Floorplan Image Analysis', SCIA 2019. CC BY-NC-SA 4.0.",
+ "heldout": true,
+ "files": {
+  "png": "data/cubicasa5k/high_quality_architectural-10321.png"
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "doc_id": "ifc_bench__digital-hub-arc",
+ "source": "ifc-storeys",
+ "pages": [
+  {
+   "page": 1,
+   "w": 2400,
+   "h": 818,
+   "dpi": null,
+   "words": 0,
+   "storey": "B01_OKRD",
+   "elevation_m": -3.37
+  },
+  {
+   "page": 2,
+   "w": 2400,
+   "h": 820,
+   "dpi": null,
+   "words": 0,
+   "storey": "E00_OKRD",
+   "elevation_m": -0.15
+  },
+  {
+   "page": 3,
+   "w": 2400,
+   "h": 817,
+   "dpi": null,
+   "words": 0,
+   "storey": "E01_OKRD",
+   "elevation_m": 3.75
+  }
+ ]
+}

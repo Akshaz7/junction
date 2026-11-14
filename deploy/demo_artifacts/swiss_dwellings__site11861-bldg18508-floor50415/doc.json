@@ -1,0 +1,20 @@
+{
+ "doc_id": "swiss_dwellings__site11861-bldg18508-floor50415",
+ "source": "swiss_dwellings",
+ "formats": [
+  "dxf",
+  "pdf",
+  "png"
+ ],
+ "kind": "dxf",
+ "title": "site11861_bldg18508_floor50415",
+ "pages": 1,
+ "licence": "CC-BY-4.0",
+ "credit": "Swiss Dwellings v3.0.0 by Matthias Standfest, Michael Franzen, Yvonne Schröder, Luis Gonzalez Medina, Yarilo Villanueva Hernandez, Jan Hendrik Buck, Yen-Ling Tan, Milena Niedzwiecka, Rachele Colmegna (Archilyse AG), doi:10.5281/zenodo.7788422, CC BY 4.0. Drawing rendered by us from the dataset geometry (derived work; labels, language and numbering added).",
+ "heldout": true,
+ "files": {
+  "dxf": "data/swiss_dwellings/site11861_bldg18508_floor50415.dxf",
+  "pdf": "data/swiss_dwellings/site11861_bldg18508_floor50415.pdf",
+  "png": "data/swiss_dwellings/site11861_bldg18508_floor50415.png"
+ }
+}

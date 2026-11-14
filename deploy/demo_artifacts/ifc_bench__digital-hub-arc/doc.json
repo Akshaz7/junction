@@ -1,0 +1,16 @@
+{
+ "doc_id": "ifc_bench__digital-hub-arc",
+ "source": "ifc_bench",
+ "formats": [
+  "ifc"
+ ],
+ "kind": "ifc",
+ "title": "DigitalHub (RWTH Aachen) - arc",
+ "pages": 1,
+ "licence": "MIT",
+ "credit": "Copyright (c) 2020 RWTH Aachen University - E3D Institute of Energy Efficiency and Sustainable Building (MIT License)",
+ "heldout": true,
+ "files": {
+  "ifc": "data/ifc_bench/digital_hub_arc.ifc"
+ }
+}
