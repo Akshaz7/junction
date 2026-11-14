@@ -329,6 +329,8 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
         res["answer"]["text_md"] = re.sub(r"(?m)^(?!- |\* |\||#)(\S[^\n]*)\n(- )", r"\1\n\n\2", _t)
     except Exception:  # noqa: BLE001
         pass
+    from engine.plainwords import apply as _plain_display
+    res = _plain_display(res)
     res["question"] = original   # the user's own words are what is stored and shown; the resolved question stays in the trace
     if step is not None:
         res["trace"] = [step, *(res.get("trace") or [])]
@@ -498,6 +500,15 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                 add(s_)
             res["trace"] = trace
             return res
+        # F-ORDER: keep ordering allowances and exportable quantities together.
+        if len(doc_ids) == 1:
+            from engine.order import answer_order
+            from engine.solvers.data import load_doc as _load_order
+            if (order_doc := _load_order(doc_ids[0], root)) is not None and (res := answer_order(question, order_doc, t0, root=root)) is not None:
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                return res
 
         if not os.environ.get("COMPLEX_Q_OFF"):    # E-59: multi-condition questions, every condition applied or named
             from engine import complex_q
