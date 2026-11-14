@@ -7,3 +7,5 @@ What worked and what failed. One or two lines per entry.
 - Loading .env into os.environ at import leaks keys across test suites: load it as a dict and skip secrets (server/config.py).
 - Vision baseline (V-04): count questions on raster plans are exact only 52% of the time; windows 30%, showers+bathtubs 11.5%. Rooms with readable labels do much better (balcony 88%, kitchen 75%).
 - The full question set references 4,788 of the 5,000 CubiCasa5K drawings: only ~212 are clean for training. Fine-tuning needs external or synthetic data.
+
+E-19 pass 1 (ENGINE, 14 Nov): plan-map counts of "storeys" = number of pages; room-subtype questions (bedroom, kitchen, WC room, bathroom, balcony) must filter by props.room_type instead of counting all rooms; a room number beats the shared room name; apartments = DXF items with role=unit; near-zero IfcSpace areas are broken quantities (abstain). sample200 25.7% -> 57.2% (sample200-r1 -> r8; scorer tolerance moved 1% -> 2% per the dataset README).
