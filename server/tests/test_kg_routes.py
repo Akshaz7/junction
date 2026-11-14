@@ -1,11 +1,12 @@
 """KG API without a database: exercise the real builder with isolated artifacts."""
 import uuid
+
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-import pytest
 
+from engine.tests.test_kg_core import item, plan
 from server import kg_routes
-from engine.tests.test_kg_core import plan, item
 
 
 @pytest.fixture
