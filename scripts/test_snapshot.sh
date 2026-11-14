@@ -22,6 +22,8 @@ for p in $PATHS; do
     rsync -a --delete --exclude node_modules --exclude dist --exclude test-results --exclude playwright-report "$ROOT/$p/" "$SNAP/$p/"
   elif [ -e "$ROOT/$p" ]; then mkdir -p "$SNAP/$(dirname "$p")"; cp "$ROOT/$p" "$SNAP/$p"; fi
 done
+# Optional LEAD hook run inside the snapshot after copying (e.g. apply route wiring for a test only).
+if [ -n "${SNAP_HOOK:-}" ]; then (cd "$SNAP" && bash -c "$SNAP_HOOK"); fi
 rm -rf "$SNAP/web/node_modules"; ln -sfn "$ROOT/web/node_modules" "$SNAP/web/node_modules"
 # Git-ignored inputs the tests read (reference pack, data, artifacts): link them in read-only.
 for d in refs data artifacts; do [ -e "$ROOT/$d" ] && { rm -rf "$SNAP/$d"; ln -sfn "$ROOT/$d" "$SNAP/$d"; }; done
