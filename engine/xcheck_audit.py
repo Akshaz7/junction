@@ -139,7 +139,7 @@ def audit(sets, root, output, recount_cache, ifc_checks=()):
         snapshots[str(path)] = digest(path)
     # Record exactly which indexed source state produced these observations.
     for did in sorted({o["doc_id"] for o in observations}):
-        for path in sorted((Path(root) / did).glob("planmap-[0-9]*.json")) + [Path(root) / did / "elements.json"]:
+        for path in sorted((Path(root) / did).glob("planmap-[0-9]*.json")) + [Path(root) / did / "elements.json", Path(root) / did / "scene.glb"]:
             if path.exists():
                 snapshots[str(path)] = digest(path)
     groups = defaultdict(list)
