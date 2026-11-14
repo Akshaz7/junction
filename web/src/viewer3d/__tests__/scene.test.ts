@@ -5,7 +5,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 import { Group } from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {
-  createScene, disposeScene, itemIdForObject, loadScene, setStorey, storeyName,
+  createScene, disposeScene, documentFileUrl, documentSceneUrl, itemIdForObject, loadScene, setStorey, storeyName,
   type LoadedScene, type SceneManifest,
 } from '../scene';
 
@@ -110,5 +110,20 @@ describe('Digital Hub scene (real GLB, no WebGL)', () => {
     vi.stubGlobal('fetch', fetchMock);
     await expect(loadScene('https://example.test/scene.json')).rejects.toThrow('404');
     await expect(loadScene('https://example.test/scene.json')).rejects.toThrow('Y up');
+  });
+
+  it('loads API geometry through the files route even when the manifest holds a local path', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true, json: async () => ({ ...manifest, glb: '/local/artifacts/scene.glb' }),
+    }));
+    const load = vi.spyOn(GLTFLoader.prototype, 'loadAsync').mockResolvedValue({
+      scene: new Group(), parser: { associations: new Map(), json: {} },
+    } as unknown as GLTF);
+    await loadScene('https://example.test/api/docs/ifc_bench__ac20-arc/scene');
+    expect(load).toHaveBeenCalledWith('https://example.test/api/docs/ifc_bench__ac20-arc/files/scene.glb');
+    expect(documentSceneUrl('ifc_bench__ac20-arc')).toBe('/api/docs/ifc_bench__ac20-arc/scene');
+    expect(documentFileUrl('https://example.test/api/docs/test/files/scene.json?x=1', 'elements.json'))
+      .toBe('https://example.test/api/docs/test/files/elements.json');
+    expect(documentFileUrl('https://example.test/fixtures/scene.json', 'elements.json')).toBeNull();
   });
 });

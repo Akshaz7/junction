@@ -69,7 +69,22 @@ export function createScene(manifest: SceneManifest, gltf: Pick<GLTF, 'scene' | 
   return { manifest, root: gltf.scene, items, missingItemIds, originalVisibility, itemIdsByObject };
 }
 
-/** Loads scene.json, then resolves its GLB relative to the manifest response URL. */
+export function documentSceneUrl(doc_id: string): string {
+  return `/api/docs/${encodeURIComponent(doc_id)}/scene`;
+}
+
+/** API manifests contain filesystem paths, so their assets use the files route. */
+export function documentFileUrl(manifestUrl: string | URL, name: string): string | null {
+  const base = typeof location === 'undefined' ? undefined : location.href;
+  const url = new URL(manifestUrl, base);
+  if (!/^\/api\/docs\/[^/]+\/(?:scene|files\/scene\.json)$/.test(url.pathname)) return null;
+  url.pathname = url.pathname.replace(/\/(?:scene|files\/scene\.json)$/, `/files/${name}`);
+  url.search = '';
+  url.hash = '';
+  return url.href;
+}
+
+/** Loads scene.json; API assets use the file route, offline assets stay relative. */
 export async function loadScene(manifestUrl: string | URL): Promise<LoadedScene> {
   const base = typeof location === 'undefined' ? undefined : location.href;
   const url = new URL(manifestUrl, base);
@@ -82,7 +97,9 @@ export async function loadScene(manifestUrl: string | URL): Promise<LoadedScene>
   const asset = manifest.glb;
   const glb = typeof asset === 'string' ? asset : asset?.url || asset?.path || asset?.local_path;
   if (!glb) throw new Error('Scene manifest has no GLB path or URL');
-  const gltf = await new GLTFLoader().loadAsync(new URL(glb, response.url || url).href);
+  const gltf = await new GLTFLoader().loadAsync(
+    documentFileUrl(url, 'scene.glb') ?? new URL(glb, response.url || url).href,
+  );
   return createScene(manifest, gltf);
 }
 

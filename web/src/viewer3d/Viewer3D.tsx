@@ -1,12 +1,12 @@
-import { useEffect, useId, useRef, useState, type PointerEvent } from 'react';
-import { storeyName } from './scene';
+import { useCallback, useEffect, useId, useRef, useState, type PointerEvent } from 'react';
+import { documentFileUrl, documentSceneUrl, storeyName, type SceneManifest } from './scene';
+import { buildItemDetails, indexElements, type IFCElement } from './identify';
+import { ItemDetailsCard } from './ItemDetailsCard';
 import { createViewer, type Viewer } from './viewer';
 import type { HighlightOptions } from './highlight';
 import './viewer3d.css';
 
-export interface Viewer3DProps {
-  /** A CONTRACT 5.5 scene.json URL, including /api/docs/{doc_id}/scene. */
-  sceneUrl: string;
+interface ViewerOptions {
   onPick?: (item_id: string) => void;
   /** Null shows all storeys. Changes to this prop update the dropdown and model. */
   storey?: string | null;
@@ -16,7 +16,13 @@ export interface Viewer3DProps {
   onReady?: (viewer: Viewer) => void;
 }
 
-export function Viewer3D({ sceneUrl, onPick, storey = null, highlightItemIds, highlightOptions, onReady }: Viewer3DProps) {
+/** Provide a document ID for the API, or an offline scene.json URL. */
+export type Viewer3DProps = ViewerOptions & (
+  { doc_id: string; sceneUrl?: never } | { sceneUrl: string; doc_id?: never }
+);
+
+export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey = null, highlightItemIds, highlightOptions, onReady }: Viewer3DProps) {
+  const sceneUrl = doc_id !== undefined ? documentSceneUrl(doc_id) : sourceUrl!;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
   const onReadyRef = useRef(onReady);
@@ -24,10 +30,15 @@ export function Viewer3D({ sceneUrl, onPick, storey = null, highlightItemIds, hi
   const [selectedStorey, setSelectedStorey] = useState<string | null>(storey);
   const [storeys, setStoreys] = useState<string[]>([]);
   const [picked, setPicked] = useState<string | null>(null);
+  const [manifest, setManifest] = useState<SceneManifest | null>(null);
+  const [elements, setElements] = useState<Map<string, IFCElement>>(new Map());
+  const [elementsLoading, setElementsLoading] = useState(false);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState('');
   const selectId = useId();
   const helpId = useId();
+  const closeDetails = useCallback(() => setPicked(null), []);
+  const details = manifest && picked ? buildItemDetails(manifest, picked, elements.get(picked)) : null;
 
   useEffect(() => { onReadyRef.current = onReady; }, [onReady]);
 
@@ -44,6 +55,7 @@ export function Viewer3D({ sceneUrl, onPick, storey = null, highlightItemIds, hi
     setError('');
     setStoreys([]);
     setPicked(null);
+    setManifest(null);
     pointerStart.current = null;
 
     function fail(reason: unknown) {
@@ -62,6 +74,7 @@ export function Viewer3D({ sceneUrl, onPick, storey = null, highlightItemIds, hi
           ...Object.values(scene.manifest.items).map((item) => storeyName(item.storey)),
         ].filter((name): name is string => name !== null);
         setStoreys([...new Set(names)]);
+        setManifest(scene.manifest);
         setState('ready');
         onReadyRef.current?.(viewer!);
       }).catch(fail);
@@ -74,6 +87,24 @@ export function Viewer3D({ sceneUrl, onPick, storey = null, highlightItemIds, hi
       viewer?.dispose();
       if (viewerRef.current === viewer) viewerRef.current = null;
     };
+  }, [sceneUrl]);
+
+  useEffect(() => {
+    const url = documentFileUrl(sceneUrl, 'elements.json');
+    const controller = new AbortController();
+    let active = true;
+    setElements(new Map());
+    setElementsLoading(url !== null);
+    if (url) {
+      void fetch(url, { signal: controller.signal }).then(async (response) => {
+        if (!response.ok) throw new Error('Additional IFC properties unavailable');
+        const index = indexElements(await response.json());
+        if (active) setElements(index);
+      }).catch(() => {
+        // A missing optional index must not prevent identification from scene.json.
+      }).finally(() => { if (active) setElementsLoading(false); });
+    }
+    return () => { active = false; controller.abort(); };
   }, [sceneUrl]);
 
   useEffect(() => {
@@ -117,6 +148,8 @@ export function Viewer3D({ sceneUrl, onPick, storey = null, highlightItemIds, hi
         onPointerUp={pick} onPointerCancel={() => { pointerStart.current = null; }} />
       {state === 'loading' && <p className="viewer3d-message" role="status">Loading 3D scene…</p>}
       {state === 'error' && <p className="viewer3d-message" role="alert">{error}</p>}
+      {state === 'ready' && details && <ItemDetailsCard key={details.item_id} details={details}
+        loading={elementsLoading} onClose={closeDetails} />}
     </div>
     <div className="viewer3d-footer">
       <p id={helpId}>Drag to orbit · Scroll to zoom · Click an item to identify it</p>
