@@ -57,6 +57,8 @@ app.include_router(speech_router)
 app.include_router(advise_router)
 app.include_router(findings_router)
 app.include_router(skills_router)
+from .watch_routes import router as watch_router  # noqa: E402
+app.include_router(watch_router)
 
 
 @app.get("/api/health")

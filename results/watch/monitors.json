@@ -1,0 +1,33 @@
+{
+  "status": "ok",
+  "monitors": [
+    {
+      "url": "https://www.finlex.fi/fi/lainsaadanto/saadoskokoelma/2017/241",
+      "rule_ids": [
+        "fi-acc-door-clear-width",
+        "fi-acc-entrance-landing",
+        "fi-acc-entrance-path-width",
+        "fi-acc-entrance-level-change-ramp",
+        "fi-acc-corridor-turning-space",
+        "fi-acc-level-change-connection",
+        "fi-acc-lift-third-floor"
+      ],
+      "monitor_id": "mon_3679ec7152dc44e8a22e8b3a74960763",
+      "created": false,
+      "webhook_url": null
+    },
+    {
+      "url": "https://technical-regulation-information-system.ec.europa.eu/en/notification/18529/text/F/EN",
+      "rule_ids": [
+        "fi-fire-exit-width",
+        "fi-fire-exit-corridor-width",
+        "fi-fire-exits-per-storey",
+        "fi-fire-route-length",
+        "fi-fire-door-opening-direction"
+      ],
+      "monitor_id": "mon_ceb6bbd9075c4167b64aed79e5a2d829",
+      "created": false,
+      "webhook_url": null
+    }
+  ]
+}

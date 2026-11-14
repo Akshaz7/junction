@@ -168,4 +168,12 @@ Skills (saved prompts; four builtin starters from the start screen cannot be del
 Automations (a prompt on a schedule; the latest run is kept as a report):
 - `GET/POST /api/automations`, `GET/PATCH/DELETE /api/automations/{id}`. Body: `{name, prompt, doc_ids, interval_minutes (default 1440), enabled}`.
 - `POST /api/automations/{id}/run` runs now. `GET /api/automations/{id}/report.md` returns the report as Markdown (404 before the first run).
+- `GET /api/automations/{id}/report.pdf` returns the same report as a PDF (`application/pdf`, built without extra dependencies; 404 before the first run).
 - A background loop checks every 30 s and runs due automations (`AUTOMATIONS=0` turns it off). A failed run is stored as a report with `ok: false`. Each run publishes `automation.report`.
+
+## Watch loop (E-17)
+
+Context.dev monitors (docs.context.dev, `POST /v1/monitors`, Bearer `CONTEXT_DEV_API_KEY`) watch every rule `url` in `engine/rules/*.yaml` (exact page change, every 6 h). `python -m engine.watch` (or `POST /api/watch/sync`) creates them idempotently (reuses by name/target URL) and writes ids to `results/watch/monitors.json`; signing secrets go to `artifacts/watch/secrets.json` (git-ignored). Set `WATCH_WEBHOOK_URL` to the public `https://<api>/api/watch/webhook` before syncing to attach the webhook (Context.dev refuses non-public URLs).
+- `POST /api/watch/webhook` receives `change.detected`. Verified with `X-Context-Signature: t=<unix>,v1=hex(HMAC-SHA256(secret, "t.body"))` (5 min tolerance). Fallback: env `WATCH_WEBHOOK_SECRET` as `?secret=` or `X-Watch-Secret`. No secret known: 503; bad signature: 401. A valid event inserts a `changes` row (fires `changes.new`), dedupes on the event id, and reruns findings for all documents. Returns `{status: ok|duplicate|ignored, change_id, findings_rerun_docs}`.
+- Feed entries appear in `GET /api/changes` with `type: "rule_change"` and `summary: {kind: "rule_change", source: "context.dev", url, rule_ids, title, summary, importance, headline, monitor_id, event_id}`; `doc_a`/`doc_b` are null.
+- `GET /api/watch/monitors` returns the monitor list and rule URLs.

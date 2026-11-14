@@ -161,7 +161,11 @@ def _change(r) -> dict:
     d["created_at"] = d["created_at"].isoformat()
     if isinstance(d.get("summary"), str):
         d["summary"] = json.loads(d["summary"])
-    d["type"] = "new_version"
+    s = d.get("summary") if isinstance(d.get("summary"), dict) else {}
+    d["type"] = "rule_change" if s.get("kind") == "rule_change" else "new_version"
+    if d["type"] == "new_version" and s.get("doc_id") and s.get("source") in ("truth", "engine"):
+        from . import changes_source  # the stored summary can predate the current CHANGE_SOURCE
+        s["source"] = changes_source.source_name()
     return d
 
 

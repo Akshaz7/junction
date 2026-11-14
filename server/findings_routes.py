@@ -44,9 +44,12 @@ def clean_findings(raw, library: dict[str, dict]) -> list[dict]:
         if not ids:
             continue
         sev = f.get("severity") if f.get("severity") in SEVERITIES else "suggestion"
+        text = f.get("message") or f.get("text") or f.get("title") or ""
+        extra = {k: f[k] for k in ("finding_id", "check_id", "title", "text", "labels", "storey", "measured", "source")
+                 if f.get(k) not in (None, "", {})}
         out.append({"rule_id": f["rule_id"], "item_ids": ids, "severity": sev,
-                    "message": " ".join(str(f.get("message") or "").split())[:300],
-                    "detail": f.get("detail") if isinstance(f.get("detail"), dict) else {}})
+                    "message": " ".join(str(text).split())[:300],
+                    "detail": f["detail"] if isinstance(f.get("detail"), dict) else extra})
     return out
 
 

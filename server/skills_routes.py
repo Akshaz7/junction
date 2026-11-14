@@ -252,6 +252,16 @@ async def run_automation_now(automation_id: str):
     return await run_automation(pool, await _get(pool, automation_id))
 
 
+@router.get("/automations/{automation_id}/report.pdf")
+async def report_pdf(automation_id: str):
+    a = _auto(await _get(await _pool(), automation_id))
+    if not a["last_report"]:
+        raise HTTPException(404, "no report yet")
+    from .report_pdf import markdown_to_pdf
+    return Response(markdown_to_pdf(a["last_report"]["markdown"], a["name"]), media_type="application/pdf",
+                    headers={"Content-Disposition": 'attachment; filename="report.pdf"'})
+
+
 @router.get("/automations/{automation_id}/report.md")
 async def report_md(automation_id: str):
     a = _auto(await _get(await _pool(), automation_id))
