@@ -148,3 +148,15 @@ def test_named_sheet_set_qualifier_selects_the_right_issue(monkeypatch,tmp_path)
 def test_new_routes_validate_against_answer_schema(q):
     from server.schema import validate_answer
     validate_answer(ask(q))
+
+
+def test_uncertain_room_types_are_not_presented_as_a_verified_total(monkeypatch,tmp_path):
+    from engine.solvers.solve import solve
+    d=tmp_path/'generated-for-demo';d.mkdir()
+    items=[{'item_id':'room-a','kind':'room','label':'Bedroom','conf':.95,'source':'det','props':{'room_type':'bedroom','label_room_type':'bedroom'}},
+           {'item_id':'room-b','kind':'room','conf':.7,'source':'det','props':{'room_type':'bedroom'}}]
+    (d/'planmap-1.json').write_text(json.dumps({'items':items}))
+    r=solve('How many bedrooms are there?',d.name,root=tmp_path)
+    assert r['answer']['value']==1 and r['answer']['confidence']<=.5
+    assert '1 additional possible room' in r['answer']['text_md']
+    assert 'not a verified total' in r['answer']['text_md']

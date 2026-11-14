@@ -30,11 +30,14 @@ def printed_total(question, doc_id, pts, title, t0):
         return None
     count = bool(re.search(r'\bhow many\b', q) and re.search(r'\b(?:dorms?|rooms?|apartments?|units?|beds?)\b', q))
     area = bool(re.search(r'\b(?:total|gross|overall|net)\b.*\b(?:area|square metres|square meters|m2|m²)\b', q))
+    named_area = re.search(r'\barea (?:of|for) (?:the |all |this |a )?(.+)', q)
+    if area and named_area and not re.match(r'(?:whole |entire |total |net |gross )*(?:building|floor|storey|level|plan|sheet|first|second|third|ground|\d)', named_area[1]):
+        return None  # a room/type-specific area is not the printed whole-floor total.
     if not (count or area):
         return None
     whole = bool(re.search(r'\b(?:whole|entire) building\b|\ball (?:floors|storeys|levels)\b', q))
     floor = level(question, title)
-    matches = []
+    matches, candidates = [], []
     for pt in pts:
         for text, bb in _rows(pt):
             if count:
@@ -42,6 +45,7 @@ def printed_total(question, doc_id, pts, title, t0):
                 if not m:
                     continue
                 label = compact(m[1])
+                candidates.append((pt.page, bb, m.group(0)))
                 if label != ('TOTAL' if whole else floor):
                     continue
                 noun = m[3].lower()
@@ -56,6 +60,8 @@ def printed_total(question, doc_id, pts, title, t0):
                 if not m:
                     continue
                 label = compact(m[1])
+                if label.startswith(('TOTAL','SUBTOTAL','GRANDTOTAL')):
+                    candidates.append((pt.page, bb, m.group(0)))
                 desired = 'TOTAL' + floor if floor else 'TOTAL'
                 if label not in {desired, 'GRAND' + desired}:
                     continue
@@ -63,6 +69,13 @@ def printed_total(question, doc_id, pts, title, t0):
                 unit = 'm²' if m[3].upper().startswith('M') else 'SF'
                 matches.append((val,'area',pt.page,bb,m.group(0),m[1],unit))
     if not matches:
+        if candidates:
+            result = _obj(question,doc_id,"**No printed total matches the requested scope.** The table contains other totals; I have not substituted a floor count, wing total or subtotal. Check the cited rows or specify the floor.",None,None,candidates[:8],"printed totals: requested scope unavailable; no subtotal substituted",t0,conf=.5)
+            result["reasoning_hint"] = {"steps":[{"kind":"found","title":"Found","text":f"{len(candidates)} printed table rows with other scopes","cite":1,"ok":None},
+                                                {"kind":"checked","title":"Checked","text":"No complete total matches the requested floor or building","cite":None,"ok":False}],
+                                        "pct_cap":60,"reason":"The requested total is missing or ambiguous; no partial total was substituted.",
+                                        "improve":"Identify the full-floor or building total in the cited table."}
+            return result
         return None
     # Repeated rows only agree when their labels, units AND quantities agree.
     signatures={(v,typ,compact(label),unit) for v,typ,pg,bb,txt,label,unit in matches}

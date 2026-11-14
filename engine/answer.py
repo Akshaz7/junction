@@ -835,6 +835,11 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             except SolverUnsupported:
                 continue
             res = _recount_ladder(res, question, did, parsed, root, calls, hid)
+            if (not os.environ.get("MODELS_FAKE") and parsed.type == "count" and parsed.kind == "room"
+                    and any(s.get("step") == "filter" and "unlabelled room(s)" in s.get("detail", "") for s in res["trace"])):
+                rr = _reader(question, [did], root, [*trace, *res["trace"]], calls, t0, emit)
+                if rr is not None and not rr["answer"].get("abstained"):
+                    return rr
             for s in res["trace"]:
                 if s["step"] != "route":
                     add(s)

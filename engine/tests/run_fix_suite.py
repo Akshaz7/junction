@@ -24,6 +24,8 @@ def overlay():
     source = ROOT / 'artifacts'
     target = RUNTIME / 'artifacts'
     target.mkdir(parents=True, exist_ok=True)
+    if (RUNTIME / 'inputs-frozen').exists():
+        return target
     for src in source.iterdir():
         if not src.is_dir() or not (src / 'doc.json').exists():
             continue

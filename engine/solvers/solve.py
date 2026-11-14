@@ -533,6 +533,7 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
     # --- room / label filters
     subject = None
     sub_name = None
+    weak = []
     if kind == "room" and doc.mode == "ifc":
         from .filters import room_filter, missing_room_text
         selected = room_filter(question, items)
@@ -656,7 +657,17 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         else:
             verb = "is" if n == 1 else "are"
             text = f"There {verb} **{n} {_plural(kind, n)}** {where}. {marks}"
-        return _answer_obj(question, [doc_id], text, n, "count", conf, False, boxes, cites, scene, trace, route, t0)
+        if weak:
+            text += f" {len(weak)} additional possible {_plural(kind, len(weak))} have uncertain room types and are excluded; this is a confirmed-detection count, not a verified total."
+            conf = min(conf, .5)
+        result = _answer_obj(question, [doc_id], text, n, "count", conf, False, boxes, cites, scene, trace, route, t0)
+        if weak:
+            result["reasoning_hint"] = {
+                "steps": [{"kind": "found", "title": "Found", "text": f"{n} confident detections and {len(weak)} additional candidates with uncertain room types", "cite": cites[0]["n"] if cites else None, "ok": None},
+                          {"kind": "checked", "title": "Checked", "text": "Uncertain classifications were excluded; the complete total needs a drawing check", "cite": None, "ok": False}],
+                "pct_cap": 70, "reason": "Some detected rooms could not be confidently classified; this count may be incomplete.",
+                "improve": "Check the room labels on the drawing to confirm the total."}
+        return result
 
     vals = [(i, _qty(i, kind, p.type)) for i in items]
     if doc.mode == "ifc" and kind == "room" and p.type == "area" and len(items) <= 400 and any(v is None for _, v in vals):

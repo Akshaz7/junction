@@ -31,6 +31,7 @@ def test_count_selects_whole_building_and_not_selected_floor():
 
 def test_ambiguous_or_missing_full_total_defer():
     pt=page(['TOTAL NORTH WING = 510 SF', 'TOTAL SOUTH WING = 730 SF'])
-    assert printed_total('What is the total floor area?','generated-for-demo',[pt],'Fourth Floor Plan',time.perf_counter()) is None
+    r=printed_total('What is the total floor area?','generated-for-demo',[pt],'Fourth Floor Plan',time.perf_counter())
+    assert r['answer']['value'] is None and 'not substituted' in r['answer']['text_md']
     pt=page(['TOTALFOURTHFLOOR= 2340 SF','TOTALFOURTHFLOOR= 2510 SF'])
     assert printed_total('What is the total fourth floor area?','generated-for-demo',[pt],'Fourth Floor Plan',time.perf_counter()) is None
