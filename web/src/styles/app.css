@@ -300,7 +300,10 @@ h1, h2, h3, p { margin: 0; }
 .chat-header-actions { display: flex; gap: 8px; }
 .chat-header-actions > .button { pointer-events: auto; }
 .chat-header-actions .button { height: 32px; }
-.workspace:has(.has-viewer) .chat-header-actions { margin-right: calc((100vw - 70px) / 2 + 8px); transition: margin-right .5s var(--ease-settle-wide); }
+.workspace:has(.has-viewer) .chat-header-actions { margin-right: calc((100vw - 70px) * (1 - var(--chat-split-live, .48)) - 40px); transition: margin-right .5s var(--ease-settle-wide); }
+/* With the drawing open the chat column is narrow: icon-only actions so they never cover the viewer title. */
+.workspace:has(.has-viewer) .chat-header-actions .button { width: 36px; padding: 0; }
+.workspace:has(.has-viewer) .chat-header-actions .button span { display: none; }
 .chat-page { position: relative; width: 100%; }
 .conversation { padding: 0 24px 24px; }
 .welcome { position: absolute; top: 268px; left: 50%; translate: -50% 0; width: min(768px, calc(100% - 48px)); margin: 0; padding: 0; }

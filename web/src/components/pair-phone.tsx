@@ -56,7 +56,7 @@ export function PairPhoneButton() {
   }, [open])
   const link = code ? pairLink(code) : ''
   return <span className="pair-phone" ref={host}>
-    <Button variant="raised" aria-label="Pair a phone" aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? dialogId : undefined} onClick={(event) => { trigger.current = event.currentTarget; setOpen((value) => !value) }}><Smartphone size={16} /><span>{paired ? 'Paired' : 'Pair a phone'}</span></Button>
+    <Button variant="raised" aria-label="Pair a phone" title="Pair a phone" aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? dialogId : undefined} onClick={(event) => { trigger.current = event.currentTarget; setOpen((value) => !value) }}><Smartphone size={16} /><span>{paired ? 'Paired' : 'Pair a phone'}</span></Button>
     {open && code && <section ref={dialog} id={dialogId} className="pair-popover" role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
       <header><strong id={titleId}>Pair a phone</strong><button type="button" aria-label="Close pairing" onClick={() => setOpen(false)}><X size={16} /></button></header>
       <div className="pair-qr" role="img" aria-label="QR code to pair a phone" dangerouslySetInnerHTML={{ __html: qrSvg(link) }} />

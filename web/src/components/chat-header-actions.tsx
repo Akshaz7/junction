@@ -66,9 +66,9 @@ export function ChatHeaderActions({ chatId, onNew }: { chatId: string | null; on
   }
 
   return <div className="chat-header-actions" ref={host}>
-    <Button variant="raised" aria-label="New chat" onClick={() => { setOpen(false); setToast(''); onNew() }}><Plus size={16} /><span>New</span></Button>
-    <button type="button" className="button button-raised button-size-default" ref={historyButton} aria-label="History" aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? 'chat-history' : undefined} onClick={() => setOpen((value) => !value)}><Clock size={16} /><span>History</span></button>
-    <Button variant="raised" aria-label="Share" onClick={() => void share()}><MessageSquareShare size={16} /><span>Share</span></Button>
+    <Button variant="raised" aria-label="New chat" title="New chat" onClick={() => { setOpen(false); setToast(''); onNew() }}><Plus size={16} /><span>New</span></Button>
+    <button type="button" className="button button-raised button-size-default" ref={historyButton} aria-label="History" title="History" aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? 'chat-history' : undefined} onClick={() => setOpen((value) => !value)}><Clock size={16} /><span>History</span></button>
+    <Button variant="raised" aria-label="Share" title="Share" onClick={() => void share()}><MessageSquareShare size={16} /><span>Share</span></Button>
     <PairPhoneButton />
     {open && <section ref={dialog} id="chat-history" className="chat-history-popover" role="dialog" aria-modal="true" aria-label="Chat history" aria-labelledby={titleId} tabIndex={-1}>
       <header><strong><span id={titleId} className="sr-only">Chat history</span><span aria-hidden="true">History</span></strong><FollowToggle /><button type="button" aria-label="Close chat history" onClick={() => setOpen(false)}><X size={16} /></button></header>
