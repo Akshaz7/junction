@@ -12,11 +12,13 @@ import { storeyName, type LoadedScene, type SceneItem } from './scene';
  * mirrored by the iOS AR view; keep the README ("Blueprint layer") in sync when changing them.
  */
 export const MATERIAL_COLORS: Record<string, string> = {
-  wall: '#d9d4c9', door: '#9c6b3c', window: '#9fd3ea', slab: '#e6e2d9', roof: '#9a8f86', stairs: '#5f5a54',
+  wall: '#d9d4c9', door: '#9c6b3c', window: '#9fd3ea', slab: '#e6e2d9', site: '#cfc9bf', roof: '#9a8f86', stairs: '#5f5a54',
   column: '#bdb7ad', railing: '#8d99a6', furniture: '#b9ad9d',
   toilet: '#f4f7f9', sink: '#f4f7f9', shower: '#f4f7f9', bathtub: '#f4f7f9',
 };
 export const GLASS_OPACITY = 0.38;
+/** Site/terrain is drawn faint so it never dominates the frame. */
+export const SITE_OPACITY = 0.22;
 /** Wall faces pointing up (the cut top) are multiplied by this, so walls read as a cut plan. */
 export const WALL_TOP_DARKEN = 0.42;
 export const ROOM_FLOOR_COLORS = { neutral: '#f1eee6', wet: '#cde3f3', kitchen: '#f4e4c9' } as const;
@@ -24,8 +26,10 @@ export type RoomClass = keyof typeof ROOM_FLOOR_COLORS;
 /** A room label is hidden when its text would be smaller than this (metres) or the room is narrower than ROOM_MIN_M. */
 export const ROOM_MIN_M = 1.2;
 export const LABEL_MIN_HEIGHT_M = 0.14;
-export const LABEL_MAX_HEIGHT_M = 0.45;
+export const LABEL_MAX_HEIGHT_M = 0.9;
 export const DIM_OFFSET_M = 1.2;
+/** Rooms taller than this are volumes (IFC spaces) rather than flat floor patches. */
+export const ROOM_VOLUME_M = 0.3;
 const WET = /\b(wc|toilet|bath(room)?|shower|sauna|laundry|washroom|restroom|wash|utility)\b|bad\b|dusch|wasch|pesu|kylpy|suihku|\bph\b|\bkph\b|\bwc\b|lavat/i;
 const KITCHEN = /kitchen|küche|kueche|keitti|kök|kitch|\bkk\b|\bkt\b|pantry|teekeitti/i;
 
@@ -59,7 +63,7 @@ export function fitRoomLabel(footprintX: number, footprintZ: number, aspect: num
   const rotated = footprintZ > footprintX * 1.6;
   const along = rotated ? footprintZ : footprintX;
   const across = rotated ? footprintX : footprintZ;
-  let height = Math.min(LABEL_MAX_HEIGHT_M, Math.max(LABEL_MIN_HEIGHT_M, short * 0.16));
+  let height = Math.min(LABEL_MAX_HEIGHT_M, Math.max(LABEL_MIN_HEIGHT_M, short * 0.2));
   let width = height * aspect;
   if (width > along * 0.9) { width = along * 0.9; height = width / aspect; }
   if (height > across * 0.6) { height = across * 0.6; width = height * aspect; }
@@ -101,6 +105,7 @@ function styleMaterial(kind: string, source: Material, floor: RoomClass | null):
     if (glass.metalness !== undefined) glass.metalness = 0;
   }
   if (kind === 'wall') patchWallTop(material);
+  if (kind === 'site') { material.transparent = true; material.opacity = SITE_OPACITY; material.depthWrite = false; }
   material.needsUpdate = true;
   return material;
 }
@@ -204,7 +209,9 @@ export function createBlueprint(scene: LoadedScene, eye: Vector3, materials: Rec
     mesh.renderOrder = 5;
     mesh.rotation.x = -Math.PI / 2;
     if (fit.rotated) mesh.rotation.z = Math.PI / 2;
-    mesh.position.set((min[0] + max[0]) / 2, min[1] + 0.05, (min[2] + max[2]) / 2);
+    // IFC rooms are opaque volumes: the label goes on their top face (the visible one from above); raster rooms are flat.
+    const y = max[1] - min[1] > ROOM_VOLUME_M ? max[1] + 0.03 : min[1] + 0.05;
+    mesh.position.set((min[0] + max[0]) / 2, y, (min[2] + max[2]) / 2);
     root.add(mesh);
     rooms.push({ id, mesh, object, info });
   }
@@ -258,7 +265,7 @@ export function createBlueprint(scene: LoadedScene, eye: Vector3, materials: Rec
   }
 
   // Storey name + elevation at the building's near-left corner, at each storey's floor level.
-  const storeyTags: { name: string; label: string; element: HTMLElement; ids: string[]; shown: boolean; floorY: number; position: Vector3 }[] = [];
+  const storeyTags: { name: string; label: string; element: HTMLElement; ids: string[]; shown: boolean; floorY: number; position: Vector3; object: CSS2DObject }[] = [];
   if (bounds) {
     const names = scene.manifest.storeys.map(storeyName).filter((n): n is string => !!n);
     for (const name of names) {
@@ -277,7 +284,7 @@ export function createBlueprint(scene: LoadedScene, eye: Vector3, materials: Rec
       object.position.set(bounds.min.x - 0.6, floorY + 0.05, bounds.max.z + 0.6);
       root.add(object);
       dom.push(object);
-      storeyTags.push({ name, label, element, ids, shown: true, floorY, position: object.position });
+      storeyTags.push({ name, label, element, ids, shown: true, floorY, position: object.position, object });
     }
   }
 
@@ -297,7 +304,8 @@ export function createBlueprint(scene: LoadedScene, eye: Vector3, materials: Rec
         kept.push(y);
       }
     }
-    for (const tag of storeyTags) tag.element.style.display = tag.shown ? '' : 'none';
+    // CSS2DRenderer owns element.style.display, so hide through the object.
+    for (const tag of storeyTags) tag.object.visible = tag.shown;
   }
 
   let lastCheck = 0;
@@ -355,4 +363,22 @@ function baseY(scene: LoadedScene, bounds: Box3): number {
   const elevations = scene.manifest.storeys.map((s) => typeof s === 'object' ? s.elevation_m : undefined)
     .filter((e): e is number => typeof e === 'number' && e >= 0);
   return elevations.length ? Math.min(...elevations) : bounds.min.y;
+}
+
+/** Callout tags are dropped above this many highlighted items (the per-kind glow and the legend carry the answer). */
+export const MAX_CALLOUT_TAGS = 12;
+const OVERSIZED_SLAB_FACTOR = 3;
+
+/** Item ids that count for camera framing: never the site/terrain, nor a slab more than 3x the building footprint. */
+export function framingIds(scene: LoadedScene): string[] {
+  const entries = Object.entries(scene.manifest.items).filter(([id, it]) => it.kind !== 'site' && it.bbox_m && scene.items.has(id));
+  const area = (it: SceneItem) => (it.bbox_m![1][0] - it.bbox_m![0][0]) * (it.bbox_m![1][2] - it.bbox_m![0][2]);
+  const walls = entries.filter(([, it]) => it.kind === 'wall');
+  let footprint = 0;
+  if (walls.length) {
+    const minX = Math.min(...walls.map(([, it]) => it.bbox_m![0][0])), maxX = Math.max(...walls.map(([, it]) => it.bbox_m![1][0]));
+    const minZ = Math.min(...walls.map(([, it]) => it.bbox_m![0][2])), maxZ = Math.max(...walls.map(([, it]) => it.bbox_m![1][2]));
+    footprint = (maxX - minX) * (maxZ - minZ);
+  }
+  return entries.filter(([, it]) => !(it.kind === 'slab' && footprint > 0 && area(it) > footprint * OVERSIZED_SLAB_FACTOR)).map(([id]) => id);
 }

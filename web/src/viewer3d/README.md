@@ -341,10 +341,10 @@ for single- and multi-kind answers (`answer.value` may be `{window: 11, door: 11
 The 3D view carries what a 2D drawing carries. iOS AR mirrors these rules and colours exactly. All of it comes from the
 scene manifest (`scene.json`), nothing is invented: no area in the data means no area on the label.
 
-**Room labels** (kind `room`), lying flat on the floor at `bbox.min.y + 0.05`, centred on the room's bbox:
+**Room labels** (kind `room`), lying flat, centred on the room's bbox, at `bbox.min.y + 0.05` for flat rooms (bbox height <= 0.3 m, raster plans) or at `bbox.max.y + 0.03` (the top face) for volume rooms (IFC spaces are opaque boxes, so a floor-level label would be inside them):
 - Text: line 1 `item.name` (bold, `#1f2937`), line 2 `props.area_m2` as `23.9 m²` (`#475569`), white 92% halo. Missing name or area drops that line; neither drops the label.
 - Hide when the room's shorter bbox side is under **1.2 m**, or when the fitted text height would be under **0.14 m**.
-- Text height = `clamp(shorterSide × 0.16, 0.14, 0.45)` m; shrink so the width is at most 90% of the room side and the height at most 60% of the other side.
+- Text height = `clamp(shorterSide × 0.2, 0.14, 0.9)` m; shrink so the width is at most 90% of the room side and the height at most 60% of the other side.
 - Rotate the label 90° when the room is more than 1.6× longer in z than in x.
 - Hidden whenever the room itself is hidden (storey cutaway, command hide, build-up not yet risen).
 

@@ -97,3 +97,54 @@ test('IFC model: every storey gets a name and elevation tag, rooms carry names a
   expect(bp.rooms.filter((r) => r.name && r.area).length).toBeGreaterThan(10)
   expect(bp.dimensions).toHaveLength(2)
 })
+
+test('IFC volume rooms carry labels on their top face and overlapping storey tags are thinned', async ({ page }) => {
+  await open(page, 'ifc_bench__ac20-arc', 'ifc_bench__ac20-arc')
+  await page.evaluate(() => (window as Win).viewer3dTest.setStorey('Erdgeschoss'))
+  await page.waitForTimeout(600)
+  const r = await page.evaluate(() => {
+    const v = (window as Win).viewer3dTest; const s = v.scene!
+    const labels: { y: number; top: number }[] = []
+    s.root.parent?.traverse((n) => {
+      if (!n.name.startsWith('room-label:') || !n.visible) return
+      const item = s.manifest.items[n.name.slice('room-label:'.length)]
+      labels.push({ y: n.position.y, top: item.bbox_m![1][1] })
+    })
+    return { labels, tags: [...document.querySelectorAll('.viewer3d-storey-label')].filter((e) => (e.parentElement as HTMLElement).style.display !== 'none').length }
+  })
+  expect(r.labels.length).toBeGreaterThan(5)
+  for (const l of r.labels) expect(l.y).toBeCloseTo(l.top + 0.03, 3)
+  expect(r.tags).toBeLessThan(5)
+})
+
+test('72 highlights: at most 12 callout tags, glow and legend stay, the building fills the frame and the site is faint', async ({ page }) => {
+  await page.setViewportSize({ width: 1000, height: 800 })
+  await open(page, 'ifc_bench__ac20-arc', 'ifc_bench__ac20-arc')
+  const r = await page.evaluate(async () => {
+    const v = (window as Win).viewer3dTest; const s = v.scene!
+    v.setStorey('Erdgeschoss')
+    const ground = (k: string) => [...s.items.keys()].filter((i) => s.manifest.items[i].kind === k && (s.manifest.items[i].storey === 'Erdgeschoss' || (s.manifest.items[i].storey as { name?: string })?.name === 'Erdgeschoss'))
+    const ids = [...ground('door'), ...ground('window')]
+    v.highlight(ids, {})
+    await new Promise((r) => setTimeout(r, 1500))
+    // Project every building item (not the site) and measure the screen width it covers.
+    const canvas = v.renderer.domElement
+    let min = Infinity, max = -Infinity
+    for (const [id, o] of s.items) {
+      if (s.manifest.items[id].kind === 'site' || !o.visible) continue
+      const b = s.manifest.items[id].bbox_m; if (!b) continue
+      for (const x of [b[0][0], b[1][0]]) for (const y of [b[0][1], b[1][1]]) for (const z of [b[0][2], b[1][2]]) {
+        const p = { x, y, z }; const vec = (o.position.clone() as unknown as { set(x: number, y: number, z: number): { project(c: unknown): { x: number } } }).set(p.x, p.y, p.z).project(v.camera)
+        const px = (vec.x + 1) / 2 * canvas.clientWidth
+        min = Math.min(min, px); max = Math.max(max, px)
+      }
+    }
+    let siteOpacity = 1
+    for (const [id, o] of s.items) if (s.manifest.items[id].kind === 'site') o.traverse((n) => { const m = (n as { material?: { opacity: number } }).material; if (m && !Array.isArray(m)) siteOpacity = m.opacity })
+    return { highlighted: ids.length, tags: document.querySelectorAll('.viewer3d-annotation').length, covered: (max - min) / canvas.clientWidth, siteOpacity }
+  })
+  expect(r.highlighted).toBeGreaterThan(12)
+  expect(r.tags).toBeLessThanOrEqual(12)
+  expect(r.covered).toBeGreaterThanOrEqual(0.4)
+  expect(r.siteOpacity).toBeLessThan(0.5)
+})
