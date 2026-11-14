@@ -47,3 +47,15 @@ it('renders nothing without reasoning', async () => {
   await act(async () => root.render(<EvidenceCard answer={{ ...answer, reasoning: undefined }} onOpenCitation={vi.fn()} />))
   expect(host.innerHTML).toBe('')
 })
+
+it('shows the graph path and a link to the graph when the chat belongs to a project', async () => {
+  window.location.hash = '#/chat?chat=c1&project=p9'
+  const withPath = { ...answer, reasoning: { ...answer.reasoning!, graph_path: [{ from_label: 'Grille G1', edge_kind: 'serves', to_label: 'Room 2.02' }] } } as Answer
+  await act(async () => root.render(<EvidenceCard answer={withPath} onOpenCitation={vi.fn()} />))
+  expect(host.textContent).toContain('Grille G1')
+  expect(host.textContent).toContain('Room 2.02')
+  const link = host.querySelector('a')
+  expect(link?.getAttribute('href')).toContain('tab=graph')
+  expect(link?.getAttribute('href')).toContain('id=p9')
+  window.location.hash = ''
+})

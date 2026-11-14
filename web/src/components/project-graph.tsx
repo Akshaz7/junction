@@ -82,7 +82,7 @@ function Connections({ detail, onSelect }: { detail: KgNodeDetail; onSelect: (id
         <button type="button" onClick={() => onSelect(node.id, detail)}>
           <span className="kg-dot" data-group={kindGroup(node.kind)} aria-hidden="true" />
           <span className="kg-link-text"><strong title={node.label}>{node.label}</strong>
-            <small>{kindLabel(node.kind)}{node.level ? ` · ${node.level}` : ''}</small></span>
+            <small>{kindLabel(node.kind)}{node.level && node.level !== node.label ? ` · ${node.level}` : ''}</small></span>
         </button>
         <p className="kg-method">{methodPhrase(edge)}<span className={isEstimate(edge) ? 'is-estimate' : ''}>{isEstimate(edge) ? `Estimate · ${confidencePct(edge.confidence)}%` : `${confidencePct(edge.confidence)}%`}</span></p>
       </li>)}</ul>

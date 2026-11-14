@@ -1,5 +1,7 @@
 .kg { display: grid; gap: 12px; min-width: 0; }
 .kg-stats { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.kg-stats .overview-stat { padding: 10px 12px; min-height: 0; gap: 0; }
+.kg-stats strong { font-size: var(--text-h3); }
 .kg-check { text-align: left; cursor: pointer; font: inherit; color: inherit; border: 1px solid var(--border); background: transparent; }
 .kg-check:disabled { cursor: default; opacity: 0.6; }
 .kg-check.is-active, .kg-check:not(:disabled):hover { background: var(--field-fill); }
@@ -67,7 +69,8 @@
   .kg-all { margin-left: 0; }
 }
 @media (max-width: 520px) {
-  .kg-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kg-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .kg-stats .overview-stat { padding: 8px 10px; }
   .kg-search { max-width: none; flex-basis: 100%; }
   .kg-graph { height: 52vh; }
 }
