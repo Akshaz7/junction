@@ -33,7 +33,9 @@ export function useViewerSheet() {
   return sheet
 }
 
-export function DocumentViewer({ answer, citation: originalCitation, sheet, onClose, edits, commands, chatId, initialMode }: {
+export function DocumentViewer({ answer, citation: originalCitation, sheet, onClose, edits, commands, chatId, initialMode, openRequest }: {
+  /** Changes on every open request, so "Visualise it" re-opens 3D after the user toggled back to 2D. */
+  openRequest?: number
   /** Opens straight in this view (the answer card's "Visualise it" passes '3d'). */
   initialMode?: ViewerMode
   answer: Answer; citation: Citation; sheet: boolean; onClose: () => void
@@ -44,7 +46,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   const [modelVisited, setModelVisited] = useState(initialMode === '3d')
   function changeMode(next: ViewerMode) { setMode(next); if (next === '3d') setModelVisited(true) }
   // Each new open (another citation or Visualise it click) starts in the requested view.
-  useEffect(() => { if (initialMode) changeMode(initialMode) }, [initialMode, originalCitation]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (initialMode) changeMode(initialMode) }, [initialMode, originalCitation, openRequest]) // eslint-disable-line react-hooks/exhaustive-deps
   const [place, setPlace] = useState<{ location: ItemPlace; item: LinkedItem } | null>(null)
   const [selectedItem, setSelectedItem] = useState<{ docId: string; itemId: string } | null>(null)
   const [pageNumber, setPageNumber] = useState(originalCitation.page)
