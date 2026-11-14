@@ -166,3 +166,39 @@ def test_headline_keeps_decimal_numbers_and_source_markers():
     assert headline(result) == result
     assert "\n\n- Source data." in result
     assert headline("There are **22 doors on 1. Obergeschoss**. [1]") == "**There are 22 doors on 1. Obergeschoss.** [1]"
+
+
+@pytest.mark.parametrize("provider,want", [("fake", None), ("vision-provider", 0)])
+def test_forced_model_count_needs_a_real_result_and_cites_its_image(tmp_path, monkeypatch, provider, want):
+    from types import SimpleNamespace
+    from PIL import Image
+    from engine.forced import forced_answer
+    from engine.models.core import Result
+    image = tmp_path / "page-2.png"
+    Image.new("RGB", (80, 60), "white").save(image)
+    monkeypatch.setattr("engine.forced._context", lambda *args: ("", image, "the drawing image"))
+    monkeypatch.setattr("engine.recount.recount", lambda *args: (None, 0, ""))
+    monkeypatch.setattr("engine.models.call", lambda *args, **kwargs: Result(
+        json={"value": 0}, text='{"value":0}', provider=provider, model="fixture-model"))
+    result = forced_answer("How many columns?", ["upload"], tmp_path, SimpleNamespace(type="count", kind="column"))
+    assert result["answer"]["value"] == want
+    if provider == "fake":
+        assert "won't guess a number" in result["answer"]["text_md"]
+        assert not result["citations"]
+    else:
+        assert result["citations"][0]["bbox_px"] == [0, 0, 80, 60]
+        assert result["citations"][0]["page"] == 2
+        assert "not a verified zero" in result["answer"]["text_md"]
+
+
+def test_clean_consistency_result_has_an_inventory_source(tmp_path):
+    from engine import mistakes
+    store(tmp_path, "upload", "planmap-1.json", dict(page=1, items=[
+        dict(item_id="room-a", kind="room", label="Office", bbox_px=[0, 0, 40, 40], conf=1, props={}),
+        dict(item_id="room-b", kind="room", label="Store", bbox_px=[60, 0, 100, 40], conf=1, props={}),
+    ]))
+    result = mistakes.answer("Are there any mistakes in this drawing?", ["upload"], tmp_path)
+    assert result["answer"]["value"] == 0
+    assert result["citations"][0]["doc_id"] == "upload"
+    assert result["citations"][0]["inventory_check"]
+    assert result["reasoning"]["steps"][0]["cite"] == 1

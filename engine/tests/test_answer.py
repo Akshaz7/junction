@@ -43,7 +43,7 @@ def test_abstentions_are_plain():
     t = answer("What materials are used in the walls?", [DOC])   # forced last rung: always an answer, low confidence, says so
     assert not t["answer"]["abstained"] and t["answer"]["confidence"] <= 0.25 and "confidence" not in t["answer"]["text_md"].lower() and t["route"] == "hybrid"
     m = answer("How many windows are there?", ["missing__doc"])
-    assert not m["answer"]["abstained"] and m["answer"]["value"] == 0 and "confidence" not in m["answer"]["text_md"].lower()
+    assert not m["answer"]["abstained"] and m["answer"]["value"] is None and "confidence" not in m["answer"]["text_md"].lower()
     import os
     os.environ["FORCE_ANSWER"] = "0"
     try:
