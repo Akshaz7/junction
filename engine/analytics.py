@@ -1008,9 +1008,9 @@ def piping(question: str, doc: Doc, t0) -> dict | None:
 
     def done(text, value, unit, ids, steps):
         ids = [i for i in dict.fromkeys(ids) if i in by_id]
-        items = [by_id[i] for i in ids[:HL_CAP]]
+        items = [by_id[i] for i in ids]
         _b, cites, _s = _evidence(doc, items)
-        scene = {"doc_id": doc.doc_id, "highlight_item_ids": [i.item_id for i in items], "camera_target_item_id": items[0].item_id if items else None}
+        scene = {"doc_id": doc.doc_id, "highlight_item_ids": ids[:HL_CAP], "camera_target_item_id": ids[0] if ids else None}
         trace = [_step("route", "piping -> V-08 plumbing extract (item ids = IFC GlobalIds), code, no model")] + [_step("filter", x) for x in steps]
         return _answer_obj(question, [doc.doc_id], text + tail + note, value, unit, 1.0 if items else 0.7, False, [], cites, scene, trace, "index", t0 or time.perf_counter())
 

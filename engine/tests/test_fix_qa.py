@@ -54,6 +54,29 @@ def test_mep_cache_separates_artifact_roots_and_cites_entire_large_total(tmp_pat
     assert mep.answer("How many pipes?", other, time.perf_counter())["answer"]["value"] == 3
 
 
+@pytest.mark.parametrize("noun,kind", [("light fittings", "light"), ("pipe fittings", "pipe_fitting"), ("duct fittings", "duct_fitting")])
+def test_compound_service_nouns_do_not_include_unrelated_fittings(tmp_path, monkeypatch, noun, kind):
+    doc = services(tmp_path, kind=kind)
+    path = tmp_path / doc.doc_id / "mep.json"
+    data = json.loads(path.read_text())
+    data["services"].append(dict(data["services"][0], id="other", k="cable_fitting"))
+    path.write_text(json.dumps(data))
+    monkeypatch.setenv("ARTIFACTS_DIR", str(tmp_path))
+    assert mep.answer(f"How many {noun}?", doc, time.perf_counter())["answer"]["value"] == 2
+
+
+def test_legacy_pipe_extract_uses_selected_root_and_counts_segments(tmp_path, monkeypatch):
+    from engine.analytics import piping
+    doc = Doc("upload", "ifc", [Item("a", "mep_other"), Item("b", "mep_other")])
+    store(tmp_path, doc.doc_id, "piping.json", dict(pipes=[
+        dict(item_id="a", length_m=3.5, dn_mm=50), dict(item_id="b", length_m=1.25, dn_mm=50)]))
+    monkeypatch.setenv("ARTIFACTS_DIR", str(tmp_path))
+    result = piping("How many pipe segments are recorded?", doc, time.perf_counter())
+    assert (result["answer"]["value"], result["answer"]["unit"]) == (2, "count")
+    length = piping("How many metres of piping?", doc, time.perf_counter())
+    assert (length["answer"]["value"], length["answer"]["unit"]) == (4.75, "m")
+
+
 @pytest.mark.parametrize("noun", ["doors", "windows"])
 @pytest.mark.parametrize("n", [0, 1, 11])
 def test_order_recorded_count_is_not_a_room_and_zero_has_source(tmp_path, noun, n):

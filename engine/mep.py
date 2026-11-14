@@ -641,6 +641,15 @@ OVERVIEW_Q = re.compile(r"\bwhat\b.*\b(?:in|are in|is in) (?:this|the) (?:buildi
 
 def _subjects(ql: str) -> list[str]:
     out = []
+    # A light fitting is a light, not every fitting in the model. Consume
+    # compound nouns before their generic "pipe" / "fitting" components.
+    for key, rx in (("light", r"\blight fittings?\b"),
+                    ("pipe_fitting", r"\bpipe fittings?\b"),
+                    ("duct_fitting", r"\bduct fittings?\b"),
+                    ("cable_fitting", r"\bcable (?:tray )?fittings?\b")):
+        if re.search(rx, ql):
+            out.append(key)
+            ql = re.sub(rx, "", ql)
     for key, rx in SUBJECTS:
         if re.search(rx, ql) and key not in out:
             out.append(key)
