@@ -82,3 +82,21 @@ def test_room_count_and_width(tmp_path):
     r = sheetqa.answer("What is the width of the north wing?", [d], tmp_path)
     assert r and "52'-8" in r["answer"]["value"]
     assert sheetqa.answer("How many toilet rooms?", [d], tmp_path) is None
+
+
+def test_room_row_not_total_and_schedule_rows(tmp_path):
+    ln = [("DINING 164 SF", 100, 100), ("KITCHEN 300 SF", 100, 200), ("OFFICE 90 SF", 100, 300), ("TOTAL 554 SF", 100, 400)]
+    d = _mk(tmp_path, "gro", ln, "Floor plan A-101")
+    r = sheetqa.answer("What is the area of the dining room in square metres?", [d], tmp_path)
+    assert r and abs(r["answer"]["value"] - 15.2) < 0.1
+    assert sheetqa.answer("What is the area of the library?", [d], tmp_path) is None  # no row: never the total
+    r = sheetqa.answer("How many rooms are in the schedule?", [d], tmp_path)
+    assert r and r["answer"]["value"] == 3
+
+
+def test_shower_and_vent_size(tmp_path):
+    ln = [("SH-1", 100, 100), ("SH-1", 300, 100), ("SH - SHOWER", 100, 900), ("1-1/2\"V FROM KS-1", 100, 300), ("3\"VTR", 100, 500), ("3\"VTR", 300, 500)]
+    d = _mk(tmp_path, "plb", ln, "Plumbing P-1.02")
+    assert sheetqa.answer("How many showers are there?", [d], tmp_path)["answer"]["value"] == 2
+    assert sheetqa.answer("How many 3 inch roof vents (VTR) are there?", [d], tmp_path)["answer"]["value"] == 2
+    assert "1-1/2" in sheetqa.answer("What size is the vent from the kitchen sink?", [d], tmp_path)["answer"]["value"]

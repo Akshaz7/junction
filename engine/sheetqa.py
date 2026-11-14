@@ -32,7 +32,9 @@ NOUN_PREFIX = {
     "fuel pump": ["FP"], "pump": ["P", "FP", "CP"], "check valve": ["CV"], "filter separator": ["FSR", "FSI", "FS"],
     "filter separator vessel": ["FSR", "FSI", "FS"], "pipe support": ["PS"], "exhaust fan": ["EXF", "EF"],
     "return air grille": ["RAG"], "supply air grille": ["SAG"], "return grille": ["RAG"], "supply grille": ["SAG"],
-    "control valve": ["FSCV", "CV"], "fire damper": ["FD"], "damper": ["CD", "FD", "VD"], "sump": ["SP"],
+    "control valve": ["FSCV", "CV"], "water closet": ["WC"], "toilet": ["WC"], "lavatory": ["LAV"], "shower": ["SH"],
+    "kitchen sink": ["KS"], "sink": ["KS", "S"], "floor drain": ["FD"], "cleanout": ["CO"], "roof vent": ["VTR"], "vent through roof": ["VTR"],
+    "vent": ["VTR", "V"], "fire damper": ["FD"], "damper": ["CD", "FD", "VD"], "sump": ["SP"],
 }
 
 
@@ -186,6 +188,36 @@ def _tag_words(pts):
     return out
 
 
+def _legend_prefixes(noun, pts, present):
+    """Prefixes whose legend / abbreviation line (e.g. 'SH - SHOWER') contains the noun."""
+    out = []
+    for pt in pts:
+        for sg in pt.segs:
+            m = re.match(r"^([A-Z]{1,4})\s*[-=:.]\s*([A-Za-z][A-Za-z /&]+)$", sg["text"].strip())
+            if m and m.group(1) in present and _norm_noun(m.group(2)) and noun and (noun in _norm_noun(m.group(2)) or _norm_noun(m.group(2)) in noun):
+                out.append(m.group(1))
+    return out
+
+
+def _pipe_label_count(question, noun, explicit, pts):
+    """'how many 3 inch roof vents (VTR)': count pipe labels such as 3"VTR; None when the question names no pipe size."""
+    sz = re.search(r"(\d+(?:[- ]\d/\d)?)\s*(?:inch|in\b|\"|”)", question, re.I)
+    key = explicit[0] if explicit else ("VTR" if "roof vent" in noun or noun == "vent" else None)
+    if not sz or not key:
+        return None
+    want = re.sub(r"[- ]", " ", sz.group(1))
+    hits = []
+    for pt in pts:
+        for sg in pt.segs:
+            for m in re.finditer(r"(\d+(?:[- ]\d/\d)?)\s*(?:\"|”|″)\s*" + key + r"\b", sg["text"]):
+                if re.sub(r"[- ]", " ", m.group(1)) == want:
+                    hits.append((pt.page, sg["bbox_px"], m.group(0)))
+    if not hits:
+        return None
+    n = len(hits)
+    return (f"There are **{n}** {sz.group(1)}\" {key} labels on the sheet. {{marks}}", n, hits, f"pipe labels {sz.group(1)}\" {key}: {n}")
+
+
 def tag_count(question, doc_id, pts, t0):
     m = re.search(r"\bhow many\s+(.+?)(?:\s+(?:are|is|do|does|on|in|does|can)\b.*)?[?.!]*$", question.strip(), re.I)
     if not m:
@@ -194,6 +226,10 @@ def tag_count(question, doc_id, pts, t0):
     if not noun or noun in ("room", "door", "window", "wall", "stair", "toilet", "sink", "column", "dorm room", "dorm"):
         return None
     tags = _tag_words(pts)
+    explicit = re.findall(r"\(([A-Z]{2,4})\)", question)
+    vt = _pipe_label_count(question, noun, explicit, pts)
+    if vt is not None:
+        return _obj(question, doc_id, vt[0].replace("{marks}", "{marks}"), vt[1], "count", vt[2], vt[3], t0)
     if not tags:
         return None
     prefixes = []
@@ -202,6 +238,8 @@ def tag_count(question, doc_id, pts, t0):
             prefixes = v
             break
     present = {t.split("-")[0] for t, _p, _b in tags}
+    if not prefixes:
+        prefixes = [e for e in explicit if e in present] or _legend_prefixes(noun, pts, present)
     if prefixes:
         prefixes = [p for p in prefixes if p in present]
     if not prefixes:
@@ -235,8 +273,55 @@ def _row_numbers(pt, seg):
             and w["bbox_px"][0] >= seg["bbox_px"][0] - 5]
 
 
+def room_area(question, doc_id, pts, t0):
+    """'area of the dining room': the matching table row ('DINING 164 SF'), never the total."""
+    m = re.search(r"\b(?:area|size)\s+of\s+(?:the\s+)?(.+?)(?:\s+in\s+(?:square\s+)?(?:m|metres?|meters?|m2|m²|sf|feet).*)?[?.!]*$", question, re.I)
+    if not m or re.search(r"\b(total|floor|building|gross|whole|second|first|level)\b", m.group(1), re.I):
+        return None
+    keys = [k for k in re.findall(r"[a-z]{3,}", m.group(1).lower()) if k not in ("room", "the", "square", "metres", "meters", "feet", "area")]
+    if not keys:
+        return None
+    for pt in pts:
+        for sg in pt.segs:
+            if all(re.search(re.escape(k), sg["text"], re.I) for k in keys) and not re.search(r"\btotal\b", sg["text"], re.I):
+                tm = re.findall(r"(\d{1,3}(?:,\d{3})+|\d{2,6})\s*(?:SF|S\.F\.)", sg["text"], re.I)
+                val = _num(tm[0]) if tm else None
+                if val is None:  # the figure is its own word followed by an SF word on the same row, to the right of the room name
+                    cy = (sg["bbox_px"][1] + sg["bbox_px"][3]) / 2
+                    row = sorted((w for w in pt.words if w.get("bbox_px") and abs((w["bbox_px"][1] + w["bbox_px"][3]) / 2 - cy) < (sg["bbox_px"][3] - sg["bbox_px"][1]) * 0.8
+                                  and w["bbox_px"][0] >= sg["bbox_px"][0]), key=lambda w: w["bbox_px"][0])
+                    for a, b in zip(row, row[1:]):
+                        if SF_NUM.match(str(a["text"]).strip()) and str(b["text"]).upper().strip(".") in ("SF", "SQFT"):
+                            val = _num(str(a["text"]))
+                            break
+                if val:
+                    text = f"The area of **{m.group(1)}** is **{val:,.0f} SF = {val * M2_PER_SF:,.1f} m²** (1 SF = 0.0929 m²), from the table row \"{sg['text'][:80]}\". {{marks}}"
+                    return _obj(question, doc_id, text, round(val * M2_PER_SF, 1), "m2", [(pt.page, sg["bbox_px"], sg["text"])], "table row for the named room", t0)
+    return None
+
+
+def schedule_rows(question, doc_id, pts, t0):
+    """'how many rooms in the schedule': rows of the table that carry an area figure, TOTAL excluded."""
+    if not re.search(r"\bhow many\b.*\b(rooms?|spaces?|rows?|entries)\b.*\b(schedule|table|list)\b", question, re.I):
+        return None
+    rows = []
+    for pt in pts:
+        for sg in pt.segs:
+            t = sg["text"]
+            if re.search(r"\btotal\b", t, re.I) or not re.search(r"[A-Za-z]{3}", t):
+                continue
+            if re.search(r"(\d{1,3}(?:,\d{3})+|\d{2,6})\s*(?:SF|S\.F\.)\b", t, re.I):
+                rows.append((pt.page, sg["bbox_px"], t))
+    if len(rows) < 2:
+        return None
+    return _obj(question, doc_id, f"The schedule lists **{len(rows)}** rows with an area (the total row is not counted). {{marks}}", len(rows), "count", rows, "table rows with an SF figure", t0, 0.7)
+
+
 def area_total(question, doc_id, pts, t0):
     """TOTAL ... SF on a square-footage table, in m2, with the column arithmetic checked."""
+    nm = re.search(r"\b(?:area|size)\s+of\s+(?:the\s+)?(.+?)[?.!]*$", question, re.I)
+    if nm and not re.search(r"\b(total|floor|building|gross|whole|second|first|level|storey|story)\b", nm.group(1), re.I):
+        return None  # a named room: never answer with the table total
     if not re.search(r"\b(area|square|floor space|m2|m²|sf|gross)\b", question, re.I) or re.search(r"\b(share|percent|%|proportion)\b", question, re.I):
         return None
     for pt in pts:
@@ -259,7 +344,7 @@ def area_total(question, doc_id, pts, t0):
             if above:
                 sm = sum(above)
                 check = (f" Check: the {len(above)} figures above add to {sm:,.0f} SF" +
-                         (", matching the total." if abs(sm - val) < 0.5 else f"; the total is {val - sm:+,.0f} SF different (rows not shown in this column, e.g. exterior stairs)."))
+                         (", matching the total." if abs(sm - val) < 0.5 else f"; the total differs by {val - sm:+,.0f} SF (the column may include sub-rows such as circulation, or omit rows such as exterior stairs), so check the table."))
             m2 = val * M2_PER_SF
             text = f"The area is **{val:,.0f} SF = {m2:,.1f} m²** (1 SF = 0.0929 m²).{check} {{marks}}"
             hits = [(pt.page, s["bbox_px"], s["text"]), (pt.page, bb, f"{val:,.0f}")]
@@ -314,7 +399,7 @@ def note_sum(question, doc_id, pts, t0):
     return None
 
 
-SIZE = re.compile(r"\d{2,4}\s*[xX×]\s*\d{2,4}(?:\s*[xX×]\s*\d{2,4})?(?:\s*(?:mm|DEEP))?|\b\d{1,3}(?:\s\d/\d)?\s*(?:\"|”|″|IN\b|INCH)", re.I)
+SIZE = re.compile(r"\d{2,4}\s*[xX×]\s*\d{2,4}(?:\s*[xX×]\s*\d{2,4})?(?:\s*(?:mm|DEEP))?|\b\d{1,3}(?:[-\s]\d/\d)?\s*(?:\"|”|″|IN\b|INCH)", re.I)
 
 
 def size_of(question, doc_id, pts, t0):
@@ -326,10 +411,18 @@ def size_of(question, doc_id, pts, t0):
     if not keys:
         return None
     best = None
+    pfx = []
+    phrase = _norm_noun(" ".join(keys))
+    for k, v in NOUN_PREFIX.items():
+        if k in phrase and k not in ("vent", "pump", "sink"):
+            pfx += v
+    if pfx:
+        keys = [w for w in keys if w not in ("vent", "drain", "pipe", "waste", "line", "from")] or keys
     for pt in pts:
         for sg in pt.segs:
             t = sg["text"]
-            if all(re.search(re.escape(k.rstrip("s")), t, re.I) for k in keys) and SIZE.search(t):
+            tag_hit = any(re.search(rf"\b{p}-?\d", t) for p in pfx)
+            if (all(re.search(re.escape(k.rstrip("s")), t, re.I) for k in keys) or (pfx and tag_hit)) and SIZE.search(t):
                 best = (pt, sg)
                 break
         if best:
@@ -442,7 +535,7 @@ def answer(question: str, doc_ids: list[str], root, t0=None, other_docs=()):
     pts = _pages(doc_id, root)
     if not any(pt.words for pt in pts):
         return None
-    for fn in (tag_count, scale_answer, share_of_total, area_total, note_sum, rebar_of, size_of, room_count, overall_width):
+    for fn in (tag_count, scale_answer, share_of_total, room_area, schedule_rows, area_total, note_sum, rebar_of, size_of, room_count, overall_width):
         res = fn(question, doc_id, pts, t0)
         if res is not None:
             res["doc_ids"] = list(doc_ids)

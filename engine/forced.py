@@ -120,6 +120,9 @@ def forced_answer(question: str, doc_ids: list[str], root: Path, parsed=None, tr
             text = ("I couldn't find this on the drawing, so I won't guess a number. "
                     "Try asking about something drawn or labelled on the plan, or upload a model (IFC) or a clearer drawing that includes it.")
             value = None
+        elif value == 0:
+            text = (f"**I could not find any** on this drawing. That is what a model could read from {basis or 'the drawing'}, so it is not a verified zero: "
+                    "the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure.")
         else:
             text = f"About **{shown}**. This is an estimate, not an exact count: it was read from {basis or 'the drawing'} by a model."
     else:

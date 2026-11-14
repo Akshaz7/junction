@@ -31,7 +31,7 @@ def test_tiling_applies_every_number():
     r = ask("How much floor tiling should I order for all WC Herren and WC Damen rooms from Keller through 2. Obergeschoss, allowing 10% waste, if each box covers 1.44 m² and costs €32 excluding VAT?")
     t = r["answer"]["text_md"]
     assert "Scope I applied" in t and "76 boxes" in t and "EUR 2,432" in t and r["answer"]["confidence"] > 0.9
-    assert {"waste 10%", "box coverage 1.44 m2"} <= set(r["conditions"]["applied"])
+    assert {"waste 10%", "box coverage 1.44 m²"} <= set(r["conditions"]["applied"])
 
 
 def test_office_filter_uses_net_area_and_name_exclusions():

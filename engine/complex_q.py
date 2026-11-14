@@ -122,14 +122,14 @@ def h_tiling(q: str, doc: Doc) -> Ans | None:
     a.ap(f"rooms: {len(rooms)} matched", f"storeys: {st[0]} to {st[-1]}")
     tot = sum(r.q.get("net_floor_area_m2", 0) for r in rooms)
     rows = [[r.storey, _ln(r), f"{r.q.get('net_floor_area_m2', 0):.2f}"] for r in sorted(rooms, key=lambda r: (STOREY_ORDER.index(r.storey) if r.storey in STOREY_ORDER else 9, _ln(r)))]
-    a.body += _table(rows, ["Storey", "Room", "Net floor area (m2)"]) + ["", f"Net floor area total: **{tot:.2f} m2**."]
+    a.body += _table(rows, ["Storey", "Room", "Net floor area (m²)"]) + ["", f"Net floor area total: **{tot:.2f} m²**."]
     need = tot * (1 + waste / 100)
     a.ap(f"waste {waste:g}%")
-    a.body.append(f"With {waste:g}% waste: **{need:.2f} m2**.")
+    a.body.append(f"With {waste:g}% waste: **{need:.2f} m²**.")
     if cov:
         boxes = math.ceil(need / cov - 1e-9)
-        a.ap(f"box coverage {cov:g} m2")
-        a.body.append(f"Whole boxes at {cov:g} m2 each: **{boxes} boxes** ({boxes * cov:.2f} m2).")
+        a.ap(f"box coverage {cov:g} m²")
+        a.body.append(f"Whole boxes at {cov:g} m² each: **{boxes} boxes** ({boxes * cov:.2f} m²).")
         a.value = boxes
         if price is not None:
             a.ap(f"price EUR {price:g} per box, excluding VAT")
@@ -152,7 +152,7 @@ def h_external_face(q: str, doc: Doc) -> Ans | None:
         gs, ns = w.q.get("gross_side_area_m2", 0), w.q.get("net_side_area_m2", 0)
         g, n = g + gs, n + ns
         rows.append([w.name, f"{gs:.2f}", f"{gs - ns:.2f}", f"{ns:.2f}"])
-    a.body += _table(rows, ["Wall", "Gross (m2)", "Opening deductions (m2)", "Net (m2)"]) + ["", f"Totals: gross **{g:.2f} m2**, deductions **{g - n:.2f} m2**, net **{n:.2f} m2**."]
+    a.body += _table(rows, ["Wall", "Gross (m²)", "Opening deductions (m²)", "Net (m²)"]) + ["", f"Totals: gross **{g:.2f} m²**, deductions **{g - n:.2f} m²**, net **{n:.2f} m²**."]
     if re.search(r"reveal", q, re.I):
         a.ap("reveals excluded: the side-area figure is the wall face only, reveals are separate surfaces")
     a.value = round(n, 2)
@@ -181,7 +181,7 @@ def h_paint(q: str, doc: Doc) -> Ans | None:
         a.ap("reveals excluded (side-area figure only)")
     if re.search(r"ceiling", q, re.I):
         a.ap("ceilings excluded (not measured)")
-    a.body += [f"Painted area: {sum(w.q.get('net_side_area_m2', 0) for w in walls):.2f} m2 net per face x {faces} = **{area:.2f} m2**.",
+    a.body += [f"Painted area: {sum(w.q.get('net_side_area_m2', 0) for w in walls):.2f} m² net per face x {faces} = **{area:.2f} m²**.",
                f"Paint: {area:.2f} x {coats:g} coats / {cov:g} = {area * coats / cov:.1f} litres, +{extra:g}% = **{litres:.1f} litres**.",
                f"Tins of {tin:g} litres: **{tins} tins**."]
     a.value = tins
@@ -275,9 +275,9 @@ def h_windows(q: str, doc: Doc) -> Ans | None:
     for x in ws:
         groups.setdefault((x.storey, x.type_name), []).append(x)
     rows = [[s, t, len(v), f"{sum(i.q.get('width_m', 0) * i.q.get('height_m', 0) for i in v):.2f}", ", ".join(i.name for i in v)] for (s, t), v in groups.items()]
-    a.body += _table(rows, ["Storey", "Type", "Count", "Nominal opening area (m2)", "Marks"]) if rows else ["No window matches."]
+    a.body += _table(rows, ["Storey", "Type", "Count", "Nominal opening area (m²)", "Marks"]) if rows else ["No window matches."]
     tot = sum(i.q.get("width_m", 0) * i.q.get("height_m", 0) for i in ws)
-    a.body += ["", f"**{len(ws)} windows**, total nominal opening area **{tot:.2f} m2**" + (" (windows 1.5 m high not included)." if h and h != 1.5 else ".")]
+    a.body += ["", f"**{len(ws)} windows**, total nominal opening area **{tot:.2f} m²**" + (" (windows 1.5 m high not included)." if h and h != 1.5 else ".")]
     for s in st:
         if not any(x.storey == s for x in ws):
             a.body.append(f"None on {s}.")
@@ -306,14 +306,14 @@ def h_offices(q: str, doc: Doc) -> Ans | None:
             out.append(r)
         elif lo - 0.1 <= na < lo or hi < na <= hi + 0.1:
             edge.append(r)
-    a = Ans(f"offices on {', '.join(st)} with NET floor area {lo:g} to {hi:g} m2 inclusive, excluding the secretary's office and rooms whose name contains {', '.join(excl)}.")
+    a = Ans(f"offices on {', '.join(st)} with NET floor area {lo:g} to {hi:g} m² inclusive, excluding the secretary's office and rooms whose name contains {', '.join(excl)}.")
     a.items = out
-    a.ap(f"storey {', '.join(st)}", "office class from the room name (type_name is Büroarbeit for every room)", f"net area {lo:g}-{hi:g} m2 inclusive",
+    a.ap(f"storey {', '.join(st)}", "office class from the room name (type_name is Büroarbeit for every room)", f"net area {lo:g}-{hi:g} m² inclusive",
          "secretary's office excluded (name 'Sekr.')", f"names excluded: {', '.join(excl)} (umlaut and ue spellings folded)")
     out.sort(key=lambda r: (r.q.get("net_floor_area_m2", 0), r.name))
-    a.body += _table([[r.name, _ln(r), f"{r.q['net_floor_area_m2']:.2f}"] for r in out], ["Room no.", "Name", "Net area (m2)"]) if out else ["No office matches."]
+    a.body += _table([[r.name, _ln(r), f"{r.q['net_floor_area_m2']:.2f}"] for r in out], ["Room no.", "Name", "Net area (m²)"]) if out else ["No office matches."]
     if edge:
-        a.body += ["", "Just outside on NET area (net is just under the lower bound): " + ", ".join(f"{_ln(r)} ({r.q['net_floor_area_m2']:.2f} m2)" for r in edge) + "."]
+        a.body += ["", "Just outside on NET area (net is just under the lower bound): " + ", ".join(f"{_ln(r)} ({r.q['net_floor_area_m2']:.2f} m²)" for r in edge) + "."]
     a.lf("the model has no occupant assignment; 'assigned to' is read from the name in the room label")
     a.value = len(out)
     return a
@@ -453,7 +453,7 @@ def h_schedule_rooms(q: str, doc: Doc) -> Ans | None:
     for c in ("laboratory", "technical room", "meeting room", "seminar room", "toilet", "corridor", "office", "unclassified"):
         if c in groups:
             v = groups[c]
-            a.body += [f"**{c.capitalize()}s ({len(v)})**", *_table([[r.name, _ln(r), f"{r.q.get('net_floor_area_m2', 0):.1f}"] for r in sorted(v, key=lambda r: r.name)], ["No.", "Name", "Net area (m2)"]), ""]
+            a.body += [f"**{c.capitalize()}s ({len(v)})**", *_table([[r.name, _ln(r), f"{r.q.get('net_floor_area_m2', 0):.1f}"] for r in sorted(v, key=lambda r: r.name)], ["No.", "Name", "Net area (m²)"]), ""]
     ty = sorted({r.type_name for r in rs})
     a.body.append(f"Why not use type_name: every space on Keller carries the same type_name ({', '.join(ty)}), so grouping by it would call all {len(rs)} spaces offices. The room name is what tells them apart.")
     return a

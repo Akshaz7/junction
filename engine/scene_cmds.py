@@ -227,7 +227,7 @@ def scene_answer(question: str, doc: Doc, intent: SceneIntent, state: dict | Non
         n = len(ids)
         who = ", ".join(tg[i] for i in ids if i in tg) if n <= 6 and intent.tags else f"{n} {_noun(intent.kind, n)}"
         verb = {"hide": "Hidden", "restore": "Restored", "isolate": "Showing only", "highlight": "Highlighted"}[intent.op]
-        text = f"{verb} **{who}**."
+        text = (f"{verb} {who} on the drawing." if intent.op == "highlight" and not intent.tags else f"{verb} **{who}**.")
         kinds = {i.kind for i in sel}
         if intent.op in ("hide", "restore") and len(kinds) == 1:
             k = next(iter(kinds))
@@ -235,8 +235,16 @@ def scene_answer(question: str, doc: Doc, intent: SceneIntent, state: dict | Non
             hidden = set(state.get("hidden") or [])
             hidden = hidden | set(ids) if intent.op == "hide" else hidden - set(ids)
             vis = total - sum(1 for i in doc.items if i.kind == k and i.item_id in hidden)
-            one = (f"{k.capitalize()} {tg[ids[0]]} is hidden." if intent.op == "hide" else f"{k.capitalize()} {tg[ids[0]]} is visible again.") \
-                if n == 1 and ids[0] in tg else text
+            one = text
+            if n == 1 and ids[0] in tg:
+                # name the item the user meant ("the front door (D34)") and its storey
+                m_ = re.search(r"\b(front|main|street)\s+door\b|\b(main\s+entrance|entrance(?:\s+door)?)\b", question, re.I)
+                nm = f"the {re.sub(r'\\s+', ' ', m_.group(0).lower())}" if m_ else k.capitalize()
+                if m_ and "door" not in nm and k == "door":
+                    nm += " door"
+                nm = nm[0].upper() + nm[1:]
+                st_ = f" on {sel[0].storey}" if sel[0].storey else ""
+                one = f"{nm} ({tg[ids[0]]}){st_} is hidden." if intent.op == "hide" else f"{nm} ({tg[ids[0]]}){st_} is visible again."
             text = f"{one} {vis} of {total} {_noun(k, total)} remain visible." if intent.op == "hide" else f"{one} {vis} of {total} {_noun(k, total)} are visible."
     boxes = []
     if doc.mode == "planmap" and intent.op in ("highlight", "isolate"):

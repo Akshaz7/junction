@@ -13,13 +13,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 P = "Partial answer|not in the document|cannot|not given"
 MUST = {
-    1: [r"99\.02 m2", r"\*\*76 boxes", r"EUR 2,432"],
-    2: [r"Wand-002", r"216\.64 m2", r"302\.94"],
+    1: [r"99\.02 m²", r"\*\*76 boxes", r"EUR 2,432"],
+    2: [r"Wand-002", r"216\.64 m²", r"302\.94"],
     3: [r"24 tins", r"756\.24"],
     4: [P, r"scale"],
     5: [r"96\.42", r"96\.84", r"EUR 42,614"],
     6: [r"Tür-017", r"Tür-018", r"None of these 2"],
-    7: [r"\*\*3 windows", r"5\.40 m2", r"None on 1\. Obergeschoss"],
+    7: [r"\*\*3 windows", r"5\.40 m²", r"None on 1\. Obergeschoss"],
     8: [r"Oberschmitt", r"24\.75"],
     9: [r"Scope I applied", r"removed volume"],
     10: [P, r"external"],

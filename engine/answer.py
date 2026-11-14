@@ -282,6 +282,15 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
     except Exception:  # noqa: BLE001
         pass
     res = ensure_markers(_guarded(question, doc_ids, on_event, scene_state, history))
+    try:   # E-61: implausible raster areas and sparse uploaded plans (engine/rastersanity.py)
+        if len(doc_ids) == 1:
+            from engine import rastersanity
+            from engine.solvers.data import load_doc
+            _doc = load_doc(doc_ids[0], _root())
+            if _doc is not None:
+                res = rastersanity.guard(res, question, _doc)
+    except Exception:  # noqa: BLE001 — a sanity note must never break an answer
+        pass
     res["question"] = original   # the user's own words are what is stored and shown; the resolved question stays in the trace
     if step is not None:
         res["trace"] = [step, *(res.get("trace") or [])]
@@ -410,6 +419,11 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                     add(s_)
                 res["trace"] = trace
                 return res
+            if sheetqa.is_sheet(doc_ids[0], root) and re.match(r"\s*how many\b", question, re.I) \
+                    and not re.search(r"\b(schedule|table|row|rows|list|finish\w*|walls?)\b", question, re.I):
+                # a count nobody could find on an engineering sheet is "not found", never "About 0"
+                return _abstained(question, doc_ids, "I couldn't find that on this sheet: no matching tags or table rows. "
+                                  "Check the legend or ask with the tag (for example FP-1).", trace, t0, "index", calls=None)
         except Exception:  # never break the answer path
             pass
 
@@ -439,6 +453,29 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                     add(s_)
                 res["trace"] = trace
                 return res
+
+        # 0-w. "Can we remove the front door / window W7?": a what-if on that one item, same rule checks, nothing persisted
+        _wm = re.match(r"^\W*(?:can|could|should|would)\s+(?:we|i)\s+(?:safely\s+)?(?:remove|delete|take\s+out|get\s+rid\s+of|knock\s+out)\s+(.+?)\s*\??\s*$", question, re.I)
+        if _wm and re.search(r"\b(?:door|doors|window|windows|[dw]\d+)\b", _wm.group(1), re.I) and not re.search(r"\b(?:all|every|each|both)\b|\bdoors\b|\bwindows\b", _wm.group(1), re.I):
+            _wi = parse_scene("remove " + _wm.group(1))
+            from engine.solvers.data import load_doc as _ldw
+            _wdoc = _ldw(doc_ids[0], root) if _wi is not None and _wi.op == "hide" else None
+            if _wdoc is not None:
+                emit("status", {"text": f"Exploring document: {_title(doc_ids[0], root)}"})
+                res = scene_answer("remove " + _wm.group(1), _wdoc, _wi, None, t0)
+                _cmd = next((c for c in (res.get("evidence", {}).get("scene", {}).get("commands") or []) if isinstance(c, dict) and c.get("op") == "hide"), None)
+                if _cmd and len(_cmd.get("item_ids") or []) == 1 and not res["answer"].get("abstained"):
+                    from engine.analytics import edit_advice
+                    edit_advice(res, _wdoc, list(_cmd["item_ids"]))
+                    t_ = res["answer"]["text_md"]
+                    t_ = t_.replace(" is hidden.", " would be removed in this what-if.", 1).replace(" remain visible.", " would remain.", 1)
+                    res["answer"]["text_md"] = t_ + "\n\n_Preview only: nothing was changed or saved. Say \"remove it\" to apply the edit._"
+                    res["evidence"]["scene"]["commands"] = []
+                    res["question"] = question
+                    for s_ in res["trace"]:
+                        add(s_)
+                    res["trace"] = trace
+                    return res
 
         # 0. scene commands (hide / isolate / highlight / reset): code only, edits never touch data
         intent = parse_scene(question)
