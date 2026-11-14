@@ -157,6 +157,15 @@
 }
 .viewer3d-visualise-panel[open] { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 12px; }
 .viewer3d-visualise-panel::backdrop { background: #0007; }
+.viewer3d-linked-panel {
+  position: fixed;
+  inset: 80px auto 16px 16px;
+  z-index: 80;
+  width: calc(50vw - 32px);
+  height: auto;
+  margin: 0;
+  box-shadow: 0 8px 28px #0002;
+}
 .viewer3d-visualise-panel .viewer3d { height: auto; min-height: 0; grid-template-rows: auto minmax(0, 1fr) auto; }
 .viewer3d-visualise-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
 .viewer3d-visualise-heading h2 { margin: 0; font-size: 18px; }

@@ -1,8 +1,10 @@
+import type { SceneCommand } from './commands';
+
 /** The subset of CONTRACT 5.7 needed by the button, compatible with a full Answer. */
 export interface VisualiseAnswer {
   doc_ids: readonly string[];
   evidence: {
-    scene: { doc_id: string; highlight_item_ids: readonly string[]; camera_target_item_id?: string | null };
+    scene: { doc_id: string; highlight_item_ids: readonly string[]; camera_target_item_id?: string | null; commands?: readonly SceneCommand[] };
     boxes: readonly { item_id: string; label: string }[];
   };
 }
@@ -20,5 +22,6 @@ export function answerToVisualise(answer: VisualiseAnswer) {
     highlight,
     labels,
     cameraTargetItemId: answer.evidence.scene.camera_target_item_id ?? undefined,
+    ...(answer.evidence.scene.commands ? { commands: answer.evidence.scene.commands } : {}),
   };
 }

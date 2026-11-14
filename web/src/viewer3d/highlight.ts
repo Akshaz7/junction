@@ -5,6 +5,8 @@ export interface HighlightOptions {
   /** CONTRACT 5.7 evidence.boxes labels, keyed by the same item_id. */
   labels?: Record<string, string>;
   cameraTargetItemId?: string;
+  /** Isolation supplies its own dimming layer. */
+  dimOthers?: boolean;
 }
 
 export interface HighlightState {
@@ -84,7 +86,7 @@ export function createHighlightController(scene: LoadedScene) {
               surface.emissive.copy(accent);
               surface.emissiveIntensity = 1.5;
             } else surface.color?.copy(accent);
-          } else {
+          } else if (options.dimOthers !== false) {
             if (surface.color) {
               const gray = surface.color.r * 0.2126 + surface.color.g * 0.7152 + surface.color.b * 0.0722;
               surface.color.lerp(new Color().setRGB(gray, gray, gray), 0.85);

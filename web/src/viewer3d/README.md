@@ -169,3 +169,30 @@ T-11 adds `e2e/viewer3d-cutaway.spec.ts`: real AC20 API metadata, initial ground
 cutaway, roof visibility, storey stepping, highlight selection and live propagation
 to VisualisePanel. A second case checks the light roofless extrusion. LEAD runs
 this and the other viewer3d specs on the stable snapshot outside the sandbox.
+
+T-12 accepts `commands={answer.evidence.scene.commands}` on `Viewer3D` and
+`VisualisePanel`; `VisualiseItButton` forwards commands from its answer. A nonempty
+command list takes precedence over legacy answer highlights. Equivalent rerenders
+do not replay commands. Imperative hosts use `viewer.applyCommand(command)` and
+`viewer.applyState(snapshot)`; `useLiveSceneCommands(viewer, docId)` binds those
+hosts to `/ws` (Viewer3D already binds during scene loading). `onSceneEvent` and
+`sendCommand` use the same shared socket as T-06. Commands retain arrival order
+while loading/offline; edit IDs suppress server echoes. Snapshots replace the edit
+layer. No source geometry or manifest is edited.
+
+Command highlights use explicit labels, then manifest tags, then the item ID.
+Hide removes the item's command label and fades out over 250 ms before disabling
+its node. Restore reverses an in-flight hide from its current opacity; empty
+restore restores all hidden items. Isolation restores its targets, highlights
+them and dims other items. Reset clears hidden/highlighted/isolated state.
+Cutaway visibility wins over edits; reduced motion applies visibility immediately.
+The details card shows a manifest tag when available.
+
+The test page also exposes `window.__viewer3d.getCommandState()`, returning copies
+of `{hidden: string[], highlighted: Record<item_id,label>, isolated: string[]|null}`.
+With `?viewer3dTest=1`, each canvas exposes `canvas.__viewer3d.commandState()`.
+The new command e2e spec adds demo tags to fixture metadata, exercises answer
+commands on the light extrusion, checks real `/ws` propagation to another browser
+context within two seconds, and covers AC20 commands and fade interruption.
+LEAD runs the handoff's full viewer3d suite through `scripts/heavy.sh` outside
+the worker sandbox; Chromium cannot register its macOS Mach port inside it.

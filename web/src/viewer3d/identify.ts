@@ -52,6 +52,7 @@ export function buildItemDetails(
     const formatted = text(value);
     if (formatted !== null) fields.push({ label, value: formatted });
   }
+  add('Tag', sceneItem.tag);
   add('IFC class', element?.ifc_class);
   add('Type', element?.type_name);
   add('Predefined type', element?.predefined_type);

@@ -3,10 +3,12 @@ import { Viewer3D } from './Viewer3D';
 import type { Viewer } from './viewer';
 import type { HighlightState } from './highlight';
 import { VisualiseItButton } from './VisualiseIt';
+import type { SceneCommand } from './commands';
 
 /** The LEAD mounts this page at /#/viewer-test; production callers pass their API URL. */
 export function ViewerTestPage() {
   const [viewer, setViewer] = useState<Viewer | null>(null);
+  const [commands, setCommands] = useState<SceneCommand[] | undefined>();
   const [document, setDocument] = useState(() => {
     const requested = new URLSearchParams(window.location.search).get('doc');
     if (requested === 'colorful-11397' || requested === 'cubicasa5k__colorful-11397') return 'colorful-11397';
@@ -18,10 +20,10 @@ export function ViewerTestPage() {
 
   // Only the dedicated dev page exposes the camera for deterministic pointer tests.
   useEffect(() => {
-    const target = window as typeof window & { viewer3dTest?: Viewer };
-    if (viewer) target.viewer3dTest = viewer;
+    const target = window as typeof window & { viewer3dTest?: Viewer; __viewer3d?: Viewer };
+    if (viewer) { target.viewer3dTest = viewer; target.__viewer3d = viewer; }
     const unsubscribe = viewer?.onHighlightChange(setHighlightState);
-    return () => { unsubscribe?.(); delete target.viewer3dTest; };
+    return () => { unsubscribe?.(); delete target.viewer3dTest; delete target.__viewer3d; };
   }, [viewer]);
 
   useEffect(() => {
@@ -62,6 +64,7 @@ export function ViewerTestPage() {
         <label htmlFor="viewer3d-document">Document</label>
         <select id="viewer3d-document" value={document} onChange={(event) => {
           setViewer(null);
+          setCommands(undefined);
           setHighlightState({ highlighted: [], dimmed: 0, labels: {} });
           setDocument(event.target.value);
         }}>
@@ -73,6 +76,18 @@ export function ViewerTestPage() {
         <button type="button" disabled={!viewer} onClick={() => {
           viewer?.clearHighlight();
         }}>Clear highlight</button>
+        <button type="button" disabled={!viewer} onClick={() => {
+          const ids = [...viewer!.scene!.items.keys()].filter((id) => viewer!.scene!.manifest.items[id].kind === 'window');
+          setCommands([{ op: 'highlight', item_ids: ids }]);
+        }}>Highlight all windows</button>
+        <button type="button" disabled={!viewer} onClick={() => {
+          const id = Object.entries(viewer!.scene!.manifest.items).find(([, item]) => item.tag === 'W3')?.[0];
+          if (id) setCommands([{ op: 'hide', item_ids: [id] }]);
+        }}>Hide W3</button>
+        <button type="button" disabled={!viewer} onClick={() => {
+          const id = Object.entries(viewer!.scene!.manifest.items).find(([, item]) => item.tag === 'W3')?.[0];
+          if (id) setCommands([{ op: 'restore', item_ids: [id] }]);
+        }}>Restore W3</button>
         <output aria-label="Highlight state">{JSON.stringify(highlightState)}</output>
       </div>
       <section className="viewer3d-test-visualise" aria-label="Visualise an answer">
@@ -86,7 +101,7 @@ export function ViewerTestPage() {
     </header>
     <Viewer3D key={document} {...(document === 'ifc_bench__ac20-arc'
       ? { doc_id: document }
-      : { sceneUrl: `${import.meta.env.BASE_URL}fixtures/${document}/scene.json` })} onReady={setViewer} />
+      : { sceneUrl: `${import.meta.env.BASE_URL}fixtures/${document}/scene.json` })} commands={commands} onReady={setViewer} />
   </main>;
 }
 

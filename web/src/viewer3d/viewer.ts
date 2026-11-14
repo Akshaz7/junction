@@ -11,7 +11,10 @@ import {
   disposeScene, itemIdForObject, loadScene, type LoadedScene,
 } from './scene';
 import { createCutawayController, type CutawayState } from './cutaway';
+import { createLinkedHighlightController } from './linkedHighlight';
 import { createRiseAnimation, scheduleRiseTransitions, type RisePhase, type RiseState } from './rise';
+import { applyCommand, applyState, emptyCommandState, readCommandState, type SceneCommand, type SceneSnapshot, type CommandTestState } from './commands';
+import { createCommandVisuals } from './commandVisuals';
 
 export interface Viewer {
   readonly renderer: WebGLRenderer;
@@ -29,6 +32,14 @@ export interface Viewer {
   clearHighlight(): void;
   getHighlightState(): HighlightState;
   onHighlightChange(callback: (state: HighlightState) => void): () => void;
+  applyCommand(command: SceneCommand): void;
+  applyState(snapshot: SceneSnapshot): void;
+  getCommandState(): CommandTestState;
+  onCommandChange(callback: (command: SceneCommand) => void): () => void;
+  isApplyingCommand(): boolean;
+  /** Local 2D/3D interaction layer, independent of answer/live highlights. */
+  setLinkedItems(hovered: string | null, selected: string | null, labels?: Record<string, string>): void;
+  getLinkedHighlightState(): HighlightState;
   /** Show the flat plan/top-down IFC view, then raise the architectural items. */
   visualise(onStateChange?: (state: RiseState) => void): void;
   /** Coordinates are viewport client pixels, as in PointerEvent.clientX/clientY. */
@@ -63,6 +74,13 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   let disposed = false;
   let loadVersion = 0;
   let highlights: ReturnType<typeof createHighlightController> | null = null;
+  let linkedHighlights: ReturnType<typeof createLinkedHighlightController> | null = null;
+  let commandVisuals: ReturnType<typeof createCommandVisuals> | null = null;
+  let commandState = emptyCommandState();
+  let applyingCommand = false;
+  const commandListeners = new Set<(command: SceneCommand) => void>();
+  let linked = { hovered: null as string | null, selected: null as string | null, labels: {} as Record<string, string> };
+  let linkedLabel: CSS2DObject | null = null;
   const highlightListeners = new Set<(state: HighlightState) => void>();
   const labels: CSS2DObject[] = [];
   let flight: { start: number; from: Vector3; to: Vector3; targetFrom: Vector3; targetTo: Vector3 } | null = null;
@@ -86,13 +104,64 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   }
 
   function clearHighlight(): void {
+    commandVisuals?.clearMaterials();
     flight = null;
+    clearLinkedVisuals();
     highlights?.clearHighlight();
     for (const label of labels) {
       label.removeFromParent();
       label.element.remove();
     }
     labels.length = 0;
+  }
+
+  function clearLinkedVisuals(): void {
+    linkedHighlights?.clear();
+    linkedLabel?.removeFromParent();
+    linkedLabel?.element.remove();
+    linkedLabel = null;
+  }
+
+  function getLinkedHighlightState(): HighlightState {
+    const base = highlights?.getHighlightState() ?? { highlighted: [], dimmed: 0, labels: {} };
+    const highlighted = [...new Set([...base.highlighted, linked.hovered, linked.selected]
+      .filter((id): id is string => id !== null && !!active?.items.has(id)))];
+    if (linked.selected && active?.items.has(linked.selected)) {
+      base.labels[linked.selected] ??= linked.labels[linked.selected]
+        ?? active.manifest.items[linked.selected].tag ?? linked.selected;
+    }
+    return { highlighted, dimmed: Math.max(0, base.dimmed - (highlighted.length - base.highlighted.length)), labels: base.labels };
+  }
+
+  function applyLinkedVisuals(): void {
+    commandVisuals?.clearMaterials();
+    clearLinkedVisuals();
+    if (disposed || !active) return;
+    const accent = readHighlightColor(canvas);
+    linkedHighlights?.apply(linked.hovered, linked.selected, accent);
+    commandVisuals?.rebuildMaterials();
+    commandVisuals?.sample(performance.now());
+    const id = linked.selected;
+    if (!id || !active.items.has(id) || labels.some((label) => label.element.dataset.itemId === id)) return;
+    // A selection can arrive while the plan is still flat. Position its label
+    // in the full geometry frame before returning to the current rise phase.
+    rise?.animation.restore();
+    const bounds = itemBounds(active, [id]);
+    if (bounds.isEmpty()) { rise?.animation.sample(performance.now()); return; }
+    const element = document.createElement('span');
+    const text = getLinkedHighlightState().labels[id];
+    element.className = 'viewer3d-item-label';
+    element.dataset.itemId = id;
+    element.textContent = text;
+    element.setAttribute('aria-label', `Item ${text}: ${id}`);
+    element.style.backgroundColor = accent.getStyle();
+    linkedLabel = new CSS2DObject(element);
+    const top = bounds.getCenter(new Vector3());
+    top.y = bounds.max.y + Math.max(bounds.getSize(new Vector3()).length() * 0.04, 0.08);
+    const object = active.items.get(id)!;
+    linkedLabel.position.copy(object.worldToLocal(top));
+    object.add(linkedLabel);
+    rise?.animation.sample(performance.now());
   }
 
   function flyTo(bounds: Box3): void {
@@ -126,6 +195,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     clearHighlight();
     if (disposed || !active || !highlights) return;
     cutaway?.followHighlight(ids, options.cameraTargetItemId);
+    commandVisuals?.captureVisibility();
     notifyCutaway();
     // Compute labels using full geometry: a flat node has a singular world matrix.
     rise?.animation.restore();
@@ -150,6 +220,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       labels.push(label);
     }
     const target = options.cameraTargetItemId;
+    applyLinkedVisuals();
     if (rise) rise.animation.sample(performance.now());
     else flyTo(itemBounds(active, target && active.items.has(target) ? [target] : state.highlighted));
     notifyHighlight();
@@ -158,6 +229,16 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   function notifyHighlight(): void {
     if (!highlights) return;
     for (const listener of highlightListeners) listener(highlights.getHighlightState());
+  }
+
+  function renderCommandState(): void {
+    if (!active) return;
+    const labels = Object.fromEntries(commandState.highlighted);
+    applyingCommand = true;
+    try {
+      commandVisuals?.setState(commandState, performance.now(), window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      highlight([...commandState.highlighted.keys()], { labels, dimOthers: commandState.isolated === null });
+    } finally { applyingCommand = false; }
   }
 
   function visualise(onStateChange?: (state: RiseState) => void): void {
@@ -238,13 +319,18 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     rise?.animation.restore();
     rise = null;
     clearHighlight();
+    commandVisuals?.dispose();
     if (active) {
       world.remove(active.root);
       disposeScene(active);
     }
     active = scene;
+    commandState = emptyCommandState();
+    linked = { hovered: null, selected: null, labels: {} };
     cutaway = createCutawayController(scene);
     highlights = createHighlightController(scene);
+    linkedHighlights = createLinkedHighlightController(scene);
+    commandVisuals = createCommandVisuals(scene);
     world.add(scene.root);
     fit(scene);
     notifyCutaway();
@@ -259,6 +345,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     if (disposed) return;
     controls.update();
     sampleRise();
+    commandVisuals?.sample(performance.now());
     if (flight) {
       const progress = Math.min(1, (performance.now() - flight.start) / 600);
       const eased = progress * progress * (3 - 2 * progress);
@@ -294,16 +381,51 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     },
     setStorey(name) {
       cutaway?.setStorey(name);
+      commandVisuals?.captureVisibility();
+      commandVisuals?.sample(performance.now());
       notifyCutaway();
     },
-    setShowRoof(show) { cutaway?.setShowRoof(show); notifyCutaway(); },
+    setShowRoof(show) {
+      cutaway?.setShowRoof(show);
+      commandVisuals?.captureVisibility();
+      commandVisuals?.sample(performance.now());
+      notifyCutaway();
+    },
     getCutawayState() { return cutaway?.getState() ?? { activeStorey: null, showRoof: false, hiddenCount: 0 }; },
     onCutawayChange(callback) {
       cutawayListeners.add(callback);
       return () => { cutawayListeners.delete(callback); };
     },
     highlight,
-    clearHighlight() { clearHighlight(); notifyHighlight(); },
+    clearHighlight() { clearHighlight(); applyLinkedVisuals(); notifyHighlight(); },
+    applyCommand(command) {
+      if (!active || disposed) return;
+      const resolved = command.op === 'highlight' || command.op === 'isolate'
+        ? { ...command, labels: Object.fromEntries(command.item_ids.map((id) =>
+          [id, command.labels?.[id] ?? active!.manifest.items[id]?.tag ?? id])) } : command;
+      commandState = applyCommand(commandState, resolved);
+      renderCommandState();
+      for (const callback of commandListeners) callback(resolved);
+    },
+    applyState(snapshot) {
+      if (!active || disposed) return;
+      commandState = applyState({ ...snapshot, labels: Object.fromEntries(snapshot.highlighted.map((id) =>
+        [id, snapshot.labels[id] ?? active!.manifest.items[id]?.tag ?? id])) });
+      renderCommandState();
+    },
+    getCommandState() { return readCommandState(commandState); },
+    onCommandChange(callback) { commandListeners.add(callback); return () => { commandListeners.delete(callback); }; },
+    isApplyingCommand: () => applyingCommand,
+    setLinkedItems(hovered, selected, labels = {}) {
+      if (selected && selected !== linked.selected && active?.items.has(selected)) {
+        cutaway?.followHighlight([selected]);
+        commandVisuals?.captureVisibility();
+        notifyCutaway();
+      }
+      linked = { hovered, selected, labels };
+      applyLinkedVisuals();
+    },
+    getLinkedHighlightState,
     getHighlightState() {
       return highlights?.getHighlightState() ?? { highlighted: [], dimmed: 0, labels: {} };
     },
@@ -331,6 +453,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       if (disposed) return;
       disposed = true;
       highlightListeners.clear();
+      commandListeners.clear();
       cutawayListeners.clear();
       loadVersion++;
       cancelAnimationFrame(frame);
@@ -341,6 +464,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       rise?.animation.restore();
       rise = null;
       clearHighlight();
+      commandVisuals?.dispose();
       labelRenderer.domElement.remove();
       if (active) {
         world.remove(active.root);
@@ -348,6 +472,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
         active = null;
       }
       highlights = null;
+      linkedHighlights = null;
       renderer.dispose();
     },
   };

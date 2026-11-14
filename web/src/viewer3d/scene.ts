@@ -7,6 +7,8 @@ export type Storey = string | { name: string; elevation_m?: number };
 export type SceneAsset = string | { url?: string; path?: string; local_path?: string };
 
 export interface SceneItem {
+  /** CONTRACT 5.11 stable document tag; older scene manifests may omit it. */
+  tag?: string;
   node: string;
   usd_name: string;
   bbox_m: [Vec3, Vec3] | null;

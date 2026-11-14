@@ -3,10 +3,12 @@ import { documentSceneUrl, SceneLoadError, type SceneManifest } from './scene';
 import { buildItemDetails, type IFCElement } from './identify';
 import { ItemDetailsCard } from './ItemDetailsCard';
 import { createViewer, type Viewer } from './viewer';
-import type { HighlightOptions } from './highlight';
+import type { HighlightOptions, HighlightState } from './highlight';
 import type { RiseState } from './rise';
-import { bindLiveHighlight } from './liveViewerHighlight';
+import { bindLiveCommands, bindLiveHighlight } from './liveViewerHighlight';
+import type { CommandTestState, SceneCommand } from './commands';
 import { cutawayStoreys, isRoof, type CutawayState } from './cutaway';
+import { setHover, setSelected, useLinkedItem } from './link';
 import './viewer3d.css';
 
 interface ViewerOptions {
@@ -15,6 +17,8 @@ interface ViewerOptions {
   storey?: string | null;
   highlightItemIds?: readonly string[];
   highlightOptions?: HighlightOptions;
+  /** CONTRACT 5.11: ordered answer.evidence.scene.commands. */
+  commands?: readonly SceneCommand[];
   /** Imperative highlight/clearHighlight API, called once the scene is ready. */
   onReady?: (viewer: Viewer) => void;
   visualise?: boolean;
@@ -27,17 +31,29 @@ export type Viewer3DProps = ViewerOptions & (
   { doc_id: string; sceneUrl?: never } | { sceneUrl: string; doc_id?: never }
 );
 
-export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highlightItemIds, highlightOptions, onReady, visualise = false, onRiseStateChange, onError }: Viewer3DProps) {
+/** Opt in with ?viewer3dTest=1. Picks use the same handler as a real canvas click. */
+export interface Viewer3DTestHandle {
+  state(): HighlightState;
+  commandState(): CommandTestState;
+  pick(item_id: string): boolean;
+}
+export type LinkedViewerCanvas = HTMLCanvasElement & { __viewer3d?: Viewer3DTestHandle };
+
+export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highlightItemIds, highlightOptions, commands, onReady, visualise = false, onRiseStateChange, onError }: Viewer3DProps) {
   const sceneUrl = doc_id !== undefined ? documentSceneUrl(doc_id) : sourceUrl!;
   // Answer objects may be recreated on parent renders. Only new evidence should
   // replace a live selection; equivalent arrays/maps must leave it in place.
   const highlightRequest = highlightItemIds === undefined ? undefined
     : JSON.stringify([highlightItemIds, highlightOptions ?? {}]);
+  const commandRequest = commands === undefined ? undefined : JSON.stringify(commands);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
   const onReadyRef = useRef(onReady);
   const riseStateRef = useRef(onRiseStateChange);
   const onErrorRef = useRef(onError);
+  const onPickRef = useRef(onPick);
+  const linked = useLinkedItem();
+  const [highlightState, setHighlightState] = useState<HighlightState>({ highlighted: [], dimmed: 0, labels: {} });
   const pointerStart = useRef<{ id: number; x: number; y: number } | null>(null);
   const [cutaway, setCutaway] = useState<CutawayState>({ activeStorey: null, showRoof: false, hiddenCount: 0 });
   const [hasRoof, setHasRoof] = useState(false);
@@ -55,6 +71,13 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
   useEffect(() => { onReadyRef.current = onReady; }, [onReady]);
   useEffect(() => { riseStateRef.current = onRiseStateChange; }, [onRiseStateChange]);
   useEffect(() => { onErrorRef.current = onError; }, [onError]);
+  useEffect(() => { onPickRef.current = onPick; }, [onPick]);
+
+  const selectItem = useCallback((itemId: string | null) => {
+    setPicked(itemId);
+    setSelected(itemId, '3d');
+    if (itemId !== null) onPickRef.current?.(itemId);
+  }, []);
 
   useEffect(() => {
     if (storey !== undefined) viewerRef.current?.setStorey(storey);
@@ -66,7 +89,9 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
     let active = true;
     let viewer: Viewer | null = null;
     let live: ReturnType<typeof bindLiveHighlight> | undefined;
+    let liveCommands: ReturnType<typeof bindLiveCommands> | undefined;
     let unsubscribeCutaway: (() => void) | undefined;
+    let unsubscribeHighlight: (() => void) | undefined;
     setState('loading');
     setError('');
     setStoreys([]);
@@ -74,6 +99,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
     setManifest(null);
     setElements(new Map());
     setHasRoof(false);
+    setHighlightState({ highlighted: [], dimmed: 0, labels: {} });
     pointerStart.current = null;
 
     function fail(reason: unknown) {
@@ -90,11 +116,14 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
       viewer = createViewer(canvas);
       viewerRef.current = viewer;
       unsubscribeCutaway = viewer.onCutawayChange(setCutaway);
+      unsubscribeHighlight = viewer.onHighlightChange(() => setHighlightState(viewer!.getLinkedHighlightState()));
       live = bindLiveHighlight(viewer, doc_id);
+      liveCommands = bindLiveCommands(viewer, doc_id);
       void viewer.loadScene(sceneUrl).then((scene) => {
         if (!active) return;
         if (storey !== undefined) viewer!.setStorey(storey);
         live?.sceneReady();
+        liveCommands?.sceneReady();
         setCutaway(viewer!.getCutawayState());
         setStoreys(cutawayStoreys(scene.manifest).map((entry) => entry.name));
         setHasRoof(Object.entries(scene.manifest.items).some(([id, item]) => isRoof(item.kind, scene.elements?.get(id))));
@@ -110,17 +139,49 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
     return () => {
       active = false;
       unsubscribeCutaway?.();
+      unsubscribeHighlight?.();
+      setHover(null, '3d');
       live?.dispose();
+      liveCommands?.dispose();
       viewer?.dispose();
       if (viewerRef.current === viewer) viewerRef.current = null;
     };
   }, [sceneUrl]);
 
   useEffect(() => {
-    if (state !== 'ready' || highlightRequest === undefined) return;
+    if (state !== 'ready' || highlightRequest === undefined || commands?.length) return;
     const [ids, options] = JSON.parse(highlightRequest) as [string[], HighlightOptions];
     viewerRef.current?.highlight(ids, options);
-  }, [state, highlightRequest, sceneUrl]);
+  }, [state, highlightRequest, commandRequest, sceneUrl]);
+
+  useEffect(() => {
+    if (state !== 'ready' || commandRequest === undefined) return;
+    const next = JSON.parse(commandRequest) as SceneCommand[];
+    for (const command of next) viewerRef.current?.applyCommand(command);
+  }, [state, commandRequest, sceneUrl]);
+
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (state !== 'ready' || !viewer) return;
+    // Render either source; only pointer handlers publish, so subscriptions cannot echo.
+    viewer.setLinkedItems(linked.hovered, linked.selected, highlightOptions?.labels);
+    setHighlightState(viewer.getLinkedHighlightState());
+  }, [state, linked, highlightRequest, sceneUrl]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current as LinkedViewerCanvas | null;
+    if (!canvas || state !== 'ready' || new URLSearchParams(window.location.search).get('viewer3dTest') !== '1') return;
+    canvas.__viewer3d = {
+      state: () => viewerRef.current!.getLinkedHighlightState(),
+      commandState: () => viewerRef.current!.getCommandState(),
+      pick(itemId) {
+        if (!viewerRef.current?.scene?.items.has(itemId)) return false;
+        selectItem(itemId);
+        return true;
+      },
+    };
+    return () => { delete canvas.__viewer3d; };
+  }, [state, sceneUrl, selectItem]);
 
   useEffect(() => {
     if (state === 'ready' && visualise) {
@@ -135,8 +196,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
     if (!start || start.id !== event.pointerId
       || Math.hypot(event.clientX - start.x, event.clientY - start.y) > 5) return;
     const itemId = viewerRef.current?.pick(event.clientX, event.clientY) ?? null;
-    setPicked(itemId);
-    if (itemId !== null) onPick?.(itemId);
+    selectItem(itemId);
   }
 
   const storeyIndex = storeys.indexOf(cutaway.activeStorey ?? '');
@@ -146,6 +206,9 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
   }
 
   return <section className="viewer3d" aria-label="3D viewer" data-state={state}
+    data-highlighted-item-ids={JSON.stringify(highlightState.highlighted)}
+    data-linked-selected={highlightState.highlighted.includes(linked.selected ?? '') ? linked.selected : ''}
+    data-linked-hover={highlightState.highlighted.includes(linked.hovered ?? '') ? linked.hovered : ''}
     data-active-storey={cutaway.activeStorey ?? ''} data-show-roof={cutaway.showRoof} data-hidden-count={cutaway.hiddenCount}>
     <div className="viewer3d-toolbar">
       <label htmlFor={selectId}>Storey</label>
@@ -169,7 +232,12 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
           pointerStart.current = event.isPrimary && event.button === 0
             ? { id: event.pointerId, x: event.clientX, y: event.clientY } : null;
         }}
-        onPointerUp={pick} onPointerCancel={() => { pointerStart.current = null; }} />
+        onPointerMove={(event) => {
+          if (event.pointerType !== 'mouse' || event.buttons !== 0 || state !== 'ready') return;
+          setHover(viewerRef.current?.pick(event.clientX, event.clientY) ?? null, '3d');
+        }}
+        onPointerLeave={() => setHover(null, '3d')}
+        onPointerUp={pick} onPointerCancel={() => { pointerStart.current = null; setHover(null, '3d'); }} />
       {state === 'loading' && <p className="viewer3d-message" role="status">Loading 3D scene…</p>}
       {state === 'error' && <p className="viewer3d-message" role="alert">{error}</p>}
       {state === 'ready' && details && <ItemDetailsCard key={details.item_id} details={details}
