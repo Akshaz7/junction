@@ -1,7 +1,11 @@
-import { test, expect, production, docs } from './final-helpers'
+import { readFileSync } from 'node:fs'
+import { basename, resolve } from 'node:path'
+import { test, expect, production, chooseDocument, ask, fixtureManifest, repoRoot } from './final-helpers'
+import type { Document } from '../src/lib/types'
 
 // Contract: handoff/F-PROJECTS-CONTRACT.md v1. Enable when both feature branches have commits.
-test.setTimeout(180_000)
+test.setTimeout(360_000)
+test.use({ viewport: { width: 1440, height: 1000 } })
 test.beforeEach(() => test.skip(process.env.E2E_PROJECTS !== '1', 'Projects branches are not integrated yet; enable E2E_PROJECTS=1 on the integrated stack'))
 
 test('[PROJECTS] Project list and seeded demo open in the real browser', async ({ page, request }) => {
@@ -19,26 +23,44 @@ test('[PROJECTS] Project list and seeded demo open in the real browser', async (
   expect(detail.ok()).toBe(true)
   const project = await detail.json()
   expect(project.docs.length).toBeGreaterThan(0)
-  await expect(page.getByText(project.docs[0].title, { exact: true }).first()).toBeVisible()
+  await page.getByRole('tab', { name: 'Files', exact: true }).click()
+  await expect(page.locator(`[data-doc-id="${project.docs[0].doc_id}"]`)).toBeVisible()
   await page.screenshot({ path: test.info().outputPath('demo-project.png') })
 })
 
 test('[PROJECTS] Create, attach, classify, edit metadata, overview, project chat, remove and delete', async ({ page, request }) => {
   test.skip(production, 'Production is read-only: project writes forbidden')
-  const available = await docs(request)
-  const kinds = new Set<string>()
-  const chosen = available.filter((doc) => {
-    if (kinds.has(doc.kind) || !['ifc', 'dxf', 'raster'].includes(doc.kind)) return false
-    kinds.add(doc.kind); return true
-  }).slice(0, 3)
+  const chosen: Document[] = []
+  for (const kind of ['ifc', 'dxf', 'raster']) chosen.push(await chooseDocument(request, kind))
   const name = `E2E project ${Date.now()}`
-  const create = await request.post('/api/projects', { data: { name, doc_ids: [chosen[0].doc_id] } })
+  await page.goto('/#/projects')
+  await page.getByRole('button', { name: 'New project', exact: true }).first().click()
+  const dialog = page.getByRole('dialog', { name: 'New project', exact: true })
+  await dialog.getByLabel('Name', { exact: true }).fill(name)
+  await dialog.getByRole('button', { name: 'Add from library', exact: true }).click()
+  await dialog.getByRole('searchbox', { name: 'Search the library' }).fill(chosen[0].doc_id)
+  await dialog.getByRole('option').click()
+  const created = page.waitForResponse((r) => new URL(r.url()).pathname === '/api/projects' && r.request().method() === 'POST')
+  await dialog.getByRole('button', { name: /^Create/ }).click()
+  const create = await created
   expect(create.ok()).toBe(true)
   let project = await create.json()
   const id = project.id
   expect(project.name).toBe(name)
+  let deleted = false
   try {
-    const add = await request.post(`/api/projects/${id}/docs`, { data: { doc_ids: chosen.slice(1).map((d) => d.doc_id) } })
+    await expect(page.getByRole('heading', { name, exact: true })).toBeVisible()
+    await page.getByRole('tab', { name: 'Files', exact: true }).click()
+    await page.getByRole('button', { name: 'Add files', exact: true }).first().click()
+    const adding = page.getByRole('dialog', { name: 'Add files', exact: true })
+    await adding.getByRole('button', { name: 'Add from library', exact: true }).click()
+    for (const doc of chosen.slice(1)) {
+      await adding.getByRole('searchbox', { name: 'Search the library' }).fill(doc.doc_id)
+      await adding.getByRole('option').click()
+    }
+    const added = page.waitForResponse((r) => new URL(r.url()).pathname === `/api/projects/${id}/docs` && r.request().method() === 'POST')
+    await adding.getByRole('button', { name: 'Add 2 files', exact: true }).click()
+    const add = await added
     expect(add.ok()).toBe(true)
     project = await add.json()
     expect(project.docs.map((d: { doc_id: string }) => d.doc_id).sort()).toEqual(chosen.map((d) => d.doc_id).sort())
@@ -47,7 +69,16 @@ test('[PROJECTS] Create, attach, classify, edit metadata, overview, project chat
       expect(roles).toContain(doc.role)
       expect(doc.role_source).toBe('auto')
     }
-    const edit = await request.patch(`/api/projects/${id}/docs/${encodeURIComponent(chosen[0].doc_id)}`, { data: { role: 'detail', level: 'Site office' } })
+    const row = page.locator(`[data-doc-id="${chosen[0].doc_id}"]`)
+    const edited = page.waitForResponse((r) => new URL(r.url()).pathname === `/api/projects/${id}/docs/${chosen[0].doc_id}` && r.request().method() === 'PATCH')
+    await row.getByRole('combobox').selectOption('detail')
+    expect((await edited).ok()).toBe(true)
+    await expect(row.getByRole('combobox')).toBeEnabled()
+    const level = row.getByRole('textbox')
+    await level.fill('Site office')
+    const levelEdited = page.waitForResponse((r) => new URL(r.url()).pathname === `/api/projects/${id}/docs/${chosen[0].doc_id}` && r.request().method() === 'PATCH')
+    await level.press('Enter')
+    const edit = await levelEdited
     expect(edit.ok()).toBe(true)
     project = await edit.json()
     expect(project.docs.find((d: { doc_id: string }) => d.doc_id === chosen[0].doc_id)).toMatchObject({ role: 'detail', level: 'Site office', role_source: 'user' })
@@ -63,25 +94,93 @@ test('[PROJECTS] Create, attach, classify, edit metadata, overview, project chat
       expect(issue.evidence.kind).toBeTruthy()
     }
     await test.info().attach('project-overview.json', { body: JSON.stringify(result, null, 2), contentType: 'application/json' })
-    const rename = await request.patch(`/api/projects/${id}`, { data: { name: `${name} renamed` } })
+    await page.getByRole('tab', { name: 'Overview', exact: true }).click()
+    await expect(page.getByRole('heading', { name: 'Mistakes found', exact: true })).toBeVisible({ timeout: 60_000 })
+    await page.screenshot({ path: test.info().outputPath('project-overview.png') })
+    await page.getByLabel('Project actions', { exact: true }).click()
+    await page.getByRole('button', { name: 'Rename', exact: true }).click()
+    await page.getByRole('textbox', { name: 'Project name', exact: true }).fill(`${name} renamed`)
+    const renamed = page.waitForResponse((r) => new URL(r.url()).pathname === `/api/projects/${id}` && r.request().method() === 'PATCH')
+    await page.getByRole('button', { name: 'Save', exact: true }).click()
+    const rename = await renamed
     expect(rename.ok()).toBe(true)
-    await page.goto(`/#/projects?project=${id}`)
     await expect(page.getByText(`${name} renamed`, { exact: true }).first()).toBeVisible()
-    const chat = await request.post('/api/chats', { data: { project_id: id } })
-    expect(chat.ok()).toBe(true)
-    const createdChat = await chat.json()
+    await page.goto(`/#/chat?project=${id}`)
+    await expect(page.getByRole('complementary', { name: 'Project content', exact: true })).toBeVisible()
+    const chatCreated = page.waitForResponse((r) => new URL(r.url()).pathname === '/api/chats' && r.request().method() === 'POST')
+    const answer = await ask(page, 'How many doors across all documents?')
+    const createdChat = await (await chatCreated).json()
     expect(createdChat.project_id).toBe(id)
-    const answerResponse = await request.post(`/api/chats/${createdChat.id}/messages`, { data: { content: 'Which documents are in this project?' }, timeout: 90_000 })
-    expect(answerResponse.ok()).toBe(true)
-    const stream = await answerResponse.text()
-    expect(stream).toContain('event: answer')
-    await page.goto(`/#/chat?chat=${createdChat.id}`)
-    await expect(page.getByTestId('answer-card')).toBeVisible({ timeout: 30_000 })
-    const remove = await request.delete(`/api/projects/${id}/docs/${encodeURIComponent(chosen[0].doc_id)}`)
+    expect([...answer.doc_ids].sort()).toEqual(chosen.map((doc) => doc.doc_id).sort())
+    expect(answer.citations.length).toBeGreaterThan(0)
+    expect(answer.reasoning?.steps.length).toBeGreaterThan(0)
+    await page.goto(`/#/projects?id=${id}&tab=files`)
+    const removed = page.waitForResponse((r) => new URL(r.url()).pathname === `/api/projects/${id}/docs/${chosen[0].doc_id}` && r.request().method() === 'DELETE')
+    await page.locator(`[data-doc-id="${chosen[0].doc_id}"]`).getByRole('button', { name: /^Remove/ }).click()
+    const remove = await removed
     expect(remove.ok()).toBe(true)
     expect((await remove.json()).docs).toHaveLength(chosen.length - 1)
+    await expect(page.locator(`[data-doc-id="${chosen[0].doc_id}"]`)).toHaveCount(0)
+    await page.getByLabel('Project actions', { exact: true }).click()
+    await page.getByRole('button', { name: 'Delete project', exact: true }).click()
+    const deletion = page.waitForResponse((r) => new URL(r.url()).pathname === `/api/projects/${id}` && r.request().method() === 'DELETE')
+    await page.getByRole('button', { name: 'Delete for good?', exact: true }).click()
+    expect((await deletion).ok()).toBe(true)
+    deleted = true
+    await expect(page).toHaveURL(/#\/projects$/)
   } finally {
-    const remove = await request.delete(`/api/projects/${id}`)
-    expect(remove.ok(), 'Only delete this test-created project').toBe(true)
+    if (!deleted) {
+      const remove = await request.delete(`/api/projects/${id}`)
+      expect(remove.ok(), 'Only delete this test-created project').toBe(true)
+    }
   }
+})
+
+test('[PROJECTS] Upload a real file directly to a project and show ingestion status', async ({ page, request }) => {
+  test.skip(production, 'Production is read-only: no project uploads')
+  const create = await request.post('/api/projects', { data: { name: `E2E upload project ${Date.now()}` } })
+  expect(create.ok()).toBe(true)
+  const { id } = await create.json()
+  try {
+    await page.goto(`/#/projects?id=${id}&tab=files`)
+    await page.getByTestId('files-empty').getByRole('button', { name: 'Add files', exact: true }).click()
+    const dialog = page.getByRole('dialog', { name: 'Add files', exact: true })
+    const [relative] = fixtureManifest['.dxf']
+    await dialog.getByLabel('Choose files to upload', { exact: true }).setInputFiles({
+      name: `e2e-project-${Date.now()}-${basename(relative)}`, mimeType: 'application/octet-stream', buffer: readFileSync(resolve(repoRoot, relative)),
+    })
+    const uploaded = page.waitForResponse((r) => new URL(r.url()).pathname === `/api/projects/${id}/upload`)
+    await dialog.getByRole('button', { name: 'Add 1 file', exact: true }).click()
+    const response = await uploaded
+    expect(response.ok()).toBe(true)
+    const receipt = await response.json()
+    expect(receipt.project.docs.some((doc: { doc_id: string }) => doc.doc_id === receipt.doc_id)).toBe(true)
+    const row = page.locator(`[data-doc-id="${receipt.doc_id}"]`)
+    await expect(row).toBeVisible()
+    await expect(row).toContainText(/Reading the file|Set automatically/)
+    await expect.poll(async () => (await (await request.get(`/api/docs/${receipt.doc_id}/ingest`)).json()).status,
+      { timeout: 285_000, intervals: [1000, 2000, 5000] }).toMatch(/^(ready|partial)$/)
+    await expect(row).toContainText('Set automatically', { timeout: 30_000 })
+    await page.screenshot({ path: test.info().outputPath('project-upload-ready.png') })
+  } finally {
+    expect((await request.delete(`/api/projects/${id}`)).ok()).toBe(true)
+  }
+})
+
+test('[PROJECTS] Phone keeps Projects, files, overview and project chat within 390x844', async ({ page, request }) => {
+  const response = await request.get('/api/projects')
+  expect(response.ok()).toBe(true)
+  const { projects } = await response.json()
+  expect(projects.length).toBeGreaterThan(0)
+  const id = projects[0].id
+  await page.setViewportSize({ width: 390, height: 844 })
+  for (const route of ['projects', `projects?id=${id}`, `projects?id=${id}&tab=files`, `projects?id=${id}&tab=overview`, `chat?project=${id}`]) {
+    await page.goto(`/#/${route}`)
+    await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible()
+    if (route.startsWith('chat')) await expect(page.getByRole('combobox', { name: 'Ask about your drawings' })).toBeEnabled()
+    else await expect(page.getByRole('heading', { level: 1 }).last()).toBeVisible()
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1)
+  }
+  await expect(page.getByRole('combobox', { name: 'Ask about your drawings' })).toBeEnabled()
+  await page.screenshot({ path: test.info().outputPath('project-phone.png') })
 })

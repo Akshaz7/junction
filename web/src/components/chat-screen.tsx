@@ -33,7 +33,8 @@ const starters = [
 
 type Mention = { start: number; end: number; query: string }
 
-export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, onOpenCitation, onChatChange, onRefresh }: {
+export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, onOpenCitation, onChatChange, onRefresh, projectId = null }: {
+  projectId?: string | null
   docs: Document[]; loadingDocs: boolean; demo: boolean; contextDocument: Document | null; hidden: boolean
   onChatChange: (id: string | null) => void
   onRefresh?: () => Promise<void>
@@ -386,7 +387,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   async function ask(question: string, documentIds?: string[]) {
     if (!question.trim() || submitting.current || restoring || !docs.length) return
     // A drawing question with nothing attached would hang on "Thinking…": ask for a document and keep the text.
-    if (!documentIds && !selected.length && !chatId.current && needsDocument(question)) { blocked.current = question; setNeedDoc(true); return }
+    if (!documentIds && !selected.length && !chatId.current && !projectId && needsDocument(question)) { blocked.current = question; setNeedDoc(true); return }
     setNeedDoc(false)
     if (viewer && sheet) setViewer(null) // the answer streams into the conversation behind the sheet
     const version = generation.current
