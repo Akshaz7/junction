@@ -86,6 +86,7 @@ def finalise(graph, counterpart_docs=()):
         return root
 
     linked = set()
+    counterpart_docs = set(counterpart_docs)
     clean = {}
     for e in graph['edges']:
         if e['from'] not in nodes or e['to'] not in nodes or e['from'] == e['to']:
@@ -100,6 +101,8 @@ def finalise(graph, counterpart_docs=()):
             parent[max(ra, rb)] = min(ra, rb)
             if set(nodes[a]['doc_ids']) != set(nodes[b]['doc_ids']):
                 linked.update((a, b))
+                counterpart_docs.update(nodes[a]['doc_ids'])
+                counterpart_docs.update(nodes[b]['doc_ids'])
     for n in nodes.values():
         n['degree'] = degree[n['id']]
         n['canonical'] = find(n['id']) if n['id'] in parent and find(n['id']) != n['id'] else None

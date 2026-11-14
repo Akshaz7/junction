@@ -119,3 +119,14 @@ def test_text_is_reference_evidence_not_a_service_fixture(tmp_path):
     n=next(n for n in g['nodes'] if n.get('source') and n['source']['item_id']=='label')
     assert n['kind']=='sheet_ref'
     assert not any(e['kind']=='in_room' and e['from']==n['id'] for e in g['edges'])
+
+
+def test_enrichment_same_as_links_contribute_to_coverage():
+    from engine.kg.schema import Records, finalise
+    r=Records()
+    a=r.node('room','a','r','Room A',source={'doc_id':'a','item_id':'r','page':1,'bbox':None})
+    b=r.node('room','b','r','Room A',source={'doc_id':'b','item_id':'r','page':1,'bbox':None})
+    r.edge('same_as',a,b,'label_text',.5,{'value':'Room A'})
+    graph=finalise({'nodes':list(r.nodes.values()),'edges':list(r.edges.values())})
+    assert graph['stats']['linked_pct']==100
+    assert graph['stats']['counterpart_items']==2
