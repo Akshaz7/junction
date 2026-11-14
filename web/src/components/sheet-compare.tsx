@@ -137,7 +137,7 @@ export function SheetCompare({ prev, curr, size, changes, initialMode = 'Wipe', 
   const dismissHint = () => { if (hint) { setHint(false); onHintDone?.() } }
 
   const focusChange = useCallback((id: string | null) => {
-    setFocused(id); onFocusChange?.(id)
+    dismissHint(); setFocused(id); onFocusChange?.(id)
     const change = id ? changes.find((c) => c.id === id) : null
     if (change && usableBox(change.bbox, size)) animateTo(regionView(change.bbox, size, fit, viewport))
     else if (!id) animateTo(FIT_VIEW)
@@ -249,7 +249,7 @@ export function SheetCompare({ prev, curr, size, changes, initialMode = 'Wipe', 
   const bothFailed = prevState === 'error' && currState === 'error'
   const shownBoxes = boxes && sizeOk && fit.w > 0 && !bothFailed
 
-  const card = (c: SheetChange, compact = false) => <article key={c.id} className={`sc-card ${c.kind}`} data-change-id={c.id} data-active={c.id === focused || undefined} role="button" tabIndex={0} aria-pressed={c.id === focused}
+  const card = (c: SheetChange, compact = false) => <article key={c.id} className={`sc-card ${c.kind}${compact ? ' compact' : ''}`} data-change-id={c.id} data-active={c.id === focused || undefined} role="button" tabIndex={0} aria-pressed={c.id === focused}
     onClick={() => focusChange(c.id === focused ? null : c.id)}
     onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); focusChange(c.id === focused ? null : c.id) } }}>
     <span className="reading-number">{c.n}</span>
@@ -322,7 +322,7 @@ export function SheetCompare({ prev, curr, size, changes, initialMode = 'Wipe', 
           {summary && <div className="changes-plain-summary">{summary}</div>}
           {changes.length > 0 && <p className="sc-key" aria-label="Box colours"><i className="added" />{counts.added} added<i className="removed" />{counts.removed} removed<i className="edited" />{counts.edited} edited</p>}
           {main.map((c) => card(c))}
-          {minor.length > 0 && <details className="cmp-small"><summary>Minor edits ({minor.length})</summary>{minor.map((c) => card(c, true))}</details>}
+          {minor.length > 0 && <details className="cmp-small" open={main.length === 0 || undefined}><summary>Minor edits ({minor.length})</summary>{minor.map((c) => card(c, main.length > 0))}</details>}
           {!changes.length && <p className="sc-empty" role="status">{emptyText}</p>}
         </div>
       </aside>

@@ -98,6 +98,7 @@ it('zoom to a region centres it and fills about 60% of the canvas', () => {
   expect(rect.width).toBeLessThanOrEqual(viewport.w * 0.6 + 0.5)
   expect(rect.height).toBeLessThanOrEqual(viewport.h * 0.6 + 0.5)
   expect(view.s).toBeGreaterThan(1)
+  expect(regionView([10, 10, 20, 20], sheet, fit, viewport).s).toBe(5)
   // A whole-sheet region never zooms out.
   expect(regionView([0, 0, 6300, 4500], sheet, fit, viewport).s).toBe(1)
 })
