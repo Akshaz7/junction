@@ -342,6 +342,51 @@ def size_of(question, doc_id, pts, t0):
     return _obj(question, doc_id, text, m, None, [(pt.page, sg["bbox_px"], sg["text"])], "dimension printed in the label naming the thing", t0, 0.8)
 
 
+def room_count(question, doc_id, pts, t0):
+    """'how many dorm rooms on this floor': unique room numbers (one 3-digit series, e.g. 201..248) printed on the plan."""
+    if not re.search(r"\bhow many\b.*\b(rooms?|units?|suites?)\b", question, re.I):
+        return None
+    if re.search(r"\b(bath|toilet|restroom|stair|exit|door)\w*\b", question, re.I):
+        return None
+    hits = {}
+    for pt in pts:
+        for w in pt.words:
+            t = str(w.get("text") or "").strip(".,;:()")
+            if re.fullmatch(r"[1-9]\d{2}[A-Z]?", t) and w.get("bbox_px"):
+                hits.setdefault(t, (pt.page, w["bbox_px"]))
+    if len(hits) < 8:
+        return None
+    from collections import Counter
+    series = Counter(k[0] for k in hits)
+    lead, n = series.most_common(1)[0]
+    if n < 8 or n < 0.7 * len(hits):
+        return None
+    keys = sorted(k for k in hits if k[0] == lead)
+    text = (f"There are **{n}** numbered rooms on this floor ({keys[0]} to {keys[-1]}), counted from the room numbers printed on the plan. "
+            f"I cannot tell from the numbers alone how many are dorm rooms versus other room types, and one floor only: "
+            f"other floors are not on this sheet. {{marks}}")
+    return _obj(question, doc_id, text, n, "count", [(hits[k][0], hits[k][1], k) for k in keys], f"unique room numbers in series {lead}xx", t0, 0.6)
+
+
+def overall_width(question, doc_id, pts, t0):
+    """'width of the north wing': the largest feet-inch (or mm) dimension string on the sheet, when the question names a wing/building."""
+    if not re.search(r"\bwidth\b", question, re.I) or not re.search(r"\b(wing|building|block|overall)\b", question, re.I):
+        return None
+    best = None
+    for pt in pts:
+        for sg in pt.segs:
+            for m in re.finditer(r"\b\d{1,3}'\s*-\s*\d{1,2}(?:\s+\d/\d)?\s*(?:\"|”|″)?", sg["text"]):
+                v = feet_inches_to_m(m.group(0))
+                if v and (best is None or v > best[0]):
+                    best = (v, m.group(0).strip(), pt, sg)
+    if not best:
+        return None
+    v, shown, pt, sg = best
+    text = (f"The largest overall dimension printed on the sheet is **{shown}** ({v:.2f} m). This is the overall plan dimension; "
+            f"I cannot confirm it is that particular wing's width. {{marks}}")
+    return _obj(question, doc_id, text, shown, None, [(pt.page, sg["bbox_px"], sg["text"])], "largest feet-inch dimension string", t0, 0.5)
+
+
 REBAR = re.compile(r"(?:D|Ø|ø|T|Y|#)\s?\d{1,2}\s*@\s*\d{2,4}(?:\s*(?:O\.?C\.?|EW|E\.?W\.?|mm))?|\d+\s*[Øø]\s*\d+\s*@\s*\d+", re.I)
 
 
@@ -397,7 +442,7 @@ def answer(question: str, doc_ids: list[str], root, t0=None, other_docs=()):
     pts = _pages(doc_id, root)
     if not any(pt.words for pt in pts):
         return None
-    for fn in (tag_count, scale_answer, share_of_total, area_total, note_sum, rebar_of, size_of):
+    for fn in (tag_count, scale_answer, share_of_total, area_total, note_sum, rebar_of, size_of, room_count, overall_width):
         res = fn(question, doc_id, pts, t0)
         if res is not None:
             res["doc_ids"] = list(doc_ids)

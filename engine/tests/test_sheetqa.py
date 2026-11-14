@@ -72,3 +72,13 @@ def test_size_lookup(tmp_path):
     d = _mk(tmp_path, "sz", [("16\" SUCTION HEADER", 100, 100), ("SUMP 600 X 600 X 300 DEEP", 100, 300)], "Piping M-101A")
     assert "16" in sheetqa.answer("What is the suction header size?", [d], tmp_path)["answer"]["value"]
     assert "600" in sheetqa.answer("What is the sump size?", [d], tmp_path)["answer"]["value"]
+
+
+def test_room_count_and_width(tmp_path):
+    ln = [(str(201 + i), 100 + (i % 12) * 80, 100 + (i // 12) * 100) for i in range(48)] + [("52'-8\" NORTH WING", 100, 900), ("30'-0\"", 100, 950)]
+    d = _mk(tmp_path, "dorm", ln, "Dormitory A-2")
+    r = sheetqa.answer("How many dorm rooms are on this floor?", [d], tmp_path)
+    assert r and r["answer"]["value"] == 48
+    r = sheetqa.answer("What is the width of the north wing?", [d], tmp_path)
+    assert r and "52'-8" in r["answer"]["value"]
+    assert sheetqa.answer("How many toilet rooms?", [d], tmp_path) is None
