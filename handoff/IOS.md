@@ -9,3 +9,4 @@ Last failed attempt (if any): none
 
 ---
 <!-- Worker appends RESULT: or NEEDS: lines below. -->
+RESULT: I-01 passed on attempt 1: XcodeGen SwiftUI/WKWebView shell, WEB_URL/local ATS, validated ar bridge, camera permission, optional ignored signing config; done test ** BUILD SUCCEEDED **; unit-test target ** TEST BUILD SUCCEEDED ** (compiled only; sandbox CoreSimulator unavailable).

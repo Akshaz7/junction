@@ -1,0 +1,3 @@
+// Copy to Local.xcconfig and set your Apple development team for device builds.
+// Keep Local.xcconfig out of git. No team is needed for simulator builds.
+DEVELOPMENT_TEAM =

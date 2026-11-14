@@ -1,0 +1,2 @@
+// Optional developer signing configuration; simulator builds need no team.
+#include? "Local.xcconfig"

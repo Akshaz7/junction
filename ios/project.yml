@@ -1,0 +1,45 @@
+name: Hologram
+options:
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+configFiles:
+  Debug: Config/App.xcconfig
+  Release: Config/App.xcconfig
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+targets:
+  Hologram:
+    type: application
+    platform: iOS
+    sources:
+      - Hologram
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.teamrs3.hologram
+        INFOPLIST_FILE: Config/Info.plist
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        CODE_SIGN_STYLE: Automatic
+  HologramTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - HologramTests
+    dependencies:
+      - target: Hologram
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.teamrs3.hologram.tests
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  Hologram:
+    build:
+      targets:
+        Hologram: all
+        HologramTests: [test]
+    test:
+      targets:
+        - HologramTests

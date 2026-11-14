@@ -121,7 +121,7 @@ Status values: `todo`, `doing`, `done`, `blocked`, `waiting-key`, `blocked-human
 ### IOS (Codex)
 | ID | Tier | Depends | Keys | Task | Done test | Status | Notes |
 |---|---|---|---|---|---|---|---|
-| I-01 | 2 | - | - | Xcode project with XcodeGen. SwiftUI shell with a WKWebView that loads `WEB_URL` (local dev URL until deploy). | `xcodebuild` builds for the simulator. | doing | |
+| I-01 | 2 | - | - | Xcode project with XcodeGen. SwiftUI shell with a WKWebView that loads `WEB_URL` (local dev URL until deploy). | `xcodebuild` builds for the simulator. | done | XcodeGen SwiftUI shell + WKWebView + ar bridge; simulator build passes (LEAD re-ran). |
 | I-02 | 2 | I-01, D-10 | - | AR screen with RealityKit: find a flat surface, place `scene.usdz` (a bundled fixture scene as fallback), pinch to scale, rotate, drag, a scale slider from 1:100 to 1:1, reset. | The build succeeds. A unit test loads the fixture USDZ and finds a prim by `usd_name`. | todo | |
 | I-03 | 2 | I-02 | - | Highlight in AR: glow the answer items, dim the rest, show the number labels. | A unit test applies a highlight to named entities of the fixture scene. | todo | |
 | I-04 | 2 | I-03, W-11 | - | Bridge and live link: "Show on table" from the web view opens AR with the right doc and items. The AR screen follows `scene.highlight` from `/ws`. | A test message through the bridge handler opens the AR screen with the given `doc_id`. | todo | |
