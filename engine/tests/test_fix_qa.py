@@ -137,3 +137,4 @@ def test_headline_keeps_decimal_numbers_and_source_markers():
     assert result.startswith("**There are 12 windows with 0.9 m width.** [1]")
     assert headline(result) == result
     assert "\n\n- Source data." in result
+    assert headline("There are **22 doors on 1. Obergeschoss**. [1]") == "**There are 22 doors on 1. Obergeschoss.** [1]"

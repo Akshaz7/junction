@@ -73,7 +73,9 @@ def headline(text: str) -> str:
     if not text or text.lstrip().startswith(("**", "|", "#", "```", "- ")):
         return text
     first, newline, rest = text.partition("\n")
-    parts = re.split(r"(?<=[.!?])\s+|\s+(?=\[\d+\])", first, maxsplit=1)
+    # Numbered levels ("1. Obergeschoss") and decimal values contain periods
+    # that are not sentence boundaries.
+    parts = re.split(r"(?<!\d\.)(?<=[.!?])\s+|\s+(?=\[\d+\])", first, maxsplit=1)
     lead = parts[0].strip().replace("**", "")
     tail = (" " + parts[1]) if len(parts) == 2 else ""
     return "**" + lead + "**" + tail + newline + rest
