@@ -512,7 +512,7 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                 res["trace"] = trace
                 return res
         from engine import props  # F-PROPS: exact properties before broad counts and the reader
-        if (res := props.answer(question, doc_ids, root, t0)) is not None:
+        if parse_scene(question) is None and (res := props.answer(question, doc_ids, root, t0, hidden=(scene_state or {}).get("hidden"))) is not None:
             for s_ in res["trace"]:
                 add(s_)
             res["trace"] = trace
