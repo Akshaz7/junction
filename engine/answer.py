@@ -100,6 +100,10 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
     try:
         if not doc_ids:
             if (question or "").strip():
+                from engine.project_answer import project_answer
+                res = project_answer(question, history, on_event, trace, t0, root, calls)
+                if res is not None:
+                    return res
                 return _chat_answer(question, history, trace, t0, add, emit)
             add(_step("abstain", "no document selected"))
             return _abstained(question, doc_ids, NO_DOC, trace, t0)
