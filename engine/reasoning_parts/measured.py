@@ -186,6 +186,8 @@ def _length(ctx) -> bool:
 
 
 def run(ctx: dict) -> None:
+    from engine.reasoning_parts.wallarea_steps import run as wallarea_steps
+    if wallarea_steps(ctx): return
     steps, unit, value, question, cited = ctx["steps"], ctx["unit"], ctx["value"], ctx["question"], ctx["cited"]
     area_q = unit == "m2" or (unit not in ("count", "m") and bool(re.search(r"\b(area|how big|size|m2|m²|square)\b", question or "", re.I)))
     rooms = [it for it in cited if it.kind in ("room", "space")]

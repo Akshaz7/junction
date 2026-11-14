@@ -1,0 +1,1181 @@
+{
+  "created_at": "2026-11-14T23:31:22+0200",
+  "files": [
+    {
+      "path": "data/full/junction-dataset/data/ifc_bench/fzk_house_arc.ifc",
+      "schema": "IFC4",
+      "applications": [
+        "ARCHICAD-64"
+      ],
+      "length_unit_to_m": 1.0,
+      "walls_measured": 13,
+      "walls_skipped": 0,
+      "skipped": [],
+      "rooms_with_boundaries": 7,
+      "openings": 16,
+      "unallocated_cut_m2": 3.019806626980426e-14,
+      "exterior_classified_walls": 13,
+      "inferred_axes": 0,
+      "net_quantity_walls": 13,
+      "stored_net_one_side_m2": 190.46552427742,
+      "measured_net_one_side_mean_m2": 196.64252316711307,
+      "max_wall_net_quantity_difference_pct": 29.639018980009848,
+      "gross_m2": 463.906177491181,
+      "net_m2": 393.28504633422614,
+      "floors": [
+        {
+          "name": "Erdgeschoss",
+          "walls": 9,
+          "gross_m2": 351.42,
+          "opening_m2": 67.48080000000002,
+          "net_m2": 283.9392,
+          "independent_gross_m2": 351.42,
+          "independent_net_m2": 283.9392,
+          "independent_walls": 9,
+          "numeric_allowance_m2": 0.008781400000090594,
+          "gross_difference_pct": 0.0,
+          "net_difference_pct": 0.0
+        },
+        {
+          "name": "Dachgeschoss",
+          "walls": 4,
+          "gross_m2": 112.48617749118097,
+          "opening_m2": 3.140331156954794,
+          "net_m2": 109.34584633422617,
+          "independent_gross_m2": 162.91195000223064,
+          "independent_net_m2": 158.91195000223064,
+          "independent_walls": 4,
+          "numeric_allowance_m2": 0.004830072206962913,
+          "gross_difference_pct": 44.82841682037164,
+          "net_difference_pct": 45.32966301847523
+        }
+      ],
+      "independent_check": "World wall-axis extent \u00d7 clipped height, minus each void's width \u00d7 clipped height on both sides. Rectangular check only: overlaps, mitres, slopes and irregular void outlines can disagree legitimately. No quantity tuned to this check.",
+      "elapsed_s": 1.461,
+      "blind": false
+    },
+    {
+      "path": "data/full/junction-dataset/data/ifc_bench/ac20_arc.ifc",
+      "schema": "IFC4",
+      "applications": [
+        "ARCHICAD-64"
+      ],
+      "length_unit_to_m": 1.0,
+      "walls_measured": 121,
+      "walls_skipped": 0,
+      "skipped": [],
+      "rooms_with_boundaries": 82,
+      "openings": 283,
+      "unallocated_cut_m2": 3.0109248427834245e-13,
+      "exterior_classified_walls": 121,
+      "inferred_axes": 0,
+      "net_quantity_walls": 121,
+      "stored_net_one_side_m2": 2378.62235841626,
+      "measured_net_one_side_mean_m2": 2440.2278019185765,
+      "max_wall_net_quantity_difference_pct": 59.21809439501517,
+      "gross_m2": 5857.295603837153,
+      "net_m2": 4880.455603837153,
+      "floors": [
+        {
+          "name": "Keller",
+          "walls": 24,
+          "gross_m2": 1257.1200000000001,
+          "opening_m2": 209.28000000000006,
+          "net_m2": 1047.8399999999997,
+          "independent_gross_m2": 1257.1200000000001,
+          "independent_net_m2": 1047.84,
+          "independent_walls": 24,
+          "numeric_allowance_m2": 0.029552000000447637,
+          "gross_difference_pct": 0.0,
+          "net_difference_pct": 2.1699274263554752e-14
+        },
+        {
+          "name": "Erdgeschoss",
+          "walls": 29,
+          "gross_m2": 1386.7199999999998,
+          "opening_m2": 250.7199999999999,
+          "net_m2": 1136.0,
+          "independent_gross_m2": 1386.7199999999998,
+          "independent_net_m2": 1136.0,
+          "independent_walls": 29,
+          "numeric_allowance_m2": 0.03378000000045874,
+          "gross_difference_pct": 0.0,
+          "net_difference_pct": 0.0
+        },
+        {
+          "name": "1. Obergeschoss",
+          "walls": 29,
+          "gross_m2": 1465.56,
+          "opening_m2": 260.52000000000004,
+          "net_m2": 1205.0399999999995,
+          "independent_gross_m2": 1465.5600000000002,
+          "independent_net_m2": 1205.0399999999997,
+          "independent_walls": 29,
+          "numeric_allowance_m2": 0.035216000000678566,
+          "gross_difference_pct": 1.551445696138214e-14,
+          "net_difference_pct": 1.8868558341900032e-14
+        },
+        {
+          "name": "2. Obergeschoss",
+          "walls": 29,
+          "gross_m2": 1465.56,
+          "opening_m2": 256.32,
+          "net_m2": 1209.2399999999996,
+          "independent_gross_m2": 1465.5599999999995,
+          "independent_net_m2": 1209.2399999999993,
+          "independent_walls": 29,
+          "numeric_allowance_m2": 0.03513200000111022,
+          "gross_difference_pct": 3.102891392276428e-14,
+          "net_difference_pct": 1.8803023009760855e-14
+        },
+        {
+          "name": "Dachgeschoss",
+          "walls": 10,
+          "gross_m2": 282.3356038371524,
+          "opening_m2": 0.0,
+          "net_m2": 282.3356038371524,
+          "independent_gross_m2": 428.73462318645267,
+          "independent_net_m2": 428.73462318645267,
+          "independent_walls": 10,
+          "numeric_allowance_m2": 0.01517754679743786,
+          "gross_difference_pct": 51.852836609916665,
+          "net_difference_pct": 51.852836609916665
+        }
+      ],
+      "independent_check": "World wall-axis extent \u00d7 clipped height, minus each void's width \u00d7 clipped height on both sides. Rectangular check only: overlaps, mitres, slopes and irregular void outlines can disagree legitimately. No quantity tuned to this check.",
+      "elapsed_s": 6.117,
+      "blind": false
+    },
+    {
+      "path": "data/full/junction-dataset/data/ifc_bench/duplex_arc.ifc",
+      "schema": "IFC2X3",
+      "applications": [
+        "Autodesk Revit Architecture 2011"
+      ],
+      "length_unit_to_m": 1.0,
+      "walls_measured": 57,
+      "walls_skipped": 0,
+      "skipped": [],
+      "rooms_with_boundaries": 0,
+      "openings": 36,
+      "unallocated_cut_m2": 1.1324274851176597e-13,
+      "exterior_classified_walls": 57,
+      "inferred_axes": 0,
+      "net_quantity_walls": 0,
+      "stored_net_one_side_m2": 0,
+      "measured_net_one_side_mean_m2": 0,
+      "max_wall_net_quantity_difference_pct": null,
+      "gross_m2": 1379.8652368000412,
+      "net_m2": 1199.5848448000413,
+      "floors": [
+        {
+          "name": "Level 2",
+          "walls": 27,
+          "gross_m2": 610.7639327999191,
+          "opening_m2": 102.76421599999928,
+          "net_m2": 507.99971679992007,
+          "independent_gross_m2": 632.3543327999191,
+          "independent_net_m2": 529.59011679992,
+          "independent_walls": 27,
+          "numeric_allowance_m2": 1.732618552711179e-06,
+          "gross_difference_pct": 3.534982804407488,
+          "net_difference_pct": 4.250081109494691
+        },
+        {
+          "name": "Roof",
+          "walls": 29,
+          "gross_m2": 62.765976000081,
+          "opening_m2": 3.2311742677852644e-27,
+          "net_m2": 62.765976000081,
+          "independent_gross_m2": 62.76597600008098,
+          "independent_net_m2": 62.76597600008098,
+          "independent_walls": 29,
+          "numeric_allowance_m2": 2.0562826024491713e-06,
+          "gross_difference_pct": 2.2641016074032954e-14,
+          "net_difference_pct": 2.2641016074032954e-14
+        },
+        {
+          "name": "Level 1",
+          "walls": 21,
+          "gross_m2": 552.5386380000413,
+          "opening_m2": 77.51617600000053,
+          "net_m2": 475.0224620000406,
+          "independent_gross_m2": 552.5386380000411,
+          "independent_net_m2": 475.0224620000405,
+          "independent_walls": 21,
+          "numeric_allowance_m2": 1.4729362156053464e-06,
+          "gross_difference_pct": 2.0575364309926783e-14,
+          "net_difference_pct": 2.3932939348372606e-14
+        },
+        {
+          "name": "T/FDN",
+          "walls": 7,
+          "gross_m2": 153.7966899999999,
+          "opening_m2": 0.0,
+          "net_m2": 153.7966899999999,
+          "independent_gross_m2": 153.7966899999999,
+          "independent_net_m2": 153.7966899999999,
+          "independent_walls": 7,
+          "numeric_allowance_m2": 5.625680497379914e-07,
+          "gross_difference_pct": 0.0,
+          "net_difference_pct": 0.0
+        }
+      ],
+      "independent_check": "World wall-axis extent \u00d7 clipped height, minus each void's width \u00d7 clipped height on both sides. Rectangular check only: overlaps, mitres, slopes and irregular void outlines can disagree legitimately. No quantity tuned to this check.",
+      "elapsed_s": 0.539,
+      "blind": false
+    },
+    {
+      "path": "data/full/junction-dataset/data/ifc_bench/fantasy_residential_building_1_arc.ifc",
+      "schema": "IFC4",
+      "applications": [
+        "Autodesk Revit 2025 (DEU)"
+      ],
+      "length_unit_to_m": 1.0,
+      "walls_measured": 104,
+      "walls_skipped": 42,
+      "skipped": [
+        {
+          "item_id": "07BpbuVBnFBA1BV6Rjn80m",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "0Eg$SXNDfB5epk2ZIuTYuw",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "2Lnt_XQ8D4qRPQOyLZE$8u",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "11skHLYovCBhqdYuQtrOKX",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "0OOJujfOj84wZZnCqMCMSa",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "0LaSb7ThXCy8gKhejCJNXm",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "1C2465LnHARBtzuYAQtmu3",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "1C2465LnHARBtzuYAQtmuM",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "1C2465LnHARBtzuYAQtmup",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "1C2465LnHARBtzuYAQtmvW",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "0tBMoA8GH3VA7a$3sSJH6F",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "1Ycaffu490CeyVqwmeHXHv",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "17aIyisE56yv1us97xGpv2",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "17aIyisE56yv1us97xGpr_",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "273BqsXefBl8QjNI5_imOq",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "0Gdovt2hPA5hsQcCIkJ9Dc",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "2dENt1wz932v0cdDM_mspi",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "2dENt1wz932v0cdDM_mst0",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "35GhLrlNn9mPvbRMQMD9$S",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "0RgKgXPa5AqeGvHba2K_jv",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "0RgKgXPa5AqeGvHba2K_i_",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "0RgKgXPa5AqeGvHba2K_if",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "0RgKgXPa5AqeGvHba2K_ZW",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "0RgKgXPa5AqeGvHba2K_ZY",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "0RgKgXPa5AqeGvHba2K_YS",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "06gyUag89EaRv52$iIynie",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "0wWzhGA85BmABLFeqDOraY",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "0wWzhGA85BmABLFeqDOqRU",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "2odsreyuHD88JhNDddqWab",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "2odsreyuHD88JhNDddqWZ_",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "2odsreyuHD88JhNDddqWXw",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "2odsreyuHD88JhNDddqWlt",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "2odsreyuHD88JhNDddqWhL",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "2odsreyuHD88JhNDddqWfL",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "2odsreyuHD88JhNDddqWwe",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "2odsreyuHD88JhNDddqW1X",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "2odsreyuHD88JhNDddqW1d",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "2odsreyuHD88JhNDddqW1b",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "2odsreyuHD88JhNDddqW1h",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "3NK9lS3oLEGfjTwPup38ao",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "3NK9lS3oLEGfjTwPup38et",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        },
+        {
+          "item_id": "3NK9lS3oLEGfjTwPup39k9",
+          "reason": "Curtain-wall assemblies need a separate frame/glazing take-off; excluded from solid wall finishes"
+        }
+      ],
+      "rooms_with_boundaries": 0,
+      "openings": 149,
+      "unallocated_cut_m2": 43.19178015976945,
+      "exterior_classified_walls": 104,
+      "inferred_axes": 0,
+      "net_quantity_walls": 0,
+      "stored_net_one_side_m2": 0,
+      "measured_net_one_side_mean_m2": 0,
+      "max_wall_net_quantity_difference_pct": null,
+      "gross_m2": 4431.763559548544,
+      "net_m2": 4388.571779388775,
+      "floors": [
+        {
+          "name": "Ground Floor",
+          "walls": 36,
+          "gross_m2": 1338.0572821713638,
+          "opening_m2": 5.1514348342607263e-14,
+          "net_m2": 1338.057282171364,
+          "independent_gross_m2": 1657.789261373208,
+          "independent_net_m2": 1362.5506170983817,
+          "independent_walls": 36,
+          "numeric_allowance_m2": 0.04008268486226924,
+          "gross_difference_pct": 23.895238526933,
+          "net_difference_pct": 1.8305146762678632
+        },
+        {
+          "name": "First Floor",
+          "walls": 36,
+          "gross_m2": 1350.2644515099344,
+          "opening_m2": 8.881784197001252e-15,
+          "net_m2": 1350.2644515099344,
+          "independent_gross_m2": 1679.9196613732095,
+          "independent_net_m2": 1374.8423890501601,
+          "independent_walls": 36,
+          "numeric_allowance_m2": 0.04024888847005066,
+          "gross_difference_pct": 24.41412195178788,
+          "net_difference_pct": 1.8202314008001526
+        },
+        {
+          "name": "Second Floor",
+          "walls": 32,
+          "gross_m2": 1304.2974982887,
+          "opening_m2": 25.6400000000001,
+          "net_m2": 1278.6574982887003,
+          "independent_gross_m2": 1609.8174879288717,
+          "independent_net_m2": 1368.5069540301188,
+          "independent_walls": 32,
+          "numeric_allowance_m2": 0.04788591563879199,
+          "gross_difference_pct": 23.42410301645357,
+          "net_difference_pct": 7.026858706234402
+        },
+        {
+          "name": "Roof",
+          "walls": 32,
+          "gross_m2": 439.144327578546,
+          "opening_m2": 17.551780159769343,
+          "net_m2": 421.59254741877663,
+          "independent_gross_m2": 517.4121682491168,
+          "independent_net_m2": 517.4121682491168,
+          "independent_walls": 32,
+          "numeric_allowance_m2": 0.04788591563879199,
+          "gross_difference_pct": 17.822805796477407,
+          "net_difference_pct": 22.72801580981472
+        }
+      ],
+      "independent_check": "World wall-axis extent \u00d7 clipped height, minus each void's width \u00d7 clipped height on both sides. Rectangular check only: overlaps, mitres, slopes and irregular void outlines can disagree legitimately. No quantity tuned to this check.",
+      "elapsed_s": 2.638,
+      "blind": false
+    },
+    {
+      "path": "data/full/junction-dataset/data/ifc_bench/molio_arc.ifc",
+      "schema": "IFC2X3",
+      "applications": [
+        "ARCHICAD"
+      ],
+      "length_unit_to_m": 0.001,
+      "walls_measured": 98,
+      "walls_skipped": 91,
+      "skipped": [
+        {
+          "item_id": "1BeXudiH55sh5MigX$7A40",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "24RRUXQGT47Oni6SowGHRP",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "2gHaY3GCDCDB4NBYv9JBLY",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3sBH3T3z55Sey1TW9CTVMU",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1tLOTPv9nEjPpOUG1zPvqg",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "21TO1o6KX97QE95V8mA7M7",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "0tpSrcx3zFM8wcmmJ$pbs6",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3Kjink1k55pgnDtiF68QXD",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3YAxLpcW94vgGNo9LZM2c_",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "20YaTWov14OPZG7C0mGgSX",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3jat7m4KL16wuU5Atnv6EZ",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "0myN9KDU56YPvgCGGynbdE",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1vQjEiLdTEkvBU9PczScaO",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1AV5uB7zXDmuEtXfVZTyQp",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "31kEOzCELA5xlRSIs3gqgz",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1zRAeOfrvDMwdsfHM276iK",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "0SoPIQXG56dBPhrG1qoVcS",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "26J67fdLjEsPmhK04NaEtV",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "2_jE1VCJLDj8C9x3kBZdWN",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "20US2PYGL4OfZgQLEbSjbE",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "0SEdURjeP1JuqCDpTkK2_3",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "2CAga7$CDAdAvxkYC9Rdi_",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1GU$X5Hxf3mgdieuv6AA3g",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3VCb2VU2n4aeS9h44SwBOy",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "0X1YF$6DzEce32ipcdu03c",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1qEQYVXnfCywZfblrVsA74",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1XW3vvNw5EPu1jIGMmhMEW",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "2PD8gjKRf2MRdLWHzcwWe$",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3zMHLGX253qOdTzVXEOoj0",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "2Vk_I45iL53hMAV_yIKuO1",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "2XxgFQdUfFQvSVYb$4ARK7",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1jVqKp2lb2jx89hegpmLaa",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "0M8QhntLfF9viHCcVGm7fn",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "038GYOvFv8OfWIw8OJGyjT",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "0KWxLaR2r0QQo7jIDh03Ja",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1Bg11JuSnF1xf5cUFsjNOx",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1atd7jciHE78sIQHW34Nzt",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3g52KdC8f1yRb6gSrqWPZX",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3fXwLjH_T3T9j2uXoCLSpF",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "2FCT8jnknDg9wqcdZlX50$",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "0bgzaNIrtW6I$Z8VaSBMFW",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "06oyWnOaCSDZjAotpQQHac",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "0_8AfxY6MqMUSOjsYEg_9D",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "0KPegVtRe38YPvD6fZ6_rb",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1$krLvuBrG3jWl1RtdQ8x9",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "24FYMGp$sJmwLhX8jFIlSp",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "0daiTlINDS1rhui_ghqHkt",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "0shVHa1_tJ41h_f0ljZ0uI",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "2pMwmyQur0sjVeYbUntkxr",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "2Cn3Nb8iIj4TkzbFXcm2Ax",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3nd0aVbvupRO$nw2ivgVQy",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "2beeR3QYdHCezMW1AwlIrs",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "0yxviBfd0pP22iHcAPpaK_",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1TnI9_tjQ2P457iMgVRVAM",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1qWwD9GdFVrdvvDPEkV__T",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1qCEb3r17JjgDDIt$fNTMt",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3c5co9EgSDnRIhPD0kbbto",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3149ITUEPnEtrFJKQlcC5s",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "09b0_boBLtpt2TdKXr48wM",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1Bi_687ueiF65Q9mkXZZIH",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "2fwyR5qJsu8Z8St1QG34It",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "2$bCFWetYThNJWHhsZ5fiM",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "2W6uV5Sxr4HOsUelS1k5xG",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3RnUySaN3w5R5W6UHPDkwn",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "14KTUp9wy7qncPGzBeGuDX",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "2ijI8H8oIwyUtQU6vGePkW",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1_UhKbwFv7HB$WUlH424Bc",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "33bN9GU4f538iG_vLhA5it",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1miyh1HabCsRD7MtPCCLI_",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3YXsW0aNT9fBJKoNu48wMl",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "0bF6ilXTJCpEHdrYDdpA5Y",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1u8mjwoHwfG7hFwCONGQfh",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "34EIHHZTLKrFNNENT67EUZ",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1Kccv3ZlSEzFZ0cTkut$tf",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1sN2TUrjDMKpOIOXLi3UTp",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "2iY0KCLJG6oMYH2A2PJ9BA",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "2rjbwk8czsfqV1jsVVyPKh",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "12KVyD3e$hqPe9tkmUG4SZ",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3KljgoOGwhJg0sVJTjvd37",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "35Yit1JCQEfF2MDghgk_sL",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "0OU_GoX_qXDIEPMo6PCY2g",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3Cr2K_6GknBdPNwALyAOPH",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1i7erV$Yszpw3RiXXNVb1f",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1gVIvfjMag8LFla_MNls$p",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1v5SYTWvT7zgXQcohoYSyY",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3rh_eaAfjD385dA0Kfu0QP",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3N9IcaDzT7Mx55daEDyU1b",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "3pK7GCEKz49P4daaxi3ZWw",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "1lcz$QU7DFQAnDIVQXw6g6",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "0MiVUlmKPAtgBMWWb4q3Z2",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        },
+        {
+          "item_id": "14IlVp__H5_BRNynwUltXl",
+          "reason": "No wall/void body: only an axis or bounding box is recorded"
+        }
+      ],
+      "rooms_with_boundaries": 66,
+      "openings": 61,
+      "unallocated_cut_m2": 7.105427357601002e-15,
+      "exterior_classified_walls": 98,
+      "inferred_axes": 2,
+      "net_quantity_walls": 96,
+      "stored_net_one_side_m2": 1622.04681516685,
+      "measured_net_one_side_mean_m2": 1625.6488212622555,
+      "max_wall_net_quantity_difference_pct": 5.0234210284139085,
+      "gross_m2": 3252.0376425245113,
+      "net_m2": 3252.0376425245113,
+      "floors": [
+        {
+          "name": "K\u00e6lder",
+          "walls": 38,
+          "gross_m2": 1374.3556267015185,
+          "opening_m2": 4.726219415829291e-13,
+          "net_m2": 1374.355626701518,
+          "independent_gross_m2": 1452.9524597891323,
+          "independent_net_m2": 1383.5348597891323,
+          "independent_walls": 38,
+          "numeric_allowance_m2": 0.03782367879241558,
+          "gross_difference_pct": 5.718813352279696,
+          "net_difference_pct": 0.6678935865853398
+        },
+        {
+          "name": "Fundament",
+          "walls": 21,
+          "gross_m2": 4.808479252531604,
+          "opening_m2": 5.551115123125783e-17,
+          "net_m2": 4.8084792525320745,
+          "independent_gross_m2": 4.824479252531604,
+          "independent_net_m2": 4.824479252531604,
+          "independent_walls": 21,
+          "numeric_allowance_m2": 0.01882079857245271,
+          "gross_difference_pct": 0.3327455347046827,
+          "net_difference_pct": 0.33274553469486046
+        },
+        {
+          "name": "Grundplan",
+          "walls": 22,
+          "gross_m2": 305.70199036298135,
+          "opening_m2": 1.0769163338864018e-14,
+          "net_m2": 305.7019903629815,
+          "independent_gross_m2": 343.77513514120665,
+          "independent_net_m2": 314.12313514120655,
+          "independent_walls": 22,
+          "numeric_allowance_m2": 0.016060760460751246,
+          "gross_difference_pct": 12.454333297934499,
+          "net_difference_pct": 2.7546908570094715
+        },
+        {
+          "name": "1. Sal",
+          "walls": 22,
+          "gross_m2": 300.4155076636313,
+          "opening_m2": 1.470677413184518e-09,
+          "net_m2": 300.4155076621606,
+          "independent_gross_m2": 333.8708912212167,
+          "independent_net_m2": 306.31889122121663,
+          "independent_walls": 22,
+          "numeric_allowance_m2": 0.01635408110247705,
+          "gross_difference_pct": 11.136370361760653,
+          "net_difference_pct": 1.9650728436079272
+        },
+        {
+          "name": "2. Sal",
+          "walls": 22,
+          "gross_m2": 292.74000752708207,
+          "opening_m2": 1.4705672790604751e-09,
+          "net_m2": 292.7400075270821,
+          "independent_gross_m2": 333.6714042014767,
+          "independent_net_m2": 298.4754042014767,
+          "independent_walls": 22,
+          "numeric_allowance_m2": 0.01679912172276649,
+          "gross_difference_pct": 13.982166981603287,
+          "net_difference_pct": 1.959211767070809
+        },
+        {
+          "name": "3. Sal",
+          "walls": 22,
+          "gross_m2": 292.74000750988284,
+          "opening_m2": 3.552713678800501e-15,
+          "net_m2": 292.74000751135344,
+          "independent_gross_m2": 333.67140256947675,
+          "independent_net_m2": 298.4754025694768,
+          "independent_walls": 22,
+          "numeric_allowance_m2": 0.01679892092073651,
+          "gross_difference_pct": 13.98216643080877,
+          "net_difference_pct": 1.959211215057753
+        },
+        {
+          "name": "4. Sal",
+          "walls": 22,
+          "gross_m2": 292.74000484147666,
+          "opening_m2": 7.216449660063518e-15,
+          "net_m2": 292.7400048414766,
+          "independent_gross_m2": 333.6713648414767,
+          "independent_net_m2": 298.47536484147673,
+          "independent_walls": 22,
+          "numeric_allowance_m2": 0.01679872011868166,
+          "gross_difference_pct": 13.982154581901103,
+          "net_difference_pct": 1.9591992570697392
+        },
+        {
+          "name": "5. Sal",
+          "walls": 11,
+          "gross_m2": 282.2354926407326,
+          "opening_m2": 7.105427357601002e-15,
+          "net_m2": 282.2354926407326,
+          "independent_gross_m2": 320.72429264073276,
+          "independent_net_m2": 285.5282926407328,
+          "independent_walls": 11,
+          "numeric_allowance_m2": 0.00839936005935504,
+          "gross_difference_pct": 13.63712254609801,
+          "net_difference_pct": 1.166685298575006
+        },
+        {
+          "name": "6. sal",
+          "walls": 5,
+          "gross_m2": 106.30052602467393,
+          "opening_m2": 3.552713678800501e-15,
+          "net_m2": 106.3005260246739,
+          "independent_gross_m2": 116.17608677997111,
+          "independent_net_m2": 108.53208677997114,
+          "independent_walls": 5,
+          "numeric_allowance_m2": 0.0034280000591332556,
+          "gross_difference_pct": 9.290227550713082,
+          "net_difference_pct": 2.099294179202143
+        }
+      ],
+      "independent_check": "World wall-axis extent \u00d7 clipped height, minus each void's width \u00d7 clipped height on both sides. Rectangular check only: overlaps, mitres, slopes and irregular void outlines can disagree legitimately. No quantity tuned to this check.",
+      "elapsed_s": 2.268,
+      "blind": false
+    },
+    {
+      "path": "data/full/junction-dataset/data/ifc_models/bsc-esplanades_1807-ep-ar-v18.ifc",
+      "schema": "IFC2X3",
+      "applications": [
+        "ARCHICAD-64"
+      ],
+      "length_unit_to_m": 0.001,
+      "walls_measured": 846,
+      "walls_skipped": 0,
+      "skipped": [],
+      "rooms_with_boundaries": 0,
+      "openings": 509,
+      "unallocated_cut_m2": 63.25400044922845,
+      "exterior_classified_walls": 753,
+      "inferred_axes": 68,
+      "net_quantity_walls": 0,
+      "stored_net_one_side_m2": 0,
+      "measured_net_one_side_mean_m2": 0,
+      "max_wall_net_quantity_difference_pct": null,
+      "gross_m2": 19181.561385144356,
+      "net_m2": 16640.413712994028,
+      "floors": [
+        {
+          "name": "1.korrus",
+          "walls": 143,
+          "gross_m2": 3470.399861284884,
+          "opening_m2": 547.8830004085369,
+          "net_m2": 2922.5168608763474,
+          "independent_gross_m2": 3490.4376365898624,
+          "independent_net_m2": 2927.0295958475263,
+          "independent_walls": 143,
+          "numeric_allowance_m2": 9.106198616491733e-05,
+          "gross_difference_pct": 0.5773909666294063,
+          "net_difference_pct": 0.15441262398142758
+        },
+        {
+          "name": "2.korrus",
+          "walls": 156,
+          "gross_m2": 3553.0511909950847,
+          "opening_m2": 499.90899996323304,
+          "net_m2": 3053.14219103185,
+          "independent_gross_m2": 3576.6121981587253,
+          "independent_net_m2": 3061.180081946986,
+          "independent_walls": 156,
+          "numeric_allowance_m2": 9.229264154828718e-05,
+          "gross_difference_pct": 0.6631203970084657,
+          "net_difference_pct": 0.2632661832372567
+        },
+        {
+          "name": "3.korrus",
+          "walls": 259,
+          "gross_m2": 3584.4462844263403,
+          "opening_m2": 499.9089999595094,
+          "net_m2": 3084.5372844668314,
+          "independent_gross_m2": 3608.007291619925,
+          "independent_net_m2": 3092.5751753778104,
+          "independent_walls": 259,
+          "numeric_allowance_m2": 0.00015205029642611668,
+          "gross_difference_pct": 0.6573123245270103,
+          "net_difference_pct": 0.2605866024527055
+        },
+        {
+          "name": "4.korrus",
+          "walls": 160,
+          "gross_m2": 3585.3561962778413,
+          "opening_m2": 499.9089999595092,
+          "net_m2": 3085.447196318334,
+          "independent_gross_m2": 3608.917203463335,
+          "independent_net_m2": 3093.485087252408,
+          "independent_walls": 160,
+          "numeric_allowance_m2": 9.381983025865565e-05,
+          "gross_difference_pct": 0.657145507884376,
+          "net_difference_pct": 0.2605097550742387
+        },
+        {
+          "name": "5.korrus",
+          "walls": 257,
+          "gross_m2": 3514.414311055143,
+          "opening_m2": 493.53767185953785,
+          "net_m2": 3020.876639195606,
+          "independent_gross_m2": 3821.0144856728957,
+          "independent_net_m2": 3316.2838289641127,
+          "independent_walls": 257,
+          "numeric_allowance_m2": 0.00016063501916663208,
+          "gross_difference_pct": 8.724075976281268,
+          "net_difference_pct": 9.778856439737545
+        },
+        {
+          "name": "Katus",
+          "walls": 58,
+          "gross_m2": 367.38155991220754,
+          "opening_m2": 1.582334753471394e-23,
+          "net_m2": 367.38155991220754,
+          "independent_gross_m2": 365.43188872455227,
+          "independent_net_m2": 365.43188872455227,
+          "independent_walls": 58,
+          "numeric_allowance_m2": 9.848037909973703e-05,
+          "gross_difference_pct": 0.5306938073106279,
+          "net_difference_pct": 0.5306938073106279
+        },
+        {
+          "name": "Vundament",
+          "walls": 49,
+          "gross_m2": 1106.5119811928519,
+          "opening_m2": 0.0,
+          "net_m2": 1106.5119811928519,
+          "independent_gross_m2": 1106.5119812028943,
+          "independent_net_m2": 1106.5119812028943,
+          "independent_walls": 49,
+          "numeric_allowance_m2": 4.165277566355521e-05,
+          "gross_difference_pct": 9.075738260398427e-10,
+          "net_difference_pct": 9.075738260398427e-10
+        }
+      ],
+      "independent_check": "World wall-axis extent \u00d7 clipped height, minus each void's width \u00d7 clipped height on both sides. Rectangular check only: overlaps, mitres, slopes and irregular void outlines can disagree legitimately. No quantity tuned to this check.",
+      "elapsed_s": 18.605,
+      "blind": false
+    },
+    {
+      "path": "data/full/junction-dataset/data/ifc_models/resbim-329_model.ifc",
+      "schema": "IFC4",
+      "applications": [
+        "Autodesk Revit 2026 (ENG)"
+      ],
+      "length_unit_to_m": 0.001,
+      "walls_measured": 15,
+      "walls_skipped": 0,
+      "skipped": [],
+      "rooms_with_boundaries": 0,
+      "openings": 10,
+      "unallocated_cut_m2": 1.509903313490213e-14,
+      "exterior_classified_walls": 0,
+      "inferred_axes": 0,
+      "net_quantity_walls": 0,
+      "stored_net_one_side_m2": 0,
+      "measured_net_one_side_mean_m2": 0,
+      "max_wall_net_quantity_difference_pct": null,
+      "gross_m2": 405.23150000000004,
+      "net_m2": 363.5599000000141,
+      "floors": [
+        {
+          "name": "Level 0",
+          "walls": 15,
+          "gross_m2": 405.2315000000001,
+          "opening_m2": 41.671599999985936,
+          "net_m2": 363.55990000001407,
+          "independent_gross_m2": 405.2315000000002,
+          "independent_net_m2": 363.5599000000141,
+          "independent_walls": 15,
+          "numeric_allowance_m2": 0.010002200000120637,
+          "gross_difference_pct": 2.805478787350342e-14,
+          "net_difference_pct": 1.5635227884264962e-14
+        }
+      ],
+      "independent_check": "World wall-axis extent \u00d7 clipped height, minus each void's width \u00d7 clipped height on both sides. Rectangular check only: overlaps, mitres, slopes and irregular void outlines can disagree legitimately. No quantity tuned to this check.",
+      "elapsed_s": 0.095,
+      "blind": true
+    }
+  ],
+  "blind_selection": {
+    "blind_file": "data/full/junction-dataset/data/ifc_models/resbim-329_model.ifc",
+    "selection": "SystemRandom before development; not opened until final validation"
+  },
+  "totals": {
+    "files": 7,
+    "walls_measured": 1254,
+    "walls_without_body_or_excluded_assemblies": 133
+  },
+  "validation": {
+    "tests_passed": 109,
+    "test_command": "MODELS_FAKE=1 /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest -q engine/tests/test_wallarea.py engine/tests/test_answer.py engine/tests/test_reasoning_measured.py engine/tests/test_reasoning_confidence.py engine/tests/test_reasoning_checked.py engine/tests/test_quantity_takeoff.py engine/tests/test_analytics.py engine/tests/test_complex_q.py engine/tests/test_units.py",
+    "live_model_cost_usd": 0,
+    "limitations": [
+      "Independent rectangle checks are not ground truth for shaped walls or irregular/overlapping openings. Disagreements are retained per floor.",
+      "Source-model accuracy and construction tolerances are unknown; numerical allowance is separate.",
+      "No exterior flags: both-face totals remain measurable; facade/interior finish cannot be asserted.",
+      "Only polygonal room boundaries lying on supported planar wall faces are measured per room.",
+      "Tilted curved axes, complex branched 2D walls and curtain-wall frame/glazing finishes need separate measurement.",
+      "2D defaults are stated; absent scale/height accuracy does not support a finite total error bound."
+    ],
+    "compileall_passed": true,
+    "git_diff_check_passed": true,
+    "answer_examples": "results/final/WALLAREA/answers.json"
+  },
+  "integration": {
+    "branch": "final/wallarea",
+    "base_commit": "2a725c5e2240206f904ed5c71fac54200c36e72e",
+    "commit_status": "blocked: filesystem denies .git/worktrees/wallarea/index.lock; no new commit created",
+    "source_patch": "results/final/WALLAREA/implementation.patch",
+    "cross_file": [
+      "engine/answer.py",
+      "engine/reasoning_parts/measured.py",
+      "engine/reasoning_parts/confidence.py",
+      "engine/explain.py"
+    ]
+  }
+}
