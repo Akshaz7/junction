@@ -397,7 +397,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       const box = boxes.find((item) => item.item_id === itemId)!
       const citation: Citation = { n: 1, doc_id: docId, page: plan.page, kind: 'element', bbox_px: box.bbox_px, item_ids: [itemId], quote: null }
       const drawingAnswer = { ...answer, citations: [citation], evidence: { ...answer.evidence, boxes } }
-      setViewer((previous) => ({ answer: drawingAnswer, citation, request: (previous?.request ?? 0) + 1 }))
+      setViewer((previous) => ({ answer: drawingAnswer, citation, request: (previous?.request ?? 0) + 1, mode: '2d' }))
       setError('')
       onOpenCitation(citation)
     } catch (err) {
@@ -422,7 +422,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       {answers.map((exchange, index) => exchange.answer ? <AnswerCard key={`${exchange.answer.answer_id}-${index}`} answer={exchange.answer} docs={docs} demo={demo} chatId={liveChatId} activeCitation={viewer?.answer.answer_id === exchange.answer.answer_id ? viewer.citation : undefined}
         edits={sceneEdits[exchange.answer.evidence.scene.doc_id || exchange.answer.doc_ids[0]]} busy={busy || restoring}
         onUndo={() => void ask('undo', [exchange.answer!.evidence.scene.doc_id || exchange.answer!.doc_ids[0]])} onOpenItem={(id) => void openCommandItem(exchange.answer!, id)} onOpenCitation={(citation) => {
-        setViewer((previous) => ({ answer: exchange.answer!, citation, request: (previous?.request ?? 0) + 1 }))
+        setViewer((previous) => ({ answer: exchange.answer!, citation, request: (previous?.request ?? 0) + 1, mode: '2d' }))
         onOpenCitation(citation)
       }} onVisualise={(citation) => {
         setViewer((previous) => ({ answer: exchange.answer!, citation, request: (previous?.request ?? 0) + 1, mode: '3d' }))

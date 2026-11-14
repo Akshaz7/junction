@@ -61,7 +61,10 @@ async function expectDrawing(drawing: Locator, answer: Answer) {
   await expect(drawing.getByTestId('drawing-viewport')).toBeVisible()
   const image = drawing.getByRole('img', { name: /^Drawing:/ })
   await expect.poll(() => image.evaluate((node: HTMLImageElement) => node.complete && node.naturalWidth > 0)).toBe(true)
-  const expected = answer.evidence.boxes.filter((box) => box.page === answer.citations[0].page)
+  // The viewer stays on the page it shows when the new answer also cites it, else opens the first citation's page.
+  const shown = Number((await image.getAttribute('alt'))?.match(/page (\d+)$/)?.[1])
+  const page = answer.citations.some((citation) => citation.page === shown) ? shown : answer.citations[0].page
+  const expected = answer.evidence.boxes.filter((box) => box.page === page)
   expect(expected.length).toBeGreaterThan(0)
   await expect(boxesOf(drawing)).toHaveCount(expected.length)
   await expect.poll(() => boxesOf(drawing).evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-item-id')).sort()))
