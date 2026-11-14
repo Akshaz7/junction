@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { FileText, Layers3, Box } from 'lucide-react'
+import { FileText, Layers3, Box, Smartphone } from 'lucide-react'
 import { AdvisorCardView } from '../viewer3d/AdvisorCardView'
 import { onAdvisorCards } from '../viewer3d/liveHighlight'
 import type { AdvisorCard } from '../viewer3d/advisor'
@@ -11,6 +11,9 @@ import { ExportAnswerButton } from './answer-export'
 import { answerTableSelection } from '../lib/ar-bridge'
 import { ShowOnTableButton } from './show-on-table'
 import { SceneCommandTags } from './scene-command-tags'
+import { sceneOpen } from '../lib/scene-open'
+import { isPaired, onPairingChange } from '../lib/pairing'
+import { PairPhoneButton } from './pair-phone'
 import type { DrawingEdits } from '../lib/scene-edits'
 
 export function formatCost(total: number): string {
@@ -59,6 +62,17 @@ function useAnswerAdvice(answer: Answer, chatId?: string | null): AdvisorCard[] 
   return cards
 }
 
+/** Inline hint for "show on table" answers: AR runs in the iOS app, not the browser. */
+export function ArHint() {
+  const [paired, setPaired] = useState(isPaired())
+  useEffect(() => onPairingChange(() => setPaired(isPaired())), [])
+  return <div className="ar-hint" role="note" data-testid="ar-hint">
+    <Smartphone size={16} aria-hidden="true" />
+    <p>Open the Hologram app on your iPhone and tap <strong>Show on table</strong>.</p>
+    {!paired && <PairPhoneButton />}
+  </div>
+}
+
 export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation, onVisualise, edits, busy, onUndo, onOpenItem, chatId }: {
   answer: Answer; docs: Document[]; demo: boolean; activeCitation?: Citation; onOpenCitation: (citation: Citation) => void
   /** Open the viewer straight in 3D. */
@@ -89,6 +103,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
     {!!docChips.length && <div className="answer-docs" aria-label="Documents used" data-testid="answer-docs">{docChips.map(({ docId, title, first }) => first
       ? <button type="button" key={docId} className="source-file-chip answer-doc-chip" aria-label={`Open document ${title}`} onClick={() => onOpenCitation(first)}><FileText size={14} /><span>{title}</span></button>
       : <span key={docId} className="source-file-chip answer-doc-chip"><FileText size={14} /><span>{title}</span></span>)}</div>}
+    {sceneOpen(answer) === 'ar' && <ArHint />}
     <SceneCommandTags answer={answer} edits={edits} busy={busy} onUndo={onUndo} onOpenItem={onOpenItem} />
     {!!advice.length && <div className="advisor-card-list" aria-label="Advice for this change" data-testid="answer-advisor-cards">
       {advice.map((card) => <AdvisorCardView key={card.card_id} card={card} />)}

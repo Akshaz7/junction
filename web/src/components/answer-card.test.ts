@@ -94,3 +94,21 @@ describe('answer rendering (QA-LIVE #7)', () => {
     expect(html).toContain('other__doc')
   })
 })
+
+describe('scene.open (CONTRACT 3.3)', () => {
+  it('shows the Show-on-table hint with a pair link when open is "ar"', () => {
+    const answer = makeDemoAnswer('Show it on the table')
+    answer.evidence.scene.open = 'ar'
+    const html = renderToStaticMarkup(createElement(AnswerCard, { answer, docs: [demoDocument], demo: true, onOpenCitation: () => {} }))
+    expect(html).toContain('data-testid="ar-hint"')
+    expect(html).toContain('Open the Hologram app on your iPhone and tap')
+    expect(html).toContain('Pair a phone')
+  })
+  it('shows no hint when open is absent or "3d"', () => {
+    for (const open of [undefined, '3d' as const]) {
+      const answer = makeDemoAnswer('How many windows are there?')
+      answer.evidence.scene.open = open
+      expect(renderToStaticMarkup(createElement(AnswerCard, { answer, docs: [demoDocument], demo: true, onOpenCitation: () => {} }))).not.toContain('ar-hint')
+    }
+  })
+})

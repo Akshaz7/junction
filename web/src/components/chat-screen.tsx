@@ -1,3 +1,4 @@
+import { sceneOpen, sceneOpenCitation } from '../lib/scene-open'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { ArrowUp, AtSign, CalendarClock, FileSearch, FileText, FolderOpen, HardHat, Plus, Scale, X } from 'lucide-react'
 import { Button } from './ui'
@@ -77,6 +78,10 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     lastAnswerId.current = latest.answer_id
     if (!seen || latest.answer.abstained) return
     const docId = latest.evidence.scene.doc_id || latest.doc_ids[0]
+    if (sceneOpen(latest) === '3d') { // CONTRACT 3.3: same path as the Visualise it button
+      const citation = sceneOpenCitation(latest)
+      if (citation) { setViewer((previous) => ({ answer: latest, citation, request: (previous?.request ?? 0) + 1, mode: '3d' })); onOpenCitation(citation); return }
+    }
     setViewer((previous) => {
       if (!previous || previous.citation.doc_id !== docId) return previous
       const citation = latest.citations.find((entry) => entry.doc_id === docId && entry.page === previous.citation.page) ?? latest.citations.find((entry) => entry.doc_id === docId)

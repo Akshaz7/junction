@@ -16,7 +16,7 @@ button, input, textarea { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: default; opacity: .45; }
 button, a, input, textarea, summary { -webkit-tap-highlight-color: transparent; }
-:focus-visible { outline: 2px solid var(--forest-600); outline-offset: 4px; }
+:focus-visible { outline: 2px solid var(--ring); outline-offset: 4px; }
 button, a { transition: background-color var(--duration-quick) ease; }
 a { color: inherit; text-decoration: none; }
 svg { flex-shrink: 0; }
@@ -864,3 +864,6 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 .pair-qr svg { width: 100%; height: 100%; display: block; }
 .pair-link { width: 100%; font: inherit; font-size: 12px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--ink-well); color: inherit; }
 .pair-notice { position: fixed; left: 50%; bottom: 24px; translate: -50% 0; z-index: 80; padding: 10px 16px; border-radius: 10px; background: var(--foreground); color: var(--background); font-size: 14px; max-width: calc(100vw - 32px); }
+
+.ar-hint { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 10px 0; padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--muted, transparent); font-size: 14px; }
+.ar-hint p { margin: 0; flex: 1 1 220px; }
