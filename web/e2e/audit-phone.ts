@@ -11,6 +11,7 @@ export class Audit {
   consoleErrors: string[] = []
   badResponses: string[] = []
   requests = 0
+  clicked: string[] = []
   constructor(readonly page: Page, readonly label: string) {
     page.on('console', (message) => { if (message.type() === 'error') this.consoleErrors.push(message.text()) })
     page.on('pageerror', (error) => this.consoleErrors.push(`pageerror: ${error.message}`))
@@ -25,6 +26,7 @@ export class Audit {
   report(testInfo: TestInfo) {
     const text = this.findings.map((f) => `[${f.kind}] ${f.where}: ${f.detail}`).join('\n')
     if (text) console.log(`AUDIT ${this.label}\n${text}`)
+    console.log(`AUDIT ${this.label}: clicked ${this.clicked.length}: ${this.clicked.join(' | ')}`)
     return testInfo.attach(`findings-${this.label}`, { body: text || 'none', contentType: 'text/plain' })
   }
   /** Console errors that are not caused by an intentional request failure. */
@@ -56,13 +58,13 @@ const interactive = 'button, a[href], [role=tab], [role=menuitem], [role=button]
 export interface Item { index: number; tag: string; name: string; key: string }
 
 /** Tag visible, enabled interactive elements with data-audit and return descriptors. */
-export async function collect(page: Page): Promise<Item[]> {
-  return page.evaluate((selector) => {
+export async function collect(page: Page, scope = 'body'): Promise<Item[]> {
+  return page.evaluate(([selector, scopeSelector]) => {
     document.querySelectorAll('[data-audit]').forEach((node) => node.removeAttribute('data-audit'))
     const items: { index: number; tag: string; name: string; key: string }[] = []
     const seen: Record<string, number> = {}
     let index = 0
-    for (const node of Array.from(document.querySelectorAll<HTMLElement>(selector))) {
+    for (const node of Array.from(document.querySelectorAll<HTMLElement>(scopeSelector).length ? Array.from(document.querySelectorAll<HTMLElement>(scopeSelector)).flatMap((root) => Array.from(root.querySelectorAll<HTMLElement>(selector))) : [])) {
       const style = getComputedStyle(node), rect = node.getBoundingClientRect()
       if (style.visibility === 'hidden' || style.display === 'none' || rect.width < 1 || rect.height < 1) continue
       if (node.closest('[inert],[hidden],[aria-hidden=true]')) continue
@@ -77,7 +79,7 @@ export async function collect(page: Page): Promise<Item[]> {
       index++
     }
     return items
-  }, interactive)
+  }, [interactive, scope])
 }
 
 export async function signature(page: Page) {
@@ -142,4 +144,48 @@ export async function layoutChecks(page: Page, audit: Audit, where: string) {
   const placeholder = info.text.match(/coming soon|lorem ipsum|not implemented|\bTODO\b|\bTBD\b|placeholder text|under construction/i)
   if (placeholder) audit.add(where, 'placeholder', placeholder[0])
   if (!/Inter/i.test(info.font)) audit.add(where, 'brand', `body font is ${info.font}`)
+}
+
+/**
+ * Click every control inside `scope` once, each from a freshly opened state (`open`), and require
+ * that it changes something (route, state, layer, API call) and that any layer it opens can be closed.
+ */
+export async function crawlScope(page: Page, audit: Audit, name: string, open: () => Promise<void>, scope: string, options: { skip?: RegExp; max?: number } = {}) {
+  await open()
+  const first = await collect(page, scope)
+  let count = 0
+  for (const item of first) {
+    const where = `${name} > ${item.tag} "${item.name}"`
+    if (/delete|remove|discard/i.test(item.name) || options.skip?.test(item.name)) continue
+    if (options.max && count >= options.max) break
+    await open()
+    const current = (await collect(page, scope)).find((entry) => entry.key === item.key && entry.name === item.name)
+    if (!current) { audit.add(where, 'unstable', 'control disappeared on reopen'); continue }
+    const el = page.locator(`[data-audit="${current.index}"]`)
+    const geo = await geometry(el)
+    if (!(item.tag === 'a' && geo.inProse) && !geo.hit) audit.add(where, 'touch-target', `${geo.w}x${geo.h}px, hit area under 44px`)
+    if (geo.covered) audit.add(where, 'covered', `covered by ${geo.covered}`)
+    if (geo.notch) audit.add(where, 'notch', 'control sits under the notch or home bar')
+    audit.clicked.push(item.name || item.tag); count++
+    const before = await signature(page), requests = audit.requests, bad = audit.badResponses.length, url = page.url()
+    try { await el.click({ timeout: 4000 }) } catch (error) { audit.add(where, 'unclickable', String(error).split('\n')[0]); continue }
+    await page.waitForTimeout(500)
+    if (audit.badResponses.length > bad) audit.add(where, 'bad-response', audit.badResponses.slice(bad).join('; '))
+    const file = await page.evaluate(() => document.activeElement instanceof HTMLInputElement && document.activeElement.type === 'file')
+    if (before === await signature(page) && audit.requests === requests && page.url() === url && !file) audit.add(where, 'dead', 'click changed nothing (no route, state, dialog or API call)')
+    await closeLayers(page, audit, where)
+    await layoutChecks(page, audit, `${where} (after click)`)
+  }
+}
+
+/** Anything a click opened must be closable: Escape, a Close/Back control, or the nav. */
+export async function closeLayers(page: Page, audit: Audit, where: string) {
+  const layer = page.locator('[role=dialog]:visible, dialog[open], .document-viewer:visible, [role=alertdialog]:visible')
+  if (!await layer.count()) return
+  await page.keyboard.press('Escape')
+  await page.waitForTimeout(250)
+  if (!await layer.count()) return
+  const close = page.getByRole('button', { name: /close|back|dismiss|cancel/i }).filter({ visible: true }).first()
+  if (await close.count()) { await close.click().catch(() => {}); await page.waitForTimeout(250) }
+  if (await layer.count()) audit.add(where, 'dead-end', 'dialog/sheet opened and could not be closed')
 }

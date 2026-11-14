@@ -16,7 +16,8 @@ const domHash = (page: Page) => page.evaluate(() => { const s = document.body.in
 
 async function audit(page: Page, route: string, problems: string[], seen: string[]) {
   const consoleErrors: string[] = []
-  page.on('console', (m) => { if (m.type() === 'error' && !/favicon|WebSocket|ws:/i.test(m.text())) consoleErrors.push(m.text()) })
+  page.on('console', (m) => { if (m.type() === 'error' && !/favicon|WebSocket|ws:|Failed to load resource/i.test(m.text())) consoleErrors.push(m.text()) })
+  page.on('response', (r) => { if (r.status() >= 400 && !/favicon/.test(r.url())) consoleErrors.push(`HTTP ${r.status()} ${r.url().replace(/^https?:\/\/[^/]+/, '')}`) })
   page.on('pageerror', (e) => consoleErrors.push(String(e)))
   const open = async () => { await page.goto(`/#/${route}`); await page.waitForLoadState('networkidle').catch(() => {}); await page.waitForTimeout(400) }
   await open()
@@ -31,6 +32,8 @@ async function audit(page: Page, route: string, problems: string[], seen: string
     const tag = await el.evaluate((n) => n.tagName.toLowerCase())
     const who = `${route}: ${tag} "${label}"`
     seen.push(who)
+    if (/skip to content/i.test(label)) continue
+    const current = await el.evaluate((n) => n.getAttribute('aria-pressed') === 'true' || n.getAttribute('aria-selected') === 'true' || n.getAttribute('aria-current') === 'page')
     if (destructive.test(label) || await el.isDisabled().catch(() => false)) continue
     const href = tag === 'a' ? await el.getAttribute('href') : null
     if (tag === 'a' && (!href || href === '#')) { problems.push(`${who} has no real href`); continue }
@@ -51,7 +54,7 @@ async function audit(page: Page, route: string, problems: string[], seen: string
     if (bad) problems.push(`${who} network failure ${bad}`)
     if (!outcome && !reqs && after === before) {
       // A link to the current route is a legitimate no-op only when the href equals the current hash.
-      if (!(href && href === `#/${route}`)) problems.push(`${who} did nothing`)
+      if (!current && !(href && href === `#/${route}`)) problems.push(`${who} did nothing`)
     }
   }
   if (consoleErrors.length) problems.push(`${route}: console errors ${[...new Set(consoleErrors)].slice(0, 3).join(' | ')}`)
@@ -66,3 +69,68 @@ for (const route of routes) {
     expect(problems, problems.join('\n')).toEqual([])
   })
 }
+
+const ac20 = 'ifc_bench__ac20-arc'
+
+test('Library flow: create a skill, run it on a drawing, see the answer, delete it (all through the UI)', async ({ page }) => {
+  const name = `Audit skill ${Date.now()}`
+  await page.goto('/#/library')
+  const panel = page.getByRole('tabpanel')
+  const create = panel.getByRole('form', { name: 'Create skill' })
+  await create.getByLabel('Skill name', { exact: true }).fill(name)
+  await create.getByLabel('Skill prompt', { exact: true }).fill('How many windows are there?')
+  const saved = page.waitForResponse((r) => r.url().endsWith('/api/skills') && r.request().method() === 'POST')
+  await create.getByRole('button', { name: 'Save skill', exact: true }).click()
+  expect((await saved).status()).toBe(201)
+  await panel.getByLabel('Run on drawing', { exact: true }).selectOption(ac20)
+  const card = panel.locator('article, section').filter({ hasText: name }).filter({ has: page.getByRole('button', { name: 'Run skill', exact: true }) }).last()
+  const ran = page.waitForResponse((r) => /\/api\/skills\/[^/]+\/run$/.test(r.url()))
+  await card.getByRole('button', { name: 'Run skill', exact: true }).click()
+  expect((await ran).ok()).toBe(true)
+  await expect(panel.getByRole('region', { name: 'Skill answer' })).toBeVisible()
+  const del = page.waitForResponse((r) => r.request().method() === 'DELETE' && r.url().includes('/api/skills/'))
+  await panel.getByRole('button', { name: `Delete skill ${name}` }).click()
+  expect((await del).status()).toBe(204)
+  await expect(panel.getByText(name, { exact: true })).toHaveCount(0)
+})
+
+test('Library flow: create an automation, run now, see and export the report, delete it', async ({ page }) => {
+  const name = `Audit routine ${Date.now()}`
+  await page.goto('/#/library')
+  await page.getByRole('tab', { name: 'Automations' }).click()
+  const screen = page.getByRole('tabpanel')
+  const create = screen.getByRole('form', { name: 'Create automation' })
+  await create.getByLabel('Automation name', { exact: true }).fill(name)
+  await create.getByLabel('Automation prompt', { exact: true }).fill('How many windows are there?')
+  await create.getByLabel('Automation drawing', { exact: true }).selectOption(ac20)
+  const saved = page.waitForResponse((r) => r.url().endsWith('/api/automations') && r.request().method() === 'POST')
+  await create.getByRole('button', { name: 'Save automation', exact: true }).click()
+  expect((await saved).status()).toBe(201)
+  const card = screen.locator('[data-automation-id]').filter({ hasText: name })
+  await expect(card).toContainText('Not run yet')
+  const ran = page.waitForResponse((r) => /\/api\/automations\/[^/]+\/run$/.test(r.url()))
+  await card.getByRole('button', { name: 'Run now', exact: true }).click()
+  expect((await ran).ok()).toBe(true)
+  const report = screen.getByRole('region', { name: 'Last automation report' })
+  await expect(report.getByRole('heading', { name, exact: true })).toBeVisible()
+  const download = page.waitForEvent('download')
+  await report.getByRole('button', { name: 'Export .md', exact: true }).click()
+  expect((await download).suggestedFilename()).toMatch(/\.md$/)
+  const del = page.waitForResponse((r) => r.request().method() === 'DELETE' && r.url().includes('/api/automations/'))
+  await screen.getByRole('button', { name: `Delete automation ${name}` }).click()
+  expect((await del).status()).toBe(204)
+  await expect(screen.getByText(name, { exact: true })).toHaveCount(0)
+})
+
+test('Tools flow: run checks on AC20 and open a finding in the viewer', async ({ page }) => {
+  await page.goto('/#/tools')
+  const screen = page.getByRole('region', { name: 'Findings', exact: true })
+  await screen.getByLabel('Drawing', { exact: true }).selectOption(ac20)
+  const run = page.waitForResponse((r) => r.url().endsWith('/api/findings/run'))
+  await screen.getByRole('button', { name: 'Run checks', exact: true }).click()
+  expect((await run).ok()).toBe(true)
+  const open = screen.getByRole('button', { name: /^Open finding / }).first()
+  await expect(open).toBeEnabled({ timeout: 30_000 })
+  await open.click()
+  await expect(page.locator('.viewer3d canvas, .evidence-region').first()).toBeVisible({ timeout: 30_000 })
+})

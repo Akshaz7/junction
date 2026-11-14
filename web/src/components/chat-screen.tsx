@@ -43,7 +43,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const [mention, setMention] = useState<Mention | null>(null)
   const [toolsOpen, setToolsOpen] = useState(false)
   const [activeOption, setActiveOption] = useState(0)
-  const [viewer, setViewer] = useState<{ answer: Answer; citation: Citation; request: number } | null>(null)
+  const [viewer, setViewer] = useState<{ answer: Answer; citation: Citation; request: number; mode?: '2d' | '3d' } | null>(null)
   const [split, setSplit] = useState(48)
   const splitContainer = useRef<HTMLDivElement>(null)
   const sheet = useViewerSheet()
@@ -154,7 +154,11 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       if (event.type === 'connected') { refresh(); return }
       if (event.type === 'disconnected') return
       if (event.chat_id !== liveChatId || submitting.current) return
-      if (event.type === 'chat.message' || event.type === 'chat.done') refresh()
+      if (event.type === 'chat.message' && event.role === 'user' && event.text) {
+        // Show the question straight from the event; the snapshot fetch below only reconciles.
+        setPendingQuestion(event.text); setBusy(true); setStatuses(['Thinking…']); setTraces([]); setStreamText(''); setError('')
+        refresh()
+      } else if (event.type === 'chat.message' || event.type === 'chat.done') refresh()
       else if (event.type === 'chat.status') setStatuses((previous) => previous.at(-1) === event.text ? previous : [...previous, event.text])
       else if (event.type === 'chat.delta') setStreamText(event.text)
       else if (event.type === 'chat.trace') setTraces((previous) => JSON.stringify(previous.at(-1)) === JSON.stringify(event.step) ? previous : [...previous, event.step])
@@ -348,6 +352,9 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         onUndo={() => void ask('undo', [exchange.answer!.evidence.scene.doc_id || exchange.answer!.doc_ids[0]])} onOpenItem={(id) => void openCommandItem(exchange.answer!, id)} onOpenCitation={(citation) => {
         setViewer((previous) => ({ answer: exchange.answer!, citation, request: (previous?.request ?? 0) + 1 }))
         onOpenCitation(citation)
+      }} onVisualise={(citation) => {
+        setViewer((previous) => ({ answer: exchange.answer!, citation, request: (previous?.request ?? 0) + 1, mode: '3d' }))
+        onOpenCitation(citation)
       }} /> : <article className="exchange" key={`${exchange.id}-${index}`}>
         {exchange.question && <div className="question-bubble">{exchange.question}</div>}
         <p className="answer-text">{exchange.content || 'No answer yet.'}</p>
@@ -417,7 +424,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         }}
         onPointerUp={(event) => event.currentTarget.releasePointerCapture(event.pointerId)} />
       <DrawingEditsContext value={sceneEdits}>
-        <DocumentViewer key={viewer.citation.doc_id} answer={viewer.answer} citation={viewer.citation} sheet={sheet}
+        <DocumentViewer key={viewer.citation.doc_id} answer={viewer.answer} citation={viewer.citation} sheet={sheet} initialMode={viewer.mode}
           chatId={liveChatId}
           edits={sceneEdits[viewer.citation.doc_id]} commands={viewerCommands.length ? viewerCommands : undefined} onClose={() => setViewer(null)} />
       </DrawingEditsContext>

@@ -1,11 +1,21 @@
 import type { ItemEdit } from './edits';
 
+export type AdvisorSeverity = 'violation' | 'suggestion' | 'info';
+export function cardSeverity(card: Pick<AdvisorCard, 'kind' | 'severity'>): AdvisorSeverity {
+  if (card.severity === 'violation' || card.severity === 'suggestion' || card.severity === 'info') return card.severity;
+  return card.kind === 'warning' ? 'violation' : card.kind === 'option' ? 'suggestion' : 'info';
+}
+
 export interface AdvisorCard {
   card_id: string;
   kind: 'warning' | 'option' | 'info';
   title: string;
   body: string;
   item_ids: string[];
+  /** violation (red), suggestion (amber), info (grey); older cards only have `kind`. */
+  severity?: AdvisorSeverity;
+  /** Rule ids the check ran against. */
+  checked?: string[];
   source: { type: 'rule' | 'material_table' | 'document'; ref: string; title: string; quote: string };
 }
 export interface AdvisorEvent {
@@ -30,7 +40,9 @@ export function sourcedCards(value: unknown): AdvisorCard[] {
       || !['card_id', 'title', 'body'].every((key) => text(entry[key]))
       || !Array.isArray(entry.item_ids) || !entry.item_ids.every(text)
       || cards.some((card) => card.card_id === entry.card_id)) continue;
-    cards.push(entry as unknown as AdvisorCard);
+    const severity = ['violation', 'suggestion', 'info'].includes(entry.severity as string) ? entry.severity : undefined;
+    const checked = Array.isArray(entry.checked) ? entry.checked.filter(text) : undefined;
+    cards.push({ ...(entry as unknown as AdvisorCard), severity: severity as AdvisorSeverity | undefined, checked });
     if (cards.length === 3) break;
   }
   return cards;

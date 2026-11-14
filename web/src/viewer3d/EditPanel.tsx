@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertTriangle, Info, Lightbulb } from 'lucide-react';
+import { AdvisorCardView } from './AdvisorCardView';
 import { createAdvisorRequests, type AdvisorCard } from './advisor';
 import { onAdvisorCards } from './liveHighlight';
 import { WALL_MATERIALS, type EditState, type ItemEdit, type WallMaterial } from './edits';
@@ -60,17 +60,7 @@ export function EditPanel({ selected, manifest, edits, moving, advice, onRemove,
       {advice.status === 'loading' && <p role="status">Checking this change…</p>}
       {advice.status === 'error' && <p role="status">Advice is unavailable for this change.</p>}
       {advice.status === 'ready' && !advice.cards.length && <p role="status">No advice for this change.</p>}
-      {advice.cards.map((card) => {
-        const Icon = card.kind === 'warning' ? AlertTriangle : card.kind === 'option' ? Lightbulb : Info;
-        return <article className="viewer3d-advisor-card" key={card.card_id} data-advisor-card={card.card_id} data-kind={card.kind}>
-          <button type="button" className="viewer3d-advisor-select" onClick={() => onHighlight(card.item_ids)}
-            aria-label={`Highlight: ${card.title}`}>
-            <span><Icon size={16} aria-label={card.kind} /><strong>{card.title}</strong></span>
-            <span>{card.body}</span>
-          </button>
-          <details><summary>{card.source.title}</summary><blockquote>{card.source.quote}</blockquote></details>
-        </article>;
-      })}
+      {advice.cards.map((card) => <AdvisorCardView key={card.card_id} card={card} onHighlight={onHighlight} />)}
     </div>
   </aside>;
 }

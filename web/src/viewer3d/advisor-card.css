@@ -1,0 +1,14 @@
+.viewer3d-advisor-card { border-left: 4px solid var(--advisor-color, #7f7f7f); }
+.viewer3d-advisor-card[data-severity='violation'] { --advisor-color: #b3261e; background: #fdecea; }
+.viewer3d-advisor-card[data-severity='suggestion'] { --advisor-color: #b26a00; background: #fff4e0; }
+.viewer3d-advisor-card[data-severity='info'] { --advisor-color: #6b6b6b; background: #f2f2f2; }
+.viewer3d-advisor-card .advisor-severity { margin-left: .5rem; font-size: .75rem; font-weight: 600; color: var(--advisor-color); text-transform: uppercase; letter-spacing: .03em; }
+.viewer3d-advisor-card .advisor-checked { margin: .25rem 0 0; font-size: .75rem; color: #555; overflow-wrap: anywhere; }
+.viewer3d-advisor-card .viewer3d-advisor-select { text-align: left; width: 100%; }
+.advisor-card-list { display: grid; gap: .5rem; margin: .75rem 0; }
+@media (prefers-color-scheme: dark) {
+  .viewer3d-advisor-card[data-severity='violation'] { background: #3a1613; }
+  .viewer3d-advisor-card[data-severity='suggestion'] { background: #3a2a0c; }
+  .viewer3d-advisor-card[data-severity='info'] { background: #262626; }
+  .viewer3d-advisor-card .advisor-checked { color: #bbb; }
+}

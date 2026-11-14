@@ -119,14 +119,25 @@ import { VisualiseItButton, VisualisePanel } from './viewer3d';
 
 The button opens a modal with focus containment, Escape/Close dismissal and
 focus restoration. The scene loads through the same API routes. It holds a
-top-down flat plan for 600 ms, then eases wall/door/window Y scales to their
-original values over 1200 ms while the camera moves into perspective. The
-textured `plan_floor` stays readable. IFC scenes also begin top-down. Reduced
-motion opens the completed view immediately. Orbit input finishes the rise
-and gives the user camera control. Timer fallbacks advance the rise phases even
-when animation frames are delayed; closing cancels these timers and disposes
-the viewer and animation. The dialog reports `loading`, `flat`, `rising`, `done`,
-or `error` through `data-rise-state`.
+top-down flat plan for 600 ms, then builds the model step by step (`rise.ts`,
+`buildSteps`) while the camera moves into perspective:
+
+- IFC: foundations, then per storey (lowest first) slab, columns and beams, walls,
+  stairs, doors and windows, then roof. Empty steps are dropped.
+- Raster and DXF plans: floor, walls, doors and windows.
+- Each step takes 200-600 ms. A slider under the view (`BuildSlider`) has one stop
+  per step, labelled "Step 4 of 12 · Ground floor walls", with play/pause and
+  step back/forward. Dragging pauses the build and works both ways. The camera
+  stays put and the answer's highlighted items stay fully visible at every step.
+- Reduced motion shows the finished model at once; the slider still works.
+- `BuildState` (`index`, `total`, `label`, `playing`, `phase`, `progress`) is
+  exported and reaches the page through `viewer.onBuildChange`; control it with
+  `setBuildStep`, `playBuild`, `pauseBuild`.
+
+Orbit input only takes over the camera. Timer fallbacks advance the phases even
+when animation frames are delayed; closing cancels them and disposes the viewer.
+The dialog reports `loading`, `flat`, `rising`, `done` or `error` through
+`data-rise-state`.
 A missing scene displays “3D model not available for this document”.
 
 `answerToVisualise` uses the scene document ID, the exact answer highlight IDs,
@@ -282,8 +293,11 @@ and pass `{doc_id, chat_id?, edit: {op, item_ids, detail}}`. Optional `chat_id`
 is a `Viewer3D` prop. Move details contain `delta_m`/`position_m`; material details
 contain `material`. The existing shared `/ws` connection also receives scoped
 `advisor.cards` events. Live responses supersede older in-flight HTTP responses.
-At most three complete sourced cards render, with kind icons and expandable
-source quotes. Card selection highlights its item IDs with manifest tags. Empty
+At most three complete sourced cards render (`AdvisorCardView`, also used in the
+chat answer card for `answer.advisor_cards` and live `advisor.cards`). Colour
+follows `severity`: red violation, amber suggestion, grey info (older cards fall
+back to `kind`). A "Checked: rule ids" line lists `checked`, and the source
+quote is expandable. Hiding an item posts `edit: {op: 'hide', item_ids}`. Card selection highlights its item IDs with manifest tags. Empty
 responses say “No advice for this change.”; failed requests say advice is
 unavailable. The server currently needs advisor-only move/material validation
 and detail forwarding (recorded in the handoff).
@@ -309,3 +323,11 @@ building items. Sprite picking updates world matrices and supplies the camera
 through `Raycaster.setFromCamera`. The e2e test disables only the DOM pin pointer
 targets to verify this canvas path, then restores them and opens the same card
 with the pin button's Enter key.
+
+## Kind colours and legends
+
+One fixed colour per item kind (Okabe-Ito) lives in `../lib/kind-colors.ts` and is
+mirrored to `public/kind-colors.json` for iOS (a vitest keeps them equal). 2D
+evidence boxes (`box.kind`, or the citation's `item_kind`, else the id prefix) and
+3D highlights both use it. `KindLegend` shows colour plus label and count ("Windows 11"),
+for single- and multi-kind answers (`answer.value` may be `{window: 11, door: 11}`).

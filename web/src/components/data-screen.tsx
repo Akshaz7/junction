@@ -1,16 +1,15 @@
-import { useEffect, useLayoutEffect, useRef, useState, type DragEvent } from 'react'
-import { ArrowRight, Box, ChevronDown, ChevronLeft, ChevronRight, Download, File, FileImage, FileText, Folder, FolderPlus, GitCompare, Info, Layers, LoaderCircle, Maximize2, MessageSquare, Minus, MoreHorizontal, PenLine, Plus, ScanText, Search, SlidersHorizontal, Upload, X } from 'lucide-react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { ArrowRight, Box, ChevronDown, ChevronLeft, ChevronRight, Download, File, FileImage, FileText, Folder, FolderPlus, GitCompare, Info, Layers, Maximize2, MessageSquare, Minus, MoreHorizontal, PenLine, Plus, ScanText, Search, SlidersHorizontal, Upload, X } from 'lucide-react'
 import { Badge, Button, Input } from './ui'
 import { workspaceApi } from '../lib/api'
-import type { Document, IngestStatus } from '../lib/types'
+import type { Document } from '../lib/types'
 import { fitPhonePage, type Size } from '../lib/page-transform'
 import { DrawingModel, ViewerModeToggle, type ViewerMode } from './drawing-model'
 import './data-screen.css'
 import { ShowOnTableButton } from './show-on-table'
+import { UploadDialog } from './upload-dialog'
 
 const PAGE_SIZE = 40
-const ACCEPTED = '.ifc,.dxf,.dwg,.pdf,.svg,.png,.jpg,.jpeg,.tif,.tiff'
-const terminal = new Set(['ready', 'partial', 'failed', 'stored'])
 
 type Version = { doc_id: string; index: number; date: string | null; size: number | null; label: string }
 export type FileDocument = Document & {
@@ -44,11 +43,6 @@ function DocumentTitle({ title }: { title: string }) {
   const suffix = title.match(/^(.*?)(\s*[—–-]?\s*generated for demo)$/i)
   return suffix ? <><span className="document-title-name">{suffix[1]}</span><small className="document-demo-label">{suffix[2]}</small></> : <span className="document-title-name">{title}</span>
 }
-type UploadState = {
-  name: string; docId?: string; status: 'uploading' | 'stored' | IngestStatus['status']
-  stages: IngestStatus['stages']; detail: string
-}
-
 function DocumentImage({ doc, preview = false, onLoad }: { doc: Document; preview?: boolean; onLoad?: (size: Size) => void }) {
   const [failed, setFailed] = useState(false)
   const Icon = doc.kind === 'ifc' || doc.kind === 'dxf' || doc.kind === 'dwg' ? Box : doc.kind === 'raster' || doc.kind === 'svg' ? FileImage : File
@@ -131,7 +125,6 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const [versionError, setVersionError] = useState('')
   const [versionLoading, setVersionLoading] = useState(false)
   const versionRequest = useRef(0)
-  const openedUpload = useRef<string | null>(null)
   useEffect(() => {
     if (demo || hidden) return
     const controller = new AbortController()
@@ -149,14 +142,9 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const [page, setPage] = useState(1)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [previewDocked, setPreviewDocked] = useState(false)
-  const [upload, setUpload] = useState<UploadState | null>(null)
+  const [uploadOpen, setUploadOpen] = useState(false)
   const [uploadError, setUploadError] = useState('')
-  const [pollAttempt, setPollAttempt] = useState(0)
-  const [dragging, setDragging] = useState(false)
-  const uploadInput = useRef<HTMLInputElement>(null)
-  const uploading = useRef(false)
   const lastOpened = useRef<HTMLButtonElement | null>(null)
-  const pending = !!upload && !terminal.has(upload.status)
 
   // Reopening Data keeps the retained preview alongside navigation. Opening a
   // file explicitly starts a full-screen reading session on phones.
@@ -164,80 +152,10 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
     if (hidden && selectedId) setPreviewDocked(true)
   }, [hidden, selectedId])
 
-  useEffect(() => {
-    if (!upload?.docId || terminal.has(upload.status)) return
-    const docId = upload.docId
-    const controller = new AbortController()
-    let timer: ReturnType<typeof setTimeout>
-    async function poll() {
-      try {
-        const result = await workspaceApi.getIngestStatus(docId, controller.signal)
-        if (controller.signal.aborted) return
-        setUpload((previous) => previous ? { ...previous, ...result } : previous)
-        if (terminal.has(result.status)) {
-          await onRefresh()
-          if (controller.signal.aborted) return
-          if (result.status === 'ready' || result.status === 'partial') {
-            setOlderDoc(null)
-            setPreviewDocked(false)
-            setSelectedId(docId)
-            openedUpload.current = docId
-          }
-        } else {
-          timer = setTimeout(poll, 1500)
-        }
-      } catch (error) {
-        if (!controller.signal.aborted) setUploadError(error instanceof Error ? error.message : 'Could not check upload progress.')
-      }
-    }
-    void poll()
-    return () => { controller.abort(); clearTimeout(timer) }
-    // Status updates must not restart the poll; only a new upload or an explicit retry does.
-  }, [upload?.docId, pollAttempt, onRefresh])
-
-  async function uploadFile(file: File) {
-    if (uploading.current || pending) return
-    setUploadError('')
-    if (!/\.(ifc|dxf|dwg|pdf|svg|png|jpe?g|tiff?)$/i.test(file.name)) {
-      setUploadError('Choose an IFC, DXF, DWG, PDF, SVG, PNG, JPG or TIF file.')
-      return
-    }
-    if (file.size > 100 * 1024 * 1024) { setUploadError('Choose a file smaller than 100 MB.'); return }
-    uploading.current = true
-    setUpload({ name: file.name, status: 'uploading', detail: '', stages: [] })
-    try {
-      const receipt = await workspaceApi.uploadDocument(file)
-      setUpload({ name: file.name, docId: receipt.doc_id, status: receipt.status === 'stored' ? 'stored' : 'running', detail: receipt.status === 'stored' ? receipt.detail : '', stages: [] })
-      setFolder('Uploads')
-      setSearch('')
-      setPage(1)
-      await onRefresh()
-    } catch (error) {
-      setUploadError(error instanceof Error ? error.message : 'Upload failed. Please try again.')
-      setUpload((previous) => previous?.docId ? previous : null)
-    } finally {
-      uploading.current = false
-    }
-  }
-
-  function drop(event: DragEvent) {
-    event.preventDefault()
-    setDragging(false)
-    if (event.dataTransfer.files[0]) void uploadFile(event.dataTransfer.files[0])
-  }
-
   function closeDetail() {
     setSelectedId(null)
     requestAnimationFrame(() => lastOpened.current?.focus())
   }
-
-  useEffect(() => {
-    if (!upload?.docId || upload.status !== 'stored' || openedUpload.current === upload.docId || !docs.some((doc) => doc.doc_id === upload.docId)) return
-    openedUpload.current = upload.docId
-    setOlderDoc(null)
-    setPreviewDocked(false)
-    setSelectedId(upload.docId)
-  }, [docs, upload])
 
   async function openVersion(id: string) {
     const request = ++versionRequest.current
@@ -265,40 +183,27 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const query = search.trim().toLowerCase()
   // Searching always spans every source, even with a folder selected.
   const filtered = docs.filter((doc) => query ? `${doc.title} ${doc.doc_id} ${doc.source} ${doc.folder || ''} ${doc.formats.join(' ')} ${doc.licence || ''} ${doc.credit || ''}`.toLowerCase().includes(query) : inFolder(doc, activeFolder))
-  if (upload?.docId) filtered.sort((a, b) => Number(b.doc_id === upload.docId) - Number(a.doc_id === upload.docId))
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, pageCount)
   const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
   const selected = docs.find((doc) => doc.doc_id === selectedId) || (olderDoc?.doc_id === selectedId ? olderDoc : null)
-  const uploadLabel = !upload ? '' : upload.status === 'uploading' ? 'Uploading…' : upload.status === 'running' || upload.status === 'none' ? 'Processing document…' : upload.status === 'ready' ? 'Ready to use' : upload.status === 'partial' ? 'Page preview ready; some processing is unavailable.' : upload.status === 'failed' ? 'Processing failed. The original file is stored.' : 'File stored. Processing is unavailable on this server.'
-
-  return <section className="data-screen" aria-label="Project documents" hidden={hidden} onDragOver={(event) => {
-    event.preventDefault()
-    if (!demo && !pending) setDragging(true)
-  }} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false) }} onDrop={(event) => {
-    if (demo || pending) { event.preventDefault(); setDragging(false) } else drop(event)
-  }}>
+  return <section className="data-screen" aria-label="Project documents" hidden={hidden}>
     <div className="data-screen-toolbar"><div><h2>Project documents</h2><p>The sources behind your answers.</p></div>
-      <Button variant="raised" disabled={demo || pending} onClick={() => uploadInput.current?.click()}><Upload size={16} />Upload</Button>
+      <Button variant="raised" disabled={demo} onClick={() => { setUploadError(''); setUploadOpen(true) }}><Upload size={16} />Upload</Button>
     </div>
-    <input ref={uploadInput} className="data-file-input" type="file" aria-label="Upload drawing" accept={ACCEPTED} disabled={demo || pending} onChange={(event) => {
-      const file = event.target.files?.[0]
-      event.target.value = ''
-      if (file) void uploadFile(file)
-    }} />
-    <div className={`data-drop-zone ${dragging ? 'is-dragging' : ''}`}>
-      <Upload size={18} aria-hidden="true" /><span>{demo ? 'Connect to the server to upload a drawing.' : 'Drop a drawing here, or use Upload.'}<small>One file at a time · IFC, DXF, DWG, PDF, SVG, PNG, JPG, TIF · up to 100 MB</small></span>
+    <UploadDialog open={uploadOpen} onClose={() => setUploadOpen(false)} onAsk={onAsk}
+      onOpen={(doc) => { setOlderDoc(doc); setPreviewDocked(false); setSelectedId(doc.doc_id) }}
+      onReady={() => {
+        setFolder(''); setSearch(''); setPage(1)
+        void onRefresh().catch((error: unknown) => setUploadError(error instanceof Error ? error.message : 'Could not refresh documents.'))
+      }} />
+    <div className="data-drop-zone">
+      <Upload size={18} aria-hidden="true" /><span>{demo ? 'Connect to the server to upload a drawing.' : 'Use Upload to choose or drop a drawing.'}<small>One file at a time · PDF, PNG, JPG, DXF, IFC · up to 100 MiB</small></span>
     </div>
-    {upload && <div className="data-upload-status" role="status" aria-live="polite" aria-busy={pending && !uploadError}>
-      {pending && !uploadError && <LoaderCircle size={16} className="data-spinner" />}<div><strong>{upload.name}</strong><p>{uploadLabel}</p>{pending && <progress aria-label="Document processing" />} {upload.detail && !terminal.has(upload.status) && <p>{upload.detail}</p>}
-        {!!upload.stages.length && <ul>{upload.stages.map((stage, index) => <li key={`${stage.stage}-${index}`}>{stage.stage}: {stage.ok ? 'complete' : 'unavailable'}</li>)}</ul>}
-        {upload.detail && terminal.has(upload.status) && <p>{upload.detail}</p>}</div>
-    </div>}
-    {uploadError && <div className="data-upload-error"><p role="alert">{uploadError}</p>{upload?.docId && <Button variant="outline" onClick={async () => {
+    {uploadError && <div className="data-upload-error"><p role="alert">{uploadError}</p><Button variant="outline" onClick={async () => {
       setUploadError('')
-      setPollAttempt((attempt) => attempt + 1)
       try { await onRefresh() } catch (error) { setUploadError(error instanceof Error ? error.message : 'Could not refresh documents.') }
-    }}>Retry status</Button>}</div>}
+    }}>Retry refresh</Button></div>}
     {versionError && <p className="data-upload-error" role="alert">{versionError}</p>}
     <div className={`data-browser ${selected ? 'has-detail' : ''}`}>
       <nav className="data-folders" aria-label="Document folders"><h2>Folders<FolderPlus size={14} /></h2>

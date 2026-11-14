@@ -6,7 +6,9 @@ export { Viewer3D, type Viewer3DProps, type Viewer3DTestHandle, type LinkedViewe
 export { ViewerTestPage } from './ViewerTestPage';
 export { VisualiseItButton, VisualisePanel, type VisualiseItButtonProps, type VisualisePanelProps } from './VisualiseIt';
 export { answerToVisualise, type VisualiseAnswer } from './visualise';
-export { type RisePhase, type RiseState } from './rise';
+export { type RisePhase, type RiseState, type BuildState, type BuildStep } from './rise';
+export { AdvisorCardView } from './AdvisorCardView';
+export { cardSeverity, type AdvisorCard, type AdvisorSeverity } from './advisor';
 export { buildItemDetails, indexElements, type ItemDetails, type IFCElement } from './identify';
 export { onHighlight, sendHighlight, type HighlightChannel, type HighlightMessage } from './liveHighlight';
 export { onSceneEvent, sendCommand, type SceneChannel, type SceneEvent } from './liveHighlight';

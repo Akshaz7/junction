@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Clock, MessageSquareShare, Plus, X } from 'lucide-react'
 import { Button } from './ui'
 import { overviewDate } from '../lib/overview'
+import { FollowToggle } from './follow-banner'
+import './follow-banner.css'
 
 interface HistoryChat { id: string; title: string | null; created_at: string }
 
@@ -68,7 +70,7 @@ export function ChatHeaderActions({ chatId, onNew }: { chatId: string | null; on
     <button type="button" className="button button-raised button-size-default" ref={historyButton} aria-label="History" aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? 'chat-history' : undefined} onClick={() => setOpen((value) => !value)}><Clock size={16} /><span>History</span></button>
     <Button variant="raised" aria-label="Share" onClick={() => void share()}><MessageSquareShare size={16} /><span>Share</span></Button>
     {open && <section id="chat-history" className="chat-history-popover" role="dialog" aria-label="Chat history">
-      <header><strong>History</strong><button type="button" aria-label="Close chat history" onClick={() => { setOpen(false); historyButton.current?.focus() }}><X size={16} /></button></header>
+      <header><strong>History</strong><FollowToggle /><button type="button" aria-label="Close chat history" onClick={() => { setOpen(false); historyButton.current?.focus() }}><X size={16} /></button></header>
       {loading ? <p role="status">Loading chats…</p> : error ? <p role="alert">{error}</p> : chats.length ? <ul>{chats.map((chat) => <li key={chat.id}>
         <a href={`#/chat/${encodeURIComponent(chat.id)}`} aria-current={chat.id === chatId ? 'page' : undefined} onClick={() => setOpen(false)}><span>{chat.title || 'Untitled chat'}</span><time dateTime={chat.created_at}>{overviewDate(chat.created_at)}</time></a>
       </li>)}</ul> : <p>No saved chats yet.</p>}

@@ -1,5 +1,5 @@
 import { devices, expect, test, type Page } from '@playwright/test'
-import { Audit, collect, geometry, installSafeAreas, layoutChecks, openRoute, routes, signature } from './audit-phone'
+import { Audit, closeLayers, collect, geometry, installSafeAreas, layoutChecks, openRoute, routes, signature } from './audit-phone'
 
 /**
  * Phone button audit: every route reached through the bottom tabs + More, every visible
@@ -69,6 +69,7 @@ for (const config of configs) {
           if (tap && !geo.hit) audit.add(where, 'touch-target', `${geo.w}x${geo.h}px, hit area under 44px`)
           if (geo.notch) audit.add(where, 'notch', 'control sits under the notch or home bar')
           if (geo.covered) audit.add(where, 'covered', `covered by ${geo.covered}`)
+          audit.clicked.push(item.name || item.tag)
           const before = await signature(page)
           const requestsBefore = audit.requests
           const badBefore = audit.badResponses.length
@@ -92,18 +93,6 @@ for (const config of configs) {
 
 async function isFile(page: Page) {
   return page.evaluate(() => document.activeElement instanceof HTMLInputElement && document.activeElement.type === 'file')
-}
-
-/** Anything a click opened must be closable: Escape, a Close/Back control, or the nav. */
-async function closeLayers(page: Page, audit: Audit, where: string) {
-  const layer = page.locator('[role=dialog]:visible, .document-viewer:visible, [role=alertdialog]:visible')
-  if (!await layer.count()) return
-  await page.keyboard.press('Escape')
-  await page.waitForTimeout(250)
-  if (!await layer.count()) return
-  const close = page.getByRole('button', { name: /close|back|dismiss|cancel/i }).filter({ visible: true }).first()
-  if (await close.count()) { await close.click().catch(() => {}); await page.waitForTimeout(250) }
-  if (await layer.count()) audit.add(where, 'dead-end', 'dialog/sheet opened and could not be closed')
 }
 
 async function navChecks(page: Page, audit: Audit, route: string) {

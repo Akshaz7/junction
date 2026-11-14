@@ -11,7 +11,7 @@ export function viewerEvidence(answer: Answer, citation: Citation): { regions: V
   const boxDoc = answer.evidence.scene.doc_id || (answer.doc_ids.length === 1 ? answer.doc_ids[0] : null)
   const regions: ViewerRegion[] = answer.evidence.boxes
     .filter((box) => box.page === citation.page && (boxDoc === citation.doc_id || itemIds.has(box.item_id)))
-    .map((box) => ({ id: box.item_id, label: box.label, bbox: box.bbox_px, text: false, kind: kindFromItemId(box.item_id) }))
+    .map((box) => ({ id: box.item_id, label: box.label, bbox: box.bbox_px, text: false, kind: box.kind ?? pageCitations.find((item) => item.item_kind && item.item_ids.includes(box.item_id))?.item_kind ?? kindFromItemId(box.item_id) }))
   for (const source of pageCitations) {
     if (source.bbox_px && (source.kind === 'text' || !source.item_ids.some((id) => regions.some((region) => region.id === id)))) {
       regions.push({ id: `citation-${source.n}`, label: String(source.n), bbox: source.bbox_px, text: source.kind === 'text' })

@@ -7,6 +7,8 @@ export interface HighlightOptions {
   cameraTargetItemId?: string;
   /** Retained for callers; answer highlighting always preserves other materials. */
   dimOthers?: boolean;
+  /** Play the reveal (orbit, dim, one-by-one pulse) when this is a new answer in an open view. */
+  cinematic?: boolean;
 }
 
 export interface HighlightState {
@@ -37,8 +39,11 @@ export function createHighlightController(scene: LoadedScene) {
   const originals = new Map<Mesh, Material | Material[]>();
   const clones = new Set<Material>();
   let state: HighlightState = { highlighted: [], dimmed: 0, labels: {} };
+  /** Emissive surfaces per answer item, with their settled intensity, so a reveal can pulse them. */
+  const glows = new Map<string, { surface: { emissiveIntensity?: number }; base: number }[]>();
 
   function clearHighlight(): void {
+    glows.clear();
     for (const [mesh, material] of originals) mesh.material = material;
     originals.clear();
     clones.forEach((material) => material.dispose());
@@ -78,6 +83,7 @@ export function createHighlightController(scene: LoadedScene) {
             if (surface.emissive) {
               surface.emissive.copy(color);
               surface.emissiveIntensity = 1.5;
+              (glows.get(owner!) ?? glows.set(owner!, []).get(owner!)!).push({ surface, base: 1.5 });
             } else surface.color?.copy(color);
           }
           clone.needsUpdate = true;
@@ -87,6 +93,10 @@ export function createHighlightController(scene: LoadedScene) {
       });
     },
     clearHighlight,
+    /** Scales an item's settled emissive glow (0 = unlit, 1 = settled, above 1 = pulse peak). */
+    setGlow(id: string, factor: number): void {
+      for (const entry of glows.get(id) ?? []) entry.surface.emissiveIntensity = entry.base * factor;
+    },
     getHighlightState(): HighlightState {
       return { ...state, highlighted: [...state.highlighted], labels: { ...state.labels } };
     },

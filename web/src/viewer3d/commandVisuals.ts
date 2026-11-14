@@ -1,6 +1,10 @@
 import type { Material, Mesh, Object3D } from 'three';
 import type { LoadedScene } from './scene';
 import { emptyCommandState, type CommandState } from './commands';
+import { DIM_OPACITY } from './cinematic';
+
+const ISOLATE_OPACITY = 0.18;
+const ISOLATE_MS = 250;
 
 /** Last material layer: never mutate the source, answer or local-selection materials. */
 export function createCommandVisuals(scene: LoadedScene) {
@@ -11,6 +15,15 @@ export function createCommandVisuals(scene: LoadedScene) {
   const originals = new Map<Mesh, Material | Material[]>();
   const layers: { material: Material; opacity: number; id: string }[] = [];
   let dirty = true;
+  // Isolate dims everything else; the level tweens so "show only the stairs" and "reset" fade rather than snap.
+  let dimSet: ReadonlySet<string> | null = null;
+  let dim = { from: 0, to: 0, start: 0, level: 0 };
+  // Transient reveal: items outside `focus` sit at DIM_OPACITY * focusLevel while the answer is lit one by one.
+  let focus: ReadonlySet<string> | null = null;
+  let focusLevel = 0;
+  const factor = (id: string) =>
+    (dimSet && !dimSet.has(id) ? 1 - (1 - ISOLATE_OPACITY) * dim.level : 1)
+    * (focus && !focus.has(id) ? 1 - (1 - DIM_OPACITY) * focusLevel : 1);
   const captureVisibility = () => {
     for (const object of scene.items.values()) visibility.set(object, object.visible);
     dirty = true;
@@ -25,8 +38,14 @@ export function createCommandVisuals(scene: LoadedScene) {
   }
 
   function sample(now: number) {
-    if (!dirty && !fades.size) return false;
+    const dimming = dim.level !== dim.to;
+    if (!dirty && !fades.size && !dimming) return false;
     dirty = false;
+    if (dimming) {
+      const t = Math.max(0, Math.min(1, (now - dim.start) / ISOLATE_MS));
+      dim.level = dim.from + (dim.to - dim.from) * t;
+      if (t === 1) { dim.level = dim.to; if (dim.to === 0 && !state.isolated) { dimSet = null; rebuildMaterials(); } }
+    }
     let completed = false;
     for (const [id, fade] of fades) {
       const t = Math.max(0, Math.min(1, (now - fade.start) / 250));
@@ -39,7 +58,7 @@ export function createCommandVisuals(scene: LoadedScene) {
       object.visible = visibility.get(object) !== false && (amounts.get(id) ?? 1) > 0;
     }
     for (const layer of layers) {
-      layer.material.opacity = layer.opacity * (amounts.get(layer.id) ?? 1);
+      layer.material.opacity = layer.opacity * (amounts.get(layer.id) ?? 1) * factor(layer.id);
     }
     return true;
   }
@@ -56,15 +75,15 @@ export function createCommandVisuals(scene: LoadedScene) {
         if (id) break;
       }
       if (!id) return;
-      const dim = state.isolated !== null && !state.isolated.has(id);
-      if (!dim && !fades.has(id) && (amounts.get(id) ?? 1) === 1) return;
+      const dimmed = (dimSet !== null && !dimSet.has(id)) || (focus !== null && !focus.has(id));
+      if (!dimmed && !fades.has(id) && (amounts.get(id) ?? 1) === 1) return;
       originals.set(mesh, mesh.material);
       const clone = (material: Material) => {
         const copy = material.clone();
-        const opacity = material.opacity * (dim ? 0.18 : 1);
+        const opacity = material.opacity;
         copy.transparent = true;
         copy.depthWrite = false;
-        copy.opacity = opacity * (amounts.get(id!) ?? 1);
+        copy.opacity = opacity * (amounts.get(id!) ?? 1) * factor(id!);
         layers.push({ material: copy, opacity, id: id! });
         return copy;
       };
@@ -74,6 +93,13 @@ export function createCommandVisuals(scene: LoadedScene) {
 
   return {
     captureVisibility, clearMaterials, rebuildMaterials, sample,
+    /** Transient reveal dim: everything outside `ids` fades to DIM_OPACITY at level 1. `null` releases it. */
+    setFocus(ids: ReadonlySet<string> | null, level: number) {
+      const changed = (focus === null) !== (ids === null);
+      focus = ids; focusLevel = level; dirty = true;
+      if (changed) rebuildMaterials();
+    },
+    focusActive: () => focus !== null,
     setState(next: CommandState, now: number, reducedMotion: boolean) {
       sample(now);
       if (reducedMotion) {
@@ -88,6 +114,11 @@ export function createCommandVisuals(scene: LoadedScene) {
         if (reducedMotion) { amounts.set(id, target); fades.delete(id); }
         else fades.set(id, { from: amounts.get(id) ?? 1, to: target, start: now });
       }
+      const isolating = next.isolated !== null;
+      if (isolating) dimSet = next.isolated;
+      const target = isolating ? 1 : 0;
+      if (target !== dim.to) dim = { from: dim.level, to: target, start: now, level: dim.level };
+      if (reducedMotion) { dim = { from: target, to: target, start: now, level: target }; if (!isolating) dimSet = null; }
       state = next;
       rebuildMaterials();
       sample(now);
