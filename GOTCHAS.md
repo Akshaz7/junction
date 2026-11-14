@@ -45,3 +45,4 @@
 - BSD sed has no \| alternation: use grep -E to pull RESULT/NEEDS lines before rewriting a handoff (lost the T-03 note once; recovered from ~/.codex/sessions).
 - Never edit a file a Codex worker is editing with a regex over JSX: a loose pattern matched an earlier prop and broke App.tsx (05:05, fixed). Use exact-string Edit.
 - git -C <repo> hash-object <relative path> resolves against the REPO, not your cwd: always pass absolute paths when staging a file from a temp copy (broke HEAD build once, fixed 05:20).
+- Playwright default headless = SwiftShader software WebGL (slow, not the Mac GPU). For GPU perf tests use channel:'chromium' + --use-angle=metal --ignore-gpu-blocklist --enable-gpu → Apple M4 Pro Metal (T-07).

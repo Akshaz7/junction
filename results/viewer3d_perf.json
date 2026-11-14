@@ -1,0 +1,26 @@
+{
+  "doc_id": "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000",
+  "triangles": 5401670,
+  "draw_calls": 1541,
+  "load_ms": 1199.3999999985099,
+  "p50_ms": 16.69999999552965,
+  "p95_ms": 18.5,
+  "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4 Pro, Unspecified Version)",
+  "frames": 301,
+  "largest_model": {
+    "doc_id": "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000",
+    "bytes": 99571088,
+    "load_ms": 1199.3999999985099
+  },
+  "load_attempts": [
+    {
+      "doc_id": "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000",
+      "bytes": 99571088,
+      "load_ms": 1199.3999999985099,
+      "elapsed_ms": 1350,
+      "status": "ready"
+    }
+  ],
+  "bytes": 99571088,
+  "measurement": "five-second-orbit"
+}

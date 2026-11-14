@@ -8,6 +8,7 @@ import {
   createScene, disposeScene, documentFileUrl, documentSceneUrl, itemIdForObject, loadScene, setStorey, storeyName,
   type LoadedScene, type SceneManifest,
 } from '../scene';
+import { withAbort } from '../loadGLTF';
 
 const fixtureUrl = new URL('../__fixtures__/digital_hub/scene.json', import.meta.url);
 let loaded: LoadedScene;
@@ -150,5 +151,50 @@ describe('Digital Hub scene (real GLB, no WebGL)', () => {
     const scene = await loadScene('https://example.test/api/docs/ac20/scene');
     expect(scene.elements?.size).toBe(0);
     expect(scene.manifest).toEqual(manifest);
+  });
+
+  it('streams geometry with progress and parses the actual GLB when loading with cancellation support', async () => {
+    const bytes = await readFile(new URL(manifest.glb as string, fixtureUrl));
+    const progress: string[] = [];
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async (url: string | URL) => {
+      if (String(url).endsWith('scene.glb')) return new Response(bytes, {
+        headers: { 'content-length': String(bytes.byteLength) },
+      });
+      if (String(url).endsWith('elements.json')) return Response.json([]);
+      return Response.json(manifest);
+    }));
+    const controller = new AbortController();
+    const scene = await loadScene('https://example.test/api/docs/digital-hub/scene', {
+      signal: controller.signal, onProgress: (next) => progress.push(next.phase),
+    });
+    expect(progress[0]).toBe('manifest');
+    expect(progress).toContain('download');
+    expect(progress).toContain('parse');
+    expect(progress.at(-1)).toBe('prepare');
+    expect([...scene.items.keys()]).toEqual([...loaded.items.keys()]);
+    disposeScene(scene);
+  });
+
+  it('propagates a load-budget abort instead of leaving an outstanding download', async () => {
+    const controller = new AbortController();
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async (url: string | URL, options?: RequestInit) => {
+      if (String(url).endsWith('scene.glb')) return new Promise((_, reject) => {
+        options?.signal?.addEventListener('abort', () => reject(options.signal?.reason), { once: true });
+      });
+      return Response.json(String(url).endsWith('elements.json') ? [] : manifest);
+    }));
+    const pending = loadScene('https://example.test/api/docs/digital-hub/scene', {
+      signal: controller.signal, onProgress: ({ phase }) => {
+        if (phase === 'manifest') setTimeout(() => controller.abort(new Error('60 second budget exceeded')), 0);
+      },
+    });
+    await expect(pending).rejects.toThrow('60 second budget exceeded');
+  });
+
+  it('ends the UI wait even when a glTF image or decoder never settles', async () => {
+    const controller = new AbortController();
+    const pending = withAbort(new Promise(() => {}), controller.signal);
+    controller.abort(new Error('3D model took too long to load'));
+    await expect(pending).rejects.toThrow('3D model took too long to load');
   });
 });

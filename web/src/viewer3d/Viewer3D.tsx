@@ -9,6 +9,7 @@ import { bindLiveCommands, bindLiveHighlight } from './liveViewerHighlight';
 import type { CommandTestState, SceneCommand } from './commands';
 import { cutawayStoreys, isRoof, type CutawayState } from './cutaway';
 import { setHover, setSelected, useLinkedItem } from './link';
+import type { LoadProgress } from './loadGLTF';
 import './viewer3d.css';
 
 interface ViewerOptions {
@@ -63,6 +64,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
   const [elements, setElements] = useState<Map<string, IFCElement>>(new Map());
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState('');
+  const [progress, setProgress] = useState<LoadProgress>({ phase: 'manifest' });
   const selectId = useId();
   const helpId = useId();
   const closeDetails = useCallback(() => setPicked(null), []);
@@ -93,6 +95,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
     let unsubscribeCutaway: (() => void) | undefined;
     let unsubscribeHighlight: (() => void) | undefined;
     setState('loading');
+    setProgress({ phase: 'manifest' });
     setError('');
     setStoreys([]);
     setPicked(null);
@@ -119,7 +122,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
       unsubscribeHighlight = viewer.onHighlightChange(() => setHighlightState(viewer!.getLinkedHighlightState()));
       live = bindLiveHighlight(viewer, doc_id);
       liveCommands = bindLiveCommands(viewer, doc_id);
-      void viewer.loadScene(sceneUrl).then((scene) => {
+      void viewer.loadScene(sceneUrl, { onProgress: (next) => { if (active) setProgress(next); } }).then((scene) => {
         if (!active) return;
         if (storey !== undefined) viewer!.setStorey(storey);
         live?.sceneReady();
@@ -238,7 +241,13 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, onPick, storey, highligh
         }}
         onPointerLeave={() => setHover(null, '3d')}
         onPointerUp={pick} onPointerCancel={() => { pointerStart.current = null; setHover(null, '3d'); }} />
-      {state === 'loading' && <p className="viewer3d-message" role="status">Loading 3D scene…</p>}
+      {state === 'loading' && <p className="viewer3d-message" role="status">
+        {progress.phase === 'parse' ? 'Reading 3D model…'
+          : progress.phase === 'prepare' ? 'Preparing 3D view…'
+          : progress.phase === 'download' && progress.total
+          ? `Loading 3D scene… ${Math.min(100, Math.round((progress.loaded ?? 0) / progress.total * 100))}%`
+          : 'Loading 3D scene…'}
+      </p>}
       {state === 'error' && <p className="viewer3d-message" role="alert">{error}</p>}
       {state === 'ready' && details && <ItemDetailsCard key={details.item_id} details={details}
         loading={false} onClose={closeDetails}

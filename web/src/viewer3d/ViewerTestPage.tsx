@@ -12,7 +12,7 @@ export function ViewerTestPage() {
   const [document, setDocument] = useState(() => {
     const requested = new URLSearchParams(window.location.search).get('doc');
     if (requested === 'colorful-11397' || requested === 'cubicasa5k__colorful-11397') return 'colorful-11397';
-    return requested === 'ifc_bench__ac20-arc' ? requested : 'digital_hub';
+    return requested || 'digital_hub';
   });
   const [visualiseDocId, setVisualiseDocId] = useState('cubicasa5k__colorful-11397');
   const [visualiseViewer, setVisualiseViewer] = useState<Viewer | null>(null);
@@ -54,12 +54,14 @@ export function ViewerTestPage() {
 
   return <main className="viewer3d-test-page">
     <header>
-      <h1>{document === 'digital_hub' ? 'DigitalHub' : document === 'colorful-11397' ? 'CubiCasa colorful-11397' : 'AC20'} — 3D viewer</h1>
+      <h1>{document === 'digital_hub' ? 'DigitalHub' : document === 'colorful-11397' ? 'CubiCasa colorful-11397' : document === 'ifc_bench__ac20-arc' ? 'AC20' : document} — 3D viewer</h1>
       <p>{document === 'digital_hub'
         ? 'Copyright (c) 2020 RWTH Aachen University — E3D Institute of Energy Efficiency and Sustainable Building · MIT'
         : document === 'colorful-11397'
         ? "CubiCasa5K, (c) 2019 CubiCasa. Kalervo, Ylioinas, Häikiö, Karhu, Kannala: 'CubiCasa5K: A Dataset and an Improved Multi-Task Model for Floorplan Image Analysis', SCIA 2019. CC BY-NC-SA 4.0. Extruded heights generated for demo."
-        : 'Institute for Automation and Applied Informatics (IAI) / Karlsruhe Institute of Technology (KIT) · KIT IFC Examples'}</p>
+        : document === 'ifc_bench__ac20-arc'
+        ? 'Institute for Automation and Applied Informatics (IAI) / Karlsruhe Institute of Technology (KIT) · KIT IFC Examples'
+        : 'API document — original item IDs and geometry'}</p>
       <div className="viewer3d-test-actions">
         <label htmlFor="viewer3d-document">Document</label>
         <select id="viewer3d-document" value={document} onChange={(event) => {
@@ -71,6 +73,8 @@ export function ViewerTestPage() {
           <option value="digital_hub">DigitalHub (offline fixture)</option>
           <option value="colorful-11397">CubiCasa colorful-11397 (light offline fixture)</option>
           <option value="ifc_bench__ac20-arc">AC20 (API)</option>
+          {!['digital_hub', 'colorful-11397', 'ifc_bench__ac20-arc'].includes(document)
+            && <option value={document}>{document} (API)</option>}
         </select>
         <button type="button" disabled={!viewer} onClick={highlightRandom}>Highlight 3 random items</button>
         <button type="button" disabled={!viewer} onClick={() => {
@@ -99,7 +103,7 @@ export function ViewerTestPage() {
         <VisualiseItButton answer={fakeAnswer} onReady={setVisualiseViewer} />
       </section>
     </header>
-    <Viewer3D key={document} {...(document === 'ifc_bench__ac20-arc'
+    <Viewer3D key={document} {...(!['digital_hub', 'colorful-11397'].includes(document)
       ? { doc_id: document }
       : { sceneUrl: `${import.meta.env.BASE_URL}fixtures/${document}/scene.json` })} commands={commands} onReady={setViewer} />
   </main>;

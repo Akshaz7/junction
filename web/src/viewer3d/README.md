@@ -196,3 +196,44 @@ commands on the light extrusion, checks real `/ws` propagation to another browse
 context within two seconds, and covers AC20 commands and fade interruption.
 LEAD runs the handoff's full viewer3d suite through `scripts/heavy.sh` outside
 the worker sandbox; Chromium cannot register its macOS Mach port inside it.
+
+T-07 exposes `window.__viewer3d.perf()` on the dedicated test page: rendered
+`frames`, RAF completion-interval `p50_ms`/`p95_ms`, latest-frame `draw_calls` and
+`triangles`, and `load_ms` through the first scene render. `resetPerf()` starts a
+fresh frame window without discarding load time. `?doc=<doc_id>#/viewer-test`
+also accepts any API document. The performance spec finds the largest explicitly
+publishable GLB under `artifacts/`, serves the actual files through intercepted
+API routes, reveals every storey and roof, warms up rendering, and orbits for
+five real seconds. It writes `results/viewer3d_perf.json` before asserting
+`p95_ms < 33`. This spec uses the normal headless GPU path; the functional specs
+retain their software-rendering settings. No timing result is inferred from
+geometry counts or reported when browser launch fails.
+
+Scenes with at least 500 meshes use separate render buffers: byte-identical
+repeats (at least eight) use `InstancedMesh`; other compatible opaque geometry
+shares `BatchedMesh` buffers by material. Original item meshes remain in the
+item tree on a picking layer, with exact IDs, geometry and transforms. Changed
+materials render through those originals until cleared; visibility and rise
+transforms synchronize into batches when they change. Opaque batches retain
+per-item frustum culling without depth sorting. Idle edit layers and empty label
+trees skip traversal, pixel ratio stays capped at 2, shadows are disabled, and
+scene replacement/unmount releases both original and batch resources. No mesh
+decoder is needed by the largest current publishable GLB (no compression extension).
+
+T-07 attempt 2 streams geometry with download progress. Static untextured GLBs
+over 5 MiB parse in a bundled module worker with three.js `parseAsync`; typed
+geometry buffers transfer ownership, including precomputed bounds. Rebuilding
+the item hierarchy yields to the browser. Textures/animation and other unsupported
+features retain the full glTF loader. Closing/replacing a scene aborts downloads
+and terminates its worker. A 60-second load budget displays an error even when
+an image/decoder promise stalls; any late scene is disposed. Source-material and
+raycast-mesh indexes are deferred until interaction.
+
+The perf spec has a 180-second timeout and a separate 150-second load expectation.
+Its temporary HTTP server streams actual artifact GLBs, avoiding large base64
+payloads over Playwright's control protocol. It tries publishable models in
+descending file size and records attempted loads, including errors and elapsed
+times. If the largest exceeds the 60-second load budget, it measures the next
+largest candidate that loads within budget. Both the largest artifact and the
+selected model remain in the report; unfinished loads have null `load_ms` rather
+than an invented timing. Browser launch failures produce no benchmark result.

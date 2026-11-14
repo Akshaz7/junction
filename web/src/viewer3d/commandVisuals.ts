@@ -10,8 +10,10 @@ export function createCommandVisuals(scene: LoadedScene) {
   const fades = new Map<string, { from: number; to: number; start: number }>();
   const originals = new Map<Mesh, Material | Material[]>();
   const layers: { material: Material; opacity: number; id: string }[] = [];
+  let dirty = true;
   const captureVisibility = () => {
     for (const object of scene.items.values()) visibility.set(object, object.visible);
+    dirty = true;
   };
   captureVisibility();
 
@@ -23,6 +25,8 @@ export function createCommandVisuals(scene: LoadedScene) {
   }
 
   function sample(now: number) {
+    if (!dirty && !fades.size) return false;
+    dirty = false;
     let completed = false;
     for (const [id, fade] of fades) {
       const t = Math.max(0, Math.min(1, (now - fade.start) / 250));
@@ -37,9 +41,11 @@ export function createCommandVisuals(scene: LoadedScene) {
     for (const layer of layers) {
       layer.material.opacity = layer.opacity * (amounts.get(layer.id) ?? 1);
     }
+    return true;
   }
 
   function rebuildMaterials() {
+    dirty = true;
     clearMaterials();
     scene.root.traverse((object) => {
       const mesh = object as Mesh;

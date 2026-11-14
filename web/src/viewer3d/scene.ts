@@ -1,6 +1,7 @@
 import { Object3D, Texture, type Material, type Mesh } from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { indexElements, type IFCElement } from './identify';
+import { loadGLTF, type SceneLoadOptions } from './loadGLTF';
 
 export type Vec3 = [number, number, number];
 export type Storey = string | { name: string; elevation_m?: number };
@@ -95,10 +96,11 @@ export class SceneLoadError extends Error {
 }
 
 /** Loads scene.json; API assets use the file route, offline assets stay relative. */
-export async function loadScene(manifestUrl: string | URL): Promise<LoadedScene> {
+export async function loadScene(manifestUrl: string | URL, options?: SceneLoadOptions): Promise<LoadedScene> {
   const base = typeof location === 'undefined' ? undefined : location.href;
   const url = new URL(manifestUrl, base);
-  const response = await fetch(url);
+  options?.onProgress?.({ phase: 'manifest' });
+  const response = await fetch(url, options ? { signal: options.signal } : undefined);
   if (!response.ok) throw new SceneLoadError(response.status);
   const manifest = await response.json() as SceneManifest;
   if (manifest.units !== 'm' || manifest.up !== 'Y' || !manifest.items) {
@@ -108,13 +110,20 @@ export async function loadScene(manifestUrl: string | URL): Promise<LoadedScene>
   const glb = typeof asset === 'string' ? asset : asset?.url || asset?.path || asset?.local_path;
   if (!glb) throw new Error('Scene manifest has no GLB path or URL');
   const elementsUrl = documentFileUrl(url, 'elements.json');
+  const geometryUrl = documentFileUrl(url, 'scene.glb') ?? new URL(glb, response.url || url).href;
   const [gltf, elements] = await Promise.all([
-    new GLTFLoader().loadAsync(documentFileUrl(url, 'scene.glb') ?? new URL(glb, response.url || url).href),
-    elementsUrl ? fetch(elementsUrl).then(async (result) => result.ok
+    options ? loadGLTF(geometryUrl, options) : new GLTFLoader().loadAsync(geometryUrl),
+    elementsUrl ? fetch(elementsUrl, options ? { signal: options.signal } : undefined).then(async (result) => result.ok
       ? indexElements(await result.json()) : new Map<string, IFCElement>()).catch(() => new Map<string, IFCElement>())
       : Promise.resolve(new Map<string, IFCElement>()),
   ]);
-  return { ...createScene(manifest, gltf), elements };
+  const scene = { ...createScene(manifest, gltf), elements };
+  if (options?.signal?.aborted) {
+    disposeScene(scene);
+    options.signal.throwIfAborted();
+  }
+  options?.onProgress?.({ phase: 'prepare' });
+  return scene;
 }
 
 /** Null restores each item's original visibility. Unassigned items hide for a named storey. */

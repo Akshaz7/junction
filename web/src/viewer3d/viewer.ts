@@ -15,13 +15,20 @@ import { createLinkedHighlightController } from './linkedHighlight';
 import { createRiseAnimation, scheduleRiseTransitions, type RisePhase, type RiseState } from './rise';
 import { applyCommand, applyState, emptyCommandState, readCommandState, type SceneCommand, type SceneSnapshot, type CommandTestState } from './commands';
 import { createCommandVisuals } from './commandVisuals';
+import { createFrameProbe, type ViewerPerf } from './perf';
+import { createRenderBatches, PICK_LAYER } from './renderBatches';
+import { withAbort, type LoadProgress } from './loadGLTF';
+
+export const SCENE_LOAD_BUDGET_MS = 60_000;
 
 export interface Viewer {
   readonly renderer: WebGLRenderer;
   readonly camera: PerspectiveCamera;
   readonly controls: OrbitControls;
   readonly scene: LoadedScene | null;
-  loadScene(url: string | URL): Promise<LoadedScene>;
+  perf(): ViewerPerf;
+  resetPerf(): void;
+  loadScene(url: string | URL, options?: { onProgress?: (progress: LoadProgress) => void }): Promise<LoadedScene>;
   /** Transfers ownership; replaced scenes and the active scene are disposed by the viewer. */
   setScene(scene: LoadedScene): void;
   setStorey(name: string | null): void;
@@ -49,7 +56,9 @@ export interface Viewer {
 }
 
 export function createViewer(canvas: HTMLCanvasElement): Viewer {
+  const probe = createFrameProbe();
   const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.shadowMap.enabled = false;
   const labelRenderer = new CSS2DRenderer();
   labelRenderer.domElement.className = 'viewer3d-label-layer';
   Object.assign(labelRenderer.domElement.style, { position: 'absolute', pointerEvents: 'none', top: '0', left: '0' });
@@ -66,13 +75,19 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   world.add(light);
 
   let active: LoadedScene | null = null;
+  // Populated on the first pointer interaction, never during model loading.
+  let pickMeshes: Scene['children'] | null = null;
+  let renderBatches: ReturnType<typeof createRenderBatches> | null = null;
+  let batchesDirty = false;
   let cutaway: ReturnType<typeof createCutawayController> | null = null;
   const cutawayListeners = new Set<(state: CutawayState) => void>();
   function notifyCutaway(): void {
+    batchesDirty = true;
     if (cutaway) for (const listener of cutawayListeners) listener(cutaway.getState());
   }
   let disposed = false;
   let loadVersion = 0;
+  let pendingLoad: AbortController | null = null;
   let highlights: ReturnType<typeof createHighlightController> | null = null;
   let linkedHighlights: ReturnType<typeof createLinkedHighlightController> | null = null;
   let commandVisuals: ReturnType<typeof createCommandVisuals> | null = null;
@@ -89,6 +104,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     phase: RisePhase; onStateChange?: (state: RiseState) => void; cancelTransitions: () => void;
   } | null = null;
   const raycaster = new Raycaster();
+  raycaster.layers.enable(PICK_LAYER);
   const pointer = new Vector2();
 
   function resize(): void {
@@ -104,6 +120,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   }
 
   function clearHighlight(): void {
+    batchesDirty = true;
     commandVisuals?.clearMaterials();
     flight = null;
     clearLinkedVisuals();
@@ -134,10 +151,12 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   }
 
   function applyLinkedVisuals(): void {
+    batchesDirty = true;
     commandVisuals?.clearMaterials();
     clearLinkedVisuals();
     if (disposed || !active) return;
     const accent = readHighlightColor(canvas);
+    if (linked.hovered || linked.selected) ensureInteractionMaterials();
     linkedHighlights?.apply(linked.hovered, linked.selected, accent);
     commandVisuals?.rebuildMaterials();
     commandVisuals?.sample(performance.now());
@@ -192,6 +211,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   }
 
   function highlight(ids: readonly string[], options: HighlightOptions = {}): void {
+    if (ids.length) ensureInteractionMaterials();
     clearHighlight();
     if (disposed || !active || !highlights) return;
     cutaway?.followHighlight(ids, options.cameraTargetItemId);
@@ -227,12 +247,14 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   }
 
   function notifyHighlight(): void {
+    batchesDirty = true;
     if (!highlights) return;
     for (const listener of highlightListeners) listener(highlights.getHighlightState());
   }
 
   function renderCommandState(): void {
     if (!active) return;
+    ensureInteractionMaterials();
     const labels = Object.fromEntries(commandState.highlighted);
     applyingCommand = true;
     try {
@@ -243,6 +265,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
 
   function visualise(onStateChange?: (state: RiseState) => void): void {
     if (disposed || !active) return;
+    batchesDirty = true;
     rise?.cancelTransitions();
     rise?.animation.restore();
     rise = null;
@@ -289,6 +312,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       rise = null;
       previous.cancelTransitions();
       previous.animation.restore();
+      batchesDirty = true;
       previous.onStateChange?.({ phase: 'done', progress: 1 });
     }
   });
@@ -320,20 +344,31 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     rise = null;
     clearHighlight();
     commandVisuals?.dispose();
+    renderBatches?.dispose();
+    renderBatches = null;
     if (active) {
       world.remove(active.root);
       disposeScene(active);
     }
     active = scene;
+    pickMeshes = null;
     commandState = emptyCommandState();
     linked = { hovered: null, selected: null, labels: {} };
     cutaway = createCutawayController(scene);
     highlights = createHighlightController(scene);
-    linkedHighlights = createLinkedHighlightController(scene);
+    // Keep the source-material index lazy until the first highlight/selection.
+    // It must be captured before any interaction replaces original materials.
+    linkedHighlights = null;
     commandVisuals = createCommandVisuals(scene);
     world.add(scene.root);
     fit(scene);
+    renderBatches = createRenderBatches(scene);
+    world.add(renderBatches.root);
     notifyCutaway();
+  }
+
+  function ensureInteractionMaterials(): void {
+    if (active && !linkedHighlights) linkedHighlights = createLinkedHighlightController(active);
   }
 
   const observer = new ResizeObserver(resize);
@@ -344,8 +379,9 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   function render(): void {
     if (disposed) return;
     controls.update();
+    const wasRising = rise !== null;
     sampleRise();
-    commandVisuals?.sample(performance.now());
+    const fading = commandVisuals?.sample(performance.now());
     if (flight) {
       const progress = Math.min(1, (performance.now() - flight.start) / 600);
       const eased = progress * progress * (3 - 2 * progress);
@@ -354,29 +390,54 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       camera.lookAt(controls.target);
       if (progress === 1) flight = null;
     }
+    if (batchesDirty || wasRising || fading) {
+      renderBatches?.sync();
+      batchesDirty = false;
+    }
     renderer.render(world, camera);
-    labelRenderer.render(world, camera);
+    if (labels.length || linkedLabel) labelRenderer.render(world, camera);
+    probe.frame(performance.now(), active !== null);
     frame = requestAnimationFrame(render);
   }
   render();
 
   return {
     renderer, camera, controls,
+    perf: () => probe.read(renderer.info.render.calls, renderer.info.render.triangles),
+    resetPerf: () => probe.reset(),
     get scene() { return active; },
-    async loadScene(url) {
+    async loadScene(url, options) {
       if (disposed) throw new Error('Viewer has been disposed');
+      pendingLoad?.abort(new Error('Scene load superseded'));
+      const controller = new AbortController();
+      pendingLoad = controller;
+      const timeout = setTimeout(() => controller.abort(new Error('3D model took too long to load (60 seconds). Try a smaller model.')),
+        SCENE_LOAD_BUDGET_MS);
       const version = ++loadVersion;
-      const loaded = await loadScene(url);
-      if (disposed || version !== loadVersion) {
-        disposeScene(loaded);
-        throw new Error('Scene load was superseded or viewer disposed');
+      const loadStart = performance.now();
+      try {
+        const loaded = await withAbort(loadScene(url, { signal: controller.signal, onProgress: options?.onProgress }), controller.signal);
+        if (disposed || version !== loadVersion || controller.signal.aborted) {
+          disposeScene(loaded);
+          controller.signal.throwIfAborted();
+          throw new Error('Scene load was superseded or viewer disposed');
+        }
+        probe.beginLoad(loadStart);
+        probe.reset();
+        attach(loaded);
+        return loaded;
+      } finally {
+        clearTimeout(timeout);
+        if (pendingLoad === controller) pendingLoad = null;
       }
-      attach(loaded);
-      return loaded;
     },
     setScene(scene) {
       if (disposed) throw new Error('Viewer has been disposed');
+      pendingLoad?.abort(new Error('Scene load superseded'));
       loadVersion++;
+      pendingLoad = null;
+      probe.beginLoad(performance.now());
+      probe.reset();
       attach(scene);
     },
     setStorey(name) {
@@ -442,7 +503,18 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       camera.updateWorldMatrix(true, false);
       active.root.updateWorldMatrix(true, true);
       raycaster.setFromCamera(pointer, camera);
-      for (const hit of raycaster.intersectObject(active.root, true)) {
+      if (!pickMeshes) {
+        pickMeshes = [];
+        active.root.traverse((object) => {
+          if (!(object as { isMesh?: boolean }).isMesh) return;
+          // Include every storey so later cutaways do not invalidate the index.
+          for (let owner: typeof object | null = object; owner; owner = owner.parent) {
+            if (active!.itemIdsByObject.has(owner)) { pickMeshes!.push(object); break; }
+          }
+        });
+      }
+      const visibleMeshes = pickMeshes.filter((object) => itemIdForObject(active!, object) !== null);
+      for (const hit of raycaster.intersectObjects(visibleMeshes, false)) {
         const id = itemIdForObject(active, hit.object);
         if (id !== null) return id;
       }
@@ -456,6 +528,8 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       commandListeners.clear();
       cutawayListeners.clear();
       loadVersion++;
+      pendingLoad?.abort(new Error('Viewer disposed'));
+      pendingLoad = null;
       cancelAnimationFrame(frame);
       observer.disconnect();
       window.removeEventListener('resize', resize);
@@ -465,6 +539,8 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       rise = null;
       clearHighlight();
       commandVisuals?.dispose();
+      renderBatches?.dispose();
+      renderBatches = null;
       labelRenderer.domElement.remove();
       if (active) {
         world.remove(active.root);
@@ -473,6 +549,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       }
       highlights = null;
       linkedHighlights = null;
+      pickMeshes = null;
       renderer.dispose();
     },
   };
