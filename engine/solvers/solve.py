@@ -195,16 +195,17 @@ def _evidence(doc: Doc, items: list[Item]):
     items = _reading_order(items)
     boxes, cites = [], []
     if doc.mode == "planmap":
-        by_page: dict[int, list[Item]] = {}
+        by_page: dict[tuple, list[Item]] = {}
         for i in items:
-            by_page.setdefault(i.page, []).append(i)
+            by_page.setdefault((i.page, i.props.get("view_id") or ""), []).append(i)
         n = 0
-        for pg, its in sorted(by_page.items()):
+        for (pg, _view), its in sorted(by_page.items()):
             n += 1
             xs = [i.bbox_px for i in its if i.bbox_px]
             union = [min(b[0] for b in xs), min(b[1] for b in xs), max(b[2] for b in xs), max(b[3] for b in xs)] if xs else None
             cites.append({"n": n, "doc_id": doc.doc_id, "page": pg, "kind": "region", "bbox_px": union,
-                          "item_ids": [i.item_id for i in its], "quote": None, "label": _cite_label(doc, its, pg)})
+                          "item_ids": [i.item_id for i in its], "quote": None,
+                          "label": (its[0].props.get("view_title") + " · " if its[0].props.get("view_title") else "") + _cite_label(doc, its, pg)})
         for k, i in enumerate(items[:MAX_BOXES], 1):
             if i.bbox_px:
                 boxes.append({"item_id": i.item_id, "page": i.page, "bbox_px": i.bbox_px, "label": str(k)})
@@ -394,6 +395,10 @@ def _solve_multi(question, doc_id, p: Parsed, root, page, hidden, t0) -> dict:
     if sm:
         where = f"on **{sm.group(1)}**" + (" (ground floor)" if sm.group(1).strip().lower() == "erdgeschoss" else "")
     text = f"There {'is' if sum(counts.values()) == 1 else 'are'} " + (", ".join(parts[:-1]) + " and " + parts[-1]) + f" {where}. " + _cite_marks(cites)
+    from pipeline.sheet_views import multi_count_note
+    doc = load_doc(doc_id, Path(root))
+    if doc is not None:
+        text += multi_count_note(doc, subs)
     scene = {"doc_id": doc_id, "highlight_item_ids": ids, "camera_target_item_id": ids[0] if ids else None, "item_kinds": item_kinds}
     return _answer_obj(question, [doc_id], text, counts, "count", min(confs), False, boxes, cites, scene, trace, subs[0][1]["route"], t0)
 
@@ -426,6 +431,14 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
                 filtered["answer"]["text_md"] += " (with " + ", ".join(hidden.values()) + " hidden)"
             return filtered
     kind = p.kind
+    if doc.mode == "planmap" and doc.meta.get("view_regions"):
+        relevant = [r for r in doc.meta["view_regions"] if not page or r["page"] == page]
+        if relevant and not any(r.get("view_type") == "plan" for r in relevant):
+            trace.append(_step("view_scope", "no identifiable floor-plan view; other views cannot supply plan quantities"))
+            res = _abstain(question, doc_id, "No floor-plan view could be identified on this sheet. Elevations, sections and unresolved views cannot supply a plan count.", trace, route, t0)
+            res["citations"] = [{"n": n, "doc_id": doc_id, "page": r["page"], "kind": "region", "bbox_px": r["bbox"],
+                                 "item_ids": [], "quote": r.get("title")} for n, r in enumerate(relevant, 1)]
+            return res
     if kind == "apartment" and doc.mode == "planmap" and p.type in ("count", "area"):
         res = _apartments(question, doc, p, trace, route, t0)
         if res is not None:
@@ -660,6 +673,8 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         else:
             verb = "is" if n == 1 else "are"
             text = f"There {verb} **{n} {_plural(kind, n)}** {where}. {marks}"
+        from pipeline.sheet_views import count_note
+        text += count_note(doc, items, kind, page)
         return _answer_obj(question, [doc_id], text, n, "count", conf, False, boxes, cites, scene, trace, route, t0)
 
     vals = [(i, _qty(i, kind, p.type)) for i in items]
@@ -692,7 +707,9 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
                 return _abstain(question, doc_id, "This plan has no scale I can trust, so I cannot give areas in square metres.", trace, route, t0)
             conf = float(sc.get("confidence") or 0.3)
             if conf < 0.5:
-                scale_note = " Areas are estimated from door sizes because no printed scale was found, so treat them as approximate."
+                scale_note = (" A scale ratio is printed, but image DPI or a verified paper size is missing; these areas still use a door-size estimate."
+                              if sc.get("unverified_printed_ratio") else
+                              " Areas are estimated from door sizes because no printed scale was found, so treat them as approximate.")
             elif sc.get("method") in ("scalebar", "ratio-dpi", "ratio-sheet"):
                 scale_note = scale_note or " Sized from the scale printed on the drawing."
         else:

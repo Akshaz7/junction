@@ -110,7 +110,7 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
                 it.page, it.bbox_px = placed[it.item_id]
         return Doc(doc_id, "ifc", items, title, e.get("storeys") or [], meta=e.get("building") or {})
     if pms:
-        items, scale = [], None
+        items, scale, view_regions, excluded = [], None, [], []
         for p in pms:
             m = _json(p)
             from engine.scales import apply_item_scales
@@ -133,6 +133,14 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
                                   bbox_px=x.get("bbox_px"), polygon_px=x.get("polygon_px"), conf=float(x.get("conf") or 0), q=q, props=pr,
                                   source=x.get("source", "")))
             apply_item_scales(items[page_start:], m)
+            from pipeline.sheet_views import filter_plan_items
+            page_items = items[page_start:]
+            selected = filter_plan_items(page_items, m)
+            kept = {id(i) for i in selected}
+            excluded.extend(i.item_id for i in page_items if id(i) not in kept)
+            items[page_start:] = selected
+            if m.get("view_analysis"):
+                view_regions.extend({**r, "page": m.get("page", 1)} for r in m.get("regions", []))
         items = dedupe_openings(items)
         try:   # E-57: a printed scale (scale bar, or 1:200 + sheet size / dpi) beats the door-size guess
             from engine import scale_text
@@ -142,7 +150,8 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
                 scale = {**better, "replaced": (scale or {}).get("method")}
         except Exception:  # noqa: BLE001 - never block a document on scale reading
             pass
-        return Doc(doc_id, "planmap", items, title, [], scale, len(pms))
+        return Doc(doc_id, "planmap", items, title, [], scale, len(pms),
+                   meta={"view_regions": view_regions, "excluded_view_items": excluded} if view_regions else {})
     return None
 
 

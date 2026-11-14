@@ -161,7 +161,7 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
     try:
         from engine.solvers.data import load_doc
         doc = load_doc(did, root)
-        if doc is None or doc.mode != "planmap" or not any(i.source == "det" for i in doc.items):
+        if doc is None or doc.mode != "planmap" or doc.meta.get("view_regions") or not any(i.source == "det" for i in doc.items):
             return res
         det = Path(root) / did / "planmap-det.json"
         # calibration: the fine-tuned detector is far below the vision recount (shower/bath .28 vs .89 exact count), so it is opt-in (DET_BOXES=1)
@@ -358,7 +358,7 @@ def _answer_forced(question: str, doc_ids: list[str], on_event: Callable | None 
     finally:
         _P.DELTA_SINK.reset(_tok)
     if (os.environ.get("FORCE_ANSWER", "1") == "0" or not doc_ids or not (question or "").strip() or not res["answer"].get("abstained")
-            or any(s.get("step") == "unclassified" for s in res.get("trace", []))
+            or any(s.get("step") in ("unclassified", "view_scope") for s in res.get("trace", []))
             or parse_scene(question) is not None or _other_doc(question, doc_ids)):
         return res
     _t = res["answer"].get("text_md", "")
@@ -824,6 +824,8 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             last["question"] = question
             last["cost"] = {"usd_total": round(sum(c["cost_usd"] for c in calls), 6), "calls": calls}
             last["latency_ms"] = int((time.perf_counter() - t0) * 1000)
+            if any(s.get("step") == "view_scope" for s in trace):
+                return last
             return _use_reader(last, question, doc_ids, root, trace, calls, t0, emit)
         return _use_reader(_abstained(question, doc_ids, NOT_YET, trace, t0, "index", calls), question, doc_ids, root, trace, calls, t0, emit)
     except Exception as e:  # the server must always get an answer object back

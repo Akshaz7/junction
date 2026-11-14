@@ -37,8 +37,15 @@ def _union(boxes):
     return [min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes)]
 
 
-METRIC = re.compile(r"(?<![\d.])1\s*:\s*(\d+(?:[.,]\d+)?)(?!\d)")
+METRIC = re.compile(r"(?<![\d.])1\s*:\s*(\d+(?:[.,]\d+)?(?:\s+\d+\s*/\s*\d+)?)(?![\d/]|[.,]\d)")
 IMPERIAL = re.compile(r'''(\d+(?:\s+\d+)?(?:\s*/\s*\d+)?)\s*["”″]\s*=\s*(\d+(?:\.\d+)?)\s*['’′](?:\s*-\s*(\d+(?:\.\d+)?)\s*["”″]?)?''')
+
+
+def _metric_number(text):
+    try:
+        return positive(sum(float(Fraction(part)) for part in re.sub(r'\s*/\s*', '/', text.replace(',', '.')).split()))
+    except (ValueError, ZeroDivisionError):
+        return None
 
 
 def _ratio(text):
@@ -52,7 +59,7 @@ def _ratio(text):
             return None, None
     m = METRIC.search(text)
     if m:
-        return positive(m[1].replace(",", ".")), m.span()
+        return _metric_number(m[1]), m.span()
     return None, None
 
 
@@ -90,8 +97,9 @@ def scale_anchors(words):
             # Several labels in one OCR line are ambiguous; do not pick the first.
             imperial = list(IMPERIAL.finditer(text))
             ratios = [_ratio(m[0])[0] for m in imperial]
-            ratios += [float(m[1].replace(",", ".")) for m in METRIC.finditer(text)
+            ratios += [_metric_number(m[1]) for m in METRIC.finditer(text)
                        if not any(im.start() <= m.start() < im.end() for im in imperial)]
+            ratios = [r for r in ratios if r]
             if len(set(ratios)) > 1:
                 for rr in set(ratios):
                     anchors.append({"bbox": _union([w["bbox_px"] for w in group]), "ratio": rr, "title": None, "quote": text})

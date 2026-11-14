@@ -392,6 +392,12 @@ class Session:
         tot = {k: sum(float(i.q[k]) for i in items if i.q.get(k) is not None) for k in ("area_m2", "length_m", "width_m")}
         n_with = {k: sum(1 for i in items if i.q.get(k) is not None) for k in tot}
         out = [f"{len(items)} item(s)" + "".join(f"; sum {k} = {_fmt(v)} over {n_with[k]} item(s)" for k, v in tot.items() if n_with[k])]
+        from pipeline.sheet_views import count_views
+        for region in count_views(d, items, kind or None, int(page) if page else None):
+            ref = self.reg("region", did, region['page'], region['bbox'], region.get('title'))
+            out.append(f"{ref} Plan view {region.get('title') or 'unnamed'} (p{region['page']}): {region['count']} matching items")
+        if d.meta.get('view_regions'):
+            out.append('Only plan views are counted. Elevations, sections and unresolved regions are excluded; empty detections do not prove that no elements exist.')
         sc = d.scale or {}
         if sc:
             out.append(f"scale confidence {sc.get('confidence')} ({sc.get('method')})")

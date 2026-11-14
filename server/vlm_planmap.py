@@ -30,6 +30,11 @@ SCHEMA = {
     "type": "object", "required": ["is_plan", "items", "dimensions"], "additionalProperties": False,
     "properties": {
         "is_plan": {"type": "boolean"},
+        "views": {"type": "array", "items": {
+            "type": "object", "required": ["title", "view_type", "box_2d", "printed_scale"], "additionalProperties": False,
+            "properties": {"title": {"type": "string"}, "box_2d": _BOX,
+                           "view_type": {"type": "string", "enum": ["plan", "elevation", "section", "detail", "site", "unknown"]},
+                           "printed_scale": {"type": "string"}}}},
         "items": {"type": "array", "items": {
             "type": "object", "required": ["kind", "box_2d"], "additionalProperties": False,
             "properties": {"kind": {"type": "string", "enum": list(KINDS)}, "box_2d": _BOX,
@@ -42,8 +47,15 @@ SCHEMA = {
 }
 PROMPT = (
     "You read ONE page of a building drawing and return a structured plan map as JSON only.\n"
-    "is_plan: true only if the page is a floor plan (or a plan-like layout) where rooms, walls, doors or windows are drawn. "
+    "is_plan: true if the page contains at least one floor-plan view, including mixed sheets with elevations and sections. "
     "For elevations, sections, details, schedules or text pages set is_plan=false and items=[].\n"
+    "views: identify EVERY separate drawing view, including elevations, sections, details and site plans. "
+    "For each supply title exactly as printed (empty if none), view_type, box_2d enclosing the drawing AND its title/scale label, "
+    "and printed_scale exactly as printed (e.g. 1:100 or 3/16\"=1'-0\"; empty if none). "
+    "Regions must not overlap; never merge an elevation with a floor plan. "
+    "Plan, Pohjapiirros, Grundriss and Våningsplan indicate plans; Julkisivu/Ansicht/Fasad indicate elevations; Leikkaus/Schnitt/Sektion indicate sections. "
+    "A site plan, roof profile, detail or section does not provide floor-plan door/window/room counts. "
+    "If view boundaries are unclear mark unknown. Never infer a printed scale from door size.\n"
     "items: one entry per element you can SEE, box_2d=[ymin,xmin,ymax,xmax] on a 0-1000 scale of the full image, tight boxes.\n"
     "- room: the whole room area. label = the printed room name/number exactly as printed (else omit). room_type from the enum. "
     "printed_area_m2 only if an area is printed in m2 on the page.\n"
@@ -165,9 +177,18 @@ def build(doc_id: str, page: int, W: int, H: int, raw: dict, model: str, ms: flo
         counters[it["kind"]] = counters.get(it["kind"], 0) + 1
         it = {k: v for k, v in it.items() if k != "item_id"}
         out.append({"item_id": f"{it['kind']}-{counters[it['kind']]:03d}", **it})
-    return {"doc_id": doc_id, "page": page, "image": {"w": W, "h": H}, "scale": scale, "items": out,
+    pm = {"doc_id": doc_id, "page": page, "image": {"w": W, "h": H}, "scale": scale, "items": out,
+          "dimension_evidence": [{"text": d["text"], "meters": d["meters"], "bbox_px": d["px"]} for d in dims],
             "provenance": {"models": {"vlm": model}, "rules": rules, "created": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                            "ms": int(ms), "note": "read by a vision-language model, geometry-checked; boxes are approximate"}}
+    from pipeline.sheet_views import annotate_views
+    views = []
+    for view in raw.get("views") or []:
+        px = _px(view.get("box_2d"), W, H)
+        if px:
+            views.append({"bbox": px, "title": view.get("title") or None, "view_type": view.get("view_type", "unknown"),
+                          "printed_scale": view.get("printed_scale") or "", "classification_source": "vlm"})
+    return annotate_views(pm, [], views=views) if views else pm
 
 
 def validate(pm: dict) -> list[str]:
@@ -180,7 +201,7 @@ TILE_FROM = 3000      # px: pages larger than this also get 2x2 tile passes for 
 TILE_KINDS = ("door", "window", "toilet", "sink", "shower", "bathtub", "stairs", "column")
 TILE_NOTE = ("\n\nThis image is ONE TILE of a larger page. Return ONLY items of kind door, window, toilet, sink, shower, "
              "bathtub, stairs, column that are fully or mostly inside the tile (rooms and walls: none; dimensions: []; "
-             "is_plan: true).")
+             "is_plan: true only if the tile contains a floor plan; ignore elevation/section symbols even in a mixed tile).")
 
 
 def _tiles(src: Path, W: int, H: int):
@@ -236,7 +257,12 @@ def read_page(doc_id: str, page: int, image_path: Path, out_dir: Path) -> dict:
     raw = r.json or {}
     cost = r.cost_usd
     if not raw.get("is_plan"):
-        return {"planmap": None, "is_plan": False, "cost_usd": cost, "model": r.model, "ms": int(ms)}
+        # Keep explicit non-plan regions as evidence. Otherwise a later count
+        # falls back to reading elevation doors as if they were a floor plan.
+        pm = build(doc_id, page, W, H, dict(raw, items=[], dimensions=[]), r.model, ms) if raw.get("views") else None
+        if pm is not None:
+            (Path(out_dir) / f"planmap-{page}.json").write_text(json.dumps(pm))
+        return {"planmap": pm, "is_plan": False, "cost_usd": cost, "model": r.model, "ms": int(ms)}
     if max(W, H) > TILE_FROM:
         tile_items, tcost = _read_tiles(Path(image_path), W, H)
         cost += tcost

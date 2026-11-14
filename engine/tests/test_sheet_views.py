@@ -43,3 +43,156 @@ def test_room_labels_do_not_suppress_scale_ocr(tmp_path, monkeypatch):
     assert len(calls) == 1
     annotate_cached(pm, tmp_path, allow_ocr=True)
     assert len(calls) == 1
+
+from pipeline.sheet_views import annotate_views, view_type
+from engine.solvers.data import load_doc
+from engine.solvers import solve
+
+
+@pytest.mark.parametrize('title,kind', [('Ground floor plan', 'plan'), ('Pohjapiirros', 'plan'), ('Grundriss EG', 'plan'), ('Våningsplan', 'plan'), ('North elevation', 'elevation'), ('Julkisivu etelään', 'elevation'), ('Fasad', 'elevation'), ('Section A-A', 'section'), ('Leikkaus A-A', 'section'), ('Schnitt', 'section'), ('Site plan', 'site'), ('Plans and elevations', 'unknown')])
+def test_multilingual_view_titles(title, kind):
+    assert view_type(title) == kind
+
+
+def mixed_map():
+    items = []
+    for kind in ['door', 'window', 'room']:
+        for k, bbox in enumerate([[20, 20, 80, 80], [520, 20, 580, 80], [20, 420, 80, 480], [520, 420, 580, 480], [450, 50, 550, 100]], 1):
+            if kind == 'window':
+                bbox = [bbox[0]+80, bbox[1], bbox[2]+80, bbox[3]]
+            items.append({'item_id': f'{kind}-{k:03}', 'kind': kind, 'bbox_px': bbox, 'props': {}, 'conf': .9, 'source': 'det'})
+    return {'doc_id': 'generated__mixed', 'page': 1, 'image': {'w': 1000, 'h': 800}, 'scale': {'m_per_px': .02, 'method': 'door-prior', 'confidence': .3}, 'items': items}
+
+
+def views():
+    return [{'bbox': [0, 0, 490, 390], 'title': 'Pohjapiirros', 'view_type': 'plan', 'printed_scale': '1:100'},
+            {'bbox': [500, 0, 1000, 390], 'title': 'Julkisivu', 'view_type': 'elevation', 'printed_scale': '1:200'},
+            {'bbox': [0, 400, 490, 800], 'title': 'Upper plan', 'view_type': 'plan', 'printed_scale': '3/16"=1\'-0"'},
+            {'bbox': [500, 400, 1000, 800], 'title': 'Leikkaus', 'view_type': 'section', 'printed_scale': '1:48'}]
+
+
+def test_explicit_views_assign_scales_and_exclude_crossing_items():
+    pm = annotate_views(mixed_map(), [], views=views(), dpi=254)
+    assert [r['scale']['ratio'] for r in pm['regions']] == [100, 200, 64, 48]
+    for kind in ['door', 'window', 'room']:
+        its = [i for i in pm['items'] if i['kind'] == kind]
+        assert [i['props']['excluded_from_plan_counts'] for i in its] == [False, True, False, True, True]
+    assert mixed_map()['items'][0]['props'] == {}  # source map stays intact
+
+
+def store(tmp_path, pm):
+    d = tmp_path / pm['doc_id']
+    d.mkdir()
+    (d/'doc.json').write_text(json.dumps({'kind': 'raster'}))
+    (d/'planmap-1.json').write_text(json.dumps(pm))
+    return d
+
+
+def test_plan_count_per_view_evidence_and_reasoning(tmp_path):
+    from engine import reasoning
+    from jsonschema import validate
+    from pathlib import Path
+    pm = annotate_views(mixed_map(), [], views=views())
+    d = store(tmp_path, pm)
+    result = solve('How many doors?', d.name, root=tmp_path)
+    assert result['answer']['value'] == 2
+    assert 'Pohjapiirros' in result['answer']['text_md'] and 'Upper plan' in result['answer']['text_md']
+    assert 'Elevation' in result['answer']['text_md']
+    assert len(result['citations']) == 2
+    assert {b['item_id'] for b in result['evidence']['boxes']} == {'door-001', 'door-003'}
+    card = reasoning.build(result, 'How many doors?', tmp_path)
+    assert any(s['title'] == 'Plan views' for s in card['steps'])
+    result['reasoning'] = card
+    validate(result, json.loads(Path('server/schemas/answer.schema.json').read_text()))
+
+
+def test_all_nonplan_views_abstain_instead_of_false_zero(tmp_path):
+    vv = views()
+    for v in vv:
+        v['view_type'] = 'elevation'
+    pm = annotate_views(mixed_map(), [], views=vv)
+    d = store(tmp_path, pm)
+    result = solve('How many windows?', d.name, root=tmp_path)
+    assert result['answer']['abstained'] and result['answer']['value'] is None
+    assert 'No floor-plan view' in result['answer']['text_md']
+
+
+def test_titles_without_printed_scales_still_separate_views():
+    from PIL import ImageDraw
+    im = Image.new('L', (1000, 800), 'white')
+    draw = ImageDraw.Draw(im)
+    draw.rectangle([30, 40, 400, 600], outline='black', width=3)
+    draw.rectangle([600, 40, 950, 600], outline='black', width=3)
+    pm = annotate_views(mixed_map(), [word('Floor plan', 30, 650), word('Elevation', 600, 650)], im)
+    assert len(pm['regions']) == 2
+    assert {r['view_type'] for r in pm['regions']} == {'plan', 'elevation'}
+
+
+def test_unresolved_boundaries_do_not_assign_nearest_title():
+    pm = annotate_views(mixed_map(), [word('Floor plan', 30, 650), word('Elevation', 600, 650)])
+    assert pm['regions'][0]['view_type'] == 'unknown'
+    assert all(i['props']['excluded_from_plan_counts'] for i in pm['items'])
+
+
+def test_overlapping_peer_views_do_not_supply_a_plan_count():
+    vv = views()
+    vv[1]['bbox'] = [30, 0, 1000, 390]
+    pm = annotate_views(mixed_map(), [], views=vv)
+    assert pm['items'][0]['props']['excluded_from_plan_counts']
+
+
+def test_legacy_maps_have_unchanged_counts(tmp_path):
+    d = store(tmp_path, mixed_map())
+    assert solve('How many rooms?', d.name, root=tmp_path)['answer']['value'] == 5
+
+
+def test_model_view_boxes_flow_into_planmap():
+    from server.vlm_planmap import build
+    pm = build('generated__model', 1, 1000, 800, {
+        'items': [{'kind': 'door', 'box_2d': [20, 20, 100, 100]}, {'kind': 'door', 'box_2d': [20, 600, 100, 700]}],
+        'dimensions': [], 'views': [
+            {'title': 'Plan', 'view_type': 'plan', 'box_2d': [0, 0, 1000, 490], 'printed_scale': '1:100'},
+            {'title': 'Elevation', 'view_type': 'elevation', 'box_2d': [0, 500, 1000, 1000], 'printed_scale': '1:200'}]}, 'fake', 0)
+    assert len(pm['regions']) == 2
+    assert [i['props']['excluded_from_plan_counts'] for i in pm['items']] == [False, True]
+
+
+def test_public_answer_does_not_force_a_count_on_nonplan_sheet(tmp_path, monkeypatch):
+    from engine import answer
+    vv = views()
+    for v in vv:
+        v['view_type'] = 'elevation'
+    d = store(tmp_path, annotate_views(mixed_map(), [], views=vv))
+    monkeypatch.setenv('ARTIFACTS_DIR', str(tmp_path))
+    monkeypatch.setenv('MODELS_FAKE', '1')
+    result = answer.answer('How many windows?', [d.name])
+    assert result['answer']['value'] is None
+    assert 'No floor-plan view' in result['answer']['text_md']
+
+
+def test_reader_planmap_lists_per_view_counts(tmp_path):
+    from engine.reader.tools import Session
+    d = store(tmp_path, annotate_views(mixed_map(), [], views=views()))
+    result = Session([d.name], tmp_path).t_planmap('d1', kind='window')
+    assert '2 item(s)' in result
+    assert 'Pohjapiirros' in result and 'Upper plan' in result
+    assert 'Elevations, sections' in result
+
+
+@pytest.mark.parametrize('text,ratio', [('1:66 2/3', 200/3), ('Scale 1:100.', 100), ('1:37,5', 37.5)])
+def test_fractional_metric_denominator_and_label_punctuation(text, ratio):
+    from engine.scales import scale_anchors
+    assert scale_anchors([word(text)])[0]['ratio'] == pytest.approx(ratio)
+
+
+def test_view_scale_uses_only_its_local_dimensions():
+    pm = mixed_map()
+    pm['dimension_evidence'] = [
+        {'bbox_px': [10, 100, 210, 120], 'meters': 2},
+        {'bbox_px': [10, 200, 210, 220], 'meters': 2},
+        {'bbox_px': [600, 100, 800, 120], 'meters': 20},
+        {'bbox_px': [600, 200, 800, 220], 'meters': 20}]
+    pm = annotate_views(pm, [], views=views())
+    assert pm['regions'][0]['scale']['m_per_px'] == .01
+    assert pm['regions'][1]['scale']['m_per_px'] == .1
+    assert pm['regions'][2]['scale']['m_per_px'] is None

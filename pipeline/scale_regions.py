@@ -47,6 +47,13 @@ def _partitions(image, anchors, width, height):
             crop = ink[int(b[1] * sy):int(b[3] * sy), int(b[0] * sx):int(b[2] * sx)]
             if not crop.size:
                 continue
+            crop = crop.copy()
+            # Long enclosing frame strokes must not close an otherwise blank
+            # gutter. Remove only near-continuous rows/columns, not drawing ink.
+            if axis == 0:
+                crop[crop.sum(axis=1) >= .9 * crop.shape[1], :] = False
+            else:
+                crop[:, crop.sum(axis=0) >= .9 * crop.shape[0]] = False
             # A gutter may meet the two strokes of an enclosing sheet frame.
             # Allow only a fraction of one text height of ink along its span.
             blank = crop.sum(axis=0 if axis == 0 else 1) <= max(1, font * factor * .25)
@@ -159,7 +166,7 @@ def annotate_planmap(pm, words, image=None, dpi=None, frames=None):
 def annotate_cached(pm, directory, allow_ocr=False):
     """Read cached OCR and page metadata. Never writes shared source artifacts."""
     d = Path(directory)
-    if pm.get("regions") or any(i.get("source") in ("dxf", "ifc") for i in pm.get("items", [])):
+    if any(i.get("source") in ("dxf", "ifc") for i in pm.get("items", [])):
         return copy.deepcopy(pm)
     page = pm.get("page", 1)
     words, dpi = [], None
@@ -186,9 +193,16 @@ def annotate_cached(pm, directory, allow_ocr=False):
                 extra = ocr_words(d / f"page-{page}.png")
                 words.extend(extra)
                 (d / f"scale-ocr-{page}.json").write_text(json.dumps({"image": pm["image"], "words": extra}))
-            return annotate_planmap(pm, words, im, dpi)
+            from pipeline.sheet_views import annotate_views
+            annotated = annotate_planmap(pm, words, im, dpi)
+            # Revisit model view boxes with real OCR/DPI rather than letting a
+            # previously stored annotation prevent scale recovery.
+            if annotated.get("view_analysis"):
+                annotated.pop("view_analysis")
+            return annotate_views(annotated, words, im, dpi)
     except (OSError, ImportError):
-        return annotate_planmap(pm, words, dpi=dpi)
+        from pipeline.sheet_views import annotate_views
+        return annotate_views(annotate_planmap(pm, words, dpi=dpi), words, dpi=dpi)
 
 
 def annotate_document(directory, page):
