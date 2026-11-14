@@ -40,18 +40,24 @@ export function bindLiveHighlight(
   };
 }
 
-/** Ordered commands share T-06's socket. Loading buffers every edit; a snapshot replaces the layer. */
+/** Ordered commands share T-06's socket. Loading buffers every edit; a snapshot replaces the layer.
+ * `chatId` (value or getter): local edits are sent with it, so the server keeps them in the chat's shared
+ * edit layer, and another chat's edits on the same document are ignored. */
 export function bindLiveCommands(
   viewer: Pick<Viewer, 'scene' | 'applyCommand' | 'applyState' | 'onCommandChange'>,
   docId?: string,
   channel: Pick<SceneChannel, 'onSceneEvent' | 'sendCommand'> = { onSceneEvent, sendCommand },
+  chatId?: string | (() => string | undefined),
 ) {
+  const currentChat = () => (typeof chatId === 'function' ? chatId() : chatId) || undefined;
   const pending: SceneEvent[] = [];
   const seen = new Set<string>();
   let applyingRemote = false;
   const currentDoc = () => docId ?? viewer.scene?.manifest.doc_id;
   function apply(event: SceneEvent) {
     if (event.doc_id !== currentDoc()) return;
+    const chat = currentChat();
+    if (chat && event.chat_id && event.chat_id !== chat) return;
     if (event.type === 'scene.edit' && event.edit_id) {
       if (seen.has(event.edit_id)) return;
       seen.add(event.edit_id);
@@ -75,7 +81,7 @@ export function bindLiveCommands(
     if (!applyingRemote && doc) {
       // The shared channel delivers locally too; do not apply our own command twice.
       applyingRemote = true;
-      try { channel.sendCommand(doc, command); }
+      try { const chat = currentChat(); if (chat) channel.sendCommand(doc, command, chat); else channel.sendCommand(doc, command); }
       finally { applyingRemote = false; }
     }
   });

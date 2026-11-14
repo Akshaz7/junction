@@ -62,6 +62,8 @@ export interface Viewer {
   applyState(snapshot: SceneSnapshot): void;
   getCommandState(): CommandTestState;
   onCommandChange(callback: (command: SceneCommand) => void): () => void;
+  /** Fires after every command or snapshot (remote ones included), unlike onCommandChange. */
+  onCommandStateChange(callback: (state: CommandTestState) => void): () => void;
   isApplyingCommand(): boolean;
   /** Local 2D/3D interaction layer, independent of answer/live highlights. */
   setLinkedItems(hovered: string | null, selected: string | null, labels?: Record<string, string>): void;
@@ -69,6 +71,8 @@ export interface Viewer {
   getEditState(): EditState;
   removeItem(item_id: string): ItemEdit | null;
   changeMaterial(item_id: string, material: WallMaterial): ItemEdit | null;
+  /** Bring back hidden items (hidden here or by the chat); goes through the same command path and Undo history. */
+  restoreItems(item_ids: readonly string[]): ItemEdit | null;
   undoEdit(): ItemEdit | null;
   resetEdits(): ItemEdit | null;
   beginMove(item_id: string, x: number, y: number): boolean;
@@ -146,6 +150,17 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   let moving: { id: string; from: Vector3; start: Vector3; plane: Plane; dx: number; dz: number; controlsEnabled: boolean } | null = null;
   let applyingCommand = false;
   const commandListeners = new Set<(command: SceneCommand) => void>();
+  const commandStateListeners = new Set<(state: CommandTestState) => void>();
+  let localEdit = false;
+  /** Hides from outside the Edit panel join its Undo history; then everyone hears the new state. */
+  function afterCommandState(before: ReadonlySet<string>) {
+    if (!localEdit) {
+      const gone = [...commandState.hidden].filter((id) => !before.has(id));
+      if (gone.length) edits?.noteExternalHide(gone);
+    }
+    const state = readCommandState(commandState);
+    for (const callback of commandStateListeners) callback(state);
+  }
   let linked = { hovered: null as string | null, selected: null as string | null, labels: {} as Record<string, string> };
   let linkedLabel: CSS2DObject | null = null;
   const highlightListeners = new Set<(state: HighlightState) => void>();
@@ -189,9 +204,9 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     clearHighlight();
     linkedHighlights = null;
     let result: ItemEdit | null;
-    mutatingEdit = true;
+    mutatingEdit = true; localEdit = true;
     try { result = action(); }
-    finally { mutatingEdit = false; }
+    finally { mutatingEdit = false; localEdit = false; }
     if (previous?.highlighted.length) highlight(previous.highlighted, { labels: previous.labels, dimOthers: commandState.isolated === null });
     else { applyLinkedVisuals(); notifyHighlight(); }
     batchesDirty = true;
@@ -778,23 +793,29 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       if (!active || disposed) return;
       const resolved = command.op === 'highlight' || command.op === 'isolate'
         ? { ...command, labels: resolveCommandLabels(command.item_ids, command.labels, active.manifest.items) } : command;
-      if (!mutatingEdit) edits?.recordCommand(resolved, commandState);
+      const before = commandState.hidden;
+      if (!mutatingEdit && command.op !== 'hide' && command.op !== 'restore') edits?.recordCommand(resolved, commandState);
       commandState = applyCommand(commandState, resolved);
       cinematicNext = command.op === 'highlight' || command.op === 'isolate';
       renderCommandState();
       cinematicNext = false;
       for (const callback of commandListeners) callback(resolved);
+      afterCommandState(before);
     },
     applyState(snapshot) {
       if (!active || disposed) return;
+      const before = commandState.hidden;
       const next = applyState({ ...snapshot,
         labels: resolveCommandLabels(snapshot.highlighted, snapshot.labels, active.manifest.items) });
-      if (!mutatingEdit) edits?.recordState(commandState, next);
+      const hiddenChanged = next.hidden.size !== before.size || [...next.hidden].some((id) => !before.has(id));
+      if (!mutatingEdit && !hiddenChanged) edits?.recordState(commandState, next);
       commandState = next;
       renderCommandState();
+      afterCommandState(before);
     },
     getCommandState() { return readCommandState(commandState); },
     onCommandChange(callback) { commandListeners.add(callback); return () => { commandListeners.delete(callback); }; },
+    onCommandStateChange(callback) { commandStateListeners.add(callback); return () => { commandStateListeners.delete(callback); }; },
     isApplyingCommand: () => applyingCommand,
     setLinkedItems(hovered, selected, labels = {}) {
       if (selected && selected !== linked.selected && active?.items.has(selected)) {
@@ -809,6 +830,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     getEditState: () => edits?.state() ?? { undoCount: 0, moved: {}, materials: {} },
     removeItem: (id) => mutateEdit(() => edits?.remove(id) ?? null),
     changeMaterial: (id, choice) => mutateEdit(() => edits?.changeMaterial(id, choice) ?? null),
+    restoreItems(ids) { endMove(true); return mutateEdit(() => edits?.restore(ids) ?? null); },
     undoEdit() { endMove(true); return mutateEdit(() => edits?.undo() ?? null); },
     resetEdits() { endMove(true); return mutateEdit(() => edits?.reset() ?? null); },
     beginMove(id, x, y) {
@@ -897,6 +919,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       disposed = true;
       highlightListeners.clear();
       commandListeners.clear();
+      commandStateListeners.clear();
       cutawayListeners.clear();
       walkListeners.clear();
       walk.dispose();

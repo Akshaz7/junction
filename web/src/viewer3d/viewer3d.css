@@ -125,7 +125,8 @@
 .viewer3d-edit-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .viewer3d-edit-actions strong { margin-right: auto; }
 .viewer3d-edit-actions label { display: flex; align-items: center; gap: 8px; }
-.viewer3d-edit-actions button, .viewer3d-edit-actions select {
+.viewer3d-edit-removed { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: .9em; }
+.viewer3d-edit-actions button, .viewer3d-edit-actions select, .viewer3d-edit-removed button {
   padding: 6px 10px; border: 1px solid var(--border, #e7e7e7); border-radius: 8px;
   color: inherit; background: var(--card, #fff); font: inherit; cursor: pointer;
 }
