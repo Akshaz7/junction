@@ -68,7 +68,7 @@ def _stem(t: str) -> str:
 SYN_GROUPS = [
     {"light", "lighting", "luminaire", "fixture", "fitting", "lamp", "downlight", "valaisin", "valaisimet", "leuchte", "armatur", "belysning", "lampa"},
     {"socket", "receptacle", "outlet", "plug", "pistorasia", "steckdose", "uttag", "stikkontakt", "gfci", "gfi", "duplex"},
-    {"smoke", "savu", "rauch", "rok", "fire", "palo", "brand"},
+    {"smoke", "savu", "rauch", "rok"},
     {"detector", "sensor", "alarm", "ilmaisin", "melder", "detektor", "larm"},
     {"switch", "kytkin", "schalter", "brytare"},
     {"valve", "venttiili", "ventil", "ventile"},
