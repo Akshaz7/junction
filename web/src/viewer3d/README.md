@@ -370,3 +370,9 @@ edges nearest the camera at the build's ground storey (elevation >= 0, else lowe
 `elevation_m`. Only storeys that are currently visible show a tag; tags that would overlap on screen (within 20 px) keep the topmost.
 
 `viewer.getBlueprintState()` returns the rooms (shown or why hidden), dimension strings, storey tags and the applied colours for tests.
+
+## Many highlights: tags, framing, site (W-53)
+- More than `MAX_CALLOUT_TAGS` (12) highlighted items: no per-item callout tags. The per-kind glow and the legend ("Doors 18 · Windows 54") carry the answer; a tag shows on hover/tap and for the item picked from a citation. 12 or fewer keep their tags.
+- Framing (`fit` and `flyTo`) uses a tight, perspective-aware distance on the highlighted items' bbox (`tightDistance`), never the site or slabs more than 3x the wall footprint (`framingIds`).
+- `IfcSite` ("Gelaende") renders faint (opacity 0.22, no depth write) so it never dominates.
+- The answer's storey is selected by the caller (`setStorey`); the viewer keeps it.

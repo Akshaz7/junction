@@ -127,15 +127,15 @@ test('72 highlights: at most 12 callout tags, glow and legend stay, the building
     const ids = [...ground('door'), ...ground('window')]
     v.highlight(ids, {})
     await new Promise((r) => setTimeout(r, 1500))
-    // Project every building item (not the site) and measure the screen width it covers.
+    // Screen width covered by the building's walls (projected bbox corners), not the site.
     const canvas = v.renderer.domElement
     let min = Infinity, max = -Infinity
     for (const [id, o] of s.items) {
-      if (s.manifest.items[id].kind === 'site' || !o.visible) continue
-      const b = s.manifest.items[id].bbox_m; if (!b) continue
-      for (const x of [b[0][0], b[1][0]]) for (const y of [b[0][1], b[1][1]]) for (const z of [b[0][2], b[1][2]]) {
-        const p = { x, y, z }; const vec = (o.position.clone() as unknown as { set(x: number, y: number, z: number): { project(c: unknown): { x: number } } }).set(p.x, p.y, p.z).project(v.camera)
-        const px = (vec.x + 1) / 2 * canvas.clientWidth
+      const it = s.manifest.items[id]
+      if (it.kind !== 'wall' || !o.visible || !it.bbox_m) continue
+      for (const x of [it.bbox_m[0][0], it.bbox_m[1][0]]) for (const y of [it.bbox_m[0][1], it.bbox_m[1][1]]) for (const z of [it.bbox_m[0][2], it.bbox_m[1][2]]) {
+        const p = v.camera.position.clone().set(x, y, z).project(v.camera)
+        const px = (p.x + 1) * canvas.clientWidth / 2
         min = Math.min(min, px); max = Math.max(max, px)
       }
     }

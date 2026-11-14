@@ -267,3 +267,5 @@
 @media (prefers-reduced-motion: reduce) {
   .viewer3d-annotation .viewer3d-label-pill, .viewer3d-annotation .viewer3d-label-leader { transition: none; }
 }
+.viewer3d-test-page { grid-template-columns: minmax(0, 1fr); }
+.viewer3d-test-page output { overflow-wrap: anywhere; }

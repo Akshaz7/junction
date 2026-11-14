@@ -23,7 +23,7 @@ import { createEditLayer, type ItemEdit, type EditState, type WallMaterial } fro
 import { createItemAnnotation, layoutAnnotations } from './annotations';
 import { createFindingsLayer, type Finding, type FindingPinState } from './findings';
 import { kindColor } from '../lib/kind-colors';
-import { createBlueprint, styleSceneMaterials, type Blueprint, type BlueprintState } from './blueprint';
+import { createBlueprint, framingIds, MAX_CALLOUT_TAGS, styleSceneMaterials, type Blueprint, type BlueprintState } from './blueprint';
 import { planCinematic, sampleCinematic, type CinematicPlan } from './cinematic';
 
 export const SCENE_LOAD_BUDGET_MS = 60_000;
@@ -272,15 +272,31 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     build?.animation.sample(performance.now());
   }
 
+  /** Smallest distance along `direction` from `center` at which every corner of `bounds` is inside the frame (tight, perspective-aware). */
+  function tightDistance(bounds: Box3, center: Vector3, direction: Vector3, loose: number): number {
+    const probe = camera.clone();
+    const corners: Vector3[] = [];
+    for (const x of [bounds.min.x, bounds.max.x]) for (const y of [bounds.min.y, bounds.max.y]) for (const z of [bounds.min.z, bounds.max.z]) corners.push(new Vector3(x, y, z));
+    const fits = (d: number): boolean => {
+      probe.position.copy(center).addScaledVector(direction, d);
+      probe.lookAt(center); probe.updateMatrixWorld(true);
+      return corners.every((c) => { const p = c.clone().project(probe); return p.z < 1 && Math.abs(p.x) <= 0.94 && Math.abs(p.y) <= 0.94; });
+    };
+    let lo = loose * 0.1, hi = loose;
+    if (!fits(hi)) return loose;
+    for (let i = 0; i < 28; i++) { const mid = (lo + hi) / 2; if (fits(mid)) hi = mid; else lo = mid; }
+    return hi;
+  }
+
   function flyTo(bounds: Box3): void {
     if (bounds.isEmpty()) return;
     const sphere = bounds.getBoundingSphere(new Sphere());
     const radius = Math.max(sphere.radius, 0.1);
     const halfFov = camera.fov * Math.PI / 360;
     const limitingFov = Math.min(halfFov, Math.atan(Math.tan(halfFov) * camera.aspect));
-    const distance = radius / Math.sin(limitingFov) * 1.25;
     const direction = camera.position.clone().sub(controls.target).normalize();
     if (direction.lengthSq() === 0) direction.set(1, 0.8, 1).normalize();
+    const distance = tightDistance(bounds, sphere.center, direction, radius / Math.sin(limitingFov) * 1.25);
     flight = {
       start: performance.now(), from: camera.position.clone(),
       to: sphere.center.clone().addScaledVector(direction, distance),
@@ -312,7 +328,11 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     const scene = active;
     highlights.highlight(ids, options, (id) => new Color(kindColor(scene.manifest.items[id]?.kind)));
     const state = highlights.getHighlightState();
-    for (const id of state.highlighted) {
+    // Past 12 items the per-item callouts bury the drawing: keep the glow and legend, tag only the picked item
+    // (hover/tap adds a tag through the linked-item path).
+    const tagIds = state.highlighted.length > MAX_CALLOUT_TAGS
+      ? state.highlighted.filter((id) => id === options.cameraTargetItemId) : state.highlighted;
+    for (const id of tagIds) {
       const label = createItemAnnotation(active, id, state.labels[id]);
       if (label) labels.push(label);
     }
@@ -325,7 +345,9 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     const canFly = !(build && build.phase !== 'done') && !walk.state().active;
     if (canFly) {
       // An explicit camera target wins; otherwise frame every highlighted item so all numbered tags stay in view.
-      const fly = itemBounds(active, options.cameraTargetItemId && active.items.has(options.cameraTargetItemId) ? [options.cameraTargetItemId] : state.highlighted);
+      const framed = new Set(framingIds(active));
+      const flyIds = options.cameraTargetItemId && active.items.has(options.cameraTargetItemId) ? [options.cameraTargetItemId] : state.highlighted;
+      const fly = itemBounds(active, flyIds.filter((id) => framed.has(id)).length ? flyIds.filter((id) => framed.has(id)) : flyIds);
       const reveal = options.cinematic === true && !prefersReducedMotion() && state.highlighted.length > 0
         && !fly.isEmpty() && performance.now() - sceneShownAt > REVEAL_AFTER_LOAD_MS;
       if (reveal) startCinematic(state.highlighted, fly); else flyTo(fly);
@@ -468,8 +490,16 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       current.phase = state.phase;
       current.onStateChange?.({ phase: state.phase, progress: state.progress });
       if (state.phase === 'done') {
+        const wasIntro = current.intro;
         current.intro = false;
-        if (previous !== 'done' && cameraTarget && active) flyTo(itemBounds(active, [cameraTarget]));
+        // Only the opening build-up frames the answer; scrubbing never moves the camera, and many items frame together.
+        const marked = highlights?.getHighlightState().highlighted ?? [];
+        if (wasIntro && previous !== 'done' && active && marked.length) {
+          const ids = marked.length > MAX_CALLOUT_TAGS || !cameraTarget ? marked : [cameraTarget];
+          const framed = new Set(framingIds(active));
+          const use = ids.filter((id) => framed.has(id));
+          if (use.length) flyTo(itemBounds(active, use));
+        }
       }
     }
   }
@@ -493,15 +523,18 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
 
   function fit(scene: LoadedScene): void {
     scene.root.updateWorldMatrix(true, true);
-    const bounds = new Box3().setFromObject(scene.root);
+    // Frame the building, not the site/terrain or an oversized slab.
+    let bounds = itemBounds(scene, framingIds(scene));
+    if (bounds.isEmpty()) bounds = new Box3().setFromObject(scene.root);
     if (bounds.isEmpty()) return;
     const sphere = bounds.getBoundingSphere(new Sphere());
     const radius = Math.max(sphere.radius, 0.1);
     const verticalFov = camera.fov * Math.PI / 360;
     const limitingFov = Math.min(verticalFov, Math.atan(Math.tan(verticalFov) * camera.aspect));
-    const distance = radius / Math.sin(limitingFov) * 1.15;
+    const fitDirection = new Vector3(1, 0.8, 1).normalize();
+    const distance = tightDistance(bounds, sphere.center, fitDirection, radius / Math.sin(limitingFov) * 1.15);
     controls.target.copy(sphere.center);
-    camera.position.copy(sphere.center).add(new Vector3(1, 0.8, 1).normalize().multiplyScalar(distance));
+    camera.position.copy(sphere.center).addScaledVector(fitDirection, distance);
     camera.near = Math.max(radius / 1000, 0.001);
     camera.far = Math.max(distance + radius * 10, 100);
     camera.updateProjectionMatrix();

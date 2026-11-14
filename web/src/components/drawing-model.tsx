@@ -34,7 +34,7 @@ export function DrawingModel({ answer, docId, chatId }: { answer?: VisualiseAnsw
     : { docId, highlight: [], labels: {}, cameraTargetItemId: undefined }, [answer, docId])
   const highlightOptions = useMemo(() => ({ labels: evidence.labels, cameraTargetItemId: evidence.cameraTargetItemId }), [evidence])
   return <div className="drawing-model" role="region" aria-label="3D model pane" data-rise-state={phase}>
-    <Viewer3D doc_id={evidence.docId} chat_id={chatId ?? undefined} highlightItemIds={drawing ? undefined : evidence.highlight} highlightOptions={highlightOptions}
+    <Viewer3D doc_id={evidence.docId} chat_id={chatId ?? undefined} highlightItemIds={evidence.highlight} highlightOptions={highlightOptions}
       commands={drawing ? undefined : evidence.commands} onReady={ready} visualise onRiseStateChange={(state) => setPhase(state.phase)} onError={() => setPhase('error')} />
   </div>
 }
