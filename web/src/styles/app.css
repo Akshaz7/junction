@@ -897,3 +897,10 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 .rail .project-switcher, .rail .workspace-footer { display: none; }
 .rail .brand-mark { left: 2px; width: 100px; font-size: 14.5px; }
 .rail nav { top: 92px; }
+/* W-69: phone header shows the Stoa Pro mark (top right) instead of the decorative project badge. */
+@media (max-width: 640px) {
+  .mobile-project { display: none !important; }
+  .topbar .project-title { justify-content: flex-end; }
+  .topbar .wordmark { display: inline-flex !important; color: #fff; font-size: 20px; gap: .25em; }
+  .topbar .wordmark .brand-logo { height: .8em; }
+}
