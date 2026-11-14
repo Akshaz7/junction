@@ -19,6 +19,7 @@ import numpy as np
 import trimesh
 from PIL import Image
 from shapely.geometry import LineString, Point, Polygon
+from shapely.ops import unary_union
 from shapely import constrained_delaunay_triangles
 
 REPO = Path(__file__).resolve().parent.parent
@@ -234,7 +235,32 @@ def fixture_parts(kind, bb):
     return [("steps", _flat(_boxes(steps), "stair"))]
 
 
-def process(doc_id: str, art: Path, page: int = 1) -> dict:
+
+def _shell(pm, img_gray, mpp):
+    """Outline shell for drawings with no readable wall pixels: perimeter walls around the content box."""
+    from shapely.geometry import box as _box
+    H, W = img_gray.shape
+    boxes = [it["bbox_px"] for it in pm["items"] if it["kind"] in ("room", "door", "window", "wall") and it.get("bbox_px")]
+    if boxes:
+        x0, y0 = min(b[0] for b in boxes), min(b[1] for b in boxes)
+        x1, y1 = max(b[2] for b in boxes), max(b[3] for b in boxes)
+    else:
+        paper = float(np.percentile(img_gray, 70))
+        ys, xs = np.where(img_gray < 0.7 * paper)
+        if len(xs) < 50:
+            x0, y0, x1, y1 = 0.05 * W, 0.05 * H, 0.95 * W, 0.95 * H
+        else:
+            x0, x1 = np.percentile(xs, 2), np.percentile(xs, 98)
+            y0, y1 = np.percentile(ys, 2), np.percentile(ys, 98)
+    t = 0.18 / mpp
+    outer = _box(x0 - t / 2, y0 - t / 2, x1 + t / 2, y1 + t / 2)
+    inner = _box(x0 + t / 2, y0 + t / 2, x1 - t / 2, y1 - t / 2)
+    if inner.is_empty or not inner.area:
+        return None
+    return {"walls": [outer.difference(inner)], "floor": outer, "wall_frac": 0.0}
+
+
+def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False) -> dict:
     pm = json.loads((art / f"planmap-{page}.json").read_text())
     W, H = pm["image"]["w"], pm["image"]["h"]
     mpp = pm["scale"]["m_per_px"]
@@ -257,6 +283,23 @@ def process(doc_id: str, art: Path, page: int = 1) -> dict:
     def height_of(it, default):
         return float(it["props"].get("height_m") or default)
 
+    rw = None
+    if raster_walls and (art / f"page-{page}.png").is_file():
+        try:
+            from pipeline import raster_walls as _rw
+            rw = _rw.read(np.asarray(Image.open(art / f"page-{page}.png").convert("L"), dtype=float), mpp)
+        except Exception as ex:  # noqa: BLE001
+            print("raster walls skipped:", repr(ex)[:200])
+    approx = False
+    if raster_walls and rw is None and sum(1 for it in pm["items"] if it["kind"] == "wall") < 3:
+        # ladder step 3: no wall pixels and no usable plan-map walls -> clean shell around the drawing's outline
+        try:
+            rw = _shell(pm, img_gray=np.asarray(Image.open(art / f"page-{page}.png").convert("L"), dtype=float), mpp=mpp)
+            approx = rw is not None
+            if approx:
+                floor.visual = trimesh.visual.TextureVisuals(uv=uv, material=_mat((255, 255, 255), 255, rough=1.0, tex=img))
+        except Exception as ex:  # noqa: BLE001
+            print("shell fallback skipped:", repr(ex)[:200])
     win_o = [_opening(it, to_m) for it in pm["items"] if it["kind"] == "window"]
     door_o = [_opening(it, to_m) for it in pm["items"] if it["kind"] == "door"]
 
@@ -277,11 +320,55 @@ def process(doc_id: str, art: Path, page: int = 1) -> dict:
                       "bbox_m": [[round(float(v), 4) for v in lo], [round(float(v), 4) for v in hi]],
                       "storey": "Floor 1", "kind": k}
 
+    if rw:
+        rw["walls_u"] = unary_union(rw["walls"])
+        rw["taken"] = Polygon()
+        tm = lambda g: Polygon([to_m(q) for q in g.exterior.coords], [[to_m(q) for q in r.coords] for r in g.interiors])
+        fl = rw["floor"]
+        sl = [x for x in (prism(tm(g), 0.0, FLOOR_T) for g in (fl.geoms if fl.geom_type == "MultiPolygon" else [fl])) if x is not None]
+        slab = trimesh.util.concatenate(sl) if sl else None
+        if slab is not None:
+            slab.visual = trimesh.visual.TextureVisuals(material=_mat((178, 168, 152), rough=0.9, double=True))
+            register("floor-slab", "floor", [("floor", slab)])
+        wo_all, do_all = win_o, door_o
+        for wi, wp in enumerate(rw["walls"], 1):
+            g = Polygon([to_m(q) for q in wp.exterior.coords], [[to_m(q) for q in r.coords] for r in wp.interiors])
+            g = g if g.is_valid else g.buffer(0)
+            PAD = 0.08
+
+            def cut(opens):
+                shp = []
+                for x0, x1, z0, z1, ax in opens:
+                    sh = Polygon([(x0 - PAD, z0 - PAD), (x1 + PAD, z0 - PAD), (x1 + PAD, z1 + PAD), (x0 - PAD, z1 + PAD)])
+                    if sh.intersects(g):
+                        shp.append(sh)
+                return unary_union(shp) if shp else None
+            dc, wc = cut(do_all), cut(wo_all)
+            low = g if dc is None else g.difference(dc)
+            mid = low if wc is None else low.difference(wc)
+            ms = []
+            for sh, y0, y1 in ((low, 0.0, SILL), (mid, SILL, HEAD), (g, HEAD, WALL_H)):
+                if sh.is_empty:
+                    continue
+                for q in (list(sh.geoms) if sh.geom_type in ("MultiPolygon", "GeometryCollection") else [sh]):
+                    if q.geom_type == "Polygon" and q.area > 1e-5:
+                        mm = prism(q, y0, y1)
+                        if mm is not None:
+                            ms.append(mm)
+            if ms:
+                mesh = trimesh.util.concatenate(ms)
+                vn = np.zeros_like(mesh.vertices)
+                vn[mesh.faces.reshape(-1)] = np.repeat(mesh.face_normals, 3, axis=0)
+                mesh.vertex_normals = vn
+                mesh.visual = trimesh.visual.TextureVisuals(material=MATS["wall"]())
+                register(f"wall-r{wi:03d}", "wall", [("wall", mesh)])
     for it in pm["items"]:
         k = it["kind"]
         if k not in ("wall", "door", "window", "room") + FIXTURES:
             continue
         iid = it["item_id"]
+        if rw and k == "wall":
+            continue
         poly = it.get("polygon_px") or _bbox_poly(it)
         pts = [to_m(p) for p in poly]
         if k == "wall":
@@ -294,7 +381,6 @@ def process(doc_id: str, art: Path, page: int = 1) -> dict:
             if not wo and not do:
                 m = prism(pts, 0.0, hh)
             else:
-                from shapely.ops import unary_union
                 from shapely.geometry import Polygon as P
 
                 half = max(0.15, float(it["props"].get("thickness_px") or 0) * mpp / 2 + 0.05)
@@ -330,10 +416,19 @@ def process(doc_id: str, art: Path, page: int = 1) -> dict:
         elif k == "window":
             register(iid, k, window_parts(_opening(it, to_m)))
         elif k == "room":
-            m = prism(pts, 0.0, FLOOR_T)
+            if rw:
+                from shapely.geometry import box as _box
+                g = _box(*it["bbox_px"]).intersection(rw["floor"]).difference(rw["walls_u"]).difference(rw["taken"])
+                rw["taken"] = rw["taken"].union(g)
+                g = max(list(g.geoms), key=lambda q: q.area) if g.geom_type in ("MultiPolygon", "GeometryCollection") and not g.is_empty else g
+                m = prism(Polygon([to_m(q) for q in g.exterior.coords], [[to_m(q) for q in r.coords] for r in g.interiors]), 0.0, FLOOR_T) if g.geom_type == "Polygon" and g.area > 40 else None
+            else:
+                m = prism(pts, 0.0, FLOOR_T)
             if m is not None:
                 rgb = ROOM_TINT.get(str(it["props"].get("room_type") or "").lower(), ROOM_DEFAULT)
-                m.visual = trimesh.visual.TextureVisuals(material=_mat(rgb, rough=0.9))
+                if rw:  # darker, so the floor reads against a white wall and a light background
+                    rgb = tuple(int(c * 0.78) for c in rgb)
+                m.visual = trimesh.visual.TextureVisuals(material=_mat(rgb, rough=0.9, double=True))
             register(iid, k, [("floor", m)])
         else:
             x0, y0, x1, y1 = it["bbox_px"]
@@ -351,6 +446,9 @@ def process(doc_id: str, art: Path, page: int = 1) -> dict:
           "note": "generated for demo: extruded from plan map with default heights; "
                   "stairs only when the plan map has a stairs item (none from raster plans)",
           "publishable": not (lic.startswith("CC-BY-ND") or lic.startswith("GPL"))}
+    if approx:
+        sc["props"] = {"approx": True}
+        sc["note"] = "3D approximated from the drawing"
     (art / "scene.json").write_text(json.dumps(sc, indent=1))
     try:  # names, room areas, door widths for the info cards (pipeline/manifest_info.py)
         from pipeline import manifest_info
