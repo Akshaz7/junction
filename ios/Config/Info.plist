@@ -23,9 +23,9 @@
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>WEB_URL</key>
-    <string>http://localhost:5173</string>
+    <string>$(HOLOGRAM_WEB_URL)</string>
     <key>API_URL</key>
-    <string></string>
+    <string>$(HOLOGRAM_API_URL)</string>
     <key>NSAppTransportSecurity</key>
     <dict>
         <key>NSAllowsLocalNetworking</key>
