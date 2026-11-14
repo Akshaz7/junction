@@ -26,7 +26,7 @@ None yet.
 
 ## 6. What Ash must do by hand next
 - Fill missing keys in `.env`.
-- Saturday morning: plug in the iPhone (unlocked, trusted, Developer Mode on), set APPLE_TEAM_ID in .env, then follow the I-05 install steps below; test AR on a table; run the demo script once.
+- Saturday morning: plug in the iPhone (unlocked, trusted, Developer Mode on), (APPLE_TEAM_ID 472PHZCF99 already in .env), then follow the I-05 install steps below; test AR on a table; run the demo script once.
 - Logins still missing (see STATE.md).
 - Before Sunday 10:00: record the 2-minute video, fill the submission form, switch DRAFT → FINAL, join peer review 10:30–14:00.
 
