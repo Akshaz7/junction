@@ -1,0 +1,444 @@
+{
+  "created": "2026-11-14T21:30:10+00:00",
+  "revision": "afd48acc7e026de7d7fbc0e7332998f8432b5a24",
+  "commit": "afd48acc7e026de7d7fbc0e7332998f8432b5a24",
+  "mode": "code",
+  "runner_sha256": "c34c946f4849d9e9ccab23d7004715f98a86cc4b506a93ff061276f62a05dd5b",
+  "case_file_sha256": "8545c90cd2722a518573b0890c0ac07280af2abfc21cb23a227c8419aa574fe2",
+  "selected_cases_sha256": "3bc424649f28fe9faafe97152fd4b4d86157f90fd24c88b2b5e1ee2453507fa1",
+  "selected_questions": 9,
+  "owners": null,
+  "question_timeout_s": 20.0,
+  "grading_version": 2,
+  "budget_cap_usd": 0.0,
+  "row_cap_usd": 3,
+  "artifact_json_hashes": {
+    "cubicasa5k__high-quality-architectural-1269": {
+      "scene.json": "b12e513072ab83014cd725f83eeb7d37ea205ca3c3d350fa8f1463d7736f1905",
+      "doc.json": "0b56621da625ded3210c4893ff8c4a5c3981aa66cef0bea52cfbb99be8662ec6",
+      "planmap-1.json": "b1fd3f2e8bb6123c0a96a6434ad691bca1ed42e1ad02ca683ec1a19f46790888",
+      "planmap-seg.json": "51c459822b864ac01dbcd61a95fd8023663d407875242ef3865bd6dc6200a9b0",
+      "pages.json": "93025394f0a162d740eadc13ede91e082f978e78f390c2ecd3a9a882ba01f55e"
+    },
+    "opening_design__crema-cafe-models-crema-cafe-6-blend": {
+      "doc.json": "f145e2bb6e0e2d68bbd8b929af457868f2e7559f492ee135a473e835a0c9fe4b",
+      "pages.json": "5b3e65a0e53027de055ec0ae3ff7c0729fab0e9e408a74d4f8014f93c82b6341"
+    },
+    "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives": {
+      "doc.json": "9d106e2ca1a441fc500ad81291e48c5d75c2eed2b2d903d291ffd1035e900792"
+    },
+    "swiss_dwellings__site961-bldg2019-floor8945": {
+      "scene.json": "33efb8601f1bcd13a03dc5859ff88ef7ecfe398a97d321160c8df5eca3a11a24",
+      "doc.json": "8c3aab7f7a667c1c9dc8a790fcdf694aca530a8d1ecb7c1ef117812410dbfe91",
+      "planmap-1.json": "b8b0e4808d46e8ca81ad62ea112ea678bd4812e1001fcd18ee750a03c37b80e8",
+      "pages.json": "87bfe9c7f17fa6520e7dfd46823addd05d8e83e4f2fb8ae23c6b222cd385ee1e",
+      "text-1.json": "1f5db8651b860429387c9eca326a4c51ff275934c1b55851a13be2b3de555e87"
+    },
+    "wikimedia__79521417": {
+      "doc.json": "c29a6d1de1400d30c8fe854de0e8926dd26e8e6ec24f1faa25974c205a4e6c3b",
+      "pages.json": "eaa20b8a1868ce0a22ecd06cf75c5f42aba6a18b5d70fc72c08ecb8da4bcd47d"
+    }
+  },
+  "corpus_sha256": "e1d150b48ad168b491a9b4d6d793cf2c9dde53c67b971d4b7878f4ef1fefc928",
+  "worker_runner_sha256": "f36bc2c3773b9eb5e7d8225c1facb0edc6f57e1740c8d75d394c93d659d9e1df",
+  "sessions": [
+    {
+      "resumed_at": "2026-11-14T21:30:10+00:00",
+      "previously_completed": 0,
+      "runner_sha256": "c34c946f4849d9e9ccab23d7004715f98a86cc4b506a93ff061276f62a05dd5b"
+    }
+  ],
+  "run_id": "20261114T213010120339Z",
+  "wall_s": 8.953,
+  "latest_session_wall_s": 8.958,
+  "complete": true,
+  "budget": {
+    "accounted_usd": 0,
+    "reported_usd": 0,
+    "unsettled_reserve_usd": 0,
+    "requests": 0
+  },
+  "row_budget": {
+    "accounted_usd": 1.593122,
+    "reported_usd": 1.122578,
+    "unsettled_reserve_usd": 0.470544,
+    "requests": 371
+  },
+  "summaries": {
+    "public": {
+      "questions": 9,
+      "statuses": {
+        "correct": 4,
+        "honest-abstain": 4,
+        "incorrect": 1
+      },
+      "numeric_questions": 0,
+      "numeric_correct": 0,
+      "behaviour_only_questions": 9,
+      "issues": {
+        "headline_not_bold": 4,
+        "no_source_citations": 1,
+        "no_reasoning_card": 1,
+        "no_confidence_label": 1
+      },
+      "timeouts": 0,
+      "latency_ms_median": 548,
+      "latency_ms_max": 4276,
+      "model_requests_blocked": 105,
+      "exact_evidence_checked": 0,
+      "exact_evidence_matches": 0
+    }
+  },
+  "results": [
+    {
+      "status": "correct",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": 157,
+      "abstained": false,
+      "has_citations": true,
+      "citation_count": 1,
+      "cited_item_count": 157,
+      "exact_count_evidence": null,
+      "has_reasoning_card": true,
+      "has_reasoning_label": true,
+      "confidence_label": "Verified",
+      "confidence_pct": 95,
+      "jargon": [],
+      "bold_first_line": true,
+      "bullets": 2,
+      "issues": [],
+      "answer_text": "**There are 157 doors on this floor plan.** [1]\n\n- Six of them are highlighted on the drawing as examples. [1]\n- A full door-by-door list isn't available here, so only those six can be pointed out.",
+      "answer_cost_usd": 0,
+      "route": "planmap",
+      "engine_latency_ms": 157,
+      "latency_ms": 196,
+      "blocked_model_requests": {},
+      "id": "swiss_dwellings__site961-bldg2019-floor8945:doors",
+      "question": "How many doors are on this drawing? Show each one.",
+      "doc_ids": [
+        "swiss_dwellings__site961-bldg2019-floor8945"
+      ],
+      "split": "public",
+      "owner": "SCANSYM",
+      "wall_latency_ms": 314,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "correct",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": 52,
+      "abstained": false,
+      "has_citations": true,
+      "citation_count": 1,
+      "cited_item_count": 52,
+      "exact_count_evidence": null,
+      "has_reasoning_card": true,
+      "has_reasoning_label": true,
+      "confidence_label": "Verified",
+      "confidence_pct": 95,
+      "jargon": [],
+      "bold_first_line": true,
+      "bullets": 2,
+      "issues": [],
+      "answer_text": "**There are 52 windows on this floor plan.** [1]\n\n- No symbols were flagged as uncertain: all 52 windows were clear matches.\n- Any symbol that is not a clear window match is not counted here.",
+      "answer_cost_usd": 0,
+      "route": "planmap",
+      "engine_latency_ms": 96,
+      "latency_ms": 122,
+      "blocked_model_requests": {},
+      "id": "swiss_dwellings__site961-bldg2019-floor8945:windows",
+      "question": "Count the windows on this drawing, and identify uncertain symbols.",
+      "doc_ids": [
+        "swiss_dwellings__site961-bldg2019-floor8945"
+      ],
+      "split": "public",
+      "owner": "SCANSYM",
+      "wall_latency_ms": 220,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "honest-abstain",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": null,
+      "abstained": false,
+      "has_citations": false,
+      "citation_count": 0,
+      "cited_item_count": 0,
+      "exact_count_evidence": null,
+      "has_reasoning_card": false,
+      "has_reasoning_label": false,
+      "confidence_label": null,
+      "confidence_pct": null,
+      "jargon": [],
+      "bold_first_line": false,
+      "bullets": 0,
+      "issues": [
+        "headline_not_bold"
+      ],
+      "answer_text": "I couldn't find this on the drawing, so I won't guess a number. Try asking about something drawn or labelled on the plan, or upload a model (IFC) or a clearer drawing that includes it.",
+      "answer_cost_usd": 0.0,
+      "route": "hybrid",
+      "engine_latency_ms": 565,
+      "latency_ms": 715,
+      "blocked_model_requests": {
+        "code_only": 18
+      },
+      "id": "opening_design__crema-cafe-models-crema-cafe-6-blend:doors",
+      "question": "How many doors are on this drawing? Show each one.",
+      "doc_ids": [
+        "opening_design__crema-cafe-models-crema-cafe-6-blend"
+      ],
+      "split": "public",
+      "owner": "SCANSYM",
+      "wall_latency_ms": 828,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "honest-abstain",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": null,
+      "abstained": false,
+      "has_citations": false,
+      "citation_count": 0,
+      "cited_item_count": 0,
+      "exact_count_evidence": null,
+      "has_reasoning_card": false,
+      "has_reasoning_label": false,
+      "confidence_label": null,
+      "confidence_pct": null,
+      "jargon": [],
+      "bold_first_line": false,
+      "bullets": 0,
+      "issues": [
+        "headline_not_bold"
+      ],
+      "answer_text": "I couldn't find this on the drawing, so I won't guess a number. Try asking about something drawn or labelled on the plan, or upload a model (IFC) or a clearer drawing that includes it.",
+      "answer_cost_usd": 0.0,
+      "route": "hybrid",
+      "engine_latency_ms": 539,
+      "latency_ms": 687,
+      "blocked_model_requests": {
+        "code_only": 18
+      },
+      "id": "opening_design__crema-cafe-models-crema-cafe-6-blend:windows",
+      "question": "Count the windows on this drawing, and identify uncertain symbols.",
+      "doc_ids": [
+        "opening_design__crema-cafe-models-crema-cafe-6-blend"
+      ],
+      "split": "public",
+      "owner": "SCANSYM",
+      "wall_latency_ms": 801,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "correct",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": 11,
+      "abstained": false,
+      "has_citations": true,
+      "citation_count": 1,
+      "cited_item_count": 11,
+      "exact_count_evidence": null,
+      "has_reasoning_card": true,
+      "has_reasoning_label": true,
+      "confidence_label": "Cross-checked",
+      "confidence_pct": 80,
+      "jargon": [],
+      "bold_first_line": true,
+      "bullets": 3,
+      "issues": [],
+      "answer_text": "**There are 11 doors on this floor plan.** [1]\n\n- Each door is marked on the drawing; the numbered markers show them one by one.\n- Only 6 of the 11 are individually marked, so I can't list the other 5 from these facts.\n- Door sizes and room locations aren't in these results, so I can't give them here.",
+      "answer_cost_usd": 0,
+      "route": "planmap",
+      "engine_latency_ms": 4265,
+      "latency_ms": 4276,
+      "blocked_model_requests": {
+        "code_only": 4
+      },
+      "id": "cubicasa5k__high-quality-architectural-1269:doors",
+      "question": "How many doors are on this drawing? Show each one.",
+      "doc_ids": [
+        "cubicasa5k__high-quality-architectural-1269"
+      ],
+      "split": "public",
+      "owner": "SCANSYM",
+      "wall_latency_ms": 4404,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "correct",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": 8,
+      "abstained": false,
+      "has_citations": true,
+      "citation_count": 1,
+      "cited_item_count": 8,
+      "exact_count_evidence": null,
+      "has_reasoning_card": true,
+      "has_reasoning_label": true,
+      "confidence_label": "Cross-checked",
+      "confidence_pct": 80,
+      "jargon": [],
+      "bold_first_line": true,
+      "bullets": 2,
+      "issues": [],
+      "answer_text": "**There are 8 windows on this floor plan.** [1]\n\n- No uncertain symbols were flagged; all 8 windows were detected with confidence of 0.5 or higher.\n- Only 6 of the 8 windows are named in the cited elements, so check the other 2 on the drawing.",
+      "answer_cost_usd": 0,
+      "route": "planmap",
+      "engine_latency_ms": 96,
+      "latency_ms": 107,
+      "blocked_model_requests": {
+        "code_only": 4
+      },
+      "id": "cubicasa5k__high-quality-architectural-1269:windows",
+      "question": "Count the windows on this drawing, and identify uncertain symbols.",
+      "doc_ids": [
+        "cubicasa5k__high-quality-architectural-1269"
+      ],
+      "split": "public",
+      "owner": "SCANSYM",
+      "wall_latency_ms": 210,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "honest-abstain",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": null,
+      "abstained": false,
+      "has_citations": false,
+      "citation_count": 0,
+      "cited_item_count": 0,
+      "exact_count_evidence": null,
+      "has_reasoning_card": false,
+      "has_reasoning_label": false,
+      "confidence_label": null,
+      "confidence_pct": null,
+      "jargon": [],
+      "bold_first_line": false,
+      "bullets": 0,
+      "issues": [
+        "headline_not_bold"
+      ],
+      "answer_text": "I couldn't find this on the drawing, so I won't guess a number. Try asking about something drawn or labelled on the plan, or upload a model (IFC) or a clearer drawing that includes it.",
+      "answer_cost_usd": 0.0,
+      "route": "hybrid",
+      "engine_latency_ms": 826,
+      "latency_ms": 1200,
+      "blocked_model_requests": {
+        "code_only": 16
+      },
+      "id": "wikimedia__79521417:doors",
+      "question": "How many doors are on this drawing? Show each one.",
+      "doc_ids": [
+        "wikimedia__79521417"
+      ],
+      "split": "public",
+      "owner": "SCANSYM",
+      "wall_latency_ms": 1323,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "honest-abstain",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": null,
+      "abstained": false,
+      "has_citations": false,
+      "citation_count": 0,
+      "cited_item_count": 0,
+      "exact_count_evidence": null,
+      "has_reasoning_card": false,
+      "has_reasoning_label": false,
+      "confidence_label": null,
+      "confidence_pct": null,
+      "jargon": [],
+      "bold_first_line": false,
+      "bullets": 0,
+      "issues": [
+        "headline_not_bold"
+      ],
+      "answer_text": "I couldn't find this on the drawing, so I won't guess a number. Try asking about something drawn or labelled on the plan, or upload a model (IFC) or a clearer drawing that includes it.",
+      "answer_cost_usd": 0.0,
+      "route": "hybrid",
+      "engine_latency_ms": 94,
+      "latency_ms": 548,
+      "blocked_model_requests": {
+        "code_only": 20
+      },
+      "id": "wikimedia__79521417:windows",
+      "question": "Count the windows on this drawing, and identify uncertain symbols.",
+      "doc_ids": [
+        "wikimedia__79521417"
+      ],
+      "split": "public",
+      "owner": "SCANSYM",
+      "wall_latency_ms": 654,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "incorrect",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": 0,
+      "abstained": false,
+      "has_citations": false,
+      "citation_count": 0,
+      "cited_item_count": 0,
+      "exact_count_evidence": null,
+      "has_reasoning_card": false,
+      "has_reasoning_label": false,
+      "confidence_label": null,
+      "confidence_pct": null,
+      "jargon": [],
+      "bold_first_line": true,
+      "bullets": 0,
+      "issues": [
+        "no_source_citations",
+        "no_reasoning_card",
+        "no_confidence_label"
+      ],
+      "answer_text": "**I could not find any** on this drawing. That is what a model could read from the drawing, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+      "answer_cost_usd": 0.0,
+      "route": "hybrid",
+      "engine_latency_ms": 70,
+      "latency_ms": 101,
+      "blocked_model_requests": {
+        "code_only": 25
+      },
+      "id": "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:windows",
+      "question": "Count the windows on this drawing, and identify uncertain symbols.",
+      "doc_ids": [
+        "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives"
+      ],
+      "split": "public",
+      "owner": "SCANSYM",
+      "wall_latency_ms": 199,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    }
+  ]
+}
