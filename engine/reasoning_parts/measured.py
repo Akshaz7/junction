@@ -186,6 +186,8 @@ def _length(ctx) -> bool:
 
 
 def run(ctx: dict) -> None:
+    from engine.reasoning_parts.wallarea_steps import run as wallarea_steps
+    if wallarea_steps(ctx): return
     steps, unit, value, question, cited = ctx["steps"], ctx["unit"], ctx["value"], ctx["question"], ctx["cited"]
     # A count headline can also report a room size in its explanation.
     text = ctx["ans"].get("text_md") or ""

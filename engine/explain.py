@@ -92,6 +92,7 @@ def _ok(orig: str, new: str) -> bool:
 
 
 def explain(res: dict, question: str, root: Path, timeout_s: float = 12.0) -> dict:
+    if "wallarea" in res: return res  # preserve exact finish arithmetic and explicit source limitations
     if os.environ.get("EXPLAIN", "1") == "0" or os.environ.get("MODELS_FAKE") == "1":
         return res
     ans = res.get("answer") or {}
