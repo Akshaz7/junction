@@ -16,6 +16,7 @@ from .live import hub, router as live_router
 from .speech_routes import router as speech_router
 from .advise_routes import router as advise_router
 from .findings_routes import router as findings_router
+from .bench_routes import router as bench_router
 from .linked_routes import router as linked_router
 from .skills_routes import router as skills_router, scheduler, scheduler_enabled, seed_skills
 from .ratelimit import RateLimitMiddleware
@@ -81,6 +82,7 @@ app.include_router(live_router)
 app.include_router(speech_router)
 app.include_router(advise_router)
 app.include_router(findings_router)
+app.include_router(bench_router)
 app.include_router(skills_router)
 from .watch_routes import router as watch_router  # noqa: E402
 app.include_router(watch_router)

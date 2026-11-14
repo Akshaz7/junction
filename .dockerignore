@@ -13,3 +13,8 @@ web/node_modules
 **/__pycache__
 .env
 .env.*
+!results/
+results/*
+!results/bench/
+results/bench/*
+!results/bench/*.json

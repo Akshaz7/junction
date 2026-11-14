@@ -155,19 +155,23 @@ def test_changes_empty(client):
     assert client.get("/api/changes/00000000-0000-0000-0000-000000000000").status_code == 404
 
 
-def test_bench_summaries_only_tag_and_list(client, dirs):
+def test_bench_summaries_only_tag_and_list(client, dirs, monkeypatch):
     import os
+    from server import config
     _, res = dirs
+    monkeypatch.setattr(config, "REPO", res.parent)
     b = res / "bench"
     assert client.get("/api/bench").json() == {"benches": []}
     old = b / "fake200.json"
     old.write_text(json.dumps({"set": "sample200", "tag": "fake200", "fake": True, "totals": {"n": 200}, "cells": []}))
     new = b / "real50.json"
-    new.write_text(json.dumps({"set": "sample50", "tag": "real50", "fake": False, "totals": {"n": 50}, "cells": []}))
+    new.write_text(json.dumps({"set": "sample50", "tag": "real50", "fake": False,
+                               "totals": {"questions": 50, "of": 50},
+                               "cells": {"ALL x ALL": {"n": 50, "unscored": 0}}}))
     os.utime(old, (1_000_000, 1_000_000))
     (b / "real50.rows.jsonl").write_text('{"row": 1}\n')  # newest file, must be ignored
     r = client.get("/api/bench/latest").json()
-    assert r["file"] == "real50.json" and r["tag"] == "real50" and r["data"]["totals"] == {"n": 50}
+    assert r["file"] == "real50.json" and r["tag"] == "real50" and r["data"]["totals"] == {"questions": 50, "of": 50}
     one = client.get("/api/bench/latest", params={"tag": "fake200"}).json()
     assert one["data"]["set"] == "sample200" and one["data"]["fake"] is True
     assert client.get("/api/bench/latest", params={"tag": "nope"}).status_code == 404
@@ -177,11 +181,15 @@ def test_bench_summaries_only_tag_and_list(client, dirs):
     assert lst[1]["set"] == "sample200" and lst[1]["fake"] is True and lst[0]["mtime"] > lst[1]["mtime"]
 
 
-def test_bench_and_costs(client, dirs):
+def test_bench_and_costs(client, dirs, monkeypatch):
+    from server import config
     _, res = dirs
-    assert client.get("/api/bench/latest").status_code == 404
+    monkeypatch.setattr(config, "REPO", res.parent)
+    assert client.get("/api/bench/latest").status_code == 200
+    assert client.get("/api/bench/latest").json()["status"] == "no_bench"
     (res / "bench" / "run1.json").write_text('{"accuracy": 0.9}')
-    r = client.get("/api/bench/latest").json()
+    assert client.get("/api/bench/latest").json()["status"] == "no_bench"
+    r = client.get("/api/bench/latest?tag=run1").json()
     assert r["file"] == "run1.json" and r["data"] == {"accuracy": 0.9}
     assert client.get("/api/costs").json()["total_usd"] == 0
     (res / "costs.jsonl").write_text(

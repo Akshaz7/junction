@@ -131,15 +131,18 @@ Each change's `v1`/`v2` is null or `{item_id:null,bbox_px:[x0,y0,x1,y1]}`. Boxes
 
 ## Benchmarks and costs
 
-Source: [files_routes.py](../server/files_routes.py). These endpoints read files without requiring PostgreSQL.
+Sources: [files_routes.py](../server/files_routes.py), [bench_routes.py](../server/bench_routes.py). Only the cost summary requires PostgreSQL.
 
 | Route | Request | Response | Errors |
 |---|---|---|---|
 | GET /api/bench | None | `{benches:[{tag,set,fake,file,mtime}]}` newest mtime first; UTC ISO-8601 `mtime`; empty list if absent | No route-specific error |
-| GET /api/bench/latest | Optional query `tag` matching summary's tag or file stem | `{file,tag,data:<summary JSON>}` | 404 `{status:"no_bench",detail}` if absent or unmatched |
+| GET /api/bench/latest | Optional query `tag` matching summary's tag or file stem | `{tag,n,numeric_correct,numeric_total,accuracy,abstentions,by_type,cost_usd_total,cost_per_answer,file,data:<summary JSON>}` | Default missing results: 200 `status:"no_bench"`, null measurements; explicit unmatched tag: 404 |
 | GET /api/costs | None | `{total_usd,calls,by_provider:{<provider>:{calls,usd}},by_task:{<task>:{calls,usd}}}` | No route-specific error |
+| GET /api/costs/summary | None | `{total_usd,calls,spend_source:"model_cost_log",window_hours:24,answers,answers_with_cost,answers_missing_cost,answer_cost_usd_total,median_cost_per_answer,cost_sources}` | DB |
 
-Bench summaries are parseable dictionary-valued `results/bench/*.json`; row dumps are ignored. Costs aggregate `results/costs.jsonl` (`provider,task,cost_usd`; task falls back to row, then `unknown`); absent logs yield zero totals and empty maps. Runtime directories follow `RESULTS_DIR`.
+Bench summaries are dictionary-valued `results/bench/*.json`, at most 1 MB; row dumps are ignored. Runtime directories follow `RESULTS_DIR`, with packaged `<repo>/results/bench` as a fallback (runtime names take precedence). The default latest result selects only `fake:false`, completed runs (`totals.questions == totals.of`, positive question count matching the overall cell, no budget stop), preferring `e-s200-z1` from `docs/REPORT.md`, otherwise newest file mtime. An explicit tag can retrieve historical or fake runs. `data` preserves the raw summary for existing clients. `numeric_total` excludes unscored text (`n - unscored`); accuracy includes numeric abstentions/errors in its denominator. `by_type` contains the `ALL x <type>` cells. Bench answer costs come from `cells["ALL x ALL"]`, excluding text-judge spend recorded separately in `totals.cost_usd`.
+
+`/api/costs` aggregates `results/costs.jsonl` (`provider,task,cost_usd`; task falls back to row, then `unknown`); absent logs yield zero totals and empty maps. `/api/costs/summary` reports all spend recorded in the runtime model log (`MODELS_COSTS_LOG`, else `RESULTS_DIR/costs.jsonl`), including non-answer calls. This total covers the available log's lifetime, not just 24 hours, and is not a billing-account total. Its answer metrics use only rows created within the last 24 hours. The `answers` table has no separate cost column: the route reads `answer.cost.usd_total` from JSONB, falling back to summed `answer.trace[].cost_usd`. Costs are counted once; zero-cost answers are included in the median, unknown costs are excluded and reported as `answers_missing_cost`. No measured answer costs yields a null median. `cost_sources` reports counts by JSON cost source.
 
 ## Speech
 

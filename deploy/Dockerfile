@@ -16,12 +16,13 @@ COPY server ./server
 COPY engine ./engine
 COPY pipeline ./pipeline
 COPY vision/verify.py vision/planmap_schema.json ./vision/
+COPY results/bench/*.json /app/results/bench/
 # Baked-in demo artifacts (deploy/build_demo_artifacts.py); empty unless built before the image build.
 COPY --chown=app:app deploy/demo_artifacts/ /app/artifacts/
 ENV ARTIFACTS_DIR=/app/artifacts RESULTS_DIR=/tmp/hologram MODELS_CACHE_DIR=/tmp/hologram/models-cache \
     MODELS_COSTS_LOG=/tmp/hologram/costs.jsonl INGEST_MODE=vlm
 RUN mkdir -p /app/artifacts/uploads /tmp/hologram && python -m engine.project_index build && chown -R app:app /app/artifacts /tmp/hologram
 USER app
-ENV RATE_LIMIT=1
+ENV RATE_LIMIT=1 HIDE_EMPTY_DOCS=1
 EXPOSE 8000
 CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "8000"]
