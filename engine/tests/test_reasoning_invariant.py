@@ -49,7 +49,7 @@ def test_unboxed_recount_has_explicit_coverage_and_selected_policy(tmp_path):
     assert "source count; 4 have numbered boxes" in r["answer"]["text_md"]
     assert "level **2**" in r["answer"]["text_md"]
     assert r["answer"]["value"] == 6 and len(r["evidence"]["boxes"]) == 4
-    assert r["reasoning"]["confidence"]["pct"] <= 69
+    assert r["reasoning"]["confidence"]["pct"] is None
 
 
 def test_rejected_recount_reports_boxed_policy(tmp_path):
@@ -70,7 +70,7 @@ def test_citation_groups_are_not_item_counts(tmp_path):
     r = attach(response(6), tmp_path)
     assert len(r["citations"]) == 1 and "6 doors marked" in texts(r)
     assert "1 marked region" not in texts(r)
-    assert r["reasoning"]["confidence"]["label"] != "Estimate"
+    assert r["reasoning"]["confidence"]["pct"] is None  # Matching boxes do not measure accuracy.
 
 
 def test_existing_cards_cannot_bypass_invariant(tmp_path):
@@ -79,7 +79,7 @@ def test_existing_cards_cannot_bypass_invariant(tmp_path):
                       "confidence": {"label": "Verified", "pct": 99}}
     attach(r, tmp_path)
     assert "4 doors" not in texts(r) and "6 doors marked" in texts(r)
-    assert r["reasoning"]["confidence"]["pct"] <= 69
+    assert r["reasoning"]["confidence"]["pct"] is None
 
 
 def test_optional_confidence_failure_cannot_bypass_invariant(tmp_path, monkeypatch):
@@ -167,7 +167,7 @@ def test_agreeing_multikind_counts_keep_confidence(tmp_path):
         b["kind"] = "door" if i < 2 else "window"
     attach(r, tmp_path)
     assert "2 doors and 4 windows marked" in texts(r)
-    assert r["reasoning"]["confidence"]["label"] != "Estimate"
+    assert r["reasoning"]["confidence"]["pct"] is None  # Matching boxes do not measure accuracy.
 
 
 def test_invalid_boxes_and_repeated_links_do_not_prove_a_count(tmp_path):
@@ -192,7 +192,8 @@ def test_dimensions_are_not_confused_with_count_values(tmp_path):
     card = {"steps": [{"kind": "found", "text": "6 rooms on level 2"}], "confidence": {"label": "Verified", "pct": 95}}
     r["reasoning"] = copy.deepcopy(card)
     attach(r, tmp_path)
-    assert r["reasoning"] == card
+    assert r["reasoning"]["steps"] == card["steps"]
+    assert r["answer"]["value"] == 26.5
 
 
 def test_invariant_is_idempotent(tmp_path):

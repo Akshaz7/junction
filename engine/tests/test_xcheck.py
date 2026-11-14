@@ -238,7 +238,7 @@ def test_legacy_numeric_card_does_not_bypass_measured_confidence(tmp_path, monke
     assert res["reasoning"]["calc"]["result"]["value"] == 2
     assert res["reasoning"]["confidence"]["pct"] is None
     assert res["reasoning"]["confidence"]["label"] == "Estimate"
-    assert res["reasoning"]["steps"][0]["text"] == "Two symbols"
+    assert "2 are not boxed yet" in res["reasoning"]["steps"][0]["text"]  # EVFIX exposes missing proof.
 
 
 def test_existing_structured_calc_is_preserved(tmp_path):

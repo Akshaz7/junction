@@ -237,7 +237,7 @@ def enforce(res, card, question):
 
 def _lower_confidence(res, card):
     c = card.setdefault("confidence", {})
-    c.update(label="Estimate", pct=min(c.get("pct") if isinstance(c.get("pct"), (int, float)) else 69, 69),
+    c.update(label="Estimate", pct=None,
              reason="The reported count and the visual evidence are not fully reconciled; the coverage and any independent count are stated above.",
              improve="Check the numbered boxes and the surrounding drawing before using this count to order materials.")
     ans = res["answer"]

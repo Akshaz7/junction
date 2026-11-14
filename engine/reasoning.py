@@ -111,7 +111,7 @@ def build(res: dict, question: str, root: Path) -> dict | None:
     if hint and hint.get("steps"):
         steps = list(hint["steps"])
         cap = hint.get("pct_cap")
-        if cap and c.get("pct", 0) > cap:
+        if cap and isinstance(c.get("pct"), (int, float)) and c["pct"] > cap:
             c["pct"] = cap
             c["label"] = "Cross-checked" if cap >= 80 else "Estimate"
             c["reason"] = hint.get("reason") or c.get("reason")
