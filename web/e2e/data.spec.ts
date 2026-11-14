@@ -15,7 +15,7 @@ test('source folder opens a file with credit and passes its document to Chat', a
   await expect(row).toBeVisible()
   for (const format of doc.formats) await expect(row.getByText(format.toUpperCase(), { exact: true })).toBeVisible()
   await row.getByRole('button', { name: `Open ${doc.title}`, exact: true }).click()
-  const detail = page.getByRole('complementary', { name: 'Document details' })
+  const detail = page.locator('aside.data-detail')
   await expect(detail.getByRole('heading', { name: doc.title, exact: true })).toBeVisible()
   await expect(detail.locator('.data-document-credit')).toContainText(doc.credit || 'Not provided')
   await expect(detail.locator('.data-document-credit')).toContainText(doc.licence || 'Not provided')
@@ -34,7 +34,7 @@ test('a document offers its scene, handles a missing preview, and retains phone 
   await page.route('**/api/docs/demo__scene/files/scene.json', (route) => route.fulfill({ json: { doc_id: doc.doc_id, glb: 'scene.glb' } }))
   await page.goto('/#/data')
   await page.getByRole('button', { name: `Open ${doc.title}`, exact: true }).click()
-  const detail = page.getByRole('complementary', { name: 'Document details' })
+  const detail = page.locator('aside.data-detail')
   await expect(detail.getByRole('button', { name: 'Visualise it', exact: true })).toBeVisible()
   await expect(detail.getByText('Page preview unavailable', { exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Close document details' }).click()
@@ -48,16 +48,16 @@ test('a document offers its scene, handles a missing preview, and retains phone 
   await detail.getByLabel('Drawing credit and licence', { exact: true }).click()
   await expect(detail.locator('.data-credit-info dl')).toContainText(doc.credit!)
   await expect(detail.locator('.data-credit-info dl')).toContainText(doc.licence!)
-  const visualise = detail.getByRole('button', { name: 'Visualise it', exact: true })
-  await expect(visualise).toBeEnabled()
-  await visualise.click()
-  await expect(detail.locator('.data-mobile-scene').getByText('No 3D scene available for this document.', { exact: true })).toBeVisible()
+  // A document without a built scene must not offer a dead 3D control.
+  await expect(detail.getByRole('button', { name: 'Visualise it', exact: true })).toHaveCount(0)
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
   await page.getByRole('button', { name: 'Close document details' }).click()
   await expect(page.getByRole('button', { name: `Open ${doc.title}`, exact: true })).toBeFocused()
   await page.getByRole('button', { name: `Open ${doc.title}`, exact: true }).click()
   await detail.getByRole('button', { name: 'Ask about it', exact: true }).click()
   await tabs.getByRole('link', { name: 'Data', exact: true }).click()
+  await expect(detail).toBeVisible()
+  await expect(detail.locator('.data-zoom-controls')).toBeVisible()
   const tabBounds = (await tabs.boundingBox())!
   const previewBounds = (await detail.boundingBox())!
   const zoomBounds = (await detail.locator('.data-zoom-controls').boundingBox())!

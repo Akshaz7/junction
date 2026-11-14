@@ -45,8 +45,9 @@ function UploadSession({ onClose, onAsk, onOpen, onReady }: UploadDialogProps) {
   }, [])
 
   useEffect(() => {
-    if (state.status === 'ready' && announced.current !== state.docId) {
-      announced.current = state.docId
+    const key = state.status === 'ready' ? `${state.docId}:${state.processing ? 'processing' : 'done'}` : null
+    if (state.status === 'ready' && announced.current !== key) {
+      announced.current = key
       onReady?.(state.document)
     }
   }, [state, onReady])
@@ -57,6 +58,7 @@ function UploadSession({ onClose, onAsk, onOpen, onReady }: UploadDialogProps) {
     const result = await waitForUpload(docId, {
       signal: controller.signal,
       onProgress: (step, progress) => { if (!controller.signal.aborted) dispatch({ type: 'processing-progress', step, progress }) },
+      onReadable: (document) => { if (!controller.signal.aborted) dispatch({ type: 'ready', document, processing: true }) },
     })
     if (!controller.signal.aborted) dispatch({ type: 'ready', ...result })
   }
@@ -144,6 +146,7 @@ function UploadSession({ onClose, onAsk, onOpen, onReady }: UploadDialogProps) {
       <Button variant="outline" onClick={() => { void retry() }}>Try again</Button></div></div>}
 
     {state.status === 'ready' && <section className="upload-dialog-ready"><p role="status"><Check size={18} aria-hidden="true" /><strong>Ready</strong></p>
+      {state.processing && <p className="upload-dialog-note" data-testid="upload-still-processing">Still processing 3D…</p>}
       {state.note && <p className="upload-dialog-note">{state.note}</p>}
       <div className="upload-dialog-actions"><Button onClick={() => { onAsk(state.document); close() }}>Ready — Ask about it<ArrowRight size={16} /></Button>
         <Button variant="outline" onClick={() => { onOpen(state.document); close() }}>Open</Button></div>

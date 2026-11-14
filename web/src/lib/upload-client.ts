@@ -51,11 +51,13 @@ export function uploadFile(file: File, signal: AbortSignal, onProgress: (fractio
   })
 }
 
-type Ingest = { status?: string; step?: string; progress?: number; detail?: string; reason?: string }
+type Ingest = { status?: string; readable?: boolean; step?: string; progress?: number; detail?: string; reason?: string }
 type UploadDocument = Document & { status?: string; ingest?: Ingest; ingest_status?: string }
 type PollOptions = {
   signal: AbortSignal
   onProgress: (step: string, progress: number | null) => void
+  /** Fires once when pages and text exist (ingest `readable`) while processing continues. */
+  onReadable?: (document: Document) => void
   transport?: typeof fetch
   intervalMs?: number
   timeoutMs?: number
@@ -72,11 +74,12 @@ function pause(ms: number, signal: AbortSignal): Promise<void> {
 
 /** A legacy document row exists before ingestion finishes; existence alone is not readiness. */
 export async function waitForUpload(docId: string, options: PollOptions): Promise<{ document: Document; note?: string }> {
-  const { signal, onProgress, transport = fetch, intervalMs = 1500, timeoutMs = 300_000 } = options
+  const { signal, onProgress, onReadable, transport = fetch, intervalMs = 1500, timeoutMs = 300_000 } = options
   const path = `/api/docs/${encodeURIComponent(docId)}`
   const deadline = Date.now() + timeoutMs
   const bounded = AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)])
   let legacy = false
+  let announcedReadable = false
   async function readDocument(): Promise<UploadDocument> {
     const response = await transport(path, { signal: bounded })
     if (!response.ok) throw new UploadError(responseReason(await response.json().catch(() => null), `Could not read the document (${response.status}). Try again to check its progress.`), 'poll')
@@ -112,6 +115,10 @@ export async function waitForUpload(docId: string, options: PollOptions): Promis
         return { document: document ?? await readDocument(), note: status.detail || (status.status === 'partial' ? 'Some drawing content could not be processed. Answers may be limited.' : undefined) }
       }
       if (status.status === 'none' || status.status === 'stored') throw new UploadError(status.reason || status.detail || 'Your file was saved, but processing is unavailable on this server. Please try again later.', 'poll')
+      if (status.readable && !announcedReadable && onReadable) {
+        announcedReadable = true
+        onReadable(document ?? await readDocument())
+      }
       onProgress(status.step?.replace(/_/g, ' ') || (legacy ? 'Checking your drawing. Detailed progress is unavailable…' : 'Preparing your drawing…'), uploadProgress(status.progress))
       await pause(intervalMs, bounded)
     }

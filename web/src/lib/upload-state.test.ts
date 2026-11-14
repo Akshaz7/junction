@@ -6,6 +6,18 @@ const file = new File(['drawing'], 'Floor Plan.PDF', { type: 'application/pdf' }
 const document = { doc_id: 'uploads__floor', title: 'Floor plan' } as Document
 
 describe('upload state machine', () => {
+  it('shows ready with a processing flag when readable, then settles when ingestion ends', () => {
+    const file = new File(['x'], 'plan.png')
+    const document = { doc_id: 'd1' } as never
+    let state = uploadReducer({ status: 'idle' }, { type: 'start', file })
+    state = uploadReducer(state, { type: 'uploaded', docId: 'd1' })
+    state = uploadReducer(state, { type: 'ready', document, processing: true })
+    expect(state).toMatchObject({ status: 'ready', processing: true })
+    state = uploadReducer(state, { type: 'ready', document })
+    expect(state).toMatchObject({ status: 'ready' })
+    expect((state as { processing?: boolean }).processing).toBeUndefined()
+  })
+
   it('moves idle → uploading → processing → ready with separate progress', () => {
     let state: UploadState = { status: 'idle' }
     state = uploadReducer(state, { type: 'start', file })

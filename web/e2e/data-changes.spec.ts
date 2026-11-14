@@ -51,7 +51,7 @@ test('API folder hierarchy, file facts and older versions open the matching draw
   const older = doc!.versions![0]
   await expect(versions.getByRole('option')).toHaveCount(doc!.versions!.length)
   await versions.selectOption(older.doc_id)
-  const detail = page.getByRole('complementary', { name: 'Document details' })
+  const detail = page.locator('aside.data-detail')
   const resolved = await request.get(`/api/docs/${encodeURIComponent(older.doc_id)}`)
   const title = resolved.ok() ? (await resolved.json() as FileDocument).title : `${doc!.title} (${older.label})`
   await expect(detail.getByRole('heading', { name: title, exact: true })).toBeVisible()
@@ -106,17 +106,21 @@ test('upload polls ingestion, shows progress, opens the ready file and hides AR 
   pdf += `xref\n0 6\n0000000000 65535 f \n${offsets.slice(1).map((offset) => `${String(offset).padStart(10, '0')} 00000 n \n`).join('')}trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`
   const receiptResponse = page.waitForResponse((response) => response.request().method() === 'POST' && new URL(response.url()).pathname === '/api/upload')
   const ingestResponse = page.waitForResponse((response) => new URL(response.url()).pathname.endsWith('/ingest'))
-  await page.getByLabel('Upload drawing', { exact: true }).setInputFiles({ name, mimeType: 'application/pdf', buffer: Buffer.from(pdf) })
+  await page.getByRole('button', { name: 'Upload', exact: true }).click()
+  const dialog = page.getByRole('dialog', { name: 'Upload a drawing' })
+  await dialog.getByLabel('Choose a drawing').setInputFiles({ name, mimeType: 'application/pdf', buffer: Buffer.from(pdf) })
   const receipt = await receiptResponse
   expect(receipt.ok()).toBe(true)
   const { doc_id, status } = await receipt.json() as { doc_id: string; status: string }
   expect(status, 'The done test requires enabled ingestion').toBe('ingesting')
   expect((await ingestResponse).ok()).toBe(true)
-  await expect(page.locator('.data-upload-status')).toContainText(name)
-  await expect(page.locator('.data-upload-status')).toContainText(/Ready to use|Page preview ready/, { timeout: 45_000 })
-  const detail = page.getByRole('complementary', { name: 'Document details' })
-  await expect(detail.getByRole('heading', { name: name.replace(/\.pdf$/, ''), exact: true })).toBeVisible()
+  // W-65: the file opens as soon as pages and text are readable, while 3D/plan-map work may still run.
+  await expect(dialog.getByRole('status').filter({ hasText: 'Ready' }).first()).toBeVisible({ timeout: 45_000 })
+  await dialog.getByRole('button', { name: 'Open', exact: true }).click()
+  const detail = page.locator('aside.data-detail')
+  await expect(detail.getByRole('heading', { name: /web3-notes-\d+/ })).toBeVisible()
   await expect(detail.locator('img').first()).toHaveAttribute('src', `/api/docs/${doc_id}/pages/1/image`)
+  await expect.poll(async () => (await read<{ status: string }>(request, `/api/docs/${doc_id}/ingest`)).status, { timeout: 45_000 }).toMatch(/ready|partial/)
   const state = await read<{ status: string; stages: unknown[] }>(request, `/api/docs/${doc_id}/ingest`)
   expect(['ready', 'partial']).toContain(state.status)
   expect(state.stages.length).toBeGreaterThan(0)

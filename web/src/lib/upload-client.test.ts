@@ -101,6 +101,20 @@ describe('ingest monitoring', () => {
     expect(transport.mock.calls.map(([path]) => path)).toEqual([`/api/docs/${doc.doc_id}/ingest`, `/api/docs/${doc.doc_id}/ingest`, `/api/docs/${doc.doc_id}`])
   })
 
+  it('offers the document as soon as ingest reports readable, then keeps polling to ready', async () => {
+    const transport = vi.fn<typeof fetch>()
+      .mockResolvedValueOnce(Response.json({ status: 'running', step: 'planmap', progress: 0.75, readable: true }))
+      .mockResolvedValueOnce(Response.json(doc))
+      .mockResolvedValueOnce(Response.json({ status: 'running', step: 'planmap', progress: 0.9, readable: true }))
+      .mockResolvedValueOnce(Response.json({ status: 'ready', readable: true }))
+      .mockResolvedValueOnce(Response.json(doc))
+    const onReadable = vi.fn()
+    const result = await waitForUpload(doc.doc_id, { signal: controller().signal, transport, intervalMs: 0, onProgress: vi.fn(), onReadable })
+    expect(onReadable).toHaveBeenCalledTimes(1)
+    expect(onReadable).toHaveBeenCalledWith(doc)
+    expect(result.document).toEqual(doc)
+  })
+
   it('uses reason for terminal failure and preserves partial processing notes', async () => {
     await expect(waitForUpload(doc.doc_id, { signal: controller().signal, onProgress: vi.fn(), transport: vi.fn().mockResolvedValue(Response.json({ status: 'failed', reason: 'The IFC file is corrupt.' })) })).rejects.toMatchObject({ message: 'The IFC file is corrupt.', retry: 'upload' })
     const transport = vi.fn().mockResolvedValueOnce(Response.json({ status: 'partial', detail: 'Page image only; no plan map.' })).mockResolvedValueOnce(Response.json(doc))

@@ -15,7 +15,7 @@ export type UploadState =
   | { status: 'idle' }
   | { status: 'uploading'; file: File; progress: number | null }
   | { status: 'processing'; file: File; docId: string; step: string; progress: number | null }
-  | { status: 'ready'; file: File; docId: string; document: Document; note?: string }
+  | { status: 'ready'; file: File; docId: string; document: Document; note?: string; processing?: boolean }
   | { status: 'failed'; file?: File; docId?: string; reason: string; retry: 'choose' | 'upload' | 'poll' }
 
 export type UploadEvent =
@@ -24,7 +24,7 @@ export type UploadEvent =
   | { type: 'uploaded'; docId: string }
   | { type: 'upload-progress'; progress: number | null }
   | { type: 'processing-progress'; step: string; progress: number | null }
-  | { type: 'ready'; document: Document; note?: string }
+  | { type: 'ready'; document: Document; note?: string; processing?: boolean }
   | { type: 'failed'; reason: string; retry: 'choose' | 'upload' | 'poll'; file?: File }
   | { type: 'resume' }
 
@@ -42,8 +42,8 @@ export function uploadReducer(state: UploadState, event: UploadEvent): UploadSta
     case 'upload-progress': return state.status === 'uploading' ? { ...state, progress: uploadProgress(event.progress) } : state
     case 'uploaded': return state.status === 'uploading' ? { status: 'processing', file: state.file, docId: event.docId, step: 'Preparing your drawing…', progress: null } : state
     case 'processing-progress': return state.status === 'processing' ? { ...state, step: event.step, progress: uploadProgress(event.progress) } : state
-    case 'ready': return state.status === 'processing' && event.document.doc_id === state.docId
-      ? { status: 'ready', file: state.file, docId: state.docId, document: event.document, note: event.note } : state
+    case 'ready': return (state.status === 'processing' || state.status === 'ready') && event.document.doc_id === state.docId
+      ? { status: 'ready', file: state.file, docId: state.docId, document: event.document, note: event.note, processing: event.processing } : state
     case 'failed': return {
       status: 'failed', file: event.retry === 'choose' ? undefined : event.file ?? ('file' in state ? state.file : undefined),
       docId: event.retry !== 'choose' && 'docId' in state ? state.docId : undefined, reason: event.reason, retry: event.retry,
