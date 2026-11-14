@@ -275,12 +275,7 @@ h1, h2, h3, p { margin: 0; }
 .app-shell { grid-template-columns: 64px minmax(0, 1fr); }
 .workspace { position: relative; }
 .rail { position: relative; padding: 0; gap: 0; height: 100dvh; margin-top: -6px; overflow: visible; }
-.rail .brand-mark { position: absolute; top: 29px; left: 5px; width: 54px; min-height: 30px; padding: 0; justify-content: center; font-size: 11px; letter-spacing: -.05em; }
-.rail .project-switcher { position: absolute; top: 85px; left: 9px; width: 40px; height: 40px; padding: 0; border: 0; }
-.rail .project-mark { width: 40px; height: 40px; background: #465845; border-radius: 8px; }
 .rail .project-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.rail .project-switcher select { position: absolute; inset: 0; opacity: 0; }
-.rail .project-switcher > svg { display: none; }
 .rail nav { position: absolute; top: 152px; left: 12px; gap: 8px; }
 .rail-item { width: 40px; padding: 0; justify-content: center; transition: background-color .25s ease, transform .18s ease; }
 .rail-item > span { display: none; }
@@ -878,26 +873,11 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 .brand-pro { font-weight: 500; letter-spacing: -.02em; }
 .rail .brand-mark { flex-direction: column; gap: 2px; }
 /* W-66: wider rail so the Stoa Pro mark reads at a glance; PRO set in a serif at the STOA cap height; rail controls scaled to the wider rail. */
-.app-shell { grid-template-columns: 104px minmax(0, 1fr); }
-.rail .brand-mark { top: 28px; left: 4px; width: 96px; min-height: 30px; flex-direction: row; justify-content: center; align-items: center; gap: .25em; font-size: 16px; letter-spacing: 0; }
-.rail .brand-logo { height: .8em; }
-.brand-pro { font-family: "Cormorant Garamond", "Times New Roman", serif; font-weight: 500; text-transform: uppercase; letter-spacing: .01em; font-size: 1.1em; line-height: 1; }
-.rail .project-switcher { top: 80px; left: 26px; width: 52px; height: 52px; }
-.rail .project-mark { width: 52px; height: 52px; border-radius: 10px; font-size: 15px; }
-.rail nav { top: 156px; left: 26px; gap: 10px; }
-.rail-item { width: 52px; height: 52px; border-radius: 12px; }
-.rail-item svg { width: 24px; height: 24px; }
-.rail .tooltip-content { left: 60px; top: 14px; }
-.workspace-footer { left: 26px; }
-.workspace-avatar { width: 52px; height: 52px; border-radius: 14px; font-size: 15px; }
 .need-document { display: grid; gap: 4px; width: min(768px, calc(100% - 48px)); margin: 0 auto 10px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--ink-well); font-size: 14px; }
 .need-document span { color: var(--muted-foreground); }
 .need-document-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
 @media (max-width: 800px) { .need-document { width: calc(100% - 32px); } }
 /* W-66d: the rail's project badge and avatar were decorative (no accounts, one project); removed so nothing in the rail is a dead end. */
-.rail .project-switcher, .rail .workspace-footer { display: none; }
-.rail .brand-mark { left: 2px; width: 100px; font-size: 14.5px; }
-.rail nav { top: 92px; }
 /* W-69: phone header shows the Stoa Pro mark (top right) instead of the decorative project badge. */
 @media (max-width: 640px) {
   .mobile-project { display: none !important; }
@@ -906,10 +886,6 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
   .topbar .wordmark .brand-logo { height: .8em; }
 }
 /* W-66e: rail mark stacked (STOA logo, PRO underneath) so both read at a glance. */
-.rail .brand-mark { top: 22px; left: 8px; width: 88px; flex-direction: column; gap: 3px; font-size: 19px; }
-.rail .brand-mark .brand-pro { font-size: .78em; letter-spacing: .32em; margin-right: -.32em; }
-.rail nav { top: 100px; }
-.rail .brand-mark .brand-pro { translate: .62em 0; }
 /* W-71: phone: Stoa Pro mark top left; the 4 starter cards sit 2x2 and all fit on screen. */
 @media (max-width: 640px) {
   .topbar .project-title { justify-content: flex-start; }
@@ -919,13 +895,8 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
   .starter-grid .starter-card > strong { top: auto; bottom: 10px; left: 12px; right: 8px; font-size: 13px; line-height: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
 /* W-66f: stacked PRO set like the STOA letters (same serif, size and tracking), centred under them. */
-.rail .brand-mark .brand-pro { font-size: 1.02em; letter-spacing: .04em; margin-right: 0; translate: .78em 0; }
 /* W-66g: stacked lockup: PRO starts under the S of STOA and spans the same width, same serif and cap height. */
-.rail .brand-mark { align-items: flex-start; left: 14px; width: auto; }
-.rail .brand-mark .brand-pro { translate: none; margin-left: 1.07em; font-size: 1.02em; letter-spacing: .2em; margin-right: -.2em; }
 /* W-66h: PRO with natural tracking, centred under STOA. */
-.rail .brand-mark { align-items: center; left: 8px; width: 88px; }
-.rail .brand-mark .brand-pro { margin-left: 1.05em; letter-spacing: .02em; margin-right: 0; font-size: 1.02em; translate: none; }
 
 /* W-77: phone touch target for source chips */
 @media (max-width:640px){ .source-file-chip{min-height:44px;display:inline-flex;align-items:center} }
@@ -951,3 +922,77 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 .skeleton-line { display: block; height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--muted) 0%, color-mix(in oklab, var(--muted) 55%, var(--background)) 50%, var(--muted) 100%); background-size: 200% 100%; animation: skeleton-shimmer 1.4s ease-in-out infinite; }
 @keyframes skeleton-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
 @media (prefers-reduced-motion: reduce) { .skeleton-line { animation: none; } }
+
+/* M-SHELL: Stoa shell geometry. Rail 64 px, mark only (30x30 at 17/22) with a small PRO pill, project tile, 8 nav items at 48 px pitch from 152, avatar at the bottom, no footer text. */
+.app-shell { grid-template-columns: 64px minmax(0, 1fr); }
+.rail .brand-mark { position: absolute; top: 22px; left: 17px; width: 30px; min-height: 0; padding: 0; display: block; font-size: 9px; }
+.rail .brand-glyph { display: block; width: 30px; height: 30px; background: currentColor; -webkit-mask: url(/brand/stoa-logo.svg) left center / auto 100% no-repeat; mask: url(/brand/stoa-logo.svg) left center / auto 100% no-repeat; }
+.rail .brand-mark .brand-pro { position: absolute; top: 34px; left: 1px; width: 28px; height: 14px; margin: 0; display: grid; place-items: center; border-radius: 4px; background: rgb(255 255 255 / .16); color: #fff; font-family: var(--font-sans); font-size: 9px; line-height: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; translate: none; }
+.rail .project-switcher { display: block; position: absolute; top: 85px; left: 9px; width: 40px; height: 40px; padding: 0; border: 0; }
+.rail .project-mark { position: relative; width: 40px; height: 40px; border: 0; border-radius: 8px; background: #465845; font-size: 15px; }
+.rail .project-org { position: absolute; top: -4px; left: -4px; display: grid; place-items: center; width: 16px; height: 16px; border-radius: 99px; background: #fff; color: var(--foreground); font-size: 9px; font-weight: 700; }
+.rail nav { top: 152px; left: 12px; gap: 8px; }
+.rail-item { width: 40px; height: 40px; border-radius: 12px; }
+.rail-item svg { width: 20px; height: 20px; }
+.rail .tooltip-content { left: 48px; top: 8px; }
+.rail .workspace-footer { display: flex; position: absolute; top: 744px; bottom: auto; left: 12px; padding: 0; margin: 0; }
+.workspace-avatar { width: 40px; height: 40px; border-radius: 12px; background: rgb(255 255 255 / .3); font-size: 13px; font-weight: 600; color: #fff; }
+.topbar > .badge { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; padding: 0; }
+.rail .workspace-footer > .workspace-avatar { display: grid; place-items: center; }
+
+/* M-SHELL: Data rows (checkbox, tile, name, "size · date", versions, ellipsis), viewer rise, info popover instead of the caption block. */
+.data-file-row { position: relative; gap: 12px; }
+.data-check { appearance: none; flex: 0 0 16px; width: 16px; height: 16px; margin: 0 4px 0 0; border: 1px solid #a1a1a1; border-radius: 4px; background: var(--card); display: grid; place-items: center; cursor: pointer; }
+.data-check:checked { background: var(--foreground); border-color: var(--foreground); }
+.data-check:checked::after { content: ''; width: 8px; height: 4px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; rotate: -45deg; translate: 0 -1px; }
+.data-check:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.data-thumbnail { width: 40px; height: 40px; border-radius: 10px; }
+.data-file-row .data-formats { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.data-file-facts { flex-direction: row; align-items: center; gap: 16px; max-width: none; white-space: nowrap; font-size: 13px; }
+.data-version-picker, .data-version-count { position: relative; display: flex; flex-direction: row; align-items: center; gap: 6px; }
+.data-version-picker select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; padding: 0; }
+.data-row-menu { position: relative; flex: 0 0 auto; margin-right: 4px; }
+.data-row-menu > summary { list-style: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; }
+.data-row-menu > summary::-webkit-details-marker { display: none; }
+.data-row-menu > summary:hover, .data-row-menu[open] > summary { background: var(--ink-selected); }
+.data-row-menu > summary:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+.data-row-popover { position: absolute; z-index: 30; top: 100%; right: 0; width: 280px; padding: 6px; border-radius: var(--radius-overlay, 14px); background: var(--card); box-shadow: var(--shadow-float); font-size: 13px; }
+.data-row-popover > button { display: block; width: 100%; text-align: left; height: 32px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; font-size: 13px; }
+.data-row-popover > button:hover { background: var(--ink-selected); }
+.data-row-popover dl { margin: 6px 0 0; padding: 8px 10px 4px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted-foreground); }
+.data-row-popover dl > div { display: block; padding: 0 0 6px; }
+.data-row-popover dt { font-weight: 600; color: var(--foreground); }
+.data-row-popover dd { margin: 0; overflow-wrap: anywhere; }
+@media (min-width: 641px) {
+  .data-detail { animation: stoa-rise-opacity .35s ease both, stoa-rise-lift .55s var(--ease-settle-wide) both; }
+  .data-detail-body { position: relative; }
+  .data-document-credit, .data-scene-note { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); padding: 0; }
+  .data-detail-actions { position: absolute; left: 50%; bottom: 24px; translate: -50% 0; z-index: 3; padding: 4px; gap: 4px; border-radius: 12px; background: var(--card); box-shadow: var(--shadow-float); flex-wrap: nowrap; }
+  .data-detail-actions .button, .data-detail-actions .viewer3d-visualise-button { height: 32px; font-size: 13px; }
+  .data-credit-info { display: inline-block; position: relative; margin-left: 6px; vertical-align: middle; }
+  .data-credit-info summary { display: inline-flex; list-style: none; cursor: pointer; color: var(--muted-foreground); }
+  .data-credit-info summary::-webkit-details-marker { display: none; }
+  .data-credit-popover { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; width: 320px; padding: 12px; border-radius: 12px; background: var(--card); box-shadow: var(--shadow-float); font-size: 12px; }
+  .data-credit-info dl { margin: 0; font-size: 12px; }
+  .data-credit-info dl > div { display: block; padding: 0 0 6px; }
+  .data-credit-info dl dt { font-weight: 600; }
+  .data-credit-info dl dd { margin: 0; color: var(--muted-foreground); overflow-wrap: anywhere; }
+  .data-mobile-scene { display: none; }
+}
+@keyframes stoa-rise-opacity { from { opacity: 0; } to { opacity: 1; } }
+@keyframes stoa-rise-lift { from { translate: 0 16px; } to { translate: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .data-detail { animation: none; } }
+
+/* M-SHELL: chat polish (Stoa mirror) */
+.chat-header-actions[data-has-chat="false"] > .button { opacity: .5; transition: opacity .25s ease; }
+.chat-header-actions > .button { transition: opacity .25s ease, transform .18s ease; }
+.chat-header-actions > .button:active { transform: scale(.94); }
+@keyframes stoa-slide-in-x { from { transform: translateX(32px); } to { transform: none; } }
+@keyframes stoa-highlight-in { from { fill-opacity: 0; } to { fill-opacity: .45; } }
+@media (min-width: 801px) {
+  .chat-workspace.has-viewer .document-viewer { animation: stoa-rise-opacity .35s ease both, stoa-slide-in-x .55s var(--ease-settle-wide) both; }
+}
+.evidence-region.text-highlight > rect { fill: rgb(250 204 21); fill-opacity: .45; animation: stoa-highlight-in .35s ease .45s both; }
+@media (prefers-reduced-motion: reduce) {
+  .chat-workspace.has-viewer .document-viewer, .evidence-region.text-highlight > rect { animation: none; }
+}
