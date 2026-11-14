@@ -1,4 +1,4 @@
-"""E-41: generated for demo schedules only; never inspect held-out PDFs here."""
+"""E-41/E-48: generated for demo schedules only; never inspect held-out PDFs here."""
 import json
 from pathlib import Path
 
@@ -108,7 +108,7 @@ def test_multirow_merged_wall_header_and_number_column():
     assert solve_table(pt(), t, Request('room', 'walls', 'W7'))[0] == 2
 
 
-def make_pdf(path, headers=HEAD, records=ROWS, title='ROOM FINISH SCHEDULE'):
+def make_pdf(path, headers=HEAD, records=ROWS, title='ROOM FINISH SCHEDULE', rotated_headers=()):
     """Tiny generated PDF with real vector grid and positioned Helvetica text."""
     commands = ['0.5 w']
     x, y, width, height = 100, 130, 100 * len(headers), 35 * (len(records) + 1)
@@ -119,16 +119,21 @@ def make_pdf(path, headers=HEAD, records=ROWS, title='ROOM FINISH SCHEDULE'):
         yy = 800 - y - row * 35
         commands.append(f'{x} {yy} m {x+width} {yy} l S')
 
-    def text(s, xx, yy, size=10):
+    def text(s, xx, yy, size=10, rotated=False):
         s = s.replace('\\', '\\\\').replace('(', '\\(').replace(')', '\\)')
-        commands.append(f'BT /F1 {size} Tf {xx} {800-yy-size} Td ({s}) Tj ET')
+        position = f'0 1 -1 0 {xx} {800-yy} Tm' if rotated else f'{xx} {800-yy-size} Td'
+        commands.append(f'BT /F1 {size} Tf {position} ({s}) Tj ET')
 
     text(title, 100, 95)
     for r, row in enumerate([headers, *records]):
         for c, value in enumerate(row):
-            text(value, x + c * 100 + 8, y + r * 35 + 10)
+            if r == 0 and c in rotated_headers:
+                text(value, x + c * 100 + 30, y + 30, 5, rotated=True)
+            else:
+                text(value, x + c * 100 + 8, y + r * 35 + 10)
     text('W7 W7 W7 W7 - LEGEND ONLY', 100, 600)
     text('A909', 880, 735, 30)
+    text('generated for demo', 100, 750)
     stream = '\n'.join(commands).encode()
     objs = [b'<< /Type /Catalog /Pages 2 0 R >>', b'<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
             b'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 1000 800] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
@@ -214,3 +219,119 @@ def test_bad_schedule_reaches_production_reader_and_forced_ladder(tmp_path, monk
     a = mod.answer('How many rooms in the schedule have all four walls finished with W7?', [DOC])
     assert calls == (['reader'] if reader_answers else ['reader', 'forced'])
     assert a['answer']['value'] == 8 and not a['answer']['abstained']
+
+
+def test_mirrored_room_numbers_are_verified_for_wall_and_area_routes():
+    headers = ['ROOM NO.', 'ROOM NAME', 'SQ.FT.', 'NORTH WALL', 'EAST WALL', 'SOUTH WALL', 'WEST WALL', 'ROOM NO.']
+    records = [[*r, r[0]] for r in ROWS]
+    t = table(headers, records)
+    assert solve_table(pt(), t, Request('room', 'walls', 'W7'))[0] == 2
+    assert solve_table(pt(), t, Request('room', 'area', '302'))[:2] == (1240, 'ft²')
+    assert 'Reading' in solve_table(pt(), t, Request('room', 'largest'))[2]
+    t.cell_at(2, 7).text = '399'
+    for request in (Request('room', 'walls', 'W7'), Request('room', 'area', '302'), Request('room', 'largest')):
+        assert solve_table(pt(), t, request) is None
+
+
+def test_scoped_area_does_not_require_unrelated_room_areas_but_largest_does():
+    t = table(HEAD, ROWS)
+    t.cell_at(2, 2).text = ''
+    assert solve_table(pt(), t, Request('room', 'area', '302'))[:2] == (1240, 'ft²')
+    assert solve_table(pt(), t, Request('room', 'largest')) is None
+    assert solve_table(pt(), t, Request('room', 'area', '303')) is None
+
+
+@pytest.mark.parametrize('unknown', ['?', 'W7?', 'SEE NOTE 3', 'W7/W70', 'DITTO', 'W7*'])
+def test_unread_or_qualified_wall_cells_defer_instead_of_undercounting(unknown):
+    t = table(HEAD, ROWS)
+    t.cell_at(1, 3).text = unknown
+    assert solve_table(pt(), t, Request('room', 'walls', 'W7')) is None
+
+
+@pytest.mark.parametrize('area', ['1,24 SF', ',1240 SF', '1240, SF', '0 SF', '1240 m²', '1240 SF / 115 m²'])
+def test_malformed_or_conflicting_area_values_defer(area):
+    t = table(HEAD, ROWS)
+    t.cell_at(1, 2).text = area
+    assert solve_table(pt(), t, Request('room', 'area', '302')) is None
+
+
+@pytest.mark.parametrize('header,value,expected', [
+    ('AREA (SF)', '1 240', (1240, 'ft²')),
+    ('S.F.', '1,240', (1240, 'ft²')),
+    ('AREA (m²)', '124.5', (124.5, 'm²')),
+    ('AREA', '124.5 SQ. M.', (124.5, 'm²')),
+])
+def test_area_units_are_grounded_in_the_column_or_cell(header, value, expected):
+    t = table(['ROOM', 'NAME', header], [['302', 'Reading', value]])
+    assert solve_table(pt(), t, Request('room', 'area', '302'))[:2] == expected
+
+
+def test_ambiguous_area_columns_or_mixed_header_units_defer():
+    t = table(['ROOM', 'NAME', 'AREA SF', 'AREA m²'], [['302', 'Reading', '1240', '115.2']])
+    assert solve_table(pt(), t, Request('room', 'area', '302')) is None
+    t = table(['ROOM', 'NAME', 'AREA SF / m²'], [['302', 'Reading', '1240 SF']])
+    assert solve_table(pt(), t, Request('room', 'area', '302')) is None
+
+
+def test_rotated_pdf_headers_and_mirrored_identity_have_grounded_zero_cost_answers(tmp_path, monkeypatch):
+    import pypdfium2 as pdfium
+    import engine.models
+    from engine.answer import answer
+    d = tmp_path / DOC
+    d.mkdir()
+    headers = ['ROOM NO.', 'NAME', 'SQ.FT.', 'NORTH', 'EAST', 'SOUTH', 'WEST', 'ROOM NO.']
+    make_pdf(d / 'generated.pdf', headers, [[*r, r[0]] for r in ROWS], rotated_headers=range(2, 7))
+    with pdfium.PdfDocument(d / 'generated.pdf') as pdf:
+        pdf[0].render(scale=1).to_pil().save(d / 'page-1.png')
+    (d / 'doc.json').write_text(json.dumps({'doc_id': DOC, 'kind': 'pdf', 'pages': 1,
+                                         'title': 'generated for demo: rotated schedule'}))
+    monkeypatch.setenv('ARTIFACTS_DIR', str(tmp_path))
+    monkeypatch.setattr(engine.models, 'call', lambda *a, **k: pytest.fail('schedule called model'))
+    questions = [
+        ('On sheet A-909, how many rooms have all four walls finished with W7?', 2, 'count'),
+        ('On sheet A-909, what is the area of room 302 in the room finish schedule?', 1240, 'ft²'),
+        ('On sheet A-909, which room in the room finish schedule has the largest area?', None, 'ft²'),
+    ]
+    for question, value, unit in questions:
+        a = answer(question, [DOC])
+        assert a['route'] == 'index' and not a['answer']['abstained']
+        assert (a['answer']['value'], a['answer']['unit']) == (value, unit)
+        assert a['cost']['usd_total'] == 0 and not a['cost']['calls']
+        assert a['citations'][0]['quote'] and a['evidence']['boxes']
+        assert a['trace'][0]['step'] == 'schedule_lookup'
+        if value is None:
+            assert 'Room 302 Reading (1240 ft²)' in a['answer']['text_md']
+    assert not list(d.glob('*text-*.json'))
+
+
+@pytest.mark.parametrize('question', [
+    'What is the area of room 302 in the finish room schedule?',
+    'Which room in the finish room schedule has the largest area?',
+])
+@pytest.mark.parametrize('reader_answers', [False, True])
+def test_unread_area_reaches_production_reader_and_forced_rung(tmp_path, monkeypatch, question, reader_answers):
+    import engine.answer as mod
+    import engine.forced
+    incomplete = [list(row) for row in ROWS]
+    incomplete[0][2] = '? SF'
+    write_doc(tmp_path, records=incomplete)
+    monkeypatch.setenv('ARTIFACTS_DIR', str(tmp_path))
+    monkeypatch.setenv('FORCE_ANSWER', '1')
+    monkeypatch.setenv('MODELS_FAKE', '1')
+    monkeypatch.setenv('TEXT_WITH_MODEL', '0')
+    calls = []
+
+    def fallback(name, answered):
+        def respond(q, ids, *args):
+            calls.append(name)
+            out = mod._abstained(q, ids, 'Generated for demo model fallback.', [], 1)
+            if answered:
+                out['answer'].update(value=1240, confidence=.2, abstained=False)
+            return out
+        return respond
+
+    monkeypatch.setattr(mod, '_reader', fallback('reader', reader_answers))
+    monkeypatch.setattr(engine.forced, 'forced_answer', fallback('forced', True))
+    a = mod.answer(question, [DOC])
+    assert calls == (['reader'] if reader_answers else ['reader', 'forced'])
+    assert a['answer']['value'] == 1240 and not a['answer']['abstained']

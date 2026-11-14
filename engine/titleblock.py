@@ -49,7 +49,11 @@ def _pdfminer_page(pdf, page, size, doc_id):
     """pdfminer applies the page rotation; map its bottom-left coords to pixels."""
     from pdfminer.high_level import extract_pages
     from pdfminer.layout import LAParams, LTChar, LTTextLine
-    layout = next(iter(extract_pages(str(pdf), page_numbers=[page - 1], laparams=LAParams())))
+    # Finish schedules often rotate narrow column headings by 90 degrees.
+    # Without vertical grouping pdfminer emits separate character words, so an
+    # explicit AREA/NORTH/ROOM heading cannot be identified from its cell.
+    layout = next(iter(extract_pages(str(pdf), page_numbers=[page - 1],
+                                     laparams=LAParams(detect_vertical=True))))
     w, h = size or (round(layout.width * 150 / 72), round(layout.height * 150 / 72))
     sx, sy = w / layout.width, h / layout.height
     words = []

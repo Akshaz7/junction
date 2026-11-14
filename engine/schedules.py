@@ -51,22 +51,25 @@ def _record_id(text):
     return s if re.fullmatch(r'[A-Z]*\d+(?:[.-]?[A-Z0-9]+)*', s) else None
 
 
-def _columns(table, end):
-    """Only header cells above the first record, including merged group headings."""
-    out = {}
+def _header_roles(table, end):
+    """Keep repeated identity columns: many schedules repeat room no. at right.
+
+    Repetition is only safe when every row agrees, checked in _records(). Other
+    duplicate roles stay ambiguous, including two different area columns.
+    """
+    roles = {}
+    directions = {'N': 'NORTH', 'E': 'EAST', 'S': 'SOUTH', 'W': 'WEST'}
     for col in range(table.ncols):
-        # A merged WALLS heading belongs to all children; each direction is a
-        # separate, unmerged header. Deduplicate repeated merged cell references.
         cells = {id(c): c for r in range(end) if (c := table.cell_at(r, col)) is not None}
         parts = [_norm(c.text) for c in cells.values() if c.text]
         joined = ' '.join(parts)
         role = None
-        for direction, variants in {'N': {'N', 'NORTH'}, 'E': {'E', 'EAST'},
-                                    'S': {'S', 'SOUTH'}, 'W': {'W', 'WEST'}}.items():
-            if any(p in variants for p in parts):
+        for direction, full in directions.items():
+            if any(p in {direction, full, f'{direction} WALL', f'{full} WALL',
+                         f'WALL {direction}', f'WALL {full}'} for p in parts):
                 role = direction
         if role is None:
-            if 'AREA' in joined.split():
+            if 'AREA' in joined.split() or any(_area_unit(c.text) for c in cells.values()):
                 role = 'area'
             elif any(p in {'QTY', 'QUANTITY', 'COUNT'} for p in parts):
                 role = 'qty'
@@ -77,11 +80,14 @@ def _columns(table, end):
             elif parts and parts[-1] in {'ROOM', 'DOOR', 'WINDOW'}:
                 role = 'room' if parts[-1] == 'ROOM' else 'id'
         if role:
-            if role in out:  # duplicate headings cannot identify a column uniquely
-                out[role] = None
-            else:
-                out[role] = col
-    return {k: v for k, v in out.items() if v is not None}
+            roles.setdefault(role, []).append(col)
+    return roles
+
+
+def _columns(table, end):
+    """Only header cells above the first record, including merged group headings."""
+    return {role: cols[0] for role, cols in _header_roles(table, end).items()
+            if len(cols) == 1 or role in {'room', 'id'}}
 
 
 def _records(table, req):
@@ -98,7 +104,9 @@ def _records(table, req):
         if cell is None or not _record_id(cell.text):
             continue
         required = ({'N', 'E', 'S', 'W'} if req.op == 'walls' else
-                    {'area'} if req.op in {'area', 'largest'} else set())
+                    {'area'} if req.op == 'largest' else set())
+        if req.op == 'area' and 'area' not in cols:
+            return None
         if not required <= cols.keys():
             return None
         if req.kind != 'room':
@@ -108,6 +116,8 @@ def _records(table, req):
                 return None
         elif re.search(r'\b(?:door|window)\s+schedule\b', table.title, re.I):
             return None
+        roles = _header_roles(table, start)
+        identities = [group for role, group in roles.items() if role in {'room', 'id'} and len(group) > 1]
         records, seen = [], set()
         for row in range(start, table.nrows):
             id_cell = table.cell_at(row, id_col)
@@ -124,6 +134,14 @@ def _records(table, req):
             rid = _record_id(id_cell.text)
             if rid is None or rid in seen or id_cell.rs != 1 or id_cell.cs != 1:
                 return None
+            # A repeated room-number heading is a check column, never another
+            # record or an excuse to silently choose the left-hand value.
+            for group in identities:
+                checks = [table.cell_at(row, col) for col in group]
+                if any(c is None or c.rs != 1 or c.cs != 1 or _record_id(c.text) is None for c in checks):
+                    return None
+                if len({_record_id(c.text) for c in checks}) != 1:
+                    return None
             seen.add(rid)
             values = {}
             for key, col in cols.items():
@@ -137,17 +155,33 @@ def _records(table, req):
     return None
 
 
+def _area_units(text):
+    sf = bool(re.search(r'\b(?:S\.?F\.?|SQ\.?\s*FT\.?|FT[²2]|SQUARE\s+FEET)(?!\w)', text, re.I))
+    sqm = bool(re.search(r'\b(?:M[²2]|SQ\.?\s*M\.?|SQUARE\s+MET(?:RE|ER)S)(?!\w)', text, re.I))
+    return ({'ft²'} if sf else set()) | ({'m²'} if sqm else set())
+
+
+def _area_unit(text):
+    units = _area_units(text)
+    return next(iter(units)) if len(units) == 1 else None
+
+
 def _area(text, heading):
-    m = re.fullmatch(r'\s*([\d,]+(?:\.\d+)?)\s*(SF|SQ\.?\s*FT|FT[²2]|M[²2]|SQ\.?\s*M)?\s*', text, re.I)
+    number = r'(?:\d{1,3}(?:,\d{3})+|\d{1,3}(?:[ \u00a0\u202f]\d{3})+|\d+)(?:\.\d+)?'
+    m = re.fullmatch(r'\s*(' + number + r')\s*(S\.?F\.?|SQ\.?\s*FT\.?|FT[²2]|M[²2]|SQ\.?\s*M\.?)?\s*', text, re.I)
     if not m:
         return None
     # Preserve the printed unit; never relabel square feet as square metres.
-    units = (m[2] or heading).upper()
-    sf = bool(re.search(r'\bSF\b|\bSQ\.?\s*FT\b|FT[²2]', units))
-    sqm = bool(re.search(r'\bM[²2]\b|\bSQ\.?\s*M\b', units))
-    if sf == sqm:
+    if len(_area_units(heading)) > 1:
         return None
-    return float(m[1].replace(',', '')), 'ft²' if sf else 'm²'
+    explicit, header_unit = _area_unit(m[2] or ''), _area_unit(heading)
+    if explicit and header_unit and explicit != header_unit:
+        return None
+    unit = explicit or header_unit
+    if unit is None:
+        return None
+    value = float(re.sub(r'[,\s\u00a0\u202f]', '', m[1]))
+    return (value, unit) if value > 0 else None
 
 
 def solve_table(pt, table, req):
@@ -157,6 +191,11 @@ def solve_table(pt, table, req):
     cols, records = parsed
     selected = []
     if req.op == 'walls':
+        # Unknown finishes cannot be counted as definite nonmatches. Otherwise
+        # an unread W7 cell would produce a confident undercount.
+        if any(not re.fullmatch(r'[A-Z]+\d+[A-Z]?|-|N/A|NONE', r[1][d].upper())
+               for r in records for d in 'NESW'):
+            return None
         selected = [r for r in records if all(r[1][d].upper() == req.target for d in 'NESW')]
         value, unit = len(selected), 'count'
         text = f'**{value} rooms** have {req.target} on all four walls.'
@@ -180,7 +219,10 @@ def solve_table(pt, table, req):
         text = f'**{value} {req.kind}s** are listed for room {req.target}.'
     else:
         header = ' '.join(c.text for c in table.cells if c.r < records[0][2] and c.c <= cols['area'] < c.c + c.cs)
-        areas = [(r, _area(r[1]['area'], header)) for r in records]
+        candidates = records if req.op == 'largest' else [r for r in records if r[0] == req.target]
+        if not candidates:
+            return None
+        areas = [(r, _area(r[1].get('area', ''), header)) for r in candidates]
         if any(a is None for _, a in areas) or len({a[1] for _, a in areas}) != 1:
             return None
         if req.op == 'largest':
