@@ -1,0 +1,25 @@
+.viewer-item-layout { display: contents; }
+.viewer-item-layout:has(.item-panel) { display: flex; flex: 1; min-height: 0; min-width: 0; }
+.viewer-item-layout:has(.item-panel) > .drawing-stage { min-width: 0; }
+.item-panel { width: clamp(220px, 42%, 320px); flex-shrink: 0; min-height: 0; display: flex; flex-direction: column; border-left: 1px solid var(--border); background: var(--card); color: var(--foreground); font-size: var(--text-body-sm); }
+.item-panel > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.item-panel h2 { margin: 0; font-size: var(--text-body-sm); font-weight: 600; }
+.item-panel h3 { margin: 20px 0 10px; font-size: var(--text-body-sm); font-weight: 600; }
+.item-panel-content { padding: 12px; overflow: auto; overscroll-behavior: contain; }
+.item-panel-content p { color: var(--muted-foreground); }
+.item-panel dl { margin: 0; }
+.item-panel dl > div { margin-bottom: 12px; }
+.item-panel dt { color: var(--muted-foreground); font-size: var(--text-caption); }
+.item-panel dd { margin: 3px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.item-properties > div { padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.item-places { list-style: none; padding: 0; margin: 0; }
+.item-places button { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--foreground); text-align: left; cursor: pointer; }
+.item-places li + li { margin-top: 8px; }
+.item-places span { min-width: 0; overflow-wrap: anywhere; }
+.item-places small { display: block; margin-top: 3px; color: var(--muted-foreground); }
+.item-places svg { flex-shrink: 0; }
+.item-panel-scrim { position: fixed; inset: 0; z-index: 39; background: rgb(0 0 0 / .15); }
+@media (max-width: 800px) {
+  .item-panel-sheet { position: fixed; z-index: 40; inset: auto 0 0; width: 100%; max-height: 65dvh; border: 1px solid var(--border); border-radius: 16px 16px 0 0; box-shadow: var(--shadow-card); padding-bottom: env(safe-area-inset-bottom); }
+  .viewer-item-layout:has(.item-panel) { display: contents; }
+}

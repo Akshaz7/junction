@@ -13,6 +13,8 @@ import { ShowOnTableButton } from './show-on-table'
 import { itemIsHidden, type DrawingEdits } from '../lib/scene-edits'
 import type { SceneCommand } from '../viewer3d/commands'
 import { DrawingModel } from './drawing-model'
+import { ItemPanel } from './item-panel'
+import { placeEvidence, type ItemPlace, type LinkedItem } from '../lib/linked'
 
 export function useViewerSheet() {
   const [sheet, setSheet] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 800px)').matches)
@@ -26,12 +28,16 @@ export function useViewerSheet() {
   return sheet
 }
 
-export function DocumentViewer({ answer, citation, sheet, onClose, edits, commands, chatId }: {
+export function DocumentViewer({ answer, citation: originalCitation, sheet, onClose, edits, commands, chatId }: {
   answer: Answer; citation: Citation; sheet: boolean; onClose: () => void
   edits?: DrawingEdits; commands?: readonly SceneCommand[]
   chatId?: string | null
 }) {
-  const { regions, sources, initial } = useMemo(() => viewerEvidence(answer, citation), [answer, citation])
+  const [place, setPlace] = useState<{ location: ItemPlace; item: LinkedItem } | null>(null)
+  const [selectedItem, setSelectedItem] = useState<{ docId: string; itemId: string } | null>(null)
+  const itemTrigger = useRef<Element | null>(null)
+  const citation = place ? { ...originalCitation, doc_id: place.location.doc_id, page: place.location.page, item_ids: [place.item.item_id] } : originalCitation
+  const { regions, sources, initial } = useMemo(() => place ? placeEvidence(place.location, place.item) : viewerEvidence(answer, originalCitation), [answer, originalCitation, place])
   const table = answerTableSelection(answer)
   const [active, setActive] = useState(initial)
   const [doc, setDoc] = useState<Document | null>(null)
@@ -52,6 +58,21 @@ export function DocumentViewer({ answer, citation, sheet, onClose, edits, comman
   const close = useRef<HTMLButtonElement>(null)
   const pointers = useRef(new Map<number, Point>())
   const returnFocus = useRef(typeof document !== 'undefined' ? document.activeElement as HTMLElement | null : null)
+
+  useEffect(() => { setPlace(null); setSelectedItem(null) }, [originalCitation])
+  function closeItem() {
+    setSelectedItem(null)
+    requestAnimationFrame(() => {
+      const trigger = itemTrigger.current
+      if (trigger?.isConnected) (trigger as SVGElement | HTMLElement).focus()
+      else stage.current?.focus()
+    })
+  }
+  function openItem(index: number, id: string, trigger: Element) {
+    setActive(index); setSelected(id, '2d')
+    itemTrigger.current = trigger
+    setSelectedItem({ docId: citation.doc_id, itemId: sources[index]?.itemIds[0] ?? id })
+  }
 
   useEffect(() => {
     const controller = new AbortController()
@@ -158,7 +179,7 @@ export function DocumentViewer({ answer, citation, sheet, onClose, edits, comman
     onKeyDown={(event) => {
       // The 3D viewer owns keyboard handling while its native modal is open.
       if ((event.target as HTMLElement).closest('dialog')) return
-      if (event.key === 'Escape') { event.stopPropagation(); onClose() }
+      if (event.key === 'Escape') { event.stopPropagation(); if (selectedItem) closeItem(); else onClose() }
       if (sheet && event.key === 'Tab') {
         const controls = panel.current?.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], [tabindex="0"]')
         if (!controls?.length) return
@@ -191,6 +212,7 @@ export function DocumentViewer({ answer, citation, sheet, onClose, edits, comman
         <Button variant="ghost" size="icon" aria-label="Zoom in" disabled={!image} onClick={() => zoom(1.25)}><Plus size={16} /></Button>
       </div>
     </div>
+    <div className="viewer-item-layout">
     <div className="drawing-stage" ref={stage} data-testid="drawing-viewport" tabIndex={0} aria-label="Drawing canvas. Drag to pan, scroll or pinch to zoom. Arrow keys pan, plus and minus zoom, zero fits."
       onKeyDown={(event) => {
         if (event.target !== event.currentTarget) return
@@ -233,23 +255,35 @@ export function DocumentViewer({ answer, citation, sheet, onClose, edits, comman
           {regions.map((region, index) => {
             const [x, y, right, bottom] = region.bbox
             const labelSize = 22 / view.scale
-            const tag = tags[region.id] ?? region.label
+            const label = region.label
+            const tag = tags[region.id]
+            const secondaryTag = answer.evidence.scene.commands?.length && tag !== label ? tag : undefined
             const hidden = itemIsHidden(edits, region.id)
-            return <g key={region.id} className={`evidence-region ${region.text ? 'text-highlight' : ''} ${index === active || linked.selected === region.id || linked.hovered === region.id ? 'is-active' : ''} ${hidden ? 'is-hidden' : ''}`} data-testid={`evidence-box-${region.label}`} aria-label={`${region.text ? 'Text source' : 'Box'} ${tag}${hidden ? ', hidden' : ''}`}
+            return <g key={region.id} className={`evidence-region ${region.text ? 'text-highlight' : ''} ${index === active || linked.selected === region.id || linked.hovered === region.id ? 'is-active' : ''} ${hidden ? 'is-hidden' : ''}`} data-testid={`evidence-box-${region.label}`} aria-label={`${region.text ? 'Text source' : 'Box'} ${label}${secondaryTag ? `, ${secondaryTag}` : ''}${hidden ? ', hidden' : ''}`}
               data-item-id={region.id} data-linked={linked.selected === region.id || linked.hovered === region.id ? 'true' : undefined}
               data-hidden={String(hidden)} data-tag={tag}
+              role="button" tabIndex={0} aria-haspopup={sheet ? 'dialog' : undefined}
               onPointerDown={(event) => event.stopPropagation()}
               onMouseEnter={() => setHover(region.id, '2d')} onMouseLeave={() => setHover(null, '2d')}
-              onClick={() => { setActive(index); setSelected(region.id, '2d') }}>
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openItem(index, region.id, event.currentTarget) }
+              }}
+              onClick={(event) => openItem(index, region.id, event.currentTarget)}>
               <title>{region.text ? citation.quote ?? 'Text source' : region.id}</title>
               <rect x={x} y={y} width={Math.max(0, right - x)} height={Math.max(0, bottom - y)} vectorEffect="non-scaling-stroke" />
-              <svg x={x} y={y} width={labelSize * Math.max(1, tag.length / 2)} height={labelSize} viewBox={`0 0 ${22 * Math.max(1, tag.length / 2)} 22`} overflow="visible"><rect className="evidence-label-bg" width={22 * Math.max(1, tag.length / 2)} height="22" rx="5" /><text x={11 * Math.max(1, tag.length / 2)} y="15" textAnchor="middle">{tag}</text></svg>
+              <svg x={x} y={y} width={labelSize * Math.max(1, label.length / 2)} height={labelSize} viewBox={`0 0 ${22 * Math.max(1, label.length / 2)} 22`} overflow="visible"><rect className="evidence-label-bg" width={22 * Math.max(1, label.length / 2)} height="22" rx="5" /><text x={11 * Math.max(1, label.length / 2)} y="15" textAnchor="middle">{label}</text></svg>
+              {secondaryTag && <svg className="evidence-secondary-tag" x={x + labelSize * Math.max(1, label.length / 2)} y={y} width={labelSize * Math.max(1, secondaryTag.length / 2)} height={labelSize} viewBox={`0 0 ${22 * Math.max(1, secondaryTag.length / 2)} 22`}><text x="4" y="15">{secondaryTag}</text></svg>}
             </g>
           })}
         </svg>}
       </div>}
       {error ? <div className="viewer-message"><p role="alert">{error}</p><Button variant="raised" onClick={() => setRetry(retry + 1)}>Try again</Button></div>
         : !image && <p className="viewer-message" role="status">Loading drawing…</p>}
+    </div>
+    {selectedItem && <ItemPanel docId={selectedItem.docId} itemId={selectedItem.itemId} sheet={sheet} onClose={closeItem} onOpenPlace={(location, item) => {
+      setPlace({ location, item }); setActive(0); setSelected(item.item_id, '2d')
+      if (sheet) closeItem()
+    }} />}
     </div>
     <div className="viewer-3d-slot">{!sheet
       ? <DrawingModel docId={citation.doc_id} chatId={chatId} answer={(answer.evidence.scene.doc_id || answer.doc_ids[0]) === citation.doc_id ? visualiseAnswer : undefined} />
