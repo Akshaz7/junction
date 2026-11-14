@@ -922,3 +922,6 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 /* W-66g: stacked lockup: PRO starts under the S of STOA and spans the same width, same serif and cap height. */
 .rail .brand-mark { align-items: flex-start; left: 14px; width: auto; }
 .rail .brand-mark .brand-pro { translate: none; margin-left: 1.07em; font-size: 1.02em; letter-spacing: .2em; margin-right: -.2em; }
+/* W-66h: PRO with natural tracking, centred under STOA. */
+.rail .brand-mark { align-items: center; left: 8px; width: 88px; }
+.rail .brand-mark .brand-pro { margin-left: 1.05em; letter-spacing: .02em; margin-right: 0; font-size: 1.02em; translate: none; }
