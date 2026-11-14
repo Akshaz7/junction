@@ -22,7 +22,7 @@ TIMEOUT_S = 120.0
 # STREAM_NOW only for STREAM_TASKS, and the anthropic adapter then streams. Never part of the cache key.
 DELTA_SINK: contextvars.ContextVar = contextvars.ContextVar("delta_sink", default=None)
 STREAM_NOW: contextvars.ContextVar = contextvars.ContextVar("stream_now", default=None)
-STREAM_TASKS = {"write_answer", "chat", "chat_long", "task_write"}
+STREAM_TASKS = {"write_answer", "chat", "chat_long", "task_write", "reader_plan"}  # reader_plan: the caller filters its JSON down to the final answer text
 
 
 class ProviderError(Exception):

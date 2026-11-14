@@ -9,6 +9,7 @@ import time
 import uuid
 from pathlib import Path
 
+from engine.models import providers as P
 from engine.reader.tools import Session
 
 MAX_STEPS = int(__import__("os").environ.get("READER_STEPS", "6"))
@@ -34,6 +35,61 @@ Tools (doc is d1, d2...; page numbers start at 1; pixel boxes are page-image pix
 Rules: every fact and number in the answer must come from an observation; cite the ids that show it. Never invent codes, ratings or sources.
 If the drawings do not contain the answer (for example a rule that lives in a building code), say so and cite what they do show.
 Be quick: prefer one precise call over many. Stop as soon as the evidence is enough."""
+
+
+_FINAL = re.compile(r'"action"\s*:\s*"final"')
+_ANSWER = re.compile(r'"answer"\s*:\s*"')
+_ESC = {"n": "\n", "t": "\t", "r": "", "b": "", "f": "", '"': '"', "\\": "\\", "/": "/"}
+
+
+def final_answer_text(buf: str) -> str | None:
+    """Answer text typed so far in a streaming reader JSON reply, or None while it is a tool step / not yet at the answer.
+    Only a reply that says action=final is exposed, so planner steps never leak into the chat."""
+    if not _FINAL.search(buf):
+        return None
+    m = _ANSWER.search(buf)
+    if not m:
+        return None
+    out, i, n = [], m.end(), len(buf)
+    while i < n:
+        c = buf[i]
+        if c == '"':
+            break
+        if c == "\\":
+            if i + 1 >= n:
+                break
+            e = buf[i + 1]
+            if e == "u":
+                if i + 6 > n:
+                    break
+                try:
+                    out.append(chr(int(buf[i + 2:i + 6], 16)))
+                except ValueError:
+                    pass
+                i += 6
+                continue
+            out.append(_ESC.get(e, e))
+            i += 2
+            continue
+        out.append(c)
+        i += 1
+    return "".join(out)
+
+
+def _reader_sink():
+    """DELTA_SINK wrapper for reader_plan calls: forwards only the final answer's text (cumulative)."""
+    from engine.models import providers as P
+    sink = P.DELTA_SINK.get()
+    if sink is None:
+        return None
+    last = [""]
+
+    def push(buf: str):
+        txt = final_answer_text(buf)
+        if txt and txt != last[0]:
+            last[0] = txt
+            sink(txt)
+    return push
 
 
 def _extract_json(text: str) -> dict | None:
@@ -206,7 +262,11 @@ def read_answer(question: str, doc_ids: list[str], root, on_event=None, trace: l
             msgs.append({"role": "user", "content": "Budget reached. Reply now with the final JSON using only what you have."})
         ts = time.perf_counter()
         try:
-            r = M.call("reader_plan", msgs, images=[thumb] if (thumb and step == 0) else None)
+            _tok = P.DELTA_SINK.set(_reader_sink())
+            try:
+                r = M.call("reader_plan", msgs, images=[thumb] if (thumb and step == 0) else None)
+            finally:
+                P.DELTA_SINK.reset(_tok)
         except Exception as e:  # noqa: BLE001
             add({"step": "error", "detail": f"planner unavailable ({type(e).__name__})", "ms": 0, "model": None, "cost_usd": 0})
             return _build(question, doc_ids, sess, {"answer": last_obs[:300], "evidence": []}, trace, calls, t0, "planner unavailable")
@@ -232,7 +292,11 @@ def read_answer(question: str, doc_ids: list[str], root, on_event=None, trace: l
     # steps exhausted: force a final answer
     msgs.append({"role": "user", "content": "Out of steps. Reply now with the final JSON using only what you have."})
     try:
-        r = M.call("reader_plan", msgs)
+        _tok = P.DELTA_SINK.set(_reader_sink())
+        try:
+            r = M.call("reader_plan", msgs)
+        finally:
+            P.DELTA_SINK.reset(_tok)
         calls.append({"task": "reader_plan", "provider": r.provider, "model": r.model, "cost_usd": r.cost_usd})
         act = r.json if isinstance(r.json, dict) else _extract_json(r.text) or {}
     except Exception:  # noqa: BLE001
