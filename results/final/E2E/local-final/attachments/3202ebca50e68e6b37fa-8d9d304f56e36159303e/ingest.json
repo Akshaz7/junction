@@ -1,0 +1,51 @@
+{
+  "fixture": "data/full/junction-dataset/data/cubicasa5k/high_quality_architectural-7607.png",
+  "receipt": {
+    "doc_id": "uploads__e2e-1794690891442-high-quality-architectural-7607-971de6",
+    "status": "ingesting",
+    "detail": "poll GET /api/docs/{doc_id}/ingest until status is not running; doc.new fires again when it ends"
+  },
+  "state": {
+    "status": "ready",
+    "stages": [
+      {
+        "stage": "normalise",
+        "ok": true,
+        "s": 0
+      },
+      {
+        "stage": "pages",
+        "ok": true,
+        "s": 0
+      },
+      {
+        "stage": "text",
+        "ok": true,
+        "s": 0
+      },
+      {
+        "stage": "planmap",
+        "ok": true,
+        "s": 13.6
+      },
+      {
+        "stage": "extrude",
+        "ok": true,
+        "s": 0.9
+      },
+      {
+        "stage": "usdz",
+        "ok": true,
+        "s": 0.9
+      }
+    ],
+    "detail": "plan map on page(s) [1]",
+    "mode": "full",
+    "started_at": 1794690894.340394,
+    "step": "usdz",
+    "readable": true,
+    "progress": 1,
+    "cost_usd": 0,
+    "updated": "2026-11-14T23:15:09+0200"
+  }
+}

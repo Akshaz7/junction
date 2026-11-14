@@ -1,0 +1,11 @@
+{
+  "run": "prod-read-only-1",
+  "base_url": "https://hologram-khaki.vercel.app",
+  "status": "failed",
+  "startTime": "2026-11-14T21:07:04.804Z",
+  "duration": 72823.865,
+  "counts": {
+    "failed": 3,
+    "passed": 5
+  }
+}

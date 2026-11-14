@@ -1,0 +1,56 @@
+[
+  {
+    "title": " > chromium > final-api.spec.ts > [SERVER] Read-only local/production endpoints and saved evidence are reachable",
+    "owner": "SERVER",
+    "status": "passed",
+    "duration_ms": 3508,
+    "errors": [],
+    "annotations": [],
+    "attachments": []
+  },
+  {
+    "title": " > chromium > final-api.spec.ts > [ENGINE] Real dxf source yields a streamed answer with citations and reasoning",
+    "owner": "ENGINE",
+    "status": "passed",
+    "duration_ms": 1012,
+    "errors": [],
+    "annotations": [],
+    "attachments": []
+  },
+  {
+    "title": " > chromium > final-api.spec.ts > [ENGINE] Real ifc source yields a streamed answer with citations and reasoning",
+    "owner": "ENGINE",
+    "status": "passed",
+    "duration_ms": 1359,
+    "errors": [],
+    "annotations": [],
+    "attachments": []
+  },
+  {
+    "title": " > chromium > final-api.spec.ts > [ENGINE] Real raster source yields a streamed answer with citations and reasoning",
+    "owner": "ENGINE",
+    "status": "failed",
+    "duration_ms": 13934,
+    "errors": [
+      "Error: Page 1 contains cited item vision-door-01\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false",
+      "Error: Page 1 contains cited item vision-door-02\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false",
+      "Error: Page 1 contains cited item vision-door-03\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false",
+      "Error: Page 1 contains cited item vision-door-04\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false",
+      "Error: Page 1 contains cited item vision-door-05\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false",
+      "Error: Page 1 contains cited item vision-door-06\n\nexpect(received).toBe(expected) // Object.is equality\n\nExpected: true\nReceived: false"
+    ],
+    "annotations": [],
+    "attachments": [
+      {
+        "name": "error-context",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/api-final/artifacts/final-api--ENGINE-Real-ras-917b6-ith-citations-and-reasoning-chromium/error-context.md",
+        "contentType": "text/markdown"
+      },
+      {
+        "name": "trace",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/api-final/artifacts/final-api--ENGINE-Real-ras-917b6-ith-citations-and-reasoning-chromium/trace.zip",
+        "contentType": "application/zip"
+      }
+    ]
+  }
+]

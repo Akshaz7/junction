@@ -396,7 +396,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   async function ask(question: string, documentIds?: string[]) {
     if (!question.trim() || submitting.current || restoring || !docs.length) return
     // A drawing question with nothing attached would hang on "Thinking…": ask for a document and keep the text.
-    if (!documentIds && !selected.length && !chatId.current && needsDocument(question)) { blocked.current = question; setNeedDoc(true); return }
+    if (!documentIds && !selected.length && !chatId.current && !projectId && needsDocument(question)) { blocked.current = question; setNeedDoc(true); return }
     setNeedDoc(false)
     if (viewer && sheet) setViewer(null) // the answer streams into the conversation behind the sheet
     const version = generation.current

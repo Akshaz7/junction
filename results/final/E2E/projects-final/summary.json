@@ -1,0 +1,10 @@
+{
+  "run": "projects-final",
+  "base_url": "http://127.0.0.1:5175",
+  "status": "passed",
+  "startTime": "2026-11-14T21:17:28.071Z",
+  "duration": 29842.167,
+  "counts": {
+    "passed": 4
+  }
+}

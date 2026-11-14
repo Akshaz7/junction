@@ -1,0 +1,173 @@
+{
+  "answer_id": "f7000c9743054471b8ed0a41d7a3134f",
+  "question": "How many doors are there?",
+  "doc_ids": [
+    "uploads__e2e-1794690891442-high-quality-architectural-7607-971de6"
+  ],
+  "answer": {
+    "text_md": "**There are 5 doors on this floor plan.** [1]",
+    "value": 5,
+    "unit": "count",
+    "confidence": 0.898,
+    "abstained": false
+  },
+  "citations": [
+    {
+      "n": 1,
+      "doc_id": "uploads__e2e-1794690891442-high-quality-architectural-7607-971de6",
+      "page": 1,
+      "kind": "region",
+      "bbox_px": [
+        467,
+        195,
+        792,
+        637
+      ],
+      "item_ids": [
+        "door-001",
+        "door-002",
+        "door-003",
+        "door-004",
+        "door-005"
+      ],
+      "quote": null,
+      "label": "Floor plan · 5 doors"
+    }
+  ],
+  "evidence": {
+    "boxes": [
+      {
+        "item_id": "door-001",
+        "page": 1,
+        "bbox_px": [
+          494,
+          195,
+          550,
+          219
+        ],
+        "label": "1"
+      },
+      {
+        "item_id": "door-002",
+        "page": 1,
+        "bbox_px": [
+          701,
+          373,
+          712,
+          439
+        ],
+        "label": "2"
+      },
+      {
+        "item_id": "door-003",
+        "page": 1,
+        "bbox_px": [
+          535,
+          538,
+          547,
+          596
+        ],
+        "label": "3"
+      },
+      {
+        "item_id": "door-004",
+        "page": 1,
+        "bbox_px": [
+          779,
+          552,
+          792,
+          612
+        ],
+        "label": "4"
+      },
+      {
+        "item_id": "door-005",
+        "page": 1,
+        "bbox_px": [
+          467,
+          618,
+          534,
+          637
+        ],
+        "label": "5"
+      }
+    ],
+    "scene": {
+      "doc_id": "uploads__e2e-1794690891442-high-quality-architectural-7607-971de6",
+      "highlight_item_ids": [
+        "door-001",
+        "door-002",
+        "door-003",
+        "door-004",
+        "door-005"
+      ],
+      "camera_target_item_id": "door-001"
+    }
+  },
+  "trace": [
+    {
+      "step": "route",
+      "detail": "count / door / unscoped (rules)",
+      "ms": 0,
+      "model": null,
+      "cost_usd": 0
+    },
+    {
+      "step": "load",
+      "detail": "plan map: 5 door items (conf >= 0.5; 0 below ignored)",
+      "ms": 0,
+      "model": null,
+      "cost_usd": 0
+    },
+    {
+      "step": "count",
+      "detail": "5 door",
+      "ms": 0,
+      "model": null,
+      "cost_usd": 0
+    },
+    {
+      "step": "explain",
+      "detail": "explained in plain words from the cited elements (numbers unchanged)",
+      "ms": 1773,
+      "model": "claude-sonnet-5-5",
+      "cost_usd": 0.002742
+    }
+  ],
+  "route": "planmap",
+  "cost": {
+    "usd_total": 0.002742,
+    "calls": [
+      {
+        "task": "recount",
+        "provider": "vision",
+        "model": "cache:gemini-4-carbon",
+        "cost_usd": 0
+      },
+      {
+        "task": "write_answer",
+        "provider": "runware_claude",
+        "model": "claude-sonnet-5-5",
+        "cost_usd": 0.002742
+      }
+    ]
+  },
+  "latency_ms": 3611,
+  "reasoning": {
+    "steps": [
+      {
+        "kind": "found",
+        "title": "Found",
+        "text": "5 doors on the scanned drawing, each one numbered",
+        "cite": 1,
+        "ok": null
+      }
+    ],
+    "confidence": {
+      "label": "Cross-checked",
+      "pct": 82,
+      "reason": "Detected on a scanned image; raised because detector confidence 90%.",
+      "improve": null
+    }
+  }
+}

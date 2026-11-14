@@ -1,0 +1,11 @@
+{
+  "run": "api-final",
+  "base_url": "http://127.0.0.1:5174",
+  "status": "failed",
+  "startTime": "2026-11-14T21:16:53.933Z",
+  "duration": 20350.513000000003,
+  "counts": {
+    "passed": 3,
+    "failed": 1
+  }
+}

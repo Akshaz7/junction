@@ -1,0 +1,8 @@
+{
+  "fixture": "data/full/junction-dataset/data/ifc_models/resbim-409_model.ifc",
+  "schema": "IFC4",
+  "source_door_count": 5,
+  "answer_value": 5,
+  "cited_ids_match_source": true,
+  "only_opened_after_final_upload": true
+}

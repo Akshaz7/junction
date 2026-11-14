@@ -1,0 +1,47 @@
+{
+  "project_id": "962353a2-e362-43b2-accf-8ffc00969649",
+  "totals": {
+    "storeys": 1,
+    "rooms": 47,
+    "doors": 36,
+    "windows": 28,
+    "floor_area_m2": 343.27
+  },
+  "levels": [
+    {
+      "level": "2. Obergeschoss",
+      "rooms": 47,
+      "doors": 36,
+      "windows": 28,
+      "floor_area_m2": 343.27,
+      "sources": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ]
+    }
+  ],
+  "agreements": [],
+  "mistakes": [],
+  "coverage": [
+    {
+      "doc_id": "ifc_bench__4351-arc",
+      "role": "detail",
+      "level": "Site office",
+      "contributes": "reference drawing, not counted",
+      "confidence_label": "Estimate"
+    },
+    {
+      "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+      "role": "plan",
+      "level": "2. Obergeschoss",
+      "contributes": "rooms, doors, windows",
+      "confidence_label": "Estimate"
+    },
+    {
+      "doc_id": "cubicasa5k__colorful-10052",
+      "role": "plan",
+      "level": null,
+      "contributes": "rooms, doors, windows (level not stated, not added to totals)",
+      "confidence_label": "Estimate"
+    }
+  ]
+}

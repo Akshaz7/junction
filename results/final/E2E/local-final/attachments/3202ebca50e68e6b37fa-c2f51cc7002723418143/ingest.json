@@ -1,0 +1,36 @@
+{
+  "fixture": "data/full/junction-dataset/data/ifc_models/resbim-409_model.ifc",
+  "receipt": {
+    "doc_id": "uploads__e2e-1794690973986-resbim-409-model-0cf983",
+    "status": "ingesting",
+    "detail": "poll GET /api/docs/{doc_id}/ingest until status is not running; doc.new fires again when it ends"
+  },
+  "state": {
+    "status": "ready",
+    "stages": [
+      {
+        "stage": "ifc_scene",
+        "ok": true,
+        "s": 0.7
+      },
+      {
+        "stage": "ifc_plans",
+        "ok": true,
+        "s": 0
+      },
+      {
+        "stage": "usdz",
+        "ok": true,
+        "s": 0.4
+      }
+    ],
+    "detail": "",
+    "mode": "full",
+    "started_at": 1794690975.585292,
+    "step": "usdz",
+    "readable": true,
+    "progress": 1,
+    "cost_usd": 0,
+    "updated": "2026-11-14T23:16:17+0200"
+  }
+}

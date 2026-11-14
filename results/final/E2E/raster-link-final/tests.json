@@ -1,0 +1,50 @@
+[
+  {
+    "title": " > chromium > final-raster-link.spec.ts > [ENGINE] Raster answer boxes keep the same item identities when visualised in 3D",
+    "owner": "ENGINE",
+    "status": "failed",
+    "duration_ms": 12213,
+    "errors": [
+      "Error: Every answer highlight resolves to a real scene item\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  - 1\n+ Received  + 8\n\n- Array []\n+ Array [\n+   \"vision-door-01\",\n+   \"vision-door-02\",\n+   \"vision-door-03\",\n+   \"vision-door-04\",\n+   \"vision-door-05\",\n+   \"vision-door-06\",\n+ ]",
+      "Error: The same numbered items glow in 3D\n\nThe same numbered items glow in 3D\n\nexpect(received).toEqual(expected) // deep equality\n\n- Expected  - 8\n+ Received  + 1\n\n- Array [\n-   \"vision-door-01\",\n-   \"vision-door-02\",\n-   \"vision-door-03\",\n-   \"vision-door-04\",\n-   \"vision-door-05\",\n-   \"vision-door-06\",\n- ]\n+ Array []\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate"
+    ],
+    "annotations": [],
+    "attachments": [
+      {
+        "name": "answer.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/raster-link-final/attachments/be52c707166debe70a7f-cdb8a74fe02f24ddd385/answer.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "loading.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/raster-link-final/attachments/be52c707166debe70a7f-cdb8a74fe02f24ddd385/loading.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "raster-scene-link.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/raster-link-final/attachments/be52c707166debe70a7f-cdb8a74fe02f24ddd385/raster-scene-link.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "screenshot",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/raster-link-final/artifacts/final-raster-link--ENGINE--04c49-ities-when-visualised-in-3D-chromium/test-failed-1.png",
+        "contentType": "image/png"
+      },
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/raster-link-final/attachments/be52c707166debe70a7f-cdb8a74fe02f24ddd385/network-and-browser.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "error-context",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/raster-link-final/artifacts/final-raster-link--ENGINE--04c49-ities-when-visualised-in-3D-chromium/error-context.md",
+        "contentType": "text/markdown"
+      },
+      {
+        "name": "trace",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/raster-link-final/artifacts/final-raster-link--ENGINE--04c49-ities-when-visualised-in-3D-chromium/trace.zip",
+        "contentType": "application/zip"
+      }
+    ]
+  }
+]
