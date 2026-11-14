@@ -111,5 +111,5 @@ def run(ctx: dict) -> dict:
         else:
             improve = "Check the boxed areas, or upload a CAD file to make this exact."
     if not steps and cites and route not in ("planmap", "index") and not exact:
-        steps.append({"kind": "read", "title": "Read", "text": f"{_plural(len(cites), 'marked region')} on the drawing", "cite": cites[0].get("n"), "ok": None})
+        steps.append({"kind": "read", "title": "Read", "text": "Used the cited drawing as the source; individual items were not identified", "cite": cites[0].get("n"), "ok": None})
     return {"label": label, "pct": pct, "reason": reason, "improve": improve, "_steps": steps}

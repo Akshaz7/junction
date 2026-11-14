@@ -108,10 +108,9 @@ def _read_text(ctx: dict) -> str:
         pre = f"Printed on {loc}: “"
         q = _clip(c["quote"], max(20, MAX - len(pre) - 1 - len(_docs_suffix(ctx))))
         return f"{pre}{q}”{_docs_suffix(ctx)}"
-    n = len(cites)
     pages = sorted({c.get("page") or 1 for c in cites})
     pg = f" on page {pages[0]}" if len(pages) == 1 and pages[0] > 1 else ""
-    return f"{n} marked region{'s' if n != 1 else ''}{pg} of {noun}{_docs_suffix(ctx)}"
+    return f"Used {noun}{pg} as the source; individual items were not identified{_docs_suffix(ctx)}"
 
 
 def run(ctx: dict) -> None:

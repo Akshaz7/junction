@@ -109,13 +109,16 @@ def build(res: dict, question: str, root: Path) -> dict | None:
             c["label"] = "Cross-checked" if cap >= 80 else "Estimate"
             c["reason"] = hint.get("reason") or c.get("reason")
             c["improve"] = hint.get("improve") or c.get("improve")
-    if not steps:
-        return None
-    return {"steps": steps[:4], "confidence": c}
+    from engine.reasoning_parts.counts import enforce
+    card = enforce(res, {"steps": steps[:4], "confidence": c}, question)
+    return card if card["steps"] else None
 
 
 def attach(res: dict, question: str, root: Path) -> dict:
-    if res.get("reasoning"):   # these routes bring their own card
+    if res.get("reasoning"):   # these routes bring their own card; the invariant still applies
+        from engine.reasoning_parts.counts import enforce
+        res["reasoning"] = enforce(res, res["reasoning"], question)
+        res.pop("reasoning_hint", None)
         return res
     try:
         r = build(res, question, root)
