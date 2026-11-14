@@ -30,6 +30,7 @@ None yet. Aiven Postgres `hologram-pg` is running (EU, do-fra) and seeded. App d
 None now. OK: NVIDIA, Runware, HF, ElevenLabs, Modal, Aiven. Missing: GEMINI_API_KEY, ANTHROPIC_API_KEY (both covered by Runware for now), CLOUDINARY_URL, Google Drive credentials.
 
 ## 6. What Ash must do by hand next
+- iPhone: at 04:20 `xcrun devicectl` already listed "Akshat's iPhone … available (paired)" (reachable over Wi-Fi). Unlock it, make sure Developer Mode is on, then run `bash ios/scripts/install_on_device.sh` (one command; see ios/README.md). Nothing was installed overnight.
 - Fill missing keys in `.env`.
 - Saturday morning: plug in the iPhone (unlocked, trusted, Developer Mode on), (APPLE_TEAM_ID 472PHZCF99 already in .env), then follow the I-05 install steps below; test AR on a table; run the demo script once.
 - Aiven: install the Aiven GitHub App for repo Akshaz7/junction in the Aiven console (Integrations / GitHub) so the Runtime app can build from the repo (needed for deploy, S-05).

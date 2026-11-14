@@ -1,0 +1,45 @@
+{
+  "_note": "Generated for demo: anonymized regression sample matching CoreDevice JSON fields; not a hardware capture.",
+  "result": {
+    "devices": [
+      {
+        "hardwareProperties": {
+          "platform": "iOS", "reality": "physical", "productType": "iPhone16,2",
+          "udid": "00000000-0000000000000001"
+        },
+        "connectionProperties": {"pairingState": "paired", "tunnelState": "disconnected"},
+        "deviceProperties": {"name": "Demo iPhone over Wi-Fi"}
+      },
+      {
+        "properties": {
+          "hardware": {
+            "platform": "iOS", "reality": "physical",
+            "udid": "00000000-0000000000000002"
+          },
+          "connection": {"pairingState": "paired", "tunnelState": "disconnected"},
+          "device": {"name": "Demo available iPhone"},
+          "state": {"availability": "available (paired)"}
+        }
+      },
+      {
+        "hardwareProperties": {
+          "platform": "iOS", "reality": "simulated", "deviceType": "iPhone",
+          "udid": "00000000-0000000000000003"
+        },
+        "connectionProperties": {"pairingState": "paired", "tunnelState": "connected"},
+        "deviceProperties": {"name": "Demo simulator"}
+      },
+      {
+        "properties": {
+          "hardware": {
+            "platform": "iOS", "reality": "physical", "deviceType": "iPhone",
+            "udid": "00000000-0000000000000004"
+          },
+          "connection": {"pairingState": "paired", "tunnelState": "disconnected"},
+          "device": {"name": "Demo offline iPhone"},
+          "state": {"availability": "unavailable"}
+        }
+      }
+    ]
+  }
+}

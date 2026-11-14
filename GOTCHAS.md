@@ -40,3 +40,4 @@
 - Held-out (full): 5,953 docs; CubiCasa5K: 4,787 held out, 213 clean (data/sets/cubicasa_clean_ids.txt).
 - Rebuilding derived files: `uv run` wrapped in heavy.sh silently did nothing twice (stale 03:35 GLB/USDZ). Always check output mtimes after a rebuild; `PYTHONPATH=. .venv/bin/python -m pipeline.<x>` works.
 - LEAD runs web e2e on a stable snapshot via scripts/test_snapshot.sh <port> "<worker paths>" -- <specs>: HEAD + only that worker's files, built and served by vite preview. The live :5173 dev server breaks whenever a Codex worker is mid-edit.
+- `echo` inside a zsh `for` loop with `==` breaks: zsh's = expansion. Use `echo '== x'` quoted.
