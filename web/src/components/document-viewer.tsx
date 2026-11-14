@@ -485,7 +485,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       {error ? <div className="viewer-message"><p role="alert">{error}</p><Button variant="raised" onClick={() => setRetry(retry + 1)}>Try again</Button></div>
         : !image && <p className="viewer-message" role="status">Loading drawing…</p>}
     </div>
-    {calcOpen && answer.reasoning && <CalculationPanel reasoning={answer.reasoning} title={doc?.title} onClose={() => setCalcOpen(false)} onFocus={focusCalcItem} />}
+    {calcOpen && answer.reasoning && <CalculationPanel reasoning={answer.reasoning} title={doc?.title} docTitle={(id) => id === citation.doc_id && doc?.title ? doc.title : id} onClose={() => setCalcOpen(false)} onFocus={focusCalcItem} />}
     {specOpen && !calcOpen && specCitation && <SpecPanel citation={specCitation} title={doc?.title ?? citation.doc_id} text={sheetText} onClose={() => setSpecOpen(false)} />}
     {selectedItem && <ItemPanel docId={selectedItem.docId} itemId={selectedItem.itemId} sheet={sheet} onClose={closeItem} onOpenPlace={(location, item) => {
       setPlace({ location, item }); setActive(0); setSelected(item.item_id, '2d')
