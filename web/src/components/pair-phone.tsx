@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { Smartphone, X } from 'lucide-react'
 import qrcode from 'qrcode-generator'
 import { Button } from './ui'
-import { ensurePairCode, getPairings, onPairingChange, pairCodeFromHash, addPairing, pairLink, pairAppLink, unpair, registerChat } from '../lib/pairing'
+import { ensurePairCode, getPairings, onPairingChange, pairCodeFromHash, addPairing, pairLink, pairAppLink, unpair, registerChat, isWaitingForPhone } from '../lib/pairing'
 import { useDialogFocus } from '../lib/use-dialog-focus'
 
 function qrSvg(text: string): string {
@@ -46,13 +46,14 @@ export function PairPhoneButton() {
   const [open, setOpen] = useState(false)
   const [code, setCode] = useState('')
   const [paired, setPaired] = useState(getPairings().length > 0)
+  const [waiting, setWaiting] = useState(isWaitingForPhone())
   const host = useRef<HTMLSpanElement>(null)
   const trigger = useRef<HTMLButtonElement>(null)
   const dialog = useRef<HTMLElement>(null)
   const dialogId = useId()
   const titleId = useId()
   useDialogFocus(open && !!code, dialog, trigger, () => setOpen(false))
-  useEffect(() => onPairingChange(() => setPaired(getPairings().length > 0)), [])
+  useEffect(() => onPairingChange(() => { setPaired(getPairings().length > 0); setWaiting(isWaitingForPhone()) }), [])
   useEffect(() => {
     if (!open) return
     setCode(ensurePairCode())
@@ -71,7 +72,7 @@ export function PairPhoneButton() {
   }, [open])
   const link = code ? pairLink(code) : ''
   return <span className="pair-phone" ref={host}>
-    <Button variant="raised" aria-label="Pair a phone" title="Pair a phone" aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? dialogId : undefined} onClick={(event) => { trigger.current = event.currentTarget; setOpen((value) => !value) }}><Smartphone size={16} /><span>{paired ? 'Paired' : 'Pair a phone'}</span></Button>
+    <Button variant="raised" aria-label="Pair a phone" title="Pair a phone" aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? dialogId : undefined} onClick={(event) => { trigger.current = event.currentTarget; setOpen((value) => !value) }}><Smartphone size={16} /><span>{waiting ? 'Waiting for phone…' : paired ? 'Paired' : 'Pair a phone'}</span></Button>
     {open && code && <section ref={dialog} id={dialogId} className="pair-popover" role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
       <header><strong id={titleId}>Pair a phone</strong><button type="button" aria-label="Close pairing" onClick={() => setOpen(false)}><X size={16} /></button></header>
       <div className="pair-qr" role="img" aria-label="QR code to pair a phone" dangerouslySetInnerHTML={{ __html: qrSvg(pairAppLink(code)) }} />

@@ -18,12 +18,15 @@ function useOverviewSection<T>(load: (signal: AbortSignal) => Promise<T>, liveCh
       controller?.abort()
       controller = new AbortController()
       const signal = controller.signal
+      const current = controller
       setState((previous) => ({ ...previous, loading: true, error: '' }))
+      // A panel must never spin forever: after 15 s show "Not available yet" with Retry.
+      const timeout = window.setTimeout(() => { if (!signal.aborted) { setState((previous) => previous.loading ? { loading: false, error: 'Not available yet.' } : previous); current.abort() } }, 15_000)
       load(signal).then((data) => {
         if (!signal.aborted) setState({ data, loading: false, error: '' })
       }).catch((error: unknown) => {
         if (!signal.aborted) setState({ loading: false, error: error instanceof Error ? error.message : 'Could not load this section.' })
-      })
+      }).finally(() => window.clearTimeout(timeout))
     }
     refresh()
     const unsubscribe = liveChats ? chatLive.subscribe((event) => {

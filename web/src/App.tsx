@@ -17,7 +17,7 @@ import { ChangesScreen } from './components/changes-screen'
 import { HelpScreen } from './components/help-screen'
 import { ProjectsScreen } from './components/project-page'
 import { ChatCrumb, PanelToggle, ProjectContentPanel, projectLibraryDocs, useChatProject } from './components/project-chat-panel'
-import { workspaceApi } from './lib/api'
+import { subscribeApiRetry, workspaceApi } from './lib/api'
 import { navigate, useRoute } from './lib/router'
 import type { Citation, Document } from './lib/types'
 
@@ -29,6 +29,8 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
   const [loadingDocs, setLoadingDocs] = useState(true)
   const [demo, setDemo] = useState(workspaceApi.isDemo)
   const [error, setError] = useState('')
+  const [retry, setRetry] = useState('')
+  useEffect(() => subscribeApiRetry(setRetry), [])
   const [activeChatId, setActiveChatId] = useState<string | null>(null)
   const [chatKey, setChatKey] = useState(0)
   const activeChatTitle = undefined as string | undefined
@@ -61,7 +63,7 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
     <main className="workspace" id="main-content" tabIndex={-1}>
       <header className="topbar">
         <div className="project-title"><span className="wordmark"><span className="brand-logo" role="img" aria-label="Stoa" /><span className="brand-pro">Pro</span></span><span className="topbar-divider" /><span className="workspace-name">Demo workspace</span><div className="mobile-project"><ProjectSwitcher /></div></div>
-        <Badge variant={demo || loadingDocs || error ? 'neutral' : 'success'}>{demo ? 'Local demo' : loadingDocs ? 'Connecting…' : error ? 'Connection unavailable' : 'Connected workspace'}</Badge>
+        <Badge variant={demo || loadingDocs || error ? 'neutral' : 'success'}>{demo ? 'Local demo' : loadingDocs ? (retry || 'Connecting…') : error ? 'Connection unavailable' : 'Connected workspace'}</Badge>
       </header>
       <div className={`pagebar${view === 'chat' && inProject ? ' pj-pagebar' : ''}`}>
         <h1>{pageLabel(view)}</h1>

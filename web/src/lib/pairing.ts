@@ -36,7 +36,17 @@ export function addPairing(code: string) {
   return true
 }
 
-export function unpair() { write([]) }
+const HOST_KEY = 'hologram.pair-hosted'
+let hostedMemory = ''
+const hostedCode = (): string => { try { return window.localStorage.getItem(HOST_KEY) ?? hostedMemory } catch { return hostedMemory } }
+/** True while this device only shows its own QR code: no phone has been confirmed, so never claim "Paired". */
+export const isWaitingForPhone = (): boolean => { const hosted = hostedCode(); return !!hosted && read().length > 0 && read().every((code) => code === hosted) }
+
+export function unpair() {
+  hostedMemory = ''
+  try { window.localStorage.removeItem(HOST_KEY) } catch { /* memory only */ }
+  write([])
+}
 
 export function onPairingChange(listener: () => void) {
   window.addEventListener('hologram:pairing', listener)
@@ -48,6 +58,8 @@ export function ensurePairCode(): string {
   const [first] = read()
   if (first) return first
   const code = newPairCode()
+  hostedMemory = code
+  try { window.localStorage.setItem(HOST_KEY, code) } catch { /* memory only */ }
   addPairing(code)
   return code
 }

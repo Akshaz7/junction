@@ -133,6 +133,13 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
     </div>
     <UploadDialog open={uploadOpen} onClose={() => setUploadOpen(false)} onAsk={onAsk}
       onOpen={(doc) => { setOlderDoc(doc); setPreviewDocked(false); setSelectedId(doc.doc_id) }}
+      onUploaded={() => {
+        // The dialog may be closed during processing: keep refreshing so the new document appears without a reload.
+        setFolder(''); setSearch(''); setPage(1)
+        let tries = 0
+        const timer = window.setInterval(() => { void onRefresh().catch(() => undefined); if (++tries >= 24) window.clearInterval(timer) }, 5000)
+        void onRefresh().catch(() => undefined)
+      }}
       onReady={() => {
         setFolder(''); setSearch(''); setPage(1)
         void onRefresh().catch((error: unknown) => setUploadError(error instanceof Error ? error.message : 'Could not refresh documents.'))
