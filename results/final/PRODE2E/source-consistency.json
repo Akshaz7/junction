@@ -1,0 +1,22 @@
+[
+  {
+    "doc_id": "ifc_bench__ac20-arc",
+    "source": "files/elements.json",
+    "door_counts_by_storey": {
+      "Keller": 16,
+      "Erdgeschoss": 18,
+      "1. Obergeschoss": 22,
+      "2. Obergeschoss": 21
+    },
+    "returned_level_2_count": 21,
+    "matches_indexed_storey_count": true
+  },
+  {
+    "doc_id": "cubicasa5k__colorful-11397",
+    "source": "planmap/1",
+    "retained_door_count": 11,
+    "returned_count": 11,
+    "matches_retained_inventory": true,
+    "note": "Agreement with saved inventory is not independent drawing accuracy; answer discloses recount=12."
+  }
+]

@@ -1,12 +1,14 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
 import { ArrowDown, ArrowLeft, ArrowUp, ChevronRight, Maximize2, Minimize2, X } from 'lucide-react'
 import { Button } from './ui'
 import type { Calculation, Reasoning } from '../lib/types'
 import { columnKeys, columnLabel, fmt, focusOf, pageRows, signed, sortRows, sourceText, totalsOf, withUnit, type FocusTarget, type RowSort } from '../lib/calc-view'
 import { workspaceApi } from '../lib/api'
+import { calculationImages } from '../lib/calc-images'
 import './calc-panel.css'
 
 const PAGE = 15
+const CropImages = createContext<ReturnType<typeof calculationImages> | null>(null)
 
 function Section({ title, hint, open = true, children, id }: { title: string; hint?: string; open?: boolean; children: ReactNode; id: string }) {
   return <details className="calc-section" open={open} data-section={id}>
@@ -19,30 +21,27 @@ function Section({ title, hint, open = true, children, id }: { title: string; hi
 function BboxCrop({ source }: { source: NonNullable<Calculation['rows'][number]['source']> }) {
   const ref = useRef<HTMLCanvasElement>(null)
   const [ok, setOk] = useState(true)
+  const images = useContext(CropImages)
   const { doc_id: docId, page, bbox } = source
   useEffect(() => {
     if (!docId || !page || !bbox || bbox.length < 4) { setOk(false); return }
-    const controller = new AbortController()
-    let url = ''
-    void workspaceApi.getPageImage(docId, page, controller.signal).then((blob) => {
-      const image = new Image()
-      image.onload = () => {
-        const canvas = ref.current
-        const [x0, y0, x1, y1] = bbox as number[]
-        const pad = Math.max(8, 0.25 * Math.max(x1 - x0, y1 - y0))
-        const sx = Math.max(0, x0 - pad), sy = Math.max(0, y0 - pad)
-        const sw = Math.min(image.naturalWidth - sx, x1 - x0 + 2 * pad), sh = Math.min(image.naturalHeight - sy, y1 - y0 + 2 * pad)
-        if (!canvas || sw <= 0 || sh <= 0) { setOk(false); return }
-        const scale = Math.min(1, 96 / sw, 64 / sh) * 2
-        canvas.width = Math.max(1, Math.round(sw * scale)); canvas.height = Math.max(1, Math.round(sh * scale))
-        canvas.getContext('2d')?.drawImage(image, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
-        URL.revokeObjectURL(url)
-      }
-      image.onerror = () => setOk(false)
-      url = URL.createObjectURL(blob); image.src = url
-    }).catch(() => { if (!controller.signal.aborted) setOk(false) })
-    return () => { controller.abort(); if (url) URL.revokeObjectURL(url) }
-  }, [docId, page, bbox])
+    if (!images) return
+    let cancelled = false
+    setOk(true)
+    void images.get(docId, page).then((image) => {
+      if (cancelled) return
+      const canvas = ref.current
+      const [x0, y0, x1, y1] = bbox as number[]
+      const pad = Math.max(8, 0.25 * Math.max(x1 - x0, y1 - y0))
+      const sx = Math.max(0, x0 - pad), sy = Math.max(0, y0 - pad)
+      const sw = Math.min(image.naturalWidth - sx, x1 - x0 + 2 * pad), sh = Math.min(image.naturalHeight - sy, y1 - y0 + 2 * pad)
+      if (!canvas || sw <= 0 || sh <= 0) { setOk(false); return }
+      const scale = Math.min(1, 96 / sw, 64 / sh) * 2
+      canvas.width = Math.max(1, Math.round(sw * scale)); canvas.height = Math.max(1, Math.round(sh * scale))
+      canvas.getContext('2d')?.drawImage(image, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
+    }).catch(() => { if (!cancelled) setOk(false) })
+    return () => { cancelled = true }
+  }, [docId, page, bbox, images])
   if (!ok) return null
   return <canvas ref={ref} className="calc-crop" role="img" aria-label="Source region" />
 }
@@ -101,6 +100,8 @@ const MAIN_STEPS = 12
 export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle }: {
   reasoning: Reasoning; title?: string; onClose: () => void; onFocus?: (target: FocusTarget) => void; docTitle?: (id: string) => string
 }) {
+  const images = useMemo(() => calculationImages((docId, page, signal) => workspaceApi.getPageImage(docId, page, signal)), [])
+  useEffect(() => () => images.clear(), [images])
   // Engine output is data-driven and may omit any part: fill the gaps so every section simply disappears when empty.
   const claims = reasoning.calc?.kind === 'claims' ? reasoning.calc : undefined
   const numeric = reasoning.calc?.kind !== 'claims' ? reasoning.calc : undefined
@@ -120,7 +121,7 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
   const { confidence } = reasoning
   const margin = calc?.margin ?? reasoning.margin
   const result = calc?.result
-  return <aside className={`viewer-calc-panel${expanded ? ' is-expanded' : ''}`} aria-label="Calculation" data-testid="calc-panel" style={expanded ? undefined : { width }}>
+  return <CropImages.Provider value={images}><aside className={`viewer-calc-panel${expanded ? ' is-expanded' : ''}`} aria-label="Calculation" data-testid="calc-panel" style={expanded ? undefined : { width }}>
     {!expanded && <div className="calc-resize" role="separator" aria-orientation="vertical" aria-label="Resize calculation panel" aria-valuemin={300} aria-valuemax={900} aria-valuenow={width} tabIndex={0}
       onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={(e) => { drag.current = null; e.currentTarget.releasePointerCapture(e.pointerId) }} onKeyDown={keyResize} />}
     <header>
@@ -255,5 +256,5 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
         {confidence.improve && <p className="calc-note">To verify: {confidence.improve}</p>}
       </Section>
     </div>
-  </aside>
+  </aside></CropImages.Provider>
 }

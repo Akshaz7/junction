@@ -1,0 +1,15 @@
+[
+  {
+    "name": "scan",
+    "url": "https://stoa-pro.vercel.app/#/chat?chat=49f0367a-3de6-4b40-b427-0e05a9dd0200",
+    "projectUrl": "https://stoa-pro.vercel.app/#/chat?chat=fb8eac50-7ee8-4e7d-bd33-893ae86e1286&project=a993e497-de8b-4b48-8257-f4e39d6646e8"
+  },
+  {
+    "name": "ifc",
+    "url": "https://stoa-pro.vercel.app/#/chat?chat=3a3c9323-25a8-442a-a65b-0c409b4ffafb"
+  },
+  {
+    "name": "pdf",
+    "url": "https://stoa-pro.vercel.app/#/chat?chat=6cad6fae-8ad8-4a05-a433-4efd570fbf93"
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "answer_id": "835b782660ef4ad2ab2aa0e450018cce",
+    "question": "How many doors?",
+    "doc_ids": [
+      "cubicasa5k__colorful-11397"
+    ],
+    "answer": {
+      "text_md": "**There are 11 doors on this floor plan.** [1]",
+      "value": 11,
+      "unit": "count",
+      "confidence": 0.69,
+      "abstained": false
+    },
+    "box_count": 11,
+    "citation_count": 1,
+    "calculation_kind": "numeric",
+    "calculation_rows": 11,
+    "calculation_steps": 182,
+    "cost_usd": 0.005398
+  },
+  {
+    "answer_id": "82cec62b9711419aabfb13fd7a3937b1",
+    "question": "Give me a quantity take-off",
+    "doc_ids": [
+      "cubicasa5k__colorful-11397"
+    ],
+    "answer": {
+      "text_md": "**Quantity take-off**, computed from the file's own data with no model call.\n\n| Item | Quantity | Unit | Source |\n|---|---|---|---|\n| Floor area - storage | 0.60 | m2 | [1] |\n| Floor area - TERASSI  terrace | 21.56 | m2 | [2] |\n| Floor area - PARVEKE  balcony | 9.82 | m2 | [3] |\n| Floor area - living | 21.55 | m2 | [4] |\n| Floor area - bedroom | 8.02 | m2 | [5] |\n| Floor area - bedroom | 4.09 | m2 | [6] |\n| Floor area - kitchen | 13.75 | m2 | [7] |\n| Floor area - entry | 1.40 | m2 | [8] |\n| Floor area - bathroom | 0.43 | m2 | [9] |\n| Floor area - MH  bedroom | 12.49 | m2 | [10] |\n| Baseboard - storage | not in this file |  |  |\n| Baseboard - TERASSI  terrace | not in this file |  |  |\n| Baseboard - PARVEKE  balcony | not in this file |  |  |\n| Baseboard - living | not in this file |  |  |\n| Baseboard - bedroom | not in this file |  |  |\n| Baseboard - bedroom | not in this file |  |  |\n| Baseboard - kitchen | not in this file |  |  |\n| Baseboard - entry | not in this file |  |  |\n| Baseboard - bathroom | not in this file |  |  |\n| Baseboard - MH  bedroom | not in this file |  |  |\n| Doors | 11 | count | [11] |\n| Windows | 11 | count | [12] |\n| Slab area by type | not in this file |  |  |\n| Piping by system | not in this file |  |  |\n\n_Baseboard needs a drawing scale and this one has none._\n\nAreas are estimated from door sizes because no printed scale was found, so treat them as approximate.",
+      "value": 10,
+      "unit": "rooms",
+      "confidence": 0.4,
+      "abstained": false
+    },
+    "box_count": 32,
+    "citation_count": 12,
+    "calculation_kind": "numeric",
+    "calculation_rows": 32,
+    "calculation_steps": 189,
+    "cost_usd": 0.0
+  },
+  {
+    "answer_id": "ae82822b30064ba9a8f42b2733c9051e",
+    "question": "What is the wall surface area per floor?",
+    "doc_ids": [
+      "ifc_bench__ac20-arc"
+    ],
+    "answer": {
+      "text_md": "**Both wall faces: 4,880.46 m\u00b2 net area.** [1] [2] [3]\n\n- Gross 5,857.30 m\u00b2 \u2212 openings 976.84 m\u00b2 = net 4,880.46 m\u00b2.\n- Numerical/orientation allowance \u00b10.1489 m\u00b2; source-model accuracy is not quantified.\n\n| Item | Quantity | Unit | Source |\n| --- | ---: | --- | --- |\n| Keller \u00b7 outside of external walls \u00b7 gross | 302.4000 | m\u00b2 | [1] [2] [3] |\n| Keller \u00b7 outside of external walls \u00b7 openings deducted | 66.0000 | m\u00b2 | [1] [2] [3] |\n| Keller \u00b7 outside of external walls \u00b7 net | 236.4000 | m\u00b2 | [1] [2] [3] |\n| Keller \u00b7 inside of external walls \u00b7 gross | 295.9200 | m\u00b2 | [1] [2] [3] |\n| Keller \u00b7 inside of external walls \u00b7 openings deducted | 66.0000 | m\u00b2 | [1] [2] [3] |\n| Keller \u00b7 inside of external walls \u00b7 net | 229.9200 | m\u00b2 | [1] [2] [3] |\n| Keller \u00b7 both sides of internal walls \u00b7 gross | 658.8000 | m\u00b2 | [1] [2] [3] |\n| Keller \u00b7 both sides of internal walls \u00b7 openings deducted | 77.2800 | m\u00b2 | [1] [2] [3] |\n| Keller \u00b7 both sides of internal walls \u00b7 net | 581.5200 | m\u00b2 | [1] [2] [3] |\n| Erdgeschoss \u00b7 outside of external walls \u00b7 gross | 314.8200 | m\u00b2 | [1] [2] [3] |\n| Erdgeschoss \u00b7 outside of external walls \u00b7 openings deducted | 86.3000 | m\u00b2 | [1] [2] [3] |\n| Erdgeschoss \u00b7 outside of external walls \u00b7 net | 228.5200 | m\u00b2 | [1] [2] [3] |\n| Erdgeschoss \u00b7 inside of external walls \u00b7 gross | 303.4800 | m\u00b2 | [1] [2] [3] |\n| Erdgeschoss \u00b7 inside of external walls \u00b7 openings deducted | 86.3000 | m\u00b2 | [1] [2] [3] |\n| Erdgeschoss \u00b7 inside of external walls \u00b7 net | 217.1800 | m\u00b2 | [1] [2] [3] |\n| Erdgeschoss \u00b7 both sides of internal walls \u00b7 gross | 768.4200 | m\u00b2 | [1] [2] [3] |\n| Erdgeschoss \u00b7 both sides of internal walls \u00b7 openings deducted | 78.1200 | m\u00b2 | [1] [2] [3] |\n| Erdgeschoss \u00b7 both sides of internal walls \u00b7 net | 690.3000 | m\u00b2 | [1] [2] [3] |\n| 1. Obergeschoss \u00b7 outside of external walls \u00b7 gross | 302.4000 | m\u00b2 | [1] [2] [3] |\n| 1. Obergeschoss \u00b7 outside of external walls \u00b7 openings deducted | 80.7000 | m\u00b2 | [1] [2] [3] |\n| 1. Obergeschoss \u00b7 outside of external walls \u00b7 net | 221.7000 | m\u00b2 | [1] [2] [3] |\n| 1. Obergeschoss \u00b7 inside of external walls \u00b7 gross | 295.9200 | m\u00b2 | [1] [2] [3] |\n| 1. Obergeschoss \u00b7 inside of external walls \u00b7 openings deducted | 80.7000 | m\u00b2 | [1] [2] [3] |\n| 1. Obergeschoss \u00b7 inside of external walls \u00b7 net | 215.2200 | m\u00b2 | [1] [2] [3] |\n| 1. Obergeschoss \u00b7 both sides of internal walls \u00b7 gross | 867.2400 | m\u00b2 | [1] [2] [3] |\n| 1. Obergeschoss \u00b7 both sides of internal walls \u00b7 openings deducted | 99.1200 | m\u00b2 | [1] [2] [3] |\n| 1. Obergeschoss \u00b7 both sides of internal walls \u00b7 net | 768.1200 | m\u00b2 | [1] [2] [3] |\n| 2. Obergeschoss \u00b7 outside of external walls \u00b7 gross | 302.4000 | m\u00b2 | [1] [2] [3] |\n| 2. Obergeschoss \u00b7 outside of external walls \u00b7 openings deducted | 80.7000 | m\u00b2 | [1] [2] [3] |\n| 2. Obergeschoss \u00b7 outside of external walls \u00b7 net | 221.7000 | m\u00b2 | [1] [2] [3] |\n| 2. Obergeschoss \u00b7 inside of external walls \u00b7 gross | 295.9200 | m\u00b2 | [1] [2] [3] |\n| 2. Obergeschoss \u00b7 inside of external walls \u00b7 openings deducted | 80.7000 | m\u00b2 | [1] [2] [3] |\n| 2. Obergeschoss \u00b7 inside of external walls \u00b7 net | 215.2200 | m\u00b2 | [1] [2] [3] |\n| 2. Obergeschoss \u00b7 both sides of internal walls \u00b7 gross | 867.2400 | m\u00b2 | [1] [2] [3] |\n| 2. Obergeschoss \u00b7 both sides of internal walls \u00b7 openings deducted | 94.9200 | m\u00b2 | [1] [2] [3] |\n| 2. Obergeschoss \u00b7 both sides of internal walls \u00b7 net | 772.3200 | m\u00b2 | [1] [2] [3] |\n| Dachgeschoss \u00b7 outside of external walls \u00b7 gross | 74.1123 | m\u00b2 | [1] [2] [3] |\n| Dachgeschoss \u00b7 outside of external walls \u00b7 openings deducted | 5.9327 | m\u00b2 | [1] [2] [3] |\n| Dachgeschoss \u00b7 outside of external walls \u00b7 net | 68.1795 | m\u00b2 | [1] [2] [3] |\n| Dachgeschoss \u00b7 inside of external walls \u00b7 gross | 101.6617 | m\u00b2 | [1] [2] [3] |\n| Dachgeschoss \u00b7 inside of external walls \u00b7 openings deducted | -5.9327 | m\u00b2 | [1] [2] [3] |\n| Dachgeschoss \u00b7 inside of external walls \u00b7 net | 107.5944 | m\u00b2 | [1] [2] [3] |\n| Dachgeschoss \u00b7 both sides of internal walls \u00b7 gross | 106.5616 | m\u00b2 | [1] [2] [3] |\n| Dachgeschoss \u00b7 both sides of internal walls \u00b7 openings deducted | 0.0000 | m\u00b2 | [1] [2] [3] |\n| Dachgeschoss \u00b7 both sides of internal walls \u00b7 net | 106.5616 | m\u00b2 | [1] [2] [3] |",
+      "value": 4880.455604,
+      "unit": "m\u00b2",
+      "confidence": 0.99,
+      "abstained": false
+    },
+    "box_count": 17,
+    "citation_count": 6,
+    "calculation_kind": "numeric",
+    "calculation_rows": 121,
+    "calculation_steps": 143,
+    "cost_usd": 0.0
+  },
+  {
+    "answer_id": "f5b3beeb7edb486eb62e2872ca8d3326",
+    "question": "How many doors on level 2?",
+    "doc_ids": [
+      "ifc_bench__ac20-arc"
+    ],
+    "answer": {
+      "text_md": "**21 doors** on **2. Obergeschoss**. [1]",
+      "value": 21,
+      "unit": "count",
+      "confidence": 0.6,
+      "abstained": false
+    },
+    "box_count": 21,
+    "citation_count": 1,
+    "calculation_kind": "numeric",
+    "calculation_rows": 21,
+    "calculation_steps": 21,
+    "cost_usd": 0.00446
+  },
+  {
+    "answer_id": "c8c3e8fe656b4d4ea9e9552e3dadbbae",
+    "question": "What is this file?",
+    "doc_ids": [
+      "uploads__kit-fzk-haus-ac20-fzk-haus-plan-02-dachgeschoss-4725830b292f"
+    ],
+    "answer": {
+      "text_md": "**This is the attic floor plan (Grundriss: Dachgeschoss) of the FZK-Haus (Simple Phantasy Building).**\n\n- Drawn at 1:100 scale with a cut height 1.20 m above the floor level, generated from `AC20-FZK-Haus.ifc`.\n- Shows a single room labeled `Galerie 7`. [1]",
+      "value": null,
+      "unit": null,
+      "confidence": 0.6,
+      "abstained": false
+    },
+    "box_count": 1,
+    "citation_count": 1,
+    "calculation_kind": "claims",
+    "calculation_rows": 0,
+    "calculation_steps": 10,
+    "cost_usd": 0.015008
+  },
+  {
+    "answer_id": "28d8365383c94e9d8106d0ae80a3b78c",
+    "question": "How many doors on level 2?",
+    "doc_ids": [
+      "ifc_bench__ac20-arc"
+    ],
+    "answer": {
+      "text_md": "**21 doors** on **2. Obergeschoss**. [1]",
+      "value": 21,
+      "unit": "count",
+      "confidence": 0.6,
+      "abstained": false
+    },
+    "box_count": 21,
+    "citation_count": 1,
+    "calculation_kind": "numeric",
+    "calculation_rows": 21,
+    "calculation_steps": 21,
+    "cost_usd": 0
+  }
+]

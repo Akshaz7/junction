@@ -40,7 +40,7 @@ export const docTitle = (doc: Pick<ProjectDoc, 'title'>) => cleanTitle(doc.title
 export const isReading = (doc: Pick<ProjectDoc, 'status'>) => !!doc.status && ['running', 'ingesting', 'pending', 'queued', 'processing'].includes(doc.status)
 export const isFailed = (doc: Pick<ProjectDoc, 'status'>) => doc.status === 'failed'
 
-export const thumbUrl = (doc: Pick<ProjectDoc, 'doc_id' | 'thumb_url'>) => doc.thumb_url || `/api/docs/${encodeURIComponent(doc.doc_id)}/files/page-1.thumb.png`
+export const thumbUrl = (doc: Pick<ProjectDoc, 'doc_id' | 'thumb_url'>) => doc.thumb_url?.replace(/^(\/api\/docs\/[^/?#]+\/pages\/\d+)\.png$/, '$1/image') || `/api/docs/${encodeURIComponent(doc.doc_id)}/files/page-1.thumb.png`
 
 /** Value shown in a tile or table cell; a missing number stays missing. */
 export const count = (value: number | null | undefined) => value == null ? '–' : new Intl.NumberFormat('en-GB').format(value)

@@ -1,0 +1,11 @@
+{
+  "reserved_before_development": true,
+  "file": "data/full/junction-dataset/data/ifc_models/resbim-35_model.ifc",
+  "schema": "IFC4",
+  "counts": {
+    "IfcDoor": 6,
+    "IfcWindow": 4,
+    "IfcWall": 25
+  },
+  "scope": "Final native metadata check only; no training or detector tuning; not a production browser pass."
+}
