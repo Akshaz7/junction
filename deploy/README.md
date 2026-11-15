@@ -98,3 +98,12 @@ Load (needs `TARGET_DATABASE_URL`, never printed; dry run is the default):
 `python3 deploy/load_artifacts_pg.py --docs-file <deployed /api/docs json> --apply`
 
 Measured: 353 docs, about 700 MB in PG. Restored docs accumulate on the container's ephemeral disk.
+
+
+## Current plan: startup-200-10240 (10 GB RAM, multi-CPU) - 15 Nov
+
+The service now runs on `startup-200-10240`; the 256/512 MB figures above are historical. Settings baked into `deploy/Dockerfile`:
+- `uvicorn --workers 3` (`WEB_CONCURRENCY=3`): one slow request or blocking call no longer stalls everyone. Live sync is safe across workers because events fan out through PostgreSQL NOTIFY; caches live on disk or in PG. Only one worker (flock on `$RESULTS_DIR/hologram-startup.lock`) runs migrations, seeding and the upload restore at boot. The in-memory rate limiter is per worker (effective limit is up to 3x).
+- DB pool per worker: `DB_MIN_CONN=2`, `DB_MAX_CONN=6` (3 workers + 3 LISTEN connections stay near 21 connections; raise only if the PG plan allows).
+- IFC budgets: `IFC_WORKER_MEMORY_MB=4096`, `IFC_INDEX_TIMEOUT_S=300`, `IFC_SCENE_TIMEOUT_S=420`, `IFC_INPROC_MAX_MB=60`; whole-job watchdog `INGEST_TIMEOUT_S=900` (was a hard 5 min; the job deadline is this minus 30 s). `HEAVY_SLOTS=3` ingests at once across workers.
+- `POST /api/upload` returns as soon as the file is validated and the row exists; saving the original to PostgreSQL and the ingest both run in background tasks. Poll `GET /api/docs/{id}/ingest`.

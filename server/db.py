@@ -6,8 +6,8 @@ import asyncpg
 
 from . import config
 
-MIN_CONN = int(os.environ.get("DB_MIN_CONN", "4"))
-MAX_CONN = int(os.environ.get("DB_MAX_CONN", "10"))
+MIN_CONN = int(os.environ.get("DB_MIN_CONN", "2"))
+MAX_CONN = int(os.environ.get("DB_MAX_CONN", "6"))
 KEEPALIVE_S = float(os.environ.get("DB_KEEPALIVE_S", "25"))
 _pool: asyncpg.Pool | None = None
 _keepalive: asyncio.Task | None = None

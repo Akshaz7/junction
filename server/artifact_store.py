@@ -6,6 +6,7 @@ at most MAX_DOC_BYTES (page images dominate); thumbnails, plan maps, text, scene
 """
 from __future__ import annotations
 
+import asyncio
 import mimetypes
 import os
 from pathlib import Path
@@ -91,7 +92,7 @@ async def save_doc(pool, doc_id: str, originals: bool = True) -> int:
             await store(prefix + "manifest.json", json.dumps(manifest).encode(), "application/json")
             n += size
         else:
-            data = p.read_bytes()
+            data = await asyncio.to_thread(p.read_bytes)
             await store(name, data, ct)
             n += len(data)
     return n
@@ -110,7 +111,7 @@ async def restore_doc(pool, doc_id: str) -> int:
             continue
         row = await pool.fetchrow("select data from doc_artifacts where doc_id=$1 and name=$2", doc_id, name)
         dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_bytes(bytes(row["data"]))
+        await asyncio.to_thread(dest.write_bytes, bytes(row["data"]))
         written += 1
     import hashlib
     import json
@@ -217,7 +218,7 @@ async def _topup(doc_id: str) -> None:
         for n in missing:
             row = await pool.fetchrow("select data from doc_artifacts where doc_id=$1 and name=$2", doc_id, n)
             if row is not None:
-                (d / n).write_bytes(bytes(row["data"]))
+                await asyncio.to_thread((d / n).write_bytes, bytes(row["data"]))
     except Exception as e:  # noqa: BLE001 - optional sidecars never break a request
         print("topup failed:", doc_id, repr(e)[:200])
 
@@ -268,8 +269,8 @@ async def servable_ids(pool) -> set[str]:
         return _servable_cache[1]
     ids = {r["doc_id"] for r in await pool.fetch(_SERVABLE_SQL)}
     d = config.artifacts_dir()
-    if d.is_dir():
-        ids |= {p.name for p in d.iterdir() if p.is_dir() and "__" in p.name and has_data_on_disk(p.name)}
+    if d.is_dir():  # directory scan off the event loop
+        ids |= await asyncio.to_thread(lambda: {p.name for p in d.iterdir() if p.is_dir() and "__" in p.name and has_data_on_disk(p.name)})
     _servable_cache = (time.monotonic(), ids)
     return ids
 
