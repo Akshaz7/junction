@@ -81,7 +81,6 @@ def resolve_storey(q: str, storeys: list[dict]) -> str | None:
     requested, basement = basement_scope(q, storeys)
     if requested:
         return basement
-    storeys = unique_levels(storeys)
     ql = fold(q)
     names = [s["name"] for s in storeys]
     for n in sorted(names, key=len, reverse=True):
