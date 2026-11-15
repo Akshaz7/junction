@@ -50,3 +50,46 @@ def test_rooms_without_matching_dimensions_keep_the_scale_area(tmp_path):
     _doc(tmp_path)
     a = solve("What is the area of the corridor in square metres?", "uploads__scan", root=tmp_path)
     assert "Printed dimensions" not in a["answer"]["text_md"] and "Dimensions used" not in a["answer"]["text_md"]
+
+
+@pytest.mark.parametrize("q,expect", [
+    ("Using only the printed kitchen dimensions 2.55 by 2.23 metres, calculate its rectangular area. Do not use pixel geometry.", 5.6865),
+    ("The kitchen is 3.2 x 4.1 m, what is its area?", 13.12),
+    ("Calculate the area of a room 4200 mm × 3000 mm", 12.6),
+    ("Multiply 2.55 by 2.23.", 5.6865),
+    ("What is the area of the kitchen if it measures 3200 mm by 4100 mm?", 13.12),
+])
+def test_user_supplied_numbers_are_computed_as_given(tmp_path, monkeypatch, q, expect):
+    from engine.answer import answer
+    monkeypatch.setenv("ARTIFACTS_DIR", str(tmp_path))
+    monkeypatch.setenv("MODELS_FAKE", "1")
+    _doc(tmp_path)
+    a = answer(q, ["uploads__scan"])
+    assert a["answer"]["value"] == pytest.approx(expect, abs=1e-3)
+    assert a["cost"]["usd_total"] == 0 and not a["answer"]["abstained"]
+
+
+def test_stated_rectangle_is_compared_with_the_drawing(tmp_path, monkeypatch):
+    from engine.answer import answer
+    monkeypatch.setenv("ARTIFACTS_DIR", str(tmp_path))
+    monkeypatch.setenv("MODELS_FAKE", "1")
+    _doc(tmp_path, lambda pm: pm.pop("dimension_evidence"))   # drawing value comes from the scale: 5.87
+    a = answer("The kitchen is 3.2 x 4.1 m, what is its area?", ["uploads__scan"])
+    text = a["answer"]["text_md"]
+    assert "13.12" in text and "5.87" in text and "drawing's own value" in text
+    assert a["citations"]
+
+
+@pytest.mark.parametrize("q", ["How many windows are 1.2 x 1.5 m?", "What is the total area of all rooms?", "What is the area of the kitchen?"])
+def test_ordinary_questions_do_not_trigger_arithmetic(q):
+    from engine.user_arith import parse
+    assert parse(q) is None
+
+
+def test_comparison_survives_if_it_measures_phrasing(tmp_path, monkeypatch):
+    from engine.answer import answer
+    monkeypatch.setenv("ARTIFACTS_DIR", str(tmp_path))
+    monkeypatch.setenv("MODELS_FAKE", "1")
+    _doc(tmp_path)
+    t = answer("What is the area of the kitchen if it measures 3200 mm by 4100 mm?", ["uploads__scan"])["answer"]["text_md"]
+    assert "13.12" in t and "drawing's own value" in t

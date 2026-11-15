@@ -376,6 +376,13 @@ def _answer_with_evidence(question: str, doc_ids: list[str], on_event: Callable 
             step = _tstep if step is None else step
     except Exception:  # noqa: BLE001
         pass
+    try:   # F9: numbers given in the question are computed as given, then compared with the drawing
+        from engine.user_arith import answer as user_arith
+        stated = user_arith(question, doc_ids, _root())
+        if stated is not None:
+            return stated
+    except Exception:  # noqa: BLE001
+        pass
     from engine.taught_items import query as taught_query
     try:
         marked = taught_query(question, doc_ids, _root(), {iid: iid for iid in (scene_state or {}).get('hidden', [])})
