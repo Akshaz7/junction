@@ -1,0 +1,111 @@
+{
+  "worker": "F-UIGLITCH",
+  "branch": "final/uiglitch",
+  "status": "PASS",
+  "changes": [
+    "Render graph match/comparison totals from full-project statistics; explain zero matches/comparisons in tooltips. Preserve API percentages below one percent.",
+    "Size the desktop canvas to the remaining viewport and scroll selected-item details independently.",
+    "Add cost regression coverage through drawing opening and chat refresh; stabilize existing async pairing test fixture."
+  ],
+  "costFinding": {
+    "reproducedReset": false,
+    "paidAnswerId": "246e071da8414601a1cf5826bf9358fd",
+    "paidUsd": 0.005434,
+    "cachedAnswerId": "df2d9d7bb9f24516afa1de33ff00749b",
+    "cachedUsd": 0,
+    "note": "Production has separate paid and cached responses to the same question. The paid answer remains $0.0054 before/after drawing and calculation opening; zero-cost cached answers remain zero. No production cost calculation was changed."
+  },
+  "viewport": {
+    "width": 1440,
+    "height": 900,
+    "before": {
+      "scrollHeight": 1196,
+      "clientHeight": 888,
+      "canvasBottom": 1080
+    },
+    "after": {
+      "scrollHeight": 888,
+      "clientHeight": 888,
+      "canvasBottom": 820
+    }
+  },
+  "validation": {
+    "typescript": "PASS: npx tsc --noEmit -p .",
+    "vitest": {
+      "filesPassed": 99,
+      "testsPassed": 571,
+      "testsSkipped": 9
+    },
+    "playwright": {
+      "testsPassed": 2,
+      "viewportHeights": [
+        900,
+        720
+      ],
+      "realDocuments": 4,
+      "selectedDetailsFit": true
+    },
+    "readOnlyProductionApi": true,
+    "newModelCalls": 0,
+    "liveSpendUsd": 0
+  },
+  "reservedUnseen": {
+    "selection": "Random saved-chat document selected before implementation; opened only during final validation.",
+    "docId": "cubicasa5k__high-quality-108",
+    "chatId": "56d4138a-315b-423a-bfe4-f7e9d393a157"
+  },
+  "costs": [
+    {
+      "chatId": "42be3bea-c71c-4942-a30c-f5b1abb4fd0d",
+      "answerId": "246e071da8414601a1cf5826bf9358fd",
+      "docIds": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "usdTotal": 0.005434,
+      "before": "$0.0054",
+      "after": "$0.0054"
+    },
+    {
+      "chatId": "c645aa90-1880-42f1-a463-0bf1f48f2130",
+      "answerId": "9bd9cd1b5a8c46feafb7e941575803ec",
+      "docIds": [
+        "ifc_bench__ac20-arc"
+      ],
+      "usdTotal": 0.004358,
+      "before": "$0.0044",
+      "after": "$0.0044"
+    },
+    {
+      "chatId": "fac5c63f-e4dd-40e2-b58d-33024fa7f59c",
+      "answerId": "a8a2e4cf28a44338b3da76a14104ae10",
+      "docIds": [
+        "swiss_dwellings__site289-bldg536-floor2149"
+      ],
+      "usdTotal": 0,
+      "before": "$0.0000",
+      "after": "$0.0000"
+    },
+    {
+      "chatId": "56d4138a-315b-423a-bfe4-f7e9d393a157",
+      "answerId": "3ad1f111d43a401287215f9c1e469086",
+      "docIds": [
+        "cubicasa5k__high-quality-108"
+      ],
+      "usdTotal": 0,
+      "before": "$0.0000",
+      "after": "$0.0000"
+    }
+  ],
+  "screenshots": {
+    "graphBefore": "before-graph.png",
+    "graphAfter": "after-graph.png",
+    "calculationBefore": "before-calculation.png",
+    "calculationAfter": "after-calculation.png",
+    "details": "graph-details.png"
+  },
+  "crossFile": [],
+  "needsAwais": [],
+  "needs": [
+    "Integrator: merge commits on final/uiglitch and deploy the web app."
+  ]
+}

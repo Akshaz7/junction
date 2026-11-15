@@ -1,0 +1,31 @@
+{
+  "phase": "before",
+  "graph": {
+    "screenHeight": 888,
+    "scrollHeight": 1196,
+    "canvas": {
+      "x": 229,
+      "y": 522,
+      "width": 1040,
+      "height": 558,
+      "top": 522,
+      "right": 1269,
+      "bottom": 1080,
+      "left": 229
+    },
+    "footer": {
+      "x": 229,
+      "y": 1092,
+      "width": 1040,
+      "height": 46,
+      "top": 1092,
+      "right": 1269,
+      "bottom": 1138,
+      "left": 229
+    },
+    "stats": "806\nItems\n3,169\nLinks\n–\nLinked across files\n–\nValues agree\n0\nOpen issues\n50\nCheck these"
+  },
+  "costBefore": "$0.0054",
+  "costAfter": "$0.0054",
+  "errors": []
+}
