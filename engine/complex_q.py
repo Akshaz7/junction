@@ -786,6 +786,14 @@ def h_thickness(q: str, doc: Doc) -> Ans | None:
     a.ap(f"{len(ws)} walls", "thickness = IFC wall width")
     a.body += _table(rows, ["Thickness", "Material", "Walls"])
     a.items = [v[0] for v in groups.values()][:12]
+    thin = re.search(r"\b(?:thinnest|narrowest|smallest|min(?:imum)?)\b", q, re.I)
+    pick = (min if thin else max)(t for t, _ in groups)
+    tied = sorted((w for (t, _), v in groups.items() if t == pick for w in v), key=lambda w: w.item_id)
+    a.value, a.unit = round(tied[0].q["width_m"], 3), "m"
+    # Cite the walls that carry the answered thickness so the IFC dimension calc reads exactly them:
+    # ties for a thickest/thinnest question, one representative wall otherwise.
+    ext_q = re.search(r"\b(?:thickest|thinnest|widest|narrowest|largest|smallest|max(?:imum)?|min(?:imum)?)\b", q, re.I)
+    a.items = tied[:12] if ext_q else tied[:1]
     if len(groups) == 1:
         a.body.append(f"\nAll {len(ws)} walls are **{rows[0][0]}** thick.")
     return a
@@ -793,6 +801,10 @@ def h_thickness(q: str, doc: Doc) -> Ans | None:
 
 def h_height(q: str, doc: Doc) -> Ans | None:
     if not _only_ifc(doc) or not re.search(r"\bhow (?:tall|high) is (?:the|this|it)\b|\b(?:building|overall|total) height\b|\bheight of the building\b", q, re.I):
+        return None
+    # IFC-WHY: an element's height is its own stored quantity, not the building's extent.
+    if re.search(r"\b(?:doors?|windows?|walls?|openings?|rooms?|spaces?|ceilings?|columns?|slabs?|stairs?|railings?|beams?|roofs?)\b", q, re.I) \
+            and not re.search(r"\bbuilding\b", q, re.I):
         return None
     its = [i for i in doc.items if i.bbox_m and i.kind in ("wall", "slab", "roof", "column", "stairs", "door", "window")]
     if not its:
@@ -836,7 +848,7 @@ def answer(question: str, doc_ids: list[str], root: Path, t0: float | None = Non
             scene.setdefault("commands", [])
         conf = 0.6 if a.left else 0.95
         trace = [{"step": "complex_q", "detail": f"{h.__name__}: applied {len(a.applied)}, left {len(a.left)}", "ms": 0, "model": None, "cost_usd": 0.0}]
-        res = S._answer_obj(question, doc_ids, a.text(), a.value, None, conf, False, boxes, cites, scene, trace, "index" if doc.mode == "ifc" else "planmap", t0)
+        res = S._answer_obj(question, doc_ids, a.text(), a.value, getattr(a, "unit", None), conf, False, boxes, cites, scene, trace, "index" if doc.mode == "ifc" else "planmap", t0)
         if a.calc:
             from engine.calc import record
             record(res, a.calc)

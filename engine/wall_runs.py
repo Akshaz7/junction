@@ -80,7 +80,8 @@ def item_runs(it, mpp: float) -> dict | None:
     if cl and len(cl) >= 2:
         runs = [(l * mpp, a, b) for l, a, b in _merge([tuple(map(float, p)) for p in cl], False)]
         total = sum(r[0] for r in runs)
-        return {"runs": runs, "total_m": total, "thick_px": 0.0, "method": "centreline"} if runs else None
+        return {"runs": runs, "total_m": total, "thick_px": 0.0, "method": "centreline", "m_per_px": mpp,
+                "total_runs": runs, "rings": []} if runs else None
     pts = it.polygon_px
     if not pts and it.bbox_px:
         x0, y0, x1, y1 = it.bbox_px
@@ -89,7 +90,8 @@ def item_runs(it, mpp: float) -> dict | None:
         return None
     ring = [(float(x), float(y)) for x, y in pts]
     poly = Polygon(ring)
-    if not poly.is_valid:
+    repaired = not poly.is_valid
+    if repaired:
         poly = poly.buffer(0)
     if poly.is_empty or poly.area <= 0 or poly.geom_type != "Polygon":
         return None
@@ -106,10 +108,148 @@ def item_runs(it, mpp: float) -> dict | None:
     if rectlike:
         k = sides.index(max(sides))
         runs = [(max(sides) * mpp, rc[k], rc[k + 1])]
-        return {"runs": runs, "total_m": max(sides) * mpp, "thick_px": min(sides), "method": "rectangular outline"}
+        return {"runs": runs, "total_m": max(sides) * mpp, "thick_px": min(sides), "method": "rectangular outline",
+                "m_per_px": mpp, "total_runs": runs, "rings": [], "repaired": repaired}
     runs = [(l * mpp, a, b) for l, a, b in chains if l * mpp >= MIN_RUN_M]
     # Both faces of a thin wall give a run each; the longer one is within a wall thickness of the other.
-    return {"runs": runs, "total_m": poly.length * mpp / 2, "thick_px": thick_px, "method": "wall network outline"}
+    return {"runs": runs, "total_m": poly.length * mpp / 2, "thick_px": thick_px, "method": "wall network outline",
+            "m_per_px": mpp, "total_runs": [], "repaired": repaired,
+            "rings": [list(poly.exterior.coords)[:-1]] + [list(h.coords)[:-1] for h in poly.interiors]}
+
+
+_RUN_FIELD = {"centreline": "props.centerline_px (ends of a merged straight run)",
+              "rectangular outline": "polygon_px -> minimum rotated rectangle, long side",
+              "wall network outline": "polygon_px simplified to 3 cm -> ends of a straight outline run"}
+
+
+def _scale_ref(doc, it, r) -> dict:
+    from engine.calc import source
+    ref = source(doc, it)
+    if "measurement_scale" in (it.props or {}):
+        return {**ref, "field": "props.measurement_scale.m_per_px"}
+    return {**ref, "kind": "scale", "item_id": None, "field": "scale.m_per_px"}
+
+
+def _run_steps(doc, it, r, run, sid) -> list[dict]:
+    """Pixel length of one straight run from its two ends, then metres = px × m/px (the route's own arithmetic)."""
+    from engine.calc import evaluate, input_value, source, step, step_source
+    _, a, b = run
+    ref = {**source(doc, it), "field": _RUN_FIELD.get(r["method"], "polygon_px")}
+    ends = [input_value(f"point {k + 1} {axis}", float(pt[j]), "px", ref)   # the run's two ends
+            for k, pt in enumerate((a, b)) for j, axis in enumerate(("x", "y"))]
+    px = evaluate("polyline", [i["value"] for i in ends])
+    m = evaluate("multiply", [px, r["m_per_px"]])
+    return [step(sid + "-px", "Straight run length in pixels", "√((x₂ − x₁)² + (y₂ − y₁)²)", px, "px", ends, operation="polyline"),
+            step(sid, "Run length in metres", "pixel length × metres per pixel", m, "m",
+                 [input_value("run length", px, "px", step_source(sid + "-px")),
+                  input_value("metres per pixel", r["m_per_px"], "m/px", _scale_ref(doc, it, r))], operation="multiply")]
+
+
+def _result_steps(raw, value, source_step):
+    from engine.calc import input_value, places, step, step_source
+    nd = places(value)
+    return step("result", "Round for the answer", f"round({raw}, {nd})", value, "m",
+                [input_value("unrounded length", raw, "m", step_source(source_step)),
+                 input_value("decimal places", nd, "decimal places", {"kind": "policy", "text": "Route's recorded answer precision"})],
+                operation="round")
+
+
+def longest_calc(doc, cand, chosen, value) -> dict | None:
+    """Calc record for the longest run: px length of the chosen run × m/px, max over every compared run, rounded."""
+    from engine.calc import close, input_value, places, row, source, step, step_source
+    length, it, run, r = chosen
+    steps = _run_steps(doc, it, r, run, "run")
+    if not close(steps[-1]["value"], length):
+        return None
+    inputs = []
+    for k, (l, ci, crun, cr) in enumerate(cand):
+        if ci is it and crun is run:
+            inputs.append(input_value(f"{ci.item_id} run (chosen)", steps[-1]["value"], "m", step_source("run")))
+        else:
+            inputs.append(input_value(f"{ci.item_id} run", l, "m", {**source(doc, ci), "field": _RUN_FIELD.get(cr["method"], "polygon_px")}))
+    raw = steps[1]["value"]
+    steps.append(step("longest", "Longest straight run", "max(run lengths)", raw, "m", inputs,
+                      f"{len(cand)} straight runs of at least {MIN_RUN_M} m compared; shorter outline edges are caps, jogs and pixel noise.",
+                      "max"))
+    if not close(round(raw, places(value)), value):
+        return None
+    steps.append(_result_steps(raw, value, "longest"))
+    rw = row(doc, it, steps[1]["value"], "m", kind="wall", length_px=steps[0]["value"])
+    rw["measured_by"] = "run"
+    return {"formula": "longest wall run = max(run length); run length = pixel length × metres per pixel",
+            "steps": steps, "rows": [rw], "checks": [], "margin": {}, "issues": [],
+            "result": {"value": value, "unit": "m", "rounded_as": f"{places(value)} decimal places"},
+            "row_key": "length_m", "row_total_step": "longest"}
+
+
+def total_calc(doc, rows, value) -> dict | None:
+    """Calc record for the total run length: per wall the long side / straight runs, or half the outline perimeter."""
+    from engine.calc import close, evaluate, input_value, places, row, source, step, step_source
+    steps, out, sums = [], [], []
+    for w, (it, r) in enumerate(rows):
+        sid = f"wall-{w}"
+        ref = source(doc, it)
+        if r["total_runs"]:
+            parts = []
+            for k, run in enumerate(r["total_runs"]):
+                part = _run_steps(doc, it, r, run, f"{sid}-run-{k}")
+                steps += part
+                parts.append(part[-1])
+            if len(parts) == 1:
+                last = parts[0]
+                last_id = last["id"]
+            else:
+                last_id = sid + "-runs"
+                last = step(last_id, "Add straight runs", "Σ(run lengths)", evaluate("sum", [p["value"] for p in parts]), "m",
+                            [input_value("run", p["value"], "m", step_source(p["id"])) for p in parts], operation="sum")
+                steps.append(last)
+            wall = step(sid, f"{it.item_id} run length", "Σ(straight runs)", last["value"], "m",
+                        [input_value("run length", last["value"], "m", step_source(last_id))], operation="source")
+        else:
+            field = "polygon_px repaired by buffer(0)" if r.get("repaired") else "polygon_px"
+            rings = []
+            for k, ring in enumerate(r["rings"]):
+                if len(ring) < 3:
+                    continue
+                pts = [input_value(f"vertex {n + 1} {axis}", float(pt[j]), "px", {**ref, "field": f"{field}[{n}]" if k == 0 else f"{field} hole {k}[{n}]"})
+                       for n, pt in enumerate(ring) for j, axis in enumerate(("x", "y"))]
+                rings.append(step(f"{sid}-ring-{k}", "Outline perimeter" if k == 0 else f"Hole {k} perimeter", "Σ edge lengths, closed outline",
+                                  evaluate("polygon_perimeter", [i["value"] for i in pts]), "px", pts, operation="polygon_perimeter"))
+            if not rings:
+                return None
+            steps += rings
+            perim = evaluate("sum", [x["value"] for x in rings])
+            if len(rings) > 1:
+                steps.append(step(f"{sid}-perimeter", "Whole outline perimeter", "Σ ring perimeters", perim, "px",
+                                  [input_value("ring", x["value"], "px", step_source(x["id"])) for x in rings], operation="sum"))
+            pref = step_source(f"{sid}-perimeter" if len(rings) > 1 else rings[0]["id"])
+            wall = step(sid, f"{it.item_id} run length", "outline perimeter ÷ 2 × metres per pixel",
+                        evaluate("multiply", [perim, 0.5, r["m_per_px"]]), "m",
+                        [input_value("outline perimeter", perim, "px", pref),
+                         input_value("half (two faces of one thin wall)", 0.5, "factor",
+                                     {"kind": "policy", "text": "A thin wall network's centreline run is half its outline perimeter (same relation as engine.wallarea)."}),
+                         input_value("metres per pixel", r["m_per_px"], "m/px", _scale_ref(doc, it, r))], operation="multiply")
+        if not close(wall["value"], r["total_m"], 1e-6):
+            return None
+        steps.append(wall)
+        sums.append(input_value(it.item_id, wall["value"], "m", step_source(sid)))
+        rw = row(doc, it, wall["value"], "m", kind="wall")
+        rw["measured_by"] = sid
+        rw["method"] = r["method"]
+        out.append(rw)
+    total = evaluate("sum", [i["value"] for i in sums])
+    if not close(round(total, places(value)), value):
+        return None
+    steps.append(step("sum", "Add wall run lengths", " + ".join(f"{i['value']:.3f}" for i in sums), total, "m", sums, operation="sum"))
+    steps.append(_result_steps(total, value, "sum"))
+    return {"formula": "total = Σ(wall run length); run length = long side (straight wall) or outline perimeter ÷ 2 (network), × metres per pixel",
+            "steps": steps, "rows": out, "checks": [], "margin": {}, "issues": [],
+            "result": {"value": value, "unit": "m", "rounded_as": f"{places(value)} decimal places"},
+            "row_key": "length_m", "row_total_step": "sum"}
+
+
+def _sig(v: float) -> str:
+    return f"{v:.4g}"
 
 
 def _scale_text(sc: dict) -> tuple[str, bool]:
@@ -174,6 +314,12 @@ def answer(question, doc_ids, root, t0=None):
                 f"{scale_txt}. {''.join(f'[{c['n']}]' for c in cites)}")
         value, hl = round(total, 3), items
         trace.append(_step("sum", f"total run length = {total:.3f} m"))
+        calc = total_calc(doc, rows, value)
+        mpps = {round(r["m_per_px"], 12) for _, r in rows}
+        sc_txt = f"{_sig(next(iter(mpps)))} m/px" if len(mpps) == 1 else "each view's own m/px"
+        found = (f"{len(rows)} wall outlines; each wall's run length is its long side (straight wall) or half its outline "
+                 f"perimeter (connected network).")
+        measured = f"Run lengths in pixels × {sc_txt}, added over {len(rows)} walls = {_fmt(total, 'length')} m."
     else:
         pick = max if mode == "longest" else min
         cand = [(r_[0], it, r_, r) for it, r in rows for r_ in r["runs"]]
@@ -192,13 +338,25 @@ def answer(question, doc_ids, root, t0=None):
                 f"({'one run of a connected wall network' if r['method'] == 'wall network outline' else 'a single straight wall'}); "
                 f"{scale_txt}. [1]")
         value, hl = round(length, 3), [it]
-        trace.append(_step(word, f"{word} run {length:.3f} m = {math.dist(a, b):.1f} px x {mpp:.5f} m/px on {it.item_id}"))
+        trace.append(_step(word, f"{word} run {length:.3f} m = {math.dist(a, b):.1f} px x {r['m_per_px']:.5f} m/px on {it.item_id}"))
+        calc = longest_calc(doc, cand, (length, it, run, r), value) if mode == "longest" else None
+        how = {"wall network outline": "one straight run of a connected wall outline", "centreline": "a straight run of the wall centreline",
+               "rectangular outline": "the long side of a straight wall"}.get(r["method"], "a straight wall run")
+        found = (f"{word.capitalize()} straight wall: {it.item_id}, {math.dist(a, b):,.0f} px long ({how}); the {word} of "
+                 f"{len(cand)} straight runs of at least {MIN_RUN_M} m on {len(rows)} wall outlines.")
+        measured = f"{it.item_id}: {math.dist(a, b):,.0f} px × {_sig(r['m_per_px'])} m/px = {_fmt(length, 'length')} m."
     conf = min(float(sc.get("confidence") or 0.3), 0.5) if est else min(float(sc.get("confidence") or 0.7), 0.9)
     scene["highlight_item_ids"] = [i.item_id for i in hl]
     scene["camera_target_item_id"] = hl[0].item_id
     scene["item_kinds"] = {i.item_id: "wall" for i in hl}
     res = _answer_obj(question, doc_ids, text, value, "m", conf, False, boxes, cites, scene, trace, "planmap", t0)
-    res["reasoning_hint"] = {"steps": [{"kind": "measured", "title": "Measured", "text": f"{value} m from wall outline runs; {scale_txt}",
+    if calc:   # exact operands, replayed by engine.calc.validate (F-CALC)
+        from engine.calc import record
+        record(res, calc)
+    # Found names what was measured; Measured carries the arithmetic (engine.measure_why may replace it with
+    # its Calculation line built from the same calc steps, and adds Source / Scale / How sure).
+    res["reasoning_hint"] = {"steps": [{"kind": "found", "title": "Found", "text": found, "cite": 1, "ok": None},
+                                       {"kind": "measured", "title": "Measured", "text": f"{measured} {scale_txt[0].upper()}{scale_txt[1:]}.",
                                         "cite": 1, "ok": None}],
                              "pct_cap": 50 if est else 90,
                              "reason": "Wall runs come from the detected wall outlines and a scale " + ("assumed from door widths." if est else "recorded for this drawing."),

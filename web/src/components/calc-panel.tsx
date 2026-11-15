@@ -209,8 +209,29 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
 
       {!!calc?.scale_proof?.length && <Section id="scale" title="Scale proof" hint={`${calc.scale_proof.length}`} open={false}>
         {calc.scale_proof.map((proof, i) => <div key={i} className="calc-proof">
-          <p className="calc-note"><b>{proof.method ?? 'scale'}</b>{proof.m_per_px != null && <> {fmt(proof.m_per_px, 6)} m/px</>}{proof.page != null && <>, page {proof.page}</>}{proof.spread_pct != null && <>, readings differ by up to {fmt(proof.spread_pct, 2)}%</>}</p>
+          {(() => {
+            // Old shape: proof.method / proof.m_per_px. Newer shape: {formula, steps, result}; the used step equals result.value.
+            const used = proof.m_per_px ?? proof.result?.value ?? null
+            const usedStep = typeof used === 'number' && used > 0 ? proof.steps?.find((st) => typeof st.value === 'number' && Math.abs(st.value / used - 1) < 1e-6) : undefined
+            const method = proof.method ?? usedStep?.label
+            return <p className="calc-note" data-testid="scale-proof-head"><b>{method ?? 'scale'}</b>{used != null && <> {fmt(used, 6)} m/px</>}{proof.page != null && <>, page {proof.page}</>}{proof.spread_pct != null && <>, readings differ by up to {fmt(proof.spread_pct, 2)}%</>}</p>
+          })()}
+          {proof.formula && <p className="calc-note"><code>{proof.formula}</code></p>}
           {proof.proof_warning && <p className="calc-warning" role="status">{proof.proof_warning}</p>}
+          {!!proof.steps?.length && <ol className="calc-proof-steps" aria-label="Scale derivation">{proof.steps.map((st, k) => {
+            const counts = new Map<string, number>()
+            for (const inp of st.inputs ?? []) counts.set(inp.name, (counts.get(inp.name) ?? 0) + 1)
+            const shown = [...counts.entries()].map(([name, n]) => {
+              const same = (st.inputs ?? []).filter((inp) => inp.name === name)
+              return n === 1 ? `${name} = ${withUnit(same[0].value, same[0].unit)}` : `${n} × ${name} (${same.slice(0, 4).map((inp) => withUnit(inp.value, inp.unit)).join(', ')}${n > 4 ? ', …' : ''})`
+            })
+            return <li key={st.id ?? k} className="calc-note">
+              <b>{st.label ?? 'scale'}</b>: <code>{st.expr ?? 'scale'}</code>{st.value != null && <> = {withUnit(st.value, st.unit ?? 'm/px')}</>}
+              {st.median_width_px != null && <>, median {fmt(st.median_width_px)} px</>}
+              {!!shown.length && <small> Inputs: {shown.join('; ')}</small>}
+              {st.note && <small> {st.note}</small>}
+            </li>
+          })}</ol>}
           {!!proof.available_candidates?.length && <table aria-label="Scale readings"><thead><tr><th scope="col">Reading</th><th scope="col" className="num">m/px</th><th scope="col">Formula</th></tr></thead>
             <tbody>{proof.available_candidates.map((c, k) => <tr key={k}><th scope="row">{c.method}{c.note && <small>{c.note}</small>}</th><td className="num">{c.m_per_px != null ? fmt(c.m_per_px, 6) : '-'}</td><td><code>{c.formula}</code></td></tr>)}</tbody></table>}
         </div>)}
