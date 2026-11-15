@@ -73,13 +73,22 @@ _ORD = {"ground": 0, "grund": 0, "first": 1, "second": 2, "third": 3, "fourth": 
 
 
 def resolve_storey(q: str, storeys: list[dict]) -> str | None:
+    from engine.ifc_storeys import canonical_storeys, elevation
+    storeys = canonical_storeys(storeys) if any("source_indices" not in s for s in storeys) else storeys
     from .filters import fold
     ql = fold(q)
     names = [s["name"] for s in storeys]
     for n in sorted(names, key=len, reverse=True):
         if re.search(rf"(?<!\w){re.escape(fold(n))}(?!\w)", ql):
             return n
+    alias_matches = [s for s in storeys if any(alias and re.search(rf"(?<!\w){re.escape(fold(alias))}(?!\w)", ql)
+                                             for alias in s.get("aliases", []))]
+    if alias_matches:
+        return alias_matches[0]["name"] if len(alias_matches) == 1 else None
     if not storeys:
+        return None
+    # Unknown elevations cannot establish floor order.
+    if any(elevation(s) is None for s in storeys):
         return None
     srt = sorted(storeys, key=lambda s: s["elevation_m"])
     ground = next((i for i, s in enumerate(srt) if s["elevation_m"] >= -0.5), 0)   # a ground floor at -0.15 m (finished floor below the site datum) is still ground
@@ -435,6 +444,8 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         return _abstain(question, doc_id, "I have no structured data for this document yet, so I cannot answer that reliably.",
                         trace, "index", t0)
     route = "index" if doc.mode == "ifc" else "planmap"
+    from engine.ifc_storeys import dedup_trace
+    trace.extend(dedup_trace(doc))
     if doc.mode == "ifc":
         from engine.analytics import filtered_question
         from dataclasses import replace
@@ -492,9 +503,10 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         return storeys(result, doc, detected=found)
 
     if doc.mode == "ifc" and kind == "storey" and p.type == "count" and not page:
-        sts = sorted(doc.storeys, key=lambda s: s.get("elevation_m", 0))
+        from engine.ifc_storeys import elevation, sort_key
+        sts = sorted(doc.storeys, key=sort_key)
         n = len(sts)
-        trace.append(_step("count", f"{n} storey(s) declared in the model"))
+        trace.append(_step("count", f"{n} distinct storey(s) declared in the model"))
         if not n:
             return _answer_obj(question, [doc_id], "This model does not declare any storeys (no IfcBuildingStorey), so I cannot give a floor count from it.",
                                None, None, 0.0, True, [], [], {"doc_id": doc_id, "highlight_item_ids": [], "camera_target_item_id": None},
@@ -505,7 +517,8 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
             its.sort(key=lambda i: (i.kind != "slab", i.kind != "wall", i.item_id))
             if its:
                 rep.append(its[0])
-        listing = ", ".join(f"{s_['name']} ({s_.get('elevation_m', 0):+.1f} m)" for s_ in sts)
+        listing = ", ".join(f"{s_['name']} ({elevation(s_):+.1f} m)" if elevation(s_) is not None
+                            else f"{s_['name']} (elevation unavailable)" for s_ in sts)
         _, cites, scene = _evidence(doc, rep)
         text = f"The model has **{n} {'storey' if n == 1 else 'storeys'}**, from lowest to highest: {listing}. {_cite_marks(cites)}"
         res = _answer_obj(question, [doc_id], text, n, "count", 1.0, False, [], cites, scene, trace, route, t0)

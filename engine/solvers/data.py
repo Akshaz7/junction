@@ -37,6 +37,15 @@ class Doc:
     pages: int = 1
     meta: dict = field(default_factory=dict)            # IFC only: project/building/software metadata (elements.json 'building')
 
+    def __post_init__(self):
+        if self.mode == "ifc":
+            from engine.ifc_storeys import canonical_name, canonical_storeys
+            if any("source_indices" not in s for s in self.storeys):
+                self.storeys = canonical_storeys(self.storeys)
+            for item in self.items:
+                if item.storey is not None:
+                    item.storey = canonical_name(item.storey, item.props.get("storey_elevation_m"), self.storeys)
+
     def kinds(self) -> set[str]:
         return {i.kind for i in self.items}
 
@@ -98,7 +107,8 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
             Item(item_id=x["item_id"], kind=x.get("kind") or "other", page=1,
                  storey=(x.get("storey") or {}).get("name"), q=x.get("quantities") or {},
                  props={**(x.get("props") or {}), "ifc_class": x.get("ifc_class"), "predefined_type": x.get("predefined_type"),
-                        "quantity_source": x.get("quantity_source") or {}},
+                        "quantity_source": x.get("quantity_source") or {},
+                        "storey_elevation_m": (x.get("storey") or {}).get("elevation_m")},
                  name=x.get("name"), type_name=x.get("type_name"), source="ifc", bbox_m=x.get("bbox_m"))
             for x in e["elements"]
         ]
