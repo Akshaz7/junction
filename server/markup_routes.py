@@ -121,7 +121,6 @@ async def page_image(doc_id, page):
 def page_context(path, page, signature):
     """Read only existing words/plan maps. Cached by page and artifact timestamps."""
     from pathlib import Path
-    from engine.symbols import find_legend
     d = Path(path)
     def read(name, default):
         try:
@@ -133,7 +132,13 @@ def page_context(path, page, signature):
     words = [w for w in words if isinstance(w, dict) and isinstance(w.get('text'), str) and isinstance(w.get('bbox_px'), (list, tuple)) and len(w['bbox_px']) == 4] if isinstance(words, list) else []
     plan = read(f'planmap-{page}.json', {})
     rooms = [i for i in plan.get('items', []) if isinstance(i, dict) and i.get('kind') == 'room'] if isinstance(plan, dict) else []
-    legend = find_legend(d / f'page-{page}.png', words=words) if words else {}
+    legend = {}
+    if words:
+        try:
+            from engine.symbols import find_legend  # needs cv2; the legend is optional, never fail markup over it
+            legend = find_legend(d / f'page-{page}.png', words=words)
+        except Exception as e:  # noqa: BLE001 - e.g. ImportError libxcb.so.1 in the slim container
+            print('legend unavailable:', repr(e)[:160])
     return {'suggestions': list(dict.fromkeys(e['label'] for e in legend.get('entries', []))), 'rooms': rooms}
 
 
