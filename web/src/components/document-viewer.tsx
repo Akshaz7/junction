@@ -26,6 +26,7 @@ import { RoomLabels } from './viewer-tools/room-labels'
 import { ViewRegions } from './viewer-tools/view-regions'
 import { SpecPanel } from './viewer-tools/spec-panel'
 import { CalculationPanel } from './calc-panel'
+import { ErrorBoundary } from './error-boundary'
 import type { FocusTarget } from '../lib/calc-view'
 import { downloadSource } from './viewer-tools/download-source'
 import { TellStoaBubble } from './viewer-tools/tell-stoa-bubble'
@@ -550,7 +551,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
           onDelete={mark ? () => markup.remove(mark.id) : undefined} onClose={markup.cancel} />
       })()}
     </div>
-    {calcOpen && answer.reasoning && <CalculationPanel reasoning={answer.reasoning} title={doc?.title} docTitle={(id) => id === citation.doc_id && doc?.title ? doc.title : id} onClose={() => setCalcOpen(false)} onFocus={focusCalcItem} />}
+    {calcOpen && answer.reasoning && <ErrorBoundary resetKey={answer.reasoning} fallback={<aside className="viewer-calc-panel" role="alert" data-testid="calc-error"><div className="calc-content"><p>Could not render this calculation.</p><button type="button" onClick={() => setCalcOpen(false)}>Back to the drawing</button></div></aside>}><CalculationPanel reasoning={answer.reasoning} title={doc?.title} docTitle={(id) => id === citation.doc_id && doc?.title ? doc.title : id} onClose={() => setCalcOpen(false)} onFocus={focusCalcItem} /></ErrorBoundary>}
     {markup.open && <SymbolMarkupPanel markup={markup} page={citation.page} onFocus={(box) => { if (image) setView(focusBox(box, viewport, Math.max(fittedScale, Math.min(4, viewport.width / Math.max(128, (box[2] - box[0]) * 6), viewport.height / Math.max(128, (box[3] - box[1]) * 6))))) }} />}
     {specOpen && !calcOpen && specCitation && <SpecPanel citation={specCitation} title={doc?.title ?? citation.doc_id} text={sheetText} onClose={() => setSpecOpen(false)} />}
     {selectedItem && <ItemPanel docId={selectedItem.docId} itemId={selectedItem.itemId} sheet={sheet} onClose={closeItem} onOpenPlace={(location, item) => {

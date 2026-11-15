@@ -148,7 +148,7 @@ export function displayRounding(calc: Pick<Calculation, 'steps'>): { value: numb
 }
 
 /** Strip float noise from numbers inside an expression: 61.20000000000002 becomes 61.2. */
-export const cleanExpr = (expr: string): string => expr.replace(/-?\d+\.\d{4,}/g, (n) => String(parseFloat(Number(n).toFixed(3))))
+export const cleanExpr = (expr?: string | null): string => (expr ?? '').replace(/-?\d+\.\d{4,}/g, (n) => String(parseFloat(Number(n).toFixed(3))))
 
 /** Columns worth showing: drops a column whose values equal an earlier one on every row (Area == Net). */
 export function distinctColumns(rows: Row[], keys: string[]): string[] {
