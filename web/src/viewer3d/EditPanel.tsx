@@ -3,7 +3,7 @@ import { AdvisorCardView } from './AdvisorCardView';
 import { createAdvisorRequests, type AdvisorCard } from './advisor';
 import { onAdvisorCards } from './liveHighlight';
 import { WALL_MATERIALS, type EditState, type ItemEdit, type WallMaterial } from './edits';
-import type { SceneManifest } from './scene';
+import { itemLabel, type SceneManifest } from './scene';
 
 export function useEditAdvisor(doc_id?: string, chat_id?: string) {
   const [cards, setCards] = useState<AdvisorCard[]>([]);
@@ -45,10 +45,10 @@ export function EditPanel({ selected, manifest, edits, moving, advice, hidden = 
   save?: SaveVersionControl;
 }) {
   const item = selected ? manifest.items[selected] : null;
-  const label = item?.tag ?? selected;
+  const label = selected ? itemLabel(manifest, selected) : '';
   return <aside className="viewer3d-edit-panel" aria-label="Edit items">
     <div className="viewer3d-edit-actions">
-      <strong>{selected ? `Selected: ${label}` : 'Select an item to edit'}</strong>
+      <strong title={selected ? `ID ${selected}` : undefined}>{selected ? `Selected: ${label}` : 'Select an item to edit'}</strong>
       <button type="button" disabled={!selected} onClick={onRemove}>Remove</button>
       <button type="button" disabled={!selected} aria-pressed={moving} onClick={onMove}>Move</button>
       {selected && item?.kind === 'wall' && <label>Change material
@@ -65,8 +65,8 @@ export function EditPanel({ selected, manifest, edits, moving, advice, hidden = 
     </div>
     {onRestore && hidden.length > 0 && <div className="viewer3d-edit-removed" aria-label="Removed items">
       <span>Removed ({hidden.length}):</span>
-      {hidden.slice(0, 12).map((id) => <button key={id} type="button" aria-label={`Restore ${manifest.items[id]?.tag ?? id}`}
-        onClick={() => onRestore([id])}>{manifest.items[id]?.tag ?? id} ↺</button>)}
+      {hidden.slice(0, 12).map((id) => <button key={id} type="button" aria-label={`Restore ${itemLabel(manifest, id)}`} title={`ID ${id}`}
+        onClick={() => onRestore([id])}>{itemLabel(manifest, id)} ↺</button>)}
       {hidden.length > 1 && <button type="button" onClick={() => onRestore([...hidden])}>Restore all</button>}
     </div>}
     {save?.message && <p role="status">{save.message}{save.href && <> <a href={save.href}>Compare with the original</a></>}</p>}
