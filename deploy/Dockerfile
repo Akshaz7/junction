@@ -14,6 +14,9 @@ RUN uv pip install --system --no-cache pillow numpy pypdfium2 pdfminer.six ezdxf
 RUN uv pip uninstall --system opencv-python || true; uv pip install --system --no-cache --reinstall opencv-python-headless
 # IFC uploads: ifcopenshell (LGPL) geometry -> GLB (pipeline/ifc_scene.convert_py), pygltflib for node boxes, usd-core for the AR USDZ.
 RUN uv pip install --system --no-cache ifcopenshell==0.9.0.post1 pygltflib==1.16.5 usd-core
+# Detector experiment (door confirm only): the modal client calls junction-det on Modal. Needs MODAL_TOKEN_ID /
+# MODAL_TOKEN_SECRET as runtime secrets (never in git); without them the call fails fast and ingest carries on.
+RUN uv pip install --system --no-cache modal
 COPY server ./server
 COPY engine ./engine
 COPY pipeline ./pipeline
@@ -34,6 +37,7 @@ USER app
 # 3 concurrent ingests per box (heavy.sh slots).
 ENV RATE_LIMIT=1 HIDE_EMPTY_DOCS=1 WEB_CONCURRENCY=4 \
     IFC_WORKER_MEMORY_MB=2048 IFC_CONCURRENCY=2 IFC_SCENE_TIMEOUT_S=420 IFC_INDEX_TIMEOUT_S=300 IFC_INPROC_MAX_MB=60 \
-    INGEST_TIMEOUT_S=900 INGEST_BUDGET_S=540 INGEST_CONCURRENCY=4 HEAVY_SLOTS=4
+    INGEST_TIMEOUT_S=900 INGEST_BUDGET_S=540 INGEST_CONCURRENCY=4 HEAVY_SLOTS=4 \
+    PDF_DETECT=1 PDF_DETECT_RUN=y11l PDF_DETECT_TIMEOUT_S=30
 EXPOSE 8000
 CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--timeout-keep-alive", "75"]

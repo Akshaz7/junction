@@ -1619,6 +1619,9 @@ def _add_storey(f, bldg, body, planmap: dict, storey_name: str, storey_elevation
                   f"head {z1:.2f} m: {'printed' if head_p else 'default'}")
         evidence(el, "measured", f"{kind} {it['item_id']}: width {wid:.3f} m and position measured from the drawn "
                  f"symbol (bbox px {[round(float(v), 1) for v in (it.get('bbox_px') or [])]}); {hd}", hs)
+        if kind == "door" and pr.get("det_conf") is not None:  # detector experiment: supporting evidence only
+            w.pset(el, "Hologram_Detector", {"Confirmed": True, "Confidence": float(pr["det_conf"]),
+                                             "Evidence": str(pr.get("det_evidence") or "derived: detector")[:200]})
         products.append(el)
 
     for tkey, els in fill_by_type.items():

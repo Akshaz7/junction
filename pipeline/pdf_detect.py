@@ -25,10 +25,18 @@ def enabled() -> bool:
     return os.environ.get("PDF_DETECT", "") == "1"
 
 
-def _call(pdf_path, page_index, m_per_pt, timeout=180):
+def _call(pdf_path, page_index, m_per_pt, timeout=None):
+    """PDF_DETECT_PY: an interpreter with the `modal` package (default: this one, when it can import modal).
+    PDF_DETECT_TIMEOUT_S caps the whole call (default 30 s) so a cold or unreachable Modal never stalls an ingest."""
     py = os.environ.get("PDF_DETECT_PY")
     if not py:
-        raise RuntimeError("PDF_DETECT_PY not set (interpreter with the modal package)")
+        import importlib.util
+        import sys
+        if importlib.util.find_spec("modal") is None:
+            raise RuntimeError("PDF_DETECT_PY not set and the modal package is not installed")
+        py = sys.executable
+    if timeout is None:
+        timeout = float(os.environ.get("PDF_DETECT_TIMEOUT_S", "30"))
     out = subprocess.run([py, CLIENT, str(pdf_path), str(page_index), json.dumps(m_per_pt)], capture_output=True,
                          text=True, timeout=timeout)
     if out.returncode != 0:

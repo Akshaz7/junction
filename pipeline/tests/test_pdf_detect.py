@@ -37,3 +37,22 @@ def test_call_failure_never_breaks(monkeypatch):
     pm = _pm()
     summ = pdf_detect.apply(pm, "x.pdf", 0, 1.0, 0.01)
     assert "modal down" in summ["error"] and all("props" not in i for i in pm["items"])
+
+
+def test_timeout_and_interpreter_defaults(monkeypatch):
+    seen = {}
+
+    class Out:
+        returncode, stdout, stderr = 0, '{"items": []}', ""
+
+    def fake_run(cmd, **kw):
+        seen["cmd"], seen["timeout"] = cmd, kw.get("timeout")
+        return Out()
+    monkeypatch.delenv("PDF_DETECT_PY", raising=False)
+    monkeypatch.delenv("PDF_DETECT_TIMEOUT_S", raising=False)
+    monkeypatch.setattr(pdf_detect.importlib_util if hasattr(pdf_detect, "importlib_util") else __import__("importlib.util").util,
+                        "find_spec", lambda name: object())
+    monkeypatch.setattr(pdf_detect.subprocess, "run", fake_run)
+    assert pdf_detect._call("x.pdf", 0, None) == {"items": []}
+    import sys
+    assert seen["cmd"][0] == sys.executable and seen["timeout"] == 30.0
