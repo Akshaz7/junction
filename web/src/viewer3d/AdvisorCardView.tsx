@@ -34,6 +34,13 @@ export const sourceLinkLabel = (url: string) => {
 /** Official links for a card's rule: the English text first, then the Finnish legal text when it differs. */
 export const sourceLinks = (source: AdvisorCard['source']) =>
   [...new Set([httpUrl(source.url), httpUrl(source.finnish_url)].filter((u): u is string => !!u))];
+/** Short source label; adds the card's own section when the title has none. */
+export const sourceLabel = (source: AdvisorCard['source']) => {
+  const short = shortSource(source.title);
+  const section = source.section?.trim();
+  if (!section || short.includes('§')) return short;
+  return `${short} ${/^\d/.test(section) ? `§${section}` : section}`;
+};
 
 /** One advisor card: severity colour (red violation, amber suggestion, grey info), body, rules checked, source. */
 export function AdvisorCardView({ card, className = '', onHighlight }: {
@@ -41,6 +48,7 @@ export function AdvisorCardView({ card, className = '', onHighlight }: {
 }) {
   const severity = cardSeverity(card);
   const Icon = severity === 'violation' ? AlertTriangle : severity === 'suggestion' ? Lightbulb : Info;
+  const label = sourceLabel(card.source);
   const head = <>
     <span><Icon size={16} aria-label={LABEL[severity]} /><strong>{card.title}</strong><span className="advisor-severity">{LABEL[severity]}</span></span>
     <span>{card.body}</span>
@@ -50,7 +58,7 @@ export function AdvisorCardView({ card, className = '', onHighlight }: {
       ? <button type="button" className="viewer3d-advisor-select" onClick={() => onHighlight(card.item_ids)} aria-label={`Highlight: ${card.title}`}>{head}</button>
       : <div className="viewer3d-advisor-select">{head}</div>}
     {!!card.checked?.length && <p className="advisor-checked" data-testid="advisor-checked">Checked: {card.checked.map(ruleName).join(' · ')}</p>}
-    <details><summary title={card.source.title}>{shortSource(card.source.title)}</summary><blockquote>{card.source.quote}</blockquote></details>
+    <details><summary title={card.source.title}>{label}</summary><blockquote>{card.source.quote}</blockquote></details>
     {!!sourceLinks(card.source).length && <p className="advisor-links" data-testid="advisor-source-links">
       {sourceLinks(card.source).map((url) => <a key={url} href={url} target="_blank" rel="noreferrer">{sourceLinkLabel(url)} <ExternalLink size={12} aria-hidden /></a>)}
     </p>}

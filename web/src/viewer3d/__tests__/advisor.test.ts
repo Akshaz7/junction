@@ -42,6 +42,23 @@ describe('sourced advisor cards and edit requests', () => {
     client.dispose();
   });
 
+  it('clears the previous cards as soon as an undo/reset is queued and shows the recomputed (empty) set', async () => {
+    vi.useFakeTimers();
+    const request = vi.fn<typeof fetch>().mockResolvedValueOnce(new Response(JSON.stringify({ cards: [card] })))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ cards: [] })));
+    const seen: string[] = [];
+    const client = createAdvisorRequests({ doc_id: 'demo', request, onError: vi.fn(),
+      onLoading: () => seen.push('loading'), onCards: (cards) => seen.push(`cards:${cards.length}`) });
+    client.enqueue({ op: 'hide', item_ids: ['door'], detail: {} });
+    await vi.advanceTimersByTimeAsync(400);
+    client.enqueue({ op: 'restore', item_ids: ['door'], detail: { undo: 'hide' } });
+    expect(seen).toEqual(['loading', 'cards:1', 'loading']);
+    await vi.advanceTimersByTimeAsync(400);
+    expect(seen).toEqual(['loading', 'cards:1', 'loading', 'cards:0']);
+    expect(JSON.parse(request.mock.calls[1][1]!.body as string).edit.op).toBe('restore');
+    client.dispose();
+  });
+
   it('cancels debounced work on scene disposal and reports failed advice without inventing an empty answer', async () => {
     vi.useFakeTimers();
     const request = vi.fn<typeof fetch>().mockResolvedValue(new Response('', { status: 422 }));

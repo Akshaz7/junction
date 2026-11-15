@@ -4,8 +4,29 @@ import type { Viewer } from './viewer';
 import { findingColors, type Finding, type FindingSeverity } from './findings';
 import { onFindingsUpdated } from './liveHighlight';
 
-function sourceUrl(url?: string | null): string | undefined {
+/** http(s) URLs only; anything else is not rendered as a link. */
+export function sourceUrl(url?: string | null): string | undefined {
   return url && /^https?:\/\//i.test(url) ? url : undefined;
+}
+
+export interface FindingsRunResponse {
+  findings: Finding[]; status?: string; detail?: string; checked?: string[]; items_checked?: number | null;
+  checked_at?: string; edited?: boolean; hidden?: number;
+}
+
+function plural(n: number, word: string): string { return `${n} ${word}${n === 1 ? '' : 's'}`; }
+
+/** One honest status line: what was checked, on what, when, and what came out. */
+export function findingsStatus(data: FindingsRunResponse, run: boolean): string {
+  if (data.status === 'no_checks') return data.detail || 'Checks are not available yet.';
+  if (!run) return data.findings.length ? '' : 'No saved findings. Press Run checks to check this drawing.';
+  const time = data.checked_at ? new Date(data.checked_at) : null;
+  const at = time && !Number.isNaN(time.getTime()) ? ` at ${time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}` : '';
+  const rules = data.checked ? plural(data.checked.length, 'rule') : 'the rules';
+  const items = typeof data.items_checked === 'number' ? ` on ${plural(data.items_checked, 'item')}` : '';
+  const edits = data.edited && data.hidden ? ` (your ${plural(data.hidden, 'unsaved removal')} applied)` : '';
+  const outcome = data.findings.length ? `${plural(data.findings.length, 'finding')}.` : 'no rule problems found.';
+  return `Checked ${rules}${items}${edits}${at}: ${outcome}`;
 }
 
 /** Fetch only while enabled; source text is displayed verbatim from the API. */
@@ -30,17 +51,19 @@ export function FindingsPanel({ viewer, stage }: { viewer: Viewer | null; stage:
       const controller = new AbortController(); controllers.add(controller);
       setLoading(true); setError('');
       try {
+        // Unsaved removals from Edit mode go along, so the checks see the drawing as it is on screen.
+        const hidden = run ? viewer?.getCommandState().hidden ?? [] : [];
         const response = await fetch(run ? '/api/findings/run' : `/api/findings?doc_id=${encodeURIComponent(docId!)}`, {
-          ...(run ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ doc_id: docId }) } : {}),
+          ...(run ? { method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ doc_id: docId, hidden_item_ids: hidden }) } : {}),
           signal: controller.signal,
         });
         if (!response.ok) throw new Error(`${run ? 'Checks' : 'Findings'} unavailable (${response.status}).`);
-        const data = await response.json() as { findings: Finding[]; status?: string; detail?: string };
+        const data = await response.json() as FindingsRunResponse;
         if (!Array.isArray(data.findings)) throw new Error('Findings response is unavailable.');
         if (!active || current !== version) return;
         setFindings(data.findings); setSelected([]);
-        setStatus(data.status === 'no_checks' ? data.detail || 'Checks are not available yet.'
-          : data.findings.length ? '' : 'Checks ran: no rule problems found on this drawing.');
+        setStatus(findingsStatus(data, run));
       } catch (reason) {
         if (active && current === version) setError(reason instanceof Error ? reason.message : 'Findings unavailable.');
       } finally {
@@ -85,15 +108,15 @@ export function FindingsPanel({ viewer, stage }: { viewer: Viewer | null; stage:
   return <>
     <button type="button" aria-pressed={enabled} disabled={!viewer} onClick={() => setEnabled(!enabled)}>Findings</button>
     {enabled && <>
-      <button type="button" disabled={loading || !viewer} onClick={() => void fetchRef.current(true)}>Run checks</button>
-      <span className="viewer3d-findings-legend" aria-label="Finding severity legend">
-        {(['violation', 'suggestion', 'info'] as FindingSeverity[]).map((severity) =>
+      <button type="button" disabled={loading || !viewer} onClick={() => void fetchRef.current(true)}>{loading ? 'Checking…' : 'Run checks'}</button>
+      {findings.length > 0 && <span className="viewer3d-findings-legend" aria-label="Finding severity legend">
+        {(['violation', 'suggestion', 'info'] as FindingSeverity[]).filter((severity) => findings.some((f) => f.severity === severity)).map((severity) =>
           <span key={severity}><i style={{ background: findingColors[severity] }} />{severity}</span>)}
-      </span>
+      </span>}
       <span className="viewer3d-findings-scope">All storeys</span>
-      {loading && <span role="status">Loading findings…</span>}
+      {loading && <span role="status">Checking the drawing…</span>}
       {error && <span role="alert">{error}</span>}
-      {!loading && status && <span role="status">{status}</span>}
+      {!loading && !error && status && <span role="status">{status}</span>}
     </>}
     {stage && card && createPortal(card, stage)}
   </>;

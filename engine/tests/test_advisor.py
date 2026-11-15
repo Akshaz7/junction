@@ -22,7 +22,9 @@ def _exit_id():
 def _valid(c):
     assert c["kind"] in ("warning", "option", "info") and len(c["title"]) <= 60 and len(c["body"]) <= 200
     s = c["source"]
-    assert s["ref"] in RULES and s["quote"] and RULES[s["ref"]]["quote"].startswith(s["quote"]) and len(s["quote"]) <= 200
+    assert s["ref"] in RULES and s["quote"] == RULES[s["ref"]]["quote"].strip()      # the full verbatim quote, never cut
+    assert s["url"].startswith("https://") and s["url"] in (RULES[s["ref"]].get("url"), RULES[s["ref"]].get("finnish_url"))
+    assert s["section"] == RULES[s["ref"]]["section"]
     assert c["item_ids"]
 
 
@@ -127,6 +129,17 @@ def test_raster_entrance_door_removed_is_a_violation_and_says_it_is_detected():
 def test_raster_other_door_gets_info_card_not_silence():
     cards = advisor.advise(RASTER, {"op": "hide", "item_ids": ["door-004"]})
     assert len(cards) == 1 and cards[0]["severity"] == "info" and "IFC" in cards[0]["title"] and cards[0]["checked"] == []
+
+
+@pytest.mark.skipif(not (ROOT / RASTER).exists(), reason="artifact missing")
+def test_raster_window_edit_or_revert_gets_no_card():
+    # nothing rule-relevant on a drawing: no sourced 848/2017 card, the UI says 'No advice for this change.'
+    assert advisor.advise(RASTER, {"op": "hide", "item_ids": ["window-008"]}) == []
+    assert advisor.advise(RASTER, {"op": "move", "item_ids": ["window-008"], "detail": {"delta_m": [1, 0, 0]}}) == []
+    assert advisor.advise(RASTER, {"op": "restore", "item_ids": ["door-011"], "detail": {"undo": "hide"}}) == []
+    assert advisor.advise(RASTER, {"op": "reset", "item_ids": ["door-011", "window-008"], "detail": {}}) == []
+    v = advisor.advise(RASTER, {"op": "hide", "item_ids": ["door-011", "window-008"]})
+    assert len(v) == 1 and v[0]["severity"] == "violation"
 
 
 def test_front_door_phrase_on_raster_selects_the_detected_entrance():
@@ -249,3 +262,23 @@ def test_hide_compliance_answer_has_numbered_boxes_and_full_rule_ref():
     assert "18PQUIFELEARLM4c0brquf" in ids and len(ids) >= 2          # hidden door + remaining exit
     assert r["citations"] and f"[{r['citations'][0]['n']}]" in t
     assert r["evidence"]["scene"]["commands"][0]["op"] == "hide"
+
+
+def test_card_source_has_full_quote_url_and_section():
+    r = RULES["fi-fire-exits-per-storey"]
+    assert len(r["quote"]) > 200                                   # the quote that used to be cut at "...exits that are at least"
+    s = advisor._source(advisor.findings._src(r))
+    assert s["quote"] == r["quote"] and s["url"] == r["url"] and s["section"] == r["section"]
+
+
+def test_source_keeps_finnish_url_and_links_stay_optional():
+    s = advisor._source({"ref": "x", "quote": "q.", "finnish_url": "https://www.finlex.fi/fi/x"})
+    assert s["finnish_url"] == "https://www.finlex.fi/fi/x" and "url" not in s and "section" not in s
+    assert "url" not in advisor._source({"type": "document", "ref": "d#p1", "quote": "WC 1"})
+
+
+def test_overlong_quote_cut_only_at_a_sentence_end():
+    q = "First sentence here. " + "word " * 400 + "end."
+    out = advisor._quote(q)
+    assert out == "First sentence here." and q.startswith(out)
+    assert advisor._quote("word " * 400) == ("word " * 400).strip()   # no sentence end in reach: whole, never mid-sentence

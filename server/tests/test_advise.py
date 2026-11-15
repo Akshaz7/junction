@@ -46,7 +46,7 @@ def test_cards_need_a_verifiable_source(client, monkeypatch):
     wrong_quote = card(source={"type": "rule", "ref": RULE, "title": "t", "quote": "doors must be 900 millimetres wide"})
     bad_kind = card(kind="idea")
     doc_card = card(source={"type": "document", "ref": f"{DOC}#p1", "title": "Plan", "quote": "WC 1"})
-    long_quote = card(source={"type": "document", "ref": DOC, "title": "Plan", "quote": "x" * 201})
+    long_quote = card(source={"type": "document", "ref": DOC, "title": "Plan", "quote": "x" * 1201})
     monkeypatch.setattr(advise_routes, "_engine_advise", lambda: (
         lambda doc_id, edit, chat_id: [no_source, empty_quote, invented_rule, wrong_quote, bad_kind, long_quote, good, doc_card]))
     cards = client.post("/api/advise", json={"doc_id": DOC}).json()["cards"]

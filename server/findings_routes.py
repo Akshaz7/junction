@@ -10,7 +10,9 @@ import json
 import uuid
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+import datetime as dt
+
+from pydantic import BaseModel, Field
 
 from . import config, db
 from .live import publish
@@ -21,6 +23,9 @@ SEVERITIES = ("info", "suggestion", "violation")  # "suggestion" unless the rule
 
 class RunBody(BaseModel):
     doc_id: str
+    # Items the user removed in the viewer but has not saved. With them the checks run on that edited copy and the
+    # result is returned only (never stored over the saved drawing's findings).
+    hidden_item_ids: list[str] = Field(default_factory=list, max_length=5000)
 
 
 WAITING = ("running", "queued", "pending", "ingesting")
@@ -91,6 +96,33 @@ def _engine_run():
         return None
 
 
+def _engine_report():
+    try:
+        return importlib.import_module("engine.findings").report
+    except (ImportError, AttributeError):
+        return None
+
+
+def _coverage(doc_id: str, hidden: list[str]) -> dict:
+    """Which rules this run could check, and on how many items. Empty when the engine cannot say."""
+    fn = _engine_report()
+    try:
+        r = fn(doc_id, hidden=hidden or None) if fn else None
+    except Exception:  # noqa: BLE001 - coverage is a nice-to-have, never fails the run
+        r = None
+    if not isinstance(r, dict):
+        return {}
+    return {"checked": list(r.get("checked") or []), "not_checked": list(r.get("not_checked") or []),
+            "items_checked": r.get("items_checked"), "mode": r.get("mode"), "hidden": r.get("hidden") or 0}
+
+
+def _no_checks_detail(cov: dict) -> str:
+    if cov.get("mode") and cov["mode"] != "ifc":
+        return ("No rule can be checked on this drawing: door widths, exits and stairs are not measured on a drawing, "
+                "and no entrance door could be read from it. Rule checks need an IFC model.")
+    return "No rule could be checked: the model lacks the data the rules need."
+
+
 def _library() -> dict[str, dict]:
     from engine.rules import load_rules
     return {r["id"]: r for r in load_rules()}
@@ -104,7 +136,8 @@ def clean_findings(raw, library: dict[str, dict]) -> list[dict]:
         ids = [i for i in (f.get("item_ids") or []) if isinstance(i, str) and i]
         if not ids:
             continue
-        sev = f.get("severity") if f.get("severity") in SEVERITIES else "suggestion"
+        sev = "violation" if f.get("severity") == "fail" else f.get("severity")   # engine says "fail" for a clear miss
+        sev = sev if sev in SEVERITIES else "suggestion"
         text = f.get("message") or f.get("text") or f.get("title") or ""
         extra = {k: f[k] for k in ("finding_id", "check_id", "title", "text", "labels", "storey", "measured", "source")
                  if f.get(k) not in (None, "", {})}
@@ -147,11 +180,24 @@ async def run_findings(body: RunBody):
     fn = _engine_run()
     if fn is None:
         return {"status": "no_checks", "detail": "the checks are not available yet", "findings": []}
+    hidden = [h for h in body.hidden_item_ids if isinstance(h, str) and h]
     try:
         library = _library()
-        found = clean_findings(await asyncio.to_thread(fn, body.doc_id), library)
+        raw = await asyncio.to_thread(fn, body.doc_id, hidden=hidden) if hidden else await asyncio.to_thread(fn, body.doc_id)
+        found = clean_findings(raw, library)
+        cov = await asyncio.to_thread(_coverage, body.doc_id, hidden)
     except Exception as e:  # noqa: BLE001
         raise HTTPException(502, f"checks failed: {type(e).__name__}")
+    now = dt.datetime.now(dt.timezone.utc)
+    meta = {**cov, "checked_at": now.isoformat(), "edited": bool(hidden)}
+    status = "no_checks" if not found and cov and not cov.get("checked") else "ok"
+    if status == "no_checks":
+        meta["detail"] = _no_checks_detail(cov)
+    if hidden:   # unsaved edits: answer for the edited copy, keep the saved drawing's findings as they are
+        out = [{"id": f"edit-{n}", "doc_id": body.doc_id, "rule_id": f["rule_id"], "item_ids": f["item_ids"],
+                "severity": f["severity"], "message": f["message"], "detail": f["detail"],
+                "rule": rule_view(library[f["rule_id"]]), "created_at": now.isoformat()} for n, f in enumerate(found)]
+        return {"status": status, **meta, "findings": out}
     async with pool.acquire() as conn, conn.transaction():
         await _ensure_rules(conn, library)
         await conn.execute("delete from findings where doc_id=$1", body.doc_id)
@@ -161,7 +207,7 @@ async def run_findings(body: RunBody):
                 uuid.uuid4(), body.doc_id, f["rule_id"], f["item_ids"], f["severity"],
                 json.dumps({"message": f["message"], "detail": f["detail"]}))
     await publish({"type": "findings.updated", "doc_id": body.doc_id, "count": len(found)})
-    return {"status": "ok", "findings": (await _list(pool, body.doc_id, None, None)),
+    return {"status": status, **meta, "findings": (await _list(pool, body.doc_id, None, None)),
             "coverage": await asyncio.to_thread(run_coverage, body.doc_id)}
 
 

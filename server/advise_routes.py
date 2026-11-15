@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api")
 
 KINDS = ("warning", "option", "info")
 SOURCE_TYPES = ("rule", "material_table", "document")
-MAX_CARDS, MAX_TITLE, MAX_BODY, MAX_QUOTE = 3, 60, 200, 200
+MAX_CARDS, MAX_TITLE, MAX_BODY, MAX_QUOTE = 3, 60, 200, 1200   # quote: the full verbatim rule text
 
 
 ADVISE_OPS = ("hide", "restore", "reset", "move", "material", "undo", "resize", "narrow", "scale", "set_width")  # move/material are local what-ifs, never persisted
@@ -110,6 +110,13 @@ def clean_cards(raw, doc_id: str) -> list[dict]:
         card = {"card_id": str(c.get("card_id") or uuid.uuid4().hex), "kind": c["kind"],
                 "title": _cut(ctitle, MAX_TITLE), "body": _cut(body, MAX_BODY), "item_ids": ids,
                 "source": {"type": src["type"], "ref": ref, "title": title, "quote": quote}}
+        for k in ("url", "finnish_url"):   # official pages for the rule, so a violation is externally verifiable
+            u = str(src.get(k) or "").strip()
+            if u.startswith("https://") and len(u) <= 500:
+                card["source"][k] = u
+        section = str(src.get("section") or "").strip()
+        if section and len(section) <= 40:
+            card["source"]["section"] = section
         sev = c.get("severity")
         card["severity"] = sev if sev in ("violation", "suggestion", "info") else {"warning": "violation", "option": "suggestion"}.get(c["kind"], "info")
         chk = c.get("checked")

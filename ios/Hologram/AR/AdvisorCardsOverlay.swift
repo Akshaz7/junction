@@ -61,6 +61,11 @@ private struct AdvisorSourceDisclosure: View {
                 Text(card.source.quote)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("advisor-source-quote-\(card.id)")
+                if let section = card.source.section, !section.isEmpty {
+                    Text(section)
+                        .foregroundStyle(.secondary)
+                        .accessibilityIdentifier("advisor-source-section-\(card.id)")
+                }
             }
             ForEach(card.source.links, id: \.self) { url in
                 Link(destination: url) {

@@ -20,7 +20,9 @@ export interface AdvisorCard {
   checked?: string[];
   source: { type: 'rule' | 'material_table' | 'document'; ref: string; title: string; quote: string;
     /** Official page for the rule (government / EU text), so a violation can be checked externally. */
-    url?: string | null; finnish_url?: string | null };
+    url?: string | null; finnish_url?: string | null;
+    /** Optional section label, e.g. "33 §". */
+    section?: string };
 }
 export interface AdvisorEvent {
   type: 'advisor.cards';
@@ -46,7 +48,13 @@ export function sourcedCards(value: unknown): AdvisorCard[] {
       || cards.some((card) => card.card_id === entry.card_id)) continue;
     const severity = ['violation', 'suggestion', 'info'].includes(entry.severity as string) ? entry.severity : undefined;
     const checked = Array.isArray(entry.checked) ? entry.checked.filter(text) : undefined;
-    cards.push({ ...(entry as unknown as AdvisorCard), severity: severity as AdvisorSeverity | undefined, checked });
+    const { url, section, ...base } = source;
+    const cleanSource = {
+      ...base,
+      ...(typeof url === 'string' && /^https?:\/\//i.test(url) ? { url } : {}),
+      ...(text(section) ? { section } : {}),
+    } as AdvisorCard['source'];
+    cards.push({ ...(entry as unknown as AdvisorCard), source: cleanSource, severity: severity as AdvisorSeverity | undefined, checked });
     if (cards.length === 3) break;
   }
   return cards;

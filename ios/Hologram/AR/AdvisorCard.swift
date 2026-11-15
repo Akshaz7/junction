@@ -13,6 +13,16 @@ struct AdvisorCard: Codable, Equatable, Identifiable {
         var url: String? = nil
         /// Finnish legal text on Finlex when it differs from `url`.
         var finnish_url: String? = nil
+        /// Section within the source (e.g. "33 §"); absent on older servers.
+        var section: String? = nil
+
+        /// `url` as a link only when it is an absolute http(s) URL with a host.
+        var linkURL: URL? {
+            guard let url, let parsed = URL(string: url.trimmingCharacters(in: .whitespacesAndNewlines)),
+                  let scheme = parsed.scheme?.lowercased(), scheme == "https" || scheme == "http",
+                  parsed.host?.isEmpty == false else { return nil }
+            return parsed
+        }
 
         /// http(s) links only, English text first, duplicates dropped.
         var links: [URL] {

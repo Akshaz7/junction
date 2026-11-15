@@ -62,6 +62,38 @@ final class AdvisorCardTests: XCTestCase {
         }
     }
 
+    func testSourceURLAndSectionAreOptionalAndOnlyHTTPLinksAreShown() throws {
+        let base = try JSONDecoder().decode(AdvisorCardsResponse.self, from: fixture()).cards[0]
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(base)) as? [String: Any])
+        let fullQuote = String(repeating: "Each evacuation area shall have exits. ", count: 20)
+
+        // Without url/section (older servers): decodes, no link.
+        json["source"] = ["type": "rule", "ref": "fi-fire-exits-per-storey", "title": "848/2017, 33 §", "quote": "q"]
+        let plain = try JSONDecoder().decode(AdvisorCard.self, from: JSONSerialization.data(withJSONObject: json))
+        XCTAssertNil(plain.source.url)
+        XCTAssertNil(plain.source.section)
+        XCTAssertNil(plain.source.linkURL)
+
+        // With url/section and a full (uncut) quote.
+        let link = "https://technical-regulation-information-system.ec.europa.eu/en/notification/18529/text/F/EN"
+        json["source"] = ["type": "rule", "ref": "fi-fire-exits-per-storey", "title": "848/2017, 33 §",
+                          "quote": fullQuote, "url": link, "section": "33 §"]
+        let linked = try JSONDecoder().decode(AdvisorCard.self, from: JSONSerialization.data(withJSONObject: json))
+        XCTAssertEqual(linked.source.url, link)
+        XCTAssertEqual(linked.source.section, "33 §")
+        XCTAssertEqual(linked.source.quote, fullQuote)
+        XCTAssertEqual(linked.source.linkURL, URL(string: link))
+        XCTAssertEqual(try JSONDecoder().decode(AdvisorCard.self, from: JSONEncoder().encode(linked)), linked)
+
+        // Explicit null and non-http(s) URLs decode but never become links.
+        let badURLs: [Any] = [NSNull(), "javascript:alert(1)", "ftp://example.com/x", "not a url", ""]
+        for bad in badURLs {
+            json["source"] = ["type": "rule", "ref": "r", "title": "t", "quote": "q", "url": bad]
+            let card = try JSONDecoder().decode(AdvisorCard.self, from: JSONSerialization.data(withJSONObject: json))
+            XCTAssertNil(card.source.linkURL, "\(bad)")
+        }
+    }
+
     @MainActor
     func testLiveSocketDecodesDispatchesAndFiltersAdvisorCardsByDocument() async throws {
         let data = try eventData()
