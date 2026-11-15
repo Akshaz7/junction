@@ -20,19 +20,7 @@ REPO = Path(__file__).resolve().parent.parent
 UNIT_M = {0: 1.0, 1: 0.0254, 2: 0.3048, 4: 0.001, 5: 0.01, 6: 1.0, 7: 1000.0}  # $INSUNITS -> metres
 NUM = re.compile(r"^\d+\.\d+$")
 AREA = re.compile(r"^[\d.]+\s*m²$")
-FIXTURE_KINDS = {
-    "toilet": re.compile(r"\b(?:toilet\w*|wc|water closet|toilette)\b", re.I),
-    "sink": re.compile(r"\b(?:sink\w*|wash ?basin\w*|basin\w*|lavabo\w*|waschbecken|waschtisch)\b", re.I),
-    "shower": re.compile(r"\b(?:shower\w*|dusche\w*|douche\w*|doccia)\b", re.I),
-    "bathtub": re.compile(r"\b(?:bath ?tub\w*|badewanne\w*|wanne|baignoire\w*|vasca)\b", re.I),
-}
-
-
-def fixture_kind(*names):
-    """Use explicit CAD semantics only; the size of an unnamed symbol is not its type."""
-    text = " ".join(str(n or "") for n in names).replace("_", " ").replace("-", " ")
-    matches = [kind for kind, rx in FIXTURE_KINDS.items() if rx.search(text)]
-    return matches[0] if len(matches) == 1 else None
+from pipeline.dxf_symbols import fixture_kind  # re-export for existing callers
 
 
 def room_texts(ms, layer="ROOM_TEXT"):
@@ -156,11 +144,11 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
 
     items, cnt = [], Counter()
 
-    def add(kind, label, poly_m, props, src):
+    def add(kind, label, poly_m, props, src, conf=1.0):
         cnt[kind] += 1
         poly = [px(q) for q in poly_m]
         items.append({"item_id": f"{kind}-{cnt[kind]}", "kind": kind, "label": label, "bbox_px": box(poly) if poly else None,
-                      "polygon_px": poly, "props": props, "conf": 1.0, "source": src})
+                      "polygon_px": poly, "props": props, "conf": conf, "source": src})
         return items[-1]
 
     # rooms
@@ -197,39 +185,10 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
             props["parent_room_item_id"] = room_items[parent]["item_id"]
     for e in ms.query('LWPOLYLINE POLYLINE[layer=="WALL"]'):
         add("wall", "", _pts(e), {}, "dxf")
-    for e in ms.query('LWPOLYLINE POLYLINE[layer=="WINDOW"]'):
-        if _closed(e):
-            add("window", "", _pts(e), {}, "dxf")
-    arcs = [(e.dxf.center.x, e.dxf.center.y, e.dxf.radius) for e in ms.query('ARC[layer=="DOOR"]')]
-    for e in ms.query('LWPOLYLINE POLYLINE[layer=="DOOR"]'):
-        p = _pts(e)
-        if len(p) == 5:  # door leaf frame; the 2-point lines and arcs are swing symbols
-            cx = sum(q[0] for q in p[:4]) / 4; cy = sum(q[1] for q in p[:4]) / 4
-            sw = min(arcs, key=lambda c: (c[0] - cx) ** 2 + (c[1] - cy) ** 2, default=None)
-            w = max(box(p)[2] - box(p)[0], box(p)[3] - box(p)[1])
-            add("door", "", p, {"swing_radius_m": round(sw[2] * unit_m, 2) if sw and unit_m is not None else None,
-                                "leaf_len_m": round(w * unit_m, 2) if unit_m is not None else None}, "dxf")
-    # Blocks represent one fixture, even when several nested curves draw its symbol.
-    # Semantic layers/block names can identify a fixture; anonymous FIXTURE geometry stays unknown.
-    from ezdxf import bbox as dxf_bbox
-    for e in ms.query("LWPOLYLINE POLYLINE INSERT ELLIPSE CIRCLE"):
-        name = e.dxf.name if e.dxftype() == "INSERT" else ""
-        kind = fixture_kind(e.dxf.layer, name)
-        if kind is None and e.dxf.layer != "FIXTURE":
-            continue
-        if e.dxftype() in ("LWPOLYLINE", "POLYLINE"):
-            if not _closed(e):
-                continue
-            poly = _pts(e)
-        else:
-            bounds = dxf_bbox.extents([e])
-            if not bounds.has_data:
-                continue
-            lo, hi = bounds.extmin, bounds.extmax
-            poly = [(lo.x, lo.y), (hi.x, lo.y), (hi.x, hi.y), (lo.x, hi.y)]
-        add(kind or "other", name, poly,
-            {"role": "fixture", "dxf_layer": e.dxf.layer, "dxf_block": name,
-             "classification": "explicit" if kind else "unknown"}, "dxf")
+    from pipeline.dxf_symbols import extract_fixtures, extract_openings
+    for symbol in [*extract_openings(ms, "window", unit_m), *extract_openings(ms, "door", unit_m),
+                   *extract_fixtures(ms)]:
+        add(symbol["kind"], symbol["label"], symbol["polygon"], symbol["props"], "dxf", symbol["conf"])
     # text items
     for t, x, y in texts:
         c = px((x, y)); h = 8

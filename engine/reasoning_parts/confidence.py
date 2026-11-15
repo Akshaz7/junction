@@ -67,8 +67,14 @@ def run(ctx: dict) -> dict:
     source = ctx.get('quantified_source', source)
     if ctx.get('models_used') and ctx.get('route') not in ('planmap', 'index'):
         source = "vision"
+    inferred_cad = any(getattr(it, "source", None) == "dxf" and (getattr(it, "props", None) or {}).get("classification") == "geometry"
+                       for it in ctx.get("cited") or []) and not ctx.get("models_used")
+    if inferred_cad:
+        exact, checked = False, None
     label = "Verified" if exact else "Cross-checked" if checked is True else "Estimate"
-    if exact:
+    if inferred_cad:
+        reason = "The fixtures were identified from the shapes of the CAD symbols, not from a named block or layer."
+    elif exact:
         reason = "The cited source quantities reproduce the answer; the source's completeness is not verified."
     elif checked is True:
         reason = "Two recorded readings agree within the recorded tolerance; agreement does not establish an error bound."
@@ -84,7 +90,9 @@ def run(ctx: dict) -> dict:
     else:
         reason += " No measured accuracy is available for this answer type."
     improve = None
-    if not exact:
+    if inferred_cad:
+        improve = "Check the numbered fixture symbols against the drawing or the fixture schedule."
+    elif not exact:
         improve = "Check the numbered evidence and the source quantities."
         if ctx.get('unit') in ('m', 'm2', 'm3') and not ctx.get('is_ifc') and not ctx.get('from_cad'):
             improve = "Supply a known dimension and check the measured outlines."
