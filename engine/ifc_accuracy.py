@@ -147,6 +147,10 @@ def prepare_doc(doc, root, *, for_count=False, geometry=False, question=''):
         if row['ifc_class'] == 'IfcSpace' and gid not in present and (not doc.meta.get('sheet_of') or row.get('storey') in levels):
             items.append(Item(gid, 'room', name=row.get('name'), storey=row.get('storey'), source='ifc',
                               props={'ifc_class': 'IfcSpace', 'long_name': row.get('long_name')}))
+    from engine.space_dedupe import split_spaces
+    kept_rooms, excluded_spaces = split_spaces([i for i in items if i.kind == 'room'])
+    drop = {r.item_id for r, _ in excluded_spaces}
+    items = [i for i in items if i.item_id not in drop]
     result = []
     for it in items:
         row = rows.get(it.item_id, {})
@@ -202,7 +206,8 @@ def prepare_doc(doc, root, *, for_count=False, geometry=False, question=''):
         result.append(replace(it, kind=kind, props=props, q=q))
     complete = (not idx.get('errors')) if idx is not None else bool(items) and all(i.props.get('count_status') == 'verified' for i in items)
     return replace(doc, items=result, meta={**doc.meta, 'ifc_accuracy_complete': complete,
-                                           'space_inventory_complete': bool(idx and idx.get('space_inventory_complete'))})
+                                           'space_inventory_complete': bool(idx and idx.get('space_inventory_complete')),
+                                           'excluded_spaces': [{'item_id': r.item_id, 'name': r.name, 'reason': w} for r, w in excluded_spaces]})
 
 
 def count_rows(rows, doc, root):
@@ -238,6 +243,13 @@ def annotate(res, question, doc, root):
     geometry_wanted = wants_room_geometry(question)
     rooms = [i for i in cited if i.kind == 'room']
     missing = (res.get('measurement_coverage') or {}).get('missing', 0)
+    gone = doc.meta.get('excluded_spaces') or []
+    if gone and rooms and res.get('answer', {}).get('text_md'):
+        from engine.space_dedupe import note as _note
+        class _R:  # name/item_id view for the shared sentence
+            def __init__(self, g): self.name, self.item_id = g.get('name'), g['item_id']
+        res['answer']['text_md'] += _note([(_R(g), g['reason']) for g in gone])
+        notes.append(f"{len(gone)} duplicate or MEP/HVAC space(s) were excluded so each footprint counts once.")
     if geometry_wanted and missing:
         unavailable += missing
         notes.append(f'{missing} selected rooms have no usable area; the reported sum is partial.')
