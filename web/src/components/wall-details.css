@@ -11,3 +11,6 @@
 .wall-ask { display: inline-block; margin: 8px 8px 0 0; color: inherit; text-underline-offset: 3px; font-size: var(--text-caption, 12px); }
 .viewer3d-item-card:has(.wall-details) { width: min(340px, calc(100% - 32px)); }
 .viewer3d-item-card .wall-details dl > div { grid-template-columns: 100px minmax(0, 1fr); gap: 8px; }
+.wall-details .wall-detail-how { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px; color: var(--foreground); }
+.wall-details .wall-detail-how ol { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; color: var(--muted-foreground); }
+.wall-details .wall-detail-how li:nth-last-child(-n+2) { font-variant-numeric: tabular-nums; color: var(--foreground); }

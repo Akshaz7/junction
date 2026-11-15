@@ -1,4 +1,4 @@
-import { wallMeasure, type WallDetails as Details } from '../lib/wall-details'
+import { howMeasured, wallMeasure, type WallDetails as Details } from '../lib/wall-details'
 import './wall-details.css'
 
 /** Shared by the drawing sidebar and the picked 3D wall. */
@@ -19,6 +19,10 @@ export function WallDetails({ wall }: { wall: Details }) {
         <div><dt>Net</dt><dd><strong>{wallMeasure(face.net_m2, 'm²')}</strong></dd></div>
       </dl>
     </div>)}
+    {(() => { const how = howMeasured(wall); return !!how.length && <details className="wall-detail-how" open>
+      <summary>How we measured this</summary>
+      <ol>{how.map((line) => <li key={line}>{line}</li>)}</ol>
+    </details> })()}
     <p className="wall-detail-method">{wall.method}</p>
     {!!wall.notes.length && <details><summary>Assumptions and limits</summary>{wall.notes.map((note) => <p key={note}>{note}</p>)}</details>}
   </section>

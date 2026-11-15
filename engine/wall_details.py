@@ -158,4 +158,5 @@ def details(doc_id, item_id, root, *, quantities=None, props=None, storey=None):
             "height_source": height_source, "storey": storey or ", ".join(dict.fromkeys(f["storey"] for f in floors)),
             "classification": "External (facade)" if external else "Internal" if external is False else "Not recorded",
             "faces": faces, "opening_count": len(openings) if wall else None,
-            "method": method, "notes": list(dict.fromkeys(notes))}
+            "method": method, "scale_method": None if is_ifc else wall.get("scale_method"),
+            "axis_source": wall.get("axis_source"), "notes": list(dict.fromkeys(notes))}
