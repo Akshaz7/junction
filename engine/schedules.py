@@ -34,6 +34,8 @@ def request_for(question):
     kind = next((k for k in ('door', 'window') if re.search(r'\b' + k + r's?\b', q)), None)
     if room and kind and re.search(r'how many|number of', q):
         return Request(kind, 'count', room[1].upper())
+    if kind and not room and re.search(r'\b(?:list|read|show|give|each|every|all|total|quantit\w*|types?)\b', q):
+        return Request(kind, 'list')
     if 'area' in q:
         if re.search(r'largest|greatest|biggest', q):
             return Request('room', 'largest')
@@ -184,7 +186,81 @@ def _area(text, heading):
     return (value, unit) if value > 0 else None
 
 
+_LIST_ROLES = (('width', r'\bWIDTH\b|\bWIDE\b|^W$'), ('height', r'\bHEIGHT\b|\bHT\b|^H$'),
+               ('qty', r'^(?:QTY|QUANTITY|COUNT|NO OF|NUMBER OF|TOTAL)$|\bQTY\b|\bQUANTITY\b|^COUNT$'),
+               ('mark', r'^(?:TYPE MARK|MARK|TYPE|DOOR TYPE|WINDOW TYPE|DOOR NUMBER|DOOR NO|WINDOW NUMBER|NO|TAG|ID|SYMBOL)$'))
+
+
+def _int_qty(text):
+    return int(text) if re.fullmatch(r'[1-9]\d*', text.strip()) else None
+
+
+def solve_list(pt, table, req):
+    """Read a whole door/window schedule as a table: per type width, height, quantity, total.
+
+    Nothing is guessed: a missing or non-integer quantity, a duplicated type or a
+    table that does not name its kind defers to the other routes.
+    """
+    for start in range(1, min(table.nrows, 6)):
+        roles = {}
+        for col in range(table.ncols):
+            texts = [_norm(c.text) for r in range(start) if (c := table.cell_at(r, col)) is not None and c.text.strip()]
+            for role, rx in _LIST_ROLES:
+                if role not in roles and any(re.search(rx, t) for t in texts):
+                    roles[role] = col
+        if not {'width', 'height', 'mark'} <= roles.keys() or len({roles[k] for k in roles}) != len(roles):
+            continue
+        first = table.cell_at(start, roles['mark'])
+        if first is None or not first.text.strip() or _norm(first.text) in {'TOTAL', 'TOTALS'}:
+            continue
+        body = ' '.join(c.text for c in table.cells)
+        heading = table.title + ' ' + ' '.join(c.text for c in table.cells if c.r < start)
+        if not re.search(r'\b' + req.kind + r's?\b', heading + ' ' + body, re.I):
+            return None
+        rows, seen = [], set()
+        for row in range(start, table.nrows):
+            mark = table.cell_at(row, roles['mark'])
+            text = mark.text.strip() if mark is not None else ''
+            if not text:
+                if any(c.text.strip() for c in table.cells if c.r == row):
+                    return None
+                continue
+            if _norm(text) in {'TOTAL', 'TOTALS', 'GRAND TOTAL'}:
+                continue
+            if _norm(text) in seen:
+                return None
+            seen.add(_norm(text))
+            cells = {k: table.cell_at(row, col) for k, col in roles.items()}
+            w, h = (cells[k].text.strip() if cells[k] is not None else '' for k in ('width', 'height'))
+            if not w or not h:
+                return None
+            if 'qty' in roles:
+                q = _int_qty(cells['qty'].text if cells['qty'] is not None else '')
+                if q is None:
+                    return None
+            else:
+                q = 1
+            rows.append((text, w, h, q, row))
+        if not rows:
+            return None
+        total = sum(r[3] for r in rows)
+        word = req.kind.capitalize()
+        by = f', in {len(rows)} types' if 'qty' in roles else ''
+        lines = [f'**{total} {req.kind}s** are listed on this schedule{by}.', '',
+                 f'| {word} type | Width | Height | Quantity |', '|---|---|---|---|']
+        lines += [f'| {m} | {w} | {h} | {q} |' for m, w, h, q, _ in rows]
+        lines.append(f'| **Grand total** | | | **{total}** |')
+        if 'qty' not in roles:
+            lines += ['', 'The schedule lists one row per opening, so each row counts as one.']
+        spans = [Span(pt, ' | '.join(c.text for c in table.cells if c.text), table.bbox_px)]
+        spans += [Span(pt, ' | '.join(c.text for c in table.cells if c.r == r[4] and c.text), table.row_bbox(r[4])) for r in rows]
+        return total, 'count', '\n'.join(lines), spans
+    return None
+
+
 def solve_table(pt, table, req):
+    if req.op == 'list':
+        return solve_list(pt, table, req)
     parsed = _records(table, req)
     if parsed is None:
         return None
@@ -257,7 +333,7 @@ def answer_schedule(question, doc_ids, root, t0=None):
     sheet = re.search(r'\bsheet\s+([A-Z]{1,3}[-.]?\d{2,4})\b', question, re.I)
     for did in doc_ids:
         for pt in _pages(did, root, question):
-            if sheet:
+            if sheet and not re.search(r'\bpage\s+\d+\b', question, re.I):
                 actual = _sheet(pt)
                 # A named sheet must be proven, not silently ignored.
                 if actual is None or re.sub(r'\W', '', actual['text'].upper()) != re.sub(r'\W', '', sheet[1].upper()):
