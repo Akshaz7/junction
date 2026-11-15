@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type K
 import { ArrowDown, ArrowLeft, ArrowUp, ChevronRight, Maximize2, Minimize2, X } from 'lucide-react'
 import { Button } from './ui'
 import type { Calculation, Reasoning } from '../lib/types'
-import { columnKeys, columnLabel, fmt, focusOf, pageRows, signed, sortRows, sourceText, totalsOf, withUnit, type FocusTarget, type RowSort } from '../lib/calc-view'
+import { columnKeys, columnLabel, fmt, focusOf, meaningfulPath, pageRows, shortConfidence, shortUnavailable, signed, stepRows, sortRows, sourceText, totalsOf, withUnit, type FocusTarget, type RowSort } from '../lib/calc-view'
 import { workspaceApi } from '../lib/api'
 import { calculationImages } from '../lib/calc-images'
 import './calc-panel.css'
@@ -94,8 +94,6 @@ function RowsTable({ calc, onFocus, docTitle }: { calc: Calculation; onFocus?: (
   </>
 }
 
-const MAIN_STEPS = 12
-
 /** The technical view of "How we know": every step with its numbers, inputs and sources, the per-element table, checks, margin and confidence. */
 export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle }: {
   reasoning: Reasoning; title?: string; onClose: () => void; onFocus?: (target: FocusTarget) => void; docTitle?: (id: string) => string
@@ -137,10 +135,11 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
         {result && typeof result.value !== 'number' && <p className="calc-result">{Object.entries(result.value).map(([k, v]) => <span key={k}><b>{fmt(v)}</b> <small>{k}</small> </span>)}</p>}
       </div>}
       {method && <div className="calc-method" data-testid="calc-method">
-        <p><strong>Method:</strong> {method.label}{method.why_chosen && <>, chosen because {method.why_chosen.replace(/^because\s+/i, '').replace(/\.$/, '')}.</>}</p>
-        {!!method.alternatives?.length && <details className="calc-inputs calc-alternatives"><summary>Other methods considered ({method.alternatives.length})</summary>
-          <table aria-label="Other methods considered"><thead><tr><th scope="col">Method</th><th scope="col" className="num">Value</th><th scope="col">Why not used</th></tr></thead>
-            <tbody>{method.alternatives.map((alt, i) => <tr key={i}><th scope="row">{alt.label ?? alt.id}</th><td className="num">{alt.value == null ? '-' : typeof alt.value === 'number' ? withUnit(alt.value, alt.unit ?? '') : alt.value}</td><td>{alt.rejected_because}</td></tr>)}</tbody></table>
+        <p><strong>Method:</strong> {method.label}</p>
+        {(!!method.why_chosen || !!method.alternatives?.length) && <details className="calc-inputs calc-alternatives"><summary>Why this method{!!method.alternatives?.length && ` · ${method.alternatives.length} other considered`}</summary>
+          {method.why_chosen && <p className="calc-note">{method.why_chosen}</p>}
+          {!!method.alternatives?.length && <table aria-label="Other methods considered"><thead><tr><th scope="col">Method</th><th scope="col" className="num">Value</th><th scope="col">Why not used</th></tr></thead>
+            <tbody>{method.alternatives.map((alt, i) => <tr key={i}><th scope="row">{alt.label ?? alt.id}</th><td className="num">{alt.value == null ? '-' : typeof alt.value === 'number' ? withUnit(alt.value, alt.unit ?? '') : alt.value}</td><td>{alt.rejected_because}</td></tr>)}</tbody></table>}
         </details>}
       </div>}
       {calc?.status === 'incomplete' && <p className="calc-warning" role="status">This calculation could not be reproduced in full.{calc.issues?.length ? ` ${calc.issues.join(' ')}` : ''}</p>}
@@ -169,41 +168,42 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
         </Section>}
       </>}
 
-      {!!reasoning.graph_path?.length && <Section id="path" title="Chain of evidence">
-        <ol className="calc-path" aria-label="Chain of evidence">{reasoning.graph_path.map((node, i) => <li key={i}>
+      {meaningfulPath(reasoning.graph_path).length > 2 && <Section id="path" title="Chain of evidence">
+        <ol className="calc-path" aria-label="Chain of evidence">{reasoning.graph_path!.map((node, i) => <li key={i}>
           {i > 0 && <span className="calc-edge" aria-hidden="true">→{node.relation ? ` ${node.relation}` : ''}</span>}
           {node.item_id && focus ? <button type="button" className="calc-node" onClick={() => focus({ item_id: node.item_id!, ...(node.doc_id ? { doc_id: node.doc_id } : {}), ...(node.page != null ? { page: node.page } : {}) })}>{node.label}</button> : <span className="calc-node">{node.label}</span>}
           {node.kind && <small>{node.kind}</small>}
         </li>)}</ol>
       </Section>}
 
-      {!!calc?.steps.length && <Section id="steps" title="Steps" hint={`${calc.steps.length}`}>
-        {(() => {
-          const all = calc.steps
-          // Engine marks supporting figures level="detail"; until it does, the first few steps lead and the rest fold away.
-          const leveled = all.some((x) => x.level)
-          const isMain = (x: (typeof all)[number], i: number) => leveled ? x.level !== 'detail' : i < MAIN_STEPS
-          const main = all.map((x, i) => ({ x, i })).filter(({ x, i }) => isMain(x, i))
-          const rest = all.map((x, i) => ({ x, i })).filter(({ x, i }) => !isMain(x, i))
-          const item = ({ x: step, i }: { x: (typeof all)[number]; i: number }) => <li key={step.id} data-step={step.id} value={i + 1}>
-            <div className="calc-step-head"><span className="calc-index">{i + 1}</span><strong>{step.label}</strong></div>
-            <p className="calc-expr"><code>{step.expr}</code>{step.value != null && <span className="calc-eqline"><span className="calc-eq">=</span> <b className="calc-value">{withUnit(step.value, step.unit)}</b></span>}</p>
-            {step.note && <p className="calc-note">{step.note}</p>}
-            {!!step.inputs.length && <details className="calc-inputs"><summary>Inputs ({step.inputs.length})</summary>
-              <table aria-label={`Inputs of ${step.label}`}><thead><tr><th scope="col">Input</th><th scope="col" className="num">Value</th><th scope="col">Source</th></tr></thead>
-                <tbody>{step.inputs.map((input, k) => <tr key={k}><th scope="row">{input.name}</th><td className="num">{withUnit(input.value, input.unit)}</td><td><SourceLink source={input.source} docTitle={docTitle} onFocus={focus} /></td></tr>)}</tbody></table>
-            </details>}
+      {!!calc?.steps.length && (() => {
+        const { main, folded } = stepRows(calc, method)
+        if (!main.length && !folded.length) return null
+        type S = (typeof calc.steps)[number]
+        const item = (step: S, i: number) => <li key={step.id} data-step={step.id} value={i + 1}>
+          <div className="calc-step-head"><span className="calc-index">{i + 1}</span><strong>{step.label}</strong></div>
+          <p className="calc-expr">{step.expr.length > 120 ? <details className="calc-long-expr"><summary><code>{step.expr.slice(0, 80)} …</code></summary><code>{step.expr}</code></details> : <code>{step.expr}</code>}{step.value != null && <span className="calc-eqline"><span className="calc-eq">=</span> <b className="calc-value">{withUnit(step.value, step.unit)}</b></span>}</p>
+          {step.note && (step.note.length <= 90 ? <p className="calc-note">{step.note}</p> : <details className="calc-inputs"><summary>Note</summary><p className="calc-note">{step.note}</p></details>)}
+          {!!step.inputs.length && <details className="calc-inputs"><summary>Inputs ({step.inputs.length})</summary>
+            <table aria-label={`Inputs of ${step.label}`}><thead><tr><th scope="col">Input</th><th scope="col" className="num">Value</th><th scope="col">Source</th></tr></thead>
+              <tbody>{step.inputs.map((input, k) => <tr key={k}><th scope="row">{input.name}</th><td className="num">{withUnit(input.value, input.unit)}</td><td><SourceLink source={input.source} docTitle={docTitle} onFocus={focus} /></td></tr>)}</tbody></table>
+          </details>}
+        </li>
+        const row = (r: (typeof main)[number], k: number) => r.kind === 'step' ? item(r.step, k)
+          : <li key={`g${k}`} className="calc-step-group" data-step-group={r.label}>
+            <div className="calc-step-head"><span className="calc-index">{k + 1}</span><strong>{r.label}</strong>{r.kind === 'group' && <span className="calc-group-count">{r.steps.length} steps</span>}</div>
+            {r.kind === 'class' && <p className="calc-expr calc-class-parts">{r.parts.map((part) => <span key={part.name}>{part.name} <b className="calc-value">{part.text}</b></span>)}</p>}
+            <details className="calc-inputs"><summary>Show {r.kind === 'class' ? 'sources' : 'list'} ({r.steps.length})</summary><ol className="calc-steps">{r.steps.map(({ step }, j) => item(step, j))}</ol></details>
           </li>
-          return <>
-            <ol className="calc-steps">{main.map(item)}</ol>
-            {!!rest.length && <details className="calc-more-steps" data-testid="calc-more-steps"><summary>Show all {all.length} steps ({rest.length} more)</summary>
-              <ol className="calc-steps">{rest.map(item)}</ol>
-            </details>}
-          </>
-        })()}
-      </Section>}
+        return <Section id="steps" title="Steps" hint={`${main.length}`}>
+          <ol className="calc-steps">{main.map(row)}</ol>
+          {!!folded.length && <details className="calc-more-steps" data-testid="calc-more-steps"><summary>Show {folded.length} supporting steps</summary>
+            <ol className="calc-steps">{folded.map((r, k) => row(r, k + main.length))}</ol>
+          </details>}
+        </Section>
+      })()}
 
-      {!!calc?.rows.length && <Section id="rows" title="Per-element figures" hint={`${calc.rows.length}`}><RowsTable calc={calc} onFocus={focus} docTitle={docTitle} /></Section>}
+      {!!calc?.rows.length && <Section id="rows" title={calc.result?.unit === 'count' ? `${calc.rows.length} items, each counted once` : 'Per-element figures'} hint={calc.result?.unit === 'count' ? undefined : `${calc.rows.length}`} open={calc.result?.unit !== 'count'}><RowsTable calc={calc} onFocus={focus} docTitle={docTitle} /></Section>}
 
       {!!calc?.scale_proof?.length && <Section id="scale" title="Scale proof" hint={`${calc.scale_proof.length}`} open={false}>
         {calc.scale_proof.map((proof, i) => <div key={i} className="calc-proof">
@@ -226,8 +226,8 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
         {calc.reader.note && <p className="calc-note">{calc.reader.note}</p>}
       </Section>}
 
-      {!!calc?.unavailable?.length && <Section id="unavailable" title="Not available" hint={`${calc.unavailable.length}`}>
-        <ul className="calc-unavailable">{calc.unavailable.map((u, i) => <li key={i} className="calc-note">{u}</li>)}</ul>
+      {!!calc?.unavailable?.length && <Section id="unavailable" title={`Not available (${shortUnavailable(calc.unavailable).length})`} open={false}>
+        <ul className="calc-unavailable">{shortUnavailable(calc.unavailable).map((u, i) => <li key={i} className="calc-note">{u}</li>)}</ul>
       </Section>}
 
       {!!calc?.checks.length && <Section id="checks" title="Checks" hint="second methods">
@@ -247,7 +247,7 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
       </Section>}
 
       <Section id="confidence" title="Confidence" hint={confidence.pct != null ? `${confidence.label} · ${confidence.pct}%` : confidence.label}>
-        <p className="calc-note">{confidence.reason}</p>
+        <p className="calc-note" title={confidence.reason}>{shortConfidence(confidence.reason)}</p>
         {!!confidence.factors?.length && <table className="calc-factors" aria-label="What moved the confidence figure"><tbody>
           {confidence.factors.map((f, i) => <tr key={i}><th scope="row">{f.label}{f.note && <small>{f.note}</small>}</th><td className="num">{f.base ? 'start' : `${signed(f.delta)} pts`}</td></tr>)}
           {confidence.pct != null && <tr className="calc-factor-total"><th scope="row">Confidence</th><td className="num">{confidence.pct}%</td></tr>}

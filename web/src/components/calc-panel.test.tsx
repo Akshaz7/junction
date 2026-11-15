@@ -74,7 +74,7 @@ for (const [name, calc] of [['scan door prior', scanCalc], ['scan printed scale'
   it(`renders whatever the ${name} calculation contains, with its method`, async () => {
     await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc, graph_path: undefined }} onClose={() => {}} />))
     expect(host.querySelector('[data-testid="calc-method"]')?.textContent).toContain(calc.method!.label)
-    expect(host.querySelector('[data-testid="calc-method"]')?.textContent).toContain('chosen because')
+    expect(host.querySelector('[data-testid="calc-method"]')?.textContent).toContain('Why this method')
     expect(host.querySelector('.calc-alternatives')?.textContent).toContain(calc.method!.alternatives![0].rejected_because)
     expect([...host.querySelectorAll('.calc-steps > li strong')].map((n) => n.textContent)).toEqual(calc.steps.map((s) => s.label))
     expect(!!host.querySelector('.calc-table')).toBe(calc.rows.length > 0)
@@ -106,11 +106,11 @@ it('folds supporting steps behind "Show all N steps", by level or by count', asy
   const base = scanReasoning.calc!
   const mk = (n: number, level?: (i: number) => 'main' | 'detail') => Array.from({ length: n }, (_, i) => ({ id: `s${i}`, label: `Step ${i}`, expr: 'x', value: i, unit: 'count', inputs: [], ...(level ? { level: level(i) } : {}) }))
   await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc: { ...base, steps: mk(30) } }} onClose={() => {}} />))
-  expect(host.querySelectorAll('.calc-steps')[0].children.length).toBe(12)
-  expect(host.querySelector('[data-testid="calc-more-steps"] summary')?.textContent).toContain('Show all 30 steps')
+  expect(host.querySelectorAll('.calc-steps')[0].children.length).toBe(4)
+  expect(host.querySelector('[data-testid="calc-more-steps"] summary')?.textContent).toContain('Show 26 supporting steps')
   await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc: { ...base, steps: mk(30, (i) => i < 3 ? 'main' : 'detail') } }} onClose={() => {}} />))
   expect(host.querySelectorAll('.calc-steps')[0].children.length).toBe(3)
-  await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc: { ...base, steps: mk(5) } }} onClose={() => {}} />))
+  await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc: { ...base, steps: mk(4) } }} onClose={() => {}} />))
   expect(host.querySelector('[data-testid="calc-more-steps"]')).toBeNull()
 })
 
@@ -125,4 +125,22 @@ it('claims calc: shows claim list with status chips, check line, crop, click-to-
   expect(host.querySelector('.calc-crop')).toBeTruthy()
   await act(async () => host.querySelector<HTMLButtonElement>('.calc-claims .calc-source-link')!.click())
   expect(onFocus).toHaveBeenCalled()
+})
+
+import { stepRows, meaningfulPath } from '../lib/calc-view'
+it('stepRows drops no-op rounding and repeated method text, and folds repeated steps', () => {
+  const st = (id: string, label: string, expr: string, value: number | null, extra = {}) => ({ id, label, expr, value, unit: 'count', inputs: [], level: 'main' as const, ...extra })
+  const steps = [
+    st('r', 'Result', 'round(22.0, 0)', 22, { note: 'Because of the filters.' }),
+    st('a', 'Detections · wall', 'sum', 22), st('b', 'Detections · door', 'sum', 3), st('c', 'Detections · room', 'sum', 5),
+    st('m', 'Margin · x', 'max', 0), ...Array.from({ length: 5 }, (_, i) => st(`n${i}`, 'Net wall surface', 'a − b', i)),
+    st('k', 'Keep', 'round(4.56, 1)', 4.6, { note: 'because of the filters' }),
+  ]
+  const { main } = stepRows({ steps }, { why_chosen: 'Because of the filters.' })
+  expect(main.map((r) => r.kind)).toEqual(['class', 'group', 'step'])
+  expect(main[0].kind === 'class' && main[0].parts.map((p) => p.name)).toEqual(['wall', 'door', 'room'])
+  expect(main[2].kind === 'step' && main[2].step.note).toBeUndefined()
+})
+it('meaningfulPath ignores the trivial page → method chain', () => {
+  expect(meaningfulPath([{ label: 'Cited source page', relation: 'source of answer evidence' }, { label: 'Count', kind: 'calculation', relation: 'method used for this answer' }])).toHaveLength(0)
 })
