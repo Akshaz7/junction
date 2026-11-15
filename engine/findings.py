@@ -321,7 +321,8 @@ def exits_map(doc: Doc) -> dict[str, list[Item]]:
         for s in doc.storeys:
             r = find_exits(doc, s["name"], boxes)
             doors = r["named"] + [d for d in r["outer"] if d not in r["named"]]
-            out[s["name"]] = doors + r["stairs"]
+            seen: set[str] = set()
+            out[s["name"]] = [i for i in doors + r["stairs"] if not (i.item_id in seen or seen.add(i.item_id))]  # one entry per element
     return out
 
 

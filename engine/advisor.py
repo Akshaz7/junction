@@ -132,8 +132,8 @@ def _route_cards(doc: Doc, after_doc: Doc, edit: dict, touched: list, touched_id
     if r_exit:
         for d in doors:
             if d.item_id in ex_ids and (hide or (_new_width(d, edit.get("detail") or {}) or 9) < 0.9):
-                left = len([i for i in after_map.get(d.storey, []) if i.item_id != d.item_id]) if hide else None
-                body = (f"{name(d)} is an outer door of {d.storey}. " + (f"Hiding it leaves {left} other exit{'s' if left != 1 else ''} counted there. " if hide else "Narrowing it may cut the usable exit. ")
+                left = len({i.item_id for i in after_map.get(d.storey, []) if i.kind == "door" and i.item_id != d.item_id and i.item_id not in touched_ids}) if hide else None
+                body = (f"{name(d)} is an outer door of {d.storey}. " + (f"Hiding it leaves {left} other exit door{'s' if left != 1 else ''} counted there. " if hide else "Narrowing it may cut the usable exit. ")
                         + "Each evacuation area needs the number of separate exits in Table 11.")
                 c = _card("option", f"Exit door {name(d)} changed on {d.storey}", body, [d.item_id], findings._src(r_exit), f"exitdoor:{d.item_id}")
                 out.append(c)
