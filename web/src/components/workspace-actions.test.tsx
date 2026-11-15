@@ -67,7 +67,7 @@ async function value(selector: string, text: string) {
   await act(async () => { Object.getOwnPropertyDescriptor(prototype, 'value')!.set!.call(node, text); node.dispatchEvent(new Event(node.tagName === 'SELECT' ? 'change' : 'input', { bubbles: true })) })
 }
 async function form(auto = false) { await value('input', auto ? ' New automation ' : ' New skill '); await value('textarea', ' Count windows '); if (auto) { await value('[aria-label="Automation drawing"]', 'doc-two'); await value('[aria-label="Schedule"]', '10080') } }
-function requested(method: string, path: string, body?: unknown) { expect(calls).toContainEqual({ method, path, ...(body === undefined ? {} : { body }) }) }
+function requested(method: string, path: string, body?: unknown) { expect(calls).toContainEqual({ method, path, ...(body === undefined ? {} : { body: path.endsWith('/messages') ? { ...(body as object), client_message_id: expect.any(String) } : body }) }) }
 function failOnce(method: string, path: string) { let failed = false; handle = (call) => { if (!failed && call.method === method && call.path === path) { failed = true; return Response.json({ detail: 'Test service unavailable' }, { status: 500 }) } return defaults(call) } }
 
 describe('Skills actions', () => {

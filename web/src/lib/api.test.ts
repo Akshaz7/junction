@@ -45,7 +45,7 @@ describe('backend chat contract', () => {
     expect(transport.mock.calls[1][0]).toBe('/api/chats')
     expect(JSON.parse(transport.mock.calls[1][1]!.body as string)).toEqual({ doc_ids: ids, title: 'Windows' })
     expect(transport.mock.calls[2][0]).toBe('/api/chats/persisted-chat/messages')
-    expect(JSON.parse(transport.mock.calls[2][1]!.body as string)).toEqual({ content: answer.question, doc_ids: ids })
+    expect(JSON.parse(transport.mock.calls[2][1]!.body as string)).toEqual({ content: answer.question, doc_ids: ids, client_message_id: expect.any(String) })
     expect(api.isDemo).toBe(false)
   })
 
@@ -99,5 +99,27 @@ describe('readAnswerStream idle watchdog', () => {
   it('rejects a silent stream instead of waiting forever', async () => {
     const body = new ReadableStream<Uint8Array>({ start() { /* never sends or closes */ } })
     await expect(readAnswerStream(new Response(body), { onStatus: () => {}, onTrace: () => {} }, 50)).rejects.toThrow(/connection dropped/)
+  })
+})
+
+describe('Send is idempotent and never re-posted', () => {
+  it('posts once with a client message id and recovers a dropped stream from the saved chat', async () => {
+    const calls: { url: string; body?: string }[] = []
+    const api = new WorkspaceApi('real')
+    const now = new Date().toISOString()
+    ;(api as unknown as { request: unknown }).request = async (url: string, init?: RequestInit) => {
+      calls.push({ url, body: init?.body as string | undefined })
+      if (init?.method === 'POST') return new Response(new ReadableStream({ start(c) { c.error(new TypeError('network dropped')) } }))
+      const ready = calls.length > 2
+      return { json: async () => ({ id: 'c', doc_id: null, messages: [{ id: 'u', role: 'user', content: 'hi', created_at: now, answer: null },
+        ...(ready ? [{ id: 'a', role: 'assistant', content: 'x', created_at: now, answer: { answer_id: 'A1' } }] : [])] }) }
+    }
+    const original = api.awaitSavedAnswer.bind(api)
+    api.awaitSavedAnswer = (chatId, sentAt, content) => original(chatId, sentAt, content, 100, 1)
+    const answer = await api.askQuestion('c', 'hi', [], {} as never)
+    expect(answer).toMatchObject({ answer_id: 'A1' })
+    const posts = calls.filter((c) => c.body)
+    expect(posts).toHaveLength(1)
+    expect(JSON.parse(posts[0].body!).client_message_id).toMatch(/\S{8,}/)
   })
 })
