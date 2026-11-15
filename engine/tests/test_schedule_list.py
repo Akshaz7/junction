@@ -67,3 +67,15 @@ def test_named_page_with_unprovable_sheet_still_reads_that_page():
     from engine.schedules import answer_schedule
     r = answer_schedule('On sheet A105 (page 1), read the door schedule. List each door type, width, height, quantity and the total.', [did], root)
     assert r and r['answer']['value'] == 10 and 'Grand total' in r['answer']['text_md']
+
+
+def test_window_schedule_with_header_above_the_grid():
+    root = Path('artifacts')
+    did = 'opening_design__aalseth-residence-transfer-20190321-to-lumber-yard-latest-plans-with-door-and-window-schedule-sheet-a600-3196-aalseth-lane-schedules'
+    if not (root / did).exists():
+        pytest.skip('artifact not local')
+    from engine.schedules import answer_schedule
+    r = answer_schedule('On page 1, read the window schedule. List each window type, width, height, quantity and the total.', [did], root)
+    assert r and r['answer']['value'] == 39
+    assert len(r['citations']) == 9 and all(c['bbox_px'] for c in r['citations'])
+    assert len(r['evidence']['boxes']) == 9
