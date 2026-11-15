@@ -17,6 +17,15 @@ export type FileDocument = Document & {
   version_count?: number | null; version_index?: number | null; versions?: Version[]
 }
 type FolderNode = { name: string; path: string; count: number; children: FolderNode[] }
+const titleKey = (doc: FileDocument) => doc.title.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+/** Stable: keeps the server order between different titles; same-title copies newest (updated_at) first. */
+function newestCopyFirst(rows: FileDocument[]): FileDocument[] {
+  const first = new Map<string, number>()
+  rows.forEach((doc, i) => { if (!first.has(titleKey(doc))) first.set(titleKey(doc), i) })
+  const time = (doc: FileDocument) => Date.parse(doc.updated_at ?? '') || 0
+  return rows.map((doc, i) => ({ doc, i })).sort((a, b) => first.get(titleKey(a.doc))! - first.get(titleKey(b.doc))!
+    || time(b.doc) - time(a.doc) || a.i - b.i).map((row) => row.doc)
+}
 const inFolder = (doc: FileDocument, path: string) => !path || doc.folder === path || !!doc.folder?.startsWith(`${path}/`)
 function FolderBranch({ node, active, onSelect }: { node: FolderNode; active: string; onSelect: (path: string) => void }) {
   const [expanded, setExpanded] = useState(false)
@@ -44,15 +53,17 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const [versionError, setVersionError] = useState('')
   const [versionLoading, setVersionLoading] = useState(false)
   const versionRequest = useRef(0)
+  const haveFolders = useRef(false)
   useEffect(() => {
     if (demo || hidden) return
     const controller = new AbortController()
-    setFolderLoading(true)
+    // Background refreshes (upload polling) keep the current tree on screen instead of flashing "Loading folders…".
+    if (!haveFolders.current) setFolderLoading(true)
     setFolderError('')
     fetch('/api/folders', { signal: controller.signal }).then(async (response) => {
       if (!response.ok) throw new Error(`Could not load folders (${response.status}).`)
       const result = await response.json() as { folders: FolderNode[] }
-      if (!controller.signal.aborted) setFolders(result.folders)
+      if (!controller.signal.aborted) { setFolders(result.folders); haveFolders.current = true }
     }).catch((error: unknown) => { if (!controller.signal.aborted) setFolderError(error instanceof Error ? error.message : 'Could not load folders.') })
       .finally(() => { if (!controller.signal.aborted) setFolderLoading(false) })
     return () => controller.abort()
@@ -65,6 +76,8 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const [uploadOpen, setUploadOpen] = useState(false)
   const [uploadError, setUploadError] = useState('')
   const lastOpened = useRef<HTMLButtonElement | null>(null)
+  const uploadPoll = useRef<number | undefined>(undefined)
+  useEffect(() => () => window.clearInterval(uploadPoll.current), [])
 
   function openUpload() { setUploadError(''); setUploadOpen(true) }
   useEffect(() => { // chat's "Upload" note lands here with the dialog already open (the screen may stay mounted)
@@ -123,7 +136,9 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const options = folderOptions(folders)
   const query = search.trim().toLowerCase()
   // Searching always spans every source, even with a folder selected.
-  const filtered = query ? searchDocuments(docs, query) : docs.filter((doc) => inFolder(doc, activeFolder))
+  // Re-uploads of one file keep its title (only case/separators may differ): list the newest copy first so the
+  // first row is the latest ingest, not a stale copy built by an older pipeline.
+  const filtered = query ? searchDocuments(docs, query) : newestCopyFirst(docs.filter((doc) => inFolder(doc, activeFolder)))
   if (newId && !query) { const at = filtered.findIndex((doc) => doc.doc_id === newId); if (at > 0) filtered.unshift(...filtered.splice(at, 1)) }
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, pageCount)
@@ -139,8 +154,10 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
         setNewId(docId); setSelectedId(docId)
         // The dialog may be closed during processing: keep refreshing so the new document appears without a reload.
         setFolder(''); setSearch(''); setPage(1)
+        // One poll per screen: a later upload replaces it rather than stacking another 2-minute timer.
+        window.clearInterval(uploadPoll.current)
         let tries = 0
-        const timer = window.setInterval(() => { void onRefresh().catch(() => undefined); if (++tries >= 24) window.clearInterval(timer) }, 5000)
+        uploadPoll.current = window.setInterval(() => { void onRefresh().catch(() => undefined); if (++tries >= 24) window.clearInterval(uploadPoll.current) }, 5000)
         void onRefresh().catch(() => undefined)
       }}
       onReady={() => {

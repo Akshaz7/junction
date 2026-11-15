@@ -35,9 +35,9 @@ export function isRoof(kind: string, element?: IFCElement): boolean {
 }
 
 /** Building-services kinds (ifc_scene MEP classes): shown as their own layer next to the building. */
-const SERVICE_KINDS = new Set(['duct', 'duct_fitting', 'terminal', 'valve_damper', 'pump_fan', 'pipe', 'pipe_fitting',
+const SERVICE_KINDS = new Set(['duct', 'duct_fitting', 'terminal', 'air_terminal', 'valve_damper', 'pump_fan', 'pipe', 'pipe_fitting',
   'equipment', 'mep_other', 'cable_tray', 'cable', 'valve', 'damper', 'fan', 'pump', 'tank', 'light']);
-const AIR_KINDS = new Set(['duct', 'duct_fitting', 'terminal', 'valve_damper', 'damper', 'fan', 'pump_fan']);
+const AIR_KINDS = new Set(['duct', 'duct_fitting', 'terminal', 'air_terminal', 'valve_damper', 'damper', 'fan', 'pump_fan']);
 
 export type ModelLayer = 'all' | 'building' | 'services';
 

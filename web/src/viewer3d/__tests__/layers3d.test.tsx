@@ -31,6 +31,12 @@ it('groups manifest kinds into 3D layers', () => {
   expect(g.get('structure')).toEqual(['c1']);
 });
 
+it('puts ventilation items on their own Ducts layer, not Other', () => {
+  const g = groupSceneItems({ manifest: { items: { d: { kind: 'duct' }, f: { kind: 'duct_fitting' }, a: { kind: 'air_terminal' }, e: { kind: 'equipment' } } } } as never);
+  expect(g.get('duct')).toEqual(['d', 'f', 'a']);
+  expect(g.get('other')).toEqual(['e']);
+});
+
 it('shows chips with counts, all on, and toggling hides that layer visually', () => {
   act(() => root.render(<Layers3D viewer={viewer()} />));
   const chips = [...host.querySelectorAll<HTMLButtonElement>('[data-layer]')];
