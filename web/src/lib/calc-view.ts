@@ -125,3 +125,64 @@ export function keyNumbers(calc: Calculation | ClaimsCalculation | undefined): {
   if (judged.length) out.push({ label: 'Checks', text: `${judged.filter((c) => c.agrees).length} of ${judged.length} agree` })
   return out
 }
+
+type Step = Calculation['steps'][number]
+export type StepRow =
+  | { kind: 'step'; step: Step; index: number }
+  | { kind: 'class'; label: string; parts: { name: string; text: string }[]; steps: { step: Step; index: number }[] }
+  | { kind: 'group'; label: string; steps: { step: Step; index: number }[] }
+
+const norm = (text: string | undefined) => (text ?? '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+/** "round(22.0, 0)" where the number is already what it rounds to: no information. */
+function isNoopRound(step: Step): boolean {
+  const m = /^round\(\s*(-?[\d.]+(?:e-?\d+)?)\s*,\s*(\d+)\s*\)$/i.exec(step.expr ?? '')
+  return !!m && step.value != null && Number(m[1]) === step.value
+}
+
+/**
+ * The few steps worth reading, in order. Drops no-op rounding, steps that only repeat the method text or a section shown
+ * below (margin, confidence), folds "Detections · wall/door/…" into one row and folds long runs of the same step into one row.
+ * `folded` keeps everything else, so nothing is lost: it sits behind a disclosure.
+ */
+export function stepRows(calc: Pick<Calculation, 'steps'>, method?: { why_chosen?: string }): { main: StepRow[]; folded: StepRow[]; hidden: number } {
+  const all = calc.steps.map((step, index) => ({ step, index }))
+  const leveled = all.some(({ step }) => step.level)
+  const hiddenIds = new Set<number>()
+  for (const { step, index } of all) if (isNoopRound(step) || /-(margin|confidence)$/.test(step.id ?? '') || /^(margin|confidence) ·/i.test(step.label)) hiddenIds.add(index)
+  const why = norm(method?.why_chosen)
+  const note = (step: Step) => step.note && why && norm(step.note) === why ? { ...step, note: undefined } : step
+  // Unlevelled engines list set-up first and the result last: keep the last few steps and any folded runs, fold the rest.
+  const isDetail = (step: Step, index: number) => leveled ? step.level === 'detail' : false
+  const rows: StepRow[] = [], folded: StepRow[] = []
+  const used = new Set<number>()
+  for (const { step, index } of all) {
+    if (used.has(index) || hiddenIds.has(index)) continue
+    const target = isDetail(step, index) ? folded : rows
+    const prefix = step.label.includes(' · ') ? step.label.split(' · ')[0] : ''
+    const same = (prefix
+      ? all.filter((o) => !used.has(o.index) && !hiddenIds.has(o.index) && o.step.label.startsWith(`${prefix} · `) && isDetail(o.step, o.index) === isDetail(step, index))
+      : all.filter((o) => !used.has(o.index) && !hiddenIds.has(o.index) && o.step.label === step.label && isDetail(o.step, o.index) === isDetail(step, index)))
+    if (same.length >= (prefix ? 3 : 4)) {
+      same.forEach((o) => used.add(o.index))
+      const members = same.map((o) => ({ step: note(o.step), index: o.index }))
+      if (prefix && same.every((o) => typeof o.step.value === 'number')) {
+        target.push({ kind: 'class', label: prefix, steps: members, parts: members.map(({ step: s }) => ({ name: s.label.slice(prefix.length + 3), text: withUnit(s.value, s.unit) })) })
+      } else target.push({ kind: 'group', label: prefix || step.label, steps: members })
+      continue
+    }
+    used.add(index)
+    target.push({ kind: 'step', step: note(step), index })
+  }
+  if (!leveled) {
+    const keep = new Set(all.slice(-4).map((o) => o.index))
+    const lead = rows.filter((r) => r.kind === 'step' ? !keep.has(r.index) : r.steps.length <= 10)
+    const main = rows.filter((r) => !lead.includes(r))
+    return { main, folded: [...lead, ...folded], hidden: hiddenIds.size }
+  }
+  return { main: rows, folded, hidden: hiddenIds.size }
+}
+
+/** Only chain-of-evidence nodes that say something: "cited page → method used" is not a chain. */
+export function meaningfulPath<T extends { label?: string; kind?: string | null; relation?: string | null }>(path: T[] | null | undefined): T[] {
+  return (path ?? []).filter((n) => !(n.label === 'Cited source page' || n.relation === 'method used for this answer' || n.relation === 'source of answer evidence'))
+}
