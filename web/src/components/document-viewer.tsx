@@ -490,7 +490,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       <Button variant="ghost" size="icon-xs" aria-label="Close sheet search" onClick={closeSearch}><X size={14} /></Button>
     </div>}
     {mode === '2d' && measure.mode && <div className="viewer-annotation-controls viewer-measure-controls" role="status" aria-live="polite">
-      <span>{!mPerPx ? 'No scale on this drawing, so distances cannot be measured.' : measure.result?.distanceM != null ? `Distance: ${formatM(measure.result.distanceM)}` : measure.result?.areaM2 != null ? `Area: ${formatM2(measure.result.areaM2)} · perimeter ${formatM(measure.result.perimeterM ?? 0)}` : measure.mode === 'distance' ? 'Click two points to measure (snaps to plan corners)' : 'Click the corners, then double-click or press Enter'}</span>
+      <span>{!mPerPx ? 'No scale on this drawing, so distances cannot be measured.' : measure.result?.distanceM != null ? `Distance: ${formatM(measure.result.distanceM)}` : measure.result?.areaM2 != null ? `Area: ${formatM2(measure.result.areaM2)} · perimeter ${formatM(measure.result.perimeterM ?? 0)}` : measure.mode === 'distance' ? 'Click two points to measure (snaps to plan corners) · Esc to cancel' : 'Click the corners, then double-click or press Enter · Esc to cancel'}</span>
       <Button variant="ghost" size="xs" aria-pressed={measure.mode === 'distance'} onClick={() => measure.start('distance')}>Distance</Button>
       <Button variant="ghost" size="xs" aria-pressed={measure.mode === 'area'} onClick={() => measure.start('area')}>Area</Button>
       <Button variant="ghost" size="xs" onClick={measure.stop}>Done</Button>

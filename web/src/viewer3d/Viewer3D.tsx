@@ -457,7 +457,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       {walking && <WalkJoystick onMove={(x, y) => viewerRef.current?.setWalkJoystick(x, y)} />}
       {state === 'ready' && details && !editing && <ItemDetailsCard key={details.item_id} details={details}
         loading={detailsLoading} viewer={viewerRef.current} onClose={closeDetails}
-        onHighlight={() => viewerRef.current?.highlight([details.item_id])} />}
+        onHighlight={() => viewerRef.current?.highlight([details.item_id])} docId={doc_id ?? manifest?.doc_id ?? null} />}
     </div>
     <div className="viewer3d-footer">
       {state === 'ready' && build && <BuildSlider build={build} viewer={viewerRef.current} />}

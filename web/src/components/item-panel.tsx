@@ -107,3 +107,16 @@ function SourceProperties({ props }: { props: Record<string, unknown> }) {
     {rest.length ? <dl className="item-properties">{rest.map(([key, value]) => <div key={key} data-property={key}><dt>{key}</dt><dd>{propertyValue(value)}</dd></div>)}</dl> : <p>No additional source properties supplied.</p>}
   </>
 }
+
+/** The same deterministic facts as the 2D item panel (measured values, where they come from, what the item
+ * connects to), for the 3D item card. Fetches the linked item itself; renders nothing until it has data. */
+export function LinkedItemFacts({ docId, itemId }: { docId: string; itemId: string }) {
+  const [item, setItem] = useState<ItemWithQuantities | null>(null)
+  useEffect(() => {
+    const controller = new AbortController()
+    setItem(null)
+    linkedApi.get(docId, itemId, controller.signal).then((value) => { if (!controller.signal.aborted) setItem(value) }).catch(() => {})
+    return () => controller.abort()
+  }, [docId, itemId])
+  return item ? <div className="linked-item-facts" data-testid="linked-item-facts"><ItemMeasures item={item} /></div> : null
+}

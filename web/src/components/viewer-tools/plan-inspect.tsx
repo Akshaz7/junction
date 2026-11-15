@@ -37,6 +37,18 @@ export function usePlanInspect(docId: string, page: number) {
     }).catch(() => {})
     return () => controller.abort()
   }, [docId, page])
+  // Keyboard while measuring (capture phase, so the page's own Escape handling does not also close the document):
+  // Esc cancels the measurement (distance or area), Enter closes an area, Backspace removes the last point.
+  useEffect(() => {
+    if (!measure.mode) return
+    function onKey(event: KeyboardEvent) {
+      if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); measure.stop() }
+      else if (event.key === 'Enter' && measure.mode === 'area') { event.preventDefault(); event.stopPropagation(); measure.close() }
+      else if (event.key === 'Backspace' && !(event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement)) { event.preventDefault(); measure.undo() }
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  }, [measure.mode, measure.stop, measure.close, measure.undo]) // eslint-disable-line react-hooks/exhaustive-deps
   const byId = useMemo(() => new Map(items.map((item) => [item.id, item])), [items])
   return { docId, page, items, byId, mPerPx, hover, setHover, selected, setSelected, layers, measure }
 }
@@ -55,7 +67,7 @@ export function PlanInspectTools({ state }: { state: PlanInspect }) {
       {!mPerPx ? 'No scale on this drawing, so distances cannot be measured.'
         : measure.result?.distanceM != null ? `Distance ${formatM(measure.result.distanceM)}`
         : measure.result?.areaM2 != null ? `Area ${formatM2(measure.result.areaM2)} · perimeter ${formatM(measure.result.perimeterM ?? 0)}`
-        : measure.mode === 'distance' ? 'Click two points (snaps to plan corners)' : 'Click corners, double-click to close'}
+        : measure.mode === 'distance' ? 'Click two points (snaps to plan corners) · Esc to cancel' : 'Click corners, double-click or Enter to close · Esc to cancel'}
       <Button variant="ghost" size="xs" aria-pressed={measure.mode === 'distance'} onClick={() => measure.start('distance')}>Distance</Button>
       <Button variant="ghost" size="xs" aria-pressed={measure.mode === 'area'} onClick={() => measure.start('area')}>Area</Button>
       <Button variant="ghost" size="xs" onClick={measure.stop}>Done</Button>
