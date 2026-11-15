@@ -1,0 +1,32 @@
+{
+  "typescript": "pass: npx tsc --noEmit -p .",
+  "vitest": {
+    "passed": 14,
+    "files": 4
+  },
+  "engine_tests": {
+    "passed": 46,
+    "known_baseline_failure": "engine/tests/test_wallarea.py::test_full_dispatch_evidence_reasoning_and_csv_table expects Checked but unchanged reasoning emits Found; reproduced using HEAD engine/wallarea.py"
+  },
+  "playwright": {
+    "passed": 2,
+    "covers": [
+      "IFC properties preloaded, linked detail still fetched",
+      "reopen uses cached wall detail",
+      "Ask about this wall pre-fills question and selects source document",
+      "real AC20 scene; real scan extruded in temporary scratch from unmodified source"
+    ]
+  },
+  "real_source_files": 4,
+  "scan_planmap_walls": 9,
+  "swiss_dxf_supported_walls": 8,
+  "swiss_dxf_unsupported_complex_wall_networks": 5,
+  "limitations": [
+    "Complex wall networks retain unavailable face areas; no invented length or area.",
+    "Generated raster component estimates cover the source outline and exclude lintel/sill infill beyond it.",
+    "Missing external classification or face orientation is explicitly shown as not recorded."
+  ],
+  "shared_artifacts_modified": false,
+  "pdf_ingest_modified": false,
+  "model_cost_usd": 0
+}

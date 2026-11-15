@@ -1,4 +1,5 @@
 import { storeyName, type SceneManifest, type Storey } from './scene';
+import type { WallDetails } from '../lib/wall-details';
 
 /** CONTRACT 5.5; quantities and properties are optional facts, never inferred. */
 export interface IFCElement {
@@ -11,6 +12,7 @@ export interface IFCElement {
   storey?: Storey | null;
   quantities?: Record<string, number | null> | null;
   props?: Record<string, unknown> | null;
+  wall_details?: WallDetails | null;
 }
 
 export interface ItemDetails {
@@ -18,6 +20,8 @@ export interface ItemDetails {
   name: string;
   fields: { label: string; value: string }[];
   hasElement: boolean;
+  wall?: WallDetails;
+  askHref?: string;
 }
 
 /** Supports the pipeline's {elements: [...]} envelope and a plain entry array. */
@@ -53,21 +57,22 @@ export function buildItemDetails(
     if (formatted !== null) fields.push({ label, value: formatted });
   }
   add('Tag', sceneItem.tag);
-  add('IFC class', element?.ifc_class);
+  if (!element?.wall_details) add('IFC class', element?.ifc_class);
   add('Type', element?.type_name ?? sceneItem.type_name ?? sceneItem.kind);
   add('Predefined type', element?.predefined_type);
-  for (const [key, label, unit] of [
+  for (const [key, label, unit] of element?.wall_details ? [] : [
     ['width_m', 'Width', 'm'], ['height_m', 'Height', 'm'], ['length_m', 'Length', 'm'],
     ['area_m2', 'Area', 'm²'], ['volume_m3', 'Volume', 'm³'],
   ]) {
     const value = element?.quantities?.[key] ?? sceneItem.quantities?.[key] ?? element?.props?.[key] ?? sceneItem.props?.[key];
     if (typeof value === 'number' && Number.isFinite(value)) add(label, `${value} ${unit}`);
   }
-  if (!fields.some(({ label }) => ['Width', 'Height', 'Length', 'Area', 'Volume'].includes(label))) {
+  if (!element?.wall_details && !fields.some(({ label }) => ['Width', 'Height', 'Length', 'Area', 'Volume'].includes(label))) {
     add('Size', 'Not available');
   }
   add('Material', element?.props?.material);
   add('Fire rating', element?.props?.fire_rating);
   add('External', element?.props?.is_external);
-  return { item_id, name: text(element?.name) ?? text(sceneItem.name) ?? item_id, fields, hasElement: element !== undefined };
+  return { item_id, name: text(element?.name) ?? text(sceneItem.name) ?? item_id, fields, hasElement: element !== undefined,
+    ...(element?.wall_details ? { wall: element.wall_details } : {}) };
 }

@@ -1,0 +1,67 @@
+{
+  "doc_id": "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000",
+  "item_id": "3cVKGwMBL7bvgNa1Q7DV2Y",
+  "kind": "wall",
+  "tag": "WL21",
+  "name": "Basic Wall:21_WA_LB_290_thermally insulated:7252783",
+  "storey": "Ground Level",
+  "type_name": "Basic Wall:21_WA_LB_290_thermally insulated",
+  "ifc_class": "IfcWallStandardCase",
+  "props": {
+    "is_external": true,
+    "material": "Plaster above thermal insulation; Semi-rigid insulation- expanded polystyren; Plaster with adhesive; Plaster; Masonry - Brick; Plaster; Plaster and paint interior face",
+    "load_bearing": false,
+    "ifc_class": "IfcWallStandardCase",
+    "predefined_type": "STANDARD",
+    "quantity_source": {
+      "length_m": "bbox",
+      "height_m": "bbox"
+    },
+    "storey_elevation_m": -0.06
+  },
+  "quantities": {
+    "length_m": 5.5,
+    "height_m": 2.27
+  },
+  "wall_details": {
+    "status": "Measured",
+    "length_m": 5.5,
+    "thickness_m": null,
+    "height_m": 2.27,
+    "height_source": "model",
+    "storey": "Ground Level",
+    "classification": "External (facade)",
+    "faces": [
+      {
+        "label": "Face A",
+        "gross_m2": 12.484999999999998,
+        "opening_m2": 2.4821999999999864,
+        "net_m2": 10.002800000000011
+      },
+      {
+        "label": "Face B",
+        "gross_m2": 12.484999999999998,
+        "opening_m2": 2.4821999999999864,
+        "net_m2": 10.002800000000011
+      }
+    ],
+    "opening_count": 2,
+    "method": "IFC gross and void-cut longitudinal side faces; openings deducted from the geometry.",
+    "notes": [
+      "Inner/outer orientation is not recorded; faces A and B are shown without guessing."
+    ]
+  },
+  "places": [
+    {
+      "doc_id": "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000",
+      "page": 1,
+      "bbox_px": [
+        40.0,
+        58.4,
+        58.0,
+        273.1
+      ],
+      "storey": "Ground Level"
+    }
+  ]
+}

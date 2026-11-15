@@ -1,0 +1,81 @@
+{
+  "doc_id": "ifc_bench__ac20-arc",
+  "item_id": "2UZhzWc8v0fA0sfv__WgLn",
+  "kind": "wall",
+  "tag": "WL2",
+  "name": "Wand-002",
+  "storey": "Keller",
+  "type_name": "Kalksandstein 2816491304 300",
+  "ifc_class": "IfcWallStandardCase",
+  "props": {
+    "material": "Kalksandstein 2816491304",
+    "is_external": true,
+    "is_external_source": "space_boundary",
+    "ifc_class": "IfcWallStandardCase",
+    "predefined_type": null,
+    "quantity_source": {
+      "length_m": "qto",
+      "height_m": "qto",
+      "width_m": "qto",
+      "gross_footprint_area_m2": "qto",
+      "net_footprint_area_m2": "qto",
+      "gross_side_area_m2": "qto",
+      "net_side_area_m2": "qto",
+      "gross_volume_m3": "qto",
+      "net_volume_m3": "qto",
+      "volume_m3": "qto"
+    },
+    "storey_elevation_m": -3.0
+  },
+  "quantities": {
+    "length_m": 18.0,
+    "height_m": 2.7,
+    "width_m": 0.3,
+    "gross_footprint_area_m2": 5.4,
+    "net_footprint_area_m2": 5.4,
+    "gross_side_area_m2": 46.845,
+    "net_side_area_m2": 28.845,
+    "gross_volume_m3": 14.58,
+    "net_volume_m3": 9.18,
+    "volume_m3": 9.18
+  },
+  "wall_details": {
+    "status": "Measured",
+    "length_m": 18.0,
+    "thickness_m": 0.3,
+    "height_m": 2.7,
+    "height_source": "model",
+    "storey": "Keller",
+    "classification": "External (facade)",
+    "faces": [
+      {
+        "label": "Inner face",
+        "gross_m2": 48.6,
+        "opening_m2": 18.000000000000007,
+        "net_m2": 30.599999999999994
+      },
+      {
+        "label": "Outer face (facade)",
+        "gross_m2": 48.6,
+        "opening_m2": 17.999999999999982,
+        "net_m2": 30.60000000000002
+      }
+    ],
+    "opening_count": 12,
+    "method": "IFC gross and void-cut longitudinal side faces; openings deducted from the geometry.",
+    "notes": []
+  },
+  "places": [
+    {
+      "doc_id": "ifc_bench__ac20-arc",
+      "page": 1,
+      "bbox_px": [
+        40.0,
+        150.5,
+        1050.9,
+        167.0
+      ],
+      "storey": "Keller"
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { ItemDetails } from './identify';
 import type { Viewer } from './viewer';
+import { WallDetails } from '../components/wall-details';
 
 export function ItemDetailsCard({ details, loading, viewer, onClose, onHighlight }: {
   details: ItemDetails; loading: boolean; onClose: () => void; onHighlight: () => void;
@@ -53,7 +54,8 @@ export function ItemDetailsCard({ details, loading, viewer, onClose, onHighlight
     <dl>{details.fields.map(({ label, value }) => <div key={label}>
       <dt>{label}</dt><dd>{value}</dd>
     </div>)}</dl>
-    {details.name !== details.item_id && <p className="viewer3d-item-id">{details.item_id}</p>}
+    {details.wall && <WallDetails wall={details.wall} />}
+    {details.askHref && <a className="wall-ask" href={details.askHref}>Ask about this wall</a>}
     {!details.hasElement && <p className="viewer3d-item-note" role="status">
       {loading ? 'Loading properties…' : 'No additional properties available.'}
     </p>}

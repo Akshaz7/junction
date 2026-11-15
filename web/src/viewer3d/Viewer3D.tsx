@@ -25,6 +25,7 @@ import { roomTypeLabel } from './blueprint';
 import { itemKindKey, pipeSizeLabel } from '../lib/kind-colors';
 import type { FindingPinState } from './findings';
 import { qualitySummary } from '../lib/scene-quality';
+import { wallAskHref } from '../lib/wall-details';
 import './viewer3d.css';
 
 interface ViewerOptions {
@@ -105,6 +106,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
   const [saved, setSaved] = useState<{ busy: boolean; message?: string; href?: string; parent: number; doc?: string }>({ busy: false, parent: 0 });
   const [elements, setElements] = useState<Map<string, IFCElement>>(new Map());
   const [detailsLoading, setDetailsLoading] = useState(false);
+  const [detailFetched, setDetailFetched] = useState<Set<string>>(new Set());
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState('');
   const [progress, setProgress] = useState<LoadProgress>({ phase: 'manifest' });
@@ -112,19 +114,25 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
   const helpId = useId();
   const closeDetails = useCallback(() => setPicked(null), []);
   const details = manifest && picked ? buildItemDetails(manifest, picked, elements.get(picked)) : null;
+  if (details && manifest && picked && manifest.items[picked]?.kind === 'wall') {
+    details.askHref = wallAskHref(manifest.doc_id, manifest.items[picked].tag || picked);
+  }
 
   useEffect(() => {
-    if (!picked || !manifest || elements.has(picked) || !/^\/api\/docs\//.test(sceneUrl)) return;
+    if (!picked || !manifest || detailFetched.has(`${manifest.doc_id}/${picked}`) || !/^\/api\/docs\//.test(sceneUrl)) return;
     const controller = new AbortController();
     setDetailsLoading(true);
     void fetch(`/api/docs/${encodeURIComponent(manifest.doc_id)}/items/${encodeURIComponent(picked)}`,
       { signal: controller.signal }).then(async (response) => {
       if (!response.ok) return;
       const item = await response.json() as IFCElement;
-      if (!controller.signal.aborted && item.item_id === picked) setElements((previous) => new Map(previous).set(picked, item));
+      if (!controller.signal.aborted && item.item_id === picked) {
+        setElements((previous) => new Map(previous).set(picked, { ...previous.get(picked), ...item }));
+        setDetailFetched((previous) => new Set(previous).add(`${manifest.doc_id}/${picked}`));
+      }
     }).catch(() => {}).finally(() => { if (!controller.signal.aborted) setDetailsLoading(false); });
     return () => { controller.abort(); setDetailsLoading(false); };
-  }, [picked, manifest, sceneUrl, elements]);
+  }, [picked, manifest, sceneUrl, detailFetched]);
 
   function finishEdit(edit: ItemEdit | null) {
     setEdits(viewerRef.current?.getEditState() ?? { undoCount: 0, moved: {}, materials: {} });
@@ -203,6 +211,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     setEdits({ undoCount: 0, moved: {}, materials: {} });
     setHiddenIds([]);
     setElements(new Map());
+    setDetailFetched(new Set());
     setHasRoof(false);
     setWalking(false);
     setWalkMessage('');

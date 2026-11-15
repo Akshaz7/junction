@@ -1,0 +1,13 @@
+.wall-details { margin: 12px 0; font-size: var(--text-caption, 12px); line-height: 1.5; }
+.wall-details .wall-detail-status { color: var(--foreground); margin: 0 0 10px; }
+.wall-details dl { display: grid; gap: 5px; margin: 0; }
+.wall-details dl > div { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 8px; margin: 0; }
+.wall-details dt { color: var(--muted-foreground); }
+.wall-details dd { margin: 0; }
+.wall-detail-face { border-top: 1px solid var(--border); margin-top: 10px; padding-top: 8px; }
+.wall-details .wall-detail-face h3 { font-size: inherit; margin: 0 0 6px; }
+.wall-detail-method, .wall-details details { color: var(--muted-foreground); }
+.wall-details summary { cursor: pointer; }
+.wall-ask { display: inline-block; margin: 8px 8px 0 0; color: inherit; text-underline-offset: 3px; font-size: var(--text-caption, 12px); }
+.viewer3d-item-card:has(.wall-details) { width: min(340px, calc(100% - 32px)); }
+.viewer3d-item-card .wall-details dl > div { grid-template-columns: 100px minmax(0, 1fr); gap: 8px; }

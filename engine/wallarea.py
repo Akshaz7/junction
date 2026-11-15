@@ -448,6 +448,11 @@ def measure_ifc(path: str | Path) -> dict:
             # Area removed is measured once from the boolean result, not the sum
             # of nominal opening sizes. Per-opening allocations intersect that
             # removed region and consume it once, even for overlapping voids.
+            if axis["kind"] == "line":
+                vertices = np.concatenate([f.vertices for f in gross])
+                tangent = np.array([axis["normal"][1], -axis["normal"][0], 0])
+                row["length_m"] = float(np.ptp(vertices @ tangent))
+                row["thickness_m"] = float(np.ptp(vertices @ axis["normal"]))
             removed = []
             for face in gross:
                 if face.planar:
@@ -653,7 +658,7 @@ def _stated_height(text):
     return float(m[1].replace(",", ".")) * {"mm": .001, "cm": .01, "ft": .3048, "feet": .3048}.get(m[2].lower(), 1.)
 
 
-def estimate_planmaps(doc_id, root, question):
+def estimate_planmaps(doc_id, root, question, *, planmaps=None):
     """Conditional 2D estimate; no hidden height/scale accuracy percentages.
 
     Needs source lengths or a page scale. Rectangular outlines and centrelines
@@ -664,8 +669,8 @@ def estimate_planmaps(doc_id, root, question):
     from shapely.ops import unary_union
     directory = Path(root) / doc_id
     out = {"source": "2D plan estimate", "walls": [], "skipped": [], "storeys": [], "assumptions": [], "precision_m": 0.}
-    for path in sorted(directory.glob("planmap-[0-9]*.json")):
-        pm = json.loads(path.read_text())
+    pages = planmaps if planmaps is not None else (json.loads(path.read_text()) for path in sorted(directory.glob("planmap-[0-9]*.json")))
+    for pm in pages:
         page = int(pm.get("page") or 1)
         sc = pm.get("scale") or {}
         mpp = _number(sc.get("m_per_px"))
@@ -738,7 +743,7 @@ def estimate_planmaps(doc_id, root, question):
             external = props.get("is_external") if isinstance(props.get("is_external"), bool) else None
             row = {"item_id": it["item_id"], "name": it.get("label") or "Wall", "type": props.get("type_name"),
                    "materials": [props["material"]] if props.get("material") else [], "is_external": external,
-                   "height_m": h, "length_m": length, "height_source": "wall data" if props.get("height_m") else height_source,
+                   "height_m": h, "length_m": length, "thickness_m": thick, "height_source": props.get("height_source") or ("wall data" if props.get("height_m") else height_source),
                    "axis_source": method, "quantities": {}, "checks": [], "curved": False, "rooms": [], "openings": [],
                    "page": page, "floors": [], "notes": [], "_line": line, "_thickness": thick,
                    "_holes": [], "scale_relative_error": sc.get("relative_error"), "scale_method": sc.get("method")}
