@@ -186,3 +186,27 @@ export function stepRows(calc: Pick<Calculation, 'steps'>, method?: { why_chosen
 export function meaningfulPath<T extends { label?: string; kind?: string | null; relation?: string | null }>(path: T[] | null | undefined): T[] {
   return (path ?? []).filter((n) => !(n.label === 'Cited source page' || n.relation === 'method used for this answer' || n.relation === 'source of answer evidence'))
 }
+
+/** "Not available" entries as short phrases; per-page "x: not recorded for this page" entries fold into one. */
+export function shortUnavailable(list: string[]): string[] {
+  const names: string[] = [], out: string[] = []
+  for (const text of list) {
+    const m = /^([\w.]+): not recorded for this page/i.exec(text)
+    if (m) { names.push(m[1]); continue }
+    let t = text
+    if (/second[- ]look/i.test(t) && /count|reading|recount/i.test(t)) t = 'No second-look recount'
+    else if (/dpi/i.test(t)) t = 'Image DPI not recorded'
+    else if (/accuracy percentage/i.test(t)) t = 'No measured accuracy calibration'
+    else { t = t.split(/[;:]/)[0].trim().replace(/\.$/, ''); if (t.length > 60) t = `${t.slice(0, 57).trimEnd()}…` }
+    if (!out.includes(t)) out.push(t)
+  }
+  if (names.length) out.splice(Math.min(out.length, 2), 0, `Detector settings not recorded (${names.length})`)
+  return out
+}
+
+/** One line for the confidence disclaimer; the engine's long text stays available behind it. */
+export function shortConfidence(reason: string): string {
+  if (/uncalibrated/i.test(reason)) return 'Uncalibrated route score, not measured accuracy.'
+  const first = reason.split(/(?<=\.)\s/)[0] ?? reason
+  return first.length > 110 ? `${first.slice(0, 107).trimEnd()}…` : first
+}

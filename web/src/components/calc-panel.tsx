@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type K
 import { ArrowDown, ArrowLeft, ArrowUp, ChevronRight, Maximize2, Minimize2, X } from 'lucide-react'
 import { Button } from './ui'
 import type { Calculation, Reasoning } from '../lib/types'
-import { columnKeys, columnLabel, fmt, focusOf, meaningfulPath, pageRows, signed, stepRows, sortRows, sourceText, totalsOf, withUnit, type FocusTarget, type RowSort } from '../lib/calc-view'
+import { columnKeys, columnLabel, fmt, focusOf, meaningfulPath, pageRows, shortConfidence, shortUnavailable, signed, stepRows, sortRows, sourceText, totalsOf, withUnit, type FocusTarget, type RowSort } from '../lib/calc-view'
 import { workspaceApi } from '../lib/api'
 import { calculationImages } from '../lib/calc-images'
 import './calc-panel.css'
@@ -226,8 +226,8 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
         {calc.reader.note && <p className="calc-note">{calc.reader.note}</p>}
       </Section>}
 
-      {!!calc?.unavailable?.length && <Section id="unavailable" title="Not available" hint={`${calc.unavailable.length}`}>
-        <ul className="calc-unavailable">{calc.unavailable.map((u, i) => <li key={i} className="calc-note">{u}</li>)}</ul>
+      {!!calc?.unavailable?.length && <Section id="unavailable" title={`Not available (${shortUnavailable(calc.unavailable).length})`} open={false}>
+        <ul className="calc-unavailable">{shortUnavailable(calc.unavailable).map((u, i) => <li key={i} className="calc-note">{u}</li>)}</ul>
       </Section>}
 
       {!!calc?.checks.length && <Section id="checks" title="Checks" hint="second methods">
@@ -247,7 +247,7 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
       </Section>}
 
       <Section id="confidence" title="Confidence" hint={confidence.pct != null ? `${confidence.label} · ${confidence.pct}%` : confidence.label}>
-        <p className="calc-note">{confidence.reason}</p>
+        <p className="calc-note" title={confidence.reason}>{shortConfidence(confidence.reason)}</p>
         {!!confidence.factors?.length && <table className="calc-factors" aria-label="What moved the confidence figure"><tbody>
           {confidence.factors.map((f, i) => <tr key={i}><th scope="row">{f.label}{f.note && <small>{f.note}</small>}</th><td className="num">{f.base ? 'start' : `${signed(f.delta)} pts`}</td></tr>)}
           {confidence.pct != null && <tr className="calc-factor-total"><th scope="row">Confidence</th><td className="num">{confidence.pct}%</td></tr>}
