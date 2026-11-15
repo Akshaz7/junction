@@ -474,18 +474,24 @@ def ifc_unreadable(doc, root) -> str | None:
     return None
 
 
+def _pdf_planmap(doc: Doc, root):
+    """The plan map of a PDF sheet whose IFC was built from it (None for anything else)."""
+    try:
+        meta = _json_file(Path(root) / doc.doc_id / "doc.json")
+    except (OSError, ValueError):
+        return None
+    if meta.get("kind") != "pdf":
+        return None
+    pm = load_doc(doc.doc_id, Path(root), prefer="planmap")
+    return pm if pm is not None and pm.mode == "planmap" else None
+
+
 def _planmap_extras(doc: Doc, root, kinds: set, items: list, st, page):
     """Plan-map items of these kinds that the IFC built from the PDF lacks. Only for PDF sheets and only with no storey named."""
     if st is not None:
         return [], ""
-    try:
-        meta = _json_file(Path(root) / doc.doc_id / "doc.json")
-    except (OSError, ValueError):
-        return [], ""
-    if meta.get("kind") != "pdf":
-        return [], ""
-    pm = load_doc(doc.doc_id, Path(root), prefer="planmap")
-    if pm is None or pm.mode != "planmap":
+    pm = _pdf_planmap(doc, root)
+    if pm is None:
         return [], ""
     have = {i.item_id for i in items}
     pm_ids = {i.item_id for i in pm.items if i.kind in kinds and i.conf >= MIN_CONF}
@@ -497,6 +503,30 @@ def _planmap_extras(doc: Doc, root, kinds: set, items: list, st, page):
         return [], ""
     return extra, (f"{len(extra)} of them {'has' if len(extra) == 1 else 'have'} no drawn wall, "
                    f"so the 3D model shows {len(items)}")
+
+
+def augment_pdf_doc(doc: Doc, root) -> Doc:
+    """Project path: give a PDF-derived IFC doc the same door/window add-back as a single-sheet answer."""
+    if doc is None or doc.mode != "ifc":
+        return doc
+    for kind in ("door", "window"):
+        mine = [i for i in doc.items if i.kind == kind]
+        extra, _ = _planmap_extras(doc, root, {kind}, mine, None, None)
+        if extra:
+            only = doc.storeys[0]["name"] if len(doc.storeys) == 1 else None
+            for i in extra:
+                i.storey = i.storey or only
+            doc.items = doc.items + extra
+            doc.meta.setdefault("planmap_extra", {})[kind] = {"extra": len(extra), "model": len(mine)}
+    return doc
+
+
+def _undrawn_here(doc: Doc, root, kinds: set, items: list) -> bool:
+    """True when every counted item comes from a model this PDF sheet is anchored on and none is drawn on the sheet."""
+    if not items or any(i.bbox_px for i in items):
+        return False
+    pm = _pdf_planmap(doc, root)
+    return pm is not None and not any(i.kind in kinds and i.conf >= MIN_CONF for i in pm.items)
 
 
 def _json_file(p: Path):
@@ -675,6 +705,12 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
             items = [i for i in items if i.storey == st]
             where = f"on **{st}**"
             trace.append(_step("scope", f"storey = {st}: {len(items)} left"))
+
+    if doc.mode == "ifc" and p.type == "count" and kind in ("door", "window") and not hidden and _undrawn_here(doc, root, kinds, items):
+        n_model = len(items)
+        trace.append(_step("scope", f"{n_model} {kind}(s) come from the model this sheet is built on; none is drawn on this sheet's plan"))
+        return _abstain(question, doc_id, f"**This sheet does not draw {_plural(kind, 2)}.** The model it is built on has {n_model}, "
+                        "but none appears on this sheet's plan, so there is nothing to box here. Ask on the architectural plan.", trace, route, t0)
 
     # --- PDF-derived IFC: the plan map can hold doors/windows the 3D build dropped (no host wall on their line)
     if doc.mode == "ifc" and p.type == "count" and kind in ("door", "window") and not hidden and not EXT_RE.search(question):
