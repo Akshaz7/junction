@@ -1,0 +1,71 @@
+{
+  "purpose": "source consistency, not independent gold accuracy",
+  "injected_answer_data": "generated for demo",
+  "results": [
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-5507",
+      "source": "cubicasa5k",
+      "blind": false,
+      "mode": "planmap",
+      "stored_items": 72,
+      "solver_room_count": 17,
+      "reader_inventory_count": 17,
+      "public_room_count": 17,
+      "checks": [
+        "public answer with reasoning",
+        "wrong-measurement retry",
+        "missing reader value recovery with citation"
+      ],
+      "passed": true
+    },
+    {
+      "doc_id": "ifc_models__bsc-duplex-duplex-a-20110907",
+      "source": "ifc_models",
+      "blind": false,
+      "mode": "ifc",
+      "stored_items": 240,
+      "solver_room_count": 21,
+      "reader_inventory_count": 21,
+      "public_room_count": 21,
+      "checks": [
+        "public answer with reasoning",
+        "wrong-measurement retry",
+        "missing reader value recovery with citation"
+      ],
+      "passed": true
+    },
+    {
+      "doc_id": "swiss_dwellings__site28-bldg259-floor47941",
+      "source": "swiss_dwellings",
+      "blind": false,
+      "mode": "planmap",
+      "stored_items": 211,
+      "solver_room_count": 30,
+      "reader_inventory_count": 30,
+      "public_room_count": 30,
+      "checks": [
+        "public answer with reasoning",
+        "wrong-measurement retry",
+        "missing reader value recovery with citation"
+      ],
+      "passed": true
+    },
+    {
+      "doc_id": "swiss_dwellings__site695-bldg1470-floor6424",
+      "source": "swiss_dwellings",
+      "blind": true,
+      "mode": "planmap",
+      "stored_items": 113,
+      "solver_room_count": 19,
+      "reader_inventory_count": 19,
+      "public_room_count": 19,
+      "checks": [
+        "public answer with reasoning",
+        "wrong-measurement retry",
+        "missing reader value recovery with citation"
+      ],
+      "passed": true
+    }
+  ],
+  "checks_passed": 12
+}

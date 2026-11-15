@@ -1,0 +1,6 @@
+{
+  "blind_doc_id": "swiss_dwellings__site695-bldg1470-floor6424",
+  "selection": "random.SystemRandom from eligible original structured artifact directory names, excluding forbidden list and all measurement inputs; reserved before inspecting any document",
+  "eligible_blind_candidates": 6240,
+  "sample_rows": 200
+}
