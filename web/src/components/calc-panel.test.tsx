@@ -172,3 +172,13 @@ for (const [name, r] of [['bathroom area (JUDGE-QS F6)', bathroomReasoning], ['d
     expect(host.querySelector('[data-testid="calc-panel"]')).toBeTruthy()
   })
 }
+
+it('shows element names, not GUIDs, as sources (GUID kept in the tooltip)', async () => {
+  const guid = '2O2Fr$t4X7Zf8NhDbOs6Kn'
+  const calc = { formula: 'n = count', result: { value: 1, unit: 'count' }, steps: [], checks: [], rows: [{ label: 'Door D1', source: { doc_id: 'd', page: 1, item_id: guid, kind: 'element' }, values: { count: 1 } }] } as unknown as Calculation
+  await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc, graph_path: undefined }} onClose={() => {}} />))
+  const src = host.querySelector('.calc-table .calc-source')!
+  expect(src.textContent).toContain('Door D1')
+  expect(src.textContent).not.toContain(guid)
+  expect(src.getAttribute('title')).toContain(guid)
+})
