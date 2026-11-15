@@ -84,7 +84,10 @@ function relationRows(relations: Relations | null | undefined): { label: string;
 
 function ItemMeasures({ item }: { item: ItemWithQuantities }) {
   const extra = item as ItemWithQuantities & { measures?: Record<string, unknown> | null; relations?: Relations | null }
-  const derived = Object.fromEntries(Object.entries(extra.measures ?? {}).filter(([key, value]) => typeof value === 'number' && key !== 'm_per_px'))
+  // Engine measures fill gaps only: never repeat a value the drawing's own props already give.
+  const shown = new Set(Object.keys(item.props ?? {}))
+  const derived = Object.fromEntries(Object.entries(extra.measures ?? {}).filter(([key, value]) => typeof value === 'number' && key !== 'm_per_px'
+    && !shown.has(key) && !(key === 'area_measured_m2' && shown.has('area_m2_geom'))))
   const rows = measuredRows(item.kind, item.props ?? {}, { ...derived, ...(item.quantities ?? {}) })
   const provenance = measureProvenance(item.props ?? {})
   const related = relationRows(extra.relations)

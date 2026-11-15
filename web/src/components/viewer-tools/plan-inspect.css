@@ -1,0 +1,12 @@
+/* Data page 2D: the page image box hosts the inspect overlay (same content box as the contained image). */
+.data-preview.has-plan-inspect { position: relative; }
+.plan-inspect-svg { position: absolute; inset: 12px; width: calc(100% - 24px); height: calc(100% - 24px); overflow: visible; touch-action: manipulation; }
+.plan-inspect-svg.is-pickable { cursor: pointer; }
+.plan-inspect-svg.is-measuring { cursor: crosshair; }
+.plan-inspect-svg .plan-pick { color: var(--kind-color, var(--info-text)); pointer-events: none; }
+.plan-inspect-svg .plan-pick polygon, .plan-inspect-svg .plan-pick rect { fill: currentColor; fill-opacity: .14; stroke: currentColor; stroke-width: 2; }
+.plan-inspect-svg .plan-pick.is-selected polygon, .plan-inspect-svg .plan-pick.is-selected rect { fill-opacity: .22; stroke-width: 3; }
+.plan-inspect-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.plan-measure-readout { display: inline-flex; align-items: center; gap: 4px; font-size: var(--text-caption, 12px); font-variant-numeric: tabular-nums; }
+.data-detail-body:has(> .item-panel) { position: relative; }
+.data-detail-body > .item-panel { position: absolute; top: 0; right: 0; bottom: 0; z-index: 5; width: min(340px, 90%); overflow: auto; box-shadow: -8px 0 24px rgb(0 0 0 / .12); border-radius: var(--radius-control, 8px); }
