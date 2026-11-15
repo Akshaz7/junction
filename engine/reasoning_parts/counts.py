@@ -139,7 +139,7 @@ def facts(res, question):
         problems.append("recount")
     return dict(counts=counts, total=total, boxes=len(boxes), linked=len(linked),
                 per_kind=per_kind, reread=reread, problems=problems,
-                derived=derived,
+                derived=derived, model=res.get("route") == "index",
                 cite=next((c.get("n") for c in cites if c.get("n") is not None), None))
 
 
@@ -170,7 +170,8 @@ def _found(f):
     n, b = f["total"], f["boxes"]
     summary = _summary(f["counts"])
     if n == b and f["per_kind"] == f["counts"]:
-        text = f"{summary} marked on the drawing, each with a numbered box." if n else (
+        where = "listed in the building model, each with a numbered highlight" if f.get("model") else "marked on the drawing, each with a numbered box"
+        text = f"{summary} {where}." if n else (
             f"No matching {_word(next(iter(f['counts'])), 2)} found in the available data; this does not prove none exist in the building.")
     else:
         text = f"The answer reports {summary}; {b:,} numbered boxes are shown."
