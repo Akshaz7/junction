@@ -1,7 +1,7 @@
 import { overlayActionAnswer, overlayAlignedAnswer, overlayRequest } from '../lib/sheet-overlay'
 import { sceneOpen, sceneOpenCitation } from '../lib/scene-open'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { ArrowUp, AtSign, CalendarClock, FileSearch, FileText, FolderOpen, HardHat, Paperclip, Plus, Scale, Upload, X } from 'lucide-react'
+import { ArrowUp, AtSign, CalendarClock, FileSearch, FileText, FolderOpen, HardHat, Plus, Scale, Upload, X } from 'lucide-react'
 import { Button } from './ui'
 import { AnswerCard } from './answer-card'
 import { rememberChat } from '../lib/known-chats'
@@ -572,7 +572,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
           <p className="picker-heading">Skills</p>
           <SkillPicker disabled={busy || restoring || hidden} onPick={(prompt) => { setDraft(prompt); setMention(null); setToolsOpen(false); textarea.current?.focus() }} />
         </div>}
-        <div className="composer-actions"><button ref={toolsButton} className="document-context" aria-label="Add to question" aria-haspopup="dialog" aria-expanded={toolsOpen} aria-controls={toolsOpen ? 'composer-tools' : undefined} title="Add documents or skills" type="button" disabled={busy || restoring || hidden} onClick={() => { setMention(null); setToolsOpen((open) => !open) }}><Plus size={16} /></button><button className="document-context composer-upload" aria-label="Upload a drawing" title="Upload a drawing" type="button" disabled={busy || restoring || hidden || demo} onClick={() => openUpload()}><Paperclip size={16} /></button><MicButton disabled={busy || restoring || hidden} onInterim={(text) => setDraft(text)} onText={(text) => { setDraft(text); setMention(null); textarea.current?.focus() }} />
+        <div className="composer-actions"><button ref={toolsButton} className="document-context" aria-label="Add to question" aria-haspopup="dialog" aria-expanded={toolsOpen} aria-controls={toolsOpen ? 'composer-tools' : undefined} title="Add documents or skills" type="button" disabled={busy || restoring || hidden} onClick={() => { setMention(null); setToolsOpen((open) => !open) }}><Plus size={16} /></button><MicButton disabled={busy || restoring || hidden} onInterim={(text) => setDraft(text)} onText={(text) => { setDraft(text); setMention(null); textarea.current?.focus() }} />
           <Button type="submit" variant="primary" className="send-button" aria-label="Send question" disabled={!draft.trim() || busy || restoring || !docs.length || !!mention}><ArrowUp size={18} /></Button>
         </div>
       </form>
