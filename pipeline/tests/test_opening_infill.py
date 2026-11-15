@@ -8,6 +8,7 @@ import trimesh
 from PIL import Image, ImageDraw
 from shapely.affinity import rotate
 from shapely.geometry import Point, Polygon, box
+from shapely.ops import unary_union
 
 from pipeline import extrude
 from pipeline.tests.measure_opening_gaps import masonry, measure, section
@@ -168,3 +169,14 @@ def test_window_sill_infill_never_closes_a_door(tmp_path):
     walls = masonry(trimesh.load_scene(tmp_path / 'scene.glb'), manifest)
     assert not section(walls, .45).buffer(1e-5).covers(Point(-.4, -1))   # door half stays open
     assert section(walls, .45).buffer(1e-5).covers(Point(.0, -1))        # window half keeps its sill wall
+
+
+def test_deep_off_centre_window_box_is_seated_on_the_wall_line():
+    # A 0.4 m deep detection box drawn 0.15 m off a 0.1 m wall: frame and glass
+    # must sit on the wall line between the two wall ends, not beside the wall.
+    walls = unary_union([box(-3, -.05, -.6, .05), box(.6, -.05, 3, .05)])
+    fitted = extrude._fit_opening((-.6, .6, -.05, .35, 'x'), [('wall-001', walls)])
+    local, matrix, footprint, host = extrude._seat_opening(fitted, walls)
+    assert (local[2] + local[3]) / 2 == pytest.approx(0, abs=.01)
+    assert local[3] - local[2] == pytest.approx(.1, abs=.01)
+    assert local[1] - local[0] == pytest.approx(1.2)

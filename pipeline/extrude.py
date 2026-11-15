@@ -245,14 +245,12 @@ INFILL_MAX_T = 0.6    # no drawn wall this thick beside a door/window: anything 
 INFILL_LONE_T = 0.3   # floating opening with no wall end found: keep the masonry wall-like
 
 
-def _infill_gap(local, matrix, walls, search=0.6, probe=0.45):
-    """Masonry footprint for an opening: only the gap between the wall ends beside it.
+def _wall_band(local, matrix, walls, search=0.6, probe=0.45):
+    """Across-wall band (v0, v1) of the wall ends beside an opening, or None.
 
     Walks the opening's centreline (u along the wall, v across) to the wall ends on
     either side, measures each end's own faces just inside it, and keeps the band
-    both ends share. The opening box narrowed to that band minus the existing walls
-    is returned (shapely, plan metres), so infill never overlaps a wall or sticks out
-    past its faces. None when there is no gap to fill.
+    both ends share (one end: that wall's faces).
     """
     a, b, v0, v1, _ = local
     u = np.array([matrix[0, 0], matrix[2, 0]])
@@ -297,8 +295,47 @@ def _infill_gap(local, matrix, walls, search=0.6, probe=0.45):
             ranges = end_faces(c + dc)
             if ranges:
                 break
-    if ranges:  # both ends: the band both wall ends share; one end: that wall's faces
-        v0, v1 = max(r[0] for r in ranges), min(r[1] for r in ranges)
+    if not ranges:
+        return None
+    return max(r[0] for r in ranges), min(r[1] for r in ranges)
+
+
+def _seat_opening(opening, walls):
+    """Centre a fitted opening across the wall on the wall-end band beside it.
+
+    A detection box can be much deeper than its wall and drawn off its line, so
+    frame/glass would float beside the wall. When a wall end is found, the opening
+    takes that band (capped like the infill); otherwise it is returned unchanged.
+    """
+    local, matrix, footprint, host = opening
+    band = _wall_band(local, matrix, walls) if not walls.is_empty else None
+    if band is None or band[1] - band[0] < 0.02:
+        return opening
+    v0, v1 = band
+    if v1 - v0 > INFILL_MAX_T:
+        c = (v0 + v1) / 2
+        v0, v1 = c - INFILL_MAX_T / 2, c + INFILL_MAX_T / 2
+    a, b = local[0], local[1]
+    u = np.array([matrix[0, 0], matrix[2, 0]])
+    v = np.array([matrix[0, 2], matrix[2, 2]])
+    footprint = Polygon([u * s + v * t for s, t in ((a, v0), (b, v0), (b, v1), (a, v1))])
+    return (a, b, v0, v1, local[4]), matrix, footprint, host
+
+
+def _infill_gap(local, matrix, walls):
+    """Masonry footprint for an opening: only the gap between the wall ends beside it.
+
+    The opening box narrowed to the wall-end band (_wall_band) minus the existing
+    walls is returned (shapely, plan metres), so infill never overlaps a wall or
+    sticks out past its faces. None when there is no gap to fill.
+    """
+    a, b, v0, v1, _ = local
+    u = np.array([matrix[0, 0], matrix[2, 0]])
+    v = np.array([matrix[0, 2], matrix[2, 2]])
+    plan = lambda s, t: tuple(u * s + v * t)
+    band = _wall_band(local, matrix, walls) if not walls.is_empty else None
+    if band:
+        v0, v1 = band
         cap = INFILL_MAX_T
     else:
         cap = INFILL_LONE_T
@@ -586,7 +623,8 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False, *
     wall_polys = [(f"wall-r{i:03d}", tm(g)) for i, g in enumerate(rw["walls"], 1)] if rw else [
         (it["item_id"], unary_union(_polys([to_m(p) for p in (it.get("polygon_px") or _bbox_poly(it))])))
         for it in pm["items"] if it["kind"] == "wall"]
-    openings = {it["item_id"]: _fit_opening((_door_box if it["kind"] == "door" else _opening)(it, to_m), wall_polys)
+    walls_m = unary_union([g if g.is_valid else g.buffer(0) for _, g in wall_polys]) if wall_polys else Polygon()
+    openings = {it["item_id"]: _seat_opening(_fit_opening((_door_box if it["kind"] == "door" else _opening)(it, to_m), wall_polys), walls_m)
                 for it in pm["items"] if it["kind"] in ("window", "door")}
     win_o = [openings[it["item_id"]][2] for it in pm["items"] if it["kind"] == "window"]
     door_o = [openings[it["item_id"]][2] for it in pm["items"] if it["kind"] == "door"]
@@ -714,7 +752,6 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False, *
     # Segmented walls stop at openings: add masonry to the host wall without
     # creating extra answer items or changing the window/door item identity.
     kinds = {it["item_id"]: it["kind"] for it in pm["items"]}
-    walls_m = unary_union([g if g.is_valid else g.buffer(0) for _, g in wall_polys]) if wall_polys else Polygon()
     door_fp = unary_union([openings[i][2].buffer(0.01, join_style="mitre") for i in openings if kinds[i] == "door"])
     placed = {"head": Polygon(), "sill": Polygon()}  # two detections of one opening must not stack coplanar blocks
     for iid, (local, matrix, footprint, host) in openings.items():
