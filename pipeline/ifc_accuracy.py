@@ -66,7 +66,7 @@ def count_metadata(el):
             'proxy_kind': proxy_kind(el) if el.is_a('IfcBuildingElementProxy') else None}
 
 
-def stored_net_area(space):
+def stored_area(space, quantity_name):
     """Occurrence Qto before typed Pset; explicit property units before project units."""
     import ifcopenshell.util.element as E
     import ifcopenshell.util.unit as U
@@ -75,7 +75,7 @@ def stored_net_area(space):
         if not isinstance(values, dict):
             continue
         for name, entry in values.items():
-            if re.sub(r'\W', '', name).casefold() != 'netfloorarea' or not isinstance(entry, dict):
+            if re.sub(r'\W', '', name).casefold() != quantity_name or not isinstance(entry, dict):
                 continue
             value = entry.get('value')
             if not isinstance(value, (int, float)) or isinstance(value, bool) or not math.isfinite(value) or value < 0:
@@ -92,6 +92,10 @@ def stored_net_area(space):
     return None, None
 
 
+def stored_net_area(space):
+    return stored_area(space, 'netfloorarea')
+
+
 def space_area(space):
     """Horizontal union footprint, including holes, not twice the floor/ceiling.
 
@@ -103,6 +107,8 @@ def space_area(space):
               'difference_pct': None, 'method': 'IfcSpace geometry horizontal footprint'}
     stored, source = stored_net_area(space)
     result.update(stored_net_m2=stored, stored_source=source)
+    gross, gross_source = stored_area(space, 'grossfloorarea')
+    result.update(stored_gross_m2=gross, stored_gross_source=gross_source)
     try:
         length_unit = U.get_project_unit(space.file, 'LENGTHUNIT', use_cache=True)
     except (IndexError, RuntimeError):
@@ -130,7 +136,7 @@ def space_area(space):
         else:
             delta = abs(stored - area) / area
             result['difference_pct'] = delta * 100
-            # 2% is the handoff's cross-check policy, not a fitted constant.
+            # 2% is our cross-check policy, not a fitted constant.
             result['status'] = 'agree' if delta <= .02 + 1e-12 else 'flag'
     except (RuntimeError, ValueError, AttributeError, TypeError, ZeroDivisionError, ImportError) as exc:
         result['reason'] = f'Footprint unavailable ({type(exc).__name__}).'
@@ -181,6 +187,13 @@ def enrich_elements(elements, index):
         props.update({k: row[k] for k in ('aggregate_ancestors', 'count_component_of', 'count_status', 'proxy_kind')})
         if 'space_area' in row:
             check = props['space_area'] = row['space_area']
+            quantities = el.setdefault('quantities', {})
+            if check.get('stored_gross_m2') is not None:
+                quantities['gross_floor_area_m2'] = check['stored_gross_m2']
+            if check.get('stored_net_m2') is not None:
+                quantities['net_floor_area_m2'] = check['stored_net_m2']
             if check['measured_m2'] is not None:
-                el.setdefault('quantities', {})['area_m2'] = check['measured_m2']
-                el.setdefault('quantity_source', {})['area_m2'] = 'IfcSpace geometry footprint'
+                quantities['measured_floor_area_m2'] = check['measured_m2']
+                if check.get('stored_gross_m2') is None:
+                    quantities['area_m2'] = check['measured_m2']
+                    el.setdefault('quantity_source', {})['area_m2'] = 'IfcSpace geometry footprint'

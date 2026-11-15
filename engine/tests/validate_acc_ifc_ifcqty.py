@@ -1,4 +1,4 @@
-"""Read-only integration check against the IFCQTY commit named in the handoff."""
+"""Read-only integration check against the original IFCQTY sidecar implementation."""
 import json
 import os
 from pathlib import Path

@@ -26,7 +26,10 @@ def type_class(cls):
 
 def is_item_count(question):
     from engine.router.parser import parse
-    return parse(question).type == 'count' and not MEASUREMENT_COUNT.search(question)
+    p = parse(question)
+    # People/capacity are not model occurrences, even when a room is named.
+    capacity = re.search(r'\b(?:people|persons?|occupants?|occupancy|capacity|seating)\b', question, re.I)
+    return p.type == 'count' and p.kind is not None and not capacity and not MEASUREMENT_COUNT.search(question)
 
 
 def default_root():
@@ -42,7 +45,7 @@ def checked_solver(fn):
         from engine.solvers.data import load_doc, load_sheet_parent
         doc = load_doc(doc_id, root) or load_sheet_parent(doc_id, root)
         if doc is not None and doc.mode == 'ifc':
-            doc = prepare_doc(doc, root, geometry=wants_room_geometry(question))
+            doc = prepare_doc(doc, root, geometry=wants_room_geometry(question), question=question)
             if hidden:
                 doc = replace(doc, items=[i for i in doc.items if i.item_id not in hidden])
             res = annotate(res, question, doc, root)
@@ -55,7 +58,7 @@ def checked_analytics(fn):
     def checked(question, doc, t0, solve_fn=None):
         if doc.mode == 'ifc':
             doc = prepare_doc(doc, default_root(), for_count=is_item_count(question),
-                              geometry=wants_room_geometry(question))
+                              geometry=wants_room_geometry(question), question=question)
         res = fn(question, doc, t0, solve_fn)
         return annotate(res, question, doc, default_root()) if res is not None else None
     return checked
@@ -102,7 +105,9 @@ def load_index(doc, root, *, geometry=False):
                                or not isinstance(r.get('ifc_class'), str) for r in idx['rows'])):
                     return None
                 # A metadata-only sidecar must not mask an available source mesh.
-                need = geometry and any(r['ifc_class'] == 'IfcSpace' and 'space_area' not in r for r in idx['rows'])
+                need = geometry and any(r['ifc_class'] == 'IfcSpace' and
+                                        ('space_area' not in r or 'stored_gross_m2' not in (r.get('space_area') or {}))
+                                        for r in idx['rows'])
                 if need and source is not None:
                     import ifcopenshell
                     idx = build(ifcopenshell.open(str(source)), geometry=True)
@@ -117,7 +122,7 @@ def load_index(doc, root, *, geometry=False):
         return None
 
 
-def prepare_doc(doc, root, *, for_count=False, geometry=False):
+def prepare_doc(doc, root, *, for_count=False, geometry=False, question=''):
     """Recover unindexed IfcSpaces and apply metadata without mutating a cached Doc."""
     if doc.mode != 'ifc':
         return doc
@@ -125,6 +130,15 @@ def prepare_doc(doc, root, *, for_count=False, geometry=False):
     idx = load_index(doc, root, geometry=geometry)
     rows = {r['item_id']: r for r in (idx or {}).get('rows', [])}
     items = list(doc.items)
+    from engine.solvers.filters import room_filter
+    net_requested = bool(re.search(r'\bnet\b', question, re.I))
+    gross_requested = bool(re.search(r'\bgross\b', question, re.I))
+    total_requested = bool(re.search(r'\b(?:total|sum|overall|whole|entire)\b', question, re.I))
+    # An unqualified whole-model/floor total uses gross Qto when available.
+    # Named room areas and room filters retain their declared net quantities.
+    from engine.router.parser import parse
+    gross_requested |= (total_requested and parse(question).type == 'area'
+                        and room_filter(question, [i for i in items if i.kind == 'room']) is None)
     present = {i.item_id for i in items}
     # A floor sheet stays on that floor. Other selected files are never searched
     # or combined: discipline models with no spaces must say so.
@@ -144,11 +158,40 @@ def prepare_doc(doc, root, *, for_count=False, geometry=False):
         check = check if isinstance(check, dict) else None
         if check:
             props['space_area'] = check
+            if check.get('stored_gross_m2') is not None:
+                q['gross_floor_area_m2'] = check['stored_gross_m2']
             if check.get('stored_net_m2') is not None:
                 q['net_floor_area_m2'] = check['stored_net_m2']
             if check.get('measured_m2') is not None:
                 q['measured_floor_area_m2'] = check['measured_m2']
-                q['area_m2'] = check['measured_m2']
+        if it.kind == 'room':
+            # A space body can describe gross extent rather than usable net area.
+            # If its footprint matches gross Qto but conflicts with net Qto,
+            # keep the declared net value for net requests and flag the check.
+            gross = q.get('gross_floor_area_m2')
+            measured = (check or {}).get('measured_m2')
+            stored_net = q.get('net_floor_area_m2')
+            gross_geometry = (gross is not None and measured is not None and measured > 0
+                              and abs(gross - measured) / measured <= .02 + 1e-12
+                              and (check or {}).get('status') == 'flag')
+            if not net_requested and gross_requested and gross is not None:
+                selected, basis = gross, 'stored gross floor area'
+            elif net_requested and measured is not None and not gross_geometry:
+                selected, basis = measured, 'measured footprint'
+            elif stored_net is not None and gross is not None:
+                selected, basis = stored_net, 'stored net floor area'
+            elif gross is not None:
+                selected, basis = gross, 'stored gross floor area'
+            else:
+                selected, basis = measured, 'measured footprint'
+            if gross_geometry:
+                props['footprint_basis'] = 'Footprint agrees with gross floor area; it does not independently measure the declared net area.'
+            if selected is None:
+                selected = q.get('net_floor_area_m2', q.get('area_m2'))
+                basis = 'stored area (geometry unavailable)'
+            if selected is not None:
+                q['selected_floor_area_m2'] = selected
+                props['selected_area_basis'] = basis
         if for_count and props.get('count_component_of'):
             continue
         if for_count and type_class(props.get('ifc_class')):
@@ -168,7 +211,7 @@ def count_rows(rows, doc, root):
     props = {i.item_id: i.props for i in checked.items}
     idx = load_index(doc, root)
     by = {r['item_id']: r for r in (idx or {}).get('rows', [])}
-    return [r for r in rows if not by.get(r['item_id'], props.get(r['item_id'], {})).get('count_component_of')]
+    return [r for r in rows if not by.get(r.get('item_id'), props.get(r.get('item_id'), {})).get('count_component_of')]
 
 
 def count_index(index, doc):
@@ -226,6 +269,10 @@ def annotate(res, question, doc, root):
                 continue
             label = str(i.props.get('long_name') or i.name or 'Room')
             detail = f'{label}: measured footprint {measured:.6g} m²'
+            if i.props.get('selected_area_basis'):
+                detail += f'; answer uses {i.props["selected_area_basis"]}: {i.q["selected_floor_area_m2"]:.6g} m²'
+            if i.props.get('footprint_basis'):
+                detail += '; ' + i.props['footprint_basis']
             if stored is not None:
                 detail += f'; stored net area {stored:.6g} m²; {check["difference_pct"]:.4g}% difference -> {check["status"]}'
             else:
@@ -310,7 +357,10 @@ def annotate(res, question, doc, root):
         card['steps'] = [s for s in card['steps'] if s.get('kind') != 'checked'][:3] + [step]
         cap = .6 if unavailable else .8 if flags or res.get('proxy_candidates') else 1.
         res['answer']['confidence'] = min(res['answer'].get('confidence', 0), cap)
-        pct = min(card.get('confidence', {}).get('pct', 100), round(res['answer'].get('confidence', 0)*100), round(cap * 100))
+        card_pct = (card.get('confidence') or {}).get('pct')
+        if not isinstance(card_pct, (int, float)) or isinstance(card_pct, bool) or not math.isfinite(card_pct):
+            card_pct = 100
+        pct = min(card_pct, round(res['answer'].get('confidence', 0)*100), round(cap * 100))
         card['confidence'] = {'label': 'Verified' if pct >= 92 else 'Cross-checked' if pct >= 80 else 'Estimate',
                               'pct': pct, 'reason': check_text,
                               'improve': 'Check the model quantities and object classifications.' if cap < 1 else None}

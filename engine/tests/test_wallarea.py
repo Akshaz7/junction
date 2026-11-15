@@ -218,7 +218,7 @@ def test_invalid_source_and_no_geometry_do_not_call_reader(tmp_path, monkeypatch
     monkeypatch.setenv("MODELS_FAKE", "1"); monkeypatch.setenv("ARTIFACTS_DIR", str(tmp_path))
     res = answer("Net wall area per floor", ["bad"])
     assert res["answer"]["value"] is None
-    assert res["answer"]["abstained"] is False
+    assert res["answer"]["abstained"] is True
     assert res["cost"]["usd_total"] == 0
     assert res["reasoning"]["confidence"]["label"] == "Estimate"
 

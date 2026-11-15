@@ -1,0 +1,6 @@
+{
+  "random_unseen_file": "data/full/junction-dataset/data/europeana/1373_https___ekultura_hr_purl_url_2SCMSYDU6ZCXDY45JAN3CG5DJQHQPODM.jpg",
+  "policy": "Chosen before implementation; do not open until final evaluation. No training or tuning on held-out drawings.",
+  "initial_random_unseen_file": "data/full/junction-dataset/data/habs/az0258_sheet_00018.jpg",
+  "final_round": "Reserved before tightening the general Finnish title rule; do not inspect before final code freeze."
+}

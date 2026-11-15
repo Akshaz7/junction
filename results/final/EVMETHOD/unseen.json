@@ -1,0 +1,82 @@
+{
+  "path": "data/full/junction-dataset/data/ifc_models/resbim-227_model.ifc",
+  "schema": "IFC4",
+  "native_units": {
+    "method": "ifc-units",
+    "m_per_unit": 0.001,
+    "inputs": [
+      {
+        "name": "SI length unit multiplier",
+        "value": 0.001,
+        "unit": "m/native unit",
+        "source": {
+          "doc_id": "unseen",
+          "page": null,
+          "format": "ifc",
+          "entity": "#7",
+          "assignment": "#4075",
+          "attribute": "Name",
+          "name": "METRE",
+          "prefix": "MILLI",
+          "definition": "SI prefix applied to metre"
+        }
+      }
+    ],
+    "formula": "metres per native unit = product of declared conversion factors and SI prefix multipliers",
+    "note": "From the project unit assignment; quantities and rendered geometry are converted once to metres.",
+    "schema": "IFC4"
+  },
+  "originating_system": "Autodesk - Revit 26.4.0.32 (ENG) - 26.4.0.32",
+  "elements": 50,
+  "answers": [
+    {
+      "question": "How many doors are there?",
+      "value": 7,
+      "native_kind_count": 7,
+      "matches": true,
+      "method": {
+        "id": "ifc-index",
+        "label": "count = Σ(1 per selected item)",
+        "why_chosen": "count / door / unscoped -> code, no model",
+        "alternatives": []
+      },
+      "issues": []
+    },
+    {
+      "question": "How many windows are there?",
+      "value": 5,
+      "native_kind_count": 5,
+      "matches": true,
+      "method": {
+        "id": "ifc-index",
+        "label": "count = Σ(1 per selected item)",
+        "why_chosen": "count / window / unscoped -> code, no model",
+        "alternatives": []
+      },
+      "issues": []
+    },
+    {
+      "question": "How many walls are there?",
+      "value": 21,
+      "native_kind_count": 21,
+      "matches": true,
+      "method": {
+        "id": "ifc-index",
+        "label": "count = Σ(1 per selected item)",
+        "why_chosen": "count / wall / unscoped -> code, no model",
+        "alternatives": []
+      },
+      "issues": []
+    }
+  ],
+  "limitations": "Only metadata/classification/count routes were tested. No geometry was generated or used as a truth for areas/lengths.",
+  "implementation_sha256": {
+    "engine/method_inventory.py": "2bc9851d9af6c2d63a4fd7b5de8388ef3a2810c87484862632fdd84483cd4152",
+    "engine/method_lengths.py": "6ca8ae7ed8aded7dfcae7e1da13cdbd562c690f03dc536c33ef1c57c0923b06a",
+    "engine/method_multidoc.py": "c3d6fe6c3802d8e28e8d74c114ffcbe5dcb16cf6572e2674bcad696d0f1f5a04",
+    "engine/method_properties.py": "f30c833df8914de5e798585dc0529ae419ffc8d90c371508eadac2cd0480995d",
+    "engine/method_rescale.py": "2edd05325967a5739317bb889df47151848cee8ef46117a09a18a2530eb540fe",
+    "engine/method_trace.py": "c29bb36bb59f7d314f05a995d8a879c43ec9d814407a9aeb90758e66c81a1be8",
+    "engine/scale_policy.py": "a428ad4e49ca89611ca38f490589d7b2bd77d60d62755c75c6f3ac7668632dde"
+  }
+}

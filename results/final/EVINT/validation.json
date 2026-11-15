@@ -1,0 +1,43 @@
+{
+  "time": "2026-11-14T23:03:26.717560+00:00",
+  "integration_commit": "bfc463f",
+  "product_commit": "cb1c66e",
+  "branch": "final/evui",
+  "focused_pytest": {
+    "passed": 346,
+    "command": "MODELS_FAKE=1 /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest engine/tests/test_scan_calc.py vision/tests/test_infer_trace.py engine/tests/test_reasoning* engine/tests/test_calc* engine/tests/test_scale* engine/tests/test_xcheck* engine/tests/test_reader* engine/tests/test_order.py server/tests/test_calc_export.py server/tests/test_scale_evidence.py -q"
+  },
+  "web": {
+    "typescript": "PASS: npx tsc --noEmit -p .",
+    "vitest_passed": 16,
+    "vitest_command": "npx vitest run src/lib/calc-export.test.ts src/lib/answer-export.test.ts"
+  },
+  "step1": {
+    "focused_tests_passed": 280,
+    "sample200_count_questions_checked": 60,
+    "command": "MODELS_FAKE=1 READER=0 RECOUNT=0 EXPLAIN=0 scripts/heavy.sh /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest engine/tests/test_answer.py::test_count_headline_equals_numbered_boxes -q"
+  },
+  "audit": {
+    "real_documents": 7,
+    "trace_checks": 21,
+    "trace_checks_passed": 21,
+    "with_calc_before": 15,
+    "with_calc_after": 21,
+    "calc_steps": 2146,
+    "resolvable_inputs": 40105,
+    "commands": [
+      "scripts/heavy.sh /Users/akshatthapa/Workspace/junction/.venv/bin/python -m engine.tests.run_evint_audit",
+      "scripts/heavy.sh /Users/akshatthapa/Workspace/junction/.venv/bin/python -m engine.tests.run_evint_audit --blind"
+    ],
+    "blind_doc_id": "cubicasa5k__high-quality-architectural-11018",
+    "product_changes_after_blind": false,
+    "limits": [
+      "Tests establish source and arithmetic replay, not semantic answer accuracy.",
+      "Legacy missing extraction thresholds/tiles/merge histories and scale inputs remain explicit unknowns.",
+      "Description audits used fake models; generated reader/view/detector fixtures are labelled generated for demo.",
+      "One real-file area answer intentionally withheld its scalar after the scale sanity guard; source geometry remains context."
+    ],
+    "live_calls": 0,
+    "live_spend_usd": 0
+  }
+}

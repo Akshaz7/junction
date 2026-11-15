@@ -1,0 +1,107 @@
+{
+ "worker": "F-IFCQTY",
+ "created": "2026-11-15T01:46:57.805193+02:00",
+ "status": "PASS",
+ "branch": "final/ifcqty",
+ "pilot": {
+  "questions": 64,
+  "before": {
+   "correct": 36,
+   "wrong": 28
+  },
+  "after": {
+   "correct": 61,
+   "abstained": 1,
+   "wrong": 2
+  },
+  "correct_to_wrong": [],
+  "fake_models": false,
+  "final_usd": 0.0
+ },
+ "sample200": {
+  "questions": 200,
+  "before": {
+   "wrong": 48,
+   "correct": 138,
+   "unscored": 13,
+   "abstained": 1
+  },
+  "after": {
+   "wrong": 48,
+   "correct": 138,
+   "unscored": 13,
+   "abstained": 1
+  },
+  "correct_to_wrong": [],
+  "fake_models": true,
+  "final_usd": 0.0
+ },
+ "development_live_usd": 0.007746,
+ "development_live_usd_note": "One initial implementation pilot invoked the old forced fallback ($0.007746, observed at runtime); the fallback is now bypassed for unavailable IFC quantities. All final pilot questions cost zero.",
+ "real_files": {
+  "n": 3,
+  "checks": 9,
+  "passed": 9,
+  "final_untouched_file": "data/full/junction-dataset/data/ifc_models/resbim-114_model.ifc",
+  "initial_untouched_file": "data/full/junction-dataset/data/ifc_models/bimspeed-gdynia_ruchu-oporu-18.ifc",
+  "initial_result": "8/9 checks overall; quoted Floor 2 in a slab type was treated as floor scope. Fixed with synthetic tests; reserved another unseen IFC before that correction."
+ },
+ "unit_tests": {
+  "tests": 56,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0
+ },
+ "remaining_pilot_exceptions": [
+  {
+   "question": "How many linear metres of baseboard are needed for all the rooms on the ground floor of unit A, leaving out the door openings?",
+   "gold": 63.859,
+   "actual": null,
+   "outcome": "abstained",
+   "source_class": "IfcSpace",
+   "class_count": 21,
+   "semantic_kinds": {
+    "room": 21
+   },
+   "rooms_with_group_assignments": 0,
+   "interpretation": "No verified room-to-unit assignment exists; identifier prefixes are not treated as assignments."
+  },
+  {
+   "question": "How many valves or dampers are there?",
+   "gold": 14,
+   "actual": 8,
+   "outcome": "wrong",
+   "source_class": "IfcFlowController",
+   "class_count": 14,
+   "semantic_kinds": {
+    "valve": 8,
+    "control": 6
+   },
+   "rooms_with_group_assignments": null,
+   "interpretation": "Gold counts the entire broad class, including smoke-detector controls."
+  },
+  {
+   "question": "How many pipe fittings (elbows, tees, couplings) are there?",
+   "gold": 358,
+   "actual": 356,
+   "outcome": "wrong",
+   "source_class": "IfcFlowFitting",
+   "class_count": 358,
+   "semantic_kinds": {
+    "pipe_fitting": 356,
+    "duct_fitting": 2
+   },
+   "rooms_with_group_assignments": null,
+   "interpretation": "Gold counts the entire broad class, including duct fittings."
+  }
+ ],
+ "cross_file_hooks": [
+  "engine/analytics.py: quantity dispatch before broad handlers",
+  "engine/answer.py: preserve quantity abstentions through forced fallback",
+  "engine/explain.py: preserve exact calculation notes",
+  "pipeline/ifc_scene.py: reinforcement kinds and ingest sidecar",
+  "server/artifact_store.py: persist sidecar with index priority"
+ ],
+ "needs_awais": [],
+ "integration": "Merge final/ifcqty and deploy normally. New IFC ingests create the sidecar. For existing documents lacking both sidecar and original IFC, restore the source and backfill pipeline.ifc_quantities.build(..., space_geometry=True) before expecting these new quantities."
+}

@@ -1,0 +1,813 @@
+[
+  {
+    "family": "FZK",
+    "project": {
+      "id": "65082b34-fb42-4725-a4e6-7b675122b71f",
+      "docs": [
+        {
+          "doc_id": "ifc_bench__fzk-house-arc"
+        },
+        {
+          "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus"
+        },
+        {
+          "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus-elevation-east"
+        },
+        {
+          "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus-elevation-north"
+        },
+        {
+          "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus-elevation-south"
+        },
+        {
+          "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus-elevation-west"
+        },
+        {
+          "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-01-erdgeschoss"
+        },
+        {
+          "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-02-dachgeschoss"
+        },
+        {
+          "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus-section-east-west"
+        },
+        {
+          "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus-section-north-south"
+        }
+      ]
+    },
+    "questions": [
+      {
+        "question": "Do the plan and model agree on doors on Erdgeschoss?",
+        "expect": {
+          "shape": "agreement",
+          "value": 100.0
+        },
+        "truth": "Equal source-index door counts per matching floor; existing comparison edges all agree.",
+        "source_counts": {
+          "ifc_bench__fzk-house-arc": {
+            "Erdgeschoss": 5
+          },
+          "ifc_models__kit-fzk-haus-ac20-fzk-haus": {
+            "Erdgeschoss": 5
+          },
+          "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-01-erdgeschoss": {
+            "Erdgeschoss": 5
+          }
+        }
+      },
+      {
+        "question": "Does the plan match the model on doors on the ground floor?",
+        "expect": {
+          "shape": "agreement",
+          "value": 100.0
+        },
+        "truth": "Equal source-index door counts per matching floor; existing comparison edges all agree.",
+        "source_counts": {
+          "ifc_bench__fzk-house-arc": {
+            "Erdgeschoss": 5
+          },
+          "ifc_models__kit-fzk-haus-ac20-fzk-haus": {
+            "Erdgeschoss": 5
+          },
+          "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-01-erdgeschoss": {
+            "Erdgeschoss": 5
+          }
+        }
+      },
+      {
+        "question": "Compare doors per floor across files.",
+        "expect": {
+          "shape": "agreement",
+          "value": 100.0
+        },
+        "truth": "Equal source-index door counts per matching floor; existing comparison edges all agree.",
+        "source_counts": {
+          "ifc_bench__fzk-house-arc": {
+            "Erdgeschoss": 5
+          },
+          "ifc_models__kit-fzk-haus-ac20-fzk-haus": {
+            "Erdgeschoss": 5
+          },
+          "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-01-erdgeschoss": {
+            "Erdgeschoss": 5
+          }
+        }
+      },
+      {
+        "question": "Which files disagree?",
+        "expect": {
+          "shape": "agreement",
+          "value": 100.0
+        },
+        "truth": "Equal source-index door counts per matching floor; existing comparison edges all agree.",
+        "source_counts": {
+          "ifc_bench__fzk-house-arc": {
+            "Erdgeschoss": 5
+          },
+          "ifc_models__kit-fzk-haus-ac20-fzk-haus": {
+            "Erdgeschoss": 5
+          },
+          "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-01-erdgeschoss": {
+            "Erdgeschoss": 5
+          }
+        }
+      },
+      {
+        "question": "Do the drawings agree on doors on EG?",
+        "expect": {
+          "shape": "agreement",
+          "value": 100.0
+        },
+        "truth": "Equal source-index door counts per matching floor; existing comparison edges all agree.",
+        "source_counts": {
+          "ifc_bench__fzk-house-arc": {
+            "Erdgeschoss": 5
+          },
+          "ifc_models__kit-fzk-haus-ac20-fzk-haus": {
+            "Erdgeschoss": 5
+          },
+          "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-01-erdgeschoss": {
+            "Erdgeschoss": 5
+          }
+        }
+      },
+      {
+        "question": "Do the plan and model agree on doors on level 0?",
+        "expect": {
+          "shape": "agreement",
+          "value": 100.0
+        },
+        "truth": "Equal source-index door counts per matching floor; existing comparison edges all agree.",
+        "source_counts": {
+          "ifc_bench__fzk-house-arc": {
+            "Erdgeschoss": 5
+          },
+          "ifc_models__kit-fzk-haus-ac20-fzk-haus": {
+            "Erdgeschoss": 5
+          },
+          "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-01-erdgeschoss": {
+            "Erdgeschoss": 5
+          }
+        }
+      },
+      {
+        "question": "Where else does door Innentuer-1 appear?",
+        "expect": {
+          "shape": "appearances",
+          "groups": 1,
+          "required_nodes": [
+            "door:ifc_bench__fzk-house-arc:1Oms875aH3Wg$9l65H2ZGw",
+            "door:ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-01-erdgeschoss:1Oms875aH3Wg$9l65H2ZGw",
+            "door:ifc_models__kit-fzk-haus-ac20-fzk-haus:1Oms875aH3Wg$9l65H2ZGw"
+          ]
+        },
+        "truth": "Exact label source records grouped by explicit same_as links; distinct floors remain separate."
+      },
+      {
+        "question": "Which other files show door Innentuer-1?",
+        "expect": {
+          "shape": "appearances",
+          "groups": 1,
+          "required_nodes": [
+            "door:ifc_bench__fzk-house-arc:1Oms875aH3Wg$9l65H2ZGw",
+            "door:ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-01-erdgeschoss:1Oms875aH3Wg$9l65H2ZGw",
+            "door:ifc_models__kit-fzk-haus-ac20-fzk-haus:1Oms875aH3Wg$9l65H2ZGw"
+          ]
+        },
+        "truth": "Exact label source records grouped by explicit same_as links; distinct floors remain separate."
+      },
+      {
+        "question": "If the ceiling in the hall drops to 2.4 m what is affected?",
+        "expect": {
+          "shape": "impact",
+          "required_nodes": [
+            "door:ifc_bench__fzk-house-arc:0pGAjlJMP3ifYPATVF5xAR",
+            "door:ifc_bench__fzk-house-arc:1Oms875aH3Wg$9l65H2ZGw",
+            "door:ifc_bench__fzk-house-arc:2jTRqchjf7oB0yhQ6462T0",
+            "door:ifc_bench__fzk-house-arc:2qiPPF3FrF8OIqfrKiSUqm",
+            "door:ifc_models__kit-fzk-haus-ac20-fzk-haus:0pGAjlJMP3ifYPATVF5xAR",
+            "door:ifc_models__kit-fzk-haus-ac20-fzk-haus:1Oms875aH3Wg$9l65H2ZGw",
+            "door:ifc_models__kit-fzk-haus-ac20-fzk-haus:2jTRqchjf7oB0yhQ6462T0",
+            "door:ifc_models__kit-fzk-haus-ac20-fzk-haus:2qiPPF3FrF8OIqfrKiSUqm",
+            "fixture:ifc_bench__fzk-house-arc:2O1epMSyD6ol5XOFRviRIZ",
+            "fixture:ifc_bench__fzk-house-arc:3x5bWRj6N6PhHPHxSQnO1r",
+            "fixture:ifc_models__kit-fzk-haus-ac20-fzk-haus:2O1epMSyD6ol5XOFRviRIZ",
+            "fixture:ifc_models__kit-fzk-haus-ac20-fzk-haus:3x5bWRj6N6PhHPHxSQnO1r",
+            "slab:ifc_bench__fzk-house-arc:1pPHnf7cXCpPsNEnQf8_6B",
+            "slab:ifc_bench__fzk-house-arc:2RGlQk4xH47RHK93zcTzUL",
+            "slab:ifc_models__kit-fzk-haus-ac20-fzk-haus:1pPHnf7cXCpPsNEnQf8_6B",
+            "slab:ifc_models__kit-fzk-haus-ac20-fzk-haus:2RGlQk4xH47RHK93zcTzUL",
+            "wall:ifc_bench__fzk-house-arc:1$wmdwWPjDYuku_ghVkynE",
+            "wall:ifc_bench__fzk-house-arc:3PfS__Y_DBAfq5naM6zD2Z",
+            "wall:ifc_bench__fzk-house-arc:3jjW3rL656ex34Gws22EfM",
+            "wall:ifc_bench__fzk-house-arc:3rPX_Juz59peXXY6wDJl18",
+            "wall:ifc_models__kit-fzk-haus-ac20-fzk-haus:1$wmdwWPjDYuku_ghVkynE",
+            "wall:ifc_models__kit-fzk-haus-ac20-fzk-haus:3PfS__Y_DBAfq5naM6zD2Z",
+            "wall:ifc_models__kit-fzk-haus-ac20-fzk-haus:3jjW3rL656ex34Gws22EfM",
+            "wall:ifc_models__kit-fzk-haus-ac20-fzk-haus:3rPX_Juz59peXXY6wDJl18"
+          ],
+          "origin_nodes": [
+            "room:ifc_bench__fzk-house-arc:3$f2p7VyLB7eox67SA_zKE",
+            "room:ifc_models__kit-fzk-haus-ac20-fzk-haus:3$f2p7VyLB7eox67SA_zKE",
+            "room:ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-01-erdgeschoss:3$f2p7VyLB7eox67SA_zKE"
+          ],
+          "ceiling_height_m": 2.4
+        },
+        "truth": "Explicit room boundaries/containment/service graph edges; English room usage translated via general vocabulary."
+      },
+      {
+        "question": "If the ceiling in room Flur drops to 2400 mm what is affected?",
+        "expect": {
+          "shape": "impact",
+          "required_nodes": [
+            "door:ifc_bench__fzk-house-arc:0pGAjlJMP3ifYPATVF5xAR",
+            "door:ifc_bench__fzk-house-arc:1Oms875aH3Wg$9l65H2ZGw",
+            "door:ifc_bench__fzk-house-arc:2jTRqchjf7oB0yhQ6462T0",
+            "door:ifc_bench__fzk-house-arc:2qiPPF3FrF8OIqfrKiSUqm",
+            "door:ifc_models__kit-fzk-haus-ac20-fzk-haus:0pGAjlJMP3ifYPATVF5xAR",
+            "door:ifc_models__kit-fzk-haus-ac20-fzk-haus:1Oms875aH3Wg$9l65H2ZGw",
+            "door:ifc_models__kit-fzk-haus-ac20-fzk-haus:2jTRqchjf7oB0yhQ6462T0",
+            "door:ifc_models__kit-fzk-haus-ac20-fzk-haus:2qiPPF3FrF8OIqfrKiSUqm",
+            "fixture:ifc_bench__fzk-house-arc:2O1epMSyD6ol5XOFRviRIZ",
+            "fixture:ifc_bench__fzk-house-arc:3x5bWRj6N6PhHPHxSQnO1r",
+            "fixture:ifc_models__kit-fzk-haus-ac20-fzk-haus:2O1epMSyD6ol5XOFRviRIZ",
+            "fixture:ifc_models__kit-fzk-haus-ac20-fzk-haus:3x5bWRj6N6PhHPHxSQnO1r",
+            "slab:ifc_bench__fzk-house-arc:1pPHnf7cXCpPsNEnQf8_6B",
+            "slab:ifc_bench__fzk-house-arc:2RGlQk4xH47RHK93zcTzUL",
+            "slab:ifc_models__kit-fzk-haus-ac20-fzk-haus:1pPHnf7cXCpPsNEnQf8_6B",
+            "slab:ifc_models__kit-fzk-haus-ac20-fzk-haus:2RGlQk4xH47RHK93zcTzUL",
+            "wall:ifc_bench__fzk-house-arc:1$wmdwWPjDYuku_ghVkynE",
+            "wall:ifc_bench__fzk-house-arc:3PfS__Y_DBAfq5naM6zD2Z",
+            "wall:ifc_bench__fzk-house-arc:3jjW3rL656ex34Gws22EfM",
+            "wall:ifc_bench__fzk-house-arc:3rPX_Juz59peXXY6wDJl18",
+            "wall:ifc_models__kit-fzk-haus-ac20-fzk-haus:1$wmdwWPjDYuku_ghVkynE",
+            "wall:ifc_models__kit-fzk-haus-ac20-fzk-haus:3PfS__Y_DBAfq5naM6zD2Z",
+            "wall:ifc_models__kit-fzk-haus-ac20-fzk-haus:3jjW3rL656ex34Gws22EfM",
+            "wall:ifc_models__kit-fzk-haus-ac20-fzk-haus:3rPX_Juz59peXXY6wDJl18"
+          ],
+          "origin_nodes": [
+            "room:ifc_bench__fzk-house-arc:3$f2p7VyLB7eox67SA_zKE",
+            "room:ifc_models__kit-fzk-haus-ac20-fzk-haus:3$f2p7VyLB7eox67SA_zKE",
+            "room:ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-01-erdgeschoss:3$f2p7VyLB7eox67SA_zKE"
+          ],
+          "ceiling_height_m": 2.4
+        },
+        "truth": "Explicit room boundaries/containment/service graph edges; English room usage translated via general vocabulary."
+      }
+    ]
+  },
+  {
+    "family": "AC20",
+    "project": {
+      "id": "800f0f6d-02ca-4c27-8e23-05b9cb97c3b3",
+      "docs": [
+        {
+          "doc_id": "ifc_bench__ac20-arc"
+        },
+        {
+          "doc_id": "ifc_models__kit-institute-ac20-institute-var-2"
+        },
+        {
+          "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-elevation-east"
+        },
+        {
+          "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-elevation-north"
+        },
+        {
+          "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-elevation-south"
+        },
+        {
+          "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-elevation-west"
+        },
+        {
+          "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-plan-01-keller"
+        },
+        {
+          "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss"
+        },
+        {
+          "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-plan-03-1-obergeschoss"
+        },
+        {
+          "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-plan-04-2-obergeschoss"
+        },
+        {
+          "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-plan-05-dachgeschoss"
+        },
+        {
+          "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-section-east-west"
+        },
+        {
+          "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-section-north-south"
+        }
+      ]
+    },
+    "questions": [
+      {
+        "question": "Do the plan and model agree on doors on Erdgeschoss?",
+        "expect": {
+          "shape": "agreement",
+          "value": 100.0
+        },
+        "truth": "Equal source-index door counts per matching floor; existing comparison edges all agree.",
+        "source_counts": {
+          "ifc_bench__ac20-arc": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-01-keller": {
+            "Keller": 16
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss": {
+            "Erdgeschoss": 18
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-03-1-obergeschoss": {
+            "1. Obergeschoss": 22
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-04-2-obergeschoss": {
+            "2. Obergeschoss": 21
+          }
+        }
+      },
+      {
+        "question": "Does the plan match the model on doors on the ground floor?",
+        "expect": {
+          "shape": "agreement",
+          "value": 100.0
+        },
+        "truth": "Equal source-index door counts per matching floor; existing comparison edges all agree.",
+        "source_counts": {
+          "ifc_bench__ac20-arc": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-01-keller": {
+            "Keller": 16
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss": {
+            "Erdgeschoss": 18
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-03-1-obergeschoss": {
+            "1. Obergeschoss": 22
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-04-2-obergeschoss": {
+            "2. Obergeschoss": 21
+          }
+        }
+      },
+      {
+        "question": "Compare doors per floor across files.",
+        "expect": {
+          "shape": "agreement",
+          "value": 100.0
+        },
+        "truth": "Equal source-index door counts per matching floor; existing comparison edges all agree.",
+        "source_counts": {
+          "ifc_bench__ac20-arc": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-01-keller": {
+            "Keller": 16
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss": {
+            "Erdgeschoss": 18
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-03-1-obergeschoss": {
+            "1. Obergeschoss": 22
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-04-2-obergeschoss": {
+            "2. Obergeschoss": 21
+          }
+        }
+      },
+      {
+        "question": "Which files disagree?",
+        "expect": {
+          "shape": "agreement",
+          "value": 100.0
+        },
+        "truth": "Equal source-index door counts per matching floor; existing comparison edges all agree.",
+        "source_counts": {
+          "ifc_bench__ac20-arc": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-01-keller": {
+            "Keller": 16
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss": {
+            "Erdgeschoss": 18
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-03-1-obergeschoss": {
+            "1. Obergeschoss": 22
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-04-2-obergeschoss": {
+            "2. Obergeschoss": 21
+          }
+        }
+      },
+      {
+        "question": "Do the drawings agree on doors on EG?",
+        "expect": {
+          "shape": "agreement",
+          "value": 100.0
+        },
+        "truth": "Equal source-index door counts per matching floor; existing comparison edges all agree.",
+        "source_counts": {
+          "ifc_bench__ac20-arc": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-01-keller": {
+            "Keller": 16
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss": {
+            "Erdgeschoss": 18
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-03-1-obergeschoss": {
+            "1. Obergeschoss": 22
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-04-2-obergeschoss": {
+            "2. Obergeschoss": 21
+          }
+        }
+      },
+      {
+        "question": "Do the plan and model agree on doors on level 0?",
+        "expect": {
+          "shape": "agreement",
+          "value": 100.0
+        },
+        "truth": "Equal source-index door counts per matching floor; existing comparison edges all agree.",
+        "source_counts": {
+          "ifc_bench__ac20-arc": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-01-keller": {
+            "Keller": 16
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss": {
+            "Erdgeschoss": 18
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-03-1-obergeschoss": {
+            "1. Obergeschoss": 22
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-04-2-obergeschoss": {
+            "2. Obergeschoss": 21
+          }
+        }
+      },
+      {
+        "question": "Does the plan match the model?",
+        "expect": {
+          "shape": "agreement",
+          "value": 100.0
+        },
+        "truth": "Equal source-index door counts per matching floor; existing comparison edges all agree.",
+        "source_counts": {
+          "ifc_bench__ac20-arc": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-01-keller": {
+            "Keller": 16
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss": {
+            "Erdgeschoss": 18
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-03-1-obergeschoss": {
+            "1. Obergeschoss": 22
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-04-2-obergeschoss": {
+            "2. Obergeschoss": 21
+          }
+        }
+      },
+      {
+        "question": "Compare doors across files on 1. Obergeschoss.",
+        "expect": {
+          "shape": "agreement",
+          "value": 100.0
+        },
+        "truth": "Equal source-index door counts per matching floor; existing comparison edges all agree.",
+        "source_counts": {
+          "ifc_bench__ac20-arc": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-01-keller": {
+            "Keller": 16
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss": {
+            "Erdgeschoss": 18
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-03-1-obergeschoss": {
+            "1. Obergeschoss": 22
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-04-2-obergeschoss": {
+            "2. Obergeschoss": 21
+          }
+        }
+      },
+      {
+        "question": "Do the model and plan agree on doors on the first floor?",
+        "expect": {
+          "shape": "agreement",
+          "value": 100.0
+        },
+        "truth": "Equal source-index door counts per matching floor; existing comparison edges all agree.",
+        "source_counts": {
+          "ifc_bench__ac20-arc": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2": {
+            "Keller": 16,
+            "Erdgeschoss": 18,
+            "1. Obergeschoss": 22,
+            "2. Obergeschoss": 21
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-01-keller": {
+            "Keller": 16
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss": {
+            "Erdgeschoss": 18
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-03-1-obergeschoss": {
+            "1. Obergeschoss": 22
+          },
+          "ifc_models__kit-institute-ac20-institute-var-2-plan-04-2-obergeschoss": {
+            "2. Obergeschoss": 21
+          }
+        }
+      },
+      {
+        "question": "Where else does door Tür-019 appear?",
+        "expect": {
+          "shape": "appearances",
+          "groups": 2,
+          "required_nodes": [
+            "door:ifc_bench__ac20-arc:0JdG5rMQr10RkgztM3HqwA",
+            "door:ifc_bench__ac20-arc:18PQUIFELEARLM4c0brquf",
+            "door:ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss:18PQUIFELEARLM4c0brquf",
+            "door:ifc_models__kit-institute-ac20-institute-var-2-plan-03-1-obergeschoss:0JdG5rMQr10RkgztM3HqwA",
+            "door:ifc_models__kit-institute-ac20-institute-var-2:0JdG5rMQr10RkgztM3HqwA",
+            "door:ifc_models__kit-institute-ac20-institute-var-2:18PQUIFELEARLM4c0brquf"
+          ]
+        },
+        "truth": "Exact label source records grouped by explicit same_as links; distinct floors remain separate."
+      },
+      {
+        "question": "Which other files show door Tür-019?",
+        "expect": {
+          "shape": "appearances",
+          "groups": 2,
+          "required_nodes": [
+            "door:ifc_bench__ac20-arc:0JdG5rMQr10RkgztM3HqwA",
+            "door:ifc_bench__ac20-arc:18PQUIFELEARLM4c0brquf",
+            "door:ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss:18PQUIFELEARLM4c0brquf",
+            "door:ifc_models__kit-institute-ac20-institute-var-2-plan-03-1-obergeschoss:0JdG5rMQr10RkgztM3HqwA",
+            "door:ifc_models__kit-institute-ac20-institute-var-2:0JdG5rMQr10RkgztM3HqwA",
+            "door:ifc_models__kit-institute-ac20-institute-var-2:18PQUIFELEARLM4c0brquf"
+          ]
+        },
+        "truth": "Exact label source records grouped by explicit same_as links; distinct floors remain separate."
+      },
+      {
+        "question": "Where else does door Tür-019 appear on the ground floor?",
+        "expect": {
+          "shape": "appearances",
+          "groups": 1,
+          "required_nodes": [
+            "door:ifc_bench__ac20-arc:18PQUIFELEARLM4c0brquf",
+            "door:ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss:18PQUIFELEARLM4c0brquf",
+            "door:ifc_models__kit-institute-ac20-institute-var-2:18PQUIFELEARLM4c0brquf"
+          ]
+        },
+        "truth": "Exact label source records grouped by explicit same_as links; distinct floors remain separate."
+      },
+      {
+        "question": "If the ceiling in the entrance hall drops to 2.4 m what is affected?",
+        "expect": {
+          "shape": "impact",
+          "required_nodes": [
+            "door:ifc_bench__ac20-arc:18PQUIFELEARLM4c0brquf",
+            "door:ifc_bench__ac20-arc:1_hrYGMATEmeNbEHgfoKxd",
+            "door:ifc_bench__ac20-arc:31UFds84f5oAxxal4G6S8P",
+            "door:ifc_models__kit-institute-ac20-institute-var-2:18PQUIFELEARLM4c0brquf",
+            "door:ifc_models__kit-institute-ac20-institute-var-2:1_hrYGMATEmeNbEHgfoKxd",
+            "door:ifc_models__kit-institute-ac20-institute-var-2:31UFds84f5oAxxal4G6S8P",
+            "slab:ifc_bench__ac20-arc:2Og5$70yb1DxR1TY1w8bzN",
+            "slab:ifc_bench__ac20-arc:3QoJ6BxnbEJAsAxl5gQcR_",
+            "slab:ifc_models__kit-institute-ac20-institute-var-2:2Og5$70yb1DxR1TY1w8bzN",
+            "slab:ifc_models__kit-institute-ac20-institute-var-2:3QoJ6BxnbEJAsAxl5gQcR_",
+            "wall:ifc_bench__ac20-arc:054SZ4_9H5tRVfRLsmTmFu",
+            "wall:ifc_bench__ac20-arc:09MDBnUZP8hhAAplbz1Q$1",
+            "wall:ifc_bench__ac20-arc:0tNy_iP2b0Ge3YC49v0CwY",
+            "wall:ifc_bench__ac20-arc:1DPAiLw8z7UOS6MROTEe9q",
+            "wall:ifc_bench__ac20-arc:1QjkZhkJHDXvqiuYRJXgHb",
+            "wall:ifc_bench__ac20-arc:1wk9c1dpX2_PJQtcSI9FcM",
+            "wall:ifc_bench__ac20-arc:2xrOyxR9nEifMekjrljPsL",
+            "wall:ifc_bench__ac20-arc:3UHq8yqkf4oQOgspFsMBg$",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:054SZ4_9H5tRVfRLsmTmFu",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:09MDBnUZP8hhAAplbz1Q$1",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:0tNy_iP2b0Ge3YC49v0CwY",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:1DPAiLw8z7UOS6MROTEe9q",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:1QjkZhkJHDXvqiuYRJXgHb",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:1wk9c1dpX2_PJQtcSI9FcM",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:2xrOyxR9nEifMekjrljPsL",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:3UHq8yqkf4oQOgspFsMBg$",
+            "window:ifc_bench__ac20-arc:0KqFIy5jL1Mgh2ggQ4WLch",
+            "window:ifc_bench__ac20-arc:12ErTRo_9EmBI9cF9PJCvF",
+            "window:ifc_bench__ac20-arc:2S05fJwurB0AsobKzEqBs1",
+            "window:ifc_bench__ac20-arc:2UjUodKnf77PmcAVpITSgL",
+            "window:ifc_models__kit-institute-ac20-institute-var-2:0KqFIy5jL1Mgh2ggQ4WLch",
+            "window:ifc_models__kit-institute-ac20-institute-var-2:12ErTRo_9EmBI9cF9PJCvF",
+            "window:ifc_models__kit-institute-ac20-institute-var-2:2S05fJwurB0AsobKzEqBs1",
+            "window:ifc_models__kit-institute-ac20-institute-var-2:2UjUodKnf77PmcAVpITSgL"
+          ],
+          "origin_nodes": [
+            "room:ifc_bench__ac20-arc:1RP4kkhTDFJuLugWfrM_1s",
+            "room:ifc_models__kit-institute-ac20-institute-var-2:1RP4kkhTDFJuLugWfrM_1s",
+            "room:ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss:1RP4kkhTDFJuLugWfrM_1s",
+            "room:ifc_bench__ac20-arc:1RP4kkhTDFJuLugWfrM_1s:p1",
+            "room:ifc_models__kit-institute-ac20-institute-var-2:1RP4kkhTDFJuLugWfrM_1s:p1"
+          ],
+          "ceiling_height_m": 2.4
+        },
+        "truth": "Explicit room boundaries/containment/service graph edges; English room usage translated via general vocabulary."
+      },
+      {
+        "question": "If the ceiling in room Flur EG Eingang drops to 2400 mm what is affected?",
+        "expect": {
+          "shape": "impact",
+          "required_nodes": [
+            "door:ifc_bench__ac20-arc:18PQUIFELEARLM4c0brquf",
+            "door:ifc_bench__ac20-arc:1_hrYGMATEmeNbEHgfoKxd",
+            "door:ifc_bench__ac20-arc:31UFds84f5oAxxal4G6S8P",
+            "door:ifc_models__kit-institute-ac20-institute-var-2:18PQUIFELEARLM4c0brquf",
+            "door:ifc_models__kit-institute-ac20-institute-var-2:1_hrYGMATEmeNbEHgfoKxd",
+            "door:ifc_models__kit-institute-ac20-institute-var-2:31UFds84f5oAxxal4G6S8P",
+            "slab:ifc_bench__ac20-arc:2Og5$70yb1DxR1TY1w8bzN",
+            "slab:ifc_bench__ac20-arc:3QoJ6BxnbEJAsAxl5gQcR_",
+            "slab:ifc_models__kit-institute-ac20-institute-var-2:2Og5$70yb1DxR1TY1w8bzN",
+            "slab:ifc_models__kit-institute-ac20-institute-var-2:3QoJ6BxnbEJAsAxl5gQcR_",
+            "wall:ifc_bench__ac20-arc:054SZ4_9H5tRVfRLsmTmFu",
+            "wall:ifc_bench__ac20-arc:09MDBnUZP8hhAAplbz1Q$1",
+            "wall:ifc_bench__ac20-arc:0tNy_iP2b0Ge3YC49v0CwY",
+            "wall:ifc_bench__ac20-arc:1DPAiLw8z7UOS6MROTEe9q",
+            "wall:ifc_bench__ac20-arc:1QjkZhkJHDXvqiuYRJXgHb",
+            "wall:ifc_bench__ac20-arc:1wk9c1dpX2_PJQtcSI9FcM",
+            "wall:ifc_bench__ac20-arc:2xrOyxR9nEifMekjrljPsL",
+            "wall:ifc_bench__ac20-arc:3UHq8yqkf4oQOgspFsMBg$",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:054SZ4_9H5tRVfRLsmTmFu",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:09MDBnUZP8hhAAplbz1Q$1",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:0tNy_iP2b0Ge3YC49v0CwY",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:1DPAiLw8z7UOS6MROTEe9q",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:1QjkZhkJHDXvqiuYRJXgHb",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:1wk9c1dpX2_PJQtcSI9FcM",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:2xrOyxR9nEifMekjrljPsL",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:3UHq8yqkf4oQOgspFsMBg$",
+            "window:ifc_bench__ac20-arc:0KqFIy5jL1Mgh2ggQ4WLch",
+            "window:ifc_bench__ac20-arc:12ErTRo_9EmBI9cF9PJCvF",
+            "window:ifc_bench__ac20-arc:2S05fJwurB0AsobKzEqBs1",
+            "window:ifc_bench__ac20-arc:2UjUodKnf77PmcAVpITSgL",
+            "window:ifc_models__kit-institute-ac20-institute-var-2:0KqFIy5jL1Mgh2ggQ4WLch",
+            "window:ifc_models__kit-institute-ac20-institute-var-2:12ErTRo_9EmBI9cF9PJCvF",
+            "window:ifc_models__kit-institute-ac20-institute-var-2:2S05fJwurB0AsobKzEqBs1",
+            "window:ifc_models__kit-institute-ac20-institute-var-2:2UjUodKnf77PmcAVpITSgL"
+          ],
+          "origin_nodes": [
+            "room:ifc_bench__ac20-arc:1RP4kkhTDFJuLugWfrM_1s",
+            "room:ifc_models__kit-institute-ac20-institute-var-2:1RP4kkhTDFJuLugWfrM_1s",
+            "room:ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss:1RP4kkhTDFJuLugWfrM_1s",
+            "room:ifc_bench__ac20-arc:1RP4kkhTDFJuLugWfrM_1s:p1",
+            "room:ifc_models__kit-institute-ac20-institute-var-2:1RP4kkhTDFJuLugWfrM_1s:p1"
+          ],
+          "ceiling_height_m": 2.4
+        },
+        "truth": "Explicit room boundaries/containment/service graph edges; English room usage translated via general vocabulary."
+      },
+      {
+        "question": "If the ceiling in the entrance hall is lowered to 240 cm, what is affected?",
+        "expect": {
+          "shape": "impact",
+          "required_nodes": [
+            "door:ifc_bench__ac20-arc:18PQUIFELEARLM4c0brquf",
+            "door:ifc_bench__ac20-arc:1_hrYGMATEmeNbEHgfoKxd",
+            "door:ifc_bench__ac20-arc:31UFds84f5oAxxal4G6S8P",
+            "door:ifc_models__kit-institute-ac20-institute-var-2:18PQUIFELEARLM4c0brquf",
+            "door:ifc_models__kit-institute-ac20-institute-var-2:1_hrYGMATEmeNbEHgfoKxd",
+            "door:ifc_models__kit-institute-ac20-institute-var-2:31UFds84f5oAxxal4G6S8P",
+            "slab:ifc_bench__ac20-arc:2Og5$70yb1DxR1TY1w8bzN",
+            "slab:ifc_bench__ac20-arc:3QoJ6BxnbEJAsAxl5gQcR_",
+            "slab:ifc_models__kit-institute-ac20-institute-var-2:2Og5$70yb1DxR1TY1w8bzN",
+            "slab:ifc_models__kit-institute-ac20-institute-var-2:3QoJ6BxnbEJAsAxl5gQcR_",
+            "wall:ifc_bench__ac20-arc:054SZ4_9H5tRVfRLsmTmFu",
+            "wall:ifc_bench__ac20-arc:09MDBnUZP8hhAAplbz1Q$1",
+            "wall:ifc_bench__ac20-arc:0tNy_iP2b0Ge3YC49v0CwY",
+            "wall:ifc_bench__ac20-arc:1DPAiLw8z7UOS6MROTEe9q",
+            "wall:ifc_bench__ac20-arc:1QjkZhkJHDXvqiuYRJXgHb",
+            "wall:ifc_bench__ac20-arc:1wk9c1dpX2_PJQtcSI9FcM",
+            "wall:ifc_bench__ac20-arc:2xrOyxR9nEifMekjrljPsL",
+            "wall:ifc_bench__ac20-arc:3UHq8yqkf4oQOgspFsMBg$",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:054SZ4_9H5tRVfRLsmTmFu",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:09MDBnUZP8hhAAplbz1Q$1",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:0tNy_iP2b0Ge3YC49v0CwY",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:1DPAiLw8z7UOS6MROTEe9q",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:1QjkZhkJHDXvqiuYRJXgHb",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:1wk9c1dpX2_PJQtcSI9FcM",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:2xrOyxR9nEifMekjrljPsL",
+            "wall:ifc_models__kit-institute-ac20-institute-var-2:3UHq8yqkf4oQOgspFsMBg$",
+            "window:ifc_bench__ac20-arc:0KqFIy5jL1Mgh2ggQ4WLch",
+            "window:ifc_bench__ac20-arc:12ErTRo_9EmBI9cF9PJCvF",
+            "window:ifc_bench__ac20-arc:2S05fJwurB0AsobKzEqBs1",
+            "window:ifc_bench__ac20-arc:2UjUodKnf77PmcAVpITSgL",
+            "window:ifc_models__kit-institute-ac20-institute-var-2:0KqFIy5jL1Mgh2ggQ4WLch",
+            "window:ifc_models__kit-institute-ac20-institute-var-2:12ErTRo_9EmBI9cF9PJCvF",
+            "window:ifc_models__kit-institute-ac20-institute-var-2:2S05fJwurB0AsobKzEqBs1",
+            "window:ifc_models__kit-institute-ac20-institute-var-2:2UjUodKnf77PmcAVpITSgL"
+          ],
+          "origin_nodes": [
+            "room:ifc_bench__ac20-arc:1RP4kkhTDFJuLugWfrM_1s",
+            "room:ifc_models__kit-institute-ac20-institute-var-2:1RP4kkhTDFJuLugWfrM_1s",
+            "room:ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss:1RP4kkhTDFJuLugWfrM_1s",
+            "room:ifc_bench__ac20-arc:1RP4kkhTDFJuLugWfrM_1s:p1",
+            "room:ifc_models__kit-institute-ac20-institute-var-2:1RP4kkhTDFJuLugWfrM_1s:p1"
+          ],
+          "ceiling_height_m": 2.4
+        },
+        "truth": "Explicit room boundaries/containment/service graph edges; English room usage translated via general vocabulary."
+      }
+    ]
+  }
+]

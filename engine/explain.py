@@ -88,11 +88,17 @@ def _ok(orig: str, new: str) -> bool:
     new_nums = {n.replace(",", "") for n in _NUM.findall(re.sub(r"\[\d+\]", "", new))}
     if any(n.replace(",", "") not in new_nums for n in nums):
         return False
+    # Explanations may preserve/format facts, never introduce new measurements
+    # or speculative code ratings alongside an otherwise correct headline.
+    allowed = {n.replace(",", "") for n in _NUM.findall(re.sub(r"\[\d+\]", "", orig))}
+    if not new_nums <= allowed:
+        return False
     marks = set(re.findall(r"\[\d+\]", orig))
     return marks <= set(re.findall(r"\[\d+\]", new))
 
 
 def explain(res: dict, question: str, root: Path, timeout_s: float = 12.0, on_event=None) -> dict:
+    if "quantity_rows" in res: return res  # Keep exact IFC filters, missing-data notes and measurement rules.
     if "wallarea" in res: return res  # preserve exact finish arithmetic and explicit source limitations
     if os.environ.get("EXPLAIN", "1") == "0" or os.environ.get("MODELS_FAKE") == "1":
         return res

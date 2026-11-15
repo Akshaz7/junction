@@ -156,11 +156,12 @@ def test_task_template_when_the_writer_is_down(root, monkeypatch):
     assert a["citations"] and "[1]" in a["answer"]["text_md"] and "Evidence gaps" in a["answer"]["text_md"]
 
 
-def test_forced_answer_on_attached_drawing_sends_the_image(root, mock):
+def test_attached_drawing_is_read_before_missing_materials_abstain(root, mock):
     a = answer("What materials are used in the walls?", [DOC])
-    fc = [c for c in mock.calls if c["task"] == "forced_answer"]
-    assert fc and fc[0]["images"] and str(fc[0]["images"][0]).endswith("page-1.png")
-    assert a["route"] == "hybrid" and "title" not in a["answer"]["text_md"] and "drawing image" in a["answer"]["text_md"]
+    reads = [c for c in mock.calls if c["task"] == "read_drawing"]
+    assert reads and reads[0]["images"] and str(reads[0]["images"][0]).endswith("page-1.png")
+    assert not any(c["task"] == "forced_answer" for c in mock.calls)
+    assert a["answer"]["abstained"] and a["answer"]["value"] is None
 
 
 def test_progress_block_only_states_what_ran():

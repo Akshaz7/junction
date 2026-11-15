@@ -60,3 +60,5 @@
 - ym.fi serves an incomplete cert chain: Python urllib fails verification, rules validator falls back to curl (verifying). Stairs in IFC are one IfcStair assembly: no riser/tread/width, so 1007 stair checks are reported as not checkable.
 - Plan-map counts ignore items with conf < 0.5 (MIN_CONF), and ENGINE-ACC's recount can drop one more; compute gold the same way or counts differ by 1.
 - Local engine runs skip answer.schema.json validation; the deployed API enforces it (route enum index|planmap|vlm|hybrid). New routes must use an allowed value or update the schema; test answers against server/schemas/answer.schema.json.
+
+- F-EVMETHOD: legacy margin consumers interpret scale.spread_pct as an error budget. Keep method disagreement under method_spread_pct instead; agreement/scatter alone cannot establish physical accuracy.

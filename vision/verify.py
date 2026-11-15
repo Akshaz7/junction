@@ -255,7 +255,26 @@ CUT = {"door": 0.7, "window": 0.7, "toilet": 0.7}  # picked on calibration drawi
 FREE = {"dup_gap_frac": 0.003, "dup_iou": 0.3, "dup_kinds": ("door", "window", "toilet", "bathtub", "shower")}
 
 
-def free_pass(items, W, H):
+def free_pass(items, W, H, diagnostics=None):
     """Duplicate/adjacent merge, then a confidence cut for door/window/toilet. Walls, rooms, text untouched."""
+    before = [(i['kind'], i['conf']) for i in items] if diagnostics is not None else []
     items = rule_dup(items, W, H, {**DEFAULTS, **FREE})
-    return [i for i in items if i["conf"] >= CUT.get(i["kind"], 0)]
+    kept = [i for i in items if i["conf"] >= CUT.get(i["kind"], 0)]
+    if diagnostics is not None:
+        from statistics import median
+        kinds = sorted({kind for kind, _ in before})
+        diagnostics.update(label='Mask components', tiles=1, raw_count=len(before), after_threshold=len(kept),
+                           dedupe_merged=len(before) - len(items),
+                           raw_scope='Connected components after mask area filters and wall-source selection, before duplicate merge and score cut',
+                           note='Duplicate merging precedes the score cut. Statistics exclude subsequently appended rooms and text.',
+                           dedupe={'enabled': True, 'iou': FREE['dup_iou'], 'containment': DEFAULTS['dup_contain'], 'gap_fraction': FREE['dup_gap_frac']},
+                           classes={kind: {'score_threshold': CUT.get(kind, 0),
+                                           'raw_count': sum(k == kind for k, _ in before),
+                                           'after_dedupe': sum(i['kind'] == kind for i in items),
+                                           'after_threshold': sum(i['kind'] == kind for i in kept),
+                                           'dedupe_merged': sum(k == kind for k, _ in before) - sum(i['kind'] == kind for i in items),
+                                           'proposal_score_min': min(v for k, v in before if k == kind),
+                                           'proposal_score_median': median(v for k, v in before if k == kind),
+                                           'retained_score_min': min((i['conf'] for i in kept if i['kind'] == kind), default=None),
+                                           'retained_score_median': median(i['conf'] for i in kept if i['kind'] == kind) if any(i['kind'] == kind for i in kept) else None} for kind in kinds})
+    return kept

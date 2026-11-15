@@ -12,7 +12,7 @@ import threading
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-OUT = ROOT / 'results/final/ACC-IFC'
+OUT = ROOT / 'results/final/ACC-IFC' / os.environ.get('ACC_IFC_VALIDATION_PHASE', '')
 FORBIDDEN = Path('/private/tmp/claude-501/-Users-akshatthapa-Workspace-junction-server/bb83e630-bcda-48d0-8000-9c87e8300b2a/scratchpad/bench/forbidden_heldout_docs.txt')
 
 
@@ -40,7 +40,7 @@ def main():
                 stream.extractall(base, filter='data')
             (base / 'engine/tests').mkdir(parents=True, exist_ok=True)
             shutil.copyfile(__file__, base / 'engine/tests/run_acc_ifc_validation.py')
-            dest = base / 'results/final/ACC-IFC'
+            dest = base / OUT.relative_to(ROOT)
             dest.mkdir(parents=True)
             shutil.copyfile(OUT / 'selection.json', dest / 'selection.json')
             for name in ('data', 'artifacts'):

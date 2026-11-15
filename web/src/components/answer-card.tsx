@@ -101,7 +101,7 @@ export function howAnswered(answer: Answer): string {
   return `How: ${models.slice(0, 3).join(', ')} read the drawing; the result was checked against what the file contains, and every numbered box is shown so you can verify it.`
 }
 
-export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation, onVisualise, edits, busy, onUndo, onOpenItem, chatId, onAsk }: {
+export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation, onVisualise, edits, busy, onUndo, onOpenItem, chatId, onAsk, onOpenCalc }: {
   answer: Answer; docs: Document[]; demo: boolean; activeCitation?: Citation; onOpenCitation: (citation: Citation) => void
   /** Open the viewer straight in 3D. */
   onVisualise?: (citation: Citation) => void
@@ -109,6 +109,8 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
   chatId?: string | null
   /** Ask a follow-up question in this chat (the Take-off sheet button). */
   onAsk?: (question: string) => void
+  /** Open the Calculation panel next to the drawing. */
+  onOpenCalc?: (citation: Citation) => void
 }) {
   const allCitations = answer.answer.abstained ? [] : answer.citations
   const [showAll, setShowAll] = useState(false)
@@ -134,7 +136,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
     <div className="question-bubble">{answer.question}</div>
     <details className="answer-detail thought-process"><summary>Show thought process</summary>{answer.trace.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>
     <AnswerBody answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} />
-    {!!answer.reasoning?.steps?.length && <EvidenceCard answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} />}
+    {!!answer.reasoning?.steps?.length && <EvidenceCard answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} onShowCalculation={onOpenCalc && allCitations[0] ? () => onOpenCalc(allCitations[0]) : undefined} />}
     {!!docChips.length && <div className="answer-docs" aria-label="Documents used" data-testid="answer-docs">{docChips.map(({ docId, title, first }) => first
       ? <button type="button" key={docId} className="source-file-chip answer-doc-chip" aria-label={`Open document ${title}`} onClick={() => onOpenCitation(first)}><FileText size={14} /><span>{title}</span></button>
       : <span key={docId} className="source-file-chip answer-doc-chip"><FileText size={14} /><span>{title}</span></span>)}</div>}

@@ -1,0 +1,210 @@
+{
+  "time": "2026-11-14T23:02:09.686003+00:00",
+  "baseline_commit": "bfc463f",
+  "scope": "Calculation/source-trace replay only; fake-model prose is not interpreted or scored. No accuracy claim.",
+  "blind": true,
+  "real_sources": [
+    "cubicasa5k__high-quality-architectural-11018"
+  ],
+  "before": [
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-11018",
+      "question": "what is this",
+      "route": "hybrid",
+      "value": null,
+      "abstained": false,
+      "steps": 0,
+      "selected_rows": 0,
+      "inventory_rows": 0,
+      "complete": false,
+      "issues": [
+        "No calc"
+      ],
+      "scale_proofs": 0,
+      "missing": [],
+      "score_statistics": 0,
+      "pixel_measurements": 0,
+      "numeric_input_sources": 0,
+      "confidence": {
+        "label": "Estimate",
+        "pct": null,
+        "reason": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type.",
+        "improve": "Check the numbered evidence and the source quantities.",
+        "calibration": null,
+        "agreement": []
+      },
+      "model_calls": 2,
+      "cost_usd": 0.0
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-11018",
+      "question": "How many doors are there?",
+      "route": "planmap",
+      "value": 4,
+      "abstained": false,
+      "steps": 2,
+      "selected_rows": 4,
+      "inventory_rows": 0,
+      "complete": true,
+      "issues": [],
+      "scale_proofs": 0,
+      "missing": [],
+      "score_statistics": 0,
+      "pixel_measurements": 0,
+      "numeric_input_sources": 6,
+      "confidence": {
+        "label": "Estimate",
+        "pct": null,
+        "reason": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type.",
+        "improve": "Check the numbered evidence and the source quantities.",
+        "calibration": null,
+        "agreement": []
+      },
+      "model_calls": 0,
+      "cost_usd": 0
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-11018",
+      "question": "What is the total area of all rooms?",
+      "route": "planmap",
+      "value": 790.15,
+      "abstained": false,
+      "steps": 12,
+      "selected_rows": 9,
+      "inventory_rows": 0,
+      "complete": true,
+      "issues": [],
+      "scale_proofs": 0,
+      "missing": [],
+      "score_statistics": 0,
+      "pixel_measurements": 0,
+      "numeric_input_sources": 40,
+      "confidence": {
+        "label": "Estimate",
+        "pct": null,
+        "reason": "The recorded readings disagree; check the highlighted evidence. No measured accuracy is available for this answer type.",
+        "improve": "Supply a known dimension and check the measured outlines.",
+        "calibration": null,
+        "agreement": []
+      },
+      "model_calls": 0,
+      "cost_usd": 0.0
+    }
+  ],
+  "after": [
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-11018",
+      "question": "what is this",
+      "route": "hybrid",
+      "value": null,
+      "abstained": false,
+      "steps": 213,
+      "selected_rows": 91,
+      "inventory_rows": 231,
+      "complete": true,
+      "issues": [],
+      "scale_proofs": 1,
+      "missing": [
+        "Image DPI was not recorded; pixel size alone does not establish real-world size.",
+        "score_threshold: not recorded for this page; cannot reconstruct the pre-filter detector run from retained items.",
+        "tiles: not recorded for this page; cannot reconstruct the pre-filter detector run from retained items.",
+        "dedupe_merged: not recorded for this page; cannot reconstruct the pre-filter detector run from retained items.",
+        "No independent second-look count was recorded for this answer; saved model scores are not a recount.",
+        "Answer accuracy percentage: no matching measured calibration. A fixed vision heuristic is not used."
+      ],
+      "score_statistics": 20,
+      "pixel_measurements": 93,
+      "numeric_input_sources": 4584,
+      "confidence": {
+        "label": "Estimate",
+        "pct": null,
+        "reason": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type.",
+        "improve": "Check the numbered evidence and the source quantities.",
+        "calibration": null,
+        "agreement": []
+      },
+      "model_calls": 2,
+      "cost_usd": 0.0
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-11018",
+      "question": "How many doors are there?",
+      "route": "planmap",
+      "value": 4,
+      "abstained": false,
+      "steps": 219,
+      "selected_rows": 4,
+      "inventory_rows": 231,
+      "complete": true,
+      "issues": [],
+      "scale_proofs": 1,
+      "missing": [
+        "No independent second reading covers the complete answer.",
+        "Image DPI was not recorded; pixel size alone does not establish real-world size.",
+        "score_threshold: not recorded for this page; cannot reconstruct the pre-filter detector run from retained items.",
+        "tiles: not recorded for this page; cannot reconstruct the pre-filter detector run from retained items.",
+        "dedupe_merged: not recorded for this page; cannot reconstruct the pre-filter detector run from retained items.",
+        "No independent second-look count was recorded for this answer; saved model scores are not a recount.",
+        "Answer accuracy percentage: no matching measured calibration. A fixed vision heuristic is not used."
+      ],
+      "score_statistics": 21,
+      "pixel_measurements": 93,
+      "numeric_input_sources": 4594,
+      "confidence": {
+        "label": "Estimate",
+        "pct": null,
+        "reason": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type.",
+        "improve": "Check the numbered evidence and the source quantities.",
+        "calibration": null,
+        "agreement": []
+      },
+      "model_calls": 0,
+      "cost_usd": 0
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-11018",
+      "question": "What is the total area of all rooms?",
+      "route": "planmap",
+      "value": 790.15,
+      "abstained": false,
+      "steps": 225,
+      "selected_rows": 9,
+      "inventory_rows": 231,
+      "complete": true,
+      "issues": [],
+      "scale_proofs": 1,
+      "missing": [
+        "No independent second reading covers the complete answer.",
+        "Image DPI was not recorded; pixel size alone does not establish real-world size.",
+        "score_threshold: not recorded for this page; cannot reconstruct the pre-filter detector run from retained items.",
+        "tiles: not recorded for this page; cannot reconstruct the pre-filter detector run from retained items.",
+        "dedupe_merged: not recorded for this page; cannot reconstruct the pre-filter detector run from retained items.",
+        "No independent second-look count was recorded for this answer; saved model scores are not a recount.",
+        "Answer accuracy percentage: no matching measured calibration. A fixed vision heuristic is not used."
+      ],
+      "score_statistics": 20,
+      "pixel_measurements": 93,
+      "numeric_input_sources": 4624,
+      "confidence": {
+        "label": "Estimate",
+        "pct": null,
+        "reason": "The recorded readings disagree; check the highlighted evidence. No measured accuracy is available for this answer type.",
+        "improve": "Supply a known dimension and check the measured outlines.",
+        "calibration": null,
+        "agreement": []
+      },
+      "model_calls": 0,
+      "cost_usd": 0.0
+    }
+  ],
+  "summary": {
+    "answers": 3,
+    "before_with_calc": 2,
+    "after_with_calc": 3,
+    "after_complete": 3,
+    "after_total_steps": 657,
+    "after_inputs": 13802,
+    "live_calls": 0,
+    "live_spend_usd": 0
+  }
+}

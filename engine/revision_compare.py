@@ -611,7 +611,7 @@ def comparison_answer(question, doc_ids, root):
                   "improve": "; ".join(result["warnings"]) if result and result["warnings"] else None}
     steps = [{"kind": "found", "title": "Found", "text": f"Read both version inventories: {result['inventory_a']} and {result['inventory_b']} items.", "cite": 1, "ok": True},
              {"kind": "checked", "title": "Checked", "text": result["note"], "cite": 2, "ok": result["status"] == "ready"}] if available else []
-    return {"answer_id": uuid.uuid4().hex, "question": question, "doc_ids": ids,
+    res = {"answer_id": uuid.uuid4().hex, "question": question, "doc_ids": ids,
             "answer": {"text_md": text, "value": result["summary"]["total"] if available else None,
                        "unit": "changes" if available else None, "confidence": pct / 100, "abstained": not available},
             "citations": citations, "evidence": {"boxes": [], "scene": {"doc_id": ids[-1] if ids else "", "highlight_item_ids": scene_ids,
@@ -619,3 +619,7 @@ def comparison_answer(question, doc_ids, root):
             "trace": [{"step": "revision_compare", "detail": result["note"] if result else "Two versions required", "ms": 0, "model": None, "cost_usd": 0}],
             "route": "index" if result and result.get("method") == "ifc-globalid" else "planmap", "cost": {"usd_total": 0, "calls": []},
             "latency_ms": int((time.perf_counter() - t0) * 1000), "reasoning": {"steps": steps, "confidence": confidence}}
+    if available:
+        from engine.calc_inventory import revisions
+        revisions(res, result)
+    return res

@@ -1,0 +1,45 @@
+{
+  "new_fitted_numeric_constants": [],
+  "explanation": "No symbol classifiers, sizes or geometry tolerances introduced. Exact label matching, same-page polygon containment, arithmetic, existing MIN_CONF, and displayed decimal precision only.",
+  "apartment_label_provenance": {
+    "n_files": 3,
+    "n_unit_outlines": 11,
+    "observed_form": "Whg. <identifier> on rooms and text; corresponding unit labels empty",
+    "files": [
+      {
+        "doc_id": "swiss_dwellings__site28-bldg259-floor47941",
+        "units": 4,
+        "unit_label_distribution": {
+          "empty": 4
+        },
+        "anchor_kind_distribution": {
+          "room": 4,
+          "text": 4
+        }
+      },
+      {
+        "doc_id": "swiss_dwellings__site11111-bldg16275-floor42197",
+        "units": 2,
+        "unit_label_distribution": {
+          "empty": 2
+        },
+        "anchor_kind_distribution": {
+          "room": 2,
+          "text": 2
+        }
+      },
+      {
+        "doc_id": "swiss_dwellings__site353-bldg750-floor48732",
+        "units": 5,
+        "unit_label_distribution": {
+          "empty": 5
+        },
+        "anchor_kind_distribution": {
+          "room": 5,
+          "text": 5
+        }
+      }
+    ]
+  },
+  "vocabulary": "Existing App. apartment labels retained. Other apartment terms are language synonyms, not fitted symbol constants."
+}

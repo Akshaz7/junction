@@ -32,7 +32,8 @@ PROMPT = ("You read a building drawing (floor plan page) and answer one question
           "plain sentence saying so). answer: 1-3 short sentences, key fact first in **bold**, English, keep room labels "
           "exactly as printed. regions: boxes around the parts of the drawing that show the answer, as "
           "box_2d=[ymin,xmin,ymax,xmax] on a 0-1000 scale of the full image, each with a short 'what' (quote any printed "
-          "text). Do not guess; no region means no evidence.\n\nQuestion: ")
+          "text). Do not guess; no region means no evidence. When information is missing, say only what is missing: "
+          "never add typical values, code requirements, or general construction guidance.\n\nQuestion: ")
 MAX_REGIONS = 8
 CENTRE_IN, IOU_MIN = True, 0.2
 
@@ -111,7 +112,7 @@ def read_drawing(question: str, doc: Doc, root: Path, page: int = 1) -> dict:
     text = (j.get("answer") or "").strip()
     if not j.get("can_answer") or not text:
         trace.append({"step": "abstain", "detail": "the drawing does not show the answer", "ms": 0, "model": None, "cost_usd": 0})
-        return _abstain(question, doc, text or "The drawing does not show this, so I cannot answer it.", trace, t0, calls)
+        return _abstain(question, doc, "**This drawing does not show the requested information.**", trace, t0, calls)
 
     items = [i for i in doc.items if i.page == page]
     w, h = size

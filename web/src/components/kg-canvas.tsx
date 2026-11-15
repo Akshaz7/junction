@@ -38,7 +38,7 @@ export function GraphCanvas({ nodes, edges, selectedId, markedIds, label, onSele
     const style = getComputedStyle(host.current)
     const read = (name: string, fallback: string) => style.getPropertyValue(name).trim() || fallback
     colors.current = {
-      structure: read(groupToken.structure, '#152e14'), space: read(groupToken.space, '#808e80'), element: read(groupToken.element, '#8a8a8a'), service: read(groupToken.service, '#c98137'), issue: read(groupToken.issue, '#b14142'),
+      structure: read(groupToken.structure, '#011e01'), space: read(groupToken.space, '#617061'), element: read(groupToken.element, '#d6d6d6'), service: read(groupToken.service, '#c98137'), issue: read(groupToken.issue, '#b14142'),
       edge: read('--neutral-350', '#c4c4c4'), edgeStrong: read('--neutral-500', '#8a8a8a'), differs: read('--change-removed', '#ca482a'), text: read('--foreground', '#1a1a1a'), halo: read('--background', '#fdfdfd'), ring: read('--foreground', '#1a1a1a'),
       mark: read('--amber-500', '#e5a648'), font: style.fontFamily || 'sans-serif',
     }

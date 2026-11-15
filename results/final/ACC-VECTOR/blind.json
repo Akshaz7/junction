@@ -1,0 +1,128 @@
+{
+  "phase": "blind",
+  "baseline_ref": "a05067e^",
+  "files": [
+    {
+      "doc_id": "opening_design__kb-classical-moulding-federal-profiles",
+      "path": "data/full/junction-dataset/data/opening_design/Lake_Kegonsa_Home/Info/mouldings/Federal-Moulding-Collection/KB Classical Moulding - Federal Profiles.dxf",
+      "source": "opening_design",
+      "units_code": 0,
+      "before": {},
+      "after": {},
+      "uncertain_symbols": 0,
+      "fixture_classifications": {},
+      "questions": []
+    },
+    {
+      "doc_id": "swiss_dwellings__site1073-bldg2196-floor10014",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1073_bldg2196_floor10014.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 268838,
+      "units_code": 6,
+      "before": {
+        "room": 39,
+        "other": 77,
+        "wall": 67,
+        "window": 16,
+        "door": 28,
+        "text": 57
+      },
+      "after": {
+        "room": 39,
+        "other": 26,
+        "wall": 67,
+        "window": 16,
+        "door": 28,
+        "sink": 5,
+        "bathtub": 3,
+        "toilet": 5,
+        "shower": 2,
+        "text": 57
+      },
+      "uncertain_symbols": 1,
+      "fixture_classifications": {
+        "closed_frame": 44,
+        "geometry": 15,
+        "kitchen_hob": 7,
+        "empty_outline": 2,
+        "parallel_partitions": 13,
+        "unknown": 1
+      },
+      "questions": [
+        {
+          "question": "How many doors (interior doors and entrance doors together) are drawn on this floor plan?",
+          "gold": 28,
+          "before": {
+            "value": 28,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 28,
+            "outcome": "correct",
+            "boxes": 28
+          }
+        },
+        {
+          "question": "How many windows are drawn on this floor plan?",
+          "gold": 16,
+          "before": {
+            "value": 16,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 16,
+            "outcome": "correct",
+            "boxes": 16
+          }
+        },
+        {
+          "question": "How many toilets (WC) are drawn on this floor plan?",
+          "gold": 5,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        },
+        {
+          "question": "How many bathtubs are drawn on this floor plan?",
+          "gold": 3,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        },
+        {
+          "question": "How many showers are drawn on this floor plan?",
+          "gold": 2,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        }
+      ]
+    }
+  ],
+  "files_checked": 2,
+  "dataset_origins": [
+    "opening_design",
+    "swiss_dwellings"
+  ],
+  "before_correct": 2,
+  "after_correct": 2,
+  "questions": 5
+}

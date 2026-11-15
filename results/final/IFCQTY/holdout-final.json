@@ -1,0 +1,4 @@
+{
+  "path": "data/full/junction-dataset/data/ifc_models/resbim-114_model.ifc",
+  "rule": "Randomly selected before correcting the quoted-type/floor scope bug. Tested only after this correction; initial holdout result is preserved separately."
+}

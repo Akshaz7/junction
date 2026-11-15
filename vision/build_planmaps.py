@@ -6,7 +6,9 @@ Writes artifacts/<doc_id>/planmap-seg.json (V-01, seg only) and planmap-1.json (
 results/vision/timing.json (ms per image, per stage).
 """
 import argparse
+import copy
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -83,8 +85,15 @@ def run(doc_ids, stages=("seg", "merged"), out_root=None):
             texts, ocr_ms = ocr_res[d]
             t = time.perf_counter()
             room_list, _ = RS.room_items(rooms_map, room_conf, W, H, P.PARAMS["det_size"])
+            if os.environ.get("SCAN_ROOM_TOPOLOGY", "1") != "0":
+                from vision.scan_rooms import room_regions
+                connected = room_regions(rooms_map, room_conf, VF.free_pass(copy.deepcopy(d_items), W, H))
+                if connected:
+                    room_list = connected
             RS.label_rooms(room_list, texts)
-            scale = RS.estimate_scale(room_list, texts, [i for i in d_items if i["kind"] == "door"])
+            dpi_info = img.info.get("dpi")
+            dpi = dpi_info[0] if isinstance(dpi_info, (tuple, list)) and dpi_info else None
+            scale = RS.estimate_scale(room_list, texts, [i for i in d_items if i["kind"] == "door"], image_size=img.size, dpi=dpi)
             RS.apply_scale(room_list, scale)
             text_items = [dict(kind="text", label=x["text"], bbox_px=x["bbox"], polygon_px=None, props={}, conf=round(x["conf"], 3), source="ocr") for x in texts]
             rooms_ms = (time.perf_counter() - t) * 1000
@@ -92,10 +101,12 @@ def run(doc_ids, stages=("seg", "merged"), out_root=None):
             wall_frac = sum((i["bbox_px"][2] - i["bbox_px"][0]) * (i["bbox_px"][3] - i["bbox_px"][1]) for i in seg_walls) / (W * H)
             use_det_walls = wall_frac < P.PARAMS["seg_wall_min_frac"]  # UNet fails on scans/hand-drawn plans
             keep = ([] if use_det_walls else seg_walls) + [i for i in d_items if i["kind"] != "wall" or use_det_walls]
-            keep = VF.free_pass(keep, W, H)  # V-09 free pass: duplicate merge + confidence cut
+            extraction_trace = {}
+            keep = VF.free_pass(keep, W, H, diagnostics=extraction_trace)  # V-09 free pass: duplicate merge + confidence cut
             timing[d]["walls_from"] = "det" if use_det_walls else "seg"
             pm = P.assemble(d, W, H, keep + room_list + text_items, {**models, "det": infer.OfficialModel.NAME, "ocr": "rapidocr-onnxruntime"},
                             s_ms + d_ms + ocr_ms + rooms_ms, scale=scale)
+            pm['provenance']['extraction'] = extraction_trace
             (dd / "planmap-1.json").write_text(json.dumps(pm))
             timing[d]["det_ms"] = round(d_ms, 1)
             timing[d]["ocr_ms"] = round(ocr_ms, 1)

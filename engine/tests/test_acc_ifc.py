@@ -261,14 +261,14 @@ def test_count_guard_cleans_components_from_old_quantity_route(tmp_path):
     assert fixed['citations'][0]['item_ids'] == [a.GlobalId]
 
 
-def test_fractional_count_is_never_rounded_to_an_instance(tmp_path):
+def test_unrecognized_count_question_keeps_existing_route(tmp_path):
     f = model()
     entity(f, 'IfcWall', 'A')
     did = document(tmp_path, f)
     wrong = _answer_obj('How many unknown gadgets?', [did], '1.25', 1.25, 'count', 1., False,
                         [], [], {}, [], 'index', time.perf_counter())
     fixed = guard(wrong, 'How many unknown gadgets?', [did], tmp_path)
-    assert fixed['answer']['abstained'] and fixed['answer']['value'] is None
+    assert fixed is wrong
 
 
 def test_measurement_count_is_not_rejected(tmp_path):
@@ -316,7 +316,11 @@ def test_persisted_measurements_work_without_optional_ifc_parser(monkeypatch, tm
     (tmp_path / did / 'source.ifc').unlink()
     assert solve('What is the area of the room?', did, root=tmp_path)['answer']['value'] == pytest.approx(12)
     result = solve('How many rooms?', did, root=tmp_path)
-    assert result['answer']['value'] == 1 and result['answer']['confidence'] == 1
+    assert result['answer']['value'] == 1
+    # The persisted hierarchy verifies the inventory. This fixture has no visual
+    # boxes, so the shared count/evidence policy still caps route confidence.
+    assert result['answer']['confidence'] <= .69
+    assert not any('hierarchy could not be verified' in s['detail'] for s in result['trace'])
 
 
 def test_typed_net_area_pset_units_and_untyped_real():
@@ -374,6 +378,83 @@ def test_mep_rows_use_same_aggregate_count_rule(monkeypatch, tmp_path):
     result = count_index(idx, load_doc(did, tmp_path))
     assert result['services'] == [{'item_id': a.GlobalId, 'length': 10}]
     assert len(idx['services']) == 2
+
+
+def test_mep_rows_without_identity_are_preserved(tmp_path):
+    f = model()
+    entity(f, 'IfcPipeSegment', 'Pipe')
+    did = document(tmp_path, f)
+    from engine.ifc_accuracy import count_rows
+    rows = [{'length': 2}, {'item_id': None, 'length': 3}]
+    assert count_rows(rows, load_doc(did, tmp_path), tmp_path) == rows
+
+
+@pytest.mark.parametrize('pct', [None, 'unknown', float('nan')])
+def test_non_numeric_card_percentage_does_not_crash(pct, tmp_path):
+    f = model()
+    entity(f, 'IfcWall', 'Wall')
+    did = document(tmp_path, f)
+    res = _answer_obj('How many walls?', [did], '**1 wall**', 1, 'count', .9, False,
+                      [], [], {}, [], 'index', time.perf_counter())
+    res['reasoning'] = {'steps': [], 'confidence': {'pct': pct}}
+    from engine.ifc_accuracy import annotate
+    doc = prepare_doc(load_doc(did, tmp_path), tmp_path)
+    assert annotate(res, res['question'], doc, tmp_path)['answer']['value'] == 1
+
+
+@pytest.mark.parametrize('question', ['how many', 'How many people can fit in the seminar room?',
+                                     'What is the occupancy capacity of the room?', 'How many square metres?'])
+def test_count_guards_only_apply_to_occurrence_questions(question, tmp_path):
+    from engine.ifc_accuracy import is_item_count
+    from engine.numeric import count_question
+    assert not is_item_count(question)
+    assert not count_question(question)
+    res = _answer_obj(question, ['synthetic__generated-for-test'], 'Existing text', None, None, .5, False,
+                      [], [], {}, [], 'index', time.perf_counter())
+    assert guard(res, question, res['doc_ids'], tmp_path) is res
+
+
+@pytest.mark.parametrize('length,area', [('m', 'm2'), ('mm', 'mm2'), ('ft', 'ft2')])
+def test_gross_qto_and_measured_net_remain_distinct(tmp_path, length, area):
+    f = model(length=length, area=area)
+    scale = {'m': 1., 'mm': .001, 'ft': .3048}[length]
+    area_scale = {'m2': 1., 'mm2': 1e-6, 'ft2': .3048**2}[area]
+    r = room(f, [(x / scale, y / scale) for x, y in ((0, 0), (4, 0), (4, 3), (0, 3))], net=12/area_scale)
+    qty = f.create_entity('IfcQuantityArea', Name='GrossFloorArea', AreaValue=15/area_scale)
+    qt = r.IsDefinedBy[0].RelatingPropertyDefinition
+    qt.Quantities = list(qt.Quantities) + [qty]
+    did = document(tmp_path, f)
+    for question in ['What is the total floor area of the rooms (spaces)?', 'What is the gross floor area of all rooms?']:
+        res = solve(question, did, root=tmp_path)
+        assert res['answer']['value'] == pytest.approx(15)
+        assert any('answer uses stored gross floor area: 15' in s['detail'] for s in res['trace'])
+    net = solve('What is the total net floor area of all rooms?', did, root=tmp_path)
+    assert net['answer']['value'] == pytest.approx(12)
+    # The ingestion sidecar preserves both declared quantities for parser-free use.
+    from pipeline.ifc_accuracy import enrich_elements
+    p = tmp_path / did / 'elements.json'
+    data = json.loads(p.read_text())
+    enrich_elements(data['elements'], build(f, geometry=True))
+    p.write_text(json.dumps(data))
+    (tmp_path / did / 'source.ifc').unlink()
+    assert solve('What is the total floor area of all rooms?', did, root=tmp_path)['answer']['value'] == pytest.approx(15)
+    assert solve('What is the total net floor area of all rooms?', did, root=tmp_path)['answer']['value'] == pytest.approx(12)
+
+
+def test_gross_geometry_does_not_replace_declared_usable_net_area(tmp_path):
+    f = model()
+    r = room(f, net=9)
+    qty = f.create_entity('IfcQuantityArea', Name='GrossFloorArea', AreaValue=12.)
+    qt = r.IsDefinedBy[0].RelatingPropertyDefinition
+    qt.Quantities = list(qt.Quantities) + [qty]
+    did = document(tmp_path, f)
+    gross = solve('What is the total floor area of all rooms?', did, root=tmp_path)
+    assert gross['answer']['value'] == pytest.approx(12)
+    net = solve('What is the total net floor area of all rooms?', did, root=tmp_path)
+    assert net['answer']['value'] == pytest.approx(9)
+    assert any('Footprint agrees with gross floor area' in s['detail'] for s in net['trace'])
+    assert any('-> flag' in s['detail'] for s in net['trace'])
+    assert net['answer']['confidence'] <= .8
 
 
 def test_native_and_proxy_evidence_stay_distinct(tmp_path):

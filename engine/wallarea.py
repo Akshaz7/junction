@@ -673,7 +673,16 @@ def estimate_planmaps(doc_id, root, question):
             if it.get("kind") != "wall":
                 continue
             props = it.get("props") or {}
+            if props.get("derived") == "room-outline":
+                out["skipped"].append({"item_id": it.get("item_id"), "reason": "Room detection rectangle, not a measured wall"})
+                continue
             pts = props.get("centerline_px") or it.get("polygon_px")
+            if not pts and it.get("bbox_px"):
+                x0, y0, x1, y1 = it["bbox_px"]
+                # A slender detected wall box can supply an explicit rectangle
+                # estimate; a whole network/square box cannot define an axis.
+                if min(x1 - x0, y1 - y0) > 0 and max(x1 - x0, y1 - y0) > 2 * min(x1 - x0, y1 - y0):
+                    pts = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]
             length = _number(props.get("length_m"))
             thick = _number(props.get("thickness_m") or props.get("width_m"))
             h = _number(props.get("height_m")) or height
@@ -849,7 +858,7 @@ def answer(question, doc_ids, root, t0=None, hidden=None):
         text = text.replace("{marks}", marks)
         route = "planmap" if report["source"] == "2D plan estimate" else "index"
         res = _answer_obj(question, doc_ids, text, value, unit if value is not None else None, .99 if report["complete"] else .4,
-                          False, boxes, cites, scene, trace, route, t0)
+                          value is None, boxes, cites, scene, trace, route, t0)
         res["wallarea"] = report
         from engine.reasoning_parts.wallarea_steps import card
         res["reasoning"] = card(report)
@@ -863,11 +872,18 @@ def answer(question, doc_ids, root, t0=None, hidden=None):
         elif doc and doc.mode == "planmap":
             measured = estimate_planmaps(did, root, question)
         else:
+            metadata_path = Path(root) / did / "doc.json"
+            metadata = json.loads(metadata_path.read_text()) if metadata_path.exists() else {}
+            if metadata.get("kind") in {"raster", "pdf", "dxf", "dwg", "svg"}:
+                report["source"] = "2D plan estimate"
+                return finish("**Wall surface area cannot be measured from this sheet.** No usable scaled wall lengths are recorded; floor area cannot establish wall surface area.")
             return finish("**Wall surface area cannot be verified from this data.** The original IFC body geometry, or a scaled wall plan with heights, is needed; floor area is not wall area.")
     except Exception as exc:  # noqa: BLE001 — IFC backends also have their own exception classes
         trace.append(_step("wallarea", f"wall measurement unavailable: {type(exc).__name__}"))
         return finish("**The wall geometry could not be measured.** Check that the file contains valid wall bodies and units; no nominal area has been substituted.")
     report["source"] = measured["source"]
+    if measured["source"] == "2D plan estimate":
+        trace[0]["detail"] = "2D wall length × stated/printed/assumed height, both faces minus detected openings; estimate"
     if doc is None and source:
         from engine.solvers.data import Doc
         doc = Doc(did, "ifc", [Item(w["item_id"], "wall", name=w["name"]) for w in measured["walls"]], storeys=measured["storeys"])
@@ -1003,6 +1019,8 @@ def answer(question, doc_ids, root, t0=None, hidden=None):
     report["opening_count"] = len(report["openings"])
     report["complete"] = bool(report["rows"]) and report["source"] != "2D plan estimate" and not report["warnings"]
     if not report["rows"]:
+        if measured["source"] == "2D plan estimate":
+            return finish("**Wall surface area cannot be measured from this sheet.** No usable scaled wall lengths were found; room detection boxes cannot establish wall surfaces.")
         return finish("**No wall surfaces could be measured for this request.** Check the wall bodies, room boundaries and exterior/interior flags.")
     report["margin_m2"] = report["numerical_allowance_m2"] + report["orientation_allowance_m2"] if report["source"] != "2D plan estimate" and not report["skipped_walls"] and not unknown else None
     report["margin_pct"] = 100 * report["margin_m2"] / report["net_m2"] if report.get("margin_m2") is not None and report["net_m2"] else None

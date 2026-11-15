@@ -83,7 +83,11 @@ def test_X11_still_141_with_both_docs_and_card_text():
     assert r["answer"]["value"] == 141
     assert {c["doc_id"] for c in r["citations"]} == {AC, DH}
     assert any("Added 77 + 64 from 2 drawings" in s["text"] for s in r["reasoning"]["steps"])
-    assert r["reasoning"]["confidence"]["label"] == "Verified"
+    # The viewer only carries the primary model's boxes. A complete source
+    # total must state that coverage instead of claiming every item is numbered.
+    assert r["reasoning"]["confidence"]["label"] == "Estimate"
+    unboxed = 141 - len(r["evidence"]["boxes"])
+    assert any(f"{unboxed} are not boxed yet" in s["text"] for s in r["reasoning"]["steps"])
 
 
 def test_same_building_total_uses_model_and_says_so():

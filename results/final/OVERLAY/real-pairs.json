@@ -1,0 +1,125 @@
+{
+  "judges": {
+    "base": "data/judges/ARK-103-03_floor_plan_3rd_floor.pdf",
+    "overlay": "data/judges/L30301_ventilation_3rd_floor_block_U.pdf",
+    "base_image": {
+      "w": 1600,
+      "h": 970
+    },
+    "overlay_image": {
+      "w": 1600,
+      "h": 849
+    },
+    "status": "aligned",
+    "matrix": [
+      [
+        0.5712259723163786,
+        5.878629737529306e-05,
+        580.446590083581
+      ],
+      [
+        -5.878629737529306e-05,
+        0.5712259723163786,
+        86.07210639609018
+      ]
+    ],
+    "method": "similarity",
+    "anchor_count": 950,
+    "candidate_count": 952,
+    "residual_px": 0.4429789687906721,
+    "residual_mm": 40.69938491228174,
+    "detail": "Aligned on 950 shared labels, \u00b1 40.7 mm",
+    "seconds": 11.71192112499557
+  },
+  "real_raster_pairs": [
+    {
+      "project": "Crema Cafe",
+      "base": "data/full/junction-dataset/data/opening_design/Crema_Cafe/Models/pdfs/A-100 - Floor Plans v3.pdf",
+      "overlay": "data/full/junction-dataset/data/opening_design/Crema_Cafe/Transfer/20170509 - Markup to Maira/A-100 - Floor Plans v2.pdf",
+      "status": "aligned",
+      "matrix": [
+        [
+          0.0004060839639718404,
+          1.0474721511981566,
+          -110.06929355299796
+        ],
+        [
+          -1.0474721511981566,
+          0.0004060839639718404,
+          1840.8384316558065
+        ]
+      ],
+      "method": "raster-features",
+      "anchor_count": 416,
+      "candidate_count": 494,
+      "residual_px": 1.3328646283539507,
+      "residual_mm": null,
+      "detail": "Aligned on 416 shared drawing features, \u00b1 1.3 px \u00b7 drawing scale unavailable",
+      "seconds": 0.46423720799793955
+    },
+    {
+      "project": "Sports Complex",
+      "base": "data/full/junction-dataset/data/opening_design/Sports_Complex/Models/2D/Sports Complex - Sheet - A-101 - First Floor Plan.pdf",
+      "overlay": "data/full/junction-dataset/data/opening_design/Sports_Complex/Transfer/_Archive/20150428 - clean plans to owner/20150428 - XSC - Floor Plan.pdf",
+      "status": "needs_manual",
+      "matrix": null,
+      "method": null,
+      "anchor_count": 0,
+      "candidate_count": 10,
+      "residual_px": null,
+      "residual_mm": null,
+      "detail": "Too few shared drawing features. Use two grid crossings.",
+      "manual_check": {
+        "status": "manual",
+        "matrix": [
+          [
+            0.9998459711658136,
+            0.009353751022171444,
+            -157.88028038849274
+          ],
+          [
+            -0.009353751022171444,
+            0.9998459711658136,
+            10.133881862658399
+          ]
+        ],
+        "method": "two-point",
+        "anchor_count": 2,
+        "candidate_count": 2,
+        "residual_px": null,
+        "residual_mm": null,
+        "detail": "Manually aligned on 2 points. Check a third crossing before relying on it.",
+        "anchors": [
+          {
+            "base": [
+              281.0,
+              428.0
+            ],
+            "overlay": [
+              435.0,
+              422.0
+            ],
+            "label": "1"
+          },
+          {
+            "base": [
+              1346.0,
+              970.0
+            ],
+            "overlay": [
+              1495.0,
+              974.0
+            ],
+            "label": "2"
+          }
+        ],
+        "third_corner_residual_px": 11.1788243414174,
+        "note": "Evaluation-only visual picks on source rasters; no production coordinates. No millimetre claim."
+      },
+      "seconds": 0.5286586250003893
+    }
+  ],
+  "model_calls": 0,
+  "cost_usd": 0,
+  "residual_note": "Residual is RMS agreement of accepted anchors, not a guarantee of building measurement accuracy. Millimetres are reported only from an explicit unambiguous PDF scale or trusted plan-map scale."
+}

@@ -14,6 +14,8 @@ from . import config
 
 MAX_DOC_BYTES = int(os.environ.get("MAX_DOC_BYTES", 60 * 1024 * 1024))
 ORIGINAL = "__original__/"
+SOURCE_CHUNKS = "__source_chunks__/"
+SOURCE_CHUNK_BYTES = 4 * 1024 * 1024
 SKIP = {"ingest.json.tmp", ".restored"}
 RESTORE_CAP = int(float(os.environ.get("RESTORE_CAP_MB", "400")) * 1024 * 1024)  # disk for docs restored from PostgreSQL
 _restored: set[str] = set()
@@ -22,7 +24,7 @@ _restored: set[str] = set()
 def _priority(name: str) -> int:
     if name.startswith(ORIGINAL) or name.startswith("source."):
         return 0
-    if name in ("doc.json", "ingest.json", "text.json", "scene.json", "pages.json", "elements.json", "piping.json", "ifc-accuracy.json") or name.startswith("planmap-"):
+    if name in ("doc.json", "ingest.json", "text.json", "scene.json", "pages.json", "elements.json", "piping.json", "ifc-quantities.json", "ifc-accuracy.json") or name.startswith("planmap-"):
         return 1
     if name.endswith(".thumb.png") or name.startswith("text-"):
         return 2
@@ -62,15 +64,36 @@ def doc_files(doc_id: str, originals: bool = True) -> list[tuple[str, Path]]:
 
 async def save_doc(pool, doc_id: str, originals: bool = True) -> int:
     """Upsert every file of the document. Returns bytes stored. originals=False leaves the source file (ifc/pdf) out."""
-    n = 0
-    for name, p in doc_files(doc_id, originals):
-        data = p.read_bytes()
-        ct = mimetypes.guess_type(p.name)[0] or "application/octet-stream"
+    import hashlib
+    import json
+
+    async def store(name, data, ct):
         await pool.execute(
             "insert into doc_artifacts (doc_id, name, content_type, data, size) values ($1,$2,$3,$4,$5) "
             "on conflict (doc_id, name) do update set data=excluded.data, content_type=excluded.content_type, "
             "size=excluded.size, created_at=now()", doc_id, name, ct, data, len(data))
-        n += len(data)
+
+    n = 0
+    for name, p in doc_files(doc_id, originals):
+        ct = mimetypes.guess_type(p.name)[0] or "application/octet-stream"
+        if name.startswith(ORIGINAL) and p.stat().st_size > SOURCE_CHUNK_BYTES:
+            prefix = SOURCE_CHUNKS + p.name + "/"
+            digest, count, size = hashlib.sha256(), 0, 0
+            with p.open("rb") as source:
+                while chunk := source.read(SOURCE_CHUNK_BYTES):
+                    await store(prefix + f"{count:06d}", chunk, ct)
+                    digest.update(chunk)
+                    count += 1
+                    size += len(chunk)
+            # Publish the manifest last so an interrupted save is never restored
+            # as a complete original. Each DB parameter stays at most 4 MiB.
+            manifest = {"name": p.name, "chunks": count, "size": size, "sha256": digest.hexdigest()}
+            await store(prefix + "manifest.json", json.dumps(manifest).encode(), "application/json")
+            n += size
+        else:
+            data = p.read_bytes()
+            await store(name, data, ct)
+            n += len(data)
     return n
 
 
@@ -80,6 +103,8 @@ async def restore_doc(pool, doc_id: str) -> int:
     written = 0
     names = [r["name"] for r in await pool.fetch("select name from doc_artifacts where doc_id=$1", doc_id)]
     for name in names:
+        if name.startswith(SOURCE_CHUNKS):
+            continue
         dest = (art / "uploads" / name[len(ORIGINAL):]) if name.startswith(ORIGINAL) else art / doc_id / name
         if dest.exists():
             continue
@@ -87,6 +112,39 @@ async def restore_doc(pool, doc_id: str) -> int:
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_bytes(bytes(row["data"]))
         written += 1
+    import hashlib
+    import json
+    for name in names:
+        if not (name.startswith(SOURCE_CHUNKS) and name.endswith("/manifest.json")):
+            continue
+        row = await pool.fetchrow("select data from doc_artifacts where doc_id=$1 and name=$2", doc_id, name)
+        manifest = json.loads(bytes(row["data"]))
+        source_name = manifest["name"]
+        if Path(source_name).name != source_name:
+            raise ValueError("Invalid original filename in storage")
+        dest = art / "uploads" / source_name
+        if dest.exists():
+            continue
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        tmp = dest.with_suffix(dest.suffix + ".restore.tmp")
+        digest, size = hashlib.sha256(), 0
+        try:
+            with tmp.open("wb") as target:
+                for i in range(manifest["chunks"]):
+                    part = await pool.fetchrow("select data from doc_artifacts where doc_id=$1 and name=$2",
+                                               doc_id, name.rsplit("/", 1)[0] + f"/{i:06d}")
+                    if part is None:
+                        raise ValueError("The stored original is incomplete. Upload it again.")
+                    chunk = bytes(part["data"])
+                    target.write(chunk)
+                    digest.update(chunk)
+                    size += len(chunk)
+            if size != manifest["size"] or digest.hexdigest() != manifest["sha256"]:
+                raise ValueError("The stored original failed its integrity check. Upload it again.")
+            tmp.replace(dest)
+            written += 1
+        finally:
+            tmp.unlink(missing_ok=True)
     return written
 
 

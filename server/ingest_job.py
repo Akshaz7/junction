@@ -25,6 +25,7 @@ class Status:
     def __init__(self, path: Path):
         self.path, self.stages, self.mode, self.cost = path, [], None, None
         self.started_at, self.step = time.time(), "starting"
+        self.detail = ""
         self.readable = False  # page images and text exist: the document can be viewed and questioned
         if path.is_file():
             try:
@@ -34,7 +35,7 @@ class Status:
         self.write("running")
 
     def write(self, status, detail=""):
-        state = {"status": status, "stages": self.stages, "detail": detail, "mode": self.mode,
+        state = {"status": status, "stages": self.stages, "detail": detail or self.detail, "mode": self.mode,
                  "started_at": self.started_at, "step": self.step, "readable": self.readable or status == "ready",
                  "progress": 1 if status == "ready" else len(self.stages) / (len(self.stages) + 1),
                                          "cost_usd": round(self.cost["usd"], 5) if self.cost else None,
@@ -57,7 +58,7 @@ class Status:
             return True
         except Exception as e:  # noqa: BLE001
             error = str(e)[:300] or type(e).__name__
-            if name == "ifc_scene":
+            if name == "ifc_scene" and not self.readable:
                 error = ("This IFC could not be read or converted. Export it again as IFC, or split the model into smaller files. "
                          + error)
             self.stages.append({"stage": name, "ok": False, "error": error})
@@ -411,8 +412,9 @@ def run(doc_id: str) -> str:
     try:
         final = _run(doc_id, st)
     except Exception as e:  # noqa: BLE001
-        st.write("failed", f"Ingestion could not complete: {str(e)[:300] or type(e).__name__}")
-        return "failed"
+        final = "partial" if st.readable else "failed"
+        st.write(final, f"Ingestion could not complete: {str(e)[:300] or type(e).__name__}")
+        return final
     if final in ("ready", "partial"):
         try:  # after the status is final: the slow, more exact text layer replaces the quick one
             refine_text(doc_id, _art() / doc_id)
@@ -471,30 +473,9 @@ def _run(doc_id: str, st: Status) -> str:
     plan_pages: list[int] = []
     vector = False
     if kind == "ifc":
-        ifc_path = REPO / doc["files"]["ifc"]
-        cap = float(os.environ.get("INGEST_IFC_MAX_MB", "15" if light else "400"))
-        if ifc_path.stat().st_size > cap * 1e6:
-            st.write("failed", f"IFC is {ifc_path.stat().st_size / 1e6:.0f} MB; this server converts IFC files up to {cap:.0f} MB. "
-                               "The original is stored, but it cannot be viewed or questioned yet. Split the model into smaller IFC files and upload them separately.")
-            return "failed"
-        from pipeline import ifc_plans, ifc_scene
-        ifc = REPO / doc["files"]["ifc"]
-        ok = st.stage("ifc_scene", lambda: ifc_scene.process(ifc, doc, ddir))
-        if ok:
-            st.readable = True
-            st.write("running", "The model index and 3D scene are ready. Building drawing previews.")
-        ok = ok and st.stage("ifc_plans", lambda: ifc_plans.process(doc_id, art))
-        if ok and (ddir / "pages.json").is_file():
-            doc["pages"] = len(json.loads((ddir / "pages.json").read_text())["pages"])
-            (ddir / "doc.json").write_text(json.dumps(doc, indent=1))
-        ok = ok and st.stage("usdz", lambda: _usdz(doc_id, ddir))
-        if ok and _has_piping(ifc):
-            def pip():
-                try:
-                    _piping(doc_id, ddir, ifc)
-                except Exception as e:  # noqa: BLE001  optional extra: never fail the ingest over it
-                    st.stages[-1]["note"] = f"piping skipped: {e}"[:200]
-            st.stage("piping", pip)
+        from server import ifc_ingest
+        return ifc_ingest.run(REPO / doc["files"]["ifc"], doc, ddir, st)
+
     else:
         from pipeline import pages
         if light:

@@ -1,0 +1,131 @@
+{
+  "models": "MODELS_FAKE=1; READER=0; RECOUNT=0; EXPLAIN=0; no live model calls",
+  "live_spend_usd": 0,
+  "checks": [
+    {
+      "command": "MODELS_FAKE=1 scripts/heavy.sh <python> -m pytest -q engine/tests/test_calc_real.py engine/tests/test_projects_engine.py engine/tests/test_order.py engine/tests/test_calc_wallarea.py engine/tests/test_scale_policy.py",
+      "passed": 143
+    },
+    {
+      "command": "MODELS_FAKE=1 scripts/heavy.sh <python> -m pytest -q engine/tests/test_reasoning_margin.py engine/tests/test_reasoning_confidence.py engine/tests/test_reasoning_invariant.py engine/tests/test_reasoning_measured.py engine/tests/test_xcheck.py engine/tests/test_xcheck_ifc.py engine/tests/test_solvers.py engine/tests/test_solvers_e19.py engine/tests/test_units.py engine/tests/test_analytics.py engine/tests/test_quantity_takeoff.py",
+      "passed": 174
+    },
+    {
+      "command": "MODELS_FAKE=1 <python> -m pytest -q engine/tests/test_method_trace.py engine/tests/test_scale_policy.py engine/tests/test_scale_proof.py engine/tests/test_calc.py engine/tests/test_scale_text.py",
+      "passed": 85
+    },
+    {
+      "command": "MODELS_FAKE=1 <python> -m pytest -q engine/tests/test_method_trace.py engine/tests/test_calc.py engine/tests/test_calc_wallarea.py",
+      "passed": 31,
+      "purpose": "After retaining cited item-count secondary results"
+    },
+    {
+      "command": "MODELS_FAKE=1 <python> -m pytest -q engine/tests/test_scale_policy.py",
+      "passed": 18,
+      "purpose": "After rejecting invalid stored scales"
+    },
+    {
+      "command": "scripts/heavy.sh <python> -m engine.tests.run_method_audit",
+      "summary": {
+        "cases": 80,
+        "run": 80,
+        "numeric": 73,
+        "complete": 80,
+        "methods": 70,
+        "numeric_complete_pct": 100.0,
+        "non_scan_cases": 70,
+        "non_scan_method_pct": 100.0
+      }
+    },
+    {
+      "command": "scripts/heavy.sh <python> -m engine.tests.run_method_audit --scales",
+      "summary": {
+        "sample_pages": 37,
+        "sampling": "Seeded random sample, up to 12 source documents per input family; one page per document; no new OCR/model calls",
+        "population_by_family": {
+          "ifc": 574,
+          "dxf": 1042,
+          "raster": 4901,
+          "pdf": 1
+        },
+        "available_by_rung": {
+          "ifc": 12,
+          "door-prior": 36,
+          "ratio-dpi": 13,
+          "dxf_units_fit": 12,
+          "dimension": 1
+        },
+        "chosen_by_rung": {
+          "ifc": 12,
+          "dxf_units_fit": 12,
+          "door-prior": 11,
+          "unknown": 1,
+          "ratio-dpi": 1
+        },
+        "native_comparisons": 24,
+        "within_1pct": 24,
+        "max_diff_pct": 0.002855461909115256,
+        "ifc_dxf_twins": [],
+        "limitations": [
+          "Candidate availability reflects cached operands, not everything a fresh drawing reader could extract.",
+          "No unrecorded dimensions, OCR, native geometry or physical error bounds were invented.",
+          "Independent scale accuracy requires matching surveyed/native twins; same-source agreement is not that accuracy."
+        ],
+        "rung_availability": {
+          "native IFC projection": {
+            "pages": 12,
+            "pct_of_sample": 32.432432432432435
+          },
+          "native CAD units/registration": {
+            "pages": 12,
+            "pct_of_sample": 32.432432432432435
+          },
+          "matched printed dimensions": {
+            "pages": 1,
+            "pct_of_sample": 2.7027027027027026
+          },
+          "printed ratio + DPI": {
+            "pages": 13,
+            "pct_of_sample": 35.13513513513514
+          },
+          "printed ratio + full paper size": {
+            "pages": 0,
+            "pct_of_sample": 0.0
+          },
+          "scale bar": {
+            "pages": 0,
+            "pct_of_sample": 0.0
+          },
+          "recorded known-size object": {
+            "pages": 0,
+            "pct_of_sample": 0.0
+          },
+          "door-width prior": {
+            "pages": 36,
+            "pct_of_sample": 97.29729729729729
+          }
+        }
+      }
+    },
+    {
+      "command": "scripts/heavy.sh <python> -m engine.tests.run_method_audit --unseen",
+      "answers": 3,
+      "matches": 3
+    },
+    {
+      "command": "MODELS_FAKE=1 <python> -m pytest -q engine/tests/test_method_trace.py engine/tests/test_calc.py engine/tests/test_calc_wallarea.py engine/tests/test_scale_policy.py",
+      "passed": 49,
+      "purpose": "After explicit polygon shoelace operands and cited item-count results"
+    }
+  ],
+  "scope_limits": [
+    "Counts above overlap between test commands; they must not be summed as distinct tests.",
+    "135 inventoried entrypoints include delegated scan/PDF handlers and comparison APIs. The 80 real questions are observed route variants, not exhaustive testing of all possible queries.",
+    "The 10 scan cases have complete numeric arithmetic but method records remain owned by F-EVINT.",
+    "Native mapping comparisons establish conversion/projection agreement, not physical accuracy. No matching IFC/DXF twins were available.",
+    "Cached dimensions require a label-to-line association; known-size objects require an actual recorded size. Missing operands do not become guesses.",
+    "The reserved IFC exercised classification/counts and native-unit provenance; no new geometry or independent area/length truth was generated."
+  ],
+  "python": "/Users/akshatthapa/Workspace/junction/.venv/bin/python",
+  "shared_artifacts": "Read only during the recorded audit: crop creation suppressed; unseen index created in TemporaryDirectory."
+}

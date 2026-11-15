@@ -81,6 +81,8 @@ app.include_router(docs_router)
 app.include_router(linked_router)
 app.include_router(files_router)
 app.include_router(chats_router)
+from .calc_routes import router as calc_router
+app.include_router(calc_router)
 app.include_router(live_router)
 app.include_router(speech_router)
 app.include_router(advise_router)
@@ -93,8 +95,12 @@ from .pair_routes import router as pair_router  # noqa: E402
 app.include_router(pair_router)
 from .design_versions import router as design_versions_router  # noqa: E402
 app.include_router(design_versions_router)
+from .sheet_align_routes import router as sheet_align_router  # noqa: E402
+app.include_router(sheet_align_router)
 from .projects_routes import router as projects_router  # noqa: E402
 app.include_router(projects_router)
+from .markup_routes import router as markup_router  # noqa: E402
+app.include_router(markup_router)
 
 
 @app.get("/api/health")

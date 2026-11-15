@@ -38,6 +38,8 @@ class Facts:
     item_ids: list[str] = field(default_factory=list)
     topic: str = ""
     available: bool = True
+    value: int | float | None = None
+    unit: str | None = None
 
 
 def _pl(kind: str, n: int = 2) -> str:
@@ -60,6 +62,8 @@ def _ids(items) -> list[str]:
 
 
 def _area(i: Item) -> float | None:
+    if i.q.get("selected_floor_area_m2") is not None:
+        return float(i.q['selected_floor_area_m2'])
     measured = (i.props.get("space_area") or {}).get("measured_m2")
     if measured is not None:
         return float(measured)
@@ -151,7 +155,7 @@ def _structural_facts(doc: Doc) -> Facts:
         ids += _ids(lb)
     if not lines:
         return Facts(["No structural elements were found in this model."], [], "absent", available=False)
-    return Facts([f"Structural elements: {total} in total"] + lines, ids[:MAX_IDS], "structural")
+    return Facts([f"Structural elements: {total} in total"] + lines, ids[:MAX_IDS], "structural", value=total, unit="count")
 
 
 def _furniture_in_room(question: str, items: list[Item], doc: Doc, st: str | None) -> Facts | None:
@@ -173,7 +177,7 @@ def _furniture_in_room(question: str, items: list[Item], doc: Doc, st: str | Non
         lines.append(f"{_rname(r)} ({r.name}, {r.storey}): {len(fit)} furniture items")
         for n, its in _group(fit, lambda i: i.type_name or i.name)[:10]:
             lines.append(f"  {n}: {len(its)}")
-    return Facts([f"{total} furniture items in {_rname(rooms[0])}{' on ' + st if st else ''}, from {len(rooms)} matching room(s)."] + lines, ids[:MAX_IDS], "furniture-in-room")
+    return Facts([f"{total} furniture items in {_rname(rooms[0])}{' on ' + st if st else ''}, from {len(rooms)} matching room(s)."] + lines, ids[:MAX_IDS], "furniture-in-room", value=total, unit="count")
 
 
 def facts_for(question: str, doc: Doc) -> Facts:
@@ -201,7 +205,7 @@ def facts_for(question: str, doc: Doc) -> Facts:
             if h is None and r.bbox_m:
                 h, src = r.bbox_m[1][1] - r.bbox_m[0][1], "vertical extent of the room volume"
             if h:
-                return Facts([f"Ceiling height of room {r.name} ({_rname(r)}): {h:.2f} m ({src}).".replace(" m (", " m (")], [r.item_id], "room-height")
+                return Facts([f"Ceiling height of room {r.name} ({_rname(r)}): {h:.2f} m ({src}).".replace(" m (", " m (")], [r.item_id], "room-height", value=h, unit="m")
     if re.search(r"structural elements?|structural components?", ql):
         return _structural_facts(doc)
     # level questions
@@ -211,7 +215,7 @@ def facts_for(question: str, doc: Doc) -> Facts:
         for a, b in zip(srt, srt[1:] + [None]):
             h = f", height {_f(b['elevation_m'] - a['elevation_m'])} m" if b else ""
             lines.append(f"{a['name']}: elevation {_f(a['elevation_m'])} m{h}")
-        return Facts(lines, [], "levels")
+        return Facts(lines, [], "levels", value=len(srt), unit="count")
     if not kinds:
         for label, rx in ABSENT:
             if re.search(rx, ql):
@@ -262,24 +266,24 @@ def facts_for(question: str, doc: Doc) -> Facts:
                 top = max(hs)
                 hit = [i for i in items if i.q.get("height_m") is not None and round(float(i.q["height_m"]), 2) == top]
                 return Facts([f"{len(hit)} of {len(items)} rooms have the greatest ceiling height, {_f(top)} m."]
-                             + ([f"All rooms have a ceiling height of {_f(top)} m."] if len(hs) == 1 else []), _ids(hit), "room-height")
+                             + ([f"All rooms have a ceiling height of {_f(top)} m."] if len(hs) == 1 else []), _ids(hit), "room-height", value=top, unit="m")
             small = "smallest" in ql
             if not rooms:
                 return Facts(["The model has no usable room areas to compare."], [], "no-prop", available=False)
             r = (min if small else max)(rooms, key=lambda t: t[1])
             i = r[0]
-            return Facts([f"{'Smallest' if small else 'Largest'} room: {_rname(i)} (room {i.name}), {_f(r[1])} m², on {i.storey}."], [i.item_id], "room-extreme")
+            return Facts([f"{'Smallest' if small else 'Largest'} room: {_rname(i)} (room {i.name}), {_f(r[1])} m², on {i.storey}."], [i.item_id], "room-extreme", value=r[1], unit="m²")
         by = _group(items, lambda i: i.storey)
         if re.search(r"by (level|floor|storey)|each (level|floor|storey)|per (level|floor|storey)|distribution|breakdown|total", ql) and not st:
             lines = [f"{len(items)} rooms in total, {_f(sum(a for _, a in rooms))} m² net."]
             for name, its in sorted(by, key=lambda kv: next((s['elevation_m'] for s in doc.storeys if s['name'] == kv[0]), 0)):
                 lines.append(f"{name}: {len(its)} rooms, {_f(sum(_area(i) or 0 for i in its))} m²")
-            return Facts(lines, _ids(items), "room-levels")
+            return Facts(lines, _ids(items), "room-levels", value=len(items), unit="count")
         if st or re.search(r"breakdown|grouped|function", ql):
             lines = [f"{st or 'The building'}: {len(items)} rooms, {_f(sum(_area(i) or 0 for i in items))} m² net."]
             for name, its in _group(items, lambda i: i.type_name):
                 lines.append(f"{name}: " + ", ".join(f"{i.name} {_f(_area(i))} m²" for i in sorted(its, key=lambda i: i.name or "") if _area(i) is not None))
-            return Facts(lines, _ids(items), "room-function")
+            return Facts(lines, _ids(items), "room-function", value=len(items), unit="count")
 
     if re.search(r"widest|narrowest|greatest|largest|smallest|biggest", ql) and kind in ("door", "window", "column"):
         key = "width_m" if kind != "column" else "cross_section_area_m2"
@@ -303,14 +307,14 @@ def facts_for(question: str, doc: Doc) -> Facts:
     if re.search(r"material", ql):
         by = _group(items, lambda i: i.props.get("material"))
         lines = [f"{len(items)} {_pl(kind)}{where}; materials:"] + [f"{n}: {len(its)}" for n, its in by]
-        return Facts(lines, _ids(items), "materials")
+        return Facts(lines, _ids(items), "materials", value=len(items), unit="count")
 
     # default: counts per type
     by = _group(items, lambda i: clean_type_name(str(i.type_name or i.name or "")))
     lines = [f"Total {_pl(kind)}{where}: {len(items)}."] + [f"{n}: {len(its)} ({len(its) / len(items) * 100:.1f}%)" for n, its in by[:25]]
     if len(by) > 25:
         lines.append(f"... and {len(by) - 25} more types")
-    return Facts(lines, _ids(items), "types")
+    return Facts(lines, _ids(items), "types", value=len(items), unit="count")
 
 
 def _numbers(s: str) -> set[str]:
@@ -356,6 +360,9 @@ def text_answer(question: str, doc: Doc, use_model: bool | None = None) -> dict:
     calls: list[dict] = []
     cites = [] if not f.item_ids else [{"n": 1, "doc_id": doc.doc_id, "page": 1, "kind": "element", "bbox_px": None,
                                        "item_ids": f.item_ids, "quote": None, "label": _label(doc, f.item_ids)}]
+    if f.available and f.value is not None and not cites:
+        cites = [{"n": 1, "doc_id": doc.doc_id, "page": 1, "kind": "element", "bbox_px": None,
+                  "item_ids": [], "quote": f.lines[0], "inventory_check": True}]
     marks = "[1]" if cites else ""
     text = None
     if use_model is None:
@@ -379,7 +386,8 @@ def text_answer(question: str, doc: Doc, use_model: bool | None = None) -> dict:
     scene = {"doc_id": doc.doc_id, "highlight_item_ids": ids, "camera_target_item_id": ids[0] if ids else None}
     return {
         "answer_id": uuid.uuid4().hex, "question": question, "doc_ids": [doc.doc_id],
-        "answer": {"text_md": text, "value": None, "unit": None, "confidence": 0.9 if f.available else 0.0, "abstained": not f.available},
+        "answer": {"text_md": text, "value": f.value if f.available else None, "unit": f.unit if f.available else None,
+                   "confidence": 0.9 if f.available else 0.0, "abstained": not f.available},
         "citations": cites, "evidence": {"boxes": [], "scene": scene}, "trace": trace, "route": "index",
         "cost": {"usd_total": round(sum(c["cost_usd"] for c in calls), 6), "calls": calls},
         "latency_ms": int((time.perf_counter() - t0) * 1000),
