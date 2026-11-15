@@ -52,9 +52,6 @@ export interface Viewer {
   setScene(scene: LoadedScene): void;
   setStorey(name: string | null): void;
   setShowRoof(show: boolean): void;
-  /** Building / services layer filter, combined with the storey cutaway. */
-  setLayer(layer: ModelLayer): void;
-  getLayer(): ModelLayer;
   /** Purely visual: hide these items (3D layer chips). Not a scene command; answer highlights stay visible. */
   setLayerHidden(item_ids: readonly string[]): void;
   getCutawayState(): CutawayState;
