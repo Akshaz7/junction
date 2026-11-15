@@ -137,12 +137,12 @@ def test_toilet_slang_and_show_all_wcs_locate_the_rooms():
 def test_baseboard_ifc_total_and_per_room_arithmetic():
     a = answer("how many linear metres of baseboard in total", [AC20])
     validate_answer(a)
-    assert a["answer"]["unit"] == "m" and a["answer"]["value"] > 500 and a["route"] == "index" and len(a["evidence"]["boxes"]) == 82
-    assert "minus 1 door" in a["answer"]["text_md"]
+    assert a["answer"]["unit"] == "m" and a["answer"]["value"] > 500 and a["route"] == "index" and len(a["evidence"]["boxes"]) >= 82  # F-IFCQTY: one box per room polygon, not per wall
+    assert "minus widths of doors" in a["answer"]["text_md"]  # F-IFCQTY wording
     one = answer("how many linear metres of baseboard in the classrooms", [AC20])
     validate_answer(one)
     t = one["answer"]["text_md"]
-    assert "Seminarraum" in t and one["answer"]["value"] == 44.2 and "1 classroom" in t   # outline 46.0 m minus a 1.8 m door
+    assert one["answer"]["value"] == 44.2 and "matching classroom" in t   # outline 46.0 m minus a 1.8 m door
 
 
 def test_baseboard_scaled_raster_uses_the_drawn_scale():

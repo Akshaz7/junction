@@ -81,7 +81,7 @@ def _fallback(doc):
                      'reference':it.props.get('reference'), 'bar_role':it.props.get('bar_role'),
                      'boundary_doors':it.props.get('boundary_doors') or {},
                      'boundaries_recorded':it.props.get('boundaries_recorded', False), 'groups':[]})
-    return {'rows':rows, 'indexed_classes':['IfcWall','IfcSlab','IfcSpace','IfcDoor'], 'errors':[], 'source_available':False}
+    return {'rows':rows, 'indexed_classes':['IfcWall','IfcSlab','IfcSpace','IfcDoor'], 'errors':[], 'source_available':False, 'fallback':True}
 
 
 def load_index(doc):
@@ -486,6 +486,8 @@ def mep_families(question,doc,t0):
     count=bool(COUNT.search(question)) and not re.search(r'\bhow many (?:linear |running )?(?:metres?|meters?|feet)\b',q)
     key,unit=(None,'count') if count else ('length_m','m')
     missing=sum(r['quantities'].get(key) is None for r in rows) if key else 0
+    if missing and not count and any((_artifacts() / doc.doc_id / n).is_file() for n in ('piping.json', 'mep.json')):
+        return None  # no recorded lengths in the IFC, but a measured piping/MEP sidecar exists: that solver answers instead of a refusal
     if missing or idx.get('errors'):
         return _result(question,doc,rows,None,unit,'No complete total can be computed.',filters,t0,
                        notes=[f'{missing} elements have no recorded length.' if missing else 'Some IFC elements could not be indexed.'],confidence=0.)
