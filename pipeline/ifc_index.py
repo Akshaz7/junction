@@ -131,18 +131,25 @@ def process(path: Path, doc: dict, out: Path, offset: int = 0, batch_size: int |
             q[k], sources[k] = v, "property"
         for k, v in (quantities_of(e, scale) if has_project else {}).items():
             q[k], sources[k] = v, "qto"
+        operation = getattr(e, 'OperationType', None)
+        if operation in (None, 'NOTDEFINED', 'USERDEFINED'):
+            operation = getattr(typ, 'OperationType', None) if typ else None
+        properties = props_of(e)
+        if operation not in (None, 'NOTDEFINED', 'USERDEFINED'):
+            properties['operation_type'] = str(operation)
         elements.append({
             "item_id": gid, "name": e.Name, "ifc_class": e.is_a(), "kind": kind_of(e),
             "predefined_type": uel.get_predefined_type(e), "type_name": typ.Name if typ else None,
             "storey": level(st) if st is not None else None, "bbox_m": None, "bbox_source": None,
-            "quantities": q, "quantity_source": sources, "props": props_of(e),
+            "quantities": q, "quantity_source": sources, "props": properties,
         })
     enrich_elements(f, elements)
     warnings = [("The 3D view is still being prepared. Counts and quantities stored in the model are available; "
                 "measurements that require geometry are not available yet.")]
     if not length_known:
         warnings.append("This IFC does not declare length units. Length measurements are unavailable.")
-    result = {"doc_id": doc["doc_id"], "version": 2, "schema": f.schema, "units": "m",
+    from pipeline.scale_provenance import ifc_units
+    result = {"unit_provenance": ifc_units(f, doc["doc_id"]), "doc_id": doc["doc_id"], "version": 2, "schema": f.schema, "units": "m",
               "building": building_meta(f), "storeys": storeys, "elements": elements,
               "geometry": "pending", "warnings": warnings, "total_elements": len(target_ids), "indexed_offset": offset}
     out.mkdir(parents=True, exist_ok=True)

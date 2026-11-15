@@ -41,6 +41,7 @@ def test_property_index_preserves_units_ids_and_no_geometry(tmp_path, schema, im
     assert by_id[door.GlobalId]["quantities"]["width_m"] == pytest.approx(.9144 if imperial else .9)
     assert by_id[door.GlobalId]["storey"]["name"] == st.Name
     assert all(e["bbox_m"] is None and e["bbox_source"] is None for e in data["elements"])
+    assert data['unit_provenance']['m_per_unit'] == pytest.approx(.3048 if imperial else .001)
     assert not ifc_index.open_properties(src).by_type("IfcCartesianPoint")
     assert point.id() > 0
 

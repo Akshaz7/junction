@@ -119,6 +119,7 @@ def test_scene_reuses_index_and_streams_unchanged_binary(tmp_path, monkeypatch):
     index = json.loads((tmp_path / 'elements.json').read_text())
     index['elements'][0]['quantities'] = {'width_m': 17.25}
     index['elements'][0]['quantity_source'] = {'width_m': 'qto'}
+    index['elements'][0]['props']['operation_type'] = 'SINGLE_SWING_LEFT'
     (tmp_path / 'elements.json').write_text(json.dumps(index))
     monkeypatch.setenv('IFC_CONVERT_PY', '1')
     monkeypatch.setattr(ifc_index, 'open_properties', lambda *a: pytest.fail('The completed index must be reused'))
@@ -137,6 +138,7 @@ def test_scene_reuses_index_and_streams_unchanged_binary(tmp_path, monkeypatch):
     assert raw_length == final_length
     assert raw.read_bytes()[raw_offset:] == final.read_bytes()[final_offset:]
     assert header['nodes'][0]['extras']['kind'] == 'proxy'
+    assert manifest['items'][element.GlobalId]['props']['swing'] == 'left'
 
 
 def test_mixed_facets_and_curves_use_correct_item_transforms():

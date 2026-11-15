@@ -80,6 +80,12 @@ def process(raw: Path, doc: dict, out: Path, started=None):
         header['nodes'][ni].setdefault('extras', {})['kind'] = element['kind']
         items[guid] = {'node': guid, 'usd_name': usd_name(guid), 'bbox_m': bbox,
                        'storey': (element.get('storey') or {}).get('name'), 'kind': element['kind']}
+        operation = (element.get('props') or {}).get('operation_type')
+        if operation:
+            from pipeline.manifest_info import _swing
+            items[guid]['props'] = {'operation_type': operation}
+            if _swing(operation):
+                items[guid]['props']['swing'] = _swing(operation)
         # Keep exact source quantities. Fill only dimensions the prior scene
         # builder also derived from a box, and explicitly retain that provenance.
         if not any('does not declare length units' in w for w in warnings):
