@@ -5,3 +5,4 @@
   .data-detail > header:has(> .show-on-table) { flex-wrap: wrap; height: auto; }
   .data-detail > header > .show-on-table { order: 2; margin-left: auto; }
 }
+.show-on-table-unavailable { flex-shrink: 1; font-size: 11px; color: var(--muted-foreground); max-width: 28ch; }
