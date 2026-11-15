@@ -10,6 +10,7 @@ import { ProjectList } from './project-list'
 import { projectChatHref, projectsApi, type Project, type ProjectChat } from '../lib/projects-api'
 import { docTitle, fileCount, isReading, relativeTime } from '../lib/projects-format'
 import type { Document } from '../lib/types'
+import { fetchProjectSnapshot, readCachedProject, writeCachedProject } from '../lib/graph-cache'
 
 type Tab = 'chats' | 'files' | 'graph' | 'overview'
 const tabs: { id: Tab; label: string }[] = [{ id: 'chats', label: 'Chats' }, { id: 'files', label: 'Files' }, { id: 'graph', label: 'Graph' }, { id: 'overview', label: 'Overview' }]
@@ -34,10 +35,15 @@ export function useProject(id: string | null) {
   const [key, setKey] = useState(0)
   useEffect(() => {
     if (!id) { setState({ error: '' }); return }
-    let live = true
-    projectsApi.get(id).then((project) => { if (live) setState({ project, error: '' }) })
+    let live = true; let gotLive = false
+    const aborter = new AbortController()
+    // Stale-while-revalidate: last good copy, else the bundled one, shown at once; the live answer replaces it.
+    const cached = readCachedProject(id)
+    if (cached) setState({ project: cached, error: '' })
+    else void fetchProjectSnapshot(id, aborter.signal).then((snap) => { if (live && snap && !gotLive) setState((prev) => prev.project ? prev : { project: snap, error: '' }) })
+    projectsApi.get(id).then((project) => { if (!live) return; gotLive = true; writeCachedProject(id, project); setState({ project, error: '' }) })
       .catch((error: unknown) => { if (live) setState({ error: error instanceof Error ? error.message : 'This project could not be loaded.' }) })
-    return () => { live = false }
+    return () => { live = false; aborter.abort() }
   }, [id, key])
   const setProject = useCallback((project: Project) => setState({ project, error: '' }), [])
   // Files being read by the server: look again until they are ready.
