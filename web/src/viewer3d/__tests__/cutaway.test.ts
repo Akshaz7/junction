@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { Group } from 'three';
 import { createScene, itemIdForObject, type SceneManifest } from '../scene';
-import { createCutawayController, isRoof } from '../cutaway';
+import { createCutawayController, isRoof, serviceLayerLabel } from '../cutaway';
 import { createHighlightController } from '../highlight';
 
 function fixture() {
@@ -106,5 +106,40 @@ describe('cutaway policy (generated for demo fixture)', () => {
     const scene = fixture();
     scene.manifest.storeys = [{ name: 'Upper', elevation_m: 3 }, 'Unknown', { name: 'Ground', elevation_m: 0 }];
     expect(createCutawayController(scene).getState().activeStorey).toBe('Ground');
+  });
+});
+
+describe('building / services layer (generated for demo fixture)', () => {
+  function layered() {
+    const manifest: SceneManifest = {
+      doc_id: 'generated-for-demo', glb: 'scene.glb', usdz: null, units: 'm', up: 'Y', origin_offset_m: [0, 0, 0],
+      storeys: [{ name: 'Level 1', elevation_m: 0 }, { name: 'Level 2', elevation_m: 3 }],
+      items: Object.fromEntries([
+        ['wall', 'wall', 'Level 1'], ['duct', 'duct', 'Level 1'], ['terminal', 'terminal', 'Level 1'], ['duct-up', 'duct', 'Level 2'],
+      ].map(([id, kind, storey]) => [id!, { node: id!, usd_name: id!, bbox_m: null, storey, kind: kind! }])),
+    };
+    const root = new Group();
+    for (const id of Object.keys(manifest.items)) { const object = new Group(); object.name = id; root.add(object); }
+    return createScene(manifest, { scene: root, parser: { associations: new Map(), json: {} } } as Parameters<typeof createScene>[1]);
+  }
+  it('labels air-side services as ventilation and offers no choice without both layers', () => {
+    expect(serviceLayerLabel(layered().manifest)).toBe('Ventilation');
+    expect(serviceLayerLabel({ items: { a: { node: 'a', usd_name: 'a', bbox_m: null, storey: null, kind: 'wall' } } })).toBeNull();
+    expect(serviceLayerLabel({ items: { a: { node: 'a', usd_name: 'a', bbox_m: null, storey: null, kind: 'pipe' }, b: { node: 'b', usd_name: 'b', bbox_m: null, storey: null, kind: 'wall' } } })).toBe('Services');
+  });
+  it('shows building only, services only or both, combined with the storey cut', () => {
+    const scene = layered();
+    const cutaway = createCutawayController(scene);
+    const shown = () => ['wall', 'duct', 'terminal', 'duct-up'].filter((id) => visible(scene as ReturnType<typeof fixture>, id));
+    expect(shown()).toEqual(['wall', 'duct', 'terminal']);
+    cutaway.setLayer('building');
+    expect(shown()).toEqual(['wall']);
+    cutaway.setLayer('services');
+    expect(shown()).toEqual(['duct', 'terminal']);
+    cutaway.setStorey(null);
+    expect(shown()).toEqual(['duct', 'terminal', 'duct-up']);
+    cutaway.setLayer('building');
+    cutaway.followHighlight(['duct']);
+    expect(cutaway.getLayer()).toBe('all');
   });
 });

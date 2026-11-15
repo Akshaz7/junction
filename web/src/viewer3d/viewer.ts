@@ -10,7 +10,7 @@ import {
 import {
   disposeScene, itemIdForObject, itemLabel, loadScene, storeyName, type LoadedScene,
 } from './scene';
-import { createCutawayController, type CutawayState } from './cutaway';
+import { createCutawayController, type CutawayState, type ModelLayer } from './cutaway';
 import { createLinkedHighlightController } from './linkedHighlight';
 import { createBuildAnimation, scheduleBuildTransitions, FLAT_DURATION_MS, type BuildAnimation, type BuildState, type RisePhase, type RiseState } from './rise';
 import { applyCommand, applyState, emptyCommandState, readCommandState, resolveCommandLabels, type SceneCommand, type SceneSnapshot, type CommandTestState } from './commands';
@@ -52,6 +52,9 @@ export interface Viewer {
   setScene(scene: LoadedScene): void;
   setStorey(name: string | null): void;
   setShowRoof(show: boolean): void;
+  /** Building / services layer filter, combined with the storey cutaway. */
+  setLayer(layer: ModelLayer): void;
+  getLayer(): ModelLayer;
   getCutawayState(): CutawayState;
   onCutawayChange(callback: (state: CutawayState) => void): () => void;
   highlight(item_ids: readonly string[], options?: HighlightOptions): void;
@@ -809,6 +812,13 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       commandVisuals?.sample(performance.now());
       notifyCutaway();
     },
+    setLayer(layer) {
+      cutaway?.setLayer(layer);
+      commandVisuals?.captureVisibility();
+      commandVisuals?.sample(performance.now());
+      notifyCutaway();
+    },
+    getLayer() { return cutaway?.getLayer() ?? 'all'; },
     getCutawayState() { return cutaway?.getState() ?? { activeStorey: null, showRoof: false, hiddenCount: 0 }; },
     onCutawayChange(callback) {
       cutawayListeners.add(callback);

@@ -34,6 +34,25 @@ export function isRoof(kind: string, element?: IFCElement): boolean {
     `${element?.predefined_type ?? ''} ${element?.type_name ?? ''}`);
 }
 
+/** Building-services kinds (ifc_scene MEP classes): shown as their own layer next to the building. */
+const SERVICE_KINDS = new Set(['duct', 'duct_fitting', 'terminal', 'valve_damper', 'pump_fan', 'pipe', 'pipe_fitting',
+  'equipment', 'mep_other', 'cable_tray', 'cable', 'valve', 'damper', 'fan', 'pump', 'tank', 'light']);
+const AIR_KINDS = new Set(['duct', 'duct_fitting', 'terminal', 'valve_damper', 'damper', 'fan', 'pump_fan']);
+
+export type ModelLayer = 'all' | 'building' | 'services';
+
+export function isService(kind: string | undefined | null): boolean {
+  return SERVICE_KINDS.has((kind ?? '').toLowerCase());
+}
+
+/** Null when the scene lacks either building or services items (no layer choice to offer). */
+export function serviceLayerLabel(manifest: Pick<SceneManifest, 'items'>): string | null {
+  const kinds = Object.values(manifest.items).map((item) => (item.kind ?? '').toLowerCase());
+  const services = kinds.filter((kind) => SERVICE_KINDS.has(kind));
+  if (!services.length || services.length === kinds.length) return null;
+  return services.every((kind) => AIR_KINDS.has(kind)) ? 'Ventilation' : 'Services';
+}
+
 export function createCutawayController(scene: LoadedScene) {
   const storeys = cutawayStoreys(scene.manifest);
   const roofIds = new Set(Object.entries(scene.manifest.items)
@@ -41,6 +60,8 @@ export function createCutawayController(scene: LoadedScene) {
   let activeStorey: string | null = storeys.find((storey) => storey.elevation_m !== undefined && storey.elevation_m >= 0)?.name
     ?? storeys[0]?.name ?? null;
   let showRoof = false;
+  let layer: ModelLayer = 'all';
+  const layerShows = (id: string) => layer === 'all' || (isService(scene.manifest.items[id]?.kind) === (layer === 'services'));
 
   function apply(): void {
     for (const [object, visible] of scene.originalVisibility) object.visible = visible;
@@ -49,7 +70,7 @@ export function createCutawayController(scene: LoadedScene) {
       const itemIndex = storeys.findIndex((storey) => storey.name === storeyName(scene.manifest.items[id].storey));
       // Explicitly showing the roof reveals it even above the cutaway plane.
       object.visible = scene.originalVisibility.get(object) !== false && (roofIds.has(id)
-        ? showRoof : activeIndex < 0 || itemIndex <= activeIndex);
+        ? showRoof : activeIndex < 0 || itemIndex <= activeIndex) && layerShows(id);
     }
     for (const object of scene.items.values()) {
       if (!object.visible) continue;
@@ -65,6 +86,8 @@ export function createCutawayController(scene: LoadedScene) {
     hasRoof: roofIds.size > 0,
     setStorey(name: string | null) { activeStorey = name; apply(); },
     setShowRoof(value: boolean) { showRoof = value; apply(); },
+    setLayer(value: ModelLayer) { layer = value; apply(); },
+    getLayer(): ModelLayer { return layer; },
     followHighlight(ids: readonly string[], cameraTargetItemId?: string) {
       const candidates = cameraTargetItemId ? [cameraTargetItemId, ...ids] : ids;
       // An answer spanning several storeys keeps all of them (cut only above the highest one); roof stays off.
@@ -76,6 +99,8 @@ export function createCutawayController(scene: LoadedScene) {
       if (top >= 0) activeStorey = storeys[top].name;
       // A roof answer must remain visible too.
       if (candidates.some((id) => roofIds.has(id))) showRoof = true;
+      // An answer about an item the layer filter hides brings both layers back.
+      if (candidates.some((id) => scene.manifest.items[id] && !layerShows(id))) layer = 'all';
       apply();
     },
     getState(): CutawayState {
