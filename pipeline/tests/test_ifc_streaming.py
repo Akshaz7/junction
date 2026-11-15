@@ -84,6 +84,9 @@ def test_fragments_and_facets_preserve_native_geometry(tmp_path, schema, imperia
     expected = np.asarray(native.geometry.verts).reshape(-1,3)
     assert vertices.min(axis=0) == pytest.approx(expected.min(axis=0))
     assert vertices.max(axis=0) == pytest.approx(expected.max(axis=0))
+    triangles = vertices[faces.reshape(-1, 3)]
+    volume = np.einsum('ij,ij->i', triangles[:,0], np.cross(triangles[:,1], triangles[:,2])).sum() / 6
+    assert volume == pytest.approx(6 * (.3048**3 if imperial else 1) * (8 if mapped else 1))
 
 
 def test_product_openings_are_retained_and_force_native_subtraction(tmp_path):
@@ -134,3 +137,40 @@ def test_scene_reuses_index_and_streams_unchanged_binary(tmp_path, monkeypatch):
     assert raw_length == final_length
     assert raw.read_bytes()[raw_offset:] == final.read_bytes()[final_offset:]
     assert header['nodes'][0]['extras']['kind'] == 'proxy'
+
+
+def test_mixed_facets_and_curves_use_correct_item_transforms():
+    f, element = box_model(imperial=True, mapped=False)
+    profile = f.create_entity('IfcRectangleProfileDef', ProfileType='AREA', XDim=2., YDim=1.)
+    location = f.create_entity('IfcCartesianPoint', (6., 0., 0.))
+    axis = f.create_entity('IfcAxis2Placement3D', Location=location)
+    direction = f.create_entity('IfcDirection', (0., 0., 1.))
+    solid = f.create_entity('IfcExtrudedAreaSolid', profile, axis, direction, 3.)
+    representation = element.Representation.Representations[0]
+    representation.Items = (*representation.Items, solid)
+    vertices, faces = mesh(element)
+    settings = geom.settings()
+    settings.set('use-world-coords', True)
+    shape = geom.create_shape(settings, element)
+    native = np.asarray(shape.geometry.verts).reshape(-1, 3)
+    assert vertices.min(axis=0) == pytest.approx(native.min(axis=0))
+    assert vertices.max(axis=0) == pytest.approx(native.max(axis=0))
+    triangles = vertices[faces.reshape(-1, 3)]
+    volume = np.einsum('ij,ij->i', triangles[:,0], np.cross(triangles[:,1], triangles[:,2])).sum() / 6
+    assert volume == pytest.approx(12 * .3048**3)
+
+
+def test_aggregate_boxes_keep_parent_identity(tmp_path, monkeypatch):
+    from pipeline import ifc_scene, ifc_index
+    f, child = box_model()
+    parent = f.create_entity('IfcStair', GlobalId=ifcopenshell.guid.new(), Name='generated for demo assembly')
+    f.create_entity('IfcRelAggregates', GlobalId=ifcopenshell.guid.new(), RelatingObject=parent, RelatedObjects=[child])
+    source = tmp_path / 'source.ifc'
+    f.write(str(source))
+    doc = {'doc_id': 'generated-for-demo'}
+    ifc_index.process(source, doc, tmp_path)
+    monkeypatch.setenv('IFC_CONVERT_PY', '1')
+    ifc_scene.process(source, doc, tmp_path)
+    elements = {e['item_id']: e for e in json.loads((tmp_path / 'elements.json').read_text())['elements']}
+    assert elements[parent.GlobalId]['bbox_m'] == elements[child.GlobalId]['bbox_m']
+    assert elements[parent.GlobalId]['bbox_source'] == 'parts'

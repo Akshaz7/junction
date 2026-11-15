@@ -36,7 +36,7 @@ class Fragments:
             end = token.end()
             record = self.mapping[start:end]
             if not in_data:
-                if record.strip().upper() == b'DATA;':
+                if re.fullmatch(rb'\s*(?:/\*.*?\*/\s*)*DATA\s*;', record, re.I | re.S):
                     in_data, header_end = True, end
             else:
                 match = ENTITY.match(record)
@@ -103,6 +103,27 @@ class Fragments:
             size += extra
         if ids:
             yield ids, selected
+
+    def aggregates(self):
+        """Keep aggregate boxes linkable without retaining a native property file."""
+        def guid(step_id):
+            row = self.db.execute('SELECT start,end FROM records WHERE id=?', (step_id,)).fetchone()
+            if row is None:
+                return None
+            record = self.mapping[row[0]:row[1]]
+            match = ENTITY.match(record)
+            identity = re.match(rb"\s*'([^']+)'", record[match.end():]) if match else None
+            return identity[1].decode('ascii') if identity else None
+        result = {}
+        for start, end in self.db.execute("SELECT start,end FROM records WHERE type IN ('IFCRELAGGREGATES','IFCRELNESTS')"):
+            record = self.mapping[start:end]
+            # The last two attributes are RelatingObject and RelatedObjects.
+            match = re.search(rb',\s*#(\d+)\s*,\s*\((.*?)\)\s*\)\s*;', record, re.S)
+            if match:
+                parent = guid(int(match[1]))
+                if parent:
+                    result.setdefault(parent, []).extend(g for i in references(match[2]) if (g := guid(i)))
+        return result
 
     def write(self, path: Path, selected):
         with path.open('wb') as target:

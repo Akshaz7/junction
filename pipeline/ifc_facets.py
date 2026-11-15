@@ -1,8 +1,9 @@
 """Read already faceted IFC geometry without building an OpenCascade solid.
 
-Only planar polygonal faces qualify. Other representations and
-products requiring opening subtraction use the native geometry kernel.
+Planar polygons go straight to triangles. Curves use the native kernel one
+representation item at a time; products with openings keep native solid subtraction.
 """
+from ifcopenshell import geom
 import numpy as np
 import ifcopenshell.util.placement as placement
 import ifcopenshell.util.unit as unit
@@ -77,6 +78,26 @@ def mesh(element):
         for a, b, c in triangles:
             faces.append((indices[c], indices[b], indices[a]) if reverse else (indices[a], indices[b], indices[c]))
 
+    def native(item, matrix):
+        settings = geom.settings()
+        settings.set('mesher-linear-deflection', .01)
+        settings.set('no-normals', True)
+        shape = geom.create_shape(settings, item)
+        geometry = getattr(shape, 'geometry', shape)
+        local = np.frombuffer(geometry.verts_buffer, dtype=np.float64).reshape(-1, 3)
+        triangles = np.frombuffer(geometry.faces_buffer, dtype=np.int32).reshape(-1, 3)
+        transformed = (matrix[:3, :3] @ local.T).T + matrix[:3, 3] * scale
+        indices = []
+        for point in transformed:
+            key = tuple(point)
+            if key not in lookup:
+                lookup[key] = len(vertices)
+                vertices.append(point.tolist())
+            indices.append(lookup[key])
+        reverse = np.linalg.det(matrix[:3, :3]) < 0
+        for triangle in triangles:
+            faces.append(tuple(indices[i] for i in (triangle[::-1] if reverse else triangle)))
+
     def face(face, matrix):
         if face.is_a() != 'IfcFace' or not face.Bounds:
             raise ValueError('Curved face')
@@ -85,7 +106,12 @@ def mesh(element):
         if any(not b.Bound.is_a('IfcPolyLoop') for b in bounds):
             raise ValueError('Non-polygonal bound')
         holes = [[p.Coordinates for p in b.Bound.Polygon] for b in bounds if b != outer]
-        polygon([p.Coordinates for p in outer.Bound.Polygon], matrix, not outer.Orientation, holes)
+        try:
+            polygon([p.Coordinates for p in outer.Bound.Polygon], matrix, not outer.Orientation, holes)
+        except (ValueError, ImportError, KeyError):
+            # A malformed/non-planar polygon must not force its entire detailed
+            # furniture solid through OCC. Let the kernel handle this face only.
+            native(face, matrix)
 
     def item(item, matrix, ancestors):
         if item.id() in ancestors:
@@ -111,7 +137,7 @@ def mesh(element):
             for triangle in item.CoordIndex:
                 polygon([coords[(remap[i - 1] if remap else i) - 1] for i in triangle], matrix)
         else:
-            raise ValueError('Geometry requires the native kernel')
+            native(item, matrix)
 
     item_fn = item
     try:

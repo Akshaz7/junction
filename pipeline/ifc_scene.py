@@ -216,7 +216,19 @@ def convert(ifc: Path, raw_glb: Path):
 
 def node_matrices(g: GLTF2):
     """World transforms, including glTF parent nodes and TRS transforms."""
-    from trimesh.transformations import quaternion_matrix
+    def quaternion_matrix(q):
+        q = np.asarray(q, dtype=float)
+        norm = np.dot(q, q)
+        if norm < np.finfo(float).eps:
+            return np.eye(4)
+        q *= np.sqrt(2. / norm)
+        q = np.outer(q, q)
+        return np.array([
+            [1. - q[2, 2] - q[3, 3], q[1, 2] - q[3, 0], q[1, 3] + q[2, 0], 0.],
+            [q[1, 2] + q[3, 0], 1. - q[1, 1] - q[3, 3], q[2, 3] - q[1, 0], 0.],
+            [q[1, 3] - q[2, 0], q[2, 3] + q[1, 0], 1. - q[1, 1] - q[2, 2], 0.],
+            [0., 0., 0., 1.],
+        ])
     parents = {child: i for i, node in enumerate(g.nodes) for child in (node.children or [])}
     world = {}
     visiting = set()
@@ -273,6 +285,9 @@ def process(ifc: Path, doc: dict, out_dir: Path):
     out_dir.mkdir(parents=True, exist_ok=True)
     raw = out_dir / "tmp" / "raw.glb"
     convert(ifc, raw)
+    if (out_dir / "elements.json").is_file():
+        from pipeline.ifc_scene_indexed import process as indexed_scene
+        return indexed_scene(raw, doc, out_dir, t0)
     g = GLTF2().load(str(raw))
     boxes = node_boxes(g)
     if not boxes:
