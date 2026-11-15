@@ -275,7 +275,16 @@ def _qty(it: Item, kind: str, t: str, question: str = '') -> float | None:
         if key:
             # A requested source net quantity is not the gross/mesh footprint.
             value = q.get(key)
-            return float(value) if value is not None and float(value) >= .05 else None
+            if value is not None and float(value) >= .05:
+                return float(value)
+            if kind != 'room':
+                return None
+            # A closed IfcSpace footprint measures the usable floor boundary;
+            # malformed near-zero/missing Qto values do not invalidate that mesh.
+            measured = (it.props.get('space_area') or {}).get('measured_m2')
+            if measured is not None:
+                return float(measured)
+            return None
         measured = (it.props.get("space_area") or {}).get("measured_m2")
         if kind == "room" and measured is not None:
             return float(measured)
@@ -752,7 +761,7 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         return result
 
     vals = [(i, _qty(i, kind, p.type, question)) for i in items]
-    if doc.mode == "ifc" and kind == "room" and p.type == "area" and not requested_area_key(question, kind) and len(items) <= 400 and any(v is None for _, v in vals):
+    if doc.mode == "ifc" and kind == "room" and p.type == "area" and len(items) <= 400 and any(v is None for _, v in vals):
         from engine.solvers.glbarea import room_floor_area_m2
         glb = Path(root) / (doc.meta.get("sheet_of") or doc_id) / "scene.glb"
         if glb.exists():

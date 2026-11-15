@@ -193,7 +193,13 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
         text = (f"The {'combined area' if len(hit) > 1 else 'area'} of **{target}** {where} is **{total:.2f} m²**. {per}. {{marks}}")
         if doc.mode == "planmap":
             text += scale_note(doc)
-    return _done(question, doc, text, round(total, 4), "m²", hit, trace, t0=t0)
+    res = _done(question, doc, text, round(total, 4), "m²", hit, trace, t0=t0)
+    if doc.mode == 'ifc':
+        from engine.solvers.solve import requested_area_key
+        if requested_area_key(question, 'room'):
+            from engine.calc import record_items
+            record_items(res, doc, have, formula='net floor area = Σ(selected room net areas)')
+    return res
 
 
 def arithmetic_question(question: str, doc: Doc, t0, solve_fn) -> dict | None:

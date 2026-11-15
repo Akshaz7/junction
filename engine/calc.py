@@ -194,6 +194,10 @@ def record_items(res, doc, pairs, unit=None, formula="total = Σ(source quantiti
             requested = requested_area_key(res.get('question', ''), item.kind)
             if unit == 'm2' and requested and close(item.q.get(requested), value):
                 sref['field'] = 'quantities.' + requested
+            elif unit == 'm2' and item.source == 'ifc' and close((item.props.get('space_area') or {}).get('measured_m2'), value):
+                sref.update(kind='measurement', field='space_area.measured_m2',
+                            record=dict(item.props['space_area']),
+                            text='IfcSpace floor footprint measured from its source geometry in square metres.')
             if not close(stored, value):
                 sref.update({"artifact": "scene.glb", "kind": "geometry", "field": "mesh floor area" if unit == "m2" else "closed mesh volume"})
         rows.append(r)
@@ -369,7 +373,7 @@ def _default(res, question, root):
     items, missing = _cited(res, root)
     rows, issues = [], []
     for doc, it in items:
-        v = 1 if unit in ("count", "rooms") else _qty(it, "room" if it.kind == "space" else it.kind, {"m2": "area", "m": "length", "m3": "volume"}.get(unit, ""))
+        v = 1 if unit in ("count", "rooms") else _qty(it, "room" if it.kind == "space" else it.kind, {"m2": "area", "m": "length", "m3": "volume"}.get(unit, ""), question)
         r = row(doc, it, v, unit, kind=it.kind)
         # IFC parent sheets resolve through the parent artifact, never a guessed sheet index.
         if doc.meta.get("sheet_of"):
