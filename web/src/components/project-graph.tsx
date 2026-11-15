@@ -9,36 +9,12 @@ import {
 } from '../lib/kg'
 import { projectsApi, projectsMock, type Project } from '../lib/projects-api'
 import { docTitle } from '../lib/projects-format'
+import { useProjectGraph } from './use-project-graph'
 import './project-graph.css'
 
 const FILTER_GROUPS: KindGroup[] = ['space', 'element', 'service', 'issue']
 const EXPAND_LIMIT = 40
 const ALL_LIMIT = 2000
-
-/** The cluster graph, then the full one on demand. A partial answer (still being built) is asked for again. */
-function useGraph(projectId: string, docCount: number) {
-  const [state, setState] = useState<{ graph?: KgGraph; error: string }>({ error: '' })
-  const [key, setKey] = useState(0)
-  useEffect(() => {
-    if (!docCount) { setState({ error: '' }); return }
-    let live = true; let timer: ReturnType<typeof setTimeout> | undefined; let tries = 0
-    const load = () => projectsApi.graph(projectId, { depth: 'cluster' }).then((graph) => {
-      if (!live) return
-      setState({ graph, error: '' })
-      if (graph.partial && ++tries < 20) timer = setTimeout(load, 3000)
-    }).catch((error: unknown) => { if (live) setState({ error: error instanceof Error ? error.message : 'The graph could not be loaded.' }) })
-    setState({ error: '' }); void load()
-    return () => { live = false; if (timer) clearTimeout(timer) }
-  }, [projectId, docCount, key])
-  const [slow, setSlow] = useState(false)
-  useEffect(() => {
-    setSlow(false)
-    if (state.graph || state.error || !docCount) return
-    const timer = setTimeout(() => setSlow(true), 8_000)
-    return () => clearTimeout(timer)
-  }, [projectId, docCount, key, state.graph, state.error])
-  return { ...state, slow, retry: () => setKey((value) => value + 1) }
-}
 
 function StatsStrip({ graph, onUnlinked, active }: { graph: KgGraph; onUnlinked: () => void; active: boolean }) {
   const { stats } = graph
@@ -156,7 +132,7 @@ export function GraphTab({ project, focus = [], onShow, onAsk, canShow3d }: {
   project: Project; focus?: string[]
   onShow: (docId: string, itemIds?: string[], mode?: '2d' | '3d') => void; onAsk: (text: string) => void; canShow3d?: (docId: string) => boolean
 }) {
-  const { graph, error, slow, retry } = useGraph(project.id, project.docs.length)
+  const { graph, error, slow, pending, retry } = useProjectGraph(project.id, project.docs.length)
   const [shown, setShown] = useState<{ nodes: KgNode[]; edges: KgGraph['edges'] }>({ nodes: [], edges: [] })
   const [mode, setMode] = useState<'overview' | 'all'>('overview')
   const [filters, setFilters] = useState<GraphFilters>(noFilters)
@@ -312,7 +288,7 @@ export function GraphTab({ project, focus = [], onShow, onAsk, canShow3d }: {
           canShow3d={canShow3d ?? ((docId) => { const doc = project.docs.find((row) => row.doc_id === docId); return !!doc && (doc.kind === 'ifc' || doc.formats.includes('ifc')) })}
           onClose={() => { setSelectedId(null); setMarked(new Set()) }} onSelect={(id, data) => void reveal(id, data.node.id === id ? data : undefined)} onShow={onShow} onAsk={onAsk} /> : null}
     </div>
-    <div className="kg-foot"><Legend /><p className="pj-hint" role="status">{notice || (projectsMock ? 'Sample graph, generated for demo. Click an item for details, double-click to expand it.' : 'Click an item for details, double-click to expand it. Dashed links are estimates.')}</p></div>
+    <div className="kg-foot"><Legend />{pending && <p className="pj-hint kg-updating" role="status">Updating…</p>}<p className="pj-hint" role="status">{notice || (projectsMock ? 'Sample graph, generated for demo. Click an item for details, double-click to expand it.' : 'Click an item for details, double-click to expand it. Dashed links are estimates.')}</p></div>
   </div>
 }
 
