@@ -51,9 +51,10 @@ function Tile({ doc, busy, onOpen }: { doc: ProjectDoc; busy: boolean; onOpen: (
 }
 
 /** "Project content": the project's files as tiles beside the chat. Clicking one opens it in the viewer. */
-export function ProjectContentPanel({ project }: { project: Project }) {
+export function ProjectContentPanel({ project, onClose }: { project: Project; onClose?: () => void }) {
   const viewer = useProjectViewer()
   return <aside className="pj-content" aria-label="Project content">
+    {onClose && <button type="button" className="pj-content-back" onClick={onClose}>← Back to chat</button>}
     <h2>Project content</h2>
     <a className="pj-content-card" href={projectHref(project.id)}>
       <span className="pj-icon" aria-hidden="true"><Folder size={16} /></span>

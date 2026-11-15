@@ -140,6 +140,17 @@ export class WorkspaceApi {
     return response
   }
 
+  private async retryDocuments(): Promise<Response> {
+    const key = Symbol('docs')
+    try {
+      for (let attempt = 1; ; attempt++) {
+        publishRetry(key, `Server is busy, retrying… (${attempt})`)
+        await new Promise((resolve) => setTimeout(resolve, Math.min(1_000 * 2 ** Math.min(attempt - 1, 3), 8_000)))
+        try { return await this.request('/api/docs', { signal: AbortSignal.timeout(20_000) }) } catch { /* keep retrying */ }
+      }
+    } finally { publishRetry(key, '') }
+  }
+
   async getDocuments(): Promise<Document[]> {
     let response: Response
     try {
@@ -155,9 +166,14 @@ export class WorkspaceApi {
       const unreachable = error instanceof TypeError || (error instanceof DOMException && error.name === 'TimeoutError') ||
         (error instanceof ApiError && ([502, 504].includes(error.status) || (error.status === 500 && error.empty)))
       if (this.mode !== 'auto' || !unreachable) throw error
-      // Choose the offline dataset before selecting docs; never substitute fake answers for real docs.
-      this.isDemo = true
-      response = await this.request('/api/docs')
+      if (!allowDemoFallback) {
+        // Production: a real visitor must never land in the toy offline demo. Keep retrying with backoff.
+        response = await this.retryDocuments()
+      } else {
+        // Dev/test: choose the offline dataset before selecting docs; never substitute fake answers for real docs.
+        this.isDemo = true
+        response = await this.request('/api/docs')
+      }
     }
     const data = await response.json() as { sources: { docs: Document[] }[] }
     return data.sources.flatMap((source) => source.docs)
@@ -255,4 +271,6 @@ export class WorkspaceApi {
 }
 
 const setting = import.meta.env?.VITE_USE_MOCK  // env is undefined when e2e specs import helpers from this module in Node
+/** The offline mock only exists outside production builds (or when explicitly forced). */
+const allowDemoFallback = !import.meta.env?.PROD || import.meta.env?.VITE_ALLOW_DEMO === 'true'
 export const workspaceApi = new WorkspaceApi(setting === 'true' ? 'demo' : setting === 'false' ? 'real' : 'auto')

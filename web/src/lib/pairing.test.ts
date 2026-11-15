@@ -91,3 +91,15 @@ describe('pairing', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 })
+
+describe('waiting for phone', () => {
+  it('reports waiting after hosting a code, and not after unpair', async () => {
+    const { ensurePairCode, isWaitingForPhone, unpair } = await import('./pairing')
+    unpair()
+    expect(isWaitingForPhone()).toBe(false)
+    ensurePairCode()
+    expect(isWaitingForPhone()).toBe(true)
+    unpair()
+    expect(isWaitingForPhone()).toBe(false)
+  })
+})

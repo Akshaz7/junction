@@ -60,6 +60,7 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [newId, setNewId] = useState<string | null>(null)
   const [previewDocked, setPreviewDocked] = useState(false)
   const [uploadOpen, setUploadOpen] = useState(false)
   const [uploadError, setUploadError] = useState('')
@@ -123,6 +124,7 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
   const query = search.trim().toLowerCase()
   // Searching always spans every source, even with a folder selected.
   const filtered = query ? searchDocuments(docs, query) : docs.filter((doc) => inFolder(doc, activeFolder))
+  if (newId && !query) { const at = filtered.findIndex((doc) => doc.doc_id === newId); if (at > 0) filtered.unshift(...filtered.splice(at, 1)) }
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, pageCount)
   const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
@@ -133,6 +135,14 @@ export function DataScreen({ docs, loading, demo, hidden, onRefresh, onAsk }: {
     </div>
     <UploadDialog open={uploadOpen} onClose={() => setUploadOpen(false)} onAsk={onAsk}
       onOpen={(doc) => { setOlderDoc(doc); setPreviewDocked(false); setSelectedId(doc.doc_id) }}
+      onUploaded={(docId) => {
+        setNewId(docId); setSelectedId(docId)
+        // The dialog may be closed during processing: keep refreshing so the new document appears without a reload.
+        setFolder(''); setSearch(''); setPage(1)
+        let tries = 0
+        const timer = window.setInterval(() => { void onRefresh().catch(() => undefined); if (++tries >= 24) window.clearInterval(timer) }, 5000)
+        void onRefresh().catch(() => undefined)
+      }}
       onReady={() => {
         setFolder(''); setSearch(''); setPage(1)
         void onRefresh().catch((error: unknown) => setUploadError(error instanceof Error ? error.message : 'Could not refresh documents.'))

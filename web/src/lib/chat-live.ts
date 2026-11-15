@@ -34,6 +34,7 @@ export function createChatLiveClient(options: { url?: string; connect?: (url: st
   let socket: WebSocket | null = null
   let retry: ReturnType<typeof setTimeout> | undefined
   let attempt = 0
+  let stable: ReturnType<typeof setTimeout> | undefined
   let suspended = false
   function emit(event: ChatLiveEvent) { for (const listener of listeners) listener(event) }
   function reconnect() {
@@ -48,7 +49,9 @@ export function createChatLiveClient(options: { url?: string; connect?: (url: st
       socket = connection
       connection.addEventListener('open', () => {
         if (socket !== connection) return
-        attempt = 0
+        // A flapping socket must keep backing off: only forget failures once the link stayed up for 5 s.
+        clearTimeout(stable)
+        stable = setTimeout(() => { if (socket === connection) attempt = 0 }, 5000)
         // Refetch snapshots on every reconnect so missed notifications are recovered.
         emit({ type: 'connected' })
       })
@@ -62,6 +65,7 @@ export function createChatLiveClient(options: { url?: string; connect?: (url: st
       })
       connection.addEventListener('close', () => {
         if (socket !== connection) return
+        clearTimeout(stable)
         socket = null
         emit({ type: 'disconnected' })
         reconnect()
@@ -70,6 +74,7 @@ export function createChatLiveClient(options: { url?: string; connect?: (url: st
     } catch { reconnect() }
   }
   function disconnect() {
+    clearTimeout(stable)
     if (retry !== undefined) clearTimeout(retry)
     retry = undefined
     const previous = socket

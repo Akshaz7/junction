@@ -17,7 +17,7 @@ import { ChangesScreen } from './components/changes-screen'
 import { HelpScreen } from './components/help-screen'
 import { ProjectsScreen } from './components/project-page'
 import { ChatCrumb, PanelToggle, ProjectContentPanel, projectLibraryDocs, useChatProject } from './components/project-chat-panel'
-import { workspaceApi } from './lib/api'
+import { subscribeApiRetry, workspaceApi } from './lib/api'
 import { navigate, useRoute } from './lib/router'
 import type { Citation, Document } from './lib/types'
 
@@ -29,12 +29,21 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
   const [loadingDocs, setLoadingDocs] = useState(true)
   const [demo, setDemo] = useState(workspaceApi.isDemo)
   const [error, setError] = useState('')
+  const [retry, setRetry] = useState('')
+  useEffect(() => subscribeApiRetry(setRetry), [])
   const [activeChatId, setActiveChatId] = useState<string | null>(null)
   const [chatKey, setChatKey] = useState(0)
   const activeChatTitle = undefined as string | undefined
   const [contextDocument, setContextDocument] = useState<Document | null>(null)
   const chatProject = useChatProject(view === 'chat')
   const [panelOpen, setPanelOpen] = useState(() => window.innerWidth > 800)
+  // Narrowing to phone width (rotate, resize) must not leave the content panel covering the chat.
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 800px)')
+    const onChange = () => { if (query.matches) setPanelOpen(false) }
+    query.addEventListener('change', onChange)
+    return () => query.removeEventListener('change', onChange)
+  }, [])
   const inProject = !!chatProject.id
   const chatDocs = chatProject.id ? projectLibraryDocs(chatProject.project, chatProject.project ? docs : []) : docs
 
@@ -61,7 +70,7 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
     <main className="workspace" id="main-content" tabIndex={-1}>
       <header className="topbar">
         <div className="project-title"><span className="wordmark"><span className="brand-logo" role="img" aria-label="Stoa" /><span className="brand-pro">Pro</span></span><span className="topbar-divider" /><span className="workspace-name">Demo workspace</span><div className="mobile-project"><ProjectSwitcher /></div></div>
-        <Badge variant={demo || loadingDocs || error ? 'neutral' : 'success'}>{demo ? 'Local demo' : loadingDocs ? 'Connecting…' : error ? 'Connection unavailable' : 'Connected workspace'}</Badge>
+        <Badge variant={demo || loadingDocs || error ? 'neutral' : 'success'}>{demo ? 'Local demo' : loadingDocs ? (retry || 'Connecting…') : error ? 'Connection unavailable' : 'Connected workspace'}</Badge>
       </header>
       <div className={`pagebar${view === 'chat' && inProject ? ' pj-pagebar' : ''}`}>
         <h1>{pageLabel(view)}</h1>
@@ -72,7 +81,7 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
       {error && (view === 'chat' || view === 'data') && <p className="error-message document-error" role="alert">{error}</p>}
       <div className={inProject ? 'chat-with-project' : 'chat-passthrough'}>
         <ChatScreen onChatChange={setActiveChatId} key={chatKey} docs={chatDocs} projectId={chatProject.id} loadingDocs={loadingDocs || (inProject && !chatProject.project && !chatProject.error)} demo={demo} contextDocument={contextDocument} hidden={view !== 'chat'} onRefresh={refreshDocuments} onOpenCitation={onOpenCitation} />
-        {view === 'chat' && chatProject.project && panelOpen && <ProjectContentPanel project={chatProject.project} />}
+        {view === 'chat' && chatProject.project && panelOpen && <ProjectContentPanel project={chatProject.project} onClose={() => setPanelOpen(false)} />}
       </div>
       <DataScreen docs={docs} loading={loadingDocs} demo={demo} hidden={view !== 'data'} onRefresh={refreshDocuments} onAsk={(doc) => {
         setContextDocument(doc)
