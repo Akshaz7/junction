@@ -151,6 +151,8 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
             from pipeline.scale_regions import annotate_cached
             if meta.get("kind") in ("raster", "dxf", "dwg"):
                 m = annotate_cached(m, d)
+            from pipeline.printed_dims import apply as printed_dims
+            m = printed_dims(m)
             page_scale = m.get("scale")
             page_start = len(items)
             for x in m["items"]:
