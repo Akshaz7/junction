@@ -1,6 +1,7 @@
 import type { Alignment, OverlayDoc } from '../lib/sheet-overlay'
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ChevronLeft, ChevronRight, Download, FileSymlink, FileText, Highlighter, Maximize2, Minus, PenLine, Plus, Search, X } from 'lucide-react'
+import { ReadOnceChip } from './read-once-chip'
 import { SheetOverlay } from './sheet-overlay'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document } from '../lib/types'
@@ -395,7 +396,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
         if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
       }
     }}>
-    <header className="viewer-heading"><FileText size={24} /><div><strong id={titleId}>{doc?.title ?? citation.doc_id}</strong><small>/{doc?.source || 'Drawings'}</small></div>
+    <header className="viewer-heading"><FileText size={24} /><div><strong id={titleId}>{doc?.title ?? citation.doc_id}</strong><small>/{doc?.source || 'Drawings'}<ReadOnceChip docId={citation.doc_id} /></small></div>
       <Button variant="ghost" size="xs" className="overlay-open-button" onClick={() => setOverlayOpen(true)}>Overlay with…</Button>
       <ViewerModeToggle mode={mode} onChange={changeMode} />
       <div className="viewer-source-nav" hidden={mode === '3d'}>
