@@ -23,6 +23,9 @@ _WORDS = {
 }
 
 
+_UNIT_WORD = r"(?:mm|cm|m|km|m2|m²|m3|m³|sqm|sq|ft|in|inch|inches|feet|%|percent|kg|deg|degrees|min|minutes|s|sec|seconds|hours?|ml|l)\b"
+
+
 def _integer(v):
     return isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) and v >= 0 and int(v) == v
 
@@ -30,9 +33,11 @@ def _integer(v):
 def _kind(question, headline):
     # The answer's noun is narrower than the router's parent kind (e.g. bedrooms).
     clean = headline.replace("*", "")
-    m = re.search(rf"(?:{_NUMBER}|no)\s+(?:boxed\s+)?([\w -]+?)(?=\s+(?:on|in|reported|matching|with)\b|[.;\n]|$)", clean, re.I)
-    if m:
+    # A measurement ("900 mm threshold", "2.1 m high", "5 %") is not a count of anything: never take its unit as the noun.
+    for m in re.finditer(rf"(?:{_NUMBER}|no)\s+(?:boxed\s+)?([\w -]+?)(?=\s+(?:on|in|reported|matching|with)\b|[.;\n]|$)", clean, re.I):
         noun = m[1].strip()
+        if re.match(_UNIT_WORD, noun, re.I):
+            continue
         if len(noun) <= 45:
             return noun
     try:

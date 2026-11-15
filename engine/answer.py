@@ -281,9 +281,39 @@ def _guarded(question, doc_ids, on_event, scene_state, history):
         ex.shutdown(wait=False)
 
 
+def reconcile_cost(res: dict) -> dict:
+    """The cost shown always equals the sum of the recorded model calls: every paid trace step must be in cost.calls
+    (refusal and abstain paths used to drop them), and usd_total is recomputed from calls."""
+    try:
+        cost = res.setdefault("cost", {"usd_total": 0.0, "calls": []})
+        calls = cost.setdefault("calls", [])
+        have: dict = {}
+        for c in calls:
+            k = (c.get("model"), round(float(c.get("cost_usd") or 0), 6))
+            have[k] = have.get(k, 0) + 1
+        for st in res.get("trace") or []:
+            usd = float(st.get("cost_usd") or 0)
+            if usd <= 0 or not st.get("model"):
+                continue
+            k = (st["model"], round(usd, 6))
+            if have.get(k, 0) > 0:
+                have[k] -= 1
+                continue
+            calls.append({"task": st.get("step") or "model", "provider": "", "model": st["model"], "cost_usd": usd})
+        cost["usd_total"] = round(sum(float(c.get("cost_usd") or 0) for c in calls), 6)
+    except (AttributeError, TypeError, ValueError):
+        pass
+    return res
+
+
 @document_scope
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None, _split: bool | None = None) -> dict:
+    return reconcile_cost(_answer_outer(question, doc_ids, on_event, scene_state=scene_state, history=history, _split=_split))
+
+
+def _answer_outer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
+                  history: list[dict] | None = None, _split: bool | None = None) -> dict:
     if _split is None and doc_ids and not os.environ.get("MULTIQ_OFF"):
         # F-MULTIQ: a message holding several questions is split, each part answered, and the results merged.
         from engine import multiq

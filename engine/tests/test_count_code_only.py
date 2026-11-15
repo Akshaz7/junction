@@ -24,3 +24,15 @@ def test_ifc_count_proof_says_model_not_drawing():
     assert "building model" in counts._found(f)["text"] and "drawing" not in counts._found(f)["text"]
     f["model"] = False
     assert "drawing" in counts._found(f)["text"]
+
+
+def test_threshold_number_is_never_taken_as_a_count_noun():
+    from engine.reasoning_parts import counts
+    res = {"answer": {"text_md": "**Two doors: Bathroom door is 760 mm wide, below your 900 mm threshold.**", "value": 2, "unit": "count",
+                      "abstained": False}, "citations": [], "evidence": {"boxes": []}, "trace": []}
+    f = counts.facts(res, "What are the widths of each door? Which are below my 900 mm screening threshold?")
+    assert list(f["counts"]) == ["door"]
+    ans = res["answer"]
+    counts._rewrite_headline(ans, f)
+    assert "900 mm threshold" in ans["text_md"] and "2 mm" not in ans["text_md"]
+    assert "mm threshold" not in counts._found(f)["text"]
