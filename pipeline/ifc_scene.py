@@ -36,7 +36,7 @@ KINDS = [
     ("IfcFlowMovingDevice", "pump_fan"), ("IfcEnergyConversionDevice", "equipment"),
     ("IfcDistributionElement", "mep_other"), ("IfcBuildingElementProxy", "proxy"),
     ("IfcMechanicalFastener", "fastener"), ("IfcFastener", "fastener"), ("IfcDiscreteAccessory", "accessory"),
-    ("IfcSpace", "room"), ("IfcSite", "site"),
+    ("IfcSpace", "room"), ("IfcSite", "site"), ("IfcGeographicElement", "site"),
 ]
 TYPE_KINDS = [
     ("IfcPipeSegmentType", "pipe"), ("IfcPipeFittingType", "pipe_fitting"), ("IfcDuctSegmentType", "duct"),
@@ -72,6 +72,23 @@ def kind_of(el):
             return k
     return "other"
 
+
+def is_site_context(el, kind: str) -> bool:
+    """Terrain / landscape around the building, not the building: the IfcSite's own shape (e.g. a terrain block with
+    the excavation cut out), IfcGeographicElement (terrain, trees), and proxies placed directly in the site rather
+    than in a building or storey. These meshes are left out of scene.glb (the viewer drew them as big translucent
+    blocks around the model); their elements.json entries and bboxes stay, with kind "site"."""
+    if kind == "site":
+        return True
+    if kind == "proxy":
+        c = uel.get_container(el)
+        return c is not None and c.is_a("IfcSite")
+    return False
+
+
+# Never hide more than this share of the mesh nodes as site context: a model that puts its whole building straight
+# into the IfcSite (no IfcBuildingStorey) must still show its proxies.
+SITE_CONTEXT_MAX_SHARE = 0.5
 
 CONVERT_TIMEOUT_S = 1200
 
@@ -305,11 +322,22 @@ def process(ifc: Path, doc: dict, out_dir: Path):
     targets = [e for e in list(f.by_type("IfcElement")) + list(f.by_type("IfcSpace")) + list(f.by_type("IfcSite")) if not e.is_a("IfcOpeningElement")]
     by_guid = {e.GlobalId: e for e in targets}
     kinds = {e.GlobalId: kind_of(e) for e in targets}
+    mesh_names = {n.name for n in g.nodes if n.mesh is not None}
+    site_ctx = {gid for gid in mesh_names & kinds.keys() if is_site_context(by_guid[gid], kinds[gid])}
+    if len(site_ctx) > SITE_CONTEXT_MAX_SHARE * len(mesh_names):
+        site_ctx = {gid for gid in site_ctx if kinds[gid] == "site"}  # keep proxies: they are the building here
+    if len(site_ctx) == len(mesh_names):
+        site_ctx = set()  # a terrain-only model: show it rather than an empty scene
+    for gid in site_ctx:
+        kinds[gid] = "site"
     if "proxy" in kinds.values():
         warnings.append("Some model shapes have no building object type. Counts by object type may be incomplete; check the 3D shapes or export with object classifications.")
     for n in g.nodes:  # viewers can hide rooms / pick kinds without a lookup
         if n.mesh is not None and n.name in kinds:
             n.extras = {"kind": kinds[n.name]}
+            if n.name in site_ctx:  # terrain / site context: keep the node (and the recentring), drop the mesh
+                n.mesh = None
+                n.extras["site_context"] = True
     g.save(str(out_dir / "scene.glb"))
 
     # roll up aggregates without own geometry from their parts
@@ -362,7 +390,7 @@ def process(ifc: Path, doc: dict, out_dir: Path):
             "bbox_source": src.get(gid),
         }
         elements.append(entry)
-        if gid in name_to_box:
+        if gid in name_to_box and gid not in site_ctx:
             items[gid] = {"node": gid, "usd_name": usd_name(gid), "bbox_m": bbox,
                           "storey": entry["storey"]["name"] if entry["storey"] else None, "kind": k_}
     for s in f.by_type("IfcBuildingStorey"):
@@ -388,7 +416,7 @@ def process(ifc: Path, doc: dict, out_dir: Path):
     source_offset = np.array((g.extras or {}).get("source_origin_offset_m", [0, 0, 0]), dtype=float)
     scene = {"doc_id": doc["doc_id"], "glb": "scene.glb", "usdz": None, "units": "m", "up": "Y",
              "origin_offset_m": [round(float(x), 5) for x in off + source_offset], "storeys": storey_list,
-             "plan_image": None, "items": items, "warnings": warnings,
+             "plan_image": None, "items": items, "warnings": warnings, "site_context_hidden": sorted(site_ctx),
              "publishable": not (lic.startswith("CC-BY-ND") or lic.startswith("GPL"))}
     (out_dir / "scene.json").write_text(json.dumps(scene, indent=1))
     try:  # names, room areas, door widths for the info cards (pipeline/manifest_info.py)
