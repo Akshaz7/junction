@@ -1,0 +1,474 @@
+{
+ "worker": "F-EVQA",
+ "status": "PARTIAL",
+ "branch": "final/evqa",
+ "created_at": "2026-11-15T00:35:28.480482+02:00",
+ "implementation": {
+  "status": "PASS",
+  "unit_tests": 86,
+  "ruff": "PASS",
+  "engine_files_changed": []
+ },
+ "authoritative_report": "run-20261115-003400-rechecked.json",
+ "engine_snapshot": {
+  "created_at": "2026-11-14T22:22:44.597175+00:00",
+  "baseline": "18250f8a959dae9ddf7f191990c1545bf8f77631",
+  "branches": {
+   "final/calc": "33f2c4e47053709cf512bdbd037232792315a8e7",
+   "final/scaleproof": "5419fda99e690ec1f5d7fae0948764116a9e310e",
+   "final/xcheck": "6a681ef825e6395909ba84af6e03eed955b86b0b"
+  },
+  "merges": [
+   {
+    "branch": "final/calc",
+    "revision": "33f2c4e47053709cf512bdbd037232792315a8e7",
+    "status": "merged"
+   },
+   {
+    "branch": "final/scaleproof",
+    "revision": "5419fda99e690ec1f5d7fae0948764116a9e310e",
+    "status": "merged"
+   },
+   {
+    "branch": "final/xcheck",
+    "revision": "6a681ef825e6395909ba84af6e03eed955b86b0b",
+    "status": "merged"
+   }
+  ],
+  "complete_merge": true,
+  "audit_report": "run-20261115-002244-547745.json",
+  "all_four_evidence_branches": false,
+  "scratch_revision": "9250d9fcc6426374b0ffb8ac27182509378f21b9",
+  "audit_exit": 1
+ },
+ "audit_summary": {
+  "questions": 199,
+  "statuses": {
+   "fail": 78,
+   "pass": 114,
+   "not_numeric": 7
+  },
+  "numeric_answers": 192,
+  "formats": {
+   "dxf": 66,
+   "ifc": 101,
+   "raster": 32
+  },
+  "sources": {
+   "swiss_dwellings": 66,
+   "ifc_bench": 29,
+   "ifc_models": 72,
+   "cubicasa5k": 32
+  },
+  "origins": {
+   "data/junction-dataset-preview/questions.jsonl": 122,
+   "data/sets/sample200.jsonl": 77
+  },
+  "cost_usd": 0.0,
+  "failure_occurrences_by_owner": {
+   "F-CALC": 125,
+   "F-EVFIX": 15
+  },
+  "fake_model_answers": 47
+ },
+ "distinct_evaluation_cases": 200,
+ "evaluation_ledger": {
+  "pass": 114,
+  "fail": 78,
+  "not_numeric": 7,
+  "uncheckable": 1,
+  "note": "199 engine responses in the authoritative report plus the reserved document tested once in the earlier 200-question run. These are evidence-invariant outcomes, not answer accuracy."
+ },
+ "blind": {
+  "doc_id": "cubicasa5k__high-quality-5815",
+  "tested_last": true,
+  "tested_once": true,
+  "source_report": "run-20261115-001936-377200.json",
+  "status": "uncheckable",
+  "findings": [
+   {
+    "code": "card.headline_uncheckable",
+    "owner": "F-EVFIX",
+    "severity": "uncheckable",
+    "detail": "headline numeric quantity could not be parsed"
+   }
+  ],
+  "note": "No claimed pass: the headline quantity could not be parsed safely. No file-specific adjustments were made from this case."
+ },
+ "real_sources": {
+  "swiss_dwellings": "swiss_dwellings__site2292-bldg3379-floor15050",
+  "ifc_bench": "ifc_bench__duplex-arc",
+  "ifc_models": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+  "cubicasa5k": "cubicasa5k__high-quality-architectural-14809"
+ },
+ "baseline": {
+  "report": "run-20261115-002000-baseline.json",
+  "summary": {
+   "questions": 199,
+   "statuses": {
+    "fail": 192,
+    "not_numeric": 7
+   },
+   "numeric_answers": 192,
+   "formats": {
+    "dxf": 66,
+    "ifc": 101,
+    "raster": 32
+   },
+   "sources": {
+    "swiss_dwellings": 66,
+    "ifc_bench": 29,
+    "ifc_models": 72,
+    "cubicasa5k": 32
+   },
+   "origins": {
+    "data/junction-dataset-preview/questions.jsonl": 122,
+    "data/sets/sample200.jsonl": 77
+   },
+   "cost_usd": 0.0,
+   "failure_occurrences_by_owner": {
+    "F-CALC": 223,
+    "F-EVFIX": 10
+   },
+   "fake_model_answers": 46
+  },
+  "same_199_questions": true,
+  "overlapping_artifact_hashes": 163,
+  "changed_overlapping_artifacts": []
+ },
+ "integration_blocker": {
+  "branch": "final/evfix",
+  "revision": "d6b3c396c020dc01da4e9c266df5059f9a413107",
+  "files": [
+   "engine/reasoning.py",
+   "engine/reasoning_parts/confidence.py"
+  ],
+  "note": "Three four-branch merge attempts recorded conflicts. Worker code was not changed or conflicts resolved by guessing. Authoritative audit covers calc + scaleproof + xcheck only."
+ },
+ "top_failure_groups": [
+  {
+   "owner": "F-CALC",
+   "code": "calc.headline_secondary",
+   "severity": "error",
+   "occurrences": 42,
+   "examples": [
+    {
+     "doc_ids": [
+      "swiss_dwellings__site2292-bldg3379-floor15050"
+     ],
+     "question": "What is the total net floor area in m² of all numbered indoor rooms on this floor (excluding balconies, loggias, terraces and other outdoor spaces, shafts and voids)?",
+     "detail": "headline also reports 13 elements, absent from calc.result quantities"
+    },
+    {
+     "doc_ids": [
+      "ifc_models__bsc-molio-molio-with-uris"
+     ],
+     "question": "What is the total length of all walls on '6. sal', in metres?",
+     "detail": "headline also reports 11 elements, absent from calc.result quantities"
+    },
+    {
+     "doc_ids": [
+      "ifc_models__bsc-molio-molio-with-uris"
+     ],
+     "question": "What is the total net volume of all walls on '2. Sal', in m³?",
+     "detail": "headline also reports 0 elements, absent from calc.result quantities"
+    }
+   ]
+  },
+  {
+   "owner": "F-CALC",
+   "code": "source.unresolved",
+   "severity": "error",
+   "occurrences": 33,
+   "examples": [
+    {
+     "doc_ids": [
+      "ifc_models__bsc-molio-molio-with-uris"
+     ],
+     "question": "What is the total net volume of all walls on '2. Sal', in m³?",
+     "detail": "input 'model-reported answer': model input lacks a labelled recorded model call"
+    },
+    {
+     "doc_ids": [
+      "swiss_dwellings__site4038-bldg6362-floor26166"
+     ],
+     "question": "How many toilets (WC) are drawn on this floor plan?",
+     "detail": "input 'model-reported answer': model input lacks a labelled recorded model call"
+    },
+    {
+     "doc_ids": [
+      "ifc_models__bsc-molio-molio-with-uris"
+     ],
+     "question": "What is the total net volume of all slabs on '1. Sal', in m³?",
+     "detail": "input 'model-reported answer': model input lacks a labelled recorded model call"
+    }
+   ]
+  },
+  {
+   "owner": "F-CALC",
+   "code": "calc.margin_missing",
+   "severity": "error",
+   "occurrences": 15,
+   "examples": [
+    {
+     "doc_ids": [
+      "ifc_bench__digital-hub-arc"
+     ],
+     "question": "Which doors are installed in this building, showing distribution by type?",
+     "detail": "measured headline has no recorded uncertainty"
+    },
+    {
+     "doc_ids": [
+      "ifc_bench__fantasy-office-building-3-arc"
+     ],
+     "question": "What proportion of walls are load-bearing, including the total count and breakdown of load-bearing walls by type?",
+     "detail": "measured headline has no recorded uncertainty"
+    },
+    {
+     "doc_ids": [
+      "ifc_bench__digital-hub-arc"
+     ],
+     "question": "How many walls are load-bearing compared with non-load-bearing?",
+     "detail": "measured headline has no recorded uncertainty"
+    }
+   ]
+  },
+  {
+   "owner": "F-CALC",
+   "code": "calc.missing",
+   "severity": "error",
+   "occurrences": 15,
+   "examples": [
+    {
+     "doc_ids": [
+      "ifc_bench__digital-hub-arc"
+     ],
+     "question": "Which doors are installed in this building, showing distribution by type?",
+     "detail": "measured headline has no reasoning.calc"
+    },
+    {
+     "doc_ids": [
+      "ifc_bench__fantasy-office-building-3-arc"
+     ],
+     "question": "What proportion of walls are load-bearing, including the total count and breakdown of load-bearing walls by type?",
+     "detail": "measured headline has no reasoning.calc"
+    },
+    {
+     "doc_ids": [
+      "ifc_bench__digital-hub-arc"
+     ],
+     "question": "How many walls are load-bearing compared with non-load-bearing?",
+     "detail": "measured headline has no reasoning.calc"
+    }
+   ]
+  },
+  {
+   "owner": "F-CALC",
+   "code": "calc.numeric_value_missing",
+   "severity": "error",
+   "occurrences": 15,
+   "examples": [
+    {
+     "doc_ids": [
+      "ifc_bench__digital-hub-arc"
+     ],
+     "question": "Which doors are installed in this building, showing distribution by type?",
+     "detail": "headline has measured quantities [{'value': 64.0, 'unit': 'count'}], but answer.value has no numeric result"
+    },
+    {
+     "doc_ids": [
+      "ifc_bench__fantasy-office-building-3-arc"
+     ],
+     "question": "What proportion of walls are load-bearing, including the total count and breakdown of load-bearing walls by type?",
+     "detail": "headline has measured quantities [{'value': 223.0, 'unit': 'count'}], but answer.value has no numeric result"
+    },
+    {
+     "doc_ids": [
+      "ifc_bench__digital-hub-arc"
+     ],
+     "question": "How many walls are load-bearing compared with non-load-bearing?",
+     "detail": "headline has measured quantities [{'value': 178.0, 'unit': 'count'}], but answer.value has no numeric result"
+    }
+   ]
+  },
+  {
+   "owner": "F-EVFIX",
+   "code": "card.box_count",
+   "severity": "error",
+   "occurrences": 6,
+   "examples": [
+    {
+     "doc_ids": [
+      "ifc_models__bsc-molio-molio-with-uris"
+     ],
+     "question": "How many walls are shown on the floor plan of '1. Sal'?",
+     "detail": "headline count 26 has 11 numbered elements without explaining the difference"
+    },
+    {
+     "doc_ids": [
+      "ifc_models__bsc-molio-molio-with-uris"
+     ],
+     "question": "How many stairs are shown on the floor plan of '4. Sal'?",
+     "detail": "headline count 80 has 78 numbered elements without explaining the difference"
+    },
+    {
+     "doc_ids": [
+      "ifc_models__bsc-molio-molio-with-uris"
+     ],
+     "question": "How many stairs are shown on the floor plan of '5. Sal'?",
+     "detail": "headline count 44 has 43 numbered elements without explaining the difference"
+    }
+   ]
+  },
+  {
+   "owner": "F-EVFIX",
+   "code": "confidence.overclaim",
+   "severity": "error",
+   "occurrences": 5,
+   "examples": [
+    {
+     "doc_ids": [
+      "swiss_dwellings__site65-bldg3-floor5"
+     ],
+     "question": "What is the net floor area of apartment C in m², summing all its rooms except balconies, loggias, terraces and other outdoor spaces?",
+     "detail": "Verified label has disagreeing, estimated or unresolved evidence"
+    },
+    {
+     "doc_ids": [
+      "swiss_dwellings__site1101-bldg2241-floor10275"
+     ],
+     "question": "What is the net floor area of apartment A in m², summing all its rooms except balconies, loggias, terraces and other outdoor spaces?",
+     "detail": "Verified label has disagreeing, estimated or unresolved evidence"
+    },
+    {
+     "doc_ids": [
+      "swiss_dwellings__site357-bldg769-floor4266"
+     ],
+     "question": "What is the net floor area of apartment B in m², summing all its rooms except balconies, loggias, terraces and other outdoor spaces?",
+     "detail": "Verified label has disagreeing, estimated or unresolved evidence"
+    }
+   ]
+  },
+  {
+   "owner": "F-CALC",
+   "code": "calc.rows_sum",
+   "severity": "error",
+   "occurrences": 2,
+   "examples": [
+    {
+     "doc_ids": [
+      "ifc_bench__digital-hub-arc"
+     ],
+     "question": "What is the building's total gross floor area, with breakdown by level?",
+     "detail": "sum of rows 2842.1214799999993 differs from result 2842.13; exclusions/conversions need a reconcilable step"
+    },
+    {
+     "doc_ids": [
+      "ifc_bench__digital-hub-arc"
+     ],
+     "question": "What is the building's total floor area, number of levels, total spaces, and program breakdown by floor?",
+     "detail": "sum of rows 2842.1214799999993 differs from result 2842.13; exclusions/conversions need a reconcilable step"
+    }
+   ]
+  },
+  {
+   "owner": "F-CALC",
+   "code": "calc.step_operands",
+   "severity": "error",
+   "occurrences": 2,
+   "examples": [
+    {
+     "doc_ids": [
+      "ifc_bench__digital-hub-arc"
+     ],
+     "question": "What is the building's total gross floor area, with breakdown by level?",
+     "detail": "step 'result': declared operands produce 2842.12, not 2842.13"
+    },
+    {
+     "doc_ids": [
+      "ifc_bench__digital-hub-arc"
+     ],
+     "question": "What is the building's total floor area, number of levels, total spaces, and program breakdown by floor?",
+     "detail": "step 'result': declared operands produce 2842.12, not 2842.13"
+    }
+   ]
+  },
+  {
+   "owner": "F-EVFIX",
+   "code": "card.meaningless_read",
+   "severity": "error",
+   "occurrences": 1,
+   "examples": [
+    {
+     "doc_ids": [
+      "ifc_models__bsc-molio-molio-with-uris"
+     ],
+     "question": "What is the total net floor area of all rooms (spaces) on '4. Sal', in m²?",
+     "detail": "card describes one marked region without explaining what was found"
+    }
+   ]
+  },
+  {
+   "owner": "F-EVFIX",
+   "code": "card.headline_uncheckable",
+   "severity": "uncheckable",
+   "occurrences": 3,
+   "examples": [
+    {
+     "doc_ids": [
+      "ifc_bench__digital-hub-arc"
+     ],
+     "question": "What is the building's total gross floor area, with breakdown by level?",
+     "detail": "headline numeric quantity could not be parsed"
+    },
+    {
+     "doc_ids": [
+      "ifc_bench__digital-hub-arc"
+     ],
+     "question": "What is the building's total floor area, number of levels, total spaces, and program breakdown by floor?",
+     "detail": "headline numeric quantity could not be parsed"
+    },
+    {
+     "doc_ids": [
+      "ifc_bench__digital-hub-arc"
+     ],
+     "question": "Which foundation system is used?",
+     "detail": "headline numeric quantity could not be parsed"
+    }
+   ]
+  },
+  {
+   "owner": "F-CALC",
+   "code": "calc.rows_uncheckable",
+   "severity": "uncheckable",
+   "occurrences": 1,
+   "examples": [
+    {
+     "doc_ids": [
+      "swiss_dwellings__site157-bldg323-floor1313"
+     ],
+     "question": "What is the net floor area of apartment D in m², summing all its rooms except balconies, loggias, terraces and other outdoor spaces?",
+     "detail": "row quantity columns cannot be mapped uniquely to result units"
+    }
+   ]
+  }
+ ],
+ "cross_file": [],
+ "needs_awais": [],
+ "limitations": [
+  "No PDF internals, live model verification, or correctness claim against potentially noisy dataset gold.",
+  "Unrecognized headline/row semantics are uncheckable, never counted as passing.",
+  "A finite unknown margin with an explanation is honest; no arbitrary percentage ceiling is imposed.",
+  "Only existing structured artifacts are eligible; missing-data exclusions are reported.",
+  "Judge sets under results/final/QA were absent in the audited snapshots.",
+  "All model calls forced fake; 47 of 199 responses include fake-model fallbacks and cannot establish live model accuracy.",
+  "Earlier diagnostic reports are superseded where their checker revisions were too strict.",
+  "The combined four-branch product has not been audited because its merge conflicts remain unresolved.",
+  "Selected structured questions covered IFC, DXF and raster. No DWG/SVG or JPEG-specific case was available in this selected corpus; ingest internals were not audited."
+ ],
+ "rerun": {
+  "once": "/Users/akshatthapa/Workspace/junction/.venv/bin/python scripts/evidence_repeat.py",
+  "every_45_minutes": "/Users/akshatthapa/Workspace/junction/.venv/bin/python scripts/evidence_repeat.py --watch",
+  "note": "Driver acquires scripts/heavy.sh per audit; do not wrap the watch process in another heavy.sh. Blind document deferred by default. No watcher left running."
+ }
+}

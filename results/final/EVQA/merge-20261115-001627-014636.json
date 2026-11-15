@@ -1,0 +1,19 @@
+{
+ "created_at": "2026-11-14T22:16:27.039603+00:00",
+ "baseline": "d6b3c396c020dc01da4e9c266df5059f9a413107",
+ "branches": {
+  "final/evfix": "d6b3c396c020dc01da4e9c266df5059f9a413107"
+ },
+ "merges": [
+  {
+   "branch": "final/evfix",
+   "revision": "d6b3c396c020dc01da4e9c266df5059f9a413107",
+   "status": "merged"
+  }
+ ],
+ "complete_merge": true,
+ "audit_report": "run-20261115-001627-014636.json",
+ "all_four_evidence_branches": false,
+ "scratch_revision": "d6b3c396c020dc01da4e9c266df5059f9a413107",
+ "audit_exit": 1
+}

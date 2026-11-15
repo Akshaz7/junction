@@ -1,0 +1,31 @@
+{
+ "created_at": "2026-11-14T22:22:44.597175+00:00",
+ "baseline": "18250f8a959dae9ddf7f191990c1545bf8f77631",
+ "branches": {
+  "final/calc": "33f2c4e47053709cf512bdbd037232792315a8e7",
+  "final/scaleproof": "5419fda99e690ec1f5d7fae0948764116a9e310e",
+  "final/xcheck": "6a681ef825e6395909ba84af6e03eed955b86b0b"
+ },
+ "merges": [
+  {
+   "branch": "final/calc",
+   "revision": "33f2c4e47053709cf512bdbd037232792315a8e7",
+   "status": "merged"
+  },
+  {
+   "branch": "final/scaleproof",
+   "revision": "5419fda99e690ec1f5d7fae0948764116a9e310e",
+   "status": "merged"
+  },
+  {
+   "branch": "final/xcheck",
+   "revision": "6a681ef825e6395909ba84af6e03eed955b86b0b",
+   "status": "merged"
+  }
+ ],
+ "complete_merge": true,
+ "audit_report": "run-20261115-002244-547745.json",
+ "all_four_evidence_branches": false,
+ "scratch_revision": "9250d9fcc6426374b0ffb8ac27182509378f21b9",
+ "audit_exit": 1
+}

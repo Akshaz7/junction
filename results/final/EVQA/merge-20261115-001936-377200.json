@@ -1,0 +1,41 @@
+{
+ "created_at": "2026-11-14T22:19:36.431623+00:00",
+ "baseline": "f39741e6e01b3fabde93e8dfa25dfaa02bb33929",
+ "branches": {
+  "final/calc": "33f2c4e47053709cf512bdbd037232792315a8e7",
+  "final/scaleproof": "efbb1b6a5bfa3918a0aa16ed7c8f9ec1c01a4126",
+  "final/xcheck": "1c375cb9cc120d04bc0e1057e884de6b731330a1",
+  "final/evfix": "d6b3c396c020dc01da4e9c266df5059f9a413107"
+ },
+ "merges": [
+  {
+   "branch": "final/calc",
+   "revision": "33f2c4e47053709cf512bdbd037232792315a8e7",
+   "status": "merged"
+  },
+  {
+   "branch": "final/scaleproof",
+   "revision": "efbb1b6a5bfa3918a0aa16ed7c8f9ec1c01a4126",
+   "status": "merged"
+  },
+  {
+   "branch": "final/xcheck",
+   "revision": "1c375cb9cc120d04bc0e1057e884de6b731330a1",
+   "status": "merged"
+  },
+  {
+   "branch": "final/evfix",
+   "revision": "d6b3c396c020dc01da4e9c266df5059f9a413107",
+   "status": "conflict",
+   "files": [
+    "engine/reasoning.py",
+    "engine/reasoning_parts/confidence.py"
+   ]
+  }
+ ],
+ "complete_merge": false,
+ "audit_report": "run-20261115-001936-377200.json",
+ "all_four_evidence_branches": false,
+ "scratch_revision": "18250f8a959dae9ddf7f191990c1545bf8f77631",
+ "audit_exit": 1
+}
