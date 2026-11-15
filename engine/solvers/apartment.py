@@ -64,9 +64,16 @@ def uncertain_hint(rooms, total):
     if not unknown:
         return None
     reason = f"The sum includes {len(unknown)} unlabelled outlines; their room use is unknown."
-    return {"pct_cap": round(min(r.conf for r in unknown) * 100), "reason": reason,
+    hint = {"pct_cap": round(min(r.conf for r in unknown) * 100), "reason": reason,
             "improve": "Check the unlabelled outlines before relying on the apartment total.",
             "steps": [
                 {"kind": "found", "title": "Found", "text": f"{len(rooms)} indoor room outlines assigned to this apartment", "cite": 1, "ok": None},
                 {"kind": "calculated", "title": "Calculated", "text": f"Indoor room areas sum to {total:.2f} m²; outdoor rooms excluded", "cite": None, "ok": None},
                 {"kind": "checked", "title": "Checked", "text": reason, "cite": None, "ok": False}]}
+    pairs = [r.props["area_crosscheck"] for r in rooms if r.props.get("area_crosscheck")]
+    if pairs:
+        good = sum(p["agrees_at_written_precision"] for p in pairs)
+        hint["steps"].append({"kind": "checked", "title": "Checked", "cite": None,
+                              "text": f"{good} of {len(pairs)} written room areas match geometry at their written precision",
+                              "ok": good == len(pairs)})
+    return hint

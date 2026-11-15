@@ -88,6 +88,46 @@
     "Cage d'escalier": 1
   },
   "geometry_thresholds": [],
-  "policy": "Containment and even-odd topology only; no fitted size/coordinate constants. Remaining multilingual terms come from ACC-UNITS task vocabulary, not an observed-frequency claim. Confidence 0.4 marks unknown below the existing solver MIN_CONF=0.5. Crosscheck precision follows the written decimal places; stored computed areas rounded to 6 decimals.",
-  "blind_file_reserved": "swiss_dwellings__site317-bldg647-floor2745"
+  "policy": "Containment and even-odd topology only; no fitted size/coordinate constants. Remaining multilingual terms are explicit vocabulary from ACC-UNITS or general Finnish/Swedish language support, not an observed-frequency claim. Confidence 0.4 marks unknown below the existing solver MIN_CONF=0.5. Crosscheck precision follows the written decimal places; stored computed areas rounded to 6 decimals.",
+  "blind_file_reserved": "swiss_dwellings__site317-bldg647-floor2745",
+  "explicit_unobserved_vocabulary": {
+    "unit_prefixes": [
+      "Appt",
+      "Apt",
+      "Wohnung",
+      "Appartement",
+      "Appartamento",
+      "Logement",
+      "Apartment",
+      "Flat",
+      "Unit",
+      "Asunto",
+      "Huoneisto",
+      "Lgh",
+      "L\u00e4genhet",
+      "Lagenhet",
+      "Bostad"
+    ],
+    "outdoor_terms": [
+      "balcone",
+      "balcony",
+      "terrasse",
+      "terrazza",
+      "terrace",
+      "dachterrasse",
+      "sitzplatz",
+      "veranda",
+      "wintergarten",
+      "jardin",
+      "garten",
+      "giardino",
+      "patio",
+      "garden",
+      "outdoor",
+      "parveke",
+      "terassi",
+      "balkong",
+      "uterum"
+    ]
+  }
 }

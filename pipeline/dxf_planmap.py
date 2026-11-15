@@ -160,8 +160,10 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
     rooms = [p for e in ms.query('LWPOLYLINE POLYLINE[layer=="ROOM_OUTLINE"]') if _closed(e) for p in [_pts(e)]]
     from pipeline.dxf_units import analyse
     # A repeated endpoint closes CAD rings even when the DXF closed bit is unset.
-    outlines = [_pts(e) for e in ms.query('LWPOLYLINE POLYLINE[layer=="UNIT_OUTLINE"]') if _closed(e)]
-    records, units = analyse(rooms, texts, outlines, room_texts(ms, layer=None), unit_m)
+    unit_entities = list(ms.query('LWPOLYLINE POLYLINE[layer=="UNIT_OUTLINE"]'))
+    outlines = [_pts(e) for e in unit_entities]
+    records, units = analyse(rooms, texts, outlines, room_texts(ms, layer=None), unit_m,
+                             unit_closed=[_closed(e) for e in unit_entities])
     room_items = []
     for r, record in zip(rooms, records):
         props = record["props"]

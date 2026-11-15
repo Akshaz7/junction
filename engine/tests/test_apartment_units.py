@@ -33,7 +33,7 @@ def drawing(tmp_path, rooms, units, texts, *, unit_code=6):
     return json.loads((art / "planmap-1.json").read_text())
 
 
-@pytest.mark.parametrize("label", ["Whg. A", "App. A", "Appt. A", "Apt A", "Wohnung A", "Appartement A", "Appartamento A", "Logement A", "unit A"])
+@pytest.mark.parametrize("label", ["Whg. A", "App. A", "Appt. A", "Apt A", "Wohnung A", "Appartement A", "Appartamento A", "Logement A", "unit A", "Asunto A", "Huoneisto A", "Lgh. A", "Lägenhet A"])
 def test_multilingual_unit_membership_and_evidence(tmp_path, label):
     pm = drawing(tmp_path, [rect(0, 0, 4, 3)], [rect(-1, -1, 6, 5)],
                  [(label, 1, 2), ("Zimmer", 1, 1)])
@@ -76,6 +76,15 @@ def test_explicit_endpoint_closure_without_dxf_closed_bit(tmp_path):
     process(art.name, art, art / "drawing.dxf")
     answer = solve("What is the net floor area of apartment A?", art.name, root=tmp_path)
     assert answer["answer"]["value"] == 12
+
+
+def test_open_unit_outline_is_retained_with_invalid_geometry_flag():
+    rooms, units = analyse([rect(0, 0, 4, 3)], [("Room", 1, 1)],
+                           [rect(-1, -1, 6, 5)], [("App. A", 1, 2)], 1, unit_closed=[False])
+    assert len(units) == 1
+    assert not units[0]["props"]["geometry_valid"]
+    assert units[0]["props"]["area_m2_geom"] is None
+    assert rooms[0]["props"]["unit_index"] is None
 
 
 def test_unit_assignment_uses_label_before_centroid():
@@ -166,6 +175,15 @@ def test_unlabelled_standalone_outlines_keep_geometry_but_flag_uncertainty(tmp_p
     attach(answer, answer["question"], tmp_path)
     assert answer["reasoning"]["confidence"]["label"] == "Estimate"
     assert "unknown" in answer["reasoning"]["confidence"]["reason"]
+
+
+def test_uncertain_total_still_exposes_written_area_crosscheck():
+    from engine.solvers.apartment import uncertain_hint
+    rooms = [Item("unknown", "room", conf=.4, props={"classification": "unlabelled"}),
+             Item("labelled", "room", props={"area_crosscheck": {"agrees_at_written_precision": False}})]
+    hint = uncertain_hint(rooms, 20)
+    assert hint["steps"][-1]["ok"] is False
+    assert "0 of 1 written room areas" in hint["steps"][-1]["text"]
 
 
 def test_duplicate_apartment_labels_do_not_select_first(tmp_path):

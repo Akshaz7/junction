@@ -8,7 +8,8 @@ import unicodedata
 # Observed labels and outdoor names, plus the task's multilingual vocabulary:
 # results/final/ACC-UNITS/constants.json. No learned geometry/size thresholds.
 UNIT_LABEL = re.compile(
-    r"^(?:whg|app|appt|apt|wohnung|appartement|appartamento|logement|apartment|flat|unit)"
+    r"^(?:whg|app|appt|apt|wohnung|appartement|appartamento|logement|apartment|flat|unit|"
+    r"asunto|huoneisto|lgh|lägenhet|lagenhet|bostad)"
     r"\.?\s*(?:[-:#]\s*)?((?:[A-Za-zÀ-ÖØ-öø-ÿ]|[A-Za-z]*\d+[A-Za-z]*)(?:[-.][A-Za-z0-9]+)*)$", re.IGNORECASE)
 ROOM_NUMBER = re.compile(r"^\d+(?:[.,]\d+)+$")
 WRITTEN_AREA = re.compile(r"^(\d+(?:[.,]\d+)?)\s*(m²|m2|sqm|sq\.?\s*m|ft²|ft2|sq\.?\s*ft)$", re.IGNORECASE)
@@ -75,14 +76,14 @@ def _membership(anchors, centroid, units):
         None, "ambiguous" if found else "unassigned")
 
 
-def analyse(rooms, texts, outlines, unit_texts, unit_m):
+def analyse(rooms, texts, outlines, unit_texts, unit_m, unit_closed=None):
     """Return room and unit records in source order; unrecognised outlines are retained.
 
     Each unlabelled descendant of a labelled room toggles filled area (even-odd).
     Labelled nested rooms are separate spaces, not holes inferred from their size.
     """
     polys = [polygon(r) for r in rooms]
-    upolys = [polygon(r) for r in outlines]
+    upolys = [polygon(r) if unit_closed is None or unit_closed[i] else None for i, r in enumerate(outlines)]
     assigned = assign_texts(rooms, texts)
     unit_assigned = {i: [] for i in range(len(outlines))}
     for text, x, y in unit_texts:
