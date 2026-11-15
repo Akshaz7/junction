@@ -280,7 +280,7 @@ async def servable_ids(pool) -> set[str]:
     return ids
 
 
-async def restore_all() -> int:
+async def restore_all(uploads_only: bool | None = None) -> int:
     """Startup: pull every uploaded document back to disk, newest first."""
     from . import db
     pool = await db.get_pool()
@@ -288,6 +288,9 @@ async def restore_all() -> int:
         return 0
     n = 0
     for r in await pool.fetch("select distinct doc_id from doc_artifacts order by doc_id"):
+        up = r["doc_id"].startswith("uploads__")
+        if uploads_only is not None and up != uploads_only:
+            continue
         await ensure_doc(r["doc_id"])
         n += 1
     return n
