@@ -141,6 +141,11 @@ def build(res: dict, question: str, root: Path) -> dict | None:
             c['reason'] += ' Includes items marked by you; their labels are user-verified, not their dimensions or sheet completeness.'
     from engine.reasoning_parts.counts import enforce
     card = enforce(res, {"steps": steps[:4], "confidence": c, **quantitative}, question)
+    # The count invariant replaces Found totals; retain the separate view
+    # selection evidence without changing that invariant or confidence.
+    scope = next((s for s in ctx["steps"] if s.get("title") == "Plan views"), None)
+    if scope and not any(s.get("title") == "Plan views" for s in card["steps"]):
+        card["steps"] = [*card["steps"][:3], scope]
     if manual and card["steps"] and card["steps"][0].get("title") != manual.get("title"):
         card["steps"] = [manual, *card["steps"]][:4]   # the invariant rewrites Found; the user's own marks stay first
     if all_marked:

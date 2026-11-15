@@ -42,6 +42,9 @@ def _fmt(v: float) -> str:
 
 
 def _done(question, doc, text, value, unit, items, trace, route="analytics", t0=None):
+    if doc.mode == "planmap" and unit == "count" and doc.meta.get("view_regions"):
+        from pipeline.sheet_views import count_note
+        text += count_note(doc, items, None)
     if doc.mode == "planmap" and unit == "m2":
         missing_scale = [i for i in items if "measurement_scale" in i.props and not i.props["measurement_scale"].get("m_per_px") and i.q.get("area_m2") is None]
         if missing_scale and len(missing_scale) == len(items):

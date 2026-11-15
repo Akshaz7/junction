@@ -175,7 +175,7 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
     try:
         from engine.solvers.data import load_doc
         doc = load_doc(did, root)
-        if doc is None or doc.mode != "planmap" or doc.pages != 1 or not any(i.source == "det" for i in doc.items):
+        if doc is None or doc.mode != "planmap" or doc.pages != 1 or doc.meta.get("view_regions") or not any(i.source == "det" for i in doc.items):
             return res
         if any(i.props.get('confirmed_by_user') and i.kind == parsed.kind for i in doc.items):
             return res
@@ -932,6 +932,8 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             last["question"] = question
             last["cost"] = {"usd_total": round(sum(c["cost_usd"] for c in calls), 6), "calls": calls}
             last["latency_ms"] = int((time.perf_counter() - t0) * 1000)
+            if any(s.get("step") == "view_scope" for s in trace):
+                return last
             from engine.visual_rooms import answer as visual_rooms
             if (visual := visual_rooms(question, doc_ids, root, trace, calls, t0,
                                        hidden=(scene_state or {}).get("hidden") or ())) is not None:

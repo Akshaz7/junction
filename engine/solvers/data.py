@@ -133,7 +133,7 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
                                       props=x.get('props') or {}, source='taught', conf=1.0))
         return Doc(doc_id, "ifc", items, title, e.get("storeys") or [], meta={**(e.get("building") or {}), "unit_provenance": e.get("unit_provenance")})
     if pms:
-        items, scale, page_scales = [], None, {}
+        items, scale, page_scales, view_regions, excluded = [], None, {}, [], []
         for p in pms:
             m = _json(p)
             from engine.scales import apply_item_scales
@@ -187,11 +187,19 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
                 changed = {k: {"before": original.get(k), "after": v} for k, v in it.q.items() if original.get(k) != v}
                 if changed:
                     it.scale_adjustment = {"quantities": changed, "old_scale": m.get("scale") or {}, "new_scale": selected_scale}
+            from pipeline.sheet_views import filter_plan_items
+            page_items = items[page_start:]
+            selected = filter_plan_items(page_items, m)
+            kept = {id(i) for i in selected}
+            excluded.extend(i.item_id for i in page_items if id(i) not in kept)
+            items[page_start:] = selected
+            if m.get("view_analysis"):
+                view_regions.extend({**r, "page": m.get("page", 1)} for r in m.get("regions", []))
             page_scales[m.get("page", 1)] = page_scale
             if scale is None:
                 scale = page_scale
         items = dedupe_openings(items)
-        return Doc(doc_id, "planmap", items, title, [], scale, len(pms), meta={"page_scales": page_scales})
+        return Doc(doc_id, "planmap", items, title, [], scale, len(pms), meta={"page_scales": page_scales, **({"view_regions": view_regions, "excluded_view_items": excluded} if view_regions else {})})
     return None
 
 

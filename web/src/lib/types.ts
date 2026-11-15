@@ -105,6 +105,7 @@ export type TraceStep = Answer['trace'][number]
 export interface PlanMap {
   doc_id: string
   page: number
+  regions?: { view_id?: string; bbox: Bbox; title?: string | null; view_type?: 'plan' | 'elevation' | 'section' | 'detail' | 'site' | 'unknown'; scale?: { ratio?: number; unverified_printed_ratio?: number; m_per_px?: number | null } }[]
   items: { item_id: string; bbox_px: Bbox | null; tag?: string; props?: { tag?: string } }[]
 }
 

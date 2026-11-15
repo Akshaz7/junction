@@ -117,18 +117,14 @@ def imperial_ratio(words: list[dict]) -> float | None:
 
 
 def ratio_and_sheet(words: list[dict]) -> tuple[int | None, str | None]:
+    from engine.scales import scale_anchors
     texts = [str(w.get("text") or "") for w in words]
-    ratio = None
-    for i in range(len(texts)):
-        for n in (1, 2, 3):
-            m = RATIO_RE.search("".join(texts[i:i + n]))
-            if m and int(m.group(1)) in RATIOS:
-                ratio = int(m.group(1))
-                break
-        if ratio:
-            break
-    if ratio is None:
-        ratio = imperial_ratio(words)
+    ratios = {a["ratio"] for a in scale_anchors(words)}
+    # Different views can have different scales. Never select the first one
+    # and use it for the whole sheet. Spatial assignment lives in scale_regions.
+    ratio = next(iter(ratios)) if len(ratios) == 1 else None
+    if ratio is not None and ratio.is_integer():
+        ratio = int(ratio)
     sheet = None
     for t in texts:
         m = SHEET_RE.match(t.strip())
@@ -401,57 +397,38 @@ def evidenced_candidates(words, W, H, dpi=None, dpi_source=None):
     b = scalebar(words)
     if b:
         out.append({"method": b["method"], "m_per_px": b["m_per_px"], **b["derivation"]})
-    # Join adjacent words only on the same printed line. Never join separate
-    # detail drawings into a fictitious title-block ratio.
-    seen = set()
-    for i, w in enumerate(words):
-        group = [w]
-        for other in words[i + 1:i + 5]:
-            prev, bb = group[-1]["bbox_px"], other["bbox_px"]
-            h = max(prev[3] - prev[1], bb[3] - bb[1])
-            if abs(_cy(prev) - _cy(bb)) > h * .6 or bb[0] < prev[0] or bb[0] - prev[2] > 3 * h:
-                break
-            group.append(other)
-        for n in range(1, len(group) + 1):
-            ws = group[:n]
-            text = " ".join(str(x.get("text") or "") for x in ws)
-            m = RATIO_RE.search(text)
-            ratio = int(m[1]) if m and positive(m[1]) else imperial_ratio(ws)
-            if not ratio:
-                continue
-            box = [min(x["bbox_px"][0] for x in ws), min(x["bbox_px"][1] for x in ws),
-                   max(x["bbox_px"][2] for x in ws), max(x["bbox_px"][3] for x in ws)]
-            key = (ratio, tuple(w["bbox_px"]))
-            if key in seen:
-                break
-            seen.add(key)
-            src = {**ws[0].get("_source", {}), "bbox": box, "text": text}
-            if m is None:
-                src["interpretation"] = "ratio = (printed feet × 12 + printed inches) / printed paper inches; fractions and mixed fractions evaluated exactly before division"
-            inputs = [operand("printed ratio denominator", ratio, "ratio", src)]
-            if positive(dpi):
-                resize = (dpi_source or {}).get("resize_factor", 1)
-                raw_dpi = (dpi_source or {}).get("raw_dpi") or float(dpi)
-                inputs += [operand("page render resolution", float(raw_dpi), "px/in", dpi_source or {"metadata": "page render DPI"}),
-                           operand("metres per inch", .0254, "m/in", {"definition": "1 international inch = 0.0254 m"})]
-                if resize != 1:
-                    inputs.append(operand("uniform image resizing", resize, "current px/render px", dpi_source))
-                out.append(candidate("ratio-dpi", ratio * .0254 / float(dpi), "scale = printed ratio × 0.0254 m/in / (page render DPI × uniform image resizing)", inputs,
-                                     "Assumes the raster retains the recorded resolution and has not been resized or distorted."))
-            else:
-                for sw in words:
-                    sm = SHEET_RE.match(str(sw.get("text", "")).strip())
-                    if not sm:
-                        continue
-                    sheet = sm[1].upper()
-                    c = from_ratio(ratio, sheet, W, H, None) if W and H else None
-                    if not c:
-                        continue
-                    short, long_ = SHEETS[sheet]
-                    out.append(candidate("ratio-sheet", c["m_per_px"], "scale = printed ratio × long paper side in mm × 0.001 m/mm / long image side in pixels",
-                                         inputs + [operand("paper long side", long_, "mm", {**sw.get("_source", {}), "bbox": sw["bbox_px"], "text": str(sw.get("text")), "definition": f"ISO 216 {sheet}: {short} × {long_} mm"}),
-                                                   operand("metres per millimetre", .001, "m/mm", {"definition": "1 mm = 0.001 m"}),
-                                                   operand("long image side", max(W, H), "px", {"file": "planmap-page.json", "pointer": "/image"})],
-                                         "Assumes an uncropped full sheet; aspect ratio alone does not establish this. No physical error bound is available."))
-            break
+    # Use the same spatial parser as view assignment: decimal/fractional
+    # denominators and multiple local labels must keep their exact value.
+    from engine.scales import IMPERIAL, contains, scale_anchors
+    for anchor in scale_anchors(words):
+        ratio, box, text = anchor['ratio'], anchor['bbox'], anchor['quote']
+        word = next((w for w in words if contains(box, w['bbox_px'])), {})
+        src = {**word.get('_source', {}), "bbox": box, "text": text}
+        if IMPERIAL.search(text):
+            src["interpretation"] = "ratio = (printed feet × 12 + printed inches) / printed paper inches; fractions and mixed fractions evaluated exactly before division"
+        inputs = [operand("printed ratio denominator", ratio, "ratio", src)]
+        if positive(dpi):
+            resize = (dpi_source or {}).get("resize_factor", 1)
+            raw_dpi = (dpi_source or {}).get("raw_dpi") or float(dpi)
+            inputs += [operand("page render resolution", float(raw_dpi), "px/in", dpi_source or {"metadata": "page render DPI"}),
+                       operand("metres per inch", .0254, "m/in", {"definition": "1 international inch = 0.0254 m"})]
+            if resize != 1:
+                inputs.append(operand("uniform image resizing", resize, "current px/render px", dpi_source))
+            out.append(candidate("ratio-dpi", ratio * .0254 / float(dpi), "scale = printed ratio × 0.0254 m/in / (page render DPI × uniform image resizing)", inputs,
+                                 "Assumes the raster retains the recorded resolution and has not been resized or distorted."))
+        else:
+            for sw in words:
+                sm = SHEET_RE.match(str(sw.get("text", "")).strip())
+                if not sm:
+                    continue
+                sheet = sm[1].upper()
+                c = from_ratio(ratio, sheet, W, H, None) if W and H else None
+                if not c:
+                    continue
+                short, long_ = SHEETS[sheet]
+                out.append(candidate("ratio-sheet", c["m_per_px"], "scale = printed ratio × long paper side in mm × 0.001 m/mm / long image side in pixels",
+                                     inputs + [operand("paper long side", long_, "mm", {**sw.get("_source", {}), "bbox": sw["bbox_px"], "text": str(sw.get("text")), "definition": f"ISO 216 {sheet}: {short} × {long_} mm"}),
+                                               operand("metres per millimetre", .001, "m/mm", {"definition": "1 mm = 0.001 m"}),
+                                               operand("long image side", max(W, H), "px", {"file": "planmap-page.json", "pointer": "/image"})],
+                                     "Assumes an uncropped full sheet; aspect ratio alone does not establish this. No physical error bound is available."))
     return out
