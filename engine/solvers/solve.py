@@ -474,6 +474,37 @@ def ifc_unreadable(doc, root) -> str | None:
     return None
 
 
+def _planmap_extras(doc: Doc, root, kinds: set, items: list, st, page):
+    """Plan-map items of these kinds that the IFC built from the PDF lacks. Only for PDF sheets and only with no storey named."""
+    if st is not None:
+        return [], ""
+    try:
+        meta = _json_file(Path(root) / doc.doc_id / "doc.json")
+    except (OSError, ValueError):
+        return [], ""
+    if meta.get("kind") != "pdf":
+        return [], ""
+    pm = load_doc(doc.doc_id, Path(root), prefer="planmap")
+    if pm is None or pm.mode != "planmap":
+        return [], ""
+    have = {i.item_id for i in items}
+    pm_ids = {i.item_id for i in pm.items if i.kind in kinds and i.conf >= MIN_CONF}
+    if items and len(have & pm_ids) < 0.8 * len(items):
+        return [], ""   # the two sources do not share identities: do not add one to the other
+    extra = [i for i in pm.items if i.kind in kinds and i.conf >= MIN_CONF and i.item_id not in have
+             and (not page or i.page == page)]
+    if not extra:
+        return [], ""
+    return extra, (f"{len(extra)} of them {'has' if len(extra) == 1 else 'have'} no drawn wall, "
+                   f"so the 3D model shows {len(items)}")
+
+
+def _json_file(p: Path):
+    import json
+    with p.open(encoding="utf-8") as f:
+        return json.load(f)
+
+
 @checked_solver
 def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path | str = ARTIFACTS,
           page: int | None = None, hidden: dict[str, str] | None = None) -> dict:
@@ -633,13 +664,25 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
     if doc.mode == "ifc":
         st = resolve_storey(question, doc.storeys)
         from .filters import storey_requested
-        if st is None and (p.scope == "storey" or storey_requested(question)):
+        # "on this floor" on a one-level model (every uploaded PDF sheet) names no other level: it is the whole model.
+        deictic = bool(re.search(r"\b(?:this|the|current|that) (?:floor|level|storey|story)\b", question, re.I)) and not storey_requested(question)
+        if st is None and deictic and len(doc.storeys) <= 1:
+            pass
+        elif st is None and (p.scope == "storey" or storey_requested(question)):
             return _abstain(question, doc_id, "No matching floor was found. Storeys present: "
                             + ", ".join(s["name"] for s in doc.storeys) + ".", trace, route, t0)
         if st:
             items = [i for i in items if i.storey == st]
             where = f"on **{st}**"
             trace.append(_step("scope", f"storey = {st}: {len(items)} left"))
+
+    # --- PDF-derived IFC: the plan map can hold doors/windows the 3D build dropped (no host wall on their line)
+    if doc.mode == "ifc" and p.type == "count" and kind in ("door", "window") and not hidden and not EXT_RE.search(question):
+        extra, pm_note = _planmap_extras(doc, root, kinds, items, st, page)
+        if extra:
+            items = items + extra
+            where = f"{where} ({pm_note})"
+            trace.append(_step("load", f"plan map adds {len(extra)} {kind}(s) the 3D model has no host wall for: {len(items)} in total"))
 
     # --- exterior / interior (IFC only): IsExternal property, else EXTERNAL space boundaries (flag set by pipeline.ifc_props)
     if doc.mode == "ifc" and kind in ("wall", "door", "window"):
