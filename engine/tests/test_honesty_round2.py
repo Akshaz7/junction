@@ -109,3 +109,15 @@ def test_unsuccessful_source_lookup_still_reports_its_cost(tmp_path, monkeypatch
     result = answer("What is the floor area?", [d.name])
     assert result["answer"]["abstained"] and result["cost"]["usd_total"] == .02
 
+
+def test_reader_cost_preserves_existing_calls_without_double_counting(tmp_path, monkeypatch):
+    import time
+    import engine.answer as mod
+    first = {"task": "read_drawing", "cost_usd": .01}
+    second = dict(first)  # two separate calls can have identical metadata
+    res = mod._abstained("q", ["doc"], "Unavailable", [], time.perf_counter(), calls=[first, second])
+    shared = [first]
+    monkeypatch.setattr(mod, "_reader", lambda *a: None)
+    result = mod._use_reader(res, "q", ["doc"], tmp_path, [], shared, time.perf_counter(), lambda *a: None)
+    assert result["cost"]["usd_total"] == .02 and len(result["cost"]["calls"]) == 2
+

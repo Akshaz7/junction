@@ -89,6 +89,11 @@ def _use_reader(res, question, doc_ids, root, trace, calls, t0, emit):
     """Run the reader when `res` is an abstention; return the reader's answer if it found one, else `res`."""
     if res is not None and not res["answer"].get("abstained"):
         return res
+    # Some source solvers own their call list. Carry those calls into the
+    # reader's shared ledger without counting the same call object twice.
+    for call in (res or {}).get("cost", {}).get("calls", []):
+        if not any(call is existing for existing in calls):
+            calls.append(call)
     rr = _reader(question, doc_ids, root, trace, calls, t0, emit)
     if rr is not None and not rr["answer"].get("abstained"):
         rr["trace"] = trace
