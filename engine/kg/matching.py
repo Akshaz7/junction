@@ -24,7 +24,8 @@ _LEVEL_ALIASES = {
     'ground': ('erdgeschoss', 'eg', 'ground floor', 'ground', 'ground level', 'level 0', 'floor 0', 'floor 1', 'level 1', 'rez de chaussee', 'begane grond', 'maaiveld', 'plan terre', 'kerrosta 1', '0', '00', 'l0', 'gf'),
     'first': ('1 obergeschoss', '1 og', '1og', 'obergeschoss', 'first floor', '1st floor', 'floor 2', 'level 2', '1 verdieping', 'eerste verdieping', 'l1', '1'),
     'second': ('2 obergeschoss', '2 og', '2og', 'second floor', '2nd floor', 'floor 3', 'level 3', '2 verdieping', 'tweede verdieping', 'l2', '2'),
-    'basement': ('keller', 'kellergeschoss', 'ug', 'untergeschoss', 'basement', 'souterrain', 'kelder', 'cellar', 'level -1', 'b1'),
+    'basement': ('keller', 'kellergeschoss', 'ug', 'untergeschoss', 'basement', 'souterrain', 'kelder', 'cellar', 'level -1', 'b1', 'fundering', '-1', 'foundation', 'untergeschoss 1'),
+    'third': ('3 obergeschoss', '3 og', '3og', 'third floor', '3rd floor', 'floor 4', 'level 4', '3 verdieping', 'derde verdieping', 'l3', '3'),
     'roof': ('dachgeschoss', 'dg', 'dach', 'roof', 'attic', 'dak', 'zolder', 'roof level'),
 }
 
@@ -39,6 +40,12 @@ def level_key(name):
     for key, names in _LEVEL_ALIASES.items():
         if t in names:
             return key
+    # Numbered storey names ("00 begane grond", "-1 fundering", "04 dak"): match by the words, else by the number.
+    m = re.match(r'^(-?\d{1,2}) +([a-z].*)$', t)
+    if m:
+        for key, names in _LEVEL_ALIASES.items():
+            if m.group(2) in names:
+                return key
     return t
 
 

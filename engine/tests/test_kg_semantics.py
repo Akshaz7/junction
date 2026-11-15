@@ -190,3 +190,14 @@ def test_same_building_levels_and_rooms_link_across_files(tmp_path):
 
 def g_kind(g, nid):
     return next(n['kind'] for n in g['nodes'] if n['id'] == nid)
+
+
+def test_level_key_numbered_dutch_storeys():
+    from engine.kg.matching import level_key
+    assert level_key('-1 fundering') == 'basement'
+    assert level_key('00 begane grond') == level_key('Ground floor') == 'ground'
+    assert level_key('01 eerste verdieping') == level_key('Level 2') == 'first'
+    assert level_key('02 tweede verdieping') == 'second'
+    assert level_key('03 derde verdieping') == 'third'
+    assert level_key('04 dak') == 'roof'
+    assert level_key('Undefined') == 'undefined'
