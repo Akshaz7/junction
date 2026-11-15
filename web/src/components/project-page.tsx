@@ -134,7 +134,7 @@ export function ProjectPage({ id, tab, docs, focus = [] }: { id: string; tab: Ta
   if (!project) return <section className="pj-screen" aria-busy="true" aria-label="Loading project"><div className="pj-wrap"><Breadcrumb /><Skeleton lines={2} className="pj-skel-title" /><div className="pj-columns"><div className="pj-main"><div className="pj-ask pj-ask-loading" /></div><div className="pj-side"><div className="pj-panel"><Skeleton lines={3} /></div></div></div></div></section>
   const shown = project.docs.slice(0, 4)
   const waiting = uploads.pending.filter((row) => !row.error).length
-  return <section className="pj-screen" aria-label={project.name}>
+  return <section className="pj-screen" data-tab={tab} aria-label={project.name}>
     <div className="pj-wrap">
       <div className="pj-bar"><Breadcrumb name={project.name} /><ProjectMenu project={project} onRenamed={setProject} /></div>
       <header className="pj-head"><h1 className="pj-title">{project.name}</h1>

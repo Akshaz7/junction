@@ -4,7 +4,7 @@ import { Button } from './ui'
 import { ErrorLine, Skeleton } from './project-parts'
 import { GraphCanvas, type GraphCanvasHandle } from './kg-canvas'
 import {
-  asPercent, confidencePct, countByKind, edgeVerb, filterGraph, filtersActive, groupConnections, groupLabel, indexGraph, isEstimate, kindGroup, kindLabel, kindPlural, mergeGraph, methodPhrase, noFilters, propLines, searchNodes,
+  confidencePct, countByKind, edgeVerb, filterGraph, filtersActive, graphMatchMetrics, groupConnections, groupLabel, indexGraph, isEstimate, kindGroup, kindLabel, kindPlural, mergeGraph, methodPhrase, noFilters, propLines, searchNodes,
   type GraphFilters, type KgGraph, type KgNode, type KgNodeDetail, type KindGroup,
 } from '../lib/kg'
 import { projectsApi, projectsMock, type Project } from '../lib/projects-api'
@@ -33,15 +33,14 @@ function useGraph(projectId: string, docCount: number) {
   return { ...state, retry: () => setKey((value) => value + 1) }
 }
 
-const pctText = (value: number | null | undefined) => { const pct = asPercent(value); return pct == null ? '–' : `${pct}%` }
-
 function StatsStrip({ graph, onUnlinked, active }: { graph: KgGraph; onUnlinked: () => void; active: boolean }) {
   const { stats } = graph
   const by = stats.by_kind ?? {}
   const structural = (by.project ?? 0) + (by.doc ?? 0) + (by.level ?? 0)
   const items = by.project != null || by.doc != null ? Math.max(0, stats.nodes - structural) : stats.nodes
   const check = stats.unlinked?.length ?? 0
-  const tiles: [string, string, string?][] = [['Items', items.toLocaleString()], ['Links', stats.edges.toLocaleString()], ['Linked across files', pctText(stats.linked_pct), 'Items that appear in more than one file and are matched up'], ['Values agree', pctText(stats.agree_pct), 'Matched items whose numbers agree between files'], ['Open issues', String(stats.issues ?? 0)]]
+  const metrics = graphMatchMetrics(stats)
+  const tiles: [string, string, string?][] = [['Items', items.toLocaleString()], ['Links', stats.edges.toLocaleString()], ['Linked across files', metrics.linked.value, metrics.linked.hint], ['Values agree', metrics.agree.value, metrics.agree.hint], ['Open issues', String(stats.issues ?? 0)]]
   return <div className="overview-stats pj-stats kg-stats" aria-label="Graph totals">
     {tiles.map(([label, value, hint]) => <div className="overview-stat" key={label} title={hint}><strong>{value}</strong><span>{label}</span></div>)}
     <button type="button" className={`overview-stat kg-check${active ? ' is-active' : ''}`} disabled={!check} aria-pressed={active} onClick={onUnlinked} title="Items that could not be matched to another file"><strong>{check}</strong><span>Check these</span></button>

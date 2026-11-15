@@ -29,9 +29,10 @@ beforeEach(() => {
   fakeStorage(); live.listeners.clear()
   api.createChat.mockReset().mockResolvedValue('chat-1')
   api.askQuestion.mockReset()
+  api.getChat.mockReset().mockImplementation(async (id: string) => ({ id, doc_id: null, messages: [] }))
   host = document.createElement('div'); document.body.append(host); root = createRoot(host)
 })
-afterEach(async () => { await act(async () => root.unmount()); host.remove(); vi.unstubAllGlobals() })
+afterEach(async () => { await act(async () => root.unmount()); host.remove(); vi.restoreAllMocks(); vi.unstubAllGlobals() })
 
 async function mount() {
   await act(async () => root.render(<ChatScreen docs={[demoDocument]} loadingDocs={false} demo={false} contextDocument={null} hidden={false} onChatChange={() => {}} onOpenCitation={() => {}} />))
@@ -125,7 +126,14 @@ it('a pair.chat proof for this device\'s code opens the chat before its first me
   await mount()
   addPairing('abc12345')
   const proof = createHash('sha256').update('abc12345:proof-chat').digest('hex').slice(0, 16)
-  const emitProof = (chatId: string, value: string) => { for (const fn of live.listeners) fn({ type: 'pair.chat', chat_id: chatId, proof: value }) }
+  const digest = crypto.subtle.digest.bind(crypto.subtle)
+  let verification: Promise<ArrayBuffer> | undefined
+  vi.spyOn(crypto.subtle, 'digest').mockImplementation((...args) => { verification = digest(...args); return verification })
+  const emitProof = async (chatId: string, value: string) => {
+    for (const fn of live.listeners) fn({ type: 'pair.chat', chat_id: chatId, proof: value })
+    // Native WebCrypto completes on a later task, beyond React's microtask drain.
+    await verification
+  }
   await act(async () => setFollow(true))
   window.location.hash = '#/chat'
   await act(async () => emitProof('proof-chat', 'deadbeefdeadbeef'))

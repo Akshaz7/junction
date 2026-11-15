@@ -1,0 +1,42 @@
+[
+  {
+    "chatId": "42be3bea-c71c-4942-a30c-f5b1abb4fd0d",
+    "answerId": "246e071da8414601a1cf5826bf9358fd",
+    "docIds": [
+      "cubicasa5k__colorful-11397"
+    ],
+    "usdTotal": 0.005434,
+    "before": "$0.0054",
+    "after": "$0.0054"
+  },
+  {
+    "chatId": "c645aa90-1880-42f1-a463-0bf1f48f2130",
+    "answerId": "9bd9cd1b5a8c46feafb7e941575803ec",
+    "docIds": [
+      "ifc_bench__ac20-arc"
+    ],
+    "usdTotal": 0.004358,
+    "before": "$0.0044",
+    "after": "$0.0044"
+  },
+  {
+    "chatId": "fac5c63f-e4dd-40e2-b58d-33024fa7f59c",
+    "answerId": "a8a2e4cf28a44338b3da76a14104ae10",
+    "docIds": [
+      "swiss_dwellings__site289-bldg536-floor2149"
+    ],
+    "usdTotal": 0,
+    "before": "$0.0000",
+    "after": "$0.0000"
+  },
+  {
+    "chatId": "56d4138a-315b-423a-bfe4-f7e9d393a157",
+    "answerId": "3ad1f111d43a401287215f9c1e469086",
+    "docIds": [
+      "cubicasa5k__high-quality-108"
+    ],
+    "usdTotal": 0,
+    "before": "$0.0000",
+    "after": "$0.0000"
+  }
+]

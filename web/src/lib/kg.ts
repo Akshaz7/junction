@@ -11,10 +11,28 @@ export type KgNode = {
   canonical?: string | null; degree?: number
 }
 export type KgEdge = { id: string; kind: KgEdgeKind | string; from: string; to: string; method: KgMethod | string; confidence: number; evidence: Record<string, unknown>; doc_ids: string[] }
-export type KgStats = { nodes: number; edges: number; by_kind?: Record<string, number>; linked_pct: number | null; agree_pct: number | null; unlinked: string[]; issues: number }
+export type KgStats = { nodes: number; edges: number; by_kind?: Record<string, number>; edges_by_kind?: Record<string, number>; linked_pct: number | null; agree_pct: number | null; counterpart_items?: number; linked_items?: number; unlinked: string[]; issues: number }
 export type KgGraph = { project_id: string; version: number; built_at?: string; stats: KgStats; nodes: KgNode[]; edges: KgEdge[]; partial?: boolean }
 export type KgNodeDetail = { node: KgNode; neighbours: { edge: KgEdge; node: KgNode }[]; path_to_project?: string[] }
 export type KgGraphPath = { from_label: string; edge_kind: string; to_label: string; method?: string; confidence?: number }
+
+/** Use project totals, never the subset of edges drawn in the cluster view. */
+export function graphMatchMetrics(stats: KgStats) {
+  const percent = (value: number) => `${Number(value.toFixed(1))}%`
+  const matches = stats.edges_by_kind?.same_as ?? 0
+  const agrees = stats.edges_by_kind?.agrees ?? 0
+  const compared = agrees + (stats.edges_by_kind?.differs ?? 0)
+  const linkedPct = stats.linked_pct ?? ((stats.counterpart_items ?? 0) > 0 ? 100 * (stats.linked_items ?? 0) / stats.counterpart_items! : null)
+  const agreePct = stats.agree_pct ?? (compared ? 100 * agrees / compared : null)
+  return {
+    linked: linkedPct != null
+      ? { value: percent(linkedPct), hint: 'Items that appear in more than one file and are matched up' }
+      : { value: matches.toLocaleString(), hint: matches ? 'Matching links across files. The share of matched items is not available.' : 'No items have been matched across files yet.' },
+    agree: agreePct != null
+      ? { value: percent(agreePct), hint: 'Compared values that agree between files' }
+      : { value: '0', hint: 'No values have been compared between files yet.' },
+  }
+}
 
 /** Below this an edge is an estimate: dashed in the view, and called an estimate in words. */
 export const SOLID_CONFIDENCE = 0.6
