@@ -215,7 +215,8 @@ async def list_chats(limit: int | None = None):
         rows = await pool.fetch(q + " limit $1", max(1, min(int(limit), 1000)))
     else:
         rows = await pool.fetch(q)
-    return {"chats": [_chat(r) for r in rows]}
+    from engine.library import JUNK_TITLE   # overnight test chats (judge-/break-/smoke-/lead-) stay out of History
+    return {"chats": [_chat(r) for r in rows if not JUNK_TITLE.search(str(r["title"] or "").strip())]}
 
 
 @router.post("/chats")

@@ -987,6 +987,9 @@ def _pdf_via_ifc(doc_id: str, ddir: Path, doc: dict, page, notes: list | None = 
             ifc = pdf_to_ifc.build(pms[0], ddir / "model.ifc", storey_name=names[0][0], storey_elevation=names[0][1],
                                    doc_id=doc_id)
         _mep_enrich(Path(ifc), doc, pages_[0], pms[0], notes)
+        # A property index left by an earlier pass describes a different model; the indexed path would reject the new
+        # GLB's nodes. Drop it so the scene is indexed from the IFC just built.
+        (ddir / "elements.json").unlink(missing_ok=True)
         ifc_scene.process(Path(ifc), doc, ddir)
         for n in used:
             pdf_to_ifc.link_planmap(files[n], doc_id)

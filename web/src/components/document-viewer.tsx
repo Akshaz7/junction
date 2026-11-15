@@ -1,6 +1,6 @@
 import type { Alignment, OverlayDoc } from '../lib/sheet-overlay'
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import { ChevronLeft, ChevronRight, Download, FileSymlink, FileText, Highlighter, Maximize2, Minus, PenLine, Plus, Ruler, Search, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, FileSymlink, FileText, Highlighter, Layers, Maximize2, Minus, PenLine, Plus, Ruler, Search, X } from 'lucide-react'
 import { ReadOnceChip } from './read-once-chip'
 import { SheetOverlay } from './sheet-overlay'
 import { workspaceApi } from '../lib/api'
@@ -126,6 +126,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   const markup = useSymbolMarkup(citation.doc_id, citation.page)
   const [searchOpen, setSearchOpen] = useState(false)
   const [showViews, setShowViews] = useState(false)
+  const [layersOpen, setLayersOpen] = useState(false)
   const searchTrigger = useRef<HTMLButtonElement>(null)
   const titleId = useId()
   function closeSearch() { setSearchOpen(false); searchTrigger.current?.focus() }
@@ -469,7 +470,10 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       <div className="viewer-page-position"><Button variant="ghost" size="icon-xs" aria-label="Previous page" disabled={citation.page <= 1} onClick={() => changePage(citation.page - 1)}><ChevronLeft size={14} /></Button><span className="page-number">{citation.page}</span><span>/ {totalPages ?? '…'}</span><Button variant="ghost" size="icon-xs" aria-label="Next page" disabled={!totalPages || citation.page >= totalPages} onClick={() => changePage(citation.page + 1)}><ChevronRight size={14} /></Button></div>
       <span className="toolbar-spacer" />
       <Button variant="ghost" size="xs" onClick={highlights.clear}>Clear highlights</Button>
-      {mode === '2d' && planItems.length > 0 && <PlanLayerChips items={planItems} shown={layers.shown} onToggle={layers.toggle} />}
+      {mode === '2d' && planItems.length > 0 && <div className="viewer-layers-menu" onKeyDown={(event) => { if (event.key === 'Escape') setLayersOpen(false) }}>
+        <Button variant="ghost" size="xs" aria-label="Plan layers" aria-expanded={layersOpen} aria-haspopup="true" onClick={() => setLayersOpen((open) => !open)}><Layers size={14} />Layers</Button>
+        {layersOpen && <><div className="viewer-layers-backdrop" onClick={() => setLayersOpen(false)} /><div className="viewer-layers-card" role="dialog" aria-label="Plan layers"><p className="viewer-layers-title">Show on drawing</p><PlanLayerChips items={planItems} shown={layers.shown} onToggle={layers.toggle} /></div></>}
+      </div>}
       {mode === '2d' && <Button variant="ghost" size="icon-sm" aria-label="Measure distance on the drawing" title={mPerPx ? 'Measure: click two points (double-click for an area)' : 'Measure (no scale on this drawing)'} aria-pressed={!!measure.mode} disabled={!image} onClick={() => { if (measure.mode) measure.stop(); else { chooseTool('pan'); setSelectedItem(null); measure.start('distance') } }}><Ruler size={16} /></Button>}
       <div className="viewer-markup-tools">
         <Button variant="ghost" size="xs" aria-label="Show drawing view regions" aria-pressed={showViews} onClick={() => setShowViews((shown) => !shown)}>Views</Button>

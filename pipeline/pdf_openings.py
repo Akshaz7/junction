@@ -442,7 +442,8 @@ def page_m_per_pt(page):
         return float(v), "given"
     try:
         from engine.scale_text import ratio_and_sheet
-        ratio, _ = ratio_and_sheet(page.get("words", []))
+        # engine.scales reads word boxes as "bbox_px"; PDF page words carry "bbox" (points)
+        ratio, _ = ratio_and_sheet([{**w, "bbox_px": w.get("bbox_px") or w.get("bbox")} for w in page.get("words", [])])
     except Exception:
         ratio = None
     if ratio:

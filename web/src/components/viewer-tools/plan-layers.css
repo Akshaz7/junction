@@ -1,4 +1,5 @@
-.plan-layer-chips { display: inline-flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.plan-layer-chips { display: inline-flex; flex-wrap: nowrap; gap: 4px; align-items: center; }
+.plan-layer-chip { white-space: nowrap; }
 .plan-layer-chip { gap: 6px; }
 .plan-layer-chip .plan-layer-swatch { width: 8px; height: 8px; border-radius: 2px; border: 1.5px solid var(--kind-color); background: transparent; flex: none; }
 .plan-layer-chip.is-on .plan-layer-swatch { background: var(--kind-color); }
@@ -6,3 +7,11 @@
 .plan-layer-shape { color: var(--kind-color, var(--info-text)); fill: currentColor; fill-opacity: .18; stroke: currentColor; stroke-width: 1.5; stroke-opacity: .9; }
 .plan-layer-shape.is-room { fill-opacity: .08; }
 .plan-layer-shape.is-selected { fill-opacity: .3; stroke-width: 3; stroke-opacity: 1; }
+
+.viewer-layers-menu { position: relative; display: inline-flex; }
+.viewer-layers-menu > button { gap: 4px; }
+.viewer-layers-backdrop { position: fixed; inset: 0; z-index: 40; }
+.viewer-layers-card { position: absolute; top: calc(100% + 6px); left: 0; z-index: 41; min-width: 180px; padding: 10px; border-radius: 10px; background: var(--background, #fff); border: 1px solid var(--border, rgba(0,0,0,.1)); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+.viewer-layers-card .plan-layer-chips { display: flex; flex-direction: column; align-items: stretch; gap: 2px; }
+.viewer-layers-card .plan-layer-chip { justify-content: flex-start; width: 100%; }
+.viewer-layers-title { margin: 0 0 6px; font-size: 12px; color: var(--muted-foreground, #666); }
