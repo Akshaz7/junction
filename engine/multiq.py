@@ -40,7 +40,7 @@ def split(question: str) -> list[str]:
         segs.extend(_runon(chunk) if _OPENS.match(chunk) else [chunk])
     segs = [s.strip(" ,;") for s in segs if len(re.findall(r"\w+", s)) >= 2]
     segs = [re.sub(r"\s+(?:and|then|also|plus)\s*$", "", s, flags=re.I).strip(" ,;") for s in segs]
-    if len(segs) < 2 or any(re.search(r"\b(?:of each|each of|them|those|the same|their)\b", x, re.I) for x in segs[1:]):
+    if len(segs) < 2 or any(re.search(r"\b(?:of each|each of|them|those|the same|their|they)\b", x, re.I) for x in segs[1:]):
         return []                                   # a later part leans on the earlier answer: keep it whole
     return [s if s.endswith("?") else s + "?" for s in segs]
 
