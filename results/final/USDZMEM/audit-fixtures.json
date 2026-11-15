@@ -1,0 +1,16 @@
+{
+  "isolated_original_fixture_tests": [
+    {
+      "doc_id": "swiss_dwellings__site289-bldg536-floor2149",
+      "test_usdz_prims_and_arkit": "pass"
+    },
+    {
+      "doc_id": "ifc_bench__ac20-arc",
+      "test_usdz_prims_and_arkit": "pass"
+    },
+    {
+      "doc_id": "cubicasa5k__colorful-11397",
+      "test_usdz_prims_and_arkit": "pass"
+    }
+  ]
+}

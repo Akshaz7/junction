@@ -1,0 +1,18 @@
+{
+  "label": "after",
+  "case": "munich",
+  "input": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-scenemem-a9lpukhd",
+  "work": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-usdzmem-5bv664yg",
+  "glb_mb": 4.839188,
+  "sampled_peak_mib": 104.109375,
+  "seconds": 0.5677910840022378,
+  "exit_code": 0,
+  "stopped": null,
+  "ok": true,
+  "result": {
+    "prims": 210,
+    "parts": 228,
+    "mb": 4.79
+  },
+  "resource_peak_mib": 106.578125
+}

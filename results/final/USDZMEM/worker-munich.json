@@ -1,0 +1,14 @@
+{
+  "label": "worker",
+  "case": "munich",
+  "input": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-scenemem-a9lpukhd",
+  "work": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-usdzmem-_txbswpw",
+  "glb_mb": 4.839188,
+  "sampled_peak_mib": 105.875,
+  "seconds": 0.5579578339966247,
+  "exit_code": 0,
+  "stopped": null,
+  "ok": true,
+  "result": null,
+  "resource_peak_mib": 108.375
+}

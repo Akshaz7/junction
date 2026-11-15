@@ -1,0 +1,18 @@
+{
+  "label": "before",
+  "case": "bimspeed",
+  "input": "artifacts/ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000",
+  "work": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-usdzmem-zkc7lkea",
+  "glb_mb": 99.571088,
+  "sampled_peak_mib": 704.1875,
+  "seconds": 12.976615125007811,
+  "exit_code": 0,
+  "stopped": null,
+  "ok": true,
+  "result": {
+    "prims": 14808,
+    "parts": 17794,
+    "mb": 18.68
+  },
+  "resource_peak_mib": 709.953125
+}
