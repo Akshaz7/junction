@@ -25,7 +25,10 @@ from .ratelimit import RateLimitMiddleware
 async def _restore_uploads():
     from . import artifact_store
     try:
-        await artifact_store.restore_all()
+        await artifact_store.restore_all(uploads_only=True)  # judge uploads first, then resume their lost ingests
+        from .files_routes import requeue_lost_ingests
+        await requeue_lost_ingests()
+        await artifact_store.restore_all(uploads_only=False)
         from engine.project_index import doc_ids_in, load_index, upsert_doc  # re-index uploads restored from PG
         ix = await asyncio.to_thread(load_index)
         have = set(ix.docs) if ix else set()

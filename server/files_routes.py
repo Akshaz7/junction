@@ -10,6 +10,7 @@ import sys
 import tempfile
 import time
 import uuid
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
@@ -304,7 +305,38 @@ def ingestion_available() -> bool:
     return os.environ.get("INGEST", "1") != "0" and importlib.util.find_spec("pipeline") is not None
 
 
+BOOT_TS = time.time()
+IFC_SLOTS = max(1, int(os.environ.get("IFC_CONCURRENCY", "2")))
+
+
+def _acquire_ifc_slot():
+    """Cross-process counting semaphore (flock on N files): at most IFC_SLOTS IFC jobs run at once, the rest queue."""
+    import fcntl
+    lockdir = Path(os.environ.get("RESULTS_DIR", "/tmp")) / "ifc-slots"
+    lockdir.mkdir(parents=True, exist_ok=True)
+    while True:
+        for i in range(IFC_SLOTS):
+            fd = open(lockdir / f"slot{i}", "w")
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                return fd
+            except OSError:
+                fd.close()
+        time.sleep(1)
+
+
 async def _ingest(doc_id: str):
+    if doc_id.lower().endswith(".ifc") or any(p.suffix.lower() == ".ifc" for p in (config.artifacts_dir() / "uploads").glob(doc_id + ".*")):
+        fd = await asyncio.to_thread(_acquire_ifc_slot)
+        try:
+            await _ingest_inner(doc_id)
+        finally:
+            fd.close()
+    else:
+        await _ingest_inner(doc_id)
+
+
+async def _ingest_inner(doc_id: str):
     f = config.artifacts_dir() / doc_id / "ingest.json"
     proc = None
     failure = None
@@ -340,7 +372,7 @@ async def _ingest(doc_id: str):
                 detail += " The server may have run out of memory."
             _fail_ingest(f, state.get("reason") or detail)
     except TimeoutError:
-        failure = "Ingestion timed out after 5 minutes. Try a smaller file."
+        failure = f"Ingestion timed out after {int(INGEST_TIMEOUT // 60)} minutes. Try a smaller file."
     except asyncio.CancelledError:
         failure = "Ingestion was interrupted. Please upload the file again."
         raise
@@ -394,8 +426,13 @@ async def ingest_status(doc_id: str):
     state = _read_ingest(f)
     # Also recover stale statuses restored from a previous container/process.
     if state["status"] == "running" and time.time() - state.get("started_at", f.stat().st_mtime) >= INGEST_TIMEOUT:
-        state = _fail_ingest(f, "Ingestion timed out after 5 minutes. Try a smaller file.")
+        state = _fail_ingest(f, f"Ingestion timed out after {int(INGEST_TIMEOUT // 60)} minutes. Try a smaller file.")
         await _persist(doc_id)
+    if state.get("status") == "running" and state.get("step") == "queued":
+        pos = await asyncio.to_thread(_queue_position, doc_id)
+        if pos:
+            state["queue_position"] = pos
+            state["detail"] = f"Waiting in the processing queue (position {pos})."
     return state
 
 
@@ -602,3 +639,57 @@ async def costs():
                 e["calls"] += 1
                 e["usd"] = round(e["usd"] + c, 6)
     return {"total_usd": round(total, 6), "calls": n, "by_provider": by_provider, "by_task": by_task}
+
+
+async def requeue_lost_ingests():
+    """Boot: uploads whose ingest was running/queued when the previous container stopped have no live job. Re-queue them.
+    Only states started before this boot are touched, so uploads accepted by sibling workers meanwhile are left alone."""
+    def scan():
+        out = []
+        root = config.artifacts_dir()
+        for d in root.glob("uploads__*"):
+            if not d.is_dir():
+                continue
+            f = d / "ingest.json"
+            try:
+                st = json.loads(f.read_text()) if f.is_file() else None
+            except ValueError:
+                st = None
+            src_exists = any((root / "uploads").glob(d.name + ".*"))
+            if not src_exists:
+                continue
+            if st is None:
+                if not any(d.glob("elements.json")) and not any(d.glob("planmap-*.json")) and not any(d.glob("page-*.png")):
+                    out.append((d.name, 0.0))
+            elif st.get("status") == "running" and float(st.get("started_at") or 0) < BOOT_TS:
+                out.append((d.name, float(st.get("started_at") or 0)))
+        return sorted(out, key=lambda x: x[1])
+    ids = await asyncio.to_thread(scan)
+    for doc_id, _ in ids:
+        f = config.artifacts_dir() / doc_id / "ingest.json"
+        f.write_text(json.dumps({"status": "running", "stages": [], "detail": "queued (resumed after restart)",
+                                 "step": "queued", "progress": 0, "started_at": time.time()}))
+        _spawn(_ingest(doc_id))
+    if ids:
+        print(f"re-queued {len(ids)} interrupted ingests")
+    return len(ids)
+
+
+def _queue_position(doc_id: str) -> int | None:
+    """1-based place among queued uploads (oldest first); None when not queued."""
+    root = config.artifacts_dir()
+    mine = None
+    ahead = 0
+    entries = []
+    for d in root.glob("uploads__*"):
+        try:
+            st = json.loads((d / "ingest.json").read_text())
+        except (OSError, ValueError):
+            continue
+        if st.get("status") == "running" and st.get("step") == "queued":
+            entries.append((float(st.get("started_at") or 0), d.name))
+    entries.sort()
+    for i, (_, name) in enumerate(entries, 1):
+        if name == doc_id:
+            return i
+    return None
