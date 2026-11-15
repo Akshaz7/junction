@@ -1,0 +1,15 @@
+--- a/pipeline/pdf_planmap.py
++++ b/pipeline/pdf_planmap.py
+@@ -671,6 +671,12 @@
+     if sum(1 for i in pm["items"] if i["kind"] in ("room", "wall")) < 3:
+         return None
+     pm["provenance"]["gate"] = reason
++    try:  # EXPERIMENT detector (OFF unless PDF_DETECT=1): door confirm only; never adds geometry
++        from pipeline import pdf_detect
++        if pdf_detect.enabled():
++            pdf_detect.apply(pm, pdf_path, page_index, s, sc.get("m_per_pt"))
++    except Exception as e:  # noqa: BLE001
++        pm["detector"] = {"error": f"{type(e).__name__}: {e}"[:200]}
+     try:  # ingest-time accuracy score vs the PDF's own evidence; can never break ingest
+         from pipeline import pdf_quality
+         pm["quality"] = pdf_quality.assess(page, pm, raw_walls=walls, pdf_path=pdf_path, page_index=page_index)
