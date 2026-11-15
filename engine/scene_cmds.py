@@ -125,6 +125,8 @@ def parse_scene(question: str) -> SceneIntent | None:
     p = parse(q)
     if op == "highlight" and p.type in ("area", "length", "volume"):
         return None
+    if op == "highlight" and re.search(r"\b(?:count|list|which|how many|what|width|rating|name)\b", q, re.I):
+        return None   # "list the doors with their widths ... and highlight them" is a question first; its answer carries the highlight
     tg = [f"{m.group(1).upper()}{int(m.group(2))}" for m in TAG_RE.finditer(q)]
     kind = p.kind
     if not kind and not tg:

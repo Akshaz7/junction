@@ -61,6 +61,7 @@ export function unpair() {
   hostedMemory = ''
   try { window.localStorage.removeItem(HOST_KEY) } catch { /* memory only */ }
   write([])
+  setFollow(false)   // unpairing must also stop automatic chat following
 }
 
 export function onPairingChange(listener: () => void) {

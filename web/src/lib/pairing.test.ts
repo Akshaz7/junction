@@ -123,3 +123,15 @@ describe('phone joined', () => {
     expect(p.isWaitingForPhone()).toBe(false)
   })
 })
+
+describe('unpair', () => {
+  it('forgets the codes and turns Follow off', async () => {
+    const p = await import('./pairing')
+    const follow = await import('./chat-follow')
+    p.addPairing('abcd1234')
+    expect(follow.getFollow()).toBe(true)
+    p.unpair()
+    expect(p.getPairings()).toEqual([])
+    expect(follow.getFollow()).toBe(false)
+  })
+})
