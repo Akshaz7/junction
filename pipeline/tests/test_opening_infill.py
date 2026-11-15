@@ -7,7 +7,8 @@ import pytest
 import trimesh
 from PIL import Image, ImageDraw
 from shapely.affinity import rotate
-from shapely.geometry import Point, box
+from shapely.geometry import Point, Polygon, box
+from shapely.ops import unary_union
 
 from pipeline import extrude
 from pipeline.tests.measure_opening_gaps import masonry, measure, section
@@ -131,3 +132,51 @@ def test_connected_raster_wall_network_uses_local_thickness(tmp_path):
     infill = scene.geometry[geometry].copy().apply_transform(transform)
     assert infill.extents[2] == pytest.approx(.39, abs=.03)
     assert measure(tmp_path)['incomplete_width_support'] == 0
+
+
+def test_corner_to_corner_window_keeps_its_own_axis():
+    # Raster plans lose the host wall when a window spans it end to end: only the
+    # perpendicular end walls are near. The pane must still run along the window.
+    ends = [('wall-001', box(-1.7, -2, -1.5, .2)), ('wall-002', box(1.5, -2, 1.7, .2))]
+    local, matrix, footprint, host = extrude._fit_opening((-1.5, 1.5, -.2, .2, 'x'), ends)
+    assert local[1] - local[0] == pytest.approx(3.0)
+    assert abs(matrix[0, 0]) == pytest.approx(1.0)
+    assert local[3] - local[2] <= .5
+    assert host in {'wall-001', 'wall-002'}
+
+
+def test_infill_stays_inside_the_gap_and_the_wall_faces():
+    """A fat or long opening box must not grow masonry into or past the walls beside it."""
+    walls = box(-3, -.1, -.8, .1).union(box(.8, -.1, 3, .1))
+    # a perpendicular wall meeting the left end must not widen the band either
+    walls = walls.union(box(-1.0, -1.5, -.8, 1.5))
+    gap = extrude._infill_gap((-1.2, 1.2, -.3, .3, 'x'), np.eye(4), walls)
+    assert gap.intersection(walls).area < 1e-6
+    assert gap.bounds == pytest.approx((-.8, -.1, .8, .1), abs=1e-6)
+
+
+def test_lone_opening_infill_is_wall_thin():
+    gap = extrude._infill_gap((-.5, .5, -1., 1., 'x'), np.eye(4), Polygon())
+    assert gap.bounds[3] - gap.bounds[1] == pytest.approx(extrude.INFILL_LONE_T)
+
+
+def test_window_sill_infill_never_closes_a_door(tmp_path):
+    drawing(tmp_path, [item('wall-001', 'wall', [20, 90, 140, 110]), item('wall-002', 'wall', [220, 90, 370, 110]),
+                       item('window-001', 'window', [140, 96, 220, 104]),
+                       item('door-001', 'door', [140, 92, 180, 108])], size=(400, 400))
+    extrude.process('generated-for-demo', tmp_path)
+    manifest = json.loads((tmp_path / 'scene.json').read_text())
+    walls = masonry(trimesh.load_scene(tmp_path / 'scene.glb'), manifest)
+    assert not section(walls, .45).buffer(1e-5).covers(Point(-.4, -1))   # door half stays open
+    assert section(walls, .45).buffer(1e-5).covers(Point(.0, -1))        # window half keeps its sill wall
+
+
+def test_deep_off_centre_window_box_is_seated_on_the_wall_line():
+    # A 0.4 m deep detection box drawn 0.15 m off a 0.1 m wall: frame and glass
+    # must sit on the wall line between the two wall ends, not beside the wall.
+    walls = unary_union([box(-3, -.05, -.6, .05), box(.6, -.05, 3, .05)])
+    fitted = extrude._fit_opening((-.6, .6, -.05, .35, 'x'), [('wall-001', walls)])
+    local, matrix, footprint, host = extrude._seat_opening(fitted, walls)
+    assert (local[2] + local[3]) / 2 == pytest.approx(0, abs=.01)
+    assert local[3] - local[2] == pytest.approx(.1, abs=.01)
+    assert local[1] - local[0] == pytest.approx(1.2)

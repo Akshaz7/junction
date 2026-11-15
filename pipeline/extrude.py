@@ -179,7 +179,12 @@ def _fit_opening(o, walls):
     center = corners.mean(axis=0)
     width = max(x1 - x0, z1 - z0, 0.1)
     hint = np.array([1., 0.]) if ax == "x" else np.array([0., 1.])
-    choices = []
+    # An elongated detection box already gives the wall direction. Raster plans
+    # often lose the host wall itself (a window runs corner to corner, leaving
+    # no wall pixels beside it), so the nearest piece is a perpendicular end
+    # wall; fitting to that turns the opening into a strip one wall thick.
+    elongated = max(x1 - x0, z1 - z0) > 1.7 * min(x1 - x0, z1 - z0)
+    choices, crossing = [], []
     for iid, wall in walls:
         if wall.is_empty or wall.geom_type != "Polygon":
             continue
@@ -207,14 +212,24 @@ def _fit_opening(o, walls):
             distance = candidate.distance(Point(center))
             if distance > width + 0.5 or across > max(width * 0.6, 0.35):
                 continue
-            penalty = (1 - abs(u @ hint)) * width if max(x1 - x0, z1 - z0) > 1.7 * min(x1 - x0, z1 - z0) else 0
-            choices.append((distance + across + penalty, iid, u, v, c, float(vs.max() - vs.min())))
+            penalty = (1 - abs(u @ hint)) * width if elongated else 0
+            choice = (distance + across + penalty, iid, u, v, c, float(vs.max() - vs.min()))
+            (crossing if elongated and abs(u @ hint) < 0.8 else choices).append(choice)
     host = None
     u, v = hint, np.array([-hint[1], hint[0]])
     c = float(center @ v)
     thickness = max(0.12, min(x1 - x0, z1 - z0))
     if choices:
         _, host, u, v, c, thickness = min(choices, key=lambda q: q[0])
+    elif crossing:  # keep the box frame; the touching end wall still hosts the sill/head masonry
+        host = min(crossing, key=lambda q: q[0])[1]
+    # A fitted piece that includes a wall junction reports the junction depth as
+    # thickness; the cut and sill/head masonry would then bulge past the faces.
+    short = max(min(x1 - x0, z1 - z0), 0.06)
+    # (The icon itself may be much thinner than its wall, so it is no cap.)
+    thickness = min(thickness, 0.6)
+    if elongated and abs(c - center @ v) > max(short, thickness) / 2:
+        c = float(center @ v)
     us = corners @ u
     a, b = float(us.min()), float(us.max())
     # Coordinates in this frame are still metres; the rotation also aligns frames/glass.
@@ -224,6 +239,116 @@ def _fit_opening(o, walls):
     matrix[0, 2], matrix[2, 2] = v
     footprint = Polygon([u * s + v * t for s, t in ((a, local[2]), (b, local[2]), (b, local[3]), (a, local[3]))])
     return local, matrix, footprint, host
+
+
+INFILL_MAX_T = 0.6    # no drawn wall this thick beside a door/window: anything wider is a mis-fit
+INFILL_LONE_T = 0.3   # floating opening with no wall end found: keep the masonry wall-like
+
+
+def _wall_band(local, matrix, walls, search=0.6, probe=0.45):
+    """Across-wall band (v0, v1) of the wall ends beside an opening, or None.
+
+    Walks the opening's centreline (u along the wall, v across) to the wall ends on
+    either side, measures each end's own faces just inside it, and keeps the band
+    both ends share (one end: that wall's faces).
+    """
+    a, b, v0, v1, _ = local
+    u = np.array([matrix[0, 0], matrix[2, 0]])
+    v = np.array([matrix[0, 2], matrix[2, 2]])
+    plan = lambda s, t: tuple(u * s + v * t)
+    c, mid = (v0 + v1) / 2, (a + b) / 2
+
+    def spans(line, axis):  # wall intervals along a probe line, in that line's own coordinate
+        hit = walls.intersection(line)
+        out = []
+        for g in getattr(hit, "geoms", [hit]):
+            if g.geom_type == "LineString" and g.length > 1e-4:
+                q = np.asarray(g.coords) @ (u if axis == "u" else v)
+                out.append((float(q.min()), float(q.max())))
+        return out
+
+    def end_faces(c):  # across-wall faces of the wall ends met along the line v = c
+        along = spans(LineString([plan(a - search, c), plan(b + search, c)]), "u")
+        left = [hi for lo, hi in along if hi <= mid + 1e-6]
+        right = [lo for lo, hi in along if lo >= mid - 1e-6]
+        found = []
+        for end, sign in ((max(left) if left else None, -1), (min(right) if right else None, 1)):
+            if end is None:
+                continue
+            best = None
+            # Read the wall's faces across a few depths inside its end. A read that runs to the
+            # probe limit crossed a perpendicular wall (corner / T junction), not this wall's
+            # faces; deeper reads get past such a junction to the wall itself.
+            for d in (0.03, 0.08, 0.13, 0.2, 0.3):
+                for lo, hi in spans(LineString([plan(end + sign * d, c - probe), plan(end + sign * d, c + probe)]), "v"):
+                    if lo <= c - probe + 1e-3 or hi >= c + probe - 1e-3:
+                        continue
+                    if lo - 1e-6 <= c <= hi + 1e-6 and (best is None or hi - lo < best[1] - best[0]):
+                        best = (lo, hi)
+            if best:
+                found.append(best)
+        return found
+
+    ranges = []
+    if not walls.is_empty:
+        for dc in (0, -.08, .08, -.16, .16):  # a detection box drawn on one wall face misses the centreline
+            ranges = end_faces(c + dc)
+            if ranges:
+                break
+    if not ranges:
+        return None
+    return max(r[0] for r in ranges), min(r[1] for r in ranges)
+
+
+def _seat_opening(opening, walls):
+    """Centre a fitted opening across the wall on the wall-end band beside it.
+
+    A detection box can be much deeper than its wall and drawn off its line, so
+    frame/glass would float beside the wall. When a wall end is found, the opening
+    takes that band (capped like the infill); otherwise it is returned unchanged.
+    """
+    local, matrix, footprint, host = opening
+    band = _wall_band(local, matrix, walls) if not walls.is_empty else None
+    if band is None or band[1] - band[0] < 0.02:
+        return opening
+    v0, v1 = band
+    if v1 - v0 > INFILL_MAX_T:
+        c = (v0 + v1) / 2
+        v0, v1 = c - INFILL_MAX_T / 2, c + INFILL_MAX_T / 2
+    a, b = local[0], local[1]
+    u = np.array([matrix[0, 0], matrix[2, 0]])
+    v = np.array([matrix[0, 2], matrix[2, 2]])
+    footprint = Polygon([u * s + v * t for s, t in ((a, v0), (b, v0), (b, v1), (a, v1))])
+    return (a, b, v0, v1, local[4]), matrix, footprint, host
+
+
+def _infill_gap(local, matrix, walls):
+    """Masonry footprint for an opening: only the gap between the wall ends beside it.
+
+    The opening box narrowed to the wall-end band (_wall_band) minus the existing
+    walls is returned (shapely, plan metres), so infill never overlaps a wall or
+    sticks out past its faces. None when there is no gap to fill.
+    """
+    a, b, v0, v1, _ = local
+    u = np.array([matrix[0, 0], matrix[2, 0]])
+    v = np.array([matrix[0, 2], matrix[2, 2]])
+    plan = lambda s, t: tuple(u * s + v * t)
+    band = _wall_band(local, matrix, walls) if not walls.is_empty else None
+    if band:
+        v0, v1 = band
+        cap = INFILL_MAX_T
+    else:
+        cap = INFILL_LONE_T
+    if v1 - v0 < 0.02:
+        return None
+    if v1 - v0 > cap:
+        c = (v0 + v1) / 2
+        v0, v1 = c - cap / 2, c + cap / 2
+    gap = Polygon([plan(a, v0), plan(b, v0), plan(b, v1), plan(a, v1)])
+    if not walls.is_empty:
+        gap = gap.difference(walls)
+    parts = [g for g in getattr(gap, "geoms", [gap]) if g.geom_type == "Polygon" and g.area > 1e-4]
+    return unary_union(parts) if parts else None
 
 
 def window_parts(o):
@@ -242,20 +367,52 @@ def window_parts(o):
     return [("frame", _flat(_boxes(fr), "frame")), ("glass", _flat(_boxes(glass), "glass"))]
 
 
+def _door_depth(o):
+    """Door frame depth across the wall: the seated wall band, never thicker (no 12 cm minimum, so the
+    frame does not stick out of a thin wall and show from above), 4 cm..30 cm."""
+    x0, x1, z0, z1, ax = o
+    return min(max((z1 - z0) if ax == "x" else (x1 - x0), 0.04), 0.3)
+
+
+def _door_head(local, matrix):
+    """Plan footprint of a door's frame (opening width x frame depth), for the lintel above its head."""
+    a, b, v0, v1, _ = local
+    c, t = (v0 + v1) / 2, _door_depth(local) / 2
+    u = np.array([matrix[0, 0], matrix[2, 0]])
+    v = np.array([matrix[0, 2], matrix[2, 2]])
+    return Polygon([u * s_ + v * t_ for s_, t_ in ((a, c - t), (b, c - t), (b, c + t), (a, c + t))])
+
+
 def door_parts(o):
+    """Door in its wall opening: thin jambs + head (wall-deep frame) and a closed 4 cm leaf in the wall plane.
+
+    The plan map has no swing direction for raster doors, so the leaf is shown closed, centred in the
+    wall; it never exceeds the opening (u0..u1) or the door height. Narrow openings get thinner jambs.
+    """
     x0, x1, z0, z1, ax = o
     u0, u1 = (x0, x1) if ax == "x" else (z0, z1)
     c = ((z0 + z1) / 2) if ax == "x" else ((x0 + x1) / 2)
-    T = min(max((z1 - z0) if ax == "x" else (x1 - x0), 0.12), 0.3)
-    f = 0.05
+    T = _door_depth(o)
+    f = min(0.05, (u1 - u0) / 8)
     B = lambda a, b, ya, yb, va, vb: _wb(ax, a, b, ya, yb, c + va, c + vb)
     fr = [B(u0, u0 + f, 0, DOOR_H, -T / 2, T / 2), B(u1 - f, u1, 0, DOOR_H, -T / 2, T / 2),
           B(u0, u1, DOOR_H - f, DOOR_H, -T / 2, T / 2)]
-    w = max(u1 - u0 - 2 * f, 0.2)
-    leaf = _boxes([B(u0 + f, u0 + f + w, 0.01, DOOR_H - f, -0.02, 0.02)])
-    hinge = np.array([(u0 + f) if ax == "x" else c, 0, c if ax == "x" else (u0 + f)])
-    leaf.apply_transform(trimesh.transformations.rotation_matrix(np.radians(28), [0, 1, 0], hinge))
-    return [("frame", _flat(_boxes(fr), "doorframe")), ("leaf", _flat(leaf, "leaf"))]
+    leaf = [B(u0 + f + 0.003, u1 - f - 0.003, 0.01, DOOR_H - f - 0.003, -0.02, 0.02)]
+    return [("frame", _flat(_boxes(fr), "doorframe")), ("leaf", _flat(_boxes(leaf), "leaf"))]
+
+
+def _door_box(it, to_m):
+    """Door opening box. A detector box that also holds the swing arc is square; the door polygon
+    (leaf/threshold strip) then gives the true width and wall direction."""
+    o = _opening(it, to_m)
+    x0, x1, z0, z1, _ = o
+    poly = it.get("polygon_px")
+    if not poly or max(x1 - x0, z1 - z0) > 1.7 * min(x1 - x0, z1 - z0):
+        return o
+    xs, ys = [p[0] for p in poly], [p[1] for p in poly]
+    q = _opening({"bbox_px": [min(xs), min(ys), max(xs), max(ys)]}, to_m)
+    dx, dz = q[1] - q[0], q[3] - q[2]
+    return q if max(dx, dz) > 1.7 * min(dx, dz) and max(dx, dz) > 0.4 else o
 
 
 def _cyl(cx, cz, r, y0, y1, n=12):
@@ -482,7 +639,8 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False, *
     wall_polys = [(f"wall-r{i:03d}", tm(g)) for i, g in enumerate(rw["walls"], 1)] if rw else [
         (it["item_id"], unary_union(_polys([to_m(p) for p in (it.get("polygon_px") or _bbox_poly(it))])))
         for it in pm["items"] if it["kind"] == "wall"]
-    openings = {it["item_id"]: _fit_opening(_opening(it, to_m), wall_polys)
+    walls_m = unary_union([g if g.is_valid else g.buffer(0) for _, g in wall_polys]) if wall_polys else Polygon()
+    openings = {it["item_id"]: _seat_opening(_fit_opening((_door_box if it["kind"] == "door" else _opening)(it, to_m), wall_polys), walls_m)
                 for it in pm["items"] if it["kind"] in ("window", "door")}
     win_o = [openings[it["item_id"]][2] for it in pm["items"] if it["kind"] == "window"]
     door_o = [openings[it["item_id"]][2] for it in pm["items"] if it["kind"] == "door"]
@@ -616,11 +774,29 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False, *
     # Segmented walls stop at openings: add masonry to the host wall without
     # creating extra answer items or changing the window/door item identity.
     kinds = {it["item_id"]: it["kind"] for it in pm["items"]}
-    for iid, (_, _, footprint, host) in openings.items():
-        specs = [(footprint, HEAD, wall_h)]
+    door_fp = unary_union([openings[i][2].buffer(0.01, join_style="mitre") for i in openings if kinds[i] == "door"])
+    placed = {"head": Polygon(), "sill": Polygon()}  # two detections of one opening must not stack coplanar blocks
+    for iid, (local, matrix, footprint, host) in openings.items():
+        gap = _infill_gap(local, matrix, walls_m)
+        if kinds[iid] == "door":
+            # Every door gets a lintel over its whole frame where no wall already stands above the head
+            # (raster walls can lose the host wall); never wider than the opening or deeper than the frame.
+            lintel = _door_head(local, matrix)
+            lintel = lintel if walls_m.is_empty else lintel.difference(walls_m)
+            gap = lintel if gap is None else unary_union([gap, lintel])
+            gap = None if gap.is_empty else gap
+        if gap is None:
+            continue
+        head = gap.difference(placed["head"])
+        placed["head"] = placed["head"].union(head)
+        specs = [(head, HEAD, wall_h)]
         if kinds[iid] == "window":
-            specs.append((footprint, 0.0, SILL))
-        meshes = [prism(g, lo, hi) for g, lo, hi in specs if hi > lo]
+            # below the sill: never close a door that shares (part of) this opening
+            sill = gap.difference(placed["sill"]).difference(door_fp)
+            placed["sill"] = placed["sill"].union(sill)
+            specs.append((sill, 0.0, SILL))
+        meshes = [prism(p, lo, hi) for g, lo, hi in specs if hi > lo
+                  for p in getattr(g, "geoms", [g]) if p.geom_type == "Polygon" and p.area > 1e-4]
         meshes = [m for m in meshes if m is not None]
         if not meshes:
             continue
