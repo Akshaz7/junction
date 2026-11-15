@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { classifyRoom, fitRoomLabel, formatElevation, roomLabelText } from '../blueprint';
+import { classifyRoom, dimensionText, fitRoomLabel, formatElevation, formatMetres, roomLabelText, scaleTrust } from '../blueprint';
 
 describe('blueprint rules', () => {
   it('tints wet rooms bluish, kitchens warm, the rest neutral', () => {
@@ -26,5 +26,25 @@ describe('blueprint rules', () => {
     expect(formatElevation(-3)).toBe('−3.00 m');
     expect(formatElevation(0)).toBe('+0.00 m');
     expect(formatElevation(3)).toBe('+3.00 m');
+  });
+});
+
+describe('unscaled drawings never show made-up metres', () => {
+  it('classifies the scale method', () => {
+    expect(scaleTrust('door-prior')).toBe('estimate');
+    expect(scaleTrust('assumed')).toBe('none');
+    expect(scaleTrust('none')).toBe('none');
+    expect(scaleTrust('dimension')).toBe('measured');
+    expect(scaleTrust(undefined)).toBe('measured');
+  });
+  it('prefixes ≈ on door-prior metres and areas', () => {
+    expect(formatMetres(4.2, 'estimate')).toBe('≈ 4.2 m');
+    expect(formatMetres(4.2)).toBe('4.2 m');
+    expect(roomLabelText({ name: 'Bad', props: { area_m2: 6.25 } }, 'estimate').area).toBe('≈ 6.3 m²');
+  });
+  it('shows no metres without a scale', () => {
+    expect(roomLabelText({ name: 'Bad', props: { area_m2: 6.25 } }, 'none').area).toBeNull();
+    expect(dimensionText(8, 4, 'none')).toBe('2.00×');
+    expect(dimensionText(8, 4, 'none')).not.toMatch(/\bm\b/);
   });
 });

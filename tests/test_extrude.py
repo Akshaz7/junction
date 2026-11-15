@@ -64,6 +64,18 @@ def test_openings_group_nodes_and_stairs(tmp_path):
     wall = sc.geometry[sc.graph["wall-001"][1]]
     solid = 8.0 * 1.0 * 2.7  # 160px*0.05 x 20px*0.05 x 2.7
     assert 0 < wall.volume < solid - 0.5
-    # stairs rise to about one storey
+    # stairs are low geometry, never wall height
     st = sj["items"]["stairs-001"]["bbox_m"]
-    assert abs(st[1][1] - 2.7) < 0.05
+    assert 0.5 < st[1][1] <= 1.0
+    assert "scale_method" in sj
+
+
+def test_tread_grid_component_is_not_a_wall():
+    from shapely.geometry import box
+    from pipeline import extrude
+    pm = {"items": [{"kind": "stairs", "bbox_px": [100, 100, 200, 200]}, {"kind": "door", "bbox_px": [0, 0, 5, 5]}]}
+    boxes = extrude._stair_boxes(pm)
+    assert boxes == [[100, 100, 200, 200]]
+    assert extrude._is_tread_grid(box(105, 105, 195, 195), boxes)
+    assert not extrude._is_tread_grid(box(0, 0, 90, 10), boxes)
+    assert not extrude._is_tread_grid(box(0, 0, 90, 10), [])

@@ -53,16 +53,29 @@ export function classifyRoom(item: Pick<SceneItem, 'name' | 'props'>): RoomClass
   return 'neutral';
 }
 
+export type ScaleTrust = 'measured' | 'estimate' | 'none';
+
+/** Whether metre values may be shown as measured, only as an estimate (door-width prior), or not at all. */
+export function scaleTrust(method: string | null | undefined): ScaleTrust {
+  if (method === 'door-prior') return 'estimate';
+  if (method === 'none' || method === 'assumed') return 'none';
+  return 'measured';
+}
+
+export const ESTIMATE_NOTE = 'Estimate (scale from door widths)';
+export const NO_SCALE_NOTE = 'No scale: relative sizes only';
+
 export function roomArea(item: Pick<SceneItem, 'props'>): number | null {
   const area = item.props?.area_m2;
   return typeof area === 'number' && Number.isFinite(area) && area > 0 ? area : null;
 }
 
 /** Text of a room label: the name (when known) and the area (only when the data carries it). */
-export function roomLabelText(item: Pick<SceneItem, 'name' | 'props'>): { name: string | null; area: string | null } {
+export function roomLabelText(item: Pick<SceneItem, 'name' | 'props'>, trust: ScaleTrust = 'measured'): { name: string | null; area: string | null } {
   const name = item.name?.trim() || null;
   const area = roomArea(item);
-  return { name, area: area === null ? null : `${area.toFixed(1)} m²` };
+  if (area === null || trust === 'none') return { name, area: null };
+  return { name, area: `${trust === 'estimate' ? '≈ ' : ''}${area.toFixed(1)} m²` };
 }
 
 export interface LabelFit { show: boolean; height: number; width: number; rotated: boolean }
@@ -81,7 +94,16 @@ export function fitRoomLabel(footprintX: number, footprintZ: number, aspect: num
   return height < LABEL_MIN_HEIGHT_M ? { show: false, height: 0, width: 0, rotated } : { show: true, height, width, rotated };
 }
 
-export function formatMetres(value: number): string { return `${value.toFixed(1)} m`; }
+export function formatMetres(value: number, trust: ScaleTrust = 'measured'): string {
+  return `${trust === 'estimate' ? '≈ ' : ''}${value.toFixed(1)} m`;
+}
+
+/** Dimension text: metres (with ≈ when estimated), or a relative size when there is no scale. */
+export function dimensionText(value: number, other: number, trust: ScaleTrust): string {
+  if (trust !== 'none') return formatMetres(value, trust);
+  const ref = Math.min(value, other);
+  return ref > 0 ? `${(value / ref).toFixed(2)}×` : '—';
+}
 export function formatElevation(metres: number): string {
   const rounded = Math.round(metres * 100) / 100;
   return `${rounded < 0 ? '−' : '+'}${Math.abs(rounded).toFixed(2)} m`;
@@ -221,6 +243,7 @@ export function createBlueprint(scene: LoadedScene, eye: Vector3, materials: Rec
   scene.root.updateWorldMatrix(true, true);
   const disposables: { dispose(): void }[] = [];
   const dom: CSS2DObject[] = [];
+  const trust = scaleTrust(scene.manifest.scale_method);
   const rooms: { id: string; mesh: Mesh | null; object: Object3D; info: BlueprintState['rooms'][number] }[] = [];
 
   // Room names and areas lying flat on each room's floor.
@@ -228,7 +251,7 @@ export function createBlueprint(scene: LoadedScene, eye: Vector3, materials: Rec
     if (item.kind !== 'room') continue;
     const object = scene.items.get(id);
     if (!object || !item.bbox_m) continue;
-    const { name, area } = roomLabelText(item);
+    const { name, area } = roomLabelText(item, trust);
     const info = { id, name, area, floor: classifyRoom(item), shown: false, hidden: null as 'small' | 'no-text' | null };
     if (!name && !area) { info.hidden = 'no-text'; rooms.push({ id, mesh: null, object, info }); continue; }
     const [min, max] = item.bbox_m;
@@ -295,8 +318,8 @@ export function createBlueprint(scene: LoadedScene, eye: Vector3, materials: Rec
       dom.push(label);
       dims.push(text);
     };
-    addDim(formatMetres(lengthX), new Vector3((bounds.min.x + bounds.max.x) / 2, y, lineZ));
-    addDim(formatMetres(lengthZ), new Vector3(lineX, y, (bounds.min.z + bounds.max.z) / 2));
+    addDim(dimensionText(lengthX, lengthZ, trust), new Vector3((bounds.min.x + bounds.max.x) / 2, y, lineZ));
+    addDim(dimensionText(lengthZ, lengthX, trust), new Vector3(lineX, y, (bounds.min.z + bounds.max.z) / 2));
   }
 
   // Storey name + elevation at the building's near-left corner, at each storey's floor level.
