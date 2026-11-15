@@ -1,0 +1,15 @@
+{
+  "questions": 200,
+  "before_correct": 149,
+  "after_correct": 149,
+  "correct_to_wrong": 0,
+  "regressions": [],
+  "changed_outcomes": [],
+  "tests": {
+    "passed": 35,
+    "deselected": 1,
+    "command": "MODELS_FAKE=1 scripts/heavy.sh .venv/bin/python -m pytest engine/tests/test_wallarea.py engine/tests/test_calc_wallarea.py -q -k 'not full_dispatch_evidence_reasoning_and_csv_table'",
+    "existing_failure": "test_full_dispatch_evidence_reasoning_and_csv_table expects Checked but current reasoning emits Found; reproduced with HEAD engine/wallarea.py loaded read-only"
+  },
+  "integration": "Fresh AC20 IFC: no skipped walls, all per-side net <= gross; full dispatcher: answer schema and unattributed trace pass"
+}

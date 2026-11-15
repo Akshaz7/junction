@@ -1,0 +1,43 @@
+{
+  "before_value_m2": 4880.455604,
+  "after_value_m2": 4880.455604,
+  "fresh_value_m2": 4880.455603837153,
+  "fresh_skipped": [],
+  "dachgeschoss": {
+    "name": "Dachgeschoss",
+    "facade": {
+      "gross_m2": 74.11228338566502,
+      "opening_m2": 0.0,
+      "net_m2": 74.11228338566502
+    },
+    "external_inside": {
+      "gross_m2": 101.66170877316887,
+      "opening_m2": 0.0,
+      "net_m2": 101.66170877316887
+    },
+    "internal_both": {
+      "gross_m2": 106.56161167831849,
+      "opening_m2": 0.0,
+      "net_m2": 106.56161167831849
+    },
+    "unclassified_net_m2": 0.0
+  },
+  "unattributed": [
+    {
+      "item_id": "2OU4curhvDMPArGs3c5lc0",
+      "storey_id": "3P_7taSfTB1uu5RSuYEGO1",
+      "area_m2": 0.0,
+      "side_transfer_m2": 5.93274067940451,
+      "gross_sides_m2": [
+        30.008981612754738,
+        22.3903484234418
+      ],
+      "net_sides_m2": [
+        35.94172229215925,
+        16.45760774403729
+      ],
+      "reason": "Legacy coplanar face correspondence moved retained area between sides",
+      "resolution": "No removed area: both net sides equal their gross sides"
+    }
+  ]
+}
