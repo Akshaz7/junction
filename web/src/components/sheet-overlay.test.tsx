@@ -6,8 +6,8 @@ import { SheetOverlay } from './sheet-overlay'
 import { requestAlignment } from '../lib/sheet-overlay'
 
 vi.mock('../lib/api', () => ({ workspaceApi: { getDocuments: vi.fn(async () => [
-  { doc_id: 'base', title: 'Floor plan', pages: 1, kind: 'pdf' },
-  { doc_id: 'other', title: 'Ventilation', pages: 1, kind: 'pdf' },
+  { doc_id: 'base', title: 'Floor plan 3rd floor', pages: 1, kind: 'pdf' },
+  { doc_id: 'other', title: 'Ventilation 3RD FLOOR', pages: 1, kind: 'pdf' },
 ]), getPageImage: vi.fn(async () => new Blob(['page'])) } }))
 vi.mock('../lib/sheet-overlay', async (original) => ({ ...await original<typeof import('../lib/sheet-overlay')>(), requestAlignment: vi.fn(), registeredSheet: vi.fn(async () => 'blob:registered') }))
 let host: HTMLDivElement, root: Root

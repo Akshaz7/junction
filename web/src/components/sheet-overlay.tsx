@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState, type CSSProperties } from 'react'
 import { Layers2, X } from 'lucide-react'
 import { workspaceApi } from '../lib/api'
-import { discipline, rankOverlaySheets, registeredSheet, requestAlignment, type Alignment, type OverlayDoc, type SheetSize, type XY } from '../lib/sheet-overlay'
+import { discipline, isOverlayMatch, rankOverlaySheets, registeredSheet, requestAlignment, type Alignment, type OverlayDoc, type SheetSize, type XY } from '../lib/sheet-overlay'
 import { SheetCompare } from './sheet-compare'
 import { parseHex, tintMatrix } from '../lib/sheet-compare'
 import { Button } from './ui'
@@ -40,6 +40,8 @@ function PointSheet({ src, size, label, points, onPick, view: externalView, onVi
   </svg></div>
 }
 
+const overlayOption = (d: OverlayDoc) => <option key={d.doc_id} value={d.doc_id}>{d.title}{d.project ? ` · ${d.project}` : ''}{d.floor || d.storey ? ` · ${d.floor || d.storey}` : ''}</option>
+
 export function SheetOverlay({ baseDocId, page = 1, initialOverlayDocId, onClose, onAlignment }: {
   onAlignment?: (result: Alignment, base: OverlayDoc, overlay: OverlayDoc, basePage: number, overlayPage: number) => void
   baseDocId: string; page?: number; initialOverlayDocId?: string | null; onClose: () => void
@@ -53,10 +55,19 @@ export function SheetOverlay({ baseDocId, page = 1, initialOverlayDocId, onClose
   const [sideView, setSideView] = useState({ x: 0, y: 0, zoom: 1 })
   const id = useId().replace(/:/g, ''), heading = useRef<HTMLHeadingElement>(null)
   const alignmentCallback = useRef(onAlignment); alignmentCallback.current = onAlignment
-  const base = docs.find((d) => d.doc_id === baseDocId), overlay = docs.find((d) => d.doc_id === overlayId)
+  const [loaded, setLoaded] = useState(false), [fetchedBase, setFetchedBase] = useState<OverlayDoc | null>(null)
+  const base = docs.find((d) => d.doc_id === baseDocId) ?? fetchedBase ?? undefined, overlay = docs.find((d) => d.doc_id === overlayId)
   const options = base ? rankOverlaySheets(base, docs) : []
+  const matches = base ? options.filter((d) => isOverlayMatch(base, d)) : [], others = options.filter((d) => !matches.includes(d))
   const color = overlay ? discipline(overlay).color : '#166ed1'
-  useEffect(() => { let active = true; workspaceApi.getDocuments().then((d) => { if (active) setDocs(d) }).catch((e) => { if (active) setError(e.message) }); heading.current?.focus(); return () => { active = false } }, [])
+  useEffect(() => { let active = true; workspaceApi.getDocuments().then((d) => { if (active) { setDocs(d); setLoaded(true) } }).catch((e) => { if (active) setError(e.message) }); heading.current?.focus(); return () => { active = false } }, [])
+  // The cited sheet can be missing from the workspace list (renamed or re-uploaded copy): look it up directly.
+  useEffect(() => {
+    if (!loaded || docs.some((d) => d.doc_id === baseDocId)) return
+    let active = true
+    workspaceApi.getDocument(baseDocId).then((d) => { if (active) setFetchedBase(d) }).catch(() => {})
+    return () => { active = false }
+  }, [loaded, docs, baseDocId])
   useEffect(() => {
     setResult(null); setRegistered(''); setImages(null); setManual(false); setBasePoints([]); setOverlayPoints([]); setError(''); setSideView({ x: 0, y: 0, zoom: 1 })
     if (!overlayId) return
@@ -101,10 +112,12 @@ export function SheetOverlay({ baseDocId, page = 1, initialOverlayDocId, onClose
     <header className="overlay-heading"><Layers2 size={18} /><h3 ref={heading} tabIndex={-1} id={`${id}-title`}>Overlay sheets</h3><Button variant="ghost" size="icon" aria-label="Close overlay" onClick={onClose}><X size={18} /></Button></header>
     <div className="overlay-pickers"><label>Base sheet<strong>{base?.title || 'Current sheet'}</strong></label>
       <label>Page<input aria-label="Base page" type="number" min={1} max={base?.pages ?? 1} value={basePage} onChange={(e) => setBasePage(Math.max(1, Math.min(base?.pages ?? 1, Number(e.target.value) || 1)))} /></label>
-      <label>Overlay with…<select aria-label="Overlay sheet" value={overlayId} onChange={(e) => { setOverlayId(e.target.value); setOtherPage(1) }}><option value="">Choose a sheet</option>{options.map((d) => <option key={d.doc_id} value={d.doc_id}>{d.title}{d.project ? ` · ${d.project}` : ''}{d.floor || d.storey ? ` · ${d.floor || d.storey}` : ''}</option>)}</select></label>
+      <label>Overlay with…<select aria-label="Overlay sheet" value={overlayId} disabled={!options.length} onChange={(e) => { setOverlayId(e.target.value); setOtherPage(1) }}><option value="">{!loaded ? 'Loading sheets…' : options.length ? 'Choose a sheet' : 'No other sheets'}</option>
+        {matches.length > 0 && <optgroup label="Same floor, other discipline">{matches.map(overlayOption)}</optgroup>}
+        {others.length > 0 && (matches.length > 0 ? <optgroup label="Other sheets">{others.map(overlayOption)}</optgroup> : others.map(overlayOption))}</select></label>
       <label>Page<input aria-label="Overlay page" type="number" min={1} max={overlay?.pages ?? 1} value={otherPage} onChange={(e) => setOtherPage(Math.max(1, Math.min(overlay?.pages ?? 1, Number(e.target.value) || 1)))} /></label>
     </div>
-    {!overlayId && <p className="overlay-note" role="status">Choose another discipline’s sheet of the same floor. Sheets from the same project and floor appear first when that information is available.</p>}
+    {!overlayId && <p className="overlay-note" role="status">{!loaded ? 'Loading sheets…' : !options.length ? 'There is no other sheet to overlay. Upload or add another discipline’s sheet of the same floor.' : matches.length ? 'Choose another discipline’s sheet of the same floor. Sheets that match the floor are listed first.' : 'No other discipline’s sheet of this floor was found, so every other sheet is listed. Pick one only if it shows the same floor.'}</p>}
     {error && <p className="overlay-error" role="alert">{error} <Button size="xs" onClick={() => setRetry(retry+1)}>Try again</Button></p>}
     {busy && <p className="overlay-note" role="status">Checking shared drawing anchors…</p>}
     {result && <><p className="overlay-status" role="status" data-testid="alignment-status">{result.detail}</p>

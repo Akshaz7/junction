@@ -23,10 +23,33 @@ export function discipline(doc: OverlayDoc) {
   return disciplines.find((d) => d.pattern.test(text)) ?? { name: doc.subdiscipline || doc.discipline || 'Drawing', color: '#166ed1' }
 }
 
+/** Normalise "3rd floor", "3RD FLOOR", "Level 3", "floor_3", "3" to one key; null when no floor is stated. */
+export function floorKey(doc: OverlayDoc & { level?: string }): string | null {
+  const text = (v: unknown) => typeof v === 'string' ? v.toLowerCase().replace(/[_-]+/g, ' ').trim() : ''
+  const parse = (t: string): string | null => {
+    if (!t) return null
+    if (/^-?\d+$/.test(t)) return String(Number(t))
+    if (/\b(ground|erdgeschoss|maantaso|pohjakerros)\b/.test(t)) return '0'
+    if (/\b(basement|cellar|kælder|kellergeschoss|kellari)\b/.test(t)) return '-1'
+    const m = /\b(\d{1,2})\s*(?:st|nd|rd|th|\.)?\s*(?:floor|level|storey|story|korrus|kerros|etage|og)\b/.exec(t) ?? /\b(?:floor|level|storey|story|etage|kerros)\s*(\d{1,2})\b/.exec(t)
+    return m ? String(Number(m[1])) : null
+  }
+  return parse(text(doc.floor)) ?? parse(text(doc.storey)) ?? parse(text(doc.level)) ?? parse(text(doc.title))
+}
+
+const knownDiscipline = (d: OverlayDoc) => { const n = discipline(d).name; return n === 'Drawing' || n === 'Reference drawings' ? null : n }
+
+/** True when the sheet shows the same floor as the base but another discipline: the pairing an overlay is for. */
+export function isOverlayMatch(base: OverlayDoc, d: OverlayDoc) {
+  const floor = floorKey(base), other = knownDiscipline(d), mine = knownDiscipline(base)
+  return floor !== null && floorKey(d) === floor && other !== null && other !== mine
+}
+
 /** Explicit metadata wins; no assumption that two sheets in one dataset share a floor. */
 export function rankOverlaySheets(base: OverlayDoc, docs: OverlayDoc[]) {
-  const score = (d: OverlayDoc) => (base.project && d.project === base.project ? 4 : 0) +
-    ((base.floor || base.storey) && (d.floor || d.storey) === (base.floor || base.storey) ? 2 : 0) +
+  const baseFloor = floorKey(base)
+  const score = (d: OverlayDoc) => (isOverlayMatch(base, d) ? 8 : 0) + (base.project && d.project === base.project ? 4 : 0) +
+    (baseFloor !== null && floorKey(d) === baseFloor ? 2 : 0) +
     (base.folder && d.folder === base.folder ? 1 : 0)
   return docs.filter((d) => d.doc_id !== base.doc_id && d.pages > 0 && d.kind !== 'ifc')
     .sort((a, b) => score(b) - score(a) || a.title.localeCompare(b.title))
