@@ -175,3 +175,20 @@ def test_named_room_net_operand_is_preserved_in_calculation(tmp_path):
     assert result['answer']['value'] == 10
     assert result['_calc']['rows'][0]['values']['area_m2'] == 10
     assert result['_calc']['rows'][0]['source']['field'] == 'quantities.net_floor_area_m2'
+
+
+def test_stale_cached_wall_units_are_refreshed_from_typed_source(tmp_path):
+    from engine.tests.test_acc_ifc import model, entity, document
+    f = model(length='mm')
+    wall = entity(f, 'IfcWall', 'Generated for demo wall')
+    q = f.create_entity('IfcQuantityArea', Name='NetSideArea', AreaValue=18.)
+    qt = entity(f, 'IfcElementQuantity', 'Qto_WallBaseQuantities', Quantities=[q])
+    entity(f, 'IfcRelDefinesByProperties', RelatedObjects=[wall], RelatingPropertyDefinition=qt)
+    did = document(tmp_path, f, q={'net_side_area_m2': .000018})
+    path = tmp_path / did / 'elements.json'
+    before = path.read_bytes()
+    result = answer('What is the total net side area of all walls?', [did], tmp_path)
+    assert result['answer']['value'] == 18
+    ref = result['_calc']['rows'][0]['source']
+    assert ref['kind'] == 'measurement' and ref['record']['value'] == 18
+    assert path.read_bytes() == before

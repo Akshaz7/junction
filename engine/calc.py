@@ -194,6 +194,9 @@ def record_items(res, doc, pairs, unit=None, formula="total = Σ(source quantiti
             requested = requested_area_key(res.get('question', ''), item.kind)
             if unit == 'm2' and requested and close(item.q.get(requested), value):
                 sref['field'] = 'quantities.' + requested
+                if net_source := item.props.get('net_quantity_source'):
+                    sref.update(kind='measurement', record=dict(net_source),
+                                text='Typed IFC net quantity read from the source file and normalized using its own area units.')
             elif unit == 'm2' and item.source == 'ifc' and close((item.props.get('space_area') or {}).get('measured_m2'), value):
                 sref.update(kind='measurement', field='space_area.measured_m2',
                             record=dict(item.props['space_area']),

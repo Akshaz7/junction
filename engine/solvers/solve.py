@@ -465,6 +465,9 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
     if doc.mode == "ifc":
         from engine.ifc_accuracy import prepare_doc, wants_room_geometry, is_item_count
         doc = prepare_doc(doc, root, for_count=is_item_count(question), geometry=wants_room_geometry(question))
+        if p.type == 'area' and (net_key := requested_area_key(question, p.kind)):
+            from engine.ifc_net import refresh
+            doc = refresh(doc, root, net_key)
         from engine.analytics import filtered_question
         from dataclasses import replace
         filtered_doc = replace(doc, items=[i for i in doc.items if i.item_id not in hidden]) if hidden else doc
