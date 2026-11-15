@@ -16,6 +16,7 @@ test('export report dialog closes with Escape and the close button, and focus re
   const trigger = card.getByRole('button', { name: 'Export report', exact: true })
   const dialog = page.getByRole('dialog', { name: 'Export site report' })
 
+  await card.getByLabel('More answer actions').click()
   await trigger.click()
   await expect(dialog).toBeVisible()
   await page.keyboard.press('Escape')

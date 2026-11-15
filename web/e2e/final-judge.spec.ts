@@ -72,6 +72,7 @@ test('[WEB] Export report prepares source evidence; Take-off sheet downloads a c
     answer = await ask(page, 'How many doors are there?')
   }
   const card = page.getByTestId('answer-card').filter({ hasText: answer.question }).first()
+  await card.getByLabel('More answer actions').click()
   const trigger = card.getByRole('button', { name: 'Export report', exact: true })
   await trigger.click()
   const dialog = page.getByRole('dialog', { name: 'Export site report', exact: true })
@@ -102,6 +103,7 @@ test('[WEB] Export report prepares source evidence; Take-off sheet downloads a c
   const takeoff = page.getByTestId('answer-card').last()
   await expect(takeoff.locator('table')).toBeVisible()
   await expect(takeoff.locator('table .citation-chip').first()).toBeVisible()
+  await takeoff.getByLabel('More answer actions').click()
   const [download] = await Promise.all([page.waitForEvent('download'), takeoff.getByTestId('takeoff-csv').click()])
   expect(download.suggestedFilename()).toMatch(/\.csv$/)
   const csv = readFileSync((await download.path())!, 'utf8')
