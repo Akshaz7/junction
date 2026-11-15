@@ -283,8 +283,8 @@ def _guarded(question, doc_ids, on_event, scene_state, history):
 
 @document_scope
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
-           history: list[dict] | None = None, _split: bool = True) -> dict:
-    if _split and doc_ids and not os.environ.get("MULTIQ_OFF"):
+           history: list[dict] | None = None, _split: bool | None = None) -> dict:
+    if _split is None and doc_ids and not os.environ.get("MULTIQ_OFF"):
         # F-MULTIQ: a message holding several questions is split, each part answered, and the results merged.
         from engine import multiq
         merged = multiq.run(question, doc_ids, lambda q, d: answer(q, d, on_event, scene_state=scene_state, history=history, _split=False), _root())
