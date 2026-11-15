@@ -1324,7 +1324,7 @@ def split_mep(vent_page: dict, underlay_page: dict | None = None, *, m_per_pt: f
 def _printed_m_per_pt(page) -> float:
     try:
         from engine import scale_text
-        ratio, _ = scale_text.ratio_and_sheet(page.get("words") or [])
+        ratio, _ = scale_text.ratio_and_sheet([{**w, "bbox_px": w.get("bbox_px") or w.get("bbox")} for w in page.get("words") or []])
     except Exception:  # noqa: BLE001
         ratio = None
     return 0.0254 / 72 * (ratio or 100)

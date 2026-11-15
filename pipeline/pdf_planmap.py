@@ -280,7 +280,7 @@ def _draft_rooms(page: dict, walls: list, words_pt: list, s: float, W: int, H: i
     if len(labels) < MIN_ROOMS:
         return []
     from engine import scale_text
-    ratio, _ = scale_text.ratio_and_sheet([{"text": w["text"]} for w in words_pt])
+    ratio, _ = scale_text.ratio_and_sheet([{"text": w["text"], "bbox_px": w.get("bbox")} for w in words_pt])
     guess = (M_PER_PT_1 * ratio / s) if ratio else 0.034
     wpx = [[(x * s, y * s) for x, y in w["polygon"]] for w in walls]
     thin = [[(x * s, y * s) for x, y in p] for p in page.get("_draft", {}).get("thin", [])]
@@ -297,7 +297,7 @@ def _draft_rooms(page: dict, walls: list, words_pt: list, s: float, W: int, H: i
 def _draft_scale(page: dict, rooms_: list, words_pt: list) -> dict:
     """Ladder rungs 1 and 3: printed 1:N, checked against (or replaced by) a fit to the printed room areas."""
     from engine import scale_text
-    ratio, _ = scale_text.ratio_and_sheet([{"text": w["text"]} for w in words_pt])
+    ratio, _ = scale_text.ratio_and_sheet([{"text": w["text"], "bbox_px": w.get("bbox")} for w in words_pt])
     pairs = [(r["pts_area"], r["area_printed_m2"]) for r in rooms_ if r.get("pts_area") and r.get("area_printed_m2")]
     fit = None
     if len(pairs) >= 2:  # least squares of printed m² = k² * pt²  ->  k² = sum(a*m)/sum(a*a)
@@ -661,7 +661,7 @@ def process(doc_id: str, ddir: Path, pdf_path: Path, page_index: int = 0, write:
     _wall_mpt = None
     try:  # r5-walls: metric wall-thickness limits when the sheet prints its scale (None = old behaviour)
         from engine import scale_text
-        _r, _ = scale_text.ratio_and_sheet([{"text": w["text"]} for w in words_pt])
+        _r, _ = scale_text.ratio_and_sheet([{"text": w["text"], "bbox_px": w.get("bbox")} for w in words_pt])
         _wall_mpt = (M_PER_PT_1 * _r) if _r else None
     except Exception:  # noqa: BLE001
         _wall_mpt = None
