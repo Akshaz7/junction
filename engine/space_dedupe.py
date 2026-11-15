@@ -41,44 +41,41 @@ def _overlap(a, b) -> float:
     return iw * ih / small if small > 0 else 0.0
 
 
+def _same_footprint(a, b) -> bool:
+    f, g = _foot(a), _foot(b)
+    if not f or not g or a.storey != b.storey or _overlap(f, g) <= OVERLAP:
+        return False
+    fa, ga = (f[2] - f[0]) * (f[3] - f[1]), (g[2] - g[0]) * (g[3] - g[1])
+    return ga > 0 and 0.9 <= fa / ga <= 1 / 0.9
+
+
 def split_spaces(rooms):
-    """-> (kept, excluded) where excluded is [(item, reason)]. MEP/HVAC-marked spaces go first; then a space whose footprint is
-    more than 90% inside an already-kept space on the same storey (nested or duplicate) goes, but only when both footprints
-    are the same size within 10% (a duplicate), so a small room inside a big hall is never dropped."""
-    kept, excluded = [], []
+    """-> (kept, excluded) where excluded is [(item, reason)].
+
+    Only an MEP/HVAC-marked space that duplicates an architectural room is left out: same storey, same footprint (>90%
+    overlap, same size within 10%). An MEP space with no matching architectural footprint, and every architectural
+    space, is kept, so distinct rooms that share or abut a footprint (a location plan) are never merged. A space with no
+    geometry that is marked MEP is left out when architectural spaces exist. A pure MEP model keeps all its spaces."""
     arch = [r for r in rooms if not is_mep_space(r)]
+    kept, excluded = [], []
     for r in rooms:
-        if is_mep_space(r):
-            if arch:
-                excluded.append((r, "marked as an MEP/HVAC space or zone"))
-            else:
-                kept.append(r)       # a pure MEP model: its spaces are all there is, keep them
+        if not is_mep_space(r) or not arch:
+            kept.append(r)
+            continue
+        twin = next((a for a in arch if _same_footprint(r, a)), None)
+        if twin is not None:
+            excluded.append((r, f"marked as an MEP/HVAC space or zone; same footprint as {twin.name or twin.item_id}"))
+        elif not _foot(r):
+            excluded.append((r, "marked as an MEP/HVAC space or zone"))
         else:
             kept.append(r)
-    out = []
-    for r in sorted(kept, key=lambda i: str(i.item_id)):
-        f = _foot(r)
-        dup = None
-        if f:
-            for k in out:
-                g = _foot(k)
-                if g and k.storey == r.storey and _overlap(f, g) > OVERLAP:
-                    fa, ga = (f[2] - f[0]) * (f[3] - f[1]), (g[2] - g[0]) * (g[3] - g[1])
-                    if ga > 0 and 0.9 <= fa / ga <= 1 / 0.9:
-                        dup = k
-                        break
-        if dup is not None:
-            excluded.append((r, f"same footprint as {dup.name or dup.item_id}"))
-        else:
-            out.append(r)
-    keep_ids = {i.item_id for i in out}
-    return [r for r in rooms if r.item_id in keep_ids], excluded
+    return kept, excluded
 
 
 def note(excluded) -> str:
     if not excluded:
         return ""
     names = ", ".join(str(r.name or r.item_id) for r, _ in excluded[:6]) + (" …" if len(excluded) > 6 else "")
-    why = sorted({w.split(" as ")[0] if w.startswith("same") else w for _, w in excluded})
+    why = sorted({w.split(";")[0] for _, w in excluded})
     return (f" Not counted, so each footprint counts once: {len(excluded)} space(s) ({names}), "
             f"{'; '.join(why)}.")

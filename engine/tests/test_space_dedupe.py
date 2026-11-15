@@ -23,11 +23,23 @@ def test_hvac_zone_words():
     assert is_mep_space(sp("z", "Z1", "HVAC Zone 3")) and not is_mep_space(sp("r", "A1", "Mechanical Room"))
 
 
-def test_duplicate_footprints_dropped_but_nested_small_room_kept():
-    a, b = sp("a", "R1"), sp("b", "R1b")                                    # identical footprint: duplicate
-    closet = sp("c", "Closet", box=((1, 0, 1), (2, 3, 2)))                  # small room inside a big one: a real room
-    kept, gone = split_spaces([a, b, closet])
-    assert {r.item_id for r in kept} == {"a", "c"} and [r.item_id for r, _ in gone] == ["b"]
+def test_distinct_rooms_sharing_a_footprint_are_all_kept():
+    """Location plan: many distinct spaces can share or abut one footprint. None is an MEP duplicate, so none is dropped."""
+    rooms = [sp(f"r{i}", f"Room {i}") for i in range(48)]
+    kept, gone = split_spaces(rooms)
+    assert len(kept) == 48 and not gone
+
+
+def test_mep_space_without_matching_arch_footprint_is_kept():
+    arch = sp("a", "A101", "Foyer")
+    mep = sp("m", "A102-M", "Plant MEP Space", box=((20, 0, 20), (24, 3, 25)))
+    kept, gone = split_spaces([arch, mep])
+    assert len(kept) == 2 and not gone
+
+
+def test_nested_small_room_kept():
+    kept, gone = split_spaces([sp("a", "Hall"), sp("c", "Closet", box=((1, 0, 1), (2, 3, 2)))])
+    assert len(kept) == 2 and not gone
 
 
 def test_different_storeys_not_duplicates():
