@@ -3,6 +3,7 @@
 # usage: scripts/detector_up.sh <path/to/best.pt> [path/to/result.json] [path/to/test.pdf]
 #   result.json (optional): {"conf": {"door": 0.4, "window": 0.3, "fixture": 0.3}} per-class thresholds picked on VAL.
 # Needs: `modal` CLI with profile akshatsunita07 (our workspace) in ~/.modal.toml. Keys are never printed.
+# NOT IN USE: prod calls Awais's existing "junction-det" app via the .env token. Do not run this unless we own a separate deployment.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 W="${1:?usage: detector_up.sh <best.pt> [result.json] [test.pdf]}"
