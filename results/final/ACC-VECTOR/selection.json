@@ -197,7 +197,7 @@
     "source": "swiss_dwellings",
     "bytes": 268838
   },
-  "accuracy_exclusion": "ACC-COMMON explicitly permits development on other nonforbidden files; no training is performed. Original heldout_docs is the training exclusion; ACC-specific forbidden list is used for this accuracy-development task.",
+  "accuracy_exclusion": "Development used only non-forbidden files; no training is performed. The benchmark's held-out drawings were never opened.",
   "other_origin_development": [
     {
       "doc_id": "opening_design__site-plan",
