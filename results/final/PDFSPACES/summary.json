@@ -1,0 +1,45 @@
+{
+  "status": "PASS",
+  "baseline": "2ba8777",
+  "production_commits": [
+    "ed63ed0",
+    "788f337"
+  ],
+  "room_checks": {
+    "real_pdfs": 4,
+    "development_pdfs": 3,
+    "blind_pdfs": 1,
+    "before_pass": 222,
+    "after_pass": 227,
+    "total": 227,
+    "evidence_checks": 162,
+    "method": "Source labels, declared room identifiers and producer room types checked against real PDF-derived plan maps; checks validate lookup/evidence, not upstream extraction accuracy."
+  },
+  "unit_checks": {
+    "new_pdf_tests": 41,
+    "room_identifier_tests": 34,
+    "targeted_passed": 75,
+    "broader_passed": 220,
+    "broader_preexisting_failures": 8,
+    "new_failures": []
+  },
+  "sample200": {
+    "questions": 200,
+    "correct_before": 148,
+    "correct_after": 148,
+    "correct_to_wrong": 0,
+    "lost_correct": 0,
+    "outcome_changes": 0
+  },
+  "model_cost_usd": 0,
+  "cross_file": [],
+  "needs_awais": "No new hook required. Consumes existing label, props.number and props.room_type. Some producer regions combine multiple labels/numbers/areas: preserves those source items and does not split or validate their upstream quantities.",
+  "needs": "Integrator merge; eight unrelated selected-suite failures reproduce on the starting filters (unit-baseline.json).",
+  "reproduction": [
+    "MODELS_FAKE=1 .venv/bin/python -m pytest engine/tests/test_pdfspaces.py engine/tests/test_room_identifiers.py -q",
+    "MODELS_FAKE=1 scripts/heavy.sh .venv/bin/python -m engine.tests.validate_pdfspaces --sample --output <before.json>",
+    "MODELS_FAKE=1 scripts/heavy.sh .venv/bin/python -m engine.tests.validate_pdfspaces --sample --snapshot <snapshot from before.json> --output <after.json>",
+    ".venv/bin/python -m engine.tests.validate_pdfspaces --compare <before.json> <after.json> --output <comparison.json>",
+    "MODELS_FAKE=1 scripts/heavy.sh .venv/bin/python -m engine.tests.validate_pdfspaces --pdf <PDF paths from development.json or blind.json> --output <room-checks.json>"
+  ]
+}

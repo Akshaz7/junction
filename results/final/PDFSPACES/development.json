@@ -1,0 +1,4232 @@
+{
+  "baseline": "2ba8777",
+  "documents": [
+    {
+      "pdf": "data/junction-dataset-preview/data/swiss_dwellings/site289_bldg536_floor2149.pdf",
+      "page": 1,
+      "vector_paths": 519,
+      "indexed_rooms": 37,
+      "source": "pdf_vector",
+      "scale": {
+        "m_per_pt": 0.03535864000157513,
+        "method": "printed areas fit",
+        "confidence": 0.85,
+        "ratio": "1:100",
+        "check": {
+          "printed_areas_rel_err": 0.0107,
+          "fit_m_per_pt": 0.03535864000157513,
+          "fit_n": 20
+        }
+      },
+      "checks": [
+        {
+          "question": "What is the area of Balcon / Couloir?",
+          "kind": "drawn label",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.04?",
+          "kind": "source number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is balcony 2.04?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.06?",
+          "kind": "source number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is balcony 2.06?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce?",
+          "kind": "drawn label",
+          "expected": [
+            "room-002",
+            "room-003",
+            "room-004",
+            "room-009",
+            "room-011",
+            "room-016",
+            "room-019",
+            "room-025",
+            "room-026",
+            "room-027"
+          ],
+          "before": [
+            "room-002",
+            "room-003",
+            "room-004",
+            "room-009",
+            "room-011",
+            "room-016",
+            "room-019",
+            "room-025",
+            "room-026",
+            "room-027"
+          ],
+          "after": [
+            "room-002",
+            "room-003",
+            "room-004",
+            "room-009",
+            "room-011",
+            "room-016",
+            "room-019",
+            "room-025",
+            "room-026",
+            "room-027"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.01?",
+          "kind": "source number",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.01?",
+          "kind": "source name and number",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.02?",
+          "kind": "source number",
+          "expected": [
+            "room-003"
+          ],
+          "before": [
+            "room-003"
+          ],
+          "after": [
+            "room-003"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.02?",
+          "kind": "source name and number",
+          "expected": [
+            "room-003"
+          ],
+          "before": [
+            "room-003"
+          ],
+          "after": [
+            "room-003"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.03?",
+          "kind": "source number",
+          "expected": [
+            "room-004"
+          ],
+          "before": [
+            "room-004"
+          ],
+          "after": [
+            "room-004"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.03?",
+          "kind": "source name and number",
+          "expected": [
+            "room-004"
+          ],
+          "before": [
+            "room-004"
+          ],
+          "after": [
+            "room-004"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Bain?",
+          "kind": "drawn label",
+          "expected": [
+            "room-005",
+            "room-010",
+            "room-015",
+            "room-024",
+            "room-028",
+            "room-032",
+            "room-034",
+            "room-036"
+          ],
+          "before": [
+            "room-005",
+            "room-010",
+            "room-015",
+            "room-024",
+            "room-028",
+            "room-032",
+            "room-034",
+            "room-036"
+          ],
+          "after": [
+            "room-005",
+            "room-010",
+            "room-015",
+            "room-024",
+            "room-028",
+            "room-032",
+            "room-034",
+            "room-036"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.08?",
+          "kind": "source number",
+          "expected": [
+            "room-005"
+          ],
+          "before": [
+            "room-005"
+          ],
+          "after": [
+            "room-005"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Bain 2.08?",
+          "kind": "source name and number",
+          "expected": [
+            "room-005"
+          ],
+          "before": [
+            "room-005"
+          ],
+          "after": [
+            "room-005"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Cuisine?",
+          "kind": "drawn label",
+          "expected": [
+            "room-006",
+            "room-008",
+            "room-014",
+            "room-023"
+          ],
+          "before": [
+            "room-006",
+            "room-008",
+            "room-014",
+            "room-023"
+          ],
+          "after": [
+            "room-006",
+            "room-008",
+            "room-014",
+            "room-023"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.09?",
+          "kind": "source number",
+          "expected": [
+            "room-006"
+          ],
+          "before": [
+            "room-006"
+          ],
+          "after": [
+            "room-006"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Cuisine 2.09?",
+          "kind": "source name and number",
+          "expected": [
+            "room-006"
+          ],
+          "before": [
+            "room-006"
+          ],
+          "after": [
+            "room-006"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is kitchen 2.09?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-006"
+          ],
+          "before": [
+            "room-006"
+          ],
+          "after": [
+            "room-006"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Couloir / Balcon / Cuisine?",
+          "kind": "drawn label",
+          "expected": [
+            "room-008"
+          ],
+          "before": [
+            "room-008"
+          ],
+          "after": [
+            "room-008"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.11?",
+          "kind": "source number",
+          "expected": [
+            "room-008"
+          ],
+          "before": [
+            "room-008"
+          ],
+          "after": [
+            "room-008"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is kitchen 2.11?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-008"
+          ],
+          "before": [
+            "room-008"
+          ],
+          "after": [
+            "room-008"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.15?",
+          "kind": "source number",
+          "expected": [
+            "room-008"
+          ],
+          "before": [
+            "room-008"
+          ],
+          "after": [
+            "room-008"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is kitchen 2.15?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-008"
+          ],
+          "before": [
+            "room-008"
+          ],
+          "after": [
+            "room-008"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.16?",
+          "kind": "source number",
+          "expected": [
+            "room-008"
+          ],
+          "before": [
+            "room-008"
+          ],
+          "after": [
+            "room-008"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is kitchen 2.16?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-008"
+          ],
+          "before": [
+            "room-008"
+          ],
+          "after": [
+            "room-008"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Balcon / Pi\u00e8ce?",
+          "kind": "drawn label",
+          "expected": [
+            "room-009"
+          ],
+          "before": [
+            "room-009"
+          ],
+          "after": [
+            "room-009"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.14?",
+          "kind": "source number",
+          "expected": [
+            "room-009"
+          ],
+          "before": [
+            "room-009"
+          ],
+          "after": [
+            "room-009"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is balcony 2.14?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-009"
+          ],
+          "before": [
+            "room-009"
+          ],
+          "after": [
+            "room-009"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.13?",
+          "kind": "source number",
+          "expected": [
+            "room-009"
+          ],
+          "before": [
+            "room-009"
+          ],
+          "after": [
+            "room-009"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is balcony 2.13?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-009"
+          ],
+          "before": [
+            "room-009"
+          ],
+          "after": [
+            "room-009"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.17?",
+          "kind": "source number",
+          "expected": [
+            "room-010"
+          ],
+          "before": [
+            "room-010"
+          ],
+          "after": [
+            "room-010"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Bain 2.17?",
+          "kind": "source name and number",
+          "expected": [
+            "room-010"
+          ],
+          "before": [
+            "room-010"
+          ],
+          "after": [
+            "room-010"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.18?",
+          "kind": "source number",
+          "expected": [
+            "room-011"
+          ],
+          "before": [
+            "room-011"
+          ],
+          "after": [
+            "room-011"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.18?",
+          "kind": "source name and number",
+          "expected": [
+            "room-011"
+          ],
+          "before": [
+            "room-011"
+          ],
+          "after": [
+            "room-011"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Balcon?",
+          "kind": "drawn label",
+          "expected": [
+            "room-001",
+            "room-008",
+            "room-009",
+            "room-012",
+            "room-014",
+            "room-017",
+            "room-037"
+          ],
+          "before": [
+            "room-001",
+            "room-008",
+            "room-009",
+            "room-012",
+            "room-014",
+            "room-017",
+            "room-037"
+          ],
+          "after": [
+            "room-001",
+            "room-008",
+            "room-009",
+            "room-012",
+            "room-014",
+            "room-017",
+            "room-037"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.19?",
+          "kind": "source number",
+          "expected": [
+            "room-012"
+          ],
+          "before": [
+            "room-012"
+          ],
+          "after": [
+            "room-012"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Balcon 2.19?",
+          "kind": "source name and number",
+          "expected": [
+            "room-012"
+          ],
+          "before": [
+            "room-012"
+          ],
+          "after": [
+            "room-012"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is balcony 2.19?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-012"
+          ],
+          "before": [
+            "room-012"
+          ],
+          "after": [
+            "room-012"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Cuisine / Balcon?",
+          "kind": "drawn label",
+          "expected": [
+            "room-014"
+          ],
+          "before": [
+            "room-014"
+          ],
+          "after": [
+            "room-014"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.20?",
+          "kind": "source number",
+          "expected": [
+            "room-014"
+          ],
+          "before": [
+            "room-014"
+          ],
+          "after": [
+            "room-014"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is kitchen 2.20?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-014"
+          ],
+          "before": [
+            "room-014"
+          ],
+          "after": [
+            "room-014"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.23?",
+          "kind": "source number",
+          "expected": [
+            "room-014"
+          ],
+          "before": [
+            "room-014"
+          ],
+          "after": [
+            "room-014"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is kitchen 2.23?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-014"
+          ],
+          "before": [
+            "room-014"
+          ],
+          "after": [
+            "room-014"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.22?",
+          "kind": "source number",
+          "expected": [
+            "room-015"
+          ],
+          "before": [
+            "room-015"
+          ],
+          "after": [
+            "room-015"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Bain 2.22?",
+          "kind": "source name and number",
+          "expected": [
+            "room-015"
+          ],
+          "before": [
+            "room-015"
+          ],
+          "after": [
+            "room-015"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.25?",
+          "kind": "source number",
+          "expected": [
+            "room-016"
+          ],
+          "before": [
+            "room-016"
+          ],
+          "after": [
+            "room-016"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.25?",
+          "kind": "source name and number",
+          "expected": [
+            "room-016"
+          ],
+          "before": [
+            "room-016"
+          ],
+          "after": [
+            "room-016"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.26?",
+          "kind": "source number",
+          "expected": [
+            "room-017"
+          ],
+          "before": [
+            "room-017"
+          ],
+          "after": [
+            "room-017"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Balcon 2.26?",
+          "kind": "source name and number",
+          "expected": [
+            "room-017"
+          ],
+          "before": [
+            "room-017"
+          ],
+          "after": [
+            "room-017"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is balcony 2.26?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-017"
+          ],
+          "before": [
+            "room-017"
+          ],
+          "after": [
+            "room-017"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Couloir / R\u00e9duit?",
+          "kind": "drawn label",
+          "expected": [
+            "room-018"
+          ],
+          "before": [
+            "room-018"
+          ],
+          "after": [
+            "room-018"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.27?",
+          "kind": "source number",
+          "expected": [
+            "room-018"
+          ],
+          "before": [
+            "room-018"
+          ],
+          "after": [
+            "room-018"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is storage 2.27?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-018"
+          ],
+          "before": [
+            "room-018"
+          ],
+          "after": [
+            "room-018"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.29?",
+          "kind": "source number",
+          "expected": [
+            "room-018"
+          ],
+          "before": [
+            "room-018"
+          ],
+          "after": [
+            "room-018"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is storage 2.29?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-018"
+          ],
+          "before": [
+            "room-018"
+          ],
+          "after": [
+            "room-018"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.28?",
+          "kind": "source number",
+          "expected": [
+            "room-019"
+          ],
+          "before": [
+            "room-019"
+          ],
+          "after": [
+            "room-019"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.28?",
+          "kind": "source name and number",
+          "expected": [
+            "room-019"
+          ],
+          "before": [
+            "room-019"
+          ],
+          "after": [
+            "room-019"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Cage d'escalier?",
+          "kind": "drawn label",
+          "expected": [
+            "room-020",
+            "room-029"
+          ],
+          "before": [
+            "room-020",
+            "room-029"
+          ],
+          "after": [
+            "room-020",
+            "room-029"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.42?",
+          "kind": "source number",
+          "expected": [
+            "room-020"
+          ],
+          "before": [
+            "room-020"
+          ],
+          "after": [
+            "room-020"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Cage d'escalier 2.42?",
+          "kind": "source name and number",
+          "expected": [
+            "room-020"
+          ],
+          "before": [
+            "room-020"
+          ],
+          "after": [
+            "room-020"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is stairs 2.42?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-020"
+          ],
+          "before": [
+            "room-020"
+          ],
+          "after": [
+            "room-020"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Couloir?",
+          "kind": "drawn label",
+          "expected": [
+            "room-001",
+            "room-008",
+            "room-018",
+            "room-021"
+          ],
+          "before": [
+            "room-001",
+            "room-008",
+            "room-018",
+            "room-021"
+          ],
+          "after": [
+            "room-001",
+            "room-008",
+            "room-018",
+            "room-021"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.33?",
+          "kind": "source number",
+          "expected": [
+            "room-021"
+          ],
+          "before": [
+            "room-021"
+          ],
+          "after": [
+            "room-021"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Couloir 2.33?",
+          "kind": "source name and number",
+          "expected": [
+            "room-021"
+          ],
+          "before": [
+            "room-021"
+          ],
+          "after": [
+            "room-021"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of S\u00e9jour/repas?",
+          "kind": "drawn label",
+          "expected": [
+            "room-022"
+          ],
+          "before": [
+            "room-022"
+          ],
+          "after": [
+            "room-022"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.35?",
+          "kind": "source number",
+          "expected": [
+            "room-022"
+          ],
+          "before": [
+            "room-022"
+          ],
+          "after": [
+            "room-022"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of S\u00e9jour/repas 2.35?",
+          "kind": "source name and number",
+          "expected": [
+            "room-022"
+          ],
+          "before": [
+            "room-022"
+          ],
+          "after": [
+            "room-022"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is living room 2.35?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-022"
+          ],
+          "before": [
+            "room-022"
+          ],
+          "after": [
+            "room-022"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.30?",
+          "kind": "source number",
+          "expected": [
+            "room-023"
+          ],
+          "before": [
+            "room-023"
+          ],
+          "after": [
+            "room-023"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Cuisine 2.30?",
+          "kind": "source name and number",
+          "expected": [
+            "room-023"
+          ],
+          "before": [
+            "room-023"
+          ],
+          "after": [
+            "room-023"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is kitchen 2.30?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-023"
+          ],
+          "before": [
+            "room-023"
+          ],
+          "after": [
+            "room-023"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.32?",
+          "kind": "source number",
+          "expected": [
+            "room-024"
+          ],
+          "before": [
+            "room-024"
+          ],
+          "after": [
+            "room-024"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Bain 2.32?",
+          "kind": "source name and number",
+          "expected": [
+            "room-024"
+          ],
+          "before": [
+            "room-024"
+          ],
+          "after": [
+            "room-024"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.38?",
+          "kind": "source number",
+          "expected": [
+            "room-025"
+          ],
+          "before": [
+            "room-025"
+          ],
+          "after": [
+            "room-025"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.38?",
+          "kind": "source name and number",
+          "expected": [
+            "room-025"
+          ],
+          "before": [
+            "room-025"
+          ],
+          "after": [
+            "room-025"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.36?",
+          "kind": "source number",
+          "expected": [
+            "room-026"
+          ],
+          "before": [
+            "room-026"
+          ],
+          "after": [
+            "room-026"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.36?",
+          "kind": "source name and number",
+          "expected": [
+            "room-026"
+          ],
+          "before": [
+            "room-026"
+          ],
+          "after": [
+            "room-026"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.37?",
+          "kind": "source number",
+          "expected": [
+            "room-027"
+          ],
+          "before": [
+            "room-027"
+          ],
+          "after": [
+            "room-027"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.37?",
+          "kind": "source name and number",
+          "expected": [
+            "room-027"
+          ],
+          "before": [
+            "room-027"
+          ],
+          "after": [
+            "room-027"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.07?",
+          "kind": "source number",
+          "expected": [
+            "room-028"
+          ],
+          "before": [
+            "room-028"
+          ],
+          "after": [
+            "room-028"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Bain 2.07?",
+          "kind": "source name and number",
+          "expected": [
+            "room-028"
+          ],
+          "before": [
+            "room-028"
+          ],
+          "after": [
+            "room-028"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.40?",
+          "kind": "source number",
+          "expected": [
+            "room-029"
+          ],
+          "before": [
+            "room-029"
+          ],
+          "after": [
+            "room-029"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Cage d'escalier 2.40?",
+          "kind": "source name and number",
+          "expected": [
+            "room-029"
+          ],
+          "before": [
+            "room-029"
+          ],
+          "after": [
+            "room-029"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is stairs 2.40?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-029"
+          ],
+          "before": [
+            "room-029"
+          ],
+          "after": [
+            "room-029"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Ascenseur?",
+          "kind": "drawn label",
+          "expected": [
+            "room-031",
+            "room-035"
+          ],
+          "before": [
+            "room-031",
+            "room-035"
+          ],
+          "after": [
+            "room-031",
+            "room-035"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.39?",
+          "kind": "source number",
+          "expected": [
+            "room-031"
+          ],
+          "before": [
+            "room-031"
+          ],
+          "after": [
+            "room-031"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Ascenseur 2.39?",
+          "kind": "source name and number",
+          "expected": [
+            "room-031"
+          ],
+          "before": [
+            "room-031"
+          ],
+          "after": [
+            "room-031"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.12?",
+          "kind": "source number",
+          "expected": [
+            "room-032"
+          ],
+          "before": [
+            "room-032"
+          ],
+          "after": [
+            "room-032"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Bain 2.12?",
+          "kind": "source name and number",
+          "expected": [
+            "room-032"
+          ],
+          "before": [
+            "room-032"
+          ],
+          "after": [
+            "room-032"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.24?",
+          "kind": "source number",
+          "expected": [
+            "room-034"
+          ],
+          "before": [
+            "room-034"
+          ],
+          "after": [
+            "room-034"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Bain 2.24?",
+          "kind": "source name and number",
+          "expected": [
+            "room-034"
+          ],
+          "before": [
+            "room-034"
+          ],
+          "after": [
+            "room-034"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.41?",
+          "kind": "source number",
+          "expected": [
+            "room-035"
+          ],
+          "before": [
+            "room-035"
+          ],
+          "after": [
+            "room-035"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Ascenseur 2.41?",
+          "kind": "source name and number",
+          "expected": [
+            "room-035"
+          ],
+          "before": [
+            "room-035"
+          ],
+          "after": [
+            "room-035"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.31?",
+          "kind": "source number",
+          "expected": [
+            "room-036"
+          ],
+          "before": [
+            "room-036"
+          ],
+          "after": [
+            "room-036"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Bain 2.31?",
+          "kind": "source name and number",
+          "expected": [
+            "room-036"
+          ],
+          "before": [
+            "room-036"
+          ],
+          "after": [
+            "room-036"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 2.34?",
+          "kind": "source number",
+          "expected": [
+            "room-037"
+          ],
+          "before": [
+            "room-037"
+          ],
+          "after": [
+            "room-037"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Balcon 2.34?",
+          "kind": "source name and number",
+          "expected": [
+            "room-037"
+          ],
+          "before": [
+            "room-037"
+          ],
+          "after": [
+            "room-037"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is balcony 2.34?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-037"
+          ],
+          "before": [
+            "room-037"
+          ],
+          "after": [
+            "room-037"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        }
+      ],
+      "evidence": [
+        {
+          "question": "What is the area of Balcon / Couloir?",
+          "item_ids": [
+            "room-001"
+          ],
+          "value": 18.62,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.04?",
+          "item_ids": [
+            "room-001"
+          ],
+          "value": 18.62,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.06?",
+          "item_ids": [
+            "room-001"
+          ],
+          "value": 18.62,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce?",
+          "item_ids": [
+            "room-002",
+            "room-003",
+            "room-004",
+            "room-009",
+            "room-011",
+            "room-016",
+            "room-019",
+            "room-025",
+            "room-026",
+            "room-027"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.01?",
+          "item_ids": [
+            "room-002"
+          ],
+          "value": 12.09,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.01?",
+          "item_ids": [
+            "room-002"
+          ],
+          "value": 12.09,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.02?",
+          "item_ids": [
+            "room-003"
+          ],
+          "value": 11.99,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.02?",
+          "item_ids": [
+            "room-003"
+          ],
+          "value": 11.99,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.03?",
+          "item_ids": [
+            "room-004"
+          ],
+          "value": 16.54,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.03?",
+          "item_ids": [
+            "room-004"
+          ],
+          "value": 16.54,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Bain?",
+          "item_ids": [
+            "room-005",
+            "room-010",
+            "room-015",
+            "room-024",
+            "room-028",
+            "room-032",
+            "room-034",
+            "room-036"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.08?",
+          "item_ids": [
+            "room-005"
+          ],
+          "value": 6.06,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Bain 2.08?",
+          "item_ids": [
+            "room-005"
+          ],
+          "value": 6.06,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Cuisine?",
+          "item_ids": [
+            "room-006",
+            "room-008",
+            "room-014",
+            "room-023"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.09?",
+          "item_ids": [
+            "room-006"
+          ],
+          "value": 7.14,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Cuisine 2.09?",
+          "item_ids": [
+            "room-006"
+          ],
+          "value": 7.14,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Couloir / Balcon / Cuisine?",
+          "item_ids": [
+            "room-008"
+          ],
+          "value": 23.94,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.11?",
+          "item_ids": [
+            "room-008"
+          ],
+          "value": 23.94,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.15?",
+          "item_ids": [
+            "room-008"
+          ],
+          "value": 23.94,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.16?",
+          "item_ids": [
+            "room-008"
+          ],
+          "value": 23.94,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Balcon / Pi\u00e8ce?",
+          "item_ids": [
+            "room-009"
+          ],
+          "value": 16.3,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.14?",
+          "item_ids": [
+            "room-009"
+          ],
+          "value": 16.3,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.13?",
+          "item_ids": [
+            "room-009"
+          ],
+          "value": 16.3,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.17?",
+          "item_ids": [
+            "room-010"
+          ],
+          "value": 5.2,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Bain 2.17?",
+          "item_ids": [
+            "room-010"
+          ],
+          "value": 5.2,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.18?",
+          "item_ids": [
+            "room-011"
+          ],
+          "value": 15.54,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.18?",
+          "item_ids": [
+            "room-011"
+          ],
+          "value": 15.54,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Balcon?",
+          "item_ids": [
+            "room-001",
+            "room-008",
+            "room-009",
+            "room-012",
+            "room-014",
+            "room-017",
+            "room-037"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.19?",
+          "item_ids": [
+            "room-012"
+          ],
+          "value": 2.67,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Balcon 2.19?",
+          "item_ids": [
+            "room-012"
+          ],
+          "value": 2.67,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Cuisine / Balcon?",
+          "item_ids": [
+            "room-014"
+          ],
+          "value": 14.06,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.20?",
+          "item_ids": [
+            "room-014"
+          ],
+          "value": 14.06,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.23?",
+          "item_ids": [
+            "room-014"
+          ],
+          "value": 14.06,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.22?",
+          "item_ids": [
+            "room-015"
+          ],
+          "value": 5.13,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Bain 2.22?",
+          "item_ids": [
+            "room-015"
+          ],
+          "value": 5.13,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.25?",
+          "item_ids": [
+            "room-016"
+          ],
+          "value": 15.87,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.25?",
+          "item_ids": [
+            "room-016"
+          ],
+          "value": 15.87,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.26?",
+          "item_ids": [
+            "room-017"
+          ],
+          "value": 2.63,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Balcon 2.26?",
+          "item_ids": [
+            "room-017"
+          ],
+          "value": 2.63,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Couloir / R\u00e9duit?",
+          "item_ids": [
+            "room-018"
+          ],
+          "value": 11.02,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.27?",
+          "item_ids": [
+            "room-018"
+          ],
+          "value": 11.02,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.29?",
+          "item_ids": [
+            "room-018"
+          ],
+          "value": 11.02,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.28?",
+          "item_ids": [
+            "room-019"
+          ],
+          "value": 11.93,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.28?",
+          "item_ids": [
+            "room-019"
+          ],
+          "value": 11.93,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Cage d'escalier?",
+          "item_ids": [
+            "room-020",
+            "room-029"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.42?",
+          "item_ids": [
+            "room-020"
+          ],
+          "value": 13.56,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Cage d'escalier 2.42?",
+          "item_ids": [
+            "room-020"
+          ],
+          "value": 13.56,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Couloir?",
+          "item_ids": [
+            "room-001",
+            "room-008",
+            "room-018",
+            "room-021"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.33?",
+          "item_ids": [
+            "room-021"
+          ],
+          "value": 11.35,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Couloir 2.33?",
+          "item_ids": [
+            "room-021"
+          ],
+          "value": 11.35,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of S\u00e9jour/repas?",
+          "item_ids": [
+            "room-022"
+          ],
+          "value": 30.23,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.35?",
+          "item_ids": [
+            "room-022"
+          ],
+          "value": 30.23,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of S\u00e9jour/repas 2.35?",
+          "item_ids": [
+            "room-022"
+          ],
+          "value": 30.23,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.30?",
+          "item_ids": [
+            "room-023"
+          ],
+          "value": 7.24,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Cuisine 2.30?",
+          "item_ids": [
+            "room-023"
+          ],
+          "value": 7.24,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.32?",
+          "item_ids": [
+            "room-024"
+          ],
+          "value": 6.02,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Bain 2.32?",
+          "item_ids": [
+            "room-024"
+          ],
+          "value": 6.02,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.38?",
+          "item_ids": [
+            "room-025"
+          ],
+          "value": 16.64,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.38?",
+          "item_ids": [
+            "room-025"
+          ],
+          "value": 16.64,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.36?",
+          "item_ids": [
+            "room-026"
+          ],
+          "value": 11.97,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.36?",
+          "item_ids": [
+            "room-026"
+          ],
+          "value": 11.97,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.37?",
+          "item_ids": [
+            "room-027"
+          ],
+          "value": 11.88,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Pi\u00e8ce 2.37?",
+          "item_ids": [
+            "room-027"
+          ],
+          "value": 11.88,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.07?",
+          "item_ids": [
+            "room-028"
+          ],
+          "value": 3.29,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Bain 2.07?",
+          "item_ids": [
+            "room-028"
+          ],
+          "value": 3.29,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.40?",
+          "item_ids": [
+            "room-029"
+          ],
+          "value": 13.29,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Cage d'escalier 2.40?",
+          "item_ids": [
+            "room-029"
+          ],
+          "value": 13.29,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Ascenseur?",
+          "item_ids": [
+            "room-031",
+            "room-035"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.39?",
+          "item_ids": [
+            "room-031"
+          ],
+          "value": 2.74,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Ascenseur 2.39?",
+          "item_ids": [
+            "room-031"
+          ],
+          "value": 2.74,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.12?",
+          "item_ids": [
+            "room-032"
+          ],
+          "value": 1.88,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Bain 2.12?",
+          "item_ids": [
+            "room-032"
+          ],
+          "value": 1.88,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.24?",
+          "item_ids": [
+            "room-034"
+          ],
+          "value": 2.99,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Bain 2.24?",
+          "item_ids": [
+            "room-034"
+          ],
+          "value": 2.99,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.41?",
+          "item_ids": [
+            "room-035"
+          ],
+          "value": 2.76,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Ascenseur 2.41?",
+          "item_ids": [
+            "room-035"
+          ],
+          "value": 2.76,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.31?",
+          "item_ids": [
+            "room-036"
+          ],
+          "value": 3.11,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Bain 2.31?",
+          "item_ids": [
+            "room-036"
+          ],
+          "value": 3.11,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 2.34?",
+          "item_ids": [
+            "room-037"
+          ],
+          "value": 7.26,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Balcon 2.34?",
+          "item_ids": [
+            "room-037"
+          ],
+          "value": 7.26,
+          "cost_usd": 0.0
+        }
+      ],
+      "before_pass": 99,
+      "after_pass": 99,
+      "total": 99
+    },
+    {
+      "pdf": "data/judges/ARK-103-03_floor_plan_3rd_floor.pdf",
+      "page": 1,
+      "vector_paths": 60446,
+      "indexed_rooms": 30,
+      "source": "pdf_vector",
+      "scale": {
+        "m_per_pt": 0.03527076005157164,
+        "method": "dimensions",
+        "confidence": 0.6,
+        "ratio": "1:100",
+        "check": {
+          "dims_m_per_pt": 0.03527076005157164,
+          "dims_n": 118
+        }
+      },
+      "checks": [
+        {
+          "question": "What is the area of ROOF / SPL / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / KA / CORRIDOR / BA / BULKHEAD / ELECTRICAL / BULKHEAD / VP/YP / OFFICE?",
+          "kind": "drawn label",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room EI60?",
+          "kind": "source number",
+          "expected": [
+            "room-001",
+            "room-003",
+            "room-019"
+          ],
+          "before": [
+            "room-001",
+            "room-003",
+            "room-019"
+          ],
+          "after": [
+            "room-001",
+            "room-003",
+            "room-019"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is corridor EI60?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 50?",
+          "kind": "source number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is corridor 50?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room VS205?",
+          "kind": "source number",
+          "expected": [
+            "room-001",
+            "room-009"
+          ],
+          "before": [
+            "room-001",
+            "room-009"
+          ],
+          "after": [
+            "room-001",
+            "room-009"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is corridor VS205?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room VS208?",
+          "kind": "source number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is corridor VS208?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 750?",
+          "kind": "source number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is corridor 750?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 98.5?",
+          "kind": "source number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is corridor 98.5?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 240?",
+          "kind": "source number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is corridor 240?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 9.0?",
+          "kind": "source number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is corridor 9.0?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 4.0?",
+          "kind": "source number",
+          "expected": [
+            "room-001",
+            "room-010"
+          ],
+          "before": [
+            "room-001",
+            "room-010"
+          ],
+          "after": [
+            "room-001",
+            "room-010"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is corridor 4.0?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of STAIR / STAIR / ROOM?",
+          "kind": "drawn label",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 293?",
+          "kind": "source number",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is stairs 293?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 150?",
+          "kind": "source number",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is stairs 150?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 0.0?",
+          "kind": "source number",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is stairs 0.0?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of TO?",
+          "kind": "drawn label",
+          "expected": [
+            "room-003"
+          ],
+          "before": [
+            "room-003"
+          ],
+          "after": [
+            "room-003"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of TO EI60?",
+          "kind": "source name and number",
+          "expected": [
+            "room-003"
+          ],
+          "before": [
+            "room-003"
+          ],
+          "after": [
+            "room-003"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of STAIR / ROOM?",
+          "kind": "drawn label",
+          "expected": [
+            "room-002",
+            "room-004"
+          ],
+          "before": [
+            "room-002",
+            "room-004"
+          ],
+          "after": [
+            "room-002",
+            "room-004"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room P1?",
+          "kind": "source number",
+          "expected": [
+            "room-004"
+          ],
+          "before": [
+            "room-004"
+          ],
+          "after": [
+            "room-004"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is stairs P1?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-004"
+          ],
+          "before": [
+            "room-004"
+          ],
+          "after": [
+            "room-004"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room EI30?",
+          "kind": "source number",
+          "expected": [
+            "room-004",
+            "room-013"
+          ],
+          "before": [
+            "room-004",
+            "room-013"
+          ],
+          "after": [
+            "room-004",
+            "room-013"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is stairs EI30?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-004",
+            "room-013"
+          ],
+          "before": [
+            "room-004",
+            "room-013"
+          ],
+          "after": [
+            "room-004",
+            "room-013"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of ACCESSIBLE?",
+          "kind": "drawn label",
+          "expected": [
+            "room-006",
+            "room-010"
+          ],
+          "before": [
+            "room-006",
+            "room-010"
+          ],
+          "after": [
+            "room-006",
+            "room-010"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 6.0?",
+          "kind": "source number",
+          "expected": [
+            "room-006"
+          ],
+          "before": [
+            "room-006"
+          ],
+          "after": [
+            "room-006"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of ACCESSIBLE 6.0?",
+          "kind": "source name and number",
+          "expected": [
+            "room-006"
+          ],
+          "before": [
+            "room-006"
+          ],
+          "after": [
+            "room-006"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of WC 1.5 / ARK / ROOM?",
+          "kind": "drawn label",
+          "expected": [
+            "room-007"
+          ],
+          "before": [],
+          "after": [
+            "room-007"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 1.5?",
+          "kind": "source number",
+          "expected": [
+            "room-007"
+          ],
+          "before": [
+            "room-007"
+          ],
+          "after": [
+            "room-007"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is bathroom 1.5?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-007"
+          ],
+          "before": [
+            "room-007"
+          ],
+          "after": [
+            "room-007"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room B321?",
+          "kind": "source number",
+          "expected": [
+            "room-007"
+          ],
+          "before": [
+            "room-007"
+          ],
+          "after": [
+            "room-007"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is bathroom B321?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-007"
+          ],
+          "before": [
+            "room-007"
+          ],
+          "after": [
+            "room-007"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of CORRIDOR?",
+          "kind": "drawn label",
+          "expected": [
+            "room-001",
+            "room-008",
+            "room-011"
+          ],
+          "before": [
+            "room-001",
+            "room-008",
+            "room-011"
+          ],
+          "after": [
+            "room-001",
+            "room-008",
+            "room-011"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 25.5?",
+          "kind": "source number",
+          "expected": [
+            "room-008"
+          ],
+          "before": [
+            "room-008"
+          ],
+          "after": [
+            "room-008"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of CORRIDOR 25.5?",
+          "kind": "source name and number",
+          "expected": [
+            "room-008"
+          ],
+          "before": [
+            "room-008"
+          ],
+          "after": [
+            "room-008"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is corridor 25.5?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-008"
+          ],
+          "before": [
+            "room-008"
+          ],
+          "after": [
+            "room-008"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of WC / ACCESSIBLE?",
+          "kind": "drawn label",
+          "expected": [
+            "room-010"
+          ],
+          "before": [
+            "room-010"
+          ],
+          "after": [
+            "room-010"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of WC / ACCESSIBLE 4.0?",
+          "kind": "source name and number",
+          "expected": [
+            "room-010"
+          ],
+          "before": [
+            "room-010"
+          ],
+          "after": [
+            "room-010"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is bathroom 4.0?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-010"
+          ],
+          "before": [
+            "room-010"
+          ],
+          "after": [
+            "room-010"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of ROOM / CORRIDOR?",
+          "kind": "drawn label",
+          "expected": [
+            "room-011"
+          ],
+          "before": [
+            "room-011"
+          ],
+          "after": [
+            "room-011"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room B331?",
+          "kind": "source number",
+          "expected": [
+            "room-011"
+          ],
+          "before": [
+            "room-011"
+          ],
+          "after": [
+            "room-011"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is corridor B331?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-011"
+          ],
+          "before": [
+            "room-011"
+          ],
+          "after": [
+            "room-011"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 412?",
+          "kind": "source number",
+          "expected": [
+            "room-011"
+          ],
+          "before": [
+            "room-011"
+          ],
+          "after": [
+            "room-011"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is corridor 412?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-011"
+          ],
+          "before": [
+            "room-011"
+          ],
+          "after": [
+            "room-011"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of STAIR?",
+          "kind": "drawn label",
+          "expected": [
+            "room-002",
+            "room-004",
+            "room-013"
+          ],
+          "before": [
+            "room-002",
+            "room-004",
+            "room-013"
+          ],
+          "after": [
+            "room-002",
+            "room-004",
+            "room-013"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of STAIR EI30?",
+          "kind": "source name and number",
+          "expected": [
+            "room-004",
+            "room-013"
+          ],
+          "before": [
+            "room-004",
+            "room-013"
+          ],
+          "after": [
+            "room-004",
+            "room-013"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of WC 18.5?",
+          "kind": "drawn label",
+          "expected": [
+            "room-014"
+          ],
+          "before": [
+            "room-014"
+          ],
+          "after": [
+            "room-014"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of AKA1 WC?",
+          "kind": "drawn label",
+          "expected": [
+            "room-015"
+          ],
+          "before": [
+            "room-015"
+          ],
+          "after": [
+            "room-015"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room B303?",
+          "kind": "source number",
+          "expected": [
+            "room-015"
+          ],
+          "before": [
+            "room-015"
+          ],
+          "after": [
+            "room-015"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of AKA1 WC B303?",
+          "kind": "source name and number",
+          "expected": [
+            "room-015"
+          ],
+          "before": [],
+          "after": [
+            "room-015"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "Where is bathroom B303?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-015"
+          ],
+          "before": [
+            "room-015"
+          ],
+          "after": [
+            "room-015"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of KP?",
+          "kind": "drawn label",
+          "expected": [
+            "room-019"
+          ],
+          "before": [
+            "room-019"
+          ],
+          "after": [
+            "room-019"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of KP EI60?",
+          "kind": "source name and number",
+          "expected": [
+            "room-019"
+          ],
+          "before": [
+            "room-019"
+          ],
+          "after": [
+            "room-019"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of ARK?",
+          "kind": "drawn label",
+          "expected": [
+            "room-007",
+            "room-020",
+            "room-026"
+          ],
+          "before": [
+            "room-007",
+            "room-020",
+            "room-026"
+          ],
+          "after": [
+            "room-007",
+            "room-020",
+            "room-026"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 770?",
+          "kind": "source number",
+          "expected": [
+            "room-020"
+          ],
+          "before": [
+            "room-020"
+          ],
+          "after": [
+            "room-020"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of ARK 770?",
+          "kind": "source name and number",
+          "expected": [
+            "room-020"
+          ],
+          "before": [
+            "room-020"
+          ],
+          "after": [
+            "room-020"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of RISER?",
+          "kind": "drawn label",
+          "expected": [
+            "room-022"
+          ],
+          "before": [
+            "room-022"
+          ],
+          "after": [
+            "room-022"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 3.5?",
+          "kind": "source number",
+          "expected": [
+            "room-022",
+            "room-023"
+          ],
+          "before": [
+            "room-022",
+            "room-023"
+          ],
+          "after": [
+            "room-022",
+            "room-023"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of RISER 3.5?",
+          "kind": "source name and number",
+          "expected": [
+            "room-022"
+          ],
+          "before": [
+            "room-022"
+          ],
+          "after": [
+            "room-022"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of STORAGE 3.5?",
+          "kind": "source name and number",
+          "expected": [
+            "room-023"
+          ],
+          "before": [
+            "room-023"
+          ],
+          "after": [
+            "room-023"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is storage 3.5?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-023"
+          ],
+          "before": [
+            "room-023"
+          ],
+          "after": [
+            "room-023"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 555?",
+          "kind": "source number",
+          "expected": [
+            "room-024"
+          ],
+          "before": [
+            "room-024"
+          ],
+          "after": [
+            "room-024"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of WC 555?",
+          "kind": "source name and number",
+          "expected": [
+            "room-024"
+          ],
+          "before": [
+            "room-024"
+          ],
+          "after": [
+            "room-024"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is bathroom 555?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-024"
+          ],
+          "before": [
+            "room-024"
+          ],
+          "after": [
+            "room-024"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room VS211?",
+          "kind": "source number",
+          "expected": [
+            "room-026"
+          ],
+          "before": [
+            "room-026"
+          ],
+          "after": [
+            "room-026"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of ARK VS211?",
+          "kind": "source name and number",
+          "expected": [
+            "room-026"
+          ],
+          "before": [
+            "room-026"
+          ],
+          "after": [
+            "room-026"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        }
+      ],
+      "evidence": [
+        {
+          "question": "What is the area of room EI60?",
+          "item_ids": [
+            "room-001",
+            "room-003",
+            "room-019"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 50?",
+          "item_ids": [
+            "room-001"
+          ],
+          "value": 491.69,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room VS205?",
+          "item_ids": [
+            "room-001",
+            "room-009"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room VS208?",
+          "item_ids": [
+            "room-001"
+          ],
+          "value": 491.69,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 750?",
+          "item_ids": [
+            "room-001"
+          ],
+          "value": 491.69,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 98.5?",
+          "item_ids": [
+            "room-001"
+          ],
+          "value": 491.69,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 240?",
+          "item_ids": [
+            "room-001"
+          ],
+          "value": 491.69,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 9.0?",
+          "item_ids": [
+            "room-001"
+          ],
+          "value": 491.69,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 4.0?",
+          "item_ids": [
+            "room-001",
+            "room-010"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 293?",
+          "item_ids": [
+            "room-002"
+          ],
+          "value": 197.83,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 150?",
+          "item_ids": [
+            "room-002"
+          ],
+          "value": 197.83,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 0.0?",
+          "item_ids": [
+            "room-002"
+          ],
+          "value": 197.83,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of TO?",
+          "item_ids": [
+            "room-003"
+          ],
+          "value": 10.85,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of TO EI60?",
+          "item_ids": [
+            "room-003"
+          ],
+          "value": 10.85,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room P1?",
+          "item_ids": [
+            "room-004"
+          ],
+          "value": 4.3,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room EI30?",
+          "item_ids": [
+            "room-004",
+            "room-013"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of ACCESSIBLE?",
+          "item_ids": [
+            "room-006",
+            "room-010"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 6.0?",
+          "item_ids": [
+            "room-006"
+          ],
+          "value": 3.06,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of ACCESSIBLE 6.0?",
+          "item_ids": [
+            "room-006"
+          ],
+          "value": 3.06,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 1.5?",
+          "item_ids": [
+            "room-007"
+          ],
+          "value": 55.12,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room B321?",
+          "item_ids": [
+            "room-007"
+          ],
+          "value": 55.12,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of CORRIDOR?",
+          "item_ids": [
+            "room-001",
+            "room-008",
+            "room-011"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 25.5?",
+          "item_ids": [
+            "room-008"
+          ],
+          "value": 6.43,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of CORRIDOR 25.5?",
+          "item_ids": [
+            "room-008"
+          ],
+          "value": 6.43,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of ROOM / CORRIDOR?",
+          "item_ids": [
+            "room-011"
+          ],
+          "value": 8.65,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room B331?",
+          "item_ids": [
+            "room-011"
+          ],
+          "value": 8.65,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 412?",
+          "item_ids": [
+            "room-011"
+          ],
+          "value": 8.65,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room B303?",
+          "item_ids": [
+            "room-015"
+          ],
+          "value": 5.41,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of KP?",
+          "item_ids": [
+            "room-019"
+          ],
+          "value": 2.77,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of KP EI60?",
+          "item_ids": [
+            "room-019"
+          ],
+          "value": 2.77,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of ARK?",
+          "item_ids": [
+            "room-007",
+            "room-020",
+            "room-026"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 770?",
+          "item_ids": [
+            "room-020"
+          ],
+          "value": 1.75,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of ARK 770?",
+          "item_ids": [
+            "room-020"
+          ],
+          "value": 1.75,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of RISER?",
+          "item_ids": [
+            "room-022"
+          ],
+          "value": 1.33,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 3.5?",
+          "item_ids": [
+            "room-022",
+            "room-023"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of RISER 3.5?",
+          "item_ids": [
+            "room-022"
+          ],
+          "value": 1.33,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of STORAGE 3.5?",
+          "item_ids": [
+            "room-023"
+          ],
+          "value": 2.42,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 555?",
+          "item_ids": [
+            "room-024"
+          ],
+          "value": 0.55,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room VS211?",
+          "item_ids": [
+            "room-026"
+          ],
+          "value": 6.82,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of ARK VS211?",
+          "item_ids": [
+            "room-026"
+          ],
+          "value": 6.82,
+          "cost_usd": 0.0
+        }
+      ],
+      "before_pass": 73,
+      "after_pass": 75,
+      "total": 75
+    },
+    {
+      "pdf": "data/junction-dataset-preview/data/opening_design/Sports_Complex/Transfer/_Archive/20150720 - Door Schedule to Door Consultant/20150720 - XSC - floor plan and door schedule.pdf",
+      "page": 1,
+      "vector_paths": 18528,
+      "indexed_rooms": 6,
+      "source": "pdf_vector",
+      "scale": {
+        "m_per_pt": 0.03368855403448042,
+        "method": "dimensions",
+        "confidence": 0.6,
+        "ratio": "1:95",
+        "check": {
+          "dims_m_per_pt": 0.03368855403448042,
+          "dims_n": 6
+        }
+      },
+      "checks": [
+        {
+          "question": "What is the area of STOR/MECH?",
+          "kind": "drawn label",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 127?",
+          "kind": "source number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of STOR/MECH 127?",
+          "kind": "source name and number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 126?",
+          "kind": "source number",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of OFFICE 126?",
+          "kind": "source name and number",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is office 126?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of CORRIDOR?",
+          "kind": "drawn label",
+          "expected": [
+            "room-003"
+          ],
+          "before": [
+            "room-003"
+          ],
+          "after": [
+            "room-003"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 125?",
+          "kind": "source number",
+          "expected": [
+            "room-003"
+          ],
+          "before": [
+            "room-003"
+          ],
+          "after": [
+            "room-003"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of CORRIDOR 125?",
+          "kind": "source name and number",
+          "expected": [
+            "room-003"
+          ],
+          "before": [
+            "room-003"
+          ],
+          "after": [
+            "room-003"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is corridor 125?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-003"
+          ],
+          "before": [
+            "room-003"
+          ],
+          "after": [
+            "room-003"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 124?",
+          "kind": "source number",
+          "expected": [
+            "room-004"
+          ],
+          "before": [
+            "room-004"
+          ],
+          "after": [
+            "room-004"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of OFFICE 124?",
+          "kind": "source name and number",
+          "expected": [
+            "room-004"
+          ],
+          "before": [
+            "room-004"
+          ],
+          "after": [
+            "room-004"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is office 124?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-004"
+          ],
+          "before": [
+            "room-004"
+          ],
+          "after": [
+            "room-004"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 123?",
+          "kind": "source number",
+          "expected": [
+            "room-006"
+          ],
+          "before": [
+            "room-006"
+          ],
+          "after": [
+            "room-006"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of STORAGE 123?",
+          "kind": "source name and number",
+          "expected": [
+            "room-006"
+          ],
+          "before": [
+            "room-006"
+          ],
+          "after": [
+            "room-006"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is storage 123?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-006"
+          ],
+          "before": [
+            "room-006"
+          ],
+          "after": [
+            "room-006"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of corridor?",
+          "kind": "producer type",
+          "expected": [
+            "room-003"
+          ],
+          "before": [
+            "room-003"
+          ],
+          "after": [
+            "room-003"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of office?",
+          "kind": "producer type",
+          "expected": [
+            "room-002",
+            "room-004"
+          ],
+          "before": [
+            "room-002",
+            "room-004"
+          ],
+          "after": [
+            "room-002",
+            "room-004"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of storage?",
+          "kind": "producer type",
+          "expected": [
+            "room-006"
+          ],
+          "before": [
+            "room-006"
+          ],
+          "after": [
+            "room-006"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        }
+      ],
+      "evidence": [
+        {
+          "question": "What is the area of STOR/MECH?",
+          "item_ids": [
+            "room-001"
+          ],
+          "value": 7.38,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 127?",
+          "item_ids": [
+            "room-001"
+          ],
+          "value": 7.38,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of STOR/MECH 127?",
+          "item_ids": [
+            "room-001"
+          ],
+          "value": 7.38,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 126?",
+          "item_ids": [
+            "room-002"
+          ],
+          "value": 10.79,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of OFFICE 126?",
+          "item_ids": [
+            "room-002"
+          ],
+          "value": 10.79,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of CORRIDOR?",
+          "item_ids": [
+            "room-003"
+          ],
+          "value": 17.96,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 125?",
+          "item_ids": [
+            "room-003"
+          ],
+          "value": 17.96,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of CORRIDOR 125?",
+          "item_ids": [
+            "room-003"
+          ],
+          "value": 17.96,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 124?",
+          "item_ids": [
+            "room-004"
+          ],
+          "value": 3.67,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of OFFICE 124?",
+          "item_ids": [
+            "room-004"
+          ],
+          "value": 3.67,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 123?",
+          "item_ids": [
+            "room-006"
+          ],
+          "value": 1.53,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of STORAGE 123?",
+          "item_ids": [
+            "room-006"
+          ],
+          "value": 1.53,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of corridor?",
+          "item_ids": [
+            "room-003"
+          ],
+          "value": 17.96,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of office?",
+          "item_ids": [
+            "room-002",
+            "room-004"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of storage?",
+          "item_ids": [
+            "room-006"
+          ],
+          "value": 1.53,
+          "cost_usd": 0.0
+        }
+      ],
+      "before_pass": 19,
+      "after_pass": 19,
+      "total": 19
+    }
+  ]
+}
