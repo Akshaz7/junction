@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import mimetypes
 import os
+import re
 from pathlib import Path
 
 from . import config
@@ -27,6 +28,10 @@ def _priority(name: str) -> int:
         return 0
     if name in ("doc.json", "ingest.json", "text.json", "scene.json", "pages.json", "elements.json", "piping.json", "ifc-quantities.json", "wallgeom.json", "ifc-accuracy.json") or name.startswith("planmap-"):
         return 1
+    # What visual verification needs (the page image the boxes sit on, the 3D mesh) is stored right after the
+    # metadata: a persist cut short by a redeploy once left only metadata + thumbnail, so 2D and 3D both failed.
+    if re.fullmatch(r"page-\d+\.png|normalised\.png|scene\.glb", name):
+        return 1.5
     if name.endswith(".thumb.png") or name.startswith("text-"):
         return 2
     if name.startswith("scene."):
