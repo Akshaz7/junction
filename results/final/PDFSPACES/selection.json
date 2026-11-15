@@ -1,0 +1,6 @@
+{
+  "baseline": "2ba8777",
+  "blind_source": "data/junction-dataset-preview/data/swiss_dwellings/site1101_bldg2241_floor10275.pdf",
+  "blind_doc_id": "swiss_dwellings__site1101-bldg2241-floor10275",
+  "selection": "SystemRandom from Swiss PDF paths before inspecting its contents; evaluation only, no tuning"
+}
