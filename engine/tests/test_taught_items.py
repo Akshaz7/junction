@@ -134,3 +134,14 @@ def test_taught_mark_on_other_kind_or_far_away_still_adds():
                       {'item_id': 'd1', 'kind': 'door', 'source': 'det', 'bbox_px': [100, 100, 110, 110], 'conf': .6, 'props': {}}]}
     plan = project(base, [symbol(box=(8, 8, 22, 22))], 1)
     assert len(plan['items']) == 3
+
+
+def test_label_containing_a_class_word_counts_taught_items_not_rooms(tmp_path):
+    plan = project({'items': [{'item_id': f'r{i}', 'kind': 'room', 'source': 'det', 'bbox_px': [i*100, 0, i*100+50, 50], 'conf': .9, 'props': {}} for i in range(5)]},
+                   [symbol('cylinder storage room', box=(1000, 1000, 1050, 1050))], 1)
+    save(tmp_path, plan)
+    for q in ('How many cylinder storage room marks are on this drawing?', 'Count the marks named "cylinder storage room" on this drawing',
+              'how many cylinder storage rooms are there'):
+        a = query(q, ['sheet'], tmp_path)
+        assert a is not None and a['answer']['value'] == 1, q
+        assert a['evidence']['boxes'][0]['item_id'] == 'taught-one'
