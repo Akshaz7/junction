@@ -1,0 +1,86 @@
+"""Generated fixtures for residual IFC routing and quantity semantics."""
+import json
+from pathlib import Path
+
+import pytest
+
+from engine.ifc_queries import answer, query_doc
+
+
+@pytest.fixture(autouse=True)
+def fake(monkeypatch):
+    monkeypatch.setenv('MODELS_FAKE', '1')
+    monkeypatch.setenv('EXPLAIN', '0')
+
+
+def write_doc(root, did, rows, storeys=('Ground', 'Upper')):
+    d = root / did
+    d.mkdir()
+    (d / 'elements.json').write_text(json.dumps({'elements': rows, 'storeys': [
+        {'name': n, 'elevation_m': float(k * 3)} for k, n in enumerate(storeys)]}))
+    return d
+
+
+def element(iid, kind='room', storey='Ground', name='Electrical', **props):
+    return {'item_id': iid, 'kind': kind, 'ifc_class': 'IfcSpace' if kind == 'room' else 'IfcDoor',
+            'name': name, 'storey': {'name': storey}, 'props': props}
+
+
+@pytest.mark.parametrize('name', ['Roof', 'Electrical', 'Plumbing', 'Floor'])
+def test_scope_labels_do_not_filter_generic_room_counts(tmp_path, name):
+    write_doc(tmp_path, 'generated', [element('a', name=name), element('b', name='Office')])
+    result = answer(f"How many rooms (spaces) are there in the model '{name}'?", ['generated'], tmp_path)
+    assert result['answer']['value'] == 2
+    assert {i for c in result['citations'] for i in c['item_ids']} == {'a', 'b'}
+
+
+def test_linked_sheet_whole_model_and_floor_scopes(tmp_path):
+    write_doc(tmp_path, 'generated', [element('a'), element('b', storey='Upper')])
+    sheet = tmp_path / 'generated-plan-01-ground'
+    sheet.mkdir()
+    (sheet / 'doc.json').write_text(json.dumps({'title': 'Generated for demo - Planta: Ground'}))
+    did = sheet.name
+    assert len(query_doc(did, tmp_path, "How many rooms in the model 'Building'?" ).items) == 2
+    assert answer("How many rooms are shown on the floor plan of 'Ground'?", [did], tmp_path)['answer']['value'] == 1
+    assert answer("How many rooms are there in the model 'Building'?", [did], tmp_path)['answer']['value'] == 2
+
+
+def test_hidden_and_aggregate_components_excluded(tmp_path):
+    write_doc(tmp_path, 'generated', [element('a', kind='door'), element('b', kind='door'),
+                                    element('part', kind='door', count_component_of='a')])
+    result = answer('How many doors are there?', ['generated'], tmp_path, hidden=['b'])
+    assert result['answer']['value'] == 1
+    assert result['citations'][0]['item_ids'] == ['a']
+
+
+@pytest.mark.parametrize('question', ['How many rooms with windows?', 'How many external doors are there?',
+                                     'How many rooms are larger than 20 m2?', 'How many doors of each type?',
+                                     'How many rooms and doors are there?'])
+def test_filtered_and_compound_counts_keep_their_handlers(tmp_path, question):
+    write_doc(tmp_path, 'generated', [element('a')])
+    assert answer(question, ['generated'], tmp_path) is None
+
+
+def test_light_inventory_excludes_switches_and_hidden_items(monkeypatch, tmp_path):
+    write_doc(tmp_path, 'generated', [element('lamp', kind='light'), element('switch', kind='light'),
+                                    element('hidden', kind='light')])
+    from engine import mep
+    monkeypatch.setattr(mep, 'load_index', lambda doc: {'services': [
+        {'item_id': 'lamp', 'k': 'light'}, {'item_id': 'switch', 'k': 'switch'},
+        {'item_id': 'hidden', 'k': 'light'}]})
+    result = answer("How many light fixtures are there in the model 'Apartment Electrical'?",
+                    ['generated'], tmp_path, hidden=['hidden'])
+    assert result['answer']['value'] == 1
+    assert result['citations'][0]['item_ids'] == ['lamp']
+
+
+def test_full_answer_routes_linked_ifc_before_text_sheet(monkeypatch, tmp_path):
+    write_doc(tmp_path, 'generated', [element('a'), element('b', storey='Upper')])
+    did = 'generated-plan-01-ground'
+    (tmp_path / did).mkdir()
+    (tmp_path / did / 'doc.json').write_text(json.dumps({'title': 'Generated for demo: Ground'}))
+    monkeypatch.setenv('ARTIFACTS_DIR', str(tmp_path))
+    from engine.answer import answer as ask
+    result = ask("How many rooms (spaces) are there in the model 'Electrical Building'?", [did])
+    assert result['answer']['value'] == 2
+    assert result['answer']['unit'] == 'count'
