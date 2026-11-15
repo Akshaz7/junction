@@ -461,9 +461,17 @@ def scene_answer(question: str, doc: Doc, intent: SceneIntent, state: dict | Non
             if it.bbox_px:
                 boxes.append({"item_id": it.item_id, "page": it.page, "bbox_px": it.bbox_px, "label": tg.get(it.item_id, str(k))})
     cmd["op"] = op if op in ("highlight", "hide", "restore", "reset", "isolate") else intent.op
+    citations = []
+    if intent.op in ("highlight", "isolate") and ids and not abstained:
+        # One source of truth: the proof card counts the same items the scene highlights.
+        from engine.solvers.solve import _evidence
+        by_id = {i.item_id: i for i in doc.items}
+        chosen = [by_id[i] for i in ids if i in by_id]
+        if chosen:
+            citations = _evidence(doc, chosen)[1]
     return {
         "answer_id": uuid.uuid4().hex, "question": question, "doc_ids": [doc.doc_id],
         "answer": {"text_md": text, "value": None, "unit": None, "confidence": conf, "abstained": abstained},
-        "citations": [], "evidence": {"boxes": boxes, "scene": scene}, "trace": trace, "route": "index" if doc.mode == "ifc" else "planmap",
+        "citations": citations, "evidence": {"boxes": boxes, "scene": scene}, "trace": trace, "route": "index" if doc.mode == "ifc" else "planmap",
         "cost": {"usd_total": 0.0, "calls": []}, "latency_ms": int((time.perf_counter() - t0) * 1000),
     }
