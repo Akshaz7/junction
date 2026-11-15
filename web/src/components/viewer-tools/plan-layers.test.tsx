@@ -15,8 +15,13 @@ const items: LayerItem[] = [
 
 let host: HTMLDivElement
 let root: Root
-beforeEach(() => { Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true }); host = document.createElement('div'); document.body.appendChild(host); root = createRoot(host) })
-afterEach(async () => { await act(async () => root.unmount()); host.remove(); localStorage.clear() })
+function memoryStorage(): Storage {
+  const m = new Map<string, string>()
+  return { getItem: k => m.get(k) ?? null, setItem: (k, v) => void m.set(k, String(v)), removeItem: k => void m.delete(k), clear: () => m.clear(),
+    key: i => [...m.keys()][i] ?? null, get length() { return m.size } }
+}
+beforeEach(() => { vi.stubGlobal('localStorage', memoryStorage()); Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true }); host = document.createElement('div'); document.body.appendChild(host); root = createRoot(host) })
+afterEach(async () => { await act(async () => root.unmount()); host.remove(); localStorage.clear(); vi.unstubAllGlobals() })
 
 describe('plan layers', () => {
   it('maps kinds onto layers', () => {
