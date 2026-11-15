@@ -67,7 +67,33 @@ export function createItemAnnotation(scene: LoadedScene, id: string, text: strin
 }
 
 /** Called after CSS2DRenderer every frame, including orbit, resize, edits and rise. */
-export function layoutAnnotations(labels: readonly CSS2DObject[], scene: LoadedScene, camera: Camera, width: number, height: number): void {
+export interface Blocker { x: number; y: number; width: number; height: number }
+
+/** Screen rects (relative to the stage) of UI cards and panels that scene captions must never cover. */
+export function uiBlockers(stage: HTMLElement | null): Blocker[] {
+  if (!stage) return [];
+  const origin = stage.getBoundingClientRect();
+  const out: Blocker[] = [];
+  for (const el of stage.querySelectorAll<HTMLElement>('.viewer3d-item-card, .viewer3d-findings-card, .viewer3d-advisor-card, .kind-legend-3d, .viewer3d-approx')) {
+    const r = el.getBoundingClientRect();
+    if (r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden') {
+      out.push({ x: r.left - origin.left, y: r.top - origin.top, width: r.width, height: r.height });
+    }
+  }
+  return out;
+}
+
+/** Keep a DOM label fully inside the stage by nudging it after CSS2DRenderer positioned it. */
+export function clampLabelInside(element: HTMLElement, stage: HTMLElement, margin = 4): void {
+  const r = element.getBoundingClientRect();
+  if (!r.width) return;
+  const s = stage.getBoundingClientRect();
+  const dx = r.left < s.left + margin ? s.left + margin - r.left : r.right > s.right - margin ? s.right - margin - r.right : 0;
+  const dy = r.top < s.top + margin ? s.top + margin - r.top : r.bottom > s.bottom - margin ? s.bottom - margin - r.bottom : 0;
+  if (dx || dy) element.style.transform += ` translate(${dx}px, ${dy}px)`;
+}
+
+export function layoutAnnotations(labels: readonly CSS2DObject[], scene: LoadedScene, camera: Camera, width: number, height: number, blockers: readonly Blocker[] = []): void {
   const anchors: LabelAnchor[] = [];
   for (const label of labels) {
     const element = label.element;
@@ -85,6 +111,11 @@ export function layoutAnnotations(labels: readonly CSS2DObject[], scene: LoadedS
     const element = label.element;
     const placement = placements.get(element.dataset.itemId!);
     if (!placement) continue;
+    const anchorPt = anchors.find((candidate) => candidate.id === placement.id)!;
+    // Hide a caption (pill or leader tip) that would sit on a card or panel.
+    if (blockers.some((b) => (placement.x < b.x + b.width && placement.x + placement.width > b.x
+      && placement.y < b.y + b.height && placement.y + placement.height > b.y)
+      || (anchorPt.x > b.x && anchorPt.x < b.x + b.width && anchorPt.y > b.y && anchorPt.y < b.y + b.height))) continue;
     const anchor = anchors.find((candidate) => candidate.id === placement.id)!;
     element.style.visibility = 'visible';
     element.style.transform = `translate(${placement.x}px, ${placement.y}px)`;

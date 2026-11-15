@@ -20,7 +20,7 @@ import { createRenderBatches, PICK_LAYER } from './renderBatches';
 import { withAbort, type LoadProgress } from './loadGLTF';
 import { createWalkController, type WalkState } from './walk';
 import { createEditLayer, type ItemEdit, type EditState, type WallMaterial } from './edits';
-import { createItemAnnotation, layoutAnnotations } from './annotations';
+import { clampLabelInside, createItemAnnotation, layoutAnnotations, uiBlockers } from './annotations';
 import { createFindingsLayer, type Finding, type FindingPinState } from './findings';
 import { KIND_COLORS, itemKindKey } from '../lib/kind-colors';
 import { createBlueprint, framingIds, MAX_CALLOUT_TAGS, styleSceneMaterials, type Blueprint, type BlueprintState } from './blueprint';
@@ -712,7 +712,9 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     if (labels.length || linkedLabel || findingPins || blueprint?.hasLabels) {
       labelRenderer.render(world, camera);
       if (active) layoutAnnotations(linkedLabel ? [...labels, linkedLabel] : labels, active, camera,
-        canvas.clientWidth, canvas.clientHeight);
+        canvas.clientWidth, canvas.clientHeight, uiBlockers(canvas.parentElement));
+      const stage = canvas.parentElement;
+      if (stage) for (const el of labelRenderer.domElement.querySelectorAll<HTMLElement>('.viewer3d-storey-label, .viewer3d-dim-label')) clampLabelInside(el, stage);
     }
     probe.frame(performance.now(), active !== null);
     frame = requestAnimationFrame(render);
