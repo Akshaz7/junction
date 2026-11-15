@@ -7,24 +7,32 @@ import { docTitle, fileCount, isReading, relativeTime, thumbUrl } from '../lib/p
 import type { Document } from '../lib/types'
 
 /** The project a chat belongs to, taken from the address (#/chat?project=ID). */
+export const readChatProjectId = (active: boolean) => active ? new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('project') : null
+
+/**
+ * The id is read from the address on every render, not only after an effect: opening the project chat from a project
+ * page switches the view and the address in the same render, and a stale null here made the auto-sent question look
+ * project-less ("Add a drawing first") before the project's documents were known.
+ */
 export function useChatProject(active: boolean): { id: string | null; project: Project | null; error: string } {
-  const read = () => active ? new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('project') : null
-  const [id, setId] = useState(read)
-  const [state, setState] = useState<{ project: Project | null; error: string }>({ project: null, error: '' })
+  const [, setTick] = useState(0)
+  const id = readChatProjectId(active)
+  const [state, setState] = useState<{ forId: string | null; project: Project | null; error: string }>({ forId: null, project: null, error: '' })
   useEffect(() => {
-    const update = () => setId(read())
+    const update = () => setTick((n) => n + 1)
     update()
     window.addEventListener('hashchange', update)
     return () => window.removeEventListener('hashchange', update)
-  }, [active]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [active])
   useEffect(() => {
-    if (!id) { setState({ project: null, error: '' }); return }
+    if (!id) { setState({ forId: null, project: null, error: '' }); return }
     let live = true
-    projectsApi.get(id).then((project) => { if (live) setState({ project, error: '' }) })
-      .catch((error: unknown) => { if (live) setState({ project: null, error: error instanceof Error ? error.message : 'This project could not be loaded.' }) })
+    projectsApi.get(id).then((project) => { if (live) setState({ forId: id, project, error: '' }) })
+      .catch((error: unknown) => { if (live) setState({ forId: id, project: null, error: error instanceof Error ? error.message : 'This project could not be loaded.' }) })
     return () => { live = false }
   }, [id])
-  return { id, ...state }
+  const mine = state.forId === id   // never hand back another project's record while this one loads
+  return { id, project: mine ? state.project : null, error: mine ? state.error : '' }
 }
 
 const KINDS = ['raster', 'pdf', 'dxf', 'dwg', 'ifc', 'svg'] as const

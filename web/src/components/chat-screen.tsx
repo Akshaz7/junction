@@ -394,6 +394,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   useEffect(() => {
     const text = autoSend.current
     if (text === null || restoring || !docs.length || draft !== text) return
+    if (!projectId && new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('project')) return // the address names a project the app has not caught up with: wait for its documents
     autoSend.current = null
     void ask(text)
   }) // eslint-disable-line react-hooks/exhaustive-deps
