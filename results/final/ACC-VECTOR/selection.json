@@ -197,5 +197,25 @@
     "source": "swiss_dwellings",
     "bytes": 268838
   },
-  "accuracy_exclusion": "ACC-COMMON explicitly permits development on other nonforbidden files; no training is performed. Original heldout_docs is the training exclusion; ACC-specific forbidden list is used for this accuracy-development task."
+  "accuracy_exclusion": "ACC-COMMON explicitly permits development on other nonforbidden files; no training is performed. Original heldout_docs is the training exclusion; ACC-specific forbidden list is used for this accuracy-development task.",
+  "other_origin_development": [
+    {
+      "doc_id": "opening_design__site-plan",
+      "path": "data/full/junction-dataset/data/opening_design/Screened_in_Porch/Models & CAD/BIM/Linked - CAD & Data/Site plan.dxf",
+      "source": "opening_design",
+      "bytes": 9666
+    },
+    {
+      "doc_id": "opening_design__s-b-large",
+      "path": "data/full/junction-dataset/data/opening_design/Stephan_Brady_Balcony/Model/source/S&B Large.dxf",
+      "source": "opening_design",
+      "bytes": 32318
+    },
+    {
+      "doc_id": "opening_design__northstar",
+      "path": "data/full/junction-dataset/data/opening_design/Lake_Kegonsa_Home/Model/northstar/northstar.dxf",
+      "source": "opening_design",
+      "bytes": 827935
+    }
+  ]
 }

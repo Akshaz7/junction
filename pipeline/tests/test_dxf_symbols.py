@@ -186,6 +186,17 @@ def test_common_block_frame_and_nested_outlines_are_one_opening(kind):
     assert len(extract_openings(doc.modelspace(), kind)) == 1
 
 
+def test_double_door_block_with_separate_leaf_frames_is_one_door():
+    doc = ezdxf.new()
+    block = doc.blocks.new("double-door")
+    rect(block, 0, 0, .9, .1, "0")
+    rect(block, .9, 0, .9, .1, "0")
+    for x in (0, 1.8):
+        block.add_arc((x, 0), .9, 0, 90)
+    doc.modelspace().add_blockref(block.name, (0, 0))
+    assert len(extract_openings(doc.modelspace(), "door")) == 1
+
+
 def test_distinct_source_instances_are_not_merged_by_position():
     ms = ezdxf.new().modelspace()
     rect(ms, 0, 0, .9, .1, "DOOR")

@@ -14,7 +14,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 
 import numpy as np
-from shapely.geometry import LineString, Point, Polygon
+from shapely.geometry import LineString, MultiPoint, Point, Polygon
 
 
 def _words(text):
@@ -324,14 +324,16 @@ def extract_openings(layout, kind, unit_m=None):
 
     for entity in layout:
         visit(entity)
-    out, kept = [], []
-    # Outer common frame wins over inset frame outlines and duplicate exports.
-    for shape, p, polygon, symbol_id in sorted(candidates, key=lambda c: -c[2].area):
-        if symbol_id and any(owner == symbol_id and existing.buffer(EPS * math.sqrt(existing.area)).covers(polygon)
-                             for existing, owner in kept):
-            continue
-        kept.append((polygon, symbol_id))
-        props = {**shape.props, "classification": "closed_frame", "swing_radius_m": None}
+    out, groups = [], defaultdict(list)
+    for index, candidate in enumerate(candidates):
+        groups[("block", candidate[3]) if candidate[3] else ("entity", index)].append(candidate)
+    for group in groups.values():
+        shape = group[0][0]
+        # A named/layered opening block is one source object even when its two
+        # leaves have separate frame rectangles and no common outer outline.
+        p = np.asarray(MultiPoint(np.concatenate([c[1] for c in group])).convex_hull.exterior.coords[:-1])
+        props = {**shape.props, "classification": "closed_frame", "swing_radius_m": None,
+                 "frame_parts": [c[0].props for c in group]}
         if kind == "door":
             props["leaf_len_m"] = float(max(np.linalg.norm(np.roll(p, -1, axis=0) - p, axis=1))) * unit_m if unit_m else None
         out.append(_item(kind, p, props, 1.0))
