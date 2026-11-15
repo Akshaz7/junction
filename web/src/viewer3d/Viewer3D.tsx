@@ -29,6 +29,10 @@ import { wallAskHref } from '../lib/wall-details';
 import './viewer3d.css';
 import { Measure3DOverlay, measure3DStatus, useMeasure3D } from './Measure3D';
 import { Layers3D } from './Layers3D';
+import { Button } from '../components/ui';
+import { Ruler } from 'lucide-react';
+import '../components/viewer-tools/plan-inspect.css';
+import '../components/viewer-tools/plan-layers.css';
 import { PlanHoverTip } from '../components/viewer-tools/plan-hover-tip';
 import { planItemSummary, type PlanSummaryItem } from '../lib/plan-item-summary';
 import { workspaceApi } from '../lib/api';
@@ -451,14 +455,6 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
         cancelMove(); setPicked(null);
         if (viewerRef.current) clearViewerHighlights(viewerRef.current);
       }}>Clear highlights</button>
-      <button type="button" aria-label="Measure" aria-pressed={!!measure3d.mode} disabled={state !== 'ready'} title="Measure on the model: two points for a distance, or corners for an area"
-        onClick={() => { if (measure3d.mode) measure3d.stop(); else { cancelMove(); viewerRef.current?.setWalk(false); setEditing(false); closeDetails(); measure3d.start('distance'); } }}>Measure</button>
-      {measure3d.mode && <span className="viewer3d-measure-controls" role="status" aria-live="polite">
-        <span>{measure3DStatus(measure3d)}</span>
-        <button type="button" aria-pressed={measure3d.mode === 'distance'} onClick={() => measure3d.start('distance')}>Distance</button>
-        <button type="button" aria-pressed={measure3d.mode === 'area'} onClick={() => measure3d.start('area')}>Area</button>
-        <button type="button" onClick={measure3d.stop}>Done</button>
-      </span>}
       {(() => {
         const hasEdits = hiddenNow > 0 || Object.keys(edits.moveDelta ?? {}).length > 0;
         return <button type="button" className="viewer3d-revised-btn" aria-label="Revised plan"
@@ -467,6 +463,19 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
           onClick={() => setRevisedOpen(true)}>Revised plan</button>;
       })()}
       <FindingsPanel viewer={state === 'ready' ? viewerRef.current : null} stage={stage} />
+      {/* Same controls, look and order as the 2D page toolbar (plan-inspect-tools): layer chips, ruler, inline readout. */}
+      <div className="plan-inspect-tools viewer3d-plan-tools">
+        {state === 'ready' && <Layers3D viewer={viewerRef.current} />}
+        <Button variant="ghost" size="icon-xs" aria-label="Measure on the model" aria-pressed={!!measure3d.mode} disabled={state !== 'ready'}
+          title="Measure on the model: click two points for a distance, or corners for an area"
+          onClick={() => { if (measure3d.mode) measure3d.stop(); else { cancelMove(); viewerRef.current?.setWalk(false); setEditing(false); closeDetails(); measure3d.start('distance'); } }}><Ruler size={14} /></Button>
+        {measure3d.mode && <span className="plan-measure-readout" role="status" aria-live="polite">
+          {measure3DStatus(measure3d)}
+          <Button variant="ghost" size="xs" aria-pressed={measure3d.mode === 'distance'} onClick={() => measure3d.start('distance')}>Distance</Button>
+          <Button variant="ghost" size="xs" aria-pressed={measure3d.mode === 'area'} onClick={() => measure3d.start('area')}>Area</Button>
+          <Button variant="ghost" size="xs" onClick={measure3d.stop}>Done</Button>
+        </span>}
+      </div>
     </div>
     <div ref={setStage} className="viewer3d-stage" aria-busy={state === 'loading'}>
       <canvas ref={canvasRef} tabIndex={0} aria-label="3D building model" aria-describedby={walking ? helpId : undefined}
@@ -513,7 +522,6 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       {state === 'ready' && approximated && <p className="viewer3d-approx" data-testid="approx-note">3D approximated from the drawing{scaleNote && <span className="viewer3d-scale-note" data-testid="scale-note"> · {scaleNote}</span>}{quality && <span className="viewer3d-quality" data-testid="quality-badge" title={quality}>{quality}</span>}</p>}
       {state === 'ready' && answerKinds.length > 0 && <KindLegend className="kind-legend-3d" kinds={answerKinds} />}
       {picked && <output className="viewer3d-picked-overlay" aria-label="Picked item" aria-live="polite">{picked}</output>}
-      {state === 'ready' && <div className="viewer3d-layers"><Layers3D viewer={viewerRef.current} /></div>}
       {state === 'ready' && <Measure3DOverlay viewer={viewerRef.current} measure={measure3d} />}
       {state === 'ready' && !measure3d.mode && hoverTip && stage && <PlanHoverTip text={hoverTip.text} x={hoverTip.x} y={hoverTip.y} containerWidth={stage.clientWidth} containerHeight={stage.clientHeight} />}
       {walking && <WalkJoystick onMove={(x, y) => viewerRef.current?.setWalkJoystick(x, y)} />}
