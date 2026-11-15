@@ -131,6 +131,12 @@ tasks:
       - {provider: nvidia,  model: nvidia/nemotron-3.5-super-vl-120b-a12b}
       - {provider: runware_oai, model: gemini-4-carbon}
       - {provider: verda, model: nemotron-3.5-super-vl}   # ~90 s per call on 2026-11-14 (cold/loaded): last resort only
+  explain_claims:   # F-DESCEVID: one cached, bounded Claude evidence audit after a descriptive answer
+    provider: runware_claude
+    model: claude-sonnet-5-5
+    max_tokens: 650
+    fallback:
+      - {provider: anthropic, model: claude-sonnet-5-5}
   write_answer:
     provider: runware_claude
     model: claude-sonnet-5-5
