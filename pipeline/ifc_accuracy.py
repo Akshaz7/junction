@@ -177,6 +177,82 @@ def build(f, *, geometry=False):
             'space_inventory_complete': not any(e['ifc_class'] == 'IfcSpace' for e in errors)}
 
 
+def scene_space_areas(f, index, scene):
+    """Reuse converted room triangles when the property reader omits IFC geometry.
+
+    glTF positions and node transforms are already metres, Y-up. Project every
+    triangle onto X/Z and take the union, preserving holes and overlaps. Never
+    substitute bounding boxes, surface area or volume/height for a footprint.
+    """
+    import numpy as np
+    import ifcopenshell.util.unit as U
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    from shapely.errors import GEOSException
+    from pipeline.ifc_scene import node_matrices
+
+    if U.get_project_unit(f, 'LENGTHUNIT', use_cache=True) is None:
+        return index
+    transforms = node_matrices(scene)
+    blob = scene.binary_blob()
+    nodes = {}
+    for ni, node in enumerate(scene.nodes):
+        if node.mesh is not None:
+            nodes.setdefault(node.name, []).append((ni, node))
+
+    def accessor(ai, width):
+        a = scene.accessors[ai]
+        if a.sparse is not None or a.bufferView is None:
+            raise ValueError('Sparse or missing scene accessor')
+        view = scene.bufferViews[a.bufferView]
+        if view.buffer != 0:
+            raise ValueError('External scene buffer')
+        dtype = {5121: 'u1', 5123: '<u2', 5125: '<u4', 5126: '<f4'}[a.componentType]
+        scalar = np.dtype(dtype).itemsize
+        stride = view.byteStride or width * scalar
+        return np.ndarray((a.count, width), dtype=dtype, buffer=blob,
+                          offset=(view.byteOffset or 0) + (a.byteOffset or 0),
+                          strides=(stride, scalar))
+
+    for row in index['rows']:
+        if row['ifc_class'] != 'IfcSpace':
+            continue
+        check = row.get('space_area')
+        if not check:
+            check = row['space_area'] = space_area(f.by_guid(row['item_id']))
+        if check.get('measured_m2') is not None:
+            continue
+        try:
+            polygons = []
+            for ni, node in nodes.get(row['item_id'], []):
+                for prim in scene.meshes[node.mesh].primitives:
+                    if prim.mode not in (None, 4):
+                        raise ValueError('Non-triangle room primitive')
+                    points = accessor(prim.attributes.POSITION, 3)
+                    points = (transforms[ni] @ np.column_stack((points, np.ones(len(points)))).T).T[:, (0, 2)]
+                    ids = accessor(prim.indices, 1).reshape(-1) if prim.indices is not None else np.arange(len(points))
+                    for face in ids.reshape(-1, 3):
+                        polygon = Polygon(points[face])
+                        if polygon.area > 0:
+                            if not polygon.is_valid:
+                                raise ValueError('Invalid projected room face')
+                            polygons.append(polygon)
+            area = float(unary_union(polygons).area)
+            if not math.isfinite(area) or area <= 0:
+                raise ValueError('No usable room triangles')
+            check.update(measured_m2=area, method='Converted IfcSpace mesh horizontal footprint (SI, Y-up)')
+            check.pop('reason', None)
+            stored = check.get('stored_net_m2')
+            if stored is None:
+                check.update(status='no stored net area', difference_pct=None)
+            else:
+                delta = abs(stored - area) / area
+                check.update(difference_pct=delta * 100, status='agree' if delta <= .02 + 1e-12 else 'flag')
+        except (ValueError, TypeError, KeyError, IndexError, GEOSException) as exc:
+            check['reason'] = f'Converted room footprint unavailable ({type(exc).__name__}).'
+    return index
+
+
 def enrich_elements(elements, index):
     by = {r['item_id']: r for r in index['rows']}
     for el in elements:

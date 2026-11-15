@@ -372,8 +372,8 @@ def process(ifc: Path, doc: dict, out_dir: Path):
     from pipeline.scale_provenance import ifc_units
     from pipeline.ifc_props import building_meta, enrich_elements
     enrich_elements(f, elements)
-    from pipeline.ifc_accuracy import build as accuracy_index, enrich_elements as accuracy_elements
-    accuracy = accuracy_index(f, geometry=True)
+    from pipeline.ifc_accuracy import build as accuracy_index, enrich_elements as accuracy_elements, scene_space_areas
+    accuracy = scene_space_areas(f, accuracy_index(f), g)
     accuracy_elements(elements, accuracy)
     (out_dir / "ifc-accuracy.json").write_text(json.dumps(accuracy))
     from pipeline.ifc_quantities import build as build_quantity_index

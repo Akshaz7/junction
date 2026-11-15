@@ -457,6 +457,39 @@ def test_gross_geometry_does_not_replace_declared_usable_net_area(tmp_path):
     assert net['answer']['confidence'] <= .8
 
 
+@pytest.mark.parametrize('schema', ['IFC2X3', 'IFC4', 'IFC4X3'])
+def test_property_only_ingest_reuses_transformed_scene_with_hole(schema, tmp_path):
+    import numpy as np
+    from pygltflib import GLTF2, Accessor, Buffer, BufferView, Mesh, Node, Primitive, Attributes
+    from pipeline.ifc_index import open_properties
+    from pipeline.ifc_accuracy import scene_space_areas
+    f = model(schema)
+    r = room(f, net=66.)
+    path = tmp_path / 'generated-for-test.ifc'
+    f.write(str(path))
+    props = open_properties(path)
+    # Two identical projected rings (floor and ceiling) must not double count.
+    ring = [(0, 0), (4, 0), (4, 3), (0, 3), (1, 1), (2, 1), (2, 2), (1, 2)]
+    vertices = np.array([(x, y, z) for y in (0, 2) for x, z in ring], dtype='<f4')
+    faces = np.array([(0, 1, 5), (0, 5, 4), (1, 2, 6), (1, 6, 5),
+                      (2, 3, 7), (2, 7, 6), (3, 0, 4), (3, 4, 7)], dtype='<u2')
+    ids = np.concatenate((faces.reshape(-1), faces.reshape(-1) + 8)).astype('<u2')
+    blob = vertices.tobytes() + ids.tobytes()
+    scene = GLTF2(buffers=[Buffer(byteLength=len(blob))],
+        bufferViews=[BufferView(buffer=0, byteOffset=0, byteLength=vertices.nbytes),
+                     BufferView(buffer=0, byteOffset=vertices.nbytes, byteLength=ids.nbytes)],
+        accessors=[Accessor(bufferView=0, componentType=5126, count=len(vertices), type='VEC3'),
+                   Accessor(bufferView=1, componentType=5123, count=len(ids), type='SCALAR')],
+        meshes=[Mesh(primitives=[Primitive(attributes=Attributes(POSITION=0), indices=1)])],
+        nodes=[Node(mesh=0, name=r.GlobalId, translation=[7, 2, -4], scale=[2, 1, 3])])
+    scene.set_binary_blob(blob)
+    idx = scene_space_areas(props, build(props), scene)
+    check = next(row['space_area'] for row in idx['rows'] if row['item_id'] == r.GlobalId)
+    assert check['measured_m2'] == pytest.approx(66.)  # (12 - 1) × 2 × 3
+    assert check['stored_net_m2'] == 66. and check['status'] == 'agree'
+    assert 'Y-up' in check['method']
+
+
 def test_native_and_proxy_evidence_stay_distinct(tmp_path):
     f = model()
     a = entity(f, 'IfcStair', 'Native')
