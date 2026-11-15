@@ -377,9 +377,11 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       <ViewerModeToggle mode={mode} onChange={changeMode} />
       <div className="viewer-source-nav" hidden={mode === '3d'}>
         {imageUrl && <a className="viewer-open-source" aria-label="Open source page" href={imageUrl} target="_blank" rel="noreferrer"><FileSymlink size={16} /></a>}
-        <Button variant="ghost" size="icon" aria-label="Previous source" disabled={active <= 0} onClick={() => selectSource(active - 1)}><ChevronLeft size={16} /></Button>
-        <span aria-live="polite" data-testid="source-position">{sources.length ? active + 1 : 0} of {sources.length}</span>
-        <Button variant="ghost" size="icon" aria-label="Next source" disabled={active >= sources.length - 1} onClick={() => selectSource(active + 1)}><ChevronRight size={16} /></Button>
+        {sources.length > 0 && <>
+          <Button variant="ghost" size="icon" aria-label="Previous highlight" title="Previous highlight" disabled={active <= 0} onClick={() => selectSource(active - 1)}><ChevronLeft size={16} /></Button>
+          <span aria-live="polite" data-testid="source-position">Highlight {active + 1} of {sources.length}</span>
+          <Button variant="ghost" size="icon" aria-label="Next highlight" title="Next highlight" disabled={active >= sources.length - 1} onClick={() => selectSource(active + 1)}><ChevronRight size={16} /></Button>
+        </>}
         <Button className="viewer-fit" variant="ghost" size="icon" aria-label="Fit drawing" disabled={!image} onClick={() => image && setView(fitPage(image, viewport))}><Maximize2 size={16} /></Button>
       </div>
       <ShowOnTableButton docId={citation.doc_id} itemIds={table?.doc_id === citation.doc_id ? table.item_ids : citation.item_ids} chatId={chatId} />

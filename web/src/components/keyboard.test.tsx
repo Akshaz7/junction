@@ -241,6 +241,15 @@ it.each([false, true])('viewer search restores Search on Escape and button close
   const onClose = vi.fn()
   const answer = makeDemoAnswer('How many windows?')
   await act(async () => root.render(<DocumentViewer answer={answer} citation={answer.citations[0]} sheet={sheet} onClose={onClose} />))
+  expect(host.querySelector('[data-testid="source-position"]')?.textContent).toBe('Highlight 1 of 2')
+  const nextHighlight = host.querySelector<HTMLButtonElement>('[aria-label="Next highlight"]')!
+  expect(nextHighlight.title).toBe('Next highlight')
+  await click(nextHighlight)
+  expect(host.querySelector('[data-testid="source-position"]')?.textContent).toBe('Highlight 2 of 2')
+  const previousHighlight = host.querySelector<HTMLButtonElement>('[aria-label="Previous highlight"]')!
+  expect(previousHighlight.title).toBe('Previous highlight')
+  await click(previousHighlight)
+  expect(host.querySelector('[data-testid="source-position"]')?.textContent).toBe('Highlight 1 of 2')
   if (sheet) {
     const panel = checkDialog('.document-viewer')
     const title = document.getElementById(panel.getAttribute('aria-labelledby')!)!
