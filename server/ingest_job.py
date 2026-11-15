@@ -417,10 +417,12 @@ def _piping(doc_id: str, ddir: Path, ifc_path: Path):
     tmp.replace(ddir / "piping.json")
 
 
-def _usdz(doc_id: str, ddir: Path):
+def _usdz(doc_id: str, ddir: Path, strict: bool = False):
     import importlib.util as u
     if not u.find_spec("pxr"):
-        return  # AR needs usd-core, which is not in the deploy image: scene.glb still serves the web 3D viewer
+        if strict:  # IFC worker: say why there is no AR file instead of silently hiding the button
+            raise RuntimeError("the AR converter (usd-core) is not installed on this server")
+        return  # scene.glb still serves the web 3D viewer
     from pipeline import usdz
     usdz.process(doc_id, ddir)
 

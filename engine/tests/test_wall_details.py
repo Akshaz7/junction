@@ -25,7 +25,7 @@ def test_scan_estimate_dimensions_and_deductions_are_per_face(tmp_path):
     wall = details("drawing", "wall-1", tmp_path)
     assert wall["status"] == "Estimate"
     assert (wall["length_m"], wall["thickness_m"], wall["height_m"]) == (4, .2, 2.7)
-    assert "assumed" in wall["height_source"]
+    assert wall["height_source"] == "ASSUMED (no wall height on this drawing)" and wall["height_assumed"]
     assert wall["storey"] == "Level 1"
     assert wall["opening_count"] == 1
     assert wall["faces"][0]["gross_m2"] == pytest.approx(10.8)
@@ -38,13 +38,13 @@ def test_printed_height_is_labelled(tmp_path):
     plan(tmp_path, text="Wall height: 3200 mm")
     wall = details("drawing", "wall-1", tmp_path)
     assert wall["height_m"] == 3.2
-    assert wall["height_source"] == "printed height"
+    assert wall["height_source"] == "printed on this drawing"
     assert wall["status"] == "Estimate"
 
 
 def test_vector_pdf_planmap_uses_its_polyline_and_recorded_height(tmp_path):
     plan(tmp_path, props={"centerline_px": [[0, 10], [400, 10]], "thickness_m": .2,
-                          "height_m": 3.2, "height_source": "printed height", "is_external": False})
+                          "height_m": 3.2, "height_source": "printed on this drawing", "is_external": False})
     path = tmp_path / "drawing/planmap-1.json"
     pm = json.loads(path.read_text())
     pm["scale"]["method"] = "printed"
@@ -52,7 +52,7 @@ def test_vector_pdf_planmap_uses_its_polyline_and_recorded_height(tmp_path):
     path.write_text(json.dumps(pm))
     wall = details("drawing", "wall-1", tmp_path)
     assert wall["length_m"] == 4
-    assert wall["height_source"] == "printed height"
+    assert wall["height_source"] == "printed on this drawing"
     assert wall["classification"] == "Internal"
     assert wall["faces"][0]["net_m2"] == pytest.approx(10.8)
 
@@ -73,7 +73,8 @@ def test_ifc_uses_actual_sides_and_only_labels_recorded_orientation(tmp_path, in
         "floors": [{"storey": "Ground", "gross_sides_m2": [12, 15], "net_sides_m2": [10, 12]}]}]})
     wall = details("drawing", "wall-1", tmp_path, quantities={"length_m": 4, "width_m": .3})
     assert wall["status"] == "Measured"
-    assert wall["height_source"] == "model"
+    assert wall["height_source"] == "measured from this wall's 3D geometry in the file"
+    assert wall["height_basis"] == "ifc_geometry" and "top of the wall minus its bottom" in wall["height_how"]
     assert wall["faces"][0]["opening_m2"] == 2
     assert wall["faces"][1]["opening_m2"] == 3
     assert wall["classification"] == "External (facade)"
@@ -119,7 +120,7 @@ def test_generated_scene_component_reuses_the_existing_reader_and_estimator(tmp_
     assert wall["status"] == "Estimate"
     assert wall["length_m"] == 4
     assert wall["thickness_m"] == .2
-    assert wall["height_source"] == "assumed for generated 3D"
+    assert wall["height_source"] == "ASSUMED (no wall height on this drawing)" and wall["height_assumed"]
     assert wall["faces"][0]["net_m2"] == pytest.approx(8.8)
     # A stale scene must not inherit dimensions from a different raster component.
     monkeypatch.setattr(raster_walls, "read", lambda gray, mpp: {"walls": [box(100, 100, 400, 200)]})
@@ -167,3 +168,11 @@ def test_connected_raster_network_gets_perimeter_based_estimate(tmp_path):
     # without the opt-in flag the old honest refusal stands
     pm["items"][0]["props"].pop("network_estimate")
     assert wallarea.estimate_planmaps("drawing", tmp_path, "", planmaps=[pm])["skipped"]
+
+
+def test_assumed_height_wording_and_answer_flags_every_area(tmp_path):
+    from engine import wallarea
+    assert wallarea.ASSUMED_HEIGHT_LABEL == "ASSUMED (no wall height on this drawing)"
+    assert wallarea.height_basis(wallarea.ASSUMED_HEIGHT_LABEL) == "assumed"
+    assert wallarea.height_basis("stated in your question") == "question"
+    assert wallarea.height_basis("printed on this drawing") == "printed"

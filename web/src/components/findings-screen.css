@@ -29,3 +29,7 @@
 .findings-workspace { display: flex; min-height: 0; flex: 1; }
 .findings-workspace.has-evidence { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(0, 1fr); }
 @media (max-width: 800px) { .tools-screen { padding: 8px 16px 28px; gap: 14px; } .tools-card { padding: 16px; } .findings-workspace.has-evidence { display: flex; } .findings-workspace > .viewer-sheet { position: fixed; z-index: 50; inset: 0; } }
+.finding-source { margin: 8px 0 4px; }
+.finding-rule { margin: 4px 0 0; font-size: var(--text-body-sm); }
+.finding-rule summary { cursor: pointer; color: var(--muted-foreground); width: fit-content; }
+.finding-rule blockquote { margin: 8px 0; }

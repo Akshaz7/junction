@@ -8,7 +8,7 @@ import {
   createHighlightController, itemBounds, readHighlightColor, type HighlightOptions, type HighlightState,
 } from './highlight';
 import {
-  disposeScene, itemIdForObject, loadScene, storeyName, type LoadedScene,
+  disposeScene, itemIdForObject, itemLabel, loadScene, storeyName, type LoadedScene,
 } from './scene';
 import { createCutawayController, type CutawayState } from './cutaway';
 import { createLinkedHighlightController } from './linkedHighlight';
@@ -300,7 +300,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       .filter((id): id is string => id !== null && !!active?.items.has(id)))];
     if (linked.selected && active?.items.has(linked.selected)) {
       base.labels[linked.selected] ??= linked.labels[linked.selected]
-        ?? active.manifest.items[linked.selected].tag ?? linked.selected;
+        ?? itemLabel(active.manifest, linked.selected);
     }
     return { highlighted, dimmed: Math.max(0, base.dimmed - (highlighted.length - base.highlighted.length)), labels: base.labels };
   }
