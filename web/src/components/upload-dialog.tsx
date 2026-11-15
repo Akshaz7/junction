@@ -61,7 +61,14 @@ function UploadSession({ onClose, onAsk, onOpen, onReady, onUploaded, initialFil
   }, [])
 
   const uploadedId = state.status === 'processing' ? state.docId : null
-  useEffect(() => { if (uploadedId) onUploaded?.(uploadedId) }, [uploadedId, onUploaded])
+  // Once per uploaded id. onUploaded is an inline prop (new identity on every parent render); depending on it
+  // re-fired this on every refresh the callback itself caused (refresh -> render -> onUploaded -> refresh ...).
+  const notified = useRef<string | null>(null)
+  useEffect(() => {
+    if (!uploadedId || notified.current === uploadedId) return
+    notified.current = uploadedId
+    onUploaded?.(uploadedId)
+  }, [uploadedId, onUploaded])
 
   useEffect(() => {
     const key = state.status === 'ready' ? `${state.docId}:${state.processing ? 'processing' : 'done'}` : null
@@ -110,7 +117,6 @@ function UploadSession({ onClose, onAsk, onOpen, onReady, onUploaded, initialFil
       })
       if (controller.signal.aborted) return
       dispatch({ type: 'uploaded', docId: receipt.doc_id })
-      onUploaded?.(receipt.doc_id)
       phase = 'poll'
       await monitor(receipt.doc_id, controller)
     } catch (error) {
