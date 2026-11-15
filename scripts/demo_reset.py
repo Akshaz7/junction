@@ -143,7 +143,7 @@ async def reset_database(conn, *, dry_run: bool, keep_ids=()) -> list[tuple[str,
         plan = []
         for row in chat_targets:
             plan.append(("chats", "id", row["id"]))
-            print(f"DELETE chats id={display(str(row['id']))} title={display(row['title'])}")
+            print(f"DELETE chats id={display(str(row['id']))} title={display(str(row['title']))}")
         for row in change_targets:
             plan.append(("changes", "id", row["id"]))
             print(f"DELETE changes id={display(str(row['id']))} (test/generated change or test upload)")
@@ -291,7 +291,7 @@ def delete_chat(client: Client, chat_id: str, *, warmup_title: str | None = None
         allowed = automated(current)
     if not allowed:
         raise DemoError("Chat title changed; deletion skipped")
-    client.request("DELETE", path, "Delete " + str(current["title"]))
+    client.request("DELETE", path, "Delete " + str(current.get("title") or "<untitled>"))
 
 
 def prepare(client: Client, dry_run: bool, keep_ids=()):
@@ -315,7 +315,7 @@ def prepare(client: Client, dry_run: bool, keep_ids=()):
             print(f"  {n:4d}  {display(str(title))}")
     else:
         for chat in targets:
-            print(f"  DELETE {display(chat['id'])} title={display(chat['title'])}")
+            print(f"  DELETE {display(chat['id'])} title={display(str(chat['title']))}")
 
     schema = client.request("GET", "/openapi.json", "Check chat deletion support")
     supports_delete = "delete" in schema.get("paths", {}).get("/api/chats/{chat_id}", {})
@@ -333,7 +333,7 @@ def prepare(client: Client, dry_run: bool, keep_ids=()):
     warmup_title = "warmup-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     if dry_run:
         for chat in targets:
-            client.plan("Recheck title, then DELETE chat " + chat["id"] + " " + chat["title"])
+            client.plan("Recheck title, then DELETE chat " + chat["id"] + " " + str(chat.get("title") or "<untitled>"))
         client.plan("POST /api/chats title=" + warmup_title)
         for doc_id, question in questions:
             client.plan(f"POST /api/chats/<warmup>/messages doc={doc_id}: {question}")

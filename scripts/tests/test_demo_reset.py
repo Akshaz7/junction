@@ -154,7 +154,7 @@ def test_known_e2e_titles(title):
 
 
 @pytest.mark.parametrize("title", ["Draft claim", "Meeting prep", "Cross-device coordination", "Follow drawing revisions",
-    "Testimonial", "Testing material options", "Latest design", None])
+    "Testimonial", "Testing material options", "Latest design"])
 def test_preserves_ordinary_titles(title):
     assert not reset.automated({"title": title})
 
@@ -182,3 +182,9 @@ async def test_database_error_does_not_print_connection_credentials(monkeypatch)
     with pytest.raises(reset.DemoError) as error:
         await reset.database_cleanup(True, ())
     assert "secret" not in str(error.value)
+
+
+@pytest.mark.parametrize("title", [None, "", "stress stress-r1", "ttft", "audit-x", "break-ui",
+    "tellfix wall shot", "lead longest wall", "live doors", "logo check", "evui check"])
+def test_matches_prod_test_chat_titles(title):
+    assert reset.automated({"title": title})
