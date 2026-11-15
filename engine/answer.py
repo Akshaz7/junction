@@ -812,6 +812,20 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                 res["trace"] = trace
                 return res
 
+        # 0-dw. "Widen the Bathroom door from 760 to 900 mm": a door what-if (highlight that door, say what is not modelled), never a room highlight
+        from engine import door_edit as _de
+        _dp = _de.parse(question)
+        if _dp is not None:
+            from engine.solvers.data import load_doc as _lddw
+            _ddoc = _lddw(doc_ids[0], root)
+            if _ddoc is not None:
+                emit("status", {"text": f"Exploring document: {_title(doc_ids[0], root)}"})
+                res = _de.answer(question, _ddoc, _dp, t0)
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                return res
+
         # 0-w. "Can we remove the front door / window W7?": a what-if on that one item, same rule checks, nothing persisted
         _wm = re.match(r"^\W*(?:can|could|should|would)\s+(?:we|i)\s+(?:safely\s+)?(?:remove|delete|take\s+out|get\s+rid\s+of|knock\s+out)\s+(.+?)\s*\??\s*$", question, re.I)
         if _wm and re.search(r"\b(?:door|doors|window|windows|[dw]\d+)\b", _wm.group(1), re.I) and not re.search(r"\b(?:all|every|each|both)\b|\bdoors\b|\bwindows\b", _wm.group(1), re.I):

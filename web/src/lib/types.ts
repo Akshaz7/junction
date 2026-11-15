@@ -86,7 +86,7 @@ export interface ConfidenceFactor { label: string; delta: number; note?: string;
 export interface GraphNode { label: string; kind?: string; item_id?: string | null; doc_id?: string; page?: number; relation?: string }
 export interface Reasoning {
   steps: ReasoningStep[]
-  confidence: { label: 'Verified' | 'Cross-checked' | 'Estimate'; pct: number | null; reason: string; improve?: string | null; factors?: ConfidenceFactor[]; calibration?: { n: number; correct: number; source: string; scope?: string; interval_95?: [number, number] | null } | null }
+  confidence: { label: 'Verified' | 'Verified (counted from the model)' | "Verified (counted from the drawing's CAD geometry)" | 'Cross-checked' | 'Estimate'; pct: number | null; reason: string; improve?: string | null; factors?: ConfidenceFactor[]; calibration?: { n: number; correct: number; source: string; scope?: string; interval_95?: [number, number] | null } | null }
   margin?: EvidenceMargin
   based_on?: { elements: number; estimated: number; unresolved: number; text: string }
   arithmetic?: { formula: string; text: string; terms: { doc_id: string; item_id: string; cite?: number | null; value: number; unit: string; measurement?: { formula: string; operands: { value: number; unit: string }[] } }[]; result: number; unit: string }[]

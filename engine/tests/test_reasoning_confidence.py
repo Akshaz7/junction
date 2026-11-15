@@ -40,9 +40,11 @@ def test_calibration_uses_observed_counts_and_cites_sample(tmp_path, monkeypatch
     path.write_text(json.dumps({'buckets': [{'source': 'scan', 'unit': 'count', 'checked': True, 'n': 20, 'correct': 13, 'accuracy': .99}]}))
     monkeypatch.setattr(confidence, 'CALIBRATION_PATH', path)
     result = confidence.run(_ctx(checked=True))
-    assert result['pct'] == 65
+    assert result['pct'] is None            # cohort under 30: no percentage is shown
     assert result['calibration']['n'] == 20
     assert '13 of 20' in result['reason'] and 'small sample' in result['reason']
+    path.write_text(json.dumps({'buckets': [{'source': 'scan', 'unit': 'count', 'checked': True, 'n': 40, 'correct': 26}]}))
+    assert confidence.run(_ctx(checked=True))['pct'] == 65
     assert confidence.run(_ctx(unit='m2', checked=True))['pct'] is None
     assert confidence.run(_ctx(checked=False))['pct'] is None
 
@@ -51,7 +53,7 @@ def test_qa2_published_schema_matches_format_and_operation(tmp_path, monkeypatch
     path = tmp_path / 'calibration.json'
     path.write_text(json.dumps({'by_format_and_question_type': [{'format': 'ifc', 'type': 'count', 'n': 2, 'correct': 1}]}))
     monkeypatch.setattr(confidence, 'CALIBRATION_PATH', path)
-    assert confidence.run(_ctx(is_ifc=True, quantified_exact=True))['pct'] == 50
+    assert confidence.run(_ctx(is_ifc=True, quantified_exact=True))['pct'] is None   # n=2 is under 30
     assert confidence.run(_ctx(is_ifc=True, unit='m2'))['pct'] is None
     assert confidence.run(_ctx(route='vision', models_used=True))['pct'] is None
 
@@ -62,3 +64,14 @@ def test_invalid_calibration_fails_without_inventing_probability(tmp_path, monke
     for data in ('bad json', '{"buckets": [{"source": "scan", "n": 0, "correct": 0}]}', '{"buckets": [{"source": "scan", "n": 1, "correct": 2}]}'):
         path.write_text(data)
         assert confidence.run(_ctx())['pct'] is None
+
+
+def test_exact_ifc_count_is_verified_counted_from_the_model(monkeypatch):
+    from engine.reasoning_parts import counts
+    monkeypatch.setattr(counts, 'facts', lambda res, q: {'problems': [], 'total': 3, 'reread': None})
+    r = confidence.run(_ctx(is_ifc=True, route='index'))
+    assert r['label'] == 'Verified (counted from the model)' and r['pct'] is None
+    assert 'Exact for what the model contains' in r['reason']
+    # detector counts and counts with any model component stay Estimate
+    assert confidence.run(_ctx(route='planmap'))['label'] == 'Estimate'
+    assert confidence.run(_ctx(is_ifc=True, route='index', models_used=True))['label'] == 'Estimate'
