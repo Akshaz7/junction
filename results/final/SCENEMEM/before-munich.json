@@ -1,0 +1,12 @@
+{
+  "label": "before",
+  "case": "munich",
+  "doc_id": "ifc_bench__city-house-munich-arc",
+  "source": "data/full/junction-dataset/data/ifc_bench/city_house_munich_arc.ifc",
+  "source_mb": 33.499586,
+  "peak_sampled_mib": 971.17,
+  "seconds": 8.43,
+  "exit_code": -9,
+  "stopped": "memory cap",
+  "work": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-scenemem-yqkgm7aw"
+}

@@ -32,8 +32,6 @@ def run(stage, source, output):
                                  batch_size=int(os.environ.get("IFC_INDEX_BATCH_SIZE", "128")))
     if stage == "ifc_scene":
         # Load shared libraries before setting the native allocation guard.
-        import trimesh  # noqa: F401
-
         from pipeline import ifc_glb, ifc_scene  # noqa: F401
         _allocation_limit()
         return ifc_scene.process(src, doc, out)

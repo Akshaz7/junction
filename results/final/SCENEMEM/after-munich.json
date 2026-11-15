@@ -1,0 +1,27 @@
+{
+  "label": "after",
+  "case": "munich",
+  "doc_id": "ifc_bench__city-house-munich-arc",
+  "source": "data/full/junction-dataset/data/ifc_bench/city_house_munich_arc.ifc",
+  "source_mb": 33.499586,
+  "peak_sampled_mib": 291.19,
+  "seconds": 17.67,
+  "exit_code": 0,
+  "stopped": null,
+  "work": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-scenemem-a9lpukhd",
+  "fresh_index_metrics": {
+    "peak_worker_rss_mib": 81.2,
+    "memory_budget_mib": 320.0,
+    "worker_exit_code": 0,
+    "batches": 2
+  },
+  "ok": true,
+  "result": {
+    "doc_id": "ifc_bench__city-house-munich-arc",
+    "elements": 214,
+    "nodes": 210,
+    "storeys": 15,
+    "s": 17.5
+  },
+  "resource_peak_mib": 291.1875
+}
