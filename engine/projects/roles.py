@@ -270,7 +270,8 @@ def _classify(doc: dict, root: Path) -> dict:
     formats = [str(f).lower() for f in (meta.get("formats") or [])]
     folder = Path(root, doc_id) if doc_id else None
     has = (lambda name: bool(folder and (folder / name).exists()))
-    if kind == "ifc" or "ifc" in formats or has("elements.json"):
+    pdf_drawing = kind == "pdf" and "ifc" in formats   # a drawing read into an IFC (reader output) is still a drawing, never a second building
+    if not pdf_drawing and (kind == "ifc" or "ifc" in formats or has("elements.json")):
         return {"role": "model", "level": None, "confidence": 0.99}
 
     # a per-storey sheet generated from / belonging to a model: its level is the storey in its title
@@ -308,7 +309,7 @@ def _classify(doc: dict, root: Path) -> dict:
         return {"role": role, "level": level_from_text(title), "confidence": 0.8}
 
     level = _planmap_storey(doc_id, root) or sheet_level
-    level = level or level_from_text(title) or level_from_text(text[:2000])
+    level = level or level_from_text(title) or level_from_text(re.sub(r"[-_]+", " ", title)) or level_from_text(text[:2000])
 
     # CAD: layer names decide the sheet type when the title does not
     if kind in ("dxf", "dwg") or {"dxf", "dwg"} & set(formats):

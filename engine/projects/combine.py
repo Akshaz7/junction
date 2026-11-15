@@ -165,7 +165,7 @@ def _group_models(infos: dict) -> list[Group]:
     groups: list[Group] = []
     docs_of: dict[str, list] = {}
     for info in infos.values():
-        if info.role != "model" or info.doc is None or getattr(info.doc, "mode", "") != "ifc":
+        if info.role != "model" or info.doc is None or getattr(info.doc, "mode", "") != "ifc" or (info.kind == "pdf" and "ifc" in (info.formats or [])):
             continue
         for g in groups:
             if _same_building(infos[g.model_ids[0]].doc, info.doc):
@@ -244,7 +244,7 @@ def combine(docs: list, root: Path | str) -> Combined:
     sheets_group: Group | None = None
     for info in infos.values():
         d = info.doc
-        if info.role not in COUNTED_ROLES or info.role == "model" or d is None or info.derived or getattr(d, "mode", "") != "planmap":
+        if info.role not in COUNTED_ROLES or info.role == "model" or d is None or info.derived or (getattr(d, "mode", "") != "planmap" and not (info.kind == "pdf" and getattr(d, "mode", "") == "ifc")):
             continue
         row = None
         if info.level:
