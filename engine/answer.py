@@ -93,6 +93,8 @@ def _use_reader(res, question, doc_ids, root, trace, calls, t0, emit):
     if rr is not None and not rr["answer"].get("abstained"):
         rr["trace"] = trace
         return rr
+    if res is not None:
+        res["cost"] = {"usd_total": round(sum(c.get("cost_usd", 0) for c in calls), 6), "calls": calls}
     return res if res is not None else rr
 
 

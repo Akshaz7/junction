@@ -1,5 +1,4 @@
 """Round 2 regressions. Geometry is generated for demo; real cases replay separately."""
-import json
 from unittest.mock import Mock
 
 import pytest
@@ -98,4 +97,15 @@ def test_printed_schedule_precedes_missing_floor_geometry(tmp_path, monkeypatch)
     result = answer("What is the area of room 302 in the finish room schedule?", [DOC])
     assert result["answer"]["value"] == 1240 and result["answer"]["unit"] == "ft²"
     assert result["citations"] and not result["answer"]["abstained"]
+
+
+def test_unsuccessful_source_lookup_still_reports_its_cost(tmp_path, monkeypatch):
+    d = write_plan(tmp_path)
+    (d / "page-1.png").touch()
+    def reader(q, ids, root, trace, calls, t0, emit):
+        calls.append({"task": "reader_plan", "provider": "mock", "model": "mock", "cost_usd": .02})
+        return None
+    monkeypatch.setattr("engine.answer._reader", reader)
+    result = answer("What is the floor area?", [d.name])
+    assert result["answer"]["abstained"] and result["cost"]["usd_total"] == .02
 

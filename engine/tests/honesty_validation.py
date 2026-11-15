@@ -14,6 +14,7 @@ def main():
     ap.add_argument("phase", choices=("before", "after"))
     ap.add_argument("--report", type=Path, required=True)
     ap.add_argument("--artifacts", type=Path, required=True)
+    ap.add_argument("--output", type=Path, default=Path("results/final/HONEST"))
     ap.add_argument("--live", action="store_true", help="Replay only judges with real models, maximum $2.50.")
     args = ap.parse_args()
     os.environ.update(MODELS_FAKE="1", EXPLAIN="0", ANSWER_TIMEOUT_S="0",
@@ -21,7 +22,7 @@ def main():
                       MODELS_COSTS_LOG=str(Path('.honest-replay/model-costs.jsonl').resolve()))
     from engine.answer import answer
     from engine.bench import load_set, run
-    out = Path("results/final/HONEST")
+    out = args.output
     out.mkdir(parents=True, exist_ok=True)
     if not args.live:
         sample = run(load_set("sample200"), concurrency=2)
