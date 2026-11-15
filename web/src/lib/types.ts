@@ -86,7 +86,7 @@ export interface Answer {
   answer: { text_md: string; value: number | string | Record<string, number> | null; unit: string | null; confidence: number; abstained: boolean }
   citations: { n: number; doc_id: string; page: number; kind: 'region' | 'text' | 'element'; bbox_px: Bbox | null; item_ids: string[]; quote: string | null; item_kind?: string | null }[]
   evidence: {
-    boxes: { item_id: string; page: number; bbox_px: Bbox; label: string; kind?: string | null }[]
+    boxes: { item_id: string; doc_id?: string; page: number; bbox_px: Bbox; label: string; kind?: string | null }[]
     scene: { doc_id: string; highlight_item_ids: string[]; camera_target_item_id: string | null; commands?: readonly SceneCommand[]; open?: '3d' | 'ar' }
   }
   trace: { step: string; detail: string; ms: number; model: string | null; cost_usd: number; stub?: boolean }[]

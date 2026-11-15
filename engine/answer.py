@@ -350,13 +350,14 @@ def _answer_with_evidence(question: str, doc_ids: list[str], on_event: Callable 
         pass
     try:   # E-77: exact code answers explained in plain words (numbers unchanged; falls back to the code text)
         from engine.explain import explain
-        if marked is None and not any(s.get("step") == "props" for s in res.get("trace", [])):
+        if marked is None and res.get("xdisc") is None and not any(s.get("step") == "props" for s in res.get("trace", [])):
             res = explain(res, question, _root(), on_event=on_event)
     except Exception:  # noqa: BLE001
         pass
     try:   # X20-X23/D01: feet, acres, unit prices on top of the metric answer (engine/units.py; value unchanged)
         from engine import units
-        res = units.convert(res, question)
+        if res.get("xdisc") is None:
+            res = units.convert(res, question)
     except Exception:  # noqa: BLE001
         pass
     try:   # E-79: "How we know" steps + confidence label, built by code from the cited elements
@@ -536,6 +537,13 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
 
         from engine.wallarea import answer as wallarea_answer
         if (res := wallarea_answer(question, doc_ids, root, t0, hidden=set((scene_state or {}).get("hidden") or []))) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
+            return res
+
+        from engine import xdisc
+        if (res := xdisc.answer(question, doc_ids, root, t0)) is not None:
             for s_ in res["trace"]:
                 add(s_)
             res["trace"] = trace

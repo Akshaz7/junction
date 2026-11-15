@@ -150,7 +150,7 @@ def build(res: dict, question: str, root: Path) -> dict | None:
 
 def attach(res: dict, question: str, root: Path) -> dict:
     from engine.reasoning_parts import quality as _quality
-    if (res.get("mistakes") is not None or res.get("route") == "symbols") and res.get("reasoning"):
+    if (res.get("mistakes") is not None or res.get("route") == "symbols" or res.get("xdisc") is not None) and res.get("reasoning"):
         _quality.attach(res, root)
         return res
     if res.get("reasoning"):   # these routes bring their own card; the invariant still applies
