@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { asPercent, filterGraph, groupConnections, isEstimate, methodPhrase, noFilters, searchNodes, nodeRadius } from './kg'
+import { asPercent, filterGraph, graphMatchMetrics, groupConnections, isEstimate, methodPhrase, noFilters, searchNodes, nodeRadius, type KgStats } from './kg'
 import { mockGraph } from './kg-mock'
 
 describe('kg helpers', () => {
@@ -37,5 +37,30 @@ describe('kg helpers', () => {
     const groups = groupConnections(rows)
     expect(groups.length).toBeGreaterThan(0)
     expect(nodeRadius(20, 'room')).toBeGreaterThan(nodeRadius(1, 'room'))
+  })
+})
+
+describe('graph match totals', () => {
+  const empty: KgStats = { nodes: 0, edges: 0, linked_pct: null, agree_pct: null, unlinked: [], issues: 0 }
+  it('explains zero matches and zero comparisons instead of showing dashes or claiming disagreement', () => {
+    const result = graphMatchMetrics({ ...empty, nodes: 100, edges: 80, edges_by_kind: { contains: 80 } })
+    expect(result.linked).toEqual({ value: '0', hint: 'No items have been matched across files yet.' })
+    expect(result.agree).toEqual({ value: '0', hint: 'No values have been compared between files yet.' })
+  })
+  it('uses full-project item and edge counts when the API percentages are absent', () => {
+    const result = graphMatchMetrics({ ...empty, counterpart_items: 200, linked_items: 60, edges_by_kind: { same_as: 40, agrees: 3, differs: 1 } })
+    expect(result.linked.value).toBe('30%')
+    expect(result.agree.value).toBe('75%')
+  })
+  it('shows recorded matching links without guessing an item percentage', () => {
+    const result = graphMatchMetrics({ ...empty, edges_by_kind: { same_as: 12 } })
+    expect(result.linked.value).toBe('12')
+    expect(result.linked.hint).toContain('share of matched items is not available')
+  })
+  it('preserves recorded percentages including zero and percentages below one', () => {
+    const result = graphMatchMetrics({ ...empty, linked_pct: 0.6, agree_pct: 0, edges_by_kind: { agrees: 3 } })
+    expect(result.linked.value).toBe('0.6%')
+    expect(result.agree.value).toBe('0%')
+    expect(result.agree.hint).toBe('Compared values that agree between files')
   })
 })
