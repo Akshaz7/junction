@@ -586,6 +586,13 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             res["trace"] = trace
             return res
 
+        from engine.wall_runs import answer as wall_runs_answer
+        if (res := wall_runs_answer(question, doc_ids, root, t0)) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
+            return res
+
         from engine import xdisc
         if (res := xdisc.answer(question, doc_ids, root, t0)) is not None:
             for s_ in res["trace"]:
