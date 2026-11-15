@@ -788,7 +788,7 @@ def estimate_planmaps(doc_id, root, question, *, planmaps=None):
                     line = LineString(coords)
                     length = length or line.length
                     method = "centreline length"
-                else:
+                elif not props.get("holes_px"):
                     poly = Polygon(coords)
                     if poly.is_valid and poly.area > 0:
                         rect = poly.minimum_rotated_rectangle
@@ -804,6 +804,18 @@ def estimate_planmaps(doc_id, root, question, *, planmaps=None):
                             length = length or long
                             thick = thick or short
                             method = "rectangular wall outline"
+            network = None
+            if not length and mpp and props.get("network_estimate") and pts and len(pts) >= 3:
+                # Connected raster wall component (several runs/junctions): no single
+                # axis. Thin-wall relations: faces ~ perimeter, length ~ perimeter/2,
+                # thickness ~ 2*area/perimeter. Reported as an estimate only.
+                poly = Polygon([(float(x) * mpp, float(y) * mpp) for x, y in pts],
+                               [[(float(x) * mpp, float(y) * mpp) for x, y in ring] for ring in props.get("holes_px") or [] if len(ring) >= 3])
+                if poly.is_valid and poly.area > 0 and poly.length > 0:
+                    network = poly
+                    length = poly.length / 2
+                    thick = thick or 2 * poly.area / poly.length
+                    method = "wall network outline (total run length = half the outline perimeter)"
             if not length or h <= 0:
                 out["skipped"].append({"item_id": it.get("item_id"), "reason": "No scaled straight wall length/outline"})
                 continue
@@ -812,8 +824,10 @@ def estimate_planmaps(doc_id, root, question, *, planmaps=None):
                    "materials": [props["material"]] if props.get("material") else [], "is_external": external,
                    "height_m": h, "length_m": length, "thickness_m": thick, "height_source": props.get("height_source") or ("wall data" if props.get("height_m") else height_source),
                    "axis_source": method, "quantities": {}, "checks": [], "curved": False, "rooms": [], "openings": [],
-                   "page": page, "floors": [], "notes": [], "_line": line, "_thickness": thick,
+                   "page": page, "floors": [], "notes": [], "_line": line, "_poly": network, "_thickness": thick,
                    "_holes": [], "scale_relative_error": sc.get("relative_error"), "scale_method": sc.get("method")}
+            if network is not None:
+                row["notes"].append("Connected wall network: total run length and mean thickness are derived from the outline area and perimeter; faces A and B cannot be separated.")
             row["_floor"] = {"storey_id": str(page), "storey": label, "gross_m2": 2 * length * h,
                              "category": "external" if external else "internal" if external is False else "unclassified",
                              "numerical_allowance_m2": 0., "face_offset_allowance_m2": 2 * (thick or 0) * h}
@@ -831,7 +845,8 @@ def estimate_planmaps(doc_id, root, question, *, planmaps=None):
                 from shapely.geometry import Point
                 loc = Point((bb[0] + bb[2]) * mpp / 2, (bb[1] + bb[3]) * mpp / 2)
                 if not explicit:
-                    close = [(w["_line"].distance(loc), w) for w in page_rows if w["_line"] is not None]
+                    close = [((w["_line"] if w["_line"] is not None else w["_poly"]).distance(loc), w) for w in page_rows
+                             if w["_line"] is not None or w["_poly"] is not None]
                     close.sort(key=lambda x: x[0])
                     if close and close[0][0] <= (close[0][1]["_thickness"] or 0) / 2 + 2 * mpp:
                         if len(close) == 1 or close[1][0] - close[0][0] > mpp:
@@ -872,7 +887,7 @@ def estimate_planmaps(doc_id, root, question, *, planmaps=None):
             floor["orientation_unresolved"] = False
             w.update({k: floor[k] for k in ("gross_m2", "net_m2", "opening_m2")})
             w["floors"] = [floor]
-            for k in ("_line", "_thickness", "_holes"):
+            for k in ("_line", "_poly", "_thickness", "_holes"):
                 w.pop(k)
             out["walls"].append(w)
         out["assumptions"].append(f"{label}: wall height {height:g} m ({height_source}); missing door/window heights use 2.10/1.50 m, window sill 0.90 m; {unallocated} detected openings not assigned to a wall")

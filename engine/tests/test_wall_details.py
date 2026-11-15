@@ -149,3 +149,21 @@ def test_linked_wall_api_and_tag_return_the_same_measurement(tmp_path, monkeypat
         assert data["wall_details"]["faces"][0]["net_m2"] == pytest.approx(8.8)
         assert client.get(f"/api/docs/drawing/tags/{data['tag']}").json()["wall_details"] == data["wall_details"]
         assert client.get("/api/docs/drawing/items/no-wall").status_code == 404
+
+
+def test_connected_raster_network_gets_perimeter_based_estimate(tmp_path):
+    from engine import wallarea
+    ring = [[0, 0], [400, 0], [400, 400], [0, 400]]
+    hole = [[20, 20], [380, 20], [380, 380], [20, 380]]
+    pm = {"page": 1, "scale": {"m_per_px": .01, "method": "door-prior"}, "items": [
+        {"item_id": "wall-r001", "kind": "wall", "polygon_px": ring,
+         "props": {"network_estimate": True, "holes_px": [hole], "height_m": 2.7, "height_source": "assumed for generated 3D"}}]}
+    out = wallarea.estimate_planmaps("drawing", tmp_path, "", planmaps=[pm])
+    wall = out["walls"][0]
+    # perimeter = 16 m + 14.4 m = 30.4 m; area = 16 - 12.96 = 3.04 m2
+    assert wall["length_m"] == pytest.approx(15.2)
+    assert wall["thickness_m"] == pytest.approx(2 * 3.04 / 30.4)
+    assert wall["gross_m2"] == pytest.approx(30.4 * 2.7)
+    # without the opt-in flag the old honest refusal stands
+    pm["items"][0]["props"].pop("network_estimate")
+    assert wallarea.estimate_planmaps("drawing", tmp_path, "", planmaps=[pm])["skipped"]
