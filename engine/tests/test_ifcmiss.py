@@ -66,8 +66,8 @@ def test_light_inventory_excludes_switches_and_hidden_items(monkeypatch, tmp_pat
                                     element('hidden', kind='light')])
     from engine import mep
     monkeypatch.setattr(mep, 'load_index', lambda doc: {'services': [
-        {'item_id': 'lamp', 'k': 'light'}, {'item_id': 'switch', 'k': 'switch'},
-        {'item_id': 'hidden', 'k': 'light'}]})
+        {'id': 'lamp', 'k': 'light'}, {'id': 'switch', 'k': 'switch'},
+        {'id': 'hidden', 'k': 'light'}]})
     result = answer("How many light fixtures are there in the model 'Apartment Electrical'?",
                     ['generated'], tmp_path, hidden=['hidden'])
     assert result['answer']['value'] == 1
@@ -84,3 +84,44 @@ def test_full_answer_routes_linked_ifc_before_text_sheet(monkeypatch, tmp_path):
     result = ask("How many rooms (spaces) are there in the model 'Electrical Building'?", [did])
     assert result['answer']['value'] == 2
     assert result['answer']['unit'] == 'count'
+
+
+def test_both_mep_and_quantity_row_ids_follow_aggregate_hierarchy(tmp_path):
+    from engine.ifc_accuracy import count_rows
+    from engine.solvers.data import load_doc
+    write_doc(tmp_path, 'generated', [element('a'), element('part', count_component_of='a')])
+    doc = load_doc('generated', tmp_path)
+    assert count_rows([{'id': 'a'}, {'id': 'part'}], doc, tmp_path) == [{'id': 'a'}]
+    assert count_rows([{'item_id': 'a'}, {'item_id': 'part'}], doc, tmp_path) == [{'item_id': 'a'}]
+
+
+def test_explicit_net_floor_area_keeps_stored_operand_and_geometry_check(tmp_path):
+    from engine.tests.test_acc_ifc import model, room, document
+    f = model()
+    room(f, net=10)
+    did = document(tmp_path, f)
+    result = answer('What is the total net floor area of all rooms (spaces)?', [did], tmp_path)
+    assert result['answer']['value'] == 10
+    assert result['_calc']['rows'][0]['source']['field'] == 'quantities.net_floor_area_m2'
+    assert result['_calc']['rows'][0]['source']['artifact'] == 'elements.json'
+    assert any('measured footprint 12' in t['detail'] and 'stored net area 10' in t['detail'] for t in result['trace'])
+
+
+def test_explicit_net_side_area_does_not_substitute_other_wall_areas(tmp_path):
+    row = element('wall', kind='wall')
+    row['ifc_class'] = 'IfcWall'
+    row['quantities'] = {'net_side_area_m2': 18, 'area_m2': 22, 'gross_side_area_m2': 25}
+    write_doc(tmp_path, 'generated', [row])
+    result = answer("What is the total net side area of all walls on 'Ground', in m²?", ['generated'], tmp_path)
+    assert result['answer']['value'] == 18
+    assert result['_calc']['rows'][0]['source']['field'] == 'quantities.net_side_area_m2'
+
+
+def test_missing_net_quantity_is_unavailable_not_gross_area(tmp_path):
+    row = element('wall', kind='wall')
+    row['ifc_class'] = 'IfcWall'
+    row['quantities'] = {'area_m2': 22, 'gross_side_area_m2': 25}
+    write_doc(tmp_path, 'generated', [row])
+    result = answer('What is the total net side area of all walls?', ['generated'], tmp_path)
+    assert result['answer']['abstained']
+    assert result['answer']['value'] is None

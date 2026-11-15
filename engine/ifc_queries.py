@@ -26,7 +26,18 @@ def query_doc(doc_id, root, question):
 
 def answer(question, doc_ids, root, t0=None, hidden=()):
     """Only unqualified occurrence counts; detailed/filtered questions keep their routes."""
-    if len(doc_ids) != 1 or not (match := PLAIN_COUNT.search(question)):
+    if len(doc_ids) != 1:
+        return None
+    from engine.router.parser import parse
+    from engine.solvers.solve import requested_area_key, solve
+    parsed = parse(question)
+    if parsed.type == 'area' and requested_area_key(question, parsed.kind):
+        doc = query_doc(doc_ids[0], root, question)
+        if doc is not None and doc.mode == 'ifc':
+            return solve(question, doc_ids[0], parsed=parsed, root=root,
+                         hidden={iid: iid for iid in hidden})
+        return None
+    if not (match := PLAIN_COUNT.search(question)):
         return None
     # Do not silently discard filters following the generic noun.
     tail = question[match.end(1):]
@@ -54,7 +65,7 @@ def answer(question, doc_ids, root, t0=None, hidden=()):
         if index is None:
             return None  # No typed service inventory: keep the guarded fallback.
         kinds = {'light'} if kind == 'light' else mep._kinds_of(['fixture'])
-        selected = {r['item_id'] for r in index['services'] if r['k'] in kinds}
+        selected = {r['id'] for r in index['services'] if r['k'] in kinds}
         items = [i for i in items if i.item_id in selected]
     else:
         items = [i for i in items if i.kind == kind]

@@ -131,7 +131,7 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
     if not hit:
         return _done(question, doc, missing_room_text(target, rooms)
                      + (f" Storey filter: {st}." if st else ""), None, None, [], trace, t0=t0)
-    vals = [(r, _qty(r, "room", "area")) for r in hit]
+    vals = [(r, _qty(r, "room", "area", question)) for r in hit]
     if doc.mode == "planmap" and (not doc.scale or doc.scale.get("method") in (None, "none")):
         if not all(r.props.get("area_m2_label") is not None for r in hit):
             return _done(question, doc, "The matching rooms have no trusted drawing scale or printed area, so I cannot state an area.", None, None, hit, trace, t0=t0)

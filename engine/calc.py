@@ -189,8 +189,11 @@ def record_items(res, doc, pairs, unit=None, formula="total = Σ(source quantiti
                 checks.append({"method": "printed label versus outline", "value": printed, "agrees": close(printed, geom, .005),
                                "diff_pct": abs(printed - geom) / abs(printed) * 100 if printed else None, "source": sref})
         if unit in ("m2", "m3") and not measured:
-            from engine.solvers.solve import _qty
-            stored = _qty(item, "room" if item.kind == "space" else item.kind, "area" if unit == "m2" else "volume")
+            from engine.solvers.solve import _qty, requested_area_key
+            stored = _qty(item, "room" if item.kind == "space" else item.kind, "area" if unit == "m2" else "volume", res.get('question', ''))
+            requested = requested_area_key(res.get('question', ''), item.kind)
+            if unit == 'm2' and requested and close(item.q.get(requested), value):
+                sref['field'] = 'quantities.' + requested
             if not close(stored, value):
                 sref.update({"artifact": "scene.glb", "kind": "geometry", "field": "mesh floor area" if unit == "m2" else "closed mesh volume"})
         rows.append(r)
