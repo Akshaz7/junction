@@ -1,0 +1,22 @@
+{
+  "note": "No constant was changed by SCANACC2. These are the existing production values, re-validated on the CubiCasa dev split. All numbers come from offline replay of cached icon probabilities (vision/build_planmaps.py extraction + verify.free_pass duplicate merge + confidence cut).",
+  "dev_split": {"file": "results/final/SCANACC2/split.json", "n_dev": 115, "n_test": 40, "blind": 1,
+                "source": "data/cubicasa5k/calib/gt.json (SVG-derived gold counts), disjoint from the benchmark pool and the held-out id list"},
+  "constants": {
+    "cut_door": {"value": 0.7, "swept": [0.4, 0.5, 0.6, 0.7, 0.8], "n": 115,
+                 "dev_exact_acc": {"0.5": 0.348, "0.6": 0.435, "0.7": 0.461, "0.8": 0.304}, "confidence": "medium: optimum is sharp at 0.7 but 0.6 and 0.7 differ by 3 documents"},
+    "cut_window": {"value": 0.7, "n": 115, "dev_exact_acc": {"0.5": 0.313, "0.6": 0.400, "0.7": 0.470, "0.8": 0.400}, "confidence": "medium"},
+    "cut_toilet": {"value": 0.7, "n": 115, "dev_exact_acc": {"0.5": 0.757, "0.6": 0.783, "0.7": 0.817, "0.8": 0.791}, "confidence": "medium"},
+    "dup_gap_frac": {"value": 0.003, "tested_alternatives": [0.01, 0.02, 0.04, 0.08], "result": "no gain with max or weighted-mean confidence", "n": 115, "confidence": "medium"},
+    "dup_iou": {"value": 0.3, "confidence": "low: not swept on its own"},
+    "detector_input_size": {"value": 1024, "tested": [768], "dev_exact_acc_at_cut_0.7": {"1024": {"door": 0.461, "window": 0.470, "toilet": 0.817, "sink": 0.217, "shower_bathtub": 0.130}, "768": {"door": 0.487, "window": 0.417, "toilet": 0.783, "sink": 0.261, "shower_bathtub": 0.096}}, "n": 115, "confidence": "medium: mixed, no net gain"}
+  },
+  "rejected_candidates": {
+    "tta_rotate_flip_average": {"n": 62, "result": "doors +2 points, windows -1 to -4 points at cut 0.7, within noise; full dev run could not finish under memory pressure, so not adopted"},
+    "seg_opening_second_signal": {"n": 115, "result": "no gain"},
+    "collinear_fragment_merge": {"n": 115, "result": "no gain"},
+    "tiling": {"result": "dropped; previously cost sample200 76 to 72"}
+  },
+  "raw_vs_gold_totals_dev": {"window_components": 770, "window_gold": 750, "door_components": 966, "door_gold": 855,
+                            "reading": "totals match; per-document errors come from fragmented real openings and similar-confidence false blobs, not from threshold choice"}
+}
