@@ -142,7 +142,7 @@ Seven agents, Docker, dev servers, browsers, PyTorch and Xcode share 24 GB. Memo
 **Licence rules**
 - The repo is MIT. Do not add AGPL or GPL code dependencies. Known traps: `ultralytics` (AGPL) and `PyMuPDF` (AGPL). Use permissive tools instead (for example pypdfium2 + pdfminer.six for PDF; RT-DETR or YOLOX for detection).
 - Record every third-party model and dataset in `docs/MODELS.md`: name, source URL, licence, what data it was trained on.
-- `refs/` holds Stoa's material. It is a visual and timing reference only. Never copy code from `refs/stoa-hero/source/`. Never put Stoa's logo, drawings or source files in git or in the deployed app. Use our own wordmark ("Hologram", working title) and dataset drawings.
+- `refs/` holds Stoa's material. It is a visual and timing reference only. Never copy code from `refs/stoa-hero/source/`. Never put Stoa's drawings or source files in git or in the deployed app. The product is named "Stoa Pro" and uses the Stoa logo; use dataset drawings.
 - Add to the README: "UI design follows Stoa's product, with permission from Stoa Technologies Oy."
 
 **Budget rules**
