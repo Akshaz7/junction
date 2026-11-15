@@ -181,6 +181,11 @@ def _build(question, doc_ids, sess: Session, fin: dict, trace, calls, t0, forced
         if not any(abs(round(float(value), 2) - n) <= max(0.011, abs(n) * 0.005) for n in seen):
             notes.append("value not found in any tool result")
             value, conf = None, min(conf, 0.3)
+    from engine.numeric import count_question, headline_numbers
+    from engine.router.parser import parse
+    if value is None and headline_numbers(text) and (count_question(question) or parse(question).type in ("area", "length", "volume")):
+        forced_abstain = forced_abstain or "numeric headline has no verified computation"
+        text = "I could not verify a numeric answer for this question from the cited tool results."
     abstained = bool(forced_abstain) or not refs or str(fin.get("action")) == "abstain" or conf <= 0.0
     cites, boxes, ids, n = [], [], [], 0
     seen_ids = set()

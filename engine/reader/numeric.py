@@ -22,12 +22,14 @@ def recover_value(question, text, value, unit, sess, refs):
         value, unit = int(value), "count"
     if value is None:
         bases = {r.partition("#c")[0] for r in refs}
+        cited_ids = {(sess.ev[b].doc_id, iid) for b in bases for iid in sess.ev[b].item_ids}
         computed = []
         for result in sess.numeric_results:
-            if not bases.intersection(result.get("refs", [])):
+            full_selection = {(result.get("doc_id"), iid) for iid in result.get("item_ids", [])}
+            if not bases.intersection(result.get("refs", [])) and not (full_selection and full_selection <= cited_ids):
                 continue
             if result.get("compute"):
-                if expected == "count":
+                if expected == "count" or not result.get("grounded"):
                     continue  # unitless arithmetic could be an area or a length, even when integral
                 # The arithmetic tool supplies a scalar; the numeric question
                 # supplies its dimension. It still needs cited source evidence.
