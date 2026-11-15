@@ -1,0 +1,1111 @@
+{
+  "time": "2026-11-14T23:38:32.928040+00:00",
+  "baseline_commit": "0a31112a41d58d11ca8c5bef7a63e3176e0b30c0",
+  "blind": true,
+  "scope": "Arithmetic, presentation and exact saved recount replay. Description uses fake models; not semantic accuracy.",
+  "rounding": "ceil(max supported same-unit variation components) for whole-item count margin; pct uses the rounded count margin. raw_value/raw_pct retain the unrounded comparison.",
+  "summary": {
+    "real_scans": 1,
+    "answers": 4,
+    "all_checks_passed": 4,
+    "cached_recounts": 0,
+    "max_summary_steps": 7,
+    "live_calls": 0,
+    "live_spend_usd": 0
+  },
+  "before": [
+    {
+      "doc_id": "ext_resplan__plan-7912",
+      "question": "How many doors are there?",
+      "value": 0,
+      "unit": "count",
+      "checks": {
+        "replay": true,
+        "answer_matches_calc": true,
+        "factor_sum": true,
+        "at_most_12_main_steps": false,
+        "importance_order": false,
+        "detail_follows_summary": true,
+        "excluded_alternatives": true,
+        "short_margin": true,
+        "no_false_error_bound": true,
+        "result_first": false
+      },
+      "issues": [],
+      "margin": {
+        "value": 0,
+        "unit": "count",
+        "pct": null,
+        "why": "Reported count versus numbered-box coverage: 0 count (abs(0 \u2212 0)). Uses the largest recorded component; components can overlap. This is observed/reference variation, not a guaranteed error bound; shared misses and physical prior bias remain unbounded.",
+        "sources": [
+          "answer.value / evidence.boxes"
+        ],
+        "scope": "Observed scan discrepancy and historical reference",
+        "complete": false,
+        "is_error_bound": false
+      },
+      "component_values": [
+        {
+          "label": "Reported count versus numbered-box coverage",
+          "value": 0,
+          "unit": "count"
+        }
+      ],
+      "confidence": 50.0,
+      "pct_kind": "recorded_engine_score",
+      "factors": [
+        {
+          "label": "Recorded answer-route score",
+          "delta": 50.0,
+          "base": true,
+          "note": "Uncalibrated route/model score, not measured answer accuracy. No accuracy calibration is available."
+        },
+        {
+          "label": "Source: scanned image read by detector",
+          "delta": 0,
+          "note": "Source context; no unmeasured accuracy adjustment."
+        },
+        {
+          "label": "Scale: Assumed door-width prior",
+          "delta": 0,
+          "note": "Highest available evidence rank (6); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact."
+        }
+      ],
+      "recount": null,
+      "steps": 97,
+      "summary_steps": 97,
+      "first_steps": [
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-w",
+          "label": "Page image width",
+          "section": null,
+          "value": 1040,
+          "unit": "px",
+          "note": ""
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-h",
+          "label": "Page image height",
+          "section": null,
+          "value": 1040,
+          "unit": "px",
+          "note": ""
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-actual-width",
+          "label": "Actual page image width",
+          "section": null,
+          "value": 1040,
+          "unit": "px",
+          "note": ""
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-actual-height",
+          "label": "Actual page image height",
+          "section": null,
+          "value": 1040,
+          "unit": "px",
+          "note": ""
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-room",
+          "label": "Retained room items (det)",
+          "section": null,
+          "value": 4,
+          "unit": "count",
+          "note": "Saved page inventory before this question\u2019s filters. Model: cubicasa5k-official-hg_furukawa"
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-room-min",
+          "label": "room: min retained score (det)",
+          "section": null,
+          "value": 0.836,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-room-median",
+          "label": "room: median retained score (det)",
+          "section": null,
+          "value": 0.8594999999999999,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-window",
+          "label": "Retained window items (det)",
+          "section": null,
+          "value": 9,
+          "unit": "count",
+          "note": "Saved page inventory before this question\u2019s filters. Model: cubicasa5k-official-hg_furukawa"
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-window-min",
+          "label": "window: min retained score (det)",
+          "section": null,
+          "value": 0.717,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-window-median",
+          "label": "window: median retained score (det)",
+          "section": null,
+          "value": 0.794,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-ocr-text",
+          "label": "Retained text items (ocr)",
+          "section": null,
+          "value": 8,
+          "unit": "count",
+          "note": "Saved page inventory before this question\u2019s filters. Model: rapidocr-onnxruntime"
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-ocr-text-min",
+          "label": "text: min retained score (ocr)",
+          "section": null,
+          "value": 0.995,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        }
+      ],
+      "live_calls": 0,
+      "live_spend_usd": 0
+    },
+    {
+      "doc_id": "ext_resplan__plan-7912",
+      "question": "How many windows are there?",
+      "value": 9,
+      "unit": "count",
+      "checks": {
+        "replay": true,
+        "answer_matches_calc": true,
+        "factor_sum": true,
+        "at_most_12_main_steps": false,
+        "importance_order": false,
+        "detail_follows_summary": true,
+        "excluded_alternatives": false,
+        "short_margin": true,
+        "no_false_error_bound": true,
+        "result_first": false
+      },
+      "issues": [],
+      "margin": {
+        "value": 0,
+        "unit": "count",
+        "pct": 0.0,
+        "why": "Reported count versus numbered-box coverage: 0 count (abs(9 \u2212 9)); Saved extraction count disagreement: 0 count (max per saved run of \u03a3 abs(selected class count \u2212 alternate class count)). Uses the largest recorded component; components can overlap. This is observed/reference variation, not a guaranteed error bound; shared misses and physical prior bias remain unbounded.",
+        "sources": [
+          "answer.value / evidence.boxes",
+          "ext_resplan__plan-7912: planmap-seg.json"
+        ],
+        "scope": "Observed scan discrepancy and historical reference",
+        "complete": false,
+        "is_error_bound": false
+      },
+      "component_values": [
+        {
+          "label": "Reported count versus numbered-box coverage",
+          "value": 0,
+          "unit": "count"
+        },
+        {
+          "label": "Saved extraction count disagreement",
+          "value": 0,
+          "unit": "count"
+        }
+      ],
+      "confidence": 79.9,
+      "pct_kind": "recorded_engine_score",
+      "factors": [
+        {
+          "label": "Recorded answer-route score",
+          "delta": 79.9,
+          "base": true,
+          "note": "Uncalibrated route/model score, not measured answer accuracy. No accuracy calibration is available."
+        },
+        {
+          "label": "Source: scanned image read by detector",
+          "delta": 0,
+          "note": "Source context; no unmeasured accuracy adjustment."
+        },
+        {
+          "label": "Scale: Assumed door-width prior",
+          "delta": 0,
+          "note": "Highest available evidence rank (6); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact."
+        }
+      ],
+      "recount": null,
+      "steps": 99,
+      "summary_steps": 99,
+      "first_steps": [
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-w",
+          "label": "Page image width",
+          "section": null,
+          "value": 1040,
+          "unit": "px",
+          "note": ""
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-h",
+          "label": "Page image height",
+          "section": null,
+          "value": 1040,
+          "unit": "px",
+          "note": ""
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-actual-width",
+          "label": "Actual page image width",
+          "section": null,
+          "value": 1040,
+          "unit": "px",
+          "note": ""
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-actual-height",
+          "label": "Actual page image height",
+          "section": null,
+          "value": 1040,
+          "unit": "px",
+          "note": ""
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-room",
+          "label": "Retained room items (det)",
+          "section": null,
+          "value": 4,
+          "unit": "count",
+          "note": "Saved page inventory before this question\u2019s filters. Model: cubicasa5k-official-hg_furukawa"
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-room-min",
+          "label": "room: min retained score (det)",
+          "section": null,
+          "value": 0.836,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-room-median",
+          "label": "room: median retained score (det)",
+          "section": null,
+          "value": 0.8594999999999999,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-window",
+          "label": "Retained window items (det)",
+          "section": null,
+          "value": 9,
+          "unit": "count",
+          "note": "Saved page inventory before this question\u2019s filters. Model: cubicasa5k-official-hg_furukawa"
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-window-min",
+          "label": "window: min retained score (det)",
+          "section": null,
+          "value": 0.717,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-window-median",
+          "label": "window: median retained score (det)",
+          "section": null,
+          "value": 0.794,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-ocr-text",
+          "label": "Retained text items (ocr)",
+          "section": null,
+          "value": 8,
+          "unit": "count",
+          "note": "Saved page inventory before this question\u2019s filters. Model: rapidocr-onnxruntime"
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-ocr-text-min",
+          "label": "text: min retained score (ocr)",
+          "section": null,
+          "value": 0.995,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        }
+      ],
+      "live_calls": 0,
+      "live_spend_usd": 0
+    },
+    {
+      "doc_id": "ext_resplan__plan-7912",
+      "question": "what is this",
+      "value": null,
+      "unit": null,
+      "checks": {
+        "replay": true,
+        "answer_matches_calc": true,
+        "factor_sum": true,
+        "at_most_12_main_steps": false,
+        "importance_order": false,
+        "detail_follows_summary": true,
+        "excluded_alternatives": false,
+        "short_margin": true,
+        "no_false_error_bound": true
+      },
+      "issues": [],
+      "margin": {
+        "value": 0,
+        "unit": "count",
+        "pct": null,
+        "why": "Description inventory only; no scalar answer was requested. Saved extraction count disagreement: 0 count (max per saved run of \u03a3 abs(selected class count \u2212 alternate class count)). Uses the largest recorded component; components can overlap. This is observed/reference variation, not a guaranteed error bound; shared misses and physical prior bias remain unbounded.",
+        "sources": [
+          "ext_resplan__plan-7912: planmap-seg.json"
+        ],
+        "scope": "Observed scan discrepancy and historical reference",
+        "complete": false,
+        "is_error_bound": false
+      },
+      "component_values": [
+        {
+          "label": "Saved extraction count disagreement",
+          "value": 0,
+          "unit": "count"
+        }
+      ],
+      "confidence": 20.0,
+      "pct_kind": "recorded_engine_score",
+      "factors": [
+        {
+          "label": "Recorded answer-route score",
+          "delta": 20.0,
+          "base": true,
+          "note": "Uncalibrated route/model score, not measured answer accuracy. No accuracy calibration is available."
+        },
+        {
+          "label": "Source: vision-model reading",
+          "delta": 0,
+          "note": "Source context; no unmeasured accuracy adjustment."
+        },
+        {
+          "label": "Scale: Assumed door-width prior",
+          "delta": 0,
+          "note": "Highest available evidence rank (6); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact."
+        }
+      ],
+      "recount": null,
+      "steps": 93,
+      "summary_steps": 93,
+      "first_steps": [
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-w",
+          "label": "Page image width",
+          "section": null,
+          "value": 1040,
+          "unit": "px",
+          "note": ""
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-h",
+          "label": "Page image height",
+          "section": null,
+          "value": 1040,
+          "unit": "px",
+          "note": ""
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-actual-width",
+          "label": "Actual page image width",
+          "section": null,
+          "value": 1040,
+          "unit": "px",
+          "note": ""
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-actual-height",
+          "label": "Actual page image height",
+          "section": null,
+          "value": 1040,
+          "unit": "px",
+          "note": ""
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-room",
+          "label": "Retained room items (det)",
+          "section": null,
+          "value": 4,
+          "unit": "count",
+          "note": "Saved page inventory before this question\u2019s filters. Model: cubicasa5k-official-hg_furukawa"
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-room-min",
+          "label": "room: min retained score (det)",
+          "section": null,
+          "value": 0.836,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-room-median",
+          "label": "room: median retained score (det)",
+          "section": null,
+          "value": 0.8594999999999999,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-window",
+          "label": "Retained window items (det)",
+          "section": null,
+          "value": 9,
+          "unit": "count",
+          "note": "Saved page inventory before this question\u2019s filters. Model: cubicasa5k-official-hg_furukawa"
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-window-min",
+          "label": "window: min retained score (det)",
+          "section": null,
+          "value": 0.717,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-window-median",
+          "label": "window: median retained score (det)",
+          "section": null,
+          "value": 0.794,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-ocr-text",
+          "label": "Retained text items (ocr)",
+          "section": null,
+          "value": 8,
+          "unit": "count",
+          "note": "Saved page inventory before this question\u2019s filters. Model: rapidocr-onnxruntime"
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-ocr-text-min",
+          "label": "text: min retained score (ocr)",
+          "section": null,
+          "value": 0.995,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        }
+      ],
+      "live_calls": 0,
+      "live_spend_usd": 0
+    },
+    {
+      "doc_id": "ext_resplan__plan-7912",
+      "question": "What is the total area of all rooms?",
+      "value": 158.97,
+      "unit": "m2",
+      "checks": {
+        "replay": true,
+        "answer_matches_calc": true,
+        "factor_sum": true,
+        "at_most_12_main_steps": false,
+        "importance_order": false,
+        "detail_follows_summary": true,
+        "excluded_alternatives": true,
+        "short_margin": true,
+        "no_false_error_bound": true
+      },
+      "issues": [],
+      "margin": {
+        "value": null,
+        "unit": "m2",
+        "pct": null,
+        "why": "Scale method: door prior; scale confidence 0.3 (not an error bound). Real door-width variation is not measured; icon spread alone cannot bound the scale error.",
+        "sources": [
+          "ext_resplan__plan-7912: scale"
+        ]
+      },
+      "component_values": [],
+      "confidence": 40.0,
+      "pct_kind": "recorded_engine_score",
+      "factors": [
+        {
+          "label": "Recorded answer-route score",
+          "delta": 40.0,
+          "base": true,
+          "note": "Uncalibrated route/model score, not measured answer accuracy. No accuracy calibration is available."
+        },
+        {
+          "label": "Source: scanned image read by detector",
+          "delta": 0,
+          "note": "Source context; no unmeasured accuracy adjustment."
+        },
+        {
+          "label": "Scale: Assumed door-width prior",
+          "delta": 0,
+          "note": "Highest available evidence rank (6); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact."
+        }
+      ],
+      "recount": null,
+      "steps": 95,
+      "summary_steps": 95,
+      "first_steps": [
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-w",
+          "label": "Page image width",
+          "section": null,
+          "value": 1040,
+          "unit": "px",
+          "note": ""
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-h",
+          "label": "Page image height",
+          "section": null,
+          "value": 1040,
+          "unit": "px",
+          "note": ""
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-actual-width",
+          "label": "Actual page image width",
+          "section": null,
+          "value": 1040,
+          "unit": "px",
+          "note": ""
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-actual-height",
+          "label": "Actual page image height",
+          "section": null,
+          "value": 1040,
+          "unit": "px",
+          "note": ""
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-room",
+          "label": "Retained room items (det)",
+          "section": null,
+          "value": 4,
+          "unit": "count",
+          "note": "Saved page inventory before this question\u2019s filters. Model: cubicasa5k-official-hg_furukawa"
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-room-min",
+          "label": "room: min retained score (det)",
+          "section": null,
+          "value": 0.836,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-room-median",
+          "label": "room: median retained score (det)",
+          "section": null,
+          "value": 0.8594999999999999,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-window",
+          "label": "Retained window items (det)",
+          "section": null,
+          "value": 9,
+          "unit": "count",
+          "note": "Saved page inventory before this question\u2019s filters. Model: cubicasa5k-official-hg_furukawa"
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-window-min",
+          "label": "window: min retained score (det)",
+          "section": null,
+          "value": 0.717,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-det-window-median",
+          "label": "window: median retained score (det)",
+          "section": null,
+          "value": 0.794,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-ocr-text",
+          "label": "Retained text items (ocr)",
+          "section": null,
+          "value": 8,
+          "unit": "count",
+          "note": "Saved page inventory before this question\u2019s filters. Model: rapidocr-onnxruntime"
+        },
+        {
+          "id": "scan-ext_resplan__plan-7912-planmap-1.json-ocr-text-min",
+          "label": "text: min retained score (ocr)",
+          "section": null,
+          "value": 0.995,
+          "unit": "score",
+          "note": "Model score on retained detections; not the probability that the answer is correct."
+        }
+      ],
+      "live_calls": 0,
+      "live_spend_usd": 0
+    }
+  ],
+  "after": [
+    {
+      "doc_id": "ext_resplan__plan-7912",
+      "question": "How many doors are there?",
+      "value": 0,
+      "unit": "count",
+      "checks": {
+        "replay": true,
+        "answer_matches_calc": true,
+        "factor_sum": true,
+        "at_most_12_main_steps": true,
+        "importance_order": true,
+        "detail_follows_summary": true,
+        "excluded_alternatives": true,
+        "short_margin": true,
+        "no_false_error_bound": true,
+        "result_first": true
+      },
+      "issues": [],
+      "margin": {
+        "value": 0,
+        "unit": "count",
+        "pct": null,
+        "why": "From box discrepancy only. Partial variation, not a guaranteed error bound.",
+        "sources": [
+          "answer.value / evidence.boxes"
+        ],
+        "scope": "Observed scan discrepancy and historical reference",
+        "rule": "max_supported_components_then_ceil_count",
+        "raw_value": 0,
+        "raw_pct": null,
+        "excluded_components": [
+          {
+            "doc_id": "ext_resplan__plan-7912",
+            "page": 1,
+            "artifact": "planmap-seg.json",
+            "classes": [
+              "wall",
+              "window"
+            ],
+            "reason": "Rejected alternate extraction, not an independent reading of the selected quantity; class support, completeness and equivalent filters are not established."
+          }
+        ],
+        "complete": false,
+        "is_error_bound": false
+      },
+      "component_values": [
+        {
+          "label": "Reported count versus numbered-box coverage",
+          "value": 0,
+          "unit": "count"
+        }
+      ],
+      "confidence": 50.0,
+      "pct_kind": "recorded_engine_score",
+      "factors": [
+        {
+          "label": "Recorded answer-route score",
+          "delta": 50.0,
+          "base": true,
+          "note": "Uncalibrated score supplied by this route; not measured answer accuracy."
+        },
+        {
+          "label": "Source: scanned image read by detector",
+          "delta": 0,
+          "note": "Source context; no unmeasured accuracy adjustment."
+        }
+      ],
+      "recount": null,
+      "steps": 104,
+      "summary_steps": 7,
+      "first_steps": [
+        {
+          "id": "scan-overview-result",
+          "label": "Result \u00b7 Count selected scan items after question filters",
+          "section": "result",
+          "value": 0,
+          "unit": "count",
+          "note": "The answer counts the selected saved items after the recorded class, scope, score and duplicate filters. Physical scale is not required for a count; alternate extractions remain comparisons."
+        },
+        {
+          "id": "scan-overview-class-room",
+          "label": "Detections \u00b7 room",
+          "section": "detections",
+          "value": 4,
+          "unit": "count",
+          "note": "Saved class inventory before question scope and score filters; not an additional answer total. Retained scores: min 0.836, median 0.859; not calibrated accuracy. No runtime score filter for this class was recorded. Extraction score threshold and dropped proposals were not recorded; saved item scores cannot reconstruct them."
+        },
+        {
+          "id": "scan-overview-class-wall",
+          "label": "Detections \u00b7 wall",
+          "section": "detections",
+          "value": 21,
+          "unit": "count",
+          "note": "Saved class inventory before question scope and score filters; not an additional answer total. Retained scores: min 0.843, median 0.951; not calibrated accuracy. No runtime score filter for this class was recorded. Extraction score threshold and dropped proposals were not recorded; saved item scores cannot reconstruct them."
+        },
+        {
+          "id": "scan-overview-class-window",
+          "label": "Detections \u00b7 window",
+          "section": "detections",
+          "value": 9,
+          "unit": "count",
+          "note": "Saved class inventory before question scope and score filters; not an additional answer total. Retained scores: min 0.717, median 0.794; not calibrated accuracy. No runtime score filter for this class was recorded. Extraction score threshold and dropped proposals were not recorded; saved item scores cannot reconstruct them."
+        },
+        {
+          "id": "scan-overview-scale",
+          "label": "Scale \u00b7 Assumed door-width prior",
+          "section": "scale",
+          "value": 0.04285714285714286,
+          "unit": "m/px",
+          "note": "Scale is not used to count items. Highest available evidence rank (6); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact."
+        },
+        {
+          "id": "scan-overview-margin",
+          "label": "Margin \u00b7 supported variation",
+          "section": "margin",
+          "value": 0,
+          "unit": "count",
+          "note": "From box discrepancy only. Partial variation, not a guaranteed error bound."
+        },
+        {
+          "id": "scan-overview-confidence",
+          "label": "Confidence \u00b7 recorded engine score",
+          "section": "confidence",
+          "value": 50.0,
+          "unit": "%",
+          "note": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type. The percentage is an uncalibrated route/model score, not measured answer accuracy."
+        }
+      ],
+      "live_calls": 0,
+      "live_spend_usd": 0
+    },
+    {
+      "doc_id": "ext_resplan__plan-7912",
+      "question": "How many windows are there?",
+      "value": 9,
+      "unit": "count",
+      "checks": {
+        "replay": true,
+        "answer_matches_calc": true,
+        "factor_sum": true,
+        "at_most_12_main_steps": true,
+        "importance_order": true,
+        "detail_follows_summary": true,
+        "excluded_alternatives": true,
+        "short_margin": true,
+        "no_false_error_bound": true,
+        "result_first": true
+      },
+      "issues": [],
+      "margin": {
+        "value": 0,
+        "unit": "count",
+        "pct": 0.0,
+        "why": "From box discrepancy only. Partial variation, not a guaranteed error bound.",
+        "sources": [
+          "answer.value / evidence.boxes"
+        ],
+        "scope": "Observed scan discrepancy and historical reference",
+        "rule": "max_supported_components_then_ceil_count",
+        "raw_value": 0,
+        "raw_pct": 0.0,
+        "excluded_components": [
+          {
+            "doc_id": "ext_resplan__plan-7912",
+            "page": 1,
+            "artifact": "planmap-seg.json",
+            "classes": [
+              "wall",
+              "window"
+            ],
+            "reason": "Rejected alternate extraction, not an independent reading of the selected quantity; class support, completeness and equivalent filters are not established."
+          }
+        ],
+        "complete": false,
+        "is_error_bound": false
+      },
+      "component_values": [
+        {
+          "label": "Reported count versus numbered-box coverage",
+          "value": 0,
+          "unit": "count"
+        }
+      ],
+      "confidence": 79.9,
+      "pct_kind": "recorded_engine_score",
+      "factors": [
+        {
+          "label": "Recorded answer-route score",
+          "delta": 79.9,
+          "base": true,
+          "note": "Uncalibrated score supplied by this route; not measured answer accuracy."
+        },
+        {
+          "label": "Source: scanned image read by detector",
+          "delta": 0,
+          "note": "Source context; no unmeasured accuracy adjustment."
+        }
+      ],
+      "recount": null,
+      "steps": 103,
+      "summary_steps": 7,
+      "first_steps": [
+        {
+          "id": "scan-overview-result",
+          "label": "Result \u00b7 Count selected scan items after question filters",
+          "section": "result",
+          "value": 9,
+          "unit": "count",
+          "note": "The answer counts the selected saved items after the recorded class, scope, score and duplicate filters. Physical scale is not required for a count; alternate extractions remain comparisons."
+        },
+        {
+          "id": "scan-overview-class-window",
+          "label": "Detections \u00b7 window",
+          "section": "detections",
+          "value": 9,
+          "unit": "count",
+          "note": "Saved class inventory before question scope and score filters; not an additional answer total. Retained scores: min 0.717, median 0.794; not calibrated accuracy. Actual answer selection: score \u2265 0.5: 9 kept, 0 dropped of 9 saved items. Extraction score threshold and dropped proposals were not recorded; saved item scores cannot reconstruct them."
+        },
+        {
+          "id": "scan-overview-class-room",
+          "label": "Detections \u00b7 room",
+          "section": "detections",
+          "value": 4,
+          "unit": "count",
+          "note": "Saved class inventory before question scope and score filters; not an additional answer total. Retained scores: min 0.836, median 0.859; not calibrated accuracy. No runtime score filter for this class was recorded. Extraction score threshold and dropped proposals were not recorded; saved item scores cannot reconstruct them."
+        },
+        {
+          "id": "scan-overview-class-wall",
+          "label": "Detections \u00b7 wall",
+          "section": "detections",
+          "value": 21,
+          "unit": "count",
+          "note": "Saved class inventory before question scope and score filters; not an additional answer total. Retained scores: min 0.843, median 0.951; not calibrated accuracy. No runtime score filter for this class was recorded. Extraction score threshold and dropped proposals were not recorded; saved item scores cannot reconstruct them."
+        },
+        {
+          "id": "scan-overview-scale",
+          "label": "Scale \u00b7 Assumed door-width prior",
+          "section": "scale",
+          "value": 0.04285714285714286,
+          "unit": "m/px",
+          "note": "Scale is not used to count items. Highest available evidence rank (6); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact."
+        },
+        {
+          "id": "scan-overview-margin",
+          "label": "Margin \u00b7 supported variation",
+          "section": "margin",
+          "value": 0,
+          "unit": "count",
+          "note": "From box discrepancy only. Partial variation, not a guaranteed error bound."
+        },
+        {
+          "id": "scan-overview-confidence",
+          "label": "Confidence \u00b7 recorded engine score",
+          "section": "confidence",
+          "value": 79.9,
+          "unit": "%",
+          "note": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type. The percentage is an uncalibrated route/model score, not measured answer accuracy."
+        }
+      ],
+      "live_calls": 0,
+      "live_spend_usd": 0
+    },
+    {
+      "doc_id": "ext_resplan__plan-7912",
+      "question": "what is this",
+      "value": null,
+      "unit": null,
+      "checks": {
+        "replay": true,
+        "answer_matches_calc": true,
+        "factor_sum": true,
+        "at_most_12_main_steps": true,
+        "importance_order": true,
+        "detail_follows_summary": true,
+        "excluded_alternatives": true,
+        "short_margin": true,
+        "no_false_error_bound": true
+      },
+      "issues": [],
+      "margin": {},
+      "component_values": [],
+      "confidence": 20.0,
+      "pct_kind": "recorded_engine_score",
+      "factors": [
+        {
+          "label": "Recorded answer-route score",
+          "delta": 20.0,
+          "base": true,
+          "note": "Uncalibrated score supplied by this route; not measured answer accuracy."
+        },
+        {
+          "label": "Source: vision-model reading",
+          "delta": 0,
+          "note": "Source context; no unmeasured accuracy adjustment."
+        },
+        {
+          "label": "Scale: Assumed door-width prior",
+          "delta": 0,
+          "note": "Highest available evidence rank (6); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact."
+        }
+      ],
+      "recount": null,
+      "steps": 93,
+      "summary_steps": 5,
+      "first_steps": [
+        {
+          "id": "scan-overview-class-room",
+          "label": "Detections \u00b7 room",
+          "section": "detections",
+          "value": 4,
+          "unit": "count",
+          "note": "Saved class inventory before question scope and score filters; not an additional answer total. Retained scores: min 0.836, median 0.859; not calibrated accuracy. No runtime score filter for this class was recorded. Extraction score threshold and dropped proposals were not recorded; saved item scores cannot reconstruct them."
+        },
+        {
+          "id": "scan-overview-class-wall",
+          "label": "Detections \u00b7 wall",
+          "section": "detections",
+          "value": 21,
+          "unit": "count",
+          "note": "Saved class inventory before question scope and score filters; not an additional answer total. Retained scores: min 0.843, median 0.951; not calibrated accuracy. No runtime score filter for this class was recorded. Extraction score threshold and dropped proposals were not recorded; saved item scores cannot reconstruct them."
+        },
+        {
+          "id": "scan-overview-class-window",
+          "label": "Detections \u00b7 window",
+          "section": "detections",
+          "value": 9,
+          "unit": "count",
+          "note": "Saved class inventory before question scope and score filters; not an additional answer total. Retained scores: min 0.717, median 0.794; not calibrated accuracy. No runtime score filter for this class was recorded. Extraction score threshold and dropped proposals were not recorded; saved item scores cannot reconstruct them."
+        },
+        {
+          "id": "scan-overview-scale",
+          "label": "Scale \u00b7 Assumed door-width prior",
+          "section": "scale",
+          "value": 0.04285714285714286,
+          "unit": "m/px",
+          "note": "Highest available evidence rank (6); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact."
+        },
+        {
+          "id": "scan-overview-confidence",
+          "label": "Confidence \u00b7 recorded engine score",
+          "section": "confidence",
+          "value": 20.0,
+          "unit": "%",
+          "note": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type. The percentage is an uncalibrated route/model score, not measured answer accuracy."
+        }
+      ],
+      "live_calls": 0,
+      "live_spend_usd": 0
+    },
+    {
+      "doc_id": "ext_resplan__plan-7912",
+      "question": "What is the total area of all rooms?",
+      "value": 158.97,
+      "unit": "m2",
+      "checks": {
+        "replay": true,
+        "answer_matches_calc": true,
+        "factor_sum": true,
+        "at_most_12_main_steps": true,
+        "importance_order": true,
+        "detail_follows_summary": true,
+        "excluded_alternatives": true,
+        "short_margin": true,
+        "no_false_error_bound": true
+      },
+      "issues": [],
+      "margin": {
+        "value": null,
+        "unit": "m2",
+        "pct": null,
+        "why": "Scale method: door prior; scale confidence 0.3 (not an error bound). Real door-width variation is not measured; icon spread alone cannot bound the scale error.",
+        "sources": [
+          "ext_resplan__plan-7912: scale"
+        ]
+      },
+      "component_values": [],
+      "confidence": 40.0,
+      "pct_kind": "recorded_engine_score",
+      "factors": [
+        {
+          "label": "Recorded answer-route score",
+          "delta": 40.0,
+          "base": true,
+          "note": "Uncalibrated score supplied by this route; not measured answer accuracy."
+        },
+        {
+          "label": "Source: scanned image read by detector",
+          "delta": 0,
+          "note": "Source context; no unmeasured accuracy adjustment."
+        },
+        {
+          "label": "Scale: Assumed door-width prior",
+          "delta": 0,
+          "note": "Highest available evidence rank (6); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact."
+        }
+      ],
+      "recount": null,
+      "steps": 101,
+      "summary_steps": 6,
+      "first_steps": [
+        {
+          "id": "scan-overview-result",
+          "label": "Result \u00b7 Pixel geometry using Assumed door-width prior",
+          "section": "result",
+          "value": 158.97,
+          "unit": "m2",
+          "note": "The solver uses the ranked page scale selected before solving. Printed quantities, when present, retain their source values; pixel geometry uses that page\u2019s scale. Highest available evidence rank (6); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact."
+        },
+        {
+          "id": "scan-overview-class-room",
+          "label": "Detections \u00b7 room",
+          "section": "detections",
+          "value": 4,
+          "unit": "count",
+          "note": "Saved class inventory before question scope and score filters; not an additional answer total. Retained scores: min 0.836, median 0.859; not calibrated accuracy. No runtime score filter for this class was recorded. Extraction score threshold and dropped proposals were not recorded; saved item scores cannot reconstruct them."
+        },
+        {
+          "id": "scan-overview-class-wall",
+          "label": "Detections \u00b7 wall",
+          "section": "detections",
+          "value": 21,
+          "unit": "count",
+          "note": "Saved class inventory before question scope and score filters; not an additional answer total. Retained scores: min 0.843, median 0.951; not calibrated accuracy. No runtime score filter for this class was recorded. Extraction score threshold and dropped proposals were not recorded; saved item scores cannot reconstruct them."
+        },
+        {
+          "id": "scan-overview-class-window",
+          "label": "Detections \u00b7 window",
+          "section": "detections",
+          "value": 9,
+          "unit": "count",
+          "note": "Saved class inventory before question scope and score filters; not an additional answer total. Retained scores: min 0.717, median 0.794; not calibrated accuracy. No runtime score filter for this class was recorded. Extraction score threshold and dropped proposals were not recorded; saved item scores cannot reconstruct them."
+        },
+        {
+          "id": "scan-overview-scale",
+          "label": "Scale \u00b7 Assumed door-width prior",
+          "section": "scale",
+          "value": 0.04285714285714286,
+          "unit": "m/px",
+          "note": "Highest available evidence rank (6); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact."
+        },
+        {
+          "id": "scan-overview-confidence",
+          "label": "Confidence \u00b7 recorded engine score",
+          "section": "confidence",
+          "value": 40.0,
+          "unit": "%",
+          "note": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type. The percentage is an uncalibrated route/model score, not measured answer accuracy."
+        }
+      ],
+      "live_calls": 0,
+      "live_spend_usd": 0
+    }
+  ]
+}

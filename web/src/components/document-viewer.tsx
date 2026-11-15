@@ -20,6 +20,7 @@ import { AnnotationLayer, useAnnotations, type Annotation, type MarkupTool } fro
 import { findSheetText, loadSheetText, type SheetText } from './viewer-tools/sheet-text'
 import { RoomLabels } from './viewer-tools/room-labels'
 import { SpecPanel } from './viewer-tools/spec-panel'
+import { CalculationPanel } from './calc-panel'
 import { downloadSource } from './viewer-tools/download-source'
 import { useDrawingHighlights } from '../viewer3d/useDrawingHighlights'
 
@@ -35,11 +36,13 @@ export function useViewerSheet() {
   return sheet
 }
 
-export function DocumentViewer({ answer, citation: originalCitation, sheet, onClose, edits, commands, chatId, initialMode, openRequest }: {
+export function DocumentViewer({ answer, citation: originalCitation, sheet, onClose, edits, commands, chatId, initialMode, initialPanel, openRequest }: {
   /** Changes on every open request, so "Visualise it" re-opens 3D after the user toggled back to 2D. */
   openRequest?: number
   /** Opens straight in this view (the answer card's "Visualise it" passes '3d'). */
   initialMode?: ViewerMode
+  /** Opens with the Calculation panel in the side slot (the evidence card's "Show calculation"). */
+  initialPanel?: 'calc'
   answer: Answer; citation: Citation; sheet: boolean; onClose: () => void
   edits?: DrawingEdits; commands?: readonly SceneCommand[]
   chatId?: string | null
@@ -79,6 +82,8 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   const [textStatus, setTextStatus] = useState('')
   const [hitIndex, setHitIndex] = useState(0)
   const hits = useMemo(() => searchOpen ? findSheetText(sheetText, query) : [], [sheetText, query, searchOpen])
+  const [calcOpen, setCalcOpen] = useState(initialPanel === 'calc' && !!answer.reasoning)
+  useEffect(() => { setCalcOpen(initialPanel === 'calc' && !!answer.reasoning) }, [initialPanel, openRequest]) // eslint-disable-line react-hooks/exhaustive-deps
   const [specOpen, setSpecOpen] = useState(originalCitation.kind === 'text' || !!originalCitation.quote)
   function sourcePassage(index: number) {
     const source = sources[index]
@@ -152,6 +157,14 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       if (trigger?.isConnected) (trigger as SVGElement | HTMLElement).focus()
       else stage.current?.focus()
     })
+  }
+  /** A calculation source was clicked: highlight its box on the drawing (the same highlight a citation gives). */
+  function focusCalcItem(target: { item_id: string; page?: number }) {
+    if (target.page != null && target.page !== pageNumber) setPageNumber(target.page)
+    const index = sources.findIndex((source) => source.itemIds.includes(target.item_id))
+    if (index >= 0) setActive(index)
+    setSelected(target.item_id, '2d')
+    if (window.matchMedia?.('(max-width: 800px)').matches) setCalcOpen(false)
   }
   function openItem(index: number, id: string, trigger: Element) {
     setActive(index); setSelected(id, '2d')
@@ -472,7 +485,8 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       {error ? <div className="viewer-message"><p role="alert">{error}</p><Button variant="raised" onClick={() => setRetry(retry + 1)}>Try again</Button></div>
         : !image && <p className="viewer-message" role="status">Loading drawing…</p>}
     </div>
-    {specOpen && specCitation && <SpecPanel citation={specCitation} title={doc?.title ?? citation.doc_id} text={sheetText} onClose={() => setSpecOpen(false)} />}
+    {calcOpen && answer.reasoning && <CalculationPanel reasoning={answer.reasoning} title={doc?.title} docTitle={(id) => id === citation.doc_id && doc?.title ? doc.title : id} onClose={() => setCalcOpen(false)} onFocus={focusCalcItem} />}
+    {specOpen && !calcOpen && specCitation && <SpecPanel citation={specCitation} title={doc?.title ?? citation.doc_id} text={sheetText} onClose={() => setSpecOpen(false)} />}
     {selectedItem && <ItemPanel docId={selectedItem.docId} itemId={selectedItem.itemId} sheet={sheet} onClose={closeItem} onOpenPlace={(location, item) => {
       setPlace({ location, item }); setActive(0); setSelected(item.item_id, '2d')
       if (sheet) closeItem()

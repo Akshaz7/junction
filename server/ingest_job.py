@@ -487,6 +487,9 @@ def _run(doc_id: str, st: Status) -> str:
         if ok and (ddir / "pages.json").is_file():
             doc["pages"] = len(json.loads((ddir / "pages.json").read_text())["pages"])
             (ddir / "doc.json").write_text(json.dumps(doc, indent=1))
+        if ok:
+            from engine.xcheck_ifc import ingest_lengths
+            st.stage("quantity_checks", lambda: ingest_lengths(ifc, doc_id, ddir))
         ok = ok and st.stage("usdz", lambda: _usdz(doc_id, ddir))
         if ok and _has_piping(ifc):
             def pip():

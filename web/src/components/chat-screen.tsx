@@ -64,7 +64,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const [fileOver, setFileOver] = useState(false)
   const dragDepth = useRef(0)
   const [activeOption, setActiveOption] = useState(0)
-  const [viewer, setViewer] = useState<{ answer: Answer; citation: Citation; request: number; mode?: '2d' | '3d' } | null>(null)
+  const [viewer, setViewer] = useState<{ answer: Answer; citation: Citation; request: number; mode?: '2d' | '3d'; panel?: 'calc' } | null>(null)
   const [split, setSplit] = useState(48)
   const splitContainer = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -494,6 +494,9 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       }} onVisualise={(citation) => {
         setViewer((previous) => ({ answer: exchange.answer!, citation, request: (previous?.request ?? 0) + 1, mode: '3d' }))
         onOpenCitation(citation)
+      }} onOpenCalc={(citation) => {
+        setViewer((previous) => ({ answer: exchange.answer!, citation, request: (previous?.request ?? 0) + 1, mode: '2d', panel: 'calc' }))
+        onOpenCitation(citation)
       }} /> : <article className="exchange" key={`${exchange.id}-${index}`}>
         {exchange.question && <div className="question-bubble">{exchange.question}</div>}
         {exchange.content ? <p className="answer-text">{exchange.content}</p>
@@ -586,7 +589,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         }}
         onPointerUp={(event) => event.currentTarget.releasePointerCapture(event.pointerId)} />
       <DrawingEditsContext value={sceneEdits}>
-        <DocumentViewer key={viewer.citation.doc_id} answer={viewer.answer} citation={viewer.citation} sheet={sheet} initialMode={viewer.mode} openRequest={viewer.request}
+        <DocumentViewer key={viewer.citation.doc_id} answer={viewer.answer} citation={viewer.citation} sheet={sheet} initialMode={viewer.mode} initialPanel={viewer.panel} openRequest={viewer.request}
           chatId={liveChatId}
           edits={sceneEdits[viewer.citation.doc_id]} commands={viewerCommands.length ? viewerCommands : undefined} onClose={() => setViewer(null)} />
       </DrawingEditsContext>

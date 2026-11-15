@@ -1,0 +1,371 @@
+{
+  "reserved_unseen_doc_id": "ifc_models__bsc-clinic-clinic-plumbing",
+  "policy": "Random file reserved before implementation; its content and answers are only inspected at the final audit. Held-out documents are evaluation only.",
+  "questions": [
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-3710",
+      "question": "How many kitchens (including kitchenettes, open kitchens and utility kitchens) are on this floor plan?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-1524",
+      "question": "How many bathrooms or washrooms (e.g. KH, KPH, PH, PESUH, SH) are on this floor plan, not counting separate WC rooms?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-392",
+      "question": "How many sinks and wash basins (kitchen and bathroom combined; a double-bowl sink counts as one) are drawn on this floor plan?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-11384",
+      "question": "How many kitchens (including kitchenettes, open kitchens and utility kitchens) are on this floor plan?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-11459",
+      "question": "How many showers and bathtubs are drawn on this floor plan in total?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-9833",
+      "question": "How many showers and bathtubs are drawn on this floor plan in total?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-10142",
+      "question": "How many windows are shown on this floor plan?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-10498",
+      "question": "How many bathrooms or washrooms (e.g. KH, KPH, PH, PESUH, SH) are on this floor plan, not counting separate WC rooms?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-7688",
+      "question": "How many floors (storeys) does this floor plan show?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-247",
+      "question": "How many toilet bowls (WC seats) are drawn on this floor plan?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-3819",
+      "question": "How many showers and bathtubs are drawn on this floor plan in total?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-8029",
+      "question": "How many doors are shown on this floor plan? Count doorways fitted with a door; open doorways without a door leaf do not count.",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__colorful-13685",
+      "question": "How many sinks and wash basins (kitchen and bathroom combined; a double-bowl sink counts as one) are drawn on this floor plan?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-4845",
+      "question": "How many floors (storeys) does this floor plan show?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-10571",
+      "question": "How many saunas are on this floor plan?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-1000",
+      "question": "How many floors (storeys) does this floor plan show?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-20147",
+      "question": "How many sinks and wash basins (kitchen and bathroom combined; a double-bowl sink counts as one) are drawn on this floor plan?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-13767",
+      "question": "How many sinks and wash basins (kitchen and bathroom combined; a double-bowl sink counts as one) are drawn on this floor plan?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-1391",
+      "question": "How many bathrooms or washrooms (e.g. KH, KPH, PH, PESUH, SH) are on this floor plan, not counting separate WC rooms?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "cubicasa5k__colorful-11400",
+      "question": "How many showers and bathtubs are drawn on this floor plan in total?",
+      "type": "count",
+      "format": "raster"
+    },
+    {
+      "doc_id": "swiss_dwellings__site799-bldg1747-floor18743",
+      "question": "How many rooms labelled 'Couloir' are there on this floor?",
+      "type": "count",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site1101-bldg2241-floor10275",
+      "question": "How many rooms labelled 'Corridoio' are there on this floor?",
+      "type": "count",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site719-bldg1540-floor6678",
+      "question": "How many rooms labelled 'Vano scala' are there on this floor?",
+      "type": "count",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site4237-bldg7396-floor29509",
+      "question": "How many doors (interior doors and entrance doors together) are drawn on this floor plan?",
+      "type": "count",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site52-bldg298-floor1183",
+      "question": "How many toilets (WC) are drawn on this floor plan?",
+      "type": "count",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site424-bldg1074-floor4711",
+      "question": "How many windows are drawn on this floor plan?",
+      "type": "count",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site3238-bldg4922-floor22515",
+      "question": "How many rooms labelled 'Bagno' are there on this floor?",
+      "type": "count",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+      "question": "How many rooms labelled 'Pi\u00e8ce' are there on this floor?",
+      "type": "count",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site4237-bldg7396-floor29509",
+      "question": "How many bathtubs are drawn on this floor plan?",
+      "type": "count",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+      "question": "How many windows are drawn on this floor plan?",
+      "type": "count",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site3421-bldg5295-floor23605",
+      "question": "What is the total net area in m\u00b2 of all rooms labelled 'Schlafzimmer' on this floor?",
+      "type": "area",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site421-bldg1097-floor4796",
+      "question": "What is the total net floor area in m\u00b2 of all numbered indoor rooms on this floor (excluding balconies, loggias, terraces and other outdoor spaces, shafts and voids)?",
+      "type": "area",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site629-bldg1355-floor5906",
+      "question": "What is the net floor area of apartment A in m\u00b2, summing all its rooms except balconies, loggias, terraces and other outdoor spaces?",
+      "type": "area",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+      "question": "What is the net floor area of room 5.03 ('Stanza') in m\u00b2?",
+      "type": "area",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site418-bldg1080-floor4724",
+      "question": "What is the net floor area of room 0.22 ('Balkon') in m\u00b2?",
+      "type": "area",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site294-bldg554-floor2233",
+      "question": "What is the total net area in m\u00b2 of all rooms labelled 'Stanza' on this floor?",
+      "type": "area",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+      "question": "How many rooms labelled 'Cucina' are there on this floor?",
+      "type": "count",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site4038-bldg6362-floor26166",
+      "question": "How many rooms labelled 'Cucina' are there on this floor?",
+      "type": "count",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site2294-bldg3383-floor15064",
+      "question": "How many toilets (WC) are drawn on this floor plan?",
+      "type": "count",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site279-bldg514-floor2041",
+      "question": "How many rooms labelled 'Cage d'escalier' are there on this floor?",
+      "type": "count",
+      "format": "dxf"
+    },
+    {
+      "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+      "question": "How many windows are shown on the floor plan of '2. Sal'?",
+      "type": "count",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+      "question": "How many walls are shown on the floor plan of '3. Sal'?",
+      "type": "count",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+      "question": "How many stairs are shown on the floor plan of '2.korrus'?",
+      "type": "count",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+      "question": "How many doors are shown on the floor plan of '3.korrus'?",
+      "type": "count",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+      "question": "How many doors are there?",
+      "type": "count",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+      "question": "How many doors are there?",
+      "type": "count",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+      "question": "How many windows are there?",
+      "type": "count",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+      "question": "How many windows are there?",
+      "type": "count",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+      "question": "How many walls are there?",
+      "type": "count",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+      "question": "How many walls are there?",
+      "type": "count",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+      "question": "How many rooms are there?",
+      "type": "count",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+      "question": "How many rooms are there?",
+      "type": "count",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+      "question": "How many slabs are there?",
+      "type": "count",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+      "question": "How many slabs are there?",
+      "type": "count",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+      "question": "What is the total area of the rooms?",
+      "type": "area",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+      "question": "What is the total area of the rooms?",
+      "type": "area",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+      "question": "What is the total wall volume?",
+      "type": "volume",
+      "format": "ifc"
+    },
+    {
+      "doc_id": "ifc_models__bsc-clinic-clinic-plumbing",
+      "question": "How many sanitary fixtures are there in the model 'Medical-Dental Clinic - plumbing'?",
+      "type": "count",
+      "format": "ifc",
+      "reserved_unseen": true
+    },
+    {
+      "doc_id": "ifc_models__bsc-clinic-clinic-plumbing",
+      "question": "How many doors are there?",
+      "type": "count",
+      "format": "ifc",
+      "reserved_unseen": true
+    },
+    {
+      "doc_id": "ifc_models__bsc-clinic-clinic-plumbing",
+      "question": "How many windows are there?",
+      "type": "count",
+      "format": "ifc",
+      "reserved_unseen": true
+    }
+  ],
+  "random_seed": 20261114,
+  "reserved_before_implementation": true
+}

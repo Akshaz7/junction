@@ -57,15 +57,31 @@ class DetOnnx:
         return self.detect_many([img], cuts, dedupe)[0]
 
     def detect_many(self, imgs, cuts=None, dedupe=True):
+        from statistics import median
         cuts = cuts or self.cuts
         res = []
+        self.last_traces = []
         for img, dets in zip(imgs, self.raw(imgs)):
             W, H = img.size
             items = [dict(kind=d["kind"], label=None, bbox_px=[round(max(0, d["box"][0]) * W, 1), round(max(0, d["box"][1]) * H, 1), round(min(1, d["box"][2]) * W, 1), round(min(1, d["box"][3]) * H, 1)],
                           polygon_px=None, props={"model": "rtdetr-ft"}, conf=d["conf"], source="det") for d in dets if d["conf"] >= cuts.get(d["kind"], 0.5)]
+            before_merge = {kind: sum(i['kind'] == kind for i in items) for kind in self.kinds}
             if dedupe:
                 import verify as V
                 items = V.rule_dup(items, W, H, {**V.DEFAULTS, **V.FREE})
+            self.last_traces.append({'tiles': 1, 'raw_count': len(dets), 'proposal_score_floor': self.floor,
+                                     'inference_side_px': SIZE, 'raw_scope': 'Top 300 query/class scores at or above proposal_score_floor',
+                                     'after_threshold': sum(before_merge.values()), 'dedupe_merged': sum(before_merge.values()) - len(items),
+                                     'dedupe': {'enabled': dedupe, 'iou': V.DEFAULTS['dup_iou'], 'containment': V.DEFAULTS['dup_contain'],
+                                                'gap_fraction': V.FREE['dup_gap_frac']} if dedupe else {'enabled': False},
+                                     'classes': {kind: {'score_threshold': max(self.floor, cuts.get(kind, 0.5)),
+                                                       'raw_count': sum(d['kind'] == kind for d in dets),
+                                                       'after_threshold': before_merge[kind],
+                                                       'dedupe_merged': before_merge[kind] - sum(i['kind'] == kind for i in items),
+                                                       'proposal_score_min': min((d['conf'] for d in dets if d['kind'] == kind), default=None),
+                                                       'proposal_score_median': median(d['conf'] for d in dets if d['kind'] == kind) if any(d['kind'] == kind for d in dets) else None,
+                                                       'retained_score_min': min((i['conf'] for i in items if i['kind'] == kind), default=None),
+                                                       'retained_score_median': median(i['conf'] for i in items if i['kind'] == kind) if any(i['kind'] == kind for i in items) else None} for kind in self.kinds}})
             res.append(items)
         return res
 
@@ -73,12 +89,16 @@ class DetOnnx:
 def recount(pm, img, det, cuts=None, only=None):
     """Planmap copy: walls/rooms/text kept, the six detector kinds replaced by the fine-tuned detections (only=("shower","bathtub") swaps just those kinds); item_ids renumbered per kind (same scheme as planmap.assemble)."""
     only = set(only or KINDS)   # kinds taken from the detector; every other kind (incl. the remaining detector kinds) stays as in the plan map
-    items = [i for i in pm["items"] if i["kind"] not in only] + [i for i in det.detect(img, cuts) if i["kind"] in only]
+    detections = det.detect(img, cuts)
+    items = [i for i in pm["items"] if i["kind"] not in only] + [i for i in detections if i["kind"] in only]
     counters, out = {}, []
     for it in sorted(items, key=lambda i: (i["kind"], i["bbox_px"][1], i["bbox_px"][0])):
         counters[it["kind"]] = counters.get(it["kind"], 0) + 1
         out.append({**it, "item_id": f"{it['kind']}-{counters[it['kind']]:03d}"})
     prov = dict(pm.get("provenance", {})); prov["models"] = {**prov.get("models", {}), "det": "rtdetr-r50vd-ft (onnx)"}
+    traces = getattr(det, 'last_traces', [])
+    if traces:
+        prov['extraction'] = {**traces[0], 'applies_to': sorted(only), 'note': 'Extraction statistics apply only to replaced detector classes; other classes retain their original provenance.'}
     return {**pm, "items": out, "provenance": prov}
 
 

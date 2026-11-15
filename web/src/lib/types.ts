@@ -29,11 +29,52 @@ export interface UploadReceipt {
 }
 
 export interface ReasoningStep { kind: 'found' | 'measured' | 'checked' | 'calculated' | 'read'; title: string; text: string; cite?: number | null; ok?: boolean | null }
-export interface GraphPathStep { from_id?: string; to_id?: string; from_label: string; edge_kind: string; to_label: string; method?: string; confidence?: number }
+/** One entry of reasoning.graph_path: a knowledge-graph hop (from/edge/to) or an evidence-chain node (label/kind/item). */
+export interface GraphPathStep { from_id?: string; to_id?: string; from_label?: string; edge_kind?: string; to_label?: string; method?: string; confidence?: number
+  label?: string; kind?: string; item_id?: string | null; doc_id?: string; page?: number; relation?: string }
+export interface EvidenceMargin {
+  value: number | null; unit: string; pct: number | null; why: string; sources: string[]; scope?: string
+  by_kind?: Record<string, EvidenceMargin>
+}
+export interface CalculationSource {
+  kind?: string; doc_id?: string; page?: number; item_id?: string | null; bbox?: Bbox | null
+  artifact?: string; field?: string; text?: string; step_id?: string
+  /** Small image of the source region (URL), when the engine cropped one. */
+  crop?: string
+  origin?: string; record?: Record<string, unknown>
+}
+/** How the engine chose to measure this answer, and the other ways it considered. */
+export interface CalculationMethod { id: string; label: string; why_chosen: string; alternatives?: { id: string; label?: string; value?: number | string | null; unit?: string; rejected_because: string }[] }
+export interface Calculation {
+  formula: string
+  method?: CalculationMethod
+  steps: { id: string; label: string; expr: string; value: number | null; unit: string; note?: string; operation?: string; level?: 'main' | 'detail';
+    inputs: { name: string; value: unknown; unit: string; source: CalculationSource }[] }[]
+  rows: { item_id: string; label: string; values: Record<string, unknown>; source: CalculationSource }[]
+  result: { value: number | Record<string, number>; unit: string; rounded_as: string;
+    additional?: { label: string; value: number; unit: string; rounded_as?: string; step_id?: string }[] }
+  checks: { method: string; value?: number; agrees?: boolean; diff_pct?: number | null; source?: CalculationSource }[]
+  margin: EvidenceMargin
+  status?: 'complete' | 'incomplete'; issues?: string[]
+  /** Additive scan context (all optional, rendered only when present). */
+  inventory_rows?: { item_id?: string | null; label?: string; values?: Record<string, unknown>; source?: CalculationSource }[]
+  scale_proof?: { doc_id?: string; page?: number; method?: string; m_per_px?: number; spread_pct?: number; proof_warning?: string
+    available_candidates?: { method?: string; m_per_px?: number; formula?: string; note?: string; inputs?: { name: string; value: unknown; unit: string }[] }[] }[]
+  reader?: { doc_ids?: string[]; model_confidence?: number; note?: string; tool_calls?: unknown[]; calculations?: unknown[] }
+  unavailable?: string[]
+}
+/** One thing that moved the confidence figure, with its size in percentage points (negative lowers it). */
+export interface ConfidenceFactor { label: string; delta: number; note?: string; base?: boolean }
+/** A hop in the chain of evidence (file -> sheet -> item -> measurement). */
+export interface GraphNode { label: string; kind?: string; item_id?: string | null; doc_id?: string; page?: number; relation?: string }
 export interface Reasoning {
   steps: ReasoningStep[]
+  confidence: { label: 'Verified' | 'Cross-checked' | 'Estimate'; pct: number | null; reason: string; improve?: string | null; factors?: ConfidenceFactor[]; calibration?: { n: number; correct: number; source: string; scope?: string; interval_95?: [number, number] | null } | null }
+  margin?: EvidenceMargin
+  based_on?: { elements: number; estimated: number; unresolved: number; text: string }
+  arithmetic?: { formula: string; text: string; terms: { doc_id: string; item_id: string; cite?: number | null; value: number; unit: string; measurement?: { formula: string; operands: { value: number; unit: string }[] } }[]; result: number; unit: string }[]
+  calc?: Calculation
   graph_path?: GraphPathStep[] | null
-  confidence: { label: 'Verified' | 'Cross-checked' | 'Estimate'; pct: number; reason: string; improve?: string | null }
 }
 
 export interface Answer {

@@ -1,0 +1,746 @@
+{
+  "time": "2026-11-14T23:24:18.490811+00:00",
+  "blind": true,
+  "scope": "Evidence arithmetic/method/source checks; fake-model prose is not scored for semantic accuracy.",
+  "limits": [
+    "Uncalibrated route/model scores are explicitly labelled and never described as measured accuracy.",
+    "Observed scan discrepancy/reference MAE is a partial variation proxy, not an error bound.",
+    "Zero coverage discrepancy does not imply zero detection error. Unknown semantic/physical error is not assigned a fabricated bound."
+  ],
+  "summary": {
+    "answers": 4,
+    "all_checks_passed": 4,
+    "factor_sums_passed": 4,
+    "methods": 4,
+    "numeric_margins": 4,
+    "replay_passed": 4,
+    "live_calls": 0,
+    "live_spend_usd": 0
+  },
+  "records": [
+    {
+      "doc_id": "ext_cvcfp__9",
+      "question": "what is this",
+      "route": "hybrid",
+      "value": null,
+      "abstained": false,
+      "checks": {
+        "confidence_sum": true,
+        "one_base": true,
+        "method": true,
+        "replay": true,
+        "result_matches_answer": true,
+        "numeric_observed_margin": true,
+        "margin_not_false_bound": true
+      },
+      "confidence": {
+        "label": "Estimate",
+        "pct": 20.0,
+        "reason": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type. The percentage is an uncalibrated route/model score, not measured answer accuracy.",
+        "improve": "Check the numbered evidence and the source quantities.",
+        "calibration": null,
+        "agreement": [],
+        "score_origin": {
+          "value": 20.0,
+          "unit": "% points",
+          "source": "answer.confidence before evidence caps"
+        },
+        "pct_kind": "recorded_engine_score",
+        "factors": [
+          {
+            "label": "Recorded answer-route score",
+            "delta": 20.0,
+            "base": true,
+            "note": "Uncalibrated route/model score, not measured answer accuracy. No accuracy calibration is available."
+          },
+          {
+            "label": "Source: vision-model reading",
+            "delta": 0,
+            "note": "Source context; no unmeasured accuracy adjustment."
+          },
+          {
+            "label": "Scale: Assumed door-width prior",
+            "delta": 0,
+            "note": "Highest available evidence rank (5); 0 independent method families agree within 1%."
+          },
+          {
+            "label": "Door-prior proxy spread 20.1%",
+            "delta": 0,
+            "note": "Observed icon variation; physical door-width variation remains unknown."
+          }
+        ]
+      },
+      "margin": {
+        "value": 41,
+        "unit": "count",
+        "pct": null,
+        "why": "Description inventory only; no scalar answer was requested. Saved extraction count disagreement: 41 count (max per saved run of \u03a3 abs(selected class count \u2212 alternate class count)). Uses the largest recorded component; components can overlap. This is observed/reference variation, not a guaranteed error bound; shared misses and physical prior bias remain unbounded.",
+        "sources": [
+          "ext_cvcfp__9: planmap-seg.json"
+        ],
+        "scope": "Observed scan discrepancy and historical reference",
+        "components": [
+          {
+            "label": "Saved extraction count disagreement",
+            "value": 41,
+            "unit": "count",
+            "expr": "max per saved run of \u03a3 abs(selected class count \u2212 alternate class count)",
+            "source": "calc.inventory_rows",
+            "comparisons": [
+              {
+                "doc_id": "ext_cvcfp__9",
+                "page": 1,
+                "kind": "door",
+                "selected": 10,
+                "alternate": 34,
+                "artifact": "planmap-seg.json",
+                "difference": 24
+              },
+              {
+                "doc_id": "ext_cvcfp__9",
+                "page": 1,
+                "kind": "wall",
+                "selected": 32,
+                "alternate": 32,
+                "artifact": "planmap-seg.json",
+                "difference": 0
+              },
+              {
+                "doc_id": "ext_cvcfp__9",
+                "page": 1,
+                "kind": "window",
+                "selected": 9,
+                "alternate": 26,
+                "artifact": "planmap-seg.json",
+                "difference": 17
+              }
+            ],
+            "note": "Page inventory disagreement; includes shared segmentation errors and is not a ground-truth error bound."
+          }
+        ],
+        "complete": false,
+        "is_error_bound": false
+      },
+      "method": {
+        "id": "scan-vision-best-effort",
+        "label": "Best-effort model reading with scan context",
+        "why_chosen": "best-effort answer from the objects found on the drawing and the drawing image. The answer is a model reading; saved detections, scores and pixel geometry below are background evidence, not a deterministic reconstruction of its wording.",
+        "alternatives": [
+          {
+            "id": "dimension",
+            "value": 0.014822736680508238,
+            "unit": "m/px",
+            "diff_pct": 1.2723044543644693,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank.",
+            "label": "Printed dimension matched to its line"
+          },
+          {
+            "id": "planmap-seg",
+            "label": "Saved segmenter inventory",
+            "value": 92,
+            "unit": "count",
+            "doc_id": "ext_cvcfp__9",
+            "page": 1,
+            "rejected_because": "Comparison extraction only; the answer uses the selected plan-map items and its recorded filters, not this inventory."
+          }
+        ],
+        "pages": [
+          {
+            "doc_id": "ext_cvcfp__9",
+            "page": 1,
+            "value": 0.014634146341463415,
+            "unit": "m/px",
+            "id": "door-prior",
+            "label": "Assumed door-width prior",
+            "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+            "alternatives": [
+              {
+                "id": "dimension",
+                "value": 0.014822736680508238,
+                "unit": "m/px",
+                "diff_pct": 1.2723044543644693,
+                "independent": false,
+                "rejected_because": "Lower physical-evidence rank.",
+                "label": "Printed dimension matched to its line"
+              }
+            ],
+            "disagreement": false,
+            "agreement_definition": "100 \u00d7 |a \u2212 b| / max(|a|, |b|); agreement \u22641%, disagreement >5%; not an accuracy guarantee"
+          }
+        ],
+        "scale": {
+          "value": 0.014634146341463415,
+          "unit": "m/px",
+          "id": "door-prior",
+          "label": "Assumed door-width prior",
+          "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+          "alternatives": [
+            {
+              "id": "dimension",
+              "value": 0.014822736680508238,
+              "unit": "m/px",
+              "diff_pct": 1.2723044543644693,
+              "independent": false,
+              "rejected_because": "Lower physical-evidence rank.",
+              "label": "Printed dimension matched to its line"
+            }
+          ],
+          "disagreement": false,
+          "agreement_definition": "100 \u00d7 |a \u2212 b| / max(|a|, |b|); agreement \u22641%, disagreement >5%; not an accuracy guarantee"
+        },
+        "model": "fake-1"
+      },
+      "graph_path": [
+        {
+          "label": "Best-effort model reading with scan context",
+          "kind": "calculation",
+          "relation": "method used for this answer"
+        }
+      ],
+      "calc_steps": 190,
+      "replay_issues": [],
+      "model_mode": "fake",
+      "usd_total": 0.0
+    },
+    {
+      "doc_id": "ext_cvcfp__9",
+      "question": "How many doors are there?",
+      "route": "planmap",
+      "value": 10,
+      "abstained": false,
+      "checks": {
+        "confidence_sum": true,
+        "one_base": true,
+        "method": true,
+        "replay": true,
+        "result_matches_answer": true,
+        "numeric_observed_margin": true,
+        "margin_not_false_bound": true
+      },
+      "confidence": {
+        "label": "Estimate",
+        "pct": 80.2,
+        "reason": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type. The percentage is an uncalibrated route/model score, not measured answer accuracy.",
+        "improve": "Check the numbered evidence and the source quantities.",
+        "calibration": null,
+        "agreement": [],
+        "score_origin": {
+          "value": 80.2,
+          "unit": "% points",
+          "source": "answer.confidence before evidence caps"
+        },
+        "pct_kind": "recorded_engine_score",
+        "factors": [
+          {
+            "label": "Recorded answer-route score",
+            "delta": 80.2,
+            "base": true,
+            "note": "Uncalibrated route/model score, not measured answer accuracy. No accuracy calibration is available."
+          },
+          {
+            "label": "Source: scanned image read by detector",
+            "delta": 0,
+            "note": "Source context; no unmeasured accuracy adjustment."
+          },
+          {
+            "label": "Scale: Assumed door-width prior",
+            "delta": 0,
+            "note": "Highest available evidence rank (5); 0 independent method families agree within 1%."
+          },
+          {
+            "label": "Door-prior proxy spread 20.1%",
+            "delta": 0,
+            "note": "Observed icon variation; physical door-width variation remains unknown."
+          }
+        ]
+      },
+      "margin": {
+        "value": 24,
+        "unit": "count",
+        "pct": 240.0,
+        "why": "Reported count versus numbered-box coverage: 0 count (abs(10 \u2212 10)); Saved extraction count disagreement: 24 count (max per saved run of \u03a3 abs(selected class count \u2212 alternate class count)). Uses the largest recorded component; components can overlap. This is observed/reference variation, not a guaranteed error bound; shared misses and physical prior bias remain unbounded.",
+        "sources": [
+          "answer.value / evidence.boxes",
+          "ext_cvcfp__9: planmap-seg.json"
+        ],
+        "scope": "Observed scan discrepancy and historical reference",
+        "components": [
+          {
+            "label": "Reported count versus numbered-box coverage",
+            "value": 0,
+            "unit": "count",
+            "expr": "abs(10 \u2212 10)",
+            "source": "answer.value / evidence.boxes",
+            "operands": [
+              10,
+              10
+            ],
+            "note": "Coverage discrepancy only. Zero means the returned boxes reconcile, not that no items were missed; this is not an independent detection-error estimate."
+          },
+          {
+            "label": "Saved extraction count disagreement",
+            "value": 24,
+            "unit": "count",
+            "expr": "max per saved run of \u03a3 abs(selected class count \u2212 alternate class count)",
+            "source": "calc.inventory_rows",
+            "comparisons": [
+              {
+                "doc_id": "ext_cvcfp__9",
+                "page": 1,
+                "kind": "door",
+                "selected": 10,
+                "alternate": 34,
+                "artifact": "planmap-seg.json",
+                "difference": 24
+              }
+            ],
+            "note": "Page inventory disagreement; includes shared segmentation errors and is not a ground-truth error bound."
+          }
+        ],
+        "complete": false,
+        "is_error_bound": false
+      },
+      "method": {
+        "id": "scan-count",
+        "label": "Count selected scan items after question filters",
+        "why_chosen": "The answer counts the selected saved items after the recorded class, scope, score and duplicate filters. Physical scale is not required for a count; alternate extractions remain comparisons.",
+        "alternatives": [
+          {
+            "id": "dimension",
+            "value": 0.014822736680508238,
+            "unit": "m/px",
+            "diff_pct": 1.2723044543644693,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank.",
+            "label": "Printed dimension matched to its line"
+          },
+          {
+            "id": "planmap-seg",
+            "label": "Saved segmenter inventory",
+            "value": 34,
+            "unit": "count",
+            "doc_id": "ext_cvcfp__9",
+            "page": 1,
+            "rejected_because": "Comparison extraction only; the answer uses the selected plan-map items and its recorded filters, not this inventory."
+          }
+        ],
+        "pages": [
+          {
+            "doc_id": "ext_cvcfp__9",
+            "page": 1,
+            "value": 0.014634146341463415,
+            "unit": "m/px",
+            "id": "door-prior",
+            "label": "Assumed door-width prior",
+            "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+            "alternatives": [
+              {
+                "id": "dimension",
+                "value": 0.014822736680508238,
+                "unit": "m/px",
+                "diff_pct": 1.2723044543644693,
+                "independent": false,
+                "rejected_because": "Lower physical-evidence rank.",
+                "label": "Printed dimension matched to its line"
+              }
+            ],
+            "disagreement": false,
+            "agreement_definition": "100 \u00d7 |a \u2212 b| / max(|a|, |b|); agreement \u22641%, disagreement >5%; not an accuracy guarantee"
+          }
+        ],
+        "scale": {
+          "value": 0.014634146341463415,
+          "unit": "m/px",
+          "id": "door-prior",
+          "label": "Assumed door-width prior",
+          "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+          "alternatives": [
+            {
+              "id": "dimension",
+              "value": 0.014822736680508238,
+              "unit": "m/px",
+              "diff_pct": 1.2723044543644693,
+              "independent": false,
+              "rejected_because": "Lower physical-evidence rank.",
+              "label": "Printed dimension matched to its line"
+            }
+          ],
+          "disagreement": false,
+          "agreement_definition": "100 \u00d7 |a \u2212 b| / max(|a|, |b|); agreement \u22641%, disagreement >5%; not an accuracy guarantee"
+        }
+      },
+      "graph_path": [
+        {
+          "label": "Cited source page",
+          "kind": "document",
+          "doc_id": "ext_cvcfp__9",
+          "page": 1,
+          "relation": "source of answer evidence"
+        },
+        {
+          "label": "Count selected scan items after question filters",
+          "kind": "calculation",
+          "relation": "method used for this answer"
+        }
+      ],
+      "calc_steps": 195,
+      "replay_issues": [],
+      "model_mode": "fake",
+      "usd_total": 0
+    },
+    {
+      "doc_id": "ext_cvcfp__9",
+      "question": "How many windows are there?",
+      "route": "planmap",
+      "value": 9,
+      "abstained": false,
+      "checks": {
+        "confidence_sum": true,
+        "one_base": true,
+        "method": true,
+        "replay": true,
+        "result_matches_answer": true,
+        "numeric_observed_margin": true,
+        "margin_not_false_bound": true
+      },
+      "confidence": {
+        "label": "Estimate",
+        "pct": 84.7,
+        "reason": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type. The percentage is an uncalibrated route/model score, not measured answer accuracy.",
+        "improve": "Check the numbered evidence and the source quantities.",
+        "calibration": null,
+        "agreement": [],
+        "score_origin": {
+          "value": 84.7,
+          "unit": "% points",
+          "source": "answer.confidence before evidence caps"
+        },
+        "pct_kind": "recorded_engine_score",
+        "factors": [
+          {
+            "label": "Recorded answer-route score",
+            "delta": 84.7,
+            "base": true,
+            "note": "Uncalibrated route/model score, not measured answer accuracy. No accuracy calibration is available."
+          },
+          {
+            "label": "Source: scanned image read by detector",
+            "delta": 0,
+            "note": "Source context; no unmeasured accuracy adjustment."
+          },
+          {
+            "label": "Scale: Assumed door-width prior",
+            "delta": 0,
+            "note": "Highest available evidence rank (5); 0 independent method families agree within 1%."
+          },
+          {
+            "label": "Door-prior proxy spread 20.1%",
+            "delta": 0,
+            "note": "Observed icon variation; physical door-width variation remains unknown."
+          }
+        ]
+      },
+      "margin": {
+        "value": 17,
+        "unit": "count",
+        "pct": 188.88888888888889,
+        "why": "Reported count versus numbered-box coverage: 0 count (abs(9 \u2212 9)); Saved extraction count disagreement: 17 count (max per saved run of \u03a3 abs(selected class count \u2212 alternate class count)). Uses the largest recorded component; components can overlap. This is observed/reference variation, not a guaranteed error bound; shared misses and physical prior bias remain unbounded.",
+        "sources": [
+          "answer.value / evidence.boxes",
+          "ext_cvcfp__9: planmap-seg.json"
+        ],
+        "scope": "Observed scan discrepancy and historical reference",
+        "components": [
+          {
+            "label": "Reported count versus numbered-box coverage",
+            "value": 0,
+            "unit": "count",
+            "expr": "abs(9 \u2212 9)",
+            "source": "answer.value / evidence.boxes",
+            "operands": [
+              9,
+              9
+            ],
+            "note": "Coverage discrepancy only. Zero means the returned boxes reconcile, not that no items were missed; this is not an independent detection-error estimate."
+          },
+          {
+            "label": "Saved extraction count disagreement",
+            "value": 17,
+            "unit": "count",
+            "expr": "max per saved run of \u03a3 abs(selected class count \u2212 alternate class count)",
+            "source": "calc.inventory_rows",
+            "comparisons": [
+              {
+                "doc_id": "ext_cvcfp__9",
+                "page": 1,
+                "kind": "window",
+                "selected": 9,
+                "alternate": 26,
+                "artifact": "planmap-seg.json",
+                "difference": 17
+              }
+            ],
+            "note": "Page inventory disagreement; includes shared segmentation errors and is not a ground-truth error bound."
+          }
+        ],
+        "complete": false,
+        "is_error_bound": false
+      },
+      "method": {
+        "id": "scan-count",
+        "label": "Count selected scan items after question filters",
+        "why_chosen": "The answer counts the selected saved items after the recorded class, scope, score and duplicate filters. Physical scale is not required for a count; alternate extractions remain comparisons.",
+        "alternatives": [
+          {
+            "id": "dimension",
+            "value": 0.014822736680508238,
+            "unit": "m/px",
+            "diff_pct": 1.2723044543644693,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank.",
+            "label": "Printed dimension matched to its line"
+          },
+          {
+            "id": "planmap-seg",
+            "label": "Saved segmenter inventory",
+            "value": 26,
+            "unit": "count",
+            "doc_id": "ext_cvcfp__9",
+            "page": 1,
+            "rejected_because": "Comparison extraction only; the answer uses the selected plan-map items and its recorded filters, not this inventory."
+          }
+        ],
+        "pages": [
+          {
+            "doc_id": "ext_cvcfp__9",
+            "page": 1,
+            "value": 0.014634146341463415,
+            "unit": "m/px",
+            "id": "door-prior",
+            "label": "Assumed door-width prior",
+            "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+            "alternatives": [
+              {
+                "id": "dimension",
+                "value": 0.014822736680508238,
+                "unit": "m/px",
+                "diff_pct": 1.2723044543644693,
+                "independent": false,
+                "rejected_because": "Lower physical-evidence rank.",
+                "label": "Printed dimension matched to its line"
+              }
+            ],
+            "disagreement": false,
+            "agreement_definition": "100 \u00d7 |a \u2212 b| / max(|a|, |b|); agreement \u22641%, disagreement >5%; not an accuracy guarantee"
+          }
+        ],
+        "scale": {
+          "value": 0.014634146341463415,
+          "unit": "m/px",
+          "id": "door-prior",
+          "label": "Assumed door-width prior",
+          "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+          "alternatives": [
+            {
+              "id": "dimension",
+              "value": 0.014822736680508238,
+              "unit": "m/px",
+              "diff_pct": 1.2723044543644693,
+              "independent": false,
+              "rejected_because": "Lower physical-evidence rank.",
+              "label": "Printed dimension matched to its line"
+            }
+          ],
+          "disagreement": false,
+          "agreement_definition": "100 \u00d7 |a \u2212 b| / max(|a|, |b|); agreement \u22641%, disagreement >5%; not an accuracy guarantee"
+        }
+      },
+      "graph_path": [
+        {
+          "label": "Cited source page",
+          "kind": "document",
+          "doc_id": "ext_cvcfp__9",
+          "page": 1,
+          "relation": "source of answer evidence"
+        },
+        {
+          "label": "Count selected scan items after question filters",
+          "kind": "calculation",
+          "relation": "method used for this answer"
+        }
+      ],
+      "calc_steps": 195,
+      "replay_issues": [],
+      "model_mode": "fake",
+      "usd_total": 0
+    },
+    {
+      "doc_id": "ext_cvcfp__9",
+      "question": "What is the total area of all rooms?",
+      "route": "planmap",
+      "value": 146.73,
+      "abstained": false,
+      "checks": {
+        "confidence_sum": true,
+        "one_base": true,
+        "method": true,
+        "replay": true,
+        "result_matches_answer": true,
+        "numeric_observed_margin": true,
+        "margin_not_false_bound": true
+      },
+      "confidence": {
+        "label": "Estimate",
+        "pct": 40.0,
+        "reason": "The recorded readings disagree; check the highlighted evidence. No measured accuracy is available for this answer type. The percentage is an uncalibrated route/model score, not measured answer accuracy.",
+        "improve": "Supply a known dimension and check the measured outlines.",
+        "calibration": null,
+        "agreement": [],
+        "score_origin": {
+          "value": 40.0,
+          "unit": "% points",
+          "source": "answer.confidence before evidence caps"
+        },
+        "pct_kind": "recorded_engine_score",
+        "factors": [
+          {
+            "label": "Recorded answer-route score",
+            "delta": 40.0,
+            "base": true,
+            "note": "Uncalibrated route/model score, not measured answer accuracy. No accuracy calibration is available."
+          },
+          {
+            "label": "Source: scanned image read by detector",
+            "delta": 0,
+            "note": "Source context; no unmeasured accuracy adjustment."
+          },
+          {
+            "label": "Scale: Assumed door-width prior",
+            "delta": 0,
+            "note": "Highest available evidence rank (5); 0 independent method families agree within 1%."
+          },
+          {
+            "label": "Door-prior proxy spread 20.1%",
+            "delta": 0,
+            "note": "Observed icon variation; physical door-width variation remains unknown."
+          }
+        ]
+      },
+      "margin": {
+        "value": 65.01878773823579,
+        "unit": "m2",
+        "pct": 44.31185697419464,
+        "why": "Door-proxy scale sensitivity: 65.02 m2 (abs(146.73) \u00d7 ((1 + 0.201299)^2 \u2212 1)). Uses the largest recorded component; components can overlap. This is observed/reference variation, not a guaranteed error bound; shared misses and physical prior bias remain unbounded.",
+        "sources": [
+          "calc.steps:door_scale_spread"
+        ],
+        "scope": "Observed scan discrepancy and historical reference",
+        "components": [
+          {
+            "label": "Door-proxy scale sensitivity",
+            "value": 65.01878773823579,
+            "unit": "m2",
+            "expr": "abs(146.73) \u00d7 ((1 + 0.201299)^2 \u2212 1)",
+            "source": "calc.steps:door_scale_spread",
+            "operands": [
+              146.73,
+              0.2012987012987013,
+              2
+            ],
+            "note": "Variation across icon-derived scales only. Actual door-width/prior bias and outline error are not bounded."
+          }
+        ],
+        "complete": false,
+        "is_error_bound": false
+      },
+      "method": {
+        "id": "scan-pixel-measurement",
+        "label": "Pixel geometry using Assumed door-width prior",
+        "why_chosen": "The solver uses the ranked page scale selected before solving. Printed quantities, when present, retain their source values; pixel geometry uses that page\u2019s scale. Highest available evidence rank (5); 0 independent method families agree within 1%.",
+        "alternatives": [
+          {
+            "id": "dimension",
+            "value": 0.014822736680508238,
+            "unit": "m/px",
+            "diff_pct": 1.2723044543644693,
+            "independent": false,
+            "rejected_because": "Lower physical-evidence rank.",
+            "label": "Printed dimension matched to its line"
+          },
+          {
+            "id": "planmap-seg",
+            "label": "Saved segmenter inventory",
+            "value": 92,
+            "unit": "count",
+            "doc_id": "ext_cvcfp__9",
+            "page": 1,
+            "rejected_because": "Comparison extraction only; the answer uses the selected plan-map items and its recorded filters, not this inventory."
+          }
+        ],
+        "pages": [
+          {
+            "doc_id": "ext_cvcfp__9",
+            "page": 1,
+            "value": 0.014634146341463415,
+            "unit": "m/px",
+            "id": "door-prior",
+            "label": "Assumed door-width prior",
+            "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+            "alternatives": [
+              {
+                "id": "dimension",
+                "value": 0.014822736680508238,
+                "unit": "m/px",
+                "diff_pct": 1.2723044543644693,
+                "independent": false,
+                "rejected_because": "Lower physical-evidence rank.",
+                "label": "Printed dimension matched to its line"
+              }
+            ],
+            "disagreement": false,
+            "agreement_definition": "100 \u00d7 |a \u2212 b| / max(|a|, |b|); agreement \u22641%, disagreement >5%; not an accuracy guarantee"
+          }
+        ],
+        "scale": {
+          "value": 0.014634146341463415,
+          "unit": "m/px",
+          "id": "door-prior",
+          "label": "Assumed door-width prior",
+          "why_chosen": "Highest available evidence rank (5); 0 independent method families agree within 1%.",
+          "alternatives": [
+            {
+              "id": "dimension",
+              "value": 0.014822736680508238,
+              "unit": "m/px",
+              "diff_pct": 1.2723044543644693,
+              "independent": false,
+              "rejected_because": "Lower physical-evidence rank.",
+              "label": "Printed dimension matched to its line"
+            }
+          ],
+          "disagreement": false,
+          "agreement_definition": "100 \u00d7 |a \u2212 b| / max(|a|, |b|); agreement \u22641%, disagreement >5%; not an accuracy guarantee"
+        }
+      },
+      "graph_path": [
+        {
+          "label": "Cited source page",
+          "kind": "document",
+          "doc_id": "ext_cvcfp__9",
+          "page": 1,
+          "relation": "source of answer evidence"
+        },
+        {
+          "label": "Pixel geometry using Assumed door-width prior",
+          "kind": "calculation",
+          "relation": "method used for this answer"
+        }
+      ],
+      "calc_steps": 189,
+      "replay_issues": [],
+      "model_mode": "fake",
+      "usd_total": 0.0
+    }
+  ]
+}

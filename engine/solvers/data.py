@@ -23,6 +23,7 @@ class Item:
     source: str = ""
     bbox_m: list | None = None                  # IFC only: [[minx,miny,minz],[maxx,maxy,maxz]], y up
     polygon_px: list | None = None              # plan map only
+    scale_adjustment: dict = field(default_factory=dict)  # runtime quantities, never persisted over the source
 
 
 @dataclass
@@ -108,16 +109,16 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
         for it in items:
             if it.item_id in placed:
                 it.page, it.bbox_px = placed[it.item_id]
-        return Doc(doc_id, "ifc", items, title, e.get("storeys") or [], meta=e.get("building") or {})
+        return Doc(doc_id, "ifc", items, title, e.get("storeys") or [], meta={**(e.get("building") or {}), "unit_provenance": e.get("unit_provenance")})
     if pms:
-        items, scale = [], None
+        items, scale, page_scales = [], None, {}
         for p in pms:
             m = _json(p)
             from engine.scales import apply_item_scales
             from pipeline.scale_regions import annotate_cached
             if meta.get("kind") in ("raster", "dxf", "dwg"):
                 m = annotate_cached(m, d)
-            scale = scale or m.get("scale")
+            page_scale = m.get("scale")
             page_start = len(items)
             for x in m["items"]:
                 pr = x.get("props") or {}
@@ -133,16 +134,42 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
                                   bbox_px=x.get("bbox_px"), polygon_px=x.get("polygon_px"), conf=float(x.get("conf") or 0), q=q, props=pr,
                                   source=x.get("source", "")))
             apply_item_scales(items[page_start:], m)
+            regional = any("measurement_scale" in i.props for i in items[page_start:])   # per-view scales already applied
+            original_quantities = [dict(it.q) for it in items[page_start:]]
+            try:   # Refine each page independently; sheets can have different scales.
+                if regional:
+                    raise RuntimeError('regional scales')
+                from engine import scale_text
+                page_number = m.get("page", 1)
+                better = scale_text.refine_scale(d, page_number, page_scale)
+                if better:
+                    scale_text.rescale_items(items[page_start:], (page_scale or {}).get("m_per_px"), better["m_per_px"])
+                    page_scale = {**better, "replaced": (page_scale or {}).get("method")}
+            except Exception:  # noqa: BLE001 - never block a document on scale reading
+                pass
+            from engine.scale_policy import choose
+            selected_scale = page_scale if regional else choose(m, d, effective_scale=page_scale)
+            old_mpp = (page_scale or {}).get("m_per_px")
+            new_mpp = selected_scale.get("m_per_px")
+            if new_mpp and new_mpp != old_mpp:
+                from engine.scale_text import rescale_items
+                rescale_items(items[page_start:], old_mpp, new_mpp)
+            elif not new_mpp and old_mpp:
+                # An ambiguous global scale cannot support dimensional values.
+                for it in items[page_start:]:
+                    for key in ("area_m2", "width_m", "height_m", "length_m"):
+                        if key != "area_m2" or it.props.get("area_m2_label") is None:
+                            it.q.pop(key, None)
+            page_scale = selected_scale
+            for it, original in zip(items[page_start:], original_quantities):
+                changed = {k: {"before": original.get(k), "after": v} for k, v in it.q.items() if original.get(k) != v}
+                if changed:
+                    it.scale_adjustment = {"quantities": changed, "old_scale": m.get("scale") or {}, "new_scale": selected_scale}
+            page_scales[m.get("page", 1)] = page_scale
+            if scale is None:
+                scale = page_scale
         items = dedupe_openings(items)
-        try:   # E-57: a printed scale (scale bar, or 1:200 + sheet size / dpi) beats the door-size guess
-            from engine import scale_text
-            better = None if any("measurement_scale" in i.props for i in items) else scale_text.refine_scale(d, 1, scale)
-            if better:
-                scale_text.rescale_items(items, (scale or {}).get("m_per_px"), better["m_per_px"])
-                scale = {**better, "replaced": (scale or {}).get("method")}
-        except Exception:  # noqa: BLE001 - never block a document on scale reading
-            pass
-        return Doc(doc_id, "planmap", items, title, [], scale, len(pms))
+        return Doc(doc_id, "planmap", items, title, [], scale, len(pms), meta={"page_scales": page_scales})
     return None
 
 

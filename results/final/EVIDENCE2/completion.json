@@ -1,0 +1,74 @@
+{
+  "row": "F-EVIDENCE2",
+  "time": "2026-11-14T23:21:22.093831+02:00",
+  "status": "PARTIAL: implementation passes; commit blocked by filesystem",
+  "branch": "final/evidence2",
+  "base_commit": "60efc46c0671dbd10026f2351d4720b15836d1ce",
+  "python_tests": {
+    "passed": 85,
+    "seconds": 2.73,
+    "command": "MODELS_FAKE=1 /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest engine/tests/test_reasoning_margin.py engine/tests/test_reasoning_confidence.py engine/tests/test_reasoning_measured.py engine/tests/test_reasoning_checked.py engine/tests/test_reasoning_found.py engine/tests/test_quantity_takeoff.py engine/tests/test_analytics.py engine/tests/test_project_search.py -q"
+  },
+  "web_tests": {
+    "passed": 22,
+    "seconds": 0.349,
+    "command": "cd web && npx vitest run --configLoader runner --no-cache src/components/evidence-card.test.tsx src/lib/answer-export.test.ts src/components/answer-export.test.ts"
+  },
+  "typecheck": "PASS: cd web && npx tsc --noEmit -p .",
+  "validation": {
+    "checks": 6,
+    "documents": 4,
+    "formats": [
+      "IFC",
+      "DXF",
+      "scan"
+    ],
+    "report": "results/final/EVIDENCE2/validation.json"
+  },
+  "commit": {
+    "status": "blocked",
+    "error": "fatal: Unable to create '/Users/akshatthapa/Workspace/junction/.git/worktrees/evidence2/index.lock': Operation not permitted",
+    "attempts": 1
+  },
+  "files_to_commit": [
+    "engine/reasoning.py",
+    "engine/reasoning_parts/margin.py",
+    "engine/reasoning_parts/confidence.py",
+    "engine/tests/test_reasoning_margin.py",
+    "engine/tests/test_reasoning_confidence.py",
+    "engine/tests/evidence_validation.py",
+    "web/src/components/evidence-card.tsx",
+    "web/src/components/evidence-card.css",
+    "web/src/components/evidence-card.test.tsx",
+    "web/src/lib/evidence-format.ts",
+    "web/src/lib/types.ts",
+    "web/src/lib/answer-export.ts",
+    "web/src/lib/answer-export.test.ts",
+    "DECISIONS.md",
+    "results/final/EVIDENCE2/validation.json",
+    "results/final/EVIDENCE2/completion.json"
+  ],
+  "suggested_commits": [
+    "F-EVIDENCE2: quantify evidence margins and use observed calibration",
+    "F-EVIDENCE2: show quantified evidence and retain full arithmetic in exports",
+    "F-EVIDENCE2: record real-format and reserved-file validation"
+  ],
+  "cross_file": [
+    "engine/reasoning.py",
+    "web/src/lib/types.ts",
+    "web/src/lib/answer-export.ts",
+    "web/src/lib/evidence-format.ts",
+    "DECISIONS.md"
+  ],
+  "needs_awais": [],
+  "integration": [
+    "Commit the explicit paths above on final/evidence2; do not stage shared-data symlinks.",
+    "Merge QA2 calibration.json at results/final/QA2/calibration.json. Both buckets and the original format/operation schema are supported; matched observed correct/n is displayed with its sample size.",
+    "Preserve margin.run(ctx) after measured/checked in engine/reasoning.py and its margin, based_on, arithmetic return fields when merging F-ORDER. Missing-source/order-estimate guards are enforced by source reconciliation, not heuristic percentage bonuses.",
+    "To quantify scan detector counts, link provenance.detector_evaluation to results/vision/<report>.json; it must name the active model, drawing source, and per_kind precision, recall and n. Optional per-kind recount_agrees must itself be measured.",
+    "To quantify scale errors, record relative_error, uncertainty_m_per_px, spread_pct, or fit_residual_px plus scale_bar_px on that page. Door-prior errors additionally need measured door_width_relative_error. Confidence alone remains insufficient.",
+    "Complex/partial calculations without reconciled source terms keep an explicit unknown margin; never fill these gaps with invented operands."
+  ],
+  "live_provider_calls": 0,
+  "live_spend_usd": 0
+}

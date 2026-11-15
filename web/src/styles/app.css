@@ -975,3 +975,5 @@ button:active:not(:disabled), .rail-item:active { transform: scale(.94); transit
 @media (prefers-reduced-motion: reduce) {
   .chat-workspace.has-viewer .document-viewer, .evidence-region.text-highlight > rect { animation: none; }
 }
+
+.conversation { padding-bottom: 40px; scroll-padding-bottom: 40px; }

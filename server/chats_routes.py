@@ -422,6 +422,11 @@ async def ask(chat_id: str, body: NewMessage):
             "insert into messages (chat_id, role, content) values ($1,'assistant',$2) returning id",
             cid, ans["answer"]["text_md"])
         answer_docs = ans.get("doc_ids") or doc_ids
+        try:
+            from .scale_evidence import persist as persist_scale_evidence
+            await persist_scale_evidence(pool, ans, config.artifacts_dir())
+        except Exception:  # noqa: BLE001 - a crop-store outage must not drop the answer
+            pass
         await pool.execute("insert into answers (message_id, chat_id, doc_id, answer) values ($1,$2,$3,$4::jsonb)",
                            mid, cid, answer_docs[0] if answer_docs else None, json.dumps(ans))
         ACTIVE.pop(str(cid), None)  # before the notification, so the resync snapshot shows no live job

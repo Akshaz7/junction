@@ -1,0 +1,61 @@
+{
+  "status": "PARTIAL",
+  "created_utc": "2026-11-14T22:33:52.064202+00:00",
+  "engine_tests": {
+    "passed": 174,
+    "duration_s": 6.33,
+    "modules": [
+      "test_xcheck",
+      "test_xcheck_ifc",
+      "test_reasoning_margin",
+      "test_reasoning_confidence",
+      "test_reasoning_found",
+      "test_reasoning_measured",
+      "test_reasoning_checked",
+      "test_analytics",
+      "test_mep",
+      "test_quantity_takeoff",
+      "test_solvers",
+      "test_answer",
+      "test_symbols"
+    ]
+  },
+  "server_tests": {
+    "passed": 5,
+    "duration_s": 0.14,
+    "modules": [
+      "test_ingest_light"
+    ]
+  },
+  "environment": "MODELS_FAKE=1; /Users/akshatthapa/Workspace/junction/.venv/bin/python",
+  "report_integrity": "Verified observation denominators, within-1%/5% numerators and rates, complete-check coverage, strict JSON, each result file below 10 MB",
+  "summary": {
+    "questions": 307,
+    "numeric_answers": 228,
+    "complete_checks": 55,
+    "independent_observations": 3178,
+    "unavailable": 252,
+    "live_cost_usd": 0
+  },
+  "withheld": {
+    "path": "data/full/junction-dataset/data/ifc_models/resbim-364_model.ifc",
+    "selection": "SystemRandom choice from sorted data/**/*.ifc before development; contents not read until final validation",
+    "doc_id": "ifc_models__resbim-364-model",
+    "tested_at": "2026-11-15T00:23:18.309287",
+    "checks": 0,
+    "schema": "IFC4",
+    "source_sha256": "beafbff3f94d866ccce088c8429a3c20ceed65bb9212ed662f412d498c98760f",
+    "originating_system": "Autodesk - Revit 26.4.0.32 (ENG) - 26.4.0.32",
+    "elapsed_s": 0.006,
+    "outcome": "handled without crash; unavailable checks are not guessed"
+  },
+  "missing_sources": [
+    "No independently extracted raster skeletons for wall/baseboard comparisons",
+    "No complete outer-floor boundary matching the selected room sets"
+  ],
+  "integration": [
+    "Merge the small hooks in engine/reasoning.py and server/ingest_job.py alongside F-EVFIX",
+    "Existing IFC artifacts require a separately authorized backfill of xcheck.json; new IFC uploads run the cheap axis/sweep hook",
+    "Raster/PDF pipelines can supply raster_length_check(doc, item, primary_m, skeleton, skeleton_source, openings_m=0.0); returns a sourced check or None; persist it in xcheck.json elements[item_id]"
+  ]
+}

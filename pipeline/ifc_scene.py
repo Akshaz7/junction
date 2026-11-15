@@ -431,12 +431,13 @@ def process(ifc: Path, doc: dict, out_dir: Path):
         storeys[s.GlobalId] = {"name": s.Name or "Unnamed level", "elevation_m": round((s.Elevation or 0) * scale, 4)}
     storey_list = sorted(storeys.values(), key=lambda s: s["elevation_m"])
 
+    from pipeline.scale_provenance import ifc_units
     from pipeline.ifc_props import building_meta, enrich_elements
     enrich_elements(f, elements)
     from pipeline.ifc_quantities import build as build_quantity_index
     (out_dir / "ifc-quantities.json").write_text(json.dumps(build_quantity_index(f, space_geometry=True)))
     (out_dir / "elements.json").write_text(json.dumps(
-        {"doc_id": doc["doc_id"], "version": 2, "schema": f.schema, "units": "m", "building": building_meta(f),
+        {"doc_id": doc["doc_id"], "version": 2, "schema": f.schema, "units": "m", "unit_provenance": ifc_units(f, doc["doc_id"]), "building": building_meta(f),
          "coords": "recentred in X/Z by origin_offset_m, Y-up (glTF), Y keeps real elevation",
          "storeys": storey_list, "elements": elements}, indent=1))
     lic = (doc.get("licence") or "")

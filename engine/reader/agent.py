@@ -7,6 +7,7 @@ import json
 import re
 import time
 import uuid
+from dataclasses import asdict
 from pathlib import Path
 
 from engine.models import providers as P
@@ -212,16 +213,23 @@ def _build(question, doc_ids, sess: Session, fin: dict, trace, calls, t0, forced
         if notes:
             trace.append({"step": "check", "detail": "; ".join(notes), "ms": 0, "model": None, "cost_usd": 0})
     main = (cites[0]["doc_id"] if cites else (doc_ids[0] if doc_ids else ""))
-    return {
+    res = {
         "answer_id": uuid.uuid4().hex, "question": question, "doc_ids": list(doc_ids),
         "answer": {"text_md": text, "value": value if not abstained else None, "unit": unit if not abstained else None,
                    "confidence": round(conf if not abstained else 0.0, 2), "abstained": abstained},
         "citations": cites,
         "evidence": {"boxes": boxes, "scene": {"doc_id": main, "highlight_item_ids": ids, "camera_target_item_id": ids[0] if ids else None}},
         "trace": trace, "route": "hybrid",
+        "_reader_evidence": {"doc_ids": list(doc_ids), "tool_calls": list(sess.audit),
+                             "calculations": list(sess.calculations),
+                             "evidence": {key: asdict(value) for key, value in sess.ev.items()},
+                             "selected_refs": refs, "model_confidence": conf,
+                             "note": "Planner confidence is self-reported; it is not measured answer accuracy."},
         "cost": {"usd_total": round(sum(c.get("cost_usd", 0) for c in calls), 6), "calls": calls},
         "latency_ms": int((time.perf_counter() - t0) * 1000),
     }
+    from engine.reader.calc_trace import seed
+    return seed(res, res['_reader_evidence'])
 
 
 def read_answer(question: str, doc_ids: list[str], root, on_event=None, trace: list | None = None, calls: list | None = None,

@@ -81,6 +81,8 @@ app.include_router(docs_router)
 app.include_router(linked_router)
 app.include_router(files_router)
 app.include_router(chats_router)
+from .calc_routes import router as calc_router
+app.include_router(calc_router)
 app.include_router(live_router)
 app.include_router(speech_router)
 app.include_router(advise_router)

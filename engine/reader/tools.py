@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import ast
 import json
+import math
 import operator
 import re
 import tempfile
@@ -55,6 +56,8 @@ class Session:
         self.tables: dict[str, tuple[str, int, Table]] = {}
         self.views = 0
         self.transcript: list[str] = []            # every observation, for number grounding
+        self.audit: list[dict] = []
+        self.calculations: list[dict] = []
         self._planmaps: dict[str, Doc | None] = {}
         for i, d in enumerate(self.doc_ids, 1):
             self.docs[f"d{i}"] = {"id": d, **self._meta(d)}
@@ -152,6 +155,7 @@ class Session:
             obs = f"error: {tool} failed ({type(e).__name__}: {str(e)[:120]})"
         obs = obs if len(obs) <= OBS_CAP else obs[:OBS_CAP] + "\n[truncated]"
         self.transcript.append(obs)
+        self.audit.append({'tool': tool, 'args': args or {}, 'observation': obs})
         return obs
 
     def status(self, text: str):
@@ -310,6 +314,10 @@ class Session:
         self.on_cost({"task": "read_drawing", "provider": r.provider, "model": r.model, "cost_usd": r.cost_usd})
         txt = (r.text or "").strip()[:600]
         e = self.reg("region", did, pg, [x0, y0, x1, y1], txt, visual=True)
+        self.calculations.append({'tool': 'view', 'doc_id': did, 'page': pg, 'bbox': [x0, y0, x1, y1],
+                                  'crop_width_px': int(x1) - int(x0), 'crop_height_px': int(y1) - int(y0),
+                                  'model_width_px': crop.width, 'model_height_px': crop.height,
+                                  'model': r.model, 'text': txt, 'evidence_ref': e})
         return f"{e} (visual reading of the crop {[int(x0), int(y0), int(x1), int(y1)]} on p{pg}): {txt}"
 
     def t_scale(self, doc: str = "", page=1) -> str:
@@ -346,12 +354,30 @@ class Session:
         pts = [[float(p[0]), float(p[1])] for p in (points or [])]
         if len(pts) < 2:
             return "error: need at least 2 points [[x,y],...] in page pixels"
+        if any(not math.isfinite(v) for p in pts for v in p):
+            return "error: measurement coordinates must be finite page pixels"
+        if m_per_px is not None and (not math.isfinite(float(m_per_px)) or float(m_per_px) <= 0):
+            return "error: metres per pixel must be finite and positive"
+        if ratio is not None and (not math.isfinite(float(ratio)) or float(ratio) <= 0):
+            return "error: scale ratio must be finite and positive"
         self.status("Measuring")
         mpp = float(m_per_px) if m_per_px else None
+        scale_dpi = None
+        ps = geom.planmap_scale(did, pg, self.root)
+        selection = (ps or {}).get('selection') or {}
+        from engine.scale_policy import RANK
+        evidenced = bool(ps and ps.get('m_per_px') and RANK.get(selection.get('id'), 6) < RANK['door-prior']
+                          and 'Original derivation is unavailable' not in selection.get('why_chosen', ''))
+        # Prefer source-linked physical evidence over unassociated planner input.
+        if evidenced:
+            mpp, m_per_px, ratio = float(ps['m_per_px']), None, None
         if mpp is None and ratio:
             dpi = geom.page_dpi(did, pg, self.root)
+            scale_dpi = dpi
             mpp = float(ratio) * 0.0254 / dpi if dpi else None
         src = "given"
+        if evidenced:
+            src = 'ranked page scale: ' + selection.get('label', str(ps.get('method')))
         from pipeline.scale_regions import region_map
         from engine.scales import points_scale, positive, scale_description
         pm = region_map(Path(self.root) / did, pg)
@@ -364,17 +390,26 @@ class Session:
                 return "error: supplied scale disagrees with the scale for this view"
             mpp, src = local_mpp, scale_description(sc, (region or {}).get("title"))
         if mpp is None:
-            ps = geom.planmap_scale(did, pg, self.root)
             if ps and (ps.get("confidence") or 0) >= 0.5:
                 mpp, src = float(ps["m_per_px"]), f"plan map scale ({ps.get('method')}, conf {ps.get('confidence')})"
         if mpp is None:
             return "error: no scale known: call scale first, then pass ratio or m_per_px"
+        if not math.isfinite(mpp) or mpp <= 0:
+            return "error: no finite positive physical scale is established"
         length = geom.polyline_length(pts, closed) * mpp
+        if not math.isfinite(length):
+            return "error: measurement exceeds the supported numeric range"
         res = f"length {length:.3f} m"
         if closed and len(pts) >= 3:
-            res += f", area {geom.polygon_area(pts) * mpp * mpp:.2f} m2"
+            area = geom.polygon_area(pts) * mpp * mpp
+            if not math.isfinite(area):
+                return "error: measurement exceeds the supported numeric range"
+            res += f", area {area:.2f} m2"
         xs, ys = [p[0] for p in pts], [p[1] for p in pts]
         ref = self.reg("region", did, pg, [min(xs), min(ys), max(xs), max(ys)], f"measured {res}")
+        from engine.reader.calc_trace import measurement
+        self.calculations.extend(measurement(did, pg, pts, closed, mpp, src, ref,
+                                             ratio=ratio, dpi=scale_dpi, supplied=m_per_px is not None, root=self.root))
         return f"{ref} {res} (scale {mpp:.6f} m/px from {src})"
 
     def t_planmap(self, doc: str = "", kind: str = "", name: str = "", page=None, limit: int = 40) -> str:
@@ -452,6 +487,8 @@ class Session:
 
     def t_compute(self, expr: str) -> str:
         v = safe_eval(str(expr))
+        self.calculations.append({'tool': 'compute', 'expr': str(expr), 'value': v,
+                                  'note': 'The planner supplied this expression. Exact arithmetic does not verify that its operands match the drawing.'})
         return f"{expr} = {_fmt(round(v, 6))}"
 
 

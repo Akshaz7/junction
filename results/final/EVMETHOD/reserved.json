@@ -1,0 +1,4 @@
+{
+  "path": "data/full/junction-dataset/data/ifc_models/resbim-227_model.ifc",
+  "selection": "SystemRandom over *.ifc paths, contents not opened until final validation"
+}

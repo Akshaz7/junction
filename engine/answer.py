@@ -131,20 +131,26 @@ def _set_boxes(res, parsed, entries, note):
     n = len(entries)
     ids = [e[0] for e in entries]
     page = ((res.get("evidence") or {}).get("boxes") or [{"page": 1}])[0].get("page", 1)
-    res["evidence"]["boxes"] = [{"item_id": it, "page": page, "bbox_px": [int(v) for v in bb], "label": str(k)} for k, (it, bb) in enumerate(entries, 1)]
+    res["evidence"]["boxes"] = [{"item_id": it, "page": page, "bbox_px": [int(v) for v in bb], "label": str(k), "kind": parsed.kind} for k, (it, bb) in enumerate(entries, 1)]
     sc = res["evidence"]["scene"]
     sc["highlight_item_ids"] = ids
     sc["camera_target_item_id"] = ids[0] if ids else None
+    sc["item_kinds"] = {iid: parsed.kind for iid in ids}
     for c in res.get("citations") or []:
         if "item_ids" in c:
             c["item_ids"] = list(ids)
             if entries:
                 c["bbox_px"] = [min(e[1][0] for e in entries), min(e[1][1] for e in entries), max(e[1][2] for e in entries), max(e[1][3] for e in entries)]
+            else:
+                c["bbox_px"] = None
     noun = re.sub(r"^.*?\*\*\d+ ([^*]+)\*\*.*$", r"\1", ans["text_md"], flags=re.S) if re.search(r"\*\*\d+ ", ans["text_md"]) else parsed.kind + "s"
     marks = " ".join(dict.fromkeys(re.findall(r"\[\d+\]", ans["text_md"])))
     ans["value"] = n
     ans["text_md"] = f"There {'is' if n == 1 else 'are'} **{n} {noun if n != 1 else noun.rstrip('s')}** on this floor plan." + (f" {marks}" if marks else "")
     ans["confidence"] = round(min(ans.get("confidence", 0.5), 0.5), 3)
+    for c in res.get("citations") or []:
+        c["label"] = f"Floor plan · {n} {noun if n != 1 else noun.rstrip('s')}"
+        c["item_kind"] = parsed.kind
     res["trace"].append(_step("recount", note, 0, None, 0))
 
 
@@ -161,7 +167,7 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
     try:
         from engine.solvers.data import load_doc
         doc = load_doc(did, root)
-        if doc is None or doc.mode != "planmap" or not any(i.source == "det" for i in doc.items):
+        if doc is None or doc.mode != "planmap" or doc.pages != 1 or not any(i.source == "det" for i in doc.items):
             return res
         det = Path(root) / did / "planmap-det.json"
         # calibration: the fine-tuned detector is far below the vision recount (shower/bath .28 vs .89 exact count), so it is opt-in (DET_BOXES=1)
@@ -179,6 +185,8 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
         return res
     if n is None:
         return res
+    res.setdefault("_calc_models", []).append({"label": "Model count, second look", "value": n, "doc_id": did,
+                                               "policy": "Final count follows the recorded recount decision and its supported boxes; this model output alone is not a verified count."})
     calls.append({"task": "recount", "provider": "vision", "model": model, "cost_usd": usd})
     plan_n = int(ans["value"])
     final = reconcile(parsed.kind, plan_n, n)
@@ -215,6 +223,8 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
             res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n}: vision drew {len(entries)} box(es), not {final}, kept the plan map", 0, model, usd))
             return res
         _set_boxes(res, parsed, entries, f"plan map {plan_n}, drawing re-read {n}: replaced by {len(entries)} vision-drawn box(es) ({m2})")
+    else:
+        res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n}: kept the boxed plan-map count", 0, model, usd))
     return res
 
 
@@ -264,6 +274,12 @@ def _guarded(question, doc_ids, on_event, scene_state, history):
 @document_scope
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None) -> dict:
+    from engine.reasoning_parts.confidence import attach
+    return attach(_answer_with_evidence(question, doc_ids, on_event, scene_state=scene_state, history=history), question, _root())
+
+
+def _answer_with_evidence(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
+                          history: list[dict] | None = None) -> dict:
     started_at = time.perf_counter()
     # F-CHANGES: revision questions are a complete code route, including evidence.
     from engine.revision_compare import comparison_answer
@@ -272,7 +288,8 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
         if on_event:
             for entry in comparison["trace"]:
                 on_event("trace", entry)
-        return comparison
+        from engine import calc
+        return calc.attach(comparison, question, _root())
     # thread memory (engine/context.py): every route below sees the resolved, standalone question and document selection
     original, step = question, None
     try:  # keyboard mash or nonsense: say so, never reuse the previous answer
@@ -331,6 +348,11 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
             res = reasoning.attach(res, question, _root())
     except Exception:  # noqa: BLE001
         pass
+    # F-CALC: final operands must follow recounts, conversions and evidence margins.
+    from engine import calc
+    res = calc.attach(res, question, _root())
+    from engine import scan_calc
+    res = scan_calc.attach(res, question, _root())
     try:   # bullets need a blank line before them to render as a list
         _t = res["answer"].get("text_md") or ""
         res["answer"]["text_md"] = re.sub(r"(?m)^(?!- |\* |\||#)(\S[^\n]*)\n(- )", r"\1\n\n\2", _t)
