@@ -176,3 +176,18 @@ def test_missing_class_retains_qualified_detection_count_without_visual_reader(m
     r=ask('How many toilet bowls are there?',[d.name])
     assert r['answer']['value']==0 and r['answer']['confidence']<=.3
     assert 'not a verified total' in r['answer']['text_md']
+
+
+def test_document_title_words_are_not_a_room_filter():
+    from engine.solvers.filters import room_filter
+    from engine.solvers.data import Item
+    rooms=[Item('r1','room',label='Bad',props={}),Item('r2','room',label='Flur',props={})]
+    for q in ('What is the total floor area of the city house munich arc model?',
+              'What is the area of this drawing?','total area of the file','area of the Foo Bar plan'):
+        assert room_filter(q,rooms) is None,q
+    assert room_filter('What is the area of the Bad?',rooms) is not None
+
+
+def test_munich_title_total_floor_area_is_total_of_recorded_rooms():
+    r=ask('What is the total floor area of the city house munich arc model?',['ifc_bench__city-house-munich-arc'])
+    assert r['answer']['value']==pytest.approx(170.3,abs=.1) and r['citations']

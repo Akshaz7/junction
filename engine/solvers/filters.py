@@ -217,6 +217,11 @@ def room_filter(question: str, rooms: list[Item]) -> tuple[str, list[Item]] | No
         base = _room_type(target)
         if base:
             return base, [r for r in rooms if room_type_matches(r, base)]
+        # A document/model title ("city house munich arc model", "ac20 plan") is the scope, never a room name.
+        # When no room carries the words and the phrase ends in a generic document noun, there is no room filter.
+        if re.search(r"(?<!\w)(?:model|file|drawing|plan|plans|sheet|document|project|ifc|bim|building|house|property)$", target) \
+                and not any(re.search(rf"(?<!\w){re.escape(target)}(?!\w)", fold(room_name(r))) for r in rooms):
+            return None
         # Never shorten an unknown full name ('Buero Mueller XI') to a known prefix ('Buero').
         return target, [r for r in rooms if re.search(rf"(?<!\w){re.escape(target)}(?!\w)", fold(room_name(r)))]
     reference = re.search(r"\b(?:where (?:is|are)|(?:show|locate|find)(?: me)?|how many|number of|list)\s+(?:the\s+)?(.+)", question, re.I)
