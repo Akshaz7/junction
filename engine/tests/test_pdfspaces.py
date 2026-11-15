@@ -1,4 +1,5 @@
 """Generated for demo: PDF room metadata, multilingual names and preserved evidence."""
+import json
 import time
 
 import pytest
@@ -76,10 +77,23 @@ def test_excluded_types_are_not_positive_room_targets():
                        "(excluding balconies, loggias, terraces and other outdoor spaces)?", rooms) is None
 
 
+def test_bare_exclusion_fragment_does_not_widen_to_wet_room_category():
+    rooms = [room("Bathroom", "1", "bathroom"), room("WC", "2", "wc", "toilet")]
+    assert room_filter("WCs", rooms) is None
+
+
 def test_ifc_type_name_does_not_override_a_specific_source_room_name():
     rooms = [Item("meeting", "room", name="214", type_name="Office", props={"long_name": "Meeting"}),
              Item("office", "room", name="215", type_name="Office", props={"long_name": "Office"})]
     assert selected("What is the area of offices?", rooms) == ["office"]
+
+
+@pytest.mark.parametrize("label,target", [("Cuisine", "kitchen"), ("Couloir", "corridor"), ("Bain", "bathroom")])
+def test_pdf_derived_ifc_uses_name_as_number_and_long_name_as_label(label, target):
+    rooms = [Item("target", "room", name="B.102", source="ifc", props={"long_name": label}),
+             Item("other", "room", name="B.103", source="ifc", props={"long_name": label})]
+    assert selected(f"What is the area of {target} B102?", rooms) == ["target"]
+    assert selected(f"Where is {label} B.102?", rooms) == ["target"]
 
 
 def test_merged_source_room_retains_one_identity_and_unknowns_never_widen():
@@ -105,3 +119,28 @@ def test_pdf_named_area_keeps_the_source_evidence():
     assert result["evidence"]["scene"]["highlight_item_ids"] == ["target"]
     assert result["evidence"]["boxes"][0]["bbox_px"] == target.bbox_px
     assert {iid for cite in result["citations"] for iid in cite["item_ids"]} == {"target"}
+
+
+def test_public_pdf_answer_retains_evidence_and_reasoning(tmp_path, monkeypatch):
+    from engine.answer import answer
+
+    monkeypatch.setenv("MODELS_FAKE", "1")
+    monkeypatch.setenv("ARTIFACTS_DIR", str(tmp_path))
+    monkeypatch.setenv("MODELS_CACHE_DIR", str(tmp_path / "cache"))
+    monkeypatch.setenv("MODELS_COSTS_LOG", str(tmp_path / "costs.jsonl"))
+    d = tmp_path / "generated-for-demo"
+    d.mkdir()
+    (d / "doc.json").write_text(json.dumps({"kind": "pdf", "formats": ["pdf"], "title": "Generated for demo"}))
+    (d / "planmap-1.json").write_text(json.dumps({
+        "doc_id": d.name, "page": 1, "image": {"w": 100, "h": 100},
+        "scale": {"m_per_px": .01, "method": "printed", "confidence": .9},
+        "items": [{"item_id": "room-001", "kind": "room", "label": "Couloir", "source": "pdf_vector",
+                   "conf": .85, "bbox_px": [10, 20, 50, 60],
+                   "props": {"number": "2.06", "room_type": "hall", "area_m2_label": 12.5}}]}))
+    result = answer("What is the area of corridor 2.06?", [d.name])
+    assert result["answer"]["value"] == 12.5
+    assert result["route"] == "planmap"
+    assert result["cost"]["usd_total"] == 0
+    assert result["evidence"]["scene"]["highlight_item_ids"] == ["room-001"]
+    assert result["reasoning"]["steps"]
+    assert result["reasoning"]["confidence"]["label"] in {"Verified", "Cross-checked", "Estimate"}

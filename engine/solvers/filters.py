@@ -191,7 +191,9 @@ def room_filter(question: str, rooms: list[Item]) -> tuple[str, list[Item]] | No
         n = fold(name)
         if re.search(rf"(?<!\w){re.escape(n)}(?!\w)", scoped_q):
             return name, [r for r in rooms if fold(room_name(r)) == n]
-    base = _room_type(scoped_q)
+    # Bare fragments also serve as exclusion lists for callers. Preserve their
+    # exact-label/alias path (e.g. "WCs" must not widen to all bathrooms).
+    base = _room_type(scoped_q) if reference else None
     if base:
         return base, [r for r in rooms if room_type_matches(r, base)]
     for alias, base in sorted(aliases.items(), key=lambda x: -len(x[0])):
