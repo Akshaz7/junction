@@ -3,6 +3,7 @@ import type { Answer, Citation } from '../lib/types'
 import { edgeVerb } from '../lib/kg'
 import { keyNumbers } from '../lib/calc-view'
 import { confidenceText, marginText } from '../lib/evidence-format'
+import { qualitySummary } from '../lib/scene-quality'
 import './evidence-card.css'
 
 /** The project this chat belongs to, read from the address (chat inside a project). */
@@ -34,6 +35,7 @@ export function EvidenceCard({ answer, selected, onOpenCitation, onShowCalculati
   if (!reasoning) return null
   const { confidence } = reasoning
   const numbers = keyNumbers(reasoning.calc)
+  const quality = qualitySummary(reasoning.quality)
   const tone = confidence.label === 'Estimate' ? 'is-estimate' : 'is-verified'
   return <section className="evidence-card" aria-label="How we know" data-testid="evidence-card">
     <h3 className="evidence-heading">How we know</h3>
@@ -69,6 +71,7 @@ export function EvidenceCard({ answer, selected, onOpenCitation, onShowCalculati
       {confidence.calibration && <span className="evidence-reason">Calibration: {confidence.calibration.correct}/{confidence.calibration.n} · {confidence.calibration.source}</span>}
     </div>
     {onShowCalculation && reasoning.calc && <button type="button" className="evidence-calc-link" onClick={onShowCalculation}>Show calculation</button>}
+    {quality && <p className="evidence-quality" data-testid="evidence-quality">3D accuracy: {quality}</p>}
     {confidence.improve && <p className="evidence-improve">To verify: {confidence.improve}</p>}
   </section>
 }

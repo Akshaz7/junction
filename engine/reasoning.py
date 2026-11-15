@@ -149,7 +149,9 @@ def build(res: dict, question: str, root: Path) -> dict | None:
 
 
 def attach(res: dict, question: str, root: Path) -> dict:
+    from engine.reasoning_parts import quality as _quality
     if (res.get("mistakes") is not None or res.get("route") == "symbols") and res.get("reasoning"):
+        _quality.attach(res, root)
         return res
     if res.get("reasoning"):   # these routes bring their own card; the invariant still applies
         from engine.reasoning_parts.counts import enforce
@@ -166,6 +168,7 @@ def attach(res: dict, question: str, root: Path) -> dict:
         r = build(res, question, root)
         if r:
             res["reasoning"] = r
+            _quality.attach(res, root)
         res.pop("reasoning_hint", None)
     except Exception:  # noqa: BLE001 — evidence is a convenience, never break the answer
         # A failed optional factor must not bypass count/evidence consistency.

@@ -75,6 +75,8 @@ export interface Reasoning {
   arithmetic?: { formula: string; text: string; terms: { doc_id: string; item_id: string; cite?: number | null; value: number; unit: string; measurement?: { formula: string; operands: { value: number; unit: string }[] } }[]; result: number; unit: string }[]
   calc?: Calculation
   graph_path?: GraphPathStep[] | null
+  /** Accuracy note of the 3D scene built from a PDF, when the pipeline wrote one. */
+  quality?: { summary?: string | null; score?: number | null; error?: unknown } | null
 }
 
 export interface Answer {

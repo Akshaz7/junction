@@ -2,6 +2,7 @@ import { Object3D, Texture, type Material, type Mesh } from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { indexElements, type IFCElement } from './identify';
 import { loadGLTF, type SceneLoadOptions } from './loadGLTF';
+import type { SceneQuality } from '../lib/scene-quality';
 
 export type Vec3 = [number, number, number];
 export type Storey = string | { name: string; elevation_m?: number };
@@ -31,6 +32,8 @@ export interface SceneManifest {
   origin_offset_m: Vec3;
   storeys: Storey[];
   plan_image?: SceneAsset | null;
+  /** Written by the PDF-to-3D pipeline; `summary` is a plain-words accuracy note. */
+  quality?: SceneQuality | null;
   items: Record<string, SceneItem>;
 }
 
