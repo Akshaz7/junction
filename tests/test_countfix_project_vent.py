@@ -29,3 +29,4 @@ def test_project_total_matches_single_sheet_with_note(tmp_path):
     from engine.projects import multidoc
     t = multidoc.answer("How many doors are there in total?", ["uploads__ark", "uploads__vent"], tmp_path)["answer"]["text_md"]
     assert "**53 doors**" in t and "2 have no drawn wall, so the 3D model shows 51" in t
+    assert "differs" not in t and "L30301" not in t

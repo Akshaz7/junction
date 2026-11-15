@@ -188,6 +188,9 @@ def _cross_checks(c: Combined, kind: str, rows: list) -> list:
             ids, used_ids = st[kind].get("ids") or [], r.docs[used][kind].get("ids") or []
             if ids and set(map(str, ids)) == set(map(str, used_ids)):
                 continue    # identical element ids (an MEP sheet's model built on the architect plan): a copy, not a check
+            if ids and getattr(info, "kind", None) == "pdf" and getattr(info, "doc", None) is not None and set(map(str, ids)) <= set(map(str, used_ids)) and not any(
+                    i.bbox_px for i in info.doc.items if i.kind == kind and str(i.item_id) in set(map(str, ids))):
+                continue    # built on the used model and draws none of them itself: not an independent count
             if st[kind]["n"] or info.role == "model":
                 notes.append((did, used, r, st[kind]["n"], r.docs[used][kind]["n"]))
     return notes
