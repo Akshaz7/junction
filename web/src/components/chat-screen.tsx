@@ -11,7 +11,7 @@ import { NO_ANSWER_MESSAGE } from '../lib/answer-text'
 import { DocumentViewer, useViewerSheet } from './document-viewer'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document, TraceStep } from '../lib/types'
-import { ThinkingText } from './thinking-text'
+import { ThinkingRow } from './thinking-row'
 import { MicButton } from './voice-controls'
 import { chatLink, savedExchanges, type ChatExchange } from '../lib/chat-history'
 import { chatLive } from '../lib/chat-live'
@@ -215,7 +215,10 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       } else if (event.type === 'chat.message' || event.type === 'chat.done') refresh()
       else if (event.type === 'chat.status') setStatuses((previous) => previous.at(-1) === event.text ? previous : [...previous, event.text])
       else if (event.type === 'chat.delta') setStreamText(event.text)
-      else if (event.type === 'chat.trace') setTraces((previous) => JSON.stringify(previous.at(-1)) === JSON.stringify(event.step) ? previous : [...previous, event.step])
+      else if (event.type === 'chat.trace') {
+        setTraces((previous) => JSON.stringify(previous.at(-1)) === JSON.stringify(event.step) ? previous : [...previous, event.step])
+        setStatuses((previous) => previous.at(-1) === event.step.detail ? previous : [...previous, event.step.detail])
+      }
     })
     return () => { controller?.abort(); unsubscribe() }
   }, [demo, liveChatId])
@@ -436,7 +439,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       const answer = await askUntilReadable(() => workspaceApi.askQuestion(chatId.current!, question.trim(), docIds, {
         onStatus: (text) => { if (generation.current === version) setStatuses((previous) => previous.at(-1) === text ? previous : [...previous, text]) },
         onDelta: (text) => { if (generation.current === version) setStreamText(text) },
-        onTrace: (trace) => { if (generation.current === version) { streamedTraces.push(trace); setTraces([...streamedTraces]) } },
+        onTrace: (trace) => { if (generation.current === version) { streamedTraces.push(trace); setTraces([...streamedTraces]); setStatuses((previous) => previous.at(-1) === trace.detail ? previous : [...previous, trace.detail]) } },
       }), { cancelled: () => generation.current !== version, onWait: () => { setStreamText(''); setStatuses([STILL_READING_STATUS]) } })
       if (generation.current !== version) return
       setAnswers((previous) => [...previous, { id: answer.answer_id, question: answer.question, content: '', answer: { ...answer, trace: answer.trace.length ? answer.trace : streamedTraces } }])
@@ -518,14 +521,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       </article>}
       {busy && <div className="exchange pending-exchange" aria-busy="true">
         <div className="question-bubble">{pendingQuestion}</div>
-        {statuses.length > 1 && <ul className="status-trail" aria-label="Steps so far">{statuses.slice(0, -1).map((text, index) => <li key={`${index}-${text}`}>{text}</li>)}</ul>}
-        <div className="status-lines" role="status" aria-live="polite"><span className="thinking-mark" aria-hidden="true">S</span><ThinkingText text={statuses.at(-1) || 'Thinking…'} /></div>
+        <ThinkingRow active statuses={statuses} traces={traces} />
         {!!streamText && <p className="answer-text streaming-text" data-testid="streaming-answer">{streamText.replace(/\*\*/g, '').replace(/(^|\s)_([^_\n]+)_(?=\s|$)/g, '$1$2')}</p>}
-        <div className="answer-skeleton" data-testid="answer-skeleton" aria-hidden="true">
-          {streamText.length < 60 && <><span className="skeleton-line" style={{ width: '62%' }} /><span className="skeleton-line" style={{ width: '88%' }} /><span className="skeleton-line" style={{ width: '74%' }} /></>}
-          <div className="skeleton-card"><span className="skeleton-line" style={{ width: '22%' }} /><span className="skeleton-line" style={{ width: '80%' }} /><span className="skeleton-line" style={{ width: '56%' }} /></div>
-        </div>
-        {!!traces.length && <details className="answer-detail"><summary>Show thought process</summary>{traces.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>}
       </div>}
     </div>
     <div className="composer-area" ref={composerArea}>

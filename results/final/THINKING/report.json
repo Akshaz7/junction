@@ -1,0 +1,15 @@
+{
+  "worker": "F-THINKING",
+  "branch": "final/thinking",
+  "status": "PASS",
+  "validation": {
+    "typescript": "npx tsc --noEmit -p .: passed",
+    "vitest": { "files_passed": 5, "tests_passed": 21, "tests_skipped": 2 },
+    "playwright": { "tests_passed": 1, "engine": "controllable local SSE stub; generated for demo" },
+    "covered": ["latest status and trace", "collapsed step list and chevron", "24px logo", "missing-asset SVG fallback", "reduced motion", "mobile layout", "collapsed completed answer"]
+  },
+  "screenshots": ["results/final/THINKING/thinking.png", "results/final/THINKING/thinking-mobile-fallback.png"],
+  "cross_file": [],
+  "needs": [],
+  "notes": ["Brand asset remains untracked and must be supplied by the existing deployment process.", "No models called or source drawing data changed."]
+}

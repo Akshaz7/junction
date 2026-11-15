@@ -70,7 +70,12 @@ it('shows the steps of a long task as they arrive', async () => {
   await send('Draft a construction claim')
   const pending = host.querySelector('.pending-exchange')!
   expect(pending.querySelector('.status-trail')!.textContent).toContain('Gathering evidence for: claim draft')
-  expect(pending.querySelector('[role="status"]')!.textContent).toContain('Writing the claim draft')
+  expect(pending.querySelector('[role="status"]')!.textContent).toContain('Writing: the claim draft')
+  expect(pending.querySelector('details')!.open).toBe(false)
+  expect(pending.querySelectorAll('summary')).toHaveLength(1)
+  expect(pending.querySelector('.answer-skeleton')).toBeNull()
+  await act(async () => api.askQuestion.mock.calls[0][3].onTrace({ step: 'search', detail: 'Searching: EI 60 stair core', ms: 0, model: null, cost_usd: 0 }))
+  expect(pending.querySelector('[role="status"]')!.textContent).toBe('Searching: EI 60 stair core')
   await act(async () => finish(new Error('stop') as never))
 })
 
