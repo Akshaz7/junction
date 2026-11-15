@@ -678,6 +678,13 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                 res["trace"] = trace
                 return res
 
+        from engine import printed_total
+        if (res := printed_total.answer(question, doc_ids, root, t0)) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
+            return res
+
         try:
             from engine.schedules import answer_schedule
         except ImportError:  # schedule route is optional until committed

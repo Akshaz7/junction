@@ -185,3 +185,12 @@ def test_scene_control_followups_never_become_a_previous_count(monkeypatch, ques
     result = resolve(question, [DOC], history, FIX)
     assert result.question == question and not result.rewritten
     assert result.info['source'] == 'none'
+
+
+def test_highlight_proof_card_counts_the_highlighted_items():
+    res = answer("show me the windows", [DOC])
+    ids = res["evidence"]["scene"]["highlight_item_ids"]
+    assert ids
+    cited = {i for c in res["citations"] for i in c["item_ids"]}
+    assert cited == set(ids)
+    assert res["reasoning"]["based_on"]["elements"] == len(ids)
