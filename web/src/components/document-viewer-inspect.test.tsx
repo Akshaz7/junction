@@ -64,7 +64,8 @@ async function tap(target: Element, at: { clientX: number; clientY: number }, to
     pointer(target, 'pointerup', to)
     target.dispatchEvent(new MouseEvent('click', { bubbles: true, ...to }))
   })
-  await act(async () => {})
+  // A plain tap on the plan inspects after a short delay (so a double-click zoom opens nothing).
+  await act(async () => { await new Promise((resolve) => setTimeout(resolve, 250)) })
 }
 const panel = () => host.querySelector('[aria-label="Item details"]')
 const openedIds = () => getItem.mock.calls.map((call) => call[1])

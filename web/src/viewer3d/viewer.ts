@@ -1,5 +1,5 @@
 import {
-  AmbientLight, Box3, Color, DirectionalLight, PerspectiveCamera,
+  AmbientLight, Box3, type Object3D, Color, DirectionalLight, PerspectiveCamera,
   Plane, Raycaster, Scene, Sphere, Vector2, Vector3, WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -52,6 +52,8 @@ export interface Viewer {
   setScene(scene: LoadedScene): void;
   setStorey(name: string | null): void;
   setShowRoof(show: boolean): void;
+  /** Purely visual: hide these items (3D layer chips). Not a scene command; answer highlights stay visible. */
+  setLayerHidden(item_ids: readonly string[]): void;
   /** Building / services layer filter, combined with the storey cutaway. */
   setLayer(layer: ModelLayer): void;
   getLayer(): ModelLayer;
@@ -97,6 +99,10 @@ export interface Viewer {
   pauseBuild(): void;
   /** Coordinates are viewport client pixels, as in PointerEvent.clientX/clientY. */
   pick(x: number, y: number): string | null;
+  /** World point (scene metres, y up) on the visible model surface under client point (x, y), or null. */
+  pickPoint(x: number, y: number): [number, number, number] | null;
+  /** Canvas-relative screen position of a world point; visible is false when it is behind the camera or off screen. */
+  projectPoint(point: [number, number, number]): { x: number; y: number; visible: boolean };
   resize(): void;
   dispose(): void;
 }
@@ -148,6 +154,15 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
   let linkedHighlights: ReturnType<typeof createLinkedHighlightController> | null = null;
   let commandVisuals: ReturnType<typeof createCommandVisuals> | null = null;
   let commandState = emptyCommandState();
+  let layerHidden: ReadonlySet<string> = new Set();
+  function applyLayerHidden(): void {
+    if (!active || !layerHidden.size) return;
+    const lit = new Set(highlights?.getHighlightState().highlighted ?? []);
+    for (const id of layerHidden) {
+      const object = active.items.get(id);
+      if (object && !lit.has(id)) object.visible = false;
+    }
+  }
   let edits: ReturnType<typeof createEditLayer> | null = null;
   let mutatingEdit = false;
   let moving: { id: string; from: Vector3; start: Vector3; plane: Plane; dx: number; dz: number; controlsEnabled: boolean } | null = null;
@@ -658,6 +673,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     const styled = styleSceneMaterials(scene);
     pickMeshes = null;
     commandState = emptyCommandState();
+    layerHidden = new Set();
     sceneShownAt = performance.now();
     edits = createEditLayer(scene, { apply: (command) => api.applyCommand(command), hidden: () => [...commandState.hidden] });
     linked = { hovered: null, selected: null, labels: {} };
@@ -697,6 +713,7 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
     sampleRise();
     stepCinematic(now);
     const fading = commandVisuals?.sample(performance.now());
+    if (fading) applyLayerHidden();
     if (flight) {
       const progress = Math.min(1, (performance.now() - flight.start) / 600);
       const eased = progress * progress * (3 - 2 * progress);
@@ -806,6 +823,15 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       attach(scene);
     },
     setStorey,
+    setLayerHidden(ids) {
+      layerHidden = new Set(ids);
+      const state = cutaway?.getState();
+      if (state) cutaway?.setStorey(state.activeStorey);
+      commandVisuals?.captureVisibility();
+      commandVisuals?.sample(performance.now());
+      applyLayerHidden();
+      notifyCutaway();
+    },
     setShowRoof(show) {
       cutaway?.setShowRoof(show);
       commandVisuals?.captureVisibility();
@@ -940,6 +966,33 @@ export function createViewer(canvas: HTMLCanvasElement): Viewer {
       pointer.set((x - rect.left) / rect.width * 2 - 1, -(y - rect.top) / rect.height * 2 + 1);
       raycaster.setFromCamera(pointer, camera);
       return findingPins.select(raycaster);
+    },
+    pickPoint(x, y) {
+      if (disposed || !active) return null;
+      const rect = canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height || x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return null;
+      pointer.set((x - rect.left) / rect.width * 2 - 1, -(y - rect.top) / rect.height * 2 + 1);
+      camera.updateWorldMatrix(true, false);
+      active.root.updateWorldMatrix(true, true);
+      raycaster.setFromCamera(pointer, camera);
+      if (!pickMeshes) {
+        pickMeshes = [];
+        active.root.traverse((object) => {
+          if (!(object as { isMesh?: boolean }).isMesh) return;
+          for (let owner: typeof object | null = object; owner; owner = owner.parent) {
+            if (active!.itemIdsByObject.has(owner)) { pickMeshes!.push(object); break; }
+          }
+        });
+      }
+      // Only what is visible (cutaway, hidden items and layer chips respected); a miss returns null, never a ground guess.
+      const visible = pickMeshes.filter((object) => object.visible && itemIdForObject(active!, object) !== null);
+      const hit = raycaster.intersectObjects(visible, false)[0];
+      return hit ? [hit.point.x, hit.point.y, hit.point.z] : null;
+    },
+    projectPoint(point) {
+      const projected = new Vector3(...point).project(camera);
+      return { x: (projected.x + 1) * canvas.clientWidth / 2, y: (1 - projected.y) * canvas.clientHeight / 2,
+        visible: projected.z >= -1 && projected.z <= 1 && Math.abs(projected.x) <= 1.2 && Math.abs(projected.y) <= 1.2 };
     },
     pick(x, y) {
       if (disposed || !active) return null;

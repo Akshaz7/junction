@@ -173,3 +173,65 @@ def test_planmap_hook_never_breaks():
     # process() wraps the hook; the function itself must also cope with a bare page
     out = L.planmap_provenance({"W_pt": 10, "H_pt": 10, "paths": [], "words": []}, {}, 1.0)
     assert out["grid"] == [] and out["storey"]["name"] is None
+
+
+@pytest.mark.parametrize("text,name,num", [
+    ("PLAN 02 - KÆLDER", "KÆLDER", -1), ("Kælder", "KÆLDER", -1), ("1.korrus", "1.KORRUS", 1), ("2. korrus", "2. KORRUS", 2),
+    ("Dachgeschoss", "DACHGESCHOSS", None), ("Kellergeschoss", "KELLERGESCHOSS", -1), ("1. sal", "1. SAL", 1),
+    ("Stueetage", "STUEETAGE", 0), ("PLAN 02", "PLAN 02", 2),
+])
+def test_parse_name_more_languages(text, name, num):
+    assert L.parse_name(text) == (name, num)
+
+
+def test_level_table_bare_feet_inches_stacked():
+    # section sheet: storey caption with a bare feet-inch datum right under it; a scale note is never a datum
+    words = [_w("MEZZANINE", 900, 100, 10), _w("9'", 920, 113, 8), _w("-", 932, 113, 8), _w("3\"", 940, 113, 8),
+             _w("1ST", 900, 300, 10), _w("FLOOR", 925, 300, 10), _w("0'", 920, 313, 8), _w("0\"", 935, 313, 8),
+             _w("1/8\" = 1'-0\"", 100, 600, 8)]
+    t = {r["name"]: r["elevation_m"] for r in L.level_table({"words": words})}
+    assert t == {"MEZZANINE": pytest.approx(9 * 0.3048 + 3 * 0.0254, abs=1e-3), "1ST FLOOR": 0.0}
+    assert L._bare_ft("1/8\" = 1'-0\"") is None and L._bare_ft("FLOOR PLAN 1'-0\"", True) is None
+
+
+def test_storeys_take_set_level_datums_by_caption():
+    # plan titles 'FLOOR PLAN 1ST' / 'FLOOR PLAN MEZZANINE', datums from an elevation sheet named '1ST FLOOR'/'MEZZANINE'
+    table = [{"name": "MEZZANINE", "number": 1.5, "elevation_m": 2.819}, {"name": "1ST FLOOR", "number": 1, "elevation_m": 0.0}]
+    pms = [{"scale": {"m_per_pt": 0.01, "m_per_px": 0.005}, "items": [],
+            "provenance": {"storey": {"name": nm, "number": no}, "level_table": table}}
+           for nm, no in (("MEZZANINE FLOOR", 1.5), ("1ST FLOOR", 1))]
+    lv = L.storeys_from_planmaps(pms)
+    assert [(r["name"], r["elevation_m"]) for r in lv] == [("1ST FLOOR", 0.0), ("MEZZANINE FLOOR", 2.819)]
+    assert lv[0]["height_m"] == pytest.approx(2.819)
+
+
+def _sheet(title_lines, body=(), sheet_no=None, W=1000.0, H=700.0):
+    ws = [_w(t, 820, 600 + 12 * i, 10) for i, t in enumerate(title_lines)]
+    if sheet_no:
+        ws.append(_w(sheet_no, 900, 660, 16))
+    ws += [_w(t, 100 + 30 * i, 100 + 20 * i, 6) for i, t in enumerate(body)]
+    ws += [_w("x", 300 + 7 * i, 300, 6) for i in range(30)]  # body text sets the median height
+    return ws, W, H
+
+
+@pytest.mark.parametrize("lines,sheet_no,kind", [
+    (["FLOOR PLAN - 1ST"], "A101", "plan"), (["BUILDING ELEVATIONS"], "A200", "elevation"),
+    (["BUILDING SECTION"], None, "section"), (["DOOR SCHEDULE"], "A600", "schedule"), (["ROOF PLAN"], None, "roof"),
+    (["EXISTING SITE PLAN"], None, "site"), (["DEMOLITION PLANS"], None, "demo"), (["PERSPECTIVES"], None, "cover"),
+    (["FOUNDATION PLAN"], "S050", "structural"), (["Grundriss Erdgeschoss"], None, "plan"),
+    (["Plan 02 - Kælder"], None, "plan"), (["Dachgeschoss"], None, "plan"), (["Lageplan"], None, "site"),
+    (["Schnitt A-A"], None, "section"), (["MECHANICAL FLOOR PLAN"], "M201", "mep"),
+    # the design team in the title block ('Mechanical', 'X Plumbing Engineer') does not make an MEP sheet
+    (["Mechanical", "Plumbing Engineer:", "info@firm.com", "2ND FLOOR PLAN"], None, "plan"),
+    (["WALL DETAILS"], "A501", "detail"),
+])
+def test_classify_sheet(lines, sheet_no, kind):
+    ws, W, H = _sheet(lines, sheet_no=sheet_no)
+    assert L.classify_sheet(ws, W, H)["kind"] == kind
+
+
+def test_classify_sheet_storey_and_empty():
+    ws, W, H = _sheet(["FLOOR PLAN MEZZANINE"], sheet_no="A102")
+    c = L.classify_sheet(ws, W, H)
+    assert c["kind"] == "plan" and c["storey"] == ("MEZZANINE FLOOR", 1.5) and c["sheet_no"] == "A102"
+    assert L.classify_sheet([], 100, 100)["kind"] == "other" and L.classify_sheet(None, 0, 0)["kind"] == "other"

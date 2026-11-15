@@ -32,23 +32,41 @@ function closestOnSegment(p: Pt, a: Pt, b: Pt): Pt {
   return [a[0] + t * dx, a[1] + t * dy]
 }
 
+interface SnapEntry { minX: number; minY: number; maxX: number; maxY: number; verts: Pt[]; edges: [Pt, Pt][] }
+
+/** Precomputes every item's vertices/edges (and their bbox) once; the returned function snaps like `snapPoint`. */
+export function makeSnapper(items: SnapItem[]): (p: Pt, tolerancePx: number) => Pt {
+  const entries: SnapEntry[] = []
+  for (const item of items) {
+    const verts = itemVertices(item)
+    if (!verts.length) continue
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+    for (const [x, y] of verts) { if (x < minX) minX = x; if (y < minY) minY = y; if (x > maxX) maxX = x; if (y > maxY) maxY = y }
+    entries.push({ minX, minY, maxX, maxY, verts, edges: itemEdges(item) })
+  }
+  return (p: Pt, tolerancePx: number): Pt => {
+    if (!finite(p) || !(tolerancePx > 0)) return p
+    const tol2 = tolerancePx * tolerancePx
+    const near = entries.filter((e) => p[0] >= e.minX - tolerancePx && p[0] <= e.maxX + tolerancePx && p[1] >= e.minY - tolerancePx && p[1] <= e.maxY + tolerancePx)
+    let best: Pt | null = null, bestD = tol2
+    for (const e of near) for (const v of e.verts) {
+      const d = dist2(p, v)
+      if (d <= bestD) { best = [v[0], v[1]]; bestD = d }
+    }
+    if (best) return best
+    bestD = tol2
+    for (const e of near) for (const [a, b] of e.edges) {
+      const q = closestOnSegment(p, a, b)
+      const d = dist2(p, q)
+      if (d <= bestD) { best = q; bestD = d }
+    }
+    return best ?? p
+  }
+}
+
 /** Nearest polygon vertex / bbox corner within tolerance, else nearest point on an edge within tolerance, else p. */
 export function snapPoint(p: Pt, items: SnapItem[], tolerancePx: number): Pt {
-  if (!finite(p) || !(tolerancePx > 0)) return p
-  const tol2 = tolerancePx * tolerancePx
-  let best: Pt | null = null, bestD = tol2
-  for (const item of items) for (const v of itemVertices(item)) {
-    const d = dist2(p, v)
-    if (d <= bestD) { best = [v[0], v[1]]; bestD = d }
-  }
-  if (best) return best
-  bestD = tol2
-  for (const item of items) for (const [a, b] of itemEdges(item)) {
-    const q = closestOnSegment(p, a, b)
-    const d = dist2(p, q)
-    if (d <= bestD) { best = q; bestD = d }
-  }
-  return best ?? p
+  return makeSnapper(items)(p, tolerancePx)
 }
 
 export function distanceM(a: Pt, b: Pt, mPerPx: number): number {

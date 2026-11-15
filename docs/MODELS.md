@@ -154,3 +154,7 @@ The npm lockfile has no GPL/AGPL licence entries. Python installed metadata does
 
 ## Dependencies: knowledge graph view (F-KG-UI)
 - d3-force 3.0.0 (ISC licence, permissive) runs the force layout of the project Graph tab on a canvas. Types: @types/d3-force (MIT). No GPL/AGPL code.
+
+## Detector experiment (experiments/detector, off by default)
+- **ultralytics YOLO11** (code and pretrained weights): AGPL-3.0, https://github.com/ultralytics/ultralytics. Used only in `experiments/detector/` (Modal training/inference). It runs only when `PDF_DETECT` is set; the default product path does not import it. Allowed by team decision (15 Nov, 06:53) with this credit.
+- Training data: Swiss dataset drawings rendered by our own renderer (no held-out/question drawings in the clean run). No weights are committed.

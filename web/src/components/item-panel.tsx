@@ -4,7 +4,7 @@ import { linkedApi, propertyValue, type ItemPlace, type LinkedItem } from '../li
 import './item-panel.css'
 import { WallDetails } from './wall-details'
 import { wallAskHref } from '../lib/wall-details'
-import { itemAskHref, measuredRows, measureProvenance, sourceProps } from '../lib/item-measures'
+import { itemAskHref, measuredRows, measureProvenance, sourceProps, withoutWallDetailRows } from '../lib/item-measures'
 
 type ItemWithQuantities = LinkedItem & { quantities?: Record<string, unknown> | null }
 
@@ -88,7 +88,9 @@ function ItemMeasures({ item }: { item: ItemWithQuantities }) {
   const shown = new Set(Object.keys(item.props ?? {}))
   const derived = Object.fromEntries(Object.entries(extra.measures ?? {}).filter(([key, value]) => typeof value === 'number' && key !== 'm_per_px'
     && !shown.has(key) && !(key === 'area_measured_m2' && shown.has('area_m2_geom'))))
-  const rows = measuredRows(item.kind, item.props ?? {}, { ...derived, ...(item.quantities ?? {}) })
+  const all = measuredRows(item.kind, item.props ?? {}, { ...derived, ...(item.quantities ?? {}) })
+  // WallDetails (2D panel and 3D card) already shows length and thickness.
+  const rows = item.wall_details ? withoutWallDetailRows(all) : all
   const provenance = measureProvenance(item.props ?? {})
   const related = relationRows(extra.relations)
   return <>

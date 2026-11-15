@@ -84,23 +84,28 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   // on the plan open that item's details (plain code over the plan map, no model call, no 3D needed).
   const [planItems, setPlanItems] = useState<(PlanPickItem & { label?: string | null; props?: Record<string, unknown> | null })[]>([])
   const [mPerPx, setMPerPx] = useState<number | null>(null)
+  const layers = usePlanLayers()
+  const measure = useMeasure(mPerPx)
+  const stopMeasure = measure.stop
   useEffect(() => {
     const controller = new AbortController()
-    setPlanItems([]); setMPerPx(null)
+    setPlanItems([]); setMPerPx(null); stopMeasure()
     workspaceApi.getPlanMap(citation.doc_id, citation.page, controller.signal).then((pm) => {
       if (controller.signal.aborted) return
       setMPerPx(typeof pm.scale?.m_per_px === 'number' && pm.scale.m_per_px > 0 ? pm.scale.m_per_px : null)
       setPlanItems((pm.items ?? []).flatMap((item) => item.bbox_px ? [{ id: item.item_id, kind: item.kind ?? kindFromItemId(item.item_id) ?? 'other', bbox: item.bbox_px, polygon: item.polygon_px ?? null, role: typeof item.props?.role === 'string' ? item.props.role : null, label: item.label ?? null, props: item.props ?? null }] : []))
     }).catch(() => {})
     return () => controller.abort()
-  }, [citation.doc_id, citation.page])
+  }, [citation.doc_id, citation.page, stopMeasure])
   const pickBoxes = useMemo<PickBox[]>(() => planItems.map(({ id, bbox }) => ({ id, bbox })), [planItems])
   const planById = useMemo(() => new Map(planItems.map((item) => [item.id, item])), [planItems])
   const [hoverPick, setHoverPick] = useState<string | null>(null)
   const [hoverAt, setHoverAt] = useState<Point | null>(null)
-  const layers = usePlanLayers()
-  const measure = useMeasure(mPerPx)
   const tapStart = useRef<{ id: number; x: number; y: number } | null>(null)
+  // A plain tap inspects after a short wait, so the two taps of a double-click (zoom) do not open the item panel.
+  const inspectTimer = useRef<number | null>(null)
+  function cancelInspect() { if (inspectTimer.current !== null) { window.clearTimeout(inspectTimer.current); inspectTimer.current = null } }
+  useEffect(() => cancelInspect, [])
   const highlights = useDrawingHighlights(citation.doc_id, answer.answer_id, chatId)
   const answerSelection = !place && answer.citations.some((entry) => entry.doc_id === citation.doc_id && entry.page === citation.page && (entry.item_ids.length > 0 || entry.kind === 'text' || !!entry.bbox_px))
   const navigationKind = answerSelection ? 'highlight' : 'item'
@@ -434,8 +439,9 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   return <aside ref={panel} className={`document-viewer ${sheet ? 'viewer-sheet' : ''}`} role={sheet ? 'dialog' : 'region'} aria-modal={sheet || undefined} aria-label={sheet ? undefined : "Drawing viewer"} aria-labelledby={sheet ? titleId : undefined}
     onKeyDown={(event) => {
       if (mode === '3d' && event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); changeMode('2d'); return }
-      if (measure.mode && (event.key === 'Enter' || event.key === 'Backspace')) { event.preventDefault(); if (event.key === 'Enter') measure.close(); else measure.undo(); return }
-      if (event.key === 'Escape' && measure.mode) { event.stopPropagation(); measure.stop(); return }
+      const typing = event.target instanceof HTMLElement && ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(event.target.tagName)
+      if (mode === '2d' && measure.mode && !typing && (event.key === 'Enter' || event.key === 'Backspace')) { event.preventDefault(); if (event.key === 'Enter') measure.close(); else measure.undo(); return }
+      if (mode === '2d' && event.key === 'Escape' && measure.mode) { event.stopPropagation(); measure.stop(); return }
       if (event.key === 'Escape') { event.stopPropagation(); if (markup.selection || markup.mode || markup.editing) markup.cancel(); else if (markup.open) markup.close(); else if (searchOpen) closeSearch(); else if (tool !== 'pan') chooseTool('pan'); else if (selectedItem) closeItem(); else onClose() }
       if (sheet && event.key === 'Tab') {
         const controls = Array.from(panel.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), a[href], [tabindex="0"]') ?? []).filter((node) => node.getClientRects().length)
@@ -512,7 +518,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
         if (event.key === '-') { event.preventDefault(); zoom(1 / 1.25) }
         if (event.key === '0' && image) { event.preventDefault(); setView(fitPage(image, viewport)) }
       }}
-      onDoubleClick={(event) => { if (measure.mode) { if (measure.mode === 'area') measure.close(); return } if (tool === 'pan') zoom(2, pointerPoint(event.clientX, event.clientY)) }}
+      onDoubleClick={(event) => { cancelInspect(); if (measure.mode) { if (measure.mode === 'area') measure.close(); return } if (tool === 'pan') zoom(2, pointerPoint(event.clientX, event.clientY)) }}
       onPointerDown={(event) => {
         if (!image || (event.pointerType === 'mouse' && event.button !== 0)) return
         event.currentTarget.setPointerCapture(event.pointerId)
@@ -539,7 +545,8 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
             if (measure.mode) { const point = rawPagePoint(event.clientX, event.clientY); measure.move(point ? snapPoint(point as Pt, planItems, 8 / Math.max(view.scale, .001)) : null) }
             const next = planItemAt(event.clientX, event.clientY)
             if (next !== hoverPick) setHoverPick(next)
-            setHoverAt(next ? pointerPoint(event.clientX, event.clientY) : null)
+            const at = next ? pointerPoint(event.clientX, event.clientY) : null
+            if (!at ? hoverAt !== null : next !== hoverPick || !hoverAt || Math.hypot(at.x - hoverAt.x, at.y - hoverAt.y) > 2) setHoverAt(at)
           }
           return
         }
@@ -563,11 +570,16 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
         tapStart.current = null
         if (start && start.id === event.pointerId && pointers.current.size === 1) {
           const end = pointerPoint(event.clientX, event.clientY)
-          if (Math.hypot(end.x - start.x, end.y - start.y) < 5) inspectAt(event.clientX, event.clientY)
+          if (Math.hypot(end.x - start.x, end.y - start.y) < 5) {
+            const { clientX, clientY } = event
+            cancelInspect()
+            if (measure.mode) inspectAt(clientX, clientY)
+            else inspectTimer.current = window.setTimeout(() => { inspectTimer.current = null; inspectAt(clientX, clientY) }, 220)
+          }
         }
         pointers.current.delete(event.pointerId)
       }}
-      onPointerLeave={() => { if (hoverPick) setHoverPick(null); setHoverAt(null); if (measure.mode) measure.move(null) }}
+      onPointerLeave={() => { if (hoverPick) setHoverPick(null); if (hoverAt) setHoverAt(null); if (measure.mode) measure.move(null) }}
       onPointerCancel={(event) => { finishAnnotation(event.pointerId, false); pointers.current.delete(event.pointerId) }}
       onLostPointerCapture={(event) => { finishAnnotation(event.pointerId, false); pointers.current.delete(event.pointerId) }}>
       {imageUrl && <div className="drawing-plane" style={{ width: image?.width, height: image?.height, transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`, visibility: image ? 'visible' : 'hidden' }}>
@@ -590,12 +602,12 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
               data-item-id={region.id} data-linked={linked.selected === region.id || linked.hovered === region.id ? 'true' : undefined}
               data-hidden={String(hidden)} data-tag={tag}
               role="button" tabIndex={0} aria-haspopup={sheet ? 'dialog' : undefined}
-              onPointerDown={(event) => event.stopPropagation()}
+              onPointerDown={(event) => { if (!measure.mode) event.stopPropagation() }}
               onMouseEnter={() => setHover(region.id, '2d')} onMouseLeave={() => setHover(null, '2d')}
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openItem(index, region.id, event.currentTarget) }
               }}
-              onClick={(event) => openItem(index, region.id, event.currentTarget, event)}>
+              onClick={(event) => { if (!measure.mode) openItem(index, region.id, event.currentTarget, event) }}>
               <title>{region.text ? citation.quote ?? 'Text source' : region.id}</title>
               <rect x={x} y={y} width={Math.max(0, right - x)} height={Math.max(0, bottom - y)} vectorEffect="non-scaling-stroke" />
               <svg x={x} y={y} width={labelSize * Math.max(1, label.length / 2)} height={labelSize} viewBox={`0 0 ${22 * Math.max(1, label.length / 2)} 22`} overflow="visible"><rect className="evidence-label-bg" width={22 * Math.max(1, label.length / 2)} height="22" rx="5" /><text x={11 * Math.max(1, label.length / 2)} y="15" textAnchor="middle">{label}</text></svg>
@@ -621,7 +633,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
               <rect x={x} y={y} width={Math.max(0, right - x)} height={Math.max(0, bottom - y)} vectorEffect="non-scaling-stroke" />
             </g>
           })}
-          {hits.map((hit, index) => hit.bbox && <g key={`${index}-${hit.text}`} className={`sheet-search-hit ${index === hitIndex ? 'is-current' : ''}`} data-testid="sheet-search-hit" role="button" tabIndex={0} aria-label={`Search match ${index + 1}: ${hit.text}`} onPointerDown={(event) => event.stopPropagation()} onClick={() => setHitIndex(index)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setHitIndex(index) } }}>
+          {hits.map((hit, index) => hit.bbox && <g key={`${index}-${hit.text}`} className={`sheet-search-hit ${index === hitIndex ? 'is-current' : ''}`} data-testid="sheet-search-hit" role="button" tabIndex={0} aria-label={`Search match ${index + 1}: ${hit.text}`} onPointerDown={(event) => { if (!measure.mode) event.stopPropagation() }} onClick={() => { if (!measure.mode) setHitIndex(index) }} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setHitIndex(index) } }}>
             <rect x={hit.bbox[0]} y={hit.bbox[1]} width={Math.max(1, hit.bbox[2] - hit.bbox[0])} height={Math.max(1, hit.bbox[3] - hit.bbox[1])} vectorEffect="non-scaling-stroke" />
             <svg x={hit.bbox[0]} y={hit.bbox[1] - 18 / view.scale} width={20 / view.scale} height={18 / view.scale} viewBox="0 0 20 18"><rect width="20" height="18" rx="3" /><text x="10" y="13" textAnchor="middle">{index + 1}</text></svg>
           </g>)}

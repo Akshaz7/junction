@@ -549,6 +549,68 @@ def _mep_hint(pdf: Path, page_index: int) -> bool:
         return False
 
 
+# ---------------------------------------------------------------- multi-page sets: which sheets are floor plans
+SHEET_FIRST = ("plan",)                    # read first, in page order
+SHEET_THEN = ("mep", "other")              # then these (an MEP plan, a sheet with no readable title)
+SHEET_LAST = ("demo", "roof", "rcp")       # plan-like sheets: only when the set has nothing above
+# never read as a floor plan: elevation, section, schedule, cover/3D, detail, site, structural
+
+
+def _sheet_plan(ddir: Path, meta: dict) -> dict:
+    """Multi-page PDF: classify every page from the words the pages stage already extracted (text-<n>.json,
+    pdf_levels.classify_sheet: title block + view titles + sheet number, ~0.1 s a page, no vector read) and order the
+    pages for the vector read: floor plans first, elevations/sections/schedules/covers/details/site/structural never.
+    Level datums printed on the elevation/section sheets (pdf_levels.level_table) are kept for the storey stack.
+    -> {"order": [page numbers], "kinds": {n: kind}, "levels": [rows], "titles": {n: title}}. A single page, a page
+    without text or any error keeps the page order (today's behaviour)."""
+    pages_ = [int(p["page"]) for p in meta.get("pages") or []]
+    out = {"order": pages_, "kinds": {}, "levels": [], "titles": {}}
+    if len(pages_) <= 1 or os.environ.get("PDF_SHEET_SELECT", "1") == "0":
+        return out
+    try:
+        from pipeline import pdf_levels
+        kinds, levels = {}, []
+        for n in pages_:
+            f = ddir / f"text-{n}.json"
+            if not f.is_file():
+                kinds[n] = "other"
+                continue
+            t = json.loads(f.read_text())
+            ws = [{"text": w.get("text", ""), "bbox": w["bbox_px"]} for w in t.get("words") or [] if w.get("bbox_px")]
+            c = pdf_levels.classify_sheet(ws, (t.get("image") or {}).get("w"), (t.get("image") or {}).get("h"))
+            kinds[n] = c.get("kind") or "other"
+            if c.get("title"):
+                out["titles"][n] = str(c["title"])[:40]
+            if kinds[n] in ("elevation", "section"):
+                for row in pdf_levels.level_table({"words": ws}):
+                    if row.get("elevation_m") is not None and all(r["name"] != row["name"] for r in levels):
+                        levels.append({**row, "source_page": n})
+        order = [n for n in pages_ if kinds[n] in SHEET_FIRST] + [n for n in pages_ if kinds[n] in SHEET_THEN]
+        if not order:
+            order = [n for n in pages_ if kinds[n] in SHEET_LAST]
+        out.update(order=order, kinds=kinds, levels=levels)
+    except Exception as e:  # noqa: BLE001  never costs the upload: page order as before
+        print("sheet classification skipped:", repr(e)[:200], file=sys.stderr)
+    return out
+
+
+def _add_set_levels(ddir: Path, found: list, levels: list):
+    """Level datums from the set's elevation/section sheets -> each plan map's provenance.level_table (rows the plan
+    map already has win), so pdf_levels.storeys_from_planmaps (build_many) gives each storey its printed elevation."""
+    if not levels:
+        return
+    for n in found:
+        f = ddir / f"planmap-{n}.json"
+        try:
+            pm = json.loads(f.read_text())
+            prov = pm.setdefault("provenance", {})
+            have = {r.get("name") for r in prov.get("level_table") or []}
+            prov["level_table"] = list(prov.get("level_table") or []) + [r for r in levels if r["name"] not in have]
+            f.write_text(json.dumps(pm))
+        except Exception as e:  # noqa: BLE001
+            print("set levels skipped:", repr(e)[:160], file=sys.stderr)
+
+
 def _pdf_vector_pages(doc_id: str, ddir: Path, st: "Status", pdf: Path) -> list[int]:
     """Vector CAD PDF: exact plan maps from the page's drawing operators (pipeline.pdf_planmap), gated per page, at most
     MAX_PDF_PLAN_PAGES plan pages. Returns the plan pages; [] (and no plan-map files left behind) means use the VLM path."""
@@ -596,8 +658,7 @@ def _pdf_vector_pages(doc_id: str, ddir: Path, st: "Status", pdf: Path) -> list[
     def run_all():
         t0 = time.time()
         slowest = 0.0
-        for p in meta["pages"]:
-            n = p["page"]
+        for n in sheets["order"]:
             if len(found) >= cap or time.time() - t0 > budget:
                 break
             if _mep_hint(pdf, n - 1):
@@ -631,7 +692,10 @@ def _pdf_vector_pages(doc_id: str, ddir: Path, st: "Status", pdf: Path) -> list[
                 (ddir / f"planmap-{n}.json").unlink(missing_ok=True)
             else:
                 (ddir / f"planmap-{n}.json").unlink(missing_ok=True)
+    sheets = _sheet_plan(ddir, meta)
     ok = st.stage("planmap_pdf_vector", run_all)
+    if sheets["kinds"]:
+        st.stages[-1]["sheets"] = " ".join(f"p{n}:{k}" for n, k in sheets["kinds"].items())[:300]
     if not ok:  # never fail the upload over the vector reader: the VLM path runs next
         notes.append(st.stages[-1].pop("error", ""))
         st.stages[-1]["ok"] = True
@@ -642,6 +706,7 @@ def _pdf_vector_pages(doc_id: str, ddir: Path, st: "Status", pdf: Path) -> list[
             (ddir / f"planmap-{n}.json").unlink(missing_ok=True)
         return []
     st.stages[-1]["note"] = (st.stages[-1].get("note", "") + f" vector plan pages {found}").strip()
+    _add_set_levels(ddir, found, sheets["levels"])
     return found
 
 
