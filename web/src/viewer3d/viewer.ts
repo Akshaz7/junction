@@ -54,6 +54,9 @@ export interface Viewer {
   setShowRoof(show: boolean): void;
   /** Purely visual: hide these items (3D layer chips). Not a scene command; answer highlights stay visible. */
   setLayerHidden(item_ids: readonly string[]): void;
+  /** Building / services layer filter, combined with the storey cutaway. */
+  setLayer(layer: ModelLayer): void;
+  getLayer(): ModelLayer;
   getCutawayState(): CutawayState;
   onCutawayChange(callback: (state: CutawayState) => void): () => void;
   highlight(item_ids: readonly string[], options?: HighlightOptions): void;
