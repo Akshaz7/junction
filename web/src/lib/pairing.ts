@@ -83,12 +83,11 @@ export async function registerChat(chatId: string): Promise<void> {
 }
 
 /** True when this device knows the chat, or the server says a paired device created it (then it is remembered). */
-export async function isPairedChat(chatId: string, options: { failOpen?: boolean } = {}): Promise<boolean> {
+export async function isPairedChat(chatId: string): Promise<boolean> {
   if (isKnownChat(chatId)) return true
   for (const code of read()) {
     const response = await call('GET', code, chatId)
-    // The server could not answer in time: for a chat that just arrived over this browser's pairing socket, follow it anyway.
-    if (!response && options.failOpen) return true
+    // No answer (timeout, 429, 5xx) means "not proven": never follow a chat on a guess, other users' chats share this socket.
     if (response?.ok && (await response.json() as { paired?: boolean }).paired) { rememberChat(chatId); return true }
   }
   return false

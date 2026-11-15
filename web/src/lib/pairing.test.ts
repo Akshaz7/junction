@@ -57,14 +57,21 @@ describe('pairing', () => {
     expect(await p.isPairedChat('stranger')).toBe(false)
   })
 
-  it('fails open only when asked to and the server cannot answer', async () => {
+  it('never follows a chat on a guess: no server answer means not paired', async () => {
     const p = await import('./pairing')
     p.addPairing('abc12345')
-    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('timeout') }))
-    expect(await p.isPairedChat('late')).toBe(false)
-    expect(await p.isPairedChat('late', { failOpen: true })).toBe(true)
+    for (const failure of [async () => { throw new Error('timeout') }, async () => ({ ok: false, status: 429 }), async () => ({ ok: false, status: 503 })])
+      { vi.stubGlobal('fetch', vi.fn(failure)); expect(await p.isPairedChat('stranger-chat')).toBe(false) }
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => ({ paired: false }) })))
-    expect(await p.isPairedChat('stranger', { failOpen: true })).toBe(false)
+    expect(await p.isPairedChat('stranger')).toBe(false)
+  })
+
+  it('two browsers with different codes: neither accepts the other\'s chat proof', async () => {
+    const p = await import('./pairing')
+    p.addPairing('aaaa1111')
+    const proofB = async (code: string, chat: string) => Array.from(new Uint8Array((await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${code}:${chat}`))).slice(0, 8)), (b) => b.toString(16).padStart(2, '0')).join('')
+    expect(await p.acceptPairProof('chat-of-b', await proofB('bbbb2222', 'chat-of-b'))).toBe(false)
+    expect(await p.acceptPairProof('chat-of-a', await proofB('aaaa1111', 'chat-of-a'))).toBe(true)
   })
 
   it('a live proof for one of our codes marks the chat as known without a server call', async () => {
