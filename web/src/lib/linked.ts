@@ -1,5 +1,6 @@
 import type { Bbox } from './types'
 import type { ViewerRegion, ViewerSource } from './viewer-evidence'
+import type { WallDetails } from './wall-details'
 
 export interface ItemPlace {
   doc_id: string
@@ -16,6 +17,7 @@ export interface LinkedItem {
   storey: string | null
   type_name: string | null
   props: Record<string, unknown>
+  wall_details?: WallDetails | null
   places: ItemPlace[]
 }
 

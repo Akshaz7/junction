@@ -62,7 +62,12 @@ def lookup(doc_id: str, ref: str, root: Path | None = None) -> dict | None:
     tg = scene_cmds.tags(doc)
     it = _resolve(doc, tg, str(ref))
     if it is None:
-        return None
+        from engine.wall_details import scene_wall
+        generated = scene_wall(doc_id, str(ref), root)
+        if generated is None:
+            return None
+        it = Item(item_id=str(ref), kind="wall", name="Wall (generated for demo)", storey=generated.get("storey"),
+                  page=generated.get("page", 1), bbox_px=generated.get("bbox_px"), source="generated")
     raw = _raw_elements(doc_id, root).get(it.item_id, {})
     pm = _planmap_places(doc_id, root)
     props = {**(it.props or {})}
@@ -71,6 +76,10 @@ def lookup(doc_id: str, ref: str, root: Path | None = None) -> dict | None:
     same_type = [i for i in doc.items if i.item_id != it.item_id and it.type_name and i.type_name == it.type_name and i.kind == it.kind]
     key = _norm(it.label) or ""
     same_label = [i for i in doc.items if i.item_id != it.item_id and key and _norm(i.label) == key]
+    wall_details = None
+    if it.kind == "wall":
+        from engine.wall_details import details
+        wall_details = details(doc_id, it.item_id, root, quantities=quantities, props=props, storey=it.storey)
     return {
         "doc_id": doc_id,
         "item_id": it.item_id,
@@ -83,6 +92,7 @@ def lookup(doc_id: str, ref: str, root: Path | None = None) -> dict | None:
         "properties": props,
         "quantities": quantities,
         "quantity_source": raw.get("quantity_source") or {},
+        "wall_details": wall_details,
         "places": _place(it, tg.get(it.item_id, ""), pm)["drawings"] or ([{"page": it.page, "bbox_px": it.bbox_px}] if it.bbox_px else []),
         "same_type": {"type": it.type_name, "count": len(same_type) + (1 if it.type_name else 0),
                       "storeys": sorted({i.storey for i in same_type + [it] if i.storey}),

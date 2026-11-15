@@ -134,6 +134,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       if (!link) return
       if (link.kind === 'question') {
         setRestoring(false)
+        if (drawing) setRestoredDocIds([drawing])
         setDraft(link.question)
         if (new URLSearchParams(window.location.hash.split('?')[1]).get('send') === '1') autoSend.current = link.question
         return

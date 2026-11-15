@@ -1,0 +1,54 @@
+{
+  "doc_id": "cubicasa5k__colorful-12200",
+  "item_id": "wall-r001",
+  "kind": "wall",
+  "tag": null,
+  "name": "Wall (generated for demo)",
+  "storey": "Floor 1",
+  "type_name": null,
+  "ifc_class": null,
+  "props": {},
+  "quantities": {},
+  "wall_details": {
+    "status": "Estimate",
+    "length_m": 0.7714285714285722,
+    "thickness_m": 0.12857142857142856,
+    "height_m": 2.7,
+    "height_source": "assumed for generated 3D",
+    "storey": "Floor 1",
+    "classification": "Not recorded",
+    "faces": [
+      {
+        "label": "Face A",
+        "gross_m2": 2.0828571428571454,
+        "opening_m2": 0.0,
+        "net_m2": 2.0828571428571454
+      },
+      {
+        "label": "Face B",
+        "gross_m2": 2.0828571428571454,
+        "opening_m2": 0.0,
+        "net_m2": 2.0828571428571454
+      }
+    ],
+    "opening_count": 0,
+    "method": "2D raster wall outline \u00d7 height \u2212 detected openings; excludes generated lintel/sill infill; scale: door-prior.",
+    "notes": [
+      "Generated for demo: this 3D wall is a raster component, not a source plan-map wall. Areas cover the source wall outline; generated lintel/sill infill beyond it is excluded.",
+      "Floor 1: wall height 2.7 m (assumed; no wall height found); missing door/window heights use 2.10/1.50 m, window sill 0.90 m; 5 detected openings not assigned to a wall"
+    ]
+  },
+  "places": [
+    {
+      "doc_id": "cubicasa5k__colorful-12200",
+      "page": 1,
+      "bbox_px": [
+        281.0,
+        500.0,
+        291.0,
+        560.0
+      ],
+      "storey": "Floor 1"
+    }
+  ]
+}

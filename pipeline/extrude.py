@@ -698,6 +698,9 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False, *
                 mesh.vertex_normals = vn
                 mesh.visual = trimesh.visual.TextureVisuals(material=MATS["wall"]())
                 register(f"wall-r{wi:03d}", "wall", [("wall", mesh)])
+                items[f"wall-r{wi:03d}"]["props"] = {"wall_outline_px": list(wp.exterior.coords),
+                    "wall_outline_holes_px": [list(r.coords) for r in wp.interiors],
+                    "height_m": wall_h, "height_source": "assumed for generated 3D"}
     for it in pm["items"]:
         k = it["kind"]
         if k not in ("wall", "door", "window", "room") + FIXTURES and it.get('source') != 'taught':

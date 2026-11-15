@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowUpRight, X } from 'lucide-react'
 import { linkedApi, propertyValue, type ItemPlace, type LinkedItem } from '../lib/linked'
 import './item-panel.css'
+import { WallDetails } from './wall-details'
+import { wallAskHref } from '../lib/wall-details'
 
 export function ItemPanel({ docId, itemId, sheet, onClose, onOpenPlace }: {
   docId: string; itemId: string; sheet: boolean; onClose: () => void
@@ -43,8 +45,10 @@ export function ItemPanel({ docId, itemId, sheet, onClose, onOpenPlace }: {
             <dl className="item-summary">{([
               ['Kind', item.kind], ['Tag', item.tag], ['Name', item.name], ['Storey', item.storey], ['Type', item.type_name],
             ] as const).map(([key, value]) => <div key={key}><dt>{key}</dt><dd data-field={key.toLowerCase()}>{value || 'Not supplied'}</dd></div>)}</dl>
-            <h3>IFC properties</h3>
-            {Object.keys(item.props).length ? <dl className="item-properties">{Object.entries(item.props).map(([key, value]) => <div key={key} data-property={key}><dt>{key}</dt><dd>{propertyValue(value)}</dd></div>)}</dl> : <p>No IFC properties supplied.</p>}
+            {item.wall_details && <WallDetails wall={item.wall_details} />}
+            {item.kind === 'wall' && <a className="wall-ask" href={wallAskHref(docId, item.tag || item.item_id)}>Ask about this wall</a>}
+            <h3>Source properties</h3>
+            {Object.keys(item.props).length ? <dl className="item-properties">{Object.entries(item.props).map(([key, value]) => <div key={key} data-property={key}><dt>{key}</dt><dd>{propertyValue(value)}</dd></div>)}</dl> : <p>No additional source properties supplied.</p>}
             <h3>Appears in</h3>
             {item.places.length ? <ul className="item-places">{item.places.map((place, index) => <li key={`${place.doc_id}-${place.page}-${index}`}>
               <button type="button" onClick={() => onOpenPlace(place, item)}><span>{place.storey || place.doc_id}<small>Page {place.page}{!place.bbox_px ? ' · No box supplied' : ''}</small></span><ArrowUpRight size={16} /></button>

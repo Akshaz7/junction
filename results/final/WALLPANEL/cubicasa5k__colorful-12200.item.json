@@ -1,0 +1,57 @@
+{
+  "doc_id": "cubicasa5k__colorful-12200",
+  "item_id": "wall-001",
+  "kind": "wall",
+  "tag": "WL1",
+  "name": null,
+  "storey": null,
+  "type_name": null,
+  "ifc_class": null,
+  "props": {
+    "orientation": "h",
+    "length_px": 116,
+    "thickness_px": 30.4
+  },
+  "quantities": {},
+  "wall_details": {
+    "status": "Estimate",
+    "length_m": 1.4914285714285715,
+    "thickness_m": 0.39857142857142835,
+    "height_m": 2.7,
+    "height_source": "assumed; no wall height found",
+    "storey": "Page 1",
+    "classification": "Not recorded",
+    "faces": [
+      {
+        "label": "Face A",
+        "gross_m2": 4.026857142857144,
+        "opening_m2": 0.0,
+        "net_m2": 4.026857142857144
+      },
+      {
+        "label": "Face B",
+        "gross_m2": 4.026857142857144,
+        "opening_m2": 0.0,
+        "net_m2": 4.026857142857144
+      }
+    ],
+    "opening_count": 0,
+    "method": "2D rectangular wall outline \u00d7 height; openings deducted once; scale: door-prior.",
+    "notes": [
+      "Page 1: wall height 2.7 m (assumed; no wall height found); missing door/window heights use 2.10/1.50 m, window sill 0.90 m; 5 detected openings not assigned to a wall"
+    ]
+  },
+  "places": [
+    {
+      "doc_id": "cubicasa5k__colorful-12200",
+      "page": 1,
+      "bbox_px": [
+        113,
+        149,
+        229,
+        180
+      ],
+      "storey": null
+    }
+  ]
+}
