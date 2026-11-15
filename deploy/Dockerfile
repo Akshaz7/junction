@@ -31,8 +31,8 @@ RUN mkdir -p /app/artifacts/uploads /tmp/hologram && python -m engine.project_in
 USER app
 # 10 GB / multi-CPU plan (startup-200-10240): several API workers (live sync fans out over PG NOTIFY, state is in PG/disk),
 # bigger IFC budgets, whole-job watchdog 15 min, 3 concurrent ingests per box (heavy.sh slots).
-ENV RATE_LIMIT=1 HIDE_EMPTY_DOCS=1 WEB_CONCURRENCY=3 \
-    IFC_WORKER_MEMORY_MB=4096 IFC_SCENE_TIMEOUT_S=420 IFC_INDEX_TIMEOUT_S=300 IFC_INPROC_MAX_MB=60 \
-    INGEST_TIMEOUT_S=900 INGEST_CONCURRENCY=1 HEAVY_SLOTS=3
+ENV RATE_LIMIT=1 HIDE_EMPTY_DOCS=1 WEB_CONCURRENCY=4 \
+    IFC_WORKER_MEMORY_MB=2500 IFC_CONCURRENCY=2 IFC_SCENE_TIMEOUT_S=420 IFC_INDEX_TIMEOUT_S=300 IFC_INPROC_MAX_MB=60 \
+    INGEST_TIMEOUT_S=900 INGEST_CONCURRENCY=4 HEAVY_SLOTS=4
 EXPOSE 8000
-CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "3", "--timeout-keep-alive", "75"]
+CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--timeout-keep-alive", "75"]

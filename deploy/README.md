@@ -107,3 +107,6 @@ The service now runs on `startup-200-10240`; the 256/512 MB figures above are hi
 - DB pool per worker: `DB_MIN_CONN=2`, `DB_MAX_CONN=6` (3 workers + 3 LISTEN connections stay near 21 connections; raise only if the PG plan allows).
 - IFC budgets: `IFC_WORKER_MEMORY_MB=4096`, `IFC_INDEX_TIMEOUT_S=300`, `IFC_SCENE_TIMEOUT_S=420`, `IFC_INPROC_MAX_MB=60`; whole-job watchdog `INGEST_TIMEOUT_S=900` (was a hard 5 min; the job deadline is this minus 30 s). `HEAVY_SLOTS=3` ingests at once across workers.
 - `POST /api/upload` returns as soon as the file is validated and the row exists; saving the original to PostgreSQL and the ingest both run in background tasks. Poll `GET /api/docs/{id}/ingest`.
+
+### Update (plan startup-400-8192: 4 CPU, 8 GB)
+`--workers 4`, `INGEST_CONCURRENCY=4` per worker with `HEAVY_SLOTS=4` as the real cap (box-wide), IFC jobs capped at `IFC_CONCURRENCY=2` (cross-process flock slots), `IFC_WORKER_MEMORY_MB=2500`. Uploads wait in a queue: `GET /api/docs/{id}/ingest` returns `queue_position` while queued. On boot the leader worker restores uploads from PG first, then re-queues every ingest that was running/queued when the old container stopped (`requeue_lost_ingests`).
