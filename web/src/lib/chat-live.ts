@@ -30,15 +30,45 @@ export function decodeChatEvent(raw: unknown): Exclude<ChatLiveEvent, { type: 'c
   return null
 }
 
+/** What a listener wants from the server (F-WSSCOPE). No scope = everything (legacy). `{}` = no chat events at all,
+ * only connection and pair events. `chatIds` = the full live stream of those chats. `summaries` = just the one
+ * chat.message per message of any chat (overview list, Follow). */
+export type LiveScope = { chatIds?: string[]; summaries?: boolean }
+
+export function inScope(scope: LiveScope | undefined, event: ChatLiveEvent): boolean {
+  if (!scope || !event.type.startsWith('chat.') || !('chat_id' in event)) return true
+  return !!scope.chatIds?.includes(event.chat_id) || (!!scope.summaries && event.type === 'chat.message')
+}
+
+/** Union of all listener scopes, or null when any listener is unscoped (then nothing is sent: the server streams everything). */
+export function mergeScopes(scopes: Iterable<LiveScope | undefined>): { chat_ids: string[]; summaries: boolean } | null {
+  const ids = new Set<string>()
+  let summaries = false
+  for (const scope of scopes) {
+    if (!scope) return null
+    for (const id of scope.chatIds ?? []) ids.add(id)
+    summaries ||= !!scope.summaries
+  }
+  return { chat_ids: [...ids].sort(), summaries }
+}
+
 /** Shared by chat and overview. The existing scene channel decodes only scene events. */
 export function createChatLiveClient(options: { url?: string; connect?: (url: string) => WebSocket } = {}) {
-  const listeners = new Set<(event: ChatLiveEvent) => void>()
+  const listeners = new Map<(event: ChatLiveEvent) => void, LiveScope | undefined>()
+  let lastSent = ''
   let socket: WebSocket | null = null
   let retry: ReturnType<typeof setTimeout> | undefined
   let attempt = 0
   let stable: ReturnType<typeof setTimeout> | undefined
   let suspended = false
-  function emit(event: ChatLiveEvent) { for (const listener of listeners) listener(event) }
+  function emit(event: ChatLiveEvent) { for (const [listener, scope] of [...listeners]) if (inScope(scope, event)) listener(event) }
+  function sendScope(connection: WebSocket | null = socket) {
+    const merged = mergeScopes(listeners.values())
+    const text = merged ? JSON.stringify({ type: 'subscribe', ...merged }) : ''
+    if (!merged || !connection || connection.readyState !== 1 || text === lastSent) return
+    lastSent = text
+    try { connection.send(text) } catch { lastSent = '' }
+  }
   function reconnect() {
     if (suspended || retry !== undefined || !listeners.size) return
     retry = setTimeout(() => { retry = undefined; connect() }, Math.min(250 * 2 ** Math.min(attempt++, 6), 10_000))
@@ -54,6 +84,8 @@ export function createChatLiveClient(options: { url?: string; connect?: (url: st
         // A flapping socket must keep backing off: only forget failures once the link stayed up for 5 s.
         clearTimeout(stable)
         stable = setTimeout(() => { if (socket === connection) attempt = 0 }, 5000)
+        lastSent = ''
+        sendScope(connection)
         // Refetch snapshots on every reconnect so missed notifications are recovered.
         emit({ type: 'connected' })
       })
@@ -104,14 +136,15 @@ export function createChatLiveClient(options: { url?: string; connect?: (url: st
     document[method]('visibilitychange', visibility)
   }
   return {
-    subscribe(listener: (event: ChatLiveEvent) => void) {
+    subscribe(listener: (event: ChatLiveEvent) => void, scope?: LiveScope) {
       if (!listeners.size) watchPage(true)
-      listeners.add(listener)
+      listeners.set(listener, scope)
+      sendScope()
       if (socket?.readyState === 1) listener({ type: 'connected' })
       connect()
       return () => {
         listeners.delete(listener)
-        if (listeners.size) return
+        if (listeners.size) { sendScope(); return }
         watchPage(false)
         disconnect()
         suspended = false

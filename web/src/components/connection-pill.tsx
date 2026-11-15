@@ -18,7 +18,7 @@ export function ConnectionPill({ enabled = true, live = chatLive }: { enabled?: 
         clearTimeout(pending)
         setReconnecting(event.type === 'disconnected')
       }
-    })
+    }, {})
     return () => { clearTimeout(pending); unsubscribe() }
   }, [enabled, live])
   const message = retry || (reconnecting ? 'Reconnecting…' : '')
