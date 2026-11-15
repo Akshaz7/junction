@@ -69,10 +69,8 @@ def scene_wall(doc_id, item_id, root):
                 continue
             height = wallarea._number((saved.get("props") or {}).get("height_m") or (scene.get("defaults") or {}).get("wall_m"))
             props = {"height_m": height, "height_source": "assumed for generated 3D"} if height else {}
-            if polygon.interiors:
-                if iid == item_id:
-                    result["note"] += " The component is a wall network with enclosed spaces; separate face areas are unavailable."
-                continue
+            props["network_estimate"] = True
+            props["holes_px"] = [[list(p) for p in ring.coords] for ring in polygon.interiors]
             polygons.append({"item_id": iid, "kind": "wall", "bbox_px": list(bounds),
                              "polygon_px": [list(p) for p in polygon.exterior.coords], "props": props})
             if iid == item_id:
@@ -146,7 +144,9 @@ def details(doc_id, item_id, root, *, quantities=None, props=None, storey=None):
     status = "Measured" if is_ifc and wall else "Estimate" if wall or not is_ifc else "Not available"
     method = "IFC gross and void-cut longitudinal side faces; openings deducted from the geometry." if is_ifc else f"2D {wall.get('axis_source') or 'wall outline'} × height; openings deducted once; scale: {wall.get('scale_method') or 'not available'}."
     if generated and wall:
-        method = f"2D raster wall outline × height − detected openings; excludes generated lintel/sill infill; scale: {wall.get('scale_method') or 'not available'}."
+        method = f"2D raster wall outline (perimeter) × height; excludes generated lintel/sill infill; scale: {wall.get('scale_method') or 'not available'}."
+        if "network" in str(wall.get("axis_source")):
+            notes.append("Doors and windows sit in gaps of the detected wall outline, so its faces already exclude them: no opening area is deducted (net = gross).")
     if not wall:
         method = "Wall face geometry is unavailable; no area or opening deduction has been inferred."
     if wall.get("axis_source") not in (None, "IFC axis") and is_ifc:
