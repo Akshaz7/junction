@@ -1,0 +1,9 @@
+{
+  "generated_for_test": true,
+  "sidecar_version": 1,
+  "measured_m2": 12.0,
+  "stored_net_m2": 100.0,
+  "status": "flag",
+  "scene_glb_bytes": 1288,
+  "count_status": "verified"
+}

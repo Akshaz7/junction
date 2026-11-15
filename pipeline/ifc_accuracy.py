@@ -1,0 +1,275 @@
+"""ACC-IFC: occurrence hierarchy and measured space footprints, in SI.
+
+Independent of the IFCQTY sidecar: existing quantity consumers keep their format.
+No inferred dimensions, bounding-box areas or exporter-specific corrections.
+"""
+from __future__ import annotations
+
+import math
+import re
+
+VERSION = 1
+# Product taxonomy, not a fitted symbol heuristic. See results/final/ACC-IFC/constants.json.
+FAMILIES = (
+    ('IfcStair', 'stairs'), ('IfcStairFlight', 'stairs'),
+    ('IfcRamp', 'ramp'), ('IfcRampFlight', 'ramp'), ('IfcWall', 'wall'),
+    ('IfcDoor', 'door'), ('IfcWindow', 'window'), ('IfcSpace', 'room'),
+    ('IfcSlab', 'slab'), ('IfcColumn', 'column'), ('IfcBeam', 'beam'),
+    ('IfcRoof', 'roof'), ('IfcRailing', 'railing'),
+)
+PROXY_TERMS = {
+    'stairs': r'stairs?|staircases?|stairways?|treppen?|portaat|porras|trappor|trappa',
+    'door': r'doors?|t[uü]r(?:en)?|ovi|ovet|d[oö]rr(?:ar)?',
+    'window': r'windows?|fenster|ikkuna(?:t)?|f[oö]nster',
+    'room': r'rooms?|spaces?|raum|r[aä]ume|huone(?:et)?|rum',
+    'wall': r'walls?|w[aä]nde?|wand|sein[aä](?:t)?|v[aä]gg(?:ar)?',
+}
+PART_WORDS = re.compile(r'\b(?:flights?|landings?|treads?|risers?|railings?|handrails?|parts?|components?|'
+                        r'podest\w*|stufen?|treppenlauf|kaide\w*|askel\w*|r[aä]cke\w*)\b', re.I)
+
+
+def proxy_kind(el):
+    """Only explicit occurrence names/ObjectType; never a guessed type/family code."""
+    text = ' '.join(str(getattr(el, k, None) or '') for k in ('ObjectType', 'Name'))
+    if PART_WORDS.search(text):
+        return None
+    kinds = [k for k, terms in PROXY_TERMS.items() if re.search(rf'(?<!\w)(?:{terms})(?![^\W\d_])', text, re.I)]
+    return kinds[0] if len(kinds) == 1 else None
+
+
+def family(el):
+    if el.is_a('IfcBuildingElementProxy'):
+        return proxy_kind(el)
+    return next((k for cls, k in FAMILIES if el.is_a(cls)), None)
+
+
+def count_metadata(el):
+    """Skip only a related component, never every flight because some stair exists."""
+    import ifcopenshell.util.element as E
+    cur, seen, component, ancestors = el, {el.id()}, None, []
+    status = 'verified'
+    while (parent := E.get_aggregate(cur)) is not None:
+        if parent.id() in seen:
+            status = 'cyclic aggregate hierarchy'
+            component = None  # malformed hierarchy: preserve occurrences, flag uncertainty
+            break
+        seen.add(parent.id())
+        ancestors.append({'item_id': parent.GlobalId, 'ifc_class': parent.is_a()})
+        # Different products remain countable (e.g. a door in a wall or a bar
+        # in a slab). A stair/flight or ramp/flight is one semantic family.
+        if (el.is_a(parent.is_a()) or parent.is_a(el.is_a())
+                or (family(el) is not None and family(el) == family(parent))):
+            component = parent.GlobalId
+        cur = parent
+    return {'aggregate_ancestors': ancestors, 'count_component_of': component,
+            'count_status': status,
+            'proxy_kind': proxy_kind(el) if el.is_a('IfcBuildingElementProxy') else None}
+
+
+def stored_area(space, quantity_name):
+    """Occurrence Qto before typed Pset; explicit property units before project units."""
+    import ifcopenshell.util.element as E
+    import ifcopenshell.util.unit as U
+    ps = E.get_psets(space, verbose=True, should_inherit=False)
+    for pn, values in sorted(ps.items(), key=lambda kv: not kv[0].startswith('Qto_')):
+        if not isinstance(values, dict):
+            continue
+        for name, entry in values.items():
+            if re.sub(r'\W', '', name).casefold() != quantity_name or not isinstance(entry, dict):
+                continue
+            value = entry.get('value')
+            if not isinstance(value, (int, float)) or isinstance(value, bool) or not math.isfinite(value) or value < 0:
+                continue
+            prop = space.file.by_id(entry['id'])
+            try:
+                unit = U.get_property_unit(prop, space.file, use_cache=True)
+            except (IndexError, RuntimeError):
+                continue
+            if unit is not None and getattr(unit, 'UnitType', None) == 'AREAUNIT':
+                si = float(value) * U.get_unit_scale(unit)
+                if math.isfinite(si):
+                    return si, f'{pn}.{name}; declared area unit converted to m²'
+    return None, None
+
+
+def stored_net_area(space):
+    return stored_area(space, 'netfloorarea')
+
+
+def space_area(space):
+    """Horizontal union footprint, including holes, not twice the floor/ceiling.
+
+    IfcOpenShell's geometry API returns metres by default, independently of the
+    file's length unit. World coordinates preserve tilted product placements.
+    """
+    import ifcopenshell.util.unit as U
+    result = {'measured_m2': None, 'stored_net_m2': None, 'status': 'unavailable',
+              'difference_pct': None, 'method': 'IfcSpace geometry horizontal footprint'}
+    stored, source = stored_net_area(space)
+    result.update(stored_net_m2=stored, stored_source=source)
+    gross, gross_source = stored_area(space, 'grossfloorarea')
+    result.update(stored_gross_m2=gross, stored_gross_source=gross_source)
+    try:
+        length_unit = U.get_project_unit(space.file, 'LENGTHUNIT', use_cache=True)
+    except (IndexError, RuntimeError):
+        length_unit = None
+    if length_unit is None:
+        result['reason'] = 'The model does not declare length units.'
+        return result
+    try:
+        import ifcopenshell.geom as G
+        import ifcopenshell.util.shape as S
+        from shapely.errors import GEOSException
+        st = G.settings()
+        st.set('use-world-coords', True)
+        shape = G.create_shape(st, space)
+        try:
+            area = float(S.get_footprint_area(shape.geometry, axis='Z'))
+        except GEOSException:
+            result['reason'] = 'Footprint unavailable (invalid projected mesh).'
+            return result
+        if not math.isfinite(area) or area <= 0:
+            raise ValueError('no positive footprint')
+        result['measured_m2'] = area
+        if stored is None:
+            result['status'] = 'no stored net area'
+        else:
+            delta = abs(stored - area) / area
+            result['difference_pct'] = delta * 100
+            # 2% is our cross-check policy, not a fitted constant.
+            result['status'] = 'agree' if delta <= .02 + 1e-12 else 'flag'
+    except (RuntimeError, ValueError, AttributeError, TypeError, ZeroDivisionError, ImportError) as exc:
+        result['reason'] = f'Footprint unavailable ({type(exc).__name__}).'
+    return result
+
+
+def space_row(el, *, geometry=False):
+    import ifcopenshell.util.element as E
+    st, seen = el, set()
+    while st is not None and not st.is_a('IfcBuildingStorey') and st.id() not in seen:
+        seen.add(st.id())
+        st = E.get_container(st, should_get_direct=True) or E.get_aggregate(st)
+    if st is not None and not st.is_a('IfcBuildingStorey'):
+        st = None
+    row = {'item_id': el.GlobalId, 'ifc_class': el.is_a(), 'name': el.Name,
+           'long_name': el.LongName, 'storey': st.Name if st is not None else None,
+           **count_metadata(el)}
+    if geometry:
+        row['space_area'] = space_area(el)
+    return row
+
+
+def build(f, *, geometry=False):
+    rows, errors = [], []
+    # IfcProduct excludes IfcTypeProduct/IfcTypeObject in every supported schema.
+    for el in f.by_type('IfcProduct'):
+        if not (el.is_a('IfcElement') or el.is_a('IfcSpace')):
+            continue
+        if not el.GlobalId:
+            errors.append({'item_id': None, 'ifc_class': el.is_a(), 'reason': 'Missing GlobalId'})
+            continue
+        try:
+            rows.append(space_row(el, geometry=geometry) if el.is_a('IfcSpace') else
+                        {'item_id': el.GlobalId, 'ifc_class': el.is_a(), **count_metadata(el)})
+        except (RuntimeError, ValueError, AttributeError, TypeError) as exc:
+            errors.append({'item_id': el.GlobalId, 'ifc_class': el.is_a(), 'reason': type(exc).__name__})
+    return {'version': VERSION, 'schema': f.schema, 'rows': rows, 'errors': errors,
+            'space_inventory_complete': not any(e['ifc_class'] == 'IfcSpace' for e in errors)}
+
+
+def scene_space_areas(f, index, scene):
+    """Reuse converted room triangles when the property reader omits IFC geometry.
+
+    glTF positions and node transforms are already metres, Y-up. Project every
+    triangle onto X/Z and take the union, preserving holes and overlaps. Never
+    substitute bounding boxes, surface area or volume/height for a footprint.
+    """
+    import numpy as np
+    import ifcopenshell.util.unit as U
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    from shapely.errors import GEOSException
+    from pipeline.ifc_scene import node_matrices
+
+    if U.get_project_unit(f, 'LENGTHUNIT', use_cache=True) is None:
+        return index
+    transforms = node_matrices(scene)
+    blob = scene.binary_blob()
+    nodes = {}
+    for ni, node in enumerate(scene.nodes):
+        if node.mesh is not None:
+            nodes.setdefault(node.name, []).append((ni, node))
+
+    def accessor(ai, width):
+        a = scene.accessors[ai]
+        if a.sparse is not None or a.bufferView is None:
+            raise ValueError('Sparse or missing scene accessor')
+        view = scene.bufferViews[a.bufferView]
+        if view.buffer != 0:
+            raise ValueError('External scene buffer')
+        dtype = {5121: 'u1', 5123: '<u2', 5125: '<u4', 5126: '<f4'}[a.componentType]
+        scalar = np.dtype(dtype).itemsize
+        stride = view.byteStride or width * scalar
+        return np.ndarray((a.count, width), dtype=dtype, buffer=blob,
+                          offset=(view.byteOffset or 0) + (a.byteOffset or 0),
+                          strides=(stride, scalar))
+
+    for row in index['rows']:
+        if row['ifc_class'] != 'IfcSpace':
+            continue
+        check = row.get('space_area')
+        if not check:
+            check = row['space_area'] = space_area(f.by_guid(row['item_id']))
+        if check.get('measured_m2') is not None:
+            continue
+        try:
+            polygons = []
+            for ni, node in nodes.get(row['item_id'], []):
+                for prim in scene.meshes[node.mesh].primitives:
+                    if prim.mode not in (None, 4):
+                        raise ValueError('Non-triangle room primitive')
+                    points = accessor(prim.attributes.POSITION, 3)
+                    points = (transforms[ni] @ np.column_stack((points, np.ones(len(points)))).T).T[:, (0, 2)]
+                    ids = accessor(prim.indices, 1).reshape(-1) if prim.indices is not None else np.arange(len(points))
+                    for face in ids.reshape(-1, 3):
+                        polygon = Polygon(points[face])
+                        if polygon.area > 0:
+                            if not polygon.is_valid:
+                                raise ValueError('Invalid projected room face')
+                            polygons.append(polygon)
+            area = float(unary_union(polygons).area)
+            if not math.isfinite(area) or area <= 0:
+                raise ValueError('No usable room triangles')
+            check.update(measured_m2=area, method='Converted IfcSpace mesh horizontal footprint (SI, Y-up)')
+            check.pop('reason', None)
+            stored = check.get('stored_net_m2')
+            if stored is None:
+                check.update(status='no stored net area', difference_pct=None)
+            else:
+                delta = abs(stored - area) / area
+                check.update(difference_pct=delta * 100, status='agree' if delta <= .02 + 1e-12 else 'flag')
+        except (ValueError, TypeError, KeyError, IndexError, GEOSException) as exc:
+            check['reason'] = f'Converted room footprint unavailable ({type(exc).__name__}).'
+    return index
+
+
+def enrich_elements(elements, index):
+    by = {r['item_id']: r for r in index['rows']}
+    for el in elements:
+        row = by.get(el['item_id'])
+        if row is None:
+            continue
+        props = el.setdefault('props', {})
+        props.update({k: row[k] for k in ('aggregate_ancestors', 'count_component_of', 'count_status', 'proxy_kind')})
+        if 'space_area' in row:
+            check = props['space_area'] = row['space_area']
+            quantities = el.setdefault('quantities', {})
+            if check.get('stored_gross_m2') is not None:
+                quantities['gross_floor_area_m2'] = check['stored_gross_m2']
+            if check.get('stored_net_m2') is not None:
+                quantities['net_floor_area_m2'] = check['stored_net_m2']
+            if check['measured_m2'] is not None:
+                quantities['measured_floor_area_m2'] = check['measured_m2']
+                if check.get('stored_gross_m2') is None:
+                    quantities['area_m2'] = check['measured_m2']
+                    el.setdefault('quantity_source', {})['area_m2'] = 'IfcSpace geometry footprint'

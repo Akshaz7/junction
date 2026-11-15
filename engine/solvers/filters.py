@@ -179,9 +179,10 @@ def room_filter(question: str, rooms: list[Item]) -> tuple[str, list[Item]] | No
     # A quoted label that carries its own room number ('Toilet (Rum nr. S11)') is matched by the exact-label path in solve.py.
     if re.search(r"['\"\u2018\u2019\u201c][^'\"]*\([^)]*\d[^)]*\)\s*['\"\u2018\u2019\u201d]", question):
         return None
-    # Parenthesised synonyms are explanatory, not part of a room's name.
-    # Keep numbered parenthetical labels on the exact-label path above.
-    q = fold(re.sub(r"\b(rooms?|spaces?)\s*\(\s*(?:rooms?|spaces?)\s*\)", r"\1", question, flags=re.I))
+    # A generic noun followed by its synonym is not a named room. Preserve
+    # parenthesised room numbers/names everywhere else.
+    question = re.sub(r'\b(rooms?|spaces?)\s*\(\s*(?:rooms?|spaces?)\s*\)', r'\1', question, flags=re.I)
+    q = fold(question)
     if re.search(r"\b(?:largest|biggest|smallest|tiniest)\s+room\b", q):
         return None
     aliases = {**{k: k for k in ROOM_TYPES}, **ROOM_ALIASES}

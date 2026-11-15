@@ -24,7 +24,7 @@ _restored: set[str] = set()
 def _priority(name: str) -> int:
     if name.startswith(ORIGINAL) or name.startswith("source."):
         return 0
-    if name in ("doc.json", "ingest.json", "text.json", "scene.json", "pages.json", "elements.json", "piping.json", "ifc-quantities.json", "wallgeom.json") or name.startswith("planmap-"):
+    if name in ("doc.json", "ingest.json", "text.json", "scene.json", "pages.json", "elements.json", "piping.json", "ifc-quantities.json", "wallgeom.json", "ifc-accuracy.json") or name.startswith("planmap-"):
         return 1
     if name.endswith(".thumb.png") or name.startswith("text-"):
         return 2

@@ -15,6 +15,7 @@ from pathlib import Path
 from engine.router.parser import Parsed, parse
 
 from .data import Doc, Item, load_doc
+from engine.ifc_accuracy import checked_solver
 
 ROOT = Path(__file__).resolve().parents[2]
 ARTIFACTS = ROOT / "artifacts"
@@ -271,6 +272,11 @@ def _abstain(question, doc_id, why, trace, route, t0, scene_doc=None):
 def _qty(it: Item, kind: str, t: str) -> float | None:
     q = it.q
     if t == "area":
+        if kind == "room" and q.get("selected_floor_area_m2") is not None:
+            return float(q["selected_floor_area_m2"])
+        measured = (it.props.get("space_area") or {}).get("measured_m2")
+        if kind == "room" and measured is not None:
+            return float(measured)
         keys = ("net_floor_area_m2", "area_m2", "net_area_m2", "gross_area_m2") if kind == "room" else \
                ("area_m2", "net_area_m2", "gross_area_m2", "net_side_area_m2")
         for k in keys:
@@ -426,6 +432,7 @@ def _solve_multi(question, doc_id, p: Parsed, root, page, hidden, t0) -> dict:
     return _answer_obj(question, [doc_id], text, counts, "count", min(confs), False, boxes, cites, scene, trace, subs[0][1]["route"], t0)
 
 
+@checked_solver
 def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path | str = ARTIFACTS,
           page: int | None = None, hidden: dict[str, str] | None = None) -> dict:
     """hidden: {item_id: tag} the chat has hidden in the scene; they are left out and the answer says so."""
@@ -447,6 +454,8 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
     from engine.ifc_storeys import dedup_trace
     trace.extend(dedup_trace(doc))
     if doc.mode == "ifc":
+        from engine.ifc_accuracy import prepare_doc, wants_room_geometry, is_item_count
+        doc = prepare_doc(doc, root, for_count=is_item_count(question), geometry=wants_room_geometry(question), question=question)
         from engine.analytics import filtered_question
         from dataclasses import replace
         filtered_doc = replace(doc, items=[i for i in doc.items if i.item_id not in hidden]) if hidden else doc
@@ -547,8 +556,6 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
                             f"The DXF contains unclassified fixture symbols, so I cannot give a reliable {_plural(kind, 1)} count.",
                             trace, route, t0)
     items = [i for i in doc.items if i.kind in kinds]
-    if kind == "stairs" and doc.mode == "ifc" and any(i.props.get("ifc_class") == "IfcStair" for i in items):
-        items = [i for i in items if i.props.get("ifc_class") != "IfcStairFlight"]   # flights are parts of a stair
     if doc.mode == "ifc" and kind in FIXTURE_RX and not items:
         items, how = ifc_fixtures(doc, kind)
         if how:
@@ -708,7 +715,7 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
             return _abstain(question, doc_id, f"I could not find {'room ' + rid if rid else 'that room'} in the data.", trace, route, t0)
         if (sel or quoted) and not (len(sel) == len(items) > 1 and not quoted and not rid):
             items = sel
-            subject = f"room {rid}" if rid and not quoted else f"“{quoted[0]}”"
+            subject = f"room {rid}" if rid and not quoted else f"“{quoted[0]}”" if quoted else "room"
             trace.append(_step("filter", f"room {subject}: {len(items)} matched"))
     elif quoted and p.type == "count":
         sel = [i for i in items if any(_label_matches(i, t) for t in quoted)]
@@ -828,5 +835,7 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
             + (f"; and {len(have) - len(top)} more" if len(have) > len(top) else "") + "."
     text += scale_note
     res = _answer_obj(question, [doc_id], text, round(total, 4), unit, conf, False, boxes, cites, scene, trace, route, t0)
+    if doc.mode == "ifc" and kind == "room" and p.type == "area":
+        res["measurement_coverage"] = {"requested": len(items), "available": len(have), "missing": missing}
     from engine.calc import record_items
     return record_items(res, doc, have, note="Missing quantities are excluded as stated in the answer; mesh-derived quantities use scene.glb when no stored quantity exists.")

@@ -1,0 +1,59 @@
+{
+  "empirical_symbol_constants": [],
+  "explanation": "No symbol dimensions, vertex counts, document names, coordinates or gold counts are used in these code paths. Count eligibility follows explicit IFC aggregation relationships; footprints use the existing IfcOpenShell projected mesh union.",
+  "policies": {
+    "net_area_relative_difference": {
+      "value": 0.02,
+      "denominator": "measured footprint in square metres",
+      "provenance": "Our area-comparison policy, not a fitted dataset threshold or a buildingSMART requirement."
+    },
+    "length_to_m": "Declared IFC project length unit; geometry API returns SI metres by default.",
+    "area_to_m2": "Explicit quantity/property area unit, otherwise declared IFC project area unit, independently of the length unit.",
+    "confidence_caps": {
+      "unverified_or_incomplete": 0.6,
+      "stored_area_disagreement_or_labelled_proxies": 0.8,
+      "interpretation": "Conservative display caps consistent with existing app confidence bands; not measured accuracy probabilities."
+    },
+    "room_area_basis": "Explicit gross and unqualified scalar floor totals use gross Qto where available. Named-room areas and net breakdowns retain declared net quantities when a footprint matches gross Qto but disagrees with net Qto. Explicit net measurements use footprints unless the geometry is identified as gross extent; missing gross/net quantities use available footprints. No document-specific branch is used."
+  },
+  "observed_distributions_not_used_as_thresholds": {
+    "measured_space_footprints_m2": {
+      "n": 236,
+      "min": 0.5183420709799319,
+      "median": 3.8040000000000296,
+      "max": 135.15115599999973
+    },
+    "stored_net_area_difference_pct": {
+      "n": 186,
+      "min": 0.0,
+      "median": 1.150335067378812e-10,
+      "max": 30.46916612327361
+    },
+    "provenance": [
+      {
+        "doc_id": "ifc_bench__fzk-house-arc",
+        "source": "data/full/junction-dataset/data/ifc_bench/fzk_house_arc.ifc",
+        "schema": "IFC4",
+        "space_n": 7
+      },
+      {
+        "doc_id": "ifc_models__bimspeed-warmond-ar",
+        "source": "data/full/junction-dataset/data/ifc_models/bimspeed-warmond_ar.ifc",
+        "schema": "IFC4",
+        "space_n": 179
+      },
+      {
+        "doc_id": "ifc_models__bsc-duplex-duplex-a-20110907",
+        "source": "data/full/junction-dataset/data/ifc_models/bsc-duplex_duplex-a-20110907.ifc",
+        "schema": "IFC2X3",
+        "space_n": 21
+      },
+      {
+        "doc_id": "ifc_models__bsc-duplex-duplex-m-20111024-rooms-and-spaces",
+        "source": "data/full/junction-dataset/data/ifc_models/bsc-duplex_duplex-m-20111024-rooms-and-spaces.ifc",
+        "schema": "IFC2X3",
+        "space_n": 37
+      }
+    ]
+  }
+}

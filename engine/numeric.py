@@ -12,7 +12,8 @@ def count_question(question: str) -> bool:
     q = clean(question)
     if re.search(r"\bhow many\s+(?:square|cubic|sq\b|m[²³23]\b|met(?:er|re)s?\b|feet\b|ft\b)", q):
         return False
-    return parse(question).type == "count"
+    from engine.ifc_accuracy import is_item_count
+    return is_item_count(question)
 
 
 def whole_count(value) -> bool:

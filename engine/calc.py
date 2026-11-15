@@ -341,6 +341,10 @@ def _cited(res, root):
         if did not in docs:
             try:
                 docs[did] = load_doc(did, root) or load_sheet_parent(did, root) if did else None
+                if docs[did] is not None and docs[did].mode == 'ifc':
+                    from engine.ifc_accuracy import prepare_doc, wants_room_geometry
+                    question = res.get('question', '')
+                    docs[did] = prepare_doc(docs[did], root, geometry=wants_room_geometry(question), question=question)
             except (OSError, ValueError, KeyError, TypeError):
                 docs[did] = None
         doc = docs[did]

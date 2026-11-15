@@ -34,7 +34,7 @@ def _of_kind(doc: Doc, kind: str) -> list[Item]:
     its = [i for i in doc.items if i.kind == kind]
     if doc.mode == "planmap":
         its = [i for i in its if i.conf >= MIN_CONF]
-    return [i for i in its if i.props.get("ifc_class") != "IfcStairFlight"]
+    return its  # Count routes have already removed related components in prepare_doc.
 
 
 def _fmt(v: float) -> str:
@@ -206,7 +206,7 @@ def arithmetic_question(question: str, doc: Doc, t0, solve_fn) -> dict | None:
     st = resolve_storey(question, doc.storeys) if doc.mode == "ifc" else None
     suffix = f" on {st}" if st else ""
     def sub(kind, area=False, scoped=True):
-        return solve_fn((f"What is the total area of all {kind}s" if area else f"How many {kind}s are there") + (suffix if scoped else ""))
+        return solve_fn((f"What is the total {'net ' if kind == 'room' else ''}area of all {kind}s" if area else f"How many {kind}s are there") + (suffix if scoped else ""))
     def value(res):
         a = res.get("answer") or {}
         return a.get("value") if not a.get("abstained") and isinstance(a.get("value"), (int, float)) else None
@@ -1572,6 +1572,10 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
                         note="Grouped by recorded type and thickness; bounding rectangle areas are approximate where stated.")
 
 
+from engine.ifc_accuracy import checked_analytics
+
+
+@checked_analytics
 def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
     """First handler that recognises the shape wins; every handler may return None."""
     from engine.ifc_quantities import answer as ifc_quantity_answer
