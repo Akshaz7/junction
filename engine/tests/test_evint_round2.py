@@ -28,7 +28,7 @@ def test_real_answers_have_exact_factor_sum_and_method(did, question, monkeypatc
         pytest.skip('Real artifact not installed')
     r = answer(question, [did])
     c = r['reasoning']['confidence']
-    assert sum(f['delta'] for f in c['factors']) == c['pct']
+    assert sum(f['delta'] for f in c['factors']) == (c['pct'] or 0)   # no percentage shown: only the zero base entry
     assert sum(bool(f.get('base')) for f in c['factors']) == 1
     assert c['label'] != 'Verified' or c['pct_kind'] != 'unavailable'
     trace = r['reasoning'].get('calc')
@@ -47,13 +47,13 @@ def test_raw_model_score_is_explicitly_uncalibrated_not_an_accuracy_estimate():
     c = confidence.factors({'pct': None, 'label': 'Estimate'}, {'answer': {'confidence': .65}}, '')
     assert c['pct'] == 65 and c['pct_kind'] == 'recorded_engine_score'
     assert 'not measured' in c['factors'][0]['note']
-    assert sum(f['delta'] for f in c['factors']) == c['pct']
+    assert sum(f['delta'] for f in c['factors']) == (c['pct'] or 0)   # no percentage shown: only the zero base entry
 
 
 def test_observed_calibration_and_actual_cap_are_separate_signed_factors():
     c = confidence.factors({'pct': 60, 'calibration': {'pct': 65, 'correct': 13, 'n': 20}}, {'answer': {'confidence': .99}}, '')
     assert [f['delta'] for f in c['factors']] == [65, -5]
-    assert sum(f['delta'] for f in c['factors']) == c['pct'] == 60
+    assert sum(f['delta'] for f in c['factors']) == (c['pct'] or 0)   # no percentage shown: only the zero base entry == 60
 
 
 def test_runtime_coverage_cap_keeps_original_score_and_signed_adjustment(tmp_path):
@@ -75,7 +75,7 @@ def test_public_early_answers_are_finalized(question, docs, monkeypatch):
     monkeypatch.setenv('READER', '0')
     r = answer(question, docs)
     c = r['reasoning']['confidence']
-    assert sum(f['delta'] for f in c['factors']) == c['pct']
+    assert sum(f['delta'] for f in c['factors']) == (c['pct'] or 0)   # no percentage shown: only the zero base entry
 
 
 def test_missing_numeric_score_stays_unknown():
