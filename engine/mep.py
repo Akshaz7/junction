@@ -256,6 +256,8 @@ def _classify0(el, t, ps) -> str:
     if k:
         return k
     tc = t.is_a().replace("Type", "") if t is not None else ""
+    if _kind_from_words(*words) == "radiator" and CLASS_KIND.get(cls) is None:
+        return "radiator"
     if CLASS_KIND.get(tc):
         k = CLASS_KIND[tc]
         if k == "fixture":
@@ -550,6 +552,17 @@ def _find_ifc(doc_id: str) -> Path | None:
     return None
 
 
+RADIATOR_TYPE = re.compile(r"radiator|r[ae]+d?i?ator|heizk[oö]rper|patteri|convector|panel heater", re.I)
+
+
+def _fix_rows(res: dict) -> None:
+    """Indexes built before the radiator rule keep a named radiator as a generic heat exchanger; read it as a radiator."""
+    for r in res.get("services") or []:
+        if r.get("k") in ("heat_exchanger", "device") and r.get("c") in ("IfcEnergyConversionDevice", "IfcHeatExchanger", "IfcFlowTerminal") \
+                and RADIATOR_TYPE.search(r.get("t") or ""):
+            r["k"] = "radiator"
+
+
 def load_index(doc) -> dict | None:
     """artifacts/<doc>/mep.json; built on first use when the IFC is available and small enough to read in a few seconds."""
     d = _artifacts_dir()
@@ -563,6 +576,7 @@ def load_index(doc) -> dict | None:
                 return c[1]
             res = json.loads(f.read_text())
             if res.get("version") == MEP_VERSION:
+                _fix_rows(res)
                 _CACHE[key] = (st, res)
                 return res
     except (OSError, ValueError):
@@ -1189,6 +1203,10 @@ def answer(question: str, doc, t0) -> dict | None:
     generic = bool(MEP_GENERIC.search(ql))
     ssub = [k for k, rx in STRUCT_SUBJECTS if re.search(rx, ql)]
     sgen = bool(STRUCT_GENERIC.search(ql))
+    if re.search(r"\bmissing\b|\bis there anything\b|\bgaps?\b|\bnot modelled\b|\bincomplete\b", ql) and not subj and not re.search(r"\bfloor plan\b|\bsheet\b|\bdrawing\b", ql):
+        res = _missing_answer(question, doc, t0)
+        if res is not None:
+            return res
     asks = bool(re.search(r"\bhow many\b|\bhow much\b|\bwhat\b|\bwhich\b|\bwhere\b|\blist\b|\bshow\b|\bnumber\b|\btotal\b|\bare there\b|\bis there\b|\bany\b|\bgive\b|\bbreakdown\b|\bsummar|\boverview|\bdescribe|\btell\b|\bcount\b|\bcould you\b|\bcan you\b|\bprovide\b", ql))
     if not asks:
         return None
@@ -1268,3 +1286,78 @@ def answer(question: str, doc, t0) -> dict | None:
     if trade and COUNT_Q.search(ql):
         return _count_answer(c, subj, trade)
     return None
+
+
+# ------------------------------------------------------------------ MEP order / bill of quantities
+MEP_ORDER_WORDS = re.compile(r"\b(?:mep|plumbing|piping|pipes?|ducts?|ductwork|hvac|heating|ventilation|electrical|cabling|radiators?|sanitary|building services?|services)\b", re.I)
+ARCH_ORDER_WORDS = re.compile(r"\b(?:floor(?:ing)? finish|tiles?|tiling|paint\w*|skirting|baseboards?|plaster|wall finish|doors?|windows?)\b", re.I)
+
+
+def order_answer(question: str, doc, t0) -> dict | None:
+    """What to order for the services in a model: pipe lengths by system and size, fittings and terminals counted.
+    None when the question is not an MEP order question or the model has no services index."""
+    if getattr(doc, "mode", None) != "ifc":
+        return None
+    from engine.order import wants_order
+    if not (wants_order(question) and MEP_ORDER_WORDS.search(question)) or ARCH_ORDER_WORDS.search(question):
+        return None
+    idx = load_index(doc)
+    if not idx or not idx.get("services"):
+        return None
+    c = _Ctx(question, doc, t0, idx)
+    st, rows, err = _storey_filter(c, idx["services"])
+    if err:
+        return _finish(c, f"**{err}**", None, None, [], ["level not found"])
+    lin = [r for r in rows if r["k"] in LINEAR]
+    fit = Counter(); term = Counter()
+    for r in rows:
+        if r["k"] in LINEAR:
+            continue
+        (fit if r["k"].endswith("fitting") or r["k"] == "fitting" else term)[(r["k"], r.get("d") or "system not named")] += 1
+    where = f" on {st}" if st else ""
+    lines = [f"**Services order list{where}, counted from the model.** {{marks}}", "", "| Item | System | Size | Quantity | Unit |", "|---|---|---|---|---|"]
+    g = defaultdict(lambda: [0, 0.0])
+    for r in lin:
+        key = (KIND_WORDS[r["k"]][0].split(" (")[0].capitalize(), r.get("d") or "system not named", _size_label(r) or "size not recorded")
+        g[key][0] += 1; g[key][1] += r.get("L") or 0.0
+    for (k, d, sz), (n, L) in sorted(g.items(), key=lambda kv: (kv[0][0], -kv[1][1])):
+        lines.append(f"| {k} | {d} | {sz} | {_n(L)} | m ({_int(n)} runs) |" if L else f"| {k} | {d} | {sz} | {_int(n)} | runs, no length stored |")
+    for label, cnt in (("fitting", fit), ("terminal or equipment", term)):
+        for (k, d), n in sorted(cnt.items(), key=lambda kv: (-kv[1], kv[0])):
+            lines.append(f"| {plural(k, n).capitalize()} | {d} | n/a | {_int(n)} | pieces |")
+    unsized = sum(1 for r in lin if not _size_label(r))
+    nolen = sum(1 for r in lin if not r.get("L"))
+    gaps = ["manufacturer, product code, pressure class, insulation and jointing method are not stored in the model"]
+    if unsized:
+        gaps.append(f"size is missing for {_int(unsized)} of {_int(len(lin))} runs")
+    if nolen:
+        gaps.append(f"{_int(nolen)} runs have no stored length")
+    lines += ["", "- Specification gaps: " + "; ".join(gaps) + ".", "- No waste allowance is added; ask for one if wanted."]
+    tot = sum(r.get("L") or 0.0 for r in lin)
+    return _finish(c, "\n".join(lines), None, None, [r["id"] for r in rows],
+                   [f"{len(lin)} runs ({_n(tot)} m), {sum(fit.values())} fittings, {sum(term.values())} terminals and equipment"],
+                   found=f"{_int(len(rows))} service elements{where}, numbered", measured=f"Summed stored lengths: {_n(tot)} m over {_int(len(lin))} runs")
+
+
+def _missing_answer(question: str, doc, t0) -> dict | None:
+    """"Is anything missing?" on a model that holds services: counts per IFC class, never a claim of absence for what exists."""
+    idx = load_index(doc)
+    rows = (idx or {}).get("services") or []
+    if not rows:
+        return None
+    c = _Ctx(question, doc, t0, idx)
+    by_class = Counter(r["c"] for r in rows)
+    by_kind = Counter(r["k"] for r in rows)
+    arch = Counter(i.kind for i in doc.items if i.kind in ("wall", "door", "window", "slab", "column", "beam", "roof", "stairs"))
+    absent = [k for k in ("wall", "door", "window", "slab", "column", "beam", "roof", "stairs") if not arch.get(k)]
+    text = (f"**This model holds {_int(len(rows))} building-services elements.** {{marks}}\n"
+            f"- By IFC class: {', '.join(f'{_int(n)} {cl}' for cl, n in by_class.most_common())}.\n"
+            f"- By kind: {_kinds_phrase(rows, 8)}.\n")
+    if absent:
+        text += f"- Absent physical objects (count 0 in the index): {', '.join(plural(k, 2) for k in absent)}. This is expected for a services-only model.\n"
+    unsized = sum(1 for r in rows if r['k'] in LINEAR and not _size_label(r))
+    nolen = sum(1 for r in rows if r['k'] in LINEAR and not r.get('L'))
+    text += (f"- Absent properties (the element exists but a value is empty): size missing on {_int(unsized)} runs, length missing on {_int(nolen)} runs, "
+             f"system not named on {_int(sum(1 for r in rows if not r.get('d')))} elements.")
+    return _finish(c, text, None, None, [r["id"] for r in rows], [f"{len(rows)} service elements by IFC class"],
+                   found=f"{_int(len(rows))} service elements across {len(by_class)} IFC classes")

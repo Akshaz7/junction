@@ -32,6 +32,40 @@ PL = {"stairs": "stairs", "furniture": "furniture items", "room": "rooms"}
 MAX_IDS = 400
 
 
+MISSING_Q = re.compile(r"\b(?:missing|absent|gaps?|not modelled|incomplete|lacking|what is not|what's not)\b|\bis there anything\b", re.I)
+SERVICE_CLASSES = ("IfcFlowSegment", "IfcFlowTerminal", "IfcFlowFitting", "IfcFlowController", "IfcFlowMovingDevice", "IfcEnergyConversionDevice",
+                   "IfcDistributionControlElement", "IfcDistributionElement")
+
+
+def _services_facts(doc, ql: str) -> "Facts | None":
+    """A model that holds services must never be described as having none. Questions that touch services or ask what is missing
+    are answered from the MEP index counts (every service element, with the IFC class it came from)."""
+    asks_missing = bool(MISSING_Q.search(ql))
+    asks_mep = any(re.search(rx, ql) for label, rx in ABSENT if label == "pipe or MEP")
+    if not (asks_missing or asks_mep):
+        return None
+    try:
+        from engine import mep
+        idx = mep.load_index(doc)
+    except Exception:  # noqa: BLE001
+        idx = None
+    rows = (idx or {}).get("services") or []
+    if not rows:
+        return None
+    by_class = Counter(r["c"] for r in rows)
+    by_kind = Counter(r["k"] for r in rows)
+    lines = [f"This model holds {len(rows)} building-services elements.",
+             "By IFC class: " + ", ".join(f"{n} {c}" for c, n in by_class.most_common()),
+             "By kind: " + ", ".join(f"{n} {mep.plural(k, n)}" for k, n in by_kind.most_common(12))]
+    if asks_missing:
+        arch = Counter(i.kind for i in doc.items if i.kind not in ("space", "room", "storey"))
+        absent = [k for k in ("wall", "door", "window", "slab", "column", "beam", "roof", "stairs") if not arch.get(k)]
+        if absent:
+            lines.append("Not present as elements in the index: " + ", ".join(absent))
+        lines.append("Absent physical objects are those with a count of 0; absent properties (missing size, system or material on an element that exists) are a separate gap and were not audited here.")
+    return Facts(lines, [r["id"] for r in rows][:MAX_IDS], "services-present")
+
+
 @dataclass
 class Facts:
     lines: list[str]
@@ -209,7 +243,9 @@ def facts_for(question: str, doc: Doc) -> Facts:
     if re.search(r"structural elements?|structural components?", ql):
         return _structural_facts(doc)
     # level questions
-    if re.search(r"\b(levels?|storeys?|floors?)\b", ql) and re.search(r"height|how many|number of|elevation", ql) and not kinds:
+    from engine import mep as _mep
+    mep_words = bool(_mep._subjects(ql))
+    if re.search(r"\b(levels?|storeys?|floors?)\b", ql) and re.search(r"height|how many|number of|elevation", ql) and not kinds and not mep_words:
         srt = sorted(doc.storeys, key=lambda s: s["elevation_m"])
         lines = [f"The model has {len(srt)} levels."]
         for a, b in zip(srt, srt[1:] + [None]):
@@ -217,6 +253,9 @@ def facts_for(question: str, doc: Doc) -> Facts:
             lines.append(f"{a['name']}: elevation {_f(a['elevation_m'])} m{h}")
         return Facts(lines, [], "levels", value=len(srt), unit="count")
     if not kinds:
+        svc = _services_facts(doc, ql)
+        if svc is not None:
+            return svc
         for label, rx in ABSENT:
             if re.search(rx, ql):
                 return Facts([f"No {label} elements were found in this model."], [], "absent", available=False)
