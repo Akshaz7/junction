@@ -648,6 +648,14 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
         if len(doc_ids) == 1 and price_intent.asks_price(question) and not price_intent.doc_has_price_data(doc_ids[0], root):
             add(_step("price", "price question: the document records no price data, so no price or order quantity is given"))
             return _abstained(question, doc_ids, price_intent.NO_PRICE, trace, t0, route="price")
+        if len(doc_ids) == 1 and parse_scene(question) is None:   # F-FIREDOORS: recorded fire ratings in code, full list, $0
+            from engine import fire_doors
+            from engine.solvers.data import load_doc as _ldfd
+            if (res := fire_doors.answer(question, _ldfd(doc_ids[0], root), t0)) is not None:
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                return res
         from engine import props  # F-PROPS: exact properties before broad counts and the reader
         if parse_scene(question) is None and not re.search(r"\b(?:remove|demolish|prop(?:ping)?|knock down|next to|beside)\b", question, re.I) and (res := props.answer(question, doc_ids, root, t0, hidden=(scene_state or {}).get("hidden"))) is not None:
             for s_ in res["trace"]:
