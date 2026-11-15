@@ -269,9 +269,31 @@ def _abstain(question, doc_id, why, trace, route, t0, scene_doc=None):
 
 
 # ------------------------------------------------------------- the solver
-def _qty(it: Item, kind: str, t: str) -> float | None:
+def requested_area_key(question: str, kind: str) -> str | None:
+    if re.search(r'\bnet\s+(?:floor\s+)?area\b', question, re.I) and kind == 'room':
+        return 'net_floor_area_m2'
+    if re.search(r'\bnet\s+side\s+area\b', question, re.I) and kind == 'wall':
+        return 'net_side_area_m2'
+    return None
+
+
+def _qty(it: Item, kind: str, t: str, question: str = '') -> float | None:
     q = it.q
     if t == "area":
+        key = requested_area_key(question, kind) if it.source == 'ifc' else None
+        if key:
+            # A requested source net quantity is not the gross/mesh footprint.
+            value = q.get(key)
+            if value is not None and float(value) >= .05:
+                return float(value)
+            if kind != 'room':
+                return None
+            # A closed IfcSpace footprint measures the usable floor boundary;
+            # malformed near-zero/missing Qto values do not invalidate that mesh.
+            measured = (it.props.get('space_area') or {}).get('measured_m2')
+            if measured is not None:
+                return float(measured)
+            return None
         if kind == "room" and q.get("selected_floor_area_m2") is not None:
             return float(q["selected_floor_area_m2"])
         measured = (it.props.get("space_area") or {}).get("measured_m2")
@@ -456,6 +478,9 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
     if doc.mode == "ifc":
         from engine.ifc_accuracy import prepare_doc, wants_room_geometry, is_item_count
         doc = prepare_doc(doc, root, for_count=is_item_count(question), geometry=wants_room_geometry(question), question=question)
+        if p.type == 'area' and (net_key := requested_area_key(question, p.kind)):
+            from engine.ifc_net import refresh
+            doc = refresh(doc, root, net_key)
         from engine.analytics import filtered_question
         from dataclasses import replace
         filtered_doc = replace(doc, items=[i for i in doc.items if i.item_id not in hidden]) if hidden else doc
@@ -776,7 +801,7 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
             result["trace"].append(_step('user_label', manual['text']))
         return result
 
-    vals = [(i, _qty(i, kind, p.type)) for i in items]
+    vals = [(i, _qty(i, kind, p.type, question)) for i in items]
     if doc.mode == "ifc" and kind == "room" and p.type == "area" and len(items) <= 400 and any(v is None for _, v in vals):
         from engine.solvers.glbarea import room_floor_area_m2
         glb = Path(root) / (doc.meta.get("sheet_of") or doc_id) / "scene.glb"

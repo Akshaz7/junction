@@ -559,6 +559,11 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                 return _use_reader(res, question, doc_ids, root, trace, calls, t0, emit)
             return res
 
+        from engine.ifc_queries import answer as plain_ifc_answer
+        if (res := plain_ifc_answer(question, doc_ids, root, t0, hidden=(scene_state or {}).get('hidden') or ())) is not None:
+            res['trace'] = trace + res['trace']
+            return res
+
         from engine.solvers.requests import answer_request
         if (res := answer_request(question, doc_ids, root, t0, (scene_state or {}).get("hidden") or [])) is not None:
             for s_ in res["trace"]:

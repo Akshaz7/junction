@@ -1,0 +1,99 @@
+{
+  "n": 644,
+  "outcomes": {
+    "correct": 638,
+    "abstained": 4,
+    "wrong": 2
+  },
+  "cells": {
+    "ALL x ALL": {
+      "n": 644,
+      "correct": 638,
+      "wrong": 2,
+      "abstained": 4,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.9907,
+      "answered_accuracy": 0.9969,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 67,
+      "latency_ms_p95": 218
+    },
+    "ALL x area": {
+      "n": 301,
+      "correct": 295,
+      "wrong": 2,
+      "abstained": 4,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.9801,
+      "answered_accuracy": 0.9933,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 57,
+      "latency_ms_p95": 124
+    },
+    "ALL x count": {
+      "n": 343,
+      "correct": 343,
+      "wrong": 0,
+      "abstained": 0,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 1.0,
+      "answered_accuracy": 1.0,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 75,
+      "latency_ms_p95": 252
+    },
+    "ifc_models x ALL": {
+      "n": 644,
+      "correct": 638,
+      "wrong": 2,
+      "abstained": 4,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.9907,
+      "answered_accuracy": 0.9969,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 67,
+      "latency_ms_p95": 218
+    },
+    "ifc_models x area": {
+      "n": 301,
+      "correct": 295,
+      "wrong": 2,
+      "abstained": 4,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 0.9801,
+      "answered_accuracy": 0.9933,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 57,
+      "latency_ms_p95": 124
+    },
+    "ifc_models x count": {
+      "n": 343,
+      "correct": 343,
+      "wrong": 0,
+      "abstained": 0,
+      "unscored": 0,
+      "error": 0,
+      "accuracy": 1.0,
+      "answered_accuracy": 1.0,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 75,
+      "latency_ms_p95": 252
+    }
+  },
+  "fake": true,
+  "forbidden_evaluated": 0,
+  "blind_evaluated": false,
+  "shared_artifacts_written": false,
+  "cost_usd": 0.0
+}

@@ -189,8 +189,18 @@ def record_items(res, doc, pairs, unit=None, formula="total = Σ(source quantiti
                 checks.append({"method": "printed label versus outline", "value": printed, "agrees": close(printed, geom, .005),
                                "diff_pct": abs(printed - geom) / abs(printed) * 100 if printed else None, "source": sref})
         if unit in ("m2", "m3") and not measured:
-            from engine.solvers.solve import _qty
-            stored = _qty(item, "room" if item.kind == "space" else item.kind, "area" if unit == "m2" else "volume")
+            from engine.solvers.solve import _qty, requested_area_key
+            stored = _qty(item, "room" if item.kind == "space" else item.kind, "area" if unit == "m2" else "volume", res.get('question', ''))
+            requested = requested_area_key(res.get('question', ''), item.kind)
+            if unit == 'm2' and requested and close(item.q.get(requested), value):
+                sref['field'] = 'quantities.' + requested
+                if net_source := item.props.get('net_quantity_source'):
+                    sref.update(kind='measurement', record=dict(net_source),
+                                text='Typed IFC net quantity read from the source file and normalized using its own area units.')
+            elif unit == 'm2' and item.source == 'ifc' and close((item.props.get('space_area') or {}).get('measured_m2'), value):
+                sref.update(kind='measurement', field='space_area.measured_m2',
+                            record=dict(item.props['space_area']),
+                            text='IfcSpace floor footprint measured from its source geometry in square metres.')
             if not close(stored, value):
                 sref.update({"artifact": "scene.glb", "kind": "geometry", "field": "mesh floor area" if unit == "m2" else "closed mesh volume"})
         rows.append(r)
@@ -370,7 +380,7 @@ def _default(res, question, root):
     items, missing = _cited(res, root)
     rows, issues = [], []
     for doc, it in items:
-        v = 1 if unit in ("count", "rooms") else _qty(it, "room" if it.kind == "space" else it.kind, {"m2": "area", "m": "length", "m3": "volume"}.get(unit, ""))
+        v = 1 if unit in ("count", "rooms") else _qty(it, "room" if it.kind == "space" else it.kind, {"m2": "area", "m": "length", "m3": "volume"}.get(unit, ""), question)
         r = row(doc, it, v, unit, kind=it.kind)
         # IFC parent sheets resolve through the parent artifact, never a guessed sheet index.
         if doc.meta.get("sheet_of"):

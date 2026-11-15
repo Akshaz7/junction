@@ -133,7 +133,7 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
     if not hit:
         return _done(question, doc, missing_room_text(target, rooms)
                      + (f" Storey filter: {st}." if st else ""), None, None, [], trace, t0=t0)
-    vals = [(r, _qty(r, "room", "area")) for r in hit]
+    vals = [(r, _qty(r, "room", "area", question)) for r in hit]
     if doc.mode == "planmap" and (not doc.scale or doc.scale.get("method") in (None, "none")):
         if not all(r.props.get("area_m2_label") is not None for r in hit):
             return _done(question, doc, "The matching rooms have no trusted drawing scale or printed area, so I cannot state an area.", None, None, hit, trace, t0=t0)
@@ -195,7 +195,13 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
         text = (f"The {'combined area' if len(hit) > 1 else 'area'} of **{target}** {where} is **{total:.2f} m²**. {per}. {{marks}}")
         if doc.mode == "planmap":
             text += scale_note(doc)
-    return _done(question, doc, text, round(total, 4), "m²", hit, trace, t0=t0)
+    res = _done(question, doc, text, round(total, 4), "m²", hit, trace, t0=t0)
+    if doc.mode == 'ifc':
+        from engine.solvers.solve import requested_area_key
+        if requested_area_key(question, 'room'):
+            from engine.calc import record_items
+            record_items(res, doc, have, formula='net floor area = Σ(selected room net areas)')
+    return res
 
 
 def arithmetic_question(question: str, doc: Doc, t0, solve_fn) -> dict | None:

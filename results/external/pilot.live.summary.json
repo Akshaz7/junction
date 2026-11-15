@@ -1,0 +1,100 @@
+{
+ "by_dataset_kind": {
+  "ext_cvcfp x doors": {
+   "wrong": 12,
+   "n": 20,
+   "correct": 8,
+   "acc": 0.4
+  },
+  "ext_cvcfp x rooms": {
+   "wrong": 19,
+   "n": 20,
+   "correct": 1,
+   "acc": 0.05
+  },
+  "ext_cvcfp x windows": {
+   "wrong": 17,
+   "n": 20,
+   "correct": 3,
+   "acc": 0.15
+  },
+  "ext_pid2graph x instrumentation": {
+   "wrong": 5,
+   "n": 12,
+   "abstained": 1,
+   "correct": 6,
+   "acc": 0.5
+  },
+  "ext_pid2graph x pump": {
+   "correct": 3,
+   "n": 4,
+   "wrong": 1,
+   "acc": 0.75
+  },
+  "ext_pid2graph x tank": {
+   "correct": 4,
+   "n": 10,
+   "wrong": 6,
+   "acc": 0.4
+  },
+  "ext_pid2graph x valve": {
+   "correct": 5,
+   "n": 12,
+   "wrong": 7,
+   "acc": 0.417
+  },
+  "ext_resplan x area": {
+   "wrong": 18,
+   "n": 24,
+   "correct": 4,
+   "abstained": 2,
+   "acc": 0.167
+  },
+  "ext_resplan x count": {
+   "wrong": 22,
+   "n": 32,
+   "correct": 10,
+   "acc": 0.312
+  }
+ },
+ "by_dataset": {
+  "ext_cvcfp": {
+   "wrong": 48,
+   "n": 60,
+   "correct": 12,
+   "acc": 0.2
+  },
+  "ext_pid2graph": {
+   "wrong": 19,
+   "n": 38,
+   "correct": 18,
+   "abstained": 1,
+   "acc": 0.474
+  },
+  "ext_resplan": {
+   "wrong": 40,
+   "n": 56,
+   "correct": 14,
+   "abstained": 2,
+   "acc": 0.25
+  }
+ },
+ "by_type": {
+  "area": {
+   "wrong": 18,
+   "n": 24,
+   "correct": 4,
+   "abstained": 2,
+   "acc": 0.167
+  },
+  "count": {
+   "wrong": 89,
+   "n": 130,
+   "correct": 40,
+   "abstained": 1,
+   "acc": 0.308
+  }
+ },
+ "usd": 2.557,
+ "n": 154
+}

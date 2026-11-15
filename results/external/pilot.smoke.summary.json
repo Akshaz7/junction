@@ -1,0 +1,39 @@
+{
+ "by_dataset_kind": {
+  "ext_cvcfp x doors": {
+   "wrong": 1,
+   "n": 2,
+   "correct": 1,
+   "acc": 0.5
+  },
+  "ext_cvcfp x rooms": {
+   "wrong": 2,
+   "n": 2,
+   "acc": 0.0
+  },
+  "ext_cvcfp x windows": {
+   "wrong": 1,
+   "n": 2,
+   "correct": 1,
+   "acc": 0.5
+  }
+ },
+ "by_dataset": {
+  "ext_cvcfp": {
+   "wrong": 4,
+   "n": 6,
+   "correct": 2,
+   "acc": 0.333
+  }
+ },
+ "by_type": {
+  "count": {
+   "wrong": 4,
+   "n": 6,
+   "correct": 2,
+   "acc": 0.333
+  }
+ },
+ "usd": 0.0629,
+ "n": 6
+}

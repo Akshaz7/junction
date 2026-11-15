@@ -1,0 +1,172 @@
+{
+  "baseline_revision": "06c2f05",
+  "code_revision": "402b8f718cc8dc7a529a84f144bcd703beb3d39c",
+  "suites": {
+    "ifc": {
+      "rows": 644,
+      "before": {
+        "correct": 553,
+        "abstained": 79,
+        "wrong": 12
+      },
+      "after": {
+        "correct": 638,
+        "abstained": 4,
+        "wrong": 2
+      },
+      "correct_to_wrong_or_abstained": 0,
+      "by_type": {
+        "count": {
+          "before": {
+            "correct": 278,
+            "abstained": 57,
+            "wrong": 8
+          },
+          "after": {
+            "correct": 343
+          }
+        },
+        "area": {
+          "before": {
+            "correct": 275,
+            "abstained": 22,
+            "wrong": 4
+          },
+          "after": {
+            "correct": 295,
+            "abstained": 4,
+            "wrong": 2
+          }
+        }
+      }
+    },
+    "sample200": {
+      "rows": 200,
+      "before": {
+        "wrong": 31,
+        "correct": 149,
+        "abstained": 7,
+        "unscored": 13
+      },
+      "after": {
+        "wrong": 31,
+        "correct": 149,
+        "abstained": 7,
+        "unscored": 13
+      },
+      "correct_to_wrong_or_abstained": 0
+    }
+  },
+  "live_spend_usd": 0,
+  "forbidden_documents_evaluated": 0,
+  "residuals": [
+    {
+      "doc_id": "ifc_models__bimspeed-warmond-ar-plan-05-2-level",
+      "question": "Wat is de netto vloeroppervlakte van de ruimte 'Floor (414B-3-002-009)' op '2. Level', in m\u00b2?",
+      "type": "area",
+      "gold": 7.46,
+      "value": null,
+      "outcome": "abstained"
+    },
+    {
+      "doc_id": "ifc_models__bimspeed-warmond-ar-plan-05-2-level",
+      "question": "Wat is de netto vloeroppervlakte van de ruimte 'Floor (414B-9-002-010)' op '2. Level', in m\u00b2?",
+      "type": "area",
+      "gold": 7.37,
+      "value": null,
+      "outcome": "abstained"
+    },
+    {
+      "doc_id": "ifc_models__bimspeed-warmond-ar-plan-05-2-level",
+      "question": "Wat is de netto vloeroppervlakte van de ruimte 'Floor (414B-15-002-009)' op '2. Level', in m\u00b2?",
+      "type": "area",
+      "gold": 7.42,
+      "value": null,
+      "outcome": "abstained"
+    },
+    {
+      "doc_id": "ifc_models__bimspeed-warmond-ar-plan-05-2-level",
+      "question": "Wat is de netto vloeroppervlakte van de ruimte 'Floor (414B-21-002-010)' op '2. Level', in m\u00b2?",
+      "type": "area",
+      "gold": 7.35,
+      "value": null,
+      "outcome": "abstained"
+    },
+    {
+      "doc_id": "ifc_models__bimspeed-warmond-ar-plan-05-2-level",
+      "question": "What is the total net side area of all walls on '2. Level', in m\u00b2?",
+      "type": "area",
+      "gold": 809.118,
+      "value": 380.5655,
+      "outcome": "wrong"
+    },
+    {
+      "doc_id": "ifc_models__bimspeed-warmond-ar-plan-08-attic",
+      "question": "What is the total net side area of all walls on 'Attic', in m\u00b2?",
+      "type": "area",
+      "gold": 353.715,
+      "value": 245.018,
+      "outcome": "wrong"
+    }
+  ],
+  "historical_input": {
+    "rows": 644,
+    "outcomes": {
+      "correct": 563,
+      "wrong": 40,
+      "abstained": 41
+    },
+    "historically_correct_now_abstained": 4,
+    "reason": "Four Dutch-language questions were already abstentions at the starting merged baseline. English-only routing predates this worker."
+  },
+  "source_discrepancies": {
+    "warmond_2_level": {
+      "typed_source_net_side_m2": 380.56551,
+      "benchmark_gold_m2": 809.118
+    },
+    "warmond_attic": {
+      "typed_source_net_side_m2": 245.01796,
+      "benchmark_gold_m2": 353.715
+    },
+    "provenance": "source-development.json; sums of typed NetSideArea with source area units. No gold labels modified."
+  },
+  "reserved": {
+    "selection": "selection.json",
+    "validation": "source-reserved.json",
+    "source_count_checks_passed": 3,
+    "source_count_checks_total": 3,
+    "calculation_issues": 0,
+    "development_after_opening": false
+  },
+  "tests": {
+    "focused": {
+      "passed": 141,
+      "failed": 0,
+      "command": "MODELS_FAKE=1 python -m pytest engine/tests/test_ifcmiss.py engine/tests/test_acc_ifc.py engine/tests/test_ifc_quantities.py engine/tests/test_calc.py -q"
+    },
+    "compound_integration": {
+      "passed": 3,
+      "failed": 0
+    },
+    "broader": {
+      "passed": 150,
+      "failed": 12,
+      "preexisting_failure_count": 12,
+      "baseline_revision": "06c2f05",
+      "failures": [
+        "engine/tests/test_analytics.py::test_named_rooms_and_planmap_superlative",
+        "engine/tests/test_numeric_values.py::test_area_sent_to_count_question_is_recomputed_with_its_evidence",
+        "engine/tests/test_numeric_values.py::test_reader_restores_area_total_from_structured_tool_result",
+        "engine/tests/test_numeric_values.py::test_reader_restores_computed_area_sum_with_source_citations",
+        "engine/tests/test_numeric_values.py::test_apartment_source_label_selects_unique_unlabelled_outline[Whg.]",
+        "engine/tests/test_numeric_values.py::test_apartment_source_label_selects_unique_unlabelled_outline[App.]",
+        "engine/tests/test_numeric_values.py::test_apartment_source_label_selects_unique_unlabelled_outline[Apartment]",
+        "engine/tests/test_numeric_values.py::test_apartment_source_label_selects_unique_unlabelled_outline[Wohnung]",
+        "engine/tests/test_numeric_values.py::test_apartment_source_label_selects_unique_unlabelled_outline[Asunto]",
+        "engine/tests/test_numeric_values.py::test_apartment_source_label_selects_unique_unlabelled_outline[L\\xe4genhet]",
+        "engine/tests/test_numeric_values.py::test_last_resort_assembly_uses_matching_solver_value_and_citations",
+        "engine/tests/test_numeric_values.py::test_unknown_apartment_shapes_are_flagged_as_unverified"
+      ]
+    }
+  }
+}

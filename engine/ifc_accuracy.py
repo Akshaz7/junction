@@ -211,7 +211,8 @@ def count_rows(rows, doc, root):
     props = {i.item_id: i.props for i in checked.items}
     idx = load_index(doc, root)
     by = {r['item_id']: r for r in (idx or {}).get('rows', [])}
-    return [r for r in rows if not by.get(r.get('item_id'), props.get(r.get('item_id'), {})).get('count_component_of')]
+    return [r for r in rows if not by.get(r.get('item_id') or r.get('id'),
+                                        props.get(r.get('item_id') or r.get('id'), {})).get('count_component_of')]
 
 
 def count_index(index, doc):

@@ -1,0 +1,200 @@
+{
+  "documents": [
+    {
+      "doc_id": "ifc_models__bimspeed-warmond-ar",
+      "schema": "IFC4",
+      "applications": [
+        "Autodesk Revit 2021 (ESP)"
+      ],
+      "source_classes": {
+        "IfcDoor": 140,
+        "IfcRoof": 1,
+        "IfcSlab": 11,
+        "IfcWall": 353,
+        "IfcWindow": 110,
+        "IfcOpeningElement": 355,
+        "IfcBuilding": 1,
+        "IfcBuildingStorey": 8,
+        "IfcSite": 1,
+        "IfcSpace": 179
+      },
+      "native_counts_excluding_components": {
+        "door": 140,
+        "roof": 1,
+        "slab": 11,
+        "wall": 353,
+        "window": 110,
+        "other": 364,
+        "site": 1,
+        "room": 179
+      },
+      "wall_qto_by_storey": {
+        "2. Level": {
+          "count": 84,
+          "net_side_m2": 380.56551000000024,
+          "with_net_side": 84
+        },
+        "Intermediate level 2": {
+          "count": 84,
+          "net_side_m2": 376.7155100000002,
+          "with_net_side": 83
+        },
+        "3. Level": {
+          "count": 86,
+          "net_side_m2": 751.8953300000003,
+          "with_net_side": 85
+        },
+        "1. Level": {
+          "count": 80,
+          "net_side_m2": 729.0080000000003,
+          "with_net_side": 77
+        },
+        "Entrance": {
+          "count": 6,
+          "net_side_m2": 141.792,
+          "with_net_side": 6
+        },
+        "Attic": {
+          "count": 9,
+          "net_side_m2": 245.01796,
+          "with_net_side": 9
+        },
+        "Basement": {
+          "count": 4,
+          "net_side_m2": 70.896,
+          "with_net_side": 4
+        }
+      }
+    },
+    {
+      "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+      "schema": "IFC2X3",
+      "applications": [
+        "ARCHICAD"
+      ],
+      "source_classes": {
+        "IfcBeam": 7,
+        "IfcBuildingElementPart": 377,
+        "IfcBuildingElementProxy": 2,
+        "IfcColumn": 14,
+        "IfcCovering": 4,
+        "IfcDoor": 119,
+        "IfcFooting": 4,
+        "IfcRailing": 2119,
+        "IfcRoof": 2,
+        "IfcSlab": 53,
+        "IfcStair": 579,
+        "IfcWall": 189,
+        "IfcWindow": 119,
+        "IfcDistributionControlElement": 6,
+        "IfcFlowTerminal": 42,
+        "IfcOpeningElement": 245,
+        "IfcFurnishingElement": 39,
+        "IfcVirtualElement": 28,
+        "IfcDistributionPort": 115,
+        "IfcBuilding": 1,
+        "IfcBuildingStorey": 10,
+        "IfcSite": 1,
+        "IfcSpace": 117
+      },
+      "native_counts_excluding_components": {
+        "beam": 7,
+        "other": 776,
+        "proxy": 2,
+        "column": 14,
+        "covering": 4,
+        "door": 119,
+        "footing": 4,
+        "railing": 45,
+        "roof": 2,
+        "slab": 53,
+        "stairs": 15,
+        "wall": 189,
+        "window": 119,
+        "mep_other": 6,
+        "air_terminal": 42,
+        "furniture": 39,
+        "site": 1,
+        "room": 117
+      },
+      "wall_qto_by_storey": {
+        "K\u00e6lder": {
+          "count": 27,
+          "net_side_m2": 680.1300599999997,
+          "with_net_side": 25
+        },
+        "Grundplan": {
+          "count": 21,
+          "net_side_m2": 505.17457,
+          "with_net_side": 21
+        },
+        "1. Sal": {
+          "count": 26,
+          "net_side_m2": 643.91673,
+          "with_net_side": 26
+        },
+        "2. Sal": {
+          "count": 26,
+          "net_side_m2": 665.06996,
+          "with_net_side": 26
+        },
+        "3. Sal": {
+          "count": 26,
+          "net_side_m2": 668.80298,
+          "with_net_side": 26
+        },
+        "4. Sal": {
+          "count": 26,
+          "net_side_m2": 664.93887,
+          "with_net_side": 26
+        },
+        "5. Sal": {
+          "count": 26,
+          "net_side_m2": 726.8003199999999,
+          "with_net_side": 26
+        },
+        "6. sal": {
+          "count": 11,
+          "net_side_m2": 158.02442,
+          "with_net_side": 11
+        }
+      }
+    },
+    {
+      "doc_id": "ifc_models__rwth-digitalhub-digitalhub-fm-san-v2",
+      "schema": "IFC4",
+      "applications": [
+        "Autodesk Revit 2019 (DEU)"
+      ],
+      "source_classes": {
+        "IfcUnitaryEquipment": 16,
+        "IfcFlowMeter": 1,
+        "IfcValve": 3,
+        "IfcPipeFitting": 411,
+        "IfcPipeSegment": 504,
+        "IfcSanitaryTerminal": 72,
+        "IfcWasteTerminal": 2,
+        "IfcFilter": 1,
+        "IfcOpeningElement": 24,
+        "IfcDistributionPort": 2081,
+        "IfcBuilding": 1,
+        "IfcBuildingStorey": 3,
+        "IfcSite": 1
+      },
+      "native_counts_excluding_components": {
+        "equipment": 16,
+        "valve_damper": 1,
+        "valve": 3,
+        "pipe_fitting": 411,
+        "pipe": 504,
+        "sanitary": 72,
+        "terminal": 2,
+        "mep_other": 1,
+        "other": 2109,
+        "site": 1
+      },
+      "wall_qto_by_storey": {}
+    }
+  ],
+  "source_files_written": false
+}

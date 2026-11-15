@@ -1,0 +1,126 @@
+{
+ "by_dataset_kind": {
+  "ext_ifcr2 x baseboard_length": {
+   "wrong": 7,
+   "n": 7,
+   "acc": 0.0
+  },
+  "ext_ifcr2 x baseboard_length_total": {
+   "wrong": 1,
+   "n": 1,
+   "acc": 0.0
+  },
+  "ext_ifcr2 x mep_count": {
+   "correct": 2,
+   "n": 9,
+   "wrong": 7,
+   "acc": 0.222
+  },
+  "ext_ifcr2 x mep_length": {
+   "correct": 2,
+   "n": 5,
+   "wrong": 3,
+   "acc": 0.4
+  },
+  "ext_ifcr2 x multi_floor_count": {
+   "correct": 10,
+   "n": 10,
+   "acc": 1.0
+  },
+  "ext_ifcr2 x per_floor_count": {
+   "correct": 4,
+   "n": 4,
+   "acc": 1.0
+  },
+  "ext_ifcr2 x rebar_count": {
+   "wrong": 2,
+   "n": 2,
+   "acc": 0.0
+  },
+  "ext_ifcr2 x rebar_count_by_size": {
+   "wrong": 2,
+   "n": 2,
+   "acc": 0.0
+  },
+  "ext_ifcr2 x rebar_length": {
+   "wrong": 2,
+   "n": 2,
+   "acc": 0.0
+  },
+  "ext_ifcr2 x slab_area": {
+   "correct": 2,
+   "n": 2,
+   "acc": 1.0
+  },
+  "ext_ifcr2 x slab_area_by_thickness": {
+   "correct": 2,
+   "n": 2,
+   "acc": 1.0
+  },
+  "ext_ifcr2 x slab_area_by_type": {
+   "correct": 2,
+   "n": 2,
+   "acc": 1.0
+  },
+  "ext_ifcr2 x slab_count": {
+   "correct": 4,
+   "n": 4,
+   "acc": 1.0
+  },
+  "ext_ifcr2 x slab_count_by_thickness": {
+   "wrong": 2,
+   "n": 2,
+   "acc": 0.0
+  },
+  "ext_ifcr2 x slab_count_by_type": {
+   "wrong": 2,
+   "n": 3,
+   "correct": 1,
+   "acc": 0.333
+  },
+  "ext_ifcr2 x slab_volume": {
+   "correct": 1,
+   "n": 1,
+   "acc": 1.0
+  },
+  "ext_ifcr2 x storey_count": {
+   "correct": 6,
+   "n": 6,
+   "acc": 1.0
+  }
+ },
+ "by_dataset": {
+  "ext_ifcr2": {
+   "correct": 36,
+   "n": 64,
+   "wrong": 28,
+   "acc": 0.562
+  }
+ },
+ "by_type": {
+  "area": {
+   "correct": 6,
+   "n": 6,
+   "acc": 1.0
+  },
+  "count": {
+   "correct": 27,
+   "n": 42,
+   "wrong": 15,
+   "acc": 0.643
+  },
+  "length": {
+   "wrong": 13,
+   "n": 15,
+   "correct": 2,
+   "acc": 0.133
+  },
+  "volume": {
+   "correct": 1,
+   "n": 1,
+   "acc": 1.0
+  }
+ },
+ "usd": 0.3375,
+ "n": 64
+}
