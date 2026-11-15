@@ -88,4 +88,21 @@ describe('sourced advisor cards and edit requests', () => {
     stopHighlight(); expect(socket.close).not.toHaveBeenCalled();
     stopCards(); expect(socket.close).toHaveBeenCalledOnce();
   });
+
+  it('drops stale cards on a remote reset: clear, ignore older versions, accept the re-derived cards', () => {
+    const onCards = vi.fn();
+    const client = createAdvisorRequests({ doc_id: 'demo', chat_id: 'chat', request: vi.fn<typeof fetch>(), onLoading: vi.fn(), onCards, onError: vi.fn() });
+    client.receive({ ...event, cards: [], cleared: true, scene_version: 20 });
+    expect(onCards).toHaveBeenLastCalledWith([]);
+    client.receive({ ...event, scene_version: 10 });  // derived before the reset, arrives late
+    expect(onCards).toHaveBeenCalledOnce();
+    client.receive({ ...event, scene_version: 30 });
+    expect(onCards).toHaveBeenLastCalledWith([card]);
+    client.dispose();
+  });
+
+  it('decodes scene_version and cleared from the wire', () => {
+    const raw = { ...event, cards: [], cleared: true, scene_version: 5 };
+    expect(decodeLiveMessage(JSON.stringify(raw))).toEqual({ ...event, cards: [], cleared: true, scene_version: 5 });
+  });
 });

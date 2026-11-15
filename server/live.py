@@ -178,7 +178,15 @@ async def record_edit(msg: dict, chat_id=None) -> dict | None:
         event["labels"] = e["labels"]
     event.update(e.get("detail") or {})  # move: offset_m, material: material (shared edit layer)
     await publish(event)
+    if e["op"] in ("reset", "restore"):
+        from .advise_routes import refresh_after_reset
+        task = asyncio.create_task(refresh_after_reset(event))
+        _background.add(task)
+        task.add_done_callback(_background.discard)
     return event
+
+
+_background: set = set()  # keeps refresh tasks alive until done
 
 
 async def send_scene_state(ws: WebSocket, chat_id, doc_id: str | None = None) -> None:
