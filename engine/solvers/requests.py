@@ -77,7 +77,7 @@ def dimension_request(q, doc, items, st, t0):
         if re.search(r'\b(?:wide|width)\b', q, re.I): keys = keys[:1]
         elif re.search(r'\b(?:high|tall|height)\b', q, re.I): keys = keys[1:]
         vals = [(k, label, _number(item.q.get(k))) for k, label in keys]
-        text = f'**{tag[1].upper()}**: ' + '; '.join(f'{label} **{v:g} m**' if v is not None else f'{label} is not recorded' for _, label, v in vals) + '. {marks}'
+        text = f'**{tag[1].upper()}**: ' + '; '.join(_dim_text(q, label, v) if v is not None else f'{label} is not recorded' for _, label, v in vals) + '. {marks}'
         return _result(q, doc, text, match, t0, value=vals[0][2] if len(vals) == 1 else None, unit='m' if len(vals) == 1 else None, detail='dimension from scene tag -> element quantities')
     dims = {('width_m' if m[3].lower() in ('wide', 'width') else 'height_m'): float(m[1]) * _TO_M[m[2].lower()] for m in _DIM.finditer(q)}
     if len(dims) > 1:
@@ -189,6 +189,12 @@ def adjacent_request(q, doc, items, st, t0):
     return _result(q, doc, text, [target,*hit], t0, confidence=.6, detail=f'adjacency candidates on the same storey; gap <= recorded wall thickness ({tolerance:g} m)')
 
 
+def _dim_text(q, label, v):
+    from engine import units
+    base = f'{label} **{v:g} m**'
+    return base + (f' ({units.feet_inches(v)}; {v / 0.3048:,.4g} ft)' if units.imperial_requested(q) else '')
+
+
 def answer_request(q, doc_ids, root, t0, hidden=()):
     if len(doc_ids) != 1:
         return None
@@ -201,7 +207,8 @@ def answer_request(q, doc_ids, root, t0, hidden=()):
     items, st = _scoped(q, doc, set(hidden))
     if items is None:
         return _result(q, doc, '**No matching floor was found.** Storeys present: ' + ', '.join(s['name'] for s in doc.storeys) + '.', [], t0, detail='explicit storey filter: no match; no total substituted')
-    if re.search(r'\b(?:what|which)\b.*\bscale\b', q, re.I):
+    # F-IMPERIAL: "not a guessed image scale" is an instruction about method, not a request for the drawing scale.
+    if re.search(r'\b(?:what|which)\b(?:\s+\w+){0,4}?\s+scale\b', q, re.I) and not re.search(r'\b(?:not|no|never|without|instead of|rather than)\b[^.?]*\bscale\b', q, re.I):
         return _result(q, doc, '**This is an IFC model at real-world size in metres.** A printed drawing scale belongs to an exported sheet, rather than to the 3D model.', [], t0, detail='IFC contract units: metres; no printed sheet scale inferred')
     return dimension_request(q, doc, items, st, t0) or summary_request(q, doc, items, st, t0) or adjacent_request(q, doc, items, st, t0) or wall_face_request(q, doc, items, st, t0)
 
