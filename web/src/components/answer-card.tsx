@@ -18,6 +18,7 @@ import { PairPhoneButton } from './pair-phone'
 import type { DrawingEdits } from '../lib/scene-edits'
 import { EvidenceCard } from './evidence-card'
 import { calculationCitation } from '../lib/calc-view'
+import { ThinkingRow } from './thinking-row'
 
 export function formatCost(total: number): string {
   return total > 0 && total < 0.0001 ? '< $0.0001' : `$${total.toFixed(4)}`
@@ -136,7 +137,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
   const cost = <Tooltip content={callDetails}><span className="cost-chip" data-testid="answer-cost" tabIndex={0} aria-label={`Answer cost ${formatCost(answer.cost.usd_total)}`} title={callDetails}>{formatCost(answer.cost.usd_total)}</span></Tooltip>
   return <article className="exchange" data-testid="answer-card">
     <div className="question-bubble">{answer.question}</div>
-    <details className="answer-detail thought-process"><summary>Show thought process</summary>{answer.trace.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>
+    <ThinkingRow traces={answer.trace} />
     <AnswerBody answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} />
     {(!!answer.reasoning?.steps?.length || !!answer.reasoning?.calc) && <EvidenceCard answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} onShowCalculation={onOpenCalc && calcCitation ? () => onOpenCalc(calcCitation) : undefined} />}
     {!!docChips.length && <div className="answer-docs" aria-label="Documents used" data-testid="answer-docs">{docChips.map(({ docId, title, first }) => first

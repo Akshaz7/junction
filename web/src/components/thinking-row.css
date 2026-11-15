@@ -1,0 +1,21 @@
+.thinking-row { margin-top: 0; margin-bottom: 8px; }
+.thinking-row > summary { position: relative; min-height: 24px; gap: 8px; max-width: 100%; font-size: var(--text-body); line-height: var(--text-body--line-height); }
+.thinking-row.thought-process > summary::before { content: none; }
+.thinking-row .thinking-mark { display: grid; place-items: center; border-radius: 50%; flex: 0 0 24px; margin-left: -36px; margin-right: 4px; width: 24px; height: 24px; background: var(--foreground); color: var(--primary-foreground); }
+.thinking-glyph { display: block; width: 16px; height: 16px; overflow: hidden; }
+.thinking-glyph img { display: block; height: 16px; width: auto; max-width: none; filter: brightness(0) invert(1); }
+.thinking-glyph svg { display: block; width: 16px; height: 16px; }
+.thinking-row .status-lines { min-width: 0; color: var(--muted-foreground); font-size: inherit; }
+.thinking-chevron { flex: 0 0 14px; color: var(--muted-foreground); transition: transform var(--duration-quick) var(--ease-standard); }
+.thinking-row[open] .thinking-chevron { transform: rotate(90deg); }
+.thinking-row .status-trail { margin: 12px 0 0; padding: 0; font-size: var(--text-body-sm); line-height: var(--text-body-sm--line-height); }
+.thinking-row .status-trail li { margin-top: 6px; overflow-wrap: anywhere; }
+.thinking-text { position: relative; display: inline-block; color: var(--muted-foreground); white-space: pre-wrap; overflow-wrap: anywhere; }
+.thinking-verb { color: var(--foreground); font-weight: var(--font-weight-semibold); }
+.thinking-text::after { content: attr(data-text); position: absolute; inset: 0; pointer-events: none; color: transparent; background: linear-gradient(100deg, transparent 35%, var(--background) 50%, transparent 65%); background-size: 250% 100%; background-clip: text; animation: thinking-shimmer 2.4s linear infinite; }
+@keyframes thinking-shimmer { from { background-position: 150% 0; } to { background-position: -100% 0; } }
+@media (max-width: 767px) { .thinking-row .thinking-mark { margin-left: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .thinking-text::after { display: none; animation: none; }
+  .thinking-chevron { transition: none; }
+}
