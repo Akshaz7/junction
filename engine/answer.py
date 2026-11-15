@@ -647,6 +647,11 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
         if len(doc_ids) == 1 and not re.search(r"\b(?:brands?|manufacturers?|which (?:type|product)|what (?:type|product))\b", question, re.I):
             from engine.order import answer_order
             from engine.solvers.data import load_doc as _load_order
+            if (order_doc := _load_order(doc_ids[0], root)) is not None and (res := __import__("engine.mep", fromlist=["x"]).order_answer(question, order_doc, t0)) is not None:
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                return res
             if (order_doc := _load_order(doc_ids[0], root)) is not None and (res := answer_order(question, order_doc, t0, root=root)) is not None:
                 for s_ in res["trace"]:
                     add(s_)

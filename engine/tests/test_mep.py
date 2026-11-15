@@ -82,3 +82,27 @@ def test_model_without_services_says_so():
     r = ask("ifc_bench__ac20-arc", "How many sprinklers are there?")
     assert r and "no sprinklers" in text(r).lower()
     assert r["answer"].get("abstained") in (False, None, True)
+
+
+DUPLEX_MEP = "ifc_bench__duplex-mep"
+
+
+def test_missing_question_never_denies_services():
+    r = ask(DUPLEX_MEP, "Is anything missing from this model? Distinguish absent properties from absent physical objects.")
+    t = text(r).lower()
+    assert "926" in t and "no pipe or mep" not in t
+
+
+def test_named_radiators_are_counted_not_heat_exchangers():
+    r = ask(DUPLEX_MEP, "How many radiators are in this model? Give the count per floor.")
+    assert r["answer"]["value"] == 14 and "Level 2: 8" in text(r)
+
+
+def test_mep_order_question_is_a_services_bill_of_quantities():
+    from engine.answer import answer
+    if not (ART / DUPLEX_MEP).exists():
+        pytest.skip("artifact missing")
+    os.environ["ARTIFACTS_DIR"] = str(ART)
+    r = answer("What do I need to order for Level 2? Give an itemised MEP quantity takeoff with specification gaps.", [DUPLEX_MEP])
+    t = text(r)
+    assert "Pipe" in t and "Floor finish" not in t and "Specification gaps" in t
