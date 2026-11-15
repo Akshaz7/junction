@@ -259,17 +259,6 @@ export class WorkspaceApi {
     }
   }
 
-  async arStatus(docId: string, signal: AbortSignal): Promise<{ exists: boolean; usdz: boolean; reason: string }> {
-    try {
-      const response = await this.request(`/api/docs/${encodeURIComponent(docId)}/files/scene.json`, { signal })
-      const manifest = await response.json() as { usdz?: string | null; usdz_reason?: string }
-      return { exists: true, usdz: !!manifest.usdz, reason: manifest.usdz ? '' : (manifest.usdz_reason ?? '') }
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 404) return { exists: false, usdz: false, reason: '' }
-      throw error
-    }
-  }
-
   async getPageImage(docId: string, page: number, signal: AbortSignal): Promise<Blob> {
     const response = await this.request(`/api/docs/${encodeURIComponent(docId)}/pages/${page}/image`, { signal })
     return response.blob()

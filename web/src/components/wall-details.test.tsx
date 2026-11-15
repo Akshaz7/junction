@@ -8,7 +8,7 @@ import { buildItemDetails } from '../viewer3d/identify'
 import type { SceneManifest } from '../viewer3d/scene'
 
 const wall: Details = { status: 'Estimate', classification: 'Internal', length_m: 4, thickness_m: .2,
-  height_m: 2.7, height_source: 'ASSUMED (no wall height on this drawing)', height_basis: 'assumed', storey: 'Ground', opening_count: 1,
+  height_m: 2.7, height_source: 'assumed default', storey: 'Ground', opening_count: 1,
   faces: [{ label: 'Face A', gross_m2: 10.8, opening_m2: 2.1, net_m2: 8.7 },
     { label: 'Face B', gross_m2: 10.8, opening_m2: 2.1, net_m2: 8.7 }], method: '2D wall outline × height', notes: ['Door-width prior scale.'] }
 
@@ -16,7 +16,7 @@ it('renders both faces and prominently labels assumed height and status', async 
   const host = document.createElement('div')
   const root = createRoot(host)
   await act(async () => root.render(<WallDetails wall={wall} />))
-  for (const text of ['Estimate', 'Internal', '4.00 m', '0.20 m', '2.70 m', 'ASSUMED (no wall height on this drawing)', "Ask with your height, e.g. 'walls are 2.6 m'", 'Face A', 'Face B', '10.80 m²', '2.10 m²', '8.70 m²', '1 opening', wall.method]) expect(host.textContent).toContain(text)
+  for (const text of ['Estimate', 'Internal', '4.00 m', '0.20 m', '2.70 m', 'assumed default', 'Face A', 'Face B', '10.80 m²', '2.10 m²', '8.70 m²', '1 opening', wall.method]) expect(host.textContent).toContain(text)
   expect(host.querySelectorAll('.wall-detail-face')).toHaveLength(2)
   await act(async () => root.unmount())
 })
@@ -42,19 +42,5 @@ it('explains the measurement with the wall\'s own numbers', async () => {
   for (const t of ['How we measured this', 'door prior: median door 43 px', 'half the outline perimeter', 'Face A: Net = 10.80 − 2.10 = 8.70 m²']) expect(host.textContent).toContain(t)
   const ifc = howMeasured({ ...wall, status: 'Measured' })
   expect(ifc[0]).toContain('read from the IFC model twice')
-  await act(async () => root.unmount())
-})
-
-it('labels an IFC height by its geometry and shows the stored quantity, never a bare (model)', async () => {
-  const host = document.createElement('div')
-  const root = createRoot(host)
-  const ifc: Details = { ...wall, status: 'Measured', height_source: 'model', height_basis: 'ifc_geometry', height_assumed: false,
-    height_how: "Height = top of the wall minus its bottom, read from the wall's 3D solid.", height_ifc_quantity_m: 2.65 }
-  await act(async () => root.render(<WallDetails wall={ifc} />))
-  expect(host.textContent).toContain("measured from this wall's 3D geometry in the file")
-  expect(host.textContent).toContain('top of the wall minus its bottom')
-  expect(host.textContent).toContain('Stored IFC quantity: 2.65 m')
-  expect(host.textContent).not.toContain('(model)')
-  expect(host.querySelector('.wall-height-warning')).toBeNull()
   await act(async () => root.unmount())
 })

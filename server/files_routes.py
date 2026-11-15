@@ -190,12 +190,8 @@ async def doc_file(doc_id: str, name: str):
         await _taught_scene(doc_id)
         if name == 'scene.usdz':
             manifest = _doc_dir(doc_id) / 'scene.json'
-            if manifest.is_file():
-                sj = json.loads(manifest.read_text())
-                if not sj.get('usdz'):
-                    why = sj.get('usdz_reason')
-                    return JSONResponse({"status": "not_built", "detail": f"AR not available for this file: {why}" if why
-                                         else "Updated AR model not available"}, status_code=404)
+            if manifest.is_file() and not json.loads(manifest.read_text()).get('usdz'):
+                return _not_built('Updated AR model')
     f = _doc_dir(doc_id) / name
     if not f.is_file():
         if name == "elements.json" or re.match(r"^text-\d+\.json$", name):

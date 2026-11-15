@@ -75,30 +75,6 @@
       "label": "Fitting",
       "plural": "Fittings"
     },
-    "beam": {
-      "color": "#117733",
-      "on": "#FFFFFF",
-      "label": "Beam",
-      "plural": "Beams"
-    },
-    "member": {
-      "color": "#44AA99",
-      "on": "#1A1A1A",
-      "label": "Member",
-      "plural": "Members"
-    },
-    "column": {
-      "color": "#AA4499",
-      "on": "#FFFFFF",
-      "label": "Column",
-      "plural": "Columns"
-    },
-    "slab": {
-      "color": "#6699CC",
-      "on": "#1A1A1A",
-      "label": "Slab",
-      "plural": "Slabs"
-    },
     "other": {
       "color": "#7F7F7F",
       "on": "#FFFFFF",

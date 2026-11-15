@@ -56,3 +56,21 @@ def test_inch_dxf_areas_and_door_leaf_use_insunits():
     assert abs(Polygon(rooms[0]).area * unit_m ** 2 - 120 * 96 * 0.0254 ** 2) < 0.05   # 7.43 m2, not 11520
     doors, _ = dxf_generic.openings(ms, unit_m)
     assert abs(doors[0]["leaf_len"] * unit_m - 32 * 0.0254) < 1e-6   # 0.81 m measured, not an assumed 0.9 m
+
+
+def test_open_plan_region_reports_named_sub_areas_and_is_flagged():
+    """F-OPENPLAN: kitchen/living/hall share one closed region (no wall between them). The region is not cut, but each
+    named sub-area is reported (nearest label) and the room is flagged open-plan; single-label rooms are untouched."""
+    from pipeline.dxf_units import analyse
+    room = [(0, 0), (6000, 0), (6000, 3000), (0, 3000)]
+    texts = [("KITCHEN", 500, 1500), ("LIVING ROOM", 3000, 1500), ("HALL", 5500, 1500)]
+    (rec,), _ = analyse([room], texts, [], [], 0.001)
+    p = rec["props"]
+    assert p["open_plan"] is True and rec["label"] == "KITCHEN" and abs(p["area_m2_geom"] - 18.0) < 1e-6
+    sub = {s["name"]: s["area_m2_approx"] for s in p["sub_areas"]}
+    assert set(sub) == {"KITCHEN", "LIVING ROOM", "HALL"} and abs(sum(sub.values()) - 18.0) < 1e-6
+    assert abs(sub["LIVING ROOM"] - 7.5) < 1e-6
+    (one,), _ = analyse([room], [("KITCHEN", 500, 1500), ("kitchen", 900, 1500)], [], [], 0.001)
+    assert "open_plan" not in one["props"]
+    (plain,), _ = analyse([room], [("KITCHEN", 500, 1500)], [], [], 0.001)
+    assert "sub_areas" not in plain["props"]

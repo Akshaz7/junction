@@ -30,43 +30,6 @@ _MATERIALS = (
 _WASTE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(?:%|percent)\s*(?:waste|wastage|extra|allowance|overage)?", re.I)
 
 
-_TILE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(?:mm|cm|m)?\s*(?:x|×|by)\s*(\d+(?:[.,]\d+)?)\s*(mm|cm|m)\b", re.I)
-_PACK_N = re.compile(r"(\d+)\s*(?:tiles?\s*)?(?:per|/|in\s+(?:a|each|every))\s*(?:box|pack|carton)|(?:box(?:es)?|packs?|cartons?)\s*(?:of|contains?|holds?)\s*(\d+)", re.I)
-_PACK_M2 = re.compile(r"(\d+(?:[.,]\d+)?)\s*(?:m2|m²|sq\.?\s*m|sqm)\s*(?:per|/)\s*(?:box|pack|carton)", re.I)
-
-
-def _tiles(question, label, area_m2):
-    """Whole tiles (and packs) for an area order when the tile size is given; the steps are spelled out."""
-    if not label.endswith("tiles"):
-        return None
-    m = _TILE.search(question)
-    if not m:
-        return None
-    unit = {"mm": 1e-3, "cm": 1e-2, "m": 1.0}[m[3].lower()]
-    a, b = float(m[1].replace(",", ".")) * unit, float(m[2].replace(",", ".")) * unit
-    if not (a > 0 and b > 0):
-        return None
-    one = a * b
-    per_m2 = 1 / one
-    tiles = math.ceil(area_m2 / one - 1e-9)
-    size = f"{m[1]} × {m[2]} {m[3]}"
-    text = (f"Tiles ({size}): area incl. waste {area_m2:.2f} m² ÷ {one:.4f} m² per tile ({per_m2:.2f} tiles per m²) "
-            f"= {area_m2 / one:.2f}, rounded up to {tiles} whole tiles")
-    packs = None
-    pn, pm = _PACK_N.search(question), _PACK_M2.search(question)
-    if pn:
-        n = int(pn[1] or pn[2])
-        if n > 0:
-            packs = math.ceil(tiles / n)
-            text += f"; {tiles} ÷ {n} tiles per pack = {tiles / n:.2f}, rounded up to {packs} packs"
-    elif pm:
-        cover = float(pm[1].replace(",", "."))
-        if cover > 0:
-            packs = math.ceil(area_m2 / cover - 1e-9)
-            text += f"; {area_m2:.2f} m² ÷ {cover:g} m² per pack = {area_m2 / cover:.2f}, rounded up to {packs} packs"
-    return {"tiles": tiles, "packs": packs, "size": size, "per_m2": per_m2, "text": text + "."}
-
-
 def wants_order(question: str) -> bool:
     if re.search(r"\bin what order\b|\border (?:of|by)\b", question, re.I):
         return False
@@ -173,20 +136,8 @@ def _selection(question, doc):
             excluded_ids.update(r.item_id for r in scope_rooms if _matches(r, tk) or (r.name and tk.rx.search(r.name)))
         shared_hit, _unm = exclusions.excluded_rooms(excl_text, scope_rooms)
         excluded_ids.update(r.item_id for r in shared_hit)
-        if doc.mode == "planmap":
-            # A printed label inside the room ("LAUNDRY CLOSET") counts even when the room type was misread.
-            tag_items = [i for i in items if i.kind in ("text", "other") and i.label]
-            for term_rx, (_types, label_rx) in exclusions.TERMS.items():
-                if re.search(rf"\b(?:{term_rx})\b", excl_text, re.I):
-                    tags = [t for t in tag_items if re.search(label_rx, t.label, re.I)]
-                    excluded_ids.update(r.item_id for r in scope_rooms if _tag_inside(r, tags) is not None)
         if not excluded_ids:
-            labelled = [r for r in rooms if re.search(r"bath|shower|wet", f"{r.label or ''} {r.name or ''}", re.I)]
-            if classes == ["bathroom"] and 0 < len(labelled) < len(rooms):
-                doc.exclusion_note = (f"“{excl_text}” is not a labelled room, so the {len(rooms) - len(labelled)} other bathroom-type room(s) "
-                                      "without a printed bathroom label were left out; only the labelled bathroom is used.")
-                rooms = labelled
-            elif classes == ["bathroom"] and rooms:
+            if classes == ["bathroom"] and rooms:
                 # Named exclusion matches no labelled room: keep the bathroom-only scope (no WC-type rooms added) and say so.
                 doc.exclusion_note = (f"“{excl_text}” is not a labelled room in this file, so only the rooms named as bathroom are used; "
                                       "WC-type rooms that are not labelled bathroom were not added.")
@@ -337,7 +288,6 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
     if doc.mode == "planmap" and (doc.scale or {}).get("method") == "door-prior":
         notes.append("The drawing scale is estimated from door widths; verify sizes before ordering.")
     rows, cites, boxes, highlights, values, calculations = [], [], [], [], {}, []
-    tiles_info = {}
     calc_parts = []
     incomplete = bool(error)
     estimated = False
@@ -354,10 +304,6 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
             areas = [_floor_area(r, doc, root) for r in rooms]
             if rooms and all(a is not None for a in areas):
                 measured, used, how = sum(areas), rooms, "Sum of recorded floor areas or scaled room outlines."
-                uni = exclusions.union_total(rooms, [], (doc.scale or {}).get("m_per_px"))
-                if uni:
-                    measured, how = uni["total"], "Floor area of the room outlines with overlapping boxes counted once."
-                    notes.append(f"Overlapping room boxes: raw sum {uni['raw_sum']:.2f} m² reduced to {uni['total']:.2f} m² so no area is counted twice.")
                 if label.startswith("Ceiling"):
                     how = "Ceiling coverage estimated from floor area; check slopes and voids."
                     estimated = True
@@ -371,10 +317,6 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
                      else _number(i.q.get("net_side_area_m2"), i.props.get("net_side_area_m2")) for i in candidates]
             if candidates and all(a is not None for a in areas):
                 measured, used, how = sum(areas), candidates, "Net wall area; openings deducted in source quantities, one face."
-                ops = [i for i in items if i.kind in ("door", "window")]
-                if ops:
-                    nd, nw = sum(i.kind == "door" for i in ops), sum(i.kind == "window" for i in ops)
-                    notes.append(f"Opening deductions are already taken out of the net wall area: {nd} door(s) and {nw} window(s) in scope.")
             else:
                 how = "Net wall areas with openings deducted are missing; gross areas were not used."
             if label == "Paint coverage":
@@ -409,20 +351,12 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
             values[label] = need
             from engine.order_calc import quantity
             calc_parts.append(quantity(doc, label, typ, used, measured, need, pct, question, root, measurements=measurements))
-            tile = _tiles(question, label, need)
-            if tile:
-                tiles_info[label] = tile
-                notes.append(tile["text"])
-                calculations.append(tile["text"])
             quantity = str(need) if typ == "count" else f"{need:.2f}".rstrip("0").rstrip(".")
             calculations.append(f"{label}: {str(measured).removesuffix('.0')} {unit} × (1 + {pct:g}%) = {quantity} {unit}" + (", rounded up to whole items" if typ == "count" else ", rounded up to 0.01"))
         rows.append(f"| {label} | {quantity} | {unit if measured is not None else ''} | {pct:g}% | {how} | {src} |")
     if len(values) == 1 and len(materials) == 1:
         label, value = next(iter(values.items()))
         head = f"**Order {quantity} {'items' if materials[0][1] == 'count' else 'm' if materials[0][1] == 'length' else 'm²'} of {label.lower()}.**"
-        if label in tiles_info:
-            t = tiles_info[label]
-            head = f"**Order {t['packs']} packs ({t['tiles']} tiles, {t['size']}; {quantity} m² incl. waste).**" if t["packs"] else f"**Order {t['tiles']} tiles ({t['size']}; {quantity} m² incl. waste).**"
     else:
         value = values or None
         head = f"**Order list: {len(values)} measured quantities" + ("; missing data needs checking." if incomplete else ".") + "**"

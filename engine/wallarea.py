@@ -716,22 +716,6 @@ def _number(value):
         return None
 
 
-ASSUMED_HEIGHT_M = 2.7
-ASSUMED_HEIGHT_LABEL = "ASSUMED (no wall height on this drawing)"
-ASK_HEIGHT_HINT = "Ask with your height, e.g. 'walls are 2.6 m'"
-
-
-def height_basis(source):
-    s = str(source or "").lower()
-    if "assumed" in s:
-        return "assumed"
-    if "question" in s:
-        return "question"
-    if "printed" in s:
-        return "printed"
-    return "wall_data" if "wall data" in s else "other"
-
-
 def _stated_height(text):
     m = re.search(r"(?:wall\s+height|ceiling\s+height|storey\s+height|room\s+height|raumh[oö]he|huonekorkeus|rumsh[oö]jd|height|walls?\s+(?:are|is))\s*(?:of|is|=|:)?\s*(\d+(?:[.,]\d+)?)\s*(mm|cm|metres?|meters?|m|ft|feet)\b", text, re.I)
     if not m:
@@ -762,7 +746,7 @@ def estimate_planmaps(doc_id, root, question, *, planmaps=None):
         st = {"item_id": str(page), "name": label, "elevation_m": page - 1}
         out["storeys"].append(st)
         height = _stated_height(question)
-        height_source = "stated in your question" if height else None
+        height_source = "stated in question" if height else None
         if not height:
             heights = set()
             text_paths = [directory / f"text-{page}.json"]
@@ -775,9 +759,9 @@ def estimate_planmaps(doc_id, root, question, *, planmaps=None):
                         heights.add(value)
             if len(heights) == 1:
                 height, = heights
-                height_source = "printed on this drawing"
+                height_source = "printed height"
         if not height:
-            height, height_source = ASSUMED_HEIGHT_M, ASSUMED_HEIGHT_LABEL
+            height, height_source = 2.7, "assumed; no wall height found"
         page_rows = []
         for it in pm.get("items", []):
             if it.get("kind") != "wall":
@@ -838,7 +822,7 @@ def estimate_planmaps(doc_id, root, question, *, planmaps=None):
             external = props.get("is_external") if isinstance(props.get("is_external"), bool) else None
             row = {"item_id": it["item_id"], "name": it.get("label") or "Wall", "type": props.get("type_name"),
                    "materials": [props["material"]] if props.get("material") else [], "is_external": external,
-                   "height_m": h, "length_m": length, "thickness_m": thick, "height_source": props.get("height_source") or ("stored on this wall" if props.get("height_m") else height_source),
+                   "height_m": h, "length_m": length, "thickness_m": thick, "height_source": props.get("height_source") or ("wall data" if props.get("height_m") else height_source),
                    "axis_source": method, "quantities": {}, "checks": [], "curved": False, "rooms": [], "openings": [],
                    "page": page, "floors": [], "notes": [], "_line": line, "_poly": network, "_thickness": thick,
                    "_holes": [], "scale_relative_error": sc.get("relative_error"), "scale_method": sc.get("method")}
@@ -906,7 +890,7 @@ def estimate_planmaps(doc_id, root, question, *, planmaps=None):
             for k in ("_line", "_poly", "_thickness", "_holes"):
                 w.pop(k)
             out["walls"].append(w)
-        out["assumptions"].append(f"{label}: wall height {height:.2f} m, {height_source}" + (f". {ASK_HEIGHT_HINT}. Every area here depends on this assumed height" if height_source == ASSUMED_HEIGHT_LABEL else "") + f"; missing door/window heights use 2.10/1.50 m, window sill 0.90 m; {unallocated} detected openings not assigned to a wall")
+        out["assumptions"].append(f"{label}: wall height {height:g} m ({height_source}); missing door/window heights use 2.10/1.50 m, window sill 0.90 m; {unallocated} detected openings not assigned to a wall")
         out.setdefault("unallocated_openings", 0)
         out["unallocated_openings"] += unallocated
     return out
@@ -1176,10 +1160,6 @@ def answer(question, doc_ids, root, t0=None, hidden=None):
         qualifier = qualifier.replace("net area", "gross area")
     report["value_m2"] = value
     text = f"**{title}{scope}: {value:,.2f} m² {qualifier}.** {{marks}}\n\n- Gross {report['gross_m2']:,.2f} m² − openings {report['opening_m2']:,.2f} m² = net {report['net_m2']:,.2f} m²."
-    if report["source"] == "2D plan estimate" and any(ASSUMED_HEIGHT_LABEL in a for a in report["assumptions"]):
-        report["height_assumed"] = True
-        text = text.replace(" {marks}", f" (depends on the ASSUMED {ASSUMED_HEIGHT_M:.2f} m wall height) {{marks}}", 1)
-        text += f"\n- **Wall height {ASSUMED_HEIGHT_M:.2f} m is ASSUMED (no wall height on this drawing); gross, openings and net all scale with it.** {ASK_HEIGHT_HINT}."
     if report["source"] == "2D plan estimate":
         text += "\n- Estimate from a 2D plan; " + "; ".join(report["assumptions"]) + "."
     elif report.get("margin_m2") is not None:

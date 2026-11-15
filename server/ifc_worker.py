@@ -46,7 +46,7 @@ def run(stage, source, output):
         if importlib.util.find_spec("pxr"):
             from pipeline import usdz  # noqa: F401
         _allocation_limit()
-        return _usdz(doc["doc_id"], out, strict=True)
+        return _usdz(doc["doc_id"], out)
     raise ValueError("Unknown IFC phase")
 
 
