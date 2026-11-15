@@ -205,7 +205,8 @@ def query(question, doc_ids, root, hidden=None):
             continue
         rest = re.sub(pattern, '', q)
         rest = re.sub(r'\bpage\s+\d+\b', '', rest)
-        rest = re.sub(r'\b(how many|number of|count|are|is|there|in|on|this|the|drawing|sheet|document|total|please|should|i|we|order|need|to|takeoff|take-off)\b', '', rest)
+        rest = re.sub(r'["“”‘’`]', '', rest)
+        rest = re.sub(r'\b(how many|number of|count|are|is|there|in|on|this|the|drawing|sheet|document|total|please|should|i|we|order|need|to|takeoff|take-off|on|of|are|do|we|have|mark|marks|marked|label|labels|labelled|labeled|named|called|tagged|saved|taught|my|item|items|instances|instance)\b', '', rest)
         # Resolve a named room only against real enclosing polygons.
         room_scope = re.search(r'\b(?:in|inside)\s+(?:the\s+)?(.+?)(?:[?.!]|$)', q)
         if room_scope and fold(room_scope.group(1)).strip(' ?.!') in {'drawing', 'sheet', 'document', 'this drawing', 'this sheet', 'this document'}:
