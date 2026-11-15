@@ -501,3 +501,47 @@ def test_status_rerun_resets_old_started_at(tmp_path):
     assert time.time() - ingest_job.Status(f).started_at < 5   # stale: a re-run starts its own clock
     f.write_text(json.dumps({"status": "running", "started_at": time.time() - 30}))
     assert 25 < time.time() - ingest_job.Status(f).started_at < 40  # queued 30 s ago: queue time still counts
+
+
+def _text_page(ddir, n, title, extra=()):
+    """text-<n>.json as the pages stage writes it: a title-block line bottom right plus body words."""
+    def w(t, x, y, h):
+        return {"text": t, "bbox_px": [x, y, x + 0.6 * h * len(t), y + h]}
+    words = [w(t, 1650, 1300 + 24 * i, 20) for i, t in enumerate(title.split("|"))]
+    words += [w("x", 300 + 14 * i, 600, 12) for i in range(40)] + [w(t, 400, 700 + 30 * i, 12) for i, t in enumerate(extra)]
+    (ddir / f"text-{n}.json").write_text(json.dumps({"page": n, "image": {"w": 2000, "h": 1400}, "words": words}))
+
+
+def test_sheet_selection_reads_plans_first_and_skips_other_sheets(pdf_doc, monkeypatch):
+    """A drawing set: cover, site plan, elevations with level datums, two floor plans. Only the floor plans are read
+    (plans first), and the elevation sheet's level datums reach the plan maps' provenance.level_table."""
+    from pipeline import pdf_planmap
+    doc_id, ddir = pdf_doc
+    titles = {1: "COVER SHEET", 2: "SITE PLAN", 3: "BUILDING ELEVATIONS", 4: "FLOOR PLAN - 1ST", 5: "FLOOR PLAN - MEZZANINE"}
+    (ddir / "pages.json").write_text(json.dumps({"pages": [{"page": i, "w": 2000, "h": 1400} for i in titles]}))
+    for n, t in titles.items():
+        _text_page(ddir, n, t, ["MEZZANINE", "9' - 3\"", "1ST FLOOR", "0' - 0\""] if n == 3 else ())
+    calls = []
+
+    def process(doc_id, ddir, pdf, i, write=True):
+        calls.append(i + 1)
+        pm = {"page": i + 1, "items": [], "provenance": {}}
+        (ddir / f"planmap-{i + 1}.json").write_text(json.dumps(pm))
+        return pm
+    monkeypatch.setattr(pdf_planmap, "process", process)
+    st = ingest_job.Status(ddir / "ingest.json")
+    assert ingest_job._pdf_vector_pages(doc_id, ddir, st, ddir / "x.pdf") == [4, 5] and calls == [4, 5]
+    assert "p3:elevation" in st.stages[-1]["sheets"] and "p4:plan" in st.stages[-1]["sheets"]
+    lt = {r["name"]: r["elevation_m"] for r in json.loads((ddir / "planmap-4.json").read_text())["provenance"]["level_table"]}
+    assert lt == {"MEZZANINE": pytest.approx(2.819, abs=1e-3), "1ST FLOOR": 0.0}
+
+
+def test_sheet_selection_off_or_single_page_keeps_page_order(pdf_doc, monkeypatch):
+    doc_id, ddir = pdf_doc
+    meta = {"pages": [{"page": 1}, {"page": 2}]}
+    _text_page(ddir, 1, "BUILDING ELEVATIONS")
+    _text_page(ddir, 2, "FLOOR PLAN")
+    assert ingest_job._sheet_plan(ddir, meta)["order"] == [2]
+    assert ingest_job._sheet_plan(ddir, {"pages": [{"page": 1}]})["order"] == [1]
+    monkeypatch.setenv("PDF_SHEET_SELECT", "0")
+    assert ingest_job._sheet_plan(ddir, meta)["order"] == [1, 2]

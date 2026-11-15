@@ -45,7 +45,10 @@ NAME_PATTERNS = [
     (re.compile(rf"\b({_ORD_WORDS})\s+(?:FLOOR|LEVEL|STOREY|STORY)\b", re.I), "word"),
     (re.compile(r"\b(?:LEVEL|FLOOR|STOREY|STORY|LVL)\s*[-#.]?\s*(\d{1,2}|[BPGM]\d?)\b", re.I), "num"),
     (re.compile(r"(?<![\w.])(\d{1,2})\s*\.\s*(OG|UG|KRS|KERROS|KELLARIKERROS|VÅN|VAN|ETAGE|ÉTAGE|OBERGESCHOSS|"
-                r"UNTERGESCHOSS|STOCK|PLAN)\b", re.I), "num_suffix"),
+                r"UNTERGESCHOSS|STOCK|PLAN|KORRUS|SAL|ETASJE|ETG|VERDIEPING)\b", re.I), "num_suffix"),
+    # named storeys (basement / ground / attic words) before the generic 'PLAN 02': 'PLAN 02 - KÆLDER' is the cellar
+    (re.compile(r"\b(KÆLDER|KAELDER|KELDER|KELLERGESCHOSS|KELLER|UNTERGESCHOSS|SOUTERRAIN|KÄLLARE|KJELLER|"
+                r"KELDRIKORRUS|UNDERETASJE|DACHGESCHOSS|TAGETAGE|PÖÖNING|STUEETAGE|BEGANE\s+GROND)\b", re.I), "token"),
     (re.compile(r"\b(?:KERROS|VÅNING|VANING|ETAGE|PLAN|PIANO)\s+(\d{1,2})\b", re.I), "num"),
     (re.compile(r"\b(\d{1,2})\s*(?:ER|E|ÈME|EME)\s+ÉTAGE\b", re.I), "num"),
     (re.compile(r"^\s*(?:GRUNDRISS\s+)?(EG|UG|KG|DG)\s*$|\bGRUNDRISS\s+(EG|UG|KG|DG)\b", re.I), "token"),
@@ -56,7 +59,10 @@ NAME_PATTERNS = [
     (re.compile(rf"\b(?:FLOOR|LEVEL)\s+PLAN\s*[-:]?\s*({_ORD_WORDS})\b", re.I), "word_rev"),
     (re.compile(r"\b(MEZZANINE|ENTRESOL|ZWISCHENGESCHOSS|PARVI)\b", re.I), "word"),
 ]
-TOKEN_NUM = {"erdgeschoss": 0, "eg": 0, "ug": -1, "kg": -1, "dg": None, "kellari": -1, "pohjakerros": 0,
+TOKEN_NUM = {"kælder": -1, "kaelder": -1, "kelder": -1, "kellergeschoss": -1, "keller": -1, "untergeschoss": -1,
+             "souterrain": -1, "källare": -1, "kjeller": -1, "keldrikorrus": -1, "underetasje": -1, "dachgeschoss": None,
+             "tagetage": None, "pööning": None, "stueetage": 0, "begane grond": 0,
+             "erdgeschoss": 0, "eg": 0, "ug": -1, "kg": -1, "dg": None, "kellari": -1, "pohjakerros": 0,
              "rez-de-chaussée": 0, "rez-de-chaussee": 0, "piano terra": 0, "bottenvåning": 0, "sous-sol": -1,
              "ullakko": None}
 TOKEN_NAME = {"eg": "EG", "ug": "UG", "kg": "KG", "dg": "DG"}
@@ -161,7 +167,7 @@ def parse_name(text: str):
         elif how == "word":
             num = ORD.get(g.lower())
         else:
-            num = TOKEN_NUM.get(g.lower())
+            num = TOKEN_NUM.get(re.sub(r"\s+", " ", g.lower()))
             if g.lower() in TOKEN_NAME:
                 if g != g.upper():
                     continue  # 'eg'/'ug' as lowercase words in a note are not storey codes
@@ -274,6 +280,23 @@ def storey_info(page: dict, region=None) -> dict:
     return out
 
 
+BARE_FT = re.compile(r"^[+\-]?(\d{1,4})\s*['’]\s*-?\s*(\d{1,2}(?:\s+\d/\d+)?)\s*[\"”]?$")
+TAIL_FT = re.compile(r"(?<![\d/])([+\-]?\d{1,4})\s*['’]\s*-?\s*(\d{1,2}(?:\s+\d/\d+)?)\s*[\"”]\s*$")
+
+
+def _bare_ft(text: str, named: bool = False):
+    """A level datum printed as a bare feet-inch value ('9' - 3"') next to a storey caption on a section/elevation
+    sheet, or trailing the caption ('MEZZANINE 9' - 3"'). Scale notes (1/8" = 1'-0") and plan titles are skipped."""
+    t = text.strip()
+    if "=" in t or re.search(r"\b(SCALE|PLAN|MASSSTAB|MITTAKAAVA)\b", t, re.I):
+        return None
+    m = BARE_FT.match(t) or (TAIL_FT.search(t) if named else None)
+    if not m:
+        return None
+    v = _ft(m.group(1), m.group(2))
+    return round(v, 3) if abs(v) < 400 else None
+
+
 def level_table(page: dict) -> list:
     """Level datums on a section/elevation sheet: a storey caption with an elevation in the same line or stacked
     right under/over it (within 3 line heights, overlapping in x)."""
@@ -282,6 +305,8 @@ def level_table(page: dict) -> list:
     for t, bb, _ in ls:
         r = parse_name(t)
         e = parse_elevation(t)
+        if e is None:
+            e = _bare_ft(t, named=bool(r))
         if r and e is not None:
             names.append((r, bb, e))
         elif r:
@@ -299,6 +324,139 @@ def level_table(page: dict) -> list:
             e = min(near)[1]
         out.setdefault(name, {"name": name, "number": num, "elevation_m": e})
     return list(out.values())
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# sheet classification (text only: the page's words, no vector read)
+# ---------------------------------------------------------------------------------------------------------------
+# One regex per sheet kind, checked per title line in this order (first hit names the line): a 'ROOF PLAN', 'SITE
+# PLAN' or 'MECHANICAL FLOOR PLAN' line is not a floor plan although it says PLAN. Words in EN/DE/FI/SV/DA/NO/NL/FR/
+# IT/ES/ET, plus ISO 13567 / AIA-style sheet numbers as weak evidence (_SHEET_NO).
+SHEET_RX = [
+    ("schedule", re.compile(r"\b(schedules?|legend|drawing\s+(?:list|index)|sheet\s+index|index\s+of\s+drawings|"
+                            r"tabelle|liste|luettelo|förteckning|fortegnelse|ruumiprogramm|tableau|tabla)\b", re.I)),
+    ("elevation", re.compile(r"\b(elevations?|ansicht(?:en)?|julkisivu(?:t)?|fasad(?:er)?|facade|façade|opstalt|"
+                             r"aanzicht(?:en)?|vaade|prospetto|alzado)\b", re.I)),
+    ("section", re.compile(r"\b(sections?|schnitt(?:e)?|leikkau(?:s|kset)|sektion|snit|snitt|doorsnede|coupe|"
+                           r"lõige|sezione|secci[oó]n)\b", re.I)),
+    ("detail", re.compile(r"\b(details?|detalj(?:er)?|detaljer|detalje|detail(?:s)?|yksityiskohdat|detailplan)\b", re.I)),
+    ("cover", re.compile(r"\b(cover(?:\s+sheet)?|title\s+sheet|perspectives?|renderings?|3d\s+views?|axonometric|"
+                         r"isometric|general\s+notes|abbreviations|deckblatt|kansilehti|visuali[sz]ation)\b|"
+                         r"(?:^|\s)-\s*3D\b|\b3D\s*$", re.I)),
+    ("site", re.compile(r"\b(site\s*plan|plot\s*plan|location\s*plan|lageplan|asemapiirros|situationsplan|"
+                        r"situasjonsplan|situatie|plan\s+de\s+situation|planimetria|asendiplaan)\b", re.I)),
+    ("rcp", re.compile(r"\b(reflected\s+ceiling|ceiling\s+plan|rcp|deckenspiegel|alakattopiirustus)\b", re.I)),
+    ("structural", re.compile(r"\b(foundation|footing|framing|structural|tragwerk|fundament|perustus|rakenne|"
+                              r"bewehrung|reinforcement)\b", re.I)),
+    ("mep", re.compile(r"\b(mechanical|hvac|plumbing|electrical|lighting|power|ventilation|sprinkler|fire\s+alarm|"
+                       r"lüftung|heizung|sanitär|elektro|ilmanvaihto|lvi|sähkö|ventilation|vvs|el-plan|ventilatsioon|"
+                       r"küte|plomberie|électricité)\b", re.I)),
+    ("roof", re.compile(r"\b(roof\s*(?:plan|top)?|dachaufsicht|dachdraufsicht|dachplan|vesikatto|takplan|tagplan|"
+                        r"dakplan|katuseplaan|plan\s+de\s+toiture)\b", re.I)),
+    ("demo", re.compile(r"\b(demo(?:lition)?|abbruch|rückbau|purku|rivning|nedrivning|sloop)\b", re.I)),
+    ("plan", re.compile(r"\b(floor\s*plans?|plans?|grundriss(?:e)?|pohja(?:piirustus)?|plan(?:ritning|tegning)|"
+                        r"plattegrond(?:en)?|planta|pianta|plaan|layout)\b", re.I)),
+]
+PLAN_LIKE = {"plan", "mep", "roof", "demo", "rcp", "structural", "site"}
+# title-block lines naming the design team, not the sheet ('Mechanical', 'Plumbing Engineer:', 'X Electrical Inc.')
+FIRM_RX = re.compile(r"@|www\.|\.(?:com|net|org|fi|de|dk|se|no|ee|ch|at|nl)\b|\b(engineers?|engineering|consultants?|"
+                     r"contractor|inc|llc|ltd|gmbh|oy|ab|as|aps|a/s|corp|company|associates|architects?|tel|phone|fax|"
+                     r"ingenieur\w*|insinööri\w*|rådgiv\w*)\b|\d{3}[.\-\s]\d{3}[.\-\s]\d{4}", re.I)
+# MEP / structural words name a sheet only next to a drawing word ('MECHANICAL PLAN', 'FOUNDATION PLAN')
+DRAW_RX = re.compile(r"\b(plans?|layout|framing|diagram|riser|schematic|grundriss|piirustus|plaan|plan\w*|"
+                     r"duct\w*|piping|routing|level|floor|storey|geschoss|kerros|korrus|etage|etasje)\b", re.I)
+_SHEET_NO = re.compile(r"^(A|AR|ARK|S|M|P|E|FP|H|I|K|R|V)[-.\s]?(\d)(\d{2})(?:\.\d{1,2})?$", re.I)
+_SERIES = {"A": {"1": "plan", "2": "elevation", "3": "section", "5": "detail", "6": "schedule", "9": "cover"},
+           "S": "structural", "M": "mep", "P": "mep", "E": "mep", "FP": "mep", "H": "mep", "V": "mep"}
+
+
+def _line_kind(text: str):
+    for kind, rx in SHEET_RX:
+        if rx.search(text):
+            return kind
+    return None
+
+
+def _line_kind_after(text: str, skip: str):
+    """The next SHEET_RX kind after `skip` (an MEP/structural word without a drawing word is a team/notes line)."""
+    names = [k for k, _ in SHEET_RX]
+    for kind, rx in SHEET_RX[names.index(skip) + 1:]:
+        if kind not in ("mep", "structural") and rx.search(text):
+            return kind
+    return None
+
+
+def classify_sheet(words: list, W: float, H: float) -> dict:
+    """What a sheet shows, from its words alone (cheap: no vector read): {"kind", "score", "title", "storey",
+    "sheet_no", "evidence", "scores"}. kind: plan | mep | elevation | section | schedule | cover | detail | site |
+    roof | demo | rcp | structural | other. Title lines = lines in the title-block corner (right 22% / bottom 12% of
+    the sheet, weight 3) and lettering >= 1.6x the median text height (view titles, weight 1); the first SHEET_RX hit
+    names each line. A storey caption in the corner ('FLOOR PLAN - 1ST', 'Erdgeschoss') counts for plan. The sheet
+    number's series (A1xx plans, A2xx elevations, S structural, M/E/P MEP) adds 1. `words`: [{"text","bbox"}],
+    bbox in the same unit as W/H, y down."""
+    out = {"kind": "other", "score": 0.0, "title": None, "storey": None, "sheet_no": None, "evidence": "no title words",
+           "scores": {}}
+    try:
+        ws = [w for w in words or [] if w.get("bbox") and (w.get("text") or "").strip()]
+        if not ws or not W or not H:
+            return out
+        hs = sorted(max(w["bbox"][3] - w["bbox"][1], 0.0) for w in ws if w["bbox"][2] - w["bbox"][0] >= 0.5 *
+                    (w["bbox"][3] - w["bbox"][1]))
+        med = hs[len(hs) // 2] if hs else 1.0
+        sc, best, why = Counter(), {}, []
+        storey, sno = None, None
+        cand = []
+        for t, bb, _ in _lines(ws):
+            tt = t.strip()
+            if not tt or len(tt) > 90 or FIRM_RX.search(tt):
+                continue
+            h = bb[3] - bb[1]
+            if bb[2] - bb[0] < 0.8 * h:  # vertical / rotated text: heights are not lettering sizes
+                continue
+            corner = (bb[0] > 0.78 * W and bb[1] > 0.4 * H) or (bb[1] > 0.88 * H and bb[0] > 0.45 * W)
+            big = h >= 1.6 * med
+            if corner or big:
+                cand.append((tt, h, corner))
+        # the sheet title is the biggest kind-naming lettering of the title block; small corner lines weigh less
+        hmax = max([h for tt, h, c in cand if c and _line_kind(tt)] or [0.0])
+        for tt, h, corner in cand:
+            m = _SHEET_NO.match(tt.replace(" ", "")) if corner else None
+            if m:
+                ser = _SERIES.get(m.group(1).upper()[:2]) or _SERIES.get(m.group(1).upper()[:1])
+                k = ser.get(m.group(2)) if isinstance(ser, dict) else ser
+                sno = sno or tt
+                if k:
+                    sc[k] += 1.0
+                    why.append(f"sheet no {tt} -> {k}")
+                continue
+            k = _line_kind(tt)
+            if k in ("mep", "structural") and not DRAW_RX.search(SHEET_RX[[x for x, _ in SHEET_RX].index(k)][1]
+                                                                 .sub(" ", tt)):
+                k = _line_kind_after(tt, k)
+            wgt = (3.0 if h >= 0.75 * hmax else 1.5) if corner else 1.0
+            if k is None and corner:
+                r = parse_name(tt)
+                if r and not re.search(r"\d\s*['’]", tt) and sc["_storey"] < 1:  # a storey caption, once
+                    k, wgt = "plan", 1.5
+                    sc["_storey"] += 1
+            if k is None:
+                continue
+            sc[k] += wgt
+            if wgt > best.get(k, (0, ""))[0]:
+                best[k] = (wgt, tt)
+            if k in PLAN_LIKE and corner and storey is None:
+                storey = parse_name(tt)
+            why.append(f"{'title block' if corner else 'view title'} '{tt[:40]}' -> {k}")
+        sc.pop("_storey", None)
+        if not sc:
+            out["sheet_no"] = sno
+            return out
+        kind, score = max(sc.items(), key=lambda kv: (kv[1], kv[0] == "plan"))
+        out.update(kind=kind, score=round(score, 2), title=(best.get(kind) or (0, None))[1], storey=storey,
+                   sheet_no=sno, evidence="; ".join(why[:8]), scores=dict(sc))
+    except Exception as e:  # noqa: BLE001
+        out["evidence"] = f"error {type(e).__name__}: {e}"[:160]
+    return out
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -686,6 +844,26 @@ def _entry(pm, page=None):
     return {"storey": st, "grid_m": gm, "walls_m": walls_m, "m_per_pt": mpt, "levels": lt, "px_per_pt": s}
 
 
+def _norm_name(name) -> str:
+    return re.sub(r"\b(FLOOR|LEVEL|STOREY|STORY|PLAN)\b|[^\w]", "", str(name or "").upper())
+
+
+def _table_row(table: dict, name, number):
+    """The level datum row of a storey: same caption, else same caption without FLOOR/LEVEL ('MEZZANINE FLOOR' =
+    'MEZZANINE'), else the one row with the same printed floor number."""
+    if name in table:
+        return table[name]
+    k = _norm_name(name)
+    rows = [r for r in table.values() if k and _norm_name(r["name"]) == k]
+    if len(rows) == 1:
+        return rows[0]
+    if number is not None:
+        rows = [r for r in table.values() if r.get("number") == number]
+        if len(rows) == 1:
+            return rows[0]
+    return None
+
+
 def storeys(pages: list, planmaps: list) -> list:
     """See module doc. `pages` and `planmaps` are parallel lists (page_index = position); a None plan map is a
     non-plan page (its level datums are still read); a None page means: use the plan map's provenance."""
@@ -712,9 +890,11 @@ def storeys(pages: list, planmaps: list) -> list:
              "height_m": st.get("height_m"), "source": st.get("source") or "page order",
              "elevation_source": st.get("elevation_source"), "height_source": st.get("height_source"),
              "m_per_pt": e["m_per_pt"]}
-        if r["elevation_m"] is None and r["name"] and r["name"] in table:
-            r["elevation_m"] = table[r["name"]]["elevation_m"]
-            r["elevation_source"] = f"level datum of {r['name']} on another sheet"
+        if r["elevation_m"] is None and r["name"]:
+            row = _table_row(table, r["name"], r["number"])
+            if row is not None:
+                r["elevation_m"] = row["elevation_m"]
+                r["elevation_source"] = f"level datum of {row['name']} on another sheet"
         out.append(r)
     _order_and_fill(out)
     _align(out, E)
