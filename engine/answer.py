@@ -87,7 +87,8 @@ def _reader(question, doc_ids, root, trace, calls, t0, emit):
 
 def _use_reader(res, question, doc_ids, root, trace, calls, t0, emit):
     """Run the reader when `res` is an abstention; return the reader's answer if it found one, else `res`."""
-    if res is not None and not res["answer"].get("abstained"):
+    from engine.ifc_pending import missing_quantity
+    if missing_quantity(res, doc_ids, root) or (res is not None and not res["answer"].get("abstained")):
         return res
     # Some source solvers own their call list. Carry those calls into the
     # reader's shared ledger without counting the same call object twice.
@@ -397,6 +398,9 @@ def _answer_forced(question: str, doc_ids: list[str], on_event: Callable | None 
         res = _answer_core(question, doc_ids, on_event, scene_state=scene_state, history=history)
     finally:
         _P.DELTA_SINK.reset(_tok)
+    from engine.ifc_pending import missing_quantity
+    if missing_quantity(res, doc_ids, _root()):
+        return res
     return res
 
 

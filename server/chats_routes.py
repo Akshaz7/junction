@@ -38,10 +38,14 @@ def _no_data_answer(question, doc_ids, on_event=None):
             dd = root / d
             if load_doc(d, root) or load_sheet_parent(d, root) or any(dd.glob("text*.json")) or any(dd.glob("page-*.png")):   # a page image: the drawing reader can still answer
                 return None
-        running = any(json.loads((root / d / "ingest.json").read_text()).get("status") == "running"
-                      for d in doc_ids if (root / d / "ingest.json").is_file())
+        states = [json.loads((root / d / "ingest.json").read_text())
+                  for d in doc_ids if (root / d / "ingest.json").is_file()]
+        running = any(s.get("status") == "running" for s in states)
+        failures = [s.get("reason") or s.get("detail") for s in states
+                    if s.get("status") in {"failed", "partial"} and (s.get("reason") or s.get("detail"))]
         why = ("This document is still being processed, so there is nothing to answer from yet. Try again in a moment."
-               if running else "This document has no readable drawing data on this server (no plan map, model or text), "
+               if running else " ".join(dict.fromkeys(failures)) if failures else
+               "This document has no readable drawing data on this server (no plan map, model or text), "
                "so I cannot answer questions about it.")
         t0 = time.perf_counter()
         if on_event:
@@ -85,7 +89,22 @@ def _selected_engine(question, doc_ids, on_event, scene_state=None, history=None
     # E-20: hidden items from this chat's scene edits shape later answers ("how many windows" after "remove W7").
     # history: earlier turns of this chat, for plain conversation without a document.
     if ENGINE is _real_engine:
-        return ENGINE(question, doc_ids, on_event, scene_state=scene_state, history=history)
+        result = ENGINE(question, doc_ids, on_event, scene_state=scene_state, history=history)
+        from .ifc_ingest import PARTIAL_DETAIL
+        for doc_id in doc_ids:
+            folder = config.artifacts_dir() / doc_id
+            state_path = folder / "ingest.json"
+            if not (folder / "elements.json").is_file() or (folder / "scene.json").is_file() or not state_path.is_file():
+                continue
+            try:
+                state = json.loads(state_path.read_text())
+            except (OSError, ValueError):
+                continue
+            notice = ("The 3D view is still being prepared. " + PARTIAL_DETAIL
+                      if state.get("status") == "running" else state.get("detail"))
+            if notice:
+                result["answer"]["text_md"] += "\n\n" + notice
+        return result
     return ENGINE(question, doc_ids, on_event)
 
 

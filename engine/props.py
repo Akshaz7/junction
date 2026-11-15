@@ -258,7 +258,8 @@ def index(doc_id, root, kind=None):
         rec.aliases.update(str(v) for k, v in rec.item.props.items() if norm(k) in {"tag", "mark", "reference"} and v)
     status = "the stored model index"
     storeys = doc.storeys if doc else []
-    if source:
+    index_only = doc is not None and (root / doc_id / "ingest.json").is_file() and not (root / doc_id / "scene.json").is_file()
+    if source and not index_only:
         try:
             raw, raw_storeys = _read_ifc(_signature(source), kind)
             storeys = storeys or raw_storeys

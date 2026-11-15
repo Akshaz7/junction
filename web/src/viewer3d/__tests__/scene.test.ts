@@ -113,6 +113,12 @@ describe('Digital Hub scene (real GLB, no WebGL)', () => {
     await expect(loadScene('https://example.test/scene.json')).rejects.toThrow('Y up');
   });
 
+  it('preserves the server explanation when a large IFC has an index but no scene', async () => {
+    const detail = 'The 3D view could not be prepared. Counts and quantities stored in the model are available.';
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json({ detail }, { status: 404 })));
+    await expect(loadScene('https://example.test/scene.json')).rejects.toMatchObject({ status: 404, detail, message: detail });
+  });
+
   it('loads API geometry through the files route even when the manifest holds a local path', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true, json: async () => ({ ...manifest, glb: '/local/artifacts/scene.glb' }),

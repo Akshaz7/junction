@@ -1,0 +1,186 @@
+{
+  "file": "data/full/junction-dataset/data/ifc_bench/fzk_house_arc.ifc",
+  "size_bytes": 2570803,
+  "end_only": true,
+  "status": "ready",
+  "ingest_s": 4.815,
+  "state": {
+    "status": "ready",
+    "stages": [
+      {
+        "stage": "ifc_index",
+        "ok": true,
+        "s": 0.4,
+        "peak_process_rss_mib": 21.6,
+        "peak_worker_rss_mib": 66.7,
+        "memory_budget_mib": 320.0,
+        "worker_exit_code": 0,
+        "batches": 1
+      },
+      {
+        "stage": "ifc_scene",
+        "ok": true,
+        "s": 2.9,
+        "peak_process_rss_mib": 21.6,
+        "peak_worker_rss_mib": 240.3,
+        "memory_budget_mib": 320.0,
+        "worker_exit_code": 0
+      },
+      {
+        "stage": "ifc_plans",
+        "ok": true,
+        "s": 0.5,
+        "peak_process_rss_mib": 21.6,
+        "peak_worker_rss_mib": 101.0,
+        "memory_budget_mib": 320.0,
+        "worker_exit_code": 0
+      },
+      {
+        "stage": "usdz",
+        "ok": true,
+        "s": 0.9,
+        "peak_process_rss_mib": 21.6,
+        "peak_worker_rss_mib": 143.5,
+        "memory_budget_mib": 320.0,
+        "worker_exit_code": 0
+      }
+    ],
+    "detail": "",
+    "mode": "vlm",
+    "started_at": 1794700532.104977,
+    "step": "usdz",
+    "readable": true,
+    "progress": 1,
+    "cost_usd": 0.0,
+    "updated": "2026-11-15T01:55:36+0200"
+  },
+  "validation_note": "Only code answers without model calls are verified here. Fake-provider fallbacks are not source observations.",
+  "schema": "IFC4",
+  "applications": [
+    "ARCHICAD-64 20.0.0"
+  ],
+  "elements": 93,
+  "kinds": {
+    "beam": 4,
+    "door": 5,
+    "member": 42,
+    "railing": 2,
+    "slab": 4,
+    "stairs": 1,
+    "wall": 13,
+    "window": 11,
+    "other": 3,
+    "room": 7,
+    "site": 1
+  },
+  "rooms_with_area": 7,
+  "answers": [
+    {
+      "question": "How many doors are there?",
+      "answer": {
+        "text_md": "There are **5 doors** in this model. [1]",
+        "value": 5,
+        "unit": "count",
+        "confidence": 1.0,
+        "abstained": false
+      },
+      "cost": {
+        "usd_total": 0,
+        "calls": []
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "5 doors on Erdgeschoss in the building model (IFC), each one numbered, including Haustuer, Innentuer-3",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "citations": 1,
+      "cited_item_count": 5
+    },
+    {
+      "question": "How many windows are there?",
+      "answer": {
+        "text_md": "There are **11 windows** in this model. [1][2]",
+        "value": 11,
+        "unit": "count",
+        "confidence": 1.0,
+        "abstained": false
+      },
+      "cost": {
+        "usd_total": 0,
+        "calls": []
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "11 windows on Dachgeschoss, Erdgeschoss in the building model (IFC), each one numbered",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "citations": 2,
+      "cited_item_count": 11
+    },
+    {
+      "question": "What is the total floor area of all rooms?",
+      "answer": {
+        "text_md": "**7 rooms**, total **173.3 m²**, largest first:\n\n- Galerie 7: 74.5 m² [7]\n- Wohnen 5: 25.2 m² [6]\n- Schlafzimmer 4: 21.4 m² [3]\n- Küche 6: 16.3 m² [5]\n- Buero 2: 12.6 m² [1]\n- Bad 3: 12.1 m² [2]\n- Flur 1: 11.2 m² [4]",
+        "value": 173.34,
+        "unit": "m2",
+        "confidence": 1.0,
+        "abstained": false
+      },
+      "cost": {
+        "usd_total": 0.0,
+        "calls": []
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "7 rooms on Dachgeschoss, Erdgeschoss in the building model (IFC), each one numbered",
+            "cite": 1,
+            "ok": null
+          },
+          {
+            "kind": "calculated",
+            "title": "Calculated",
+            "text": "Added the stored floor areas of 7 rooms: 173.3 m²; largest 7 74.5, 5 25.2, 4 21.4",
+            "cite": null,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "citations": 2,
+      "cited_item_count": 7
+    }
+  ],
+  "time_maximum_rss_bytes": 254803968
+}
