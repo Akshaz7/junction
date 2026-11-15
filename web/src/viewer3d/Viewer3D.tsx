@@ -213,7 +213,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     function fail(reason: unknown) {
       if (!active) return;
       const message = reason instanceof SceneLoadError && reason.status === 404
-        ? '3D model not available for this document'
+        ? reason.detail || '3D model not available for this document'
         : reason instanceof Error ? reason.message : 'Could not load the 3D scene.';
       setError(message);
       setState('error');

@@ -1,0 +1,206 @@
+{
+  "file": "data/full/junction-dataset/data/ifc_models/resbim-297_model.ifc",
+  "size_bytes": 353992,
+  "end_only": true,
+  "status": "ready",
+  "ingest_s": 3.511,
+  "state": {
+    "status": "ready",
+    "stages": [
+      {
+        "stage": "ifc_index",
+        "ok": true,
+        "s": 0.2,
+        "peak_process_rss_mib": 21.2,
+        "peak_worker_rss_mib": 44.0,
+        "memory_budget_mib": 320.0,
+        "worker_exit_code": 0
+      },
+      {
+        "stage": "ifc_scene",
+        "ok": true,
+        "s": 1.4,
+        "peak_process_rss_mib": 21.3,
+        "peak_worker_rss_mib": 194.5,
+        "memory_budget_mib": 320.0,
+        "worker_exit_code": 0
+      },
+      {
+        "stage": "ifc_plans",
+        "ok": true,
+        "s": 0.4,
+        "peak_process_rss_mib": 21.3,
+        "peak_worker_rss_mib": 93.2,
+        "memory_budget_mib": 320.0,
+        "worker_exit_code": 0
+      },
+      {
+        "stage": "usdz",
+        "ok": true,
+        "s": 1.5,
+        "peak_process_rss_mib": 21.3,
+        "peak_worker_rss_mib": 153.3,
+        "memory_budget_mib": 320.0,
+        "worker_exit_code": 0
+      }
+    ],
+    "detail": "",
+    "mode": "vlm",
+    "started_at": 1794699645.8940318,
+    "step": "usdz",
+    "readable": true,
+    "progress": 1,
+    "cost_usd": 0.0,
+    "updated": "2026-11-15T01:40:49+0200"
+  },
+  "schema": "IFC4",
+  "applications": [
+    "Autodesk Revit 2026 (ENG)"
+  ],
+  "elements": 36,
+  "kinds": {
+    "door": 6,
+    "railing": 4,
+    "slab": 1,
+    "wall": 20,
+    "window": 4,
+    "site": 1
+  },
+  "rooms_with_area": 0,
+  "answers": [
+    {
+      "question": "How many doors are there?",
+      "answer": {
+        "text_md": "There are **6 doors** in this model. [1]",
+        "value": 6,
+        "unit": "count",
+        "confidence": 1.0,
+        "abstained": false
+      },
+      "cost": {
+        "usd_total": 0,
+        "calls": []
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "6 doors on Level 0 in the building model (IFC), each one numbered",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "citations": 1,
+      "cited_item_count": 6
+    },
+    {
+      "question": "How many windows are there?",
+      "answer": {
+        "text_md": "There are **4 windows** in this model. [1]",
+        "value": 4,
+        "unit": "count",
+        "confidence": 1.0,
+        "abstained": false
+      },
+      "cost": {
+        "usd_total": 0,
+        "calls": []
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "4 windows on Level 0 in the building model (IFC), each one numbered",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "citations": 1,
+      "cited_item_count": 4
+    },
+    {
+      "question": "What is the total floor area of all rooms?",
+      "answer": {
+        "text_md": "**I could not find any** on this drawing. That is what a model could read from the model's data and the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+        "value": 0.0,
+        "unit": "m²",
+        "confidence": 0.2,
+        "abstained": false
+      },
+      "cost": {
+        "usd_total": 0.0,
+        "calls": [
+          {
+            "task": "reader_plan",
+            "provider": "fake",
+            "model": "fake-1",
+            "cost_usd": 0.0
+          },
+          {
+            "task": "reader_plan",
+            "provider": "fake",
+            "model": "fake-1",
+            "cost_usd": 0.0
+          },
+          {
+            "task": "reader_plan",
+            "provider": "fake",
+            "model": "fake-1",
+            "cost_usd": 0.0
+          },
+          {
+            "task": "reader_plan",
+            "provider": "fake",
+            "model": "fake-1",
+            "cost_usd": 0.0
+          },
+          {
+            "task": "reader_plan",
+            "provider": "fake",
+            "model": "fake-1",
+            "cost_usd": 0.0
+          },
+          {
+            "task": "reader_plan",
+            "provider": "fake",
+            "model": "fake-1",
+            "cost_usd": 0.0
+          },
+          {
+            "task": "reader_plan",
+            "provider": "fake",
+            "model": "fake-1",
+            "cost_usd": 0.0
+          },
+          {
+            "task": "forced_answer",
+            "provider": "fake",
+            "model": "fake-1",
+            "cost_usd": 0.0
+          }
+        ]
+      },
+      "reasoning": null,
+      "citations": 0,
+      "cited_item_count": 0
+    }
+  ],
+  "time_maximum_rss_bytes": 209125376,
+  "validation_note": "Only code answers without model calls are verified here. Fake-provider fallbacks are not source observations."
+}

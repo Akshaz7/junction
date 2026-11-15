@@ -21,7 +21,6 @@ def _ifc_operation(ifc_path: Path | None) -> dict:
     if not ifc_path or not ifc_path.exists():
         return {}
     try:
-        import ifcopenshell
         from pipeline.ifc_index import open_properties
         f = open_properties(ifc_path)
     except Exception:  # noqa: BLE001

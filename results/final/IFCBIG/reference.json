@@ -1,0 +1,52 @@
+[
+  {
+    "file": "data/full/junction-dataset/data/ifc_bench/city_house_munich_arc.ifc",
+    "schema": "IFC4X3",
+    "door_count": 16,
+    "window_count": 13,
+    "pipe_count_from_explicit_type": 0,
+    "room_count": 19,
+    "rooms_with_explicit_area": 19,
+    "recorded_room_area_m2": 170.29778258617762
+  },
+  {
+    "file": "data/full/junction-dataset/data/opening_design/CTR/Models & CAD/IFC - CTR/CTR-CTR - 1st Phase - Shell.ifc",
+    "schema": "IFC2X3",
+    "door_count": 59,
+    "window_count": 285,
+    "pipe_count_from_explicit_type": 0,
+    "room_count": 0,
+    "rooms_with_explicit_area": 0,
+    "recorded_room_area_m2": null
+  },
+  {
+    "file": "data/full/junction-dataset/data/ifc_bench/sixty5_electrical.ifc",
+    "schema": "IFC2X3",
+    "door_count": 0,
+    "window_count": 0,
+    "pipe_count_from_explicit_type": 112,
+    "room_count": 0,
+    "rooms_with_explicit_area": 0,
+    "recorded_room_area_m2": null
+  },
+  {
+    "file": "data/full/junction-dataset/data/ifc_models/bsc-duplex_duplex-electrical-20121207.ifc",
+    "schema": "IFC2X3",
+    "door_count": 0,
+    "window_count": 0,
+    "pipe_count_from_explicit_type": 0,
+    "room_count": 1,
+    "rooms_with_explicit_area": 1,
+    "recorded_room_area_m2": 145.72168899999957
+  },
+  {
+    "file": "data/full/junction-dataset/data/ifc_bench/fzk_house_arc.ifc",
+    "schema": "IFC4",
+    "door_count": 5,
+    "window_count": 11,
+    "pipe_count_from_explicit_type": 0,
+    "room_count": 7,
+    "rooms_with_explicit_area": 7,
+    "recorded_room_area_m2": 173.3424370823
+  }
+]

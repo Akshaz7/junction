@@ -115,6 +115,19 @@ describe('ingest monitoring', () => {
     expect(result.document).toEqual(doc)
   })
 
+  it('shows which IFC quantities are ready while the 3D view is prepared', async () => {
+    const detail = 'The 3D view is still being prepared. Counts and quantities stored in the model are available.'
+    const transport = vi.fn<typeof fetch>()
+      .mockResolvedValueOnce(Response.json({ status: 'running', step: 'ifc_scene', readable: true, detail }))
+      .mockResolvedValueOnce(Response.json(doc))
+      .mockResolvedValueOnce(Response.json({ status: 'partial', readable: true, detail: 'The 3D view exceeded its memory budget. Counts are available.' }))
+      .mockResolvedValueOnce(Response.json(doc))
+    const onReadable = vi.fn()
+    const result = await waitForUpload(doc.doc_id, { signal: controller().signal, transport, intervalMs: 0, onProgress: vi.fn(), onReadable })
+    expect(onReadable).toHaveBeenCalledWith(doc, detail)
+    expect(result.note).toContain('memory budget')
+  })
+
   it('uses reason for terminal failure and preserves partial processing notes', async () => {
     await expect(waitForUpload(doc.doc_id, { signal: controller().signal, onProgress: vi.fn(), transport: vi.fn().mockResolvedValue(Response.json({ status: 'failed', reason: 'The IFC file is corrupt.' })) })).rejects.toMatchObject({ message: 'The IFC file is corrupt.', retry: 'upload' })
     const transport = vi.fn().mockResolvedValueOnce(Response.json({ status: 'partial', detail: 'Page image only; no plan map.' })).mockResolvedValueOnce(Response.json(doc))

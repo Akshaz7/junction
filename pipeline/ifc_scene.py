@@ -14,7 +14,6 @@ import sys
 import time
 from pathlib import Path
 
-import ifcopenshell
 import ifcopenshell.util.element as uel
 import ifcopenshell.util.unit as uunit
 import numpy as np

@@ -94,8 +94,8 @@ export function documentFileUrl(manifestUrl: string | URL, name: string): string
 }
 
 export class SceneLoadError extends Error {
-  constructor(readonly status: number) {
-    super(`Could not load scene manifest (${status})`);
+  constructor(readonly status: number, readonly detail?: string) {
+    super(detail || `Could not load scene manifest (${status})`);
   }
 }
 
@@ -105,7 +105,12 @@ export async function loadScene(manifestUrl: string | URL, options?: SceneLoadOp
   const url = new URL(manifestUrl, base);
   options?.onProgress?.({ phase: 'manifest' });
   const response = await fetch(url, options ? { signal: options.signal } : undefined);
-  if (!response.ok) throw new SceneLoadError(response.status);
+  if (!response.ok) {
+    let body: unknown;
+    try { body = await response.json(); } catch { /* A proxy may return HTML or an empty body. */ }
+    const detail = body && typeof body === 'object' && 'detail' in body && typeof body.detail === 'string' ? body.detail : undefined;
+    throw new SceneLoadError(response.status, detail);
+  }
   const manifest = await response.json() as SceneManifest;
   if (manifest.units !== 'm' || manifest.up !== 'Y' || !manifest.items) {
     throw new Error('Scene must use CONTRACT 5.5: metres, Y up, and an items map');

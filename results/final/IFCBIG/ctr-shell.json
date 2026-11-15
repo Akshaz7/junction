@@ -1,0 +1,155 @@
+{
+  "file": "data/full/junction-dataset/data/opening_design/CTR/Models & CAD/IFC - CTR/CTR-CTR - 1st Phase - Shell.ifc",
+  "size_bytes": 83942969,
+  "end_only": false,
+  "status": "partial",
+  "ingest_s": 18.615,
+  "state": {
+    "status": "partial",
+    "stages": [
+      {
+        "stage": "ifc_index",
+        "ok": true,
+        "s": 17.8,
+        "peak_process_rss_mib": 22.6,
+        "peak_worker_rss_mib": 100.9,
+        "memory_budget_mib": 320.0,
+        "worker_exit_code": 0,
+        "batches": 41
+      },
+      {
+        "stage": "ifc_scene",
+        "ok": false,
+        "error": "This phase exceeded its 320 MiB memory budget.",
+        "peak_worker_rss_mib": 353.7,
+        "memory_budget_mib": 320.0,
+        "worker_exit_code": -9
+      }
+    ],
+    "detail": "The 3D view could not be prepared. Counts and quantities stored in the model are available. Measurements that require geometry may be unavailable. This phase exceeded its 320 MiB memory budget.",
+    "mode": "vlm",
+    "started_at": 1794699380.520433,
+    "step": "ifc_scene",
+    "readable": true,
+    "progress": 0.6666666666666666,
+    "cost_usd": 0.0,
+    "updated": "2026-11-15T01:47:01+0200"
+  },
+  "schema": "IFC2X3",
+  "applications": [
+    "Autodesk Revit 2020 (ENU)"
+  ],
+  "elements": 5160,
+  "kinds": {
+    "site": 1,
+    "proxy": 327,
+    "wall": 176,
+    "furniture": 26,
+    "terminal": 18,
+    "covering": 8,
+    "door": 59,
+    "mep_other": 4,
+    "light": 53,
+    "roof": 8,
+    "slab": 77,
+    "beam": 175,
+    "column": 1,
+    "footing": 12,
+    "window": 285,
+    "curtain_wall": 33,
+    "member": 2173,
+    "plate": 1648,
+    "stairs": 20,
+    "ramp": 3,
+    "railing": 52,
+    "other": 1
+  },
+  "rooms_with_area": 0,
+  "answers": [
+    {
+      "question": "How many doors are there?",
+      "answer": {
+        "text_md": "There are **59 doors** in this model. [1]\n\nThe 3D view could not be prepared. Counts and quantities stored in the model are available. Measurements that require geometry may be unavailable. This phase exceeded its 320 MiB memory budget.",
+        "value": 59,
+        "unit": "count",
+        "confidence": 1.0,
+        "abstained": false
+      },
+      "cost": {
+        "usd_total": 0,
+        "calls": []
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "59 doors on 4 storeys in the building model (IFC), each one numbered",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "citations": 1,
+      "cited_item_count": 59
+    },
+    {
+      "question": "How many windows are there?",
+      "answer": {
+        "text_md": "There are **285 windows** in this model. [1]\n\nThe 3D view could not be prepared. Counts and quantities stored in the model are available. Measurements that require geometry may be unavailable. This phase exceeded its 320 MiB memory budget.",
+        "value": 285,
+        "unit": "count",
+        "confidence": 1.0,
+        "abstained": false
+      },
+      "cost": {
+        "usd_total": 0,
+        "calls": []
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "285 windows on 1ST FLOOR, 2ND FLOOR, 3RD FLOOR in the building model (IFC), each one numbered",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "citations": 1,
+      "cited_item_count": 285
+    },
+    {
+      "question": "What is the total floor area of all rooms?",
+      "answer": {
+        "text_md": "The model has no area data for rooms, so I cannot give a figure.\n\nThe 3D view could not be prepared. Counts and quantities stored in the model are available. Measurements that require geometry may be unavailable. This phase exceeded its 320 MiB memory budget.",
+        "value": null,
+        "unit": null,
+        "confidence": 0.0,
+        "abstained": true
+      },
+      "cost": {
+        "usd_total": 0,
+        "calls": []
+      },
+      "reasoning": null,
+      "citations": 0,
+      "cited_item_count": 0
+    }
+  ],
+  "time_maximum_rss_bytes": 371163136,
+  "validation_note": "Only code answers without model calls are verified here. Fake-provider fallbacks are not source observations."
+}

@@ -62,5 +62,9 @@
       "path": "data/full/junction-dataset/data/ifc_models/bsc-clinic_clinic-plumbing.ifc",
       "size_bytes": 55834520
     }
-  ]
+  ],
+  "additional_unseen_random_validation_file": "data/full/junction-dataset/data/ifc_models/resbim-71_model.ifc",
+  "additional_unseen_size_bytes": 345510,
+  "final_batched_reader_unseen_file": "data/full/junction-dataset/data/ifc_models/bsc-duplex_duplex-electrical-20121207.ifc",
+  "final_batched_reader_unseen_size_bytes": 1602758
 }
