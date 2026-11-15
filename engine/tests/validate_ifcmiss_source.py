@@ -5,6 +5,8 @@ import json
 import os
 from pathlib import Path
 import sys
+import shutil
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -40,15 +42,50 @@ def inspect(did):
             'wall_qto_by_storey': dict(levels)}
 
 
+def verify_counts(did, expected):
+    """Use only a private JSON snapshot, with no globally searchable documents."""
+    with tempfile.TemporaryDirectory(prefix='ifcmiss-reserved-') as tmp:
+        root = Path(tmp)
+        folder = root / did
+        folder.mkdir()
+        for p in (ROOT / 'artifacts' / did).glob('*.json'):
+            shutil.copyfile(p, folder / p.name)
+        previous = os.environ.get('ARTIFACTS_DIR')
+        os.environ.update(ARTIFACTS_DIR=tmp, EXPLAIN='0')
+        try:
+            from engine.answer import answer
+            from engine.calc import validate
+            results = []
+            for kind in ('door', 'window', 'wall'):
+                result = answer(f'How many {kind}s are there in this model?', [did])
+                got = result['answer']['value']
+                calc = (result.get('reasoning') or {}).get('calc') or {}
+                issues = validate(calc, root)
+                results.append({'kind': kind, 'expected': expected.get(kind, 0), 'value': got,
+                                'matches_source': got == expected.get(kind, 0),
+                                'calculation_issues': issues,
+                                'cited_items': len({i for c in result['citations'] for i in c['item_ids']})})
+            return results
+        finally:
+            if previous is None:
+                os.environ.pop('ARTIFACTS_DIR', None)
+            else:
+                os.environ['ARTIFACTS_DIR'] = previous
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('doc_ids', nargs='+')
     ap.add_argument('--out', required=True)
+    ap.add_argument('--verify-counts', action='store_true')
     args = ap.parse_args()
     os.environ['MODELS_FAKE'] = '1'
     banned = set(Path('/private/tmp/claude-501/-Users-akshatthapa-Workspace-junction-server/bb83e630-bcda-48d0-8000-9c87e8300b2a/scratchpad/bench/forbidden_heldout_docs.txt').read_text().split())
     assert not set(args.doc_ids) & banned
     rows = [inspect(did) for did in args.doc_ids]
+    if args.verify_counts:
+        for row in rows:
+            row['answer_checks'] = verify_counts(row['doc_id'], row['native_counts_excluding_components'])
     Path(args.out).write_text(json.dumps({'documents': rows, 'source_files_written': False}, indent=2) + '\n')
     print(json.dumps([{'doc_id': r['doc_id'], 'schema': r.get('schema'), 'applications': r.get('applications'),
                        'walls': r.get('wall_qto_by_storey')} for r in rows]))
