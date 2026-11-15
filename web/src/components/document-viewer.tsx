@@ -6,6 +6,7 @@ import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document } from '../lib/types'
 import { fitPage, focusBox, focusBoxWithin, zoomAt, type PageTransform, type Point, type Size } from '../lib/page-transform'
 import { viewerEvidence } from '../lib/viewer-evidence'
+import { pickItemAt, type PickBox } from '../lib/pick-item'
 import { Button } from './ui'
 import { setHover, setSelected, useLinkedItem } from '../viewer3d'
 import './document-viewer.css'
@@ -70,6 +71,15 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   const itemTrigger = useRef<Element | null>(null)
   const citation = useMemo(() => place ? { ...originalCitation, kind: 'element' as const, quote: null, doc_id: place.location.doc_id, page: place.location.page, item_ids: [place.item.item_id] } : { ...(calcSource ?? originalCitation), page: pageNumber }, [originalCitation, calcSource, place, pageNumber])
   const { regions, sources, initial } = useMemo(() => place ? placeEvidence(place.location, place.item) : viewerEvidence(calcSource ? { ...answer, citations: [...answer.citations.filter((entry) => entry.n !== calcSource.n || entry.doc_id !== calcSource.doc_id || entry.page !== calcSource.page), calcSource] } : answer, citation), [answer, citation, place, calcSource])
+  const [pickBoxes, setPickBoxes] = useState<PickBox[]>([])
+  useEffect(() => {
+    const controller = new AbortController()
+    setPickBoxes([])
+    workspaceApi.getPlanMap(citation.doc_id, citation.page, controller.signal).then((pm) => {
+      if (!controller.signal.aborted) setPickBoxes((pm.items ?? []).flatMap((item) => item.bbox_px ? [{ id: item.item_id, bbox: item.bbox_px }] : []))
+    }).catch(() => {})
+    return () => controller.abort()
+  }, [citation.doc_id, citation.page])
   const highlights = useDrawingHighlights(citation.doc_id, answer.answer_id, chatId)
   const answerSelection = !place && answer.citations.some((entry) => entry.doc_id === citation.doc_id && entry.page === citation.page && (entry.item_ids.length > 0 || entry.kind === 'text' || !!entry.bbox_px))
   const navigationKind = answerSelection ? 'highlight' : 'item'
@@ -188,12 +198,23 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
     setSelected(target.item_id, '2d')
     if (window.matchMedia?.('(max-width: 800px)').matches) setCalcOpen(false)
   }
-  function openItem(index: number, id: string, trigger: Element) {
-    setActive(index); setSelected(id, '2d')
+  /** An aggregate highlight covers several items: choose the one under the click, else keep the aggregate's first. */
+  function itemUnder(index: number, event?: { clientX: number; clientY: number; currentTarget: Element }): string | null {
+    const ids = sources[index]?.itemIds ?? []
+    const svg = (event?.currentTarget as SVGGraphicsElement | undefined)?.ownerSVGElement
+    if (!event || !svg || !image || ids.length < 2) return null
+    const rect = svg.getBoundingClientRect()
+    if (!rect.width || !rect.height) return null
+    const point: [number, number] = [(event.clientX - rect.left) / rect.width * image.width, (event.clientY - rect.top) / rect.height * image.height]
+    return pickItemAt(point, pickBoxes, ids, 6 / Math.max(view.scale, .001))
+  }
+  function openItem(index: number, id: string, trigger: Element, event?: { clientX: number; clientY: number; currentTarget: Element }) {
+    const picked = itemUnder(index, event)
+    setActive(index); setSelected(picked ?? id, '2d')
     if (sourcePassage(index)) { setSpecOpen(true); setSelectedItem(null); return }
     setSpecOpen(false)
     itemTrigger.current = trigger
-    setSelectedItem({ docId: citation.doc_id, itemId: sources[index]?.itemIds[0] ?? id })
+    setSelectedItem({ docId: citation.doc_id, itemId: picked ?? sources[index]?.itemIds[0] ?? id })
   }
 
   useEffect(() => {
@@ -493,7 +514,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
               onKeyDown={(event) => {
                 if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openItem(index, region.id, event.currentTarget) }
               }}
-              onClick={(event) => openItem(index, region.id, event.currentTarget)}>
+              onClick={(event) => openItem(index, region.id, event.currentTarget, event)}>
               <title>{region.text ? citation.quote ?? 'Text source' : region.id}</title>
               <rect x={x} y={y} width={Math.max(0, right - x)} height={Math.max(0, bottom - y)} vectorEffect="non-scaling-stroke" />
               <svg x={x} y={y} width={labelSize * Math.max(1, label.length / 2)} height={labelSize} viewBox={`0 0 ${22 * Math.max(1, label.length / 2)} 22`} overflow="visible"><rect className="evidence-label-bg" width={22 * Math.max(1, label.length / 2)} height="22" rx="5" /><text x={11 * Math.max(1, label.length / 2)} y="15" textAnchor="middle">{label}</text></svg>
