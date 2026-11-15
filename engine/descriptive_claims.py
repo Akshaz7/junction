@@ -74,6 +74,8 @@ def is_descriptive(question: str, res: dict) -> bool:
         return False
     if not DESCRIPTIVE.search(question or ""):
         return False
+    if re.search(r"\b(?:next\s+to|adjacent\s+to|adjoin\w*|neighbou?r\w*)\b", question or "", re.I):
+        return False   # adjacency is computed by code from room rectangles and keeps its own engine score
     if isinstance(ans.get("value"), (int, float)) and not isinstance(ans.get("value"), bool) and ans.get("unit"):
         return False   # numeric answers carry their own calculation
     return True
