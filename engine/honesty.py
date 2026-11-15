@@ -162,7 +162,9 @@ def before(question, doc_ids, root, t0=None, *, hidden=()):
         text += " " + " ".join(str(w.get("text") or "") for p in directory.glob("text-[0-9]*.json") for w in _json(p).get("words", []))
         recorded = bool(doc and any(i.props.get("fire_rating") for i in doc.items))
         if not recorded and not FIRE.search(text):
-            return unavailable(question, doc_ids, "**The requested door fire rating is not recorded in this drawing.**", t0, doc=doc)
+            res = unavailable(question, doc_ids, "**The requested door fire rating is not recorded in this drawing.**", t0, doc=doc)
+            res["source_lookup"] = readable_sources(directory)
+            return res
     from engine.router.parser import parse
     parsed = parse(question)
     from engine.analytics import BASEQ
@@ -177,17 +179,31 @@ def before(question, doc_ids, root, t0=None, *, hidden=()):
     if parsed.type == "area" and parsed.kind == "room" and (not doc or doc.mode == "planmap"):
         rooms = [i for i in doc.items if i.kind == "room"] if doc else []
         if not rooms:
-            # A printed room-area table can be used even without a geometric plan map.
-            from engine.textfile import answer as text_answer
-            printed = text_answer(question, doc_ids, root, t0)
-            if printed and positive(printed["answer"].get("value")) and printed.get("citations"):
-                return printed
-            return unavailable(question, doc_ids, "**Floor area cannot be measured from this sheet.** No room boundaries or room-area table are recorded; an equipment drawing or site outline is not a floor plan.", t0, doc=doc)
+            # Printed schedules/labels are direct area evidence; geometric
+            # measurement is a separate route and needs actual room outlines.
+            from engine.schedules import answer_schedule
+            from engine.sheetqa import answer as sheet_answer
+            for lookup in (answer_schedule, sheet_answer):
+                printed = lookup(question, doc_ids, root, t0)
+                if printed and not printed["answer"].get("abstained") and printed.get("citations"):
+                    return printed
+            res = unavailable(question, doc_ids, "**Floor area cannot be measured from this sheet.** No room boundaries or room-area table are recorded; an equipment drawing or site outline is not a floor plan.", t0, doc=doc)
+            res["source_lookup"] = readable_sources(directory)
+            return res
     if doc:
         return plan_services_length(question, doc, root, t0)
     if requests_length(question) and (DUCT.search(question) or PIPE.search(question)):
         return plan_services_length(question, Doc(did, "planmap", []), root, t0)
     return None
+
+
+def readable_sources(directory):
+    """The reader can inspect image/text sidecars or an original PDF."""
+    directory = Path(directory)
+    if any(directory.glob("page-*.*")) or any(directory.glob("text*.json")) or any(directory.glob("*.pdf")):
+        return True
+    # Dataset originals are resolved by the reader from doc metadata.
+    return bool(_json(directory / "doc.json").get("files"))
 
 
 def validate_result(res, question):

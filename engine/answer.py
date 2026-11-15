@@ -488,6 +488,10 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             for s_ in res["trace"]:
                 add(s_)
             res["trace"] = trace
+            # Missing indexed rooms/properties do not prove that the printed
+            # drawing or a schedule lacks them. Try the evidence reader first.
+            if res.pop("source_lookup", False):
+                return _use_reader(res, question, doc_ids, root, trace, calls, t0, emit)
             return res
 
         from engine.wallarea import answer as wallarea_answer
@@ -819,6 +823,10 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             last["question"] = question
             last["cost"] = {"usd_total": round(sum(c["cost_usd"] for c in calls), 6), "calls": calls}
             last["latency_ms"] = int((time.perf_counter() - t0) * 1000)
+            from engine.visual_rooms import answer as visual_rooms
+            if (visual := visual_rooms(question, doc_ids, root, trace, calls, t0,
+                                       hidden=(scene_state or {}).get("hidden") or ())) is not None:
+                return visual
             return _use_reader(last, question, doc_ids, root, trace, calls, t0, emit)
         return _use_reader(_abstained(question, doc_ids, NOT_YET, trace, t0, "index", calls), question, doc_ids, root, trace, calls, t0, emit)
     except Exception as e:  # the server must always get an answer object back

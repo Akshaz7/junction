@@ -55,7 +55,8 @@ def test_trick_stops_without_ratings_codes_or_unrelated_advice(tmp_path, monkeyp
     monkeypatch.setattr("engine.models.call", model)
     result = answer(TRICK, [d.name])
     assert result["answer"]["text_md"] == "**The requested door fire rating is not recorded in this drawing.**"
-    assert result["answer"]["abstained"] and not result["citations"]
+    assert result["answer"]["abstained"]
+    assert all(c.get("inventory_check") for c in result["citations"])
     model.assert_not_called()
 
 
