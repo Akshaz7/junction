@@ -71,6 +71,8 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   const citation = useMemo(() => place ? { ...originalCitation, kind: 'element' as const, quote: null, doc_id: place.location.doc_id, page: place.location.page, item_ids: [place.item.item_id] } : { ...(calcSource ?? originalCitation), page: pageNumber }, [originalCitation, calcSource, place, pageNumber])
   const { regions, sources, initial } = useMemo(() => place ? placeEvidence(place.location, place.item) : viewerEvidence(calcSource ? { ...answer, citations: [...answer.citations.filter((entry) => entry.n !== calcSource.n || entry.doc_id !== calcSource.doc_id || entry.page !== calcSource.page), calcSource] } : answer, citation), [answer, citation, place, calcSource])
   const highlights = useDrawingHighlights(citation.doc_id, answer.answer_id, chatId)
+  const answerSelection = !place && answer.citations.some((entry) => entry.doc_id === citation.doc_id && entry.page === citation.page && (entry.item_ids.length > 0 || entry.kind === 'text' || !!entry.bbox_px))
+  const navigationKind = answerSelection ? 'highlight' : 'item'
   const table = answerTableSelection(answer)
   const [active, setActive] = useState(initial)
   const [doc, setDoc] = useState<Document | null>(null)
@@ -145,7 +147,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
     setPlace(null); setCalcSource(null); setSelectedItem(null); setPageNumber(originalCitation.page)
     setSpecOpen(originalCitation.kind === 'text' || !!originalCitation.quote)
   }, [originalCitation])
-  useEffect(() => { setActive(initial) }, [initial, citation.doc_id, citation.page])
+  useEffect(() => { setActive(initial) }, [initial, sources, citation.doc_id, citation.page])
   useEffect(() => {
     setDraft(null); draftRef.current = null; drawingPointer.current = null; pointers.current.clear()
     setQuery(''); setHitIndex(0); setSheetText([]); setDownloadError(''); setTool('pan')
@@ -377,10 +379,10 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       <ViewerModeToggle mode={mode} onChange={changeMode} />
       <div className="viewer-source-nav" hidden={mode === '3d'}>
         {imageUrl && <a className="viewer-open-source" aria-label="Open source page" href={imageUrl} target="_blank" rel="noreferrer"><FileSymlink size={16} /></a>}
-        {sources.length > 0 && <>
-          <Button variant="ghost" size="icon" aria-label="Previous highlight" title="Previous highlight" disabled={active <= 0} onClick={() => selectSource(active - 1)}><ChevronLeft size={16} /></Button>
-          <span aria-live="polite" data-testid="source-position">Highlight {active + 1} of {sources.length}</span>
-          <Button variant="ghost" size="icon" aria-label="Next highlight" title="Next highlight" disabled={active >= sources.length - 1} onClick={() => selectSource(active + 1)}><ChevronRight size={16} /></Button>
+        {!highlights.cleared && sources.length > 0 && <>
+          <Button variant="ghost" size="icon" aria-label={`Previous ${navigationKind}`} title={`Previous ${navigationKind}`} disabled={active <= 0} onClick={() => selectSource(active - 1)}><ChevronLeft size={16} /></Button>
+          <span aria-live="polite" data-testid="source-position">{answerSelection ? 'Highlight' : 'Item'} {Math.min(active + 1, sources.length)} of {sources.length}{answerSelection ? '' : ' on this drawing'}</span>
+          <Button variant="ghost" size="icon" aria-label={`Next ${navigationKind}`} title={`Next ${navigationKind}`} disabled={active >= sources.length - 1} onClick={() => selectSource(active + 1)}><ChevronRight size={16} /></Button>
         </>}
         <Button className="viewer-fit" variant="ghost" size="icon" aria-label="Fit drawing" disabled={!image} onClick={() => image && setView(fitPage(image, viewport))}><Maximize2 size={16} /></Button>
       </div>
