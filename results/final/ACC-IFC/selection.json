@@ -1,0 +1,71 @@
+{
+  "blind": {
+    "doc_id": "opening_design__uli-gooseberry-models-uli-gooseberry",
+    "path": "data/full/junction-dataset/data/opening_design/ULI_Gooseberry/Models/ULI Gooseberry.ifc",
+    "bytes": 444515
+  },
+  "development": [
+    {
+      "doc_id": "ifc_models__resbim-263-model",
+      "path": "data/full/junction-dataset/data/ifc_models/resbim-263_model.ifc",
+      "bytes": 355586
+    },
+    {
+      "doc_id": "ifc_bench__sixty5-facade",
+      "path": "data/full/junction-dataset/data/ifc_bench/sixty5_facade.ifc",
+      "bytes": 6067026
+    },
+    {
+      "doc_id": "opening_design__sports-complex-ifc-roundtrip-freecad-detail-colored-shapes",
+      "path": "data/full/junction-dataset/data/opening_design/Sports_Complex/IFC Roundtrip/FreeCAD Detail/colored_shapes.ifc",
+      "bytes": 26569
+    },
+    {
+      "doc_id": "ifc_bench__fzk-house-arc",
+      "path": "data/full/junction-dataset/data/ifc_bench/fzk_house_arc.ifc",
+      "bytes": 2570803
+    },
+    {
+      "doc_id": "ifc_models__bimspeed-warmond-ar",
+      "path": "data/full/junction-dataset/data/ifc_models/bimspeed-warmond_ar.ifc",
+      "bytes": 4099545
+    },
+    {
+      "doc_id": "opening_design__stairs-railing-transfer-20170226-owner-review-stairs-railing",
+      "path": "data/full/junction-dataset/data/opening_design/Stairs-Railing/Transfer/20170226 - owner review/Stairs_Railing.ifc",
+      "bytes": 449608
+    },
+    {
+      "doc_id": "opening_design__uli-44-e-mifflin-suite-802-models-model-ryan",
+      "path": "data/full/junction-dataset/data/opening_design/ULI-44_E_Mifflin-Suite_802/Models/Model_Ryan.ifc",
+      "bytes": 3791399
+    },
+    {
+      "doc_id": "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3",
+      "path": "data/full/junction-dataset/data/ifc_models/bsc-chesapeake-bay-bridge-tunnel_chesapeake-bay-bridge-tunnel-4x3.ifc",
+      "bytes": 26280215
+    },
+    {
+      "doc_id": "ifc_models__bsc-duplex-duplex-a-20110907",
+      "path": "data/full/junction-dataset/data/ifc_models/bsc-duplex_duplex-a-20110907.ifc",
+      "bytes": 2380763
+    },
+    {
+      "doc_id": "ifc_models__bsc-duplex-duplex-m-20111024-rooms-and-spaces",
+      "path": "data/full/junction-dataset/data/ifc_models/bsc-duplex_duplex-m-20111024-rooms-and-spaces.ifc",
+      "bytes": 8781887
+    },
+    {
+      "doc_id": "opening_design__104-janesville-model-patricks",
+      "path": "data/full/junction-dataset/data/opening_design/104_Janesville/Model/Patricks.ifc",
+      "bytes": 1721688
+    }
+  ],
+  "selection": "SystemRandom choice from eligible <8MB non-Resbim IFC files; canonical registry ids including opening_design relative paths. Contents unopened until final.",
+  "exclusions": "Forbidden list excluded from every read/test. Ordinary data/sets/heldout_docs.txt is a training exclusion, not a measurement exclusion; no training performed. Blind selection also excluded it.",
+  "frozen_before_blind": {
+    "revision": "60956d0c2d126212e7dd7764edda6352b0ac9bb2",
+    "time": "2026-11-15T00:36:20.911146+00:00",
+    "blind_contents_previously_opened": false
+  }
+}
