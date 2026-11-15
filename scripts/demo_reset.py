@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Remove judging-demo test junk, optionally warming the demo over the API.
 
-Usage: python3 scripts/demo_reset.py [base_url] [--dry-run] [--keep-id ID]
+Usage: python3 scripts/demo_reset.py [base_url] [--apply] [--keep-id ID]
+Dry run is the DEFAULT; pass --apply to delete and warm.
 DATABASE_URL enables transactional DB cleanup; no .env is read or printed.
 Without a URL, --dry-run exits successfully without contacting any service.
 Only marked test uploads (source=uploads AND uploads__ ID) can be deleted;
@@ -20,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+from collections import Counter
 from datetime import datetime, timezone
 import json
 import os
@@ -33,12 +35,15 @@ from urllib.request import Request, urlopen
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PREFIXES = ("smoke-", "e2e-", "test-", "test ", "Voice in AR", "WEB2: ")
+PREFIXES = ("smoke-", "e2e-", "test-", "test ", "Voice in AR", "WEB2: ",
+            "stress", "ttft", "audit-x", "break-", "tellfix", "lead ", "live ",
+            "logo check", "evui", "demo-dryrun-", "recheck-", "Hard case:",
+            "X-03 ", "Demo flow ", "QA ", "Cross-device cited ")
 CHAT_PATTERNS = re.compile(
     r"^(?:(?:Cross-device|Follow|Live overview|W-20 history) \d+(?: second)?"
     r"|warmup-\d{8}T\d{12}Z|FIX-2 in place|Live sync verification"
     r"|Visibility return verification|Scene commands verification)$", re.I)
-TEST_UPLOAD = re.compile(r"^(?:upload-fixture(?:-|$)|smoke-|e2e-)", re.I)
+TEST_UPLOAD = re.compile(r"^(?:upload-fixture(?:-|$)|smoke-|e2e-|changes-.*-generate)", re.I)
 GENERATED = re.compile(r"generated[ -]for[ -]demo", re.I)
 INTERVAL = 2.5
 DOC_ID = re.compile(r"[A-Za-z0-9_-]+__[A-Za-z0-9_.-]+")
@@ -82,6 +87,8 @@ def demo_questions(path: Path) -> list[tuple[str, str]]:
 
 def automated(chat: dict) -> bool:
     title = chat.get("title")
+    if title is None or (isinstance(title, str) and not title.strip()):
+        return True  # untitled chats are never curated demo chats
     return isinstance(title, str) and (
         title.casefold().startswith(tuple(p.casefold() for p in PREFIXES))
         or CHAT_PATTERNS.fullmatch(title) is not None)
@@ -298,8 +305,17 @@ def prepare(client: Client, dry_run: bool, keep_ids=()):
         raise DemoError("Invalid chat entry")
     targets = [c for c in chats if automated(c) and c["id"] not in keep_ids]
     print(f"{len(targets)} matching automated chats; preserving {len(chats) - len(targets)} others.")
-    for chat in targets:
-        print(f"  DELETE {display(chat['id'])} title={display(chat['title'])}")
+    if dry_run:
+        print("Title groups that WOULD be deleted:")
+        for title, n in Counter(c.get("title") or "<untitled>" for c in targets).most_common(25):
+            print(f"  {n:4d}  {display(str(title))}")
+        print("Preserved titles (sample):")
+        kept = [c for c in chats if c not in targets]
+        for title, n in Counter(c.get("title") or "<untitled>" for c in kept).most_common(25):
+            print(f"  {n:4d}  {display(str(title))}")
+    else:
+        for chat in targets:
+            print(f"  DELETE {display(chat['id'])} title={display(chat['title'])}")
 
     schema = client.request("GET", "/openapi.json", "Check chat deletion support")
     supports_delete = "delete" in schema.get("paths", {}).get("/api/chats/{chat_id}", {})
@@ -362,9 +378,12 @@ def prepare(client: Client, dry_run: bool, keep_ids=()):
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("base_url", nargs="?", help="optional API origin for chat cleanup and demo warm-up")
-    parser.add_argument("--dry-run", action="store_true", help="read metadata and list actions; no writes/assets")
+    parser.add_argument("--dry-run", action="store_true", default=True,
+                        help="(default) read metadata and list actions; no writes/assets")
+    parser.add_argument("--apply", action="store_true", help="really delete and warm; without it nothing is written")
     parser.add_argument("--keep-id", action="append", default=[], help="preserve this document/chat/change ID; repeatable")
     args = parser.parse_args()
+    args.dry_run = not args.apply
     started = time.monotonic()
     client = None
     try:
