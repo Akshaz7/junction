@@ -25,7 +25,9 @@ export function graphMatchMetrics(stats: KgStats) {
   const linkedPct = stats.linked_pct ?? ((stats.counterpart_items ?? 0) > 0 ? 100 * (stats.linked_items ?? 0) / stats.counterpart_items! : null)
   const agreePct = stats.agree_pct ?? (compared ? 100 * agrees / compared : null)
   return {
-    linked: linkedPct != null
+    linked: linkedPct === 0 && (stats.counterpart_items ?? 0) > 0
+      ? { value: 'None', hint: 'No item was found in more than one file. These files describe different parts of the building, or their items cannot be matched by id, label or position.' }
+      : linkedPct != null
       ? { value: percent(linkedPct), hint: 'Items that appear in more than one file and are matched up' }
       : { value: matches.toLocaleString(), hint: matches ? 'Matching links across files. The share of matched items is not available.' : 'No items have been matched across files yet.' },
     agree: agreePct != null

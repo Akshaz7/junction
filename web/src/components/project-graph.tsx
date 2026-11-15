@@ -9,6 +9,7 @@ import {
 } from '../lib/kg'
 import { projectsApi, projectsMock, type Project } from '../lib/projects-api'
 import { docTitle } from '../lib/projects-format'
+import { displayNodes, levelDisplay } from '../lib/kg-display'
 import { useProjectGraph } from './use-project-graph'
 import './project-graph.css'
 
@@ -92,7 +93,7 @@ function NodePanel({ project, node, detail, loading, error, canShow3d, onClose, 
   return <aside className="kg-panel" aria-label="Item details">
     <header>
       <div><span className="kg-kind"><span className="kg-dot" data-group={kindGroup(shown.kind)} aria-hidden="true" />{kindLabel(shown.kind)}{ifcClass(shown.props) ? ` (${ifcClass(shown.props)})` : ''}{shown.level ? ` · ${shown.level}` : ''}</span>
-        <h3 title={shown.label}>{shown.label}</h3></div>
+        <h3 title={shown.label}>{shown.kind === 'level' ? levelDisplay(shown.label) : shown.label}</h3></div>
       <Button variant="ghost" size="icon-sm" aria-label="Close details" onClick={onClose}><X size={16} /></Button>
     </header>
     <div className="kg-panel-actions">
@@ -160,7 +161,8 @@ export function GraphTab({ project, focus = [], onShow, onAsk, canShow3d }: {
     void fullVersion
     return indexGraph(full.current?.nodes ?? shown.nodes, full.current?.edges ?? shown.edges)
   }, [fullVersion, shown])
-  const visible = useMemo(() => filterGraph(shown.nodes, shown.edges, filters), [shown, filters])
+  const docTitles = useMemo(() => new Map(project.docs.map((doc) => [doc.doc_id, docTitle(doc)] as const)), [project.docs])
+  const visible = useMemo(() => { const out = filterGraph(shown.nodes, shown.edges, filters); return { ...out, nodes: displayNodes(out.nodes, docTitles) } }, [shown, filters, docTitles])
   const levels = useMemo(() => [...new Set((full.current?.nodes ?? shown.nodes).filter((node) => node.kind === 'level').map((node) => node.label))].sort(), [shown, fullVersion])
   const docs = useMemo(() => project.docs.map((doc) => ({ id: doc.doc_id, title: docTitle(doc) })), [project.docs])
   const selectedNode = selectedId ? known.byId.get(selectedId) ?? shown.nodes.find((node) => node.id === selectedId) ?? null : null
@@ -271,7 +273,7 @@ export function GraphTab({ project, focus = [], onShow, onAsk, canShow3d }: {
         {query.trim() && hits.length === 0 && <p className="kg-hits kg-no-hits" role="status">Nothing matches</p>}
       </div>
       <div className="kg-chips" role="group" aria-label="Show">{FILTER_GROUPS.map((group) => <button key={group} type="button" aria-pressed={filters.groups.has(group)} onClick={() => toggleGroup(group)}>{groupLabel[group]}</button>)}</div>
-      <select aria-label="Level" value={filters.level} onChange={(event) => setFilters((prev) => ({ ...prev, level: event.target.value }))}><option value="">All levels</option>{levels.map((level) => <option key={level} value={level}>{level}</option>)}</select>
+      <select aria-label="Level" value={filters.level} onChange={(event) => setFilters((prev) => ({ ...prev, level: event.target.value }))}><option value="">All levels</option>{levels.map((level) => <option key={level} value={level}>{levelDisplay(level)}</option>)}</select>
       <select aria-label="File" value={filters.doc} onChange={(event) => setFilters((prev) => ({ ...prev, doc: event.target.value }))}><option value="">All files</option>{docs.map((doc) => <option key={doc.id} value={doc.id}>{doc.title}</option>)}</select>
       {filtersActive(filters) && <Button variant="ghost" onClick={() => setFilters(noFilters())}>Clear</Button>}
       <Button variant="outline" className="kg-all" aria-pressed={mode === 'all'} onClick={() => void toggleAll()}>{mode === 'all' ? 'Overview' : 'Show all items'}</Button>
