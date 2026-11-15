@@ -107,7 +107,9 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
         </details>}
       </div>}
       {calc?.status === 'incomplete' && <p className="calc-warning" role="status">This calculation could not be reproduced in full.{calc.issues?.length ? ` ${calc.issues.join(' ')}` : ''}</p>}
-      {!reasoning.calc && <p className="calc-none">No calculation was recorded for this answer. The steps are listed on the card.</p>}
+      {!reasoning.calc && (reasoning.steps?.length
+        ? <Section id="reasoning-steps" title="Steps"><ol className="calc-steps">{reasoning.steps.map((step, i) => <li key={i}><div className="calc-step-head"><span className="calc-index">{i + 1}</span><strong>{step.title}</strong></div><p className="calc-note">{step.text}</p></li>)}</ol></Section>
+        : <p className="calc-none">No calculation was recorded for this answer. The steps are listed on the card.</p>)}
 
       {claims && <>
         <Section id="claims" title="Claims" hint={`${claims.result.claims_total}`}>

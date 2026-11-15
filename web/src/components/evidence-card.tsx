@@ -88,7 +88,7 @@ export function EvidenceCard({ answer, selected, onOpenCitation, onShowCalculati
       <span className="evidence-reason">{confidence.reason}</span>
       {confidence.calibration && <span className="evidence-reason">Calibration: {confidence.calibration.correct}/{confidence.calibration.n} · {confidence.calibration.source}</span>}
     </div>
-    {onShowCalculation && reasoning.calc && <button type="button" className="evidence-calc-link" onClick={onShowCalculation}>Show calculation</button>}
+    {onShowCalculation && (reasoning.calc || reasoning.steps?.length || reasoning.based_on || reasoning.margin) && <button type="button" className="evidence-calc-link" onClick={onShowCalculation}>Show calculation</button>}
     {quality && <p className="evidence-quality" data-testid="evidence-quality">3D accuracy: {quality}</p>}
     {confidence.improve && <p className="evidence-improve">To verify: {confidence.improve}</p>}
   </section>

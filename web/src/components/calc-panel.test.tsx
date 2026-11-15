@@ -45,6 +45,8 @@ it('source links call onFocus; table sorts; close works', async () => {
 
 it('says so when there is no calculation', async () => {
   await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc: undefined, graph_path: undefined }} onClose={() => {}} />))
+  expect(host.textContent).toContain(scanReasoning.steps[0].text)
+  await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, steps: [], calc: undefined, graph_path: undefined }} onClose={() => {}} />))
   expect(host.textContent).toContain('No calculation was recorded')
 })
 
