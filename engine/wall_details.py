@@ -107,21 +107,10 @@ def details(doc_id, item_id, root, *, quantities=None, props=None, storey=None):
             wall = next((w for w in measured.get("walls", []) if w["item_id"] == item_id), {})
     skipped = next((w["reason"] for w in measured.get("skipped", []) if w["item_id"] == item_id), None)
     height = wallarea._number(wall.get("height_m") or quantities.get("height_m") or props.get("height_m"))
-    stored_height = wallarea._number(quantities.get("height_m") or props.get("height_m")) if is_ifc else None
-    geometry_height = wallarea._number(wall.get("height_m")) if is_ifc else None
-    height_source = wall.get("height_source")
-    if is_ifc and height:
-        height_basis = "ifc_geometry" if geometry_height else "ifc_quantity"
-        height_source = ("measured from this wall's 3D geometry in the file" if geometry_height
-                         else "stored IFC height quantity (no 3D geometry height available)")
-    elif not height and not is_ifc:
-        height, height_source = wallarea.ASSUMED_HEIGHT_M, wallarea.ASSUMED_HEIGHT_LABEL
-        height_basis = "assumed"
-    else:
-        height_basis = wallarea.height_basis(height_source)
+    height_source = "model" if is_ifc and height else wall.get("height_source")
+    if not height and not is_ifc:
+        height, height_source = 2.7, "assumed default; no wall height found"
     height_source = height_source or "not available"
-    if height_basis == "assumed" and height_source != wallarea.ASSUMED_HEIGHT_LABEL:
-        height_source = wallarea.ASSUMED_HEIGHT_LABEL
     length = wallarea._number(wall.get("length_m") or quantities.get("length_m") or props.get("length_m"))
     thickness = wallarea._number(wall.get("thickness_m") or quantities.get("width_m") or props.get("thickness_m") or props.get("width_m"))
     external = wall.get("is_external", props.get("is_external"))
@@ -166,10 +155,7 @@ def details(doc_id, item_id, root, *, quantities=None, props=None, storey=None):
     if wall.get("curved") and len(floors) > 1:
         notes.append("Curved wall storey splits are estimated from mesh fractions.")
     return {"status": status, "length_m": length, "thickness_m": thickness, "height_m": height,
-            "height_source": height_source, "height_basis": height_basis if height else "unavailable",
-            "height_how": "Height = top of the wall minus its bottom, read from the wall's 3D solid." if height_basis == "ifc_geometry" else None,
-            "height_ifc_quantity_m": stored_height if is_ifc else None,
-            "height_assumed": height_basis == "assumed", "storey": storey or ", ".join(dict.fromkeys(f["storey"] for f in floors)),
+            "height_source": height_source, "storey": storey or ", ".join(dict.fromkeys(f["storey"] for f in floors)),
             "classification": "External (facade)" if external else "Internal" if external is False else "Not recorded",
             "faces": faces, "opening_count": len(openings) if wall else None,
             "method": method, "scale_method": None if is_ifc else wall.get("scale_method"),

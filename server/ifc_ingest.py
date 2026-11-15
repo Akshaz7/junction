@@ -91,9 +91,7 @@ def phase(stage, source, out, timeout, index_offset=0):
             continue
     metrics = {"peak_worker_rss_mib": round(peak / 1024**2, 1), "memory_budget_mib": round(budget / 1024**2, 1), "worker_exit_code": proc.returncode}
     if reason or proc.returncode:
-        tail = " ".join(l.strip() for l in lines[-3:] if l.strip() and not l.lstrip().startswith("{"))[:200]
-        detail = reason or record.get("detail") or ("The 3D converter stopped before completing; it may have reached the server memory limit."
-                                                    + (f" Last output: {tail}" if tail else ""))
+        detail = reason or record.get("detail") or "The 3D converter stopped before completing; it may have reached the server memory limit."
         raise PhaseFailure(detail, metrics)
     return metrics
 
@@ -143,25 +141,6 @@ def index(source, doc, out, timeout):
     return metrics
 
 
-def note_ar(out, ok, reason):
-    """Record why AR is missing next to the manifest, so the viewer says so instead of silently hiding the button."""
-    path = Path(out) / "scene.json"
-    try:
-        manifest = json.loads(path.read_text())
-    except (OSError, ValueError):
-        return
-    if ok and manifest.get("usdz"):
-        manifest.pop("usdz_reason", None)
-    elif not ok:
-        manifest["usdz"] = None
-        manifest["usdz_reason"] = (reason or "the AR export did not finish")[:240]
-    else:
-        return
-    tmp = path.with_name(".scene-ar.json.tmp")
-    tmp.write_text(json.dumps(manifest, indent=1))
-    tmp.replace(path)
-
-
 def run(source, doc, out, status):
     cap = float(os.environ.get("INGEST_IFC_MAX_MB", str(100 * 1024**2 / 1e6)))
     size = source.stat().st_size / 1e6
@@ -203,10 +182,7 @@ def run(source, doc, out, status):
     if plans and (out / "pages.json").is_file():
         doc["pages"] = len(json.loads((out / "pages.json").read_text())["pages"])
         (out / "doc.json").write_text(json.dumps(doc, indent=1))
-    # AR is built from scene.glb alone, so a failed drawing-preview phase (common for small or simple models with no
-    # storeys) must not skip it. One retry covers a transient native failure.
-    ar = stage("usdz", 60) or stage("usdz", 60)
-    note_ar(out, ar, status.stages[-1].get("error", ""))
+    ar = stage("usdz", 30) if plans else False
     if size <= float(os.environ.get("IFC_INPROC_MAX_MB", "15")):  # optional extras run in the API process: small models only
         from engine.xcheck_ifc import ingest_lengths
         status.stage("quantity_checks", lambda: ingest_lengths(source, doc["doc_id"], out))
@@ -227,8 +203,7 @@ def run(source, doc, out, status):
                     status.stages[-1]["note"] = f"piping skipped: {e}"[:200]
             status.stage("piping", pip)
     final = "ready" if plans and ar else "partial"
-    missing = " and ".join(n for n, ok in (("Drawing previews", plans), ("AR", ar)) if not ok)
-    detail = "" if final == "ready" else (f"The 3D view and model quantities are available. {missing} could not be prepared. "
+    detail = "" if final == "ready" else ("The 3D view and model quantities are available. Drawing previews or AR could not be prepared. "
                                              + status.stages[-1].get("error", ""))
     status.detail = ""
     status.write(final, detail)

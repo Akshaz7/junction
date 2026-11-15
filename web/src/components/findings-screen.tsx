@@ -3,7 +3,7 @@ import { ClipboardCheck, Sparkles } from 'lucide-react'
 import { findingsApi, groupFindings, openFindingEvidence, type AdvisorCard, type Finding } from '../lib/findings'
 import { onAdvisorCards, onFindingsUpdated } from '../viewer3d/liveHighlight'
 import { sourcedCards } from '../viewer3d/advisor'
-import { ruleName, shortSource, sourceLinkLabel, sourceLinks } from '../viewer3d/AdvisorCardView'
+import { sourceLinkLabel, sourceLinks } from '../viewer3d/AdvisorCardView'
 import { DocumentViewer, useViewerSheet } from './document-viewer'
 import { VisualisePanel } from '../viewer3d/VisualiseIt'
 import type { Answer, Citation, Document } from '../lib/types'
@@ -15,11 +15,10 @@ export function AdvisorCardsPanel({ cards, onShowItems }: { cards: AdvisorCard[]
   const sourced = sourcedCards({ cards })
   return <section className="tools-card advisor-cards" aria-label="Advisor cards"><h3><Sparkles size={16} />Advisor</h3>
     {!sourced.length && <p className="tools-muted">No sourced advice for this drawing.</p>}
-    {sourced.map((card) => <article key={card.card_id} className="advisor-card"><span className="tools-tag">{card.kind}</span><h4 title={card.source.ref}>{card.title}</h4><p>{card.body}</p>
-      <p className="tools-muted finding-source"><span title={card.source.title}>{shortSource(card.source.title)}</span>{sourceLinks(card.source).map((url) => <span key={url}> · <a href={url} target="_blank" rel="noreferrer">{sourceLinkLabel(url)}</a></span>)}</p>
-      <details className="finding-rule"><summary>Rule text</summary><blockquote>{card.source.quote}</blockquote></details>
+    {sourced.map((card) => <article key={card.card_id} className="advisor-card"><span className="tools-tag">{card.kind}</span><h4>{card.title}</h4><p>{card.body}</p>
+      <p className="tools-muted">{card.source.title} · {card.source.ref}</p><blockquote>{card.source.quote}</blockquote>
+      {sourceLinks(card.source).map((url) => <a key={url} href={url} target="_blank" rel="noreferrer">{sourceLinkLabel(url)}</a>)}
       {!!card.item_ids.length && <Button variant="raised" onClick={() => onShowItems(card.item_ids, card.body)}>Show {card.item_ids.length} {card.item_ids.length === 1 ? 'item' : 'items'}</Button>}
-      {!!card.item_total && card.item_total > card.item_ids.length && <p className="tools-muted" title="Highlighting is limited to the first 50 elements so the drawing stays readable; the check itself covered all of them.">{card.item_total} elements checked; the first {card.item_ids.length} are highlighted.</p>}
     </article>)}
   </section>
 }
@@ -104,12 +103,12 @@ export function FindingsScreen({ docs }: { docs: Document[] }) {
       {!docs.length && <p className="tools-muted">No drawings available. Add a drawing in Data to run checks.</p>}
       {!loading && !busy && !notice && !findings.length && docId && <p className="tools-muted">No saved findings. Run checks to inspect this drawing.</p>}
       {groupFindings(findings).filter((group) => group.findings.length).map((group) => <section key={group.severity} className="tools-card" aria-label={group.label}><h3>{group.label} <span className="tools-tag">{group.findings.length}</span></h3>
-        <ul className="finding-list">{group.findings.map((finding) => { const title = typeof finding.detail.title === 'string' && finding.detail.title ? finding.detail.title : ruleName(finding.rule_id); const where = typeof finding.detail.storey === 'string' ? ` on ${finding.detail.storey}` : ''; return <li key={finding.id} data-finding-id={finding.id}>
-          <button type="button" className="finding-open" disabled={busy || opening} onClick={() => void showItems(finding.item_ids, finding.message)} aria-label={`Open finding ${title}`}><span className={`tools-tag severity-${finding.severity}`}>{finding.severity}</span><strong title={finding.rule_id}>{title}</strong><span>{finding.message}</span><small>{finding.item_ids.length} {finding.item_ids.length === 1 ? 'element' : 'elements'}{where} · Open evidence</small></button>
-          <p className="tools-muted finding-source"><span title={finding.rule.source_title}>{shortSource(finding.rule.source_title || 'Source unavailable')}</span>{finding.rule.url && /^https?:\/\//i.test(finding.rule.url) && <> · <a href={finding.rule.url} target="_blank" rel="noreferrer">{sourceLinkLabel(finding.rule.url)}</a></>}</p>
-          <details className="finding-rule"><summary>Rule text</summary><blockquote>{finding.rule.text}</blockquote>
-            {finding.rule.quote && finding.rule.quote !== finding.rule.text && <blockquote>{finding.rule.quote}</blockquote>}</details>
-        </li> })}</ul>
+        <ul className="finding-list">{group.findings.map((finding) => <li key={finding.id} data-finding-id={finding.id}>
+          <button type="button" className="finding-open" disabled={busy || opening} onClick={() => void showItems(finding.item_ids, finding.message)} aria-label={`Open finding ${finding.rule_id}`}><span className={`tools-tag severity-${finding.severity}`}>{finding.severity}</span><strong>{finding.rule_id}</strong><span>{finding.message}</span><small>{finding.item_ids.length} {finding.item_ids.length === 1 ? 'item' : 'items'} · Open evidence</small></button>
+          <blockquote>{finding.rule.text}</blockquote><p className="tools-muted">{finding.rule.source_title || 'Source unavailable'}{finding.rule.section && ` · ${finding.rule.section}`}</p>
+          {finding.rule.quote && finding.rule.quote !== finding.rule.text && <blockquote>{finding.rule.quote}</blockquote>}
+          {finding.rule.url && /^https?:\/\//i.test(finding.rule.url) && <a href={finding.rule.url} target="_blank" rel="noreferrer">Read source</a>}
+        </li>)}</ul>
       </section>)}
       <AdvisorCardsPanel cards={cards} onShowItems={(ids, text) => { if (!busy && !opening) void showItems(ids, text) }} />
     </section>

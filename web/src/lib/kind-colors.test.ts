@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { KIND_COLORS, KIND_KEYS, kindColor, kindColorsJson, kindCounts, kindFromItemId, kindKey, itemKindKey, pipeSizeLabel } from './kind-colors'
 
 describe('kind colours', () => {
-  it('has seventeen distinct colours', () => {
-    expect(new Set(KIND_KEYS.map((key) => KIND_COLORS[key].color)).size).toBe(17)
+  it('has thirteen distinct colours', () => {
+    expect(new Set(KIND_KEYS.map((key) => KIND_COLORS[key].color)).size).toBe(13)
   })
   it('maps aliases and unknown kinds', () => {
     expect(kindKey('curtain_wall')).toBe('wall')
@@ -24,14 +24,5 @@ describe('kind colours', () => {
   })
   it('public/kind-colors.json mirrors the table', () => {
     expect(readFileSync(new URL('../../public/kind-colors.json', import.meta.url), 'utf8')).toBe(kindColorsJson())
-  })
-})
-
-describe('structural kinds', () => {
-  it('beams and members have their own legend class, not Other', () => {
-    expect(kindKey('beam')).toBe('beam')
-    expect(kindKey('member')).toBe('member')
-    expect(kindCounts(Array(18).fill('beam'))).toEqual([{ key: 'beam', count: 18 }])
-    expect(KIND_COLORS.beam.plural).toBe('Beams')
   })
 })
