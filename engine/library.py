@@ -85,7 +85,7 @@ _PROJECT_SPECIFIC = re.compile(r"\b(?:window|door|room|wall|floor|storey|level|t
 
 # A request's Data catalogue is authoritative; never share it between concurrent chats.
 CATALOGUE: ContextVar[list[dict] | None] = ContextVar("library_catalogue", default=None)
-JUNK_TITLE = re.compile(r"^(?:smoke[-_]|stress[-_]|qa[-_]|web3[-_]notes[-_]|generated[ _-]+for[ _-]+demo)", re.I)
+JUNK_TITLE = re.compile(r"^(?:smoke[-_ ]|stress[-_ ]|qa[-_]|web3[-_]notes[-_]|generated[ _-]+for[ _-]+demo|judge[-_ ]|break[-_ ]|lead[-_ ])", re.I)  # judge/break/lead: overnight test traffic, hidden from the library and history
 
 
 def excluded_doc(doc: dict) -> bool:
