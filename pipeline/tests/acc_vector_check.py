@@ -86,7 +86,6 @@ def real_files(selection, forbidden, out, baseline_ref, blind=False):
 
 def sample200(forbidden, out, baseline_ref):
     """Use fresh identical-input ingestion in both arms; no artifact drift."""
-    import shutil
     from engine.bench import run
     from engine.answer import answer
     from pipeline.dxf_planmap import process
@@ -103,7 +102,7 @@ def sample200(forbidden, out, baseline_ref):
             root.mkdir()
             os.environ["ARTIFACTS_DIR"] = str(root)
             os.environ["MODELS_CACHE_DIR"] = str(Path(scratch) / "model-cache")
-            os.environ["MODELS_LOG_PATH"] = str(Path(scratch) / "model-log.jsonl")
+            os.environ["MODELS_COSTS_LOG"] = str(Path(scratch) / "model-log.jsonl")
             for did in sorted({r["doc_id"] for r in rows}):
                 source = ROOT / "artifacts" / did
                 target = root / did
