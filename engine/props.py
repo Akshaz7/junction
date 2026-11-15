@@ -314,6 +314,11 @@ def request(question):
         ("width_m", r"\bwidth\b|\bwider\b|\bnarrower\b"),
         ("height_m", r"\bheight\b|\btaller\b|\bshorter\b")) if re.search(rx, q)), None)
     schedule = bool(re.search(r"\bschedule\b|türliste|oviluettelo|dörrförteckning|fensterliste", q))
+    # F-MULTIQ: "list the fire doors with their widths and fire ratings" asks for a table (one cited row per element), not one property.
+    attrs = {k for k, rx in (("width", r"\bwidths?\b"), ("height", r"\bheights?\b"), ("fire", r"fire[ -]rat\w*|fire[ -]resistance"),
+                            ("material", r"\bmaterials?\b"), ("u", r"u[ -]values?|thermal transmittance")) if re.search(rx, q)}
+    multi_list = len(attrs) >= 2 and bool(re.search(r"\b(?:list|show|give|each|every|table|display)\b", q)) and len(kinds) == 1
+    schedule = schedule or multi_list
     if not schedule and re.search(r"\b(?:area|length|volume|perimeter)\b", q):
         return None  # Named-room quantities belong to the existing quantity solver.
     if re.search(r"\b(?:group|by)\b", q):
@@ -345,7 +350,7 @@ def request(question):
         return None  # Value comparisons need an explicit, separate value parser.
     if re.search(r"\b(?:has|have|with)\s+(?:a\s+)?material\s+\S", q):
         return None
-    if re.search(r"\b(?:widths?|heights?|materials?|ratings?|u[ -]values?)\s+and\s+(?:widths?|heights?|materials?|(?:fire |acoustic )?ratings?|u[ -]values?)\b", q):
+    if not multi_list and re.search(r"\b(?:widths?|heights?|materials?|ratings?|u[ -]values?)\s+and\s+(?:widths?|heights?|materials?|(?:fire |acoustic )?ratings?|u[ -]values?)\b", q):
         return None
     predicates = []
     for key, rx, positive in (("is_external", r"\bexternal\b|\bexterior\b", True),
