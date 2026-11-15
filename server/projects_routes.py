@@ -120,15 +120,24 @@ def _doc_obj(r) -> dict:
             "thumb_url": f"/api/docs/{r['doc_id']}/pages/1.png"}
 
 
-async def _project(pool, pid, refresh: bool = True) -> dict:
+async def _project(pool, pid, refresh: bool = True, visible_only: bool = True) -> dict:
     p = await pool.fetchrow("select id, name, demo, created_at from projects where id=$1", pid)
     if p is None:
         raise HTTPException(404, "project not found")
     rows = await _doc_rows(pool, pid)
+    skipped: list[str] = []
+    if visible_only:   # a stale or hidden document (not listed by /api/docs) is skipped with a note, never fatal
+        from .changes_source import visible_doc_ids
+        listed = await visible_doc_ids(pool)
+        skipped = [r["doc_id"] for r in rows if r["doc_id"] not in listed]
+        rows = [r for r in rows if r["doc_id"] in listed]
     if refresh:
         rows = await _refresh(pool, pid, rows)
-    return {"id": str(p["id"]), "name": p["name"], "demo": p["demo"], "created_at": p["created_at"].isoformat(),
-            "docs": [_doc_obj(r) for r in rows]}
+    out = {"id": str(p["id"]), "name": p["name"], "demo": p["demo"], "created_at": p["created_at"].isoformat(),
+           "docs": [_doc_obj(r) for r in rows]}
+    if skipped:
+        out["skipped_doc_ids"] = skipped
+    return out
 
 
 async def _attach(pool, pid, doc_ids: list[str]) -> None:
@@ -281,8 +290,9 @@ DEMO_FAMILIES = (
 
 async def seed_demo_projects(pool) -> dict:
     """Idempotent: creates each demo project once and adds any family document that is not in it yet. Returns {name: docs added}."""
-    rows = await pool.fetch("select doc_id from documents order by doc_id")
-    ids = [r["doc_id"] for r in rows]
+    from .changes_source import visible_doc_ids
+    listed = await visible_doc_ids(pool)   # hidden documents never enter a demo project
+    ids = sorted(listed)
     out = {}
     for name, belongs in DEMO_FAMILIES:
         fam = [d for d in ids if belongs(d.lower())]

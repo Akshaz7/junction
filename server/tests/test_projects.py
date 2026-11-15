@@ -151,3 +151,32 @@ def test_upload_into_project(client):
     assert body["doc_id"].startswith("uploads__") and body["doc_id"] in roles(body["project"])
     assert client.post(f"/api/projects/{pid}/upload", files={"file": ("x.exe", b"MZ", "application/octet-stream")}).status_code == 415
     assert client.post(f"/api/projects/{uuid.uuid4()}/upload", files={"file": ("a.png", buf.getvalue(), "image/png")}).status_code == 404
+
+
+def test_hidden_doc_is_skipped_not_404(client, monkeypatch):
+    """F-PROJVISIBLE: a project doc that /api/docs hides is skipped with a note; project chat still answers."""
+    from server import changes_source
+    seen = {}
+
+    def engine(question, doc_ids, on_event, **kw):
+        from server import stub_engine
+        seen["doc_ids"] = list(doc_ids)
+        return stub_engine.answer(question, doc_ids, on_event)
+    monkeypatch.setattr(chats_routes, "ENGINE", engine)
+    monkeypatch.setattr(chats_routes, "_real_engine", engine)
+    pid = client.post("/api/projects", json={"name": "Hidden", "doc_ids": [AC, FZK]}).json()["id"]
+    real = changes_source.visible_doc_ids
+
+    async def hide_fzk(pool):
+        return {d for d in await real(pool) if d != FZK}
+    monkeypatch.setattr(changes_source, "visible_doc_ids", hide_fzk)
+    proj = client.get(f"/api/projects/{pid}").json()
+    assert [d["doc_id"] for d in proj["docs"]] == [AC] and proj["skipped_doc_ids"] == [FZK]
+    chat = client.post("/api/chats", json={"project_id": pid, "title": "t"}).json()
+    r = client.post(f"/api/chats/{chat['id']}/messages", json={"content": "How many doors in total?"})
+    assert r.status_code == 200 and any(e == "answer" for e, _ in _sse(r.text))
+    assert seen["doc_ids"] == [AC]
+    r = client.post(f"/api/chats/{chat['id']}/messages", json={"content": "How many doors?", "doc_ids": [AC, FZK]})
+    assert r.status_code == 200 and seen["doc_ids"] == [AC]
+    r = client.post(f"/api/chats/{chat['id']}/messages", json={"content": "How many doors?", "doc_ids": [FZK]})
+    assert r.status_code == 404

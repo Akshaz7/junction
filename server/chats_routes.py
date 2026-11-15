@@ -317,6 +317,7 @@ async def ask(chat_id: str, body: NewMessage):
             raise HTTPException(409, "This message is already being answered")
     doc_ids = body.doc_ids if body.doc_ids is not None else ([c["doc_id"]] if c["doc_id"] else [])
     project = None
+    skipped_docs: list[str] = []
     if (body.doc_ids is None or body.doc_ids == []) and not doc_ids:   # a project chat with no explicit selection asks all the project's documents
         pid = await pool.fetchval("select project_id from chats where id=$1", cid)
         if isinstance(pid, uuid.UUID):
@@ -326,8 +327,11 @@ async def ask(chat_id: str, body: NewMessage):
     if doc_ids:
         from .changes_source import visible_doc_ids
         listed = await visible_doc_ids(pool)
-        if any(d not in listed for d in doc_ids):
-            raise HTTPException(404, "document not found")
+        skipped_docs = [d for d in doc_ids if d not in listed]
+        if skipped_docs:   # hidden or stale documents are skipped with a note; only an all-hidden selection is refused
+            doc_ids = [d for d in doc_ids if d in listed]
+            if not doc_ids:
+                raise HTTPException(404, "document not found")
 
     if sent_key is not None:
         SENT[sent_key] = {"ans": None, "t": time.monotonic()}
@@ -336,6 +340,8 @@ async def ask(chat_id: str, body: NewMessage):
         try:
             # Flush before restoring documents, loading history or writing the user turn.
             yield {"event": "status", "data": json.dumps({"text": "Thinking…"})}
+            if skipped_docs:
+                yield {"event": "status", "data": json.dumps({"text": f"Skipped {len(skipped_docs)} unavailable document(s)."})}
             async for ev in _stream():
                 yield ev
         except HTTPException as e:
