@@ -8,6 +8,14 @@ Hologram answers English questions about construction drawings and BIM models wi
 
 Open the [live app](https://hologram-khaki.vercel.app/), upload a drawing through **Data → Upload**, then ask and inspect its citations. The judging flow continues from laptop proof to the same phone chat, table AR, and a spoken question returning to the laptop. The [demo script](docs/DEMO.md) gives exact clicks, two-minute and five-minute takes, backup questions, and device checks still required for the AR build-up and voice animation. The [submission checklist](docs/SUBMISSION.md) tracks links, video, report and licences for Sunday 15 November at 10:00 EET. Recorded accuracy and cost evidence are in [docs/ACCURACY.md](docs/ACCURACY.md); final metrics remain pending until tied to a selected result run.
 
+## Research
+
+Our [research record](docs/RESEARCH.md) links the sources, implementation choices and source-data checks.
+[CubiCasa5K](https://arxiv.org/abs/1904.01920) and [Raster-to-Vector](https://jiajunwu.com/papers/im2cad_iccv.pdf) informed floor-plan parsing.
+[Swiss Dwellings](https://zenodo.org/records/7788422) supplies apartment and room geometry.
+[buildingSMART](https://github.com/buildingSMART/IFC4.3.x-development/blob/master/docs/schemas/shared/IfcSharedBldgElements/Entities/IfcStair.md) and [IfcOpenShell](https://docs.ifcopenshell.org/autoapi/ifcopenshell/util/element/index.html) informed assembly counting.
+We distinguish research papers, official documentation and non-peer-reviewed vendor articles, and state what our checks establish.
+
 ## Run locally
 
 Install Python and uv, Node.js/npm, and Docker with Compose; the Python version is pinned in [pyproject.toml](pyproject.toml). Start Docker, then run from the repo root:
