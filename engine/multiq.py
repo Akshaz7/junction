@@ -40,7 +40,7 @@ def split(question: str) -> list[str]:
         segs.extend(_runon(chunk) if _OPENS.match(chunk) else [chunk])
     segs = [s.strip(" ,;") for s in segs if len(re.findall(r"\w+", s)) >= 2]
     segs = [re.sub(r"\s+(?:and|then|also|plus)\s*$", "", s, flags=re.I).strip(" ,;") for s in segs]
-    if len(segs) < 2 or any(re.search(r"\b(?:of each|each of|them|those|the same|their|they)\b", x, re.I) for x in segs[1:]):
+    if len(segs) < 2 or any(re.search(r"\b(?:of each|each of|them|those|the same|their|they|that\s+(?:area|one|value|level|floor|room|number|size|count|total))\b", x, re.I) for x in segs[1:]):
         return []                                   # a later part leans on the earlier answer: keep it whole
     return [s if s.endswith("?") else s + "?" for s in segs]
 
@@ -209,7 +209,7 @@ def merge(question, doc_ids, parts, results) -> dict:
     res["evidence"] = ev
     res["question"] = question
     res["doc_ids"] = list(doc_ids)
-    res["route"] = "multi"
+    res["route"] = "hybrid"   # contract 5.7 route enum has no "multi"
     res["trace"] = trace
     res["cost"] = {"usd_total": round(usd, 6), "calls": calls}
     rs = res.get("reasoning") or {}

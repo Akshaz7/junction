@@ -206,3 +206,20 @@ def test_first_sse_disconnect_during_setup_clears_active(stream_setup, monkeypat
         assert CHAT_ID in chats_routes.ACTIVE
 
     assert CHAT_ID not in chats_routes.ACTIVE
+
+
+def test_invalid_engine_answer_falls_back_to_plain_abstention(stream_setup, monkeypatch):
+    client, state = stream_setup
+
+    def bad_engine(question, doc_ids, *args, **kw):
+        ans = stub_engine.answer(question, doc_ids)
+        ans["route"] = "not-a-route"
+        return ans
+    monkeypatch.setattr(chats_routes, "ENGINE", bad_engine)
+    response = client.post(URL, json={"content": "Which level has the largest floor area?"})
+    events = _sse(response.text)
+    assert not [e for e in events if e[0] == "error"]
+    final = [d for n, d in events if n == "answer"][-1]
+    text = final["answer"]["text_md"]
+    assert final["answer"]["abstained"] and "couldn't compute that reliably" in text
+    assert "schema" not in response.text.lower() and "enum" not in response.text.lower()
