@@ -110,3 +110,16 @@ describe('waiting for phone', () => {
     expect(isWaitingForPhone()).toBe(false)
   })
 })
+
+describe('phone joined', () => {
+  it('a join proof for the hosted code ends "waiting"; a proof for another code does not', async () => {
+    const p = await import('./pairing')
+    const code = p.ensurePairCode()
+    const proofOf = async (c: string) => Array.from(new Uint8Array((await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`join:${c}`))).slice(0, 8)), (b) => b.toString(16).padStart(2, '0')).join('')
+    expect(p.isWaitingForPhone()).toBe(true)
+    expect(await p.acceptJoinProof(await proofOf('zzzz9999'))).toBe(false)
+    expect(p.isWaitingForPhone()).toBe(true)
+    expect(await p.acceptJoinProof(await proofOf(code))).toBe(true)
+    expect(p.isWaitingForPhone()).toBe(false)
+  })
+})

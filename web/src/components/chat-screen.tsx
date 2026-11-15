@@ -205,7 +205,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     const unsubscribe = chatLive.subscribe((event) => {
       // A (re)connect snapshot also recovers everything missed while backgrounded or in native AR.
       if (event.type === 'connected') { expectingAnswer.current = false; refresh(); return }
-      if (event.type === 'disconnected') return
+      if (event.type === 'disconnected' || event.type === 'pair.joined') return
       if (event.chat_id !== liveChatId || submitting.current) return
       if (event.type === 'chat.message' && event.role === 'user') expectingAnswer.current = true
       else if (event.type === 'chat.message' || event.type === 'chat.done') expectingAnswer.current = false

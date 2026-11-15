@@ -42,6 +42,21 @@ const hostedCode = (): string => { try { return window.localStorage.getItem(HOST
 /** True while this device only shows its own QR code: no phone has been confirmed, so never claim "Paired". */
 export const isWaitingForPhone = (): boolean => { const hosted = hostedCode(); return !!hosted && read().length > 0 && read().every((code) => code === hosted) }
 
+/** The phone that scanned a code tells the server; the hosting laptop then stops "waiting" and shows Paired. */
+export async function announceJoin(code: string): Promise<void> {
+  try { await fetch(`/api/pair/${code}/join`, { method: 'POST', signal: AbortSignal.timeout(8000) }) } catch { /* the phone is paired locally either way */ }
+}
+
+/** A live "pair.joined" event carries a hash of (join, code): if it matches the code this laptop hosts, a phone really joined. */
+export async function acceptJoinProof(proof: string): Promise<boolean> {
+  const hosted = hostedCode()
+  if (!hosted || (await digestHex(`join:${hosted}`)) !== proof) return false
+  hostedMemory = ''
+  try { window.localStorage.removeItem(HOST_KEY) } catch { /* memory only */ }
+  window.dispatchEvent(new CustomEvent('hologram:pairing', { detail: read().length }))
+  return true
+}
+
 export function unpair() {
   hostedMemory = ''
   try { window.localStorage.removeItem(HOST_KEY) } catch { /* memory only */ }
@@ -103,6 +118,13 @@ export async function isPairedChat(chatId: string): Promise<boolean> {
     if (response?.ok && (await response.json() as { paired?: boolean }).paired) { rememberChat(chatId); return true }
   }
   return false
+}
+
+async function digestHex(text: string): Promise<string | null> {
+  try {
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
+    return Array.from(new Uint8Array(digest).slice(0, 8), (b) => b.toString(16).padStart(2, '0')).join('')
+  } catch { return null }
 }
 
 async function proofFor(code: string, chatId: string): Promise<string | null> {

@@ -110,3 +110,15 @@ def test_register_publishes_a_proof_not_the_code(monkeypatch):
     assert sent == [{"type": "pair.chat", "chat_id": "chat-7", "proof": pair_routes.proof("ABCD1234", "chat-7")}]
     assert "ABCD1234" not in json.dumps(sent)
     assert pair_routes.proof("OTHER9999", "chat-7") != sent[0]["proof"]
+
+
+def test_join_publishes_a_proof_not_the_code(monkeypatch):
+    sent = []
+
+    async def fake_publish(event):
+        sent.append(event)
+    monkeypatch.setattr(pair_routes.live, "publish", fake_publish)
+    c = TestClient(app)
+    assert c.post("/api/pair/ABCD1234/join").status_code == 204
+    assert sent == [{"type": "pair.joined", "proof": pair_routes.join_proof("ABCD1234")}]
+    assert "ABCD1234" not in str(sent) and c.post("/api/pair/x/join").status_code == 400

@@ -2,7 +2,8 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { Smartphone, X } from 'lucide-react'
 import qrcode from 'qrcode-generator'
 import { Button } from './ui'
-import { ensurePairCode, getPairings, onPairingChange, pairCodeFromHash, addPairing, pairLink, pairAppLink, unpair, registerChat, isWaitingForPhone } from '../lib/pairing'
+import { ensurePairCode, getPairings, onPairingChange, pairCodeFromHash, addPairing, pairLink, pairAppLink, unpair, registerChat, isWaitingForPhone, announceJoin, acceptJoinProof } from '../lib/pairing'
+import { chatLive } from '../lib/chat-live'
 import { useDialogFocus } from '../lib/use-dialog-focus'
 
 function qrSvg(text: string): string {
@@ -26,6 +27,7 @@ export function PairingLanding() {
       const code = pairCodeFromHash(window.location.hash)
       if (code === null) return
       const ok = addPairing(code)
+      if (ok) void announceJoin(code)
       window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#/chat`)
       window.dispatchEvent(new HashChangeEvent('hashchange'))
       setNotice(ok ? 'Paired. New chats from your other device open here.' : 'That pairing link is not valid.')
@@ -53,6 +55,7 @@ export function PairPhoneButton() {
   const dialogId = useId()
   const titleId = useId()
   useDialogFocus(open && !!code, dialog, trigger, () => setOpen(false))
+  useEffect(() => chatLive.subscribe((event) => { if (event.type === 'pair.joined') void acceptJoinProof(event.proof) }), [])
   useEffect(() => onPairingChange(() => { setPaired(getPairings().length > 0); setWaiting(isWaitingForPhone()) }), [])
   useEffect(() => {
     if (!open) return
