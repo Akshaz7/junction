@@ -1,0 +1,135 @@
+{
+  "status": "PARTIAL",
+  "origin": "https://stoa-pro.vercel.app",
+  "branch": "final/prode2e",
+  "checked_at": "2026-11-15T04:09:59.425403+02:00",
+  "scope": "One headless Chromium at a time, always launched through scripts/heavy.sh. Live UI smoke, not a geometry accuracy evaluation. No projects created. No deployment performed.",
+  "flows": [
+    {
+      "flow": "Home",
+      "status": "PASS",
+      "detail": "Project overview and navigation rendered.",
+      "screenshots": [
+        "01-home.png"
+      ]
+    },
+    {
+      "flow": "CubiCasa chat and evidence",
+      "status": "PARTIAL",
+      "detail": "Returned 11 doors with 11 boxes after closing calculation and retrying the image; answer disclosed independent recount=12. How we know, Sources, 3D, report preview, calculation CSV, take-off answer and CSV worked. Read-aloud started/stopped without an observed error; audible output was not verified. Actions are directly visible; there is no answer ellipsis menu in this deployed build. Opening calculation originally fired 222 identical image requests and 221 resource errors; fixed on this branch, pending deployment.",
+      "screenshots": [
+        "02-cubicasa-answer.png",
+        "03-cubicasa-calculation.png",
+        "05-cubicasa-3d.png",
+        "06-export-report.png",
+        "07-takeoff.png"
+      ]
+    },
+    {
+      "flow": "IFC AC20 chat and 3D",
+      "status": "PASS",
+      "detail": "Wall surface breakdown returned 4,880.455604 m2 net (headline 4,880.46); level-2 question returned 21 doors; 3D reached ready. Geometry was not independently measured. Negative roof inside-face opening deduction -5.9327 m2 requires ENGINE review.",
+      "screenshots": [
+        "08-ifc-area.png",
+        "09-ifc-doors.png",
+        "10-ifc-3d.png"
+      ]
+    },
+    {
+      "flow": "Small PDF upload and claims",
+      "status": "PASS",
+      "detail": "Uploaded a 69,074-byte dataset PDF, not a judges file. Ingest reached ready; descriptive answer exposed 7 claims and its calculation panel. Upload remains because UI/API offer no document deletion.",
+      "screenshots": [
+        "11-upload-ready.png",
+        "12-pdf-answer.png",
+        "13-pdf-claims.png"
+      ]
+    },
+    {
+      "flow": "AC20 project",
+      "status": "PARTIAL",
+      "detail": "Seeded project opened; Graph search selected a wall and showed item details; Files and project ask worked (21 doors on level 2). Project chat thumbnails made 12 HTTP 404 requests to legacy /pages/1.png URLs; UI normalization fixed on this branch, pending deployment. Graph details expose raw GUID/class fields.",
+      "screenshots": [
+        "14-projects.png",
+        "15-project-graph.png",
+        "16-project-node.png",
+        "17-project-files.png",
+        "18-project-ask.png"
+      ]
+    },
+    {
+      "flow": "Compare",
+      "status": "PASS",
+      "detail": "Side by side displayed both source images; keyboard moved wipe seam; overlay loaded. Existing saved design version used; no new version created.",
+      "screenshots": [
+        "19-compare-side-by-side.png",
+        "20-compare-wipe.png",
+        "21-compare-overlay.png"
+      ]
+    },
+    {
+      "flow": "Tell Stoa",
+      "status": "FAIL",
+      "detail": "Highlighter drag opened bubble. Save POST returned 500, as did GET markup on upload and CubiCasa. GET pins returned 200. No successful save/id observed; listing also failed, so absence of a partially persisted mark could not be confirmed.",
+      "screenshots": [
+        "22-tell-stoa-bubble.png",
+        "23-tell-stoa-save-failed.png"
+      ]
+    },
+    {
+      "flow": "Mobile 390 px",
+      "status": "PASS",
+      "detail": "Chat, 2D (11 boxes), and ready 3D fit viewport; document scrollWidth=innerWidth=390 in chat and viewer.",
+      "screenshots": [
+        "25-mobile-chat.png",
+        "26-mobile-3d.png",
+        "27-mobile-2d.png"
+      ]
+    }
+  ],
+  "fixes": [
+    "Share one fetched and decoded page image across all calculation evidence crops; abort and release when panel closes.",
+    "Normalize legacy project page-thumbnail URLs to the supported page-image endpoint; preserve custom thumbnail URLs."
+  ],
+  "validation": {
+    "unit_tests_passed": 22,
+    "typescript": "PASS via npm run build",
+    "production_build": "PASS",
+    "browser_regression": "NOT RUN: both shared heavy slots remained occupied for more than five minutes; stopped optional replay to finish promptly. Reproducible read-only test provided in web/e2e/prode2e-calculation.spec.ts. Live production smoke and 22 focused unit tests completed."
+  },
+  "console": {
+    "page_errors": 0,
+    "error_messages": {
+      "Failed to load resource: net::ERR_INSUFFICIENT_RESOURCES": 221,
+      "Failed to load resource: the server responded with a status of 500 ()": 5,
+      "Failed to load resource: the server responded with a status of 404 ()": 12
+    },
+    "http_status_counts": {
+      "500": 5,
+      "404": 12
+    },
+    "raw": "browser-errors.json"
+  },
+  "observed_spend_usd": {
+    "answers": 0.024866,
+    "pdf_ingest": 0.00767,
+    "note": "API-reported spend; no direct provider calls."
+  },
+  "cleanup": {
+    "upload_doc_id": "uploads__kit-fzk-haus-ac20-fzk-haus-plan-02-dachgeschoss-4725830b292f",
+    "attempted_mark_name": "Smoke test mark - generated for demo",
+    "mark_id": null,
+    "projects_created": 0,
+    "needs": "Integrator: delete test upload if administrative cleanup is available; check for/remove any partially persisted mark matching this exact doc/name."
+  },
+  "needs": [
+    "SERVER: inspect production markup GET/POST 500. Pins work. Check migration 010_taught_items.sql and server logs; missing migration is an inference, not confirmed.",
+    "INTEGRATOR: deploy this frontend branch to resolve calculation image flooding and project-thumbnail 404s.",
+    "ENGINE: review negative Dachgeschoss inside-external-wall openings (-5.9327 m2); net exceeds gross for that row.",
+    "WEB/ENGINE: graph details still expose GUID and raw IFC fields; judge-facing wording needs attention."
+  ],
+  "cross_file": [],
+  "needs_awais": [],
+  "reserved_validation": "reserved-file.json",
+  "screenshots": 26
+}

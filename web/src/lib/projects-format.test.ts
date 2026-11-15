@@ -1,8 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { area, count, fileCount, relativeTime, typeTag } from './projects-format'
+import { area, count, fileCount, relativeTime, thumbUrl, typeTag } from './projects-format'
 import { projectChatHref, projectHref, queueUploads, takeUploads } from './projects-api'
 
 describe('projects format', () => {
+  it('uses the supported page-image endpoint for legacy project thumbnails', () => {
+    expect(thumbUrl({ doc_id: 'any-file', thumb_url: '/api/docs/any-file/pages/1.png' })).toBe('/api/docs/any-file/pages/1/image')
+    expect(thumbUrl({ doc_id: 'another', thumb_url: '/api/docs/another/pages/12.png' })).toBe('/api/docs/another/pages/12/image')
+    expect(thumbUrl({ doc_id: 'a b' })).toBe('/api/docs/a%20b/files/page-1.thumb.png')
+    expect(thumbUrl({ doc_id: 'x', thumb_url: 'https://images.example.com/page.png' })).toBe('https://images.example.com/page.png')
+  })
   it('counts files in plain words', () => {
     expect(fileCount(0)).toBe('0 files')
     expect(fileCount(1)).toBe('1 file')
