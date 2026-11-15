@@ -257,6 +257,11 @@ def evaluate(operation, values):
     if operation == 'inverse': return 1 / values[0] if len(values) == 1 and values[0] else None
     if operation == 'dxf_scale': return values[0] / abs(values[1]) if len(values) == 2 and values[1] else None
     if operation in ("multiply", "convert"): return math.prod(values)
+    # DIST (engine/distance.py): two-point distances replay from the recorded points.
+    if operation == "midpoint": return (values[0] + values[1]) / 2 if len(values) == 2 else None
+    if operation in ("centroid_x", "centroid_y"):
+        from engine.distance import centroid_xy
+        return centroid_xy(values, 0 if operation == "centroid_x" else 1) if len(values) >= 6 and not len(values) % 2 else None
     if operation == "divide": return values[0] / values[1] if len(values) == 2 and values[1] else None
     if operation == "subtract": return values[0] - math.fsum(values[1:]) if values else None
     if operation == "abs_difference": return abs(values[0] - values[1]) if len(values) == 2 else None
@@ -306,6 +311,8 @@ def _measurement_steps(calc, root):
         ref = r.get("source") or {}
         artifact = ref.get("artifact") or ""
         value = r.get("values", {}).get("area_m2")
+        if r.get("measured_by"):   # PLAN-WHY: the route already recorded this measurement
+            continue
         if not number(value) or not artifact.startswith("planmap-") or not ref.get("item_id"):
             continue
         path = root / ref["doc_id"] / artifact
@@ -558,7 +565,9 @@ def _attach(res, question, root):
         record_wallarea(res, question)
     calc = res.pop("_calc", None)
     if not calc or calc.get("result", {}).get("value") != value:
-        calc = _default(res, question, root)
+        from engine.ifc_why import dimension_calc   # IFC-WHY: width/height/length from the exact IFC field
+        from engine.plan_measures import room_area_default   # PLAN-WHY: exact per-room pixel-area chain
+        calc = dimension_calc(res, question, root) or room_area_default(res, question, root) or _default(res, question, root)
     if value is None and calc.get('rows'):
         # Sanity guards can intentionally withdraw a scalar after a route has
         # measured individual regions. Keep that arithmetic as context without
@@ -614,9 +623,12 @@ def _attach(res, question, root):
                                            input_value("display decimal places", nd, "decimal places", {"kind": "policy", "text": "Precision printed in the answer headline"})], operation="round"))
                 calc["result"].setdefault("additional", []).append({"label": "Displayed answer", "value": shown, "unit": calc["result"]["unit"], "step_id": sid, "rounded_as": f"{nd} decimal places"})
                 break
+    from engine.ifc_why import add_measured_step, label_rows   # IFC-WHY: name the IFC field + "Measured" step
+    label_rows(calc, root)
     issues = validate(calc, root)
     calc["issues"], calc["status"] = issues, "incomplete" if issues else "complete"
     reasoning["calc"] = calc
+    add_measured_step(res, calc, root)
     return res
 
 

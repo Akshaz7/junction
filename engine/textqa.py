@@ -333,10 +333,25 @@ def facts_for(question: str, doc: Doc) -> Facts:
         if ws:
             rev = not re.search(r"narrowest|smallest", ql)
             n = 2 if re.search(r"\btwo\b|\b2\b", ql) else 1
-            srt = sorted(ws, key=lambda t: t[1], reverse=rev)[:n]
+            unit = "m" if kind != "column" else "m²"
             lab = "Widest" if rev else "Narrowest"
-            return Facts([f"{lab} {_pl(kind, 1)}{'s' if n > 1 else ''}: " + "; ".join(f"{i.name} ({i.type_name}) {_f(v)} m" for i, v in srt)],
-                         _ids([i for i, _ in srt]), "width-extreme")
+            if n > 1:
+                srt = sorted(ws, key=lambda t: t[1], reverse=rev)[:n]
+                return Facts([f"{lab} {_pl(kind, 1)}s: " + "; ".join(f"{i.name} ({i.type_name}) {_f(v)} {unit}" for i, v in srt)],
+                             _ids([i for i, _ in srt]), "width-extreme")
+            # Single extreme: answer the value itself and cite every tie (same stored quantity).
+            top = (max if rev else min)(float(v) for _, v in ws)
+            hit = [i for i, v in ws if abs(float(v) - top) < 1e-9]
+            what = "width" if kind != "column" else "cross-section area"
+            if len(hit) == 1:
+                i = hit[0]
+                lines = [f"{lab} {_pl(kind, 1)}: {i.name} ({i.type_name}), {what} {_f(top)} {unit}."]
+            else:
+                grp = _group(hit, lambda i: f"{i.name} ({i.type_name})" if i.type_name else i.name)
+                names = "; ".join(f"{n} ×{len(its)}" if len(its) > 1 else str(n) for n, its in grp[:5]) + (f"; and {len(grp) - 5} more types" if len(grp) > 5 else "")
+                lines = [f"{len(hit)} of {len(ws)} {_pl(kind)} share the {'greatest' if rev else 'smallest'} {what}, {_f(top)} {unit}, "
+                         f"for example {hit[0].name} ({hit[0].type_name}).", f"By name: {names}."]
+            return Facts(lines, _ids(hit), "width-extreme", value=round(top, 4), unit=unit)
 
     if re.search(r"thick", ql):
         ws = [i for i in items if i.q.get("width_m") is not None]

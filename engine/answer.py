@@ -454,6 +454,10 @@ def _answer_with_evidence(question: str, doc_ids: list[str], on_event: Callable 
     res = calc.attach(res, question, _root())
     from engine import scan_calc
     res = scan_calc.attach(res, question, _root())
+    from engine import measure_why   # WHY-CORE: length/area answers say source, scale, formula and margin
+    res = measure_why.attach(res, _root())
+    from engine import distance as _dist   # DIST: reader distance answers show model points + a code check
+    res = _dist.annotate(res, question, _root())
     try:   # bullets need a blank line before them to render as a list
         _t = res["answer"].get("text_md") or ""
         res["answer"]["text_md"] = re.sub(r"(?m)^(?!- |\* |\||#)(\S[^\n]*)\n(- )", r"\1\n\n\2", _t)
@@ -623,6 +627,13 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             # drawing or a schedule lacks them. Try the evidence reader first.
             if res.pop("source_lookup", False):
                 return _use_reader(res, question, doc_ids, root, trace, calls, t0, emit)
+            return res
+
+        from engine import distance as _distance   # DIST: two-item distances measured in code, inputs recorded
+        if (res := _distance.answer(question, doc_ids, root, t0)) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
             return res
 
         from engine.ifc_queries import answer as plain_ifc_answer

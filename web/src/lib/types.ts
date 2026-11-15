@@ -62,6 +62,12 @@ export interface Calculation {
   /** Additive scan context (all optional, rendered only when present). */
   inventory_rows?: { item_id?: string | null; label?: string; values?: Record<string, unknown>; source?: CalculationSource }[]
   scale_proof?: { doc_id?: string; page?: number; method?: string; m_per_px?: number; spread_pct?: number; proof_warning?: string
+    /** Newer proof shape: the scale derivation steps and the scale actually used (m/px). */
+    formula?: string; confidence?: number | null; derivation_complete?: boolean; selection_rule?: string
+    result?: { value?: number | null; unit?: string; rounded_as?: string }
+    steps?: { id?: string; label?: string; expr?: string; value?: number | null; unit?: string; note?: string; confidence?: number | null
+      sample_count?: number; median_width_px?: number; spread_pct?: number; uncertainty_known?: boolean
+      inputs?: { name: string; value: unknown; unit: string; source?: CalculationSource }[] }[]
     available_candidates?: { method?: string; m_per_px?: number; formula?: string; note?: string; inputs?: { name: string; value: unknown; unit: string }[] }[] }[]
   reader?: { doc_ids?: string[]; model_confidence?: number; note?: string; tool_calls?: unknown[]; calculations?: unknown[] }
   unavailable?: string[]

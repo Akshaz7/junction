@@ -145,7 +145,8 @@ def arithmetic(ctx, rows, missing, value, unit, rounding_error):
     if len(terms) == 1 and terms[0].get("measurement"):
         measure = terms[0]["measurement"]
         word = measure["formula"]
-        text = word + ": " + " × ".join(f"{_fmt(p['value'])} {p['unit']}" for p in measure["operands"]) + f" = {_fmt(value)} {UNITS.get(unit, unit)}."
+        shown = lambda p: f"{p['value']:.4g}" if p["unit"] == "m/px" else _fmt(p["value"])   # PLAN-WHY: 4 significant figures for scales
+        text = word + ": " + " × ".join(f"{shown(p)} {p['unit']}" for p in measure["operands"]) + f" = {_fmt(value)} {UNITS.get(unit, unit)}."
     for step in ctx["steps"]:
         if step.get("kind") in ("measured", "calculated"):
             step["text"] = text

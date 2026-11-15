@@ -103,6 +103,29 @@ it('renders the additive scan fields when present and nothing when absent', asyn
   expect(host.querySelector('[data-section="scale"], [data-section="reader"]')).toBeNull()
 })
 
+it('scale proof: the newer {formula, steps, result} shape shows method, m/px, each derivation step and its inputs', async () => {
+  const proof = { doc_id: 'plan', page: 1, formula: 'drawing distance in metres = pixel distance × scale', result: { value: 0.02903225806451613, unit: 'm/px', rounded_as: 'stored precision' },
+    steps: [{ id: 'scale-1-1', label: 'door prior', expr: 'scale = assumed door width / median(door icon widths)', value: 0.02903225806451613, unit: 'm/px', median_width_px: 31, sample_count: 3,
+      inputs: [{ name: 'assumed door width', value: 0.9, unit: 'm' }, { name: 'door icon width', value: 34, unit: 'px' }, { name: 'door icon width', value: 31, unit: 'px' }, { name: 'door icon width', value: 31, unit: 'px' }] },
+      { id: 'scale-1-2', label: 'ifc', expr: 'scale = 1 / rendered pixels per metre', value: 0.0181, unit: 'm/px', inputs: [{ name: 'rendered pixels per metre', value: 55.24, unit: 'px/m' }] }] }
+  await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc: { ...scanReasoning.calc!, scale_proof: [proof] } as Calculation }} onClose={() => {}} />))
+  const section = host.querySelector('[data-section="scale"]')!
+  expect(section.querySelector('[data-testid="scale-proof-head"]')!.textContent).toBe('door prior 0.029032 m/px, page 1')
+  expect(section.textContent).toContain('drawing distance in metres = pixel distance × scale')
+  const items = [...section.querySelectorAll('.calc-proof-steps li')].map((li) => li.textContent)
+  expect(items).toHaveLength(2)
+  expect(items[0]).toContain('scale = assumed door width / median(door icon widths) = 0.02903 m/px')
+  expect(items[0]).toContain('assumed door width = 0.9 m; 3 × door icon width (34 px, 31 px, 31 px)')
+  expect(items[1]).toContain('rendered pixels per metre = 55.24 px/m')
+})
+
+it('scale proof: the old {method, m_per_px} shape still renders', async () => {
+  const calc = { ...scanReasoning.calc!, scale_proof: [{ page: 2, method: 'printed-ratio', m_per_px: 0.0123 }] } as Calculation
+  await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc }} onClose={() => {}} />))
+  expect(host.querySelector('[data-testid="scale-proof-head"]')!.textContent).toBe('printed-ratio 0.0123 m/px, page 2')
+  expect(host.querySelector('.calc-proof-steps')).toBeNull()
+})
+
 it('folds supporting steps behind "Show all N steps", by level or by count', async () => {
   const base = scanReasoning.calc!
   const mk = (n: number, level?: (i: number) => 'main' | 'detail') => Array.from({ length: n }, (_, i) => ({ id: `s${i}`, label: `Step ${i}`, expr: 'x', value: i, unit: 'count', inputs: [], ...(level ? { level: level(i) } : {}) }))

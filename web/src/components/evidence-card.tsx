@@ -4,6 +4,7 @@ import { edgeVerb } from '../lib/kg'
 import { keyNumbers } from '../lib/calc-view'
 import { confidenceText, marginText } from '../lib/evidence-format'
 import { qualitySummary } from '../lib/scene-quality'
+import { MeasuredBlock, measureSteps, measurementLines } from './measured-block'
 import './evidence-card.css'
 
 /** The project this chat belongs to, read from the address (chat inside a project). */
@@ -40,9 +41,15 @@ export function EvidenceCard({ answer, selected, onOpenCitation, onShowCalculati
   const quality = qualitySummary(reasoning.quality)
   const claims = reasoning.calc?.kind === 'claims' ? (reasoning.calc.steps ?? []).filter((step) => step.section === 'claim' && step.level !== 'detail') : []
   const tone = confidence.label === 'Estimate' ? 'is-estimate' : 'is-verified'
+  // Length/area answers: Source / Scale / Formula / How sure sit in their own block, not twice in the step list.
+  const measured = measurementLines(answer)
+  const moved = new Set(measured.length ? Object.values(measureSteps(reasoning.steps)) : [])
+  const shown = new Set(measured.map((line) => line.text))
+  const listSteps = (reasoning.steps ?? []).filter((step) => !moved.has(step) && !shown.has((step.text ?? '').trim()))
   return <section className="evidence-card" aria-label="How we know" data-testid="evidence-card">
     <h3 className="evidence-heading">How we know</h3>
     {!!numbers.length && <dl className="evidence-numbers" data-testid="evidence-numbers">{numbers.map((n) => <div key={n.label}><dt>{n.label}</dt><dd>{n.text}</dd></div>)}</dl>}
+    <MeasuredBlock lines={measured} citations={answer.citations} onOpenCitation={onOpenCitation} />
     {claims.length > 0 && <ol className="evidence-steps evidence-claims" data-testid="evidence-claims">
       {claims.slice(0, 3).map((claim, index) => {
         const citation = claim.cite == null ? undefined : answer.citations.find((item) => item.n === claim.cite)
@@ -58,8 +65,8 @@ export function EvidenceCard({ answer, selected, onOpenCitation, onShowCalculati
       })}
       {claims.length > 3 && <li className="evidence-step"><div className="evidence-row"><span className="evidence-text evidence-reason">and {claims.length - 3} more in the calculation</span></div></li>}
     </ol>}
-    {!claims.length && <ol className="evidence-steps">
-      {(reasoning.steps ?? []).map((step, index) => {
+    {!claims.length && !!listSteps.length && <ol className="evidence-steps">
+      {listSteps.map((step, index) => {
         const citation = step.cite == null ? undefined : answer.citations.find((item) => item.n === step.cite)
         const body = <>
           <span className="evidence-dot" aria-hidden="true">{index + 1}</span>
