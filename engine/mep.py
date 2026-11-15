@@ -1192,6 +1192,9 @@ def answer(question: str, doc, t0) -> dict | None:
     # ---- structure first when a structural word leads
     if (ssub or sgen or (VOLUME_Q.search(ql) and CONCRETE.search(ql))) and not (subj and not ssub and not sgen):
         idx = load_index(doc)
+        if COUNT_Q.search(ql) and not _length_requested(ql):
+            from engine.ifc_accuracy import count_index
+            idx = count_index(idx, doc)
         c = _Ctx(question, doc, t0, idx)
         if re.search(r"\bload[- ]?bearing\b", ql) and re.search(r"\bwalls?\b", ql):
             return _loadbearing_walls(c)
@@ -1224,6 +1227,9 @@ def answer(question: str, doc, t0) -> dict | None:
     if not mep_q:
         return None
     idx = load_index(doc)
+    if COUNT_Q.search(ql) and not _length_requested(ql):
+        from engine.ifc_accuracy import count_index
+        idx = count_index(idx, doc)
     if idx is None:
         return None
     if not idx["services"] and subj and _kinds_of(subj) <= AMBIGUOUS_FIXTURES and not trade:

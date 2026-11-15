@@ -86,7 +86,7 @@ def storey_of(el):
         seen.add(cur.id())
         if cur.is_a("IfcBuildingStorey"):
             return cur
-        nxt = uel.get_container(cur) or uel.get_aggregate(cur)
+        nxt = uel.get_container(cur, should_get_direct=True) or uel.get_aggregate(cur)
         if nxt is None and cur.is_a("IfcOpeningElement"):
             nxt = next((r.RelatingBuildingElement for r in cur.VoidsElements), None)
         if nxt is None and cur.is_a("IfcElement"):

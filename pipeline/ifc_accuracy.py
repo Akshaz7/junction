@@ -51,6 +51,7 @@ def count_metadata(el):
     while (parent := E.get_aggregate(cur)) is not None:
         if parent.id() in seen:
             status = 'cyclic aggregate hierarchy'
+            component = None  # malformed hierarchy: preserve occurrences, flag uncertainty
             break
         seen.add(parent.id())
         ancestors.append({'item_id': parent.GlobalId, 'ifc_class': parent.is_a()})
@@ -80,8 +81,11 @@ def stored_net_area(space):
             if not isinstance(value, (int, float)) or isinstance(value, bool) or not math.isfinite(value) or value < 0:
                 continue
             prop = space.file.by_id(entry['id'])
-            unit = U.get_property_unit(prop, space.file, use_cache=True)
-            if unit is not None and unit.UnitType == 'AREAUNIT':
+            try:
+                unit = U.get_property_unit(prop, space.file, use_cache=True)
+            except (IndexError, RuntimeError):
+                continue
+            if unit is not None and getattr(unit, 'UnitType', None) == 'AREAUNIT':
                 si = float(value) * U.get_unit_scale(unit)
                 if math.isfinite(si):
                     return si, f'{pn}.{name}; declared area unit converted to m²'
@@ -99,16 +103,25 @@ def space_area(space):
               'difference_pct': None, 'method': 'IfcSpace geometry horizontal footprint'}
     stored, source = stored_net_area(space)
     result.update(stored_net_m2=stored, stored_source=source)
-    if U.get_project_unit(space.file, 'LENGTHUNIT', use_cache=True) is None:
+    try:
+        length_unit = U.get_project_unit(space.file, 'LENGTHUNIT', use_cache=True)
+    except (IndexError, RuntimeError):
+        length_unit = None
+    if length_unit is None:
         result['reason'] = 'The model does not declare length units.'
         return result
     try:
         import ifcopenshell.geom as G
         import ifcopenshell.util.shape as S
+        from shapely.errors import GEOSException
         st = G.settings()
         st.set('use-world-coords', True)
         shape = G.create_shape(st, space)
-        area = float(S.get_footprint_area(shape.geometry, axis='Z'))
+        try:
+            area = float(S.get_footprint_area(shape.geometry, axis='Z'))
+        except GEOSException:
+            result['reason'] = 'Footprint unavailable (invalid projected mesh).'
+            return result
         if not math.isfinite(area) or area <= 0:
             raise ValueError('no positive footprint')
         result['measured_m2'] = area
@@ -129,7 +142,7 @@ def space_row(el, *, geometry=False):
     st, seen = el, set()
     while st is not None and not st.is_a('IfcBuildingStorey') and st.id() not in seen:
         seen.add(st.id())
-        st = E.get_container(st) or E.get_aggregate(st)
+        st = E.get_container(st, should_get_direct=True) or E.get_aggregate(st)
     if st is not None and not st.is_a('IfcBuildingStorey'):
         st = None
     row = {'item_id': el.GlobalId, 'ifc_class': el.is_a(), 'name': el.Name,
@@ -146,13 +159,16 @@ def build(f, *, geometry=False):
     for el in f.by_type('IfcProduct'):
         if not (el.is_a('IfcElement') or el.is_a('IfcSpace')):
             continue
+        if not el.GlobalId:
+            errors.append({'item_id': None, 'ifc_class': el.is_a(), 'reason': 'Missing GlobalId'})
+            continue
         try:
             rows.append(space_row(el, geometry=geometry) if el.is_a('IfcSpace') else
                         {'item_id': el.GlobalId, 'ifc_class': el.is_a(), **count_metadata(el)})
         except (RuntimeError, ValueError, AttributeError, TypeError) as exc:
-            errors.append({'item_id': el.GlobalId, 'reason': type(exc).__name__})
+            errors.append({'item_id': el.GlobalId, 'ifc_class': el.is_a(), 'reason': type(exc).__name__})
     return {'version': VERSION, 'schema': f.schema, 'rows': rows, 'errors': errors,
-            'space_inventory_complete': not any(e for e in errors if f.by_guid(e['item_id']).is_a('IfcSpace'))}
+            'space_inventory_complete': not any(e['ifc_class'] == 'IfcSpace' for e in errors)}
 
 
 def enrich_elements(elements, index):

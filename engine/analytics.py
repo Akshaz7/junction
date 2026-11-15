@@ -34,7 +34,7 @@ def _of_kind(doc: Doc, kind: str) -> list[Item]:
     its = [i for i in doc.items if i.kind == kind]
     if doc.mode == "planmap":
         its = [i for i in its if i.conf >= MIN_CONF]
-    return [i for i in its if i.props.get("ifc_class") != "IfcStairFlight"]
+    return its  # Count routes have already removed related components in prepare_doc.
 
 
 def _fmt(v: float) -> str:
@@ -1457,6 +1457,10 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
     return _done(question, doc, text, tot, "m2", items_all, trace, t0=t0)
 
 
+from engine.ifc_accuracy import checked_analytics
+
+
+@checked_analytics
 def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
     """First handler that recognises the shape wins; every handler may return None."""
     res = filtered_question(question, doc, t0) or arithmetic_question(question, doc, t0, solve_fn)
