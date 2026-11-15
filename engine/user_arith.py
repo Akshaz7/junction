@@ -45,7 +45,7 @@ def _drawing_area(question, doc_ids, root):
         for did in doc_ids[:1]:
             doc = load_doc(did, root)
             rooms = [i for i in doc.items if i.kind == "room"]
-            hit = room_filter(question, rooms)
+            hit = room_filter(re.sub(r"\b(?:if|when)\s+it\b", "", PAIR.sub(" ", question)), rooms)
             if hit and len(hit[1]) == 1 and hit[1][0].q.get("area_m2") is not None:
                 return hit[1][0], float(hit[1][0].q["area_m2"]), doc
     except Exception:  # noqa: BLE001 - the comparison is a bonus; the arithmetic never depends on it
