@@ -183,8 +183,9 @@ def test_scale_falls_back_to_area_fit_without_ratio():
     page["words"] = [w for w in page["words"] if not w["text"].startswith("1:")]
     rs = R.rooms(page, walls)
     sc = R.scale(page, rs)
-    assert sc["method"] == "printed areas fit"
+    assert sc["method"].startswith("printed areas fit")
     assert abs(sc["m_per_pt"] / (PT_M * 50) - 1) < 0.02
+    assert sc["ratio"] == "1:50"   # a fit within 3% of a standard ratio snaps to it
 
 
 def test_wrong_printed_ratio_is_flagged():
@@ -251,3 +252,103 @@ def test_scale_bar_irregular_steps_feet():
              for t, v in (("0", 0), ("4'", 4), ("8'", 8), ("16'", 16))]
     sc = R.scale({"W_pt": 1190, "H_pt": 842, "paths": [], "words": words}, [])
     assert sc["method"] == "scale bar" and abs(sc["m_per_pt"] / (0.3048 / k) - 1) < 1e-6
+
+
+# ------------------------------------------------------------ r3: vertical tags, splits, partitions, door arcs
+
+def _box_page(partition=False, labels=(("KITCHEN", "101", 2.5), ("BEDROOM", "102", 7.5))):
+    """A 10 m x 4 m box at 1:100 (walls 0.2 m), labels at x metres along it, optional light partition at 5 m
+    drawn as two thin parallel lines 0.1 m apart."""
+    m = 1 / (PT_M * 100)          # pt per metre
+    ox, oy, t = 100.0, 100.0, 0.2 * m
+
+    def rect(x0, y0, x1, y1):
+        return {"polygon": [[x0, y0], [x1, y0], [x1, y1], [x0, y1]], "thickness_pt": t}
+    W, H = 10 * m, 4 * m
+    walls = [rect(ox, oy, ox + W + 2 * t, oy + t), rect(ox, oy + t + H, ox + W + 2 * t, oy + 2 * t + H),
+             rect(ox, oy, ox + t, oy + 2 * t + H), rect(ox + W + t, oy, ox + W + 2 * t, oy + 2 * t + H)]
+    paths = []
+    if partition:
+        for dx in (5.0, 5.1):
+            x = ox + t + dx * m
+            paths.append({"pts": [[x, oy + t], [x, oy + t + H]], "closed": False, "stroke": [0, 0, 0], "fill": None,
+                          "width": 0.3, "dashed": False})
+    words = [{"text": "1:100", "bbox": [800, 600, 830, 610]}]
+    for name, num, xm in labels:
+        x, y = ox + t + xm * m, oy + t + 2 * m
+        words += [{"text": name, "bbox": [x - 20, y - 6, x + 20, y + 2]}, {"text": num, "bbox": [x - 8, y + 4, x + 8, y + 12]}]
+    return {"W_pt": 1000, "H_pt": 700, "rotate": 0, "paths": paths, "words": words, "image_cover": 0.0}, walls
+
+
+def test_vertical_room_tag_is_read():
+    # text turned 90 deg counter-clockwise: columns left to right, each read bottom to top
+    words = [{"text": "K105", "bbox": [100, 150, 107, 167]}, {"text": "OFFICE", "bbox": [110, 140, 117, 170]},
+             {"text": "16.5", "bbox": [120, 153, 127, 167]}, {"text": "m²", "bbox": [120, 141, 127, 150]}]
+    bl = R.label_blocks(words)
+    assert len(bl) == 1
+    assert (bl[0]["label"], bl[0]["number"], bl[0]["area_printed_m2"]) == ("OFFICE", "K105", 16.5)
+
+
+def test_two_labels_in_one_region_are_split():
+    page, walls = _box_page(partition=False)
+    rs = [r for r in R.rooms(page, walls) if r["labels"]]
+    assert sorted(r["label"] for r in rs) == ["BEDROOM", "KITCHEN"]
+    assert all(r["polygon"] and not r["merged"] for r in rs)
+    a = [r["pts_area"] * (PT_M * 100) ** 2 for r in rs]
+    assert abs(sum(a) - 40) < 2.5 and min(a) > 12
+
+
+def test_light_partition_drawn_as_line_pair_separates_rooms():
+    page, walls = _box_page(partition=True)
+    rs = [r for r in R.rooms(page, walls) if r["labels"]]
+    a = sorted(r["pts_area"] * (PT_M * 100) ** 2 for r in rs)
+    assert len(a) == 2 and all(18 < v < 21 for v in a)   # 5.0 m and 4.9 m wide, 4 m deep
+
+
+def test_one_name_and_number_per_room():
+    r = R._room(None, [{"label": "WC", "number": "K117", "area_printed_m2": 1.5, "bbox": [0, 0, 1, 1], "xy": [0, 0]},
+                       {"label": "CLEANER", "number": "K114", "area_printed_m2": 2.5, "bbox": [0, 0, 1, 1], "xy": [0, 0]}])
+    assert (r["label"], r["number"]) == ("CLEANER", "K114") and len(r["labels"]) == 2
+
+
+def test_door_guess_ignores_closed_circles():
+    circ = [[10 + 5 * math.cos(a / 8 * math.pi), 10 + 5 * math.sin(a / 8 * math.pi)] for a in range(17)]
+    page = {"paths": [{"pts": circ, "is_arc": True, "n_curves": 4, "closed": True}] * 5}
+    assert R._door_guess(page) is None
+    q = [[10 * math.cos(a / 8 * math.pi / 2), 10 * math.sin(a / 8 * math.pi / 2)] for a in range(9)]
+    page["paths"] += [{"pts": q, "is_arc": True, "n_curves": 1, "closed": False}] * 3
+    g = R._door_guess(page)
+    assert g and abs(g["m_per_pt"] - 0.085) < 1e-6
+
+
+def test_area_cut_frees_cubicle_from_lobby():
+    """A WC cubicle whose front partition was not read joins the lobby: the tag's printed area guides a straight
+    cut, the cubicle keeps its tag and the lobby is left as a separate piece."""
+    from shapely.geometry import MultiLineString, Point, box
+    from pipeline.pdf_rooms import _neck_split
+    m = 0.01   # 1 pt = 1 cm
+    g = box(0, 0, 166, 90).union(box(-10, 90, 250, 250))
+    # no drawn line where the cut would go: no cut (cuts follow drawn linework, never just the printed number)
+    assert _neck_split(g, 1.5, Point(83, 40), m, 1.5, 0.3, drawn=None) is None
+    front = MultiLineString([[(0, 90), (60, 90)], [(140, 90), (166, 90)]])   # cubicle front with a door gap
+    cut = _neck_split(g, 1.5, Point(83, 40), m, 1.5, 0.3, drawn=front)
+    assert cut is not None
+    room, rest = cut
+    assert abs(room.area * m * m - 1.5) < 0.2
+    assert room.bounds[3] <= 95 and rest.area * m * m > 3.5
+
+
+def test_wall_run_gap_tells_a_facade_chord_from_a_partition():
+    """A drawn line across a gap in a wall run (door / glazing bay on the facade line) is a room boundary; a
+    partition ending in T-junctions on cross walls is not on a wall run."""
+    import numpy as np
+    from pipeline.pdf_rooms import _wall_run_gap
+    ppm = 40.0                                  # px per metre
+    mask = np.zeros((400, 800), np.uint8)
+    mask[200:208, 0:300] = 255                  # facade wall, gap 300..460 (4 m), wall again
+    mask[200:208, 460:800] = 255
+    assert _wall_run_gap(mask, (300, 204), (460, 204), ppm)
+    mask2 = np.zeros((400, 800), np.uint8)
+    mask2[:, 100:108] = 255                     # two cross walls (0.2 m thick)
+    mask2[:, 300:308] = 255
+    assert not _wall_run_gap(mask2, (108, 150), (300, 150), ppm)
