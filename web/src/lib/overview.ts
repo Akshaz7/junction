@@ -49,6 +49,18 @@ export function cleanTitle(raw: string) {
   return coded ? coded.charAt(0).toUpperCase() + coded.slice(1) : 'Untitled drawing'
 }
 
+/** Mirrors JUNK_TITLE in engine/library.py: overnight test traffic is hidden everywhere. */
+const junkTitle = /^(?:smoke[-_ ]|stress[-_ ]|qa[-_]|web3[-_]notes[-_]|generated[ _-]+for[ _-]+demo|judge[-_ ]|break[-_ ]|lead[-_ ])/i
+export function isJunkName(raw: string | null | undefined) {
+  const name = String(raw || '').replace(/^uploads__/, '')
+  return junkTitle.test(name) || junkTitle.test(name.split('__').slice(-1)[0]) || /upload-fixture|generated[ _-]+for[ _-]+demo|cross-device/i.test(name)
+}
+
+/** Findings whose document is not test junk (checked by id and by the library title). */
+export function realFindings(findings: OverviewFinding[], titleOf: (id: string) => string = (id) => id) {
+  return findings.filter((finding) => !isJunkName(finding.doc_id) && !isJunkName(titleOf(finding.doc_id)))
+}
+
 export function isTestUpload(raw: string) {
   const name = raw.replace(/^uploads__/, '')
   return testUpload.test(name) || /^screenshot/i.test(name) || cleanTitle(name) === 'Untitled drawing'
@@ -123,7 +135,7 @@ export function chatPreview(chat: OverviewChat) {
   const questionIndex = messages.map((message) => message.role).lastIndexOf('user')
   const response = messages.slice(questionIndex + 1).reverse().find((message) => message.role === 'assistant')
   return {
-    question: questionIndex >= 0 ? messages[questionIndex].content : chat.title || 'Untitled chat',
+    question: oneLine(questionIndex >= 0 ? messages[questionIndex].content : chat.title || 'Untitled chat'),
     answer: chat.detailUnavailable ? 'Answer unavailable.' : response ? oneLine(response.answer?.answer.text_md || response.content) : 'No answer yet.',
     cost: response?.answer?.cost.usd_total,
   }
@@ -142,7 +154,7 @@ export function hasAnswer(chat: OverviewChat) {
 /** Chats that have an answer, with repeats of the same question dropped. */
 export function visibleChats(chats: OverviewChat[], limit = 5) {
   const seen = new Set<string>()
-  return chats.filter(hasAnswer).filter((chat) => {
+  return chats.filter((chat) => !isJunkName(chat.title) && !isJunkName(chatPreview(chat).question)).filter(hasAnswer).filter((chat) => {
     const key = chatPreview(chat).question.trim().toLowerCase()
     if (seen.has(key)) return false
     seen.add(key); return true

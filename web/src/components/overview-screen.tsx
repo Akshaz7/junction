@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { ArrowRight, CalendarClock, FileSearch, HardHat, Scale } from 'lucide-react'
-import { changeSubtitle, chatHref, chatPreview, cleanTitle, groupFindings, OverviewApi, severityLabel, visibleChats, weeklyChanges } from '../lib/overview'
+import { changeSubtitle, realFindings, chatHref, chatPreview, cleanTitle, groupFindings, OverviewApi, severityLabel, visibleChats, weeklyChanges } from '../lib/overview'
 import type { Document } from '../lib/types'
 import './overview-screen.css'
 import { apiFetch, workspaceApi } from '../lib/api'
@@ -98,15 +98,12 @@ export function OverviewScreen({ docs = [] }: { docs?: Document[] }) {
   const findings = useOverviewSection(loadFindings)
   const chats = useOverviewSection(loadChats, true)
   const week = weeklyChanges(changes.data || [])
-  const groups = groupFindings(findings.data || [])
-  const counts: Record<string, number> = {}
-  for (const group of groups) counts[group.severity] = (counts[group.severity] || 0) + 1
   const docTitle = (id: string) => cleanTitle(docs.find((doc) => doc.doc_id === id)?.title || id)
-  const buildings = [...new Set(groups.map((group) => docTitle(group.doc_id)))]
+  const groups = groupFindings(realFindings(findings.data || [], (id) => docs.find((doc) => doc.doc_id === id)?.title || id))
   const chatRows = visibleChats(chats.data || [])
 
   return <section className="overview-screen" aria-label="Workspace overview" data-live={chats.live}>
-    <header className="overview-greeting"><h2>Project overview</h2><p>What is in the project, what changed, and what needs checking.</p></header>
+    <header className="overview-greeting"><p>What is in the project, what changed, and what needs checking.</p></header>
     <div className="overview-stats" aria-label="Project at a glance">
       <a className="overview-stat" href="#/data"><strong>{docs.length}</strong><span>Drawings and models</span></a>
       <a className="overview-stat" href="#/changes"><strong>{week.length}</strong><span>New this week</span></a>
@@ -114,16 +111,18 @@ export function OverviewScreen({ docs = [] }: { docs?: Document[] }) {
       <div className="overview-stat"><strong>{groups.length}</strong><span>Checks to review</span></div>
     </div>
     <div className="overview-grid">
+      <div className="overview-col">
       <OverviewCard title="Recent uploads and revisions" href="#/changes" loading={changes.loading} error={changes.error} onRetry={changes.retry}>
         {week.length ? <ul className="overview-list">{week.map((change) => {
           const doc = change.summary.doc_id || change.doc_b
           return <li key={change.id}><a href="#/changes" data-testid="overview-change"><strong>{cleanTitle(String(change.summary.title || change.summary.headline || docTitle(doc)))}</strong><span>{changeSubtitle(change)}</span><time dateTime={change.created_at} hidden /></a></li>
         })}</ul> : <p className="overview-empty">No changes this week.</p>}
       </OverviewCard>
+      </div>
+      <div className="overview-col">
       <OverviewCard title="Open findings" loading={findings.loading} error={findings.error} onRetry={findings.retry}>
         {groups.length ? <>
-          <p className="overview-building">{buildings.join(', ')}</p>
-          <ul className="overview-list overview-findings">{groups.slice(0, 3).map((group) => <li key={group.key} data-testid="overview-finding"><span className={`overview-severity overview-severity-${group.severity}`}>{severityLabel(group.severity)}</span><p>{group.line.replace(/\s+on\s+.*$/, '')}{group.storeys.length > 0 && <>{group.storeys.length > 1 ? ' on ' : ' on '}{group.storeys.join(', ')}</>}. {group.rule && <span className="overview-rule">{group.rule}.</span>}</p>{group.finding.rule?.source_title && <details><summary>Rule source</summary><p>{group.finding.rule.source_title}</p>{group.finding.rule.quote && <blockquote>{group.finding.rule.quote}</blockquote>}</details>}</li>)}</ul>
+          <ul className="overview-list overview-findings">{groups.map((group) => <li key={group.key} data-testid="overview-finding"><span className={`overview-severity overview-severity-${group.severity}`}>{severityLabel(group.severity)}</span><p>{group.line.replace(/\s+on\s+.*$/, '')}{group.storeys.length > 0 && <>{group.storeys.length > 1 ? ' on ' : ' on '}{group.storeys.join(', ')}</>}. {group.rule && <span className="overview-rule">{group.rule}.</span>}</p>{group.finding.rule?.source_title && <details><summary>Rule source</summary><p>{group.finding.rule.source_title}</p>{group.finding.rule.quote && <blockquote>{group.finding.rule.quote}</blockquote>}</details>}</li>)}</ul>
         </> : <p className="overview-empty">No findings yet.</p>}
       </OverviewCard>
       <OverviewCard title="Latest answers" href="#/chat" loading={chats.loading} error={chats.error} onRetry={chats.retry}>
@@ -132,6 +131,7 @@ export function OverviewScreen({ docs = [] }: { docs?: Document[] }) {
           return <li key={chat.id}><a href={chatHref(chat.id)} data-testid="overview-chat"><strong>{preview.question}</strong><span className="overview-answer">{preview.answer}</span></a></li>
         })}</ul> : <p className="overview-empty">No answers yet. Start with a question below.</p>}
       </OverviewCard>
+      </div>
     </div>
     <section className="overview-start" aria-label="Start a question"><h3>Where shall we start?</h3><div className="overview-starters">{constructionStarters.map((starter) => {
       const Icon = starter.icon

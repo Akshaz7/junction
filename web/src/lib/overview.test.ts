@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { OverviewApi, chatHref, chatPreview, findingCounts, latestChats, oneLine, overviewStarters, starterHref, topFindings, weeklyChanges, cleanTitle, groupFindings, visibleChats, ruleName, type OverviewChat, type OverviewFinding } from './overview'
+import { OverviewApi, isJunkName, realFindings, chatHref, chatPreview, findingCounts, latestChats, oneLine, overviewStarters, starterHref, topFindings, weeklyChanges, cleanTitle, groupFindings, visibleChats, ruleName, type OverviewChat, type OverviewFinding } from './overview'
 import type { Answer, ChangeEntry } from './types'
 
 const chat = (id: string, created_at: string): OverviewChat => ({ id, title: 'A question', created_at })
@@ -127,5 +127,18 @@ describe('overview junk filtering', () => {
       { id: 'm1', role: 'user', content: 'q', created_at: '', answer: null }, { id: 'm2', role: 'assistant', content, created_at: '', answer: null }] })
     expect(hasAnswer(chat('This took longer than 40 s, so I stopped. Nothing was guessed.'))).toBe(false)
     expect(hasAnswer(chat('There are 11 doors.'))).toBe(true)
+  })
+})
+
+describe('test-junk filtering on the overview', () => {
+  it('matches the library junk pattern by title and by id tail', () => {
+    for (const name of ['judge-features-duplex', 'Judge multi duplex', 'break-ui-x', 'lead-check', 'smoke-a', 'stress_b', 'ext__judge-features-duplex.ifc'])
+      expect(isJunkName(name)).toBe(true)
+    for (const name of ['Duplex A', 'Schependomlaan design', '', null]) expect(isJunkName(name)).toBe(false)
+  })
+  it('drops findings of junk documents and keeps real ones', () => {
+    const f = (doc_id: string) => ({ id: doc_id, doc_id, severity: 'info', message: 'm', created_at: '2026-11-15T00:00:00Z' }) as OverviewFinding
+    const kept = realFindings([f('ifc__duplex-a'), f('uploads__judge-features-duplex'), f('x__plan')], (id) => id === 'x__plan' ? 'Break test plan' : id)
+    expect(kept.map((x) => x.doc_id)).toEqual(['ifc__duplex-a'])
   })
 })

@@ -1,6 +1,6 @@
 .overview-screen { flex: 1; min-height: 0; overflow: auto; padding: 16px 24px 32px; }
 .overview-greeting, .overview-grid, .overview-start, .overview-stats { width: 100%; max-width: 1200px; margin-inline: auto; }
-.overview-greeting { margin-bottom: 28px; }
+.overview-greeting { margin-bottom: 16px; }
 .overview-greeting h2 { font-size: var(--text-h1); line-height: var(--text-h1--line-height); letter-spacing: -.02em; font-weight: 500; }
 .overview-greeting p { margin-top: 6px; color: var(--muted-foreground); }
 .overview-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
@@ -48,7 +48,9 @@ button.overview-starter { border: 0; color: var(--foreground); text-align: left;
 .overview-rule { color: var(--text-muted, inherit); }
 
 /* W-87: balanced overview: changes on the left, findings and answers stacked on the right */
-@media (min-width: 900px) { .overview-grid { align-items: stretch; } .overview-grid > .overview-card:first-child { grid-row: span 2; } }
+.overview-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.overview-grid { align-items: stretch; }
+.overview-col > .overview-card:last-child { flex: 1; }
 
 .overview-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-block: 8px 16px; }
 .overview-stat { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; border: 1px solid var(--border, #e5e7eb); border-radius: 12px; background: var(--card, #fff); color: inherit; text-decoration: none; }
