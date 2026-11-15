@@ -252,6 +252,9 @@ def facts_for(question: str, doc: Doc) -> Facts:
             h = f", height {_f(b['elevation_m'] - a['elevation_m'])} m" if b else ""
             lines.append(f"{a['name']}: elevation {_f(a['elevation_m'])} m{h}")
         return Facts(lines, [], "levels", value=len(srt), unit="count")
+    if mep_words and not kinds and re.search(r"\b(levels?|storeys?|floors?)\b", ql) and re.search(r"how many|number of|count", ql):
+        # F-MEPFIRE: a question about heaters/pipes/ducts is never answered with the storey count
+        return Facts(["None indexed: no matching service elements are recorded in the element index for this model, so I cannot give a count."], [], "mep-none", available=False)
     if not kinds:
         svc = _services_facts(doc, ql)
         if svc is not None:
