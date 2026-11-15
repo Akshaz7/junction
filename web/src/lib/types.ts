@@ -20,6 +20,8 @@ export interface IngestStatus {
   status: 'none' | 'running' | 'ready' | 'partial' | 'failed'
   stages: { stage: string; ok: boolean; s: number }[]
   detail: string
+  /** One-time cost of reading the drawing; null when no model was used or it was not recorded. */
+  cost_usd?: number | null
 }
 
 export interface UploadReceipt {
