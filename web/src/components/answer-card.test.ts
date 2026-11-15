@@ -87,11 +87,11 @@ describe('answer rendering (QA-LIVE #7)', () => {
     expect(html).not.toContain('Quote 9')
     expect(html).toContain('aria-label="Sources 12"')
   })
-  it('shows document chips from answer.doc_ids', () => {
+  it('removes the redundant document chips while preserving source documents', () => {
     const html = render((a) => { a.doc_ids = [demoDocument.doc_id, 'other__doc'] })
-    expect(html).toContain('data-testid="answer-docs"')
+    expect(html).not.toContain('data-testid="answer-docs"')
     expect(html).toContain('Garden room')
-    expect(html).toContain('other__doc')
+    expect(html).not.toContain('other__doc')
   })
 
   it('never lists every project file on an uncited answer like a greeting', () => {

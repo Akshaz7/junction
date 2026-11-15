@@ -3,7 +3,7 @@ import { LoaderCircle, Mic, Square, Volume2 } from 'lucide-react'
 import { recordQuestion, speakAnswer, type MicState, type QuestionRecorder, type SpeechController, type SpeechStatus, voiceInputSupported } from '../lib/voice'
 import './voice-controls.css'
 
-export function SpeakButton({ text, disabled = false }: { text: string; disabled?: boolean }) {
+export function SpeakButton({ text, disabled = false, label }: { text: string; disabled?: boolean; label?: string }) {
   const [active, setActive] = useState(false)
   const [status, setStatus] = useState<SpeechStatus | 'loading' | null>(null)
   const control = useRef<SpeechController | null>(null)
@@ -37,10 +37,11 @@ export function SpeakButton({ text, disabled = false }: { text: string; disabled
     request.current = null; control.current = null
   }
   return <span className="voice-control">
-    <button type="button" className="voice-button" aria-label={active ? 'Stop' : 'Play spoken answer'} aria-pressed={active}
+    <button type="button" className="voice-button" aria-label={active ? 'Stop' : label ?? 'Play spoken answer'} aria-pressed={active}
       aria-describedby={status === 'fallback' || status === 'error' ? hintId : undefined}
       disabled={disabled || !text.trim()} onClick={() => { void toggle() }}>
       {active ? <Square size={14} aria-hidden="true" /> : <Volume2 size={16} aria-hidden="true" />}
+      {label && <span>{active ? 'Stop reading' : label}</span>}
     </button>
     <span id={hintId} className="voice-hint" role="status">{status === 'fallback' ? 'device voice' : status === 'error' ? 'Spoken audio is not available' : ''}</span>
   </span>

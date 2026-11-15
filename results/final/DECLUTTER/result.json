@@ -1,0 +1,25 @@
+{
+  "worker": "F-DECLUTTER",
+  "status": "PASS",
+  "spec": "LEAD 03:38 CHANGE",
+  "footer": [
+    "Sources N",
+    "Visualise it"
+  ],
+  "secondary_actions": "More answer actions beside Show thought process",
+  "cost": "How we know card footer; includes legacy answers without reasoning",
+  "validation": {
+    "typescript": "PASS",
+    "vitest_passed": 43,
+    "vitest_preexisting_skipped": 2,
+    "playwright_passed": 3
+  },
+  "screenshots": [
+    "footer-1440.png",
+    "footer-390.png",
+    "menu-1440.png",
+    "menu-390.png"
+  ],
+  "screenshot_content": "generated for demo; isolated AnswerCard fixture, not live API/model verification",
+  "cross_file": []
+}

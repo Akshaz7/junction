@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import type { Answer, Citation } from '../lib/types'
 import { edgeVerb } from '../lib/kg'
 import { keyNumbers } from '../lib/calc-view'
@@ -32,9 +32,9 @@ function Clamped({ text, className }: { text: string; className?: string }) {
 const STATUS_TEXT = { verified: 'Verified', read_only: 'Read only', inferred: 'Inferred' } as const
 
 /** "How we know": the steps behind an answer and how sure we are. Steps with a citation open it. */
-export function EvidenceCard({ answer, selected, onOpenCitation, onShowCalculation }: { answer: Answer; selected?: Citation; onOpenCitation: (citation: Citation) => void; onShowCalculation?: () => void }) {
+export function EvidenceCard({ answer, selected, onOpenCitation, onShowCalculation, footer }: { answer: Answer; selected?: Citation; onOpenCitation: (citation: Citation) => void; onShowCalculation?: () => void; footer?: ReactNode }) {
   const reasoning = answer.reasoning
-  if (!reasoning) return null
+  if (!reasoning) return footer ? <section className="evidence-card" aria-label="How we know" data-testid="evidence-card"><h3 className="evidence-heading">How we know</h3><footer className="evidence-footer">{footer}</footer></section> : null
   const { confidence } = reasoning
   const numbers = keyNumbers(reasoning.calc)
   const quality = qualitySummary(reasoning.quality)
@@ -91,5 +91,6 @@ export function EvidenceCard({ answer, selected, onOpenCitation, onShowCalculati
     {onShowCalculation && (reasoning.calc || reasoning.steps?.length || reasoning.based_on || reasoning.margin) && <button type="button" className="evidence-calc-link" onClick={onShowCalculation}>Show calculation</button>}
     {quality && <p className="evidence-quality" data-testid="evidence-quality">3D accuracy: {quality}</p>}
     {confidence.improve && <p className="evidence-improve">To verify: {confidence.improve}</p>}
+    {footer && <footer className="evidence-footer">{footer}</footer>}
   </section>
 }

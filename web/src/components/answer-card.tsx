@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'react'
-import { FileText, Layers3, Box, Smartphone, Download, ClipboardList } from 'lucide-react'
+import { FileText, Layers3, Box, Smartphone } from 'lucide-react'
 import { AdvisorCardView } from '../viewer3d/AdvisorCardView'
 import { onAdvisorCards } from '../viewer3d/liveHighlight'
 import type { AdvisorCard } from '../viewer3d/advisor'
 import { Tooltip } from './ui'
-import { downloadTakeoffCsv, parseTakeoff, TAKEOFF_QUESTION } from '../lib/takeoff'
-import { CITATION_CAP, humanizeIds, isOneLine, parseBlocks, plainQuote } from '../lib/answer-text'
+import { CITATION_CAP, humanizeIds, parseBlocks, plainQuote } from '../lib/answer-text'
 import type { Answer, Citation, Document } from '../lib/types'
-import { SpeakButton } from './voice-controls'
-import { ExportAnswerButton } from './answer-export'
-import { answerTableSelection } from '../lib/ar-bridge'
-import { ShowOnTableButton } from './show-on-table'
+import { AnswerMoreActions } from './answer-more-actions'
 import { SceneCommandTags } from './scene-command-tags'
 import { sceneOpen } from '../lib/scene-open'
 import { isPaired, onPairingChange } from '../lib/pairing'
@@ -120,14 +116,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
   const hidden = showAll ? 0 : Math.max(0, allCitations.length - CITATION_CAP)
   const citations = hidden ? allCitations.slice(0, CITATION_CAP) : allCitations
   const labels = labelsOf(answer)
-  const oneLine = isOneLine(answer.answer.text_md)
-  const allChips = answer.doc_ids.map((docId) => ({ docId, title: docs.find((doc) => doc.doc_id === docId)?.title ?? docId, first: allCitations.find((citation) => citation.doc_id === docId) }))
-  // Only show the documents the answer actually used: cited ones, or the picked few. Never a wall of every file in the project.
-  const citedChips = allChips.filter((chip) => chip.first)
-  const docChips = allChips.length <= 3 ? allChips : citedChips.slice(0, 6)
-  const takeoff = parseTakeoff(answer, docs)
   const advice = useAnswerAdvice(answer, chatId)
-  const table = answerTableSelection(answer)
   const generated = demo || answer.trace.some((step) => step.stub)
   const callDetails = answer.cost.calls.length ? JSON.stringify(answer.cost.calls, null, 2) : 'No model calls.'
   const sources = [...new Set(citations.map((citation) => citation.doc_id))].map((docId) => ({
@@ -137,12 +126,9 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
   const cost = <Tooltip content={callDetails}><span className="cost-chip" data-testid="answer-cost" tabIndex={0} aria-label={`Answer cost ${formatCost(answer.cost.usd_total)}`} title={callDetails}>{formatCost(answer.cost.usd_total)}</span></Tooltip>
   return <article className="exchange" data-testid="answer-card">
     <div className="question-bubble">{answer.question}</div>
-    <ThinkingRow traces={answer.trace} />
+    <div className="answer-meta"><ThinkingRow traces={answer.trace} /><AnswerMoreActions answer={answer} docs={docs} chatId={chatId} demo={demo} onAsk={onAsk} /></div>
     <AnswerBody answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} />
-    {(!!answer.reasoning?.steps?.length || !!answer.reasoning?.calc) && <EvidenceCard answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} onShowCalculation={onOpenCalc && calcCitation ? () => onOpenCalc(calcCitation) : undefined} />}
-    {!!docChips.length && <div className="answer-docs" aria-label="Documents used" data-testid="answer-docs">{docChips.map(({ docId, title, first }) => first
-      ? <button type="button" key={docId} className="source-file-chip answer-doc-chip" aria-label={`Open document ${title}`} onClick={() => onOpenCitation(first)}><FileText size={14} /><span>{title}</span></button>
-      : <span key={docId} className="source-file-chip answer-doc-chip"><FileText size={14} /><span>{title}</span></span>)}</div>}
+    <EvidenceCard answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} onShowCalculation={onOpenCalc && calcCitation ? () => onOpenCalc(calcCitation) : undefined} footer={cost} />
     {sceneOpen(answer) === 'ar' && <ArHint />}
     <SceneCommandTags answer={answer} edits={edits} busy={busy} onUndo={onUndo} onOpenItem={onOpenItem} />
     {!!advice.length && <div className="advisor-card-list" aria-label="Advice for this change" data-testid="answer-advisor-cards">
@@ -160,13 +146,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
       {!!citations.length && <details className="answer-detail sources-detail"><summary className="sources-summary" aria-label={`Sources ${allCitations.length}`}><FileText size={14} /><span>Sources</span><span className="source-count">{allCitations.length}</span></summary>{allCitations.map((citation) => <p key={citation.n}>
         <CitationChip citation={citation} selected={activeCitation} onOpenCitation={onOpenCitation} /> {humanizeIds(citation.item_ids.join(', '), labels)} · Page {citation.page}
       </p>)}</details>}
-      <SpeakButton text={answer.answer.text_md} />
-      <ExportAnswerButton answer={answer} docs={docs} chatId={chatId} demo={demo} />
       {!!citations.length && <button type="button" className="show-on-table visualise-from-answer" onClick={() => (onVisualise ?? onOpenCitation)(citations[0])}><Box size={15} aria-hidden="true" /><span>Visualise it</span></button>}
-      {takeoff && <button type="button" className="show-on-table takeoff-csv" data-testid="takeoff-csv" onClick={() => downloadTakeoffCsv(takeoff)}><Download size={15} aria-hidden="true" /><span>Download CSV</span></button>}
-      {!takeoff && onAsk && !answer.answer.abstained && <button type="button" className="show-on-table takeoff-sheet" data-testid="takeoff-sheet" onClick={() => onAsk(TAKEOFF_QUESTION)}><ClipboardList size={15} aria-hidden="true" /><span>Take-off sheet</span></button>}
-      {table && <ShowOnTableButton docId={table.doc_id} itemIds={table.item_ids} chatId={chatId} />}
-      {cost}
     </div>
     <div className="answer-footer">
       {generated && <div className="answer-brand"><Layers3 size={14} /><span>Answer generated for demo</span></div>}
