@@ -502,7 +502,7 @@ def _formula(ctx, sk):
         elif (t := _trace_px(ctx)):
             out, result, from_log = f"{_px(t[1])} px × {_sig(t[2])} m/px = {_q(t[0], 3)} m", t[0], True
         elif sk == "ifc" and len(ctx.rows) <= 1:
-            return f"None needed: the stored value is the answer, {ctx.shown()} {u}.", False
+            return f"No calculation needed: the stored value is the answer, {ctx.shown()} {u}.", False
     if out:
         conv = next((s for s in ctx.steps if s.get("operation") == "convert" and _num(s.get("value")) is not None), None)
         if conv:
@@ -605,13 +605,16 @@ def _attach(res, root):
     def mk(id, kind, title, text, cite=None, ok=None):
         return {"id": id, "kind": kind, "title": title, "text": text, "cite": cite, "ok": ok}
 
+    prior = (res.get("reasoning") or {}).get("steps") or []
+    disagrees = any(x.get("kind") == "checked" and x.get("ok") is False and x.get("id") != "why-sure" for x in prior)   # keep a failed cross-check visible as the last step
     card = res.setdefault("reasoning", {"steps": [], "confidence": {"label": "Estimate", "pct": None,
                                                                   "reason": "No independent verification was recorded."}})
     card["steps"] = _merge(card.get("steps") or [],
                            mk("why-source", "read", "Source", src_text, src_cite),
                            mk("why-scale", "measured", "Scale", scale_text) if scale_text else None,
                            mk("why-calc", "calculated", "Calculation", formula, ctx.first_cite()) if formula else None,
-                           mk("why-sure", "checked", "How sure", _sure(ctx, sk, basis, src_ok, from_log, ctx.matched)))
+                           mk("why-sure", "checked", "How sure", _sure(ctx, sk, basis, src_ok, from_log, ctx.matched),
+                              ok=False if sk == "ifc" and disagrees else None))
     return res
 
 
