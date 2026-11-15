@@ -86,7 +86,7 @@ def storey_of(el):
         seen.add(cur.id())
         if cur.is_a("IfcBuildingStorey"):
             return cur
-        nxt = uel.get_container(cur) or uel.get_aggregate(cur)
+        nxt = uel.get_container(cur, should_get_direct=True) or uel.get_aggregate(cur)
         if nxt is None and cur.is_a("IfcOpeningElement"):
             nxt = next((r.RelatingBuildingElement for r in cur.VoidsElements), None)
         if nxt is None and cur.is_a("IfcElement"):
@@ -372,6 +372,10 @@ def process(ifc: Path, doc: dict, out_dir: Path):
     from pipeline.scale_provenance import ifc_units
     from pipeline.ifc_props import building_meta, enrich_elements
     enrich_elements(f, elements)
+    from pipeline.ifc_accuracy import build as accuracy_index, enrich_elements as accuracy_elements
+    accuracy = accuracy_index(f, geometry=True)
+    accuracy_elements(elements, accuracy)
+    (out_dir / "ifc-accuracy.json").write_text(json.dumps(accuracy))
     from pipeline.ifc_quantities import build as build_quantity_index
     try:  # optional sidecar: never fail the scene over it
         (out_dir / "ifc-quantities.json").write_text(json.dumps(build_quantity_index(f, space_geometry=True)))

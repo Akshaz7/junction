@@ -1,0 +1,65 @@
+[
+ {
+  "doc_id": "opening_design__uli-gooseberry-models-uli-gooseberry",
+  "source": "data/full/junction-dataset/data/opening_design/ULI_Gooseberry/Models/ULI Gooseberry.ifc",
+  "schema": "IFC4",
+  "applications": [
+   "FreeCAD"
+  ],
+  "blind": true,
+  "checks": [
+   {
+    "question": "How many stairs are in this model?",
+    "expected_native_occurrences": 0,
+    "actual": null,
+    "pass": false,
+    "honest_unavailable": true,
+    "raw_native_before_hierarchy": 0,
+    "evidence_items": 7,
+    "confidence": 0.0
+   },
+   {
+    "question": "How many walls are in this model?",
+    "expected_native_occurrences": 12,
+    "actual": 12,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 12,
+    "evidence_items": 12,
+    "confidence": 0.6
+   },
+   {
+    "question": "How many doors are in this model?",
+    "expected_native_occurrences": 5,
+    "actual": 5,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 5,
+    "evidence_items": 5,
+    "confidence": 0.6
+   },
+   {
+    "question": "How many rooms (spaces) are in this model?",
+    "expected_native_occurrences": 0,
+    "actual": null,
+    "pass": false,
+    "honest_unavailable": true,
+    "raw_native_before_hierarchy": 0,
+    "evidence_items": 7,
+    "confidence": 0.0
+   }
+  ],
+  "index_errors": [],
+  "space_count": 0,
+  "area_status": {},
+  "profile_checks": [],
+  "area_answer": {
+   "value": null,
+   "abstained": true,
+   "confidence": 0.0,
+   "cross_check_trace_rows": 1
+  },
+  "space_measurements": [],
+  "seconds": 0.036
+ }
+]

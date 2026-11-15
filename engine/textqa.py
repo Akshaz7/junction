@@ -62,6 +62,9 @@ def _ids(items) -> list[str]:
 
 
 def _area(i: Item) -> float | None:
+    measured = (i.props.get("space_area") or {}).get("measured_m2")
+    if measured is not None:
+        return float(measured)
     for k in ("net_floor_area_m2", "area_m2"):
         if i.q.get(k) is not None:
             return float(i.q[k])

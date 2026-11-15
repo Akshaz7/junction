@@ -121,7 +121,8 @@ def room_filter(question: str, rooms: list[Item]) -> tuple[str, list[Item]] | No
         return None
     # Parenthesised synonyms are explanatory, not part of a room's name.
     # Keep numbered parenthetical labels on the exact-label path above.
-    q = fold(re.sub(r"\b(rooms?|spaces?)\s*\(\s*(?:rooms?|spaces?)\s*\)", r"\1", question, flags=re.I))
+    question = re.sub(r"\b(rooms?|spaces?)\s*\(\s*(?:rooms?|spaces?)\s*\)", r"\1", question, flags=re.I)
+    q = fold(question)
     if re.search(r"\b(?:largest|biggest|smallest|tiniest)\s+room\b", q):
         return None
     aliases = {**{k: k for k in ROOM_TYPES}, **ROOM_ALIASES}

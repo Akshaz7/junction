@@ -352,6 +352,8 @@ def _answer_with_evidence(question: str, doc_ids: list[str], on_event: Callable 
     from engine.numeric import guard_answer_value
     res = guard_answer_value(res, question, doc_ids, _root(), hidden=(scene_state or {}).get("hidden"))
     _doc = None
+    from engine.ifc_accuracy import guard as ifc_count_guard
+    res = ifc_count_guard(res, question, doc_ids, _root())
     try:   # E-61: implausible raster areas and sparse uploaded plans (engine/rastersanity.py)
         if len(doc_ids) == 1:
             from engine import rastersanity
@@ -865,7 +867,10 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             tdoc = load_doc(doc_ids[0], root)
             if tdoc is not None and tdoc.mode == "ifc":
                 emit("status", {"text": f"Exploring document: {_title(doc_ids[0], root)}"})
+                from engine.ifc_accuracy import prepare_doc, wants_room_geometry, annotate
+                tdoc = prepare_doc(tdoc, root, geometry=wants_room_geometry(question))
                 res = text_answer(question, tdoc)
+                res = annotate(res, question, tdoc, root)
                 for s_ in res["trace"]:
                     add(s_)
                 res["trace"] = trace
