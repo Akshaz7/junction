@@ -1481,7 +1481,18 @@ def plan_total(question: str, doc: Doc, t0) -> dict | None:
     lst = "; ".join(f"{(r.label or str(r.props.get('room_type') or 'room'))} {_fmt(v)} m²" for r, v in rooms)
     text = (f"This place is about **{_fmt(tot)} m²** in total, adding up the **{len(rooms)} rooms** found on the drawing (outdoor spaces left out)."
             f"{overlap} {note} Rooms used: {lst}. {{marks}}") + scale_note(doc)
-    return _done(question, doc, text, tot, "m2", [r for r, _ in rooms], trace, t0=t0)
+    res = _done(question, doc, text, tot, "m2", [r for r, _ in rooms], trace, t0=t0)
+    if not uni and res["answer"].get("value") is not None:   # PLAN-WHY: per-room chain + rooms left out, with reasons
+        from engine.calc import record
+        from engine.plan_measures import room_area_calc, room_total_hint
+        used = {id(r) for r, _ in rooms}
+        left = [(r, "excluded by the question") for r in all_rooms if r in cut] + \
+               [(r, "outdoor space") for r in all_rooms if id(r) not in used and r not in cut]
+        calc = room_area_calc(res, doc, [r for r, _ in rooms], left, question)
+        if calc:
+            record(res, calc)
+            res["reasoning_hint"] = {"steps": room_total_hint(calc)}
+    return res
 
 
 ACCESS = re.compile(r"\baccessib|wheelchair|step[- ]free|disabled|disabilit|mobility", re.I)

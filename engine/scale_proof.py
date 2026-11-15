@@ -19,6 +19,9 @@ PRIOR_WHY = ('Assumed 0.9 m door leaf for an approximate scale; icon boxes inclu
              'The file does not establish actual door widths or their physical variation.')
 
 
+NATIVE = {'ifc', 'ifc_units', 'dxf_units', 'dxf_units_fit', 'dxf_render'}
+
+
 def positive(value):
     try:
         return float(value) if not isinstance(value, bool) and math.isfinite(float(value)) and float(value) > 0 else None
@@ -190,7 +193,9 @@ def enrich(pm, folder=None, *, effective_scale=None, save_crops=False):
         readings.append({'method': sc.get('method'), 'm_per_px': sc.get('m_per_px'), **copy.deepcopy(sc['derivation'])})
     readings += dimensions(pm)
     prior = doors(pm)
-    if prior:
+    # IFC-WHY: native-unit pages (IFC projection, CAD units) already carry metres;
+    # an assumed door width is no cross-check for them and only adds noise.
+    if prior and str(sc.get('method') or '').replace('-', '_').replace(' ', '_') not in NATIVE:
         readings.append(prior)
     if folder:
         folder = Path(folder)

@@ -350,6 +350,10 @@ def annotate(res, question, doc, root):
                              if measured else 'Room geometry unavailable; stored quantities remain unverified.')
             if stored:
                 measured_text += f' Stored net areas available for {len(stored)} rooms: {sum(stored):.6g} m².'
+            from engine.ifc_why import area_basis_text   # IFC-WHY: which area was used and why
+            basis = area_basis_text(rooms)
+            if basis:
+                measured_text += ' ' + basis
             card['steps'] = [
                 {'kind': 'found', 'title': 'Found', 'text': f'{len(rooms)} cited rooms in the selected scope.', 'cite': cite, 'ok': None},
                 {'kind': 'measured', 'title': 'Measured', 'text': measured_text, 'cite': cite, 'ok': None},

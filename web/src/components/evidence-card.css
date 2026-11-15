@@ -44,3 +44,13 @@
 .evidence-footer { display: flex; justify-content: flex-end; margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border); }
 .evidence-footer .cost-chip { padding: 0; font-size: 10px; color: var(--muted-foreground); }
 .evidence-footer .tooltip-content { right: 0; left: auto; translate: none; max-width: min(400px, 75vw); white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* "How it was measured": source, scale, formula and margin of a length or area answer, always visible. */
+.evidence-measured { margin: 8px 0 10px; padding: 8px 10px; border-radius: 6px; background: var(--ink-well); }
+.evidence-measured h4 { margin: 0 0 4px; font-size: var(--text-caption); font-weight: 600; color: var(--muted-foreground); }
+.evidence-measured dl { margin: 0; display: grid; gap: 3px; }
+.evidence-measured dl > div { display: grid; grid-template-columns: 5.5em minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.evidence-measured dt { color: var(--muted-foreground); font-size: var(--text-caption); }
+.evidence-measured dd { margin: 0; font-size: var(--text-body-sm); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.evidence-measured-link { border: 0; background: none; padding: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.evidence-measured-link:hover, .evidence-measured-link:focus-visible { text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 3px; }
