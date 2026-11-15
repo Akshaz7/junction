@@ -636,7 +636,7 @@ SYN = {
     "kitchen": r"k[uü]e?che|kitchen|keitti|teek[uü]e?che",
     "storage": r"lager|storage|varasto|abstell|reduit",
     "corridor": r"flur|korridor|corridor|k[aä]yt[aä]v",
-    "bathroom": r"bad\b|bath|kylpy|wc|toilet",
+    "bathroom": r"bad\b|bath|kylpy|wc|toilet|\bkph\b|\bph\b|pesuh",
     "classroom": r"class\s?room|klassen|luokka|schulzimmer|unterricht|lehrer|seminar",
 }
 SYN_ALIAS = {"classrooms": "classroom", "class rooms": "classroom", "offices": "office", "kitchens": "kitchen", "corridors": "corridor", "hallways": "corridor", "storerooms": "storage"}

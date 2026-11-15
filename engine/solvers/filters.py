@@ -67,7 +67,7 @@ ROOM_TYPES = {
     "meeting room": r"\b(?:besprechung|meeting|conference|sitzung|kokous|motesrum)\w*",
     "lab": r"\b(?:labor|lab|laboratory|laboratories)\w*",
     "kitchen": r"\b(?:kuche|kitchen|keitti|kok|cuisine|cucina|kochen)\w*",
-    "bathroom": r"\b(?:wc|toilet|bath|bad|kylpy|toalett|bain|bagno|restroom|lavatory|douche|dusche|shower)\w*|\bsalle de bains?\b",
+    "bathroom": r"\b(?:wc|toilet|bath|bad|kylpy|toalett|bain|bagno|restroom|lavatory|douche|dusche|shower|pesuh)\w*|\b(?:kph|ph)\b|\bsalle de bains?\b",
     "bedroom": r"\b(?:bedroom|schlaf|makuu|sovrum|chambre|camera|kinderzimmer)\w*",
     "corridor": r"\b(?:flur|corridor|korridor|hallway|kaytav|couloir|corridoio|disimpegno|ingresso|entree|entry|foyer|diele|gang)\w*",
     "classroom": r"\b(?:classroom|klassen|seminar|luokka|klassrum)\w*",

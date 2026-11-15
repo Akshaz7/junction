@@ -10,23 +10,7 @@ except ImportError:  # direct script execution
     from planmap import _components, _poly_off
 
 ROOM_CLASSES = {1: "outdoor", 3: "kitchen", 4: "living", 5: "bedroom", 6: "bathroom", 7: "entry", 8: "storage", 9: "garage", 10: "undefined"}
-# Finnish plan abbreviations -> room type (exact token match after upper-casing, punctuation stripped)
-LABEL_TYPES = {
-    "MH": "bedroom", "MH1": "bedroom", "MH2": "bedroom", "MH3": "bedroom", "MAKUUHUONE": "bedroom",
-    "OH": "living", "OLOHUONE": "living", "RT": "dining",
-    "K": "kitchen", "KK": "kitchen", "KT": "kitchen", "KEITTIO": "kitchen", "KEITTIÖ": "kitchen", "AK": "kitchen",
-    "KH": "bathroom", "PH": "bathroom", "KPH": "bathroom", "SH": "bathroom", "PESUH": "bathroom", "PU": "bathroom", "KYLPYHUONE": "bathroom",
-    "WC": "wc", "S": "sauna", "SAUNA": "sauna", "PARVEKE": "balcony", "PARV": "balcony", "LASITETTU": "balcony",
-    "ET": "entry", "VH": "entry", "ETEINEN": "entry", "TAMBUURI": "entry", "VAR": "storage", "VARASTO": "storage", "KHH": "storage",
-    "TEKN": "technical", "TEKNINEN": "technical", "AUTOTALLI": "garage", "AT": "garage", "TERASSI": "terrace", "TERR": "terrace",
-    "TYÖH": "study", "TYOH": "study", "PUKUH": "dressing", "KOMERO": "storage", "ULKOVARASTO": "storage", "ULKO": "outdoor",
-    "BEDROOM": "bedroom", "CHAMBRE": "bedroom", "SCHLAFZIMMER": "bedroom", "SOVRUM": "bedroom",
-    "KITCHEN": "kitchen", "CUISINE": "kitchen", "KÜCHE": "kitchen", "KUCHE": "kitchen", "KÖK": "kitchen",
-    "BATH": "bathroom", "BATHROOM": "bathroom", "BAINS": "bathroom", "BAD": "bathroom", "BADRUM": "bathroom",
-    "LIVING": "living", "SALON": "living", "SEJOUR": "living", "SÉJOUR": "living", "WOHNZIMMER": "living", "VARDAGSRUM": "living",
-    "HALL": "entry", "ENTREE": "entry", "ENTRÉE": "entry", "FLUR": "corridor", "CORRIDOR": "corridor", "DEGT": "corridor",
-    "OFFICE": "office", "BUREAU": "office", "BÜRO": "office", "KONTOR": "office", "GARAGE": "garage",
-}
+from pipeline.room_labels import LABEL_TYPES, label_type  # noqa: E402
 AREA_RE = re.compile(r"(?<![\d.,])(\d+(?:[.,]\d+)?)\s*(m\s*(?:²|2|\^2)|㎡|sq\.?\s*m|ft\s*(?:²|2)|sq\.?\s*ft)\s*$", re.I)
 DOOR_WIDTH_M = 0.9
 
@@ -79,12 +63,10 @@ def label_rooms(rooms_items, texts):
     for r in rooms_items:
         types = []
         for t in sorted(r.pop("_texts"), key=lambda t: t["bbox"][1]):
-            # A printed room number belongs to the label, not to the type token.
-            tokens = re.findall(r"[^\W\d_]+", t["text"].upper(), re.U)
-            for tok in tokens:
-                if tok in LABEL_TYPES:
-                    types.append((t["text"], LABEL_TYPES[tok]))
-                    break
+            # A printed room number belongs to the label, not to the type token. Compound labels ("KHH+PH") are split.
+            lt = label_type(t["text"])
+            if lt:
+                types.append((t["text"], lt))
         if types:
             r["label"] = " ".join(t for t, _ in types)
             r["props"]["label_room_type"] = types[0][1]
