@@ -2,7 +2,8 @@
 LOCAL ONLY: not pushed until Awais verifies it. ultralytics = AGPL-3.0: not served to app users until he decides.
 
     modal deploy detect.py                      # app "junction-det", function "detect"
-    modal run detect.py --pdf-vol /private/private-a.pdf --m-per-pt <m_per_pt>     # smoke test on a volume file
+    modal run detect.py --pdf plan.pdf --m-per-pt <m_per_pt>     # smoke test with a local PDF
+Weights: volume "junction-det-weights", /weights/best.pt (see scripts/detector_up.sh).
 
 Client (from the pipeline):
     import modal
@@ -12,55 +13,49 @@ Client (from the pipeline):
 
 Rendering matches training: 40 px per metre on paper scale, 1280 px tiles with stride 1024, one GPU batch,
 class-wise NMS across tile overlaps. Per-class thresholds come from the run's result.json (picked on VAL), else 0.25.
-The newest weights on the volume are used, so retrains drop in with no code change.
+Re-upload best.pt and the next container start uses it.
 """
 import os
 
 import modal
 
 app = modal.App("junction-det")
-vol = modal.Volume.from_name("junction-ds")
+# Weights live on OUR volume (upload with scripts/detector_up.sh): /weights/best.pt, optional /weights/result.json
+# ({"conf": {"door": 0.4, ...}} per-class thresholds picked on VAL), else 0.25.
+vol = modal.Volume.from_name("junction-det-weights", create_if_missing=True)
 image = (modal.Image.debian_slim(python_version="3.12")
          .apt_install("libgl1", "libglib2.0-0")
          .pip_install("torch==2.5.1", "torchvision==0.20.1", "ultralytics==8.3.40", "opencv-python-headless==4.10.0.84",
                       "numpy==1.26.4", "pypdfium2==4.30.0", "pillow==11.0.0"))
 CLS = ["door", "window", "fixture"]
 PX_PER_M, TILE, STRIDE = 40.0, 1280, 1024
-RUNS = ("y11l_clean", "y11l")  # preferred first
+WEIGHTS = "/weights/best.pt"
+THRESHOLDS = "/weights/result.json"
 
 
 def _weights():
-    """Newest FINISHED run (result.json present: thresholds picked on val) in RUNS order; else any best/last.pt."""
-    import json, os
-    for need_done in (True, False):
-        for run in RUNS:
-            rj = f"/ds/runs/{run}/result.json"
-            if need_done and not os.path.exists(rj):
-                continue
-            for w in ("best.pt", "last.pt"):
-                p = f"/ds/runs/{run}/weights/{w}"
-                if os.path.exists(p):
-                    conf = json.load(open(rj)).get("conf", {}) if os.path.exists(rj) else {}
-                    return p, conf, run
-    raise FileNotFoundError("no weights on junction-ds yet")
+    """(path, per-class conf thresholds, run label) from the weights volume."""
+    import json
+    if not os.path.exists(WEIGHTS):
+        raise FileNotFoundError(f"no weights at {WEIGHTS} on volume junction-det-weights (run scripts/detector_up.sh)")
+    conf = json.load(open(THRESHOLDS)).get("conf", {}) if os.path.exists(THRESHOLDS) else {}
+    return WEIGHTS, conf, "best"
 
 
-@app.cls(image=image, gpu="H100", volumes={"/ds": vol}, timeout=900, scaledown_window=300)
+# Cheap by default: T4/L4-class GPU, scales to zero, short scaledown. DET_GPU / DET_MIN_CONTAINERS override at deploy time.
+@app.cls(image=image, gpu=os.environ.get("DET_GPU", "L4"), volumes={"/weights": vol}, timeout=300, scaledown_window=60,
+         min_containers=int(os.environ.get("DET_MIN_CONTAINERS", "0")))
 class Detector:
     @modal.enter()
     def load(self):
         from ultralytics import YOLO
-        vol.reload()
+        vol.reload()  # pick up a freshly uploaded best.pt
         self.path, self.conf, self.run = _weights()
         self.model = YOLO(self.path)
 
     @modal.method()
-    def detect_vol(self, path: str, m_per_pt: float | None = None) -> dict:
-        """Same as detect() for a PDF already on the junction-ds volume (smoke tests)."""
-        return self._detect(open("/ds" + path, "rb").read(), 0, m_per_pt, None)
-
-    @modal.method()
-    def detect(self, pdf_bytes: bytes, page_index: int = 0, m_per_pt: float | None = None, min_conf: float | None = None) -> dict:
+    def detect(self, pdf_bytes: bytes, page_index: int = 0, m_per_pt: float | None = None, min_conf: float | None = None,
+               run: str | None = None) -> dict:  # `run` accepted for client compatibility; one weights file is served
         return self._detect(pdf_bytes, page_index, m_per_pt, min_conf)
 
     def _detect(self, pdf_bytes: bytes, page_index: int = 0, m_per_pt: float | None = None, min_conf: float | None = None) -> dict:
@@ -111,8 +106,9 @@ class Detector:
 
 
 @app.local_entrypoint()
-def main(pdf_vol: str, m_per_pt: float = 0.0):
+def main(pdf: str, page: int = 0, m_per_pt: float = 0.0):
+    """Smoke test: modal run detect.py --pdf some.pdf [--page 0] [--m-per-pt 0.0035]"""
     import collections, json
-    r = Detector().detect_vol.remote(pdf_vol, m_per_pt or None)
+    r = Detector().detect.remote(open(pdf, "rb").read(), page, m_per_pt or None)
     print(json.dumps({k: v for k, v in r.items() if k != "items"}))
     print(collections.Counter(i["kind"] for i in r["items"]))

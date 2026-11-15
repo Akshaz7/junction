@@ -25,7 +25,17 @@ def enabled() -> bool:
     return os.environ.get("PDF_DETECT", "") == "1"
 
 
-def _call(pdf_path, page_index, m_per_pt, timeout=180):
+def _timeout_s() -> float:
+    """Wall-clock cap for the Modal call (live uploads must not hang on a cold GPU). PDF_DETECT_TIMEOUT_S, default 30."""
+    try:
+        v = float(os.environ.get("PDF_DETECT_TIMEOUT_S", "30"))
+        return v if v > 0 else 30.0
+    except ValueError:
+        return 30.0
+
+
+def _call(pdf_path, page_index, m_per_pt, timeout=None):
+    timeout = _timeout_s() if timeout is None else timeout
     py = os.environ.get("PDF_DETECT_PY")
     if not py:
         raise RuntimeError("PDF_DETECT_PY not set (interpreter with the modal package)")
