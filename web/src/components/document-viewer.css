@@ -103,7 +103,7 @@
 
 /* Desktop chat: the floating page bar (64px, z-index 4) sits over the top right; keep the viewer header and its Close button below it. */
 @media (min-width: 801px) {
-  .route-chat .chat-workspace.has-viewer .document-viewer:not(.viewer-sheet) { padding-top: 64px; }
+  .route-chat .chat-workspace.has-viewer .document-viewer:not(.viewer-sheet) { padding-top: 0; }
 }
 
 /* Click-to-inspect: outline of the plan item under the pointer, and of the one whose details are open. */

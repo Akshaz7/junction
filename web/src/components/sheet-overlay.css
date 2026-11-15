@@ -53,3 +53,7 @@
   .overlay-compare .sc-opacity { grid-column: 1 / -1; grid-row: 2; justify-content: center; padding: 3px 0; }
   .overlay-compare .sc-opacity input { width: 120px; }
 }
+/* Narrow viewer: the title block shrinks with an ellipsis instead of sliding under the header controls */
+.viewer-heading > div:first-of-type { min-width: 0; flex: 1 1 auto; overflow: hidden; }
+.viewer-heading > div:first-of-type > strong, .viewer-heading > div:first-of-type > small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.viewer-heading > .overlay-open-button { flex: none; }
