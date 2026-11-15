@@ -59,6 +59,21 @@ def proof(code: str, chat_id: str) -> str:
     return hashlib.sha256(f"{code}:{chat_id}".encode()).hexdigest()[:16]
 
 
+def join_proof(code: str) -> str:
+    """Lets the laptop that shows `code` recognise "a phone joined" from a live event without the code being broadcast."""
+    return hashlib.sha256(f"join:{code}".encode()).hexdigest()[:16]
+
+
+@router.post("/{code}/join", status_code=204)
+async def join(code: str):
+    """The phone that scanned `code` says so: the hosting laptop switches from 'Waiting for phone' to 'Paired'."""
+    code = _code(code)
+    try:
+        await live.publish({"type": "pair.joined", "proof": join_proof(code)})
+    except Exception:
+        log.warning("pair join: live publish failed", exc_info=True)
+
+
 @router.post("/{code}/chats/{chat_id}", status_code=204)
 async def register(code: str, chat_id: str):
     code = _code(code)

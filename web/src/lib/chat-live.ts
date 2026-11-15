@@ -7,13 +7,15 @@ export type ChatLiveEvent =
   | { type: 'chat.delta'; chat_id: string; text: string }
   | { type: 'chat.done'; chat_id: string }
   | { type: 'pair.chat'; chat_id: string; proof: string }
+  | { type: 'pair.joined'; proof: string }
   | { type: 'connected' }
   | { type: 'disconnected' }
 
-export function decodeChatEvent(raw: unknown): Extract<ChatLiveEvent, { chat_id: string }> | null {
+export function decodeChatEvent(raw: unknown): Exclude<ChatLiveEvent, { type: 'connected' | 'disconnected' }> | null {
   if (typeof raw !== 'string') return null
   let event: Record<string, unknown>
   try { event = JSON.parse(raw) } catch { return null }
+  if (event && event.type === 'pair.joined' && typeof event.proof === 'string') return { type: 'pair.joined', proof: event.proof }
   if (!event || typeof event !== 'object' || typeof event.chat_id !== 'string' || !event.chat_id) return null
   if (event.type === 'chat.message' && typeof event.message_id === 'string' && typeof event.role === 'string')
     return { type: event.type, chat_id: event.chat_id, message_id: event.message_id, role: event.role,
