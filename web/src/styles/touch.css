@@ -25,7 +25,7 @@
 
 @media (max-width: 800px) {
   .answer-actions > .voice-control .voice-button { width: 44px; height: 44px; margin: -7px -10px; }
-  button[aria-label='Next source'], button[aria-label='Previous source'] { min-width: 32px; }
+  button[aria-label='Next highlight'], button[aria-label='Previous highlight'], button[aria-label='Next item'], button[aria-label='Previous item'] { min-width: 32px; }
 }
 
 @media (max-width: 800px) {

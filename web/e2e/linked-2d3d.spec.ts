@@ -53,7 +53,7 @@ for (const phone of [false, true]) {
     await toggle2d.click()
     await expect(panel).toBeHidden()
     await expect(box3).toHaveAttribute('data-linked', 'true')
-    await expect(drawing.getByTestId('source-position')).toHaveText(/^3 of /)
+    await expect(drawing.getByTestId('source-position')).toHaveText(/^Highlight 3 of /)
     await expect(drawing.getByTestId('drawing-viewport')).toBeVisible()
     expect((await drawing.getByTestId('drawing-viewport').boundingBox())!.height).toBeGreaterThanOrEqual(initial.height - 1)
     await toggle3d.click()

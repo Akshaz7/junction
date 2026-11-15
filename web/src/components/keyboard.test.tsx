@@ -241,6 +241,15 @@ it.each([false, true])('viewer search restores Search on Escape and button close
   const onClose = vi.fn()
   const answer = makeDemoAnswer('How many windows?')
   await act(async () => root.render(<DocumentViewer answer={answer} citation={answer.citations[0]} sheet={sheet} onClose={onClose} />))
+  expect(host.querySelector('[data-testid="source-position"]')?.textContent).toBe('Highlight 1 of 2')
+  const nextHighlight = host.querySelector<HTMLButtonElement>('[aria-label="Next highlight"]')!
+  expect(nextHighlight.title).toBe('Next highlight')
+  await click(nextHighlight)
+  expect(host.querySelector('[data-testid="source-position"]')?.textContent).toBe('Highlight 2 of 2')
+  const previousHighlight = host.querySelector<HTMLButtonElement>('[aria-label="Previous highlight"]')!
+  expect(previousHighlight.title).toBe('Previous highlight')
+  await click(previousHighlight)
+  expect(host.querySelector('[data-testid="source-position"]')?.textContent).toBe('Highlight 1 of 2')
   if (sheet) {
     const panel = checkDialog('.document-viewer')
     const title = document.getElementById(panel.getAttribute('aria-labelledby')!)!
@@ -259,4 +268,41 @@ it.each([false, true])('viewer search restores Search on Escape and button close
   }
   await key('Escape')
   expect(onClose).toHaveBeenCalledOnce()
+})
+
+
+it.each([false, true])('viewer navigation follows three citations instead of 27 detections and resets when selection changes (sheet=%s)', async (sheet) => {
+  vi.spyOn(workspaceApi, 'getDocument').mockResolvedValue(demoDocument)
+  vi.spyOn(workspaceApi, 'getPageImage').mockResolvedValue(new Blob())
+  vi.spyOn(workspaceApi, 'getDocumentTags').mockResolvedValue({})
+  Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: vi.fn(() => 'blob:demo') })
+  Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: vi.fn() })
+  const answer = makeDemoAnswer('How many windows?')
+  answer.evidence.boxes = Array.from({ length: 27 }, (_, index) => ({ item_id: `item-${index + 1}`, page: 1, label: String(index + 1), bbox_px: [index * 10, 0, index * 10 + 5, 10] }))
+  answer.citations[0].item_ids = ['item-4', 'item-12', 'item-22']
+  const citation = answer.citations[0]
+  const render = async (value = answer) => act(async () => root.render(<DocumentViewer answer={value} citation={citation} sheet={sheet} onClose={() => {}} />))
+  await render()
+  const image = host.querySelector('img')!
+  Object.defineProperties(image, { naturalWidth: { value: 1000 }, naturalHeight: { value: 800 } })
+  await act(async () => image.dispatchEvent(new Event('load')))
+  expect(host.querySelectorAll('.evidence-region')).toHaveLength(3)
+  expect(host.querySelector('[data-testid="source-position"]')?.textContent).toBe('Highlight 1 of 3')
+  await click(host.querySelector('[aria-label="Next highlight"]')!)
+  expect(host.querySelector('[data-testid="source-position"]')?.textContent).toBe('Highlight 2 of 3')
+  expect(host.querySelector('.evidence-region.is-active')?.getAttribute('data-item-id')).toBe('item-12')
+  await click(host.querySelector('[aria-label="Next highlight"]')!)
+  expect(host.querySelector<HTMLButtonElement>('[aria-label="Next highlight"]')!.disabled).toBe(true)
+  const browsing = { ...answer, answer_id: 'browse', citations: [] }
+  await render(browsing)
+  expect(host.querySelector('[data-testid="source-position"]')?.textContent).toBe('Item 4 of 27 on this drawing')
+  const next = host.querySelector<HTMLButtonElement>('[aria-label="Next item"]')!
+  expect(next.title).toBe('Next item')
+  expect(host.querySelector<HTMLButtonElement>('[aria-label="Previous item"]')!.title).toBe('Previous item')
+  await click(next)
+  expect(host.querySelector('[data-testid="source-position"]')?.textContent).toBe('Item 5 of 27 on this drawing')
+  expect(host.querySelector('.evidence-region.is-active')?.getAttribute('data-item-id')).toBe('item-5')
+  await render({ ...answer, answer_id: 'single', citations: [{ ...citation, item_ids: ['item-22'] }] })
+  expect(host.querySelector('[data-testid="source-position"]')?.textContent).toBe('Highlight 1 of 1')
+  expect(host.querySelector('.evidence-region:not(.is-leaving)')?.getAttribute('data-item-id')).toBe('item-22')
 })

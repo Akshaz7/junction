@@ -3,6 +3,24 @@ import { makeDemoAnswer } from '../mock/handler'
 import { viewerEvidence } from './viewer-evidence'
 
 describe('citation to drawing evidence', () => {
+  it('navigates only the three cited items among 27 page detections', () => {
+    const answer = makeDemoAnswer('How many windows?')
+    answer.evidence.boxes = Array.from({ length: 27 }, (_, index) => ({ item_id: `item-${index + 1}`, page: 1, label: String(index + 1), bbox_px: [index, 0, index + 1, 10] }))
+    answer.citations[0].item_ids = ['item-4', 'item-12', 'item-22']
+    const result = viewerEvidence(answer, { ...answer.citations[0], item_ids: ['item-22'] })
+    expect(result.sources.map((source) => source.id)).toEqual(['item-4', 'item-12', 'item-22'])
+    expect(result.regions.map((region) => region.id)).toEqual(result.sources.map((source) => source.id))
+    expect(result.initial).toBe(2)
+  })
+
+  it('keeps all drawing items when there is no cited selection', () => {
+    const answer = makeDemoAnswer('How many windows?')
+    const citation = { ...answer.citations[0], item_ids: [], bbox_px: null }
+    answer.citations = []
+    const result = viewerEvidence(answer, citation)
+    expect(result.sources).toHaveLength(answer.evidence.boxes.length)
+  })
+
   it('preserves evidence numbering and focuses the cited item instead of the first page item', () => {
     const answer = makeDemoAnswer('How many windows are there?')
     const citation = { ...answer.citations[0], item_ids: ['window-002'] }

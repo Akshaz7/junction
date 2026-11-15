@@ -7,10 +7,12 @@ export type ViewerSource = { id: string; label: string; bbox: Bbox | null; itemI
 export function viewerEvidence(answer: Answer, citation: Citation): { regions: ViewerRegion[]; sources: ViewerSource[]; initial: number } {
   const pageCitations = answer.citations.filter((item) => item.doc_id === citation.doc_id && item.page === citation.page)
   const itemIds = new Set(pageCitations.flatMap((item) => item.item_ids))
+  // A page can contain many more detections than the answer cites. Both the
+  // painted evidence and its navigation must use the same cited subset.
   // Explicit document ownership takes precedence; older answers use the scene/citations.
   const boxDoc = answer.evidence.scene.doc_id || (answer.doc_ids.length === 1 ? answer.doc_ids[0] : null)
   const regions: ViewerRegion[] = answer.evidence.boxes
-    .filter((box) => box.page === citation.page && (box.doc_id ? box.doc_id === citation.doc_id : boxDoc === citation.doc_id || itemIds.has(box.item_id)))
+    .filter((box) => box.page === citation.page && (!itemIds.size || itemIds.has(box.item_id)) && (box.doc_id ? box.doc_id === citation.doc_id : boxDoc === citation.doc_id || itemIds.has(box.item_id)))
     .map((box) => ({ id: box.item_id, label: box.label, bbox: box.bbox_px, text: false, kind: box.kind ?? pageCitations.find((item) => item.item_kind && item.item_ids.includes(box.item_id))?.item_kind ?? kindFromItemId(box.item_id) }))
   for (const source of pageCitations) {
     if (source.bbox_px && (source.kind === 'text' || !source.item_ids.some((id) => regions.some((region) => region.id === id)))) {
