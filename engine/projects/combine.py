@@ -106,6 +106,9 @@ def load_infos(docs: list, root: Path) -> dict:
         derived = False
         try:
             doc = load_doc(did, Path(root))
+            if doc is not None and base["kind"] == "pdf":
+                from engine.solvers.solve import augment_pdf_doc
+                doc = augment_pdf_doc(doc, root)
             if doc is None:
                 sp = load_sheet_parent(did, Path(root))
                 if sp is not None:

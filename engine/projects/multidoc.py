@@ -331,6 +331,11 @@ def answer(question: str, doc_ids, root, t0=None):
             text += f" Not added, because the level is not stated: {names}."
             steps.append({"kind": "note", "title": "Not added", "cite": None, "ok": None,
                           "text": f"{len(c.unplaced)} drawing{'s' if len(c.unplaced) != 1 else ''} without a stated level: set the level on the project page to include {'them' if len(c.unplaced) != 1 else 'it'}"})
+        for d_, _v in parts:
+            ex = (getattr(c.infos[d_].doc, "meta", None) or {}).get("planmap_extra", {}).get(kind)
+            if ex:
+                text += (f" {ex['extra'] + ex['model']} on the plan of {short_title(c.infos[d_].title, 50)}; {ex['extra']} "
+                         f"{'has' if ex['extra'] == 1 else 'have'} no drawn wall, so the 3D model shows {ex['model']}.")
         if notes:
             seen_pairs = {}
             for did, used, r, n_other, n_used in notes:

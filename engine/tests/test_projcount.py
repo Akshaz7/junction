@@ -27,6 +27,11 @@ def art(tmp_path, monkeypatch):
     drop = {i["item_id"] for i in doors[3:]}
     e["elements"] = [i for i in e["elements"] if i["item_id"] not in drop]
     (tmp_path / P / "elements.json").write_text(json.dumps(e))
+
+    for pm in (tmp_path / P).glob("planmap-*.json"):   # the plan map agrees with the trimmed IFC
+        m = json.loads(pm.read_text())
+        m["items"] = [i for i in m.get("items", []) if i.get("item_id") not in drop]
+        pm.write_text(json.dumps(m))
     return tmp_path
 
 
