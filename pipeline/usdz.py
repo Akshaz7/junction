@@ -131,6 +131,21 @@ class Builder:
         return mp
 
 
+def _item_node(node: str, node_to_item: dict) -> str:
+    """Keep exact names, then remove extruded parts and trimesh primitive suffixes.
+
+    Strip from the right so underscores/colons inside a source node id survive.
+    A part can itself be split by trimesh, e.g. <node>:frame_<hash>.
+    """
+    base = node
+    while base not in node_to_item:
+        cut = max(base.rfind(":"), base.rfind("_"))
+        if cut < 0:
+            return node
+        base = base[:cut]
+    return base
+
+
 def process(doc_id: str, art: Path) -> dict:
     sj = json.loads((art / "scene.json").read_text())
     scene = trimesh.load(art / "scene.glb", process=False)
@@ -150,9 +165,7 @@ def process(doc_id: str, art: Path) -> dict:
             g = scene.geometry[gname]
             if len(g.faces) == 0:
                 continue
-            base = node
-            if base not in node_to_item and "_" in base and base.rsplit("_", 1)[0] in node_to_item:
-                base = base.rsplit("_", 1)[0]  # trimesh splits multi-primitive nodes into <guid>_<hash>
+            base = _item_node(node, node_to_item)
             verts = trimesh.transformations.transform_points(g.vertices, T)
             if base in node_to_item:
                 iid, info = node_to_item[base]

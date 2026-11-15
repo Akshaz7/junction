@@ -214,15 +214,18 @@ async def _ingest(doc_id: str):
 
 
 async def _persist(doc_id: str):
-    """After ingestion: update the documents row (pages, kind) and mirror every derived file to PostgreSQL."""
+    """After ingestion: sync document metadata and mirror derived files to PostgreSQL."""
     pool = await db.get_pool()
     if pool is None:
         return
     try:
         d = config.artifacts_dir() / doc_id
         meta = json.loads((d / "doc.json").read_text())
-        await pool.execute("update documents set pages=$2, files=$3::jsonb where doc_id=$1",
-                           doc_id, int(meta.get("pages") or 1), json.dumps(meta["files"]))
+        # formats describes the source upload: JPEG can have a derived PNG in files.
+        # Older sidecars without formats still have explicit format keys in files.
+        formats = meta.get("formats") or list(meta["files"])
+        await pool.execute("update documents set pages=$2, files=$3::jsonb, formats=$4 where doc_id=$1",
+                           doc_id, int(meta.get("pages") or 1), json.dumps(meta["files"]), formats)
         await artifact_store.save_doc(pool, doc_id)
     except Exception as e:  # noqa: BLE001
         print("persist failed:", doc_id, repr(e)[:200])

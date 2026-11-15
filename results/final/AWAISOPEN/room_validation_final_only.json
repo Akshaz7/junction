@@ -1,0 +1,121 @@
+{
+  "baseline": "e721ac8",
+  "documents": [
+    {
+      "doc_id": "swiss_dwellings__site1287-bldg2507-floor11732",
+      "mode": "planmap",
+      "questions": [
+        {
+          "question": "What is the area of room 1.01?",
+          "expected": [
+            "room-2"
+          ],
+          "before": [],
+          "after": [
+            "room-2"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Zimmer 1.01?",
+          "expected": [
+            "room-2"
+          ],
+          "before": [],
+          "after": [
+            "room-2"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Zimmer 101?",
+          "expected": [
+            "room-2"
+          ],
+          "before": [],
+          "after": [
+            "room-2"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 1.02?",
+          "expected": [
+            "room-3"
+          ],
+          "before": [],
+          "after": [
+            "room-3"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Bad 1.02?",
+          "expected": [
+            "room-3"
+          ],
+          "before": [],
+          "after": [
+            "room-3"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Bad 102?",
+          "expected": [
+            "room-3"
+          ],
+          "before": [],
+          "after": [
+            "room-3"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 1.03?",
+          "expected": [
+            "room-4"
+          ],
+          "before": [],
+          "after": [
+            "room-4"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Whg. A 1.03?",
+          "expected": [
+            "room-4"
+          ],
+          "before": [],
+          "after": [
+            "room-4"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Whg. A 103?",
+          "expected": [
+            "room-4"
+          ],
+          "before": [],
+          "after": [
+            "room-4"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        }
+      ],
+      "before_pass": 0,
+      "after_pass": 9
+    }
+  ]
+}
