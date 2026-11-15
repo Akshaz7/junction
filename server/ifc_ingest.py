@@ -186,6 +186,14 @@ def run(source, doc, out, status):
     if size <= float(os.environ.get("IFC_INPROC_MAX_MB", "15")):  # optional extras run in the API process: small models only
         from engine.xcheck_ifc import ingest_lengths
         status.stage("quantity_checks", lambda: ingest_lengths(source, doc["doc_id"], out))
+        from engine.wallarea import build_wallgeom
+
+        def wallgeom():
+            try:
+                build_wallgeom(out, source)
+            except Exception as e:  # noqa: BLE001  optional extra: wall take-off falls back to "cannot verify"
+                status.stages[-1]["note"] = f"wall geometry skipped: {e}"[:200]
+        status.stage("wall_geometry", wallgeom)
         from server.ingest_job import _has_piping, _piping
         if _has_piping(source):
             def pip():

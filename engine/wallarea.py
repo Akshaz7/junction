@@ -607,6 +607,28 @@ def _source(doc_id, root):
     return None
 
 
+WALLGEOM = "wallgeom.json"
+
+
+def _wallgeom(doc_id, root):
+    """Stored measure_ifc result (built at ingest/backfill) so deployments without the IFC can still answer."""
+    path = Path(root) / doc_id / WALLGEOM
+    try:
+        data = json.loads(path.read_text())
+    except (OSError, ValueError):
+        return None
+    return data if isinstance(data, dict) and data.get("walls") is not None and data.get("storeys") is not None else None
+
+
+def build_wallgeom(doc_dir, source):
+    """Write wallgeom.json beside the document's other artifacts; returns the measurement."""
+    measured = measure_ifc(source)
+    tmp = Path(doc_dir) / (WALLGEOM + ".tmp")
+    tmp.write_text(json.dumps(measured, allow_nan=False))
+    tmp.replace(Path(doc_dir) / WALLGEOM)
+    return measured
+
+
 def wants_wallarea(question):
     q = (question or "").casefold()
     if re.search(r"\b(?:plasterboard|drywall|gypsum board|wallboard|facade|façade)\b", q):
@@ -867,7 +889,10 @@ def answer(question, doc_ids, root, t0=None, hidden=None):
         return finish("**Select one building model for a wall-area take-off.** Combining models could count the same walls twice.")
     try:
         source = _source(did, root)
-        if source:
+        stored = _wallgeom(did, root)
+        if stored is not None:
+            measured, source = stored, True
+        elif source:
             measured = load_ifc(source)
         elif doc and doc.mode == "planmap":
             measured = estimate_planmaps(did, root, question)
