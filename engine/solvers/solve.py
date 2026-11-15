@@ -507,7 +507,11 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         unknown = [i for i in doc.items if i.source == "dxf" and i.kind == "other"
                    and i.props.get("role") == "fixture" and i.conf >= MIN_CONF
                    and (not page or i.page == page) and i.item_id not in (hidden or {})]
-        if unknown:
+        classified = [i for i in doc.items if i.kind in kinds and i.source == "dxf" and i.conf >= MIN_CONF
+                      and (not page or i.page == page) and i.item_id not in (hidden or {})]
+        if unknown and classified:   # classified symbols exist: answer, and state the unclassified ones in the trace
+            trace.append(_step("load", f"{len(unknown)} other DXF fixture symbols have no fixture type and are not counted"))
+        elif unknown:
             trace.append(_step("load", f"{len(unknown)} DXF fixture symbols have no fixture type"))
             return _abstain(question, doc_id,
                             f"The DXF contains unclassified fixture symbols, so I cannot give a reliable {_plural(kind, 1)} count.",
