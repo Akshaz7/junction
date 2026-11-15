@@ -1,6 +1,6 @@
 # Detector experiment (door / window / fixture): OFF by default, not part of the product
 
-**Status:** labelled experiment. It is not wired into the product. `pipeline/` is unchanged; the hook ships only as a patch.
+**Status:** labelled experiment. The door-confirm hook is wired into `pipeline/pdf_planmap.py` (`pipeline/pdf_detect.py`) but is **off unless `PDF_DETECT=1`**. To run it: `PDF_DETECT=1`, `PDF_DETECT_PY=<python with the modal package and a Modal token>`, optional `PDF_DETECT_RUN=<run>` (e.g. `y11l`, `y11l_clean`, `y11l_mix_a`; default = newest finished run). It never adds or moves geometry; it only adds `props.det_conf` to doors it agrees with, plus a `detector` summary in the plan map.
 **Licence:** training and inference use `ultralytics` (AGPL-3.0), which the repo rules ban from the product. Don't merge this into the product without a licence decision. The alternative is retraining the same data on RT-DETR (Apache-2.0).
 
 ## What is here
