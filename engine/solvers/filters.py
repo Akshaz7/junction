@@ -31,6 +31,37 @@ def room_name(item: Item) -> str:
     return str(item.props.get("long_name") or item.label or item.name or item.type_name or item.props.get("room_type") or "unnamed room")
 
 
+def explicit_room_label(question: str) -> str | None:
+    """Read an explicit label before any type, room-number or scope inference."""
+    match = re.search(r"\b(?:rooms?|spaces?)\s+(?:labelled|labeled|named|called)\s+", question, re.I)
+    if not match:
+        return None
+    tail = question[match.end():].strip()
+    quotes = {"'": "'", '"': '"', '‘': '’', '“': '”'}
+    if tail[:1] in quotes:
+        # An apostrophe within a word (Cage d'escalier) is not a closing quote.
+        closing = re.search(re.escape(quotes[tail[0]]) + r'(?!\w)', tail[1:])
+        return tail[1:closing.start() + 1].strip() if closing else None
+    return re.split(r"\s+(?:are there|is there|on|in|at)\b|[?]", tail, maxsplit=1, flags=re.I)[0].strip() or None
+
+
+def exact_room_label(item: Item, target: str) -> bool:
+    """Compare the complete source label, preserving compound-name separators.
+
+    Inferred room types and unit tags cannot establish a drawn room label.
+    Whitespace, Unicode presentation and letter case do not alter the name.
+    """
+    from pipeline.dxf_units import unit_key
+    if item.props.get('role') == 'unit':
+        return False
+    label = item.label or item.props.get('long_name') or item.name
+    if not label or unit_key(label) is not None:
+        return False
+    def normalise(value):
+        return ' '.join(unicodedata.normalize('NFKC', str(value)).casefold().split())
+    return normalise(label) == normalise(target)
+
+
 ROOM_TYPES = {
     "office": r"\b(?:buro|office|toimisto|kontor|bureau|ufficio)\w*",
     "meeting room": r"\b(?:besprechung|meeting|conference|sitzung|kokous|motesrum)\w*",
@@ -143,6 +174,8 @@ def _target_before_scope(target: str, rooms: list[Item]) -> str:
 
 def room_filter(question: str, rooms: list[Item]) -> tuple[str, list[Item]] | None:
     """Recognise a drawn name, a translated room type, or an explicit area target."""
+    if (label := explicit_room_label(question)) is not None:
+        return label, [r for r in rooms if exact_room_label(r, label)]
     # A quoted label that carries its own room number ('Toilet (Rum nr. S11)') is matched by the exact-label path in solve.py.
     if re.search(r"['\"\u2018\u2019\u201c][^'\"]*\([^)]*\d[^)]*\)\s*['\"\u2018\u2019\u201d]", question):
         return None
