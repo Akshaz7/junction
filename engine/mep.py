@@ -639,8 +639,13 @@ BYLEVEL_Q = re.compile(r"\bby (?:level|floor|storey|story)\b|\bper (?:level|floo
 OVERVIEW_Q = re.compile(r"\bwhat\b.*\b(?:in|are in|is in) (?:this|the) (?:building|model)\b|\boverview\b|\bsummary\b|\bwhich\b.*\bexist\b|\bwhat (?:\w+ ){0,2}(?:is|are) there\b", re.I)
 
 
+EXCLUSION = re.compile(r"\b(?:not|never|excluding|exclude|except|without|ignoring|ignore|other than|rather than|instead of)\b[^.?;!,]*", re.I)
+
+
 def _subjects(ql: str) -> list[str]:
     out = []
+    # An exclusion clause names what the user does NOT want ("not pipe segments or smoke detectors").
+    ql = EXCLUSION.sub(" ", ql)
     # A light fitting is a light, not every fitting in the model. Consume
     # compound nouns before their generic "pipe" / "fitting" components.
     for key, rx in (("light", r"\blight fittings?\b"),
