@@ -17,7 +17,6 @@ import { chatLive } from '../lib/chat-live'
 import { useSceneEdits } from '../lib/use-scene-edits'
 import { DrawingEditsContext } from '../lib/scene-edit-context'
 import { needsDocument } from '../lib/needs-document'
-import { SkillPicker } from './skills-screen'
 import { FollowBanner, useFollow } from './follow-banner'
 import { getFollow } from '../lib/chat-follow'
 import './follow-banner.css'
@@ -573,10 +572,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
             const next = draft + (draft && !/\s$/.test(draft) ? ' @' : '@')
             setToolsOpen(false); setDraft(next); updateMention(next, next.length); textarea.current?.focus()
           }}><FolderOpen size={16} />Include a document<AtSign size={13} /></button>
-          <p className="picker-heading">Skills</p>
-          <SkillPicker disabled={busy || restoring || hidden} onPick={(prompt) => { setDraft(prompt); setMention(null); setToolsOpen(false); textarea.current?.focus() }} />
         </div>}
-        <div className="composer-actions"><button ref={toolsButton} className="document-context" aria-label="Add to question" aria-haspopup="dialog" aria-expanded={toolsOpen} aria-controls={toolsOpen ? 'composer-tools' : undefined} title="Add documents or skills" type="button" disabled={busy || restoring || hidden} onClick={() => { setMention(null); setToolsOpen((open) => !open) }}><Plus size={16} /></button><MicButton disabled={busy || restoring || hidden} onInterim={(text) => setDraft(text)} onText={(text) => { setDraft(text); setMention(null); textarea.current?.focus() }} />
+        <div className="composer-actions"><button ref={toolsButton} className="document-context" aria-label="Add to question" aria-haspopup="dialog" aria-expanded={toolsOpen} aria-controls={toolsOpen ? 'composer-tools' : undefined} title="Add documents" type="button" disabled={busy || restoring || hidden} onClick={() => { setMention(null); setToolsOpen((open) => !open) }}><Plus size={16} /></button><MicButton disabled={busy || restoring || hidden} onInterim={(text) => setDraft(text)} onText={(text) => { setDraft(text); setMention(null); textarea.current?.focus() }} />
           <Button type="submit" variant="primary" className="send-button" aria-label="Send question" disabled={!draft.trim() || busy || restoring || !docs.length || !!mention}><ArrowUp size={18} /></Button>
         </div>
       </form>

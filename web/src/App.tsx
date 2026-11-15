@@ -4,7 +4,6 @@ import { Badge } from './components/ui'
 import { ProjectSwitcher, WorkspaceNavigation, pageLabel } from './components/workspace-navigation'
 import { AccuracyScreen } from './components/accuracy-screen'
 import { FindingsScreen } from './components/findings-screen'
-import { SkillsScreen } from './components/skills-screen'
 import { AutomationsScreen } from './components/automations-screen'
 import { OverviewScreen } from './components/overview-screen'
 import { ChatScreen } from './components/chat-screen'
@@ -12,7 +11,6 @@ import { ChatHeaderActions } from './components/chat-header-actions'
 import { PairingLanding } from './components/pair-phone'
 import { DataScreen } from './components/data-screen'
 import { CompareScreen } from './components/compare-screen'
-import { LibraryScreen } from './components/library-screen'
 import { ChangesScreen } from './components/changes-screen'
 import { HelpScreen } from './components/help-screen'
 import { ProjectsScreen } from './components/project-page'
@@ -90,12 +88,11 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
       }} />
       {view === 'projects' && <ProjectsScreen docs={docs} />}
       {view === 'compare' && <CompareScreen docs={docs} demo={demo} />}
-      {view === 'library' && <LibraryScreen docs={docs} />}
+      {(view === 'library' || view === 'skills') && <OverviewScreen docs={docs} />}
       {view === 'tools' && <FindingsScreen docs={docs} />}
       {view === 'changes' && <ChangesScreen docs={docs} demo={demo} />}
       {view === 'accuracy' && <AccuracyScreen />}
       {view === 'findings' && <FindingsScreen docs={docs} />}
-      {view === 'skills' && <SkillsScreen docs={docs} />}
       {view === 'automations' && <AutomationsScreen docs={docs} />}
       {view === 'overview' && <OverviewScreen docs={docs} />}
       {view === 'help' && <HelpScreen />}

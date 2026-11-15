@@ -1,4 +1,4 @@
-import { Check, Database, FolderKanban, GitCompare, House, BotMessageSquare, MoreHorizontal, Library, Inbox, Wrench, CircleHelp } from 'lucide-react'
+import { Check, Database, FolderKanban, GitCompare, House, BotMessageSquare, MoreHorizontal, Inbox, Wrench, CircleHelp } from 'lucide-react'
 import { Tooltip } from './ui/tooltip'
 import { Button } from './ui'
 import type { Route } from '../lib/router'
@@ -16,7 +16,6 @@ export const navigation = [
   { route: 'projects', label: 'Projects', icon: FolderKanban },
   { route: 'compare', label: 'Compare', icon: GitCompare },
   { route: 'changes', label: 'Changes', icon: Inbox },
-  { route: 'library', label: 'Library', icon: Library },
   { route: 'data', label: 'Data', icon: Database },
   { route: 'tools', label: 'Tools', icon: Wrench },
 ] as const
