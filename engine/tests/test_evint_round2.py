@@ -38,7 +38,8 @@ def test_real_answers_have_exact_factor_sum_and_method(did, question, monkeypatc
         assert all(set(a) >= {'id', 'label', 'value', 'unit', 'rejected_because'} for a in method['alternatives'])
         assert calc.validate(trace, ROOT) == []
         if r['answer'].get('unit') == 'count':
-            assert isinstance(r['reasoning']['margin']['value'], (int, float))
+            m_ = r['reasoning']['margin']
+            assert isinstance(m_['value'], (int, float)) or m_.get('rule') == 'coverage_only_margin_unknown'
             assert r['reasoning']['margin'].get('is_error_bound') is False
     json.dumps(r, allow_nan=False)
 
@@ -131,8 +132,9 @@ def test_zero_coverage_difference_is_explicitly_not_zero_detection_error(tmp_pat
     fixture(tmp_path)
     r = scan_calc.attach(response(0), 'How many doors?', tmp_path)
     m = r['reasoning']['margin']
-    assert m['value'] == 0 and m['pct'] is None and not m['is_error_bound']
-    assert 'not an independent' in m['components'][0]['note']
+    # Box coverage alone is never a margin: unknown, not ±0.
+    assert m['value'] is None and m['pct'] is None and not m['is_error_bound']
+    assert 'not an independent' in m['components'][0]['note'] and 'unknown' in m['why']
 
 
 def test_scale_sensitivity_is_not_used_for_a_different_selected_scale(tmp_path):
