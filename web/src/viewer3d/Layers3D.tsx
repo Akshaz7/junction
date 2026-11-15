@@ -6,16 +6,16 @@ import type { Viewer } from './viewer';
 import '../components/viewer-tools/plan-layers.css';
 
 /** 3D layers: the 2D plan layers (walls/doors/windows/rooms/fixtures) plus the IFC kinds a plan map has no layer for. */
-export type Layer3DKey = 'wall' | 'door' | 'window' | 'floor' | 'stairs' | 'structure' | 'fixture' | 'pipe' | 'other';
-export const LAYER3D_KEYS: readonly Layer3DKey[] = ['wall', 'door', 'window', 'floor', 'stairs', 'structure', 'fixture', 'pipe', 'other'];
+export type Layer3DKey = 'wall' | 'door' | 'window' | 'floor' | 'stairs' | 'structure' | 'fixture' | 'pipe' | 'duct' | 'other';
+export const LAYER3D_KEYS: readonly Layer3DKey[] = ['wall', 'door', 'window', 'floor', 'stairs', 'structure', 'fixture', 'pipe', 'duct', 'other'];
 const LABELS: Record<Layer3DKey, string> = {
   wall: 'Walls', door: 'Doors', window: 'Windows', floor: 'Rooms/Floors', stairs: 'Stairs',
-  structure: 'Structure', fixture: 'Fixtures', pipe: 'Pipes', other: 'Other',
+  structure: 'Structure', fixture: 'Fixtures', pipe: 'Pipes', duct: 'Ducts', other: 'Other',
 };
 /** Chip swatch colour per layer (same palette as the 2D chips and the 3D highlights). */
 const COLOR_KIND: Record<Layer3DKey, KindKey> = {
   wall: 'wall', door: 'door', window: 'window', floor: 'room', stairs: 'stairs',
-  structure: 'column', fixture: 'toilet', pipe: 'pipe', other: 'other',
+  structure: 'column', fixture: 'toilet', pipe: 'pipe', duct: 'fitting', other: 'other',
 };
 const BY_KIND: Partial<Record<KindKey, Layer3DKey>> = {
   wall: 'wall', door: 'door', window: 'window', room: 'floor', slab: 'floor', stairs: 'stairs',
@@ -24,7 +24,11 @@ const BY_KIND: Partial<Record<KindKey, Layer3DKey>> = {
   pipe: 'pipe', drain: 'pipe', fitting: 'pipe',
 };
 
+/** Ventilation kinds (ifc_scene: IfcDuctSegment/IfcDuctFitting/IfcAirTerminal); no 2D colour key, so matched by name. */
+const DUCT_KINDS = new Set(['duct', 'duct_fitting', 'duct_segment', 'air_terminal', 'terminal', 'damper']);
+
 export function layer3dOf(item: Parameters<typeof itemKindKey>[0]): Layer3DKey {
+  if (item && DUCT_KINDS.has((item.kind ?? '').toLowerCase())) return 'duct';
   return BY_KIND[itemKindKey(item)] ?? 'other';
 }
 

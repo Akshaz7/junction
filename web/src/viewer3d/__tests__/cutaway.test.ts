@@ -126,6 +126,8 @@ describe('building / services layer (generated for demo fixture)', () => {
     expect(serviceLayerLabel(layered().manifest)).toBe('Ventilation');
     expect(serviceLayerLabel({ items: { a: { node: 'a', usd_name: 'a', bbox_m: null, storey: null, kind: 'wall' } } })).toBeNull();
     expect(serviceLayerLabel({ items: { a: { node: 'a', usd_name: 'a', bbox_m: null, storey: null, kind: 'pipe' }, b: { node: 'b', usd_name: 'b', bbox_m: null, storey: null, kind: 'wall' } } })).toBe('Services');
+    // ifc_scene names IfcAirTerminal 'air_terminal': part of the ventilation layer, not the building.
+    expect(serviceLayerLabel({ items: { a: { node: 'a', usd_name: 'a', bbox_m: null, storey: null, kind: 'air_terminal' }, b: { node: 'b', usd_name: 'b', bbox_m: null, storey: null, kind: 'duct' }, c: { node: 'c', usd_name: 'c', bbox_m: null, storey: null, kind: 'wall' } } })).toBe('Ventilation');
   });
   it('shows building only, services only or both, combined with the storey cut', () => {
     const scene = layered();
