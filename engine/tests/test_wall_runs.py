@@ -8,7 +8,7 @@ def test_intent():
     assert wants_wall_runs("total wall length") == "total"
     assert wants_wall_runs("wall surface area") is None
     assert wants_wall_runs("how many walls are there") is None
-    assert wants_wall_runs("what is the shortest wall") is None
+    assert wants_wall_runs("what is the shortest wall") == "shortest"
 
 
 def _wall(iid, pts):
@@ -59,3 +59,30 @@ def test_no_scale_abstains(tmp_path):
     root = _write(tmp_path, {"method": "none", "confidence": 0.0})
     r = answer("longest wall length", ["doc1"], root)
     assert r is None or r["answer"]["abstained"] or "scale" in r["answer"]["text_md"]
+
+
+def test_phrasings():
+    for q in ["longest wall", "What is the longest wall?", "which wall is longest?", "what is the biggest wall", "largest wall",
+              "how long is the longest wall?"]:
+        assert wants_wall_runs(q) == "longest", q
+    for q in ["wall lengths", "how long are the walls?", "total length of walls", "total wall length"]:
+        assert wants_wall_runs(q) == "total", q
+    for q in ["how many walls are there", "largest wall area", "what is the wall thickness"]:
+        assert wants_wall_runs(q) is None, q
+
+
+def test_ifc_longest_with_ties(monkeypatch):
+    import engine.solvers.data as data
+    items = [Item("a", "wall", name="W1", storey="L1", q={"length_m": 41.7}),
+             Item("b", "wall", name="W2", storey="L2", q={"length_m": 41.7}),
+             Item("c", "wall", name="W3", storey="L1", q={"length_m": 5.0}),
+             Item("d", "wall", name="W4", storey="L1", q={})]
+    doc = Doc("x", "ifc", items, storeys=[{"name": "L1"}, {"name": "L2"}])
+    monkeypatch.setattr(data, "load_doc", lambda *a, **k: doc)
+    r = answer("What is the longest wall?", ["x"], ".")
+    assert r["answer"]["value"] == 41.7 and r["answer"]["unit"] == "m" and r["answer"]["abstained"] is False
+    assert set(r["evidence"]["scene"]["highlight_item_ids"]) == {"a", "b"} and "2 walls share" in r["answer"]["text_md"]
+    sh = answer("What is the shortest wall?", ["x"], ".")
+    assert sh["answer"]["value"] == 5.0 and sh["evidence"]["scene"]["highlight_item_ids"] == ["c"]
+    assert answer("total length of walls", ["x"], ".") is None      # existing quantity handlers own IFC totals
+    assert answer("longest exterior wall", ["x"], ".") is None

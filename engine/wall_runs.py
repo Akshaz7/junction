@@ -15,20 +15,22 @@ from pathlib import Path
 MIN_RUN_M = 0.3          # shorter outline edges are caps, jogs and pixel noise, not wall runs
 ANGLE_TOL = math.radians(4)
 RE_ASK = re.compile(r"\bwalls?\b")
-RE_LEN = re.compile(r"\b(?:longest|shortest|length|lengths|how long|long)\b")
-RE_EXCL = re.compile(r"\b(?:area|surface|volume|thickness|height|how many|count|number of|take.?off|paint|plaster)\b")
+RE_EXCL = re.compile(r"\b(?:area|surface|volume|thickness|height|how many|count|number of|take.?off|paint|plaster|wide|width)\b")
+RE_SUPER_LEN = re.compile(r"\b(?:longest|biggest|largest)\b|\bhow long is the (?:longest|biggest|largest)\b")
+RE_TOTAL = re.compile(r"\bwall lengths?\b|\blengths? of (?:the |all )?(?:\w+ )?walls\b|\bhow long are (?:the |all )?(?:\w+ )?walls\b|"
+                      r"\b(?:total|sum|combined|overall)\b.*\b(?:length|long)\b|\b(?:length|long)\b.*\b(?:total|sum|combined|overall)\b")
 
 
 def wants_wall_runs(question: str) -> str | None:
-    """'longest' | 'total' | None."""
+    """'longest' | 'shortest' | 'total' | None. Every phrasing of a wall-length question lands here, not on a count."""
     q = (question or "").casefold()
-    if not RE_ASK.search(q) or not RE_LEN.search(q) or RE_EXCL.search(q):
+    if not RE_ASK.search(q) or RE_EXCL.search(q):
         return None
-    if re.search(r"\blongest\b", q):
+    if RE_SUPER_LEN.search(q):
         return "longest"
     if re.search(r"\bshortest\b", q):
-        return None     # the shortest outline edge is a cap or noise, not a wall
-    if re.search(r"\b(?:total|sum|combined|overall|all)\b", q) or re.search(r"\bwall lengths?\b|\blengths? of (?:the )?walls\b", q):
+        return "shortest"   # plan maps decline it below (an outline edge is a cap, not a wall); IFC has stored lengths
+    if RE_TOTAL.search(q):
         return "total"
     return None
 
@@ -136,7 +138,11 @@ def answer(question, doc_ids, root, t0=None):
         doc = load_doc(did, Path(root))
     except (OSError, ValueError, TypeError, KeyError):
         return None
-    if doc is None or doc.mode != "planmap":
+    if doc is None:
+        return None
+    if doc.mode == "ifc":
+        return _ifc_answer(question, doc, doc_ids, root, t0, mode)
+    if mode == "shortest":
         return None
     sc = doc.scale or {}
     mpp = sc.get("m_per_px")
@@ -197,4 +203,52 @@ def answer(question, doc_ids, root, t0=None):
                              "pct_cap": 50 if est else 90,
                              "reason": "Wall runs come from the detected wall outlines and a scale " + ("assumed from door widths." if est else "recorded for this drawing."),
                              "improve": "Print or enter a scale (or a known dimension) to turn this estimate into a measurement."}
+    return res
+
+
+def _ifc_answer(question, doc, doc_ids, root, t0, mode):
+    """Model walls carry a stored length_m; report the longest (ties named) or the total, per storey when asked."""
+    from engine.solvers.filters import storey_requested
+    from engine.solvers.solve import _answer_obj, _evidence, _step, _fmt, resolve_storey
+    did = doc_ids[0]
+    # Totals and qualified walls (exterior, load-bearing...) belong to the existing quantity handlers.
+    if mode not in ("longest", "shortest") or re.search(r"\b(?:exter\w+|inter\w+|outer|inner|load.?bearing|partition|fire|curved|hidden)\b", question, re.I):
+        return None
+    trace = [_step("route", f"wall lengths / {mode} -> stored wall quantities, code, no model")]
+    storey = resolve_storey(question, doc.storeys)
+    if storey_requested(question) and storey is None:
+        return None
+    walls = [(i, float(i.q["length_m"])) for i in doc.items
+             if i.kind == "wall" and i.q.get("length_m") not in (None, 0) and float(i.q["length_m"]) > 0
+             and (storey is None or i.storey == storey)]
+    where = f" on {storey}" if storey else ""
+    if not walls:
+        return None
+    if mode == "total":
+        total = sum(v for _, v in walls)
+        items = [i for i, _ in walls]
+        boxes, cites, scene = _evidence(doc, items)
+        text = (f"The **{len(walls)} walls**{where} add up to **{_fmt(total, 'length')} m** of stored wall length. "
+                + "".join(f"[{c['n']}]" for c in cites))
+        value, hl = round(total, 3), items
+        trace.append(_step("sum", f"sum of length_m over {len(walls)} walls = {total:.3f} m"))
+    else:
+        top = (max if mode == "longest" else min)(v for _, v in walls)
+        tied = sorted([(i, v) for i, v in walls if abs(v - top) <= top * 0.005], key=lambda iv: (iv[0].storey or "", iv[0].item_id))
+        hl = [i for i, _ in tied][:12]
+        boxes, cites, scene = _evidence(doc, hl)
+        first = tied[0][0]
+        name = first.label or first.name or first.item_id
+        text = f"The {mode} wall{where} is **{_fmt(top, 'length')} m**: {name}" + (f" ({first.storey})" if first.storey else "") + "."
+        if len(tied) > 1:
+            levels = list(dict.fromkeys(i.storey for i, _ in tied if i.storey))
+            text += (f" {len(tied)} walls share this length" + (f" across {', '.join(levels[:6])}" if levels else "")
+                     + "; all are highlighted.")
+        text += " " + "".join(f"[{c['n']}]" for c in cites)
+        value = round(top, 3)
+        trace.append(_step(mode, f"{'max' if mode == 'longest' else 'min'} length_m over {len(walls)} walls = {top:.3f} m; {len(tied)} within 0.5%"))
+    scene["highlight_item_ids"] = [i.item_id for i in hl]
+    scene["camera_target_item_id"] = hl[0].item_id
+    scene["item_kinds"] = {i.item_id: "wall" for i in hl}
+    res = _answer_obj(question, doc_ids, text, value, "m", 0.9, False, boxes, cites, scene, trace, "index", t0)
     return res
