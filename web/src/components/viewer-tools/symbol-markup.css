@@ -1,0 +1,44 @@
+.symbol-markup-layer { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+.symbol-markup-layer.is-drawing { pointer-events: all; cursor: crosshair; touch-action: none; }
+.symbol-match { color: var(--info-text, #2563eb); pointer-events: all; cursor: pointer; }
+.symbol-match.is-confirmed { color: var(--brand-forest, #185440); }
+.symbol-match.is-rejected { color: var(--muted-foreground); opacity: .45; }
+.symbol-match > rect { stroke: currentColor; stroke-width: 1.5; fill: currentColor; fill-opacity: .18; }
+.symbol-match.is-active > rect { stroke-width: 3; }
+.symbol-match.is-rejected > rect { stroke-dasharray: 4 3; }
+.symbol-match svg rect, .markup-note-pin circle { fill: currentColor; }
+.symbol-match text, .markup-note-pin text { fill: white; font: 600 11px var(--font-sans); }
+.symbol-markup-layer.is-drawing .symbol-match { pointer-events: none; }
+.symbol-selection { fill: #185440; fill-opacity: .18; stroke: #185440; stroke-width: 2; pointer-events: none; }
+.markup-note-pin { color: var(--brand-forest, #185440); pointer-events: all; cursor: pointer; }
+.symbol-markup-layer.is-drawing .markup-note-pin { pointer-events: none; }
+.symbol-markup-panel { width: clamp(210px, 38%, 290px); min-width: 0; overflow: auto; border-left: 1px solid var(--border); background: var(--card); padding: 12px; font-size: var(--text-body-sm); user-select: text; }
+.symbol-markup-panel header { display: flex; align-items: center; justify-content: space-between; }
+.symbol-markup-panel :is(p,small) { line-height: 1.5; overflow-wrap: anywhere; }
+.symbol-markup-panel :is(form,label) { display: block; }
+.symbol-markup-panel :is(input,textarea,select) { display: block; width: 100%; margin: 6px 0 12px; padding: 8px; color: var(--foreground); background: var(--background); border: 1px solid var(--border); border-radius: 6px; font: inherit; }
+.symbol-markup-panel textarea { min-height: 64px; resize: vertical; }
+.symbol-markup-panel h3 { font-size: var(--text-body-sm); font-weight: 500; margin-top: 20px; }
+.markup-caution,.symbol-markup-panel small { color: var(--muted-foreground); font-size: var(--text-caption); }
+.markup-room-counts { padding-left: 16px; font-size: var(--text-caption); }
+.markup-review-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+.markup-box-list { display: grid; max-height: 200px; overflow: auto; margin-top: 12px; border-block: 1px solid var(--border); }
+.markup-box-list button { display: flex; justify-content: space-between; padding: 8px 4px; text-align: left; }
+.markup-box-list button[aria-pressed="true"] { background: var(--neutral-100); color: var(--brand-forest); }
+.markup-box-list span { color: var(--muted-foreground); font-size: var(--text-caption); }
+.markup-pin-list { padding: 0; list-style: none; }
+.markup-pin-list li { display: flex; align-items: start; padding-block: 8px; border-bottom: 1px solid var(--border); }
+.markup-pin-list li > button:first-child { flex: 1; text-align: left; overflow-wrap: anywhere; }
+@media(max-width:800px) { .viewer-item-layout:has(.symbol-markup-panel) { flex-direction: column; } .symbol-markup-panel { width: 100%; max-height: 35dvh; border-left: 0; border-top: 1px solid var(--border); } }
+.document-viewer .viewer-item-layout:has(.symbol-markup-panel) { display: flex; flex: 1; min-height: 0; min-width: 0; }
+.viewer-item-layout:has(.symbol-markup-panel) > .drawing-stage { min-width: 0; }
+@media(max-width:800px) { .document-viewer .viewer-item-layout:has(.symbol-markup-panel) { flex-direction: column; } }
+
+.taught-mark { color: var(--brand-forest, #185440); pointer-events: all; cursor: pointer; }
+.symbol-markup-layer.is-drawing .taught-mark { pointer-events: none; }
+.taught-mark > rect { stroke: currentColor; stroke-width: 1.5; fill: currentColor; fill-opacity: .14; }
+.taught-mark.is-active > rect { stroke-width: 3; }
+.taught-mark svg rect { fill: currentColor; }
+.taught-mark text { fill: white; font: 600 13px var(--font-sans); }
+.taught-mark:focus-visible { outline: none; }
+.taught-mark:focus-visible > rect { stroke-width: 3; stroke-dasharray: 5 3; }

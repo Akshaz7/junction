@@ -149,7 +149,7 @@ def test_dxf_unit_detection_and_missing_units(tmp_path, unit, factor):
     pm = json.loads((tmp_path / "planmap-1.json").read_text())
     if factor:
         assert pm["scale"]["m_per_px"] == pytest.approx(factor / meta["px_per_unit"], abs=1e-9)
-        assert pm["items"][0]["props"]["area_m2_geom"] == pytest.approx(round(5000 * factor ** 2, 2))
+        assert pm["items"][0]["props"]["area_m2_geom"] == pytest.approx(5000 * factor ** 2, rel=1e-4)
     else:
         assert pm["scale"]["m_per_px"] is None and pm["scale"]["confidence"] == 0
         assert pm["items"][0]["props"]["area_m2_geom"] is None

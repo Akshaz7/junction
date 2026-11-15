@@ -1,0 +1,27 @@
+[
+  {
+    "doc_id": "europeana__1373-https-ekultura-hr-purl-url-2scmsydu6zcxdy45jan3cg5djqhqpodm",
+    "source_image": "data/full/junction-dataset/data/europeana/1373_https___ekultura_hr_purl_url_2SCMSYDU6ZCXDY45JAN3CG5DJQHQPODM.jpg",
+    "image": [
+      1675,
+      2500
+    ],
+    "dpi": null,
+    "is_plan": true,
+    "before_counts": null,
+    "before_scale": null,
+    "new_unfiltered_counts": {
+      "door": 0,
+      "window": 40,
+      "room": 23
+    },
+    "after_counts": {
+      "door": 0,
+      "window": 40,
+      "room": 23
+    },
+    "cost_usd": 0.03096,
+    "elapsed_s": 27.45,
+    "manual_check": null
+  }
+]

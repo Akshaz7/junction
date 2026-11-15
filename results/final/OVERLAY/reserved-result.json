@@ -1,0 +1,38 @@
+{
+  "reserved_unseen": "data/cc_clean/cubicasa5k/high_quality_architectural/11025/F1_original.png",
+  "real_export_pair": "data/cc_clean/cubicasa5k/high_quality_architectural/11025/F1_scaled.png",
+  "pair": {
+    "status": "aligned",
+    "matrix": [
+      [
+        1.1419838361062025,
+        -1.886170286558324e-05,
+        0.024592168491969064
+      ],
+      [
+        1.886170286558324e-05,
+        1.1419838361062025,
+        -0.09393774756930436
+      ]
+    ],
+    "method": "raster-features",
+    "anchor_count": 757,
+    "candidate_count": 787,
+    "residual_px": 1.2076011559368391,
+    "residual_mm": null,
+    "detail": "Aligned on 757 shared drawing features, \u00b1 1.2 px \u00b7 drawing scale unavailable"
+  },
+  "unrelated_pair": {
+    "status": "needs_manual",
+    "matrix": null,
+    "method": null,
+    "anchor_count": 0,
+    "candidate_count": 7,
+    "residual_px": null,
+    "residual_mm": null,
+    "detail": "Too few shared drawing features. Use two grid crossings."
+  },
+  "policy": "First opened and tested after implementation and unit tests. No tuning or training on this drawing.",
+  "model_calls": 0,
+  "cost_usd": 0
+}

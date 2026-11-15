@@ -1,0 +1,637 @@
+[
+  {
+    "answer_id": "de6d499f46c84c1a9c4dd137b3240696",
+    "question": "How many bathtubs are drawn on this floor plan?",
+    "doc_ids": [
+      "swiss_dwellings__site285-bldg527-floor51568"
+    ],
+    "answer": {
+      "text_md": "**There are 4 bathtubs on this floor plan.** [1]",
+      "value": 4,
+      "unit": "count",
+      "confidence": 0.5,
+      "abstained": false
+    },
+    "citations": [
+      {
+        "n": 1,
+        "doc_id": "swiss_dwellings__site285-bldg527-floor51568",
+        "page": 1,
+        "kind": "region",
+        "bbox_px": [
+          379.4,
+          436.4,
+          1990.7,
+          531.8
+        ],
+        "item_ids": [
+          "bathtub-1",
+          "bathtub-2",
+          "bathtub-3",
+          "bathtub-4"
+        ],
+        "quote": null,
+        "label": "Floor plan \u00b7 4 bathtubs"
+      }
+    ],
+    "evidence": {
+      "boxes": [
+        {
+          "item_id": "bathtub-1",
+          "page": 1,
+          "bbox_px": [
+            379.4,
+            436.4,
+            465.0,
+            474.2
+          ],
+          "label": "1"
+        },
+        {
+          "item_id": "bathtub-2",
+          "page": 1,
+          "bbox_px": [
+            890.3,
+            436.4,
+            973.5,
+            474.2
+          ],
+          "label": "2"
+        },
+        {
+          "item_id": "bathtub-3",
+          "page": 1,
+          "bbox_px": [
+            1412.2,
+            494.0,
+            1497.8,
+            531.8
+          ],
+          "label": "3"
+        },
+        {
+          "item_id": "bathtub-4",
+          "page": 1,
+          "bbox_px": [
+            1905.0,
+            494.0,
+            1990.7,
+            531.8
+          ],
+          "label": "4"
+        }
+      ],
+      "scene": {
+        "doc_id": "swiss_dwellings__site285-bldg527-floor51568",
+        "highlight_item_ids": [
+          "bathtub-1",
+          "bathtub-2",
+          "bathtub-3",
+          "bathtub-4"
+        ],
+        "camera_target_item_id": "bathtub-1"
+      }
+    },
+    "trace": [
+      {
+        "step": "route",
+        "detail": "count / bathtub / whole-doc (rules)",
+        "ms": 0,
+        "model": null,
+        "cost_usd": 0.0
+      },
+      {
+        "step": "load",
+        "detail": "plan map: 4 bathtub items (conf >= 0.5; 0 below ignored)",
+        "ms": 0,
+        "model": null,
+        "cost_usd": 0
+      },
+      {
+        "step": "count",
+        "detail": "4 bathtub",
+        "ms": 0,
+        "model": null,
+        "cost_usd": 0
+      }
+    ],
+    "route": "planmap",
+    "cost": {
+      "usd_total": 0,
+      "calls": []
+    },
+    "latency_ms": 5,
+    "reasoning": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "4 bathtubs in the CAD drawing (DXF), each one numbered",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Estimate",
+        "pct": 59,
+        "reason": "The fixtures were identified from the shapes of the CAD symbols. Confidence is lower due to detector confidence 50%.",
+        "improve": "Check the numbered fixture symbols against the drawing or the fixture schedule."
+      }
+    }
+  },
+  {
+    "answer_id": "4154ba56dcd44409a8c11d89f7cf653c",
+    "question": "How many toilets (WC) are drawn on this floor plan?",
+    "doc_ids": [
+      "swiss_dwellings__site303-bldg598-floor2434"
+    ],
+    "answer": {
+      "text_md": "**There are 3 toilets on this floor plan.** [1]",
+      "value": 3,
+      "unit": "count",
+      "confidence": 0.5,
+      "abstained": false
+    },
+    "citations": [
+      {
+        "n": 1,
+        "doc_id": "swiss_dwellings__site303-bldg598-floor2434",
+        "page": 1,
+        "kind": "region",
+        "bbox_px": [
+          867.0,
+          785.0,
+          1614.4,
+          845.7
+        ],
+        "item_ids": [
+          "toilet-2",
+          "toilet-1",
+          "toilet-3"
+        ],
+        "quote": null,
+        "label": "Floor plan \u00b7 3 toilets"
+      }
+    ],
+    "evidence": {
+      "boxes": [
+        {
+          "item_id": "toilet-2",
+          "page": 1,
+          "bbox_px": [
+            1250.7,
+            785.0,
+            1272.8,
+            817.6
+          ],
+          "label": "1"
+        },
+        {
+          "item_id": "toilet-1",
+          "page": 1,
+          "bbox_px": [
+            867.0,
+            811.1,
+            889.0,
+            844.9
+          ],
+          "label": "2"
+        },
+        {
+          "item_id": "toilet-3",
+          "page": 1,
+          "bbox_px": [
+            1592.4,
+            812.0,
+            1614.4,
+            845.7
+          ],
+          "label": "3"
+        }
+      ],
+      "scene": {
+        "doc_id": "swiss_dwellings__site303-bldg598-floor2434",
+        "highlight_item_ids": [
+          "toilet-2",
+          "toilet-1",
+          "toilet-3"
+        ],
+        "camera_target_item_id": "toilet-2"
+      }
+    },
+    "trace": [
+      {
+        "step": "route",
+        "detail": "count / toilet / whole-doc (rules)",
+        "ms": 0,
+        "model": null,
+        "cost_usd": 0.0
+      },
+      {
+        "step": "load",
+        "detail": "plan map: 3 toilet items (conf >= 0.5; 0 below ignored)",
+        "ms": 0,
+        "model": null,
+        "cost_usd": 0
+      },
+      {
+        "step": "count",
+        "detail": "3 toilet",
+        "ms": 0,
+        "model": null,
+        "cost_usd": 0
+      }
+    ],
+    "route": "planmap",
+    "cost": {
+      "usd_total": 0,
+      "calls": []
+    },
+    "latency_ms": 3,
+    "reasoning": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "3 toilets in the CAD drawing (DXF), each one numbered",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Estimate",
+        "pct": 59,
+        "reason": "The fixtures were identified from the shapes of the CAD symbols. Confidence is lower due to detector confidence 50%.",
+        "improve": "Check the numbered fixture symbols against the drawing or the fixture schedule."
+      }
+    }
+  },
+  {
+    "answer_id": "178df7189c7b4f93a468d3986f0570e9",
+    "question": "How many bathtubs are drawn on this floor plan?",
+    "doc_ids": [
+      "swiss_dwellings__site629-bldg1355-floor5906"
+    ],
+    "answer": {
+      "text_md": "**There are 2 bathtubs on this floor plan.** [1]",
+      "value": 2,
+      "unit": "count",
+      "confidence": 0.5,
+      "abstained": false
+    },
+    "citations": [
+      {
+        "n": 1,
+        "doc_id": "swiss_dwellings__site629-bldg1355-floor5906",
+        "page": 1,
+        "kind": "region",
+        "bbox_px": [
+          1067.3,
+          447.8,
+          1412.2,
+          542.9
+        ],
+        "item_ids": [
+          "bathtub-1",
+          "bathtub-2"
+        ],
+        "quote": null,
+        "label": "Floor plan \u00b7 2 bathtubs"
+      }
+    ],
+    "evidence": {
+      "boxes": [
+        {
+          "item_id": "bathtub-1",
+          "page": 1,
+          "bbox_px": [
+            1067.3,
+            448.8,
+            1106.9,
+            542.7
+          ],
+          "label": "1"
+        },
+        {
+          "item_id": "bathtub-2",
+          "page": 1,
+          "bbox_px": [
+            1372.1,
+            447.8,
+            1412.2,
+            542.9
+          ],
+          "label": "2"
+        }
+      ],
+      "scene": {
+        "doc_id": "swiss_dwellings__site629-bldg1355-floor5906",
+        "highlight_item_ids": [
+          "bathtub-1",
+          "bathtub-2"
+        ],
+        "camera_target_item_id": "bathtub-1"
+      }
+    },
+    "trace": [
+      {
+        "step": "route",
+        "detail": "count / bathtub / whole-doc (rules)",
+        "ms": 0,
+        "model": null,
+        "cost_usd": 0.0
+      },
+      {
+        "step": "load",
+        "detail": "plan map: 2 bathtub items (conf >= 0.5; 0 below ignored)",
+        "ms": 0,
+        "model": null,
+        "cost_usd": 0
+      },
+      {
+        "step": "count",
+        "detail": "2 bathtub",
+        "ms": 0,
+        "model": null,
+        "cost_usd": 0
+      }
+    ],
+    "route": "planmap",
+    "cost": {
+      "usd_total": 0,
+      "calls": []
+    },
+    "latency_ms": 3,
+    "reasoning": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "2 bathtubs in the CAD drawing (DXF), each one numbered",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Estimate",
+        "pct": 59,
+        "reason": "The fixtures were identified from the shapes of the CAD symbols. Confidence is lower due to detector confidence 50%.",
+        "improve": "Check the numbered fixture symbols against the drawing or the fixture schedule."
+      }
+    }
+  },
+  {
+    "answer_id": "9109174dd3744d9db4f9c6c82993ad49",
+    "question": "How many bathtubs are drawn on this floor plan?",
+    "doc_ids": [
+      "swiss_dwellings__site604-bldg1319-floor5779"
+    ],
+    "answer": {
+      "text_md": "**There is 1 bathtub on this floor plan.** [1]",
+      "value": 1,
+      "unit": "count",
+      "confidence": 0.5,
+      "abstained": false
+    },
+    "citations": [
+      {
+        "n": 1,
+        "doc_id": "swiss_dwellings__site604-bldg1319-floor5779",
+        "page": 1,
+        "kind": "region",
+        "bbox_px": [
+          934.3,
+          604.4,
+          1028.9,
+          646.5
+        ],
+        "item_ids": [
+          "bathtub-1"
+        ],
+        "quote": null,
+        "label": "Floor plan \u00b7 1 bathtub"
+      }
+    ],
+    "evidence": {
+      "boxes": [
+        {
+          "item_id": "bathtub-1",
+          "page": 1,
+          "bbox_px": [
+            934.3,
+            604.4,
+            1028.9,
+            646.5
+          ],
+          "label": "1"
+        }
+      ],
+      "scene": {
+        "doc_id": "swiss_dwellings__site604-bldg1319-floor5779",
+        "highlight_item_ids": [
+          "bathtub-1"
+        ],
+        "camera_target_item_id": "bathtub-1"
+      }
+    },
+    "trace": [
+      {
+        "step": "route",
+        "detail": "count / bathtub / whole-doc (rules)",
+        "ms": 0,
+        "model": null,
+        "cost_usd": 0.0
+      },
+      {
+        "step": "load",
+        "detail": "plan map: 1 bathtub items (conf >= 0.5; 0 below ignored)",
+        "ms": 0,
+        "model": null,
+        "cost_usd": 0
+      },
+      {
+        "step": "count",
+        "detail": "1 bathtub",
+        "ms": 0,
+        "model": null,
+        "cost_usd": 0
+      }
+    ],
+    "route": "planmap",
+    "cost": {
+      "usd_total": 0,
+      "calls": []
+    },
+    "latency_ms": 72,
+    "reasoning": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "One bathtub in the CAD drawing (DXF)",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Estimate",
+        "pct": 59,
+        "reason": "The fixtures were identified from the shapes of the CAD symbols. Confidence is lower due to detector confidence 50%.",
+        "improve": "Check the numbered fixture symbols against the drawing or the fixture schedule."
+      }
+    }
+  },
+  {
+    "answer_id": "dd1850caa54645fbb01d6c5459151911",
+    "question": "How many toilets (WC) are drawn on this floor plan?",
+    "doc_ids": [
+      "swiss_dwellings__site644-bldg1390-floor6077"
+    ],
+    "answer": {
+      "text_md": "**There are 5 toilets on this floor plan.** [1]",
+      "value": 5,
+      "unit": "count",
+      "confidence": 0.5,
+      "abstained": false
+    },
+    "citations": [
+      {
+        "n": 1,
+        "doc_id": "swiss_dwellings__site644-bldg1390-floor6077",
+        "page": 1,
+        "kind": "region",
+        "bbox_px": [
+          1143.5,
+          284.8,
+          1336.1,
+          1133.8
+        ],
+        "item_ids": [
+          "toilet-2",
+          "toilet-3",
+          "toilet-1",
+          "toilet-4",
+          "toilet-5"
+        ],
+        "quote": null,
+        "label": "Floor plan \u00b7 5 toilets"
+      }
+    ],
+    "evidence": {
+      "boxes": [
+        {
+          "item_id": "toilet-2",
+          "page": 1,
+          "bbox_px": [
+            1143.5,
+            284.8,
+            1156.2,
+            305.8
+          ],
+          "label": "1"
+        },
+        {
+          "item_id": "toilet-3",
+          "page": 1,
+          "bbox_px": [
+            1235.4,
+            503.4,
+            1247.8,
+            524.1
+          ],
+          "label": "2"
+        },
+        {
+          "item_id": "toilet-1",
+          "page": 1,
+          "bbox_px": [
+            1235.2,
+            831.4,
+            1255.9,
+            844.7
+          ],
+          "label": "3"
+        },
+        {
+          "item_id": "toilet-4",
+          "page": 1,
+          "bbox_px": [
+            1323.9,
+            1076.1,
+            1336.1,
+            1097.3
+          ],
+          "label": "4"
+        },
+        {
+          "item_id": "toilet-5",
+          "page": 1,
+          "bbox_px": [
+            1324.0,
+            1109.3,
+            1336.1,
+            1133.8
+          ],
+          "label": "5"
+        }
+      ],
+      "scene": {
+        "doc_id": "swiss_dwellings__site644-bldg1390-floor6077",
+        "highlight_item_ids": [
+          "toilet-2",
+          "toilet-3",
+          "toilet-1",
+          "toilet-4",
+          "toilet-5"
+        ],
+        "camera_target_item_id": "toilet-2"
+      }
+    },
+    "trace": [
+      {
+        "step": "route",
+        "detail": "count / toilet / whole-doc (rules)",
+        "ms": 0,
+        "model": null,
+        "cost_usd": 0.0
+      },
+      {
+        "step": "load",
+        "detail": "plan map: 5 toilet items (conf >= 0.5; 0 below ignored)",
+        "ms": 0,
+        "model": null,
+        "cost_usd": 0
+      },
+      {
+        "step": "count",
+        "detail": "5 toilet",
+        "ms": 0,
+        "model": null,
+        "cost_usd": 0
+      }
+    ],
+    "route": "planmap",
+    "cost": {
+      "usd_total": 0,
+      "calls": []
+    },
+    "latency_ms": 6,
+    "reasoning": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "5 toilets in the CAD drawing (DXF), each one numbered",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Estimate",
+        "pct": 59,
+        "reason": "The fixtures were identified from the shapes of the CAD symbols. Confidence is lower due to detector confidence 50%.",
+        "improve": "Check the numbered fixture symbols against the drawing or the fixture schedule."
+      }
+    }
+  }
+]

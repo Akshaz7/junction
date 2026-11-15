@@ -229,7 +229,10 @@ def build(f, *, space_geometry=False):
     rows, errors = [], []
     for gid, el in entities.items():
         try:
-            ps = E.get_psets(el, verbose=True)
+            try:
+                ps = E.get_psets(el, verbose=True)
+            except KeyError:   # ifcopenshell cannot describe an unusual quantity entity: keep the property sets, drop that element's Qto
+                ps = E.get_psets(el, psets_only=True, verbose=True)
             typ = E.get_type(el)
             classes = [c for c in indexed if el.is_a(c)]
             kind = next((k for c, k in REINFORCEMENT.items() if el.is_a(c)), None)
@@ -272,7 +275,10 @@ def build(f, *, space_geometry=False):
             # Density may be attached to the material rather than the occurrence.
             if kind in REINFORCEMENT.values() and 'density_kg_m3' not in q:
                 for material in E.get_materials(el):
-                    mps = E.get_psets(material, verbose=True)
+                    try:
+                        mps = E.get_psets(material, verbose=True)
+                    except KeyError:
+                        mps = E.get_psets(material, psets_only=True, verbose=True)
                     value = measured(material, mps, ('MassDensity', 'Density'), 'MASSDENSITYUNIT')
                     if value[0] is not None and len(E.get_materials(el)) == 1:
                         put('density_kg_m3', value)

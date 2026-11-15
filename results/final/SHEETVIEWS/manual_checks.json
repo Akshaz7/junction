@@ -1,0 +1,146 @@
+{
+  "method": "Visual inspection of all listed source page images and enlarged plan crops. These are validation observations, never training data. null means no defensible exact count was established. Room conventions (porches, stalls, circulation) and overlapping historic revisions make several totals ambiguous.",
+  "files": {
+    "finna__hka-139877668752900-168422869617700": {
+      "mixed_plan_and_nonplan": true,
+      "plan_count_gold": null,
+      "scale_text": [
+        "1:100",
+        "1:200"
+      ],
+      "notes": "Three named main-building plans, a small outbuilding plan, elevations, section and a site drawing. Red/black revisions overlap. The two large top elevations and central section must never supply plan doors/windows/rooms. Exact material counts are not certified."
+    },
+    "finna__hka-139878174949000-145250688788000": {
+      "mixed_plan_and_nonplan": true,
+      "plan_count_gold": {
+        "room": 7
+      },
+      "scale_text": [],
+      "notes": "One central Plan, an upper Genomskarning section and lower Situationsplan. Seven enclosed central plan compartments counted by eye; doorway/window interpretation of the historic notation remains uncertain. Graphic bars are present, not a readable numeric ratio."
+    },
+    "finna__hka-139878174949000-150366720269000": {
+      "mixed_plan_and_nonplan": true,
+      "plan_count_gold": null,
+      "scale_text": [
+        "1:50"
+      ],
+      "notes": "Main toilet plan and small alternative-plan sketch; two elevations. Five toilet cubicles are visible in the main plan. Sketch/main-plan revisions must remain separate, not silently treated as one building total."
+    },
+    "finna__hka-139879309684900-154961504220600": {
+      "mixed_plan_and_nonplan": true,
+      "plan_count_gold": null,
+      "scale_text": [],
+      "notes": "Two plans below two elevations and two sections. Seven named large spaces in the outbuilding plan plus small sanitary compartments; the sauna plan has its own rooms. Graphic bars use metre labels; no readable ratio certified."
+    },
+    "finna__hka-139879309684900-154962122901100": {
+      "mixed_plan_and_nonplan": true,
+      "plan_count_gold": {
+        "door": 3,
+        "window": 5,
+        "room": 3
+      },
+      "scale_text": [],
+      "notes": "Bottom-right plan has three named rooms (Tvattstuga, Stall, Vagnslider). Three exterior door openings: bottom left, bottom centre, right side. Five window openings: left side, three top-wall spans, bottom right. Two elevations, a section and the coloured site map are excluded. Metre graphic bars, no ratio text certified."
+    },
+    "finna__hka-139879309684900-154962222514200": {
+      "mixed_plan_and_nonplan": true,
+      "plan_count_gold": {
+        "door": 1,
+        "window": 3,
+        "room": 1
+      },
+      "scale_text": [
+        "1:100",
+        "1:66 2/3"
+      ],
+      "notes": "Enlarged lower-right plan: one room, one bottom-left door opening and three window spans (top, right, bottom right). Elevations and section repeat the opening appearances. Two alternative sheet scale bars do not establish an unambiguous per-view scale."
+    },
+    "habs__de0117-sheet-00005": {
+      "mixed_plan_and_nonplan": false,
+      "plan_count_gold": null,
+      "expected_plan_answer": "unavailable",
+      "scale_text": [],
+      "notes": "Entrance-door elevation, section and moulding details. No floor plan. A door shown front-on must not become a floor-plan door count; the previous 13 room detections are unsupported."
+    },
+    "habs__ia0042-sheet-00004": {
+      "mixed_plan_and_nonplan": false,
+      "plan_count_gold": null,
+      "expected_plan_answer": "unavailable",
+      "scale_text": [
+        "1/4\"=1'-0\"",
+        "1/2\"=1'-0\""
+      ],
+      "notes": "Four exterior elevations, wall sections and three interior elevations; no floor plan. Exterior scale is 1:48, section/interior notation includes 1:24. The previous 11 room detections cannot be plan rooms."
+    },
+    "habs__mt0124-sheet-00002": {
+      "mixed_plan_and_nonplan": false,
+      "plan_count_gold": null,
+      "scale_text": [
+        "3/16\"=1'-0\"",
+        "1/16\"=1'-0\""
+      ],
+      "notes": "Two-plan control. Second floor is 1:64; first floor is 1:192, both verified visually. The lower schematic plan has incomplete opening detail, so a complete building door/window total cannot be certified from it."
+    },
+    "wikimedia__23288749": {
+      "mixed_plan_and_nonplan": false,
+      "plan_count_gold": null,
+      "scale_text": [],
+      "notes": "Three separate plans A/B/C, with a 0/50/100 m graphic scale. This is a per-view control, not an elevation-contamination case. Openings lack modern door-swing notation; zero detected doors does not establish zero actual doors."
+    },
+    "wikimedia__24018750": {
+      "mixed_plan_and_nonplan": true,
+      "plan_count_gold": null,
+      "scale_text": [],
+      "notes": "One dominant palace elevation, lower-centre plan and decorative details. Front elevation repeats many windows that must not enter the plan count. Small plan image is insufficient for certified exact opening totals. Graphic bars and detail scale text, no numeric 1:N ratio certified."
+    },
+    "finna__hka-139879309684900-155058531210000": {
+      "mixed_plan_and_nonplan": true,
+      "plan_count_gold": null,
+      "scale_text": [],
+      "notes": "Large lower-left building plan, small rectangular shed plan, wide top elevation, sections and lower-right site map. Historic cell divisions and revisions prevent a certified room total. Separate graphic bars beneath plans/site."
+    },
+    "finna__hka-139879309684900-155058737003700": {
+      "mixed_plan_and_nonplan": true,
+      "plan_count_gold": null,
+      "scale_text": [],
+      "notes": "Main building and latrine plans, with corresponding elevations and sections. Main plan has four main enclosed spaces plus porch; toilet stalls and circulation need an explicit counting convention. Graphic bars separately labelled for plans and elevations/sections."
+    },
+    "finna__hka-139879309684900-161226144595300": {
+      "mixed_plan_and_nonplan": true,
+      "plan_count_gold": null,
+      "scale_text": [],
+      "notes": "Lower building plan, lower elevation, left section and large upper-right site map. The coloured site footprints are not room or opening detections. Visible metre graphic bars are not numeric ratio labels."
+    },
+    "finna__hka-139880068219800-169332104793400": {
+      "mixed_plan_and_nonplan": true,
+      "plan_count_gold": {
+        "room": 4
+      },
+      "scale_text": [
+        "1:100",
+        "1:20",
+        "1:500"
+      ],
+      "notes": "Four enclosed plan compartments counted in enlarged crop. Two elevations, section, enlarged door/fanlight details and site plan must remain separate. Title block lists main/detail scales and site is labelled 1:500; individual detail association remains uncertain."
+    },
+    "habs__az0258-sheet-00018": {
+      "reserved_unseen": true,
+      "mixed_plan_and_nonplan": false,
+      "plan_count_gold": null,
+      "expected_plan_answer": "unavailable",
+      "scale_text": [
+        "1/2\"=1'-0\"",
+        "1:24"
+      ],
+      "notes": "Chosen randomly before implementation and inspected only after code freeze. Longitudinal section of Montezuma Castle, with small locator/section-key plans upper right. No room/door/window floor-plan quantity can be certified. 1:24 and equivalent imperial label agree. No implementation change was based on this source; a later general Finnish title correction used a second reserved unseen file."
+    },
+    "europeana__1373-https-ekultura-hr-purl-url-2scmsydu6zcxdy45jan3cg5djqhqpodm": {
+      "reserved_unseen": true,
+      "reserved_round": "final, before Finnish-title correction",
+      "mixed_plan_and_nonplan": false,
+      "plan_count_gold": null,
+      "scale_text": [],
+      "notes": "Inspected only after final code freeze. One courtyard floor plan titled Prvi sprat, not a mixed sheet. No printed 1:N scale verified. Door leaves are not shown; vaulted circulation bays are not necessarily separate rooms. Automatic opening/room totals are not certified. No implementation change followed this source."
+    }
+  }
+}

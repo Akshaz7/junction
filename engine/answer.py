@@ -87,12 +87,20 @@ def _reader(question, doc_ids, root, trace, calls, t0, emit):
 
 def _use_reader(res, question, doc_ids, root, trace, calls, t0, emit):
     """Run the reader when `res` is an abstention; return the reader's answer if it found one, else `res`."""
-    if res is not None and not res["answer"].get("abstained"):
+    from engine.ifc_pending import missing_quantity
+    if missing_quantity(res, doc_ids, root) or (res is not None and not res["answer"].get("abstained")):
         return res
+    # Some source solvers own their call list. Carry those calls into the
+    # reader's shared ledger without counting the same call object twice.
+    for call in (res or {}).get("cost", {}).get("calls", []):
+        if not any(call is existing for existing in calls):
+            calls.append(call)
     rr = _reader(question, doc_ids, root, trace, calls, t0, emit)
     if rr is not None and not rr["answer"].get("abstained"):
         rr["trace"] = trace
         return rr
+    if res is not None:
+        res["cost"] = {"usd_total": round(sum(c.get("cost_usd", 0) for c in calls), 6), "calls": calls}
     return res if res is not None else rr
 
 
@@ -131,20 +139,26 @@ def _set_boxes(res, parsed, entries, note):
     n = len(entries)
     ids = [e[0] for e in entries]
     page = ((res.get("evidence") or {}).get("boxes") or [{"page": 1}])[0].get("page", 1)
-    res["evidence"]["boxes"] = [{"item_id": it, "page": page, "bbox_px": [int(v) for v in bb], "label": str(k)} for k, (it, bb) in enumerate(entries, 1)]
+    res["evidence"]["boxes"] = [{"item_id": it, "page": page, "bbox_px": [int(v) for v in bb], "label": str(k), "kind": parsed.kind} for k, (it, bb) in enumerate(entries, 1)]
     sc = res["evidence"]["scene"]
     sc["highlight_item_ids"] = ids
     sc["camera_target_item_id"] = ids[0] if ids else None
+    sc["item_kinds"] = {iid: parsed.kind for iid in ids}
     for c in res.get("citations") or []:
         if "item_ids" in c:
             c["item_ids"] = list(ids)
             if entries:
                 c["bbox_px"] = [min(e[1][0] for e in entries), min(e[1][1] for e in entries), max(e[1][2] for e in entries), max(e[1][3] for e in entries)]
+            else:
+                c["bbox_px"] = None
     noun = re.sub(r"^.*?\*\*\d+ ([^*]+)\*\*.*$", r"\1", ans["text_md"], flags=re.S) if re.search(r"\*\*\d+ ", ans["text_md"]) else parsed.kind + "s"
     marks = " ".join(dict.fromkeys(re.findall(r"\[\d+\]", ans["text_md"])))
     ans["value"] = n
     ans["text_md"] = f"There {'is' if n == 1 else 'are'} **{n} {noun if n != 1 else noun.rstrip('s')}** on this floor plan." + (f" {marks}" if marks else "")
     ans["confidence"] = round(min(ans.get("confidence", 0.5), 0.5), 3)
+    for c in res.get("citations") or []:
+        c["label"] = f"Floor plan · {n} {noun if n != 1 else noun.rstrip('s')}"
+        c["item_kind"] = parsed.kind
     res["trace"].append(_step("recount", note, 0, None, 0))
 
 
@@ -161,7 +175,9 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
     try:
         from engine.solvers.data import load_doc
         doc = load_doc(did, root)
-        if doc is None or doc.mode != "planmap" or not any(i.source == "det" for i in doc.items):
+        if doc is None or doc.mode != "planmap" or doc.pages != 1 or doc.meta.get("view_regions") or not any(i.source == "det" for i in doc.items):
+            return res
+        if any(i.props.get('confirmed_by_user') and i.kind == parsed.kind for i in doc.items):
             return res
         det = Path(root) / did / "planmap-det.json"
         # calibration: the fine-tuned detector is far below the vision recount (shower/bath .28 vs .89 exact count), so it is opt-in (DET_BOXES=1)
@@ -179,6 +195,8 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
         return res
     if n is None:
         return res
+    res.setdefault("_calc_models", []).append({"label": "Model count, second look", "value": n, "doc_id": did,
+                                               "policy": "Final count follows the recorded recount decision and its supported boxes; this model output alone is not a verified count."})
     calls.append({"task": "recount", "provider": "vision", "model": model, "cost_usd": usd})
     plan_n = int(ans["value"])
     final = reconcile(parsed.kind, plan_n, n)
@@ -215,6 +233,8 @@ def _recount_ladder(res, question, did, parsed, root, calls, hidden):
             res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n}: vision drew {len(entries)} box(es), not {final}, kept the plan map", 0, model, usd))
             return res
         _set_boxes(res, parsed, entries, f"plan map {plan_n}, drawing re-read {n}: replaced by {len(entries)} vision-drawn box(es) ({m2})")
+    else:
+        res["trace"].append(_step("recount", f"plan map {plan_n}, drawing re-read {n}: kept the boxed plan-map count", 0, model, usd))
     return res
 
 
@@ -264,6 +284,12 @@ def _guarded(question, doc_ids, on_event, scene_state, history):
 @document_scope
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None) -> dict:
+    from engine.reasoning_parts.confidence import attach
+    return attach(_answer_with_evidence(question, doc_ids, on_event, scene_state=scene_state, history=history), question, _root())
+
+
+def _answer_with_evidence(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
+                          history: list[dict] | None = None) -> dict:
     started_at = time.perf_counter()
     # F-CHANGES: revision questions are a complete code route, including evidence.
     from engine.revision_compare import comparison_answer
@@ -272,9 +298,17 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
         if on_event:
             for entry in comparison["trace"]:
                 on_event("trace", entry)
-        return comparison
+        from engine import calc
+        return calc.attach(comparison, question, _root())
     # thread memory (engine/context.py): every route below sees the resolved, standalone question and document selection
     original, step = question, None
+    from engine.solvers.requests import quantity_followup, translate_count
+    if (translated := translate_count(question)) is not None:
+        question = translated
+        step = _step("language", "common count grammar translated to English with the same object and floor")
+    if (quantity_q := quantity_followup(question, history)) is not None:
+        question = quantity_q
+        step = _step("context", "retained the previous measured quantity and waste allowance for the unit-price follow-up")
     try:  # keyboard mash or nonsense: say so, never reuse the previous answer
         from engine.gibberish import MESSAGE, is_gibberish
         if is_gibberish(question):
@@ -304,25 +338,43 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
             step = _tstep if step is None else step
     except Exception:  # noqa: BLE001
         pass
-    res = ensure_markers(_guarded(question, doc_ids, on_event, scene_state, history))
+    from engine.taught_items import query as taught_query
+    try:
+        marked = taught_query(question, doc_ids, _root(), {iid: iid for iid in (scene_state or {}).get('hidden', [])})
+    except (OSError, ValueError, TypeError, KeyError):
+        marked = None  # A partially ingested or malformed source keeps the normal guarded answer path.
+    from engine.solvers.requests import ensure_answer_text
+    res = ensure_answer_text(ensure_markers(marked if marked is not None else _guarded(question, doc_ids, on_event, scene_state, history)))
+    from engine.honesty import validate_result
+    res = validate_result(res, question)
+    from engine.solvers.printed import cite_sheet_numbers
+    res = cite_sheet_numbers(res, question, _root())
+    from engine.numeric import guard_answer_value
+    res = guard_answer_value(res, question, doc_ids, _root(), hidden=(scene_state or {}).get("hidden"))
+    _doc = None
     try:   # E-61: implausible raster areas and sparse uploaded plans (engine/rastersanity.py)
         if len(doc_ids) == 1:
             from engine import rastersanity
             from engine.solvers.data import load_doc
             _doc = load_doc(doc_ids[0], _root())
-            if _doc is not None:
+            printed = (res.get("route") == "index" and bool(res.get("citations"))
+                       and all(c.get("kind") == "text" and c.get("quote") and not c.get("item_ids") for c in res["citations"]))
+            if _doc is not None and not printed:
                 res = rastersanity.guard(res, question, _doc)
     except Exception:  # noqa: BLE001 — a sanity note must never break an answer
         pass
     try:   # E-77: exact code answers explained in plain words (numbers unchanged; falls back to the code text)
         from engine.explain import explain
-        if not any(s.get("step") == "props" for s in res.get("trace", [])):
+        if marked is None and res.get("xdisc") is None and not any(s.get("step") == "props" for s in res.get("trace", [])):
             res = explain(res, question, _root(), on_event=on_event)
     except Exception:  # noqa: BLE001
         pass
+    if _doc is not None:
+        res = rastersanity.define_rooms(res, question, _doc)
     try:   # X20-X23/D01: feet, acres, unit prices on top of the metric answer (engine/units.py; value unchanged)
         from engine import units
-        res = units.convert(res, question)
+        if res.get("xdisc") is None:
+            res = units.convert(res, question)
     except Exception:  # noqa: BLE001
         pass
     try:   # E-79: "How we know" steps + confidence label, built by code from the cited elements
@@ -331,6 +383,11 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
             res = reasoning.attach(res, question, _root())
     except Exception:  # noqa: BLE001
         pass
+    # F-CALC: final operands must follow recounts, conversions and evidence margins.
+    from engine import calc
+    res = calc.attach(res, question, _root())
+    from engine import scan_calc
+    res = scan_calc.attach(res, question, _root())
     try:   # bullets need a blank line before them to render as a list
         _t = res["answer"].get("text_md") or ""
         res["answer"]["text_md"] = re.sub(r"(?m)^(?!- |\* |\||#)(\S[^\n]*)\n(- )", r"\1\n\n\2", _t)
@@ -352,32 +409,17 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
 
 def _answer_forced(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None) -> dict:
-    """Code -> vision recount -> reader -> forced best-effort answer. Never abstains on a selected document (FORCE_ANSWER=0 restores abstaining)."""
+    """Code -> vision recount -> reader. Missing evidence remains an abstention."""
     from engine.models import providers as _P
     _tok = _P.DELTA_SINK.set((lambda t: on_event("answer.delta", {"text": t})) if on_event else None)  # answer-text streaming
     try:
         res = _answer_core(question, doc_ids, on_event, scene_state=scene_state, history=history)
     finally:
         _P.DELTA_SINK.reset(_tok)
-    if (os.environ.get("FORCE_ANSWER", "1") == "0" or not doc_ids or not (question or "").strip() or not res["answer"].get("abstained")
-            or "quantity_rows" in res  # Missing IFC quantities must remain unavailable, never a forced zero.
-            or any(s.get("step") == "unclassified" for s in res.get("trace", []))
-            or parse_scene(question) is not None or _other_doc(question, doc_ids)):
+    from engine.ifc_pending import missing_quantity
+    if missing_quantity(res, doc_ids, _root()):
         return res
-    _t = res["answer"].get("text_md", "")
-    if ("does not record" in _t or _t.lstrip("*").startswith(("No beam", "No pipe or MEP"))) and parse(question).type not in ("count", "area", "length", "volume"):
-        res["answer"].update({"abstained": False, "confidence": 0.5})   # a checked statement that the model lacks this data is an answer
-        return res
-    try:
-        from engine.forced import forced_answer
-        (on_event or (lambda k, p: None))("status", {"text": "Estimating from the drawing…"})
-        trace = list(res.get("trace") or [])
-        calls = list((res.get("cost") or {}).get("calls") or [])
-        f = forced_answer(question, doc_ids, _root(), parse(question), trace, calls)
-        f["latency_ms"] = res.get("latency_ms", 0) + f["latency_ms"]
-        return f
-    except Exception:  # noqa: BLE001
-        return res
+    return res
 
 
 _TYPOS = [(r"\bflor\b", "floor"), (r"\bflors\b", "floors"), (r"\bmny\b", "many"), (r"\bpeple\b|\bpeopel\b|\bpepole\b", "people"),
@@ -465,15 +507,20 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                 add(_step("route", f"document task: {_task}"))
                 return run_task(_task, question, doc_ids, history, on_event, trace, t0, root, calls)
         if (question or "").strip() and not os.environ.get("LIBRARY_OFF"):
-            from engine.library import library_answer, app_feature_answer   # FIX-6: $0 library and app-feature questions
+            from engine.library import library_answer, app_feature_answer, sheet_count_answer, library_search_answer
             from engine.app_help import app_help_answer                    # E-55: how-to questions answered only from engine/app_guide.md
-            _lib = library_answer(question, root) or app_help_answer(question, doc_ids) or app_feature_answer(question, doc_ids, root)
+            _lib = (sheet_count_answer(question, doc_ids, root) or library_answer(question, root)
+                    or (library_search_answer(question, root) if not doc_ids else None)
+                    or app_help_answer(question, doc_ids) or app_feature_answer(question, doc_ids, root))
             if _lib is not None:
                 for s_ in _lib["trace"]:
                     add(s_)
                 _lib["trace"] = trace
                 return _lib
         if not doc_ids:
+            from engine.library import drawing_selection_answer
+            if parse(question).type in ("count", "area", "length", "volume") and (selection := drawing_selection_answer(question, root, history)) is not None:
+                return selection
             if (question or "").strip():
                 from engine.project_answer import project_answer
                 res = project_answer(question, history, on_event, trace, t0, root, calls)
@@ -499,8 +546,33 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             return _abstained(question, doc_ids, f"The question names **{other}**, which is not among the selected documents ({sel}). "
                               "Select that document and ask again, or ask about the selected one.", trace, t0)
 
+        from engine.honesty import before as evidence_gate
+        if (res := evidence_gate(question, doc_ids, root, t0, hidden=(scene_state or {}).get("hidden") or ())) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
+            # Missing indexed rooms/properties do not prove that the printed
+            # drawing or a schedule lacks them. Try the evidence reader first.
+            if res.pop("source_lookup", False):
+                return _use_reader(res, question, doc_ids, root, trace, calls, t0, emit)
+            return res
+
+        from engine.solvers.requests import answer_request
+        if (res := answer_request(question, doc_ids, root, t0, (scene_state or {}).get("hidden") or [])) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
+            return res
+
         from engine.wallarea import answer as wallarea_answer
         if (res := wallarea_answer(question, doc_ids, root, t0, hidden=set((scene_state or {}).get("hidden") or []))) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
+            return res
+
+        from engine import xdisc
+        if (res := xdisc.answer(question, doc_ids, root, t0)) is not None:
             for s_ in res["trace"]:
                 add(s_)
             res["trace"] = trace
@@ -520,7 +592,7 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             res["trace"] = trace
             return res
         # F-ORDER: keep ordering allowances and exportable quantities together.
-        if len(doc_ids) == 1:
+        if len(doc_ids) == 1 and not re.search(r"\b(?:brands?|manufacturers?|which (?:type|product)|what (?:type|product))\b", question, re.I):
             from engine.order import answer_order
             from engine.solvers.data import load_doc as _load_order
             if (order_doc := _load_order(doc_ids[0], root)) is not None and (res := answer_order(question, order_doc, t0, root=root)) is not None:
@@ -531,7 +603,8 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
 
         if not os.environ.get("COMPLEX_Q_OFF"):    # E-59: multi-condition questions, every condition applied or named
             from engine import complex_q
-            if (res := complex_q.answer(question, doc_ids, root, t0)) is not None:
+            from engine.solvers.data import load_doc as _load_complex
+            if _load_complex(doc_ids[0], root) is not None and (res := complex_q.answer(question, doc_ids, root, t0)) is not None:
                 for s_ in res["trace"]:
                     add(s_)
                 res["trace"] = trace
@@ -555,6 +628,12 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             for s_ in res["trace"]:
                 add(s_)
             res["trace"] = trace
+            return res
+
+        # P&IDs need individual symbol evidence before the text-only fallback.
+        from engine.scan_count import answer_counts
+        if (res := answer_counts(question, doc_ids, root, t0, incurred=calls)) is not None:
+            res["trace"] = trace + res["trace"]
             return res
 
         # text-layer upload with no plan map: answer from the file's printed text (notes, schedule rows), "not shown" only when absent
@@ -590,6 +669,31 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                     return res
             except Exception:  # never break the answer path
                 pass
+
+        from engine.solvers.printed import answer_printed
+        if (res := answer_printed(question, doc_ids, root, t0)) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
+            return res
+
+        from engine.solvers.raster import reading_reason
+        if (reason := reading_reason(question, doc_ids, root)) is not None:
+            rr = _reader(question, doc_ids, root, trace, calls, t0, emit)
+            if rr is not None and not rr["answer"].get("abstained"):
+                return rr
+            parsed_detection = parse(question)
+            if parsed_detection.type == "count" and parsed_detection.kind not in (None, "storey"):
+                detected = solve(question, doc_ids[0], parsed=parsed_detection, root=root)
+                if not detected["answer"].get("abstained") and isinstance(detected["answer"].get("value"), (int, float, dict)):
+                    detected["answer"]["text_md"] += " " + reason + " This is the automatic detection count, not a verified total from the drawing."
+                    detected["answer"]["confidence"] = .3
+                    detected["trace"] = [*trace, *detected["trace"]]
+                    detected["cost"] = {"usd_total": round(sum(c.get("cost_usd", 0) for c in calls), 6), "calls": calls}
+                    return detected
+            res = _abstained(question, doc_ids, reason + " I cannot give a verified figure from the available detection data.", trace, t0, "hybrid", calls)
+            res["answer"].update(abstained=False, confidence=.3)
+            return res
 
         # FIX-14: engineering sheets (M-/S-/P- ids, tag or SF tables) are answered from their own text, never from a plan map
         try:
@@ -714,6 +818,10 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                     res = None
                     add(_step("analytics", f"skipped: {type(e).__name__}"))
                 if res is not None:
+                    if res.pop("needs_drawing_read", False):
+                        rr = _reader(question, doc_ids, root, trace, calls, t0, emit)
+                        if rr is not None and not rr["answer"].get("abstained"):
+                            return rr
                     emit("status", {"text": f"Exploring document: {_title(doc_ids[0], root)}"})
                     for s_ in res["trace"]:
                         add(s_)
@@ -806,6 +914,11 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             except SolverUnsupported:
                 continue
             res = _recount_ladder(res, question, did, parsed, root, calls, hid)
+            from engine.solvers.raster import missing_detection_reason
+            from engine.solvers.data import load_doc as _load_count
+            if not res["answer"].get("abstained") and (reason := missing_detection_reason(question, _load_count(did, root), res)):
+                res["answer"]["text_md"] += " " + reason + " This is the automatic detection count, not a verified total from the drawing."
+                res["answer"]["confidence"] = min(res["answer"]["confidence"], .3)
             for s in res["trace"]:
                 if s["step"] != "route":
                     add(s)
@@ -828,6 +941,12 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             last["question"] = question
             last["cost"] = {"usd_total": round(sum(c["cost_usd"] for c in calls), 6), "calls": calls}
             last["latency_ms"] = int((time.perf_counter() - t0) * 1000)
+            if any(s.get("step") == "view_scope" for s in trace):
+                return last
+            from engine.visual_rooms import answer as visual_rooms
+            if (visual := visual_rooms(question, doc_ids, root, trace, calls, t0,
+                                       hidden=(scene_state or {}).get("hidden") or ())) is not None:
+                return visual
             return _use_reader(last, question, doc_ids, root, trace, calls, t0, emit)
         return _use_reader(_abstained(question, doc_ids, NOT_YET, trace, t0, "index", calls), question, doc_ids, root, trace, calls, t0, emit)
     except Exception as e:  # the server must always get an answer object back

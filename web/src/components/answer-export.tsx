@@ -4,6 +4,7 @@ import { Copy, FileDown, LoaderCircle, Printer, X } from 'lucide-react'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Document } from '../lib/types'
 import { buildAnswerReport, buildChatReport, drawReportPage, reportCrop, reportToHtml, reportToMarkdown, type AnswerReport, type ReportDrawing, type ReportPage } from '../lib/answer-export'
+import { loadReportNotes } from '../lib/markup-report'
 import reportStyles from './answer-export.css?inline'
 import './answer-export.css'
 
@@ -57,6 +58,7 @@ function ExportDialog({ answer, docs, chatId, demo, onClose }: ExportAnswerButto
   const [status, setStatus] = useState('')
   const [manualCopy, setManualCopy] = useState(false)
   const [attempt, setAttempt] = useState(0)
+  const [exporting, setExporting] = useState(false)
 
   useEffect(() => {
     const element = dialog.current
@@ -83,6 +85,8 @@ function ExportDialog({ answer, docs, chatId, demo, onClose }: ExportAnswerButto
       signal.throwIfAborted()
       const options = { chatId: chatId ?? undefined, baseUrl: window.location.origin, demo: demo || workspaceApi.isDemo }
       const report = chat ? buildChatReport(chat, metadata, options) : buildAnswerReport(answer, metadata, options)
+      const noteSources = [...new Map(report.entries.flatMap((entry) => entry.sources).map((source) => [source.docId, source])).values()]
+      report.notes = await loadReportNotes(noteSources, signal)
       const drawings: Record<string, ReportDrawing> = {}
       // One decoded drawing/canvas at a time keeps a whole-chat export usable on a phone.
       for (const page of report.entries.flatMap((entry) => entry.pages)) {
@@ -119,12 +123,28 @@ function ExportDialog({ answer, docs, chatId, demo, onClose }: ExportAnswerButto
     } catch { setError('The print dialog could not open. Please try again in your browser.') }
   }
 
+  async function downloadCalculation() {
+    if (!answer.reasoning?.calc) return
+    setExporting(true); setError('')
+    try {
+      const response = await fetch('/api/calculations/export/csv', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(answer) })
+      if (!response.ok) throw new Error('Calculation export unavailable')
+      const url = URL.createObjectURL(await response.blob())
+      const link = document.createElement('a')
+      link.href = url; link.download = 'calculation-report.csv'; link.click()
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+      setStatus('Calculation rows downloaded as CSV.')
+    } catch { setError('The calculation CSV could not be downloaded. The complete calculation is included in Markdown and the printable report.') }
+    finally { setExporting(false) }
+  }
+
   return createPortal(<dialog ref={dialog} className="answer-export-dialog" aria-labelledby="answer-export-title" onCancel={onClose}>
     <header className="answer-export-header"><div><h2 id="answer-export-title">Export site report</h2><p>Question, answer and drawing evidence.</p></div><button type="button" aria-label="Close export report" onClick={onClose}><X size={18} /></button></header>
     <div className="answer-export-toolbar">
       {chatId && <label>Include<select value={scope} onChange={(event) => setScope(event.target.value as 'answer' | 'chat')}><option value="answer">This answer</option><option value="chat">Whole chat</option></select></label>}
       <button type="button" disabled={loading || !prepared} onClick={() => void copyMarkdown()}><Copy size={15} />Copy as Markdown</button>
       <button type="button" disabled={loading || !prepared || !frameReady} onClick={print}><Printer size={15} />Print / Save PDF</button>
+      {scope === 'answer' && answer.reasoning?.calc && <button type="button" disabled={exporting} onClick={() => void downloadCalculation()}><FileDown size={15} />Calculation CSV</button>}
     </div>
     {loading && <p className="answer-export-message" role="status"><LoaderCircle size={16} className="answer-export-spinner" />Preparing report and drawing crops…</p>}
     {error && <p className="answer-export-message" role="alert">{error}{!prepared && <button type="button" onClick={() => setAttempt((value) => value + 1)}>Retry</button>}</p>}

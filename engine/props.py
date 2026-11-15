@@ -258,7 +258,8 @@ def index(doc_id, root, kind=None):
         rec.aliases.update(str(v) for k, v in rec.item.props.items() if norm(k) in {"tag", "mark", "reference"} and v)
     status = "the stored model index"
     storeys = doc.storeys if doc else []
-    if source:
+    index_only = doc is not None and (root / doc_id / "ingest.json").is_file() and not (root / doc_id / "scene.json").is_file()
+    if source and not index_only:
         try:
             raw, raw_storeys = _read_ifc(_signature(source), kind)
             storeys = storeys or raw_storeys
@@ -438,12 +439,14 @@ def _result(question, doc_id, records, text, checked, total, root, t0, *, value=
                      confidence=dict(label="Verified" if complete else "Estimate", pct=100 if complete else 0,
                                      reason="Read directly from the recorded model data." if complete else "Some requested data or scope is missing; no value was inferred.",
                                      improve=None if complete else "Check the missing properties in the source model."))
-    return dict(answer_id=uuid.uuid4().hex, question=question, doc_ids=[doc_id],
+    res = dict(answer_id=uuid.uuid4().hex, question=question, doc_ids=[doc_id],
                 answer=dict(text_md=text.rstrip(), value=value, unit="count" if isinstance(value, int) and not isinstance(value, bool) else None,
                             confidence=1.0 if complete else 0.0, abstained=False),
                 citations=citations, evidence=dict(boxes=boxes, scene=dict(doc_id=doc_id, highlight_item_ids=ids, camera_target_item_id=ids[0] if ids else None)),
                 trace=[dict(step="props", detail=checked_text, ms=0, model=None, cost_usd=0)],
                 reasoning=reasoning, route="index", cost=dict(usd_total=0.0, calls=[]), latency_ms=int((time.perf_counter()-t0)*1000))
+    from engine.method_properties import capture
+    return capture(res, records, checked, total, source)
 
 
 def _model_answer(question, doc_id, root, req, t0, hidden=()):

@@ -1,0 +1,100 @@
+{
+  "status": "PASS",
+  "upload_limit_bytes": 104857600,
+  "tests": {
+    "backend_pipeline": 77,
+    "engine": 73,
+    "web": 44,
+    "ifc_upload_e2e": 1,
+    "total": 195,
+    "typescript": "passed"
+  },
+  "live_spend_usd": 0,
+  "numeric_answers_independently_verified": 10,
+  "verification": [
+    {
+      "case": "city",
+      "field": "door_count",
+      "answer": 16,
+      "reference": 16
+    },
+    {
+      "case": "city",
+      "field": "window_count",
+      "answer": 13,
+      "reference": 13
+    },
+    {
+      "case": "city",
+      "field": "recorded_room_area_m2",
+      "answer": 170.2978,
+      "reference": 170.29778258617762
+    },
+    {
+      "case": "ctr-shell",
+      "field": "door_count",
+      "answer": 59,
+      "reference": 59
+    },
+    {
+      "case": "ctr-shell",
+      "field": "window_count",
+      "answer": 285,
+      "reference": 285
+    },
+    {
+      "case": "docker-largest-supported",
+      "field": "pipe_count_from_explicit_type",
+      "answer": 112,
+      "reference": 112
+    },
+    {
+      "case": "unseen-batched-final",
+      "field": "recorded_room_area_m2",
+      "answer": 145.72,
+      "reference": 145.72168899999957
+    },
+    {
+      "case": "archicad-final",
+      "field": "door_count",
+      "answer": 5,
+      "reference": 5
+    },
+    {
+      "case": "archicad-final",
+      "field": "window_count",
+      "answer": 11,
+      "reference": 11
+    },
+    {
+      "case": "archicad-final",
+      "field": "recorded_room_area_m2",
+      "answer": 173.34,
+      "reference": 173.3424370823
+    }
+  ],
+  "final_cases": [
+    "city",
+    "ctr-shell",
+    "docker-largest-supported",
+    "unseen-batched-final",
+    "archicad-final"
+  ],
+  "unseen_final_file": "data/full/junction-dataset/data/ifc_models/bsc-duplex_duplex-electrical-20121207.ifc",
+  "limits": "3D is optional and remains unavailable for the three large models under the resource guard. Counts and stored quantities remain available; unknown quantities are not estimated. The 342.7 MB model exceeds the 100 MiB upload policy and receives a clear limit/split message.",
+  "container_tests": {
+    "reserve_for_api_bytes": 57671680,
+    "memory_limit_bytes": 536870912,
+    "largest_input_bytes": 97058912,
+    "largest_model_objects": 19876,
+    "largest_model_ingest_s": 168.889,
+    "largest_model_peak_bytes": 391606272,
+    "oom_events": 0
+  },
+  "validation_methods": [
+    "Real ingest through scripts/heavy.sh; macOS process RSS via /usr/bin/time -l",
+    "Linux 512 MiB cgroup peak and OOM counters; existing Docker image with this worktree mounted, no network",
+    "Independent full ifcopenshell parse in reference.py; numerical comparisons rounded to two decimal places",
+    "Generated property stress fixture labelled generated for demo; no source-specific tuning"
+  ]
+}

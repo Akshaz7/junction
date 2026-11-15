@@ -122,7 +122,7 @@ def _read_text(ctx: dict) -> str:
         return "The available source data was checked; no matching measurement or element was cited."
     pages = sorted({c.get("page") or 1 for c in cites})
     pg = f" on page {pages[0]}" if len(pages) == 1 and pages[0] > 1 else ""
-    return f"{n} marked region{'s' if n != 1 else ''}{pg} of {noun}{_docs_suffix(ctx)}"
+    return f"Used {noun}{pg} as the source; individual items were not identified{_docs_suffix(ctx)}"
 
 
 def run(ctx: dict) -> None:
@@ -136,3 +136,9 @@ def run(ctx: dict) -> None:
         else:
             steps.append({"kind": "read", "title": "Read", "text": _clip(_read_text(ctx), MAX), "cite": cites[0].get("n"), "ok": None})
     ctx["steps"] = steps
+    doc = ctx.get("doc")
+    if doc and doc.meta.get("view_regions"):
+        titles = list(dict.fromkeys(i.props.get("view_title") for i in cited if i.props.get("view_title")))
+        text = "Plan views used: " + "; ".join(titles) + "." if titles else "No floor-plan detections could be assigned to a view."
+        steps.append({"kind": "found", "title": "Plan views", "text": text + " Elevations, sections and unassigned items excluded.",
+                      "cite": cites[0].get("n") if cites else None, "ok": None})

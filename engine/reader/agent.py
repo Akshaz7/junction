@@ -7,6 +7,7 @@ import json
 import re
 import time
 import uuid
+from dataclasses import asdict
 from pathlib import Path
 
 from engine.models import providers as P
@@ -35,7 +36,7 @@ Tools (doc is d1, d2...; page numbers start at 1; pixel boxes are page-image pix
 - ifc {doc, kind?, ifc_class?, storey?, name?, external?}: elements of an IFC model with totals.
 - compute {expr}: exact arithmetic. Use it for every sum, area or allowance instead of mental maths.
 Rules: every fact and number in the answer must come from an observation; cite the ids that show it. Never invent codes, ratings or sources.
-If the drawings do not contain the answer (for example a rule that lives in a building code), say so and cite what they do show.
+If the drawings do not contain the answer (for example a rule that lives in a building code), say so and stop. Never add typical values, code requirements, or unrelated guidance to a missing-data answer.
 Be quick: prefer one precise call over many. Stop as soon as the evidence is enough."""
 
 
@@ -169,12 +170,23 @@ def _build(question, doc_ids, sess: Session, fin: dict, trace, calls, t0, forced
     notes = []
     if bad:
         notes.append(f"{len(bad)} cited id(s) did not exist and were dropped")
+    from engine.reader.numeric import recover_value
+    value, unit, numeric_notes, invalid_count = recover_value(question, text, value, unit, sess, refs)
+    notes.extend(numeric_notes)
+    if invalid_count:
+        forced_abstain = forced_abstain or "no verified whole-number count"
+        text = "I could not verify a whole-number count for the requested items from the tool results."
     # numeric grounding: a returned value must appear in some observation (or be a compute result)
     if isinstance(value, (int, float)) and not isinstance(value, bool):
         seen = set().union(*[_numbers(t) for t in sess.transcript]) if sess.transcript else set()
         if not any(abs(round(float(value), 2) - n) <= max(0.011, abs(n) * 0.005) for n in seen):
             notes.append("value not found in any tool result")
             value, conf = None, min(conf, 0.3)
+    from engine.numeric import count_question, headline_numbers
+    from engine.router.parser import parse
+    if value is None and headline_numbers(text) and (count_question(question) or parse(question).type in ("area", "length", "volume")):
+        forced_abstain = forced_abstain or "numeric headline has no verified computation"
+        text = "I could not verify a numeric answer for this question from the cited tool results."
     abstained = bool(forced_abstain) or not refs or str(fin.get("action")) == "abstain" or conf <= 0.0
     cites, boxes, ids, n = [], [], [], 0
     seen_ids = set()
@@ -198,9 +210,7 @@ def _build(question, doc_ids, sess: Session, fin: dict, trace, calls, t0, forced
                 seen_ids.add(i)
     if abstained:
         why = forced_abstain or "no verifiable evidence" if not refs else (forced_abstain or "the drawings do not settle it")
-        text = (text or "I could not find this in the selected drawings.")
-        if not refs:
-            text = "I could not verify an answer from the drawing text, tables or plan data. " + (f"What I found: {text}" if text else "")
+        text = "**I could not verify the requested information from the selected drawings.**"
         trace.append({"step": "abstain", "detail": why, "ms": 0, "model": None, "cost_usd": 0})
         value, conf, cites, boxes, ids = None, 0.0, [], [], []
         if refs:
@@ -212,16 +222,23 @@ def _build(question, doc_ids, sess: Session, fin: dict, trace, calls, t0, forced
         if notes:
             trace.append({"step": "check", "detail": "; ".join(notes), "ms": 0, "model": None, "cost_usd": 0})
     main = (cites[0]["doc_id"] if cites else (doc_ids[0] if doc_ids else ""))
-    return {
+    res = {
         "answer_id": uuid.uuid4().hex, "question": question, "doc_ids": list(doc_ids),
         "answer": {"text_md": text, "value": value if not abstained else None, "unit": unit if not abstained else None,
                    "confidence": round(conf if not abstained else 0.0, 2), "abstained": abstained},
         "citations": cites,
         "evidence": {"boxes": boxes, "scene": {"doc_id": main, "highlight_item_ids": ids, "camera_target_item_id": ids[0] if ids else None}},
         "trace": trace, "route": "hybrid",
+        "_reader_evidence": {"doc_ids": list(doc_ids), "tool_calls": list(sess.audit),
+                             "calculations": list(sess.calculations),
+                             "evidence": {key: asdict(value) for key, value in sess.ev.items()},
+                             "selected_refs": refs, "model_confidence": conf,
+                             "note": "Planner confidence is self-reported; it is not measured answer accuracy."},
         "cost": {"usd_total": round(sum(c.get("cost_usd", 0) for c in calls), 6), "calls": calls},
         "latency_ms": int((time.perf_counter() - t0) * 1000),
     }
+    from engine.reader.calc_trace import seed
+    return seed(res, res['_reader_evidence'])
 
 
 def read_answer(question: str, doc_ids: list[str], root, on_event=None, trace: list | None = None, calls: list | None = None,

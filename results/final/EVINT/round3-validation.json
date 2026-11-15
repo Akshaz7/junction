@@ -1,0 +1,109 @@
+{
+  "time": "2026-11-14T23:39:14.728916+00:00",
+  "round": 3,
+  "branch": "final/evui",
+  "baseline_commit": "0a31112a41d58d11ca8c5bef7a63e3176e0b30c0",
+  "validation": {
+    "engine_vision_tests": 415,
+    "server_tests": 4,
+    "total_passed": 419,
+    "new_regression_tests": 8,
+    "commands": [
+      "MODELS_FAKE=1 /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest engine/tests/test_evint_round2.py engine/tests/test_evint_round3.py vision/tests/test_infer_trace.py engine/tests/test_reasoning* engine/tests/test_calc* engine/tests/test_scale* engine/tests/test_method_trace.py engine/tests/test_xcheck* engine/tests/test_reader* engine/tests/test_scan_calc.py engine/tests/test_order.py -q",
+      "MODELS_FAKE=1 /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest server/tests/test_calc_export.py server/tests/test_scale_evidence.py -q",
+      "scripts/heavy.sh /Users/akshatthapa/Workspace/junction/.venv/bin/python -m engine.tests.run_evint_round3_audit",
+      "scripts/heavy.sh /Users/akshatthapa/Workspace/junction/.venv/bin/python -m engine.tests.run_evint_round3_audit --blind"
+    ]
+  },
+  "audit": {
+    "real_scans": 6,
+    "answers": 24,
+    "all_checks_passed": 24,
+    "max_main_steps": 11,
+    "cached_recounts": 3,
+    "blind_doc_id": "ext_resplan__plan-7912",
+    "blind_answers_passed": 4,
+    "product_changes_after_blind": false
+  },
+  "screenshot_case": {
+    "doc_id": "cubicasa5k__colorful-11397",
+    "question": "How many doors are there?",
+    "selected_count": 11,
+    "cached_recount": {
+      "value": 12,
+      "model": "gemini-4-carbon",
+      "cache": "/tmp/hologram/recount_cache.json",
+      "match": "exact source image hash, normalized question and current prompt pin; otherwise only an unambiguous saved reading; no fake records"
+    },
+    "before": {
+      "margin": 11,
+      "pct": 100.0,
+      "main_steps": 207,
+      "confidence": 25
+    },
+    "after": {
+      "margin": 2,
+      "pct": 18.181818181818183,
+      "raw_value": 1.5833333333333333,
+      "raw_pct": 14.393939393939393,
+      "main_steps": 11,
+      "confidence": 25,
+      "pct_kind": "historical_reference_accuracy",
+      "why": "Larger of historical MAE and recount difference, rounded up to whole items. Partial variation, not a guaranteed error bound."
+    },
+    "components": [
+      {
+        "label": "Historical mean absolute error",
+        "value": 1.5833333333333333,
+        "unit": "count"
+      },
+      {
+        "label": "Observed independent recount difference",
+        "value": 1,
+        "unit": "count"
+      },
+      {
+        "label": "Reported count versus numbered-box coverage",
+        "value": 0,
+        "unit": "count"
+      }
+    ],
+    "confidence_explanation": "25% is the observed historical reference (3 of 12 exact matches), not a penalty derived from alternate extraction differences or a guarantee. No unsupported accuracy boost was applied."
+  },
+  "schema": {
+    "step.level": [
+      "main",
+      "detail"
+    ],
+    "step.section": [
+      "result",
+      "detections",
+      "scale",
+      "recount",
+      "margin",
+      "confidence"
+    ],
+    "margin.additions": [
+      "rule",
+      "raw_value",
+      "raw_pct",
+      "excluded_components"
+    ],
+    "step_order": "Importance order, with dependencies resolved by stable id. Duplicate, cyclic, missing and mismatched references fail validation."
+  },
+  "limits": [
+    "Observed/historical variation is partial and not a physical or statistical error bound.",
+    "Rounded count margin and displayed pct use the same value; unrounded operands remain explicit.",
+    "Rejected alternate extraction artifacts remain visible as detail, but never affect the margin.",
+    "No independent numeric margin is invented for descriptions supported only by rejected inventories.",
+    "Fake-model descriptions test arithmetic/presentation only, not semantic accuracy."
+  ],
+  "live_calls": 0,
+  "live_spend_usd": 0,
+  "tracked_node_modules": false,
+  "cross_file": [
+    "engine/calc.py (order-independent graph validation)",
+    "engine/reasoning_parts/confidence.py (existing assigned finalizer hook, factor wording and count scale context)"
+  ],
+  "needs_awais": null
+}

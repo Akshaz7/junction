@@ -165,7 +165,8 @@ def _build(c: Combined, question: str, text: str, value_, area: bool, picks: lis
     res = _answer_obj(question, list(doc_ids), text, value_, _unit(area), 1.0 if label == "Verified" else 0.8, False, boxes, cites, scene,
                       [{"step": "route", "detail": trace_text, "ms": 0, "model": None, "cost_usd": 0}], "index", t0)
     res["reasoning"] = {"steps": steps, "confidence": {"label": label, "pct": pct, "reason": reason, "improve": improve}}
-    return res
+    from engine.method_multidoc import capture
+    return capture(res, c, picks, area, trace_text)
 
 
 def _fmt(v, area):

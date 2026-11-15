@@ -1,0 +1,31 @@
+{
+  "before": {
+    "n": 200,
+    "correct": 137,
+    "wrong": 30,
+    "abstained": 20,
+    "unscored": 13,
+    "error": 0,
+    "accuracy": 0.7326,
+    "answered_accuracy": 0.8204,
+    "cost_usd_total": 0.0,
+    "cost_usd_per_answer": 0.0,
+    "latency_ms_mean": 21,
+    "latency_ms_p95": 85
+  },
+  "after": {
+    "n": 200,
+    "correct": 142,
+    "wrong": 30,
+    "abstained": 15,
+    "unscored": 13,
+    "error": 0,
+    "accuracy": 0.7594,
+    "answered_accuracy": 0.8256,
+    "cost_usd_total": 0.0,
+    "cost_usd_per_answer": 0.0,
+    "latency_ms_mean": 15,
+    "latency_ms_p95": 87
+  },
+  "correct_to_wrong": 0
+}

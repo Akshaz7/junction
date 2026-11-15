@@ -186,7 +186,7 @@ def test_pdfminer_grid_lookup_runs_before_models_and_has_valid_evidence(tmp_path
 
 
 @pytest.mark.parametrize('reader_answers', [False, True])
-def test_bad_schedule_reaches_production_reader_and_forced_ladder(tmp_path, monkeypatch, reader_answers):
+def test_bad_schedule_reaches_reader_without_forcing_missing_cells(tmp_path, monkeypatch, reader_answers):
     import engine.answer as mod
     import engine.forced
     from engine.answer import _abstained
@@ -215,10 +215,11 @@ def test_bad_schedule_reaches_production_reader_and_forced_ladder(tmp_path, monk
     monkeypatch.setattr(mod, '_reader', reader)
     monkeypatch.setattr(engine.forced, 'forced_answer', forced)
     # This is a supported request on an incomplete table: code must defer,
-    # then the real answer orchestration still tries the reader and forced rung.
+    # then the reader checks the source. An unread cell is never a forced guess.
     a = mod.answer('How many rooms in the schedule have all four walls finished with W7?', [DOC])
-    assert calls == (['reader'] if reader_answers else ['reader', 'forced'])
-    assert a['answer']['value'] == 8 and not a['answer']['abstained']
+    assert calls == ['reader']
+    assert a['answer']['value'] == (8 if reader_answers else None)
+    assert a['answer']['abstained'] is not reader_answers
 
 
 def test_mirrored_room_numbers_are_verified_for_wall_and_area_routes():
@@ -309,7 +310,7 @@ def test_rotated_pdf_headers_and_mirrored_identity_have_grounded_zero_cost_answe
     'Which room in the finish room schedule has the largest area?',
 ])
 @pytest.mark.parametrize('reader_answers', [False, True])
-def test_unread_area_reaches_production_reader_and_forced_rung(tmp_path, monkeypatch, question, reader_answers):
+def test_unread_area_reaches_reader_without_forcing_an_area(tmp_path, monkeypatch, question, reader_answers):
     import engine.answer as mod
     import engine.forced
     incomplete = [list(row) for row in ROWS]
@@ -333,5 +334,6 @@ def test_unread_area_reaches_production_reader_and_forced_rung(tmp_path, monkeyp
     monkeypatch.setattr(mod, '_reader', fallback('reader', reader_answers))
     monkeypatch.setattr(engine.forced, 'forced_answer', fallback('forced', True))
     a = mod.answer(question, [DOC])
-    assert calls == (['reader'] if reader_answers else ['reader', 'forced'])
-    assert a['answer']['value'] == 1240 and not a['answer']['abstained']
+    assert calls == ['reader']
+    assert a['answer']['value'] == (1240 if reader_answers else None)
+    assert a['answer']['abstained'] is not reader_answers

@@ -14,7 +14,6 @@ import sys
 import time
 from pathlib import Path
 
-import ifcopenshell
 import ifcopenshell.util.element as uel
 import ifcopenshell.util.unit as uunit
 import numpy as np
@@ -196,74 +195,10 @@ def convert_py(ifc: Path, raw_glb: Path):
     """Pure-Python IFC -> GLB (ifcopenshell geometry iterator + trimesh), used where IfcConvert is not available
     (the Linux deploy image). Same contract as IfcConvert --y-up --use-element-guids: node name = GlobalId, metres,
     Y-up, IfcOpeningElement dropped, IfcSpace kept. One mesh per element, coloured by its dominant IFC style.
-    Memory matters here (512 MB container): the iterator runs with IFC_CONVERT_THREADS threads (default 1), geometry is
-    kept as compact float32/int32 arrays, and the IFC model and iterator are freed before trimesh builds the GLB."""
-    import gc
-    import multiprocessing
-
-    import ifcopenshell.geom as geom
-    import trimesh
-    raw_glb.parent.mkdir(parents=True, exist_ok=True)
-    f = ifcopenshell.open(str(ifc))
-    st = geom.settings()
-    st.set("use-world-coords", True)
-    inc = [e for e in list(f.by_type("IfcElement")) + list(f.by_type("IfcSpace")) if not e.is_a("IfcOpeningElement")]
-    threads = int(os.environ.get("IFC_CONVERT_THREADS", "1"))
-    it = geom.iterator(st, f, max(1, min(threads, multiprocessing.cpu_count())), include=inc)
-    parts = []  # (guid, verts float32 Y-up, faces int32, rgba)
-    source_offset = None
-    if it.initialize():
-        while True:
-            sh = it.get()
-            gm = sh.geometry
-            v = np.array(gm.verts, dtype=np.float64).reshape(-1, 3)
-            fc = np.array(gm.faces, dtype=np.int32).reshape(-1, 3)
-            if len(v) and len(fc):
-                v = np.column_stack([v[:, 0], v[:, 2], -v[:, 1]])  # Z-up -> Y-up (as IfcConvert --y-up)
-                if not np.isfinite(v).all():
-                    raise ValueError("The IFC contains invalid geometry coordinates. Repair or export the model again.")
-                if source_offset is None:
-                    source_offset = np.array([v[0, 0], 0.0, v[0, 2]])
-                # Survey coordinates must be removed in double precision BEFORE
-                # glTF's float32 storage; otherwise door-sized detail disappears.
-                v = np.ascontiguousarray(v - source_offset, dtype=np.float32)
-                rgba = [0.8, 0.8, 0.8, 1.0]
-                try:
-                    mats = list(gm.materials)
-                    if mats:
-                        ids = np.array(gm.material_ids)
-                        ids = ids[ids >= 0]
-                        m = mats[int(np.bincount(ids).argmax())] if len(ids) else mats[0]
-                        d = m.diffuse
-                        a = 1.0 - float(m.transparency) if m.has_transparency else 1.0
-                        rgba = [float(d.r()), float(d.g()), float(d.b()), a]
-                        rgba = [min(1.0, max(0.0, c)) if c == c else dflt for c, dflt in zip(rgba, (0.8, 0.8, 0.8, 1.0))]
-                except Exception:  # noqa: BLE001
-                    pass
-                parts.append((sh.guid, v, fc, rgba))
-            if not it.next():
-                break
-    del it, st, inc, f
-    gc.collect()
-    if not parts:
-        raise RuntimeError("the IFC has no geometry that could be converted")
-    scene = trimesh.Scene()
-    mats = {}  # one material per distinct colour, shared between meshes
-    for guid, v, fc, rgba in parts:
-        key = tuple(int(255 * c) for c in rgba)
-        if key not in mats:
-            mats[key] = trimesh.visual.material.PBRMaterial(
-                baseColorFactor=list(key), metallicFactor=0.0, roughnessFactor=0.9,
-                alphaMode="BLEND" if rgba[3] < 0.99 else "OPAQUE")
-        mesh = trimesh.Trimesh(vertices=v, faces=fc, process=False)
-        mesh.visual = trimesh.visual.TextureVisuals(material=mats[key])
-        scene.add_geometry(mesh, node_name=guid, geom_name=guid)
-    del parts
-    raw_glb.unlink(missing_ok=True)
-    raw_glb.write_bytes(scene.export(file_type="glb"))
-    gltf = GLTF2().load(str(raw_glb))
-    gltf.extras = {**(gltf.extras or {}), "source_origin_offset_m": source_offset.tolist()}
-    gltf.save(str(raw_glb))
+    Triangles are streamed to disk as float32/uint32 arrays; only the current
+    shape and GLB metadata remain in Python memory. One geometry thread by default."""
+    from pipeline.ifc_glb import convert as stream_glb
+    return stream_glb(ifc, raw_glb)
 
 
 def convert(ifc: Path, raw_glb: Path):
@@ -274,7 +209,7 @@ def convert(ifc: Path, raw_glb: Path):
     raw_glb.unlink(missing_ok=True)  # IfcConvert asks before overwriting
     big = ifc.stat().st_size > 50e6
     env = {"HEAVY_SLOTS": "1"} if big else {}
-    cmd = [str(IFC_CONVERT), "--exclude", "entities", "IfcOpeningElement", "-j", "4",
+    cmd = [str(IFC_CONVERT), "--exclude", "entities", "IfcOpeningElement", "-j", os.environ.get("IFC_CONVERT_THREADS", "1"),
            "--use-element-guids", "--y-up", str(ifc), str(raw_glb)]
     if os.environ.get("HEAVY_SLOT_HELD") != "1":
         cmd.insert(0, str(HEAVY))
@@ -378,7 +313,8 @@ def process(ifc: Path, doc: dict, out_dir: Path):
     for ni, b in boxes.items():
         name_to_box[g.nodes[ni].name] = b
 
-    f = ifcopenshell.open(str(ifc))
+    from pipeline.ifc_index import open_properties, property_quantities_of
+    f = open_properties(ifc)
     scale = uunit.calculate_unit_scale(f)
     length_unit_known = uunit.get_project_unit(f, "LENGTHUNIT") is not None
     warnings = [] if length_unit_known else [
@@ -433,6 +369,8 @@ def process(ifc: Path, doc: dict, out_dir: Path):
         qsrc = {}
         for k, v in (attr_dims(e, scale) if length_unit_known else {}).items():
             q[k] = v; qsrc[k] = "attribute"
+        for k, v in property_quantities_of(e).items():
+            q[k] = v; qsrc[k] = "property"
         for k, v in quantities_of(e, scale).items():
             q[k] = v; qsrc[k] = "qto"  # Qto wins over attribute
         k_ = kinds[gid]
@@ -459,14 +397,21 @@ def process(ifc: Path, doc: dict, out_dir: Path):
         storeys[s.GlobalId] = {"name": s.Name or "Unnamed level", "elevation_m": round((s.Elevation or 0) * scale, 4)}
     storey_list = sorted(storeys.values(), key=lambda s: s["elevation_m"])
 
+    from pipeline.scale_provenance import ifc_units
     from pipeline.ifc_props import building_meta, enrich_elements
     enrich_elements(f, elements)
     from pipeline.ifc_quantities import build as build_quantity_index
-    (out_dir / "ifc-quantities.json").write_text(json.dumps(build_quantity_index(f, space_geometry=True)))
-    (out_dir / "elements.json").write_text(json.dumps(
-        {"doc_id": doc["doc_id"], "version": 2, "schema": f.schema, "units": "m", "building": building_meta(f),
+    try:  # optional sidecar: never fail the scene over it
+        (out_dir / "ifc-quantities.json").write_text(json.dumps(build_quantity_index(f, space_geometry=True)))
+    except Exception as e:  # noqa: BLE001
+        warnings.append(f"quantity index skipped: {e}"[:200])
+    elements_tmp = out_dir / "tmp" / "elements-scene.json"
+    elements_tmp.parent.mkdir(exist_ok=True)
+    elements_tmp.write_text(json.dumps(
+        {"doc_id": doc["doc_id"], "version": 2, "schema": f.schema, "units": "m", "unit_provenance": ifc_units(f, doc["doc_id"]), "building": building_meta(f),
          "coords": "recentred in X/Z by origin_offset_m, Y-up (glTF), Y keeps real elevation",
          "storeys": storey_list, "elements": elements}, indent=1))
+    elements_tmp.replace(out_dir / "elements.json")
     lic = (doc.get("licence") or "")
     source_offset = np.array((g.extras or {}).get("source_origin_offset_m", [0, 0, 0]), dtype=float)
     scene = {"doc_id": doc["doc_id"], "glb": "scene.glb", "usdz": None, "units": "m", "up": "Y",

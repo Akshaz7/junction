@@ -1,0 +1,686 @@
+{
+  "status": "PARTIAL",
+  "code_features": "implemented and tested",
+  "files": 17,
+  "mixed_plan_nonplan_sheets": 11,
+  "successful_model_cost_usd": 0.572554,
+  "cost_limitation": "One schema-rejected provider response did not return a cost record; successful calls only are totalled.",
+  "sample200": {
+    "before": {
+      "n": 200,
+      "correct": 137,
+      "wrong": 49,
+      "abstained": 1,
+      "unscored": 13,
+      "error": 0,
+      "accuracy": 0.7326,
+      "answered_accuracy": 0.7366,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 47,
+      "latency_ms_p95": 171
+    },
+    "after": {
+      "n": 200,
+      "correct": 137,
+      "wrong": 49,
+      "abstained": 1,
+      "unscored": 13,
+      "error": 0,
+      "accuracy": 0.7326,
+      "answered_accuracy": 0.7366,
+      "cost_usd_total": 0.0,
+      "cost_usd_per_answer": 0.0,
+      "latency_ms_mean": 44,
+      "latency_ms_p95": 188
+    },
+    "changed_numeric_answers": [],
+    "text_only_changes": [
+      [
+        "cubicasa5k__colorful-13685",
+        "How many bathrooms or washrooms (e.g. KH, KPH, PH, PESUH, SH) are on this floor plan, not counting separate WC rooms?"
+      ],
+      [
+        "cubicasa5k__high-quality-1655",
+        "How many sinks and wash basins (kitchen and bathroom combined; a double-bowl sink counts as one) are drawn on this floor plan?"
+      ]
+    ]
+  },
+  "validation": {
+    "python_tests_passed": 176,
+    "web_tests_passed": 3,
+    "typescript": "passed"
+  },
+  "rows": [
+    {
+      "doc_id": "europeana__1373-https-ekultura-hr-purl-url-2scmsydu6zcxdy45jan3cg5djqhqpodm",
+      "mixed": false,
+      "unseen": true,
+      "before_detections": null,
+      "same_detections_scoped": null,
+      "new_solver_counts": {
+        "door": 0,
+        "window": 40,
+        "room": 23
+      },
+      "manual_count_gold": null,
+      "manual_scale_text": [],
+      "assigned_ratios": [],
+      "read_scale_labels": [],
+      "ocr": {
+        "words": 7,
+        "scale_anchors": [],
+        "elapsed_s": 0.89
+      }
+    },
+    {
+      "doc_id": "finna__hka-139877668752900-168422869617700",
+      "mixed": true,
+      "unseen": false,
+      "before_detections": {
+        "door": 0,
+        "window": 0,
+        "room": 15
+      },
+      "same_detections_scoped": {
+        "door": 0,
+        "window": 0,
+        "room": 7
+      },
+      "new_solver_counts": {
+        "door": 26,
+        "window": 22,
+        "room": 22
+      },
+      "manual_count_gold": null,
+      "manual_scale_text": [
+        "1:100",
+        "1:200"
+      ],
+      "assigned_ratios": [
+        100.0,
+        200.0
+      ],
+      "read_scale_labels": [
+        "1:100",
+        "1:100.",
+        "1:200."
+      ],
+      "ocr": {
+        "words": 36,
+        "scale_anchors": [],
+        "elapsed_s": 0.0
+      }
+    },
+    {
+      "doc_id": "finna__hka-139878174949000-145250688788000",
+      "mixed": true,
+      "unseen": false,
+      "before_detections": {
+        "door": 0,
+        "window": 2,
+        "room": 3
+      },
+      "same_detections_scoped": {
+        "door": 0,
+        "window": 0,
+        "room": 1
+      },
+      "new_solver_counts": {
+        "door": 7,
+        "window": 5,
+        "room": 7
+      },
+      "manual_count_gold": {
+        "room": 7
+      },
+      "manual_scale_text": [],
+      "assigned_ratios": [],
+      "read_scale_labels": [],
+      "ocr": {
+        "words": 14,
+        "scale_anchors": [],
+        "elapsed_s": 0.0
+      }
+    },
+    {
+      "doc_id": "finna__hka-139878174949000-150366720269000",
+      "mixed": true,
+      "unseen": false,
+      "before_detections": {
+        "door": 0,
+        "window": 1,
+        "room": 8
+      },
+      "same_detections_scoped": {
+        "door": 0,
+        "window": 0,
+        "room": 5
+      },
+      "new_solver_counts": {
+        "door": 7,
+        "window": 1,
+        "room": 10
+      },
+      "manual_count_gold": null,
+      "manual_scale_text": [
+        "1:50"
+      ],
+      "assigned_ratios": [],
+      "read_scale_labels": [
+        "1 : 5 0"
+      ],
+      "ocr": {
+        "words": 27,
+        "scale_anchors": [
+          {
+            "bbox": [
+              1002.0,
+              2709.0,
+              1206.0,
+              2759.0
+            ],
+            "ratio": 50.0,
+            "title": "",
+            "quote": "1:50"
+          }
+        ],
+        "elapsed_s": 0.0
+      }
+    },
+    {
+      "doc_id": "finna__hka-139879309684900-154961504220600",
+      "mixed": true,
+      "unseen": false,
+      "before_detections": {
+        "door": 0,
+        "window": 1,
+        "room": 4
+      },
+      "same_detections_scoped": {
+        "door": 0,
+        "window": 0,
+        "room": 1
+      },
+      "new_solver_counts": {
+        "door": 8,
+        "window": 5,
+        "room": 11
+      },
+      "manual_count_gold": null,
+      "manual_scale_text": [],
+      "assigned_ratios": [],
+      "read_scale_labels": [],
+      "ocr": {
+        "words": 34,
+        "scale_anchors": [],
+        "elapsed_s": 0.0
+      }
+    },
+    {
+      "doc_id": "finna__hka-139879309684900-154962122901100",
+      "mixed": true,
+      "unseen": false,
+      "before_detections": {
+        "door": 0,
+        "window": 1,
+        "room": 10
+      },
+      "same_detections_scoped": {
+        "door": 0,
+        "window": 0,
+        "room": 5
+      },
+      "new_solver_counts": {
+        "door": 3,
+        "window": 3,
+        "room": 3
+      },
+      "manual_count_gold": {
+        "door": 3,
+        "window": 5,
+        "room": 3
+      },
+      "manual_scale_text": [],
+      "assigned_ratios": [],
+      "read_scale_labels": [],
+      "ocr": {
+        "words": 19,
+        "scale_anchors": [],
+        "elapsed_s": 0.0
+      }
+    },
+    {
+      "doc_id": "finna__hka-139879309684900-154962222514200",
+      "mixed": true,
+      "unseen": false,
+      "before_detections": {
+        "door": 0,
+        "window": 0,
+        "room": 5
+      },
+      "same_detections_scoped": {
+        "door": 0,
+        "window": 0,
+        "room": 0
+      },
+      "new_solver_counts": {
+        "door": 1,
+        "window": 2,
+        "room": 1
+      },
+      "manual_count_gold": {
+        "door": 1,
+        "window": 3,
+        "room": 1
+      },
+      "manual_scale_text": [
+        "1:100",
+        "1:66 2/3"
+      ],
+      "assigned_ratios": [],
+      "read_scale_labels": [
+        "SK 1:100",
+        "SK 1:66 2/3"
+      ],
+      "ocr": {
+        "words": 22,
+        "scale_anchors": [
+          {
+            "bbox": [
+              714.0,
+              1431.0,
+              857.0,
+              1488.0
+            ],
+            "ratio": 6693.0,
+            "title": "SK",
+            "quote": "SK1:6693"
+          }
+        ],
+        "elapsed_s": 0.0
+      }
+    },
+    {
+      "doc_id": "finna__hka-139879309684900-155058531210000",
+      "mixed": true,
+      "unseen": false,
+      "before_detections": {
+        "door": 0,
+        "window": 0,
+        "room": 5
+      },
+      "same_detections_scoped": {
+        "door": 0,
+        "window": 0,
+        "room": 2
+      },
+      "new_solver_counts": {
+        "door": 5,
+        "window": 6,
+        "room": 14
+      },
+      "manual_count_gold": null,
+      "manual_scale_text": [],
+      "assigned_ratios": [],
+      "read_scale_labels": [],
+      "ocr": {
+        "words": 56,
+        "scale_anchors": [],
+        "elapsed_s": 0.0
+      }
+    },
+    {
+      "doc_id": "finna__hka-139879309684900-155058737003700",
+      "mixed": true,
+      "unseen": false,
+      "before_detections": {
+        "door": 0,
+        "window": 0,
+        "room": 9
+      },
+      "same_detections_scoped": {
+        "door": 0,
+        "window": 0,
+        "room": 4
+      },
+      "new_solver_counts": {
+        "door": 9,
+        "window": 6,
+        "room": 8
+      },
+      "manual_count_gold": null,
+      "manual_scale_text": [],
+      "assigned_ratios": [],
+      "read_scale_labels": [],
+      "ocr": {
+        "words": 38,
+        "scale_anchors": [],
+        "elapsed_s": 0.0
+      }
+    },
+    {
+      "doc_id": "finna__hka-139879309684900-161226144595300",
+      "mixed": true,
+      "unseen": false,
+      "before_detections": {
+        "door": 0,
+        "window": 1,
+        "room": 5
+      },
+      "same_detections_scoped": {
+        "door": 0,
+        "window": 0,
+        "room": 1
+      },
+      "new_solver_counts": {
+        "door": 5,
+        "window": 3,
+        "room": 7
+      },
+      "manual_count_gold": null,
+      "manual_scale_text": [],
+      "assigned_ratios": [],
+      "read_scale_labels": [],
+      "ocr": {
+        "words": 61,
+        "scale_anchors": [],
+        "elapsed_s": 0.0
+      }
+    },
+    {
+      "doc_id": "finna__hka-139880068219800-169332104793400",
+      "mixed": true,
+      "unseen": false,
+      "before_detections": {
+        "door": 0,
+        "window": 0,
+        "room": 6
+      },
+      "same_detections_scoped": {
+        "door": 0,
+        "window": 0,
+        "room": 2
+      },
+      "new_solver_counts": {
+        "door": 4,
+        "window": 2,
+        "room": 4
+      },
+      "manual_count_gold": {
+        "room": 4
+      },
+      "manual_scale_text": [
+        "1:100",
+        "1:20",
+        "1:500"
+      ],
+      "assigned_ratios": [],
+      "read_scale_labels": [
+        "1:100, 1:20",
+        "1:500"
+      ],
+      "ocr": {
+        "words": 38,
+        "scale_anchors": [
+          {
+            "bbox": [
+              283.0,
+              2547.0,
+              1804.0,
+              2623.0
+            ],
+            "ratio": 100.0,
+            "title": "129B.1",
+            "quote": "129B.1 1:100g120%-25 Sifuafionspl lan Mannerhermsqatan lboiMukaw"
+          },
+          {
+            "bbox": [
+              842.0,
+              2594.0,
+              922.0,
+              2618.0
+            ],
+            "ratio": 500.0,
+            "title": "",
+            "quote": "1:500"
+          }
+        ],
+        "elapsed_s": 0.0
+      }
+    },
+    {
+      "doc_id": "habs__az0258-sheet-00018",
+      "mixed": false,
+      "unseen": true,
+      "before_detections": {
+        "door": 0,
+        "window": 0,
+        "room": 5
+      },
+      "same_detections_scoped": {
+        "door": 0,
+        "window": 0,
+        "room": 0
+      },
+      "new_solver_counts": {
+        "door": null,
+        "window": null,
+        "room": null
+      },
+      "manual_count_gold": null,
+      "manual_scale_text": [
+        "1/2\"=1'-0\"",
+        "1:24"
+      ],
+      "assigned_ratios": [
+        24.0
+      ],
+      "read_scale_labels": [
+        "SCALE 1/2\" = 1'-0\"",
+        "1/2\" = 1' - 0\"",
+        "1 : 24"
+      ],
+      "ocr": {
+        "words": 32,
+        "scale_anchors": [
+          {
+            "bbox": [
+              2290.0,
+              1852.0,
+              2409.0,
+              1872.0
+            ],
+            "ratio": 24.0,
+            "title": "METERS",
+            "quote": "METERS 1:24"
+          }
+        ],
+        "elapsed_s": 0.0
+      }
+    },
+    {
+      "doc_id": "habs__de0117-sheet-00005",
+      "mixed": false,
+      "unseen": false,
+      "before_detections": {
+        "door": 0,
+        "window": 0,
+        "room": 13
+      },
+      "same_detections_scoped": {
+        "door": 0,
+        "window": 0,
+        "room": 0
+      },
+      "new_solver_counts": {
+        "door": null,
+        "window": null,
+        "room": null
+      },
+      "manual_count_gold": null,
+      "manual_scale_text": [],
+      "assigned_ratios": [],
+      "read_scale_labels": [],
+      "ocr": {
+        "words": 115,
+        "scale_anchors": [],
+        "elapsed_s": 0.0
+      }
+    },
+    {
+      "doc_id": "habs__ia0042-sheet-00004",
+      "mixed": false,
+      "unseen": false,
+      "before_detections": {
+        "door": 0,
+        "window": 3,
+        "room": 11
+      },
+      "same_detections_scoped": {
+        "door": 0,
+        "window": 0,
+        "room": 0
+      },
+      "new_solver_counts": {
+        "door": null,
+        "window": null,
+        "room": null
+      },
+      "manual_count_gold": null,
+      "manual_scale_text": [
+        "1/4\"=1'-0\"",
+        "1/2\"=1'-0\""
+      ],
+      "assigned_ratios": [
+        24.0,
+        48.0
+      ],
+      "read_scale_labels": [
+        "SCALE 1/2\" = 1'-0\"",
+        "SCALE 1/2\" = 1'-0\"",
+        "1/4\" = 1'-0\"",
+        "1/4\" = 1'-0\"",
+        "1/2\" = 1'-0\"",
+        "1/4\" = 1'-0\""
+      ],
+      "ocr": {
+        "words": 83,
+        "scale_anchors": [],
+        "elapsed_s": 0.0
+      }
+    },
+    {
+      "doc_id": "habs__mt0124-sheet-00002",
+      "mixed": false,
+      "unseen": false,
+      "before_detections": {
+        "door": 6,
+        "window": 16,
+        "room": 9
+      },
+      "same_detections_scoped": {
+        "door": 6,
+        "window": 16,
+        "room": 8
+      },
+      "new_solver_counts": {
+        "door": 6,
+        "window": 32,
+        "room": 8
+      },
+      "manual_count_gold": null,
+      "manual_scale_text": [
+        "3/16\"=1'-0\"",
+        "1/16\"=1'-0\""
+      ],
+      "assigned_ratios": [
+        64.0,
+        192.0
+      ],
+      "read_scale_labels": [
+        "SCALE: 3/16\"=1'-0\"",
+        "SCALE: 1/16\"=1'-0\""
+      ],
+      "ocr": {
+        "words": 183,
+        "scale_anchors": [
+          {
+            "bbox": [
+              1889.0,
+              1310.0,
+              2185.0,
+              1354.0
+            ],
+            "ratio": 64.0,
+            "title": "SCALE",
+            "quote": "SCALE: SCALE 3/16\" = 1'-0\""
+          }
+        ],
+        "elapsed_s": 0.0
+      }
+    },
+    {
+      "doc_id": "wikimedia__23288749",
+      "mixed": false,
+      "unseen": false,
+      "before_detections": {
+        "door": 0,
+        "window": 1,
+        "room": 6
+      },
+      "same_detections_scoped": {
+        "door": 0,
+        "window": 1,
+        "room": 6
+      },
+      "new_solver_counts": {
+        "door": 0,
+        "window": 0,
+        "room": 26
+      },
+      "manual_count_gold": null,
+      "manual_scale_text": [],
+      "assigned_ratios": [],
+      "read_scale_labels": [],
+      "ocr": {
+        "words": 3,
+        "scale_anchors": [],
+        "elapsed_s": 0.0
+      }
+    },
+    {
+      "doc_id": "wikimedia__24018750",
+      "mixed": true,
+      "unseen": false,
+      "before_detections": {
+        "door": 0,
+        "window": 3,
+        "room": 4
+      },
+      "same_detections_scoped": {
+        "door": 0,
+        "window": 3,
+        "room": 0
+      },
+      "new_solver_counts": {
+        "door": 0,
+        "window": 6,
+        "room": 6
+      },
+      "manual_count_gold": null,
+      "manual_scale_text": [],
+      "assigned_ratios": [],
+      "read_scale_labels": [
+        "à 0.05 p. mètre.",
+        "à 0.05 p. mètre."
+      ],
+      "ocr": {
+        "words": 3,
+        "scale_anchors": [],
+        "elapsed_s": 0.0
+      }
+    }
+  ],
+  "limitation": "View filtering prevents non-plan detections being counted, but automatic symbol counts within historical plans remain imperfect. Shared/alternative scales without a safe local owner are left unassigned. No exact accuracy percentage claimed for the mixed-sheet set."
+}

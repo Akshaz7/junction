@@ -6,6 +6,30 @@ import { buildAnswerReport, buildChatReport, drawReportPage, reportCrop, reportP
 const options = { generatedAt: new Date('2026-11-14T12:00:00.000Z'), chatId: 'chat/1', baseUrl: 'https://hologram.example' }
 const answer = () => makeDemoAnswer('How many windows are there?')
 
+it('exports the complete evidence card and every term beyond the preview', () => {
+  const input = answer()
+  input.reasoning = {
+    steps: [{ kind: 'calculated', title: 'Calculated', text: '1 + 2 + 3 + 4 + 5 + 6 + 1 more = 28 m²' }],
+    confidence: { label: 'Verified', pct: null, reason: 'Source quantities reproduce the answer.', calibration: { n: 2, correct: 1, source: 'calibration.json' } },
+    margin: { value: .05, unit: 'm2', pct: .18, why: 'Rounding only <check>.', sources: ['source quantities'] },
+    based_on: { elements: 7, estimated: 0, unresolved: 0, text: 'Based on 7 elements; 0 estimated.' },
+    arithmetic: [{ formula: 'Add source areas', text: 'preview', result: 28, unit: 'm2', terms: Array.from({ length: 7 }, (_, i) => ({ doc_id: 'd', item_id: `term-${i}`, cite: 1, value: i + 1, unit: 'm2' })) }],
+  }
+  const report = buildAnswerReport(input, [], options)
+  const markdown = reportToMarkdown(report), html = reportToHtml(report, {}, '')
+  expect(markdown).toContain('### How we know')
+  expect(markdown).toContain('Based on 7 elements; 0 estimated')
+  expect(markdown).toContain('term\\-6')
+  expect(html).toContain('term-6')
+  expect(html).toContain('± 0.05 m² (± 0.18%)')
+  expect(html).toContain('&lt;check&gt;')
+  expect(html).not.toContain('<check>')
+  expect(html).not.toContain('null%')
+  expect(html).toContain('Calibration: 1/2')
+  report.entries[0].reasoning!.arithmetic![0].terms[0].value = 500
+  expect(input.reasoning.arithmetic![0].terms[0].value).toBe(1)
+})
+
 describe('answer export report model', () => {
   it('preserves proof labels, citations, attribution, cost, and a deterministic generated date', () => {
     const input = answer()
