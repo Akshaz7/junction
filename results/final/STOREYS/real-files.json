@@ -1,0 +1,237 @@
+{
+  "files": [
+    {
+      "doc_id": "ifc_bench__city-house-munich-arc",
+      "path": "data/full/junction-dataset/data/ifc_bench/city_house_munich_arc.ifc",
+      "blind": false,
+      "schema": "IFC4X3",
+      "applications": [
+        "Autodesk Revit 2025 (ENU)"
+      ],
+      "m_per_native_unit": 1.0,
+      "native_declarations": 15,
+      "distinct_storeys": 5,
+      "duplicates_excluded": 10,
+      "citation_item_ids": [
+        "0IJKQpLH1EchWYbeIBEmzb",
+        "1P1t78HeYaKra11p4ZpaY8",
+        "1UJvPTHl5Fbuqhj9oVI$VM",
+        "2Ciy1G4LCfj6Ts04qmQpEm",
+        "2IPI8WoUnATvextfB8MnnD"
+      ],
+      "source_rows_preserved": 15,
+      "assigned_rooms": 19,
+      "rooms_per_level_value": 19,
+      "storeys": [
+        {
+          "name": "0. Foundation",
+          "elevation_m": -3.24,
+          "source_indices": [
+            0,
+            5,
+            10
+          ]
+        },
+        {
+          "name": "1. Kellergeschoss",
+          "elevation_m": -2.82,
+          "source_indices": [
+            1,
+            6,
+            11
+          ]
+        },
+        {
+          "name": "2. Erdgeschoss",
+          "elevation_m": -0.0,
+          "source_indices": [
+            2,
+            7,
+            12
+          ]
+        },
+        {
+          "name": "3. Obergeschoss",
+          "elevation_m": 2.89,
+          "source_indices": [
+            3,
+            8,
+            13
+          ]
+        },
+        {
+          "name": "4. Dachgeschoss",
+          "elevation_m": 5.71,
+          "source_indices": [
+            4,
+            9,
+            14
+          ]
+        }
+      ],
+      "schema_valid": true,
+      "all_assertions_passed": true
+    },
+    {
+      "doc_id": "ifc_bench__ac20-arc",
+      "path": "data/full/junction-dataset/data/ifc_bench/ac20_arc.ifc",
+      "blind": false,
+      "schema": "IFC4",
+      "applications": [
+        "ARCHICAD-64 20.0.0"
+      ],
+      "m_per_native_unit": 1.0,
+      "native_declarations": 5,
+      "distinct_storeys": 5,
+      "duplicates_excluded": 0,
+      "citation_item_ids": [
+        "01DPZ9SBn5r9Sivd0bV8Ar",
+        "2Og5$70yb1DxR1TY1w8bzN",
+        "2WnDGvXIP14xQJyJ3RQPXx",
+        "3EtzNx_Z1BD9$bnmCd_7Ak",
+        "3QoJ6BxnbEJAsAxl5gQcR_"
+      ],
+      "source_rows_preserved": 5,
+      "assigned_rooms": 82,
+      "rooms_per_level_value": 82,
+      "storeys": [
+        {
+          "name": "Keller",
+          "elevation_m": -3.0,
+          "source_indices": [
+            0
+          ]
+        },
+        {
+          "name": "Erdgeschoss",
+          "elevation_m": 0.0,
+          "source_indices": [
+            1
+          ]
+        },
+        {
+          "name": "1. Obergeschoss",
+          "elevation_m": 3.0,
+          "source_indices": [
+            2
+          ]
+        },
+        {
+          "name": "2. Obergeschoss",
+          "elevation_m": 6.0,
+          "source_indices": [
+            3
+          ]
+        },
+        {
+          "name": "Dachgeschoss",
+          "elevation_m": 9.0,
+          "source_indices": [
+            4
+          ]
+        }
+      ],
+      "schema_valid": true,
+      "all_assertions_passed": true
+    },
+    {
+      "doc_id": "ext_ifcr2__bsi-ifc4-building-architecture",
+      "path": "data/external/ifc_round2/bsi_ifc4_building-architecture.ifc",
+      "blind": false,
+      "schema": "IFC4",
+      "applications": [
+        "IFC manager for sketchup 5.6.0"
+      ],
+      "m_per_native_unit": 0.001,
+      "native_declarations": 1,
+      "distinct_storeys": 1,
+      "duplicates_excluded": 0,
+      "citation_item_ids": [
+        "3zR0BOEcLADRKln4HYporH"
+      ],
+      "source_rows_preserved": 1,
+      "assigned_rooms": 2,
+      "rooms_per_level_value": null,
+      "storeys": [
+        {
+          "name": "00 groundfloor",
+          "elevation_m": 0.0,
+          "source_indices": [
+            0
+          ]
+        }
+      ],
+      "schema_valid": true,
+      "all_assertions_passed": true
+    },
+    {
+      "doc_id": "ext_ifcr2__schep-kanaalplaat",
+      "path": "data/external/ifc_round2/schep_kanaalplaat.ifc",
+      "blind": false,
+      "schema": "IFC2X3",
+      "applications": [
+        "Tekla Structures 19.1 Service Release 5"
+      ],
+      "m_per_native_unit": 0.001,
+      "native_declarations": 1,
+      "distinct_storeys": 1,
+      "duplicates_excluded": 0,
+      "citation_item_ids": [
+        "1L0K1q000LY34qCZOnDJKt"
+      ],
+      "source_rows_preserved": 1,
+      "assigned_rooms": 0,
+      "rooms_per_level_value": null,
+      "storeys": [
+        {
+          "name": "Undefined",
+          "elevation_m": 0.0,
+          "source_indices": [
+            0
+          ]
+        }
+      ],
+      "schema_valid": true,
+      "all_assertions_passed": true
+    },
+    {
+      "doc_id": "blind__reserved",
+      "path": "data/full/junction-dataset/data/ifc_models/resbim-283_model.ifc",
+      "blind": true,
+      "schema": "IFC4",
+      "applications": [
+        "Autodesk Revit 2026 (ENG)"
+      ],
+      "m_per_native_unit": 0.001,
+      "native_declarations": 2,
+      "distinct_storeys": 2,
+      "duplicates_excluded": 0,
+      "citation_item_ids": [
+        "21SxYaoMrE39UDs4nDHC4_"
+      ],
+      "source_rows_preserved": 2,
+      "assigned_rooms": 0,
+      "rooms_per_level_value": null,
+      "storeys": [
+        {
+          "name": "Level 0",
+          "elevation_m": 0.0,
+          "source_indices": [
+            0
+          ]
+        },
+        {
+          "name": "Level 1",
+          "elevation_m": 2.85,
+          "source_indices": [
+            1
+          ]
+        }
+      ],
+      "schema_valid": true,
+      "all_assertions_passed": true
+    }
+  ],
+  "cost_usd": 0,
+  "method": "Read native declarations/containment only; no tessellation, models, tuning or source writes."
+}

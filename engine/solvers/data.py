@@ -37,6 +37,15 @@ class Doc:
     pages: int = 1
     meta: dict = field(default_factory=dict)            # IFC only: project/building/software metadata (elements.json 'building')
 
+    def __post_init__(self):
+        if self.mode == "ifc":
+            from engine.ifc_storeys import canonical_name, canonical_storeys
+            if any("source_indices" not in s for s in self.storeys):
+                self.storeys = canonical_storeys(self.storeys)
+            for item in self.items:
+                if item.storey is not None:
+                    item.storey = canonical_name(item.storey, item.props.get("storey_elevation_m"), self.storeys)
+
     def kinds(self) -> set[str]:
         return {i.kind for i in self.items}
 
@@ -98,7 +107,8 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
             Item(item_id=x["item_id"], kind=x.get("kind") or "other", page=1,
                  storey=(x.get("storey") or {}).get("name"), q=x.get("quantities") or {},
                  props={**(x.get("props") or {}), "ifc_class": x.get("ifc_class"), "predefined_type": x.get("predefined_type"),
-                        "quantity_source": x.get("quantity_source") or {}},
+                        "quantity_source": x.get("quantity_source") or {},
+                        "storey_elevation_m": (x.get("storey") or {}).get("elevation_m")},
                  name=x.get("name"), type_name=x.get("type_name"), source="ifc", bbox_m=x.get("bbox_m"))
             for x in e["elements"]
         ]
@@ -215,10 +225,12 @@ def load_sheet_parent(doc_id: str, root: Path, whole: bool = False) -> Doc | Non
     if parent is None or parent.mode != "ifc" or not parent.storeys:
         return None
     title = (_json(d / "doc.json") if (d / "doc.json").exists() else {}).get("title") or ""
-    nm = title.rsplit(":", 1)[-1].strip().casefold()
-    st = next((s for s in parent.storeys if s["name"].strip().casefold() == nm), None)
-    if st is None:
+    from engine.ifc_storeys import name_key
+    nm = name_key(title.rsplit(":", 1)[-1])
+    matches = [s for s in parent.storeys if nm in {name_key(n) for n in [s["name"], *s.get("aliases", [])]}]
+    if len(matches) != 1:
         return None
+    st = matches[0]
     if whole:   # "... in the model 'X'": the whole building, not just this sheet's floor
         return Doc(doc_id, "ifc", parent.items, title, parent.storeys, meta={**parent.meta, "sheet_of": parent.doc_id})
     items = [i for i in parent.items if i.storey == st["name"]]

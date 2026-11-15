@@ -46,9 +46,11 @@ def storeys(res, doc, declared=None, detected=None):
     rows = []
     if declared is not None:
         for index, s in enumerate(declared):
-            ref = {**source(doc), "field": f"storeys[{index}]"}
-            rows.append(asdict(Row(f"storey-{index}", s["name"], {"count": 1, "elevation_m": s.get("elevation_m")}, ref)))
-        formula = "storey count = Σ(1 per declared storey)"
+            for member, (source_index, raw) in enumerate(zip(s.get("source_indices", [index]), s.get("source_storeys", [s]))):
+                ref = {**source(doc), "field": f"storeys[{source_index}]"}
+                rows.append(asdict(Row(f"storey-{source_index}", raw["name"],
+                                      {"count": int(member == 0), "elevation_m": raw.get("elevation_m"), "canonical_name": s["name"]}, ref)))
+        formula = "storey count = Σ(1 per distinct name and elevation; duplicate declarations contribute 0)"
     else:
         for pg, result in enumerate(detected, 1):
             ref = {**source(doc), "artifact": f"planmap-{pg}.json", "page": pg, "field": "items"}

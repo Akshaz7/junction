@@ -42,6 +42,8 @@ def _fmt(v: float) -> str:
 
 
 def _done(question, doc, text, value, unit, items, trace, route="analytics", t0=None):
+    from engine.ifc_storeys import dedup_trace
+    trace = [*trace, *dedup_trace(doc)]
     if doc.mode == "planmap" and unit == "count" and doc.meta.get("view_regions"):
         from pipeline.sheet_views import count_note
         text += count_note(doc, items, None)
@@ -332,7 +334,8 @@ def storey_compare(question: str, doc: Doc, t0) -> dict | None:
         score = {k: len(its) for k, its in by.items()}
     if not any(score.values()):
         return None
-    order = [s["name"] for s in sorted(doc.storeys, key=lambda s: s.get("elevation_m", 0))]
+    from engine.ifc_storeys import sort_key
+    order = [s["name"] for s in sorted(doc.storeys, key=sort_key)]
     unit = "m²" if area else ""
     parts = ", ".join(f"{k} {_fmt(score[k]) if area else score[k]}{(' ' + unit) if unit else ''}" for k in order if k in score)
     what = f"total {kind} area" if area else _noun(kind)
