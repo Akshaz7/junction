@@ -60,6 +60,7 @@ export function FindingsScreen({ docs }: { docs: Document[] }) {
     try {
       const result = await findingsApi.run(docId, controller.signal)
       if (controller.signal.aborted) return
+      if (result.status === 'waiting' || result.status === 'not_enough_data') { setNotice(result.detail || (result.status === 'waiting' ? 'Waiting for the drawing to finish processing' : 'Not enough readable data')); return }
       setFindings(result.findings)
       setNotice(result.status === 'no_checks' ? 'Checks are not available for this drawing yet.' : result.findings.length ? 'Checks complete.' : 'Checks complete. No findings were returned by the available rules.')
       retry.current = () => { void loadAdvice() }
@@ -93,7 +94,7 @@ export function FindingsScreen({ docs }: { docs: Document[] }) {
       {error && <p role="alert" className="tools-message">{error} <Button disabled={busy || opening || loading} onClick={() => retry.current()}>Retry</Button></p>}
       {(busy || opening || loading || notice) && <p role="status" className="tools-message">{busy ? 'Checking the drawing and its sources…' : opening ? 'Opening cited items…' : loading ? 'Loading findings…' : notice}</p>}
       {!docs.length && <p className="tools-muted">No drawings available. Add a drawing in Data to run checks.</p>}
-      {!loading && !busy && !findings.length && docId && <p className="tools-muted">No saved findings. Run checks to inspect this drawing.</p>}
+      {!loading && !busy && !notice && !findings.length && docId && <p className="tools-muted">No saved findings. Run checks to inspect this drawing.</p>}
       {groupFindings(findings).filter((group) => group.findings.length).map((group) => <section key={group.severity} className="tools-card" aria-label={group.label}><h3>{group.label} <span className="tools-tag">{group.findings.length}</span></h3>
         <ul className="finding-list">{group.findings.map((finding) => <li key={finding.id} data-finding-id={finding.id}>
           <button type="button" className="finding-open" disabled={busy || opening} onClick={() => void showItems(finding.item_ids, finding.message)} aria-label={`Open finding ${finding.rule_id}`}><span className={`tools-tag severity-${finding.severity}`}>{finding.severity}</span><strong>{finding.rule_id}</strong><span>{finding.message}</span><small>{finding.item_ids.length} {finding.item_ids.length === 1 ? 'item' : 'items'} · Open evidence</small></button>
