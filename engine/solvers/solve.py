@@ -74,6 +74,11 @@ _ORD = {"ground": 0, "grund": 0, "first": 1, "second": 2, "third": 3, "fourth": 
 
 def resolve_storey(q: str, storeys: list[dict]) -> str | None:
     from .filters import fold
+    from engine.ifc_levels import basement_scope, unique_levels
+    requested, basement = basement_scope(q, storeys)
+    if requested:
+        return basement
+    storeys = unique_levels(storeys)
     ql = fold(q)
     names = [s["name"] for s in storeys]
     for n in sorted(names, key=len, reverse=True):
@@ -81,7 +86,9 @@ def resolve_storey(q: str, storeys: list[dict]) -> str | None:
             return n
     if not storeys:
         return None
-    srt = sorted(storeys, key=lambda s: s["elevation_m"])
+    srt = sorted((s for s in storeys if s.get('elevation_m') is not None), key=lambda s: s["elevation_m"])
+    if not srt:
+        return None
     ground = next((i for i, s in enumerate(srt) if s["elevation_m"] >= -0.5), 0)   # a ground floor at -0.15 m (finished floor below the site datum) is still ground
     # German storey abbreviations and English numeric ordinals share the same level.
     m = re.search(r"\b(\d+)\s+(?:og|obergeschoss)\b", ql)

@@ -191,7 +191,8 @@ def _scoped(question, doc, rows):
     if explicit:
         st = next((s['name'] for s in doc.storeys if fold(s['name']) == fold(explicit[1])), None)
     if st is None and (storey_requested(question) or explicit):
-        return [], [], 'The requested floor was not found in the model.'
+        from engine.ifc_levels import available_levels
+        return [], [], 'The requested floor was not found in the model. ' + available_levels(doc.storeys)
     return ([r for r in rows if r.get('storey') == st] if st else rows), ([f'floor {st}'] if st else []), None
 
 
@@ -370,18 +371,16 @@ def room_baseboard(question, doc, t0):
         return _result(question,doc,rows,None,'m','No room perimeter computed.',filters,t0,
                        notes=[error or 'No matching room footprints are indexed.'],confidence=0.)
     source=_source(doc.doc_id,_artifacts())
-    need=[r for r in rows if not str(r['sources'].get('perimeter_m','')).startswith('union of IfcSpace')]
+    need=[r for r in rows if not str(r['sources'].get('perimeter_m','')).startswith('union of IfcSpace') or not r.get('boundaries_recorded')]
     if need and source:
-        import ifcopenshell
-        from pipeline.ifc_quantities import footprint_perimeter
-        f=ifcopenshell.open(str(source))
-        rows=[{**r,'quantities':dict(r['quantities']),'sources':dict(r['sources'])} for r in rows]
-        for r in rows:
-            if not str(r['sources'].get('perimeter_m','')).startswith('union of IfcSpace'):
-                perimeter,src=footprint_perimeter(f.by_guid(r['item_id']))
-                if perimeter is not None:
-                    r['quantities']['perimeter_m']=perimeter
-                    r['sources']['perimeter_m']=src
+        try:
+            import ifcopenshell
+            from pipeline.ifc_quantities import space_geometry_rows
+            f=ifcopenshell.open(str(source))
+            rows=space_geometry_rows(f,rows)
+        except (ImportError,RuntimeError,OSError,ValueError):
+            return _result(question,doc,rows,None,'m','Room geometry could not be read; no bounding rectangles were substituted.',filters,t0,
+                           notes=['The source room outlines or doorway geometry could not be read.'],confidence=0.)
     details,missing=[],[]
     for r in rows:
         per=r['quantities'].get('perimeter_m')
@@ -395,7 +394,10 @@ def room_baseboard(question, doc, t0):
             continue
         details.append({'label':' '.join(str(r.get(k) or '') for k in ('name','long_name')).strip() or 'Room',
                         'item_id':r['item_id'],'value':per-widths,'perimeter_m':per,'door_width_m':widths,
-                        'door_item_ids':list(doors),'perimeter_source':r['sources']['perimeter_m']})
+                        'door_item_ids':list(doors),'perimeter_source':r['sources']['perimeter_m'],
+                        'boundary_method':r.get('boundary_method','recorded IFC space boundaries'),
+                        'door_widths_m':dict(doors),'footprint_rings_m':r.get('footprint_rings_m',[]),
+                        'storey':r.get('storey')})
     if missing:
         return _result(question,doc,rows,None,'m','Complete floor perimeters and door-boundary widths are required.',filters,t0,
                        notes=[f'{len(missing)} rooms lack a footprint, space boundaries, or a boundary door width.'],confidence=0.,detail_rows=details)
@@ -405,8 +407,27 @@ def room_baseboard(question, doc, t0):
     formula=f'Room floor perimeters {per:.4f} m minus deduplicated boundary door widths {op:.4f} m = {total:.4f} m.'
     door_ids={i for d in details for i in d['door_item_ids']}
     proof=rows+[r for r in idx['rows'] if r['item_id'] in door_ids]
-    return _result(question,doc,proof,total,'m',formula,filters,t0,detail_rows=details,confidence=.90,
-                   notes=['This is a measured baseboard allowance; actual finish specifications and other openings are not recorded.'])
+    derived=any(d['boundary_method'].startswith('derived:') for d in details)
+    note=('Estimate: door adjacency is derived from room and door geometry because space boundaries are missing. Check openings before ordering.' if derived else
+          'This is a measured baseboard allowance; actual finish specifications and other openings are not recorded.')
+    res=_result(question,doc,proof,total,'m',formula,filters,t0,detail_rows=details,confidence=.70 if derived else .90,notes=[note])
+    if derived:
+        res['answer']['text_md']=res['answer']['text_md'].replace('**'+f'{total:,.2f} m of baseboard.**', '**Estimated baseboard: '+f'{total:,.2f} linear metres.**')
+        res['reasoning']['confidence'].update(label='Estimate',pct=None,reason=note)
+    citation_numbers={iid:c['n'] for c in res['citations'] for iid in c.get('item_ids',[])}
+    def cell(value):
+        return str(value or 'Not recorded').replace('|','\\|').replace('\n',' ')
+    table=['| Room | Level | Outline (m) | Door openings (m) | Baseboard (m) |', '|---|---|---:|---:|---:|']
+    for d in details[:100]:
+        mark=f" [{citation_numbers[d['item_id']]}]" if d['item_id'] in citation_numbers else ''
+        table.append(f"| {cell(d['label'])}{mark} | {cell(d['storey'])} | {d['perimeter_m']:.2f} | {d['door_width_m']:.2f} | {d['value']:.2f} |")
+    headline=res['answer']['text_md'].split('\n',1)[0]
+    res['answer']['text_md']=headline+'\n\n- Room floor outlines minus door widths; each room side is counted separately.\n- '+note+'\n\n'+'\n'.join(table)
+    if len(details)>100:
+        res['answer']['text_md']+=f'\n\nShowing 100 of {len(details)} rooms; the total and structured per-room results include every selected room.'
+    res['reasoning']['steps'][-1]['text'] += ' ' + note
+    from engine.ifc_baseboard_calc import attach
+    return attach(res,doc,details,source)
 
 
 def mep_families(question,doc,t0):
@@ -439,8 +460,21 @@ def mep_families(question,doc,t0):
     idx=load_index(doc)
     rows=([r for r in idx['rows'] if any(c in r.get('classes',[]) for c in classes)]
           if classes else [r for r in idx['rows'] if r['kind'] in subjects])
-    if not rows and not idx['source_available'] and 'IfcDistributionElement' not in idx['indexed_classes']:
+    if not rows and not idx.get('source_available') and 'IfcDistributionElement' not in idx['indexed_classes']:
         return None  # the older MEP sidecar may still hold evidence
+    if not rows and LENGTH.search(question) and (not COUNT.search(question) or re.search(r'\bhow many (?:linear |running )?(?:metres?|meters?|feet)\b',q)) and set(subjects) & {'pipe','duct'} and not idx.get('errors'):
+        unknown=[r for r in idx['rows'] if r['kind']=='segment']
+        if unknown:
+            return _result(question,doc,unknown,None,'m','No length computed: some service runs have no recorded service type.',[],t0,
+                           notes=['Some service runs have no recorded service type; I cannot establish a complete pipe or duct length.'],confidence=0.)
+        noun='pipe or duct' if {'pipe','duct'} <= set(subjects) else 'pipe' if 'pipe' in subjects else 'duct'
+        architectural=any(r['kind'] in ('room','wall','slab') for r in idx['rows']) and not any(set(r.get('classes',[])) & {'IfcFlowSegment','IfcFlowFitting','IfcFlowController'} for r in idx['rows'])
+        note=f'This model has no {noun} elements' + (' (architectural model).' if architectural else '.')
+        res=_result(question,doc,[],None,'m','No length computed: the indexed IFC inventory contains no requested service elements.',[],t0,notes=[note],confidence=0.)
+        res['answer']['text_md']='**'+note+'** No length can be measured. [1]'
+        res['citations']=[dict(n=1,doc_id=doc.doc_id,page=1,kind='text',bbox_px=None,item_ids=[],inventory_check=True,
+                               quote='Complete IFC class inventory checked for '+noun+' elements; none found. Indexed classes: '+', '.join(idx['indexed_classes']))]
+        return res
     rows,filters,error=_scoped(question,doc,rows)
     if error:
         return _result(question,doc,rows,None,None,'No quantity computed.',filters,t0,notes=[error],confidence=0.)

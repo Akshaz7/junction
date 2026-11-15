@@ -1,0 +1,154 @@
+{
+ "worker": "F-MUNICHQ",
+ "status": "PASS",
+ "branch": "final/munichq",
+ "live_spend_usd": 0,
+ "unit_tests": {
+  "passed": 167,
+  "command": "MODELS_FAKE=1 /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest engine/tests/test_munichq.py engine/tests/test_ifc_quantities.py engine/tests/test_router.py engine/tests/test_props.py engine/tests/test_honesty.py -q"
+ },
+ "sample200": {
+  "before": {
+   "wrong": 31,
+   "correct": 149,
+   "abstained": 7,
+   "unscored": 13
+  },
+  "after": {
+   "wrong": 31,
+   "correct": 149,
+   "abstained": 7,
+   "unscored": 13
+  }
+ },
+ "correct_to_wrong": 0,
+ "real_file_checks": {
+  "passed": 45,
+  "total": 45
+ },
+ "blind_file": {
+  "path": "data/full/junction-dataset/data/ifc_models/resbim-92_model.ifc",
+  "selection": "Randomly reserved before implementation; do not open until final validation."
+ },
+ "judge_questions": [
+  {
+   "question": "What is this drawing?",
+   "before": {
+    "text_md": "**I could not tell which elements the question is about, so I would rather not guess.**",
+    "value": null,
+    "unit": null,
+    "confidence": 0.0,
+    "abstained": true
+   },
+   "after": {
+    "text_md": "**This is an IFC building model: Neubau Reihenhaus mit Keller.** [1]\n\n- Project: 0001; Autodesk Revit 2025 (ENU); IFC4X3; indexed units: m. [1]\n- 5 distinct levels: 0. Foundation (-3.24 m); 1. Kellergeschoss (-2.82 m); 2. Erdgeschoss (-0 m); 3. Obergeschoss (2.89 m); 4. Dachgeschoss (5.71 m). [2]\n- Indexed elements: 83 walls, 19 slabs, 19 rooms, 16 doors, 13 windows, 6 stairs, 3 roofs, 55 other building elements. [3]\n- 170.30 m\u00b2 room floor area (measured from indexed room geometry where quantities are missing). Room areas are not gross building area. [4]",
+    "value": null,
+    "unit": null,
+    "confidence": 1.0,
+    "abstained": false
+   },
+   "room_rows": 0,
+   "reasoning_label": "Verified",
+   "calculation_status": "complete"
+  },
+  {
+   "question": "How many linear metres of baseboard do I need?",
+   "before": {
+    "text_md": "**Quantity unavailable.**\n\n- 19 rooms lack a footprint, space boundaries, or a boundary door width.",
+    "value": null,
+    "unit": "m",
+    "confidence": 0.0,
+    "abstained": true
+   },
+   "after": {
+    "text_md": "**Estimated baseboard: 221.61 linear metres.** [1][2][3][4]\n\n- Room floor outlines minus door widths; each room side is counted separately.\n- Estimate: door adjacency is derived from room and door geometry because space boundaries are missing. Check openings before ordering.\n\n| Room | Level | Outline (m) | Door openings (m) | Baseboard (m) |\n|---|---|---:|---:|---:|\n| 1 Technik/HK [1] | 1. Kellergeschoss | 14.05 | 0.98 | 13.07 |\n| 2 Keller/HK [1] | 1. Kellergeschoss | 11.44 | 0.98 | 10.46 |\n| 3 Vorraum/HK [1] | 1. Kellergeschoss | 12.49 | 3.92 | 8.57 |\n| 4 G\u00e4ste WC/HK [1] | 1. Kellergeschoss | 7.73 | 0.98 | 6.75 |\n| 5 Keller/HK [1] | 1. Kellergeschoss | 14.44 | 0.98 | 13.46 |\n| 7 Diele/FBH [2] | 2. Erdgeschoss | 7.67 | 2.41 | 5.26 |\n| 8 Wohnen/Essen/FBH [2] | 2. Erdgeschoss | 30.21 | 1.86 | 28.35 |\n| 9 z.KG/FBH [2] | 2. Erdgeschoss | 4.15 | 0.88 | 3.27 |\n| 11 Kind/FBH [3] | 3. Obergeschoss | 15.96 | 0.98 | 14.98 |\n| 12 Flur/FBH [3] | 3. Obergeschoss | 17.89 | 2.94 | 14.95 |\n| 13 Bad/FBH [3] | 3. Obergeschoss | 11.49 | 0.98 | 10.51 |\n| 15 Kind/FBH [3] | 3. Obergeschoss | 14.12 | 0.98 | 13.14 |\n| 16 Ankleide/FBH [4] | 4. Dachgeschoss | 16.63 | 0.98 | 15.65 |\n| 18 Schlafen/FBH [4] | 4. Dachgeschoss | 21.89 | 1.66 | 20.23 |\n| 17 Bad/FBH [4] | 4. Dachgeschoss | 6.90 | 0.68 | 6.22 |\n| 19 Luftraum [4] | 4. Dachgeschoss | 10.05 | 0.00 | 10.05 |\n| 14 Luftraum [3] | 3. Obergeschoss | 9.47 | 0.00 | 9.47 |\n| 10 Luftraum [2] | 2. Erdgeschoss | 9.62 | 0.00 | 9.62 |\n| 6 Treppe KG/EG [1] | 1. Kellergeschoss | 8.58 | 0.98 | 7.60 |",
+    "value": 221.613,
+    "unit": "m",
+    "confidence": 0.7,
+    "abstained": false
+   },
+   "room_rows": 19,
+   "reasoning_label": "Estimate",
+   "calculation_status": "complete"
+  },
+  {
+   "question": "What is the total length of pipes or ducts?",
+   "before": {
+    "text_md": "**0.00 m of service elements.** [1]",
+    "value": 0,
+    "unit": "m",
+    "confidence": 1.0,
+    "abstained": false
+   },
+   "after": {
+    "text_md": "**This model has no pipe or duct elements (architectural model).** No length can be measured. [1]",
+    "value": null,
+    "unit": "m",
+    "confidence": 0.0,
+    "abstained": true
+   },
+   "room_rows": 0,
+   "reasoning_label": "Estimate",
+   "calculation_status": null
+  },
+  {
+   "question": "What is the fire rating of the doors in the third basement?",
+   "before": {
+    "text_md": "**No doors are recorded in the requested scope.**",
+    "value": null,
+    "unit": null,
+    "confidence": 1.0,
+    "abstained": false
+   },
+   "after": {
+    "text_md": "**No matching level is recorded in this model.** Recorded levels: 0. Foundation (-3.24 m); 1. Kellergeschoss (-2.82 m); 2. Erdgeschoss (-0 m); 3. Obergeschoss (2.89 m); 4. Dachgeschoss (5.71 m). [1]",
+    "value": null,
+    "unit": null,
+    "confidence": 0.0,
+    "abstained": true
+   },
+   "room_rows": 0,
+   "reasoning_label": "Estimate",
+   "calculation_status": null
+  }
+ ],
+ "known_baseline_failures": {
+  "count": 14,
+  "tests": [
+   "engine/tests/test_numeric_values.py::test_parenthetical_generic_synonyms_do_not_become_names[rooms (spaces)]",
+   "engine/tests/test_numeric_values.py::test_parenthetical_generic_synonyms_do_not_become_names[spaces (rooms)]",
+   "engine/tests/test_numeric_values.py::test_parenthetical_generic_synonyms_do_not_become_names[room (space)]",
+   "engine/tests/test_numeric_values.py::test_area_sent_to_count_question_is_recomputed_with_its_evidence",
+   "engine/tests/test_numeric_values.py::test_reader_restores_area_total_from_structured_tool_result",
+   "engine/tests/test_numeric_values.py::test_reader_restores_computed_area_sum_with_source_citations",
+   "engine/tests/test_numeric_values.py::test_apartment_source_label_selects_unique_unlabelled_outline[Whg.]",
+   "engine/tests/test_numeric_values.py::test_apartment_source_label_selects_unique_unlabelled_outline[App.]",
+   "engine/tests/test_numeric_values.py::test_apartment_source_label_selects_unique_unlabelled_outline[Apartment]",
+   "engine/tests/test_numeric_values.py::test_apartment_source_label_selects_unique_unlabelled_outline[Wohnung]",
+   "engine/tests/test_numeric_values.py::test_apartment_source_label_selects_unique_unlabelled_outline[Asunto]",
+   "engine/tests/test_numeric_values.py::test_apartment_source_label_selects_unique_unlabelled_outline[L\\xe4genhet]",
+   "engine/tests/test_numeric_values.py::test_last_resort_assembly_uses_matching_solver_value_and_citations",
+   "engine/tests/test_numeric_values.py::test_unknown_apartment_shapes_are_flagged_as_unverified"
+  ],
+  "evidence": "The same 14 numeric-values failures reproduce when engine.numeric is replaced in memory with git show HEAD:engine/numeric.py. No fixes outside the assigned IFC paths were attempted."
+ },
+ "cross_file": [
+  "engine/honesty.py",
+  "engine/numeric.py",
+  "engine/props.py",
+  "engine/solvers/data.py",
+  "engine/solvers/solve.py",
+  "pipeline/ifc_quantities.py",
+  "engine/tests/test_ifc_quantities.py"
+ ],
+ "needs_awais": [],
+ "needs": [
+  "Merge branch and deploy backend. For existing Munich artifacts without a retained source IFC, publish results/final/MUNICHQ/munich-ifc-quantities.json as ifc_bench__city-house-munich-arc/ifc-quantities.json using the existing artifact-store top-up path. New IFC ingestion writes geometry quantities automatically."
+ ],
+ "limits": [
+  "Derived door adjacency is an Estimate using a 0.4 m physical wall band and matching floor elevation; finish specifications and non-door openings need checking.",
+  "A missing room footprint or unknown matched door width still abstains.",
+  "Missing room areas in the overview use indexed scene geometry where available, otherwise state unavailable/subtotal.",
+  "Source/index inventory checks verify extraction consistency, not independent field accuracy."
+ ]
+}

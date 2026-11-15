@@ -1,0 +1,370 @@
+[
+ {
+  "doc_id": "ifc_bench__city-house-munich-arc",
+  "source": "city_house_munich_arc.ifc",
+  "schema": "IFC4X3",
+  "authoring_applications": [
+   "Autodesk Revit 2025 (ENU)"
+  ],
+  "checks": [
+   {
+    "check": "IfcBuildingElementProxy indexed count agrees with native IFC class inventory",
+    "expected": 2,
+    "actual": 2,
+    "pass": true
+   },
+   {
+    "check": "IfcCovering indexed count agrees with native IFC class inventory",
+    "expected": 1,
+    "actual": 1,
+    "pass": true
+   },
+   {
+    "check": "IfcDoor indexed count agrees with native IFC class inventory",
+    "expected": 16,
+    "actual": 16,
+    "pass": true
+   },
+   {
+    "check": "IfcMember indexed count agrees with native IFC class inventory",
+    "expected": 1,
+    "actual": 1,
+    "pass": true
+   },
+   {
+    "check": "IfcRailing indexed count agrees with native IFC class inventory",
+    "expected": 5,
+    "actual": 5,
+    "pass": true
+   },
+   {
+    "check": "IfcRoof indexed count agrees with native IFC class inventory",
+    "expected": 3,
+    "actual": 3,
+    "pass": true
+   },
+   {
+    "check": "IfcSlab indexed count agrees with native IFC class inventory",
+    "expected": 19,
+    "actual": 19,
+    "pass": true
+   },
+   {
+    "check": "IfcStair indexed count agrees with native IFC class inventory",
+    "expected": 3,
+    "actual": 3,
+    "pass": true
+   },
+   {
+    "check": "IfcStairFlight indexed count agrees with native IFC class inventory",
+    "expected": 3,
+    "actual": 3,
+    "pass": true
+   },
+   {
+    "check": "IfcWall indexed count agrees with native IFC class inventory",
+    "expected": 83,
+    "actual": 83,
+    "pass": true
+   },
+   {
+    "check": "IfcWindow indexed count agrees with native IFC class inventory",
+    "expected": 13,
+    "actual": 13,
+    "pass": true
+   },
+   {
+    "check": "IfcFlowTerminal indexed count agrees with native IFC class inventory",
+    "expected": 12,
+    "actual": 12,
+    "pass": true
+   },
+   {
+    "check": "IfcSanitaryTerminal indexed count agrees with native IFC class inventory",
+    "expected": 7,
+    "actual": 7,
+    "pass": true
+   },
+   {
+    "check": "IfcFurniture indexed count agrees with native IFC class inventory",
+    "expected": 26,
+    "actual": 26,
+    "pass": true
+   },
+   {
+    "check": "IfcSpace indexed count agrees with native IFC class inventory",
+    "expected": 19,
+    "actual": 19,
+    "pass": true
+   },
+   {
+    "check": "IfcSite indexed count agrees with native IFC class inventory",
+    "expected": 1,
+    "actual": 1,
+    "pass": true
+   },
+   {
+    "check": "deduplicated indexed levels agree with distinct native IFC labels/elevations",
+    "raw_storey_entities": 15,
+    "expected": 5,
+    "actual": 5,
+    "pass": true
+   }
+  ]
+ },
+ {
+  "doc_id": "ifc_bench__ac20-arc",
+  "source": "ac20_arc.ifc",
+  "schema": "IFC4",
+  "authoring_applications": [
+   "ARCHICAD-64"
+  ],
+  "checks": [
+   {
+    "check": "IfcColumn indexed count agrees with native IFC class inventory",
+    "expected": 2,
+    "actual": 2,
+    "pass": true
+   },
+   {
+    "check": "IfcDoor indexed count agrees with native IFC class inventory",
+    "expected": 77,
+    "actual": 77,
+    "pass": true
+   },
+   {
+    "check": "IfcRailing indexed count agrees with native IFC class inventory",
+    "expected": 12,
+    "actual": 12,
+    "pass": true
+   },
+   {
+    "check": "IfcSlab indexed count agrees with native IFC class inventory",
+    "expected": 26,
+    "actual": 26,
+    "pass": true
+   },
+   {
+    "check": "IfcStair indexed count agrees with native IFC class inventory",
+    "expected": 4,
+    "actual": 4,
+    "pass": true
+   },
+   {
+    "check": "IfcWallStandardCase indexed count agrees with native IFC class inventory",
+    "expected": 121,
+    "actual": 121,
+    "pass": true
+   },
+   {
+    "check": "IfcWindow indexed count agrees with native IFC class inventory",
+    "expected": 206,
+    "actual": 206,
+    "pass": true
+   },
+   {
+    "check": "IfcFurnishingElement indexed count agrees with native IFC class inventory",
+    "expected": 253,
+    "actual": 253,
+    "pass": true
+   },
+   {
+    "check": "IfcSpace indexed count agrees with native IFC class inventory",
+    "expected": 82,
+    "actual": 82,
+    "pass": true
+   },
+   {
+    "check": "IfcSite indexed count agrees with native IFC class inventory",
+    "expected": 1,
+    "actual": 1,
+    "pass": true
+   },
+   {
+    "check": "deduplicated indexed levels agree with distinct native IFC labels/elevations",
+    "raw_storey_entities": 5,
+    "expected": 5,
+    "actual": 5,
+    "pass": true
+   }
+  ]
+ },
+ {
+  "doc_id": "ext_ifcr2__bsi-ifc4-building-architecture",
+  "source": "bsi_ifc4_building-architecture.ifc",
+  "schema": "IFC4",
+  "authoring_applications": [
+   "IFC manager for sketchup"
+  ],
+  "checks": [
+   {
+    "check": "IfcBuildingElementProxy indexed count agrees with native IFC class inventory",
+    "expected": 3,
+    "actual": 3,
+    "pass": true
+   },
+   {
+    "check": "IfcChimney indexed count agrees with native IFC class inventory",
+    "expected": 1,
+    "actual": 1,
+    "pass": true
+   },
+   {
+    "check": "IfcRoof indexed count agrees with native IFC class inventory",
+    "expected": 1,
+    "actual": 1,
+    "pass": true
+   },
+   {
+    "check": "IfcSlab indexed count agrees with native IFC class inventory",
+    "expected": 3,
+    "actual": 3,
+    "pass": true
+   },
+   {
+    "check": "IfcWall indexed count agrees with native IFC class inventory",
+    "expected": 4,
+    "actual": 4,
+    "pass": true
+   },
+   {
+    "check": "IfcFurniture indexed count agrees with native IFC class inventory",
+    "expected": 1,
+    "actual": 1,
+    "pass": true
+   },
+   {
+    "check": "IfcSpace indexed count agrees with native IFC class inventory",
+    "expected": 2,
+    "actual": 2,
+    "pass": true
+   },
+   {
+    "check": "IfcSite indexed count agrees with native IFC class inventory",
+    "expected": 2,
+    "actual": 2,
+    "pass": true
+   },
+   {
+    "check": "deduplicated indexed levels agree with distinct native IFC labels/elevations",
+    "raw_storey_entities": 1,
+    "expected": 1,
+    "actual": 1,
+    "pass": true
+   }
+  ]
+ },
+ {
+  "doc_id": "blind-reserved-model",
+  "path": "data/full/junction-dataset/data/ifc_models/resbim-92_model.ifc",
+  "reserved_untouched_until_final": true,
+  "schema": "IFC4",
+  "authoring_applications": [
+   "Autodesk Revit 2026 (ENG)"
+  ],
+  "checks": [
+   {
+    "check": "IfcSite count matches native IFC",
+    "expected": 1,
+    "actual": 1,
+    "pass": true
+   },
+   {
+    "check": "IfcWall count matches native IFC",
+    "expected": 18,
+    "actual": 18,
+    "pass": true
+   },
+   {
+    "check": "IfcDoor count matches native IFC",
+    "expected": 6,
+    "actual": 6,
+    "pass": true
+   },
+   {
+    "check": "IfcWindow count matches native IFC",
+    "expected": 4,
+    "actual": 4,
+    "pass": true
+   },
+   {
+    "check": "IfcSlab count matches native IFC",
+    "expected": 1,
+    "actual": 1,
+    "pass": true
+   },
+   {
+    "check": "IfcRailing count matches native IFC",
+    "expected": 2,
+    "actual": 2,
+    "pass": true
+   },
+   {
+    "check": "all answers have evidence cards and no error route",
+    "pass": true
+   },
+   {
+    "check": "no zero-length service answer",
+    "pass": true
+   }
+  ],
+  "answers": [
+   {
+    "question": "What is this drawing?",
+    "answer": {
+     "text_md": "**This is an IFC building model: Project Name.** [1]\n\n- Project: Project Number; Autodesk Revit 2026 (ENG); IFC4; indexed units: m. [1]\n- 2 distinct levels: Level 0 (0 m); Level 1 (2.8 m). [2]\n- Indexed elements: 18 walls, 6 doors, 4 windows, 1 slabs, 3 other building elements. [3]\n- Room area is not recorded. Room areas are not gross building area. [4]",
+     "value": null,
+     "unit": null,
+     "confidence": 1.0,
+     "abstained": false
+    },
+    "citations": 4,
+    "reasoning_label": "Verified",
+    "quantity_rows": 0,
+    "calc_status": "source-only"
+   },
+   {
+    "question": "How many linear metres of baseboard do I need?",
+    "answer": {
+     "text_md": "**Baseboard length cannot be measured from this sheet.** No usable room outlines are recorded.",
+     "value": null,
+     "unit": null,
+     "confidence": 0.0,
+     "abstained": true
+    },
+    "citations": 1,
+    "reasoning_label": "Estimate",
+    "quantity_rows": 0,
+    "calc_status": null
+   },
+   {
+    "question": "What is the total length of pipes or ducts?",
+    "answer": {
+     "text_md": "**This model has no pipe or duct elements (architectural model).** No length can be measured. [1]",
+     "value": null,
+     "unit": "m",
+     "confidence": 0.0,
+     "abstained": true
+    },
+    "citations": 1,
+    "reasoning_label": "Estimate",
+    "quantity_rows": 0,
+    "calc_status": null
+   },
+   {
+    "question": "What is the fire rating of the doors in the third basement?",
+    "answer": {
+     "text_md": "**No matching level is recorded in this model.** Recorded levels: Level 0 (0 m); Level 1 (2.8 m). [1]",
+     "value": null,
+     "unit": null,
+     "confidence": 0.0,
+     "abstained": true
+    },
+    "citations": 1,
+    "reasoning_label": "Estimate",
+    "quantity_rows": 0,
+    "calc_status": null
+   }
+  ]
+ }
+]

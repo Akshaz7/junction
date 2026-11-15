@@ -1,0 +1,16 @@
+{
+ "source_available": false,
+ "sidecar_rows": 156,
+ "sidecar_bytes": 141887,
+ "room_rows": 19,
+ "answer": {
+  "text_md": "**Estimated baseboard: 221.61 linear metres.** [1]\n\n- Room floor outlines minus door widths; each room side is counted separately.\n- Estimate: door adjacency is derived from room and door geometry because space boundaries are missing. Check openings before ordering.\n\n| Room | Level | Outline (m) | Door openings (m) | Baseboard (m) |\n|---|---|---:|---:|---:|\n| 1 Technik/HK [1] | 1. Kellergeschoss | 14.05 | 0.98 | 13.07 |\n| 2 Keller/HK [1] | 1. Kellergeschoss | 11.44 | 0.98 | 10.46 |\n| 3 Vorraum/HK [1] | 1. Kellergeschoss | 12.49 | 3.92 | 8.57 |\n| 4 G\u00e4ste WC/HK [1] | 1. Kellergeschoss | 7.73 | 0.98 | 6.75 |\n| 5 Keller/HK [1] | 1. Kellergeschoss | 14.44 | 0.98 | 13.46 |\n| 7 Diele/FBH [1] | 2. Erdgeschoss | 7.67 | 2.41 | 5.26 |\n| 8 Wohnen/Essen/FBH [1] | 2. Erdgeschoss | 30.21 | 1.86 | 28.35 |\n| 9 z.KG/FBH [1] | 2. Erdgeschoss | 4.15 | 0.88 | 3.27 |\n| 11 Kind/FBH [1] | 3. Obergeschoss | 15.96 | 0.98 | 14.98 |\n| 12 Flur/FBH [1] | 3. Obergeschoss | 17.89 | 2.94 | 14.95 |\n| 13 Bad/FBH [1] | 3. Obergeschoss | 11.49 | 0.98 | 10.51 |\n| 15 Kind/FBH [1] | 3. Obergeschoss | 14.12 | 0.98 | 13.14 |\n| 16 Ankleide/FBH [1] | 4. Dachgeschoss | 16.63 | 0.98 | 15.65 |\n| 18 Schlafen/FBH [1] | 4. Dachgeschoss | 21.89 | 1.66 | 20.23 |\n| 17 Bad/FBH [1] | 4. Dachgeschoss | 6.90 | 0.68 | 6.22 |\n| 19 Luftraum [1] | 4. Dachgeschoss | 10.05 | 0.00 | 10.05 |\n| 14 Luftraum [1] | 3. Obergeschoss | 9.47 | 0.00 | 9.47 |\n| 10 Luftraum [1] | 2. Erdgeschoss | 9.62 | 0.00 | 9.62 |\n| 6 Treppe KG/EG [1] | 1. Kellergeschoss | 8.58 | 0.98 | 7.60 |",
+  "value": 221.613,
+  "unit": "m",
+  "confidence": 0.7,
+  "abstained": false
+ },
+ "confidence_label": "Estimate",
+ "calc_status": "complete",
+ "pass": true
+}

@@ -131,7 +131,8 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
                 else:
                     items.append(Item(iid, x['kind'], label=x.get('label'), page=page, bbox_px=x.get('bbox_px'),
                                       props=x.get('props') or {}, source='taught', conf=1.0))
-        return Doc(doc_id, "ifc", items, title, e.get("storeys") or [], meta={**(e.get("building") or {}), "unit_provenance": e.get("unit_provenance")})
+        return Doc(doc_id, "ifc", items, title, e.get("storeys") or [], meta={**(e.get("building") or {}), "unit_provenance": e.get("unit_provenance"),
+                   "schema": e.get("schema") or (e.get("building") or {}).get("schema"), "indexed_units": e.get("units")})
     if pms:
         items, scale, page_scales, view_regions, excluded = [], None, {}, [], []
         for p in pms:

@@ -240,12 +240,14 @@ def test_floor_geometry_is_not_a_box_and_doors_deduplicate(monkeypatch):
     assert r['answer']['value']==pytest.approx(21.1)
 
 
-def test_room_without_boundary_information_is_unavailable(monkeypatch):
+def test_room_without_boundaries_uses_geometry_and_is_estimate(monkeypatch):
     f=model(length='m')
     a=entity(f,'IfcSpace','201')
     room_shape(a,[(0,0),(2,0),(2,3),(0,3)])
     r=ask(monkeypatch,f,'What is the baseboard length for room 201?',geometry=True)
-    assert r['answer']['value'] is None and 'boundaries' in r['answer']['text_md']
+    assert r['answer']['value'] == pytest.approx(10.)
+    assert r['reasoning']['confidence']['label'] == 'Estimate'
+    assert r['quantity_rows'][0]['boundary_method'].startswith('derived:')
 
 
 def test_unknown_apartment_prefix_is_not_a_verified_group(monkeypatch):
