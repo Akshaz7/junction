@@ -128,16 +128,17 @@ def room_filter(question: str, rooms: list[Item]) -> tuple[str, list[Item]] | No
     aliases = {**{k: k for k in ROOM_TYPES}, **ROOM_ALIASES}
     explicit = re.search(r"\b(?:area|size) of (?:the |a |an )?(.+)|\bhow (?:big|large) is (?:the |a |an )?(.+)", question, re.I)
     if explicit:
-        raw_target = _target_before_scope(explicit.group(1) or explicit.group(2))
-        literal = re.fullmatch(r'''(?:rooms?|spaces?)?\s*['"“](.+?)['"”]\s*[,?]?''', raw_target, re.I)
+        raw = explicit.group(1) or explicit.group(2)
+        literal = re.match(r'''(?:rooms?|spaces?)?\s*(?:'([^']+)'|"([^"]+)"|“([^”]+)”)''', raw, re.I)
         if literal:
             # Quoting a printed name makes it a label, not a translated type:
             # room 'WC' must not silently include every bathroom as well.
-            target = literal[1]
+            target = next(g for g in literal.groups() if g is not None)
             numbered = _numbered_rooms(target, rooms)
             if numbered is not None:
                 return numbered
             return target, [r for r in rooms if fold(room_name(r)) == fold(target)]
+        raw_target = _target_before_scope(raw)
         target = fold(raw_target)
         target = re.sub(r"^(?:(?:all|every|each|of|the)\s+)+", "", target)
         if not target or target in ("it", "this", "that") or re.fullmatch(r"(?:(?:whole|entire|total|combined|net|gross|floor)\s+)*(?:rooms?|spaces?|(?:building|model|floor|storey|plan|house|flat|apartment)(?:\s+\d+)?)", target):
