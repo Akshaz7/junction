@@ -99,6 +99,16 @@ def test_smallest_container_prevents_counter_from_owning_basin():
     assert min(p[0] for p in sink["polygon"]) == .1
 
 
+def test_explicit_fixture_layer_does_not_count_its_nested_curves_again():
+    ms = ezdxf.new().modelspace()
+    rect(ms, 0, 0, .8, .8, "SHOWER")
+    rect(ms, .05, .05, .7, .7, "SHOWER")
+    ms.add_circle((.4, .4), .025, dxfattribs={"layer": "SHOWER"})
+    items = extract_fixtures(ms)
+    assert counts(items) == {"shower": 1}
+    assert items[0]["conf"] == 1
+
+
 @pytest.mark.parametrize("offset,drain", [(0, False), (.1, True)])
 def test_ambiguous_bowl_stays_unknown(offset, drain):
     ms = ezdxf.new().modelspace()

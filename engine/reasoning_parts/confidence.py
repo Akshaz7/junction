@@ -45,7 +45,8 @@ def run(ctx: dict) -> dict:
 
     factors: list[tuple[float, str]] = []     # (signed effect, phrase for the reason line)
     exact = False
-    inferred_cad_fixture = any(it.source == "dxf" and it.props.get("classification") == "geometry" for it in cited)
+    inferred_cad_fixture = any(getattr(it, "source", None) == "dxf"
+                               and (getattr(it, "props", None) or {}).get("classification") == "geometry" for it in cited)
     ordering = any(s.get("step") == "order" for s in ctx.get("trace") or [])
     missing = bool(cites) and not any(c.get("item_ids") or c.get("bbox_px") or c.get("quote") for c in cites)
     if missing:

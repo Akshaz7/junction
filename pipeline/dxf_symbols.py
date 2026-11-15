@@ -280,6 +280,13 @@ def extract_fixtures(layout):
     for layer, shapes in by_layer.items():
         classified = classify_fixture_shapes(shapes)
         explicit = fixture_kind(layer)
+        if explicit:
+            # An explicit fixture layer names whole symbols, not every inset
+            # outline or drain. Keep its outer objects once, as for a block.
+            polygons = [Polygon(item["polygon"]) for item in classified]
+            classified = [item for i, item in enumerate(classified)
+                          if not any(j != i and p.area > polygons[i].area * (1 + EPS)
+                                     and p.covers(polygons[i]) for j, p in enumerate(polygons))]
         for item in classified:
             if explicit:
                 item.update(kind=explicit, conf=1.0)
