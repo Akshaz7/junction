@@ -3,7 +3,6 @@ import { FileText, Layers3, Box, Smartphone } from 'lucide-react'
 import { AdvisorCardView } from '../viewer3d/AdvisorCardView'
 import { onAdvisorCards } from '../viewer3d/liveHighlight'
 import type { AdvisorCard } from '../viewer3d/advisor'
-import { Tooltip } from './ui'
 import { CITATION_CAP, humanizeIds, parseBlocks, plainQuote } from '../lib/answer-text'
 import type { Answer, Citation, Document } from '../lib/types'
 import { AnswerMoreActions } from './answer-more-actions'
@@ -119,17 +118,15 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
   const labels = labelsOf(answer)
   const advice = useAnswerAdvice(answer, chatId)
   const generated = demo || answer.trace.some((step) => step.stub)
-  const callDetails = answer.cost.calls.length ? JSON.stringify(answer.cost.calls, null, 2) : 'No model calls.'
   const sources = [...new Set(citations.map((citation) => citation.doc_id))].map((docId) => ({
     docId, title: docs.find((doc) => doc.doc_id === docId)?.title ?? docId,
     citations: citations.filter((citation) => citation.doc_id === docId),
   }))
-  const cost = <Tooltip content={callDetails}><span className="cost-chip" data-testid="answer-cost" tabIndex={0} aria-label={`Answer cost ${formatCost(answer.cost.usd_total)}`} title={callDetails}>{formatCost(answer.cost.usd_total)}</span></Tooltip>
   return <article className="exchange" data-testid="answer-card">
     <div className="question-bubble">{answer.question}</div>
     <div className="answer-meta"><ThinkingRow traces={answer.trace} /><AnswerMoreActions answer={answer} docs={docs} chatId={chatId} demo={demo} onAsk={onAsk} /></div>
     <AnswerBody answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} />
-    <ErrorBoundary resetKey={answer} fallback={<p className="evidence-quantity" role="alert">Could not render the evidence for this answer.</p>}><EvidenceCard answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} onShowCalculation={onOpenCalc && calcCitation ? () => onOpenCalc(calcCitation) : undefined} footer={cost} /></ErrorBoundary>
+    <ErrorBoundary resetKey={answer} fallback={<p className="evidence-quantity" role="alert">Could not render the evidence for this answer.</p>}><EvidenceCard answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} onShowCalculation={onOpenCalc && calcCitation ? () => onOpenCalc(calcCitation) : undefined} /></ErrorBoundary>
     {sceneOpen(answer) === 'ar' && <ArHint />}
     <SceneCommandTags answer={answer} edits={edits} busy={busy} onUndo={onUndo} onOpenItem={onOpenItem} />
     {!!advice.length && <div className="advisor-card-list" aria-label="Advice for this change" data-testid="answer-advisor-cards">

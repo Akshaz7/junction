@@ -542,8 +542,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       <form className="composer" onSubmit={(event) => { event.preventDefault(); if (!mention) void ask(draft) }}>
         {!!selected.length && <div className="selected-documents" aria-label="Selected documents">{selected.map((doc) => <span className="chip document-chip" key={doc.doc_id}><FileText size={13} /><span>{doc.title}</span><button type="button" disabled={busy} aria-label={`Remove ${doc.title}`} onClick={() => setSelected((previous) => previous.filter((item) => item.doc_id !== doc.doc_id))}><X size={13} /></button></span>)}</div>}
         <div className="composer-input"><label className="sr-only" htmlFor="question">Ask about your drawings</label>
-        {!draft && <span className="phone-composer-placeholder" aria-hidden="true">Ask anything. Type @ to include a document</span>}
-        <textarea ref={textarea} id="question" rows={2} placeholder="Ask anything. Type @ to include a document" value={draft} disabled={busy || restoring}
+        {!draft && <span className="phone-composer-placeholder" aria-hidden="true">Ask anything. Type @ to include a document, or drag and drop files here</span>}
+        <textarea ref={textarea} id="question" rows={2} placeholder="Ask anything. Type @ to include a document, or drag and drop files here" value={draft} disabled={busy || restoring}
           role="combobox" aria-autocomplete="list" aria-expanded={!!mention} aria-controls={mention ? 'document-picker' : undefined} aria-activedescendant={mention && matches.length ? `document-option-${optionIndex}` : undefined}
           onChange={(event) => { setDraft(event.target.value); updateMention(event.target.value, event.target.selectionStart) }}
           onClick={(event) => updateMention(event.currentTarget.value, event.currentTarget.selectionStart)}

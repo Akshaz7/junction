@@ -15,9 +15,7 @@ describe('answer evidence', () => {
     expect(html).not.toContain('Where it is set out') // one-line answers drop the heading
     expect(html).toContain('aria-label="Sources 1"')
     expect(html).toContain('Show thought process')
-    expect(html).toContain('data-testid="answer-cost"')
-    expect(html).toContain('&lt; $0.0001')
-    expect(html).toContain('&quot;provider&quot;: &quot;fake&quot;')
+    expect(html).not.toContain('data-testid="answer-cost"')
   })
 
   it('renders abstentions without citation chips or sources even when stale citations exist', () => {
