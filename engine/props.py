@@ -467,7 +467,12 @@ def _model_answer(question, doc_id, root, req, t0, hidden=()):
     if len(named_levels) > 1:
         return None  # Let the multi-scope route keep all requested levels.
     if storey_requested(question) and st is None:
-        return _result(question, doc_id, [], "**No matching level is recorded in this model.**", 0, 0, root, t0, complete=False, source=source)
+        from engine.ifc_levels import available_levels
+        res = _result(question, doc_id, [], "**No matching level is recorded in this model.** " + available_levels(storeys), 0, 0, root, t0, complete=False, source=source)
+        res['answer']['abstained'] = True
+        res['citations'] = [dict(n=1, doc_id=doc_id, page=1, kind='text', bbox_px=None, item_ids=[], quote=available_levels(storeys))]
+        res['answer']['text_md'] += ' [1]'
+        return res
     if st:
         scope = [r for r in scope if r.item.storey == st]
     original = list(scope)

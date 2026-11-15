@@ -1,0 +1,2137 @@
+[
+ {
+  "question": "What is this drawing?",
+  "doc_ids": [
+   "ifc_bench__city-house-munich-arc"
+  ],
+  "answer": {
+   "text_md": "**I could not tell which elements the question is about, so I would rather not guess.**",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  },
+  "route": "index",
+  "trace": [
+   {
+    "step": "route",
+    "detail": "count / apartment / room (model)",
+    "ms": 9,
+    "model": "fake",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "abstain",
+    "detail": "I could not tell which elements the question is about, so I would rather not guess.",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 1,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "abstain",
+    "detail": "step limit",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   }
+  ],
+  "citations": [],
+  "validation": {
+   "confidence_label": "Estimate",
+   "calc_status": null,
+   "calc_issues": null
+  }
+ },
+ {
+  "question": "How many linear metres of baseboard do I need?",
+  "doc_ids": [
+   "ifc_bench__city-house-munich-arc"
+  ],
+  "answer": {
+   "text_md": "**Quantity unavailable.**\n\n- 19 rooms lack a footprint, space boundaries, or a boundary door width.",
+   "value": null,
+   "unit": "m",
+   "confidence": 0.0,
+   "abstained": true
+  },
+  "route": "index",
+  "trace": [
+   {
+    "step": "route",
+    "detail": "IFC quantities -> code, no model",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "filter",
+    "detail": "all matching model elements",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "calc",
+    "detail": "Complete floor perimeters and door-boundary widths are required.",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   }
+  ],
+  "citations": [
+   {
+    "n": 1,
+    "doc_id": "ifc_bench__city-house-munich-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     55.0,
+     70.6,
+     392.1,
+     912.8
+    ],
+    "item_ids": [
+     "1lX7jPqsH6yBGktuQiczV9",
+     "1lX7jPqsH6yBGktuQiczVB",
+     "1lX7jPqsH6yBGktuQiczVD",
+     "3uV4Cix0909uZhDD2U4lwn",
+     "1lX7jPqsH6yBGktuQiczVF",
+     "1lX7jPqsH6yBGktuQiczSn"
+    ],
+    "quote": null,
+    "label": "1. Kellergeschoss \u00b7 6 rooms"
+   },
+   {
+    "n": 2,
+    "doc_id": "ifc_bench__city-house-munich-arc",
+    "page": 3,
+    "kind": "element",
+    "bbox_px": [
+     55.0,
+     71.0,
+     392.1,
+     912.4
+    ],
+    "item_ids": [
+     "1lX7jPqsH6yBGktuQiczRD",
+     "1lX7jPqsH6yBGktuQiczR8",
+     "1lX7jPqsH6yBGktuQiczii",
+     "3uV4Cix0909uZhDD2U4lxD"
+    ],
+    "quote": null,
+    "label": "2. Erdgeschoss \u00b7 4 rooms"
+   },
+   {
+    "n": 3,
+    "doc_id": "ifc_bench__city-house-munich-arc",
+    "page": 5,
+    "kind": "element",
+    "bbox_px": [
+     55.0,
+     71.0,
+     392.1,
+     912.4
+    ],
+    "item_ids": [
+     "3uV4Cix0909uZhDD2U4iB2",
+     "3uV4Cix0909uZhDD2U4iB7",
+     "3uV4Cix0909uZhDD2U4lxb",
+     "3uV4Cix0909uZhDD2U4iB5",
+     "3uV4Cix0909uZhDD2U4iBB"
+    ],
+    "quote": null,
+    "label": "3. Obergeschoss \u00b7 5 rooms"
+   },
+   {
+    "n": 4,
+    "doc_id": "ifc_bench__city-house-munich-arc",
+    "page": 7,
+    "kind": "element",
+    "bbox_px": [
+     55.0,
+     40.0,
+     392.1,
+     921.1
+    ],
+    "item_ids": [
+     "3uV4Cix0909uZhDD2U4lpi",
+     "3uV4Cix0909uZhDD2U4lxp",
+     "3uV4Cix0909uZhDD2U4loT",
+     "3uV4Cix0909uZhDD2U4luF"
+    ],
+    "quote": null,
+    "label": "4. Dachgeschoss \u00b7 4 rooms"
+   }
+  ],
+  "quantity_rows": [],
+  "validation": {
+   "confidence_label": "Estimate",
+   "calc_status": null,
+   "calc_issues": null
+  }
+ },
+ {
+  "question": "What is the total length of pipes or ducts?",
+  "doc_ids": [
+   "ifc_bench__city-house-munich-arc"
+  ],
+  "answer": {
+   "text_md": "**0.00 m of service elements.** [1]",
+   "value": 0,
+   "unit": "m",
+   "confidence": 1.0,
+   "abstained": false
+  },
+  "route": "index",
+  "trace": [
+   {
+    "step": "route",
+    "detail": "IFC quantities -> code, no model",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "filter",
+    "detail": "all matching model elements",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "calc",
+    "detail": "Sum recorded lengths of 0 elements = 0 m. Sources: .",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   }
+  ],
+  "citations": [
+   {
+    "n": 1,
+    "doc_id": "ifc_bench__city-house-munich-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": null,
+    "item_ids": [],
+    "quote": "Checked the stored model inventory; no items match the requested scope.",
+    "inventory_check": true
+   }
+  ],
+  "quantity_rows": [],
+  "validation": {
+   "confidence_label": "Estimate",
+   "calc_status": "complete",
+   "calc_issues": []
+  }
+ },
+ {
+  "question": "What is the fire rating of the doors in the third basement?",
+  "doc_ids": [
+   "ifc_bench__city-house-munich-arc"
+  ],
+  "answer": {
+   "text_md": "**No doors are recorded in the requested scope.**",
+   "value": null,
+   "unit": null,
+   "confidence": 1.0,
+   "abstained": false
+  },
+  "route": "index",
+  "trace": [
+   {
+    "step": "props",
+    "detail": "Requested property present on 0 of 0 elements; checked the original model's properties, quantities, types and materials.",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   }
+  ],
+  "citations": [],
+  "validation": {
+   "confidence_label": "Verified",
+   "calc_status": "complete",
+   "calc_issues": []
+  }
+ },
+ {
+  "question": "What is this drawing?",
+  "doc_ids": [
+   "ifc_bench__ac20-arc"
+  ],
+  "answer": {
+   "text_md": "**I could not tell which elements the question is about, so I would rather not guess.**",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  },
+  "route": "index",
+  "trace": [
+   {
+    "step": "route",
+    "detail": "count / apartment / room (model)",
+    "ms": 0,
+    "model": "fake",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "abstain",
+    "detail": "I could not tell which elements the question is about, so I would rather not guess.",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "abstain",
+    "detail": "step limit",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   }
+  ],
+  "citations": [],
+  "validation": {
+   "confidence_label": "Estimate",
+   "calc_status": null,
+   "calc_issues": null
+  }
+ },
+ {
+  "question": "How many linear metres of baseboard do I need?",
+  "doc_ids": [
+   "ifc_bench__ac20-arc"
+  ],
+  "answer": {
+   "text_md": "**I could not verify a whole-number count for the requested items.** The available measurement is not a count.",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  },
+  "route": "index",
+  "trace": [
+   {
+    "step": "route",
+    "detail": "IFC quantities -> code, no model",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "filter",
+    "detail": "all matching model elements",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "calc",
+    "detail": "Room floor perimeters 1732.6000 m minus deduplicated boundary door widths 168.4000 m = 1564.2000 m.",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "numeric_guard",
+    "detail": "count question received a non-count quantity; retried the count solver",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "abstain",
+    "detail": "I could not verify a whole-number count for the requested items. The available measurement is not a count.",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   }
+  ],
+  "citations": [],
+  "validation": {
+   "confidence_label": "Estimate",
+   "calc_status": null,
+   "calc_issues": null
+  }
+ },
+ {
+  "question": "What is the total length of pipes or ducts?",
+  "doc_ids": [
+   "ifc_bench__ac20-arc"
+  ],
+  "answer": {
+   "text_md": "**0.00 m of service elements.** [1]",
+   "value": 0,
+   "unit": "m",
+   "confidence": 1.0,
+   "abstained": false
+  },
+  "route": "index",
+  "trace": [
+   {
+    "step": "route",
+    "detail": "IFC quantities -> code, no model",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "filter",
+    "detail": "all matching model elements",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "calc",
+    "detail": "Sum recorded lengths of 0 elements = 0 m. Sources: .",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   }
+  ],
+  "citations": [
+   {
+    "n": 1,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": null,
+    "item_ids": [],
+    "quote": "Checked the stored model inventory; no items match the requested scope.",
+    "inventory_check": true
+   }
+  ],
+  "quantity_rows": [],
+  "validation": {
+   "confidence_label": "Estimate",
+   "calc_status": "complete",
+   "calc_issues": []
+  }
+ },
+ {
+  "question": "What is the fire rating of the doors in the third basement?",
+  "doc_ids": [
+   "ifc_bench__ac20-arc"
+  ],
+  "answer": {
+   "text_md": "**This model does not record fire ratings for doors.** [1] [2] [3]",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": false
+  },
+  "route": "index",
+  "trace": [
+   {
+    "step": "props",
+    "detail": "Requested property present on 0 of 16 elements; checked the original model's properties, quantities, types and materials.",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   }
+  ],
+  "citations": [
+   {
+    "n": 1,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     879.6,
+     416.4,
+     934.9,
+     422.0
+    ],
+    "item_ids": [
+     "3qloCPnZDEQBom1ZjBlwJP"
+    ],
+    "quote": "material association (including inherited layers): Leer; Luftschicht; index.is_external: No; IfcDoor.OverallWidth: 1000 mm; index.area_m2: 2.1 m\u00b2; IfcDoor.OverallWidth: 1000 mm; IfcDoor.OverallHeight: 2100 mm; model type: IFC T\u00fcr - Eine \u00d6ffnunsgrichtung; model level: Keller"
+   },
+   {
+    "n": 2,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     802.3,
+     416.4,
+     857.5,
+     422.0
+    ],
+    "item_ids": [
+     "0_flqizUv5_A_EGt7DzP3T"
+    ],
+    "quote": "material association (including inherited layers): Leer; Luftschicht; index.is_external: No; IfcDoor.OverallWidth: 1000 mm; index.area_m2: 2.1 m\u00b2; IfcDoor.OverallWidth: 1000 mm; IfcDoor.OverallHeight: 2100 mm; model type: IFC T\u00fcr - Eine \u00d6ffnunsgrichtung; model level: Keller"
+   },
+   {
+    "n": 3,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     305.1,
+     416.4,
+     360.4,
+     422.0
+    ],
+    "item_ids": [
+     "17n0YjYkvEshOmsrIPLGOb"
+    ],
+    "quote": "material association (including inherited layers): Leer; Luftschicht; index.is_external: No; IfcDoor.OverallWidth: 1000 mm; index.area_m2: 2.1 m\u00b2; IfcDoor.OverallWidth: 1000 mm; IfcDoor.OverallHeight: 2100 mm; model type: IFC T\u00fcr - Eine \u00d6ffnunsgrichtung; model level: Keller"
+   },
+   {
+    "n": 4,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     470.9,
+     416.4,
+     526.1,
+     422.0
+    ],
+    "item_ids": [
+     "31Gx3VvgP1fvwL2I0a9YtY"
+    ],
+    "quote": "material association (including inherited layers): Leer; Luftschicht; index.is_external: No; IfcDoor.OverallWidth: 1000 mm; index.area_m2: 2.1 m\u00b2; IfcDoor.OverallWidth: 1000 mm; IfcDoor.OverallHeight: 2100 mm; model type: IFC T\u00fcr - Eine \u00d6ffnunsgrichtung; model level: Keller"
+   },
+   {
+    "n": 5,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     636.6,
+     416.4,
+     691.8,
+     422.0
+    ],
+    "item_ids": [
+     "0Xbk1qGZnCY9arQDkkuJ8L"
+    ],
+    "quote": "material association (including inherited layers): Leer; Luftschicht; index.is_external: No; IfcDoor.OverallWidth: 1000 mm; index.area_m2: 2.1 m\u00b2; IfcDoor.OverallWidth: 1000 mm; IfcDoor.OverallHeight: 2100 mm; model type: IFC T\u00fcr - Eine \u00d6ffnunsgrichtung; model level: Keller"
+   },
+   {
+    "n": 6,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     139.4,
+     416.4,
+     194.7,
+     422.0
+    ],
+    "item_ids": [
+     "3NTkL25Pb8Y8HEKKJUt_B_"
+    ],
+    "quote": "material association (including inherited layers): Leer; Luftschicht; index.is_external: No; IfcDoor.OverallWidth: 1000 mm; index.area_m2: 2.1 m\u00b2; IfcDoor.OverallWidth: 1000 mm; IfcDoor.OverallHeight: 2100 mm; model type: IFC T\u00fcr - Eine \u00d6ffnunsgrichtung; model level: Keller"
+   },
+   {
+    "n": 7,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     62.1,
+     541.8,
+     117.3,
+     547.4
+    ],
+    "item_ids": [
+     "1nDSxVMDT3hh2Ql2HEz6Lg"
+    ],
+    "quote": "material association (including inherited layers): Leer; Luftschicht; index.is_external: No; IfcDoor.OverallWidth: 1000 mm; index.area_m2: 2.1 m\u00b2; IfcDoor.OverallWidth: 1000 mm; IfcDoor.OverallHeight: 2100 mm; model type: IFC T\u00fcr - Eine \u00d6ffnunsgrichtung; model level: Keller"
+   },
+   {
+    "n": 8,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     382.5,
+     541.8,
+     437.7,
+     547.4
+    ],
+    "item_ids": [
+     "2MHPtmLzv5OhZf$6Z1Y75J"
+    ],
+    "quote": "material association (including inherited layers): Leer; Luftschicht; index.is_external: No; IfcDoor.OverallWidth: 1000 mm; index.area_m2: 2.1 m\u00b2; IfcDoor.OverallWidth: 1000 mm; IfcDoor.OverallHeight: 2100 mm; model type: IFC T\u00fcr - Eine \u00d6ffnunsgrichtung; model level: Keller"
+   },
+   {
+    "n": 9,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     713.9,
+     541.8,
+     769.1,
+     547.4
+    ],
+    "item_ids": [
+     "29qQ5ECrL6nQEhooPP__BH"
+    ],
+    "quote": "material association (including inherited layers): Leer; Luftschicht; index.is_external: No; IfcDoor.OverallWidth: 1000 mm; index.area_m2: 2.1 m\u00b2; IfcDoor.OverallWidth: 1000 mm; IfcDoor.OverallHeight: 2100 mm; model type: IFC T\u00fcr - Eine \u00d6ffnunsgrichtung; model level: Keller"
+   },
+   {
+    "n": 10,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     1200.0,
+     541.8,
+     1255.2,
+     547.4
+    ],
+    "item_ids": [
+     "3rmqVs9ZL3qgw1cva2u9Fv"
+    ],
+    "quote": "material association (including inherited layers): Leer; Luftschicht; index.is_external: No; IfcDoor.OverallWidth: 1000 mm; index.area_m2: 2.1 m\u00b2; IfcDoor.OverallWidth: 1000 mm; IfcDoor.OverallHeight: 2100 mm; model type: IFC T\u00fcr - Eine \u00d6ffnunsgrichtung; model level: Keller"
+   },
+   {
+    "n": 11,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     1465.1,
+     541.8,
+     1520.4,
+     547.4
+    ],
+    "item_ids": [
+     "1lf5dxZ1LE_xJj$eJu8Rhu"
+    ],
+    "quote": "material association (including inherited layers): Leer; Luftschicht; index.is_external: No; IfcDoor.OverallWidth: 1000 mm; index.area_m2: 2.1 m\u00b2; IfcDoor.OverallWidth: 1000 mm; IfcDoor.OverallHeight: 2100 mm; model type: IFC T\u00fcr - Eine \u00d6ffnunsgrichtung; model level: Keller"
+   },
+   {
+    "n": 12,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     1630.9,
+     416.4,
+     1686.1,
+     422.0
+    ],
+    "item_ids": [
+     "2$tv64Cn5DZx8YisuS365o"
+    ],
+    "quote": "material association (including inherited layers): Leer; Luftschicht; index.is_external: No; IfcDoor.OverallWidth: 1000 mm; index.area_m2: 2.1 m\u00b2; IfcDoor.OverallWidth: 1000 mm; IfcDoor.OverallHeight: 2100 mm; model type: IFC T\u00fcr - Eine \u00d6ffnunsgrichtung; model level: Keller"
+   },
+   {
+    "n": 13,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     1465.1,
+     416.4,
+     1520.4,
+     422.0
+    ],
+    "item_ids": [
+     "123VQUHCn26ei6whtqvtKu"
+    ],
+    "quote": "material association (including inherited layers): Leer; Luftschicht; index.is_external: No; IfcDoor.OverallWidth: 1000 mm; index.area_m2: 2.1 m\u00b2; IfcDoor.OverallWidth: 1000 mm; IfcDoor.OverallHeight: 2100 mm; model type: IFC T\u00fcr - Eine \u00d6ffnunsgrichtung; model level: Keller"
+   },
+   {
+    "n": 14,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     1690.8,
+     432.2,
+     1696.3,
+     531.6
+    ],
+    "item_ids": [
+     "0Ti0dr3tHAq8uzw2luJtyI"
+    ],
+    "quote": "material association (including inherited layers): Leer; Luftschicht; index.is_external: No; IfcDoor.OverallWidth: 1800 mm; index.area_m2: 3.78 m\u00b2; IfcDoor.OverallWidth: 1800 mm; IfcDoor.OverallHeight: 2100 mm; model type: IFC Doppelt\u00fcr - Zwei \u00d6ffnungsrichtungen; model level: Keller"
+   },
+   {
+    "n": 15,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     1040.6,
+     432.2,
+     1046.2,
+     531.6
+    ],
+    "item_ids": [
+     "2pe3RqZ0j8ogoAvp7iGUAH"
+    ],
+    "quote": "material association (including inherited layers): Leer; Luftschicht; index.is_external: No; IfcDoor.OverallWidth: 1800 mm; index.area_m2: 3.78 m\u00b2; IfcDoor.OverallWidth: 1800 mm; IfcDoor.OverallHeight: 2100 mm; model type: IFC Doppelt\u00fcr - Zwei \u00d6ffnungsrichtungen; model level: Keller"
+   },
+   {
+    "n": 16,
+    "doc_id": "ifc_bench__ac20-arc",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": [
+     1353.8,
+     432.2,
+     1359.4,
+     531.6
+    ],
+    "item_ids": [
+     "3sXEZFiePFsxi_o7909$c3"
+    ],
+    "quote": "material association (including inherited layers): Leer; Luftschicht; index.is_external: No; IfcDoor.OverallWidth: 1800 mm; index.area_m2: 3.78 m\u00b2; IfcDoor.OverallWidth: 1800 mm; IfcDoor.OverallHeight: 2100 mm; model type: IFC Doppelt\u00fcr - Zwei \u00d6ffnungsrichtungen; model level: Keller"
+   }
+  ],
+  "validation": {
+   "confidence_label": "Estimate",
+   "calc_status": "complete",
+   "calc_issues": []
+  }
+ },
+ {
+  "question": "What is this drawing?",
+  "doc_ids": [
+   "ext_ifcr2__schependomlaan-design"
+  ],
+  "answer": {
+   "text_md": "**I could not tell which elements the question is about, so I would rather not guess.**",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  },
+  "route": "index",
+  "trace": [
+   {
+    "step": "route",
+    "detail": "count / apartment / room (model)",
+    "ms": 0,
+    "model": "fake",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "abstain",
+    "detail": "I could not tell which elements the question is about, so I would rather not guess.",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "read",
+    "detail": "planner reply was not JSON; retrying",
+    "ms": 0,
+    "model": "fake-1",
+    "cost_usd": 0.0
+   },
+   {
+    "step": "abstain",
+    "detail": "step limit",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   }
+  ],
+  "citations": [],
+  "validation": {
+   "confidence_label": "Estimate",
+   "calc_status": null,
+   "calc_issues": null
+  }
+ },
+ {
+  "question": "How many linear metres of baseboard do I need?",
+  "doc_ids": [
+   "ext_ifcr2__schependomlaan-design"
+  ],
+  "answer": {
+   "text_md": "**Quantity unavailable.**\n\n- A0.01 instal. ruimte: 2.47 m.\n- A0.00 entree: 23.42 m.\n- A0.02 berging: 7.18 m.\n- 7 rooms lack a footprint, space boundaries, or a boundary door width.",
+   "value": null,
+   "unit": "m",
+   "confidence": 0.0,
+   "abstained": true
+  },
+  "route": "index",
+  "trace": [
+   {
+    "step": "route",
+    "detail": "IFC quantities -> code, no model",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "filter",
+    "detail": "all matching model elements",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "calc",
+    "detail": "Complete floor perimeters and door-boundary widths are required.",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   }
+  ],
+  "citations": [
+   {
+    "n": 1,
+    "doc_id": "ext_ifcr2__schependomlaan-design",
+    "page": 2,
+    "kind": "element",
+    "bbox_px": [
+     501.6,
+     537.9,
+     1136.0,
+     908.8
+    ],
+    "item_ids": [
+     "2dFicWHgz1KPbr5tHWzMcP",
+     "3ZMk1e17XESP$vROePi38_",
+     "22lJvI_rz50umvUizzyEQi"
+    ],
+    "quote": null,
+    "label": "00 begane grond \u00b7 3 rooms"
+   },
+   {
+    "n": 2,
+    "doc_id": "ext_ifcr2__schependomlaan-design",
+    "page": 3,
+    "kind": "element",
+    "bbox_px": [
+     762.8,
+     694.3,
+     989.4,
+     955.4
+    ],
+    "item_ids": [
+     "0ldLkGDpv5wRT1Q$Q3V2M1"
+    ],
+    "quote": null,
+    "label": "01 eerste verdieping \u00b7 1 room"
+   },
+   {
+    "n": 3,
+    "doc_id": "ext_ifcr2__schependomlaan-design",
+    "page": 4,
+    "kind": "element",
+    "bbox_px": [
+     444.0,
+     247.1,
+     709.0,
+     508.2
+    ],
+    "item_ids": [
+     "2Nn5OYLeT9FBcLTcY8oegS"
+    ],
+    "quote": null,
+    "label": "02 tweede verdieping \u00b7 1 room"
+   },
+   {
+    "n": 4,
+    "doc_id": "ext_ifcr2__schependomlaan-design",
+    "page": 5,
+    "kind": "element",
+    "bbox_px": [
+     303.3,
+     69.8,
+     525.4,
+     320.0
+    ],
+    "item_ids": [
+     "3c9gfBnpXAtgB1oHgYsgIs"
+    ],
+    "quote": null,
+    "label": "03 derde verdieping \u00b7 1 room"
+   },
+   {
+    "n": 5,
+    "doc_id": "ext_ifcr2__schependomlaan-design",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": null,
+    "item_ids": [
+     "00XVyzXGDDQPsHPeNwCNmZ",
+     "02NK$DEdTDwuguIz00UqtE",
+     "09WjTQSeH1n8koThMDL_IH",
+     "09fo1jWjfFtQMbiri1ZVQ3",
+     "0BsqHll2P5vhJOAHEDwAwi",
+     "0CJDgHLZLCWu7DbuOU80VN",
+     "0CujFs7XvBHACKRDUKrtM$",
+     "0Dj6N$QAjCa8$dcIusb5Sm",
+     "0EHFwkDTP5BAvP$Lr4UUAk",
+     "0FOLghHZTBOPD8KF6PRrx0",
+     "0IIWC_MJj0TegDVVevqJ7a",
+     "0IOcqFv1vCWwJz5c1VnoNe",
+     "0Jkjl8tTH5TBBcOqrZRjc0",
+     "0OFDZWgvrCbvU2AvmpKDKA",
+     "0OqmHrrnL18wpVdVYaE6Eq",
+     "0P4aIRXgD9XPdxJodXPmsI",
+     "0P5HFjHIjAsevZeF10JaZS",
+     "0a_kF4OBP2GPx5hgvIBSXe",
+     "0ajLK6DXHAaeMk704HiMsX",
+     "0asyuu9T1AaPR7AmNDL1_c",
+     "0bNesd_3DCrhdyKRJV7k4U",
+     "0c9LSnFgj7OBxwRT4cC9lK",
+     "0hW2P55_n5cOR9ThNgO3e6",
+     "0kg640irz75hysOImfQ5Ff",
+     "0lGZe9hjL5GQNRN2Ku92xr",
+     "0m66n5BInC6fBzFb8EWwyE",
+     "0oEbkL7YDD8AYm6eYpAT4B",
+     "0sEYZPVdXAZAaorrZw2LKy",
+     "0thxUtY5D3nQDlN3b_gGVK",
+     "0tv9iZwmX3QhOwYgrkdylc",
+     "0up7RAxwfAqvoyCE1kDxpy",
+     "0yLghiaXr4pB6B4YHPBOlT",
+     "0z1DMNAyb21RRdXtk2yF$a",
+     "0z1xo3KDX8yQN59ZNuWEoz",
+     "10$IVtAgz3gvaL1AC5hF6m",
+     "12AHbNFjr4FRJYlF1r7pMB",
+     "12sKPfqUvDFv$X4w8UYHNK",
+     "1AlG6Dm9L1h8L4yH9tB8FO",
+     "1AtrO37LT8iQg1RDVAeoCA",
+     "1EO6MCIfDFuRP2Ugg$wu$f",
+     "1G43xnpGf8ReA8Ux2AmH0Y",
+     "1GBaX8Qs19WPwcdIjq6ONn",
+     "1JrMACb0vE99f79I2KAPuN",
+     "1KHE8Hn6vAPe5Gw9Zrubuh",
+     "1LeiDSp9fA6h6$bEYt0VSH",
+     "1PBqvLnRDDUATdl_lvNYMh",
+     "1RPMriui52lBriSIaCeUCC",
+     "1S5uZBEqz97vGlKIzp8YFh",
+     "1Wtl5_cnDDhAIgcPpOxWTl",
+     "1bpdPR8RjDwuwW5iXv63ud",
+     "1dQmRhr_nEmea8aisHAkCQ",
+     "1geKZCJAHAVQxXKkYkD9nV",
+     "1ksvb7lcPBt9rmCaSOqIpd",
+     "1mzKtLlF9B0824gzkkIWlz",
+     "1qHWoDsfT4fQCpDzcA1RZj",
+     "1rGsZO_eH6hBvf3PaTPrrd",
+     "1s8ejb3fH1wA$G6dYM5GgC",
+     "1sCG2cUVb49PxJaBBE81Kw",
+     "1stYdhm21EUQMz3jV6WdHc",
+     "2BRXAPrXHFoR9OLTjqGZa3",
+     "2EX8CQvoT3VOdgcbCwhid_",
+     "2GOGL_EpT9BOLi26H$n8Y1",
+     "2GXKgJyIfAhxPinRH3xm0N",
+     "2Pbv_BJfT8Ev1Sj5Jh4Tgi",
+     "2SEglEZ618iOaVY$jPjl1r",
+     "2UFJkHK4XCxgqVrTwxYwA7",
+     "2WflCt48T2yQbjDADsjk3X",
+     "2Yo$EpP$z2dOC6zNZ35BJq",
+     "2brbBA_o18ffxZ1OJKAEXd",
+     "2eUwuV6Q14GRH$hdaTX4hB",
+     "2j8_gVWpbACxOVmNDi6bGE",
+     "2lSz4lYYD0yPZfZ0iQzeVj",
+     "2q_kN3Luf7wwPVcXYQjBxR",
+     "2rpp3iZFTCVwGEE7x9qiQ8",
+     "2so3nbcb13Ig9Yd7gOPiH$",
+     "2taKN3SF5AqhoJgBEDOiLL",
+     "3$vxLFFCTCjhIrAHJw7BxO",
+     "34JLBtlPXEaeJkF7ppuU09",
+     "39NQt7$3b1Mxn97UesaLDi",
+     "3EcQs2ERfA495F4sseU_w4",
+     "3F3COwDdj5LRVbWzGorFc7",
+     "3K51PWTdT9s9p1sMs0i66A",
+     "3KeJCNzFv2cPjuyq2Kb61z",
+     "3QKc$p$NXEvRNG3pdlAj02",
+     "3RW6tpuaLA5fXODOX3rOlb",
+     "3SPT$EB8r0aBxVBsVnHu5U",
+     "3_e7IngdDBjOHVpCs_T3bC",
+     "3_fPSW07z7bufHlc3SsUgF",
+     "3eVcTPP4z5PvakE2XtxxJp",
+     "3gmZJjQND96w5a6Ee$z2ah",
+     "3iG4tbXJ901RkZ0OynKIbL",
+     "3m0eaNZIj4WuqLA61vp_PJ",
+     "3o3cJaPf51HPH9CUJnfi0W",
+     "3vdzRMAWL66B6ew5$sjOj$"
+    ],
+    "quote": null,
+    "label": "All floors \u00b7 94 rooms"
+   }
+  ],
+  "quantity_rows": [
+   {
+    "label": "A0.01 instal. ruimte",
+    "item_id": "22lJvI_rz50umvUizzyEQi",
+    "value": 2.4739810822600026,
+    "perimeter_m": 3.9439810822600023,
+    "door_width_m": 1.47,
+    "door_item_ids": [
+     "38X2u$b_51PQbXrbF3UXq0"
+    ],
+    "perimeter_source": "union of IfcSpace lowest floor faces (metres)"
+   },
+   {
+    "label": "A0.00 entree",
+    "item_id": "2dFicWHgz1KPbr5tHWzMcP",
+    "value": 23.416900995069994,
+    "perimeter_m": 25.902900995069995,
+    "door_width_m": 2.4859999999999998,
+    "door_item_ids": [
+     "38X2u$b_51PQbXrbF3UXq0",
+     "012S6Z0qLCRuoYXSZ2tygw"
+    ],
+    "perimeter_source": "union of IfcSpace lowest floor faces (metres)"
+   },
+   {
+    "label": "A0.02 berging",
+    "item_id": "3ZMk1e17XESP$vROePi38_",
+    "value": 7.178,
+    "perimeter_m": 8.212,
+    "door_width_m": 1.034,
+    "door_item_ids": [
+     "0MO3NBPw1FofnfwKUa2odt"
+    ],
+    "perimeter_source": "union of IfcSpace lowest floor faces (metres)"
+   },
+   {
+    "label": "3.08 badkamer",
+    "item_id": "2GXKgJyIfAhxPinRH3xm0N",
+    "value": 10.5340000981,
+    "perimeter_m": 11.4640000981,
+    "door_width_m": 0.93,
+    "door_item_ids": [
+     "02v5nA3u16Nh8SnTLbZVnM"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "3.07 slaapkamer 2",
+    "item_id": "2lSz4lYYD0yPZfZ0iQzeVj",
+    "value": 12.5379997768,
+    "perimeter_m": 12.5379997768,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "3.06 slaapkamer 1",
+    "item_id": "39NQt7$3b1Mxn97UesaLDi",
+    "value": 12.6879999729,
+    "perimeter_m": 13.6179999729,
+    "door_width_m": 0.93,
+    "door_item_ids": [
+     "15D5L0A5L99eNxZZrhk3Pa"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "3.09 instal. ruimte",
+    "item_id": "1qHWoDsfT4fQCpDzcA1RZj",
+    "value": 6.668,
+    "perimeter_m": 7.598,
+    "door_width_m": 0.93,
+    "door_item_ids": [
+     "3I96DDOZX58xC3RmUZssQx"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "3.03 woonkamer",
+    "item_id": "1sCG2cUVb49PxJaBBE81Kw",
+    "value": 27.6352001632,
+    "perimeter_m": 29.4952001632,
+    "door_width_m": 1.86,
+    "door_item_ids": [
+     "3b$SMEeUf10eNHEHoPH0ta",
+     "3BDarYIf1EXRuu7o6glIV$"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "3.04 keuken",
+    "item_id": "10$IVtAgz3gvaL1AC5hF6m",
+    "value": 9.268000022030002,
+    "perimeter_m": 9.268000022030002,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "3.01 mk",
+    "item_id": "0asyuu9T1AaPR7AmNDL1_c",
+    "value": 1.596,
+    "perimeter_m": 2.2760000000000002,
+    "door_width_m": 0.68,
+    "door_item_ids": [
+     "2lVoJcfoDAWB0KDozjmBha"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "3.00 entree",
+    "item_id": "1G43xnpGf8ReA8Ux2AmH0Y",
+    "value": 6.629999810130001,
+    "perimeter_m": 8.239999810130001,
+    "door_width_m": 1.61,
+    "door_item_ids": [
+     "2lVoJcfoDAWB0KDozjmBha",
+     "3b$SMEeUf10eNHEHoPH0ta"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "3.02 toilet",
+    "item_id": "0IOcqFv1vCWwJz5c1VnoNe",
+    "value": 3.6140000000000003,
+    "perimeter_m": 4.5440000000000005,
+    "door_width_m": 0.93,
+    "door_item_ids": [
+     "1donuLXK125fRkeWlAA8Cq"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "3.05 gang",
+    "item_id": "3o3cJaPf51HPH9CUJnfi0W",
+    "value": 10.664799788599998,
+    "perimeter_m": 16.244799788599998,
+    "door_width_m": 5.58,
+    "door_item_ids": [
+     "3BDarYIf1EXRuu7o6glIV$",
+     "3I96DDOZX58xC3RmUZssQx",
+     "15D5L0A5L99eNxZZrhk3Pa",
+     "02v5nA3u16Nh8SnTLbZVnM",
+     "1donuLXK125fRkeWlAA8Cq",
+     "2AH9fQqwXE9O9QvwUR77zF"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "2.10 berging",
+    "item_id": "12AHbNFjr4FRJYlF1r7pMB",
+    "value": 12.361738788,
+    "perimeter_m": 13.291738788,
+    "door_width_m": 0.93,
+    "door_item_ids": [
+     "2uTeXyy8XDYvkI0uWy38WP"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "2.08 badkamer",
+    "item_id": "2brbBA_o18ffxZ1OJKAEXd",
+    "value": 9.31,
+    "perimeter_m": 10.24,
+    "door_width_m": 0.93,
+    "door_item_ids": [
+     "0wAyj9PWL7guJFQHdw7ccc"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "2.05 gang",
+    "item_id": "1GBaX8Qs19WPwcdIjq6ONn",
+    "value": 6.531953743399999,
+    "perimeter_m": 11.1819537434,
+    "door_width_m": 4.65,
+    "door_item_ids": [
+     "1LZHcsRev6lhsez4LMDFr$",
+     "2uTeXyy8XDYvkI0uWy38WP",
+     "3cjGEZBqP9GQh7eyumO1LZ",
+     "0wAyj9PWL7guJFQHdw7ccc",
+     "0NWv8IgP5Ch9a8sHZoyivA"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "2.06 slaapkamer 1",
+    "item_id": "0ajLK6DXHAaeMk704HiMsX",
+    "value": 14.2939536997,
+    "perimeter_m": 15.2239536997,
+    "door_width_m": 0.93,
+    "door_item_ids": [
+     "3cjGEZBqP9GQh7eyumO1LZ"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "2.07 slaapkamer 2",
+    "item_id": "0OqmHrrnL18wpVdVYaE6Eq",
+    "value": 11.8690482646,
+    "perimeter_m": 12.7990482646,
+    "door_width_m": 0.93,
+    "door_item_ids": [
+     "1LZHcsRev6lhsez4LMDFr$"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "2.09 instal. ruimte",
+    "item_id": "02NK$DEdTDwuguIz00UqtE",
+    "value": 4.78304224746,
+    "perimeter_m": 5.71304224746,
+    "door_width_m": 0.93,
+    "door_item_ids": [
+     "2$GgreKs5Auv1nDBFIDDQQ"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "2.04 keuken",
+    "item_id": "2rpp3iZFTCVwGEE7x9qiQ8",
+    "value": 10.263049005700001,
+    "perimeter_m": 12.1230490057,
+    "door_width_m": 1.86,
+    "door_item_ids": [
+     "2$GgreKs5Auv1nDBFIDDQQ",
+     "0NWv8IgP5Ch9a8sHZoyivA"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "1.02 toilet",
+    "item_id": "0bNesd_3DCrhdyKRJV7k4U",
+    "value": 4.63275818518,
+    "perimeter_m": 5.56275818518,
+    "door_width_m": 0.93,
+    "door_item_ids": [
+     "3N5xNVjr9Ehhxk6BUdGUAs"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "2.01 mk",
+    "item_id": "0P5HFjHIjAsevZeF10JaZS",
+    "value": 1.5960001252000002,
+    "perimeter_m": 2.2760001252000004,
+    "door_width_m": 0.68,
+    "door_item_ids": [
+     "03KwpgDxXCQBYi7KkY7sYB"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "2.00 entree",
+    "item_id": "0Dj6N$QAjCa8$dcIusb5Sm",
+    "value": 9.353711407799999,
+    "perimeter_m": 11.8937114078,
+    "door_width_m": 2.54,
+    "door_item_ids": [
+     "2cb8c3os963f5n9Wjr4O99",
+     "3N5xNVjr9Ehhxk6BUdGUAs",
+     "03KwpgDxXCQBYi7KkY7sYB"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "1.01 mk",
+    "item_id": "0EHFwkDTP5BAvP$Lr4UUAk",
+    "value": 1.596,
+    "perimeter_m": 2.2760000000000002,
+    "door_width_m": 0.68,
+    "door_item_ids": [
+     "0yy1u9ooTD5vShTp5wGvUE"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "1.06 badkamer",
+    "item_id": "0Jkjl8tTH5TBBcOqrZRjc0",
+    "value": 11.740112252000001,
+    "perimeter_m": 11.740112252000001,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "1.07 instal. ruimte",
+    "item_id": "0P4aIRXgD9XPdxJodXPmsI",
+    "value": 5.25388782742,
+    "perimeter_m": 6.1838878274199995,
+    "door_width_m": 0.93,
+    "door_item_ids": [
+     "1cjDN$L7j3xQ6006KWGjlJ"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "1.02 toilet",
+    "item_id": "1EO6MCIfDFuRP2Ugg$wu$f",
+    "value": 4.36880008265,
+    "perimeter_m": 4.36880008265,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "1.00 entree",
+    "item_id": "3K51PWTdT9s9p1sMs0i66A",
+    "value": 9.252000343199999,
+    "perimeter_m": 11.8780003432,
+    "door_width_m": 2.6260000000000003,
+    "door_item_ids": [
+     "0yy1u9ooTD5vShTp5wGvUE",
+     "012S6Z0qLCRuoYXSZ2tygw",
+     "3OgInA0dD3qBERzneS1WG0"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "1.05 slaapkamer",
+    "item_id": "3m0eaNZIj4WuqLA61vp_PJ",
+    "value": 14.60000001,
+    "perimeter_m": 14.60000001,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "1.04 keuken",
+    "item_id": "1S5uZBEqz97vGlKIzp8YFh",
+    "value": 9.319999994,
+    "perimeter_m": 10.249999994,
+    "door_width_m": 0.93,
+    "door_item_ids": [
+     "1cjDN$L7j3xQ6006KWGjlJ"
+    ],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "4.06 slaapkamer 2",
+    "item_id": "3F3COwDdj5LRVbWzGorFc7",
+    "value": 9.851910320150001,
+    "perimeter_m": 9.851910320150001,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "6.07 badkamer",
+    "item_id": "3EcQs2ERfA495F4sseU_w4",
+    "value": 9.77400011477,
+    "perimeter_m": 9.77400011477,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "6.06 slaapkamer 2",
+    "item_id": "0z1xo3KDX8yQN59ZNuWEoz",
+    "value": 12.640633405400001,
+    "perimeter_m": 12.640633405400001,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "6.05 slaapkamer 1",
+    "item_id": "3SPT$EB8r0aBxVBsVnHu5U",
+    "value": 13.720633601600001,
+    "perimeter_m": 13.720633601600001,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "6.08 instal. ruimte",
+    "item_id": "2GOGL_EpT9BOLi26H$n8Y1",
+    "value": 7.598,
+    "perimeter_m": 7.598,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "6.03 woonkamer",
+    "item_id": "0kg640irz75hysOImfQ5Ff",
+    "value": 29.5978335236,
+    "perimeter_m": 29.5978335236,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "6.04 keuken",
+    "item_id": "3_e7IngdDBjOHVpCs_T3bC",
+    "value": 9.268000022030002,
+    "perimeter_m": 9.268000022030002,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "6.01 mk",
+    "item_id": "1bpdPR8RjDwuwW5iXv63ud",
+    "value": 2.25,
+    "perimeter_m": 2.25,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "5.09 kast",
+    "item_id": "2so3nbcb13Ig9Yd7gOPiH$",
+    "value": 2.1809536370300004,
+    "perimeter_m": 2.1809536370300004,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "6.02 toilet",
+    "item_id": "09WjTQSeH1n8koThMDL_IH",
+    "value": 4.5440000000000005,
+    "perimeter_m": 4.5440000000000005,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "6.00 entree",
+    "item_id": "2WflCt48T2yQbjDADsjk3X",
+    "value": 17.9347996202,
+    "perimeter_m": 17.9347996202,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "5.07 badkamer",
+    "item_id": "1dQmRhr_nEmea8aisHAkCQ",
+    "value": 10.928953837,
+    "perimeter_m": 10.928953837,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "5.00 entree",
+    "item_id": "1AtrO37LT8iQg1RDVAeoCA",
+    "value": 24.9079539132,
+    "perimeter_m": 24.9079539132,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "5.05 slaapkamer 1",
+    "item_id": "0up7RAxwfAqvoyCE1kDxpy",
+    "value": 16.0729537118,
+    "perimeter_m": 16.0729537118,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "5.06 slaapkamer 2",
+    "item_id": "0IIWC_MJj0TegDVVevqJ7a",
+    "value": 12.6640482639,
+    "perimeter_m": 12.6640482639,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "5.08 instal. ruimte",
+    "item_id": "1KHE8Hn6vAPe5Gw9Zrubuh",
+    "value": 7.109044299600001,
+    "perimeter_m": 7.109044299600001,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "5.03 woonkamer",
+    "item_id": "0BsqHll2P5vhJOAHEDwAwi",
+    "value": 27.5100001231,
+    "perimeter_m": 27.5100001231,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "5.04 keuken",
+    "item_id": "1PBqvLnRDDUATdl_lvNYMh",
+    "value": 12.2440482929,
+    "perimeter_m": 12.2440482929,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "5.02 toilet",
+    "item_id": "2EX8CQvoT3VOdgcbCwhid_",
+    "value": 5.92,
+    "perimeter_m": 5.92,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "5.01 mk",
+    "item_id": "0hW2P55_n5cOR9ThNgO3e6",
+    "value": 2.176,
+    "perimeter_m": 2.176,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "4.01 mk",
+    "item_id": "0tv9iZwmX3QhOwYgrkdylc",
+    "value": 2.27599994944,
+    "perimeter_m": 2.27599994944,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "4.07 badkamer",
+    "item_id": "3eVcTPP4z5PvakE2XtxxJp",
+    "value": 11.140112256300002,
+    "perimeter_m": 11.140112256300002,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "4.08 instal. ruimte",
+    "item_id": "09fo1jWjfFtQMbiri1ZVQ3",
+    "value": 7.442,
+    "perimeter_m": 7.442,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "4.02 toilet",
+    "item_id": "0OFDZWgvrCbvU2AvmpKDKA",
+    "value": 4.7700000000000005,
+    "perimeter_m": 4.7700000000000005,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "4.00 entree",
+    "item_id": "2UFJkHK4XCxgqVrTwxYwA7",
+    "value": 12.6980898963,
+    "perimeter_m": 12.6980898963,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "4.05 slaapkamer 1",
+    "item_id": "1RPMriui52lBriSIaCeUCC",
+    "value": 14.8620000561,
+    "perimeter_m": 14.8620000561,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "4.04 keuken",
+    "item_id": "2eUwuV6Q14GRH$hdaTX4hB",
+    "value": 12.3920000089,
+    "perimeter_m": 12.3920000089,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "4.03 woonkamer",
+    "item_id": "2BRXAPrXHFoR9OLTjqGZa3",
+    "value": 28.7099999263,
+    "perimeter_m": 28.7099999263,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "7.06 slaapkamer 2",
+    "item_id": "3gmZJjQND96w5a6Ee$z2ah",
+    "value": 9.851910320150001,
+    "perimeter_m": 9.851910320150001,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "8.09 kast",
+    "item_id": "0sEYZPVdXAZAaorrZw2LKy",
+    "value": 2.1809536370300004,
+    "perimeter_m": 2.1809536370300004,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "8.07 badkamer",
+    "item_id": "0CJDgHLZLCWu7DbuOU80VN",
+    "value": 10.928953837,
+    "perimeter_m": 10.928953837,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "8.00 entree",
+    "item_id": "0CujFs7XvBHACKRDUKrtM$",
+    "value": 23.947954675400002,
+    "perimeter_m": 23.947954675400002,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "8.05 slaapkamer 1",
+    "item_id": "2q_kN3Luf7wwPVcXYQjBxR",
+    "value": 16.0729537118,
+    "perimeter_m": 16.0729537118,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "8.06 slaapkamer 2",
+    "item_id": "1LeiDSp9fA6h6$bEYt0VSH",
+    "value": 12.6640482639,
+    "perimeter_m": 12.6640482639,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "8.08 instal. ruimte",
+    "item_id": "1s8ejb3fH1wA$G6dYM5GgC",
+    "value": 7.109044299600001,
+    "perimeter_m": 7.109044299600001,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "8.04 keuken",
+    "item_id": "3QKc$p$NXEvRNG3pdlAj02",
+    "value": 12.2440482929,
+    "perimeter_m": 12.2440482929,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "8.02 toilet",
+    "item_id": "2taKN3SF5AqhoJgBEDOiLL",
+    "value": 5.92,
+    "perimeter_m": 5.92,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "8.01 mk",
+    "item_id": "1rGsZO_eH6hBvf3PaTPrrd",
+    "value": 2.176,
+    "perimeter_m": 2.176,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "7.01 mk",
+    "item_id": "2j8_gVWpbACxOVmNDi6bGE",
+    "value": 2.27599994944,
+    "perimeter_m": 2.27599994944,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "7.07 badkamer",
+    "item_id": "1mzKtLlF9B0824gzkkIWlz",
+    "value": 11.140112256300002,
+    "perimeter_m": 11.140112256300002,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "7.08 instal. ruimte",
+    "item_id": "3KeJCNzFv2cPjuyq2Kb61z",
+    "value": 7.442,
+    "perimeter_m": 7.442,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "7.02 toilet",
+    "item_id": "0yLghiaXr4pB6B4YHPBOlT",
+    "value": 4.7700000000000005,
+    "perimeter_m": 4.7700000000000005,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "7.00 entree",
+    "item_id": "0m66n5BInC6fBzFb8EWwyE",
+    "value": 12.6980898963,
+    "perimeter_m": 12.6980898963,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "7.05 slaapkamer 1",
+    "item_id": "1geKZCJAHAVQxXKkYkD9nV",
+    "value": 14.8620000561,
+    "perimeter_m": 14.8620000561,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "7.04 keuken",
+    "item_id": "3$vxLFFCTCjhIrAHJw7BxO",
+    "value": 12.3920000089,
+    "perimeter_m": 12.3920000089,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "9.06 slaapkamer 2",
+    "item_id": "1ksvb7lcPBt9rmCaSOqIpd",
+    "value": 9.539909974419999,
+    "perimeter_m": 9.539909974419999,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "10.07 badkamer",
+    "item_id": "1AlG6Dm9L1h8L4yH9tB8FO",
+    "value": 10.496953250099999,
+    "perimeter_m": 10.496953250099999,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "10.00 entree",
+    "item_id": "0c9LSnFgj7OBxwRT4cC9lK",
+    "value": 24.7484469414,
+    "perimeter_m": 24.7484469414,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "10.05 slaapkamer",
+    "item_id": "1JrMACb0vE99f79I2KAPuN",
+    "value": 15.4489523684,
+    "perimeter_m": 15.4489523684,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "10.06 onben. ruimte",
+    "item_id": "12sKPfqUvDFv$X4w8UYHNK",
+    "value": 12.2320475873,
+    "perimeter_m": 12.2320475873,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "10.08 instal. ruimte",
+    "item_id": "0FOLghHZTBOPD8KF6PRrx0",
+    "value": 7.109044299600001,
+    "perimeter_m": 7.109044299600001,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "10.03 woonkamer",
+    "item_id": "0lGZe9hjL5GQNRN2Ku92xr",
+    "value": 27.077999226,
+    "perimeter_m": 27.077999226,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "10.04 keuken",
+    "item_id": "0thxUtY5D3nQDlN3b_gGVK",
+    "value": 12.2440482929,
+    "perimeter_m": 12.2440482929,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "10.02 toilet",
+    "item_id": "2Pbv_BJfT8Ev1Sj5Jh4Tgi",
+    "value": 5.92,
+    "perimeter_m": 5.92,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "10.01 mk",
+    "item_id": "2Yo$EpP$z2dOC6zNZ35BJq",
+    "value": 3.3789530501,
+    "perimeter_m": 3.3789530501,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "9.01 mk",
+    "item_id": "0oEbkL7YDD8AYm6eYpAT4B",
+    "value": 2.27599994944,
+    "perimeter_m": 2.27599994944,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "9.07 badkamer",
+    "item_id": "34JLBtlPXEaeJkF7ppuU09",
+    "value": 11.140112256300002,
+    "perimeter_m": 11.140112256300002,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "9.08 instal. ruimte",
+    "item_id": "0z1DMNAyb21RRdXtk2yF$a",
+    "value": 7.442,
+    "perimeter_m": 7.442,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "9.02 toilet",
+    "item_id": "2SEglEZ618iOaVY$jPjl1r",
+    "value": 4.7700000000000005,
+    "perimeter_m": 4.7700000000000005,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "9.00 entree",
+    "item_id": "00XVyzXGDDQPsHPeNwCNmZ",
+    "value": 12.6980898963,
+    "perimeter_m": 12.6980898963,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "9.05 slaapkamer 1",
+    "item_id": "3_fPSW07z7bufHlc3SsUgF",
+    "value": 14.4299996598,
+    "perimeter_m": 14.4299996598,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "9.04 keuken",
+    "item_id": "3iG4tbXJ901RkZ0OynKIbL",
+    "value": 12.3920000089,
+    "perimeter_m": 12.3920000089,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   },
+   {
+    "label": "9.03 woonkamer",
+    "item_id": "1Wtl5_cnDDhAIgcPpOxWTl",
+    "value": 28.203999667,
+    "perimeter_m": 28.203999667,
+    "door_width_m": 0,
+    "door_item_ids": [],
+    "perimeter_source": "BaseQuantities.NetPerimeter (declared unit converted to SI)"
+   }
+  ],
+  "validation": {
+   "confidence_label": "Estimate",
+   "calc_status": null,
+   "calc_issues": null
+  }
+ },
+ {
+  "question": "What is the total length of pipes or ducts?",
+  "doc_ids": [
+   "ext_ifcr2__schependomlaan-design"
+  ],
+  "answer": {
+   "text_md": "**Quantity unavailable.**\n\n- 60 elements have no recorded length.",
+   "value": null,
+   "unit": "m",
+   "confidence": 0.0,
+   "abstained": true
+  },
+  "route": "index",
+  "trace": [
+   {
+    "step": "route",
+    "detail": "IFC quantities -> code, no model",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "filter",
+    "detail": "all matching model elements",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   },
+   {
+    "step": "calc",
+    "detail": "No complete total can be computed.",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   }
+  ],
+  "citations": [
+   {
+    "n": 1,
+    "doc_id": "ext_ifcr2__schependomlaan-design",
+    "page": 1,
+    "kind": "element",
+    "bbox_px": null,
+    "item_ids": [
+     "0$Rh2Tkb9BbvQQF52csf1G",
+     "02RZkCDMT1pQT78Sc01VQE",
+     "03BUw3rjn7Oh2DfUkYYjLd",
+     "0JovkDc9n7kfNykscy2OB_",
+     "0LMb4c46D8oe3rX6bF$mNd",
+     "0O8aPpHmX3ex1UP9YFpmi8",
+     "0OTSekFTLESAzmO_ZsE2n5",
+     "0Opm7c2Y1CsR51HkQQICul",
+     "0PvQtOU_9AeeHhxSwk9qS9",
+     "0U11HnEL99k90SlEVMnNnK",
+     "0V9vf9b_v9yxdM73PwoSw5",
+     "0Y3_lHjebCGOW575Szydvz",
+     "0bt_nRQyfDN8YfRjsoVHLW",
+     "0f0vKgq5D02uQHm5HGkhDJ",
+     "0iiT$Og5f1xvk26EXKfgVB",
+     "0jtXGehPf0Cgo9ReyUUw8R",
+     "0lEDNj8hX6Tgm5mUGyL6oh",
+     "0nftMTZOf4Oxe95_aPgk7X",
+     "0uQJf1Dj5C1BpqeoHKcCKk",
+     "0zBScffkjCvxXQOLMo_hrw",
+     "14sKJNsc1BwPzoh7DvlUdm",
+     "1AA79hZ_X5PgOaJM4Gj1Gn",
+     "1FFSqVKmL0Xwtx0P57fGxq",
+     "1I90gZziP7BB4tkb71SiN_",
+     "1KOkShUpTCM9jhwtC2kwW7",
+     "1McJJLXTj2egVhpYy4cxHf",
+     "1Nm9StVgTEQQGB5WOal1si",
+     "1YDmI78iP77BltH6f4ilkF",
+     "1_4XnDhBHBEeryMM9w_l$s",
+     "1_mHNiuEP9pQJThHBOqS0E",
+     "1oqNG_QbD67uryAYo4g_TG",
+     "1rCOY$Fcz4Nf1MoezOatqz",
+     "2$ccYjoh9CDRh6W789edSj",
+     "27Zn$pssXDvAbYrBvDzb$x",
+     "2A3YfFTA5FVRfe_MB_nN8Y",
+     "2GfECyL1jFqgq1jkTVEHXo",
+     "2HMWkpCs1EGgeWQMs4GRiK",
+     "2MNbRX9HX0nOm5SZzCNN_V",
+     "2YmrFRegP1RRAmn3cnKJ_$",
+     "2bGXF6Haz7CQggTMZpU$GC",
+     "2jYQXMJuj2hBq3zWh7wY__",
+     "2nCsdBuFfETB3yr4ac8ftC",
+     "2rTC2RJBT1fRmoeGpoZ0Ql",
+     "2s5KYyjjr3VRqGnqBGzSMO",
+     "2sgXLd7aX299FqEO35m2dC",
+     "2u6ZYt7vL1ThY38prh4L0N",
+     "31dDV_Owj6NwBCsOlk1QjJ",
+     "3C1gzdB750kRwYK1jrEb7d",
+     "3DJjU8G6j1xODAbQVxIUQz",
+     "3IisbUHgj3QAJddoFYsEyh",
+     "3Ttf7liDj6SPvSoI_zkbnL",
+     "3YxBaA7v16xxgsGypJspiE",
+     "3_yySJMP582fcSudu7WG0W",
+     "3aeec9l$DBaepVRETomj9Y",
+     "3iSKR12Gv2qAcTVBG90U9l",
+     "3iYQkCuxz2nwxpnW8$kdHE",
+     "3jHuEG8Db8cvhVT1EF7oKr",
+     "3nUvT4p0D6ae2oqX84OWGo",
+     "3xnwkpT09ARgpWP_pMglGg",
+     "3y0Q0TtNfB5wlipupt6$f4"
+    ],
+    "quote": null,
+    "label": "All floors \u00b7 60 pipes"
+   }
+  ],
+  "quantity_rows": [],
+  "validation": {
+   "confidence_label": "Estimate",
+   "calc_status": null,
+   "calc_issues": null
+  }
+ },
+ {
+  "question": "What is the fire rating of the doors in the third basement?",
+  "doc_ids": [
+   "ext_ifcr2__schependomlaan-design"
+  ],
+  "answer": {
+   "text_md": "**No doors are recorded in the requested scope.**",
+   "value": null,
+   "unit": null,
+   "confidence": 1.0,
+   "abstained": false
+  },
+  "route": "index",
+  "trace": [
+   {
+    "step": "props",
+    "detail": "Requested property present on 0 of 0 elements; checked the original model's properties, quantities, types and materials.",
+    "ms": 0,
+    "model": null,
+    "cost_usd": 0
+   }
+  ],
+  "citations": [],
+  "validation": {
+   "confidence_label": "Verified",
+   "calc_status": "complete",
+   "calc_issues": []
+  }
+ }
+]

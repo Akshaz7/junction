@@ -144,7 +144,7 @@ def geometry_length(el):
     return (total, 'swept body centreline geometry in metres') if total > 0 and not stack else (None, None)
 
 
-def footprint_perimeter(space):
+def floor_footprint(space):
     """Perimeter of the union of lowest horizontal floor faces, including holes.
 
     Weld geometric coordinates before counting triangle edges: exporters may
@@ -172,9 +172,72 @@ def footprint_perimeter(space):
         if not polygons:
             return None, None
         floor = unary_union(polygons)
-        return float(floor.length), 'union of IfcSpace lowest floor faces (metres)'
+        return floor, z0
     except (RuntimeError, ValueError, AttributeError):
         return None, None
+
+
+def footprint_perimeter(space):
+    floor, _ = floor_footprint(space)
+    return (float(floor.length), 'union of IfcSpace lowest floor faces (metres)') if floor is not None else (None, None)
+
+
+def space_geometry_rows(f, rows):
+    """Measure true floor outlines; infer missing door adjacency in world SI.
+
+    The 0.4 m boundary band allows a door in a thick wall to sit outside the
+    finished room face. This is an allowance estimate, not a space-boundary
+    relationship. Never substitute bounding rectangles or guessed door widths.
+    Only compact quantities survive this function; no IFC/mesh is cached.
+    """
+    import ifcopenshell.geom as G
+    from shapely.geometry import MultiPoint
+    st = G.settings()
+    st.set('use-world-coords', True)
+    door_geometry, failed_doors = [], []
+    infer = any(r['kind'] == 'room' and not r.get('boundaries_recorded') for r in rows)
+    if infer:
+        for door in f.by_type('IfcDoor'):
+            try:
+                shape = G.create_shape(st, door)
+                verts = list(zip(*(iter(shape.geometry.verts),) * 3))
+                if not verts:
+                    raise ValueError('No door geometry')
+                hull = MultiPoint([(v[0], v[1]) for v in verts]).convex_hull
+                width, _ = attribute(door, 'OverallWidth', 'LENGTHUNIT')
+                if width is None:
+                    import ifcopenshell.util.element as E
+                    width, _ = measured(door, E.get_psets(door, verbose=True), ('Width',), 'LENGTHUNIT')
+                door_geometry.append((door.GlobalId, hull.centroid, min(v[2] for v in verts), width))
+            except (RuntimeError, ValueError, AttributeError, TypeError):
+                failed_doors.append(_storey(door))
+    result = []
+    for original in rows:
+        r = {**original, 'quantities':dict(original['quantities']), 'sources':dict(original['sources'])}
+        result.append(r)
+        if r['kind'] != 'room':
+            continue
+        try:
+            floor, z0 = floor_footprint(f.by_guid(r['item_id']))
+        except (RuntimeError, ValueError):
+            floor = None
+        if floor is None:
+            continue
+        r['quantities']['perimeter_m'] = float(floor.length)
+        r['sources']['perimeter_m'] = 'union of IfcSpace lowest floor faces (metres)'
+        polygons = [floor] if floor.geom_type == 'Polygon' else list(floor.geoms)
+        r['footprint_rings_m'] = [list(ring.coords) for poly in polygons for ring in [poly.exterior, *poly.interiors]]
+        if r.get('boundaries_recorded'):
+            continue
+        if any(s is None or s == r.get('storey') for s in failed_doors):
+            r['boundary_inference_error'] = 'A door on this level has no usable geometry; adjacency is incomplete.'
+            continue
+        doors = {gid:width for gid,centre,z,width in door_geometry
+                 if abs(z-z0) <= .4 and floor.boundary.distance(centre) <= .4}
+        r['boundary_doors'] = doors
+        r['boundaries_recorded'] = True
+        r['boundary_method'] = 'derived: door centres within 0.4 m of the room boundary and floor elevation, using world-space geometry in metres'
+    return result
 
 
 def _systems(f):
@@ -302,8 +365,6 @@ def build(f, *, space_geometry=False):
                     door = rel.RelatedBuildingElement
                     if door is not None and door.is_a('IfcDoor'):
                         boundary_doors[door.GlobalId] = attribute(door, 'OverallWidth', 'LENGTHUNIT')[0]
-                if space_geometry:
-                    put('perimeter_m', footprint_perimeter(el))
             row = {'item_id': gid, 'kind': kind, 'ifc_class': el.is_a(), 'classes': classes,
                    'name': el.Name, 'long_name': getattr(el, 'LongName', None),
                    'type_name': typ.Name if typ is not None else getattr(el, 'ObjectType', None),
@@ -320,4 +381,6 @@ def build(f, *, space_geometry=False):
             rows.append(row)
         except (RuntimeError, ValueError, TypeError, AttributeError) as exc:
             errors.append({'item_id': gid, 'ifc_class': el.is_a(), 'reason': type(exc).__name__})
+    if space_geometry:
+        rows = space_geometry_rows(f, rows)
     return {'version': VERSION, 'schema': f.schema, 'indexed_classes': indexed, 'rows': rows, 'errors': errors}

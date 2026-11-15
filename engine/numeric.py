@@ -10,7 +10,7 @@ from engine.router.parser import clean, parse
 def count_question(question: str) -> bool:
     """An object count, including area-filtered counts, but not 'how many m²'."""
     q = clean(question)
-    if re.search(r"\bhow many\s+(?:square|cubic|sq\b|m[²³23]\b|met(?:er|re)s?\b|feet\b|ft\b)", q):
+    if re.search(r"\bhow many\s+(?:(?:linear|running)\s+)?(?:square|cubic|sq\b|m[²³23]\b|met(?:er|re)s?\b|feet\b|ft\b)", q):
         return False
     from engine.ifc_accuracy import is_item_count
     return is_item_count(question)

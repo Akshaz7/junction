@@ -156,6 +156,10 @@ def before(question, doc_ids, root, t0=None, *, hidden=()):
     if doc and hidden:
         from dataclasses import replace
         doc = replace(doc, items=[i for i in doc.items if i.item_id not in hidden])
+    if doc:
+        from engine.ifc_overview import answer as ifc_overview
+        if (overview := ifc_overview(question, doc, t0, root)) is not None:
+            return overview
     # Missing properties are not an invitation to offer a typical code rating.
     if FIRE.search(question) and (not doc or doc.mode != "ifc"):
         text = " ".join(i.label or "" for i in doc.items if i.kind == "text") if doc else ""
