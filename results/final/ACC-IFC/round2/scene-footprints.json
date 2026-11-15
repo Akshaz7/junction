@@ -1,0 +1,1342 @@
+[
+  {
+    "doc_id": "ifc_models__resbim-263-model",
+    "scene": "artifacts/ifc_models__resbim-263-model/scene.glb",
+    "rooms": 0,
+    "measured": 0,
+    "source_comparisons": 0,
+    "mismatches": 0,
+    "checks": []
+  },
+  {
+    "doc_id": "ifc_bench__fzk-house-arc",
+    "scene": "artifacts/ifc_bench__fzk-house-arc/scene.glb",
+    "rooms": 7,
+    "measured": 7,
+    "source_comparisons": 7,
+    "mismatches": 0,
+    "checks": [
+      {
+        "item_id": "347jFE2yX7IhCEIALmupEH",
+        "scene_m2": 22.072500267028772,
+        "source_geometry_m2": 22.072499999999994,
+        "difference_pct": 1.2097803953163227e-06,
+        "within_2pct": true
+      },
+      {
+        "item_id": "0e_hbkIQ5DMQlIJ$2V3j_m",
+        "scene_m2": 12.502699703979488,
+        "source_geometry_m2": 12.5027,
+        "difference_pct": 2.367652690946239e-06,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2RSCzLOBz4FAK$_wE8VckM",
+        "scene_m2": 12.985000133514404,
+        "source_geometry_m2": 12.985,
+        "difference_pct": 1.02822029160808e-06,
+        "within_2pct": true
+      },
+      {
+        "item_id": "0Lt8gR_E9ESeGH5uY_g9e9",
+        "scene_m2": 25.988550691795353,
+        "source_geometry_m2": 25.9885499999629,
+        "difference_pct": 2.6620663886088807e-06,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3$f2p7VyLB7eox67SA_zKE",
+        "scene_m2": 11.531400212949514,
+        "source_geometry_m2": 11.531400000000001,
+        "difference_pct": 1.8466926153462821e-06,
+        "within_2pct": true
+      },
+      {
+        "item_id": "17JZcMFrf5tOftUTidA0d3",
+        "scene_m2": 16.30545009689331,
+        "source_geometry_m2": 16.305450000037098,
+        "difference_pct": 5.940112780662059e-07,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2dQFggKBb1fOc1CqZDIDlx",
+        "scene_m2": 107.15999206542983,
+        "source_geometry_m2": 107.16000000000001,
+        "difference_pct": 7.404414126335476e-06,
+        "within_2pct": true
+      }
+    ]
+  },
+  {
+    "doc_id": "ifc_models__bimspeed-warmond-ar",
+    "scene": "artifacts/ifc_models__bimspeed-warmond-ar/scene.glb",
+    "rooms": 179,
+    "measured": 179,
+    "source_comparisons": 179,
+    "mismatches": 0,
+    "checks": [
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaz0",
+        "scene_m2": 10.706723862458603,
+        "source_geometry_m2": 10.706699999999953,
+        "difference_pct": 0.0002228740755699599,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaz2",
+        "scene_m2": 25.269903161621187,
+        "source_geometry_m2": 25.269900000000042,
+        "difference_pct": 1.251141138050786e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayy",
+        "scene_m2": 10.862502098083496,
+        "source_geometry_m2": 10.862500000000008,
+        "difference_pct": 1.9314922791970345e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXay_",
+        "scene_m2": 2.3855555594636826,
+        "source_geometry_m2": 2.385553980048359,
+        "difference_pct": 6.620748625374148e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayu",
+        "scene_m2": 2.070001869200496,
+        "source_geometry_m2": 2.070000000000007,
+        "difference_pct": 9.029954053417731e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayw",
+        "scene_m2": 1.2664975318912184,
+        "source_geometry_m2": 1.2664999999999933,
+        "difference_pct": 0.0001948763343790942,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayq",
+        "scene_m2": 7.860115875853808,
+        "source_geometry_m2": 7.86011000000002,
+        "difference_pct": 7.475536331589736e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXays",
+        "scene_m2": 0.9775017356878379,
+        "source_geometry_m2": 0.9775000000000065,
+        "difference_pct": 0.0001775639725279951,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaym",
+        "scene_m2": 7.458907579042716,
+        "source_geometry_m2": 7.45889997599999,
+        "difference_pct": 0.00010193249340427418,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayo",
+        "scene_m2": 0.5208875077805715,
+        "source_geometry_m2": 0.520889999999992,
+        "difference_pct": 0.0004784540729333278,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayi",
+        "scene_m2": 9.924317000579322,
+        "source_geometry_m2": 9.924299916599985,
+        "difference_pct": 0.00017214291668471245,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXamx",
+        "scene_m2": 2.436734436341794,
+        "source_geometry_m2": 2.4367499982499403,
+        "difference_pct": 0.0006386337604303933,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaw0",
+        "scene_m2": 10.709135684708599,
+        "source_geometry_m2": 10.709132212415053,
+        "difference_pct": 3.242366867036873e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaw2",
+        "scene_m2": 25.269895665740478,
+        "source_geometry_m2": 25.269900000000042,
+        "difference_pct": 1.7151866705395613e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavy",
+        "scene_m2": 11.186086737870937,
+        "source_geometry_m2": 11.186098129906435,
+        "difference_pct": 0.00010184101163560229,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXav_",
+        "scene_m2": 2.4367528123839293,
+        "source_geometry_m2": 2.436750000000009,
+        "difference_pct": 0.00011541536556536999,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavu",
+        "scene_m2": 2.070001869200496,
+        "source_geometry_m2": 2.070000000000007,
+        "difference_pct": 9.029954053417731e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavw",
+        "scene_m2": 1.2664975318912184,
+        "source_geometry_m2": 1.2664999999999933,
+        "difference_pct": 0.0001948763343790942,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavq",
+        "scene_m2": 7.86192161605868,
+        "source_geometry_m2": 7.86192047877476,
+        "difference_pct": 1.4465726579682234e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavs",
+        "scene_m2": 0.976614537590649,
+        "source_geometry_m2": 0.9766105702821388,
+        "difference_pct": 0.0004062323950691356,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavm",
+        "scene_m2": 7.457588166435016,
+        "source_geometry_m2": 7.457587028990353,
+        "difference_pct": 1.5252180879423028e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavo",
+        "scene_m2": 0.5198572961962782,
+        "source_geometry_m2": 0.5198583236379375,
+        "difference_pct": 0.00019763878206605223,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXxCV",
+        "scene_m2": 2.436733457565424,
+        "source_geometry_m2": 2.4367499999999387,
+        "difference_pct": 0.0006788728640465855,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaug",
+        "scene_m2": 10.70673404772242,
+        "source_geometry_m2": 10.70671463693996,
+        "difference_pct": 0.00018129541244624495,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaua",
+        "scene_m2": 25.272478063343442,
+        "source_geometry_m2": 25.27248943170002,
+        "difference_pct": 4.4983129218882034e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauc",
+        "scene_m2": 10.918395042419434,
+        "source_geometry_m2": 10.918394445749996,
+        "difference_pct": 5.464809321356041e-06,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauW",
+        "scene_m2": 2.4367528123839293,
+        "source_geometry_m2": 2.436750000000009,
+        "difference_pct": 0.00011541536556536999,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauY",
+        "scene_m2": 2.0689169697579928,
+        "source_geometry_m2": 2.0689080624000065,
+        "difference_pct": 0.0004305342585391085,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauS",
+        "scene_m2": 1.2662202992651146,
+        "source_geometry_m2": 1.2662235349499935,
+        "difference_pct": 0.0002555382039277496,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauU",
+        "scene_m2": 7.862469773681369,
+        "source_geometry_m2": 7.862462736599986,
+        "difference_pct": 8.950225416956895e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauO",
+        "scene_m2": 0.9769938062236179,
+        "source_geometry_m2": 0.9769906642342057,
+        "difference_pct": 0.00032159871401288173,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauQ",
+        "scene_m2": 7.458907579042716,
+        "source_geometry_m2": 7.45889997599999,
+        "difference_pct": 0.00010193249340427418,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauK",
+        "scene_m2": 0.5183434902573936,
+        "source_geometry_m2": 0.5183420709799319,
+        "difference_pct": 0.00027381097177469997,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauM",
+        "scene_m2": 9.921535374116502,
+        "source_geometry_m2": 9.921536539477112,
+        "difference_pct": 1.1745767453988155e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2a3TJhjgD3FO9iKP6TfhaC",
+        "scene_m2": 32.303341762395576,
+        "source_geometry_m2": 32.30336649142035,
+        "difference_pct": 7.655246947516746e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2a3TJhjgD3FO9iKP6TfhaE",
+        "scene_m2": 21.54253387451172,
+        "source_geometry_m2": 21.542530963249995,
+        "difference_pct": 1.3514018984598866e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXxAR",
+        "scene_m2": 2.436733457565424,
+        "source_geometry_m2": 2.4367499999999387,
+        "difference_pct": 0.0006788728640465855,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaye",
+        "scene_m2": 10.917503356933594,
+        "source_geometry_m2": 10.917499999999997,
+        "difference_pct": 3.074818957523599e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayg",
+        "scene_m2": 2.4367528123839293,
+        "source_geometry_m2": 2.436750000000002,
+        "difference_pct": 0.00011541536583874009,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaya",
+        "scene_m2": 25.269903161621187,
+        "source_geometry_m2": 25.269900000000042,
+        "difference_pct": 1.251141138050786e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayc",
+        "scene_m2": 10.706693268584786,
+        "source_geometry_m2": 10.706699999999953,
+        "difference_pct": 6.287105426969623e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayW",
+        "scene_m2": 0.9775017356878379,
+        "source_geometry_m2": 0.9775000000000065,
+        "difference_pct": 0.0001775639725279951,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayY",
+        "scene_m2": 0.5190984901419142,
+        "source_geometry_m2": 0.5190999999999961,
+        "difference_pct": 0.0002908607362538967,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayS",
+        "scene_m2": 7.861904893492465,
+        "source_geometry_m2": 7.861900000000016,
+        "difference_pct": 6.224312759749821e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayU",
+        "scene_m2": 2.1160029830934945,
+        "source_geometry_m2": 2.1160000000000143,
+        "difference_pct": 0.0001409779527521498,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayO",
+        "scene_m2": 1.3004982490529073,
+        "source_geometry_m2": 1.3004999999999922,
+        "difference_pct": 0.0001346364540467176,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayQ",
+        "scene_m2": 7.350500480650226,
+        "source_geometry_m2": 7.350499999999997,
+        "difference_pct": 6.539014066405862e-06,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXanD",
+        "scene_m2": 2.436733886715956,
+        "source_geometry_m2": 2.4367499999999396,
+        "difference_pct": 0.0006612612694590569,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXave",
+        "scene_m2": 10.918395042419434,
+        "source_geometry_m2": 10.918394445749996,
+        "difference_pct": 5.464809321356041e-06,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavg",
+        "scene_m2": 2.4632504512992455,
+        "source_geometry_m2": 2.463250365000006,
+        "difference_pct": 3.5034700709462786e-06,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXava",
+        "scene_m2": 25.271177461341722,
+        "source_geometry_m2": 25.27117824429004,
+        "difference_pct": 3.0981868432979926e-06,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavc",
+        "scene_m2": 10.7067034538195,
+        "source_geometry_m2": 10.706710853550007,
+        "difference_pct": 6.911301339673011e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavW",
+        "scene_m2": 0.977503929141676,
+        "source_geometry_m2": 0.9775024092500056,
+        "difference_pct": 0.00015548725568622406,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavY",
+        "scene_m2": 0.5192732789728325,
+        "source_geometry_m2": 0.5192759232799963,
+        "difference_pct": 0.0005092296879639207,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavS",
+        "scene_m2": 7.864183986952412,
+        "source_geometry_m2": 7.864196944022076,
+        "difference_pct": 0.00016476023879538298,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavU",
+        "scene_m2": 2.1160029830934945,
+        "source_geometry_m2": 2.116000695750011,
+        "difference_pct": 0.00010809748258132666,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavO",
+        "scene_m2": 1.300499059674621,
+        "source_geometry_m2": 1.3005014279999911,
+        "difference_pct": 0.0001821086327972164,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavQ",
+        "scene_m2": 7.350713977008127,
+        "source_geometry_m2": 7.35071781030167,
+        "difference_pct": 5.214856075225313e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXxCn",
+        "scene_m2": 2.436733886715956,
+        "source_geometry_m2": 2.4367499999999396,
+        "difference_pct": 0.0006612612694590569,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauI",
+        "scene_m2": 10.918395042419434,
+        "source_geometry_m2": 10.918394445749996,
+        "difference_pct": 5.464809321356041e-06,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauC",
+        "scene_m2": 2.4367528123839293,
+        "source_geometry_m2": 2.436750000000002,
+        "difference_pct": 0.00011541536583874009,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauE",
+        "scene_m2": 25.27253823063802,
+        "source_geometry_m2": 25.27251377494055,
+        "difference_pct": 9.676796573722965e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXau8",
+        "scene_m2": 10.710016908909893,
+        "source_geometry_m2": 10.710009760709923,
+        "difference_pct": 6.674316951552433e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauA",
+        "scene_m2": 0.9778790097479941,
+        "source_geometry_m2": 0.977877792250006,
+        "difference_pct": 0.00012450410447420617,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXau4",
+        "scene_m2": 0.5190984901419142,
+        "source_geometry_m2": 0.5190999999999961,
+        "difference_pct": 0.0002908607362538967,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXau6",
+        "scene_m2": 7.862807069395785,
+        "source_geometry_m2": 7.862803883750013,
+        "difference_pct": 4.051539144512227e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXau0",
+        "scene_m2": 2.1160007896396564,
+        "source_geometry_m2": 2.1159975953500076,
+        "difference_pct": 0.000150959039642043,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXau2",
+        "scene_m2": 1.3004966278094798,
+        "source_geometry_m2": 1.3004982226499933,
+        "difference_pct": 0.00012263304060350944,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaty",
+        "scene_m2": 7.350509616859199,
+        "source_geometry_m2": 7.350505629699995,
+        "difference_pct": 5.4243332425712244e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2a3TJhjgD3FO9iKP6Tfha8",
+        "scene_m2": 21.54253387451172,
+        "source_geometry_m2": 21.542530963249995,
+        "difference_pct": 1.3514018984598866e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2a3TJhjgD3FO9iKP6TfhaA",
+        "scene_m2": 30.78821398736909,
+        "source_geometry_m2": 30.78816174218541,
+        "difference_pct": 0.00016969244256611563,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXxAj",
+        "scene_m2": 2.436733886715956,
+        "source_geometry_m2": 2.4367499999999396,
+        "difference_pct": 0.0006612612694590569,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayK",
+        "scene_m2": 36.219896619411884,
+        "source_geometry_m2": 36.21989999999996,
+        "difference_pct": 9.333510241995741e-06,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayM",
+        "scene_m2": 10.862502098083496,
+        "source_geometry_m2": 10.862500000000008,
+        "difference_pct": 1.9314922791970345e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayG",
+        "scene_m2": 2.4176881079401937,
+        "source_geometry_m2": 2.4176856600000125,
+        "difference_pct": 0.00010125138357428853,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayC",
+        "scene_m2": 0.9775017356878379,
+        "source_geometry_m2": 0.9775000000000065,
+        "difference_pct": 0.0001775639725279951,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayE",
+        "scene_m2": 2.1160029830934945,
+        "source_geometry_m2": 2.1160000000000143,
+        "difference_pct": 0.0001409779527521498,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXay8",
+        "scene_m2": 1.3004982490529073,
+        "source_geometry_m2": 1.3004999999999922,
+        "difference_pct": 0.0001346364540467176,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayA",
+        "scene_m2": 7.861904893492465,
+        "source_geometry_m2": 7.861899999999979,
+        "difference_pct": 6.224312807198296e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXay4",
+        "scene_m2": 7.424906861881027,
+        "source_geometry_m2": 7.4249000000000125,
+        "difference_pct": 9.241715059473165e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXay6",
+        "scene_m2": 9.924316161355819,
+        "source_geometry_m2": 9.924300000000049,
+        "difference_pct": 0.00016284630422392016,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaxk",
+        "scene_m2": 0.5190984901419142,
+        "source_geometry_m2": 0.5190999999999961,
+        "difference_pct": 0.0002908607362538967,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXanX",
+        "scene_m2": 2.436733886715956,
+        "source_geometry_m2": 2.4367499999999396,
+        "difference_pct": 0.0006612612694590569,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavK",
+        "scene_m2": 25.11397385111195,
+        "source_geometry_m2": 25.113978244290045,
+        "difference_pct": 1.7492959706949254e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavM",
+        "scene_m2": 10.862507343292236,
+        "source_geometry_m2": 10.862505896000007,
+        "difference_pct": 1.3323741713281898e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavG",
+        "scene_m2": 2.4176881079401937,
+        "source_geometry_m2": 2.4176856600000125,
+        "difference_pct": 0.00010125138357428853,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavI",
+        "scene_m2": 10.813505825033644,
+        "source_geometry_m2": 10.81351021275001,
+        "difference_pct": 4.057624471529343e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavC",
+        "scene_m2": 0.977503929141676,
+        "source_geometry_m2": 0.9775017422499955,
+        "difference_pct": 0.00022372253531626268,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavE",
+        "scene_m2": 2.1160029830934945,
+        "source_geometry_m2": 2.1160006957499844,
+        "difference_pct": 0.00010809748384055976,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXav8",
+        "scene_m2": 1.300499059674621,
+        "source_geometry_m2": 1.300501428000013,
+        "difference_pct": 0.00018210863447044268,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXavA",
+        "scene_m2": 7.861911721804063,
+        "source_geometry_m2": 7.861907529349981,
+        "difference_pct": 5.332616882129308e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXav4",
+        "scene_m2": 7.424903504943359,
+        "source_geometry_m2": 7.424893660200013,
+        "difference_pct": 0.00013259103492131006,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXav6",
+        "scene_m2": 9.924325354790199,
+        "source_geometry_m2": 9.924307844550047,
+        "difference_pct": 0.00017643789800090738,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauk",
+        "scene_m2": 0.5190984901419142,
+        "source_geometry_m2": 0.5190999999999961,
+        "difference_pct": 0.0002908607362538967,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXxD5",
+        "scene_m2": 2.436733886715956,
+        "source_geometry_m2": 2.4367499999999396,
+        "difference_pct": 0.0006612612694590569,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXat_",
+        "scene_m2": 25.10751031403197,
+        "source_geometry_m2": 25.107537149919544,
+        "difference_pct": 0.00010688379116641544,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXatu",
+        "scene_m2": 10.862502098083496,
+        "source_geometry_m2": 10.862500000000008,
+        "difference_pct": 1.9314922791970345e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXatw",
+        "scene_m2": 2.4176881079401937,
+        "source_geometry_m2": 2.4176856600000125,
+        "difference_pct": 0.00010125138357428853,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXatq",
+        "scene_m2": 10.81189944522339,
+        "source_geometry_m2": 10.811918719635703,
+        "difference_pct": 0.00017827004450471498,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXats",
+        "scene_m2": 0.978395814425312,
+        "source_geometry_m2": 0.978390568415896,
+        "difference_pct": 0.0005361876519799318,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXatm",
+        "scene_m2": 2.1167507503851084,
+        "source_geometry_m2": 2.116741964621129,
+        "difference_pct": 0.0004150606982943695,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXato",
+        "scene_m2": 1.2995660308224615,
+        "source_geometry_m2": 1.2995736297335352,
+        "difference_pct": 0.0005847233969553617,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXati",
+        "scene_m2": 7.862091786344536,
+        "source_geometry_m2": 7.862091526687215,
+        "difference_pct": 3.3026494241691958e-06,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXatk",
+        "scene_m2": 7.425968567826203,
+        "source_geometry_m2": 7.425964895651667,
+        "difference_pct": 4.945046990670733e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXate",
+        "scene_m2": 9.921145938387781,
+        "source_geometry_m2": 9.921144822407806,
+        "difference_pct": 1.1248499997465068e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXatG",
+        "scene_m2": 0.5191019042977132,
+        "source_geometry_m2": 0.5191038377599957,
+        "difference_pct": 0.0003724615658483149,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2a3TJhjgD3FO9iKP6Tfhbq",
+        "scene_m2": 30.784329197602347,
+        "source_geometry_m2": 30.784308574594455,
+        "difference_pct": 6.699194767248681e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2a3TJhjgD3FO9iKP6Tfhbs",
+        "scene_m2": 21.5492276661098,
+        "source_geometry_m2": 21.54920968053663,
+        "difference_pct": 8.346279717951399e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXxB1",
+        "scene_m2": 2.436733886715956,
+        "source_geometry_m2": 2.4367499999999396,
+        "difference_pct": 0.0006612612694590569,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXay2",
+        "scene_m2": 10.862502098083496,
+        "source_geometry_m2": 10.862500000000008,
+        "difference_pct": 1.9314922791970345e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaxy",
+        "scene_m2": 25.269903161621187,
+        "source_geometry_m2": 25.269900000000042,
+        "difference_pct": 1.251141138050786e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXax_",
+        "scene_m2": 2.410185423170333,
+        "source_geometry_m2": 2.4101838992875204,
+        "difference_pct": 6.322682733182747e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaxu",
+        "scene_m2": 10.706693268584786,
+        "source_geometry_m2": 10.706699999999953,
+        "difference_pct": 6.287105426969623e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaxw",
+        "scene_m2": 2.1160029830934945,
+        "source_geometry_m2": 2.1160000000000143,
+        "difference_pct": 0.0001409779527521498,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaxq",
+        "scene_m2": 1.3004982490529073,
+        "source_geometry_m2": 1.3004999999999922,
+        "difference_pct": 0.0001346364540467176,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaxs",
+        "scene_m2": 7.861904893492465,
+        "source_geometry_m2": 7.861899999999979,
+        "difference_pct": 6.224312807198296e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaxm",
+        "scene_m2": 0.9775017356878379,
+        "source_geometry_m2": 0.9775000000000065,
+        "difference_pct": 0.0001775639725279951,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaxo",
+        "scene_m2": 0.5190984901419142,
+        "source_geometry_m2": 0.5190999999999961,
+        "difference_pct": 0.0002908607362538967,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaxi",
+        "scene_m2": 7.350500480650226,
+        "source_geometry_m2": 7.3505,
+        "difference_pct": 6.539014018072908e-06,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXanx",
+        "scene_m2": 2.436732170113828,
+        "source_geometry_m2": 2.436749999999938,
+        "difference_pct": 0.0007317076478820698,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXav2",
+        "scene_m2": 10.862507343292236,
+        "source_geometry_m2": 10.862505896000007,
+        "difference_pct": 1.3323741713281898e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauy",
+        "scene_m2": 25.271177461341722,
+        "source_geometry_m2": 25.27117824429004,
+        "difference_pct": 3.0981868432979926e-06,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXau_",
+        "scene_m2": 2.4372367241885513,
+        "source_geometry_m2": 2.437238129359543,
+        "difference_pct": 5.765423471088442e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauu",
+        "scene_m2": 10.706693268584786,
+        "source_geometry_m2": 10.706707155600006,
+        "difference_pct": 0.00012970388577663333,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauw",
+        "scene_m2": 2.1160029830934945,
+        "source_geometry_m2": 2.1160000000000143,
+        "difference_pct": 0.0001409779527521498,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauq",
+        "scene_m2": 1.3004982490529073,
+        "source_geometry_m2": 1.3004999999999922,
+        "difference_pct": 0.0001346364540467176,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaus",
+        "scene_m2": 7.861911969754146,
+        "source_geometry_m2": 7.861904488149975,
+        "difference_pct": 9.51627456555959e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaum",
+        "scene_m2": 0.977503929141676,
+        "source_geometry_m2": 0.9775032774999919,
+        "difference_pct": 6.666388739227835e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXauo",
+        "scene_m2": 0.5191019042977132,
+        "source_geometry_m2": 0.5191038377599957,
+        "difference_pct": 0.0003724615658483149,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaui",
+        "scene_m2": 7.350492851255694,
+        "source_geometry_m2": 7.350491440000004,
+        "difference_pct": 1.919947396179719e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXxDV",
+        "scene_m2": 2.436732170113828,
+        "source_geometry_m2": 2.436749999999938,
+        "difference_pct": 0.0007317076478820698,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXata",
+        "scene_m2": 10.860096452990547,
+        "source_geometry_m2": 10.860109698299388,
+        "difference_pct": 0.00012196293784132743,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXatc",
+        "scene_m2": 25.27161979061202,
+        "source_geometry_m2": 25.271623019582336,
+        "difference_pct": 1.2777059517457924e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXatW",
+        "scene_m2": 2.436127803332056,
+        "source_geometry_m2": 2.4361290004905083,
+        "difference_pct": 4.914183329904236e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXatY",
+        "scene_m2": 10.706683083350072,
+        "source_geometry_m2": 10.706690334600008,
+        "difference_pct": 6.772634408850431e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXatS",
+        "scene_m2": 2.1163802571536507,
+        "source_geometry_m2": 2.1163765065500137,
+        "difference_pct": 0.00017721816630408117,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXatU",
+        "scene_m2": 1.3004982490529073,
+        "source_geometry_m2": 1.3004999999999922,
+        "difference_pct": 0.0001346364540467176,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXatO",
+        "scene_m2": 7.860497186455177,
+        "source_geometry_m2": 7.860505777539776,
+        "difference_pct": 0.00010929429787866846,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXatQ",
+        "scene_m2": 0.9774995422339998,
+        "source_geometry_m2": 0.977496871999993,
+        "difference_pct": 0.0002731705935112551,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXatK",
+        "scene_m2": 0.5185180836560903,
+        "source_geometry_m2": 0.5185177969509934,
+        "difference_pct": 5.529320277368854e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2a3TJhjgD3FO9iKP6Tfhbm",
+        "scene_m2": 21.535840082913637,
+        "source_geometry_m2": 21.535852245963355,
+        "difference_pct": 5.647814434605533e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2a3TJhjgD3FO9iKP6Tfhbo",
+        "scene_m2": 32.31009531999007,
+        "source_geometry_m2": 32.31004521654055,
+        "difference_pct": 0.0001550708121313019,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXxBR",
+        "scene_m2": 2.436732170113828,
+        "source_geometry_m2": 2.436749999999938,
+        "difference_pct": 0.0007317076478820698,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3Gg8ocnvr2IO_xir_UgWtl",
+        "scene_m2": 2.4367459459317615,
+        "source_geometry_m2": 2.436750000000002,
+        "difference_pct": 0.0001663719397010957,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaoD",
+        "scene_m2": 2.436736168572679,
+        "source_geometry_m2": 2.4367499982499408,
+        "difference_pct": 0.0005675460047823241,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXxDn",
+        "scene_m2": 2.436735603318084,
+        "source_geometry_m2": 2.4367499999999414,
+        "difference_pct": 0.0005908148910360442,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXxBj",
+        "scene_m2": 2.436735603318084,
+        "source_geometry_m2": 2.4367499999999414,
+        "difference_pct": 0.0005908148910360442,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3Gg8ocnvr2IO_xir_UgWtx",
+        "scene_m2": 2.436759678836097,
+        "source_geometry_m2": 2.4367499999999893,
+        "difference_pct": 0.0003972026719070928,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaoX",
+        "scene_m2": 2.436734451970551,
+        "source_geometry_m2": 2.436750002749941,
+        "difference_pct": 0.0006381770543725372,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXad2",
+        "scene_m2": 2.436759678836097,
+        "source_geometry_m2": 2.4367499999999893,
+        "difference_pct": 0.0003972026719070928,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXxE5",
+        "scene_m2": 2.436732170113828,
+        "source_geometry_m2": 2.436749999999938,
+        "difference_pct": 0.0007317076478820698,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaba",
+        "scene_m2": 2.436759678836097,
+        "source_geometry_m2": 2.4367499999999893,
+        "difference_pct": 0.0003972026719070928,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXxC1",
+        "scene_m2": 2.436732170113828,
+        "source_geometry_m2": 2.436749999999938,
+        "difference_pct": 0.0007317076478820698,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3Gg8ocnvr2IO_xir_UgWtH",
+        "scene_m2": 2.4176915411662776,
+        "source_geometry_m2": 2.4176856600000125,
+        "difference_pct": 0.00024325603457887608,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXace",
+        "scene_m2": 2.4039174381177872,
+        "source_geometry_m2": 2.4039126900000127,
+        "difference_pct": 0.00019751623235996993,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXabI",
+        "scene_m2": 2.4039174381177872,
+        "source_geometry_m2": 2.4039126900000127,
+        "difference_pct": 0.00019751623235996993,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3Gg8ocnvr2IO_xir_UgWsl",
+        "scene_m2": 2.4693135285633616,
+        "source_geometry_m2": 2.469314340000018,
+        "difference_pct": 3.286080850013243e-05,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXacM",
+        "scene_m2": 2.5678321365412557,
+        "source_geometry_m2": 2.5678373100000162,
+        "difference_pct": 0.00020147143825474613,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXaau",
+        "scene_m2": 2.469038870476652,
+        "source_geometry_m2": 2.4690413700000065,
+        "difference_pct": 0.00010123456758910138,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXayk",
+        "scene_m2": 11.379368585970951,
+        "source_geometry_m2": 11.37934990079998,
+        "difference_pct": 0.00016420244683795928,
+        "within_2pct": true
+      },
+      {
+        "item_id": "2J_oFeqlHDNPq7R3anXay0",
+        "scene_m2": 11.379368585970951,
+        "source_geometry_m2": 11.37935000000006,
+        "difference_pct": 0.0001633306901721473,
+        "within_2pct": true
+      },
+      {
+        "item_id": "1m7pvZNoPB$xk2zNuOaspc",
+        "scene_m2": 2.4367459459317615,
+        "source_geometry_m2": 2.436750000000002,
+        "difference_pct": 0.0001663719397010957,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3YtUpf_rT0oADf3LIMO5W4",
+        "scene_m2": 2.4367459459317615,
+        "source_geometry_m2": 2.436750000000002,
+        "difference_pct": 0.0001663719397010957,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3YtUpf_rT0oADf3LIMO5Yu",
+        "scene_m2": 2.4367459459317615,
+        "source_geometry_m2": 2.436750000000002,
+        "difference_pct": 0.0001663719397010957,
+        "within_2pct": true
+      },
+      {
+        "item_id": "1m7pvZNoPB$xk2zNuOas0U",
+        "scene_m2": 2.4367459459317615,
+        "source_geometry_m2": 2.4367499999999893,
+        "difference_pct": 0.00016637193917258165,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3YtUpf_rT0oADf3LIMO5Xo",
+        "scene_m2": 2.4367459459317615,
+        "source_geometry_m2": 2.4367499999999893,
+        "difference_pct": 0.00016637193917258165,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3YtUpf_rT0oADf3LIMO5Ys",
+        "scene_m2": 2.4367459459317615,
+        "source_geometry_m2": 2.4367499999999893,
+        "difference_pct": 0.00016637193917258165,
+        "within_2pct": true
+      },
+      {
+        "item_id": "1m7pvZNoPB$xk2zNuOasBl",
+        "scene_m2": 2.4367459459317615,
+        "source_geometry_m2": 2.436750000000002,
+        "difference_pct": 0.0001663719397010957,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3YtUpf_rT0oADf3LIMO5Xl",
+        "scene_m2": 2.4367459459317615,
+        "source_geometry_m2": 2.436750000000002,
+        "difference_pct": 0.0001663719397010957,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3YtUpf_rT0oADf3LIMO5YZ",
+        "scene_m2": 2.4367459459317615,
+        "source_geometry_m2": 2.436750000000002,
+        "difference_pct": 0.0001663719397010957,
+        "within_2pct": true
+      },
+      {
+        "item_id": "1m7pvZNoPB$xk2zNuOas8_",
+        "scene_m2": 2.4367528123839293,
+        "source_geometry_m2": 2.436750000000015,
+        "difference_pct": 0.00011541536531022455,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3YtUpf_rT0oADf3LIMO5Xa",
+        "scene_m2": 2.4367528123839293,
+        "source_geometry_m2": 2.436750000000015,
+        "difference_pct": 0.00011541536531022455,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3YtUpf_rT0oADf3LIMO5YO",
+        "scene_m2": 2.4367528123839293,
+        "source_geometry_m2": 2.436750000000015,
+        "difference_pct": 0.00011541536531022455,
+        "within_2pct": true
+      },
+      {
+        "item_id": "1m7pvZNoPB$xk2zNuOas98",
+        "scene_m2": 2.4367459459317615,
+        "source_geometry_m2": 2.436750000000015,
+        "difference_pct": 0.00016637194022960973,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3YtUpf_rT0oADf3LIMO5XI",
+        "scene_m2": 2.4367459459317615,
+        "source_geometry_m2": 2.436750000000015,
+        "difference_pct": 0.00016637194022960973,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3YtUpf_rT0oADf3LIMO5YM",
+        "scene_m2": 2.4367459459317615,
+        "source_geometry_m2": 2.436750000000015,
+        "difference_pct": 0.00016637194022960973,
+        "within_2pct": true
+      },
+      {
+        "item_id": "1m7pvZNoPB$xk2zNuOasKN",
+        "scene_m2": 2.4367459459317615,
+        "source_geometry_m2": 2.436750000000002,
+        "difference_pct": 0.0001663719397010957,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3YtUpf_rT0oADf3LIMO5XF",
+        "scene_m2": 2.4367459459317615,
+        "source_geometry_m2": 2.436750000000002,
+        "difference_pct": 0.0001663719397010957,
+        "within_2pct": true
+      },
+      {
+        "item_id": "3YtUpf_rT0oADf3LIMO5Y3",
+        "scene_m2": 2.4367459459317615,
+        "source_geometry_m2": 2.436750000000002,
+        "difference_pct": 0.0001663719397010957,
+        "within_2pct": true
+      }
+    ]
+  },
+  {
+    "doc_id": "opening_design__uli-44-e-mifflin-suite-802-models-model-ryan",
+    "scene": "artifacts/opening_design__uli-44-e-mifflin-suite-802-models-model-ryan/scene.glb",
+    "rooms": 0,
+    "measured": 0,
+    "source_comparisons": 0,
+    "mismatches": 0,
+    "checks": []
+  }
+]

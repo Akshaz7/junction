@@ -1,0 +1,855 @@
+{
+  "source": "/Users/akshatthapa/Workspace/wt/acc-ifc/data/full/junction-dataset/data/ifc_bench/ac20_arc.ifc",
+  "doc_id": "ifc_bench__ac20-arc",
+  "schema": "IFC4",
+  "spaces": 82,
+  "totals": {
+    "gross_m2": 2266.66,
+    "net_m2": 1939.3839474444,
+    "independent_profile_m2": null,
+    "measured_footprint_m2": 2266.6600000000003
+  },
+  "profile_comparison": {
+    "supported_profiles": 0,
+    "profile_sum": null,
+    "gross_quantity_sum_for_supported_profiles": null,
+    "reason": "These representations are not supported by our simple extrusion-profile reference; they are not independently verified by that reference."
+  },
+  "measurements": [
+    {
+      "item_id": "3UEb2iq7D2tOgbX6Mufs$X",
+      "name": "001",
+      "long_name": "Besprechungsraum I",
+      "gross_m2": 24.64,
+      "net_m2": 23.9008,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 24.64
+    },
+    {
+      "item_id": "2xcLNHPon6VO6wB_n0EQLF",
+      "name": "002",
+      "long_name": "Besprechungsraum II",
+      "gross_m2": 25.52,
+      "net_m2": 24.7544,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 25.519999999999996
+    },
+    {
+      "item_id": "2Hh$tXimL1_Aogi9jn1cZ4",
+      "name": "003",
+      "long_name": "Technikraum I",
+      "gross_m2": 25.52,
+      "net_m2": 24.7544,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 25.519999999999996
+    },
+    {
+      "item_id": "2sVpKMTdb3u8IUv50wOLpo",
+      "name": "004",
+      "long_name": "Technikraum II",
+      "gross_m2": 25.52,
+      "net_m2": 24.7544,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 25.520000000000007
+    },
+    {
+      "item_id": "0V74RtuUH1zQt_CcawQbBc",
+      "name": "005",
+      "long_name": "Technikraum III",
+      "gross_m2": 25.52,
+      "net_m2": 24.7544,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 25.520000000000007
+    },
+    {
+      "item_id": "0dXE$xLxz8MwbtYoTqJPiO",
+      "name": "006",
+      "long_name": "Seminarraum",
+      "gross_m2": 132.24,
+      "net_m2": 128.2728,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 132.24
+    },
+    {
+      "item_id": "2G3Zgh3YLFBxViczryC8tv",
+      "name": "007",
+      "long_name": "Technikraum IV",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.320000000000004
+    },
+    {
+      "item_id": "1pG7ErnqL79fYOSoJhY$mD",
+      "name": "008",
+      "long_name": "WC Herren",
+      "gross_m2": 12.76,
+      "net_m2": 12.3772,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.759999999999994
+    },
+    {
+      "item_id": "2NO$Il8fr1n8x3zsU1IoYc",
+      "name": "010",
+      "long_name": "Labor K1",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.319999999999997
+    },
+    {
+      "item_id": "3vTaz$m4D7Mw20Cj4ZCMEW",
+      "name": "011",
+      "long_name": "Labor K2",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.319999999999997
+    },
+    {
+      "item_id": "29dtO28k16G9baf14UO37j",
+      "name": "012",
+      "long_name": "Labor K3",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.319999999999997
+    },
+    {
+      "item_id": "3YOWN6kp53UhVDk7gccfjD",
+      "name": "013",
+      "long_name": "Labor K4",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.32
+    },
+    {
+      "item_id": "25NDKbpWH5r94ho13fJMeb",
+      "name": "014",
+      "long_name": "Labor K5",
+      "gross_m2": 11.44,
+      "net_m2": 11.0968,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 11.440000000000001
+    },
+    {
+      "item_id": "3cjnMny5DF0g1J6kKZWO4Y",
+      "name": "015",
+      "long_name": "Flur Keller West",
+      "gross_m2": 35.4,
+      "net_m2": 34.338,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 35.4
+    },
+    {
+      "item_id": "2Zmi8kumn3P9N9wBPT48lG",
+      "name": "017",
+      "long_name": "Flur Keller Ost",
+      "gross_m2": 11.8,
+      "net_m2": 11.446,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 11.799999999999997
+    },
+    {
+      "item_id": "3Gz7u_d1P7IA35Wmtg48Rc",
+      "name": "016",
+      "long_name": "Flur Keller Treppe",
+      "gross_m2": 46.98,
+      "net_m2": 45.5706,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 46.98000000000002
+    },
+    {
+      "item_id": "1nsRm1QQb1xwWpzzFR7Ax3",
+      "name": "009",
+      "long_name": "WC Damen",
+      "gross_m2": 12.76,
+      "net_m2": 12.3772,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.760000000000003
+    },
+    {
+      "item_id": "3EN96kdYDB2OOGjNLp8e86",
+      "name": "101",
+      "long_name": "Buero Meier",
+      "gross_m2": 11.44,
+      "net_m2": 11.0968,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 11.440000000000001
+    },
+    {
+      "item_id": "1_Evy7T$DCiwLgTMLHCRoe",
+      "name": "102",
+      "long_name": "Labor I",
+      "gross_m2": 25.52,
+      "net_m2": 24.7544,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 25.520000000000007
+    },
+    {
+      "item_id": "3eQ_MQ5er5UeRXq4xxAoKl",
+      "name": "103",
+      "long_name": "Labor II",
+      "gross_m2": 25.52,
+      "net_m2": 24.7544,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 25.519999999999996
+    },
+    {
+      "item_id": "3KaloR8018sAKZVwuYVbSu",
+      "name": "116",
+      "long_name": "Flur EG West",
+      "gross_m2": 35.4,
+      "net_m2": 34.338,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 35.4
+    },
+    {
+      "item_id": "03hhkFXKT4RPFNu5rDrZPL",
+      "name": "115",
+      "long_name": "Buero Obermeier",
+      "gross_m2": 24.64,
+      "net_m2": 23.9008,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 24.64
+    },
+    {
+      "item_id": "1oKaKV7Wz8IOJ10cA1PGWP",
+      "name": "113",
+      "long_name": "WC Damen",
+      "gross_m2": 12.76,
+      "net_m2": 12.3772,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.760000000000003
+    },
+    {
+      "item_id": "3j5r$vfHT3JfqUfpdRoXnP",
+      "name": "112",
+      "long_name": "WC Herren",
+      "gross_m2": 12.76,
+      "net_m2": 12.3772,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.759999999999994
+    },
+    {
+      "item_id": "3t8qjHTuTAigDlC1x7D16b",
+      "name": "111",
+      "long_name": "Buero Maier",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.320000000000004
+    },
+    {
+      "item_id": "1DxredyET5bf_85HZe8$FO",
+      "name": "105",
+      "long_name": "Buero Studenten I",
+      "gross_m2": 39.16,
+      "net_m2": 37.9852,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 39.16
+    },
+    {
+      "item_id": "2ED0MLfrf17BXIsuJYCs7R",
+      "name": "110",
+      "long_name": "Buero Meyer",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.319999999999988
+    },
+    {
+      "item_id": "1loQAAB191MA5YmsaMJHkI",
+      "name": "109",
+      "long_name": "Buero Mayer",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.319999999999988
+    },
+    {
+      "item_id": "3Xu6SpY4vC89stuKlMWE2n",
+      "name": "108",
+      "long_name": "Buero Meyr",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.319999999999988
+    },
+    {
+      "item_id": "3yAAZZ86j388XApaG$h1X6",
+      "name": "107",
+      "long_name": "Buero Mayr",
+      "gross_m2": 11.44,
+      "net_m2": 11.0968,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 11.440000000000007
+    },
+    {
+      "item_id": "3$FatfHY1Cg9apAMwbKPN8",
+      "name": "106",
+      "long_name": "Buero Studenten II",
+      "gross_m2": 37.84,
+      "net_m2": 36.7048,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 37.84000000000001
+    },
+    {
+      "item_id": "0_TtqXcOrDbeTXyb5q0Uxb",
+      "name": "118",
+      "long_name": "Flur EG Ost",
+      "gross_m2": 35.4,
+      "net_m2": 34.338,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 35.4
+    },
+    {
+      "item_id": "25QUQJ9jHAFengkpc9N7GR",
+      "name": "104",
+      "long_name": "Buero Hausmeister",
+      "gross_m2": 12.76,
+      "net_m2": 12.3772,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.760000000000003
+    },
+    {
+      "item_id": "0jhU4VZ6XCxee3pjfx5VMh",
+      "name": "114",
+      "long_name": "Buero Studenten III",
+      "gross_m2": 38.72,
+      "net_m2": 37.5584,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 38.720000000000006
+    },
+    {
+      "item_id": "1RP4kkhTDFJuLugWfrM_1s",
+      "name": "117",
+      "long_name": "Flur EG Eingang",
+      "gross_m2": 83.16,
+      "net_m2": 80.6652,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 83.16000000000004
+    },
+    {
+      "item_id": "25CC32yK130ALlKsnej9JW",
+      "name": "220",
+      "long_name": "Flur 1.OG West",
+      "gross_m2": 35.4,
+      "net_m2": 34.338,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 35.4
+    },
+    {
+      "item_id": "37pP75EaP1axQNg3rWc_WT",
+      "name": "214",
+      "long_name": "WC Damen",
+      "gross_m2": 12.76,
+      "net_m2": 12.3772,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.760000000000003
+    },
+    {
+      "item_id": "0f6kjO4cnBngLgZgtaoBTE",
+      "name": "213",
+      "long_name": "WC Herren",
+      "gross_m2": 12.76,
+      "net_m2": 12.3772,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.759999999999994
+    },
+    {
+      "item_id": "3XJSZHVdLFTQTPYNfhA6a2",
+      "name": "222",
+      "long_name": "Flur 1.OG Ost",
+      "gross_m2": 35.4,
+      "net_m2": 34.338,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 35.4
+    },
+    {
+      "item_id": "1AW8GAtUnEYB9XPWOUYKK5",
+      "name": "211",
+      "long_name": "Buero Schmidt",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.320000000000004
+    },
+    {
+      "item_id": "0uPiF9LkPAqeB8f54Uy3_C",
+      "name": "221",
+      "long_name": "Flur 1.OG Treppe",
+      "gross_m2": 46.98,
+      "net_m2": 45.5706,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 46.98000000000002
+    },
+    {
+      "item_id": "24vVAUYDH2SetutQQsZBMv",
+      "name": "207",
+      "long_name": "Buero IL",
+      "gross_m2": 37.84,
+      "net_m2": 36.7048,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 37.84000000000001
+    },
+    {
+      "item_id": "2goaA6RR92B9xducYbaQVU",
+      "name": "206",
+      "long_name": "Buero IL Sekr.",
+      "gross_m2": 25.52,
+      "net_m2": 24.7544,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 25.51999999999999
+    },
+    {
+      "item_id": "0i4GPkF$j1$P1_N4yoKfHm",
+      "name": "210",
+      "long_name": "Buero Schmid",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.319999999999988
+    },
+    {
+      "item_id": "2Yd3UbuHLF0P7Q5pq$wqrF",
+      "name": "219",
+      "long_name": "Buero Mueller I",
+      "gross_m2": 11.44,
+      "net_m2": 11.0968,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 11.440000000000001
+    },
+    {
+      "item_id": "1GtYUXG753_h6i4vKAf46v",
+      "name": "218",
+      "long_name": "Buero Mueller II",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.320000000000002
+    },
+    {
+      "item_id": "0VWZeARNT8IAUcPL5OoYiA",
+      "name": "217",
+      "long_name": "Buero MuellerIII",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.32
+    },
+    {
+      "item_id": "3kV3mGMIX3BvUw5dL_lJVg",
+      "name": "215",
+      "long_name": "Buero Mueller V",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.319999999999997
+    },
+    {
+      "item_id": "1yZQvqj15Ab8eMXDuz85Dy",
+      "name": "204",
+      "long_name": "Buero Oberschmitt",
+      "gross_m2": 25.52,
+      "net_m2": 24.7544,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 25.520000000000007
+    },
+    {
+      "item_id": "0uC7OD3$5F7v$zL3aaoEig",
+      "name": "201",
+      "long_name": "Buero Obermueller",
+      "gross_m2": 24.64,
+      "net_m2": 23.9008,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 24.64
+    },
+    {
+      "item_id": "2E2TaOnqD0chpbuH8tXCpW",
+      "name": "208",
+      "long_name": "Buero Schmied II",
+      "gross_m2": 11.44,
+      "net_m2": 11.0968,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 11.440000000000007
+    },
+    {
+      "item_id": "3shuyF_Yb7yu2P$QLB2s8G",
+      "name": "202",
+      "long_name": "Buero Mueller VI + VII",
+      "gross_m2": 25.52,
+      "net_m2": 24.7544,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 25.52
+    },
+    {
+      "item_id": "0UiHARbFzF1RT4g_GKem_B",
+      "name": "203",
+      "long_name": "Buero Mueller VIII + IX",
+      "gross_m2": 25.52,
+      "net_m2": 24.7544,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 25.520000000000007
+    },
+    {
+      "item_id": "1LVv$xQpj6k8KE6pcNlDDU",
+      "name": "209",
+      "long_name": "Buero Schmied I",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.319999999999988
+    },
+    {
+      "item_id": "1a3ixYyUn0QO4HWUYKN$4p",
+      "name": "212",
+      "long_name": "Buero Schmitt I",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.320000000000004
+    },
+    {
+      "item_id": "3iSzpa9d93jhTDB7hG0QBW",
+      "name": "205",
+      "long_name": "Buero Schmitt II",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.320000000000004
+    },
+    {
+      "item_id": "0K6ICBa1zCjvUnsy8qMIRC",
+      "name": "216",
+      "long_name": "Buero Mueller IV",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.319999999999997
+    },
+    {
+      "item_id": "3M3dydUxH2hR7Uvg9QNhS$",
+      "name": "313",
+      "long_name": "WC Herren",
+      "gross_m2": 12.76,
+      "net_m2": 12.3772,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.759999999999994
+    },
+    {
+      "item_id": "2lebmw3XD9w9PIIn4HKbwh",
+      "name": "302",
+      "long_name": "Buero",
+      "gross_m2": 25.52,
+      "net_m2": 24.7544,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 25.519999999999996
+    },
+    {
+      "item_id": "09m2tgyfr9UfikvrKFMkeD",
+      "name": "303",
+      "long_name": "Buero",
+      "gross_m2": 25.52,
+      "net_m2": 24.7544,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 25.519999999999996
+    },
+    {
+      "item_id": "0dc6ovxJLDww6sjSpu_cfN",
+      "name": "304",
+      "long_name": "Buero",
+      "gross_m2": 25.52,
+      "net_m2": 24.7544,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 25.520000000000007
+    },
+    {
+      "item_id": "0U5AcnRYX7aw$OIZXqMUaR",
+      "name": "305",
+      "long_name": "Buero",
+      "gross_m2": 25.52,
+      "net_m2": 24.7544,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 25.520000000000007
+    },
+    {
+      "item_id": "1jJ7opRcX6uevup8Hnq0$2",
+      "name": "318",
+      "long_name": "Buero",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.32
+    },
+    {
+      "item_id": "30oDtenHrAwuYDgWTayiN$",
+      "name": "317",
+      "long_name": "Buero",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.319999999999997
+    },
+    {
+      "item_id": "3$PC9MkEH1Ex24UD3VHyzP",
+      "name": "316",
+      "long_name": "Buero",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.319999999999997
+    },
+    {
+      "item_id": "0Veunyhgf7QxfJXezc1Ydu",
+      "name": "315",
+      "long_name": "Buero",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.319999999999997
+    },
+    {
+      "item_id": "1vWhxAiTL1RR3r4R3eC2Vv",
+      "name": "306",
+      "long_name": "Buero",
+      "gross_m2": 25.52,
+      "net_m2": 24.7544,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 25.520000000000007
+    },
+    {
+      "item_id": "3uvYP4OyH5ufyPIMbZD86h",
+      "name": "307",
+      "long_name": "Buero",
+      "gross_m2": 24.64,
+      "net_m2": 23.9008,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 24.640000000000008
+    },
+    {
+      "item_id": "0oB0YIgnPE49CsBpGIdxOR",
+      "name": "312",
+      "long_name": "Buero",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.320000000000004
+    },
+    {
+      "item_id": "3jurQKaejCqgtlRMQvYO$h",
+      "name": "311",
+      "long_name": "Buero",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.320000000000004
+    },
+    {
+      "item_id": "1I4mvNGj58VPS4IqdvGDOQ",
+      "name": "310",
+      "long_name": "Buero",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.319999999999988
+    },
+    {
+      "item_id": "3BlfjPTqH1qeG63Yox0pCX",
+      "name": "309",
+      "long_name": "Buero",
+      "gross_m2": 12.32,
+      "net_m2": 11.9504,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.319999999999988
+    },
+    {
+      "item_id": "1qHIiTcLf7zwz3pTXujZ3t",
+      "name": "308",
+      "long_name": "Buero",
+      "gross_m2": 11.44,
+      "net_m2": 11.0968,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 11.440000000000007
+    },
+    {
+      "item_id": "0jh6L39QvEQu8mVKX3j43f",
+      "name": "314",
+      "long_name": "WC Damen",
+      "gross_m2": 12.76,
+      "net_m2": 12.3772,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 12.760000000000003
+    },
+    {
+      "item_id": "3zaEFaiGrF1ftyFPQrOe_i",
+      "name": "301",
+      "long_name": "Buero",
+      "gross_m2": 24.64,
+      "net_m2": 23.9008,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 24.64
+    },
+    {
+      "item_id": "3i9iiZlcT5eQkuRPP$TrLS",
+      "name": "319",
+      "long_name": "Buero",
+      "gross_m2": 11.44,
+      "net_m2": 11.0968,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 11.440000000000001
+    },
+    {
+      "item_id": "3gYFdGsxTBa9PFlMvRAaiF",
+      "name": "320",
+      "long_name": "Flur 2.OG West",
+      "gross_m2": 35.4,
+      "net_m2": 34.338,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 35.4
+    },
+    {
+      "item_id": "2mSYEw1YLDvhMYvUr3eREJ",
+      "name": "321",
+      "long_name": "Flur 2.OG Treppe",
+      "gross_m2": 46.98,
+      "net_m2": 45.5706,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 46.98000000000002
+    },
+    {
+      "item_id": "3CXBDjcSTES8AedjLKSfJe",
+      "name": "322",
+      "long_name": "Flur 2.OG Ost",
+      "gross_m2": 35.4,
+      "net_m2": 34.338,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 35.4
+    },
+    {
+      "item_id": "3txvJd9V1BPhyU$48F$mnF",
+      "name": "403",
+      "long_name": "Dachboden-2",
+      "gross_m2": 201.78,
+      "net_m2": 71.0784367732,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 201.78
+    },
+    {
+      "item_id": "0jbV$RErb7o9P7rp7ALEd$",
+      "name": "402",
+      "long_name": "Dachboden-1",
+      "gross_m2": 201.78,
+      "net_m2": 71.0784367732,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 201.78
+    },
+    {
+      "item_id": "2_rG4oliv3CxmStpGPieup",
+      "name": "401",
+      "long_name": "Flur 3.OG Treppe",
+      "gross_m2": 72.36,
+      "net_m2": 60.209273898,
+      "independent_profile_m2": null,
+      "measured_footprint_m2": 72.36000000000004
+    }
+  ],
+  "answers": [
+    {
+      "question": "What is the total floor area of all rooms?",
+      "answer": {
+        "text_md": "**82 rooms**, total **2,266.7 m\u00b2**, largest first:\n\n- Dachboden-2 403: 201.8 m\u00b2 [81]\n- Dachboden-1 402: 201.8 m\u00b2 [82]\n- Seminarraum 006: 132.2 m\u00b2 [10]\n- Flur EG Eingang 117: 83.2 m\u00b2 [18]\n- Flur 3.OG Treppe 401: 72.4 m\u00b2 [80]\n- Flur Keller Treppe 016: 47.0 m\u00b2 [1]\n- Flur 1.OG Treppe 221: 47.0 m\u00b2 [36]\n- Flur 2.OG Treppe 321: 47.0 m\u00b2 [58]\n- Buero Studenten I 105: 39.2 m\u00b2 [34]\n- Buero Studenten III 114: 38.7 m\u00b2 [20]\n- Buero Studenten II 106: 37.8 m\u00b2 [35]\n- Buero IL 207: 37.8 m\u00b2 [57]\n- Flur Keller West 015: 35.4 m\u00b2 [11]\n- Flur EG West 116: 35.4 m\u00b2 [28]\n- Flur EG Ost 118: 35.4 m\u00b2 [29]\n- Flur 1.OG West 220: 35.4 m\u00b2 [49]\n- Flur 1.OG Ost 222: 35.4 m\u00b2 [50]\n- Flur 2.OG West 320: 35.4 m\u00b2 [71]\n- Flur 2.OG Ost 322: 35.4 m\u00b2 [72]\n- Besprechungsraum II 002: 25.5 m\u00b2 [14]\n- Technikraum I 003: 25.5 m\u00b2 [15]\n- Technikraum II 004: 25.5 m\u00b2 [16]\n- Technikraum III 005: 25.5 m\u00b2 [17]\n- Labor I 102: 25.5 m\u00b2 [31]\n- Labor II 103: 25.5 m\u00b2 [32]\n- \u2026 and 57 more (all numbered on the drawing) 82 stored room area(s) differ from the measured footprint by over 2%; check the model.",
+        "value": 2266.66,
+        "unit": "m2",
+        "confidence": 0.8,
+        "abstained": false
+      },
+      "calculation": "complete",
+      "trace_count": 63,
+      "trace_examples": [
+        "Besprechungsraum I: measured footprint 24.64 m\u00b2; answer uses stored gross floor area: 24.64 m\u00b2; Footprint agrees with gross floor area; it does not independently measure the declared net area.; stored net area 23.9008 m\u00b2; 3% difference -> flag",
+        "Besprechungsraum II: measured footprint 25.52 m\u00b2; answer uses stored gross floor area: 25.52 m\u00b2; Footprint agrees with gross floor area; it does not independently measure the declared net area.; stored net area 24.7544 m\u00b2; 3% difference -> flag",
+        "Technikraum I: measured footprint 25.52 m\u00b2; answer uses stored gross floor area: 25.52 m\u00b2; Footprint agrees with gross floor area; it does not independently measure the declared net area.; stored net area 24.7544 m\u00b2; 3% difference -> flag"
+      ]
+    },
+    {
+      "question": "What is the total gross floor area of all rooms?",
+      "answer": {
+        "text_md": "**82 rooms**, total **2,266.7 m\u00b2**, largest first:\n\n- Dachboden-2 403: 201.8 m\u00b2 [81]\n- Dachboden-1 402: 201.8 m\u00b2 [82]\n- Seminarraum 006: 132.2 m\u00b2 [10]\n- Flur EG Eingang 117: 83.2 m\u00b2 [18]\n- Flur 3.OG Treppe 401: 72.4 m\u00b2 [80]\n- Flur Keller Treppe 016: 47.0 m\u00b2 [1]\n- Flur 1.OG Treppe 221: 47.0 m\u00b2 [36]\n- Flur 2.OG Treppe 321: 47.0 m\u00b2 [58]\n- Buero Studenten I 105: 39.2 m\u00b2 [34]\n- Buero Studenten III 114: 38.7 m\u00b2 [20]\n- Buero Studenten II 106: 37.8 m\u00b2 [35]\n- Buero IL 207: 37.8 m\u00b2 [57]\n- Flur Keller West 015: 35.4 m\u00b2 [11]\n- Flur EG West 116: 35.4 m\u00b2 [28]\n- Flur EG Ost 118: 35.4 m\u00b2 [29]\n- Flur 1.OG West 220: 35.4 m\u00b2 [49]\n- Flur 1.OG Ost 222: 35.4 m\u00b2 [50]\n- Flur 2.OG West 320: 35.4 m\u00b2 [71]\n- Flur 2.OG Ost 322: 35.4 m\u00b2 [72]\n- Besprechungsraum II 002: 25.5 m\u00b2 [14]\n- Technikraum I 003: 25.5 m\u00b2 [15]\n- Technikraum II 004: 25.5 m\u00b2 [16]\n- Technikraum III 005: 25.5 m\u00b2 [17]\n- Labor I 102: 25.5 m\u00b2 [31]\n- Labor II 103: 25.5 m\u00b2 [32]\n- \u2026 and 57 more (all numbered on the drawing) 82 stored room area(s) differ from the measured footprint by over 2%; check the model.",
+        "value": 2266.66,
+        "unit": "m2",
+        "confidence": 0.8,
+        "abstained": false
+      },
+      "calculation": "complete",
+      "trace_count": 63,
+      "trace_examples": [
+        "Besprechungsraum I: measured footprint 24.64 m\u00b2; answer uses stored gross floor area: 24.64 m\u00b2; Footprint agrees with gross floor area; it does not independently measure the declared net area.; stored net area 23.9008 m\u00b2; 3% difference -> flag",
+        "Besprechungsraum II: measured footprint 25.52 m\u00b2; answer uses stored gross floor area: 25.52 m\u00b2; Footprint agrees with gross floor area; it does not independently measure the declared net area.; stored net area 24.7544 m\u00b2; 3% difference -> flag",
+        "Technikraum I: measured footprint 25.52 m\u00b2; answer uses stored gross floor area: 25.52 m\u00b2; Footprint agrees with gross floor area; it does not independently measure the declared net area.; stored net area 24.7544 m\u00b2; 3% difference -> flag"
+      ]
+    },
+    {
+      "question": "What is the total net floor area of all rooms?",
+      "answer": {
+        "text_md": "**82 rooms**, total **1,939.4 m\u00b2**, largest first:\n\n- Seminarraum 006: 128.3 m\u00b2 [10]\n- Flur EG Eingang 117: 80.7 m\u00b2 [18]\n- Dachboden-2 403: 71.1 m\u00b2 [81]\n- Dachboden-1 402: 71.1 m\u00b2 [82]\n- Flur 3.OG Treppe 401: 60.2 m\u00b2 [80]\n- Flur Keller Treppe 016: 45.6 m\u00b2 [1]\n- Flur 1.OG Treppe 221: 45.6 m\u00b2 [36]\n- Flur 2.OG Treppe 321: 45.6 m\u00b2 [58]\n- Buero Studenten I 105: 38.0 m\u00b2 [34]\n- Buero Studenten III 114: 37.6 m\u00b2 [20]\n- Buero Studenten II 106: 36.7 m\u00b2 [35]\n- Buero IL 207: 36.7 m\u00b2 [57]\n- Flur Keller West 015: 34.3 m\u00b2 [11]\n- Flur EG West 116: 34.3 m\u00b2 [28]\n- Flur EG Ost 118: 34.3 m\u00b2 [29]\n- Flur 1.OG West 220: 34.3 m\u00b2 [49]\n- Flur 1.OG Ost 222: 34.3 m\u00b2 [50]\n- Flur 2.OG West 320: 34.3 m\u00b2 [71]\n- Flur 2.OG Ost 322: 34.3 m\u00b2 [72]\n- Besprechungsraum II 002: 24.8 m\u00b2 [14]\n- Technikraum I 003: 24.8 m\u00b2 [15]\n- Technikraum II 004: 24.8 m\u00b2 [16]\n- Technikraum III 005: 24.8 m\u00b2 [17]\n- Labor I 102: 24.8 m\u00b2 [31]\n- Labor II 103: 24.8 m\u00b2 [32]\n- \u2026 and 57 more (all numbered on the drawing) 82 stored room area(s) differ from the measured footprint by over 2%; check the model.",
+        "value": 1939.38,
+        "unit": "m2",
+        "confidence": 0.8,
+        "abstained": false
+      },
+      "calculation": "complete",
+      "trace_count": 63,
+      "trace_examples": [
+        "Besprechungsraum I: measured footprint 24.64 m\u00b2; answer uses stored net floor area: 23.9008 m\u00b2; Footprint agrees with gross floor area; it does not independently measure the declared net area.; stored net area 23.9008 m\u00b2; 3% difference -> flag",
+        "Besprechungsraum II: measured footprint 25.52 m\u00b2; answer uses stored net floor area: 24.7544 m\u00b2; Footprint agrees with gross floor area; it does not independently measure the declared net area.; stored net area 24.7544 m\u00b2; 3% difference -> flag",
+        "Technikraum I: measured footprint 25.52 m\u00b2; answer uses stored net floor area: 24.7544 m\u00b2; Footprint agrees with gross floor area; it does not independently measure the declared net area.; stored net area 24.7544 m\u00b2; 3% difference -> flag"
+      ]
+    },
+    {
+      "question": "What is the floor area of Besprechungsraum II?",
+      "answer": {
+        "text_md": "**The area of besprechungsraum 2 in this model is 24.75 m\u00b2.** Besprechungsraum II (002, Keller): 24.75 m\u00b2. [1] 1 stored room area(s) differ from the measured footprint by over 2%; check the model.",
+        "value": 24.7544,
+        "unit": "m\u00b2",
+        "confidence": 0.8,
+        "abstained": false
+      },
+      "calculation": "complete",
+      "trace_count": 1,
+      "trace_examples": [
+        "Besprechungsraum II: measured footprint 25.52 m\u00b2; answer uses stored net floor area: 24.7544 m\u00b2; Footprint agrees with gross floor area; it does not independently measure the declared net area.; stored net area 24.7544 m\u00b2; 3% difference -> flag"
+      ]
+    },
+    {
+      "question": "how many people can fit in the seminar room",
+      "answer": {
+        "text_md": "**Scope I applied:** an estimate of how many people fit in Seminarraum, from net floor area only.\n\n**Roughly 64 people, but this is an estimate, not a stated capacity.** 128.3 m\u00b2 divided by an assumed 2 m\u00b2 per person.\n\nConditions applied: net floor area 128.3 m\u00b2 from 1 space(s); assumed 2 m\u00b2 per person (seminar or meeting use).\n\n**Partial answer. Not applied or not verifiable from this document:** the model stores no occupancy or capacity, and the real limit depends on use, furniture and the fire-safety exit capacity. [1]",
+        "value": null,
+        "unit": null,
+        "confidence": 0.6,
+        "abstained": false
+      },
+      "calculation": "complete",
+      "trace_count": 0,
+      "trace_examples": []
+    },
+    {
+      "question": "how many",
+      "answer": {
+        "text_md": "**That question looks unfinished.** Could you finish it? For example: how many doors are there, or what is the area of the biggest room.",
+        "value": null,
+        "unit": null,
+        "confidence": 1.0,
+        "abstained": false
+      },
+      "calculation": "complete",
+      "trace_count": 0,
+      "trace_examples": []
+    }
+  ],
+  "interpretation": "The geometric space extent agrees with gross floor area. Declared net floor area follows a distinct convention. We keep net quantities when a footprint matching gross cannot verify net, and disclose the discrepancy. Existing source-backed room and explicit-net expectations were retained.",
+  "measured_spaces": 82,
+  "gross_quantity_footprint_agreements": 82
+}

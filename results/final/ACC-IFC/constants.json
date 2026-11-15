@@ -13,7 +13,8 @@
       "unverified_or_incomplete": 0.6,
       "stored_area_disagreement_or_labelled_proxies": 0.8,
       "interpretation": "Conservative display caps consistent with existing app confidence bands; not measured accuracy probabilities."
-    }
+    },
+    "room_area_basis": "Explicit gross and unqualified scalar floor totals use gross Qto where available. Named-room areas and net breakdowns retain declared net quantities when a footprint matches gross Qto but disagrees with net Qto. Explicit net measurements use footprints unless the geometry is identified as gross extent; missing gross/net quantities use available footprints. No document-specific branch is used."
   },
   "observed_distributions_not_used_as_thresholds": {
     "measured_space_footprints_m2": {

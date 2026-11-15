@@ -1,0 +1,65 @@
+[
+ {
+  "doc_id": "opening_design__sports-complex-ifc-roundtrip-freecad-detail-roundtrip-tests-other-platfroms-20150415-detail-revit-2015",
+  "source": "data/full/junction-dataset/data/opening_design/Sports_Complex/IFC Roundtrip/FreeCAD Detail/Roundtrip tests_other platfroms/20150415/detail_Revit_2015.ifc",
+  "schema": "IFC2X3",
+  "applications": [
+   "Autodesk Revit 2015 (ENU)"
+  ],
+  "blind": true,
+  "checks": [
+   {
+    "question": "How many stairs are in this model?",
+    "expected_native_occurrences": 0,
+    "actual": null,
+    "pass": false,
+    "honest_unavailable": true,
+    "raw_native_before_hierarchy": 0,
+    "evidence_items": 20,
+    "confidence": 0.0
+   },
+   {
+    "question": "How many walls are in this model?",
+    "expected_native_occurrences": 0,
+    "actual": null,
+    "pass": false,
+    "honest_unavailable": true,
+    "raw_native_before_hierarchy": 0,
+    "evidence_items": 20,
+    "confidence": 0.0
+   },
+   {
+    "question": "How many doors are in this model?",
+    "expected_native_occurrences": 0,
+    "actual": null,
+    "pass": false,
+    "honest_unavailable": true,
+    "raw_native_before_hierarchy": 0,
+    "evidence_items": 20,
+    "confidence": 0.0
+   },
+   {
+    "question": "How many rooms (spaces) are in this model?",
+    "expected_native_occurrences": 0,
+    "actual": null,
+    "pass": false,
+    "honest_unavailable": true,
+    "raw_native_before_hierarchy": 0,
+    "evidence_items": 20,
+    "confidence": 0.0
+   }
+  ],
+  "index_errors": [],
+  "space_count": 0,
+  "area_status": {},
+  "profile_checks": [],
+  "area_answer": {
+   "value": null,
+   "abstained": true,
+   "confidence": 0.0,
+   "cross_check_trace_rows": 1
+  },
+  "space_measurements": [],
+  "seconds": 0.015
+ }
+]

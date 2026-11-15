@@ -1,0 +1,2968 @@
+[
+ {
+  "doc_id": "ifc_models__resbim-263-model",
+  "source": "data/full/junction-dataset/data/ifc_models/resbim-263_model.ifc",
+  "schema": "IFC4",
+  "applications": [
+   "Autodesk Revit 2026 (ENG)"
+  ],
+  "blind": false,
+  "checks": [
+   {
+    "question": "How many stairs are in this model?",
+    "expected_native_occurrences": 0,
+    "actual": 0,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 0,
+    "evidence_items": 0,
+    "confidence": 0.5
+   },
+   {
+    "question": "How many walls are in this model?",
+    "expected_native_occurrences": 23,
+    "actual": 23,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 23,
+    "evidence_items": 23,
+    "confidence": 1.0
+   },
+   {
+    "question": "How many doors are in this model?",
+    "expected_native_occurrences": 5,
+    "actual": 5,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 5,
+    "evidence_items": 5,
+    "confidence": 1.0
+   },
+   {
+    "question": "How many rooms (spaces) are in this model?",
+    "expected_native_occurrences": 0,
+    "actual": 0,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 0,
+    "evidence_items": 0,
+    "confidence": 0.5
+   }
+  ],
+  "index_errors": [],
+  "space_count": 0,
+  "area_status": {},
+  "profile_checks": [],
+  "area_answer": {
+   "value": null,
+   "abstained": true,
+   "confidence": 0.0,
+   "cross_check_trace_rows": 1
+  },
+  "space_measurements": [],
+  "seconds": 0.027
+ },
+ {
+  "doc_id": "ifc_bench__fzk-house-arc",
+  "source": "data/full/junction-dataset/data/ifc_bench/fzk_house_arc.ifc",
+  "schema": "IFC4",
+  "applications": [
+   "ARCHICAD-64"
+  ],
+  "blind": false,
+  "checks": [
+   {
+    "question": "How many stairs are in this model?",
+    "expected_native_occurrences": 1,
+    "actual": 1,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 1,
+    "evidence_items": 1,
+    "confidence": 1.0
+   },
+   {
+    "question": "How many walls are in this model?",
+    "expected_native_occurrences": 13,
+    "actual": 13,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 13,
+    "evidence_items": 13,
+    "confidence": 1.0
+   },
+   {
+    "question": "How many doors are in this model?",
+    "expected_native_occurrences": 5,
+    "actual": 5,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 5,
+    "evidence_items": 5,
+    "confidence": 1.0
+   },
+   {
+    "question": "How many rooms (spaces) are in this model?",
+    "expected_native_occurrences": 7,
+    "actual": 7,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 7,
+    "evidence_items": 7,
+    "confidence": 0.69
+   }
+  ],
+  "index_errors": [],
+  "space_count": 7,
+  "area_status": {
+   "flag": 6,
+   "agree": 1
+  },
+  "profile_checks": [],
+  "area_answer": {
+   "value": 208.5456,
+   "abstained": false,
+   "confidence": 0.8,
+   "cross_check_trace_rows": 8
+  },
+  "space_measurements": [
+   {
+    "item_id": "347jFE2yX7IhCEIALmupEH",
+    "measured_m2": 22.072499999999994,
+    "stored_net_m2": 21.410325,
+    "status": "flag",
+    "difference_pct": 2.9999999999999747,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "BaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 22.0725,
+    "stored_gross_source": "BaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "0e_hbkIQ5DMQlIJ$2V3j_m",
+    "measured_m2": 12.5027,
+    "stored_net_m2": 12.127619,
+    "status": "flag",
+    "difference_pct": 3.0000000000000124,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "BaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 12.5027,
+    "stored_gross_source": "BaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2RSCzLOBz4FAK$_wE8VckM",
+    "measured_m2": 12.985,
+    "stored_net_m2": 12.59545,
+    "status": "flag",
+    "difference_pct": 2.9999999999999987,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "BaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 12.985,
+    "stored_gross_source": "BaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "0Lt8gR_E9ESeGH5uY_g9e9",
+    "measured_m2": 25.9885499999629,
+    "stored_net_m2": 25.2088935,
+    "status": "flag",
+    "difference_pct": 2.99999999986153,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "BaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 25.98855,
+    "stored_gross_source": "BaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3$f2p7VyLB7eox67SA_zKE",
+    "measured_m2": 11.531400000000001,
+    "stored_net_m2": 11.185458,
+    "status": "flag",
+    "difference_pct": 3.000000000000007,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "BaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 11.5314,
+    "stored_gross_source": "BaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "17JZcMFrf5tOftUTidA0d3",
+    "measured_m2": 16.305450000037098,
+    "stored_net_m2": 16.30545,
+    "status": "agree",
+    "difference_pct": 2.275155621828924e-10,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "BaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 16.30545,
+    "stored_gross_source": "BaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2dQFggKBb1fOc1CqZDIDlx",
+    "measured_m2": 107.16000000000001,
+    "stored_net_m2": 74.5092415823,
+    "status": "flag",
+    "difference_pct": 30.46916612327361,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "BaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 107.16,
+    "stored_gross_source": "BaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   }
+  ],
+  "seconds": 0.137
+ },
+ {
+  "doc_id": "ifc_models__bimspeed-warmond-ar",
+  "source": "data/full/junction-dataset/data/ifc_models/bimspeed-warmond_ar.ifc",
+  "schema": "IFC4",
+  "applications": [
+   "Autodesk Revit 2021 (ESP)"
+  ],
+  "blind": false,
+  "checks": [
+   {
+    "question": "How many stairs are in this model?",
+    "expected_native_occurrences": 0,
+    "actual": 0,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 0,
+    "evidence_items": 0,
+    "confidence": 0.5
+   },
+   {
+    "question": "How many walls are in this model?",
+    "expected_native_occurrences": 353,
+    "actual": 353,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 353,
+    "evidence_items": 353,
+    "confidence": 1.0
+   },
+   {
+    "question": "How many doors are in this model?",
+    "expected_native_occurrences": 140,
+    "actual": 140,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 140,
+    "evidence_items": 140,
+    "confidence": 1.0
+   },
+   {
+    "question": "How many rooms (spaces) are in this model?",
+    "expected_native_occurrences": 179,
+    "actual": 179,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 179,
+    "evidence_items": 179,
+    "confidence": 0.69
+   }
+  ],
+  "index_errors": [],
+  "space_count": 179,
+  "area_status": {
+   "agree": 179
+  },
+  "profile_checks": [
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXay_",
+    "profile_shoelace_m2": 2.385553980048371,
+    "mesh_footprint_m2": 2.385553980048359,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayq",
+    "profile_shoelace_m2": 7.860110000000077,
+    "mesh_footprint_m2": 7.86011000000002,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaym",
+    "profile_shoelace_m2": 7.458899976000339,
+    "mesh_footprint_m2": 7.45889997599999,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayi",
+    "profile_shoelace_m2": 9.924299916600376,
+    "mesh_footprint_m2": 9.924299916599985,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXamx",
+    "profile_shoelace_m2": 2.436749998250093,
+    "mesh_footprint_m2": 2.4367499982499403,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaw0",
+    "profile_shoelace_m2": 10.709132212414715,
+    "mesh_footprint_m2": 10.709132212415053,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavy",
+    "profile_shoelace_m2": 11.18609812990644,
+    "mesh_footprint_m2": 11.186098129906435,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXav_",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.436750000000009,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavq",
+    "profile_shoelace_m2": 7.861920478774664,
+    "mesh_footprint_m2": 7.86192047877476,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavs",
+    "profile_shoelace_m2": 0.9766105702819914,
+    "mesh_footprint_m2": 0.9766105702821388,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavm",
+    "profile_shoelace_m2": 7.457587028990474,
+    "mesh_footprint_m2": 7.457587028990353,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxCV",
+    "profile_shoelace_m2": 2.4367500000000746,
+    "mesh_footprint_m2": 2.4367499999999387,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaua",
+    "profile_shoelace_m2": 25.27248943169991,
+    "mesh_footprint_m2": 25.27248943170002,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauW",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.436750000000009,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauU",
+    "profile_shoelace_m2": 7.862462736599582,
+    "mesh_footprint_m2": 7.862462736599986,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauQ",
+    "profile_shoelace_m2": 7.458899976000339,
+    "mesh_footprint_m2": 7.45889997599999,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauM",
+    "profile_shoelace_m2": 9.921536539477302,
+    "mesh_footprint_m2": 9.921536539477112,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxAR",
+    "profile_shoelace_m2": 2.4367500000000746,
+    "mesh_footprint_m2": 2.4367499999999387,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayg",
+    "profile_shoelace_m2": 2.4367500000000746,
+    "mesh_footprint_m2": 2.436750000000002,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayS",
+    "profile_shoelace_m2": 7.861900000000787,
+    "mesh_footprint_m2": 7.861900000000016,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayQ",
+    "profile_shoelace_m2": 7.350500000000011,
+    "mesh_footprint_m2": 7.350499999999997,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXanD",
+    "profile_shoelace_m2": 2.43674999999962,
+    "mesh_footprint_m2": 2.4367499999999396,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavg",
+    "profile_shoelace_m2": 2.4632503650000217,
+    "mesh_footprint_m2": 2.463250365000006,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavc",
+    "profile_shoelace_m2": 10.706710853550248,
+    "mesh_footprint_m2": 10.706710853550007,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavW",
+    "profile_shoelace_m2": 0.9775024092500644,
+    "mesh_footprint_m2": 0.9775024092500056,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavS",
+    "profile_shoelace_m2": 7.864196944022069,
+    "mesh_footprint_m2": 7.864196944022076,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavU",
+    "profile_shoelace_m2": 2.1160006957495625,
+    "mesh_footprint_m2": 2.116000695750011,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavO",
+    "profile_shoelace_m2": 1.3005014279999614,
+    "mesh_footprint_m2": 1.3005014279999911,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavQ",
+    "profile_shoelace_m2": 7.350717810301603,
+    "mesh_footprint_m2": 7.35071781030167,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxCn",
+    "profile_shoelace_m2": 2.43674999999962,
+    "mesh_footprint_m2": 2.4367499999999396,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauC",
+    "profile_shoelace_m2": 2.4367500000000746,
+    "mesh_footprint_m2": 2.436750000000002,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXau8",
+    "profile_shoelace_m2": 10.710009760709909,
+    "mesh_footprint_m2": 10.710009760709923,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauA",
+    "profile_shoelace_m2": 0.9778777922499557,
+    "mesh_footprint_m2": 0.977877792250006,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXau6",
+    "profile_shoelace_m2": 7.86280388375053,
+    "mesh_footprint_m2": 7.862803883750013,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaty",
+    "profile_shoelace_m2": 7.350505629700137,
+    "mesh_footprint_m2": 7.350505629699995,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxAj",
+    "profile_shoelace_m2": 2.43674999999962,
+    "mesh_footprint_m2": 2.4367499999999396,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayK",
+    "profile_shoelace_m2": 36.21990000000005,
+    "mesh_footprint_m2": 36.21989999999996,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayG",
+    "profile_shoelace_m2": 2.417685659999961,
+    "mesh_footprint_m2": 2.4176856600000125,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayA",
+    "profile_shoelace_m2": 7.8619000000003325,
+    "mesh_footprint_m2": 7.861899999999979,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXay4",
+    "profile_shoelace_m2": 7.42489999999998,
+    "mesh_footprint_m2": 7.4249000000000125,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXay6",
+    "profile_shoelace_m2": 9.924300000000585,
+    "mesh_footprint_m2": 9.924300000000049,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXanX",
+    "profile_shoelace_m2": 2.436750000000302,
+    "mesh_footprint_m2": 2.4367499999999396,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavG",
+    "profile_shoelace_m2": 2.417685659999961,
+    "mesh_footprint_m2": 2.4176856600000125,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavI",
+    "profile_shoelace_m2": 10.813510212749861,
+    "mesh_footprint_m2": 10.81351021275001,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavC",
+    "profile_shoelace_m2": 0.9775017422500696,
+    "mesh_footprint_m2": 0.9775017422499955,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavE",
+    "profile_shoelace_m2": 2.1160006957502446,
+    "mesh_footprint_m2": 2.1160006957499844,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXav8",
+    "profile_shoelace_m2": 1.3005014280001888,
+    "mesh_footprint_m2": 1.300501428000013,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavA",
+    "profile_shoelace_m2": 7.861907529350219,
+    "mesh_footprint_m2": 7.861907529349981,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXav4",
+    "profile_shoelace_m2": 7.424893660200041,
+    "mesh_footprint_m2": 7.424893660200013,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXav6",
+    "profile_shoelace_m2": 9.924307844550412,
+    "mesh_footprint_m2": 9.924307844550047,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxD5",
+    "profile_shoelace_m2": 2.436750000000302,
+    "mesh_footprint_m2": 2.4367499999999396,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatw",
+    "profile_shoelace_m2": 2.417685659999961,
+    "mesh_footprint_m2": 2.4176856600000125,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatq",
+    "profile_shoelace_m2": 10.811918719635742,
+    "mesh_footprint_m2": 10.811918719635703,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXats",
+    "profile_shoelace_m2": 0.978390568415989,
+    "mesh_footprint_m2": 0.978390568415896,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXati",
+    "profile_shoelace_m2": 7.862091526687891,
+    "mesh_footprint_m2": 7.862091526687215,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatk",
+    "profile_shoelace_m2": 7.425964895651305,
+    "mesh_footprint_m2": 7.425964895651667,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXate",
+    "profile_shoelace_m2": 9.921144822407541,
+    "mesh_footprint_m2": 9.921144822407806,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxB1",
+    "profile_shoelace_m2": 2.436750000000302,
+    "mesh_footprint_m2": 2.4367499999999396,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXax_",
+    "profile_shoelace_m2": 2.410183899287631,
+    "mesh_footprint_m2": 2.4101838992875204,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaxs",
+    "profile_shoelace_m2": 7.861899999999878,
+    "mesh_footprint_m2": 7.861899999999979,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaxi",
+    "profile_shoelace_m2": 7.350500000000011,
+    "mesh_footprint_m2": 7.3505,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXanx",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.436749999999938,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXau_",
+    "profile_shoelace_m2": 2.4372381293596845,
+    "mesh_footprint_m2": 2.437238129359543,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauu",
+    "profile_shoelace_m2": 10.706707155599588,
+    "mesh_footprint_m2": 10.706707155600006,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaus",
+    "profile_shoelace_m2": 7.861904488149776,
+    "mesh_footprint_m2": 7.861904488149975,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaum",
+    "profile_shoelace_m2": 0.9775032775000909,
+    "mesh_footprint_m2": 0.9775032774999919,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaui",
+    "profile_shoelace_m2": 7.350491440000042,
+    "mesh_footprint_m2": 7.350491440000004,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxDV",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.436749999999938,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatc",
+    "profile_shoelace_m2": 25.27162301958242,
+    "mesh_footprint_m2": 25.271623019582336,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatW",
+    "profile_shoelace_m2": 2.4361290004906095,
+    "mesh_footprint_m2": 2.4361290004905083,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatY",
+    "profile_shoelace_m2": 10.706690334600125,
+    "mesh_footprint_m2": 10.706690334600008,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatO",
+    "profile_shoelace_m2": 7.860505777539402,
+    "mesh_footprint_m2": 7.860505777539776,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatQ",
+    "profile_shoelace_m2": 0.9774968720000743,
+    "mesh_footprint_m2": 0.977496871999993,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxBR",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.436749999999938,
+    "pass": true
+   },
+   {
+    "item_id": "3Gg8ocnvr2IO_xir_UgWtl",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.436750000000002,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaoD",
+    "profile_shoelace_m2": 2.4367499982495247,
+    "mesh_footprint_m2": 2.4367499982499408,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxDn",
+    "profile_shoelace_m2": 2.4367499999993925,
+    "mesh_footprint_m2": 2.4367499999999414,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxBj",
+    "profile_shoelace_m2": 2.4367499999993925,
+    "mesh_footprint_m2": 2.4367499999999414,
+    "pass": true
+   },
+   {
+    "item_id": "3Gg8ocnvr2IO_xir_UgWtx",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.4367499999999893,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaoX",
+    "profile_shoelace_m2": 2.436750002750159,
+    "mesh_footprint_m2": 2.436750002749941,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXad2",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.4367499999999893,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxE5",
+    "profile_shoelace_m2": 2.436750000000302,
+    "mesh_footprint_m2": 2.436749999999938,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaba",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.4367499999999893,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxC1",
+    "profile_shoelace_m2": 2.436750000000302,
+    "mesh_footprint_m2": 2.436749999999938,
+    "pass": true
+   },
+   {
+    "item_id": "3Gg8ocnvr2IO_xir_UgWtH",
+    "profile_shoelace_m2": 2.417685659999961,
+    "mesh_footprint_m2": 2.4176856600000125,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXace",
+    "profile_shoelace_m2": 2.4039126899997427,
+    "mesh_footprint_m2": 2.4039126900000127,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXabI",
+    "profile_shoelace_m2": 2.4039126899997427,
+    "mesh_footprint_m2": 2.4039126900000127,
+    "pass": true
+   },
+   {
+    "item_id": "3Gg8ocnvr2IO_xir_UgWsl",
+    "profile_shoelace_m2": 2.4693143399999826,
+    "mesh_footprint_m2": 2.469314340000018,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXacM",
+    "profile_shoelace_m2": 2.5678373100004137,
+    "mesh_footprint_m2": 2.5678373100000162,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaau",
+    "profile_shoelace_m2": 2.4690413700000136,
+    "mesh_footprint_m2": 2.4690413700000065,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayk",
+    "profile_shoelace_m2": 11.379349900800207,
+    "mesh_footprint_m2": 11.37934990079998,
+    "pass": true
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXay0",
+    "profile_shoelace_m2": 11.379350000000613,
+    "mesh_footprint_m2": 11.37935000000006,
+    "pass": true
+   },
+   {
+    "item_id": "1m7pvZNoPB$xk2zNuOaspc",
+    "profile_shoelace_m2": 2.436750000000302,
+    "mesh_footprint_m2": 2.436750000000002,
+    "pass": true
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5W4",
+    "profile_shoelace_m2": 2.436750000000302,
+    "mesh_footprint_m2": 2.436750000000002,
+    "pass": true
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5Yu",
+    "profile_shoelace_m2": 2.436750000000302,
+    "mesh_footprint_m2": 2.436750000000002,
+    "pass": true
+   },
+   {
+    "item_id": "1m7pvZNoPB$xk2zNuOas0U",
+    "profile_shoelace_m2": 2.436750000000302,
+    "mesh_footprint_m2": 2.4367499999999893,
+    "pass": true
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5Xo",
+    "profile_shoelace_m2": 2.436750000000302,
+    "mesh_footprint_m2": 2.4367499999999893,
+    "pass": true
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5Ys",
+    "profile_shoelace_m2": 2.436750000000302,
+    "mesh_footprint_m2": 2.4367499999999893,
+    "pass": true
+   },
+   {
+    "item_id": "1m7pvZNoPB$xk2zNuOasBl",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.436750000000002,
+    "pass": true
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5Xl",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.436750000000002,
+    "pass": true
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5YZ",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.436750000000002,
+    "pass": true
+   },
+   {
+    "item_id": "1m7pvZNoPB$xk2zNuOas8_",
+    "profile_shoelace_m2": 2.436750000000302,
+    "mesh_footprint_m2": 2.436750000000015,
+    "pass": true
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5Xa",
+    "profile_shoelace_m2": 2.436750000000302,
+    "mesh_footprint_m2": 2.436750000000015,
+    "pass": true
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5YO",
+    "profile_shoelace_m2": 2.436750000000302,
+    "mesh_footprint_m2": 2.436750000000015,
+    "pass": true
+   },
+   {
+    "item_id": "1m7pvZNoPB$xk2zNuOas98",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.436750000000015,
+    "pass": true
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5XI",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.436750000000015,
+    "pass": true
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5YM",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.436750000000015,
+    "pass": true
+   },
+   {
+    "item_id": "1m7pvZNoPB$xk2zNuOasKN",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.436750000000002,
+    "pass": true
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5XF",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.436750000000002,
+    "pass": true
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5Y3",
+    "profile_shoelace_m2": 2.436749999999847,
+    "mesh_footprint_m2": 2.436750000000002,
+    "pass": true
+   }
+  ],
+  "area_answer": {
+   "value": 1223.3043,
+   "abstained": false,
+   "confidence": 1.0,
+   "cross_check_trace_rows": 109
+  },
+  "space_measurements": [
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaz0",
+    "measured_m2": 10.706699999999953,
+    "stored_net_m2": 10.7067,
+    "status": "agree",
+    "difference_pct": 4.3136800157290965e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.7067,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaz2",
+    "measured_m2": 25.269900000000042,
+    "stored_net_m2": 25.2699,
+    "status": "agree",
+    "difference_pct": 1.6870887556185794e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 25.2699,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayy",
+    "measured_m2": 10.862500000000008,
+    "stored_net_m2": 10.8625,
+    "status": "agree",
+    "difference_pct": 6.541244978228765e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.8625,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXay_",
+    "measured_m2": 2.385553980048359,
+    "stored_net_m2": 2.385553979,
+    "status": "agree",
+    "difference_pct": 4.3946151963651716e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.385553979,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayu",
+    "measured_m2": 2.070000000000007,
+    "stored_net_m2": 2.07,
+    "status": "agree",
+    "difference_pct": 3.4325736027057865e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.07,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayw",
+    "measured_m2": 1.2664999999999933,
+    "stored_net_m2": 1.2665,
+    "status": "agree",
+    "difference_pct": 5.259643227596506e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 1.2665,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayq",
+    "measured_m2": 7.86011000000002,
+    "stored_net_m2": 7.86011,
+    "status": "agree",
+    "difference_pct": 2.598959003513033e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.86011,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXays",
+    "measured_m2": 0.9775000000000065,
+    "stored_net_m2": 0.9775,
+    "status": "agree",
+    "difference_pct": 6.587512575780936e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.9775,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaym",
+    "measured_m2": 7.45889997599999,
+    "stored_net_m2": 7.4589,
+    "status": "agree",
+    "difference_pct": 3.2176339750630693e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.4589,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayo",
+    "measured_m2": 0.520889999999992,
+    "stored_net_m2": 0.52089,
+    "status": "agree",
+    "difference_pct": 1.5346053441803932e-12,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.52089,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayi",
+    "measured_m2": 9.924299916599985,
+    "stored_net_m2": 9.9243,
+    "status": "agree",
+    "difference_pct": 8.403617029230568e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 9.9243,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXamx",
+    "measured_m2": 2.4367499982499403,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 7.181941742101783e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaw0",
+    "measured_m2": 10.709132212415053,
+    "stored_net_m2": 10.70913223,
+    "status": "agree",
+    "difference_pct": 1.6420515204425673e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.70913223,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaw2",
+    "measured_m2": 25.269900000000042,
+    "stored_net_m2": 25.2699,
+    "status": "agree",
+    "difference_pct": 1.6870887556185794e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 25.2699,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavy",
+    "measured_m2": 11.186098129906435,
+    "stored_net_m2": 11.18609814,
+    "status": "agree",
+    "difference_pct": 9.023311772907741e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 11.18609814,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXav_",
+    "measured_m2": 2.436750000000009,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 3.6449304183856447e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavu",
+    "measured_m2": 2.070000000000007,
+    "stored_net_m2": 2.07,
+    "status": "agree",
+    "difference_pct": 3.4325736027057865e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.07,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavw",
+    "measured_m2": 1.2664999999999933,
+    "stored_net_m2": 1.2665,
+    "status": "agree",
+    "difference_pct": 5.259643227596506e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 1.2665,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavq",
+    "measured_m2": 7.86192047877476,
+    "stored_net_m2": 7.871588777,
+    "status": "agree",
+    "difference_pct": 0.12297629124261084,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.871588777,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavs",
+    "measured_m2": 0.9766105702821388,
+    "stored_net_m2": 0.9766105706,
+    "status": "agree",
+    "difference_pct": 3.254738290700146e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.9766105706,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavm",
+    "measured_m2": 7.457587028990353,
+    "stored_net_m2": 7.457587009,
+    "status": "agree",
+    "difference_pct": 2.680539066446619e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.457587009,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavo",
+    "measured_m2": 0.5198583236379375,
+    "stored_net_m2": 0.5198583234,
+    "status": "agree",
+    "difference_pct": 4.576967160157567e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.5198583234,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxCV",
+    "measured_m2": 2.4367499999999387,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 2.5150019886861673e-12,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaug",
+    "measured_m2": 10.70671463693996,
+    "stored_net_m2": 10.70671464,
+    "status": "agree",
+    "difference_pct": 2.8580563102694016e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.70671464,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaua",
+    "measured_m2": 25.27248943170002,
+    "stored_net_m2": 25.24941295,
+    "status": "agree",
+    "difference_pct": 0.09131067899893734,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 25.24941295,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauc",
+    "measured_m2": 10.918394445749996,
+    "stored_net_m2": 10.91839445,
+    "status": "agree",
+    "difference_pct": 3.892516465949952e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.91839445,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauW",
+    "measured_m2": 2.436750000000009,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 3.6449304183856447e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauY",
+    "measured_m2": 2.0689080624000065,
+    "stored_net_m2": 2.068908063,
+    "status": "agree",
+    "difference_pct": 2.9000485773643383e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.068908063,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauS",
+    "measured_m2": 1.2662235349499935,
+    "stored_net_m2": 1.266223535,
+    "status": "agree",
+    "difference_pct": 3.9492587248851175e-09,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 1.266223535,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauU",
+    "measured_m2": 7.862462736599986,
+    "stored_net_m2": 7.887273148,
+    "status": "agree",
+    "difference_pct": 0.31555521763582917,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.887273148,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauO",
+    "measured_m2": 0.9769906642342057,
+    "stored_net_m2": 0.9769906646,
+    "status": "agree",
+    "difference_pct": 3.744091905307741e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.9769906646,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauQ",
+    "measured_m2": 7.45889997599999,
+    "stored_net_m2": 7.4589,
+    "status": "agree",
+    "difference_pct": 3.2176339750630693e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.4589,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauK",
+    "measured_m2": 0.5183420709799319,
+    "stored_net_m2": 0.5183420712,
+    "status": "agree",
+    "difference_pct": 4.245614762819653e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.5183420712,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauM",
+    "measured_m2": 9.921536539477112,
+    "stored_net_m2": 9.921536624,
+    "status": "agree",
+    "difference_pct": 8.519132889114394e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 9.921536624,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2a3TJhjgD3FO9iKP6TfhaC",
+    "measured_m2": 32.30336649142035,
+    "stored_net_m2": 32.3033665,
+    "status": "agree",
+    "difference_pct": 2.6559629079549412e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 32.3033665,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2a3TJhjgD3FO9iKP6TfhaE",
+    "measured_m2": 21.542530963249995,
+    "stored_net_m2": 21.54253096,
+    "status": "agree",
+    "difference_pct": 1.5086407707625086e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 21.54253096,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxAR",
+    "measured_m2": 2.4367499999999387,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 2.5150019886861673e-12,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaye",
+    "measured_m2": 10.917499999999997,
+    "stored_net_m2": 10.9175,
+    "status": "agree",
+    "difference_pct": 3.254145801511795e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.9175,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayg",
+    "measured_m2": 2.436750000000002,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 9.112326045964138e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaya",
+    "measured_m2": 25.269900000000042,
+    "stored_net_m2": 25.2699,
+    "status": "agree",
+    "difference_pct": 1.6870887556185794e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 25.2699,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayc",
+    "measured_m2": 10.706699999999953,
+    "stored_net_m2": 10.7067,
+    "status": "agree",
+    "difference_pct": 4.3136800157290965e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.7067,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayW",
+    "measured_m2": 0.9775000000000065,
+    "stored_net_m2": 0.9775,
+    "status": "agree",
+    "difference_pct": 6.587512575780936e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.9775,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayY",
+    "measured_m2": 0.5190999999999961,
+    "stored_net_m2": 0.5191,
+    "status": "agree",
+    "difference_pct": 7.48561083835114e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.5191,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayS",
+    "measured_m2": 7.861900000000016,
+    "stored_net_m2": 7.8619,
+    "status": "agree",
+    "difference_pct": 2.0335048213030211e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.8619,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayU",
+    "measured_m2": 2.1160000000000143,
+    "stored_net_m2": 2.116,
+    "status": "agree",
+    "difference_pct": 6.715904874859124e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.116,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayO",
+    "measured_m2": 1.3004999999999922,
+    "stored_net_m2": 1.3005,
+    "status": "agree",
+    "difference_pct": 5.97582558429538e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 1.3005,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayQ",
+    "measured_m2": 7.350499999999997,
+    "stored_net_m2": 7.3505,
+    "status": "agree",
+    "difference_pct": 4.833295257194072e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.3505,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXanD",
+    "measured_m2": 2.4367499999999396,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 2.478552684502309e-12,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXave",
+    "measured_m2": 10.918394445749996,
+    "stored_net_m2": 10.91839445,
+    "status": "agree",
+    "difference_pct": 3.892516465949952e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.91839445,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavg",
+    "measured_m2": 2.463250365000006,
+    "stored_net_m2": 2.463250378,
+    "status": "agree",
+    "difference_pct": 5.277577202428399e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.463250378,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXava",
+    "measured_m2": 25.27117824429004,
+    "stored_net_m2": 25.27117824,
+    "status": "agree",
+    "difference_pct": 1.6976020197848913e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 25.27117824,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavc",
+    "measured_m2": 10.706710853550007,
+    "stored_net_m2": 10.70671086,
+    "status": "agree",
+    "difference_pct": 6.024252105333546e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.70671086,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavW",
+    "measured_m2": 0.9775024092500056,
+    "stored_net_m2": 0.9775024061,
+    "status": "agree",
+    "difference_pct": 3.222504169702811e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.9775024061,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavY",
+    "measured_m2": 0.5192759232799963,
+    "stored_net_m2": 0.5192759232,
+    "status": "agree",
+    "difference_pct": 1.540534199152761e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.5192759232,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavS",
+    "measured_m2": 7.864196944022076,
+    "stored_net_m2": 7.86419707,
+    "status": "agree",
+    "difference_pct": 1.6019172076849556e-06,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.86419707,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavU",
+    "measured_m2": 2.116000695750011,
+    "stored_net_m2": 2.1160007,
+    "status": "agree",
+    "difference_pct": 2.0085006653651988e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.1160007,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavO",
+    "measured_m2": 1.3005014279999911,
+    "stored_net_m2": 1.300501428,
+    "status": "agree",
+    "difference_pct": 6.829507454413432e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 1.300501428,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavQ",
+    "measured_m2": 7.35071781030167,
+    "stored_net_m2": 7.367448378,
+    "status": "agree",
+    "difference_pct": 0.2276045432581151,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.367448378,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxCn",
+    "measured_m2": 2.4367499999999396,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 2.478552684502309e-12,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauI",
+    "measured_m2": 10.918394445749996,
+    "stored_net_m2": 10.91839445,
+    "status": "agree",
+    "difference_pct": 3.892516465949952e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.91839445,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauC",
+    "measured_m2": 2.436750000000002,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 9.112326045964138e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauE",
+    "measured_m2": 25.27251377494055,
+    "stored_net_m2": 25.27251377,
+    "status": "agree",
+    "difference_pct": 1.9549101237011513e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 25.27251377,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXau8",
+    "measured_m2": 10.710009760709923,
+    "stored_net_m2": 10.71000949,
+    "status": "agree",
+    "difference_pct": 2.5276347067763735e-06,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.71000949,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauA",
+    "measured_m2": 0.977877792250006,
+    "stored_net_m2": 0.977877796,
+    "status": "agree",
+    "difference_pct": 3.834828862793543e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.977877796,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXau4",
+    "measured_m2": 0.5190999999999961,
+    "stored_net_m2": 0.5191,
+    "status": "agree",
+    "difference_pct": 7.48561083835114e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.5191,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXau6",
+    "measured_m2": 7.862803883750013,
+    "stored_net_m2": 7.862803894,
+    "status": "agree",
+    "difference_pct": 1.3036045142137709e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.862803894,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXau0",
+    "measured_m2": 2.1159975953500076,
+    "stored_net_m2": 2.115997596,
+    "status": "agree",
+    "difference_pct": 3.0718017151487276e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.115997596,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXau2",
+    "measured_m2": 1.3004982226499933,
+    "stored_net_m2": 1.300498223,
+    "status": "agree",
+    "difference_pct": 2.6913277096532864e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 1.300498223,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaty",
+    "measured_m2": 7.350505629699995,
+    "stored_net_m2": 7.350397505,
+    "status": "agree",
+    "difference_pct": 0.001470983160101718,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.350397505,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2a3TJhjgD3FO9iKP6Tfha8",
+    "measured_m2": 21.542530963249995,
+    "stored_net_m2": 21.54253096,
+    "status": "agree",
+    "difference_pct": 1.5086407707625086e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 21.54253096,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2a3TJhjgD3FO9iKP6TfhaA",
+    "measured_m2": 30.78816174218541,
+    "stored_net_m2": 30.78816174,
+    "status": "agree",
+    "difference_pct": 7.098212635266147e-09,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 30.78816174,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxAj",
+    "measured_m2": 2.4367499999999396,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 2.478552684502309e-12,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayK",
+    "measured_m2": 36.21989999999996,
+    "stored_net_m2": 36.2199,
+    "status": "agree",
+    "difference_pct": 1.1770480908452553e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 36.2199,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayM",
+    "measured_m2": 10.862500000000008,
+    "stored_net_m2": 10.8625,
+    "status": "agree",
+    "difference_pct": 6.541244978228765e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.8625,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayG",
+    "measured_m2": 2.4176856600000125,
+    "stored_net_m2": 2.41768566,
+    "status": "agree",
+    "difference_pct": 5.143140848095897e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.41768566,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayC",
+    "measured_m2": 0.9775000000000065,
+    "stored_net_m2": 0.9775,
+    "status": "agree",
+    "difference_pct": 6.587512575780936e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.9775,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayE",
+    "measured_m2": 2.1160000000000143,
+    "stored_net_m2": 2.116,
+    "status": "agree",
+    "difference_pct": 6.715904874859124e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.116,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXay8",
+    "measured_m2": 1.3004999999999922,
+    "stored_net_m2": 1.3005,
+    "status": "agree",
+    "difference_pct": 5.97582558429538e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 1.3005,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayA",
+    "measured_m2": 7.861899999999979,
+    "stored_net_m2": 7.8619,
+    "status": "agree",
+    "difference_pct": 2.7113397617373743e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.8619,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXay4",
+    "measured_m2": 7.4249000000000125,
+    "stored_net_m2": 7.4249,
+    "status": "agree",
+    "difference_pct": 1.6747024035073513e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.4249,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXay6",
+    "measured_m2": 9.924300000000049,
+    "stored_net_m2": 9.9243,
+    "status": "agree",
+    "difference_pct": 4.83274736392557e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 9.9243,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaxk",
+    "measured_m2": 0.5190999999999961,
+    "stored_net_m2": 0.5191,
+    "status": "agree",
+    "difference_pct": 7.48561083835114e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.5191,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXanX",
+    "measured_m2": 2.4367499999999396,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 2.478552684502309e-12,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavK",
+    "measured_m2": 25.113978244290045,
+    "stored_net_m2": 25.11397824,
+    "status": "agree",
+    "difference_pct": 1.7082295102625362e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 25.11397824,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavM",
+    "measured_m2": 10.862505896000007,
+    "stored_net_m2": 10.8625059,
+    "status": "agree",
+    "difference_pct": 3.682385320506088e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.8625059,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavG",
+    "measured_m2": 2.4176856600000125,
+    "stored_net_m2": 2.41768566,
+    "status": "agree",
+    "difference_pct": 5.143140848095897e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.41768566,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavI",
+    "measured_m2": 10.81351021275001,
+    "stored_net_m2": 10.81351021,
+    "status": "agree",
+    "difference_pct": 2.5431242430937467e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.81351021,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavC",
+    "measured_m2": 0.9775017422499955,
+    "stored_net_m2": 0.977501738,
+    "status": "agree",
+    "difference_pct": 4.3478138135130163e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.977501738,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavE",
+    "measured_m2": 2.1160006957499844,
+    "stored_net_m2": 2.1160007,
+    "status": "agree",
+    "difference_pct": 2.008513257682724e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.1160007,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXav8",
+    "measured_m2": 1.300501428000013,
+    "stored_net_m2": 1.300501428,
+    "status": "agree",
+    "difference_pct": 9.90278580889931e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 1.300501428,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXavA",
+    "measured_m2": 7.861907529349981,
+    "stored_net_m2": 7.861907519,
+    "status": "agree",
+    "difference_pct": 1.3164720238439814e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.861907519,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXav4",
+    "measured_m2": 7.424893660200013,
+    "stored_net_m2": 7.424893643,
+    "status": "agree",
+    "difference_pct": 2.3165332402875788e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.424893643,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXav6",
+    "measured_m2": 9.924307844550047,
+    "stored_net_m2": 9.92430785,
+    "status": "agree",
+    "difference_pct": 5.4915198750829065e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 9.92430785,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauk",
+    "measured_m2": 0.5190999999999961,
+    "stored_net_m2": 0.5191,
+    "status": "agree",
+    "difference_pct": 7.48561083835114e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.5191,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxD5",
+    "measured_m2": 2.4367499999999396,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 2.478552684502309e-12,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXat_",
+    "measured_m2": 25.107537149919544,
+    "stored_net_m2": 25.10753715,
+    "status": "agree",
+    "difference_pct": 3.2044064493348347e-10,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 25.10753715,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatu",
+    "measured_m2": 10.862500000000008,
+    "stored_net_m2": 10.8625,
+    "status": "agree",
+    "difference_pct": 6.541244978228765e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.8625,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatw",
+    "measured_m2": 2.4176856600000125,
+    "stored_net_m2": 2.41768566,
+    "status": "agree",
+    "difference_pct": 5.143140848095897e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.41768566,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatq",
+    "measured_m2": 10.811918719635703,
+    "stored_net_m2": 10.811919,
+    "status": "agree",
+    "difference_pct": 2.593104002922921e-06,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.811919,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXats",
+    "measured_m2": 0.978390568415896,
+    "stored_net_m2": 0.9783905057,
+    "status": "agree",
+    "difference_pct": 6.410108402165008e-06,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.9783905057,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatm",
+    "measured_m2": 2.116741964621129,
+    "stored_net_m2": 2.116741964,
+    "status": "agree",
+    "difference_pct": 2.9343629807124052e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.116741964,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXato",
+    "measured_m2": 1.2995736297335352,
+    "stored_net_m2": 1.29957363,
+    "status": "agree",
+    "difference_pct": 2.0504021017995324e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 1.29957363,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXati",
+    "measured_m2": 7.862091526687215,
+    "stored_net_m2": 7.862091594,
+    "status": "agree",
+    "difference_pct": 8.561689272001219e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.862091594,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatk",
+    "measured_m2": 7.425964895651667,
+    "stored_net_m2": 7.407500734,
+    "status": "agree",
+    "difference_pct": 0.2486432660418152,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.407500734,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXate",
+    "measured_m2": 9.921144822407806,
+    "stored_net_m2": 9.921144549,
+    "status": "agree",
+    "difference_pct": 2.755809047352795e-06,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 9.921144549,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatG",
+    "measured_m2": 0.5191038377599957,
+    "stored_net_m2": 0.5191038377,
+    "status": "agree",
+    "difference_pct": 1.1557547976049607e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.5191038377,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2a3TJhjgD3FO9iKP6Tfhbq",
+    "measured_m2": 30.784308574594455,
+    "stored_net_m2": 30.78430858,
+    "status": "agree",
+    "difference_pct": 1.755942063714784e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 30.78430858,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2a3TJhjgD3FO9iKP6Tfhbs",
+    "measured_m2": 21.54920968053663,
+    "stored_net_m2": 21.54920968,
+    "status": "agree",
+    "difference_pct": 2.490255112419021e-09,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 21.54920968,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxB1",
+    "measured_m2": 2.4367499999999396,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 2.478552684502309e-12,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXay2",
+    "measured_m2": 10.862500000000008,
+    "stored_net_m2": 10.8625,
+    "status": "agree",
+    "difference_pct": 6.541244978228765e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.8625,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaxy",
+    "measured_m2": 25.269900000000042,
+    "stored_net_m2": 25.2699,
+    "status": "agree",
+    "difference_pct": 1.6870887556185794e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 25.2699,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXax_",
+    "measured_m2": 2.4101838992875204,
+    "stored_net_m2": 2.410183882,
+    "status": "agree",
+    "difference_pct": 7.172697614184538e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.410183882,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaxu",
+    "measured_m2": 10.706699999999953,
+    "stored_net_m2": 10.7067,
+    "status": "agree",
+    "difference_pct": 4.3136800157290965e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.7067,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaxw",
+    "measured_m2": 2.1160000000000143,
+    "stored_net_m2": 2.116,
+    "status": "agree",
+    "difference_pct": 6.715904874859124e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.116,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaxq",
+    "measured_m2": 1.3004999999999922,
+    "stored_net_m2": 1.3005,
+    "status": "agree",
+    "difference_pct": 5.97582558429538e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 1.3005,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaxs",
+    "measured_m2": 7.861899999999979,
+    "stored_net_m2": 7.8619,
+    "status": "agree",
+    "difference_pct": 2.7113397617373743e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.8619,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaxm",
+    "measured_m2": 0.9775000000000065,
+    "stored_net_m2": 0.9775,
+    "status": "agree",
+    "difference_pct": 6.587512575780936e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.9775,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaxo",
+    "measured_m2": 0.5190999999999961,
+    "stored_net_m2": 0.5191,
+    "status": "agree",
+    "difference_pct": 7.48561083835114e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.5191,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaxi",
+    "measured_m2": 7.3505,
+    "stored_net_m2": 7.3505,
+    "status": "agree",
+    "difference_pct": 0.0,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.3505,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXanx",
+    "measured_m2": 2.436749999999938,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 2.5514512928700258e-12,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXav2",
+    "measured_m2": 10.862505896000007,
+    "stored_net_m2": 10.8625059,
+    "status": "agree",
+    "difference_pct": 3.682385320506088e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.8625059,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauy",
+    "measured_m2": 25.27117824429004,
+    "stored_net_m2": 25.27117824,
+    "status": "agree",
+    "difference_pct": 1.6976020197848913e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 25.27117824,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXau_",
+    "measured_m2": 2.437238129359543,
+    "stored_net_m2": 2.437238144,
+    "status": "agree",
+    "difference_pct": 6.006986807967248e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.437238144,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauu",
+    "measured_m2": 10.706707155600006,
+    "stored_net_m2": 10.70670716,
+    "status": "agree",
+    "difference_pct": 4.109568862809284e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.70670716,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauw",
+    "measured_m2": 2.1160000000000143,
+    "stored_net_m2": 2.116,
+    "status": "agree",
+    "difference_pct": 6.715904874859124e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.116,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauq",
+    "measured_m2": 1.3004999999999922,
+    "stored_net_m2": 1.3005,
+    "status": "agree",
+    "difference_pct": 5.97582558429538e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 1.3005,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaus",
+    "measured_m2": 7.861904488149975,
+    "stored_net_m2": 7.861904474,
+    "status": "agree",
+    "difference_pct": 1.7998151143595693e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.861904474,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaum",
+    "measured_m2": 0.9775032774999919,
+    "stored_net_m2": 0.9775032771,
+    "status": "agree",
+    "difference_pct": 4.091975317884005e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.9775032771,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXauo",
+    "measured_m2": 0.5191038377599957,
+    "stored_net_m2": 0.5191038377,
+    "status": "agree",
+    "difference_pct": 1.1557547976049607e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.5191038377,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaui",
+    "measured_m2": 7.350491440000004,
+    "stored_net_m2": 7.350491424,
+    "status": "agree",
+    "difference_pct": 2.1767257494256988e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.350491424,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxDV",
+    "measured_m2": 2.436749999999938,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 2.5514512928700258e-12,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXata",
+    "measured_m2": 10.860109698299388,
+    "stored_net_m2": 10.8601097,
+    "status": "agree",
+    "difference_pct": 1.5659261563762354e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.8601097,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatc",
+    "measured_m2": 25.271623019582336,
+    "stored_net_m2": 25.27162311,
+    "status": "agree",
+    "difference_pct": 3.5778336989535984e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 25.27162311,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatW",
+    "measured_m2": 2.4361290004905083,
+    "stored_net_m2": 2.436129036,
+    "status": "agree",
+    "difference_pct": 1.4576195178613402e-06,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.436129036,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatY",
+    "measured_m2": 10.706690334600008,
+    "stored_net_m2": 10.70669035,
+    "status": "agree",
+    "difference_pct": 1.4383522742458066e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 10.70669035,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatS",
+    "measured_m2": 2.1163765065500137,
+    "stored_net_m2": 2.116376507,
+    "status": "agree",
+    "difference_pct": 2.1262108565039847e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.116376507,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatU",
+    "measured_m2": 1.3004999999999922,
+    "stored_net_m2": 1.3005,
+    "status": "agree",
+    "difference_pct": 5.97582558429538e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 1.3005,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatO",
+    "measured_m2": 7.860505777539776,
+    "stored_net_m2": 7.860654836,
+    "status": "agree",
+    "difference_pct": 0.0018962960456010353,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 7.860654836,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatQ",
+    "measured_m2": 0.977496871999993,
+    "stored_net_m2": 0.9774968764,
+    "status": "agree",
+    "difference_pct": 4.50130036364537e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.9774968764,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXatK",
+    "measured_m2": 0.5185177969509934,
+    "stored_net_m2": 0.518517797,
+    "status": "agree",
+    "difference_pct": 9.451281491735511e-09,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 0.518517797,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2a3TJhjgD3FO9iKP6Tfhbm",
+    "measured_m2": 21.535852245963355,
+    "stored_net_m2": 21.53585225,
+    "status": "agree",
+    "difference_pct": 1.8743844109140998e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 21.53585225,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2a3TJhjgD3FO9iKP6Tfhbo",
+    "measured_m2": 32.31004521654055,
+    "stored_net_m2": 32.31004521,
+    "status": "agree",
+    "difference_pct": 2.024309450594876e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 32.31004521,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxBR",
+    "measured_m2": 2.436749999999938,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 2.5514512928700258e-12,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3Gg8ocnvr2IO_xir_UgWtl",
+    "measured_m2": 2.436750000000002,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 9.112326045964138e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaoD",
+    "measured_m2": 2.4367499982499408,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 7.181939919636571e-08,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxDn",
+    "measured_m2": 2.4367499999999414,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 2.405654076134592e-12,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxBj",
+    "measured_m2": 2.4367499999999414,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 2.405654076134592e-12,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3Gg8ocnvr2IO_xir_UgWtx",
+    "measured_m2": 2.4367499999999893,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 4.3739165020628085e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaoX",
+    "measured_m2": 2.436750002749941,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 1.1285282284057551e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXad2",
+    "measured_m2": 2.4367499999999893,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 4.3739165020628085e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxE5",
+    "measured_m2": 2.436749999999938,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 2.5514512928700258e-12,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaba",
+    "measured_m2": 2.4367499999999893,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 4.3739165020628085e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXxC1",
+    "measured_m2": 2.436749999999938,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 2.5514512928700258e-12,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3Gg8ocnvr2IO_xir_UgWtH",
+    "measured_m2": 2.4176856600000125,
+    "stored_net_m2": 2.41768566,
+    "status": "agree",
+    "difference_pct": 5.143140848095897e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.41768566,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXace",
+    "measured_m2": 2.4039126900000127,
+    "stored_net_m2": 2.403912676,
+    "status": "agree",
+    "difference_pct": 5.823844086735353e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.403912676,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXabI",
+    "measured_m2": 2.4039126900000127,
+    "stored_net_m2": 2.403912676,
+    "status": "agree",
+    "difference_pct": 5.823844086735353e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.403912676,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3Gg8ocnvr2IO_xir_UgWsl",
+    "measured_m2": 2.469314340000018,
+    "stored_net_m2": 2.46931434,
+    "status": "agree",
+    "difference_pct": 7.373568163805518e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.46931434,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXacM",
+    "measured_m2": 2.5678373100000162,
+    "stored_net_m2": 2.567837324,
+    "status": "agree",
+    "difference_pct": 5.452052505182238e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.567837324,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXaau",
+    "measured_m2": 2.4690413700000065,
+    "stored_net_m2": 2.469041356,
+    "status": "agree",
+    "difference_pct": 5.670219485806216e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.469041356,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXayk",
+    "measured_m2": 11.37934990079998,
+    "stored_net_m2": 11.37935,
+    "status": "agree",
+    "difference_pct": 8.717547268264316e-07,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 11.37935,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "2J_oFeqlHDNPq7R3anXay0",
+    "measured_m2": 11.37935000000006,
+    "stored_net_m2": 11.37935,
+    "status": "agree",
+    "difference_pct": 5.151416882353382e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 11.37935,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "1m7pvZNoPB$xk2zNuOaspc",
+    "measured_m2": 2.436750000000002,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 9.112326045964138e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5W4",
+    "measured_m2": 2.436750000000002,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 9.112326045964138e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5Yu",
+    "measured_m2": 2.436750000000002,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 9.112326045964138e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "1m7pvZNoPB$xk2zNuOas0U",
+    "measured_m2": 2.4367499999999893,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 4.3739165020628085e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5Xo",
+    "measured_m2": 2.4367499999999893,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 4.3739165020628085e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5Ys",
+    "measured_m2": 2.4367499999999893,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 4.3739165020628085e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "1m7pvZNoPB$xk2zNuOasBl",
+    "measured_m2": 2.436750000000002,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 9.112326045964138e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5Xl",
+    "measured_m2": 2.436750000000002,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 9.112326045964138e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5YZ",
+    "measured_m2": 2.436750000000002,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 9.112326045964138e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "1m7pvZNoPB$xk2zNuOas8_",
+    "measured_m2": 2.436750000000015,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 6.19638171125558e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5Xa",
+    "measured_m2": 2.436750000000015,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 6.19638171125558e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5YO",
+    "measured_m2": 2.436750000000015,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 6.19638171125558e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "1m7pvZNoPB$xk2zNuOas98",
+    "measured_m2": 2.436750000000015,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 6.19638171125558e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5XI",
+    "measured_m2": 2.436750000000015,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 6.19638171125558e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5YM",
+    "measured_m2": 2.436750000000015,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 6.19638171125558e-13,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "1m7pvZNoPB$xk2zNuOasKN",
+    "measured_m2": 2.436750000000002,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 9.112326045964138e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5XF",
+    "measured_m2": 2.436750000000002,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 9.112326045964138e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   },
+   {
+    "item_id": "3YtUpf_rT0oADf3LIMO5Y3",
+    "measured_m2": 2.436750000000002,
+    "stored_net_m2": 2.43675,
+    "status": "agree",
+    "difference_pct": 9.112326045964138e-14,
+    "method": "IfcSpace geometry horizontal footprint",
+    "stored_source": "Qto_SpaceBaseQuantities.NetFloorArea; declared area unit converted to m\u00b2",
+    "stored_gross_m2": 2.43675,
+    "stored_gross_source": "Qto_SpaceBaseQuantities.GrossFloorArea; declared area unit converted to m\u00b2"
+   }
+  ],
+  "seconds": 1.367
+ },
+ {
+  "doc_id": "opening_design__uli-44-e-mifflin-suite-802-models-model-ryan",
+  "source": "data/full/junction-dataset/data/opening_design/ULI-44_E_Mifflin-Suite_802/Models/Model_Ryan.ifc",
+  "schema": "IFC2X3",
+  "applications": [
+   "Autodesk Revit 2016 (ENU)"
+  ],
+  "blind": false,
+  "checks": [
+   {
+    "question": "How many stairs are in this model?",
+    "expected_native_occurrences": 0,
+    "actual": null,
+    "pass": false,
+    "honest_unavailable": true,
+    "raw_native_before_hierarchy": 0,
+    "evidence_items": 20,
+    "confidence": 0.0
+   },
+   {
+    "question": "How many walls are in this model?",
+    "expected_native_occurrences": 39,
+    "actual": 39,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 39,
+    "evidence_items": 39,
+    "confidence": 0.6
+   },
+   {
+    "question": "How many doors are in this model?",
+    "expected_native_occurrences": 0,
+    "actual": null,
+    "pass": false,
+    "honest_unavailable": true,
+    "raw_native_before_hierarchy": 0,
+    "evidence_items": 20,
+    "confidence": 0.0
+   },
+   {
+    "question": "How many rooms (spaces) are in this model?",
+    "expected_native_occurrences": 0,
+    "actual": null,
+    "pass": false,
+    "honest_unavailable": true,
+    "raw_native_before_hierarchy": 0,
+    "evidence_items": 20,
+    "confidence": 0.0
+   }
+  ],
+  "index_errors": [],
+  "space_count": 0,
+  "area_status": {},
+  "profile_checks": [],
+  "area_answer": {
+   "value": null,
+   "abstained": true,
+   "confidence": 0.0,
+   "cross_check_trace_rows": 1
+  },
+  "space_measurements": [],
+  "seconds": 0.071
+ }
+]

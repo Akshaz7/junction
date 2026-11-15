@@ -1,0 +1,65 @@
+[
+ {
+  "doc_id": "ifc_models__resbim-413-model",
+  "source": "data/full/junction-dataset/data/ifc_models/resbim-413_model.ifc",
+  "schema": "IFC4",
+  "applications": [
+   "Autodesk Revit 2026 (ENG)"
+  ],
+  "blind": true,
+  "checks": [
+   {
+    "question": "How many stairs are in this model?",
+    "expected_native_occurrences": 0,
+    "actual": 0,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 0,
+    "evidence_items": 0,
+    "confidence": 0.5
+   },
+   {
+    "question": "How many walls are in this model?",
+    "expected_native_occurrences": 14,
+    "actual": 14,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 14,
+    "evidence_items": 14,
+    "confidence": 1.0
+   },
+   {
+    "question": "How many doors are in this model?",
+    "expected_native_occurrences": 5,
+    "actual": 5,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 5,
+    "evidence_items": 5,
+    "confidence": 1.0
+   },
+   {
+    "question": "How many rooms (spaces) are in this model?",
+    "expected_native_occurrences": 0,
+    "actual": 0,
+    "pass": true,
+    "honest_unavailable": false,
+    "raw_native_before_hierarchy": 0,
+    "evidence_items": 0,
+    "confidence": 0.5
+   }
+  ],
+  "index_errors": [],
+  "space_count": 0,
+  "area_status": {},
+  "profile_checks": [],
+  "area_answer": {
+   "value": null,
+   "abstained": true,
+   "confidence": 0.0,
+   "cross_check_trace_rows": 1
+  },
+  "space_measurements": [],
+  "seconds": 0.026
+ }
+]
