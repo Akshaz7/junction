@@ -14,7 +14,7 @@ Core idea: read each drawing ONCE into a structured **plan map** (walls, doors, 
 
 Judging (25% each): accuracy / visual verifiability / creativity / low inference cost.
 
-Deadlines (Finland time): hard freeze Sun 15 Nov 07:00, final report 08:30, submission 10:00. Check `date` every lead loop.
+Deadlines (Finland time): hard freeze Sun 15 Nov 07:30 (moved from 07:00 by Ash), final report 08:30, submission 10:00. Check `date` every lead loop.
 
 ## Fixed decisions (do not reopen; see DECISIONS.md)
 - English only answers. Filter non-English questions out of tests.
