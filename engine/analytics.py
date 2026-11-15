@@ -1421,16 +1421,33 @@ _OUTDOOR = re.compile(r"terrace|terrassi|balcon|parveke|outdoor|patio|garden|yar
 
 def plan_total(question: str, doc: Doc, t0) -> dict | None:
     """"how big is this flat": the indoor rooms added up (plan maps only; IFC has its own model totals)."""
-    if doc.mode != "planmap" or not PLANTOTAL.search(question) or re.search(r"\bhow many\b", question, re.I) \
+    from engine import exclusions
+    scope_q, excl_text = exclusions.split(question)
+    scope_q = re.sub(r"\bList the (?:room )?areas? used\W*", "", scope_q, flags=re.I)
+    if doc.mode != "planmap" or not PLANTOTAL.search(scope_q) or re.search(r"\bhow many\b", question, re.I) \
             or re.search(r"\b(?:apartment|unit|flat|dwelling)\s+[A-Z0-9]\b", question):   # one named apartment: the room solver sums its rooms
         return None
-    rooms = [(r, _qty(r, "room", "area")) for r in _of_kind(doc, "room") if not _OUTDOOR.search(f"{r.label or ''} {r.props.get('room_type') or ''}")]
+    all_rooms = [r for r in _of_kind(doc, "room") if _qty(r, "room", "area")]
+    cut, unmatched = exclusions.excluded_rooms(excl_text, all_rooms) if excl_text else ([], [])
+    rooms = [(r, _qty(r, "room", "area")) for r in all_rooms
+             if r not in cut and not _OUTDOOR.search(f"{r.label or ''} {r.props.get('room_type') or ''}")]
     rooms = [(r, v) for r, v in rooms if v]
     if not rooms:
         return None
     tot = round(sum(v for _, v in rooms), 2)
+    uni = exclusions.union_total([r for r, _ in rooms], cut, (doc.scale or {}).get("m_per_px"))
     trace = [_step("route", "plan total -> sum of room areas, no model"), _step("sum", f"{len(rooms)} indoor rooms = {tot} m2")]
-    text = f"This place is about **{_fmt(tot)} m²** in total, adding up the **{len(rooms)} rooms** found on the drawing (outdoor spaces left out). {{marks}}" + scale_note(doc)
+    overlap = ""
+    if uni:
+        tot = round(uni["total"], 2)
+        overlap = f" Room boxes overlap, so overlapping floor is counted once (plain sum {_fmt(uni['raw_sum'])} m²)."
+        trace.append(_step("union", f"overlapping room boxes counted once: {tot} m2 (plain sum {round(uni['raw_sum'], 2)} m2)"))
+    note = exclusions.note(cut, unmatched, excl_text) if excl_text else ""
+    if excl_text:
+        trace.append(_step("exclude", f"left out: {', '.join(sorted({(r.label or 'room') for r in cut})) or 'nothing matched'}"))
+    lst = "; ".join(f"{(r.label or str(r.props.get('room_type') or 'room'))} {_fmt(v)} m²" for r, v in rooms)
+    text = (f"This place is about **{_fmt(tot)} m²** in total, adding up the **{len(rooms)} rooms** found on the drawing (outdoor spaces left out)."
+            f"{overlap} {note} Rooms used: {lst}. {{marks}}") + scale_note(doc)
     return _done(question, doc, text, tot, "m2", [r for r, _ in rooms], trace, t0=t0)
 
 
