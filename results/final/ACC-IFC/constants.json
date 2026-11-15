@@ -1,0 +1,13 @@
+{
+  "empirical_symbol_constants": [],
+  "explanation": "No symbol dimensions, vertex counts, document names, coordinates or gold counts are used in these code paths. Count eligibility follows explicit IFC aggregation relationships; footprints use the existing IfcOpenShell projected mesh union.",
+  "policies": {
+    "net_area_relative_difference": {
+      "value": 0.02,
+      "denominator": "measured footprint in square metres",
+      "provenance": "ACC-IFC handoff, item 4. This is a requested cross-check policy, not a fitted dataset threshold or a buildingSMART requirement."
+    },
+    "length_to_m": "Declared IFC project length unit; geometry API returns SI metres by default.",
+    "area_to_m2": "Explicit quantity/property area unit, otherwise declared IFC project area unit, independently of the length unit."
+  }
+}

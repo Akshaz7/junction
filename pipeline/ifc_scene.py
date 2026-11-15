@@ -432,6 +432,10 @@ def process(ifc: Path, doc: dict, out_dir: Path):
 
     from pipeline.ifc_props import building_meta, enrich_elements
     enrich_elements(f, elements)
+    from pipeline.ifc_accuracy import build as accuracy_index, enrich_elements as accuracy_elements
+    accuracy = accuracy_index(f, geometry=True)
+    accuracy_elements(elements, accuracy)
+    (out_dir / "ifc-accuracy.json").write_text(json.dumps(accuracy))
     (out_dir / "elements.json").write_text(json.dumps(
         {"doc_id": doc["doc_id"], "version": 2, "schema": f.schema, "units": "m", "building": building_meta(f),
          "coords": "recentred in X/Z by origin_offset_m, Y-up (glTF), Y keeps real elevation",
