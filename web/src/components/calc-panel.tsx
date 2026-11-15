@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type K
 import { ArrowDown, ArrowLeft, ArrowUp, ChevronRight, Maximize2, Minimize2, X } from 'lucide-react'
 import { Button } from './ui'
 import type { Calculation, Reasoning } from '../lib/types'
-import { columnKeys, columnLabel, fmt, focusOf, meaningfulPath, pageRows, shortConfidence, shortUnavailable, signed, stepRows, sortRows, sourceText, totalsOf, withUnit, type FocusTarget, type RowSort } from '../lib/calc-view'
+import { cleanExpr, displayRounding, distinctColumns, columnKeys, columnLabel, fmt, focusOf, meaningfulPath, pageRows, shortConfidence, shortUnavailable, signed, stepRows, unitText, sortRows, sourceText, totalsOf, withUnit, type FocusTarget, type RowSort } from '../lib/calc-view'
 import { workspaceApi } from '../lib/api'
 import { calculationImages } from '../lib/calc-images'
 import './calc-panel.css'
@@ -64,7 +64,8 @@ function SourceLink({ source, docTitle, onFocus }: { source: Calculation['rows']
 function RowsTable({ calc, onFocus, docTitle }: { calc: Calculation; onFocus?: (t: FocusTarget) => void; docTitle?: (id: string) => string }) {
   const [sort, setSort] = useState<RowSort>(null)
   const [page, setPage] = useState(0)
-  const keys = useMemo(() => columnKeys(calc.rows), [calc.rows])
+  const keys = useMemo(() => distinctColumns(calc.rows, columnKeys(calc.rows)), [calc.rows])
+  const hasSource = calc.rows.some((r) => r.source && (r.source.doc_id || r.source.item_id || r.source.bbox || r.source.crop))
   const totals = useMemo(() => totalsOf(calc), [calc])
   const sorted = useMemo(() => sortRows(calc.rows, sort), [calc.rows, sort])
   const view = pageRows(sorted, page, PAGE)
@@ -77,13 +78,13 @@ function RowsTable({ calc, onFocus, docTitle }: { calc: Calculation; onFocus?: (
   }
   return <>
     <div className="calc-table-wrap"><table className="calc-table" aria-label="Per-element figures">
-      <thead><tr>{head('__label', 'Element', false)}{keys.map((k) => head(k, columnLabel(k), true))}<th scope="col">Source</th></tr></thead>
+      <thead><tr>{head('__label', 'Element', false)}{keys.map((k) => head(k, columnLabel(k), true))}{hasSource && <th scope="col">Source</th>}</tr></thead>
       <tbody>{view.rows.map((row) => <tr key={row.item_id}>
         <th scope="row">{row.label}</th>
         {keys.map((k) => <td key={k} className="num">{fmt(row.values?.[k])}</td>)}
-        <td><SourceLink source={row.source} docTitle={docTitle} onFocus={onFocus} /></td>
+        {hasSource && <td><SourceLink source={row.source} docTitle={docTitle} onFocus={onFocus} /></td>}
       </tr>)}</tbody>
-      <tfoot><tr><th scope="row">Total ({totals.count} {totals.count === 1 ? 'element' : 'elements'})</th>{keys.map((k) => <td key={k} className="num">{k in totals.sums ? fmt(totals.sums[k]) : ''}</td>)}<td /></tr></tfoot>
+      <tfoot><tr><th scope="row">Total ({totals.count} {totals.count === 1 ? 'element' : 'elements'})</th>{keys.map((k) => <td key={k} className="num">{k in totals.sums ? fmt(totals.sums[k], 2) : ''}</td>)}{hasSource && <td />}</tr></tfoot>
     </table></div>
     {totals.note && <p className={`calc-reconcile ${totals.reconciles ? 'is-ok' : 'is-off'}`} data-testid="calc-reconcile">{totals.note}</p>}
     {view.pages > 1 && <nav className="calc-pager" aria-label="Table pages">
@@ -119,6 +120,7 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
   const { confidence } = reasoning
   const margin = calc?.margin ?? reasoning.margin
   const result = calc?.result
+  const rounding = calc ? displayRounding(calc) : null
   return <CropImages.Provider value={images}><aside className={`viewer-calc-panel${expanded ? ' is-expanded' : ''}`} aria-label="Calculation" data-testid="calc-panel" style={expanded ? undefined : { width }}>
     {!expanded && <div className="calc-resize" role="separator" aria-orientation="vertical" aria-label="Resize calculation panel" aria-valuemin={300} aria-valuemax={900} aria-valuenow={width} tabIndex={0}
       onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={(e) => { drag.current = null; e.currentTarget.releasePointerCapture(e.pointerId) }} onKeyDown={keyResize} />}
@@ -131,7 +133,7 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
     <div className="calc-content">
       {calc?.formula && <div className="calc-formula" data-testid="calc-formula">
         <code>{calc.formula}</code>
-        {result && typeof result.value === 'number' && <p className="calc-result"><span>=</span> <b>{withUnit(result.value, result.unit)}</b>{result.rounded_as && <small>rounded to {result.rounded_as}</small>}</p>}
+        {result && typeof result.value === 'number' && <p className="calc-result"><span>=</span> <b>{rounding ? `${rounding.value.toLocaleString('en-GB', { maximumFractionDigits: rounding.places })}${unitText(result.unit) ? ` ${unitText(result.unit)}` : ''}` : withUnit(result.value, result.unit)}</b>{rounding ? (rounding.places > 0 && <small>rounded to {rounding.places} dp</small>) : result.rounded_as && <small>rounded to {result.rounded_as}</small>}</p>}
         {result && typeof result.value !== 'number' && <p className="calc-result">{Object.entries(result.value).map(([k, v]) => <span key={k}><b>{fmt(v)}</b> <small>{k}</small> </span>)}</p>}
       </div>}
       {method && <div className="calc-method" data-testid="calc-method">
@@ -182,8 +184,8 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
         type S = (typeof calc.steps)[number]
         const item = (step: S, i: number) => <li key={step.id} data-step={step.id} value={i + 1}>
           <div className="calc-step-head"><span className="calc-index">{i + 1}</span><strong>{step.label}</strong></div>
-          <p className="calc-expr">{step.expr.length > 120 ? <details className="calc-long-expr"><summary><code>{step.expr.slice(0, 80)} …</code></summary><code>{step.expr}</code></details> : <code>{step.expr}</code>}{step.value != null && <span className="calc-eqline"><span className="calc-eq">=</span> <b className="calc-value">{withUnit(step.value, step.unit)}</b></span>}</p>
-          {step.note && (step.note.length <= 90 ? <p className="calc-note">{step.note}</p> : <details className="calc-inputs"><summary>Note</summary><p className="calc-note">{step.note}</p></details>)}
+          <p className="calc-expr">{cleanExpr(step.expr).length > 120 ? <details className="calc-long-expr"><summary><code>{cleanExpr(step.expr).slice(0, 80)} …</code></summary><code>{cleanExpr(step.expr)}</code></details> : <code>{cleanExpr(step.expr)}</code>}{step.value != null && <span className="calc-eqline"><span className="calc-eq">=</span> <b className="calc-value">{rounding && step.unit === result?.unit && Math.abs(step.value - rounding.value) < 10 ** -rounding.places ? `${rounding.value.toLocaleString('en-GB', { maximumFractionDigits: rounding.places })}${unitText(step.unit) ? ` ${unitText(step.unit)}` : ''}` : withUnit(step.value, step.unit)}</b></span>}</p>
+          {step.note && (step.note.length <= 90 ? <p className="calc-note">{step.note}</p> : <details className="calc-inputs calc-note-fold"><summary>{step.note.slice(0, 60).trimEnd()}…</summary><p className="calc-note">{step.note}</p></details>)}
           {!!step.inputs.length && <details className="calc-inputs"><summary>Inputs ({step.inputs.length})</summary>
             <table aria-label={`Inputs of ${step.label}`}><thead><tr><th scope="col">Input</th><th scope="col" className="num">Value</th><th scope="col">Source</th></tr></thead>
               <tbody>{step.inputs.map((input, k) => <tr key={k}><th scope="row">{input.name}</th><td className="num">{withUnit(input.value, input.unit)}</td><td><SourceLink source={input.source} docTitle={docTitle} onFocus={focus} /></td></tr>)}</tbody></table>
