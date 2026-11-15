@@ -45,7 +45,7 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
     return () => query.removeEventListener('change', onChange)
   }, [])
   const inProject = !!chatProject.id
-  const chatDocs = chatProject.id ? projectLibraryDocs(chatProject.project, chatProject.project ? docs : []) : docs
+  const chatDocs = chatProject.id ? (chatProject.project ? projectLibraryDocs(chatProject.project, docs) : []) : docs
 
   const refreshDocuments = useCallback(async () => {
     const documents = await workspaceApi.getDocuments()
