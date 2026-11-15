@@ -5,6 +5,7 @@ import os
 import time
 import uuid
 
+import jsonschema
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
@@ -19,6 +20,21 @@ router = APIRouter(prefix="/api")
 def _real_engine(question, doc_ids, on_event, scene_state=None, history=None):
     from engine.answer import answer  # the function, not the engine.answer module
     return answer(question, doc_ids, on_event, scene_state=scene_state, history=history)
+
+
+def _invalid_answer_fallback(question, doc_ids):
+    """Plain honest abstention used when the engine's answer fails contract validation: no schema text reaches the user."""
+    return {
+        "answer_id": uuid.uuid4().hex, "question": question, "doc_ids": list(doc_ids),
+        "answer": {"text_md": "I couldn't compute that reliably. Try rephrasing the question or asking it in smaller parts.",
+                   "value": None, "unit": None, "confidence": 0.0, "abstained": True},
+        "citations": [],
+        "evidence": {"boxes": [], "scene": {"doc_id": doc_ids[0] if doc_ids else "", "highlight_item_ids": [],
+                                            "camera_target_item_id": None}},
+        "trace": [{"step": "validate", "detail": "answer failed validation -> plain abstention", "ms": 0, "model": None,
+                   "cost_usd": 0}],
+        "route": "index", "cost": {"usd_total": 0, "calls": []}, "latency_ms": 0,
+    }
 
 
 def _no_data_answer(question, doc_ids, on_event=None):
@@ -128,6 +144,16 @@ ENGINE = _pick_engine()
 # In-flight questions per chat (this process): lets a device that joins mid-answer catch up on the
 # status lines and trace steps so far. Events on /ws carry only small payloads (NOTIFY limit 8 KB).
 ACTIVE: dict[str, dict] = {}
+# (chat id, client message id) -> {"ans": final answer | None while in flight, "t": monotonic time}
+SENT: dict[tuple[str, str], dict] = {}
+SENT_TTL_S = 3600
+
+
+def _sent_gc() -> None:
+    cutoff = time.monotonic() - SENT_TTL_S
+    for k in [k for k, v in SENT.items() if v["t"] < cutoff]:
+        SENT.pop(k, None)
+
 MAX_TRACE_EVENTS = 60
 DELTA_INTERVAL = 0.125  # at most ~8 text updates per second on /ws and SSE
 MAX_DELTA_CHARS = 6000  # cumulative text per event; keeps NOTIFY under 8 KB
@@ -152,6 +178,7 @@ class NewChat(BaseModel):
 class NewMessage(BaseModel):
     content: str
     doc_ids: list[str] | None = None
+    client_message_id: str | None = None   # idempotency key: one Send is answered at most once
 
 
 async def _pool():
@@ -278,6 +305,16 @@ async def ask(chat_id: str, body: NewMessage):
     c = await pool.fetchrow("select id, doc_id from chats where id=$1", cid)
     if c is None:
         raise HTTPException(404, "chat not found")
+    sent_key = (str(cid), body.client_message_id[:80]) if body.client_message_id else None
+    if sent_key is not None:
+        _sent_gc()
+        seen = SENT.get(sent_key)
+        if seen is not None and seen["ans"] is not None:   # same Send again: replay, never re-ask or re-store
+            async def replay():
+                yield {"event": "answer", "data": json.dumps(seen["ans"])}
+            return EventSourceResponse(replay())
+        if seen is not None:
+            raise HTTPException(409, "This message is already being answered")
     doc_ids = body.doc_ids if body.doc_ids is not None else ([c["doc_id"]] if c["doc_id"] else [])
     project = None
     if (body.doc_ids is None or body.doc_ids == []) and not doc_ids:   # a project chat with no explicit selection asks all the project's documents
@@ -292,6 +329,9 @@ async def ask(chat_id: str, body: NewMessage):
         if any(d not in listed for d in doc_ids):
             raise HTTPException(404, "document not found")
 
+    if sent_key is not None:
+        SENT[sent_key] = {"ans": None, "t": time.monotonic()}
+
     async def stream():
         try:
             # Flush before restoring documents, loading history or writing the user turn.
@@ -304,6 +344,8 @@ async def ask(chat_id: str, body: NewMessage):
         except Exception as e:
             yield {"event": "error", "data": json.dumps({"detail": f"request failed: {e}"})}
         finally:
+            if sent_key is not None and (SENT.get(sent_key) or {}).get("ans") is None:
+                SENT.pop(sent_key, None)   # failed before an answer: the user may retry deliberately
             if ACTIVE.pop(str(cid), None) is not None:  # failed or abandoned: tell watchers to resync
                 await publish({"type": "chat.done", "chat_id": str(cid)})
 
@@ -436,7 +478,11 @@ async def ask(chat_id: str, body: NewMessage):
                 task.cancel()  # suppress late events/results; Python cannot interrupt a provider's running thread
         try:
             ans = ans if ans is not None else task.result()
-            validate_answer(ans)
+            try:
+                validate_answer(ans)
+            except jsonschema.ValidationError:
+                ans = _invalid_answer_fallback(body.content, doc_ids)
+                validate_answer(ans)
         except Exception as e:
             yield {"event": "error", "data": json.dumps({"detail": f"engine failed: {e}"})}
             return
@@ -459,6 +505,8 @@ async def ask(chat_id: str, body: NewMessage):
             if isinstance(cmd, dict):
                 await record_edit({**cmd, "doc_id": scene.get("doc_id") or (doc_ids[0] if doc_ids else ""),
                                    "edit_id": f"{ans['answer_id']}-{n}"}, chat_id=cid)
+        if sent_key is not None and sent_key in SENT:
+            SENT[sent_key]["ans"] = ans
         yield {"event": "answer", "data": json.dumps(ans)}
 
 

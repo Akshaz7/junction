@@ -206,3 +206,37 @@ def test_first_sse_disconnect_during_setup_clears_active(stream_setup, monkeypat
         assert CHAT_ID in chats_routes.ACTIVE
 
     assert CHAT_ID not in chats_routes.ACTIVE
+
+
+def test_invalid_engine_answer_falls_back_to_plain_abstention(stream_setup, monkeypatch):
+    client, state = stream_setup
+
+    def bad_engine(question, doc_ids, *args, **kw):
+        ans = stub_engine.answer(question, doc_ids)
+        ans["route"] = "not-a-route"
+        return ans
+    monkeypatch.setattr(chats_routes, "ENGINE", bad_engine)
+    response = client.post(URL, json={"content": "Which level has the largest floor area?"})
+    events = _sse(response.text)
+    assert not [e for e in events if e[0] == "error"]
+    final = [d for n, d in events if n == "answer"][-1]
+    text = final["answer"]["text_md"]
+    assert final["answer"]["abstained"] and "couldn't compute that reliably" in text
+    assert "schema" not in response.text.lower() and "enum" not in response.text.lower()
+def test_same_client_message_id_is_answered_once(stream_setup):
+    """One Send, however often it reaches the server, stores one question and one answer."""
+    client, state = stream_setup
+    body = {"content": QUESTION, "client_message_id": "send-1"}
+    events = []
+    for _ in range(3):
+        with client.stream("POST", URL, json=body) as response:
+            assert response.status_code == 200
+            events.append(_sse("\n".join(response.iter_lines())))
+    assert [m["role"] for m in state["messages"]] == ["user", "assistant"]
+    assert len(state["answers"]) == 1
+    assert events[0][-1] == events[1][-1] == events[2][-1]
+    assert events[0][-1][0] == "answer"
+    # a deliberate new Send (new id) is a new question
+    with client.stream("POST", URL, json={**body, "client_message_id": "send-2"}) as response:
+        list(response.iter_lines())
+    assert [m["role"] for m in state["messages"]] == ["user", "assistant", "user", "assistant"]

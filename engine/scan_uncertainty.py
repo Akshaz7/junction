@@ -126,6 +126,21 @@ def attach(res, question, calc):
     # MAE and a current recount can describe the same missed item; adding or
     # quadrature would imply independence that has not been measured. Compare
     # only like-unit supported components, then round count variation outward.
+    # Box coverage alone only shows that the count and the boxes agree. It says
+    # nothing about missed or false detections, so it can never stand as a margin.
+    if all(c['label'] == 'Reported count versus numbered-box coverage' for c in matching):
+        coverage = matching[0]
+        budget = {'value': None, 'unit': output_unit, 'pct': None, 'sources': list(dict.fromkeys(sources)),
+                  'why': ('The count and the numbered boxes agree' if not coverage['value'] else
+                          f"The count and the numbered boxes differ by {coverage['value']:g}") +
+                         '. The detection error is unknown: no independent recount or historical error is available.',
+                  'scope': 'Observed scan discrepancy and historical reference', 'components': matching,
+                  'rule': 'coverage_only_margin_unknown', 'excluded_components': excluded,
+                  'complete': False, 'is_error_bound': False}
+        if old.get('by_kind'):
+            budget['by_kind'] = old['by_kind']
+        card['margin'] = calc['margin'] = budget
+        return
     raw_error = max(c['value'] for c in matching)
     error = math.ceil(raw_error) if output_unit == 'count' else raw_error
     pct = 100 * error / abs(value) if number(value) and value else None
@@ -156,6 +171,8 @@ def attach(res, question, calc):
 def steps(budget, doc_id):
     """Replay supported components, the overlap rule and outward count rounding."""
     from engine.calc import input_value, step, step_source
+    if budget.get('value') is None:
+        return []  # unknown margin: nothing to replay
     out, totals = [], []
     for index, component in enumerate(budget.get('components') or []):
         prefix = f'scan-margin-{index}'

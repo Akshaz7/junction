@@ -6,8 +6,10 @@ at most MAX_DOC_BYTES (page images dominate); thumbnails, plan maps, text, scene
 """
 from __future__ import annotations
 
+import asyncio
 import mimetypes
 import os
+import re
 from pathlib import Path
 
 from . import config
@@ -26,6 +28,10 @@ def _priority(name: str) -> int:
         return 0
     if name in ("doc.json", "ingest.json", "text.json", "scene.json", "pages.json", "elements.json", "piping.json", "ifc-quantities.json", "wallgeom.json", "ifc-accuracy.json") or name.startswith("planmap-"):
         return 1
+    # What visual verification needs (the page image the boxes sit on, the 3D mesh) is stored right after the
+    # metadata: a persist cut short by a redeploy once left only metadata + thumbnail, so 2D and 3D both failed.
+    if re.fullmatch(r"page-\d+\.png|normalised\.png|scene\.glb", name):
+        return 1.5
     if name.endswith(".thumb.png") or name.startswith("text-"):
         return 2
     if name.startswith("scene."):
@@ -91,7 +97,7 @@ async def save_doc(pool, doc_id: str, originals: bool = True) -> int:
             await store(prefix + "manifest.json", json.dumps(manifest).encode(), "application/json")
             n += size
         else:
-            data = p.read_bytes()
+            data = await asyncio.to_thread(p.read_bytes)
             await store(name, data, ct)
             n += len(data)
     return n
@@ -110,7 +116,7 @@ async def restore_doc(pool, doc_id: str) -> int:
             continue
         row = await pool.fetchrow("select data from doc_artifacts where doc_id=$1 and name=$2", doc_id, name)
         dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_bytes(bytes(row["data"]))
+        await asyncio.to_thread(dest.write_bytes, bytes(row["data"]))
         written += 1
     import hashlib
     import json
@@ -217,7 +223,7 @@ async def _topup(doc_id: str) -> None:
         for n in missing:
             row = await pool.fetchrow("select data from doc_artifacts where doc_id=$1 and name=$2", doc_id, n)
             if row is not None:
-                (d / n).write_bytes(bytes(row["data"]))
+                await asyncio.to_thread((d / n).write_bytes, bytes(row["data"]))
     except Exception as e:  # noqa: BLE001 - optional sidecars never break a request
         print("topup failed:", doc_id, repr(e)[:200])
 
@@ -268,13 +274,13 @@ async def servable_ids(pool) -> set[str]:
         return _servable_cache[1]
     ids = {r["doc_id"] for r in await pool.fetch(_SERVABLE_SQL)}
     d = config.artifacts_dir()
-    if d.is_dir():
-        ids |= {p.name for p in d.iterdir() if p.is_dir() and "__" in p.name and has_data_on_disk(p.name)}
+    if d.is_dir():  # directory scan off the event loop
+        ids |= await asyncio.to_thread(lambda: {p.name for p in d.iterdir() if p.is_dir() and "__" in p.name and has_data_on_disk(p.name)})
     _servable_cache = (time.monotonic(), ids)
     return ids
 
 
-async def restore_all() -> int:
+async def restore_all(uploads_only: bool | None = None) -> int:
     """Startup: pull every uploaded document back to disk, newest first."""
     from . import db
     pool = await db.get_pool()
@@ -282,6 +288,9 @@ async def restore_all() -> int:
         return 0
     n = 0
     for r in await pool.fetch("select distinct doc_id from doc_artifacts order by doc_id"):
+        up = r["doc_id"].startswith("uploads__")
+        if uploads_only is not None and up != uploads_only:
+            continue
         await ensure_doc(r["doc_id"])
         n += 1
     return n

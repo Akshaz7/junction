@@ -99,6 +99,12 @@
 .room-labels { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
 .room-label { fill: #4b5563; font-weight: 400; paint-order: stroke; stroke: rgba(255,255,255,.85); stroke-width: .12em; }
 .room-label-detail { fill: #6b7280; }
+.read-once-chip { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Desktop chat: the floating page bar (64px, z-index 4) sits over the top right; keep the viewer header and its Close button below it. */
+@media (min-width: 801px) {
+  .route-chat .chat-workspace.has-viewer .document-viewer:not(.viewer-sheet) { padding-top: 64px; }
+}
 
 /* Click-to-inspect: outline of the plan item under the pointer, and of the one whose details are open. */
 .drawing-stage[data-tool="pan"][data-pickable="true"] { cursor: pointer; }

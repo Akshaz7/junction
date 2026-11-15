@@ -28,7 +28,7 @@ def test_real_answers_have_exact_factor_sum_and_method(did, question, monkeypatc
         pytest.skip('Real artifact not installed')
     r = answer(question, [did])
     c = r['reasoning']['confidence']
-    assert sum(f['delta'] for f in c['factors']) == c['pct']
+    assert sum(f['delta'] for f in c['factors']) == (c['pct'] or 0)   # no percentage shown: only the zero base entry
     assert sum(bool(f.get('base')) for f in c['factors']) == 1
     assert c['label'] != 'Verified' or c['pct_kind'] != 'unavailable'
     trace = r['reasoning'].get('calc')
@@ -38,7 +38,8 @@ def test_real_answers_have_exact_factor_sum_and_method(did, question, monkeypatc
         assert all(set(a) >= {'id', 'label', 'value', 'unit', 'rejected_because'} for a in method['alternatives'])
         assert calc.validate(trace, ROOT) == []
         if r['answer'].get('unit') == 'count':
-            assert isinstance(r['reasoning']['margin']['value'], (int, float))
+            m_ = r['reasoning']['margin']
+            assert isinstance(m_['value'], (int, float)) or m_.get('rule') == 'coverage_only_margin_unknown'
             assert r['reasoning']['margin'].get('is_error_bound') is False
     json.dumps(r, allow_nan=False)
 
@@ -47,13 +48,13 @@ def test_raw_model_score_is_explicitly_uncalibrated_not_an_accuracy_estimate():
     c = confidence.factors({'pct': None, 'label': 'Estimate'}, {'answer': {'confidence': .65}}, '')
     assert c['pct'] == 65 and c['pct_kind'] == 'recorded_engine_score'
     assert 'not measured' in c['factors'][0]['note']
-    assert sum(f['delta'] for f in c['factors']) == c['pct']
+    assert sum(f['delta'] for f in c['factors']) == (c['pct'] or 0)   # no percentage shown: only the zero base entry
 
 
 def test_observed_calibration_and_actual_cap_are_separate_signed_factors():
     c = confidence.factors({'pct': 60, 'calibration': {'pct': 65, 'correct': 13, 'n': 20}}, {'answer': {'confidence': .99}}, '')
     assert [f['delta'] for f in c['factors']] == [65, -5]
-    assert sum(f['delta'] for f in c['factors']) == c['pct'] == 60
+    assert sum(f['delta'] for f in c['factors']) == (c['pct'] or 0)   # no percentage shown: only the zero base entry == 60
 
 
 def test_runtime_coverage_cap_keeps_original_score_and_signed_adjustment(tmp_path):
@@ -75,7 +76,7 @@ def test_public_early_answers_are_finalized(question, docs, monkeypatch):
     monkeypatch.setenv('READER', '0')
     r = answer(question, docs)
     c = r['reasoning']['confidence']
-    assert sum(f['delta'] for f in c['factors']) == c['pct']
+    assert sum(f['delta'] for f in c['factors']) == (c['pct'] or 0)   # no percentage shown: only the zero base entry
 
 
 def test_missing_numeric_score_stays_unknown():
@@ -131,8 +132,9 @@ def test_zero_coverage_difference_is_explicitly_not_zero_detection_error(tmp_pat
     fixture(tmp_path)
     r = scan_calc.attach(response(0), 'How many doors?', tmp_path)
     m = r['reasoning']['margin']
-    assert m['value'] == 0 and m['pct'] is None and not m['is_error_bound']
-    assert 'not an independent' in m['components'][0]['note']
+    # Box coverage alone is never a margin: unknown, not ±0.
+    assert m['value'] is None and m['pct'] is None and not m['is_error_bound']
+    assert 'not an independent' in m['components'][0]['note'] and 'unknown' in m['why']
 
 
 def test_scale_sensitivity_is_not_used_for_a_different_selected_scale(tmp_path):

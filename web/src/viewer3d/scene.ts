@@ -32,6 +32,8 @@ export interface SceneManifest {
   origin_offset_m: Vec3;
   storeys: Storey[];
   plan_image?: SceneAsset | null;
+  /** How the metres were obtained (plan map scale method); absent for IFC/DXF where units are exact. */
+  scale_method?: string | null;
   /** Written by the PDF-to-3D pipeline; `summary` is a plain-words accuracy note. */
   quality?: SceneQuality | null;
   items: Record<string, SceneItem>;

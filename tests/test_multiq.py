@@ -45,3 +45,18 @@ def test_single_comparison(monkeypatch):
     monkeypatch.setenv("MODELS_FAKE", "1")
     from engine.answer import answer
     assert "has more windows" in answer("which of these two files has more windows?", DOCS)["answer"]["text_md"]
+
+
+def test_largest_level_question_stays_whole():
+    from engine import multiq
+    q = "Which level has the largest listed floor area in the page 1 schedule, and what is that area?"
+    assert multiq.split(q) == []
+
+
+def test_merged_route_is_in_contract_enum():
+    from engine import multiq
+    from server.schema import validate_answer  # noqa: F401
+    import json, pathlib
+    enum = json.loads(pathlib.Path("server/schemas/answer.schema.json").read_text())["properties"]["route"]["enum"]
+    r = {"answer": {"text_md": "x", "abstained": False, "confidence": .5}, "citations": [], "trace": [], "cost": {"usd_total": 0, "calls": []}}
+    assert multiq.merge("a b?", ["d"], ["a?", "b?"], [r, r])["route"] in enum

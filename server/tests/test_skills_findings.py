@@ -166,3 +166,33 @@ def test_scheduler_catches_up_after_restart_and_never_double_runs(client, monkey
     assert client.portal.call(go) == [0, 1]
     got = client.get(f"/api/automations/{a['id']}").json()
     assert got["last_report"]["ok"] and got["last_run_at"]
+
+
+def _ingest(dirs, state, items=None):  # noqa: F811
+    import json
+    from server import config
+    d = config.artifacts_dir() / DOC
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "ingest.json").write_text(json.dumps(state))
+    if items is not None:
+        (d / "planmap-1.json").write_text(json.dumps({"items": items}))
+
+
+def test_findings_wait_for_unfinished_ingest(client, dirs, monkeypatch):  # noqa: F811
+    ran = []
+    monkeypatch.setattr(findings_routes, "_engine_run", lambda: (lambda doc: ran.append(doc) or []))
+    _ingest(dirs, {"status": "running"})
+    body = client.post("/api/findings/run", json={"doc_id": DOC}).json()
+    assert body["status"] == "waiting" and "finish processing" in body["detail"] and body["findings"] == []
+    assert not ran
+
+
+def test_findings_need_readable_items(client, dirs, monkeypatch):  # noqa: F811
+    ran = []
+    monkeypatch.setattr(findings_routes, "_engine_run", lambda: (lambda doc: ran.append(doc) or []))
+    _ingest(dirs, {"status": "failed"}, items=[{"item_id": "a"}, {"item_id": "b"}])
+    body = client.post("/api/findings/run", json={"doc_id": DOC}).json()
+    assert body["status"] == "not_enough_data" and body["detail"] == "Not enough readable data (0 of 2 items)"
+    assert not ran
+    _ingest(dirs, {"status": "ready"}, items=[{"item_id": "a", "bbox_px": [0, 0, 1, 1]}])
+    assert client.post("/api/findings/run", json={"doc_id": DOC}).json()["status"] == "ok" and ran

@@ -13,6 +13,7 @@ import { isPaired, onPairingChange } from '../lib/pairing'
 import { PairPhoneButton } from './pair-phone'
 import type { DrawingEdits } from '../lib/scene-edits'
 import { EvidenceCard } from './evidence-card'
+import { ErrorBoundary } from './error-boundary'
 import { calculationCitation } from '../lib/calc-view'
 import { ThinkingRow } from './thinking-row'
 
@@ -128,7 +129,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
     <div className="question-bubble">{answer.question}</div>
     <div className="answer-meta"><ThinkingRow traces={answer.trace} /><AnswerMoreActions answer={answer} docs={docs} chatId={chatId} demo={demo} onAsk={onAsk} /></div>
     <AnswerBody answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} />
-    <EvidenceCard answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} onShowCalculation={onOpenCalc && calcCitation ? () => onOpenCalc(calcCitation) : undefined} footer={cost} />
+    <ErrorBoundary resetKey={answer} fallback={<p className="evidence-quantity" role="alert">Could not render the evidence for this answer.</p>}><EvidenceCard answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} onShowCalculation={onOpenCalc && calcCitation ? () => onOpenCalc(calcCitation) : undefined} footer={cost} /></ErrorBoundary>
     {sceneOpen(answer) === 'ar' && <ArHint />}
     <SceneCommandTags answer={answer} edits={edits} busy={busy} onUndo={onUndo} onOpenItem={onOpenItem} />
     {!!advice.length && <div className="advisor-card-list" aria-label="Advice for this change" data-testid="answer-advisor-cards">

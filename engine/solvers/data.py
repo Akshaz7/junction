@@ -131,8 +131,10 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
         for iid, (page, x) in manual.items():
             if iid not in existing:
                 # Same-kind overlap links a marked plan box to its IFC identity too.
-                target = next((it for it in items if it.kind == x['kind'] and it.page == page
-                               and it.bbox_px and _iou(it.bbox_px, x['bbox_px']) >= .5), None)
+                from engine.taught_items import same_item, closeness
+                near = [it for it in items if it.kind == x['kind'] and it.page == page
+                        and it.bbox_px and same_item(it.bbox_px, x['bbox_px'])]
+                target = max(near, key=lambda it: closeness(it.bbox_px, x['bbox_px'])) if near else None
                 if target:
                     labels = x['props'].get('user_labels', [])
                     target.props.setdefault('user_labels', []).extend(labels)
@@ -151,6 +153,8 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
             from pipeline.scale_regions import annotate_cached
             if meta.get("kind") in ("raster", "dxf", "dwg"):
                 m = annotate_cached(m, d)
+            from pipeline.printed_dims import apply as printed_dims
+            m = printed_dims(m)
             page_scale = m.get("scale")
             page_start = len(items)
             for x in m["items"]:

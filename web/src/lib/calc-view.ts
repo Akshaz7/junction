@@ -91,13 +91,16 @@ export function calculationCitation(answer: Answer): Citation | undefined {
   return { n: 1, doc_id: docId, page: source?.page ?? 1, kind: 'region', bbox_px: source?.bbox ?? null, item_ids: source?.item_id ? [source.item_id] : [], quote: null }
 }
 
-export function sourceText(source: CalculationSource | undefined, docTitle?: (id: string) => string): string {
+/** IFC GlobalIds (22 chars) and UUIDs are not for people. */
+export const isGuid = (id: string) => /^[0-9A-Za-z_$]{22}$/.test(id) || /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(id) || /^[0-9a-f]{24,}$/i.test(id)
+
+export function sourceText(source: CalculationSource | undefined, docTitle?: (id: string) => string, name?: string, raw = false): string {
   if (!source) return 'no source recorded'
   const parts: string[] = []
   const file = source.doc_id ? (docTitle?.(source.doc_id) ?? source.doc_id) : source.artifact
   if (file) parts.push(file)
   if (source.page != null) parts.push(`page ${source.page}`)
-  if (source.item_id) parts.push(`item ${source.item_id}`)
+  if (source.item_id) parts.push(isGuid(source.item_id) && !raw ? (name ? name : 'element') : `item ${source.item_id}`)
   if (source.field) parts.push(source.field)
   if (source.step_id) parts.push(`step ${source.step_id}`)
   if (source.text) parts.push(`"${source.text}"`)
@@ -148,7 +151,7 @@ export function displayRounding(calc: Pick<Calculation, 'steps'>): { value: numb
 }
 
 /** Strip float noise from numbers inside an expression: 61.20000000000002 becomes 61.2. */
-export const cleanExpr = (expr: string): string => expr.replace(/-?\d+\.\d{4,}/g, (n) => String(parseFloat(Number(n).toFixed(3))))
+export const cleanExpr = (expr?: string | null): string => (expr ?? '').replace(/-?\d+\.\d{4,}/g, (n) => String(parseFloat(Number(n).toFixed(3))))
 
 /** Columns worth showing: drops a column whose values equal an earlier one on every row (Area == Net). */
 export function distinctColumns(rows: Row[], keys: string[]): string[] {

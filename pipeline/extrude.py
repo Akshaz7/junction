@@ -448,10 +448,26 @@ def fixture_parts(kind, bb):
         return [("body", _flat(_boxes([W_(0, 1, 0, 0.08, 0, 1)]), "ceramic")),
                 ("glass", _flat(_boxes([W_(0, 1, 0.08, 2.0, 0.97, 1.0)]), "glass"))]
     # stairs: flight along the long axis, risers ~0.18 m up to one storey
-    n = max(2, min(int(round(WALL_H / RISER)), int(L / 0.25)))
-    steps = [W_(i / n, 1, 0, (i + 1) * WALL_H / n, 0, 1) for i in range(n)]
+    # low geometry only: the flight tops out at STAIR_TOP_M, never at wall height
+    n = max(2, min(int(round(STAIR_TOP_M / RISER)), int(L / 0.25)))
+    steps = [W_(i / n, 1, 0, (i + 1) * STAIR_TOP_M / n, 0, 1) for i in range(n)]
     return [("steps", _flat(_boxes(steps), "stair"))]
 
+
+
+STAIR_TOP_M = 0.9  # stairs and treads are low geometry (never wall height)
+
+
+def _stair_boxes(pm):
+    return [it["bbox_px"] for it in pm["items"] if it.get("kind") in ("stairs", "stair") and it.get("bbox_px")]
+
+
+def _is_tread_grid(wp, boxes):
+    """True when a raster 'wall' component is mostly inside a stairs box: drafted tread lines, not a wall."""
+    from shapely.geometry import box as _b
+    if not boxes or wp.area <= 0:
+        return False
+    return any(wp.intersection(_b(*b)).area / wp.area > 0.5 for b in boxes)
 
 
 def _shell(pm, img_gray, mpp):
@@ -582,7 +598,7 @@ def _stack_storeys(doc_id, art, page, raster_walls, pm, blocks):
     glb = merged.export(file_type="glb")
     (art / "scene.glb").write_bytes(glb)
     mpp = pm["scale"]["m_per_px"]
-    manifest.update({"items": items, "storeys": storeys, "plan_image": f"page-{page}.png",
+    manifest.update({"scale_method": (pm.get("scale") or {}).get("method"), "items": items, "storeys": storeys, "plan_image": f"page-{page}.png",
                      "origin_offset_m": [pm["image"]["w"] * mpp / 2, 0., pm["image"]["h"] * mpp / 2],
                      "note": "generated for demo: separate layout blocks aligned on wall bounds and stacked at 3 m; elevations are assumed"})
     (art / "scene.json").write_text(json.dumps(manifest, indent=1))
@@ -673,7 +689,10 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False, *
             slab.visual = trimesh.visual.TextureVisuals(material=_mat((178, 168, 152), rough=0.9, double=True))
             register("floor-slab", "floor", [("floor", slab)])
         wo_all, do_all = win_o, door_o
+        stair_px = _stair_boxes(pm)
         for wi, wp in enumerate(rw["walls"], 1):
+            if _is_tread_grid(wp, stair_px):
+                continue  # drafted stair treads must not become a wall-height cage above the stairs
             g = Polygon([to_m(q) for q in wp.exterior.coords], [[to_m(q) for q in r.coords] for r in wp.interiors])
             g = g if g.is_valid else g.buffer(0)
             def cut(opens):
@@ -816,6 +835,7 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False, *
     sc = {"doc_id": doc_id, "glb": "scene.glb", "usdz": None, "units": "m", "up": "Y",
           "origin_offset_m": [round(W * mpp / 2, 4), 0.0, round(H * mpp / 2, 4)],
           "storeys": [{"name": "Floor 1", "elevation_m": 0.0}], "plan_image": f"page-{page}.png",
+          "scale_method": (pm.get("scale") or {}).get("method"),
           "items": items, "source_planmap": f"planmap-{page}.json",
           "defaults": {"wall_m": wall_h, "door_m": DOOR_H, "window_sill_m": SILL, "window_head_m": HEAD},
           "note": "generated for demo: extruded from plan map with default heights; "

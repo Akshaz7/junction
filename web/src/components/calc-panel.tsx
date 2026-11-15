@@ -46,9 +46,9 @@ function BboxCrop({ source }: { source: NonNullable<Calculation['rows'][number][
   return <canvas ref={ref} className="calc-crop" role="img" aria-label="Source region" />
 }
 
-function SourceLink({ source, docTitle, onFocus }: { source: Calculation['rows'][number]['source']; docTitle?: (id: string) => string; onFocus?: (target: FocusTarget) => void }) {
-  const target = focusOf(source), text = sourceText(source, docTitle)
-  return <span className="calc-source">
+function SourceLink({ source, docTitle, onFocus, name }: { name?: string; source: Calculation['rows'][number]['source']; docTitle?: (id: string) => string; onFocus?: (target: FocusTarget) => void }) {
+  const target = focusOf(source), text = sourceText(source, docTitle, name), full = sourceText(source, docTitle, name, true)
+  return <span className="calc-source" title={full !== text ? full : undefined}>
     {target && onFocus
       ? <button type="button" className="calc-source-link" onClick={() => onFocus(target)} aria-label={`Show on the drawing: ${text}`}>{text}</button>
       : <span>{text}</span>}
@@ -82,7 +82,7 @@ function RowsTable({ calc, onFocus, docTitle }: { calc: Calculation; onFocus?: (
       <tbody>{view.rows.map((row) => <tr key={row.item_id}>
         <th scope="row">{row.label}</th>
         {keys.map((k) => <td key={k} className="num">{fmt(row.values?.[k])}</td>)}
-        {hasSource && <td><SourceLink source={row.source} docTitle={docTitle} onFocus={onFocus} /></td>}
+        {hasSource && <td><SourceLink name={row.label} source={row.source} docTitle={docTitle} onFocus={onFocus} /></td>}
       </tr>)}</tbody>
       <tfoot><tr><th scope="row">Total ({totals.count} {totals.count === 1 ? 'element' : 'elements'})</th>{keys.map((k) => <td key={k} className="num">{k in totals.sums ? fmt(totals.sums[k], 2) : ''}</td>)}{hasSource && <td />}</tr></tfoot>
     </table></div>
@@ -134,7 +134,7 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
       {calc?.formula && <div className="calc-formula" data-testid="calc-formula">
         <code>{calc.formula}</code>
         {result && typeof result.value === 'number' && <p className="calc-result"><span>=</span> <b>{rounding ? `${rounding.value.toLocaleString('en-GB', { maximumFractionDigits: rounding.places })}${unitText(result.unit) ? ` ${unitText(result.unit)}` : ''}` : withUnit(result.value, result.unit)}</b>{rounding ? (rounding.places > 0 && <small>rounded to {rounding.places} dp</small>) : result.rounded_as && <small>rounded to {result.rounded_as}</small>}</p>}
-        {result && typeof result.value !== 'number' && <p className="calc-result">{Object.entries(result.value).map(([k, v]) => <span key={k}><b>{fmt(v)}</b> <small>{k}</small> </span>)}</p>}
+        {result && result.value != null && typeof result.value === 'object' && <p className="calc-result">{Object.entries(result.value).map(([k, v]) => <span key={k}><b>{fmt(v)}</b> <small>{k}</small> </span>)}</p>}
       </div>}
       {method && <div className="calc-method" data-testid="calc-method">
         <p><strong>Method:</strong> {method.label}</p>
@@ -155,14 +155,14 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
             <div className="calc-step-head"><span className="calc-index">{i + 1}</span><strong>{step.label}</strong></div>
             {step.status && <span className={`calc-claim-status is-${step.status}`}>{step.status === 'read_only' ? 'Read only' : step.status === 'verified' ? 'Verified' : 'Inferred'}</span>}
             {step.check && <p className="calc-note calc-claim-check">{step.check}</p>}
-            <div className="calc-claim-sources">{(step.inputs ?? []).map((input, k) => <SourceLink key={k} source={input.source} docTitle={docTitle} onFocus={focus && ((target) => focus({ ...target, cite: step.cite }))} />)}</div>
+            <div className="calc-claim-sources">{(step.inputs ?? []).map((input, k) => <SourceLink key={k} name={input.name} source={input.source} docTitle={docTitle} onFocus={focus && ((target) => focus({ ...target, cite: step.cite }))} />)}</div>
           </li>)}</ol>
         </Section>
         {!!claims.steps?.some((step) => step.level === 'detail') && <Section id="claim-details" title="Details" open={false}>
           <ol className="calc-steps">{claims.steps.filter((step) => step.level === 'detail').map((step, i) => <li key={step.id ?? i} data-section={step.section}>
             <strong>{step.label}</strong>
             {step.value != null && <p className="calc-note">{typeof step.value === 'object' ? JSON.stringify(step.value) : withUnit(step.value, step.unit)}</p>}
-            {!!step.inputs?.length && <ul className="calc-detail-inputs">{step.inputs.map((input, k) => <li key={k}>{input.name && <strong>{input.name}: </strong>}{input.value != null && <span>{withUnit(input.value, input.unit)} </span>}<SourceLink source={input.source} docTitle={docTitle} onFocus={focus} /></li>)}</ul>}
+            {!!step.inputs?.length && <ul className="calc-detail-inputs">{step.inputs.map((input, k) => <li key={k}>{input.name && <strong>{input.name}: </strong>}{input.value != null && <span>{withUnit(input.value, input.unit)} </span>}<SourceLink name={input.name} source={input.source} docTitle={docTitle} onFocus={focus} /></li>)}</ul>}
           </li>)}</ol>
         </Section>}
         {!!claims.checks?.length && <Section id="claim-checks" title="Checks">
@@ -188,7 +188,7 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
           {step.note && (step.note.length <= 90 ? <p className="calc-note">{step.note}</p> : <details className="calc-inputs calc-note-fold"><summary>{step.note.slice(0, 60).trimEnd()}…</summary><p className="calc-note">{step.note}</p></details>)}
           {!!step.inputs.length && <details className="calc-inputs"><summary>Inputs ({step.inputs.length})</summary>
             <table aria-label={`Inputs of ${step.label}`}><thead><tr><th scope="col">Input</th><th scope="col" className="num">Value</th><th scope="col">Source</th></tr></thead>
-              <tbody>{step.inputs.map((input, k) => <tr key={k}><th scope="row">{input.name}</th><td className="num">{withUnit(input.value, input.unit)}</td><td><SourceLink source={input.source} docTitle={docTitle} onFocus={focus} /></td></tr>)}</tbody></table>
+              <tbody>{step.inputs.map((input, k) => <tr key={k}><th scope="row">{input.name}</th><td className="num">{withUnit(input.value, input.unit)}</td><td><SourceLink name={input.name} source={input.source} docTitle={docTitle} onFocus={focus} /></td></tr>)}</tbody></table>
           </details>}
         </li>
         const row = (r: (typeof main)[number], k: number) => r.kind === 'step' ? item(r.step, k)

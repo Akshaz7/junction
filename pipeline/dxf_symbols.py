@@ -31,7 +31,7 @@ FIXTURE_KINDS = {
 FIXTURE_LAYER = re.compile(r"\b(?:fixture\w*|fixt|sanitar\w*|sanitair\w*|sanitaire\w*|sanita\w*|saniteetti\w*|vesikaluste\w*|plumbing)\b")
 OPENING_LAYERS = {
     "door": re.compile(r"\b(?:doors?|tur\w*|tuer\w*|portes?|dorr\w*|ovi|ovet)\b"),
-    "window": re.compile(r"\b(?:windows?|fenster\w*|fenetre\w*|fonster\w*|ikkuna\w*)\b"),
+    "window": re.compile(r"\b(?:windows?|glaz\w*|fenster\w*|fenetre\w*|fonster\w*|ikkuna\w*)\b"),
 }
 
 

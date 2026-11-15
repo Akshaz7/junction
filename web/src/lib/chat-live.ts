@@ -7,13 +7,15 @@ export type ChatLiveEvent =
   | { type: 'chat.delta'; chat_id: string; text: string }
   | { type: 'chat.done'; chat_id: string }
   | { type: 'pair.chat'; chat_id: string; proof: string }
+  | { type: 'pair.joined'; proof: string }
   | { type: 'connected' }
   | { type: 'disconnected' }
 
-export function decodeChatEvent(raw: unknown): Extract<ChatLiveEvent, { chat_id: string }> | null {
+export function decodeChatEvent(raw: unknown): Exclude<ChatLiveEvent, { type: 'connected' | 'disconnected' }> | null {
   if (typeof raw !== 'string') return null
   let event: Record<string, unknown>
   try { event = JSON.parse(raw) } catch { return null }
+  if (event && event.type === 'pair.joined' && typeof event.proof === 'string') return { type: 'pair.joined', proof: event.proof }
   if (!event || typeof event !== 'object' || typeof event.chat_id !== 'string' || !event.chat_id) return null
   if (event.type === 'chat.message' && typeof event.message_id === 'string' && typeof event.role === 'string')
     return { type: event.type, chat_id: event.chat_id, message_id: event.message_id, role: event.role,
@@ -34,6 +36,7 @@ export function createChatLiveClient(options: { url?: string; connect?: (url: st
   let socket: WebSocket | null = null
   let retry: ReturnType<typeof setTimeout> | undefined
   let attempt = 0
+  let stable: ReturnType<typeof setTimeout> | undefined
   let suspended = false
   function emit(event: ChatLiveEvent) { for (const listener of listeners) listener(event) }
   function reconnect() {
@@ -48,7 +51,9 @@ export function createChatLiveClient(options: { url?: string; connect?: (url: st
       socket = connection
       connection.addEventListener('open', () => {
         if (socket !== connection) return
-        attempt = 0
+        // A flapping socket must keep backing off: only forget failures once the link stayed up for 5 s.
+        clearTimeout(stable)
+        stable = setTimeout(() => { if (socket === connection) attempt = 0 }, 5000)
         // Refetch snapshots on every reconnect so missed notifications are recovered.
         emit({ type: 'connected' })
       })
@@ -62,6 +67,7 @@ export function createChatLiveClient(options: { url?: string; connect?: (url: st
       })
       connection.addEventListener('close', () => {
         if (socket !== connection) return
+        clearTimeout(stable)
         socket = null
         emit({ type: 'disconnected' })
         reconnect()
@@ -70,6 +76,7 @@ export function createChatLiveClient(options: { url?: string; connect?: (url: st
     } catch { reconnect() }
   }
   function disconnect() {
+    clearTimeout(stable)
     if (retry !== undefined) clearTimeout(retry)
     retry = undefined
     const previous = socket

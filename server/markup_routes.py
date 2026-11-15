@@ -12,7 +12,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field, field_validator
 
 from engine.symbol_teach import room_for, summary
-from engine.taught_items import canonical_kind, ALIASES
+from engine.taught_items import canonical_kind, ALIASES, existing_links
 from . import taught_store
 from . import artifact_store, config, db
 
@@ -148,6 +148,14 @@ def context(image, page):
     return page_context(str(d), page, sig)
 
 
+def _links(doc_id, page):
+    try:
+        plan = json.loads((doc_dir(doc_id) / f'planmap-{page}.json').read_text())
+        return existing_links(plan)
+    except (OSError, ValueError, AttributeError):
+        return {}
+
+
 @router.get('/docs/{doc_id}/markup')
 async def get_markup(doc_id: str, page: int = 1):
     if page < 1:
@@ -160,6 +168,10 @@ async def get_markup(doc_id: str, page: int = 1):
         p['n'] = n
     image = await page_image(doc_id, page)
     ctx = await asyncio.to_thread(context, image, page)
+    links = await asyncio.to_thread(_links, doc_id, page)
+    for sym in symbols:
+        if sym['id'] in links:
+            sym['matches_existing'] = links[sym['id']]
     return {'symbols': symbols, 'pins': pins, 'suggestions': ctx['suggestions']}
 
 
@@ -185,7 +197,11 @@ async def teach(doc_id: str, body: Selection):
             path, plan = await taught_store.materialize(c, doc_id, body.page, {'w': w, 'h': h})
             taught_store.atomic_json(path, plan)
     await asyncio.to_thread(taught_store.invalidate, doc_id)
-    return {**record(r), 'method': 'user_label'}
+    out = {**record(r), 'method': 'user_label'}
+    link = existing_links(plan).get(out['id'])
+    if link:
+        out['matches_existing'] = link
+    return out
 
 
 def identifier(value):

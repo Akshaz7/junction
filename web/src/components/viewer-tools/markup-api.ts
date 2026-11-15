@@ -1,7 +1,7 @@
 import type { Bbox } from '../../lib/types'
 export type MatchStatus = 'confirmed' | 'rejected'
 export interface SymbolMatch { id: string; bbox: Bbox; score: number; status: MatchStatus; room: string | null }
-export interface TaughtSymbol { id: string; doc_id: string; name: string; note: string; canonical_kind: string | null; manual_selection: boolean; page: number; template_bbox: Bbox; matches: SymbolMatch[]; matcher_note?: string; summary: { found: number; confirmed: number; pending: number; rejected: number; rooms: Record<string, number> } }
+export interface TaughtSymbol { id: string; doc_id: string; name: string; note: string; canonical_kind: string | null; manual_selection: boolean; page: number; template_bbox: Bbox; matches: SymbolMatch[]; matcher_note?: string; matches_existing?: string; summary: { found: number; confirmed: number; pending: number; rejected: number; rooms: Record<string, number> } }
 export interface MarkupPin { id: string; doc_id: string; n: number; page: number; x: number; y: number; note: string }
 export interface MarkupData { symbols: TaughtSymbol[]; pins: MarkupPin[]; suggestions: string[] }
 export async function markupRequest<T>(docId: string, suffix = '', init?: RequestInit): Promise<T> {

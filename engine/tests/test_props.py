@@ -347,3 +347,33 @@ def test_real_models_dimension_filter_schedule_and_missing_properties(did):
 def test_area_questions_about_a_quoted_room_are_not_property_lookups():
     from engine.props import request
     assert request("What is the net floor area of the room 'ABIRUUM (304)' on '3.korrus', in m²?") is None
+
+
+def test_imperial_question_shows_feet_inches_conversion(model):
+    for q in ("What is the width of door D-104 in feet?", "What is the width and height of the doors in feet and inches?"):
+        t = ask(model, q)["answer"]["text_md"]
+        assert "1000 mm" in t and "3.281 ft = 3 ft 3.37 in" in t
+    assert " ft = " not in ask(model, "What is the width of door D-104?")["answer"]["text_md"]
+
+
+def test_imperial_thresholds_parse_feet_and_inches(model):
+    assert ids(ask(model, "Which doors are wider than 2'-11.5\"?")) == {"d1"}
+    assert ids(ask(model, "Which doors are narrower than 3 ft 0 in?")) == {"d2"}
+
+
+def test_imperial_helpers():
+    from engine import units
+    assert units.feet_inches(1.0) == "3 ft 3.37 in" and units.feet_inches(0.3048) == "1 ft 0 in"
+    assert units.normalize_imperial_question("wider than 12'-6\"") == "wider than 3810 mm"
+    assert units.imperial_requested("area in ft²") and not units.imperial_requested("area in m2")
+
+
+def test_imperial_routed_answer_is_not_scale_boilerplate(model, monkeypatch):
+    from engine.answer import answer
+    root, did = model
+    monkeypatch.setenv("ARTIFACTS_DIR", str(root))
+    monkeypatch.setenv("MODELS_FAKE", "1")
+    monkeypatch.setenv("ANSWER_TIMEOUT_S", "0")
+    r = answer("What is the width and height of the doors in feet and inches? Use the IFC dimensions, not a guessed image scale.", [did])
+    t = r["answer"]["text_md"]
+    assert "real-world size in metres" not in t and "3 ft 3.37 in" in t

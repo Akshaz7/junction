@@ -155,6 +155,7 @@ button.pj-panel-title:hover .pj-panel-h { text-decoration: underline; text-under
 .pj-pagebar-right { display: flex; align-items: center; gap: 8px; }
 .pj-content { width: 300px; flex-shrink: 0; overflow-y: auto; padding: 68px 16px 24px; border-left: 1px solid var(--border); background: var(--background); }
 .pj-content h2, .pj-content h3 { font-size: var(--text-body-sm); font-weight: 500; color: var(--muted-foreground); margin: 16px 0 8px; }
+.pj-content-back { display: none; }
 .pj-content-card { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--card); }
 .pj-content-card:hover { border-color: var(--neutral-350); }
 .pj-content-card span:last-child { display: flex; flex-direction: column; min-width: 0; }
@@ -179,7 +180,8 @@ button.pj-panel-title:hover .pj-panel-h { text-decoration: underline; text-under
   .pj-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 800px) {
-  .pj-content { position: absolute; inset: 0; z-index: 5; width: auto; border-left: 0; }
+  .pj-content { position: absolute; inset: 0; z-index: 40; width: auto; border-left: 0; }
+  .pj-content-back { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--card); color: var(--foreground); font: inherit; }
 }
 @media (max-width: 640px) {
   .pj-screen { padding: 16px 16px 48px; }

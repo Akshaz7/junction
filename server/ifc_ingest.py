@@ -150,7 +150,7 @@ def run(source, doc, out, status):
         return "failed"
 
     # Leave 30 seconds for persistence and the enclosing five-minute watchdog.
-    deadline = time.monotonic() + max(0, 270 - (time.time() - status.started_at))
+    deadline = time.monotonic() + max(0, float(os.environ.get("INGEST_TIMEOUT_S", "300")) - 30 - (time.time() - status.started_at))
 
     def stage(name, timeout):
         metrics = {}

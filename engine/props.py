@@ -8,6 +8,7 @@ and identifiable headers; proximity to a tag alone is never a schedule link.
 """
 from __future__ import annotations
 
+import contextvars
 from collections import Counter
 from dataclasses import dataclass, field
 from functools import lru_cache
@@ -299,7 +300,12 @@ class Request:
     presence: bool | None = None
 
 
+_IMPERIAL = contextvars.ContextVar("props_imperial", default=False)
+
+
 def request(question):
+    from engine import units
+    question = units.normalize_imperial_question(question)
     q = question.casefold()
     kinds = [(m.start(), k) for k, rx in KINDS.items() if (m := re.search(r"\b(?:" + rx + r")\b", q))]
     kind = min(kinds)[1] if kinds else None
@@ -314,6 +320,12 @@ def request(question):
         ("width_m", r"\bwidth\b|\bwider\b|\bnarrower\b"),
         ("height_m", r"\bheight\b|\btaller\b|\bshorter\b")) if re.search(rx, q)), None)
     schedule = bool(re.search(r"\bschedule\b|türliste|oviluettelo|dörrförteckning|fensterliste", q))
+    # F-MULTIQ: "list the fire doors with their widths and fire ratings" asks for a table (one cited row per element), not one property.
+    attrs = {k for k, rx in (("width", r"\bwidths?\b"), ("height", r"\bheights?\b"), ("fire", r"fire[ -]rat\w*|fire[ -]resistance"),
+                            ("material", r"\bmaterials?\b"), ("u", r"u[ -]values?|thermal transmittance")) if re.search(rx, q)}
+    imperial_ask = bool(re.search(r"\b(?:feet|foot|ft|inch(?:es)?|imperial)\b", q))
+    multi_list = len(attrs) >= 2 and (imperial_ask or bool(re.search(r"\b(?:list|show|give|each|every|table|display)\b", q))) and len(kinds) == 1
+    schedule = schedule or multi_list
     if not schedule and re.search(r"\b(?:area|length|volume|perimeter)\b", q):
         return None  # Named-room quantities belong to the existing quantity solver.
     if re.search(r"\b(?:group|by)\b", q):
@@ -345,7 +357,7 @@ def request(question):
         return None  # Value comparisons need an explicit, separate value parser.
     if re.search(r"\b(?:has|have|with)\s+(?:a\s+)?material\s+\S", q):
         return None
-    if re.search(r"\b(?:widths?|heights?|materials?|ratings?|u[ -]values?)\s+and\s+(?:widths?|heights?|materials?|(?:fire |acoustic )?ratings?|u[ -]values?)\b", q):
+    if not multi_list and re.search(r"\b(?:widths?|heights?|materials?|ratings?|u[ -]values?)\s+and\s+(?:widths?|heights?|materials?|(?:fire |acoustic )?ratings?|u[ -]values?)\b", q):
         return None
     predicates = []
     for key, rx, positive in (("is_external", r"\bexternal\b|\bexterior\b", True),
@@ -394,6 +406,9 @@ def display(value, key):
     if isinstance(value, bool):
         return "Yes" if value else "No"
     if key in ("width_m", "overall_width_m", "height_m"):
+        if _IMPERIAL.get():
+            from engine import units
+            return units.with_imperial(value, f"{value * 1000:g} mm")
         return f"{value * 1000:g} mm"
     if key == "area_m2":
         return f"{value:g} m²"
@@ -696,6 +711,8 @@ def answer(question, doc_ids, root, t0=None, *, hidden=None):
     if req is None or len(doc_ids) != 1:
         return None
     t0 = t0 or time.perf_counter()
+    from engine import units
+    _IMPERIAL.set(units.imperial_requested(question))
     try:
         result = _model_answer(question, doc_ids[0], Path(root), req, t0, hidden)
         if result is not None and hidden:

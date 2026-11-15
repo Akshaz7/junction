@@ -1,8 +1,7 @@
 import { overlayActionAnswer, overlayAlignedAnswer, overlayRequest } from '../lib/sheet-overlay'
-import { askUntilReadable, STILL_READING_STATUS } from '../lib/still-reading'
 import { sceneOpen, sceneOpenCitation } from '../lib/scene-open'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { ArrowUp, AtSign, CalendarClock, FileSearch, FileText, FolderOpen, HardHat, Paperclip, Plus, Scale, Upload, X } from 'lucide-react'
+import { ArrowUp, AtSign, CalendarClock, FileSearch, FileText, FolderOpen, HardHat, Plus, Scale, Upload, X } from 'lucide-react'
 import { Button } from './ui'
 import { AnswerCard } from './answer-card'
 import { rememberChat } from '../lib/known-chats'
@@ -205,7 +204,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     const unsubscribe = chatLive.subscribe((event) => {
       // A (re)connect snapshot also recovers everything missed while backgrounded or in native AR.
       if (event.type === 'connected') { expectingAnswer.current = false; refresh(); return }
-      if (event.type === 'disconnected') return
+      if (event.type === 'disconnected' || event.type === 'pair.joined') return
       if (event.chat_id !== liveChatId || submitting.current) return
       if (event.type === 'chat.message' && event.role === 'user') expectingAnswer.current = true
       else if (event.type === 'chat.message' || event.type === 'chat.done') expectingAnswer.current = false
@@ -244,7 +243,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       if (event.chat_id === chatId.current) return
       // Strangers' chats never raise the notice: only with Follow on, and only for chats this browser knows.
       if (!followingRef.current) return
-      void isPairedChat(event.chat_id, { failOpen: true }).then((known) => {
+      void isPairedChat(event.chat_id).then((known) => {
         if (known && followingRef.current && !submitting.current) window.location.hash = `#/chat?chat=${encodeURIComponent(event.chat_id)}`
       })
     })
@@ -437,11 +436,11 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         // Preserve the active stream: a hashchange would reload this new chat.
         window.history.replaceState(window.history.state, '', `#/chat?chat=${encodeURIComponent(id)}${projectId ? `&project=${encodeURIComponent(projectId)}` : ''}`)
       }
-      const answer = await askUntilReadable(() => workspaceApi.askQuestion(chatId.current!, question.trim(), docIds, {
+      const answer = await workspaceApi.askQuestion(chatId.current!, question.trim(), docIds, {
         onStatus: (text) => { if (generation.current === version) setStatuses((previous) => previous.at(-1) === text ? previous : [...previous, text]) },
         onDelta: (text) => { if (generation.current === version) setStreamText(text) },
         onTrace: (trace) => { if (generation.current === version) { streamedTraces.push(trace); setTraces([...streamedTraces]); setStatuses((previous) => previous.at(-1) === trace.detail ? previous : [...previous, trace.detail]) } },
-      }), { cancelled: () => generation.current !== version, onWait: () => { setStreamText(''); setStatuses([STILL_READING_STATUS]) } })
+      })
       if (generation.current !== version) return
       setAnswers((previous) => [...previous, { id: answer.answer_id, question: answer.question, content: '', answer: { ...answer, trace: answer.trace.length ? answer.trace : streamedTraces } }])
     } catch (err) {
@@ -573,7 +572,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
           <p className="picker-heading">Skills</p>
           <SkillPicker disabled={busy || restoring || hidden} onPick={(prompt) => { setDraft(prompt); setMention(null); setToolsOpen(false); textarea.current?.focus() }} />
         </div>}
-        <div className="composer-actions"><button ref={toolsButton} className="document-context" aria-label="Add to question" aria-haspopup="dialog" aria-expanded={toolsOpen} aria-controls={toolsOpen ? 'composer-tools' : undefined} title="Add documents or skills" type="button" disabled={busy || restoring || hidden} onClick={() => { setMention(null); setToolsOpen((open) => !open) }}><Plus size={16} /></button><button className="document-context composer-upload" aria-label="Upload a drawing" title="Upload a drawing" type="button" disabled={busy || restoring || hidden || demo} onClick={() => openUpload()}><Paperclip size={16} /></button><MicButton disabled={busy || restoring || hidden} onInterim={(text) => setDraft(text)} onText={(text) => { setDraft(text); setMention(null); textarea.current?.focus() }} />
+        <div className="composer-actions"><button ref={toolsButton} className="document-context" aria-label="Add to question" aria-haspopup="dialog" aria-expanded={toolsOpen} aria-controls={toolsOpen ? 'composer-tools' : undefined} title="Add documents or skills" type="button" disabled={busy || restoring || hidden} onClick={() => { setMention(null); setToolsOpen((open) => !open) }}><Plus size={16} /></button><MicButton disabled={busy || restoring || hidden} onInterim={(text) => setDraft(text)} onText={(text) => { setDraft(text); setMention(null); textarea.current?.focus() }} />
           <Button type="submit" variant="primary" className="send-button" aria-label="Send question" disabled={!draft.trim() || busy || restoring || !docs.length || !!mention}><ArrowUp size={18} /></Button>
         </div>
       </form>
@@ -582,6 +581,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     <UploadDialog open={uploadOpen} initialFile={droppedFile} onClose={() => { setUploadOpen(false); setDroppedFile(null) }}
       onAsk={(doc) => { attachDocument(doc); textarea.current?.focus() }}
       onOpen={(doc) => attachDocument(doc)}
+      onUploaded={() => { void onRefresh?.().catch(() => undefined) }}
       onReady={(doc) => { attachDocument(doc); void onRefresh?.().catch(() => undefined) }} />
     </section>
     {viewer && <>

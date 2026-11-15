@@ -48,10 +48,45 @@ def iou(a, b):
     return intersection / union if union > 0 else 0
 
 
+def _centre(b):
+    return ((b[0]+b[2])/2, (b[1]+b[3])/2)
+
+
+def _inside(point, b):
+    return b[0] <= point[0] <= b[2] and b[1] <= point[1] <= b[3]
+
+
+def same_item(a, b):
+    """Two same-kind boxes are one physical item: IoU >= 0.5, or either centre lies inside the other box.
+
+    A box drawn loosely around an already detected door has a low IoU but contains its centre.
+    """
+    if not a or not b:
+        return False
+    return iou(a, b) >= .5 or _inside(_centre(a), b) or _inside(_centre(b), a)
+
+
+def closeness(a, b):
+    ca, cb = _centre(a), _centre(b)
+    return (iou(a, b), -((ca[0]-cb[0])**2 + (ca[1]-cb[1])**2))
+
+
+def existing_links(plan):
+    """{taught symbol id: id of the detected item it merged with}, for the review panel."""
+    out = {}
+    for it in plan.get('items', []):
+        if it.get('source') == 'taught':
+            continue
+        for label in (it.get('props') or {}).get('user_labels', []):
+            if label.get('taught_symbol_id') is not None:
+                out[str(label['taught_symbol_id'])] = it['item_id']
+    return out
+
+
 def project(plan, symbols, page, image=None):
     """Rebuild the manual layer; detector records remain intact and retain their ids.
 
-    IoU >= 0.5 means the same-kind boxes share at least half their combined area.
+    Same-kind boxes merge when IoU >= 0.5 or a centre lies inside the other box (see same_item).
     Links record both identities, including repeated manual marks of the same item.
     Legacy find-all records are deliberately excluded, even if previously confirmed.
     """
@@ -79,8 +114,8 @@ def project(plan, symbols, page, image=None):
         box, sid = list(s['template_bbox']), str(s['id'])
         kind = item_kind(s['name'], s.get('canonical_kind'))
         iid = 'taught-' + sid
-        matches = [it for it in items if it['kind'] == kind and iou(it.get('bbox_px'), box) >= .5]
-        target = max(matches, key=lambda it: iou(it.get('bbox_px'), box)) if matches else None
+        matches = [it for it in items if it['kind'] == kind and same_item(it.get('bbox_px'), box)]
+        target = max(matches, key=lambda it: closeness(it['bbox_px'], box)) if matches else None
         label = {'taught_symbol_id': sid, 'item_id': iid, 'name': s['name'], 'note': s.get('note', ''),
                  'bbox_px': box, 'confirmed_by_user': True}
         if target is None:
@@ -170,7 +205,8 @@ def query(question, doc_ids, root, hidden=None):
             continue
         rest = re.sub(pattern, '', q)
         rest = re.sub(r'\bpage\s+\d+\b', '', rest)
-        rest = re.sub(r'\b(how many|number of|count|are|is|there|in|on|this|the|drawing|sheet|document|total|please|should|i|we|order|need|to|takeoff|take-off)\b', '', rest)
+        rest = re.sub(r'["“”‘’`]', '', rest)
+        rest = re.sub(r'\b(how many|number of|count|are|is|there|in|on|this|the|drawing|sheet|document|total|please|should|i|we|order|need|to|takeoff|take-off|on|of|are|do|we|have|mark|marks|marked|label|labels|labelled|labeled|named|called|tagged|saved|taught|my|item|items|instances|instance)\b', '', rest)
         # Resolve a named room only against real enclosing polygons.
         room_scope = re.search(r'\b(?:in|inside)\s+(?:the\s+)?(.+?)(?:[?.!]|$)', q)
         if room_scope and fold(room_scope.group(1)).strip(' ?.!') in {'drawing', 'sheet', 'document', 'this drawing', 'this sheet', 'this document'}:

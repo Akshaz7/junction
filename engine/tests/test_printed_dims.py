@@ -1,0 +1,95 @@
+import json
+from pathlib import Path
+
+import pytest
+
+from engine.solvers import solve
+from pipeline.printed_dims import room_sizes
+
+FIX = Path(__file__).parent / "fixtures" / "scan_printed_dims_planmap.json"
+
+
+def _doc(tmp_path, mutate=None):
+    pm = json.loads(FIX.read_text())
+    if mutate:
+        mutate(pm)
+    d = tmp_path / "uploads__scan"
+    d.mkdir()
+    (d / "planmap-1.json").write_text(json.dumps(pm))
+    (d / "doc.json").write_text(json.dumps({"doc_id": "uploads__scan", "kind": "raster", "pages": 1}))
+    return pm
+
+
+def test_room_sizes_pair_only_the_dimensions_that_span_the_room():
+    sizes = room_sizes(json.loads(FIX.read_text()))
+    k = sizes["room-003"]
+    assert (k["width_m"], k["depth_m"]) == (2.55, 2.23)
+    assert k["area_m2"] == pytest.approx(5.6865)
+    assert sizes["room-001"]["depth_m"] == 2.5   # dining room uses its own 2.50, not the kitchen's 2.23
+
+
+def test_kitchen_area_uses_printed_dimensions_and_shows_them(tmp_path):
+    _doc(tmp_path)
+    a = solve("What is the area of the kitchen in square metres? Show the dimensions used.", "uploads__scan", root=tmp_path)
+    assert a["answer"]["value"] == pytest.approx(5.6865, abs=1e-3)
+    text = a["answer"]["text_md"]
+    assert "2.55 m × 2.23 m" in text and "aren't available" not in text
+    assert "5.69" in text
+
+
+def test_conflicting_or_implausible_dimensions_are_not_used():
+    pm = json.loads(FIX.read_text())
+    pm["dimension_evidence"].append({"text": "2.90", "meters": 2.9, "bbox_px": [114.9, 141.0, 119.0, 208.2]})
+    assert "room-003" not in room_sizes(pm)
+    pm = json.loads(FIX.read_text())
+    pm["scale"]["m_per_px"] = 0.1   # printed 2.55 m vs 7.7 m measured: not the same thing
+    assert "room-003" not in room_sizes(pm)
+
+
+def test_rooms_without_matching_dimensions_keep_the_scale_area(tmp_path):
+    _doc(tmp_path)
+    a = solve("What is the area of the corridor in square metres?", "uploads__scan", root=tmp_path)
+    assert "Printed dimensions" not in a["answer"]["text_md"] and "Dimensions used" not in a["answer"]["text_md"]
+
+
+@pytest.mark.parametrize("q,expect", [
+    ("Using only the printed kitchen dimensions 2.55 by 2.23 metres, calculate its rectangular area. Do not use pixel geometry.", 5.6865),
+    ("The kitchen is 3.2 x 4.1 m, what is its area?", 13.12),
+    ("Calculate the area of a room 4200 mm × 3000 mm", 12.6),
+    ("Multiply 2.55 by 2.23.", 5.6865),
+    ("What is the area of the kitchen if it measures 3200 mm by 4100 mm?", 13.12),
+])
+def test_user_supplied_numbers_are_computed_as_given(tmp_path, monkeypatch, q, expect):
+    from engine.answer import answer
+    monkeypatch.setenv("ARTIFACTS_DIR", str(tmp_path))
+    monkeypatch.setenv("MODELS_FAKE", "1")
+    _doc(tmp_path)
+    a = answer(q, ["uploads__scan"])
+    assert a["answer"]["value"] == pytest.approx(expect, abs=1e-3)
+    assert a["cost"]["usd_total"] == 0 and not a["answer"]["abstained"]
+
+
+def test_stated_rectangle_is_compared_with_the_drawing(tmp_path, monkeypatch):
+    from engine.answer import answer
+    monkeypatch.setenv("ARTIFACTS_DIR", str(tmp_path))
+    monkeypatch.setenv("MODELS_FAKE", "1")
+    _doc(tmp_path, lambda pm: pm.pop("dimension_evidence"))   # drawing value comes from the scale: 5.87
+    a = answer("The kitchen is 3.2 x 4.1 m, what is its area?", ["uploads__scan"])
+    text = a["answer"]["text_md"]
+    assert "13.12" in text and "5.87" in text and "drawing's own value" in text
+    assert a["citations"]
+
+
+@pytest.mark.parametrize("q", ["How many windows are 1.2 x 1.5 m?", "What is the total area of all rooms?", "What is the area of the kitchen?"])
+def test_ordinary_questions_do_not_trigger_arithmetic(q):
+    from engine.user_arith import parse
+    assert parse(q) is None
+
+
+def test_comparison_survives_if_it_measures_phrasing(tmp_path, monkeypatch):
+    from engine.answer import answer
+    monkeypatch.setenv("ARTIFACTS_DIR", str(tmp_path))
+    monkeypatch.setenv("MODELS_FAKE", "1")
+    _doc(tmp_path)
+    t = answer("What is the area of the kitchen if it measures 3200 mm by 4100 mm?", ["uploads__scan"])["answer"]["text_md"]
+    assert "13.12" in t and "drawing's own value" in t

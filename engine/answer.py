@@ -281,9 +281,39 @@ def _guarded(question, doc_ids, on_event, scene_state, history):
         ex.shutdown(wait=False)
 
 
+def reconcile_cost(res: dict) -> dict:
+    """The cost shown always equals the sum of the recorded model calls: every paid trace step must be in cost.calls
+    (refusal and abstain paths used to drop them), and usd_total is recomputed from calls."""
+    try:
+        cost = res.setdefault("cost", {"usd_total": 0.0, "calls": []})
+        calls = cost.setdefault("calls", [])
+        have: dict = {}
+        for c in calls:
+            k = (c.get("model"), round(float(c.get("cost_usd") or 0), 6))
+            have[k] = have.get(k, 0) + 1
+        for st in res.get("trace") or []:
+            usd = float(st.get("cost_usd") or 0)
+            if usd <= 0 or not st.get("model"):
+                continue
+            k = (st["model"], round(usd, 6))
+            if have.get(k, 0) > 0:
+                have[k] -= 1
+                continue
+            calls.append({"task": st.get("step") or "model", "provider": "", "model": st["model"], "cost_usd": usd})
+        cost["usd_total"] = round(sum(float(c.get("cost_usd") or 0) for c in calls), 6)
+    except (AttributeError, TypeError, ValueError):
+        pass
+    return res
+
+
 @document_scope
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None, _split: bool | None = None) -> dict:
+    return reconcile_cost(_answer_outer(question, doc_ids, on_event, scene_state=scene_state, history=history, _split=_split))
+
+
+def _answer_outer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
+                  history: list[dict] | None = None, _split: bool | None = None) -> dict:
     if _split is None and doc_ids and not os.environ.get("MULTIQ_OFF"):
         # F-MULTIQ: a message holding several questions is split, each part answered, and the results merged.
         from engine import multiq
@@ -344,6 +374,13 @@ def _answer_with_evidence(question: str, doc_ids: list[str], on_event: Callable 
             if on_event:
                 on_event("trace", _tstep)
             step = _tstep if step is None else step
+    except Exception:  # noqa: BLE001
+        pass
+    try:   # F9: numbers given in the question are computed as given, then compared with the drawing
+        from engine.user_arith import answer as user_arith
+        stated = user_arith(question, doc_ids, _root())
+        if stated is not None:
+            return stated
     except Exception:  # noqa: BLE001
         pass
     from engine.taught_items import query as taught_query
@@ -617,6 +654,11 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
         if len(doc_ids) == 1 and not re.search(r"\b(?:brands?|manufacturers?|which (?:type|product)|what (?:type|product))\b", question, re.I):
             from engine.order import answer_order
             from engine.solvers.data import load_doc as _load_order
+            if (order_doc := _load_order(doc_ids[0], root)) is not None and (res := __import__("engine.mep", fromlist=["x"]).order_answer(question, order_doc, t0)) is not None:
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                return res
             if (order_doc := _load_order(doc_ids[0], root)) is not None and (res := answer_order(question, order_doc, t0, root=root)) is not None:
                 for s_ in res["trace"]:
                     add(s_)
@@ -765,6 +807,20 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             fdoc = _ldf(doc_ids[0], root)
             if fdoc is not None and fdoc.mode == "planmap":
                 res = fixture_locate(question, fdoc, _fx, t0)
+                for s_ in res["trace"]:
+                    add(s_)
+                res["trace"] = trace
+                return res
+
+        # 0-dw. "Widen the Bathroom door from 760 to 900 mm": a door what-if (highlight that door, say what is not modelled), never a room highlight
+        from engine import door_edit as _de
+        _dp = _de.parse(question)
+        if _dp is not None:
+            from engine.solvers.data import load_doc as _lddw
+            _ddoc = _lddw(doc_ids[0], root)
+            if _ddoc is not None:
+                emit("status", {"text": f"Exploring document: {_title(doc_ids[0], root)}"})
+                res = _de.answer(question, _ddoc, _dp, t0)
                 for s_ in res["trace"]:
                     add(s_)
                 res["trace"] = trace

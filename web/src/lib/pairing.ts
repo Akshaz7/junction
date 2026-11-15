@@ -36,7 +36,33 @@ export function addPairing(code: string) {
   return true
 }
 
-export function unpair() { write([]) }
+const HOST_KEY = 'hologram.pair-hosted'
+let hostedMemory = ''
+const hostedCode = (): string => { try { return window.localStorage.getItem(HOST_KEY) ?? hostedMemory } catch { return hostedMemory } }
+/** True while this device only shows its own QR code: no phone has been confirmed, so never claim "Paired". */
+export const isWaitingForPhone = (): boolean => { const hosted = hostedCode(); return !!hosted && read().length > 0 && read().every((code) => code === hosted) }
+
+/** The phone that scanned a code tells the server; the hosting laptop then stops "waiting" and shows Paired. */
+export async function announceJoin(code: string): Promise<void> {
+  try { await fetch(`/api/pair/${code}/join`, { method: 'POST', signal: AbortSignal.timeout(8000) }) } catch { /* the phone is paired locally either way */ }
+}
+
+/** A live "pair.joined" event carries a hash of (join, code): if it matches the code this laptop hosts, a phone really joined. */
+export async function acceptJoinProof(proof: string): Promise<boolean> {
+  const hosted = hostedCode()
+  if (!hosted || (await digestHex(`join:${hosted}`)) !== proof) return false
+  hostedMemory = ''
+  try { window.localStorage.removeItem(HOST_KEY) } catch { /* memory only */ }
+  window.dispatchEvent(new CustomEvent('hologram:pairing', { detail: read().length }))
+  return true
+}
+
+export function unpair() {
+  hostedMemory = ''
+  try { window.localStorage.removeItem(HOST_KEY) } catch { /* memory only */ }
+  write([])
+  setFollow(false)   // unpairing must also stop automatic chat following
+}
 
 export function onPairingChange(listener: () => void) {
   window.addEventListener('hologram:pairing', listener)
@@ -48,6 +74,8 @@ export function ensurePairCode(): string {
   const [first] = read()
   if (first) return first
   const code = newPairCode()
+  hostedMemory = code
+  try { window.localStorage.setItem(HOST_KEY, code) } catch { /* memory only */ }
   addPairing(code)
   return code
 }
@@ -83,15 +111,21 @@ export async function registerChat(chatId: string): Promise<void> {
 }
 
 /** True when this device knows the chat, or the server says a paired device created it (then it is remembered). */
-export async function isPairedChat(chatId: string, options: { failOpen?: boolean } = {}): Promise<boolean> {
+export async function isPairedChat(chatId: string): Promise<boolean> {
   if (isKnownChat(chatId)) return true
   for (const code of read()) {
     const response = await call('GET', code, chatId)
-    // The server could not answer in time: for a chat that just arrived over this browser's pairing socket, follow it anyway.
-    if (!response && options.failOpen) return true
+    // No answer (timeout, 429, 5xx) means "not proven": never follow a chat on a guess, other users' chats share this socket.
     if (response?.ok && (await response.json() as { paired?: boolean }).paired) { rememberChat(chatId); return true }
   }
   return false
+}
+
+async function digestHex(text: string): Promise<string | null> {
+  try {
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
+    return Array.from(new Uint8Array(digest).slice(0, 8), (b) => b.toString(16).padStart(2, '0')).join('')
+  } catch { return null }
 }
 
 async function proofFor(code: string, chatId: string): Promise<string | null> {

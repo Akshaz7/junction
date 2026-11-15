@@ -7,6 +7,9 @@ class ApiError extends Error {
   constructor(message: string, readonly status: number, readonly empty: boolean) { super(message) }
 }
 
+/** The server itself reported a failed answer: nothing to recover from the saved chat. */
+class ServerAnswerError extends Error {}
+
 type RetryListener = (message: string) => void
 const retryMessages = new Map<symbol, string>()
 const retryListeners = new Set<RetryListener>()
@@ -85,7 +88,7 @@ export async function readAnswerStream(response: Response, callbacks: StreamCall
     const data = lines.filter((line) => line.startsWith('data:')).map((line) => line.slice(5).trimStart()).join('\n')
     if (!data || !['status', 'trace', 'delta', 'answer', 'error'].includes(event ?? '')) return
     const payload = JSON.parse(data)
-    if (event === 'error') throw new Error(payload.detail || 'The answer could not be completed. Please try again.')
+    if (event === 'error') throw new ServerAnswerError(payload.detail || 'The answer could not be completed. Please try again.')
     if (event === 'status' && typeof payload.text === 'string') callbacks.onStatus(payload.text)
     if (event === 'trace') callbacks.onTrace(payload as TraceStep)
     if (event === 'delta' && typeof payload.text === 'string') callbacks.onDelta?.(payload.text)
@@ -140,6 +143,17 @@ export class WorkspaceApi {
     return response
   }
 
+  private async retryDocuments(): Promise<Response> {
+    const key = Symbol('docs')
+    try {
+      for (let attempt = 1; ; attempt++) {
+        publishRetry(key, `Server is busy, retrying… (${attempt})`)
+        await new Promise((resolve) => setTimeout(resolve, Math.min(1_000 * 2 ** Math.min(attempt - 1, 3), 8_000)))
+        try { return await this.request('/api/docs', { signal: AbortSignal.timeout(20_000) }) } catch { /* keep retrying */ }
+      }
+    } finally { publishRetry(key, '') }
+  }
+
   async getDocuments(): Promise<Document[]> {
     let response: Response
     try {
@@ -155,9 +169,14 @@ export class WorkspaceApi {
       const unreachable = error instanceof TypeError || (error instanceof DOMException && error.name === 'TimeoutError') ||
         (error instanceof ApiError && ([502, 504].includes(error.status) || (error.status === 500 && error.empty)))
       if (this.mode !== 'auto' || !unreachable) throw error
-      // Choose the offline dataset before selecting docs; never substitute fake answers for real docs.
-      this.isDemo = true
-      response = await this.request('/api/docs')
+      if (!allowDemoFallback) {
+        // Production: a real visitor must never land in the toy offline demo. Keep retrying with backoff.
+        response = await this.retryDocuments()
+      } else {
+        // Dev/test: choose the offline dataset before selecting docs; never substitute fake answers for real docs.
+        this.isDemo = true
+        response = await this.request('/api/docs')
+      }
     }
     const data = await response.json() as { sources: { docs: Document[] }[] }
     return data.sources.flatMap((source) => source.docs)
@@ -245,14 +264,46 @@ export class WorkspaceApi {
     return response.blob()
   }
 
+  /**
+   * One Send = one POST, never re-posted. The client message id lets the server answer a duplicate
+   * once. If the stream drops, the answer is recovered by polling the saved chat, not by asking again.
+   */
   async askQuestion(chatId: string, content: string, docIds: string[], callbacks: StreamCallbacks): Promise<Answer> {
+    const clientMessageId = globalThis.crypto?.randomUUID?.() ?? `m-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    const sentAt = Date.now()
     const response = await this.request(`/api/chats/${encodeURIComponent(chatId)}/messages`, {
       method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
-      body: JSON.stringify({ content, doc_ids: docIds }),
+      body: JSON.stringify({ content, doc_ids: docIds, client_message_id: clientMessageId }),
     })
-    return readAnswerStream(response, callbacks)
+    try {
+      return await readAnswerStream(response, callbacks)
+    } catch (error) {
+      if (error instanceof ServerAnswerError) throw error
+      // The server accepted the question but the stream dropped: fetch the saved answer, never ask again.
+      const recovered = await this.awaitSavedAnswer(chatId, sentAt, content)
+      if (recovered) return recovered
+      throw error
+    }
+  }
+
+  /** Poll GET /api/chats/{id} for the answer to the question that was just sent (created since `sentAt`, 60 s clock tolerance). */
+  async awaitSavedAnswer(chatId: string, sentAt: number, content: string, maxMs = 180_000, everyMs = 3_000): Promise<Answer | null> {
+    for (let waited = 0; waited <= maxMs; waited += everyMs) {
+      try {
+        const chat = await this.getChat(chatId)
+        const at = (m: { created_at?: string }) => (m.created_at ? Date.parse(m.created_at) : Infinity)
+        let index = -1
+        chat.messages.forEach((m, i) => { if (m.role === 'user' && m.content === content && at(m) >= sentAt - 60_000) index = i })
+        const done = index < 0 ? undefined : chat.messages.slice(index + 1).find((m) => m.role === 'assistant' && m.answer)
+        if (done?.answer) return done.answer
+      } catch { /* keep polling */ }
+      await new Promise((resolve) => setTimeout(resolve, everyMs))
+    }
+    return null
   }
 }
 
 const setting = import.meta.env?.VITE_USE_MOCK  // env is undefined when e2e specs import helpers from this module in Node
+/** The offline mock only exists outside production builds (or when explicitly forced). */
+const allowDemoFallback = !import.meta.env?.PROD || import.meta.env?.VITE_ALLOW_DEMO === 'true'
 export const workspaceApi = new WorkspaceApi(setting === 'true' ? 'demo' : setting === 'false' ? 'real' : 'auto')

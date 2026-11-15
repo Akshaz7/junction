@@ -27,9 +27,16 @@ export function useChatProject(active: boolean): { id: string | null; project: P
   return { id, ...state }
 }
 
-/** The library documents that belong to the project, in project order. */
+const KINDS = ['raster', 'pdf', 'dxf', 'dwg', 'ifc', 'svg'] as const
+/** A project file the library list has not caught up with yet (still being read): built from the project's own record. */
+const fromProjectDoc = (entry: Project['docs'][number]): Document => {
+  const kind = (KINDS as readonly string[]).includes(entry.kind) ? entry.kind : (entry.formats ?? []).find((f) => (KINDS as readonly string[]).includes(f)) ?? 'raster'
+  return { doc_id: entry.doc_id, source: 'uploads', formats: entry.formats ?? [], kind: kind as Document['kind'], title: entry.title, pages: 1, licence: '', credit: '', heldout: false }
+}
+
+/** Every file of the project, in project order. The project is the source of truth: a file the library list lacks is still attached. */
 export const projectLibraryDocs = (project: Project | null, docs: Document[]) =>
-  project ? project.docs.flatMap((entry) => docs.find((doc) => doc.doc_id === entry.doc_id) ?? []) : docs
+  project ? project.docs.map((entry) => docs.find((doc) => doc.doc_id === entry.doc_id) ?? fromProjectDoc(entry)) : docs
 
 export function ChatCrumb({ project, id, title }: { project: Project | null; id: string; title?: string }) {
   return <nav className="pj-crumbs" aria-label="Breadcrumb">
@@ -51,9 +58,10 @@ function Tile({ doc, busy, onOpen }: { doc: ProjectDoc; busy: boolean; onOpen: (
 }
 
 /** "Project content": the project's files as tiles beside the chat. Clicking one opens it in the viewer. */
-export function ProjectContentPanel({ project }: { project: Project }) {
+export function ProjectContentPanel({ project, onClose }: { project: Project; onClose?: () => void }) {
   const viewer = useProjectViewer()
   return <aside className="pj-content" aria-label="Project content">
+    {onClose && <button type="button" className="pj-content-back" onClick={onClose}>← Back to chat</button>}
     <h2>Project content</h2>
     <a className="pj-content-card" href={projectHref(project.id)}>
       <span className="pj-icon" aria-hidden="true"><Folder size={16} /></span>

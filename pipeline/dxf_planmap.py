@@ -122,6 +122,12 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
     p1 = page["pages"][0]
     W, H = p1["w"], p1["h"]
     texts = room_texts(ms)
+    from pipeline import dxf_generic
+    swiss = any(True for _ in ms.query('LWPOLYLINE POLYLINE[layer=="ROOM_OUTLINE"]'))
+    generic_rooms = []
+    if not swiss:  # any other CAD layering: walls/openings by layer name, rooms from the walls, labels from TEXT
+        texts = dxf_generic.room_labels(ms)
+        generic_rooms = dxf_generic.derive_rooms(ms, unit_m)
     if page["source"] == "dxf":
         lines = pg.dxf_lines(doc)
         x0, y0, s, _, Hh = pg.dxf_frame(lines)
@@ -152,7 +158,7 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
         return items[-1]
 
     # rooms
-    rooms = [p for e in ms.query('LWPOLYLINE POLYLINE[layer=="ROOM_OUTLINE"]') if _closed(e) for p in [_pts(e)]]
+    rooms = [p for e in ms.query('LWPOLYLINE POLYLINE[layer=="ROOM_OUTLINE"]') if _closed(e) for p in [_pts(e)]] or generic_rooms
     from pipeline.dxf_units import analyse
     # A repeated endpoint closes CAD rings even when the DXF closed bit is unset.
     unit_entities = list(ms.query('LWPOLYLINE POLYLINE[layer=="UNIT_OUTLINE"]'))
@@ -185,6 +191,14 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
             props["parent_room_item_id"] = room_items[parent]["item_id"]
     for e in ms.query('LWPOLYLINE POLYLINE[layer=="WALL"]'):
         add("wall", "", _pts(e), {}, "dxf")
+    if not swiss:
+        for poly in dxf_generic.wall_polygons(ms):
+            add("wall", "", [(float(x), float(y)) for x, y in poly.exterior.coords[:-1]], {"dxf_source": "wall layer"}, "dxf")
+        arcs, wins = dxf_generic.openings(ms, unit_m)
+        for d in arcs:
+            add("door", "", d["polygon"], {"classification": "swing_arc", "leaf_len_m": d["leaf_len"] * unit_m if unit_m else None}, "dxf", 0.9)
+        for w in wins:
+            add("window", "", w["polygon"], {"classification": "glazing_lines"}, "dxf", 0.9)
     from pipeline.dxf_symbols import extract_fixtures, extract_openings
     for symbol in [*extract_openings(ms, "window", unit_m), *extract_openings(ms, "door", unit_m),
                    *extract_fixtures(ms)]:
@@ -195,7 +209,7 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
         cnt["text"] += 1
         items.append({"item_id": f"text-{cnt['text']}", "kind": "text", "label": t,
                       "bbox_px": [c[0] - 4 * len(t), c[1] - h, c[0] + 4 * len(t), c[1] + h],
-                      "polygon_px": None, "props": {"dxf_layer": "ROOM_TEXT"}, "conf": 1.0, "source": "dxf"})
+                      "polygon_px": None, "props": {"dxf_layer": "ROOM_TEXT" if swiss else "label"}, "conf": 1.0, "source": "dxf"})
     scale = dxf_scale(doc, tf, doc_id)
     if scale["m_per_px"] is not None:
         scale["method"] = method

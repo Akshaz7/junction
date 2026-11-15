@@ -22,7 +22,7 @@ export class FindingsApi {
     return response.json() as Promise<T>
   }
   async list(docId: string, signal?: AbortSignal) { return (await this.request<{ findings: Finding[] }>(`/api/findings?doc_id=${encodeURIComponent(docId)}`, signal)).findings }
-  run(docId: string, signal?: AbortSignal) { return this.request<{ status: string; findings: Finding[] }>('/api/findings/run', signal, { doc_id: docId }) }
+  run(docId: string, signal?: AbortSignal) { return this.request<{ status: string; detail?: string; findings: Finding[] }>('/api/findings/run', signal, { doc_id: docId }) }
   async advise(docId: string, signal?: AbortSignal) { return sourcedCards(await this.request('/api/advise', signal, { doc_id: docId })) }
 }
 export const findingsApi = new FindingsApi()

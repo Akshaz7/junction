@@ -2,9 +2,10 @@ import { useEffect, useId, useReducer, useRef, useState, type DragEvent } from '
 import { createPortal } from 'react-dom'
 import { AlertCircle, ArrowRight, Check, FileText, Upload, X } from 'lucide-react'
 import type { Document } from '../lib/types'
-import { friendlyFailure, uploadFile, UploadError, waitForUpload } from '../lib/upload-client'
+import { findPersistedUpload, friendlyFailure, uploadFile, UploadError, waitForUpload } from '../lib/upload-client'
 import { MAX_UPLOAD_BYTES, UPLOAD_ACCEPT, uploadReducer, validateUpload } from '../lib/upload-state'
 import { Button } from './ui'
+import { ReadOnceChip } from './read-once-chip'
 import './upload-dialog.css'
 
 export type UploadDialogProps = {
@@ -15,6 +16,8 @@ export type UploadDialogProps = {
   /** Mounting screen selects this document and opens its viewer. */
   onOpen: (document: Document) => void
   onReady?: (document: Document) => void
+  /** The file reached the server (a document id exists) but may still be processing: refresh lists so it is visible even if the dialog is closed. */
+  onUploaded?: (docId: string) => void
   /** A file already chosen (for example dropped on the chat composer): upload starts on open. */
   initialFile?: File | null
 }
@@ -24,7 +27,18 @@ export function UploadDialog(props: UploadDialogProps) {
   return props.open ? createPortal(<UploadSession {...props} />, document.body) : null
 }
 
-function UploadSession({ onClose, onAsk, onOpen, onReady, initialFile }: UploadDialogProps) {
+function useElapsedSeconds(active: boolean) {
+  const [seconds, setSeconds] = useState(0)
+  useEffect(() => {
+    if (!active) { setSeconds(0); return }
+    const start = Date.now()
+    const timer = window.setInterval(() => setSeconds(Math.floor((Date.now() - start) / 1000)), 1000)
+    return () => window.clearInterval(timer)
+  }, [active])
+  return seconds
+}
+
+function UploadSession({ onClose, onAsk, onOpen, onReady, onUploaded, initialFile }: UploadDialogProps) {
   const [state, dispatch] = useReducer(uploadReducer, { status: 'idle' })
   const [dragging, setDragging] = useState(false)
   const dialog = useRef<HTMLDialogElement>(null)
@@ -45,6 +59,9 @@ function UploadSession({ onClose, onAsk, onOpen, onReady, initialFile }: UploadD
       if (previous instanceof HTMLElement && previous.isConnected) previous.focus()
     }
   }, [])
+
+  const uploadedId = state.status === 'processing' ? state.docId : null
+  useEffect(() => { if (uploadedId) onUploaded?.(uploadedId) }, [uploadedId, onUploaded])
 
   useEffect(() => {
     const key = state.status === 'ready' ? `${state.docId}:${state.processing ? 'processing' : 'done'}` : null
@@ -81,12 +98,19 @@ function UploadSession({ onClose, onAsk, onOpen, onReady, initialFile }: UploadD
     request.current = controller
     dispatch({ type: 'start', file })
     let phase: 'upload' | 'poll' = 'upload'
+    const startedAt = Date.now()
     try {
       const receipt = await uploadFile(file, controller.signal, (progress) => {
         if (!controller.signal.aborted) dispatch({ type: 'upload-progress', progress })
+      }).catch(async (error) => {
+        // A 5xx or dropped connection can happen after the file was stored: confirm before calling it a failure.
+        const stored = error instanceof UploadError && error.ambiguous ? await findPersistedUpload(file, startedAt) : null
+        if (stored) return stored
+        throw error
       })
       if (controller.signal.aborted) return
       dispatch({ type: 'uploaded', docId: receipt.doc_id })
+      onUploaded?.(receipt.doc_id)
       phase = 'poll'
       await monitor(receipt.doc_id, controller)
     } catch (error) {
@@ -124,6 +148,7 @@ function UploadSession({ onClose, onAsk, onOpen, onReady, initialFile }: UploadD
 
   const file = 'file' in state ? state.file : undefined
   const progress = busy ? state.progress : null
+  const elapsed = useElapsedSeconds(busy)
   return <dialog ref={dialog} className="upload-dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId}
     onCancel={(event) => { event.preventDefault(); close() }}>
     <header className="upload-dialog-header"><div className="upload-dialog-symbol"><Upload size={20} aria-hidden="true" /></div>
@@ -146,17 +171,18 @@ function UploadSession({ onClose, onAsk, onOpen, onReady, initialFile }: UploadD
 
     {busy && <section className="upload-dialog-progress" aria-label={state.status === 'uploading' ? 'Upload progress' : 'Drawing processing progress'}>
       <div role="status" aria-live="polite"><strong>{state.status === 'uploading' ? 'Uploading your drawing…' : 'Processing your drawing…'}</strong>
-        <p>{state.status === 'uploading' ? 'Sending your file.' : state.step}</p></div>
+        <p>{state.status === 'uploading' ? 'Sending your file.' : state.step} <span data-testid="upload-elapsed">· {elapsed}s elapsed</span></p></div>
       <div className="upload-dialog-progress-line"><progress max={1} value={progress ?? undefined} aria-label={state.status === 'uploading' ? 'File uploaded' : 'Drawing processed'} />
         <span>{progress === null ? 'In progress' : `${Math.round(progress * 100)}%`}</span></div>
-      <small>{state.status === 'uploading' ? 'Keep this dialog open until the upload finishes.' : 'You can close this dialog while your drawing is processed. Find it in Data.'}</small>
+      <small>{state.status === 'uploading' ? 'Keep this dialog open until the upload finishes.' : 'You can close this dialog while your drawing is processed. It will appear in Data when processing starts.'}</small>
     </section>}
 
     {state.status === 'failed' && <div className="upload-dialog-error" role="alert"><AlertCircle size={20} aria-hidden="true" /><div><strong>{state.retry === 'poll' ? 'Could not confirm processing' : state.docId ? 'Drawing could not be processed' : 'Drawing could not be uploaded'}</strong><p>{friendlyFailure(state.reason).message}</p>{friendlyFailure(state.reason).raw && <details className="upload-dialog-details"><summary>Details</summary><pre>{friendlyFailure(state.reason).raw}</pre></details>}
       <Button variant="outline" onClick={() => { void retry() }}>Try again</Button></div></div>}
 
-    {state.status === 'ready' && <section className="upload-dialog-ready"><p role="status"><Check size={18} aria-hidden="true" /><strong>Ready</strong></p>
-      {state.processing && <p className="upload-dialog-note" data-testid="upload-still-processing">Still processing 3D…</p>}
+    {state.status === 'ready' && <section className="upload-dialog-ready"><p role="status"><Check size={18} aria-hidden="true" /><strong>{state.processing ? 'Ready to ask · 3D still building' : 'Ready'}</strong></p>
+      {state.processing && <p className="upload-dialog-note" data-testid="upload-still-processing">You can ask questions now. The 3D view will appear when it finishes.</p>}
+      <p className="upload-dialog-note"><ReadOnceChip docId={state.docId} /></p>
       {state.note && <p className="upload-dialog-note">{state.note}</p>}
       <div className="upload-dialog-actions"><Button onClick={() => { onAsk(state.document); close() }}>{state.processing ? 'Ask about it' : 'Ready — Ask about it'}<ArrowRight size={16} /></Button>
         <Button variant="outline" onClick={() => { onOpen(state.document); close() }}>Open</Button></div>

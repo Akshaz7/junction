@@ -11,6 +11,7 @@ import re
 import time
 from pathlib import Path
 
+from engine import exclusions
 from engine.solvers.data import Doc, Item
 from engine.solvers.filters import STOREY_REQUEST, room_filter, storey_requested
 from engine.solvers.solve import MIN_CONF, _answer_obj, _evidence, _step, resolve_storey
@@ -89,12 +90,13 @@ def _selection(question, doc):
     items = [i for i in doc.items if (doc.mode == "ifc" or i.conf >= MIN_CONF) and (not st or i.storey == st)]
     rooms = [r for r in items if r.kind in ("room", "space")]
     scope_rooms = rooms
-    scope_q = re.split(r"\b(?:excluding|except|not counting|without)\b", question, flags=re.I)[0]
+    scope_q, excl_text = exclusions.split(question)
+    doc.exclusion_note = None
     classes = [c for c, rx in CLASS_Q.items() if re.search(rx, scope_q, re.I)]
     scoped = False
     if classes:
         # Match the established wet-room take-off scope, while honouring explicit exclusions.
-        if "bathroom" in classes and not re.search(r"\b(?:excluding|except|not counting|without)\b.*\b(?:wcs?|toilets?)\b", question, re.I):
+        if "bathroom" in classes and not excl_text:
             classes.append("toilet")
         ids = set()
         for cls in classes:
@@ -123,18 +125,24 @@ def _selection(question, doc):
                     target = ""  # The source quantity is the basis, not a room name.
                 if target and not re.fullmatch(r"(?:all |whole |entire )*(?:rooms?|building|model|plan|floor)", target, re.I):
                     return [], [], "The requested rooms cannot be identified in this file; no other rooms were substituted."
-    excluded = re.split(r"\b(?:excluding|except|not counting|without)\b", question, maxsplit=1, flags=re.I)
-    if len(excluded) == 2:
+    if excl_text:
         # Resolve exclusions independently of the positive selection. A WC can
         # exist on this floor while already absent from the bathroom subset.
-        picked = room_filter(excluded[1], scope_rooms)
-        exclusion_classes = [c for c, rx in CLASS_Q.items() if re.search(rx, excluded[1], re.I)]
+        picked = room_filter(excl_text, scope_rooms)
+        exclusion_classes = [c for c, rx in CLASS_Q.items() if re.search(rx, excl_text, re.I)]
         excluded_ids = {r.item_id for r in picked[1]} if picked else set()
         for cls in exclusion_classes:
             tk = Takeoff(None, cls, re.compile(ROOM_CLASSES[cls], re.I))
             excluded_ids.update(r.item_id for r in scope_rooms if _matches(r, tk) or (r.name and tk.rx.search(r.name)))
+        shared_hit, _unm = exclusions.excluded_rooms(excl_text, scope_rooms)
+        excluded_ids.update(r.item_id for r in shared_hit)
         if not excluded_ids:
-            return [], [], "The excluded rooms cannot be identified in this file; no exclusion was guessed."
+            if classes == ["bathroom"] and rooms:
+                # Named exclusion matches no labelled room: keep the bathroom-only scope (no WC-type rooms added) and say so.
+                doc.exclusion_note = (f"“{excl_text}” is not a labelled room in this file, so only the rooms named as bathroom are used; "
+                                      "WC-type rooms that are not labelled bathroom were not added.")
+            else:
+                return [], [], "The excluded rooms cannot be identified in this file; no exclusion was guessed."
         rooms = [r for r in rooms if r.item_id not in excluded_ids]
         scoped = True
     if scoped:
@@ -265,7 +273,11 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
         notes.append(error)
     if unspecified:
         notes.append("Finish materials are not specified here; confirm the finish schedule before ordering.")
-    if re.search(CLASS_Q["bathroom"], question, re.I) and not re.search(r"\b(?:excluding|except|not counting|without)\b", question, re.I):
+    if getattr(doc, "exclusion_note", None):
+        notes.append(doc.exclusion_note)
+    elif exclusions.split(question)[1]:
+        notes.append(f"Left out as asked: {exclusions.split(question)[1]}.")
+    if re.search(CLASS_Q["bathroom"], question, re.I) and not exclusions.split(question)[1]:
         notes.append("Bathroom quantities include shower rooms and WCs.")
     if error:
         notes.append("Resolve the missing scope or allowance before placing this order.")

@@ -10,6 +10,7 @@ import sys
 import tempfile
 import time
 import uuid
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
@@ -36,7 +37,7 @@ SAFE_ID = re.compile(r"^[A-Za-z0-9_.\-]+$")
 FILE_NAMES = {"scene.glb", "scene.usdz", "scene.json", "elements.json", "text.json", "ingest.json"}
 THUMB = re.compile(r"^(page-\d+\.thumb\.png|page-\d+\.png|planmap-\d+\.json|text-\d+\.json)$")
 MAX_UPLOAD = 100 * 1024 * 1024
-INGEST_TIMEOUT = 5 * 60
+INGEST_TIMEOUT = float(os.environ.get("INGEST_TIMEOUT_S", "300"))  # whole-job watchdog incl. queue wait (Dockerfile: 900 on the 10 GB plan)
 
 
 def _doc_dir(doc_id: str):
@@ -61,8 +62,81 @@ def _missing_scene(folder):
 async def page_image(doc_id: str, n: int):
     f = _doc_dir(doc_id) / f"page-{n}.png"
     if not f.is_file():
+        await _rebuild_pages(doc_id)
+    if not f.is_file():
         return _not_built(f"page {n} image")
     return FileResponse(f, media_type="image/png")
+
+
+async def _rebuild_pages(doc_id: str) -> None:
+    """An upload whose page images never reached PostgreSQL (persist cut short by a restart) is re-rendered from its
+    stored original. Rendering is deterministic, so the plan-map boxes still line up with the image."""
+    if not doc_id.startswith("uploads__"):
+        return
+    async with _REBUILD_LOCK:
+        d = _doc_dir(doc_id)
+        if (d / "page-1.png").is_file() or not (d / "doc.json").is_file():
+            return
+        try:
+            await asyncio.to_thread(_rebuild_pages_sync, doc_id)
+        except Exception as e:  # noqa: BLE001 - the viewer shows its own "not available" state
+            print("page rebuild failed:", doc_id, repr(e)[:200])
+
+
+_REBUILD_LOCK = asyncio.Lock()
+
+
+async def _rebuild_scene(doc_id: str) -> bool:
+    """scene.glb of an upload lost with a cut-short persist: extrude the stored plan map again, in the same isolated
+    subprocess and heavy-job slot an ingest uses (never in the API process)."""
+    if not doc_id.startswith("uploads__"):
+        return False
+    d = _doc_dir(doc_id)
+    plan = sorted(d.glob("planmap-[0-9]*.json"))
+    if not plan or not (d / "scene.json").is_file():
+        return False
+    page = int(plan[0].stem.split("-")[1])
+    code = ("import sys;from pathlib import Path;from server import ingest_job as j;"
+            "j._extrude(sys.argv[1], Path(sys.argv[2]), int(sys.argv[3]))")
+    try:
+        async with _INGEST_LOCK:
+            if (d / "scene.glb").is_file():
+                return True
+            proc = await asyncio.create_subprocess_exec(
+                sys.executable, "-c", code, doc_id, str(d), str(page), cwd=str(config.REPO),
+                stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
+            try:
+                await asyncio.wait_for(proc.wait(), 150)
+            except TimeoutError:
+                proc.kill()
+                await proc.wait()
+                return False
+        return (d / "scene.glb").is_file()
+    except Exception as e:  # noqa: BLE001
+        print("scene rebuild failed:", doc_id, repr(e)[:200])
+        return False
+
+
+def _rebuild_pages_sync(doc_id: str) -> None:
+    from pipeline import pages
+    from . import ingest_job
+    d = _doc_dir(doc_id)
+    doc = json.loads((d / "doc.json").read_text())
+    # Prefer the original upload: the derived normalised.png may be missing too.
+    originals = doc.get("original_files") or doc["files"]
+    if not any((config.REPO / rel).is_file() for rel in originals.values()):
+        raise FileNotFoundError("original upload is not stored")
+    if ingest_job.light_mode():
+        pages.MAX_SIDE = int(os.environ.get("PAGES_MAX_SIDE", "4096"))
+        pages.FAST_TEXT = os.environ.get("INGEST_FAST_TEXT", "1") != "0"
+    src_doc = {**doc, "files": originals}
+    if doc.get("kind") == "raster":
+        (d / "doc.json").write_text(json.dumps(src_doc, indent=1))
+        ingest_job._normalise_raster(doc_id, config.artifacts_dir())
+        src_doc = json.loads((d / "doc.json").read_text())
+    _, res = pages.process((config.REPO, config.artifacts_dir(), src_doc))
+    if not res.startswith("ok"):
+        raise RuntimeError(res)
 
 
 @router.get("/docs/{doc_id}/evidence/{name}")
@@ -123,6 +197,8 @@ async def doc_file(doc_id: str, name: str):
         if name == "elements.json" or re.match(r"^text-\d+\.json$", name):
             # Optional sidecars the viewer probes for every document: an empty payload, not a console-visible 404.
             return JSONResponse({"status": "not_built", "elements": [], "words": []})
+        if name == "scene.glb" and await _rebuild_scene(doc_id) and f.is_file():
+            return FileResponse(f, headers={'Cache-Control': 'no-store'})
         if name in {"scene.json", "scene.glb", "scene.usdz"}:
             return _missing_scene(f.parent)
         return _not_built(name)
@@ -188,21 +264,40 @@ async def upload(file: UploadFile = File(...)):
         "insert into documents (doc_id, source, title, kind, formats, pages, credit, files) "
         "values ($1,'uploads',$2,$3,$4,1,$5,$6::jsonb)",
         doc_id, doc["title"], kind, [fmt], doc["credit"], json.dumps(doc["files"]))
-    await publish({"type": "doc.new", "doc_id": doc_id})
-    try:  # keep the original now: the container disk is ephemeral
-        await artifact_store.save_doc(pool, doc_id)
+    try:  # the file is stored: a notify hiccup must never turn this into a failed upload
+        await publish({"type": "doc.new", "doc_id": doc_id})
     except Exception as e:  # noqa: BLE001
-        print("artifact save failed:", repr(e)[:200])
+        print("doc.new publish failed:", repr(e)[:200])
     if ingestion_available():
         (d / "ingest.json").write_text(json.dumps({"status": "running", "stages": [], "detail": "queued",
                                                   "step": "queued", "progress": 0, "started_at": time.time()}))
-        asyncio.create_task(_ingest(doc_id))
+        _spawn(_save_original(pool, doc_id))  # off the request path: an 11 MB original to a remote DB took seconds
+        _spawn(_ingest(doc_id))
         return {"doc_id": doc_id, "status": "ingesting",
                 "detail": "poll GET /api/docs/{doc_id}/ingest until status is not running; doc.new fires again when it ends"}
+    _spawn(_save_original(pool, doc_id))
     return {"doc_id": doc_id, "status": "stored", "detail": "ingestion is not available on this server"}
 
 
-_INGEST_LOCK = asyncio.Lock()  # heavy: one ingestion at a time
+_BG: set = set()
+
+
+def _spawn(coro):
+    """Background task with a strong reference (the loop only keeps weak ones)."""
+    t = asyncio.create_task(coro)
+    _BG.add(t)
+    t.add_done_callback(_BG.discard)
+    return t
+
+
+async def _save_original(pool, doc_id: str):
+    try:  # keep the original: the container disk is ephemeral
+        await artifact_store.save_doc(pool, doc_id)
+    except Exception as e:  # noqa: BLE001
+        print("artifact save failed:", repr(e)[:200])
+
+
+_INGEST_LOCK = asyncio.Semaphore(max(1, int(os.environ.get("INGEST_CONCURRENCY", "1"))))  # heavy jobs per worker (scripts/heavy.sh caps the box)
 
 
 def ingestion_available() -> bool:
@@ -210,7 +305,38 @@ def ingestion_available() -> bool:
     return os.environ.get("INGEST", "1") != "0" and importlib.util.find_spec("pipeline") is not None
 
 
+BOOT_TS = time.time()
+IFC_SLOTS = max(1, int(os.environ.get("IFC_CONCURRENCY", "2")))
+
+
+def _acquire_ifc_slot():
+    """Cross-process counting semaphore (flock on N files): at most IFC_SLOTS IFC jobs run at once, the rest queue."""
+    import fcntl
+    lockdir = Path(os.environ.get("RESULTS_DIR", "/tmp")) / "ifc-slots"
+    lockdir.mkdir(parents=True, exist_ok=True)
+    while True:
+        for i in range(IFC_SLOTS):
+            fd = open(lockdir / f"slot{i}", "w")
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                return fd
+            except OSError:
+                fd.close()
+        time.sleep(1)
+
+
 async def _ingest(doc_id: str):
+    if doc_id.lower().endswith(".ifc") or any(p.suffix.lower() == ".ifc" for p in (config.artifacts_dir() / "uploads").glob(doc_id + ".*")):
+        fd = await asyncio.to_thread(_acquire_ifc_slot)
+        try:
+            await _ingest_inner(doc_id)
+        finally:
+            fd.close()
+    else:
+        await _ingest_inner(doc_id)
+
+
+async def _ingest_inner(doc_id: str):
     f = config.artifacts_dir() / doc_id / "ingest.json"
     proc = None
     failure = None
@@ -246,7 +372,7 @@ async def _ingest(doc_id: str):
                 detail += " The server may have run out of memory."
             _fail_ingest(f, state.get("reason") or detail)
     except TimeoutError:
-        failure = "Ingestion timed out after 5 minutes. Try a smaller file."
+        failure = f"Ingestion timed out after {int(INGEST_TIMEOUT // 60)} minutes. Try a smaller file."
     except asyncio.CancelledError:
         failure = "Ingestion was interrupted. Please upload the file again."
         raise
@@ -300,8 +426,13 @@ async def ingest_status(doc_id: str):
     state = _read_ingest(f)
     # Also recover stale statuses restored from a previous container/process.
     if state["status"] == "running" and time.time() - state.get("started_at", f.stat().st_mtime) >= INGEST_TIMEOUT:
-        state = _fail_ingest(f, "Ingestion timed out after 5 minutes. Try a smaller file.")
+        state = _fail_ingest(f, f"Ingestion timed out after {int(INGEST_TIMEOUT // 60)} minutes. Try a smaller file.")
         await _persist(doc_id)
+    if state.get("status") == "running" and state.get("step") == "queued":
+        pos = await asyncio.to_thread(_queue_position, doc_id)
+        if pos:
+            state["queue_position"] = pos
+            state["detail"] = f"Waiting in the processing queue (position {pos})."
     return state
 
 
@@ -508,3 +639,57 @@ async def costs():
                 e["calls"] += 1
                 e["usd"] = round(e["usd"] + c, 6)
     return {"total_usd": round(total, 6), "calls": n, "by_provider": by_provider, "by_task": by_task}
+
+
+async def requeue_lost_ingests():
+    """Boot: uploads whose ingest was running/queued when the previous container stopped have no live job. Re-queue them.
+    Only states started before this boot are touched, so uploads accepted by sibling workers meanwhile are left alone."""
+    def scan():
+        out = []
+        root = config.artifacts_dir()
+        for d in root.glob("uploads__*"):
+            if not d.is_dir():
+                continue
+            f = d / "ingest.json"
+            try:
+                st = json.loads(f.read_text()) if f.is_file() else None
+            except ValueError:
+                st = None
+            src_exists = any((root / "uploads").glob(d.name + ".*"))
+            if not src_exists:
+                continue
+            if st is None:
+                if not any(d.glob("elements.json")) and not any(d.glob("planmap-*.json")) and not any(d.glob("page-*.png")):
+                    out.append((d.name, 0.0))
+            elif st.get("status") == "running" and float(st.get("started_at") or 0) < BOOT_TS:
+                out.append((d.name, float(st.get("started_at") or 0)))
+        return sorted(out, key=lambda x: x[1])
+    ids = await asyncio.to_thread(scan)
+    for doc_id, _ in ids:
+        f = config.artifacts_dir() / doc_id / "ingest.json"
+        f.write_text(json.dumps({"status": "running", "stages": [], "detail": "queued (resumed after restart)",
+                                 "step": "queued", "progress": 0, "started_at": time.time()}))
+        _spawn(_ingest(doc_id))
+    if ids:
+        print(f"re-queued {len(ids)} interrupted ingests")
+    return len(ids)
+
+
+def _queue_position(doc_id: str) -> int | None:
+    """1-based place among queued uploads (oldest first); None when not queued."""
+    root = config.artifacts_dir()
+    mine = None
+    ahead = 0
+    entries = []
+    for d in root.glob("uploads__*"):
+        try:
+            st = json.loads((d / "ingest.json").read_text())
+        except (OSError, ValueError):
+            continue
+        if st.get("status") == "running" and st.get("step") == "queued":
+            entries.append((float(st.get("started_at") or 0), d.name))
+    entries.sort()
+    for i, (_, name) in enumerate(entries, 1):
+        if name == doc_id:
+            return i
+    return None

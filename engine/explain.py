@@ -73,7 +73,7 @@ def _facts(res: dict, root: Path) -> tuple[str, str]:
                 if it is None:
                     continue
                 q = {k: _fmt(v) for k, v in (it.q or {}).items() if v not in (None, "") and not isinstance(v, (list, dict))}
-                pr = {k: v for k, v in (it.props or {}).items() if k in ("room_type", "is_external", "material", "type", "name", "width_m", "height_m", "thickness_m") and v not in (None, "")}
+                pr = {k: v for k, v in (it.props or {}).items() if k in ("room_type", "is_external", "material", "type", "name", "width_m", "height_m", "thickness_m", "printed_width_m", "printed_depth_m", "area_label_source") and v not in (None, "")}
                 parts.append(f"{it.kind} {it.label or iid}" + (f" on {it.storey}" if getattr(it, "storey", None) else "")
                              + (f" {q}" if q else "") + (f" {pr}" if pr else ""))
             lines.append(f"[{c.get('n')}] " + ("; ".join(parts) if parts else (c.get("label") or "")))
@@ -103,6 +103,8 @@ def explain(res: dict, question: str, root: Path, timeout_s: float = 12.0, on_ev
     if os.environ.get("EXPLAIN", "1") == "0" or os.environ.get("MODELS_FAKE") == "1":
         return res
     ans = res.get("answer") or {}
+    if ans.get("unit") == "count":
+        return res   # a code count is already exact and short: no paid rewording, $0 and instant
     if any(s.get("step") == "order" for s in res.get("trace") or []):
         return res  # Preserve the table, measurement notes and stated allowance for CSV export.
     if ans.get("abstained") or res.get("route") not in ("planmap", "index") or not res.get("citations"):

@@ -110,7 +110,15 @@ def _contributes(c: Combined, did: str, root: Path) -> str:
     return "nothing readable yet"
 
 
-def _labels(c: Combined, agreements: list) -> dict:
+def _ingest_status(root: Path, did: str) -> str | None:
+    try:
+        import json
+        return json.loads((root / did / "ingest.json").read_text()).get("status")
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _labels(c: Combined, agreements: list, root: Path | None = None) -> dict:
     """Per document: Verified (exact model data), Cross-checked (a drawn doc whose numbers agree with another source), Estimate."""
     agree, differ = set(), set()
     for a in agreements:
@@ -120,6 +128,11 @@ def _labels(c: Combined, agreements: list) -> dict:
     for did, info in c.infos.items():
         if info.derived:
             out[did] = "Verified"
+        elif info.doc is None and info.role in ("model", "plan", "scan") and root is not None:
+            # Nothing was read from this file: never claim Verified/Estimate for it.
+            out[did] = "Processing" if _ingest_status(root, did) in ("running", "queued", "pending", None) else "Not readable"
+        elif info.role == "model" and not (info.doc.items if info.doc is not None else []):
+            out[did] = "Partial"
         elif info.role == "model":
             out[did] = "Cross-checked" if did in agree and did not in differ else "Verified"
         elif info.role in ("plan", "scan") and info.doc is not None:
@@ -143,7 +156,7 @@ def build(project: dict, root=None) -> dict:
                        "floor_area_m2": (round(value(r, "room", "area"), 2) if value(r, "room", "area") is not None else None),
                        "sources": sources})
     agreements = _agreements(c)
-    labels = _labels(c, agreements)
+    labels = _labels(c, agreements, root)
     coverage = [{"doc_id": did, "role": i.role, "level": i.level, "contributes": _contributes(c, did, root), "confidence_label": labels[did]}
                 for did, i in c.infos.items()]
     mistakes = []

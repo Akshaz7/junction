@@ -21,7 +21,7 @@ import { editSnapshot, hasEdits as snapshotHasEdits, saveDesignVersion, savedMes
 import type { EditState, ItemEdit } from './edits';
 import { RevisedPlanDialog } from './RevisedPlanDialog';
 import { FindingsPanel } from './FindingsPanel';
-import { roomTypeLabel } from './blueprint';
+import { ESTIMATE_NOTE, NO_SCALE_NOTE, roomTypeLabel, scaleTrust } from './blueprint';
 import { itemKindKey, pipeSizeLabel } from '../lib/kind-colors';
 import type { FindingPinState } from './findings';
 import { qualitySummary } from '../lib/scene-quality';
@@ -358,6 +358,8 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
   const shownStorey = stepStorey ?? cutaway.activeStorey ?? '';
   const storeyIndex = storeys.indexOf(shownStorey);
   // Raster plans are extruded from pixels with default heights: say so. IFC/DXF scenes carry real geometry.
+  const trust = scaleTrust(manifest?.scale_method);
+  const scaleNote = trust === 'estimate' ? ESTIMATE_NOTE : trust === 'none' ? NO_SCALE_NOTE : null;
   const approximated = manifest !== null && (Boolean(manifest.plan_image)
     || (manifest as { approx?: boolean }).approx === true
     || Object.values(manifest.items).some((item) => (item.props as { approx?: unknown } | null | undefined)?.approx === true));
@@ -449,7 +451,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
           : 'Loading 3D scene…'}
       </p>}
       {state === 'error' && <p className="viewer3d-message" role="alert">{error}</p>}
-      {state === 'ready' && approximated && <p className="viewer3d-approx" data-testid="approx-note">3D approximated from the drawing{quality && <span className="viewer3d-quality" data-testid="quality-badge" title={quality}>{quality}</span>}</p>}
+      {state === 'ready' && approximated && <p className="viewer3d-approx" data-testid="approx-note">3D approximated from the drawing{scaleNote && <span className="viewer3d-scale-note" data-testid="scale-note"> · {scaleNote}</span>}{quality && <span className="viewer3d-quality" data-testid="quality-badge" title={quality}>{quality}</span>}</p>}
       {state === 'ready' && answerKinds.length > 0 && <KindLegend className="kind-legend-3d" kinds={answerKinds} />}
       {picked && <output className="viewer3d-picked-overlay" aria-label="Picked item" aria-live="polite">{picked}</output>}
       {walking && <WalkJoystick onMove={(x, y) => viewerRef.current?.setWalkJoystick(x, y)} />}

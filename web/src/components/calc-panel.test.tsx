@@ -3,6 +3,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { CalculationPanel } from './calc-panel'
+import { ErrorBoundary } from './error-boundary'
 import { EvidenceCard } from './evidence-card'
 import { scanReasoning } from '../lib/__fixtures__/calc-fixture'
 import type { Answer } from '../lib/types'
@@ -68,7 +69,7 @@ it('expands to full width and has a resize separator', async () => {
 })
 
 import { scanCalc, scanPrintedCalc, ifcCountCalc, ifcWallAreaCalc } from '../lib/__fixtures__/calc-fixture'
-import type { Calculation } from '../lib/types'
+import type { Calculation, Reasoning } from '../lib/types'
 
 for (const [name, calc] of [['scan door prior', scanCalc], ['scan printed scale', scanPrintedCalc], ['IFC count', ifcCountCalc], ['IFC wall area', ifcWallAreaCalc]] as [string, Calculation][]) {
   it(`renders whatever the ${name} calculation contains, with its method`, async () => {
@@ -143,4 +144,41 @@ it('stepRows drops no-op rounding and repeated method text, and folds repeated s
 })
 it('meaningfulPath ignores the trivial page → method chain', () => {
   expect(meaningfulPath([{ label: 'Cited source page', relation: 'source of answer evidence' }, { label: 'Count', kind: 'calculation', relation: 'method used for this answer' }])).toHaveLength(0)
+})
+
+it('does not crash on a null result value or sparse steps (door answer payload)', async () => {
+  const bad = { formula: 'doors = count', result: { value: null, unit: 'count' }, steps: [{ id: 's1', label: 'Count', value: null }], rows: [{ id: 'r', values: null }], checks: null } as unknown as Calculation
+  const errors: unknown[] = []
+  const spy = vi.spyOn(console, 'error').mockImplementation((e) => { errors.push(e) })
+  await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc: bad, graph_path: undefined }} onClose={() => {}} />))
+  spy.mockRestore()
+  expect(host.querySelector('[data-testid="calc-formula"]')).toBeTruthy()
+  expect(errors.filter((e) => !String(e).includes('unique "key"'))).toEqual([])
+})
+
+it('error boundary shows a fallback instead of blanking the app', async () => {
+  const Boom = (): never => { throw new Error('Cannot convert undefined or null to object') }
+  const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  await act(async () => root.render(<ErrorBoundary fallback={<p>Could not render this calculation</p>}><Boom /></ErrorBoundary>))
+  spy.mockRestore()
+  expect(host.textContent).toContain('Could not render this calculation')
+})
+
+import bathroomReasoning from '../lib/__fixtures__/bathroom-reasoning.json'
+import doorsReasoning from '../lib/__fixtures__/doors-reasoning.json'
+for (const [name, r] of [['bathroom area (JUDGE-QS F6)', bathroomReasoning], ['doors', doorsReasoning]] as const) {
+  it(`renders the real ${name} payload without crashing`, async () => {
+    await act(async () => root.render(<CalculationPanel reasoning={r as unknown as Reasoning} onClose={() => {}} />))
+    expect(host.querySelector('[data-testid="calc-panel"]')).toBeTruthy()
+  })
+}
+
+it('shows element names, not GUIDs, as sources (GUID kept in the tooltip)', async () => {
+  const guid = '2O2Fr$t4X7Zf8NhDbOs6Kn'
+  const calc = { formula: 'n = count', result: { value: 1, unit: 'count' }, steps: [], checks: [], rows: [{ label: 'Door D1', source: { doc_id: 'd', page: 1, item_id: guid, kind: 'element' }, values: { count: 1 } }] } as unknown as Calculation
+  await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc, graph_path: undefined }} onClose={() => {}} />))
+  const src = host.querySelector('.calc-table .calc-source')!
+  expect(src.textContent).toContain('Door D1')
+  expect(src.textContent).not.toContain(guid)
+  expect(src.getAttribute('title')).toContain(guid)
 })

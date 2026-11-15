@@ -162,7 +162,7 @@ export function SymbolMarkupPanel({ markup, page, onFocus }: { markup: Markup; p
     <h3>Marked items · Page {page}</h3>
     {marks.length === 0 ? <p className="markup-caution">Nothing marked yet. Use Mark, drag a box around one item and say what it is.</p>
       : <><p className="markup-count">{[...counts].map(([name, n]) => `${n} ${name}`).join(' · ')}</p>
-        <ol className="markup-pin-list">{marks.map((m) => <li key={m.id}><button onClick={() => { onFocus(markBox(m)); markup.edit(m.id) }}>{markName(m)}{m.canonical_kind && m.name.toLowerCase() !== markName(m).toLowerCase() ? ` (${m.name})` : ''}</button><Button variant="ghost" size="xs" disabled={markup.busy} onClick={() => markup.remove(m.id)}>Delete</Button></li>)}</ol></>}
+        <ol className="markup-pin-list">{marks.map((m) => <li key={m.id}><button onClick={() => { onFocus(markBox(m)); markup.edit(m.id) }}>{markName(m)}{m.canonical_kind && m.name.toLowerCase() !== markName(m).toLowerCase() ? ` (${m.name})` : ''}{m.matches_existing && <small> · matches existing {m.matches_existing}</small>}</button><Button variant="ghost" size="xs" disabled={markup.busy} onClick={() => markup.remove(m.id)}>Delete</Button></li>)}</ol></>}
     <h3>Note pins · Page {page}</h3><p>Saved notes are included in Export report.</p>
     <ol className="markup-pin-list">{markup.data.pins.filter((p) => p.page === page).map((pin) => <li key={pin.id}><button onClick={() => onFocus([pin.x - 30, pin.y - 30, pin.x + 30, pin.y + 30])}>Pin {pin.n}: {pin.note}</button><Button variant="ghost" size="xs" disabled={markup.busy} onClick={() => markup.removePin(pin.id)}>Delete</Button></li>)}</ol>
   </section>

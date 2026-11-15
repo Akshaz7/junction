@@ -111,3 +111,37 @@ def convert(res: dict, question: str) -> dict:
         return out
     except Exception:  # noqa: BLE001 - never break an answer over a convenience clause
         return res
+
+
+# F-IMPERIAL: feet/inches in questions and answers. Never read a bare feet/inch number as metres.
+_FT, _IN = 0.3048, 0.0254
+_IMP_ASK = re.compile(r"\b(?:feet|foot|ft|inch(?:es)?)\b|\bin\s+(?:feet|inches|imperial)\b|\bimperial\b|\d\s*(?:'|\")|\bsq\.?\s?ft\b|ft²", re.I)
+_FT_IN = re.compile(r"(\d+(?:\.\d+)?)\s*(?:'|ft\b|feet\b|foot\b)\s*-?\s*(?:(\d+(?:\.\d+)?)\s*(?:\"|in\b|inch(?:es)?\b))?", re.I)
+_IN_ONLY = re.compile(r"(\d+(?:\.\d+)?)\s*(?:\"|inch(?:es)?\b)", re.I)
+
+
+def imperial_requested(question: str) -> bool:
+    return bool(_IMP_ASK.search(question or ""))
+
+
+def feet_inches(metres: float) -> str:
+    """3.2808 ft written as '3 ft 3.37 in' (inches rounded to 2 places; carries 12 in into feet)."""
+    total_in = metres / _IN
+    ft = int(total_in // 12)
+    inch = round(total_in - ft * 12, 2)
+    if inch >= 12:
+        ft, inch = ft + 1, 0.0
+    return f"{ft} ft {inch:g} in" if ft else f"{inch:g} in"
+
+
+def with_imperial(metres: float, shown: str) -> str:
+    return f"{shown} ({metres / _FT:,.4g} ft = {feet_inches(metres)})"
+
+
+def normalize_imperial_question(q: str) -> str:
+    """Rewrite 12'-6" / 12 ft 6 in / 36" as millimetres so downstream parsers see an explicit metric unit."""
+    def ftin(m):
+        mm = (float(m[1]) * _FT + (float(m[2]) * _IN if m[2] else 0)) * 1000
+        return f"{mm:g} mm"
+    q = _FT_IN.sub(ftin, q)
+    return _IN_ONLY.sub(lambda m: f"{float(m[1]) * 25.4:g} mm", q)

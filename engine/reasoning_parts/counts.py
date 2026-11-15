@@ -23,6 +23,9 @@ _WORDS = {
 }
 
 
+_UNIT_WORD = r"(?:mm|cm|m|km|m2|m²|m3|m³|sqm|sq|ft|in|inch|inches|feet|%|percent|kg|deg|degrees|min|minutes|s|sec|seconds|hours?|ml|l)\b"
+
+
 def _integer(v):
     return isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) and v >= 0 and int(v) == v
 
@@ -30,9 +33,11 @@ def _integer(v):
 def _kind(question, headline):
     # The answer's noun is narrower than the router's parent kind (e.g. bedrooms).
     clean = headline.replace("*", "")
-    m = re.search(rf"(?:{_NUMBER}|no)\s+(?:boxed\s+)?([\w -]+?)(?=\s+(?:on|in|reported|matching|with)\b|[.;\n]|$)", clean, re.I)
-    if m:
+    # A measurement ("900 mm threshold", "2.1 m high", "5 %") is not a count of anything: never take its unit as the noun.
+    for m in re.finditer(rf"(?:{_NUMBER}|no)\s+(?:boxed\s+)?([\w -]+?)(?=\s+(?:on|in|reported|matching|with)\b|[.;\n]|$)", clean, re.I):
         noun = m[1].strip()
+        if re.match(_UNIT_WORD, noun, re.I):
+            continue
         if len(noun) <= 45:
             return noun
     try:
@@ -139,7 +144,7 @@ def facts(res, question):
         problems.append("recount")
     return dict(counts=counts, total=total, boxes=len(boxes), linked=len(linked),
                 per_kind=per_kind, reread=reread, problems=problems,
-                derived=derived,
+                derived=derived, model=res.get("route") == "index",
                 cite=next((c.get("n") for c in cites if c.get("n") is not None), None))
 
 
@@ -170,7 +175,8 @@ def _found(f):
     n, b = f["total"], f["boxes"]
     summary = _summary(f["counts"])
     if n == b and f["per_kind"] == f["counts"]:
-        text = f"{summary} marked on the drawing, each with a numbered box." if n else (
+        where = "listed in the building model, each with a numbered highlight" if f.get("model") else "marked on the drawing, each with a numbered box"
+        text = f"{summary} {where}." if n else (
             f"No matching {_word(next(iter(f['counts'])), 2)} found in the available data; this does not prove none exist in the building.")
     else:
         text = f"The answer reports {summary}; {b:,} numbered boxes are shown."

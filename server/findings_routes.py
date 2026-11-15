@@ -12,7 +12,7 @@ import uuid
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from . import db
+from . import config, db
 from .live import publish
 
 router = APIRouter(prefix="/api")
@@ -21,6 +21,56 @@ SEVERITIES = ("info", "suggestion", "violation")  # "suggestion" unless the rule
 
 class RunBody(BaseModel):
     doc_id: str
+
+
+WAITING = ("running", "queued", "pending", "ingesting")
+
+
+def _count_items(doc_dir) -> tuple[int, int]:
+    """(readable, total) items read from a document: plan-map items with geometry, indexed model elements."""
+    readable = total = 0
+    for f in sorted(doc_dir.glob("planmap-*.json")):
+        try:
+            items = json.loads(f.read_text()).get("items") or []
+        except (OSError, ValueError, AttributeError):
+            continue
+        for it in items:
+            if isinstance(it, dict):
+                total += 1
+                readable += bool(it.get("bbox_px") or it.get("polygon_px"))
+    f = doc_dir / "elements.json"
+    if f.is_file():
+        try:
+            els = json.loads(f.read_text()).get("elements") or []
+        except (OSError, ValueError, AttributeError):
+            els = []
+        for el in els:
+            if isinstance(el, dict):
+                total += 1
+                readable += bool(el.get("bbox_m") or el.get("quantities"))
+    return readable, total
+
+
+def readiness(doc_id: str) -> dict | None:
+    """None when checks may run; otherwise a non-'ok' result saying why checks cannot be called complete.
+
+    Only documents that went through ingestion (an ingest.json exists) are gated; seeded dataset documents
+    have no ingest record and are left alone.
+    """
+    try:
+        doc_dir = config.artifacts_dir() / doc_id
+        state = json.loads((doc_dir / "ingest.json").read_text())
+    except (OSError, ValueError):
+        return None
+    if not isinstance(state, dict):
+        return None
+    if state.get("status") in WAITING:
+        return {"status": "waiting", "detail": "Waiting for the drawing to finish processing", "findings": []}
+    readable, total = _count_items(doc_dir)
+    if readable == 0:
+        return {"status": "not_enough_data", "readable_items": readable, "total_items": total,
+                "detail": f"Not enough readable data ({readable} of {total} items)", "findings": []}
+    return None
 
 
 def _engine_run():
@@ -80,6 +130,9 @@ async def run_findings(body: RunBody):
         raise HTTPException(503, "database unavailable")
     if await pool.fetchval("select 1 from documents where doc_id=$1", body.doc_id) is None:
         raise HTTPException(404, "document not found")
+    blocked = readiness(body.doc_id)
+    if blocked is not None:  # never report "complete" for a drawing that is unread or still processing
+        return blocked
     fn = _engine_run()
     if fn is None:
         return {"status": "no_checks", "detail": "the checks are not available yet", "findings": []}

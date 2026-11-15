@@ -53,6 +53,38 @@ def _calibrated(source, unit, label, checked):
             "scope": "Observed audit accuracy; not an individual-answer guarantee"}
 
 
+SCOPE_NOTE = "Exact for what the model contains; elements missing from the model cannot be counted."
+VERIFIED_MODEL = "Verified (counted from the model)"
+VERIFIED_CAD = "Verified (counted from the drawing's CAD geometry)"
+
+
+def _enumerated(ctx, source):
+    """A code-only count that lists the source's own elements one by one (IFC index, DXF or vector-PDF plan map)."""
+    if ctx.get('unit') != 'count' or ctx.get('route') not in ('index', 'planmap') or ctx.get('models_used'):
+        return None
+    res = ctx.get('res') or {}
+    if (res.get('answer') or {}).get('abstained') or any(c.get('cost_usd') for c in (res.get('cost') or {}).get('calls') or []):
+        return None
+    try:
+        from engine.reasoning_parts.counts import facts
+        f = facts(res, ctx.get('question', ''))
+    except Exception:  # noqa: BLE001
+        return None
+    if not f or f['problems'] or not f['total'] or f.get('reread'):
+        return None
+    if ctx.get('is_ifc'):
+        return VERIFIED_MODEL
+    try:
+        source = geometry_source(ctx.get('root'), res.get('doc_ids') or []) or source
+    except Exception:  # noqa: BLE001
+        pass
+    if source in ('cad', 'pdf_vector') or ctx.get('from_cad'):
+        srcs = {getattr(it, 'source', None) for it in ctx.get('cited') or []}
+        if srcs and srcs <= {'dxf', 'pdf_vector'}:
+            return VERIFIED_CAD
+    return None
+
+
 def run(ctx: dict) -> dict:
     steps, checked = ctx['steps'], ctx.get('checked')
     exact = ctx.get('quantified_exact') is True
@@ -72,8 +104,13 @@ def run(ctx: dict) -> dict:
     if inferred_cad:
         exact, checked = False, None
     label = "Verified" if exact else "Cross-checked" if checked is True else "Estimate"
+    enumerated = None if inferred_cad or exact else _enumerated(ctx, source)
+    if enumerated:
+        label = enumerated
     if inferred_cad:
         reason = "The fixtures were identified from the shapes of the CAD symbols, not from a named block or layer."
+    elif enumerated:
+        reason = SCOPE_NOTE if enumerated == VERIFIED_MODEL else SCOPE_NOTE.replace("the model contains", "the CAD geometry contains").replace("the model", "it")
     elif exact:
         reason = "The cited source quantities reproduce the answer; the source's completeness is not verified."
     elif checked is True:
@@ -83,10 +120,16 @@ def run(ctx: dict) -> dict:
     else:
         reason = "The source or calculation has not been independently verified."
     calibration = _calibrated(source, ctx.get('unit'), label, checked)
+    suppress = bool(enumerated)
+    if calibration and enumerated:
+        calibration = None   # an exact enumeration is not a cohort estimate: no percentage, no audit sentence
     if calibration:
         reason += f" Audit accuracy: {calibration['correct']} of {calibration['n']} comparable answers."
         if calibration['n'] < 30:
-            reason += " This is a small sample."
+            reason += " This is a small sample, so the accuracy percentage is unknown and none is shown."
+            suppress = True
+    elif enumerated:
+        pass
     else:
         reason += " No measured accuracy is available for this answer type."
     improve = None
@@ -104,7 +147,7 @@ def run(ctx: dict) -> dict:
         reason += f" Independent methods agreed within 5% on {observed['within_5pct']} of {observed['n']} measured comparisons; this is agreement, not answer accuracy."
         if observed.get('documents') is not None:
             reason += f" These comparisons cover {observed['documents']} source documents; measurements in one document can share errors."
-    result = {"label": label, "pct": calibration['pct'] if calibration else None, "reason": reason,
+    result = {"label": label, "pct": calibration['pct'] if calibration and calibration['n'] >= 30 else None, "pct_suppressed": suppress, "reason": reason,
               "improve": improve, "calibration": calibration, "agreement": agreement, "_steps": steps}
     return factors(result, ctx.get('res') or {'answer': ctx.get('ans', {})}, ctx.get('question', ''), source=source, allow_route_score=False)
 
@@ -114,6 +157,9 @@ def _finite(value):
         return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
     except OverflowError:
         return False
+
+
+ESTIMATE_CAP = 70
 
 
 def factors(card, res, question, *, source=None, allow_route_score=True):
@@ -140,7 +186,10 @@ def factors(card, res, question, *, source=None, allow_route_score=True):
     if allow_route_score and not calibration:
         from engine.scan_uncertainty import historical
         reference = historical(res, question)
-    if calibration and _finite(calibration.get('pct')):
+    if card.get('pct_suppressed'):
+        base, pct, kind = 0, None, 'unavailable'
+        label, note = 'No percentage shown', 'The comparable cohort is too small or the count is an exact enumeration; no percentage is claimed.'
+    elif calibration and _finite(calibration.get('pct')):
         base = calibration['pct']
         pct = current if _finite(current) else base
         kind = 'observed_audit_accuracy'
@@ -170,11 +219,15 @@ def factors(card, res, question, *, source=None, allow_route_score=True):
     else:
         base, pct, kind = 0, None, 'unavailable'
         label, note = 'No numeric confidence recorded', 'No measured accuracy or route score is available; percentage is unknown.'
+    capped = False
+    if kind == 'recorded_engine_score' and card.get('label') == 'Estimate' and _finite(pct) and pct >= ESTIMATE_CAP:
+        # An unverified Estimate must never read as certain.
+        pct, capped = ESTIMATE_CAP, _finite(base) and base > ESTIMATE_CAP
     card.update(pct=pct, pct_kind=kind)
     entries = [{'label': label, 'delta': base, 'base': True, 'note': note}]
     if pct is not None and pct != base:
         entries.append({'label': 'Applied evidence confidence cap' if pct < base else 'Recorded evidence-card adjustment', 'delta': pct - base,
-                        'note': card.get('reason', 'Existing evidence cap; no additional heuristic deduction.')})
+                        'note': 'An Estimate is not independently verified, so it is capped.' if capped else card.get('reason', 'Existing evidence cap; no additional heuristic deduction.')})
     if kind == 'recorded_engine_score':
         score_note = 'The percentage is an uncalibrated route/model score, not measured answer accuracy.'
         reason = card.get('reason') or ''
@@ -182,7 +235,8 @@ def factors(card, res, question, *, source=None, allow_route_score=True):
             card['reason'] = (reason + ' ' + score_note).strip()
     if source:
         words = {'scan': 'scanned image read by detector', 'vision': 'vision-model reading',
-                 'ifc': 'building-model quantities', 'cad': 'vector CAD geometry', 'unknown': 'cited source data'}
+                 'ifc': 'building-model quantities', 'cad': 'vector CAD geometry (DXF layers)', 'pdf_vector': 'vector PDF geometry',
+                 'vlm': 'image model read of the drawing (geometry is approximate)', 'unknown': 'cited source data'}
         entries.append({'label': 'Source: ' + words.get(source, source), 'delta': 0,
                         'note': 'Source context; no unmeasured accuracy adjustment.'})
     if counted and counted.get('reread'):
@@ -200,6 +254,37 @@ def factors(card, res, question, *, source=None, allow_route_score=True):
                             'note': 'Observed icon variation; physical door-width variation remains unknown.'})
     card['factors'] = entries
     return card
+
+
+def geometry_source(root, doc_ids):
+    """Where the cited geometry really came from, read from the plan map's own item sources, not the file extension.
+    A DXF whose layers had nothing usable and was read as an image is 'vlm', not 'cad'. None when unknown or mixed."""
+    found = set()
+    for did in doc_ids:
+        d = Path(root) / did
+        try:
+            if (d / 'elements.json').is_file():
+                found.add('ifc')
+                continue
+            srcs = set()
+            for f in d.glob('planmap-[0-9]*.json'):
+                srcs |= {str(i.get('source')) for i in json.loads(f.read_text()).get('items', []) if isinstance(i, dict)}
+        except (OSError, ValueError, AttributeError):
+            return None
+        srcs -= {'ocr', 'None', 'taught', 'user'}
+        if not srcs:
+            return None
+        if srcs & {'vlm', 'vision'}:
+            found.add('vlm')
+        elif srcs & {'det', 'seg'}:
+            found.add('scan')
+        elif srcs == {'dxf'}:
+            found.add('cad')
+        elif srcs == {'pdf_vector'}:
+            found.add('pdf_vector')
+        else:
+            return None
+    return found.pop() if len(found) == 1 else None
 
 
 def attach(res, question, root):
@@ -222,6 +307,9 @@ def attach(res, question, root):
     if kinds:
         source = ('ifc' if kinds == {'ifc'} else 'cad' if kinds <= {'dxf', 'dwg'} else
                   'scan' if kinds <= {'raster', 'pdf', 'png', 'jpg', 'jpeg', 'image'} else 'unknown')
+    real = geometry_source(root, res.get('doc_ids') or [])
+    if real:
+        source = real
     if ((card.get('calc') or {}).get('reader')
             or str(((card.get('calc') or {}).get('method') or {}).get('id', '')).startswith('scan-vision-')):
         source = 'vision'
@@ -255,4 +343,6 @@ def attach(res, question, root):
         card['graph_path'] = path
     from engine.scan_presentation import attach as prioritize
     prioritize(res, question)
+    from engine.glazed_doors import attach as glazed
+    glazed(res, question, root)
     return res
