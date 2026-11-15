@@ -14,3 +14,7 @@
 .wall-details .wall-detail-how { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px; color: var(--foreground); }
 .wall-details .wall-detail-how ol { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; color: var(--muted-foreground); }
 .wall-details .wall-detail-how li:nth-last-child(-n+2) { font-variant-numeric: tabular-nums; color: var(--foreground); }
+.wall-details .wall-height-assumed dd { color: var(--foreground); }
+.wall-details .wall-height-assumed dd > strong { color: #b45309; }
+.wall-details .wall-height-warning { display: block; margin-top: 4px; padding: 6px 8px; border: 1px solid #f59e0b; border-left-width: 3px; border-radius: 6px; background: rgba(245, 158, 11, .12); color: var(--foreground); }
+.wall-details .wall-height-how { display: block; color: var(--muted-foreground); }
