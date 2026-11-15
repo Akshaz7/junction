@@ -48,7 +48,7 @@ function useOverviewSection<T>(load: (signal: AbortSignal) => Promise<T>, liveCh
       if (event.type === 'connected') { setLive('open'); if (wasDown) { wasDown = false; liveRefresh() } }
       if (event.type === 'disconnected') { setLive('connecting'); wasDown = true }
       if (event.type === 'chat.message') liveRefresh()
-    }) : undefined
+    }, { summaries: true }) : undefined
     return () => { controller.abort(); unsubscribe?.(); if (trailing !== undefined) clearTimeout(trailing) }
   }, [load, liveChats, refreshKey])
   return { ...state, live, retry: () => setRefreshKey((value) => value + 1) }

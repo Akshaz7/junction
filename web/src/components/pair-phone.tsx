@@ -55,7 +55,7 @@ export function PairPhoneButton() {
   const dialogId = useId()
   const titleId = useId()
   useDialogFocus(open && !!code, dialog, trigger, () => setOpen(false))
-  useEffect(() => chatLive.subscribe((event) => { if (event.type === 'pair.joined') void acceptJoinProof(event.proof) }), [])
+  useEffect(() => chatLive.subscribe((event) => { if (event.type === 'pair.joined') void acceptJoinProof(event.proof) }, {}), [])
   useEffect(() => onPairingChange(() => { setPaired(getPairings().length > 0); setWaiting(isWaitingForPhone()) }), [])
   useEffect(() => {
     if (!open) return

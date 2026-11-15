@@ -3,7 +3,7 @@
  * legend. Okabe-Ito based (colour-blind safe). The same table is mirrored in
  * public/kind-colors.json so iOS can copy the values; kind-colors.test.ts keeps them equal.
  */
-export const KIND_KEYS = ['door', 'window', 'wall', 'room', 'toilet', 'sink', 'shower', 'bathtub', 'stairs', 'pipe', 'drain', 'fitting', 'other'] as const
+export const KIND_KEYS = ['door', 'window', 'wall', 'room', 'toilet', 'sink', 'shower', 'bathtub', 'stairs', 'pipe', 'drain', 'fitting', 'beam', 'member', 'column', 'slab', 'other'] as const
 export type KindKey = typeof KIND_KEYS[number]
 
 export interface KindStyle {
@@ -28,6 +28,10 @@ export const KIND_COLORS: Record<KindKey, KindStyle> = {
   pipe: { color: '#332288', on: '#FFFFFF', label: 'Pipe', plural: 'Pipes' },
   drain: { color: '#8C510A', on: '#FFFFFF', label: 'Drain', plural: 'Drains' },
   fitting: { color: '#B2182B', on: '#FFFFFF', label: 'Fitting', plural: 'Fittings' },
+  beam: { color: '#117733', on: '#FFFFFF', label: 'Beam', plural: 'Beams' },
+  member: { color: '#44AA99', on: '#1A1A1A', label: 'Member', plural: 'Members' },
+  column: { color: '#AA4499', on: '#FFFFFF', label: 'Column', plural: 'Columns' },
+  slab: { color: '#6699CC', on: '#1A1A1A', label: 'Slab', plural: 'Slabs' },
   other: { color: '#7F7F7F', on: '#FFFFFF', label: 'Other', plural: 'Other' },
 }
 

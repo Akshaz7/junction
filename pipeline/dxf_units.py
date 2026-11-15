@@ -50,6 +50,34 @@ def polygon(points):
         return None
 
 
+def open_plan_split(net, names, unit_m):
+    """Several differently named labels inside one closed region: the CAD gives no wall between them (an open-plan
+    space, or openings the room builder bridged). Report each named sub-area from the nearest-label partition of the
+    region. It is an estimate, not a drawn boundary, so the caller flags it; the region itself is never cut."""
+    from shapely.geometry import MultiPoint
+    from shapely.ops import voronoi_diagram
+    seen = {}
+    for t, x, y in names:
+        seen.setdefault(t.casefold(), (t, x, y))
+    if net is None or len(seen) < 2:
+        return None
+    pts = list(seen.values())
+    try:
+        cells = list(voronoi_diagram(MultiPoint([(x, y) for _, x, y in pts]), envelope=net.envelope.buffer(1)).geoms)
+    except Exception:
+        return None
+    out = []
+    for t, x, y in pts:
+        from shapely.geometry import Point
+        cell = next((c for c in cells if c.covers(Point(x, y))), None)
+        part = net.intersection(cell) if cell is not None else None
+        if part is None or part.is_empty:
+            return None
+        out.append({"name": t, "label_point": [x, y],
+                    "area_m2_approx": round(part.area * unit_m ** 2, 6) if unit_m else None})
+    return out
+
+
 def assign_texts(rooms, texts):
     from shapely.geometry import Point
     polys = [polygon(r) for r in rooms]
@@ -147,6 +175,10 @@ def analyse(rooms, texts, outlines, unit_texts, unit_m, unit_closed=None):
                 delta = props["area_m2_geom"] - props["area_m2_label"]
                 props["area_crosscheck"] = {"difference_m2": round(delta, 6),
                     "agrees_at_written_precision": abs(delta) <= areas[0][1] + 0.5e-6}
+            split = open_plan_split(net, names, unit_m)
+            if split:
+                props.update(open_plan=True, sub_areas=split,
+                             sub_area_method="nearest label within one region with no drawn wall between the labels")
             if not ts:
                 props["classification"] = "unlabelled"
         records.append({"label": name, "props": props})

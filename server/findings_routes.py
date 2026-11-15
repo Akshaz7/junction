@@ -73,6 +73,17 @@ def readiness(doc_id: str) -> dict | None:
     return None
 
 
+def run_coverage(doc_id: str) -> dict | None:
+    """Which checks ran and which had no usable input, so 'no findings' is never read as 'all clear'."""
+    try:
+        from engine.findings import coverage
+        from engine.solvers.data import load_doc
+        doc = load_doc(doc_id, config.artifacts_dir())
+        return coverage(doc) if doc is not None else None
+    except Exception:  # noqa: BLE001 - coverage is extra detail; never fail the run for it
+        return None
+
+
 def _engine_run():
     try:
         return importlib.import_module("engine.findings").run
@@ -150,7 +161,8 @@ async def run_findings(body: RunBody):
                 uuid.uuid4(), body.doc_id, f["rule_id"], f["item_ids"], f["severity"],
                 json.dumps({"message": f["message"], "detail": f["detail"]}))
     await publish({"type": "findings.updated", "doc_id": body.doc_id, "count": len(found)})
-    return {"status": "ok", "findings": (await _list(pool, body.doc_id, None, None))}
+    return {"status": "ok", "findings": (await _list(pool, body.doc_id, None, None)),
+            "coverage": await asyncio.to_thread(run_coverage, body.doc_id)}
 
 
 async def _list(pool, doc_id, rule_id, severity) -> list[dict]:

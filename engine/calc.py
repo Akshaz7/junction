@@ -11,6 +11,7 @@ from __future__ import annotations
 import copy
 import json
 import math
+import re
 from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 from pathlib import Path
@@ -373,12 +374,36 @@ def _cited(res, root):
     return result, missing
 
 
+def _table_operands(res, value, root):
+    """Integer table cells cited by a text/schedule answer whose sum is the answer; None unless they reproduce it exactly."""
+    did0 = next(iter(res.get("doc_ids") or []), None)
+    cells = []
+    for c in res.get("citations") or []:
+        quote = str(c.get("quote") or "").strip()
+        did = c.get("doc_id") or did0
+        if c.get("item_ids") or not did or not re.fullmatch(r"\d{1,6}", quote):
+            continue
+        page = c.get("page", 1)
+        if not (Path(root) / did / f"text-{page}.json").is_file():
+            continue
+        src = {"kind": "document", "doc_id": did, "page": page, "artifact": f"text-{page}.json", "field": "text",
+               "text": quote, "bbox": c.get("bbox_px")}
+        cells.append(asdict(Row(f"cell-{len(cells) + 1}", f"Table cell {quote}", {"count": int(quote)}, src)))
+    if len(cells) < 2 or sum(r["values"]["count"] for r in cells) != value:
+        return None
+    return cells
+
+
 def _default(res, question, root):
     from engine.solvers.solve import _qty
     ans = res["answer"]
     unit, value = unit_name(ans.get("unit")) or "count", ans.get("value")
     items, missing = _cited(res, root)
     rows, issues = [], []
+    if unit == "count" and not items and not missing and number(value):
+        cells = _table_operands(res, value, root)
+        if cells:   # F-TABLEOPS: "4 + 3 = 7" is built from the cited table cells, not an empty element list
+            return summed(res, cells, "count", formula="total = Σ(quantity cells in the table)", note="Each operand is a cited table cell.") | {"issues": []}
     for doc, it in items:
         v = 1 if unit in ("count", "rooms") else _qty(it, "room" if it.kind == "space" else it.kind, {"m2": "area", "m": "length", "m3": "volume"}.get(unit, ""), question)
         r = row(doc, it, v, unit, kind=it.kind)

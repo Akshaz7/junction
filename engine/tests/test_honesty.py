@@ -164,8 +164,10 @@ def test_wall_area_estimate_states_height_and_subtracts_openings(tmp_path):
     res = answer(WALL, [d.name])
     assert res["answer"]["value"] == pytest.approx(49.8)
     assert res["reasoning"]["confidence"]["label"] == "Estimate"
-    assert "2.7 m (assumed" in res["answer"]["text_md"]
-    assert any("2.7 m (assumed" in s["text"] for s in res["reasoning"]["steps"])
+    t = res["answer"]["text_md"]
+    assert "wall height 2.70 m, ASSUMED (no wall height on this drawing)" in t
+    assert "Ask with your height, e.g. 'walls are 2.6 m'" in t and "depends on the ASSUMED 2.70 m wall height" in t
+    assert any("2.70 m, ASSUMED (no wall height on this drawing)" in s["text"] for s in res["reasoning"]["steps"])
     assert res["wallarea"]["opening_m2"] == pytest.approx(4.2)
     assert res["citations"] and res["evidence"]["boxes"]
 

@@ -1,3 +1,4 @@
+import { kindStyle } from '../lib/kind-colors';
 import { Object3D, Texture, type Material, type Mesh } from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { indexElements, type IFCElement } from './identify';
@@ -52,6 +53,18 @@ export interface LoadedScene {
 
 export function storeyName(storey: Storey | null): string | null {
   return typeof storey === 'string' ? storey : storey?.name ?? null;
+}
+
+const GUID_LIKE = /^[0-9A-Za-z_$]{22}$/;
+
+/** A readable name for an item: its own name, else "Wall — Second Floor". The GUID is never the label. */
+export function itemLabel(manifest: Pick<SceneManifest, 'items'>, id: string): string {
+  const item = manifest.items[id];
+  if (!item) return id;
+  const own = [item.name, item.tag].find((v): v is string => typeof v === 'string' && !!v.trim() && !GUID_LIKE.test(v.trim()));
+  const storey = storeyName(item.storey);
+  const base = own?.trim() ?? kindStyle(item.kind).label;
+  return storey && !base.includes(storey) ? `${base} — ${storey}` : base;
 }
 
 export function createScene(manifest: SceneManifest, gltf: Pick<GLTF, 'scene' | 'parser'>): LoadedScene {

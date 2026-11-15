@@ -161,3 +161,18 @@ def test_chat_hide_attaches_advisor_cards_and_publishes(monkeypatch):
     plain = {"evidence": {"scene": {"doc_id": DOC, "commands": [{"op": "highlight", "item_ids": ["b"]}]}}}
     asyncio.run(chats_routes._attach_advice(plain, [DOC], [], "chat-1"))
     assert "advisor_cards" not in plain
+
+
+def test_remote_reset_clears_then_rederives_cards_for_every_client(client, monkeypatch):
+    """F11: a scene reset sent by one client clears the advisor cards on all clients and re-derives them."""
+    seen = []
+    monkeypatch.setattr(advise_routes, "_engine_advise", lambda: (lambda d, e, c: seen.append(e) or [card()]))
+    with client.websocket_connect("/ws") as a, client.websocket_connect("/ws") as b:
+        a.send_json({"type": "scene.edit", "doc_id": DOC, "op": "reset", "item_ids": [], "edit_id": "r1"})
+        for w in (a, b):
+            recv_type(w, "scene.edit")
+            cleared = recv_type(w, "advisor.cards")
+            assert cleared["cards"] == [] and cleared["cleared"] is True and cleared["after_edit"] == "r1"
+            fresh = recv_type(w, "advisor.cards")
+            assert len(fresh["cards"]) == 1 and fresh["scene_version"] > cleared["scene_version"]
+    assert seen and seen[0]["op"] == "reset"

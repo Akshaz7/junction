@@ -7,6 +7,7 @@ When data is missing or the scale is unknown the answer abstains in plain words.
 """
 from __future__ import annotations
 
+import json
 import re
 import time
 import uuid
@@ -457,6 +458,22 @@ def _solve_multi(question, doc_id, p: Parsed, root, page, hidden, t0) -> dict:
     return _answer_obj(question, [doc_id], text, counts, "count", min(confs), False, boxes, cites, scene, trace, subs[0][1]["route"], t0)
 
 
+def ifc_unreadable(doc, root) -> str | None:
+    """Why this IFC cannot answer numbers at all (parse failed or nothing was indexed), else None. An unreadable file
+    must give 'unknown', never a verified zero."""
+    if doc is None or doc.mode != "ifc":
+        return None
+    if not doc.items:
+        return "the file has no readable elements (it may be corrupt, truncated or empty)"
+    try:
+        st = json.loads((Path(root) / doc.meta.get("sheet_of", doc.doc_id) / "ingest.json").read_text())
+    except (OSError, ValueError, AttributeError):
+        return None
+    if isinstance(st, dict) and st.get("status") == "failed":
+        return "reading the file failed" + (f": {str(st.get('reason') or st.get('detail'))[:160]}" if st.get("reason") or st.get("detail") else "")
+    return None
+
+
 @checked_solver
 def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path | str = ARTIFACTS,
           page: int | None = None, hidden: dict[str, str] | None = None) -> dict:
@@ -476,6 +493,10 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         return _abstain(question, doc_id, "I have no structured data for this document yet, so I cannot answer that reliably.",
                         trace, "index", t0)
     route = "index" if doc.mode == "ifc" else "planmap"
+    if (why := ifc_unreadable(doc, root)) is not None:
+        return _abstain(question, doc_id, f"**Unknown: the file could not be read.** I cannot give a count, area or length because {why}. "
+                        "A zero here would be misleading, so no number is given. Export the model again as IFC and upload it again.",
+                        trace, route, t0)
     from engine.ifc_storeys import dedup_trace
     trace.extend(dedup_trace(doc))
     if doc.mode == "ifc":
