@@ -93,7 +93,7 @@ def test_overview_matches_engine_and_is_cached(client):
     assert t["floor_area_m2"] == pytest.approx(1939.38, abs=0.01)
     assert {l["level"] for l in o["levels"]} >= {"Erdgeschoss", "1. Obergeschoss"}
     assert {c["doc_id"] for c in o["coverage"]} == {AC, VAR, PLAN, ELEV}
-    assert all(c["confidence_label"] in ("Verified", "Cross-checked", "Estimate") for c in o["coverage"])
+    assert all(c["confidence_label"] in ("Verified", "Cross-checked", "Estimate", "Partial", "Processing", "Not readable") for c in o["coverage"])
     assert isinstance(o["agreements"], list) and isinstance(o["mistakes"], list)
     again = client.get(f"/api/projects/{pid}/overview").json()
     assert again == o

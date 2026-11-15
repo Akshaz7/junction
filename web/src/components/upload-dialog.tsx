@@ -2,7 +2,7 @@ import { useEffect, useId, useReducer, useRef, useState, type DragEvent } from '
 import { createPortal } from 'react-dom'
 import { AlertCircle, ArrowRight, Check, FileText, Upload, X } from 'lucide-react'
 import type { Document } from '../lib/types'
-import { friendlyFailure, uploadFile, UploadError, waitForUpload } from '../lib/upload-client'
+import { findPersistedUpload, friendlyFailure, uploadFile, UploadError, waitForUpload } from '../lib/upload-client'
 import { MAX_UPLOAD_BYTES, UPLOAD_ACCEPT, uploadReducer, validateUpload } from '../lib/upload-state'
 import { Button } from './ui'
 import './upload-dialog.css'
@@ -81,9 +81,15 @@ function UploadSession({ onClose, onAsk, onOpen, onReady, initialFile }: UploadD
     request.current = controller
     dispatch({ type: 'start', file })
     let phase: 'upload' | 'poll' = 'upload'
+    const startedAt = Date.now()
     try {
       const receipt = await uploadFile(file, controller.signal, (progress) => {
         if (!controller.signal.aborted) dispatch({ type: 'upload-progress', progress })
+      }).catch(async (error) => {
+        // A 5xx or dropped connection can happen after the file was stored: confirm before calling it a failure.
+        const stored = error instanceof UploadError && error.ambiguous ? await findPersistedUpload(file, startedAt) : null
+        if (stored) return stored
+        throw error
       })
       if (controller.signal.aborted) return
       dispatch({ type: 'uploaded', docId: receipt.doc_id })
