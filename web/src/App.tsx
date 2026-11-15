@@ -36,7 +36,7 @@ export default function App({ onOpenCitation = ignoreCitation }: { onOpenCitatio
   const chatProject = useChatProject(view === 'chat')
   const [panelOpen, setPanelOpen] = useState(() => window.innerWidth > 800)
   const inProject = !!chatProject.id
-  const chatDocs = chatProject.id ? projectLibraryDocs(chatProject.project, chatProject.project ? docs : []) : docs
+  const chatDocs = chatProject.id ? (chatProject.project ? projectLibraryDocs(chatProject.project, docs) : []) : docs
 
   const refreshDocuments = useCallback(async () => {
     const documents = await workspaceApi.getDocuments()
