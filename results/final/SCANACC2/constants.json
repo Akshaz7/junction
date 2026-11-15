@@ -144,6 +144,42 @@
         0.9
       ],
       "result": "no change in door/window/toilet (argmax components do not nest); not adopted"
+    },
+    "sink_cut_0.8": {
+      "dev_n": 115,
+      "dev_sink_exact_acc": {
+        "none": 0.217,
+        "0.7": 0.33,
+        "0.75": 0.409,
+        "0.8": 0.443,
+        "0.85": 0.435
+      },
+      "test_n": 40,
+      "test_sink_exact_acc": {
+        "none": 0.275,
+        "0.8": 0.4,
+        "0.85": 0.475
+      },
+      "sample200_fake_gate": "6 correct-to-wrong on sink count questions (value one lower), 0 wrong-to-correct; the benchmark question counts kitchen and bathroom sinks combined, which the SVG-derived gold does not match",
+      "result": "not adopted"
+    },
+    "upscale_all_classes": {
+      "n": 115,
+      "exact_acc_all_classes_1024_vs_1280": {
+        "sink": [
+          0.217,
+          0.2
+        ],
+        "shower_bathtub": [
+          0.13,
+          0.113
+        ]
+      },
+      "768": {
+        "sink": 0.261,
+        "shower_bathtub": 0.096
+      },
+      "result": "no class improves reliably; not adopted"
     }
   },
   "raw_vs_gold_totals_dev": {
