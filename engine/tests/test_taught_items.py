@@ -118,3 +118,19 @@ def test_canonical_terminal_count_and_specific_subtypes(tmp_path):
     assert query('How many supply air terminals?',['sheet'],tmp_path)['answer']['value'] == 1
     assert query('Count extract air terminals',['sheet'],tmp_path)['answer']['value'] == 1
     assert query('Count TP',['sheet'],tmp_path)['answer']['value'] == 1
+
+
+def test_loose_box_around_detected_door_merges_by_centre():
+    detected = {'item_id': 'door-003', 'kind': 'door', 'source': 'det', 'bbox_px': [40, 40, 256, 44], 'conf': .6, 'props': {}}
+    plan = project({'items': [detected]}, [symbol(box=(25, 22, 270, 74))], 1)
+    from engine.taught_items import iou, existing_links
+    assert iou([40, 40, 256, 44], [25, 22, 270, 74]) < .5
+    assert len(plan['items']) == 1 and plan['items'][0]['item_id'] == 'door-003'
+    assert existing_links(plan) == {'one': 'door-003'}
+
+
+def test_taught_mark_on_other_kind_or_far_away_still_adds():
+    base = {'items': [{'item_id': 'w1', 'kind': 'window', 'source': 'det', 'bbox_px': [10, 10, 20, 20], 'conf': .6, 'props': {}},
+                      {'item_id': 'd1', 'kind': 'door', 'source': 'det', 'bbox_px': [100, 100, 110, 110], 'conf': .6, 'props': {}}]}
+    plan = project(base, [symbol(box=(8, 8, 22, 22))], 1)
+    assert len(plan['items']) == 3
