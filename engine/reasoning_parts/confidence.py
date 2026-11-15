@@ -182,7 +182,8 @@ def factors(card, res, question, *, source=None, allow_route_score=True):
             card['reason'] = (reason + ' ' + score_note).strip()
     if source:
         words = {'scan': 'scanned image read by detector', 'vision': 'vision-model reading',
-                 'ifc': 'building-model quantities', 'cad': 'vector CAD geometry', 'unknown': 'cited source data'}
+                 'ifc': 'building-model quantities', 'cad': 'vector CAD geometry (DXF layers)', 'pdf_vector': 'vector PDF geometry',
+                 'vlm': 'image model read of the drawing (geometry is approximate)', 'unknown': 'cited source data'}
         entries.append({'label': 'Source: ' + words.get(source, source), 'delta': 0,
                         'note': 'Source context; no unmeasured accuracy adjustment.'})
     if counted and counted.get('reread'):
@@ -200,6 +201,37 @@ def factors(card, res, question, *, source=None, allow_route_score=True):
                             'note': 'Observed icon variation; physical door-width variation remains unknown.'})
     card['factors'] = entries
     return card
+
+
+def geometry_source(root, doc_ids):
+    """Where the cited geometry really came from, read from the plan map's own item sources, not the file extension.
+    A DXF whose layers had nothing usable and was read as an image is 'vlm', not 'cad'. None when unknown or mixed."""
+    found = set()
+    for did in doc_ids:
+        d = Path(root) / did
+        try:
+            if (d / 'elements.json').is_file():
+                found.add('ifc')
+                continue
+            srcs = set()
+            for f in d.glob('planmap-[0-9]*.json'):
+                srcs |= {str(i.get('source')) for i in json.loads(f.read_text()).get('items', []) if isinstance(i, dict)}
+        except (OSError, ValueError, AttributeError):
+            return None
+        srcs -= {'ocr', 'None', 'taught', 'user'}
+        if not srcs:
+            return None
+        if srcs & {'vlm', 'vision'}:
+            found.add('vlm')
+        elif srcs & {'det', 'seg'}:
+            found.add('scan')
+        elif srcs == {'dxf'}:
+            found.add('cad')
+        elif srcs == {'pdf_vector'}:
+            found.add('pdf_vector')
+        else:
+            return None
+    return found.pop() if len(found) == 1 else None
 
 
 def attach(res, question, root):
@@ -222,6 +254,9 @@ def attach(res, question, root):
     if kinds:
         source = ('ifc' if kinds == {'ifc'} else 'cad' if kinds <= {'dxf', 'dwg'} else
                   'scan' if kinds <= {'raster', 'pdf', 'png', 'jpg', 'jpeg', 'image'} else 'unknown')
+    real = geometry_source(root, res.get('doc_ids') or [])
+    if real:
+        source = real
     if ((card.get('calc') or {}).get('reader')
             or str(((card.get('calc') or {}).get('method') or {}).get('id', '')).startswith('scan-vision-')):
         source = 'vision'
@@ -255,4 +290,6 @@ def attach(res, question, root):
         card['graph_path'] = path
     from engine.scan_presentation import attach as prioritize
     prioritize(res, question)
+    from engine.glazed_doors import attach as glazed
+    glazed(res, question, root)
     return res
