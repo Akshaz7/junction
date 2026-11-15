@@ -210,6 +210,8 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
             if scale is None:
                 scale = page_scale
         items = dedupe_openings(items)
+        from pipeline.room_labels import wet_label_rooms
+        items = items + wet_label_rooms(items)
         return Doc(doc_id, "planmap", items, title, [], scale, len(pms), meta={"page_scales": page_scales, **({"view_regions": view_regions, "excluded_view_items": excluded} if view_regions else {})})
     return None
 
