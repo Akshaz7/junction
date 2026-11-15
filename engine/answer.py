@@ -305,6 +305,8 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
     except Exception:  # noqa: BLE001
         pass
     res = ensure_markers(_guarded(question, doc_ids, on_event, scene_state, history))
+    from engine.numeric import guard_count
+    res = guard_count(res, question, doc_ids, _root(), hidden=(scene_state or {}).get("hidden"))
     try:   # E-61: implausible raster areas and sparse uploaded plans (engine/rastersanity.py)
         if len(doc_ids) == 1:
             from engine import rastersanity
