@@ -283,7 +283,13 @@ def _guarded(question, doc_ids, on_event, scene_state, history):
 
 @document_scope
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
-           history: list[dict] | None = None) -> dict:
+           history: list[dict] | None = None, _split: bool = True) -> dict:
+    if _split and doc_ids and not os.environ.get("MULTIQ_OFF"):
+        # F-MULTIQ: a message holding several questions is split, each part answered, and the results merged.
+        from engine import multiq
+        merged = multiq.run(question, doc_ids, lambda q, d: answer(q, d, on_event, scene_state=scene_state, history=history, _split=False), _root())
+        if merged is not None:
+            return merged
     from engine.reasoning_parts.confidence import attach
     res = attach(_answer_with_evidence(question, doc_ids, on_event, scene_state=scene_state, history=history), question, _root())
     from engine.descriptive_claims import attach as attach_claims
@@ -475,7 +481,7 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             _n = int(_pm.get("pages") or 1)
             txt = f"This file has **{_n} {'page' if _n == 1 else 'pages'}**."
             return _answer_obj(question, doc_ids, txt, _n, "count", 1.0, False, [], [], {"doc_id": doc_ids[0], "highlight_item_ids": [], "camera_target_item_id": None}, trace, "index", t0)
-    if doc_ids and _q and re.search(r"\b(?:what|which)\s+(?:file|document|doc|drawing)(?:\s+(?:format|type|name))?\s+(?:is\s+)?(?:this|it|open|that|here|the\s+(?:open|current)\s+\w+)?\s*\??$|\bfile\s+(?:format|type|name)\b|\bwhat\s+(?:format|type)\s+is\s+(?:this|it)\b", _q, re.I):
+    if doc_ids and _q and re.search(r"\b(?:what|which)\s+(?:file|document|doc|drawing)(?:\s+(?:format|type|name))?\s+(?:is\s+)?(?:this|it|open|that|here|the\s+(?:open|current)\s+\w+)?\s*\??$|^\W*what\s+is\s+(?:this|that|it)\s+(?:file|document|doc|drawing)\W*$|\bfile\s+(?:format|type|name)\b|\bwhat\s+(?:format|type)\s+is\s+(?:this|it)\b", _q, re.I):
         try:
             _meta = json.loads((root / doc_ids[0] / "doc.json").read_text())
         except (OSError, ValueError):
