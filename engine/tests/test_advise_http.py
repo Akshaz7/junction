@@ -55,3 +55,7 @@ def test_advise_route_front_door_gives_exit_violation_like_chat(client, monkeypa
     from engine.answer import answer
     chat = answer("remove the front door", [DOC])
     assert bad[0]["title"] in chat["answer"]["text_md"]
+    src = bad[0]["source"]
+    from engine.rules import load_rules
+    rule = {r["id"]: r for r in load_rules()}["fi-fire-exits-per-storey"]
+    assert src["quote"] == rule["quote"] and src["url"] == rule["url"] and src["section"] == rule["section"]   # full quote + link to the law

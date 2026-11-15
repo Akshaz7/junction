@@ -196,3 +196,36 @@ def test_findings_need_readable_items(client, dirs, monkeypatch):  # noqa: F811
     assert not ran
     _ingest(dirs, {"status": "ready"}, items=[{"item_id": "a", "bbox_px": [0, 0, 1, 1]}])
     assert client.post("/api/findings/run", json={"doc_id": DOC}).json()["status"] == "ok" and ran
+
+
+def test_findings_run_reports_coverage_and_checks_unsaved_edits(client, monkeypatch):
+    """Raster drawing: the run says what it checked; unsaved removals are checked but never stored."""
+    from engine import entrance, findings
+    from engine.solvers.data import load_doc
+    monkeypatch.setenv("ARTIFACTS_DIR", str(findings.ARTIFACTS))
+    doc = load_doc(DOC, findings.ARTIFACTS)
+    if doc is None or not entrance.planmap_entrances(doc):
+        pytest.skip("raster artifacts not present")
+    ents = [d.item_id for d in entrance.planmap_entrances(doc)]
+    r = client.post("/api/findings/run", json={"doc_id": DOC}).json()
+    assert r["status"] == "ok" and "fi-fire-exits-per-storey" in r["checked"] and r["checked_at"] and r["edited"] is False
+    saved = len(r["findings"])
+    e = client.post("/api/findings/run", json={"doc_id": DOC, "hidden_item_ids": ents}).json()
+    assert e["edited"] is True and e["hidden"] == len(ents)
+    v = next(f for f in e["findings"] if f["rule_id"] == "fi-fire-exits-per-storey")
+    assert v["severity"] == "violation" and set(v["item_ids"]) == set(ents) and v["rule"]["quote"]
+    assert len(client.get("/api/findings", params={"doc_id": DOC}).json()["findings"]) == saved
+
+
+def test_findings_run_says_why_nothing_was_checked(client, monkeypatch):
+    monkeypatch.setattr(findings_routes, "_engine_run", lambda: (lambda doc_id: []))
+    monkeypatch.setattr(findings_routes, "_engine_report", lambda: (lambda doc_id, hidden=None: {
+        "checked": [], "not_checked": [], "items_checked": 3, "mode": "planmap"}))
+    r = client.post("/api/findings/run", json={"doc_id": DOC}).json()
+    assert r["status"] == "no_checks" and "IFC model" in r["detail"] and r["findings"] == []
+
+
+def test_engine_fail_is_stored_as_violation():
+    lib = {RULE: {"id": RULE}}
+    out = findings_routes.clean_findings([{"rule_id": RULE, "item_ids": ["d1"], "severity": "fail", "text": "x"}], lib)
+    assert out[0]["severity"] == "violation"

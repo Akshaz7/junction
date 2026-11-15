@@ -119,8 +119,9 @@
 .viewer3d-footer { display: grid; gap: 6px; padding: 12px 16px; font-size: 12px; }
 .viewer3d-footer p { margin: 0; color: var(--muted-foreground, #666); }
 .viewer3d-footer output { overflow-wrap: anywhere; font-family: monospace; }
-.viewer3d[data-editing="true"] { grid-template-rows: auto minmax(120px, 1fr) auto; }
-.viewer3d[data-editing="true"] .viewer3d-footer { max-height: min(300px, 40vh); overflow-y: auto; }
+.viewer3d[data-editing="true"] { grid-template-rows: auto minmax(120px, 1fr) minmax(0, auto); }
+/* The footer (edit panel + advisor cards) scrolls inside its row instead of being clipped by .viewer3d's overflow. */
+.viewer3d[data-editing="true"] .viewer3d-footer { min-height: 0; max-height: min(420px, 50vh); overflow-y: auto; overscroll-behavior: contain; }
 .viewer3d-edit-panel { display: grid; gap: 8px; }
 .viewer3d-edit-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .viewer3d-edit-actions strong { margin-right: auto; }
@@ -132,14 +133,14 @@
 }
 .viewer3d-edit-actions button:disabled { opacity: .4; cursor: default; }
 .viewer3d-edit-actions button[aria-pressed="true"] { color: white; background: var(--mode-accent, #166ed1); }
-.viewer3d-advisor { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 8px; }
+.viewer3d-advisor { min-width: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 8px; }
 .viewer3d-advisor-card { border: 1px solid var(--border, #e7e7e7); border-radius: 8px; padding: 10px; }
 .viewer3d-advisor-card[data-kind="warning"] { border-color: #c18a32; }
 .viewer3d-advisor-select { display: grid; gap: 6px; width: 100%; padding: 0; text-align: left; color: inherit; background: none; border: 0; font: inherit; cursor: pointer; }
 .viewer3d-advisor-select > span:first-child { display: flex; align-items: center; gap: 6px; }
 .viewer3d-advisor-card details { margin-top: 8px; }
 .viewer3d-advisor-card summary { cursor: pointer; }
-.viewer3d-advisor-card blockquote { margin: 8px 0 0; padding-left: 10px; border-left: 2px solid var(--border, #e7e7e7); }
+.viewer3d-advisor-card blockquote { margin: 8px 0 0; padding-left: 10px; border-left: 2px solid var(--border, #e7e7e7); white-space: pre-wrap; overflow-wrap: anywhere; }
 
 .viewer3d-item-card {
   position: absolute;

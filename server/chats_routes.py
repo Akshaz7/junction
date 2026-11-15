@@ -268,25 +268,37 @@ async def get_scene_state(chat_id: str, doc_id: str | None = None):
     return {"chat_id": str(cid), "states": [{k: v for k, v in scene_edits.public_state(s).items() if k != "type"} for s in states]}
 
 
-async def _attach_advice(ans: dict, doc_ids: list[str], hidden: list[str], cid) -> None:
+def _is_undo(ans: dict) -> bool:
+    """The engine's undo answer ("Undid the last scene edit." / "There is no scene edit to undo.")."""
+    return any(isinstance(t, dict) and t.get("step") == "scene" and str(t.get("detail") or "").startswith("undo")
+               for t in ans.get("trace") or [])
+
+
+async def _attach_advice(ans: dict, doc_ids: list[str], hidden: list[str], cid,
+                         hidden_by_doc: dict[str, list[str]] | None = None) -> None:
     """FIX-4: a hide/remove command in chat runs the advisor on the edited model (everything hidden in this chat so far,
     manual edits included, plus this command). The cards go on the answer (`advisor_cards`) and out over /ws.
-    A restore/reset re-checks what stays hidden and pushes those cards (or none) so the Edit panel matches. Never blocks."""
+    An undo / restore / reset re-checks what stays hidden after ALL of the answer's commands (an undo can be
+    [reset, hide ...]) and ALWAYS publishes the result, even an empty list, so the answer card and the Edit panel
+    drop a stale violation from the earlier hide. Never blocks."""
     try:
-        from .advise_routes import _engine_advise, clean_cards, effective_edit
+        from .advise_routes import _engine_advise, clean_cards
         fn = _engine_advise()
         scene = ans.get("evidence", {}).get("scene") or {}
         doc_id = scene.get("doc_id") or (doc_ids[0] if doc_ids else None)
-        cmd = next((c for c in scene.get("commands") or [] if isinstance(c, dict) and c.get("op") in ("hide", "restore", "reset")
-                    and (c.get("item_ids") or c.get("op") != "hide")), None)
-        if fn is None or not doc_id or cmd is None or (cmd["op"] != "hide" and not hidden):
+        cmds = [c for c in scene.get("commands") or [] if isinstance(c, dict)]
+        recheck = _is_undo(ans) or any(c.get("op") in ("restore", "reset") for c in cmds)
+        hides = any(c.get("op") == "hide" and c.get("item_ids") for c in cmds)
+        if fn is None or not doc_id or not (recheck or hides):
             return
-        edit = effective_edit(hidden, {"op": cmd["op"], "item_ids": list(cmd.get("item_ids") or [])})
-        if edit["op"] != "hide":   # nothing left hidden: no cards, and the panel clears
-            await publish({"type": "advisor.cards", "doc_id": doc_id, "chat_id": str(cid), "cards": []})
-            return
-        cards = clean_cards(await asyncio.to_thread(fn, doc_id, edit, str(cid)), doc_id)
-        if cmd["op"] != "hide":
+        base = hidden if hidden_by_doc is None else hidden_by_doc.get(doc_id) or []
+        st = {**scene_edits.empty_state(doc_id), "hidden": list(base)}
+        for c in cmds:   # what is still hidden once this answer's commands land (the edit layer's own fold)
+            if c.get("op") in ("hide", "restore", "reset", "isolate"):
+                st = scene_edits.apply(st, c["op"], list(c.get("item_ids") or []), dict(c.get("labels") or {}))
+        rest = list(st["hidden"])
+        cards = clean_cards(await asyncio.to_thread(fn, doc_id, {"op": "hide", "item_ids": rest}, str(cid)), doc_id) if rest else []
+        if recheck:      # always, even [], so clients clear the card from the earlier hide
             await publish({"type": "advisor.cards", "doc_id": doc_id, "chat_id": str(cid), "cards": cards})
         elif cards:
             ans["advisor_cards"] = cards
@@ -369,6 +381,7 @@ async def ask(chat_id: str, body: NewMessage):
                        "text": body.content[:300]})
 
         hidden: list[str] = []
+        hidden_by_doc: dict[str, list[str]] = {}
         sstate = None
         try:  # shared edit layer: chat commands and manual Edit-panel removals of this chat
             edits = [e for e in await scene_edits.load_edits(pool, cid)
@@ -376,6 +389,7 @@ async def ask(chat_id: str, body: NewMessage):
             states = scene_edits.fold(edits)
             if edits:
                 hidden = list(dict.fromkeys(i for st in states.values() for i in st["hidden"]))
+                hidden_by_doc = {d: list(st["hidden"]) for d, st in states.items()}
                 sstate = {"hidden": hidden, "edits": edits,
                           "last_hidden": scene_edits.last_hidden(edits, doc_ids)}
                 # shared layer: Edit-panel moves / wall materials ("move the window back", "put it back where it was")
@@ -486,7 +500,7 @@ async def ask(chat_id: str, body: NewMessage):
         except Exception as e:
             yield {"event": "error", "data": json.dumps({"detail": f"engine failed: {e}"})}
             return
-        await _attach_advice(ans, doc_ids, hidden, cid)
+        await _attach_advice(ans, doc_ids, hidden, cid, hidden_by_doc)
         mid = await pool.fetchval(
             "insert into messages (chat_id, role, content) values ($1,'assistant',$2) returning id",
             cid, ans["answer"]["text_md"])

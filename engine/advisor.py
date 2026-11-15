@@ -16,7 +16,7 @@ from engine.rules import load_rules
 from engine.solvers import ARTIFACTS
 from engine.solvers.data import Doc, load_doc
 
-MAX_CARDS, MAX_TITLE, MAX_BODY, MAX_QUOTE = 3, 60, 200, 200
+MAX_CARDS, MAX_TITLE, MAX_BODY, MAX_QUOTE = 3, 60, 200, 1200
 SIZE_OPS = ("resize", "narrow", "scale", "set_width", "edit")
 
 
@@ -28,7 +28,12 @@ def _cut(s: str, n: int) -> str:
 
 
 def _quote(q: str) -> str:
-    return q if len(q) <= MAX_QUOTE else _cut(q, MAX_QUOTE)    # a prefix stays verbatim
+    """The full verbatim quote. Only a quote over MAX_QUOTE is shortened, and then only at a sentence end."""
+    q = q.strip()
+    if len(q) <= MAX_QUOTE:
+        return q
+    ends = [m.end() for m in re.finditer(r"[.;:!?](?=\s)", q[:MAX_QUOTE + 1])]
+    return q[:ends[-1]] if ends else q    # no sentence end in reach: send it whole, never mid-sentence
 
 
 def _source(src: dict) -> dict | None:
@@ -39,6 +44,8 @@ def _source(src: dict) -> dict | None:
     for k in ("url", "finnish_url"):
         if str(src.get(k) or "").startswith(("https://", "http://")):
             out[k] = src[k]
+    if src.get("section"):
+        out["section"] = src["section"]
     return out
 
 
@@ -201,7 +208,10 @@ def _info(title: str, body: str, ids: list[str], rule_id: str, key: str) -> dict
 
 
 def _planmap_cards(doc: Doc, edit: dict, touched: list) -> list[dict]:
-    """Raster / DXF plan maps have no measured exits. Detect entrance doors from the drawing; say plainly what was not checked."""
+    """Raster / DXF plan maps have no measured exits. Detect entrance doors from the drawing; say plainly what was not checked.
+    Only doors are rule-relevant on a drawing: an edit to windows, walls or fixtures gets no card (UI: 'No advice for this change.')."""
+    if not any(i.kind == "door" for i in touched):
+        return []
     ids = [i.item_id for i in touched]
     before = entrance.planmap_entrances(doc)
     gone = [d for d in touched if d.kind == "door" and any(d.item_id == e.item_id for e in before)]

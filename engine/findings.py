@@ -32,6 +32,7 @@ def structural_edit_warning(doc: Doc, hidden_ids: list[str]) -> str | None:
 def _src(rule: dict) -> dict:
     return {"type": "rule", "ref": rule["id"], "title": f"{rule['source_title']}, {rule['section']}", "quote": rule["quote"],
             "url": rule.get("url"), "finnish_url": rule.get("finnish_url") if rule.get("finnish_url") != rule.get("url") else None,
+            "section": rule.get("section"),
             "translation": rule.get("translation")}
 
 
@@ -256,6 +257,8 @@ def coverage(doc: Doc) -> dict:
         "emergency_window": bool(_emergency_windows(doc)),
         "door_landing": False,
     }
+    if not ifc and _planmap_ref(doc):
+        has["exits_per_storey"] = True   # plan maps: entrance door on the outer edge of the drawing (engine.entrance)
     why = {"door_landing": "the model has no landing geometry", "stair_width": "no stair flight with a footprint in the model",
            "stair_riser_tread_dwelling": "the stairs carry no riser or tread values", "stair_riser_tread_exit": "the stairs carry no riser or tread values",
            "barrier_height": "no barrier (guard rail) in the model", "emergency_window": "no window marked as an emergency exit",
@@ -278,11 +281,36 @@ def coverage(doc: Doc) -> dict:
     return {"checked": checked, "not_checked": skipped}
 
 
-def run(doc_id: str, root: Path | None = None) -> list[dict]:
-    doc = load_doc(doc_id, Path(root or os.environ.get("ARTIFACTS_DIR") or ARTIFACTS))
+def without(doc: Doc, hidden) -> Doc:
+    """The doc with the items the user removed in the viewer (unsaved edits) left out."""
+    gone = {h for h in (hidden or []) if isinstance(h, str)}
+    if not gone:
+        return doc
+    import dataclasses
+    return dataclasses.replace(doc, items=[i for i in doc.items if i.item_id not in gone])
+
+
+def _load(doc_id: str, root: Path | None) -> Doc | None:
+    return load_doc(doc_id, Path(root or os.environ.get("ARTIFACTS_DIR") or ARTIFACTS))
+
+
+def run(doc_id: str, root: Path | None = None, hidden=None) -> list[dict]:
+    doc = _load(doc_id, root)
     if doc is None:
         return []
-    return run_doc(doc)
+    return run_doc(without(doc, hidden), before=doc if hidden else None)
+
+
+def report(doc_id: str, root: Path | None = None, hidden=None) -> dict | None:
+    """What a run could check: rules checked / not checked (with reasons) and how many items were looked at."""
+    doc = _load(doc_id, root)
+    if doc is None:
+        return None
+    after = without(doc, hidden)
+    cov = coverage(after)
+    if hidden and doc.mode != "ifc" and _planmap_ref(doc) and "fi-fire-exits-per-storey" not in cov["checked"]:
+        cov["checked"].append("fi-fire-exits-per-storey")
+    return {**cov, "mode": doc.mode, "items_checked": len(after.items), "hidden": len(doc.items) - len(after.items)}
 
 
 def exits_map(doc: Doc) -> dict[str, list[Item]]:
@@ -297,8 +325,42 @@ def exits_map(doc: Doc) -> dict[str, list[Item]]:
     return out
 
 
-def run_doc(doc: Doc) -> list[dict]:
+def _planmap_ref(doc: Doc) -> bool:
+    return len([i for i in doc.items if i.kind in ("wall", "window", "door") and i.bbox_px]) >= 3
+
+
+def check_planmap_entrance(doc: Doc, rule: dict, tg: dict, before: Doc | None = None) -> list[dict]:
+    """Raster / DXF plan maps (same detection as the advisor): a door on the outer edge of the drawn content is an
+    entrance. `before` is the drawing without the user's unsaved edits; removing every detected entrance is a fail."""
+    from engine import entrance
+    if not _planmap_ref(doc):
+        return []
+    left = entrance.planmap_entrances(doc)
+    if left:
+        return []
+    if before is not None:
+        kept = {i.item_id for i in doc.items}
+        gone = [d for d in entrance.planmap_entrances(before) if d.item_id not in kept]
+        if gone:
+            return [_f(rule, "fail", "No entrance door left on the drawing",
+                       f"Violation of 848/2017 §33: the entrance door{'s' if len(gone) != 1 else ''} detected on the drawing "
+                       f"({', '.join(tg.get(d.item_id, d.item_id) for d in gone[:3])}) {'were' if len(gone) != 1 else 'was'} removed, so no exit is left. "
+                       "Detected from the drawing, not measured; check against an IFC model.", gone, tg, None, 0)]
+    doors = [d for d in doc.items if d.kind == "door"]
+    if not doors:
+        return []
+    return [_f(rule, "suggestion", "No entrance door found on the drawing",
+               f"None of the {len(doors)} door{'s' if len(doors) != 1 else ''} on the drawing sits on its outer edge, so no entrance or exit door "
+               "could be found. Detected from the drawing, not measured; check against an IFC model.", doors, tg, None, 0)]
+
+
+def run_doc(doc: Doc, before: Doc | None = None) -> list[dict]:
     rules = {r["check_id"]: r for r in load_rules()}
+    if doc.mode != "ifc":
+        tg = scene_cmds.tags(before or doc)   # labels as the viewer shows them (before the unsaved edits)
+        out = check_planmap_entrance(doc, rules["exits_per_storey"], tg, before) if "exits_per_storey" in rules else []
+        out += check_door_clear_width(doc, rules["door_clear_width"], tg, set()) if "door_clear_width" in rules else []
+        return [f for f in out if f["item_ids"] and f.get("source", {}).get("quote")]
     tg = scene_cmds.tags(doc)
     exits = exits_map(doc)
     exit_ids = {i.item_id for v in exits.values() for i in v if i.kind == "door"}

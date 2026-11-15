@@ -4,6 +4,7 @@ import { findingsApi, groupFindings, openFindingEvidence, type AdvisorCard, type
 import { onAdvisorCards, onFindingsUpdated } from '../viewer3d/liveHighlight'
 import { sourcedCards } from '../viewer3d/advisor'
 import { ruleName, shortSource, sourceLinkLabel, sourceLinks } from '../viewer3d/AdvisorCardView'
+import { findingsStatus, type FindingsRunResponse } from '../viewer3d/FindingsPanel'
 import { DocumentViewer, useViewerSheet } from './document-viewer'
 import { VisualisePanel } from '../viewer3d/VisualiseIt'
 import type { Answer, Citation, Document } from '../lib/types'
@@ -24,11 +25,36 @@ export function AdvisorCardsPanel({ cards, onShowItems }: { cards: AdvisorCard[]
   </section>
 }
 
-function coverageNotice(coverage?: { checked: string[]; not_checked: { rule_id: string; reason: string }[] } | null) {
-  if (!coverage) return 'No findings were returned. Which checks ran is not known, so this is not an all-clear.'
-  const ran = coverage.checked.length ? `${coverage.checked.length} ran (${coverage.checked.join(', ')})` : 'none ran'
-  const skipped = coverage.not_checked.length ? `; ${coverage.not_checked.length} had no usable input (${coverage.not_checked.map((c) => `${c.rule_id}: ${c.reason}`).join('; ')})` : ''
-  return `No findings. Checks: ${ran}${skipped}. Not an all-clear for the checks that did not run.`
+type RunCoverage = { checked: string[]; not_checked: { rule_id: string; reason: string }[] }
+/** POST /api/findings/run: run metadata (`checked`, `not_checked`, `items_checked`, ...) and/or a `coverage` block. */
+export type FindingsRunResult = Awaited<ReturnType<typeof findingsApi.run>> & Omit<FindingsRunResponse, 'findings' | 'status'> & { not_checked?: RunCoverage['not_checked'] }
+
+/** Which rules the run checked and which it could not, from either response shape; null when the server did not say. */
+export function runCoverage(result: FindingsRunResult): RunCoverage | null {
+  const checked = Array.isArray(result.checked) ? result.checked : result.coverage?.checked
+  if (!Array.isArray(checked)) return null
+  const skipped = Array.isArray(result.not_checked) ? result.not_checked : result.coverage?.not_checked
+  return { checked, not_checked: Array.isArray(skipped) ? skipped : [] }
+}
+
+/** One honest status line after a run; never an all-clear when no rule was checked or coverage is unknown. */
+export function runNotice(result: FindingsRunResult): string {
+  if (result.status === 'waiting') return result.detail || 'Waiting for the drawing to finish processing'
+  if (result.status === 'not_enough_data') return result.detail || 'Not enough readable data'
+  if (result.status === 'no_checks') return findingsStatus({ ...result, detail: result.detail || 'Checks are not available for this drawing yet.' }, true)
+  const coverage = runCoverage(result)
+  if (!coverage) return result.findings.length ? 'Checks complete.' : 'No findings were returned. Which checks ran is not known, so this is not an all-clear.'
+  if (!coverage.checked.length && !result.findings.length) return 'No rule could be checked on this drawing, so no findings is not an all-clear.'
+  const skipped = coverage.not_checked.length ? ` ${coverage.not_checked.length} ${coverage.not_checked.length === 1 ? 'rule' : 'rules'} not checked (no usable input).` : ''
+  return findingsStatus({ ...result, checked: coverage.checked }, true) + skipped
+}
+
+function RunCoverageDetails({ coverage }: { coverage: RunCoverage }) {
+  if (!coverage.checked.length && !coverage.not_checked.length) return null
+  return <details className="finding-rule" data-testid="findings-coverage"><summary>Rules checked ({coverage.checked.length}) · not checked ({coverage.not_checked.length})</summary>
+    {!!coverage.checked.length && <ul aria-label="Rules checked">{coverage.checked.map((id) => <li key={id} title={id}>{ruleName(id)}</li>)}</ul>}
+    {!!coverage.not_checked.length && <ul aria-label="Rules not checked">{coverage.not_checked.map((rule) => <li key={rule.rule_id} title={rule.rule_id}>{ruleName(rule.rule_id)}: {rule.reason}</li>)}</ul>}
+  </details>
 }
 
 export function FindingsScreen({ docs }: { docs: Document[] }) {
@@ -40,6 +66,7 @@ export function FindingsScreen({ docs }: { docs: Document[] }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [coverage, setCoverage] = useState<RunCoverage | null>(null)
   const [viewer, setViewer] = useState<{ answer: Answer; citation: Citation } | null>(null)
   const [opening, setOpening] = useState(false)
   const [refresh, setRefresh] = useState(0)
@@ -48,7 +75,7 @@ export function FindingsScreen({ docs }: { docs: Document[] }) {
   const sheet = useViewerSheet()
   useEffect(() => {
     const controller = new AbortController()
-    setFindings([]); setCards([]); setViewer(null); setError(''); setNotice(''); setBusy(false); setOpening(false)
+    setFindings([]); setCards([]); setViewer(null); setError(''); setNotice(''); setCoverage(null); setBusy(false); setOpening(false)
     operation.current?.abort()
     retry.current = () => setRefresh((value) => value + 1)
     setLoading(false)
@@ -64,13 +91,14 @@ export function FindingsScreen({ docs }: { docs: Document[] }) {
   async function run() {
     retry.current = () => { void run() }
     const controller = new AbortController(); operation.current = controller
-    setBusy(true); setError(''); setNotice(''); setCards([])
+    setBusy(true); setError(''); setNotice(''); setCoverage(null); setCards([])
     try {
-      const result = await findingsApi.run(docId, controller.signal)
+      const result: FindingsRunResult = await findingsApi.run(docId, controller.signal)
       if (controller.signal.aborted) return
-      if (result.status === 'waiting' || result.status === 'not_enough_data') { setNotice(result.detail || (result.status === 'waiting' ? 'Waiting for the drawing to finish processing' : 'Not enough readable data')); return }
+      setNotice(runNotice(result))
+      if (result.status === 'waiting' || result.status === 'not_enough_data') return
       setFindings(result.findings)
-      setNotice(result.status === 'no_checks' ? 'Checks are not available for this drawing yet.' : result.findings.length ? 'Checks complete.' : coverageNotice(result.coverage))
+      setCoverage(runCoverage(result))
       retry.current = () => { void loadAdvice() }
       const advice = await findingsApi.advise(docId, controller.signal)
       if (!controller.signal.aborted) setCards(advice)
@@ -101,6 +129,7 @@ export function FindingsScreen({ docs }: { docs: Document[] }) {
         <Button variant="raised" disabled={!docId || busy || opening || loading} onClick={() => void run()}>{busy ? 'Running checks…' : 'Run checks'}</Button></div>
       {error && <p role="alert" className="tools-message">{error} <Button disabled={busy || opening || loading} onClick={() => retry.current()}>Retry</Button></p>}
       {(busy || opening || loading || notice) && <p role="status" className="tools-message">{busy ? 'Checking the drawing and its sources…' : opening ? 'Opening cited items…' : loading ? 'Loading findings…' : notice}</p>}
+      {!busy && coverage && <RunCoverageDetails coverage={coverage} />}
       {!docs.length && <p className="tools-muted">No drawings available. Add a drawing in Data to run checks.</p>}
       {!loading && !busy && !notice && !findings.length && docId && <p className="tools-muted">No saved findings. Run checks to inspect this drawing.</p>}
       {groupFindings(findings).filter((group) => group.findings.length).map((group) => <section key={group.severity} className="tools-card" aria-label={group.label}><h3>{group.label} <span className="tools-tag">{group.findings.length}</span></h3>

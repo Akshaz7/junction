@@ -1,4 +1,4 @@
-# CONTRACT — version 3.6
+# CONTRACT — version 3.7
 
 Only the LEAD edits this file. Each change bumps the version and adds one line to DECISIONS.md.
 
@@ -121,7 +121,7 @@ The iOS app shows the web app (mobile layout) in a WKWebView. The web app calls 
 
 ### 5.12 Advisor cards (v3.1)
 `POST /api/advise` {doc_id, chat_id?, edit?: {op, item_ids}} → `{cards: [Card]}`, at most 3. Also pushed over `/ws` as event `advisor.cards` {doc_id, chat_id, cards}.
-Card: `{card_id, kind: "warning"|"option"|"info", title (≤60 chars), body (≤200 chars, voice guide 5.8), item_ids: [item_id], source: {type: "rule"|"material_table"|"document", ref (rule id / table row / doc_id+page), title, quote (≤200 chars, verbatim)}}`.
+Card: `{card_id, kind: "warning"|"option"|"info", title (≤60 chars), body (≤200 chars, voice guide 5.8), item_ids: [item_id], source: {type: "rule"|"material_table"|"document", ref (rule id / table row / doc_id+page), title, quote (≤1200 chars, verbatim, full rule text; only ever cut at a sentence end), url?, finnish_url?, section?}}` (v3.7).
 Hard rule: no `source` → no card. Never invented. Clients show the source title and quote with the card, and highlight `item_ids` like a citation.
 
 ### 5.13 Additions in v3.2 (multi-kind answers, severity, locate)
@@ -150,3 +150,8 @@ Live sync: `/ws` also carries `chat.trace`, `chat.delta` (cumulative answer text
 - Shared edit layer: manual 3D edits carry `chat_id` and land in the chat's `scene_edits`; `scene_state` gains `last_hidden` (ids of the most recent hide, for "restore them"); `POST /api/advise` edit ops add `reset`. Pending move/material ops are stored in the chat edit layer (migration 008_scene_edit_moves).
 - Scene commands (5.11) gain two ops: `move` {offset_m:[dx,dz]} (metres from the original spot, world X/Z; [0,0] = back in place) and `material` {material: name|null}. `scene.state` gains optional `moved` {item_id:[dx,dz]} and `materials` {item_id:name}, sent only when non-empty; `reset` clears them.
 - Projects (migration 007): `GET/POST /api/projects`, `GET/PATCH/DELETE /api/projects/{id}`, `POST /api/projects/{id}/docs`, `POST /api/projects/{id}/upload`, `PATCH/DELETE /api/projects/{id}/docs/{doc_id}`, `GET /api/projects/{id}/overview`. Demo projects (AC20 Institute, FZK-Haus) are seeded from library docs and flagged `demo: true`.
+
+### 5.15 Additions in v3.7 (advisor sources, Run checks)
+- Advisor card `source.quote` is the full verbatim rule text (≤1200 chars, was ≤200); `source.section` optional (e.g. "33 §"). The server keeps `url`, `finnish_url` and `section` (before v3.7 `/api/advise` stripped them).
+- `POST /api/findings/run` takes optional `hidden_item_ids` (unsaved Edit-mode removals): checks the edited copy and returns findings without storing them. Responses add `checked`, `not_checked`, `items_checked`, `mode`, `checked_at`, `edited`; `status: "no_checks"` + `detail` when no rule could be checked. Engine `fail` is stored as `violation`.
+- Raster drawings: findings run the plan-map entrance check (fi-fire-exits-per-storey, 848/2017 §33): every detected entrance door removed → violation.

@@ -52,3 +52,24 @@ def test_ac20_1007_checks_run_or_say_why_not():
     for rid in ("fi-use-stair-width", "fi-use-stair-dwelling-riser-tread", "fi-use-stair-exit-riser-tread", "fi-use-barrier-height", "fi-use-door-landing"):
         assert why.get(rid) and "no automatic check" not in why[rid], rid
     assert "single IfcStair volume" in why["fi-use-stair-width"] and "riser or tread" in why["fi-use-stair-dwelling-riser-tread"]
+
+
+RASTER = "cubicasa5k__colorful-11397"
+
+
+def test_raster_entrance_check_sees_unsaved_removal():
+    """Run checks on a drawing: the plan-map entrance check runs, and removing the only entrance door is a fail."""
+    from engine import entrance
+    from engine.solvers.data import load_doc
+    doc = load_doc(RASTER, findings.ARTIFACTS)
+    if doc is None:
+        import pytest
+        pytest.skip("raster artifacts not present")
+    ents = [d.item_id for d in entrance.planmap_entrances(doc)]
+    assert ents and not [f for f in findings.run(RASTER) if f["check_id"] == "exits_per_storey"]
+    fs = findings.run(RASTER, hidden=ents)
+    f = next(f for f in fs if f["check_id"] == "exits_per_storey")
+    assert f["severity"] == "fail" and set(f["item_ids"]) == set(ents) and f["source"]["quote"]
+    rep = findings.report(RASTER, hidden=ents)
+    assert "fi-fire-exits-per-storey" in rep["checked"] and rep["hidden"] == len(ents) and rep["mode"] == "planmap"
+    assert rep["items_checked"] == len(doc.items) - len(ents)
