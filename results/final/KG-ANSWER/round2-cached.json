@@ -1,0 +1,293 @@
+[
+  {
+    "family": "FZK",
+    "build_s": 0.004,
+    "passed": 10,
+    "total": 10,
+    "questions": [
+      {
+        "question": "Do the plan and model agree on doors on Erdgeschoss?",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the checked cross-file values agree.**[1][2][3]\n\n- 2 of 2 source-value checks agree; 0 differ.\n- Agreement covers the checked values only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.\n- Some plans are derived from a model; matching their counts is not an independent drawing check.",
+        "citations": 3,
+        "graph_path_edges": 4,
+        "elapsed_s": 0.0167
+      },
+      {
+        "question": "Does the plan match the model on doors on the ground floor?",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the checked cross-file values agree.**[1][2][3]\n\n- 2 of 2 source-value checks agree; 0 differ.\n- Agreement covers the checked values only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.\n- Some plans are derived from a model; matching their counts is not an independent drawing check.",
+        "citations": 3,
+        "graph_path_edges": 4,
+        "elapsed_s": 0.01
+      },
+      {
+        "question": "Compare doors per floor across files.",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the checked cross-file values agree.**[1][2][3]\n\n- 4 of 4 source-value checks agree; 0 differ.\n- Agreement covers the checked values only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.\n- Some plans are derived from a model; matching their counts is not an independent drawing check.",
+        "citations": 3,
+        "graph_path_edges": 6,
+        "elapsed_s": 0.0106
+      },
+      {
+        "question": "Which files disagree?",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the checked cross-file values agree.**[1][2][3][4][5][6]\n\n- 25 of 25 source-value checks agree; 0 differ.\n- Agreement covers the checked values only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.\n- Some plans are derived from a model; matching their counts is not an independent drawing check.",
+        "citations": 6,
+        "graph_path_edges": 29,
+        "elapsed_s": 0.0129
+      },
+      {
+        "question": "Do the drawings agree on doors on EG?",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the checked cross-file values agree.**[1][2][3]\n\n- 3 of 3 source-value checks agree; 0 differ.\n- Agreement covers the checked values only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.\n- Some plans are derived from a model; matching their counts is not an independent drawing check.",
+        "citations": 3,
+        "graph_path_edges": 5,
+        "elapsed_s": 0.0099
+      },
+      {
+        "question": "Do the plan and model agree on doors on level 0?",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the checked cross-file values agree.**[1][2][3]\n\n- 2 of 2 source-value checks agree; 0 differ.\n- Agreement covers the checked values only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.\n- Some plans are derived from a model; matching their counts is not an independent drawing check.",
+        "citations": 3,
+        "graph_path_edges": 4,
+        "elapsed_s": 0.0101
+      },
+      {
+        "question": "Where else does door Innentuer-1 appear?",
+        "pass": true,
+        "error": null,
+        "shape": "appearances",
+        "value": 2,
+        "answer": "**Innentuer-1 has 2 linked appearances in other files.**[1][2][3]\n\n- Items are grouped by recorded identity links, not by their shared label.\n- A sheet reference shows a mention; it does not prove that the physical items are identical.\n- Missing links may hide further appearances.\n\n| Item group | Level | File and page | Sources |\n|---|---|---|---|\n| 1: Innentuer-1 | Erdgeschoss | FZK-Haus - arc, page 1 | [1] |\n| 1: Innentuer-1 | Erdgeschoss | FZK-Haus (Simple Phantasy Building), page 1 | [2][2] |\n| 1: Innentuer-1 | Erdgeschoss | FZK-Haus (Simple Phantasy Building) - Grundriss: Erdgeschoss, page 1 | [3][3] |",
+        "citations": 3,
+        "graph_path_edges": 2,
+        "elapsed_s": 0.0099
+      },
+      {
+        "question": "Which other files show door Innentuer-1?",
+        "pass": true,
+        "error": null,
+        "shape": "appearances",
+        "value": 2,
+        "answer": "**Innentuer-1 has 2 linked appearances in other files.**[1][2][3]\n\n- Items are grouped by recorded identity links, not by their shared label.\n- A sheet reference shows a mention; it does not prove that the physical items are identical.\n- Missing links may hide further appearances.\n\n| Item group | Level | File and page | Sources |\n|---|---|---|---|\n| 1: Innentuer-1 | Erdgeschoss | FZK-Haus - arc, page 1 | [1] |\n| 1: Innentuer-1 | Erdgeschoss | FZK-Haus (Simple Phantasy Building), page 1 | [2][2] |\n| 1: Innentuer-1 | Erdgeschoss | FZK-Haus (Simple Phantasy Building) - Grundriss: Erdgeschoss, page 1 | [3][3] |",
+        "citations": 3,
+        "graph_path_edges": 2,
+        "elapsed_s": 0.0089
+      },
+      {
+        "question": "If the ceiling in the hall drops to 2.4 m what is affected?",
+        "pass": true,
+        "error": null,
+        "shape": "impact",
+        "value": 15,
+        "answer": "**Setting the ceiling in Flur to 2.4 m has 15 distinct linked items to check.**[1][2][3][4]\n\n- Wand-Int-ERDG-5: -0.35 m² of wall finish area; uncertainty is not recorded, if its full face follows this ceiling (before openings).\n- Wand-Int-ERDG-2: -0.557 m² of wall finish area; uncertainty is not recorded, if its full face follows this ceiling (before openings).\n- Potential effects only. Missing links, openings, lining layers and waste need checking.",
+        "citations": 4,
+        "graph_path_edges": 43,
+        "elapsed_s": 0.0116
+      },
+      {
+        "question": "If the ceiling in room Flur drops to 2400 mm what is affected?",
+        "pass": true,
+        "error": null,
+        "shape": "impact",
+        "value": 15,
+        "answer": "**Setting the ceiling in Flur to 2.4 m has 15 distinct linked items to check.**[1][2][3][4]\n\n- Wand-Int-ERDG-5: -0.35 m² of wall finish area; uncertainty is not recorded, if its full face follows this ceiling (before openings).\n- Wand-Int-ERDG-2: -0.557 m² of wall finish area; uncertainty is not recorded, if its full face follows this ceiling (before openings).\n- Potential effects only. Missing links, openings, lining layers and waste need checking.",
+        "citations": 4,
+        "graph_path_edges": 43,
+        "elapsed_s": 0.0134
+      }
+    ]
+  },
+  {
+    "family": "AC20",
+    "build_s": 0.04,
+    "passed": 15,
+    "total": 15,
+    "questions": [
+      {
+        "question": "Do the plan and model agree on doors on Erdgeschoss?",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the checked cross-file values agree.**[1][2][3]\n\n- 2 of 2 source-value checks agree; 0 differ.\n- Agreement covers the checked values only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.\n- Some plans are derived from a model; matching their counts is not an independent drawing check.",
+        "citations": 3,
+        "graph_path_edges": 4,
+        "elapsed_s": 0.0585
+      },
+      {
+        "question": "Does the plan match the model on doors on the ground floor?",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the checked cross-file values agree.**[1][2][3]\n\n- 2 of 2 source-value checks agree; 0 differ.\n- Agreement covers the checked values only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.\n- Some plans are derived from a model; matching their counts is not an independent drawing check.",
+        "citations": 3,
+        "graph_path_edges": 4,
+        "elapsed_s": 0.0475
+      },
+      {
+        "question": "Compare doors per floor across files.",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the checked cross-file values agree.**[1][2][3][4][5][6][7][8][9][10][11][12]\n\n- 13 of 13 source-value checks agree; 0 differ.\n- Agreement covers the checked values only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.\n- Some plans are derived from a model; matching their counts is not an independent drawing check.",
+        "citations": 12,
+        "graph_path_edges": 21,
+        "elapsed_s": 0.0648
+      },
+      {
+        "question": "Which files disagree?",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the checked cross-file values agree.**[1][2][3][4][5][6][7][8][9][10][11][12][13][14][15]\n\n- 128 of 128 source-value checks agree; 0 differ.\n- Agreement covers the checked values only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.\n- Some plans are derived from a model; matching their counts is not an independent drawing check.",
+        "citations": 15,
+        "graph_path_edges": 138,
+        "elapsed_s": 0.135
+      },
+      {
+        "question": "Do the drawings agree on doors on EG?",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the checked cross-file values agree.**[1][2][3]\n\n- 3 of 3 source-value checks agree; 0 differ.\n- Agreement covers the checked values only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.\n- Some plans are derived from a model; matching their counts is not an independent drawing check.",
+        "citations": 3,
+        "graph_path_edges": 5,
+        "elapsed_s": 0.0551
+      },
+      {
+        "question": "Do the plan and model agree on doors on level 0?",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the checked cross-file values agree.**[1][2][3]\n\n- 2 of 2 source-value checks agree; 0 differ.\n- Agreement covers the checked values only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.\n- Some plans are derived from a model; matching their counts is not an independent drawing check.",
+        "citations": 3,
+        "graph_path_edges": 4,
+        "elapsed_s": 0.0506
+      },
+      {
+        "question": "Does the plan match the model?",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the checked cross-file values agree.**[1][2][3][4][5][6][7][8][9][10][11][12][13][14][15]\n\n- 26 of 26 source-value checks agree; 0 differ.\n- Agreement covers the checked values only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.\n- Some plans are derived from a model; matching their counts is not an independent drawing check.",
+        "citations": 15,
+        "graph_path_edges": 36,
+        "elapsed_s": 0.0799
+      },
+      {
+        "question": "Compare doors across files on 1. Obergeschoss.",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the checked cross-file values agree.**[1][2][3]\n\n- 3 of 3 source-value checks agree; 0 differ.\n- Agreement covers the checked values only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.\n- Some plans are derived from a model; matching their counts is not an independent drawing check.",
+        "citations": 3,
+        "graph_path_edges": 5,
+        "elapsed_s": 0.0502
+      },
+      {
+        "question": "Do the model and plan agree on doors on the first floor?",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the checked cross-file values agree.**[1][2][3]\n\n- 2 of 2 source-value checks agree; 0 differ.\n- Agreement covers the checked values only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.\n- Some plans are derived from a model; matching their counts is not an independent drawing check.",
+        "citations": 3,
+        "graph_path_edges": 4,
+        "elapsed_s": 0.0473
+      },
+      {
+        "question": "Where else does door Tür-019 appear?",
+        "pass": true,
+        "error": null,
+        "shape": "appearances",
+        "value": 4,
+        "answer": "**2 distinct items share this label; their appearances are grouped below.**[1][2][3][4][5][6]\n\n- Items are grouped by recorded identity links, not by their shared label.\n- A sheet reference shows a mention; it does not prove that the physical items are identical.\n- Missing links may hide further appearances.\n\n| Item group | Level | File and page | Sources |\n|---|---|---|---|\n| 1: Tür-019 | Erdgeschoss | AC20 Institute / Phantasy Office Building - arc, page 2 | [1] |\n| 1: Tür-019 | Erdgeschoss | Buerogebaeude (Phantasy Office Building, AC20-Institute-Var-2), page 2 | [2][2] |\n| 1: Tür-019 | Erdgeschoss | Buerogebaeude (Phantasy Office Building, AC20-Institute-Var-2) - Grundriss: Erdgeschoss, page 2 | [3][3] |\n| 2: Tür-019 | 1. Obergeschoss | AC20 Institute / Phantasy Office Building - arc, page 3 | [4] |\n| 2: Tür-019 | 1. Obergeschoss | Buerogebaeude (Phantasy Office Building, AC20-Institute-Var-2), page 3 | [5][5] |\n| 2: Tür-019 | 1. Obergeschoss | Buerogebaeude (Phantasy Office Building, AC20-Institute-Var-2) - Grundriss: 1. Obergeschoss, page 3 | [6][6] |",
+        "citations": 6,
+        "graph_path_edges": 4,
+        "elapsed_s": 0.0454
+      },
+      {
+        "question": "Which other files show door Tür-019?",
+        "pass": true,
+        "error": null,
+        "shape": "appearances",
+        "value": 4,
+        "answer": "**2 distinct items share this label; their appearances are grouped below.**[1][2][3][4][5][6]\n\n- Items are grouped by recorded identity links, not by their shared label.\n- A sheet reference shows a mention; it does not prove that the physical items are identical.\n- Missing links may hide further appearances.\n\n| Item group | Level | File and page | Sources |\n|---|---|---|---|\n| 1: Tür-019 | Erdgeschoss | AC20 Institute / Phantasy Office Building - arc, page 2 | [1] |\n| 1: Tür-019 | Erdgeschoss | Buerogebaeude (Phantasy Office Building, AC20-Institute-Var-2), page 2 | [2][2] |\n| 1: Tür-019 | Erdgeschoss | Buerogebaeude (Phantasy Office Building, AC20-Institute-Var-2) - Grundriss: Erdgeschoss, page 2 | [3][3] |\n| 2: Tür-019 | 1. Obergeschoss | AC20 Institute / Phantasy Office Building - arc, page 3 | [4] |\n| 2: Tür-019 | 1. Obergeschoss | Buerogebaeude (Phantasy Office Building, AC20-Institute-Var-2), page 3 | [5][5] |\n| 2: Tür-019 | 1. Obergeschoss | Buerogebaeude (Phantasy Office Building, AC20-Institute-Var-2) - Grundriss: 1. Obergeschoss, page 3 | [6][6] |",
+        "citations": 6,
+        "graph_path_edges": 4,
+        "elapsed_s": 0.0593
+      },
+      {
+        "question": "Where else does door Tür-019 appear on the ground floor?",
+        "pass": true,
+        "error": null,
+        "shape": "appearances",
+        "value": 2,
+        "answer": "**Tür-019 has 2 linked appearances in other files.**[1][2][3]\n\n- Items are grouped by recorded identity links, not by their shared label.\n- A sheet reference shows a mention; it does not prove that the physical items are identical.\n- Missing links may hide further appearances.\n\n| Item group | Level | File and page | Sources |\n|---|---|---|---|\n| 1: Tür-019 | Erdgeschoss | AC20 Institute / Phantasy Office Building - arc, page 2 | [1] |\n| 1: Tür-019 | Erdgeschoss | Buerogebaeude (Phantasy Office Building, AC20-Institute-Var-2), page 2 | [2][2] |\n| 1: Tür-019 | Erdgeschoss | Buerogebaeude (Phantasy Office Building, AC20-Institute-Var-2) - Grundriss: Erdgeschoss, page 2 | [3][3] |",
+        "citations": 3,
+        "graph_path_edges": 2,
+        "elapsed_s": 0.0387
+      },
+      {
+        "question": "If the ceiling in the entrance hall drops to 2.4 m what is affected?",
+        "pass": true,
+        "error": null,
+        "shape": "impact",
+        "value": 17,
+        "answer": "**Setting the ceiling in Flur EG Eingang to 2.4 m has 17 distinct linked items to check.**[1][2][3][4][5][6][7]\n\n- The graph lacks the dimensions needed to calculate a material quantity change.\n- Potential effects only. Missing links, openings, lining layers and waste need checking.",
+        "citations": 7,
+        "graph_path_edges": 53,
+        "elapsed_s": 0.0572
+      },
+      {
+        "question": "If the ceiling in room Flur EG Eingang drops to 2400 mm what is affected?",
+        "pass": true,
+        "error": null,
+        "shape": "impact",
+        "value": 17,
+        "answer": "**Setting the ceiling in Flur EG Eingang to 2.4 m has 17 distinct linked items to check.**[1][2][3][4][5][6][7]\n\n- The graph lacks the dimensions needed to calculate a material quantity change.\n- Potential effects only. Missing links, openings, lining layers and waste need checking.",
+        "citations": 7,
+        "graph_path_edges": 53,
+        "elapsed_s": 0.0619
+      },
+      {
+        "question": "If the ceiling in the entrance hall is lowered to 240 cm, what is affected?",
+        "pass": true,
+        "error": null,
+        "shape": "impact",
+        "value": 17,
+        "answer": "**Setting the ceiling in Flur EG Eingang to 2.4 m has 17 distinct linked items to check.**[1][2][3][4][5][6][7]\n\n- The graph lacks the dimensions needed to calculate a material quantity change.\n- Potential effects only. Missing links, openings, lining layers and waste need checking.",
+        "citations": 7,
+        "graph_path_edges": 53,
+        "elapsed_s": 0.0644
+      }
+    ]
+  }
+]

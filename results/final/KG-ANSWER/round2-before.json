@@ -1,0 +1,293 @@
+[
+  {
+    "family": "FZK",
+    "build_s": 0.484,
+    "passed": 4,
+    "total": 10,
+    "questions": [
+      {
+        "question": "Do the plan and model agree on doors on Erdgeschoss?",
+        "pass": false,
+        "error": "**No matching cross-file comparison is recorded in this project's graph.**",
+        "shape": "missing",
+        "value": null,
+        "answer": "**No matching cross-file comparison is recorded in this project's graph.**",
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.0082
+      },
+      {
+        "question": "Does the plan match the model on doors on the ground floor?",
+        "pass": false,
+        "error": "Question was not routed to graph answers",
+        "shape": null,
+        "value": null,
+        "answer": null,
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.0
+      },
+      {
+        "question": "Compare doors per floor across files.",
+        "pass": false,
+        "error": "Question was not routed to graph answers",
+        "shape": null,
+        "value": null,
+        "answer": null,
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.0
+      },
+      {
+        "question": "Which files disagree?",
+        "pass": false,
+        "error": "Question was not routed to graph answers",
+        "shape": null,
+        "value": null,
+        "answer": null,
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.0
+      },
+      {
+        "question": "Do the drawings agree on doors on EG?",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the recorded cross-file checks agree.**[1][2]\n\n- 1 of 1 recorded checks agree; 0 differ.\n- Agreement covers recorded checks only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.",
+        "citations": 2,
+        "graph_path_edges": 1,
+        "elapsed_s": 0.0087
+      },
+      {
+        "question": "Do the plan and model agree on doors on level 0?",
+        "pass": false,
+        "error": "**No matching cross-file comparison is recorded in this project's graph.**",
+        "shape": "missing",
+        "value": null,
+        "answer": "**No matching cross-file comparison is recorded in this project's graph.**",
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.0088
+      },
+      {
+        "question": "Where else does door Innentuer-1 appear?",
+        "pass": true,
+        "error": null,
+        "shape": "appearances",
+        "value": 2,
+        "answer": "**Innentuer-1 has 2 linked appearances in other files.**[1][2][3]\n\n- 2 doors.\n- Innentuer-1; Innentuer-1.\n- Confidence follows the weakest link along each path; missing links may hide other items.",
+        "citations": 3,
+        "graph_path_edges": 2,
+        "elapsed_s": 0.01
+      },
+      {
+        "question": "Which other files show door Innentuer-1?",
+        "pass": true,
+        "error": null,
+        "shape": "appearances",
+        "value": 2,
+        "answer": "**Innentuer-1 has 2 linked appearances in other files.**[1][2][3]\n\n- 2 doors.\n- Innentuer-1; Innentuer-1.\n- Confidence follows the weakest link along each path; missing links may hide other items.",
+        "citations": 3,
+        "graph_path_edges": 2,
+        "elapsed_s": 0.0098
+      },
+      {
+        "question": "If the ceiling in the hall drops to 2.4 m what is affected?",
+        "pass": false,
+        "error": "**Several unlinked items have that label. Specify the level or document before checking its connections.**",
+        "shape": "missing",
+        "value": null,
+        "answer": "**Several unlinked items have that label. Specify the level or document before checking its connections.**",
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.0097
+      },
+      {
+        "question": "If the ceiling in room Flur drops to 2400 mm what is affected?",
+        "pass": true,
+        "error": null,
+        "shape": "impact",
+        "value": 15,
+        "answer": "**Setting the ceiling in Flur to 2.4 m has 15 distinct linked items to check.**[1][2][3][4]\n\n- Wand-Int-ERDG-5: -0.35 m² of wall finish area; uncertainty is not recorded, if its full face follows this ceiling (before openings).\n- Wand-Int-ERDG-2: -0.557 m² of wall finish area; uncertainty is not recorded, if its full face follows this ceiling (before openings).\n- Potential effects only. Missing links, openings, lining layers and waste need checking.",
+        "citations": 4,
+        "graph_path_edges": 43,
+        "elapsed_s": 0.0112
+      }
+    ]
+  },
+  {
+    "family": "AC20",
+    "build_s": 13.596,
+    "passed": 3,
+    "total": 15,
+    "questions": [
+      {
+        "question": "Do the plan and model agree on doors on Erdgeschoss?",
+        "pass": false,
+        "error": "**No matching cross-file comparison is recorded in this project's graph.**",
+        "shape": "missing",
+        "value": null,
+        "answer": "**No matching cross-file comparison is recorded in this project's graph.**",
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.0407
+      },
+      {
+        "question": "Does the plan match the model on doors on the ground floor?",
+        "pass": false,
+        "error": "Question was not routed to graph answers",
+        "shape": null,
+        "value": null,
+        "answer": null,
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.0
+      },
+      {
+        "question": "Compare doors per floor across files.",
+        "pass": false,
+        "error": "Question was not routed to graph answers",
+        "shape": null,
+        "value": null,
+        "answer": null,
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.0
+      },
+      {
+        "question": "Which files disagree?",
+        "pass": false,
+        "error": "Question was not routed to graph answers",
+        "shape": null,
+        "value": null,
+        "answer": null,
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.0
+      },
+      {
+        "question": "Do the drawings agree on doors on EG?",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "answer": "**100% of the recorded cross-file checks agree.**[1][2]\n\n- 1 of 1 recorded checks agree; 0 differ.\n- Agreement covers recorded checks only; equal counts do not prove every item matches.\n- Unlinked items have not been verified against another file.",
+        "citations": 2,
+        "graph_path_edges": 1,
+        "elapsed_s": 0.0457
+      },
+      {
+        "question": "Do the plan and model agree on doors on level 0?",
+        "pass": false,
+        "error": "**No matching cross-file comparison is recorded in this project's graph.**",
+        "shape": "missing",
+        "value": null,
+        "answer": "**No matching cross-file comparison is recorded in this project's graph.**",
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.042
+      },
+      {
+        "question": "Does the plan match the model?",
+        "pass": false,
+        "error": "Question was not routed to graph answers",
+        "shape": null,
+        "value": null,
+        "answer": null,
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.0
+      },
+      {
+        "question": "Compare doors across files on 1. Obergeschoss.",
+        "pass": false,
+        "error": "Question was not routed to graph answers",
+        "shape": null,
+        "value": null,
+        "answer": null,
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.0
+      },
+      {
+        "question": "Do the model and plan agree on doors on the first floor?",
+        "pass": false,
+        "error": "**No matching cross-file comparison is recorded in this project's graph.**",
+        "shape": "missing",
+        "value": null,
+        "answer": "**No matching cross-file comparison is recorded in this project's graph.**",
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.0175
+      },
+      {
+        "question": "Where else does door Tür-019 appear?",
+        "pass": false,
+        "error": "**Several unlinked items have that label. Specify the level or document before checking its connections.**",
+        "shape": "missing",
+        "value": null,
+        "answer": "**Several unlinked items have that label. Specify the level or document before checking its connections.**",
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.05
+      },
+      {
+        "question": "Which other files show door Tür-019?",
+        "pass": false,
+        "error": "**Several unlinked items have that label. Specify the level or document before checking its connections.**",
+        "shape": "missing",
+        "value": null,
+        "answer": "**Several unlinked items have that label. Specify the level or document before checking its connections.**",
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.0598
+      },
+      {
+        "question": "Where else does door Tür-019 appear on the ground floor?",
+        "pass": true,
+        "error": null,
+        "shape": "appearances",
+        "value": 2,
+        "answer": "**Tür-019 has 2 linked appearances in other files.**[1][2][3]\n\n- 2 doors.\n- Tür-019; Tür-019.\n- Confidence follows the weakest link along each path; missing links may hide other items.",
+        "citations": 3,
+        "graph_path_edges": 2,
+        "elapsed_s": 0.0702
+      },
+      {
+        "question": "If the ceiling in the entrance hall drops to 2.4 m what is affected?",
+        "pass": false,
+        "error": "**I cannot identify that item in this project's graph. Use its room number or drawing tag.**",
+        "shape": "missing",
+        "value": null,
+        "answer": "**I cannot identify that item in this project's graph. Use its room number or drawing tag.**",
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.0279
+      },
+      {
+        "question": "If the ceiling in room Flur EG Eingang drops to 2400 mm what is affected?",
+        "pass": true,
+        "error": null,
+        "shape": "impact",
+        "value": 17,
+        "answer": "**Setting the ceiling in Flur EG Eingang to 2.4 m has 17 distinct linked items to check.**[1][2][3][4][5][6][7]\n\n- The graph lacks the dimensions needed to calculate a material quantity change.\n- Potential effects only. Missing links, openings, lining layers and waste need checking.",
+        "citations": 7,
+        "graph_path_edges": 53,
+        "elapsed_s": 0.0831
+      },
+      {
+        "question": "If the ceiling in the entrance hall is lowered to 240 cm, what is affected?",
+        "pass": false,
+        "error": "**I cannot identify that item in this project's graph. Use its room number or drawing tag.**",
+        "shape": "missing",
+        "value": null,
+        "answer": "**I cannot identify that item in this project's graph. Use its room number or drawing tag.**",
+        "citations": 0,
+        "graph_path_edges": 0,
+        "elapsed_s": 0.0445
+      }
+    ]
+  }
+]

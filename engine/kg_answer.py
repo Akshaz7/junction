@@ -14,7 +14,7 @@ from pathlib import Path
 
 from engine.kg_impact import confidence, impact, index, number, paths
 
-AGREEMENT = re.compile(r"\b(?:agree|agreement|cross[- ]?check|mismatch|discrepanc\w*|consistent|matches?)\b", re.I)
+AGREEMENT = re.compile(r"\b(?:dis)?agree(?:s|ment)?\b|\b(?:cross[- ]?check|mismatch\w*|discrepanc\w*|consistent|match(?:es)?)\b|\bcompare\b.*\b(?:across|between)\b.*\b(?:files|drawings|documents|plan|model)\b", re.I)
 APPEARANCE = re.compile(r"\bwhere else\b|\b(?:other|which) (?:files|sheets|drawings|documents)\b.*\b(?:show|appear|contain|refer)\w*", re.I)
 CONNECTION = re.compile(r"\b(?:what|which|how)\b.*\b(?:connected|connections?|linked)\b", re.I)
 IMPACT = re.compile(r"\bif\b.*\b(?:ceiling|wall|door|window|duct|pipe)\b.*\b(?:drop\w*|lower\w*|rais\w*|mov\w*|remov\w*|delet\w*)\b", re.I)
@@ -52,32 +52,86 @@ def _label(node):
     return label
 
 
-def _resolve(q, graph, kind=None):
+ROOM_WORDS = (
+    ("entrance", "entry", "eingang", "eingangsbereich", "sisaankaynti", "entre"),
+    ("hall", "hallway", "corridor", "flur", "gang", "kaytava", "korridor"),
+    ("lobby", "foyer", "aula", "vestibule", "windfang", "eteinen"),
+    ("office", "buero", "buro", "toimisto", "kontor"),
+    ("kitchen", "kuche", "kueche", "keittio", "kok"),
+    ("bedroom", "schlafzimmer", "makuuhuone", "sovrum"),
+    ("bathroom", "bad", "badezimmer", "kylpyhuone", "badrum"),
+    ("toilet", "wc", "toilette", "toalett"),
+    ("meeting room", "conference room", "besprechungsraum", "kokoushuone", "motesrum"),
+)
+
+
+def _candidates(q, graph, kind=None):
     nodes, _, _ = index(graph)
     scoped_docs = {did for n in nodes.values() if n.get("kind") == "doc" and _has(q, n.get("label"))
                    for did in n.get("doc_ids", [])}
     candidates = []
+    # Proposed dimensions are not item numbers (room 4 must not match 2.4 m).
+    target = re.sub(r"-?\d+(?:\.\d+)?\s*(?:mm|cm|m|metres?|meters?|ft|feet|foot|inches|inch)\b", "", q, flags=re.I)
+    concepts = [words for words in ROOM_WORDS if any(_has(target, w) for w in words)]
     for n in nodes.values():
         if n.get("kind") not in KIND_WORDS or (kind and n.get("kind") != kind) or not _on_level(n, _level(q)):
             continue
         if scoped_docs and not scoped_docs.intersection(n.get("doc_ids") or []):
             continue
         p = n.get("props") or {}
-        names = [n.get("label"), p.get("tag"), p.get("name"), p.get("number"), p.get("mark"), p.get("room_number")]
+        names = [n.get("label"), p.get("tag"), p.get("name"), p.get("long_name"), p.get("number"), p.get("mark"), p.get("room_number")]
         scores = [len(v) for v in {fold(v) for v in names if v is not None}
-                  if v not in KIND_WORDS and _has(q, v)]
+                  if v not in KIND_WORDS and _has(target, v)]
+        if not scores and n.get("kind") == "room" and concepts:
+            label = " ".join(str(v) for v in names if v is not None)
+            if all(any(_has(label, w) for w in words) for words in concepts):
+                scores = [len(concepts)]
         if scores:
-            candidates.append((sum(scores), n))
+            # Redundant label/tag fields must not hide another item carrying
+            # the same exact label with fewer metadata fields.
+            candidates.append((max(scores), n))
     if not candidates:
-        return None, "I cannot identify that item in this project's graph. Use its room number or drawing tag."
+        return []
     best = max(s for s, _ in candidates)
     matches = [n for s, n in candidates if s == best]
-    if len(matches) == 1:
-        return matches[0], None
-    equivalent = paths(graph, matches[0]["id"], lambda a, e, b, d: e.get("kind") == "same_as", max_depth=None)
-    if all(n["id"] in equivalent for n in matches[1:]):
-        # Prefer a canonical member, then one with measured dimensions.
-        return min(matches, key=lambda n: (bool(n.get("canonical")), -len(n.get("props") or {}), n["id"])), None
+    return matches
+
+
+def _clusters(graph, matches):
+    parent = {n["id"]: n["id"] for n in graph.get("nodes", [])}
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+    for e in graph.get("edges", []):
+        if e.get("kind") == "same_as" and e.get("from") in parent and e.get("to") in parent:
+            parent[find(e["from"])] = find(e["to"])
+    # Optional IFC adapters can attach quantities as another page record of
+    # the same source element. Its identity is document + IFC item ID, not
+    # page. Local plan-map IDs, in contrast, can repeat on unrelated pages.
+    source_ids = {}
+    for n in graph.get("nodes", []):
+        p, s = n.get("props") or {}, n.get("source") or {}
+        if not s.get("doc_id") or not s.get("item_id") or not (p.get("guid") or p.get("source_method") == "ifc" or str(p.get("ifc_class") or "").startswith("Ifc")):
+            continue
+        key = (n.get("kind"), s["doc_id"], s["item_id"])
+        if key in source_ids:
+            parent[find(n["id"])] = find(source_ids[key])
+        source_ids[key] = n["id"]
+    groups = defaultdict(list)
+    for n in matches:
+        groups[find(n["id"])].append(n)
+    return [sorted(group, key=lambda n: (bool(n.get("canonical")), -len(n.get("props") or {}), n["id"]))
+            for group in groups.values()]
+
+
+def _resolve(q, graph, kind=None):
+    groups = _clusters(graph, _candidates(q, graph, kind))
+    if not groups:
+        return None, "I cannot identify that item in this project's graph. Use its room number or drawing tag."
+    if len(groups) == 1:
+        return groups[0][0], None
     return None, "Several unlinked items have that label. Specify the level or document before checking its connections."
 
 
@@ -248,6 +302,7 @@ def _comparison_sources(graph, endpoints, kind, evidence=None):
 
 
 def _agree(q, project, graph, t0):
+    from engine.kg_comparison import count_comparisons, pair_allowed
     nodes, _, _ = index(graph)
     doc_nodes = [n for n in nodes.values() if n.get("kind") == "doc"]
     roles = {did: (n.get("props") or {}).get("role") for n in doc_nodes for did in n.get("doc_ids", [])}
@@ -261,14 +316,8 @@ def _agree(q, project, graph, t0):
             continue
         a, b = nodes[e["from"]], nodes[e["to"]]
         dids = set(a.get("doc_ids") or []) | set(b.get("doc_ids") or [])
-        if len(dids) < 2:
+        if not pair_allowed(a, b, roles, named_docs, plan_model):
             continue
-        if named_docs and not named_docs.issubset(dids):
-            continue
-        if plan_model and roles:
-            pair_roles = {roles.get(d) for d in dids}
-            if "model" not in pair_roles or not pair_roles.intersection({"plan", "scan"}):
-                continue
         if kind and _comparison_kind(e, a, b) != kind:
             continue
         if want is not None and not (_on_level(a, want) or _on_level(b, want)):
@@ -279,6 +328,19 @@ def _agree(q, project, graph, t0):
             if "area" not in metric:
                 continue
         matches.append(e)
+    computed = []
+    if not re.search(r"\bareas?\b", q, re.I):
+        def comparison_key(e):
+            ev = e.get("evidence") or {}
+            return (tuple(sorted((e["from"], e["to"]))), ev.get("property") or ev.get("metric") or ev.get("prop"))
+        recorded = {comparison_key(e) for e in matches}
+        computed = [e for e in count_comparisons(graph, kind=kind, wanted=want, named_docs=named_docs, plan_model=plan_model)
+                    if comparison_key(e) not in recorded]
+        if computed:
+            matches.extend(computed)
+            # A local view adds transparent rule steps; source nodes/edges and
+            # the persistent project graph are never modified by a chat query.
+            graph = {**graph, "edges": [*graph.get("edges", []), *computed]}
     if not matches:
         return _missing(q, project, graph, t0, "No matching cross-file comparison is recorded in this project's graph.")
     agree = sum(e["kind"] == "agrees" for e in matches)
@@ -295,12 +357,17 @@ def _agree(q, project, graph, t0):
     for m in mismatches:
         m["citations"] = sorted({c for nid in m["node_ids"] for c in marks[nid]})
         m["doc_ids"] = sorted({c["doc_id"] for c in cites if c["n"] in m["citations"]})
-    bullets = [f"{agree} of {len(matches)} recorded checks agree; {len(mismatches)} differ."]
-    bullets.append("Agreement covers recorded checks only; equal counts do not prove every item matches.")
+    bullets = [f"{agree} of {len(matches)} source-value checks agree; {len(mismatches)} differ."]
+    bullets.append("Agreement covers the checked values only; equal counts do not prove every item matches.")
     bullets.append("Unlinked items have not been verified against another file.")
-    result = _result(q, project, graph, t0, f"{pct:g}% of the recorded cross-file checks agree.", bullets, sources,
-                     [[e["id"]] for e in matches], {"shape": "agreement", "checks": len(matches), "agree": agree,
-                     "mismatches": mismatches}, pct, "%")
+    if any((e.get("evidence") or {}).get("derived") for e in computed):
+        bullets.append("Some plans are derived from a model; matching their counts is not an independent drawing check.")
+    chains = [[e["id"], *(e.get("evidence") or {}).get("identity_edges", [])] for e in matches]
+    comparisons = [{"edge_id": e["id"], "kind": e["kind"], "from_id": e["from"], "to_id": e["to"],
+                    "evidence": e.get("evidence") or {}, "confidence": confidence(e)} for e in matches]
+    result = _result(q, project, graph, t0, f"{pct:g}% of the checked cross-file values agree.", bullets, sources,
+                     chains, {"shape": "agreement", "checks": len(matches), "agree": agree,
+                     "mismatches": mismatches, "comparisons": comparisons, "computed_checks": len(computed)}, pct, "%")
     if mismatches:
         rows = ["| Mismatch | Recorded values | Sources |", "|---|---|---|"]
         for m in mismatches:
@@ -317,22 +384,64 @@ def _agree(q, project, graph, t0):
     return result
 
 
-def _related(q, project, graph, t0, appearances):
-    named_kinds = [(m.start(), k) for k, rx in KIND_WORDS.items() if (m := re.search(rf"\b(?:{rx})\b", q, re.I))]
-    origin, why = _resolve(q, graph, min(named_kinds)[1] if named_kinds else None)
-    if origin is None:
-        return _missing(q, project, graph, t0, why)
-    kinds = {"same_as"} if appearances else {"connects", "in_room", "hosted_by", "bounds", "serves", "part_of_system",
-                                           "same_as", "references", "flags", "changed", "has_type", "made_of"}
-    if appearances:
+def _appearances(q, project, graph, t0, kind):
+    groups = _clusters(graph, _candidates(q, graph, kind))
+    if not groups:
+        return _missing(q, project, graph, t0, "I cannot identify that item in this project's graph. Use its room number or drawing tag.")
+    data_groups, sources, entries = [], [], []
+    for group in groups:
+        origin = group[0]
         def appears(a, e, b, depth):
             return (e.get("kind") == "same_as" or
                     (e.get("kind") == "references" and e.get("to") == a["id"] and b.get("kind") == "sheet_ref"))
         hits = paths(graph, origin["id"], appears, max_depth=None)
         origin_docs = set(origin.get("doc_ids") or [])
-        hits = {nid: h for nid, h in hits.items() if set(h["node"].get("doc_ids") or []) - origin_docs}
-    else:
-        hits = paths(graph, origin["id"], lambda a, e, b, d: e.get("kind") in kinds, max_depth=1)
+        items = sorted((h for h in hits.values() if set(h["node"].get("doc_ids") or []) - origin_docs),
+                       key=lambda h: h["node"]["id"])
+        sources.extend([*group, *(h["node"] for h in items)])
+        entries.extend(items)
+        data_groups.append({"origin": origin["id"], "label": _label(origin), "level": origin.get("level"),
+                            "items": items, "matched_nodes": [n["id"] for n in group]})
+    if not entries and len(groups) == 1:
+        return _missing(q, project, graph, t0, f"No linked appearance of {_label(groups[0][0])} in another document is recorded.", sources)
+    headline = (f"{_label(groups[0][0])} has {len(entries)} linked appearance{'s' if len(entries) != 1 else ''} in other files."
+                if len(groups) == 1 else f"{len(groups)} distinct items share this label; their appearances are grouped below.")
+    bullets = ["Items are grouped by recorded identity links, not by their shared label.",
+               "A sheet reference shows a mention; it does not prove that the physical items are identical.",
+               "Missing links may hide further appearances."]
+    result = _result(q, project, graph, t0, headline, bullets, sources, [h["why_path"] for h in entries],
+                     {"shape": "appearances", "origin": groups[0][0]["id"] if len(groups) == 1 else None,
+                      "groups": data_groups, "items": entries}, len(entries), "count", supported=bool(entries))
+    # Every ambiguous candidate remains inspectable with a file, page and cite.
+    titles = {d: _label(n) for n in graph.get("nodes", []) if n.get("kind") == "doc" for d in n.get("doc_ids", [])}
+    _, _, _, marks = _evidence(sources)
+    rows = ["| Item group | Level | File and page | Sources |", "|---|---|---|---|"]
+    for i, group in enumerate(data_groups, 1):
+        members = {n["id"]: n for n in sources if n["id"] in group["matched_nodes"]}
+        members.update({h["node"]["id"]: h["node"] for h in group["items"]})
+        for n in members.values():
+            s = _source(n)
+            if not s:
+                continue
+            cells = [f"{i}: {_label(n)}", n.get("level") or "Not stated",
+                     f"{titles.get(s['doc_id'], 'Source document')}, page {s.get('page') or 1}"]
+            rows.append("| " + " | ".join(str(c).replace("|", " ").replace("\n", " ") for c in cells)
+                        + " | " + "".join(f"[{c}]" for c in marks[n["id"]]) + " |")
+    result["answer"]["text_md"] += "\n\n" + "\n".join(rows)
+    return result
+
+
+def _related(q, project, graph, t0, appearances):
+    named_kinds = [(m.start(), k) for k, rx in KIND_WORDS.items() if (m := re.search(rf"\b(?:{rx})\b", q, re.I))]
+    kind = min(named_kinds)[1] if named_kinds else None
+    if appearances:
+        return _appearances(q, project, graph, t0, kind)
+    origin, why = _resolve(q, graph, kind)
+    if origin is None:
+        return _missing(q, project, graph, t0, why)
+    kinds = {"connects", "in_room", "hosted_by", "bounds", "serves", "part_of_system",
+                                           "same_as", "references", "flags", "changed", "has_type", "made_of"}
+    hits = paths(graph, origin["id"], lambda a, e, b, d: e.get("kind") in kinds, max_depth=1)
     if not hits:
         why = (f"No linked appearance of {_label(origin)} in another document is recorded." if appearances
                else f"No connection for {_label(origin)} is recorded in this project's graph.")
