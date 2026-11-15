@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 import { ac20, api, ask, selectFromData } from './demo-helpers'
 import type { Document } from '../src/lib/types'
 import { propertyValue, type LinkedItem } from '../src/lib/linked'
+import { sourceProps } from '../src/lib/item-measures'
 
 // All documents, answers, page images and item details come from the real API.
 for (const phone of [false, true]) {
@@ -55,7 +56,7 @@ for (const phone of [false, true]) {
     await expect(details.locator('[data-field="tag"]')).toHaveText(item.tag || 'Not supplied')
     expect(await details.locator('[data-property]').evaluateAll((nodes) => nodes.map((node) => [
       node.querySelector('dt')?.textContent, node.querySelector('dd')?.textContent,
-    ]))).toEqual(Object.entries(item.props).map(([key, value]) => [key, propertyValue(value)]))
+    ]))).toEqual(Object.entries(sourceProps(item.props)).map(([key, value]) => [key, propertyValue(value)]))
     if (phone) {
       await expect(details).toHaveAttribute('aria-modal', 'true')
       const bounds = await details.boundingBox()

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { itemAskHref, measuredRows, measureProvenance, sourceProps } from './item-measures'
+import { itemAskHref, measuredRows, measureProvenance, sourceProps, withoutWallDetailRows } from './item-measures'
 
 const measure = { from: 'pdf_vector', m_per_pt: 0.0352778, scale_source: 'printed 1:100',
   scale_check: { printed_areas_rel_err: 0.0236, fit_n: 17, fit_vs_printed_rel: 0.0169, agree_2pct: true }, geometry: 'polygon' }
@@ -61,4 +61,9 @@ it('builds an ask link for any item kind', () => {
   const params = new URLSearchParams(itemAskHref('plan / a', 'door', 'D 3').split('?')[1])
   expect(params.get('doc')).toBe('plan / a')
   expect(params.get('question')).toBe('Tell me about door D 3: its size and where it is.')
+})
+
+it('withoutWallDetailRows drops only length and thickness rows', () => {
+  const rows = measuredRows('wall', { length_m: 10.5, thickness_m: 0.2, height_m: 2.7 }, { length_m: 10.5, thickness_measured_m: 0.21, area_m2: 3 })
+  expect(withoutWallDetailRows(rows).map((row) => row.key)).toEqual(['height_m', 'area_m2'])
 })

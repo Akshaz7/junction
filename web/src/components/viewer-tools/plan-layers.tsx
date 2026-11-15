@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type CSSProperties, type JSX } from 'react'
+import { memo, useCallback, useMemo, useState, type CSSProperties, type JSX } from 'react'
 import { Button } from '../ui'
 import { kindStyle } from '../../lib/kind-colors'
 import './plan-layers.css'
@@ -86,7 +86,7 @@ function Shape({ item, selected }: { item: LayerItem; selected: boolean }) {
 }
 
 /** Rendered INSIDE the page-pixel <svg viewBox="0 0 W H"> of the viewer, below answer highlights. pointer-events none. */
-export function PlanLayerShapes({ items, shown, selectedId }: { items: LayerItem[]; shown: Set<LayerKey>; selectedId?: string | null }): JSX.Element | null {
+function PlanLayerShapesImpl({ items, shown, selectedId }: { items: LayerItem[]; shown: Set<LayerKey>; selectedId?: string | null }): JSX.Element | null {
   const groups = useMemo(() => groupItems(items), [items])
   // Rooms first so smaller items draw on top of their fills.
   const order: LayerKey[] = ['room', 'wall', 'fixture', 'window', 'door', 'text']
@@ -102,3 +102,6 @@ export function PlanLayerShapes({ items, shown, selectedId }: { items: LayerItem
     </g>
   )
 }
+
+/** Memoised so pointer moves over the plan (hover / tooltip state) do not re-render every shape. */
+export const PlanLayerShapes = memo(PlanLayerShapesImpl)
