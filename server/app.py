@@ -36,11 +36,31 @@ async def _restore_uploads():
         print("upload restore failed:", repr(e)[:200])
 
 
+def _startup_leader():
+    """With several uvicorn workers only one runs the once-per-boot jobs (migrations, seeding, restoring uploads
+    from PostgreSQL). Non-blocking flock on a shared file; the fd stays open for the life of the process."""
+    if int(os.environ.get("WEB_CONCURRENCY", "1") or 1) <= 1:
+        return True
+    try:
+        import fcntl
+        path = os.path.join(os.environ.get("RESULTS_DIR", "/tmp"), "hologram-startup.lock")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        fd = open(path, "w")
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        app.state.leader_lock = fd
+        return True
+    except ImportError:
+        return True
+    except OSError:
+        return False
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.started_at = time.monotonic()
+    leader = _startup_leader()
     pool = await db.get_pool()  # apply migrations on startup when a DB is reachable
-    if pool is not None:
+    if pool is not None and leader:
         try:
             async with pool.acquire() as conn:
                 await apply_migrations(conn)
@@ -53,7 +73,7 @@ async def lifespan(app: FastAPI):
                 await seed_demo_projects(pool)
         except Exception as e:  # never block startup
             print("migrations failed:", e)
-    restore = asyncio.create_task(_restore_uploads())
+    restore = asyncio.create_task(_restore_uploads()) if leader else None
     try:  # project-wide search index (built at image build time); absent -> chat fallback
         from engine.project_index import load_index
         await asyncio.to_thread(load_index)
@@ -122,7 +142,7 @@ async def health():
             pass
     return {"ok": True, "db": database_ok,
             "build_rev": os.environ.get("BUILD_REV", ""),
-            "image": image_info(), **file_counts(), "servable_docs": servable_docs,
+            "image": image_info(), **await asyncio.to_thread(file_counts), "servable_docs": servable_docs,
             "uptime_s": max(0.0, time.monotonic() - app.state.started_at),
             "models_ok": models_ok, "caps_loaded": bool(caps())}
 

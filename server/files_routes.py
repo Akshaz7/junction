@@ -36,7 +36,7 @@ SAFE_ID = re.compile(r"^[A-Za-z0-9_.\-]+$")
 FILE_NAMES = {"scene.glb", "scene.usdz", "scene.json", "elements.json", "text.json", "ingest.json"}
 THUMB = re.compile(r"^(page-\d+\.thumb\.png|page-\d+\.png|planmap-\d+\.json|text-\d+\.json)$")
 MAX_UPLOAD = 100 * 1024 * 1024
-INGEST_TIMEOUT = 5 * 60
+INGEST_TIMEOUT = float(os.environ.get("INGEST_TIMEOUT_S", "300"))  # whole-job watchdog incl. queue wait (Dockerfile: 900 on the 10 GB plan)
 
 
 def _doc_dir(doc_id: str):
@@ -192,20 +192,36 @@ async def upload(file: UploadFile = File(...)):
         await publish({"type": "doc.new", "doc_id": doc_id})
     except Exception as e:  # noqa: BLE001
         print("doc.new publish failed:", repr(e)[:200])
-    try:  # keep the original now: the container disk is ephemeral
-        await artifact_store.save_doc(pool, doc_id)
-    except Exception as e:  # noqa: BLE001
-        print("artifact save failed:", repr(e)[:200])
     if ingestion_available():
         (d / "ingest.json").write_text(json.dumps({"status": "running", "stages": [], "detail": "queued",
                                                   "step": "queued", "progress": 0, "started_at": time.time()}))
-        asyncio.create_task(_ingest(doc_id))
+        _spawn(_save_original(pool, doc_id))  # off the request path: an 11 MB original to a remote DB took seconds
+        _spawn(_ingest(doc_id))
         return {"doc_id": doc_id, "status": "ingesting",
                 "detail": "poll GET /api/docs/{doc_id}/ingest until status is not running; doc.new fires again when it ends"}
+    _spawn(_save_original(pool, doc_id))
     return {"doc_id": doc_id, "status": "stored", "detail": "ingestion is not available on this server"}
 
 
-_INGEST_LOCK = asyncio.Lock()  # heavy: one ingestion at a time
+_BG: set = set()
+
+
+def _spawn(coro):
+    """Background task with a strong reference (the loop only keeps weak ones)."""
+    t = asyncio.create_task(coro)
+    _BG.add(t)
+    t.add_done_callback(_BG.discard)
+    return t
+
+
+async def _save_original(pool, doc_id: str):
+    try:  # keep the original: the container disk is ephemeral
+        await artifact_store.save_doc(pool, doc_id)
+    except Exception as e:  # noqa: BLE001
+        print("artifact save failed:", repr(e)[:200])
+
+
+_INGEST_LOCK = asyncio.Semaphore(max(1, int(os.environ.get("INGEST_CONCURRENCY", "1"))))  # heavy jobs per worker (scripts/heavy.sh caps the box)
 
 
 def ingestion_available() -> bool:
