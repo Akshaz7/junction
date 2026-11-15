@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Download, FileSymlink, FileText, Highlighter
 import { SheetOverlay } from './sheet-overlay'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document } from '../lib/types'
-import { fitPage, focusBoxWithin, zoomAt, type PageTransform, type Point, type Size } from '../lib/page-transform'
+import { fitPage, focusBox, focusBoxWithin, zoomAt, type PageTransform, type Point, type Size } from '../lib/page-transform'
 import { viewerEvidence } from '../lib/viewer-evidence'
 import { Button } from './ui'
 import { setHover, setSelected, useLinkedItem } from '../viewer3d'
@@ -22,7 +22,11 @@ import { AnnotationLayer, useAnnotations, type Annotation, type MarkupTool } fro
 import { findSheetText, loadSheetText, type SheetText } from './viewer-tools/sheet-text'
 import { RoomLabels } from './viewer-tools/room-labels'
 import { SpecPanel } from './viewer-tools/spec-panel'
+import { CalculationPanel } from './calc-panel'
 import { downloadSource } from './viewer-tools/download-source'
+import { TellStoaBubble } from './viewer-tools/tell-stoa-bubble'
+import './viewer-tools/tell-stoa-bubble.css'
+import { markBox, SymbolMarkupLayer, SymbolMarkupPanel, SymbolMarkupTools, useSymbolMarkup } from './viewer-tools/symbol-markup'
 import { useDrawingHighlights } from '../viewer3d/useDrawingHighlights'
 
 export function useViewerSheet() {
@@ -37,13 +41,15 @@ export function useViewerSheet() {
   return sheet
 }
 
-export function DocumentViewer({ answer, citation: originalCitation, sheet, onClose, edits, commands, chatId, initialMode, openRequest, initialOverlayDocId, onOverlayAlignment }: {
+export function DocumentViewer({ answer, citation: originalCitation, sheet, onClose, edits, commands, chatId, initialMode, initialPanel, openRequest, initialOverlayDocId, onOverlayAlignment }: {
   onOverlayAlignment?: (result: Alignment, base: OverlayDoc, overlay: OverlayDoc, basePage: number, overlayPage: number) => void
   initialOverlayDocId?: string | null
   /** Changes on every open request, so "Visualise it" re-opens 3D after the user toggled back to 2D. */
   openRequest?: number
   /** Opens straight in this view (the answer card's "Visualise it" passes '3d'). */
   initialMode?: ViewerMode
+  /** Opens with the Calculation panel in the side slot (the evidence card's "Show calculation"). */
+  initialPanel?: 'calc'
   answer: Answer; citation: Citation; sheet: boolean; onClose: () => void
   edits?: DrawingEdits; commands?: readonly SceneCommand[]
   chatId?: string | null
@@ -76,6 +82,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   const drawingPointer = useRef<number | null>(null)
   const draftRef = useRef<Annotation | null>(null)
   const annotations = useAnnotations(citation.doc_id, citation.page)
+  const markup = useSymbolMarkup(citation.doc_id, citation.page)
   const [searchOpen, setSearchOpen] = useState(false)
   const searchTrigger = useRef<HTMLButtonElement>(null)
   const titleId = useId()
@@ -85,6 +92,8 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   const [textStatus, setTextStatus] = useState('')
   const [hitIndex, setHitIndex] = useState(0)
   const hits = useMemo(() => searchOpen ? findSheetText(sheetText, query) : [], [sheetText, query, searchOpen])
+  const [calcOpen, setCalcOpen] = useState(initialPanel === 'calc' && !!answer.reasoning)
+  useEffect(() => { setCalcOpen(initialPanel === 'calc' && !!answer.reasoning) }, [initialPanel, openRequest]) // eslint-disable-line react-hooks/exhaustive-deps
   const [specOpen, setSpecOpen] = useState(originalCitation.kind === 'text' || !!originalCitation.quote)
   function sourcePassage(index: number) {
     const source = sources[index]
@@ -158,6 +167,14 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       if (trigger?.isConnected) (trigger as SVGElement | HTMLElement).focus()
       else stage.current?.focus()
     })
+  }
+  /** A calculation source was clicked: highlight its box on the drawing (the same highlight a citation gives). */
+  function focusCalcItem(target: { item_id: string; page?: number }) {
+    if (target.page != null && target.page !== pageNumber) setPageNumber(target.page)
+    const index = sources.findIndex((source) => source.itemIds.includes(target.item_id))
+    if (index >= 0) setActive(index)
+    setSelected(target.item_id, '2d')
+    if (window.matchMedia?.('(max-width: 800px)').matches) setCalcOpen(false)
   }
   function openItem(index: number, id: string, trigger: Element) {
     setActive(index); setSelected(id, '2d')
@@ -306,7 +323,12 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   }
   function finishAnnotation(pointerId: number, save: boolean) {
     if (drawingPointer.current !== pointerId) return
-    if (save && draftRef.current) annotations.add(draftRef.current)
+    if (save && draftRef.current?.tool === 'marker') {
+      // Dragging with the highlighter marks an item: the Tell Stoa bubble opens for the dragged box.
+      const [a, b] = draftRef.current.points
+      const box: [number, number, number, number] = [Math.min(a.x, b.x), Math.min(a.y, b.y), Math.max(a.x, b.x), Math.max(a.y, b.y)]
+      if (box[2] - box[0] >= 4 && box[3] - box[1] >= 4) markup.select({ box })
+    } else if (save && draftRef.current) annotations.add(draftRef.current)
     drawingPointer.current = null; draftRef.current = null; setDraft(null)
   }
   function chooseTool(next: MarkupTool) {
@@ -331,7 +353,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   return <aside ref={panel} className={`document-viewer ${sheet ? 'viewer-sheet' : ''}`} role={sheet ? 'dialog' : 'region'} aria-modal={sheet || undefined} aria-label={sheet ? undefined : "Drawing viewer"} aria-labelledby={sheet ? titleId : undefined}
     onKeyDown={(event) => {
       if (mode === '3d' && event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); changeMode('2d'); return }
-      if (event.key === 'Escape') { event.stopPropagation(); if (searchOpen) closeSearch(); else if (tool !== 'pan') chooseTool('pan'); else if (selectedItem) closeItem(); else onClose() }
+      if (event.key === 'Escape') { event.stopPropagation(); if (markup.selection || markup.mode || markup.editing) markup.cancel(); else if (markup.open) markup.close(); else if (searchOpen) closeSearch(); else if (tool !== 'pan') chooseTool('pan'); else if (selectedItem) closeItem(); else onClose() }
       if (sheet && event.key === 'Tab') {
         const controls = Array.from(panel.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), a[href], [tabindex="0"]') ?? []).filter((node) => node.getClientRects().length)
         if (!controls?.length) return
@@ -358,9 +380,10 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       <span className="toolbar-spacer" />
       <Button variant="ghost" size="xs" onClick={highlights.clear}>Clear highlights</Button>
       <div className="viewer-markup-tools">
+        <SymbolMarkupTools markup={markup} disabled={!image} onActivate={() => { setTool('pan'); setSelectedItem(null); setSpecOpen(false) }} />
         <Button variant="ghost" size="icon-sm" aria-label="Search sheet" aria-expanded={searchOpen} aria-controls="viewer-sheet-search" onClick={(event) => { searchTrigger.current = event.currentTarget; if (searchOpen) closeSearch(); else setSearchOpen(true) }}><Search size={16} /></Button>
-        <Button variant="ghost" size="icon-sm" aria-label="Highlight marker" aria-pressed={tool === 'marker'} disabled={!image} onClick={() => chooseTool('marker')}><Highlighter size={16} /></Button>
-        <Button variant="ghost" size="icon-sm" aria-label="Pen annotations" aria-pressed={tool === 'pen'} disabled={!image} onClick={() => chooseTool('pen')}><PenLine size={16} /></Button>
+        <Button variant="ghost" size="icon-sm" aria-label="Highlight marker" aria-pressed={tool === 'marker'} disabled={!image} onClick={() => { markup.cancel(); chooseTool('marker') }}><Highlighter size={16} /></Button>
+        <Button variant="ghost" size="icon-sm" aria-label="Pen annotations" aria-pressed={tool === 'pen'} disabled={!image} onClick={() => { markup.cancel(); chooseTool('pen') }}><PenLine size={16} /></Button>
       </div>
       <Button className="viewer-download" variant="ghost" size="icon-sm" aria-label="Download original source" disabled={downloading} onClick={() => void download()}><Download size={16} /></Button>
       <span className="viewer-toolbar-divider" />
@@ -379,7 +402,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       <Button variant="ghost" size="icon-xs" aria-label="Next match" disabled={!hits.length} onClick={() => setHitIndex((hitIndex + 1) % hits.length)}><ChevronRight size={14} /></Button>
       <Button variant="ghost" size="icon-xs" aria-label="Close sheet search" onClick={closeSearch}><X size={14} /></Button>
     </div>}
-    {mode === '2d' && (tool !== 'pan' || annotations.marks.length > 0) && <div className="viewer-annotation-controls"><span>{tool === 'marker' ? 'Drag to highlight an area' : tool === 'pen' ? 'Draw on the sheet' : 'Annotations saved on this device'}</span><Button variant="ghost" size="xs" disabled={!annotations.marks.length} onClick={annotations.undo}>Undo annotation</Button><Button variant="ghost" size="xs" disabled={!annotations.marks.length} onClick={annotations.clear}>Clear page annotations</Button>{tool !== 'pan' && <Button variant="ghost" size="xs" onClick={() => chooseTool('pan')}>Done</Button>}</div>}
+    {mode === '2d' && (tool !== 'pan' || annotations.marks.length > 0) && <div className="viewer-annotation-controls"><span>{tool === 'marker' ? 'Drag over an item to mark it' : tool === 'pen' ? 'Draw on the sheet' : 'Annotations saved on this device'}</span><Button variant="ghost" size="xs" disabled={!annotations.marks.length} onClick={annotations.undo}>Undo annotation</Button><Button variant="ghost" size="xs" disabled={!annotations.marks.length} onClick={annotations.clear}>Clear page annotations</Button>{tool !== 'pan' && <Button variant="ghost" size="xs" onClick={() => chooseTool('pan')}>Done</Button>}</div>}
     {(downloadError || annotations.warning) && <p className="viewer-tool-error" role="alert">{downloadError || annotations.warning}</p>}
     {mode === '2d' && specCitation && !specOpen && <Button className="viewer-passage-control" variant="ghost" size="sm" onClick={() => setSpecOpen(true)}>Show cited passage</Button>}
     <div className="viewer-item-layout" hidden={mode === '3d'}>
@@ -474,12 +497,24 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
           </g>)}
           <AnnotationLayer marks={annotations.marks} draft={draft} />
         </svg>}
+        {image && shownPage === citation.page && <SymbolMarkupLayer markup={markup} image={image} scale={view.scale} />}
       </div>}
       {!highlights.cleared && image && shownPage === citation.page && regions.some((region) => !region.text) && <KindLegend className="kind-legend-2d" kinds={regions.filter((region) => !region.text).map((region) => region.kind)} totals={totalKinds} />}
       {error ? <div className="viewer-message"><p role="alert">{error}</p><Button variant="raised" onClick={() => setRetry(retry + 1)}>Try again</Button></div>
         : !image && <p className="viewer-message" role="status">Loading drawing…</p>}
+      {image && shownPage === citation.page && (() => {
+        const mark = markup.editing ? markup.symbols.find((m) => m.id === markup.editing) : undefined
+        const box = mark ? markBox(mark) : markup.selection && 'box' in markup.selection ? markup.selection.box : null
+        if (!box) return null
+        return <TellStoaBubble key={mark?.id ?? 'new'} box={box as [number, number, number, number]} view={view} stage={viewport} busy={markup.busy} error={markup.error}
+          initial={mark ? { name: mark.name, kind: mark.canonical_kind ?? null } : undefined}
+          onSave={(name, kind) => mark ? markup.rename(mark.id, name, kind) : markup.mark(name, kind)}
+          onDelete={mark ? () => markup.remove(mark.id) : undefined} onClose={markup.cancel} />
+      })()}
     </div>
-    {specOpen && specCitation && <SpecPanel citation={specCitation} title={doc?.title ?? citation.doc_id} text={sheetText} onClose={() => setSpecOpen(false)} />}
+    {calcOpen && answer.reasoning && <CalculationPanel reasoning={answer.reasoning} title={doc?.title} docTitle={(id) => id === citation.doc_id && doc?.title ? doc.title : id} onClose={() => setCalcOpen(false)} onFocus={focusCalcItem} />}
+    {markup.open && <SymbolMarkupPanel markup={markup} page={citation.page} onFocus={(box) => { if (image) setView(focusBox(box, viewport, Math.max(fittedScale, Math.min(4, viewport.width / Math.max(128, (box[2] - box[0]) * 6), viewport.height / Math.max(128, (box[3] - box[1]) * 6))))) }} />}
+    {specOpen && !calcOpen && specCitation && <SpecPanel citation={specCitation} title={doc?.title ?? citation.doc_id} text={sheetText} onClose={() => setSpecOpen(false)} />}
     {selectedItem && <ItemPanel docId={selectedItem.docId} itemId={selectedItem.itemId} sheet={sheet} onClose={closeItem} onOpenPlace={(location, item) => {
       setPlace({ location, item }); setActive(0); setSelected(item.item_id, '2d')
       if (sheet) closeItem()

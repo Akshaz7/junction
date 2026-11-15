@@ -39,4 +39,20 @@ describe('citation to drawing evidence', () => {
     const result = viewerEvidence(answer, answer.citations[0])
     expect(result.sources.map((source) => source.id)).toEqual(result.regions.map((region) => region.id))
   })
+
+  it('keeps cross-sheet boxes on their own document even when pages and item IDs overlap', () => {
+    const answer = makeDemoAnswer('How many windows are there?')
+    const first = answer.doc_ids[0]
+    answer.doc_ids.push('services')
+    answer.evidence.boxes = [
+      { item_id: 'same-id', doc_id: first, page: 1, label: '1', bbox_px: [10, 20, 30, 40] },
+      { item_id: 'same-id', doc_id: 'services', page: 1, label: '2', bbox_px: [100, 200, 300, 400] },
+    ]
+    answer.citations = [
+      { ...answer.citations[0], n: 1, doc_id: first, item_ids: ['same-id'] },
+      { ...answer.citations[0], n: 2, doc_id: 'services', item_ids: ['same-id'] },
+    ]
+    expect(viewerEvidence(answer, answer.citations[0]).regions.map((r) => r.label)).toEqual(['1'])
+    expect(viewerEvidence(answer, answer.citations[1]).regions.map((r) => r.label)).toEqual(['2'])
+  })
 })

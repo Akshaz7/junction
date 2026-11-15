@@ -1,0 +1,100 @@
+{
+  "phase": "after",
+  "models": "live",
+  "doc_ids": [
+    "ifc_bench__sixty5-arc",
+    "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+    "ifc_models__resbim-454-model"
+  ],
+  "events": [
+    {
+      "kind": "status",
+      "ms": 0.015
+    },
+    {
+      "kind": "status",
+      "ms": 2855.064
+    },
+    {
+      "kind": "status",
+      "ms": 2986.422
+    },
+    {
+      "kind": "answer.partial",
+      "ms": 2990.083
+    },
+    {
+      "kind": "trace",
+      "ms": 2991.614
+    },
+    {
+      "kind": "status",
+      "ms": 4826.544
+    },
+    {
+      "kind": "status",
+      "ms": 4854.612
+    },
+    {
+      "kind": "answer.partial",
+      "ms": 4854.984
+    },
+    {
+      "kind": "trace",
+      "ms": 4858.389
+    },
+    {
+      "kind": "trace",
+      "ms": 7901.861
+    }
+  ],
+  "snapshots": [
+    {
+      "text": "**Findings so far \u2014 still checking.**\n\n- 1049 door in the model [1]",
+      "value": null,
+      "citations": 1,
+      "cost_usd": 0.008084
+    },
+    {
+      "text": "**Findings so far \u2014 still checking.**\n\n- 1049 door in the model [1]\n- 211 door in the model [2]",
+      "value": null,
+      "citations": 2,
+      "cost_usd": 0.024664
+    }
+  ],
+  "first_status_ms": 0.015,
+  "first_finding_ms": 2990.083,
+  "first_final_token_ms": 7897.998,
+  "final_ms": 7920.541,
+  "answer": {
+    "text_md": "**The Sixty5 model has 1049 doors and the Maleva t\u00e4nav 18 model has 211 doors.**\n- Sixty5 (Strijp-S Eindhoven): 1049 doors across 17 storeys, from 70 on the ground floor (00 begane grond) to 18 on the 16th floor.\n- Maleva t\u00e4nav 18 (Esplanades): 211 doors across five storeys, with 46 on 1.korrus and 39 on 5.korrus.\n- Together that is 1260 doors. [1][2]",
+    "value": null,
+    "unit": "doors",
+    "confidence": 0.9,
+    "abstained": false
+  },
+  "cost": {
+    "usd_total": 0.052312,
+    "calls": [
+      {
+        "task": "reader_plan",
+        "provider": "runware_claude",
+        "model": "claude-opus-5-5",
+        "cost_usd": 0.008084
+      },
+      {
+        "task": "reader_plan",
+        "provider": "runware_claude",
+        "model": "claude-opus-5-5",
+        "cost_usd": 0.01658
+      },
+      {
+        "task": "reader_plan",
+        "provider": "runware_claude",
+        "model": "claude-opus-5-5",
+        "cost_usd": 0.027648
+      }
+    ]
+  },
+  "citations": 2
+}

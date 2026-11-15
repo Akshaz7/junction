@@ -72,6 +72,7 @@ class Ans:
 
     def __init__(self, scope: str):
         self.scope, self.applied, self.left, self.body, self.items, self.value = scope, [], [], [], [], None
+        self.calc = None
 
     def ap(self, *c):
         self.applied += c
@@ -134,6 +135,16 @@ def h_tiling(q: str, doc: Doc) -> Ans | None:
         if price is not None:
             a.ap(f"price EUR {price:g} per box, excluding VAT")
             a.body.append(f"Cost: {boxes} x EUR {price:g} = **EUR {boxes * price:,.2f} excluding VAT**.")
+        from engine.calc import input_value, question_source
+        from engine.calc_routes import chain, percentage_factor
+        stub = {"answer": {"value": boxes, "unit": "boxes"}}
+        ref = question_source(q)
+        chain(stub, doc, [(r, r.q.get("net_floor_area_m2", 0)) for r in rooms], "m2", [
+            ("area × (1 + waste/100)", "multiply", [percentage_factor("waste factor", waste, ref)], "m2"),
+            ("order area / box coverage", "divide", [input_value("box coverage", cov, "m2/box", ref)], "boxes"),
+            ("subtract numeric tolerance before ceil", "subtract", [input_value("floating point tolerance", 1e-9, "boxes", {"kind": "policy", "text": "Solver tolerance at an exact whole-box boundary"})], "boxes"),
+            ("round up to whole boxes", "ceil", [], "boxes")])
+        a.calc = stub["_calc"]
     else:
         a.lf("box coverage not given")
     return a
@@ -156,6 +167,10 @@ def h_external_face(q: str, doc: Doc) -> Ans | None:
     if re.search(r"reveal", q, re.I):
         a.ap("reveals excluded: the side-area figure is the wall face only, reveals are separate surfaces")
     a.value = round(n, 2)
+    from engine.calc import record_items
+    stub = {"answer": {"value": a.value, "unit": "m2"}}
+    record_items(stub, doc, [(w, w.q.get("net_side_area_m2", 0)) for w in walls], formula="net wall face = Σ(recorded net side areas)")
+    a.calc = stub["_calc"]
     return a
 
 
@@ -185,6 +200,18 @@ def h_paint(q: str, doc: Doc) -> Ans | None:
                f"Paint: {area:.2f} x {coats:g} coats / {cov:g} = {area * coats / cov:.1f} litres, +{extra:g}% = **{litres:.1f} litres**.",
                f"Tins of {tin:g} litres: **{tins} tins**."]
     a.value = tins
+    from engine.calc import assumption_source, input_value, question_source
+    from engine.calc_routes import chain, percentage_factor
+    stub = {"answer": {"value": tins, "unit": "tins"}}
+    ref = question_source(q)
+    chain(stub, doc, [(w, w.q.get("net_side_area_m2", 0)) for w in walls], "m2", [
+        ("net side area × faces × coats", "multiply", [input_value("faces", faces, "count", ref), input_value("coats", coats, "count", ref)], "m2"),
+        ("coated area / coverage", "divide", [input_value("coverage", cov, "m2/litre", ref if re.search(r"m²\s*/\s*lit", q, re.I) else assumption_source("Default paint coverage 8 m2/litre"))], "litre"),
+        ("litres × (1 + extra/100)", "multiply", [percentage_factor("extra factor", extra, ref)], "litre"),
+        ("litres / tin capacity", "divide", [input_value("tin capacity", tin, "litre/tin", ref if re.search(r"lit(?:re|er)\s*tin", q, re.I) else assumption_source("Default tin capacity 9 litres"))], "tins"),
+        ("subtract numeric tolerance before ceil", "subtract", [input_value("floating point tolerance", 1e-9, "tins", {"kind": "policy", "text": "Solver tolerance at a whole-tin boundary"})], "tins"),
+        ("round up to whole tins", "ceil", [], "tins")])
+    a.calc = stub["_calc"]
     return a
 
 
@@ -209,6 +236,13 @@ def h_masonry(q: str, doc: Doc) -> Ans | None:
         a.ap(f"EUR {price:g}/m³ excluding VAT")
         a.body += ["", f"Total: {tot:.2f} m³, with waste {tot * (1 + waste / 100):.2f} m³, **EUR {tot * (1 + waste / 100) * price:,.0f} excluding VAT** (assumed unit price)."]
         a.value = round(tot * (1 + waste / 100) * price)
+        from engine.calc import input_value, question_source
+        from engine.calc_routes import chain, percentage_factor
+        stub = {"answer": {"value": a.value, "unit": "EUR"}}
+        chain(stub, doc, [(w, w.q.get("net_volume_m3", 0)) for w in walls], "m3", [
+            ("net volume × (1 + waste/100)", "multiply", [percentage_factor("waste factor", waste, question_source(q))], "m3"),
+            ("order volume × price", "multiply", [input_value("price", price, "EUR/m3", question_source(q))], "EUR")])
+        a.calc = stub["_calc"]
     return a
 
 
@@ -662,8 +696,12 @@ def h_skirting(q: str, doc: Doc) -> Ans | None:
         a.body.append("The room is not in the plan map.")
         a.lf("room not found")
         return a
-    sc = doc.scale if isinstance(doc.scale, dict) else {}
+    from engine.scales import item_scale
+    sc = item_scale(r, doc.scale if isinstance(doc.scale, dict) else {})
     s = sc.get("m_per_px")
+    if not s:
+        a.body.append("The room's view has no verified scale, so its length cannot be measured.")
+        return a
     b = r.bbox_px
     per = 2 * ((b[2] - b[0]) + (b[3] - b[1])) * s
     ds = [d for d in doc.items if d.kind == "door" and _touch(d.bbox_px, b)]
@@ -799,6 +837,9 @@ def answer(question: str, doc_ids: list[str], root: Path, t0: float | None = Non
         conf = 0.6 if a.left else 0.95
         trace = [{"step": "complex_q", "detail": f"{h.__name__}: applied {len(a.applied)}, left {len(a.left)}", "ms": 0, "model": None, "cost_usd": 0.0}]
         res = S._answer_obj(question, doc_ids, a.text(), a.value, None, conf, False, boxes, cites, scene, trace, "index" if doc.mode == "ifc" else "planmap", t0)
+        if a.calc:
+            from engine.calc import record
+            record(res, a.calc)
         res["conditions"] = {"applied": a.applied, "left": a.left, "handler": h.__name__}
         return res
     return None

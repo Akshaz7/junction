@@ -1,5 +1,5 @@
 /** Saved design versions (3D edits kept as a new version of the same document) and picking any two versions to compare. */
-import { apiFetch } from './api'
+import { apiFetch, workspaceApi } from './api'
 
 export interface EditSnapshot {
   removed: string[]
@@ -21,9 +21,15 @@ export function editSnapshot(hidden: readonly string[], state: { moveDelta?: Rec
 
 export const hasEdits = (s: EditSnapshot) => s.removed.length > 0 || Object.keys(s.moved).length > 0 || Object.keys(s.materials).length > 0
 
+/** The offline demo (VITE_USE_MOCK) answers from the local mock API, like every other workspace call. */
+const demoTransport: typeof fetch = async (input, init) => {
+  const { handleMockRequest } = await import('../mock/handler')
+  return await handleMockRequest(new Request(new URL(String(input), 'http://localhost'), init)) ?? Response.json({ detail: 'This action is unavailable in the offline demo.' }, { status: 404 })
+}
+
 export async function saveDesignVersion(docId: string, snapshot: EditSnapshot, opts: { parent?: number; chatId?: string } = {},
-  transport: typeof fetch = apiFetch): Promise<SavedVersion> {
-  const response = await transport(`/api/docs/${encodeURIComponent(docId)}/versions`, {
+  transport?: typeof fetch): Promise<SavedVersion> {
+  const response = await (transport ?? (workspaceApi.isDemo ? demoTransport : apiFetch))(`/api/docs/${encodeURIComponent(docId)}/versions`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ ...snapshot, parent: opts.parent ?? 0, chat_id: opts.chatId }),
   })
@@ -84,3 +90,40 @@ export function pairOf(entries: readonly PairableEntry[], id: string): { a: numb
 
 /** True when the id belongs to these entries (one of them, or a free pair under their prefix). */
 export const ownsId = (entries: readonly PairableEntry[], id: string) => !!id && (entries.some((e) => e.id === id) || pairOf(entries, id) !== null)
+
+/** Default Compare pick when nothing is chosen: the most recently saved edited design, latest version against the original. */
+export function latestEditedPair(entries: readonly (PairableEntry & { created_at?: string; summary: PairableEntry['summary'] & { edited?: boolean } })[]): string | null {
+  const edited = entries.filter((e) => e.summary.edited && e.summary.pair_prefix && e.summary.index_b != null)
+  const newest = edited.reduce<typeof edited[number] | null>((best, e) => !best || (Date.parse(e.created_at ?? '') || 0) >= (Date.parse(best.created_at ?? '') || 0) ? e : best, null)
+  return newest ? `${newest.summary.pair_prefix}0-${newest.summary.index_b}` : null
+}
+
+export interface SnapshotChange { action: 'removed' | 'added' | 'moved' | 'material'; item_id: string; delta_m?: [number, number]; old?: string | null; new?: string | null }
+const MOVE_TOL = 0.05
+
+/** Snapshot a -> b by item id (same rules as engine/design_versions.py diff; used by the offline demo API). */
+export function diffSnapshots(a: EditSnapshot, b: EditSnapshot): SnapshotChange[] {
+  const ra = new Set(a.removed), rb = new Set(b.removed)
+  const out: SnapshotChange[] = [
+    ...[...rb].filter((id) => !ra.has(id)).sort().map((item_id) => ({ action: 'removed' as const, item_id })),
+    ...[...ra].filter((id) => !rb.has(id)).sort().map((item_id) => ({ action: 'added' as const, item_id })),
+  ]
+  for (const id of [...new Set([...Object.keys(a.moved), ...Object.keys(b.moved)])].sort()) {
+    if (rb.has(id)) continue
+    const pa = a.moved[id] ?? [0, 0], pb = b.moved[id] ?? [0, 0]
+    const d: [number, number] = [Math.round((pb[0] - pa[0]) * 1000) / 1000, Math.round((pb[1] - pa[1]) * 1000) / 1000]
+    if (Math.abs(d[0]) >= MOVE_TOL || Math.abs(d[1]) >= MOVE_TOL) out.push({ action: 'moved', item_id: id, delta_m: d })
+  }
+  for (const id of [...new Set([...Object.keys(a.materials), ...Object.keys(b.materials)])].sort()) {
+    if (!rb.has(id) && a.materials[id] !== b.materials[id]) out.push({ action: 'material', item_id: id, old: a.materials[id] ?? null, new: b.materials[id] ?? null })
+  }
+  return out
+}
+
+/** "1.0 m east, 0.5 m north" (world X east, Z south), worded as the engine words it. */
+export function describeMoveMetres([dx, dz]: [number, number]): string {
+  const parts: string[] = []
+  if (Math.abs(dx) >= MOVE_TOL) parts.push(`${Math.abs(dx).toFixed(1)} m ${dx > 0 ? 'east' : 'west'}`)
+  if (Math.abs(dz) >= MOVE_TOL) parts.push(`${Math.abs(dz).toFixed(1)} m ${dz > 0 ? 'south' : 'north'}`)
+  return parts.join(', ')
+}

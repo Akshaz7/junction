@@ -35,14 +35,15 @@ describe('sheet overlay', () => {
   it('UI action carries source citations and no invented alignment claim', () => {
     const answer = overlayActionAnswer('overlay', base, vent)
     expect(answer.citations.map((c) => c.doc_id)).toEqual(['a', 'v'])
-    expect(answer.reasoning?.confidence.pct).toBe(0)
+    expect(answer.reasoning?.confidence.pct).toBeNull()
     expect(answer.cost.usd_total).toBe(0)
     expect(answer.answer.value).toBeNull()
   })
   it('reports real anchor consensus separately from measurement accuracy', () => {
     const result = { status: 'aligned' as const, matrix: [[1,0,0],[0,1,0]] as [[number,number,number],[number,number,number]], method: 'similarity', anchor_count: 4, candidate_count: 5, residual_px: .5, residual_mm: 5, detail: 'Aligned on 4 shared labels, ± 5 mm', anchors: [{ label: 'A', base: [10,10] as [number,number], overlay: [10,10] as [number,number], base_bbox: [8,8,12,12] as [number,number,number,number] }], base_image: {w:100,h:100}, overlay_image: {w:100,h:100} }
     const answer = overlayAlignedAnswer(overlayActionAnswer('overlay',base,vent), result, base, vent)
-    expect(answer.reasoning?.confidence.pct).toBe(80)
+    expect(answer.reasoning?.confidence.pct).toBeNull()
+    expect(answer.reasoning?.confidence.reason).toContain('4 of 5 candidate anchors')
     expect(answer.reasoning?.confidence.reason).toContain('not measurement accuracy')
     expect(answer.evidence.boxes[0].bbox_px).toEqual([8,8,12,12])
     expect(answer.citations).toHaveLength(2)

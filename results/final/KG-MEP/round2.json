@@ -1,0 +1,2705 @@
+{
+  "sources": [
+    "ARK-103-03_floor_plan_3rd_floor.pdf",
+    "L30301_ventilation_3rd_floor_block_U.pdf"
+  ],
+  "pdf_reader_commit": "ad2cbd9",
+  "extraction_seconds": 13.279998499987414,
+  "graph_build_seconds": 8.144716084003448,
+  "alignment": {
+    "s": 0.5000318923582131,
+    "R": [
+      [
+        0.9999999996135134,
+        2.780239313642187e-05
+      ],
+      [
+        -2.7802393136418164e-05,
+        0.9999999996135133
+      ]
+    ],
+    "t": [
+      1510.1183674499282,
+      224.5039050182736
+    ],
+    "rot_deg": -0.0015929597872854678,
+    "n_words": 116,
+    "n_inliers": 115,
+    "rms_pt": 0.5939695337414035,
+    "method": "shared-text",
+    "residual": 0.5939695337414035,
+    "matches": 115,
+    "T": [
+      [
+        0.5000318921649575,
+        1.3902083252092023e-05,
+        1510.1183674499282
+      ],
+      [
+        -1.390208325209017e-05,
+        0.5000318921649574,
+        224.5039050182736
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "residual_m": 0.020953925218099512
+  },
+  "alignment_validation": {
+    "method": "leave one shared-text inlier out of the similarity refit",
+    "scope": "Registration consistency only; not service-detection or room-boundary accuracy. Inlier selection uses the full fit.",
+    "count": 115,
+    "rms_m": 0.02123453291460748,
+    "max_m": 0.15023513508580982,
+    "checks": [
+      {
+        "text": "+10.828",
+        "residual_m": 0.01589468446699175
+      },
+      {
+        "text": "+12.780",
+        "residual_m": 0.012763420378917315
+      },
+      {
+        "text": "+13.343",
+        "residual_m": 0.01559117576379781
+      },
+      {
+        "text": "+13.450",
+        "residual_m": 0.01397371243899129
+      },
+      {
+        "text": "+13.570",
+        "residual_m": 0.01268535718621945
+      },
+      {
+        "text": "12.0",
+        "residual_m": 0.03390344323973026
+      },
+      {
+        "text": "1237-07-U",
+        "residual_m": 0.02787268839557515
+      },
+      {
+        "text": "13.0",
+        "residual_m": 0.010401198531198532
+      },
+      {
+        "text": "13.5",
+        "residual_m": 0.005823009117513385
+      },
+      {
+        "text": "1331-07-U",
+        "residual_m": 0.005882372061299217
+      },
+      {
+        "text": "140",
+        "residual_m": 0.009327544889293105
+      },
+      {
+        "text": "142.5",
+        "residual_m": 0.006613954180276749
+      },
+      {
+        "text": "162",
+        "residual_m": 0.003658540174722632
+      },
+      {
+        "text": "167.5",
+        "residual_m": 0.019095390507614246
+      },
+      {
+        "text": "18.5",
+        "residual_m": 0.010350473232724222
+      },
+      {
+        "text": "180",
+        "residual_m": 0.00474308649416483
+      },
+      {
+        "text": "2.5",
+        "residual_m": 0.008279344610187298
+      },
+      {
+        "text": "22.0",
+        "residual_m": 0.0061493035304235
+      },
+      {
+        "text": "25.5",
+        "residual_m": 0.0066858558453559746
+      },
+      {
+        "text": "26",
+        "residual_m": 0.08997086872326775
+      },
+      {
+        "text": "36.5",
+        "residual_m": 0.005937031553654174
+      },
+      {
+        "text": "3H3",
+        "residual_m": 0.005214056605631323
+      },
+      {
+        "text": "44",
+        "residual_m": 0.005812182261310399
+      },
+      {
+        "text": "44.5",
+        "residual_m": 0.007791360961103186
+      },
+      {
+        "text": "45",
+        "residual_m": 0.007118299093038572
+      },
+      {
+        "text": "46",
+        "residual_m": 0.007293695494736673
+      },
+      {
+        "text": "47",
+        "residual_m": 0.006996227570145492
+      },
+      {
+        "text": "48",
+        "residual_m": 0.007499124845163986
+      },
+      {
+        "text": "49",
+        "residual_m": 0.009841589844571612
+      },
+      {
+        "text": "51",
+        "residual_m": 0.01187197133171303
+      },
+      {
+        "text": "52",
+        "residual_m": 0.008941047049142913
+      },
+      {
+        "text": "53",
+        "residual_m": 0.012291917796694541
+      },
+      {
+        "text": "54",
+        "residual_m": 0.01054715291102272
+      },
+      {
+        "text": "55",
+        "residual_m": 0.01218155998951681
+      },
+      {
+        "text": "56",
+        "residual_m": 0.01116515668500173
+      },
+      {
+        "text": "63.5",
+        "residual_m": 0.00344947177831207
+      },
+      {
+        "text": "9.0",
+        "residual_m": 0.00789925248701849
+      },
+      {
+        "text": "9.5",
+        "residual_m": 0.0067545900002047715
+      },
+      {
+        "text": "98.5",
+        "residual_m": 0.010119122334134424
+      },
+      {
+        "text": "ARK-1312-03-U",
+        "residual_m": 0.020769074763213827
+      },
+      {
+        "text": "ARK-1341-07-U",
+        "residual_m": 0.0003161788345493496
+      },
+      {
+        "text": "ARK-1341-08-U",
+        "residual_m": 0.012578423541077202
+      },
+      {
+        "text": "ARK-2511-01-U",
+        "residual_m": 0.015513608449022253
+      },
+      {
+        "text": "B302/1",
+        "residual_m": 0.005644547652127866
+      },
+      {
+        "text": "B302/2",
+        "residual_m": 0.005994909971346553
+      },
+      {
+        "text": "B302/3",
+        "residual_m": 0.006381695174521989
+      },
+      {
+        "text": "B302/4",
+        "residual_m": 0.004389069716724003
+      },
+      {
+        "text": "B313/1",
+        "residual_m": 0.006174802055462734
+      },
+      {
+        "text": "B313/2",
+        "residual_m": 0.009982448348581629
+      },
+      {
+        "text": "B329",
+        "residual_m": 0.005909236970562056
+      },
+      {
+        "text": "B329/1",
+        "residual_m": 0.010205743321207744
+      },
+      {
+        "text": "B329/2",
+        "residual_m": 0.01187604737740753
+      },
+      {
+        "text": "B331",
+        "residual_m": 0.0007833099658741199
+      },
+      {
+        "text": "B331/1",
+        "residual_m": 0.0008926382952754853
+      },
+      {
+        "text": "B331/2",
+        "residual_m": 0.014065956395109675
+      },
+      {
+        "text": "B332",
+        "residual_m": 0.004027095071423656
+      },
+      {
+        "text": "F11",
+        "residual_m": 0.021373342824756912
+      },
+      {
+        "text": "F12",
+        "residual_m": 0.025987752538976477
+      },
+      {
+        "text": "F13",
+        "residual_m": 0.02469790566841261
+      },
+      {
+        "text": "F14",
+        "residual_m": 0.02436327831379833
+      },
+      {
+        "text": "F1B",
+        "residual_m": 0.02231626633872376
+      },
+      {
+        "text": "F2A",
+        "residual_m": 0.019846808242713652
+      },
+      {
+        "text": "F2B",
+        "residual_m": 0.022290371288038312
+      },
+      {
+        "text": "F8",
+        "residual_m": 0.020771584021953497
+      },
+      {
+        "text": "F9",
+        "residual_m": 0.025912982101624942
+      },
+      {
+        "text": "H=1510",
+        "residual_m": 0.012434528136218377
+      },
+      {
+        "text": "H=2115",
+        "residual_m": 0.021536887765972186
+      },
+      {
+        "text": "H=2200",
+        "residual_m": 0.006166207311829514
+      },
+      {
+        "text": "H=3195",
+        "residual_m": 0.0085945878524448
+      },
+      {
+        "text": "KG",
+        "residual_m": 0.012363075942395177
+      },
+      {
+        "text": "KR",
+        "residual_m": 0.011210919191741565
+      },
+      {
+        "text": "LAO10BN",
+        "residual_m": 0.0006750573204803432
+      },
+      {
+        "text": "LAO10PV",
+        "residual_m": 0.0019593264695602288
+      },
+      {
+        "text": "LAO10UW",
+        "residual_m": 0.002402709483318484
+      },
+      {
+        "text": "LAO15BM",
+        "residual_m": 0.0038229637508084328
+      },
+      {
+        "text": "LAO8BZ",
+        "residual_m": 0.0026076374721437675
+      },
+      {
+        "text": "LAO9DV",
+        "residual_m": 0.0019878141187766826
+      },
+      {
+        "text": "LOGO",
+        "residual_m": 0.009173576589152826
+      },
+      {
+        "text": "MI16.1",
+        "residual_m": 0.012686532535808641
+      },
+      {
+        "text": "MI18.3",
+        "residual_m": 0.020709275856039683
+      },
+      {
+        "text": "P1",
+        "residual_m": 0.032012848114124144
+      },
+      {
+        "text": "P2",
+        "residual_m": 0.04890240660412519
+      },
+      {
+        "text": "PR202",
+        "residual_m": 0.005308452836965736
+      },
+      {
+        "text": "SPO13DM",
+        "residual_m": 0.0030456519418827904
+      },
+      {
+        "text": "SPO15EW",
+        "residual_m": 0.0036264243647568957
+      },
+      {
+        "text": "SV",
+        "residual_m": 0.007487848375122234
+      },
+      {
+        "text": "TEO31HZ",
+        "residual_m": 0.0036877412820203576
+      },
+      {
+        "text": "TLU10EX",
+        "residual_m": 0.003458398334570319
+      },
+      {
+        "text": "TPO15VZ",
+        "residual_m": 0.019273458877429407
+      },
+      {
+        "text": "TUO10HP",
+        "residual_m": 0.005552839049591611
+      },
+      {
+        "text": "TUO25NP",
+        "residual_m": 0.004189763835133474
+      },
+      {
+        "text": "TUO9HP",
+        "residual_m": 0.009377090243861786
+      },
+      {
+        "text": "U1",
+        "residual_m": 0.006877591259005124
+      },
+      {
+        "text": "U10",
+        "residual_m": 0.015491894834083215
+      },
+      {
+        "text": "U11",
+        "residual_m": 0.01250993801393259
+      },
+      {
+        "text": "U12",
+        "residual_m": 0.018542858297868427
+      },
+      {
+        "text": "U2",
+        "residual_m": 0.012321025134935035
+      },
+      {
+        "text": "U3",
+        "residual_m": 0.01032386166824072
+      },
+      {
+        "text": "U4",
+        "residual_m": 0.013075762417489457
+      },
+      {
+        "text": "U5",
+        "residual_m": 0.011480479011777083
+      },
+      {
+        "text": "U6",
+        "residual_m": 0.013520660478316598
+      },
+      {
+        "text": "U7",
+        "residual_m": 0.013682551622356914
+      },
+      {
+        "text": "U8",
+        "residual_m": 0.013071537405711887
+      },
+      {
+        "text": "U9",
+        "residual_m": 0.013944517152016217
+      },
+      {
+        "text": "UA",
+        "residual_m": 0.010034581931857522
+      },
+      {
+        "text": "UB",
+        "residual_m": 0.011872723438739746
+      },
+      {
+        "text": "UC",
+        "residual_m": 0.010493682410239373
+      },
+      {
+        "text": "UD",
+        "residual_m": 0.011563732999505404
+      },
+      {
+        "text": "UE",
+        "residual_m": 0.014362533043945195
+      },
+      {
+        "text": "UF",
+        "residual_m": 0.01784044301625219
+      },
+      {
+        "text": "US203",
+        "residual_m": 0.011098998161467553
+      },
+      {
+        "text": "VP/YP",
+        "residual_m": 0.15023513508580982
+      },
+      {
+        "text": "VS209",
+        "residual_m": 0.011761461825701529
+      },
+      {
+        "text": "YL-57",
+        "residual_m": 0.011212287221892733
+      },
+      {
+        "text": "YL-58",
+        "residual_m": 0.012848809515972783
+      }
+    ]
+  },
+  "split": {
+    "method": "geometric",
+    "stats": {
+      "paths": 93839,
+      "mep_paths": 28731,
+      "underlay_paths": 65108,
+      "mep_length_pt": 372025,
+      "underlay_length_pt": 814862
+    },
+    "source_m_per_pt": 0.01764001398041474
+  },
+  "detected": {
+    "duct_runs": 42,
+    "terminals": 3
+  },
+  "linked": {
+    "terminals": 2,
+    "duct_runs": 2,
+    "duct_room_edges": 2,
+    "room_same_as": 6
+  },
+  "rooms": [
+    {
+      "id": "room:architect:room-001",
+      "label": "ROOF / SPL / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / KA / CORRIDOR / BA / BULKHEAD / ELECTRICAL / BULKHEAD / VP/YP / OFFICE",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-001",
+        "bbox": [
+          1718.2,
+          637.4,
+          2879.0,
+          1232.2
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-002",
+      "label": "STAIR / STAIR / ROOM",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-002",
+        "bbox": [
+          1619.9,
+          755.4,
+          1977.0,
+          1217.2
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-003",
+      "label": "TO",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-003",
+        "bbox": [
+          1519.2,
+          810.7,
+          1613.6,
+          1102.0
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-004",
+      "label": "STAIR / ROOM",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-004",
+        "bbox": [
+          2908.8,
+          771.7,
+          2962.9,
+          851.0
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-005",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-005",
+        "bbox": [
+          2855.6,
+          785.2,
+          2907.9,
+          842.9
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-006",
+      "label": "ACCESSIBLE",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-006",
+        "bbox": [
+          3083.7,
+          871.8,
+          3141.5,
+          918.7
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-007",
+      "label": "WC 1.5 / ARK / ROOM",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-007",
+        "bbox": [
+          2830.3,
+          881.7,
+          2999.0,
+          1238.0
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-008",
+      "label": "CORRIDOR",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-008",
+        "bbox": [
+          3018.8,
+          919.6,
+          3127.9,
+          991.8
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-009",
+      "label": "ROOM",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-009",
+        "bbox": [
+          3018.8,
+          986.3,
+          3063.9,
+          1037.8
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-010",
+      "label": "WC / ACCESSIBLE",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-010",
+        "bbox": [
+          3304.7,
+          986.3,
+          3355.2,
+          1045.9
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-011",
+      "label": "ROOM / CORRIDOR",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-011",
+        "bbox": [
+          3300.8,
+          1045.8,
+          3409.4,
+          1143.3
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-012",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-012",
+        "bbox": [
+          3001.7,
+          1057.6,
+          3086.4,
+          1100.0
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-013",
+      "label": "STAIR",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-013",
+        "bbox": [
+          1978.0,
+          1054.9,
+          2065.5,
+          1107.2
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-014",
+      "label": "WC 18.5",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-014",
+        "bbox": [
+          2127.7,
+          1088.3,
+          2189.9,
+          1148.7
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-015",
+      "label": "AKA1 WC",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-015",
+        "bbox": [
+          2067.2,
+          1151.4,
+          2138.2,
+          1217.2
+        ]
+      },
+      "count_by_kind": {
+        "duct": 1
+      },
+      "length_m_by_kind": {
+        "duct": 2.3212777786749186
+      }
+    },
+    {
+      "id": "room:architect:room-016",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-016",
+        "bbox": [
+          2133.9,
+          1151.4,
+          2193.7,
+          1220.8
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-017",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-017",
+        "bbox": [
+          3260.4,
+          1157.7,
+          3303.8,
+          1224.5
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-018",
+      "label": "KP",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-018",
+        "bbox": [
+          2399.2,
+          1227.2,
+          2750.9,
+          1436.4
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-019",
+      "label": "ARK",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-019",
+        "bbox": [
+          3091.0,
+          788.8,
+          3141.5,
+          847.4
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-020",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-020",
+        "bbox": [
+          2845.1,
+          828.8,
+          2888.6,
+          930.2
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-021",
+      "label": "RISER",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-021",
+        "bbox": [
+          2981.8,
+          871.7,
+          3016.1,
+          918.7
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-022",
+      "label": "STORAGE",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-022",
+        "bbox": [
+          3024.2,
+          871.8,
+          3067.5,
+          918.7
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-023",
+      "label": "WC",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-023",
+        "bbox": [
+          3072.0,
+          871.8,
+          3098.8,
+          901.2
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-024",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-024",
+        "bbox": [
+          2977.9,
+          923.2,
+          3016.1,
+          981.8
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-025",
+      "label": "ARK",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-025",
+        "bbox": [
+          2070.9,
+          978.8,
+          2116.7,
+          1097.3
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-026",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-026",
+        "bbox": [
+          2980.0,
+          986.3,
+          3016.1,
+          1040.1
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-027",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-027",
+        "bbox": [
+          1983.4,
+          1010.7,
+          2048.3,
+          1041.4
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-028",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-028",
+        "bbox": [
+          2179.3,
+          1081.9,
+          2235.9,
+          1148.7
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-029",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-029",
+        "bbox": [
+          2179.4,
+          1181.2,
+          2253.7,
+          1223.6
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:mep-room-ref-1-b308",
+      "label": "Room B308",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "mep-room-ref-1-b308",
+        "bbox": [
+          2246.67,
+          895.8900000000001,
+          2259.16,
+          901.0899999999999
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:mep-room-ref-1-b306",
+      "label": "Room B306",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "mep-room-ref-1-b306",
+        "bbox": [
+          2077.59,
+          895.29,
+          2090.08,
+          900.4900000000001
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:mep-room-ref-1-b319",
+      "label": "Room B319",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "mep-room-ref-1-b319",
+        "bbox": [
+          3077.03,
+          904.02,
+          3082.23,
+          916.48
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:mep-room-ref-1-b325",
+      "label": "Room B325",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "mep-room-ref-1-b325",
+        "bbox": [
+          3223.47,
+          948.21,
+          3235.96,
+          953.42
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:mep-room-ref-1-b321",
+      "label": "Room B321",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "mep-room-ref-1-b321",
+        "bbox": [
+          2856.79,
+          1142.04,
+          2864.26,
+          1158.09
+        ]
+      },
+      "count_by_kind": {
+        "duct": 1,
+        "terminal": 2
+      },
+      "length_m_by_kind": {
+        "duct": 1.9135886738233443
+      }
+    },
+    {
+      "id": "room:architect:mep-room-ref-1-b330",
+      "label": "Room B330",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "mep-room-ref-1-b330",
+        "bbox": [
+          3308.63,
+          1029.31,
+          3313.83,
+          1041.76
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    }
+  ],
+  "sample_selection": "All first three detected terminals; seven distinct evenly spaced duct candidates, including unlinked candidates.",
+  "manual_checks": [
+    {
+      "sample": 1,
+      "edges": [
+        {
+          "id": "mep:d082beaf365933b04c45",
+          "kind": "in_room",
+          "from": "terminal:services:mep-1-terminal-1",
+          "to": "room:architect:mep-room-ref-1-b321",
+          "method": "containment_geom",
+          "confidence": 0.5,
+          "evidence": {
+            "rule": "aligned vector service intersects MEP room polygon",
+            "alignment": {
+              "T": {
+                "s": 0.5000318923582131,
+                "R": [
+                  [
+                    0.9999999996135134,
+                    2.780239313642187e-05
+                  ],
+                  [
+                    -2.7802393136418164e-05,
+                    0.9999999996135133
+                  ]
+                ],
+                "t": [
+                  1510.1183674499282,
+                  224.5039050182736
+                ],
+                "rot_deg": -0.0015929597872854678,
+                "n_words": 116,
+                "n_inliers": 115,
+                "rms_pt": 0.5939695337414035,
+                "method": "shared-text",
+                "residual": 0.5939695337414035,
+                "matches": 115,
+                "T": [
+                  [
+                    0.5000318921649575,
+                    1.3902083252092023e-05,
+                    1510.1183674499282
+                  ],
+                  [
+                    -1.390208325209017e-05,
+                    0.5000318921649574,
+                    224.5039050182736
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    1.0
+                  ]
+                ]
+              },
+              "residual": 0.020953925218099512,
+              "matches": 115
+            },
+            "residual_m": 0.020953925218099512,
+            "sources": [
+              {
+                "doc_id": "services",
+                "page": 1,
+                "item_id": "mep-1-terminal-1",
+                "bbox": [
+                  2675.0,
+                  1637.0,
+                  2705.0,
+                  1667.0
+                ]
+              },
+              {
+                "doc_id": "architect",
+                "page": 1,
+                "item_id": "mep-room-ref-1-b321",
+                "bbox": [
+                  2856.79,
+                  1142.04,
+                  2864.26,
+                  1158.09
+                ]
+              }
+            ],
+            "boundary_source": {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "mep-room-ref-1-26",
+              "bbox": [
+                2651.103,
+                1524.478,
+                2976.781,
+                1985.7109999999998
+              ],
+              "note": "Read-only room role extraction; boundary is an unverified estimate."
+            },
+            "boundary_method": "MEP room polygon",
+            "boundary_clearance_m": 0.6861436237962006,
+            "calibration": "Uncalibrated service-symbol and room-boundary detection; measured alignment alone does not establish link accuracy."
+          },
+          "doc_ids": [
+            "architect",
+            "services"
+          ]
+        }
+      ],
+      "service_label": "Terminal",
+      "room_label": "Room B321",
+      "source_detection": {
+        "center_pt": [
+          2690.0,
+          1652.0
+        ],
+        "size_pt": 29.999999999999996,
+        "size_m": 0.529,
+        "shape": "square",
+        "airflow_ls": null,
+        "label": null
+      },
+      "crops": [
+        "/tmp/kg-mep-round2-final/sample-01-architect.png",
+        "/tmp/kg-mep-round2-final/sample-01-services.png"
+      ],
+      "manual_verdict": "visually_checked",
+      "service_correct": true,
+      "room_assignment": "B321 correspondence supported by printed room number and visible meeting-room context; architectural boundary remains unverified.",
+      "note": "Square diffuser symbol visible; upper of two linked terminal candidates."
+    },
+    {
+      "sample": 2,
+      "edges": [
+        {
+          "id": "mep:0e2e4acf9431b56c965a",
+          "kind": "in_room",
+          "from": "terminal:services:mep-1-terminal-2",
+          "to": "room:architect:mep-room-ref-1-b321",
+          "method": "containment_geom",
+          "confidence": 0.5,
+          "evidence": {
+            "rule": "aligned vector service intersects MEP room polygon",
+            "alignment": {
+              "T": {
+                "s": 0.5000318923582131,
+                "R": [
+                  [
+                    0.9999999996135134,
+                    2.780239313642187e-05
+                  ],
+                  [
+                    -2.7802393136418164e-05,
+                    0.9999999996135133
+                  ]
+                ],
+                "t": [
+                  1510.1183674499282,
+                  224.5039050182736
+                ],
+                "rot_deg": -0.0015929597872854678,
+                "n_words": 116,
+                "n_inliers": 115,
+                "rms_pt": 0.5939695337414035,
+                "method": "shared-text",
+                "residual": 0.5939695337414035,
+                "matches": 115,
+                "T": [
+                  [
+                    0.5000318921649575,
+                    1.3902083252092023e-05,
+                    1510.1183674499282
+                  ],
+                  [
+                    -1.390208325209017e-05,
+                    0.5000318921649574,
+                    224.5039050182736
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    1.0
+                  ]
+                ]
+              },
+              "residual": 0.020953925218099512,
+              "matches": 115
+            },
+            "residual_m": 0.020953925218099512,
+            "sources": [
+              {
+                "doc_id": "services",
+                "page": 1,
+                "item_id": "mep-1-terminal-2",
+                "bbox": [
+                  2675.0,
+                  1693.0,
+                  2705.0,
+                  1723.0
+                ]
+              },
+              {
+                "doc_id": "architect",
+                "page": 1,
+                "item_id": "mep-room-ref-1-b321",
+                "bbox": [
+                  2856.79,
+                  1142.04,
+                  2864.26,
+                  1158.09
+                ]
+              }
+            ],
+            "boundary_source": {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "mep-room-ref-1-26",
+              "bbox": [
+                2651.103,
+                1524.478,
+                2976.781,
+                1985.7109999999998
+              ],
+              "note": "Read-only room role extraction; boundary is an unverified estimate."
+            },
+            "boundary_method": "MEP room polygon",
+            "boundary_clearance_m": 0.6861436237961862,
+            "calibration": "Uncalibrated service-symbol and room-boundary detection; measured alignment alone does not establish link accuracy."
+          },
+          "doc_ids": [
+            "architect",
+            "services"
+          ]
+        }
+      ],
+      "service_label": "+115 l/s",
+      "room_label": "Room B321",
+      "source_detection": {
+        "center_pt": [
+          2690.0,
+          1708.0
+        ],
+        "size_pt": 29.999999999999996,
+        "size_m": 0.529,
+        "shape": "square",
+        "airflow_ls": 115.0,
+        "label": "+115 l/s"
+      },
+      "crops": [
+        "/tmp/kg-mep-round2-final/sample-02-architect.png",
+        "/tmp/kg-mep-round2-final/sample-02-services.png"
+      ],
+      "manual_verdict": "visually_checked",
+      "service_correct": true,
+      "room_assignment": "B321 correspondence supported by printed room number and visible meeting-room context; architectural boundary remains unverified.",
+      "note": "Square diffuser symbol visible with nearby +115 l/s text."
+    },
+    {
+      "sample": 3,
+      "edges": [],
+      "service_label": "-115 l/s",
+      "room_label": null,
+      "source_detection": {
+        "center_pt": [
+          2652.0,
+          1888.0
+        ],
+        "size_pt": 18.0,
+        "size_m": 0.318,
+        "shape": "round",
+        "airflow_ls": -115.0,
+        "label": "-115 l/s"
+      },
+      "crops": [
+        "/tmp/kg-mep-round2-final/sample-03-architect.png",
+        "/tmp/kg-mep-round2-final/sample-03-services.png"
+      ],
+      "manual_verdict": "visually_checked",
+      "service_correct": true,
+      "room_assignment": "No graph assignment; source crop places circular exhaust symbol near the B321 room label.",
+      "note": "Round P2-315 symbol with -115 l/s visible; conservative boundary matching misses this candidate."
+    },
+    {
+      "sample": 4,
+      "edges": [],
+      "service_label": "Duct",
+      "room_label": null,
+      "source_detection": {
+        "start_pt": [
+          2282.5199489817023,
+          1665.7200192287564
+        ],
+        "end_pt": [
+          2282.5199489817023,
+          1861.0800148621202
+        ],
+        "width_pt": 11.279999747872353,
+        "width_m": 0.199,
+        "length_m": 3.446,
+        "shape": "rect",
+        "height_m": null,
+        "label": null,
+        "outline_pt": [
+          [
+            2288.1599488556385,
+            1665.7200192287564
+          ],
+          [
+            2288.1599488556385,
+            1861.0800148621202
+          ],
+          [
+            2276.879949107766,
+            1861.0800148621202
+          ],
+          [
+            2276.879949107766,
+            1665.7200192287564
+          ]
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2-final/sample-04-architect.png",
+        "/tmp/kg-mep-round2-final/sample-04-services.png"
+      ],
+      "manual_verdict": "visually_checked",
+      "service_correct": false,
+      "room_assignment": "Unlinked.",
+      "note": "Long narrow SP-200/+60 l/s symbol; treating it as a duct is a wrong-kind detection."
+    },
+    {
+      "sample": 5,
+      "edges": [],
+      "service_label": "Duct",
+      "room_label": null,
+      "source_detection": {
+        "start_pt": [
+          2898.1269466678104,
+          1005.4438506560166
+        ],
+        "end_pt": [
+          2965.898175755076,
+          1277.2594041215111
+        ],
+        "width_pt": 12.075167927638631,
+        "width_m": 0.213,
+        "length_m": 4.942,
+        "shape": "rect",
+        "height_m": null,
+        "label": null,
+        "outline_pt": [
+          [
+            2903.9851885849366,
+            1003.9832268986472
+          ],
+          [
+            2971.756417672202,
+            1275.7987803641417
+          ],
+          [
+            2960.03993383795,
+            1278.7200278788805
+          ],
+          [
+            2892.2687047506843,
+            1006.904474413386
+          ]
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2-final/sample-05-architect.png",
+        "/tmp/kg-mep-round2-final/sample-05-services.png"
+      ],
+      "manual_verdict": "visually_checked",
+      "service_correct": false,
+      "room_assignment": "Unlinked.",
+      "note": "Candidate follows diagonal leaders from a note row through the drawing, not a duct centreline."
+    },
+    {
+      "sample": 6,
+      "edges": [],
+      "service_label": "Duct",
+      "room_label": null,
+      "source_detection": {
+        "start_pt": [
+          2448.3599452748895,
+          955.800035096705
+        ],
+        "end_pt": [
+          2448.3599452748895,
+          1005.2400339916348
+        ],
+        "width_pt": 17.519999608397484,
+        "width_m": 0.309,
+        "length_m": 0.872,
+        "shape": "rect",
+        "height_m": null,
+        "label": null,
+        "outline_pt": [
+          [
+            2457.119945079088,
+            955.800035096705
+          ],
+          [
+            2457.119945079088,
+            1005.2400339916348
+          ],
+          [
+            2439.5999454706907,
+            1005.2400339916348
+          ],
+          [
+            2439.5999454706907,
+            955.800035096705
+          ]
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2-final/sample-06-architect.png",
+        "/tmp/kg-mep-round2-final/sample-06-services.png"
+      ],
+      "manual_verdict": "visually_checked",
+      "service_correct": false,
+      "room_assignment": "Unlinked.",
+      "note": "Candidate lies inside a P1-125/-20 l/s callout table, not a duct."
+    },
+    {
+      "sample": 7,
+      "edges": [],
+      "service_label": "Duct",
+      "room_label": null,
+      "source_detection": {
+        "start_pt": [
+          2858.1964245086538,
+          1006.5767362326268
+        ],
+        "end_pt": [
+          2935.35151987668,
+          1275.6485302350043
+        ],
+        "width_pt": 22.28651218026971,
+        "width_m": 0.393,
+        "length_m": 4.938,
+        "shape": "rect",
+        "height_m": null,
+        "label": null,
+        "outline_pt": [
+          [
+            2868.908009756132,
+            1003.5052385887503
+          ],
+          [
+            2946.063105124158,
+            1272.5770325911278
+          ],
+          [
+            2924.639934629202,
+            1278.7200278788807
+          ],
+          [
+            2847.4848392611757,
+            1009.6482338765032
+          ]
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2-final/sample-07-architect.png",
+        "/tmp/kg-mep-round2-final/sample-07-services.png"
+      ],
+      "manual_verdict": "visually_checked",
+      "service_correct": false,
+      "room_assignment": "Unlinked.",
+      "note": "Diagonal annotation leaders mistaken for a run."
+    },
+    {
+      "sample": 8,
+      "edges": [],
+      "service_label": "Duct",
+      "room_label": null,
+      "source_detection": {
+        "start_pt": [
+          513.9599885120988,
+          1122.84003136307
+        ],
+        "end_pt": [
+          769.0799828097224,
+          1122.84003136307
+        ],
+        "width_pt": 35.759999200701714,
+        "width_m": 0.631,
+        "length_m": 4.5,
+        "shape": "rect",
+        "height_m": null,
+        "label": null,
+        "outline_pt": [
+          [
+            513.9599885120988,
+            1104.9600317627192
+          ],
+          [
+            769.0799828097224,
+            1104.9600317627192
+          ],
+          [
+            769.0799828097224,
+            1140.7200309634209
+          ],
+          [
+            513.9599885120988,
+            1140.7200309634209
+          ]
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2-final/sample-08-architect.png",
+        "/tmp/kg-mep-round2-final/sample-08-services.png"
+      ],
+      "manual_verdict": "visually_checked",
+      "service_correct": true,
+      "room_assignment": "Unlinked.",
+      "note": "Centreline lies inside a drawn duct with elbow/fitting; room identity is not established."
+    },
+    {
+      "sample": 9,
+      "edges": [],
+      "service_label": "Duct",
+      "room_label": null,
+      "source_detection": {
+        "start_pt": [
+          255.71999428421256,
+          1385.0400255024433
+        ],
+        "end_pt": [
+          255.71999428421256,
+          1487.1600232198834
+        ],
+        "width_pt": 56.63999873399732,
+        "width_m": 0.999,
+        "length_m": 1.801,
+        "shape": "rect",
+        "height_m": null,
+        "label": null,
+        "outline_pt": [
+          [
+            284.0399936512112,
+            1385.0400255024433
+          ],
+          [
+            284.0399936512112,
+            1487.1600232198834
+          ],
+          [
+            227.39999491721392,
+            1487.1600232198834
+          ],
+          [
+            227.39999491721392,
+            1385.0400255024433
+          ]
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2-final/sample-09-architect.png",
+        "/tmp/kg-mep-round2-final/sample-09-services.png"
+      ],
+      "manual_verdict": "visually_checked",
+      "service_correct": false,
+      "room_assignment": "Unlinked.",
+      "note": "Centreline passes across the IV-KONE equipment face, not a duct run."
+    },
+    {
+      "sample": 10,
+      "edges": [],
+      "service_label": "Duct",
+      "room_label": null,
+      "source_detection": {
+        "start_pt": [
+          270.59999395161867,
+          1868.4847205789652
+        ],
+        "end_pt": [
+          391.79999124258757,
+          1868.4847205789652
+        ],
+        "width_pt": 73.84941011404294,
+        "width_m": 1.303,
+        "length_m": 2.138,
+        "shape": "rect",
+        "height_m": null,
+        "label": null,
+        "outline_pt": [
+          [
+            270.59999395161867,
+            1831.5600155219436
+          ],
+          [
+            391.79999124258757,
+            1831.5600155219436
+          ],
+          [
+            391.79999124258757,
+            1905.4094256359867
+          ],
+          [
+            270.59999395161867,
+            1905.4094256359867
+          ]
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2-final/sample-10-architect.png",
+        "/tmp/kg-mep-round2-final/sample-10-services.png"
+      ],
+      "manual_verdict": "visually_checked",
+      "service_correct": null,
+      "room_assignment": "Unlinked.",
+      "note": "Dense equipment/duct junction: crop does not establish an entire duct run."
+    }
+  ],
+  "room_matches": [
+    {
+      "from_label": "TOIMISTO",
+      "to_label": "Room B308",
+      "edge": {
+        "id": "mep:bf0e6259836ceedb9e1b",
+        "kind": "same_as",
+        "from": "room:services:room-001",
+        "to": "room:architect:mep-room-ref-1-b308",
+        "method": "position",
+        "confidence": 0.6363636363636364,
+        "evidence": {
+          "rule": "unique room-number record has matching printed text after shared-text alignment",
+          "room_number": "B308",
+          "residual_m": 0.011188212671288621,
+          "alignment": {
+            "T": {
+              "s": 0.5000318923582131,
+              "R": [
+                [
+                  0.9999999996135134,
+                  2.780239313642187e-05
+                ],
+                [
+                  -2.7802393136418164e-05,
+                  0.9999999996135133
+                ]
+              ],
+              "t": [
+                1510.1183674499282,
+                224.5039050182736
+              ],
+              "rot_deg": -0.0015929597872854678,
+              "n_words": 116,
+              "n_inliers": 115,
+              "rms_pt": 0.5939695337414035,
+              "method": "shared-text",
+              "residual": 0.5939695337414035,
+              "matches": 115,
+              "T": [
+                [
+                  0.5000318921649575,
+                  1.3902083252092023e-05,
+                  1510.1183674499282
+                ],
+                [
+                  -1.390208325209017e-05,
+                  0.5000318921649574,
+                  224.5039050182736
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "residual": 0.020953925218099512,
+            "matches": 115
+          },
+          "number_printings": {
+            "source": 2,
+            "target": 2
+          },
+          "sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "room-001",
+              "bbox": [
+                1446.7,
+                1088.8,
+                1612.9,
+                1393.3
+              ]
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "item_id": "mep-room-ref-1-b308",
+              "bbox": [
+                2246.67,
+                895.8900000000001,
+                2259.16,
+                901.0899999999999
+              ]
+            }
+          ],
+          "text_sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "bbox_pt": [
+                1473.4,
+                1342.39,
+                1498.69,
+                1352.97
+              ],
+              "quote": "B308"
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "bbox_pt": [
+                2246.67,
+                895.89,
+                2259.16,
+                901.09
+              ],
+              "quote": "B308"
+            }
+          ],
+          "calibration": "KG-EVAL non-heldout position reference-matcher table; identity only, not room-boundary or service-detection accuracy."
+        },
+        "doc_ids": [
+          "architect",
+          "services"
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2-final/room-match-01-services.png",
+        "/tmp/kg-mep-round2-final/room-match-01-architect.png"
+      ]
+    },
+    {
+      "from_label": "TOIMISTO",
+      "to_label": "Room B306",
+      "edge": {
+        "id": "mep:0b45746360375bae87e1",
+        "kind": "same_as",
+        "from": "room:services:room-003",
+        "to": "room:architect:mep-room-ref-1-b306",
+        "method": "position",
+        "confidence": 0.6363636363636364,
+        "evidence": {
+          "rule": "unique room-number record has matching printed text after shared-text alignment",
+          "room_number": "B306",
+          "residual_m": 0.008247514357330095,
+          "alignment": {
+            "T": {
+              "s": 0.5000318923582131,
+              "R": [
+                [
+                  0.9999999996135134,
+                  2.780239313642187e-05
+                ],
+                [
+                  -2.7802393136418164e-05,
+                  0.9999999996135133
+                ]
+              ],
+              "t": [
+                1510.1183674499282,
+                224.5039050182736
+              ],
+              "rot_deg": -0.0015929597872854678,
+              "n_words": 116,
+              "n_inliers": 115,
+              "rms_pt": 0.5939695337414035,
+              "method": "shared-text",
+              "residual": 0.5939695337414035,
+              "matches": 115,
+              "T": [
+                [
+                  0.5000318921649575,
+                  1.3902083252092023e-05,
+                  1510.1183674499282
+                ],
+                [
+                  -1.390208325209017e-05,
+                  0.5000318921649574,
+                  224.5039050182736
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "residual": 0.020953925218099512,
+            "matches": 115
+          },
+          "number_printings": {
+            "source": 2,
+            "target": 2
+          },
+          "sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "room-003",
+              "bbox": [
+                1082.4,
+                1088.4,
+                1270.8,
+                1395.2
+              ]
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "item_id": "mep-room-ref-1-b306",
+              "bbox": [
+                2077.59,
+                895.29,
+                2090.08,
+                900.4900000000001
+              ]
+            }
+          ],
+          "text_sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "bbox_pt": [
+                1135.14,
+                1341.31,
+                1160.41,
+                1351.89
+              ],
+              "quote": "B306"
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "bbox_pt": [
+                2077.59,
+                895.29,
+                2090.08,
+                900.49
+              ],
+              "quote": "B306"
+            }
+          ],
+          "calibration": "KG-EVAL non-heldout position reference-matcher table; identity only, not room-boundary or service-detection accuracy."
+        },
+        "doc_ids": [
+          "architect",
+          "services"
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2-final/room-match-02-services.png",
+        "/tmp/kg-mep-round2-final/room-match-02-architect.png"
+      ]
+    },
+    {
+      "from_label": "LE-WC",
+      "to_label": "Room B319",
+      "edge": {
+        "id": "mep:ee6d1131179a3749196b",
+        "kind": "same_as",
+        "from": "room:services:room-006",
+        "to": "room:architect:mep-room-ref-1-b319",
+        "method": "position",
+        "confidence": 0.6363636363636364,
+        "evidence": {
+          "rule": "unique room-number record has matching printed text after shared-text alignment",
+          "room_number": "B319",
+          "residual_m": 0.0034331225406743497,
+          "alignment": {
+            "T": {
+              "s": 0.5000318923582131,
+              "R": [
+                [
+                  0.9999999996135134,
+                  2.780239313642187e-05
+                ],
+                [
+                  -2.7802393136418164e-05,
+                  0.9999999996135133
+                ]
+              ],
+              "t": [
+                1510.1183674499282,
+                224.5039050182736
+              ],
+              "rot_deg": -0.0015929597872854678,
+              "n_words": 116,
+              "n_inliers": 115,
+              "rms_pt": 0.5939695337414035,
+              "method": "shared-text",
+              "residual": 0.5939695337414035,
+              "matches": 115,
+              "T": [
+                [
+                  0.5000318921649575,
+                  1.3902083252092023e-05,
+                  1510.1183674499282
+                ],
+                [
+                  -1.390208325209017e-05,
+                  0.5000318921649574,
+                  224.5039050182736
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "residual": 0.020953925218099512,
+            "matches": 115
+          },
+          "number_printings": {
+            "source": 2,
+            "target": 2
+          },
+          "sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "room-006",
+              "bbox": [
+                3123.2,
+                1318.7,
+                3263.1,
+                1386.8
+              ]
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "item_id": "mep-room-ref-1-b319",
+              "bbox": [
+                3077.03,
+                904.02,
+                3082.23,
+                916.48
+              ]
+            }
+          ],
+          "text_sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "bbox_pt": [
+                3133.47,
+                1359.04,
+                3144.05,
+                1384.33
+              ],
+              "quote": "B319"
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "bbox_pt": [
+                3077.03,
+                904.02,
+                3082.23,
+                916.48
+              ],
+              "quote": "B319"
+            }
+          ],
+          "calibration": "KG-EVAL non-heldout position reference-matcher table; identity only, not room-boundary or service-detection accuracy."
+        },
+        "doc_ids": [
+          "architect",
+          "services"
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2-final/room-match-03-services.png",
+        "/tmp/kg-mep-round2-final/room-match-03-architect.png"
+      ]
+    },
+    {
+      "from_label": "WC 1.5",
+      "to_label": "Room B325",
+      "edge": {
+        "id": "mep:cedeff4774d6b7dd1f74",
+        "kind": "same_as",
+        "from": "room:services:room-010",
+        "to": "room:architect:mep-room-ref-1-b325",
+        "method": "position",
+        "confidence": 0.6363636363636364,
+        "evidence": {
+          "rule": "unique room-number record has matching printed text after shared-text alignment",
+          "room_number": "B325",
+          "residual_m": 0.014596315349501638,
+          "alignment": {
+            "T": {
+              "s": 0.5000318923582131,
+              "R": [
+                [
+                  0.9999999996135134,
+                  2.780239313642187e-05
+                ],
+                [
+                  -2.7802393136418164e-05,
+                  0.9999999996135133
+                ]
+              ],
+              "t": [
+                1510.1183674499282,
+                224.5039050182736
+              ],
+              "rot_deg": -0.0015929597872854678,
+              "n_words": 116,
+              "n_inliers": 115,
+              "rms_pt": 0.5939695337414035,
+              "method": "shared-text",
+              "residual": 0.5939695337414035,
+              "matches": 115,
+              "T": [
+                [
+                  0.5000318921649575,
+                  1.3902083252092023e-05,
+                  1510.1183674499282
+                ],
+                [
+                  -1.390208325209017e-05,
+                  0.5000318921649574,
+                  224.5039050182736
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "residual": 0.020953925218099512,
+            "matches": 115
+          },
+          "number_printings": {
+            "source": 2,
+            "target": 2
+          },
+          "sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "room-010",
+              "bbox": [
+                3363.7,
+                1431.6,
+                3486.1,
+                1514.6
+              ]
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "item_id": "mep-room-ref-1-b325",
+              "bbox": [
+                3223.47,
+                948.21,
+                3235.96,
+                953.42
+              ]
+            }
+          ],
+          "text_sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "bbox_pt": [
+                3427.07,
+                1447.15,
+                3452.41,
+                1457.73
+              ],
+              "quote": "B325"
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "bbox_pt": [
+                3223.47,
+                948.21,
+                3235.96,
+                953.42
+              ],
+              "quote": "B325"
+            }
+          ],
+          "calibration": "KG-EVAL non-heldout position reference-matcher table; identity only, not room-boundary or service-detection accuracy."
+        },
+        "doc_ids": [
+          "architect",
+          "services"
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2-final/room-match-04-services.png",
+        "/tmp/kg-mep-round2-final/room-match-04-architect.png"
+      ]
+    },
+    {
+      "from_label": "KOKOUSTILA",
+      "to_label": "Room B321",
+      "edge": {
+        "id": "mep:a6cac8368d4e6c9c5834",
+        "kind": "same_as",
+        "from": "room:services:mep-room-ref-1-26",
+        "to": "room:architect:mep-room-ref-1-b321",
+        "method": "position",
+        "confidence": 0.6363636363636364,
+        "evidence": {
+          "rule": "unique room-number record has matching printed text after shared-text alignment",
+          "room_number": "B321",
+          "residual_m": 0.0058125799355558845,
+          "alignment": {
+            "T": {
+              "s": 0.5000318923582131,
+              "R": [
+                [
+                  0.9999999996135134,
+                  2.780239313642187e-05
+                ],
+                [
+                  -2.7802393136418164e-05,
+                  0.9999999996135133
+                ]
+              ],
+              "t": [
+                1510.1183674499282,
+                224.5039050182736
+              ],
+              "rot_deg": -0.0015929597872854678,
+              "n_words": 116,
+              "n_inliers": 115,
+              "rms_pt": 0.5939695337414035,
+              "method": "shared-text",
+              "residual": 0.5939695337414035,
+              "matches": 115,
+              "T": [
+                [
+                  0.5000318921649575,
+                  1.3902083252092023e-05,
+                  1510.1183674499282
+                ],
+                [
+                  -1.390208325209017e-05,
+                  0.5000318921649574,
+                  224.5039050182736
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "residual": 0.020953925218099512,
+            "matches": 115
+          },
+          "number_printings": {
+            "source": 3,
+            "target": 3
+          },
+          "sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "mep-room-ref-1-26",
+              "bbox": [
+                2693.11,
+                1834.92,
+                2707.8,
+                1867.84
+              ]
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "item_id": "mep-room-ref-1-b321",
+              "bbox": [
+                2856.79,
+                1142.04,
+                2864.26,
+                1158.09
+              ]
+            }
+          ],
+          "text_sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "bbox_pt": [
+                2693.11,
+                1834.92,
+                2707.8,
+                1867.84
+              ],
+              "quote": "B321"
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "bbox_pt": [
+                2856.79,
+                1142.04,
+                2864.26,
+                1158.09
+              ],
+              "quote": "B321"
+            }
+          ],
+          "calibration": "KG-EVAL non-heldout position reference-matcher table; identity only, not room-boundary or service-detection accuracy."
+        },
+        "doc_ids": [
+          "architect",
+          "services"
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2-final/room-match-05-services.png",
+        "/tmp/kg-mep-round2-final/room-match-05-architect.png"
+      ]
+    },
+    {
+      "from_label": "B330 LE-WC",
+      "to_label": "Room B330",
+      "edge": {
+        "id": "mep:3c719e114a455ac993d8",
+        "kind": "same_as",
+        "from": "room:services:mep-room-ref-1-76",
+        "to": "room:architect:mep-room-ref-1-b330",
+        "method": "position",
+        "confidence": 0.6363636363636364,
+        "evidence": {
+          "rule": "unique room-number record has matching printed text after shared-text alignment",
+          "room_number": "B330",
+          "residual_m": 0.0036417453064307497,
+          "alignment": {
+            "T": {
+              "s": 0.5000318923582131,
+              "R": [
+                [
+                  0.9999999996135134,
+                  2.780239313642187e-05
+                ],
+                [
+                  -2.7802393136418164e-05,
+                  0.9999999996135133
+                ]
+              ],
+              "t": [
+                1510.1183674499282,
+                224.5039050182736
+              ],
+              "rot_deg": -0.0015929597872854678,
+              "n_words": 116,
+              "n_inliers": 115,
+              "rms_pt": 0.5939695337414035,
+              "method": "shared-text",
+              "residual": 0.5939695337414035,
+              "matches": 115,
+              "T": [
+                [
+                  0.5000318921649575,
+                  1.3902083252092023e-05,
+                  1510.1183674499282
+                ],
+                [
+                  -1.390208325209017e-05,
+                  0.5000318921649574,
+                  224.5039050182736
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "residual": 0.020953925218099512,
+            "matches": 115
+          },
+          "number_printings": {
+            "source": 2,
+            "target": 2
+          },
+          "sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "mep-room-ref-1-76",
+              "bbox": [
+                3596.6699999999996,
+                1609.64,
+                3607.25,
+                1634.89
+              ]
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "item_id": "mep-room-ref-1-b330",
+              "bbox": [
+                3308.63,
+                1029.31,
+                3313.83,
+                1041.76
+              ]
+            }
+          ],
+          "text_sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "bbox_pt": [
+                3596.67,
+                1609.64,
+                3607.25,
+                1634.89
+              ],
+              "quote": "B330"
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "bbox_pt": [
+                3308.63,
+                1029.31,
+                3313.83,
+                1041.76
+              ],
+              "quote": "B330"
+            }
+          ],
+          "calibration": "KG-EVAL non-heldout position reference-matcher table; identity only, not room-boundary or service-detection accuracy."
+        },
+        "doc_ids": [
+          "architect",
+          "services"
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2-final/room-match-06-services.png",
+        "/tmp/kg-mep-round2-final/room-match-06-architect.png"
+      ]
+    }
+  ],
+  "mep": {
+    "documents": {
+      "services": {
+        "pdf_pages": {
+          "1": {
+            "ducts": 42,
+            "terminals": 3,
+            "alignment": {
+              "T": {
+                "s": 0.5000318923582131,
+                "R": [
+                  [
+                    0.9999999996135134,
+                    2.780239313642187e-05
+                  ],
+                  [
+                    -2.7802393136418164e-05,
+                    0.9999999996135133
+                  ]
+                ],
+                "t": [
+                  1510.1183674499282,
+                  224.5039050182736
+                ],
+                "rot_deg": -0.0015929597872854678,
+                "n_words": 116,
+                "n_inliers": 115,
+                "rms_pt": 0.5939695337414035,
+                "method": "shared-text",
+                "residual": 0.5939695337414035,
+                "matches": 115,
+                "T": [
+                  [
+                    0.5000318921649575,
+                    1.3902083252092023e-05,
+                    1510.1183674499282
+                  ],
+                  [
+                    -1.390208325209017e-05,
+                    0.5000318921649574,
+                    224.5039050182736
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    1.0
+                  ]
+                ]
+              },
+              "residual": 0.020953925218099512,
+              "matches": 115
+            },
+            "room_regions": 28,
+            "room_reference_regions": 5,
+            "notes": [
+              "Counts are detected candidates, not complete installed quantities.",
+              "Composite room regions and text-label boxes cannot supply room boundaries."
+            ]
+          }
+        }
+      }
+    },
+    "notes": []
+  },
+  "stats": {
+    "nodes": 1260,
+    "edges": 1476,
+    "by_kind": {
+      "project": 1,
+      "doc": 2,
+      "room": 62,
+      "wall": 1108,
+      "fixture": 42,
+      "duct": 42,
+      "terminal": 3
+    },
+    "edges_by_kind": {
+      "contains": 1259,
+      "in_room": 27,
+      "bounds": 182,
+      "same_as": 6,
+      "serves": 2
+    },
+    "linked_pct": null,
+    "agree_pct": null,
+    "unlinked": [
+      "room:architect:room-001",
+      "room:architect:room-002",
+      "room:architect:room-003",
+      "room:architect:room-004",
+      "room:architect:room-005",
+      "room:architect:room-006",
+      "room:architect:room-007",
+      "room:architect:room-008",
+      "room:architect:room-009",
+      "room:architect:room-010",
+      "room:architect:room-011",
+      "room:architect:room-012",
+      "room:architect:room-013",
+      "room:architect:room-014",
+      "room:architect:room-015",
+      "room:architect:room-016",
+      "room:architect:room-017",
+      "room:architect:room-018",
+      "room:architect:room-019",
+      "room:architect:room-020",
+      "room:architect:room-021",
+      "room:architect:room-022",
+      "room:architect:room-023",
+      "room:architect:room-024",
+      "room:architect:room-025",
+      "room:architect:room-026",
+      "room:architect:room-027",
+      "room:architect:room-028",
+      "room:architect:room-029",
+      "wall:architect:wall-001",
+      "wall:architect:wall-002",
+      "wall:architect:wall-003",
+      "wall:architect:wall-004",
+      "wall:architect:wall-005",
+      "wall:architect:wall-006",
+      "wall:architect:wall-007",
+      "wall:architect:wall-008",
+      "wall:architect:wall-009",
+      "wall:architect:wall-010",
+      "wall:architect:wall-011",
+      "wall:architect:wall-012",
+      "wall:architect:wall-013",
+      "wall:architect:wall-014",
+      "wall:architect:wall-015",
+      "wall:architect:wall-016",
+      "wall:architect:wall-017",
+      "wall:architect:wall-018",
+      "wall:architect:wall-019",
+      "wall:architect:wall-020",
+      "wall:architect:wall-021"
+    ],
+    "issues": 0,
+    "counterpart_items": 0,
+    "linked_items": 0
+  },
+  "limitations": [
+    "Detected candidates are incomplete; counts are not total installed quantities.",
+    "Crops contain local source drawings and are deliberately not committed.",
+    "Judges' sheets are evaluation only; no confidence table is fit on these files.",
+    "Upstream duct detector has confirmed wrong-kind and annotation/equipment false positives in this diagnostic sample.",
+    "The two linked duct runs are unverified candidates; neither count nor clipped length is a verified take-off.",
+    "Core maps text/dimensions to fixtures; room_services filters them out, but graph/UI needs the corresponding core fix."
+  ],
+  "manual_summary": {
+    "visually_checked": 10,
+    "plausible_service_detections": 4,
+    "wrong_kind_or_false_detections": 5,
+    "uncertain": 1,
+    "linked_terminals_checked": 2,
+    "linked_terminal_room_contexts_supported": 2,
+    "scope": "Diagnostic sample only. Not random, not a population precision estimate, and not a calibration training set."
+  },
+  "calibration_summary": {
+    "room_identity": "Use existing non-heldout KG-EVAL position table; confidence uses max of room-anchor error and measured alignment residual. No table fit on judges files.",
+    "service_geometry": "Keep 0.5 estimates: independent room-boundary/service-symbol gold is unavailable; a good registration residual cannot establish detector precision.",
+    "registration": "Fitted residual and leave-one-inlier-out errors are measured separately in round2.json; they measure alignment consistency only.",
+    "room_identity_scores": [
+      0.6363636363636364
+    ],
+    "source_bin": {
+      "max_residual_m": 0.05,
+      "n": 9,
+      "correct": 6,
+      "laplace_probability": 0.6363636363636364
+    },
+    "heldout_evaluation_only": true
+  },
+  "duct_runs_per_room": [
+    {
+      "node_id": "room:architect:room-015",
+      "label": "AKA1 WC",
+      "candidate_duct_runs": 1,
+      "candidate_terminals": 0,
+      "estimated_clipped_duct_length_m": 2.3212777786749186,
+      "status": "unverified service candidates; not an installed-quantity take-off"
+    },
+    {
+      "node_id": "room:architect:mep-room-ref-1-b321",
+      "label": "Room B321",
+      "candidate_duct_runs": 1,
+      "candidate_terminals": 2,
+      "estimated_clipped_duct_length_m": 1.9135886738233443,
+      "status": "unverified service candidates; not an installed-quantity take-off"
+    }
+  ],
+  "dangling_edges": 0,
+  "test_results": {
+    "graph_mep_pdf_mep_passed": 54,
+    "other_pdf_reader_passed": 70,
+    "graph_api_passed": 2,
+    "skipped": 1,
+    "models_fake": true
+  },
+  "performance_note": "One concurrent validation attempt exhausted the configured 20-second enrichment budget before counterpart alignment. It returned an explicit note and no service links; a final rerun is recorded separately.",
+  "status": "partial: real registration, room identities and candidate links built; service quantities and geometry precision not verified",
+  "implementation_commit": "d15e755"
+}

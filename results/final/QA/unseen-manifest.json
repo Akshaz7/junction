@@ -1,0 +1,37 @@
+{
+  "created": "2026-11-14T21:19:51+00:00",
+  "questions": 12,
+  "source_inventory": [
+    {
+      "doc_id": "ifc_models__resbim-110-model",
+      "raw_file": "data/full/junction-dataset/data/ifc_models/resbim-110_model.ifc",
+      "format": "ifc",
+      "raw_bytes": 377798,
+      "sha256": "3783c07cd412d869b95556fe9f91cbd7944821dc116bf668d0260c0d7726d454",
+      "schema": "IFC4",
+      "authoring_tools": [
+        "Autodesk Revit 2026 (ENG)"
+      ],
+      "unit_scale_m": 0.001,
+      "storey_count": 1,
+      "raw_entities": null,
+      "raw_entity_types": null,
+      "raw_dxf_insunits": null
+    }
+  ],
+  "ids": [
+    "ifc_models__resbim-110-model:door",
+    "ifc_models__resbim-110-model:window",
+    "ifc_models__resbim-110-model:column",
+    "ifc_models__resbim-110-model:beam",
+    "ifc_models__resbim-110-model:pipe",
+    "ifc_models__resbim-110-model:duct",
+    "ifc_models__resbim-110-model:light",
+    "ifc_models__resbim-110-model:storey",
+    "ifc_models__resbim-110-model:width",
+    "ifc_models__resbim-110-model:fire",
+    "ifc_models__resbim-110-model:volume",
+    "ifc_models__resbim-110-model:order"
+  ],
+  "sha256": "631268c159aabc33d93e238e0122f4cfd495a02ec8f78df9ab726b2ec4e1d45c"
+}

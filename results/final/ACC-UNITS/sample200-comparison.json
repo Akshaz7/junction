@@ -1,0 +1,46 @@
+{
+  "correct_to_wrong": 0,
+  "regressions": [],
+  "improvements": [
+    {
+      "before": {
+        "doc_id": "swiss_dwellings__site4237-bldg7396-floor29509",
+        "source": "swiss_dwellings",
+        "type": "area",
+        "question": "What is the net floor area of apartment A in m\u00b2, summing all its rooms except balconies, loggias, terraces and other outdoor spaces?",
+        "gold": 85.75,
+        "value": null,
+        "unit": "m\u00b2",
+        "confidence": 0.2,
+        "outcome": "abstained",
+        "route": "hybrid",
+        "cost_usd": 0.0,
+        "ms": 81,
+        "boxes": 0,
+        "text": "**I couldn't find this on the drawing, so I won't guess a number.** Try asking about something drawn or labelled on the plan, or upload a model (IFC) or a clearer drawing that includes it.",
+        "error": null,
+        "text_verdict": null,
+        "judge_usd": 0.0
+      },
+      "after": {
+        "doc_id": "swiss_dwellings__site4237-bldg7396-floor29509",
+        "source": "swiss_dwellings",
+        "type": "area",
+        "question": "What is the net floor area of apartment A in m\u00b2, summing all its rooms except balconies, loggias, terraces and other outdoor spaces?",
+        "gold": 85.75,
+        "value": 86.0049,
+        "unit": "m\u00b2",
+        "confidence": 0.4,
+        "outcome": "correct",
+        "route": "planmap",
+        "cost_usd": 0,
+        "ms": 3,
+        "boxes": 9,
+        "text": "**The net floor area of Whg.** A** is **86.0 m\u00b2** across 9 indoor rooms. [1] The sum includes 2 unlabelled outlines; their room use is unknown.",
+        "error": null,
+        "text_verdict": null,
+        "judge_usd": 0.0
+      }
+    }
+  ]
+}

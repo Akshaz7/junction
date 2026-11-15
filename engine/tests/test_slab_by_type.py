@@ -39,10 +39,10 @@ def test_thickness_filter_and_missing_thickness_lists_available():
     assert "No **200 mm** slab" in t and "250 mm" in t and "300 mm" in t
 
 
-def test_bbox_height_fallback_is_named():
+def test_bbox_height_cannot_substitute_for_thickness():
     it = Item(item_id="s1", kind="slab", q={"area_m2": 10}, type_name="X", props={"ifc_class": "IfcSlab"}, source="ifc", bbox_m=[[0, 0, 0], [1, 0.2, 1]])
     t = _run("slab areas by thickness", _doc([it]))["answer"]["text_md"]
-    assert "200 mm" in t and "box height" in t
+    assert "250 mm" not in t and "200 mm" not in t and "unavailable" in t and "bounding-box height" in t
 
 
 def test_rebar_reported_only_when_present():

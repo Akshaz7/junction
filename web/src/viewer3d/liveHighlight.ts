@@ -42,13 +42,18 @@ export function decodeLiveMessage(raw: unknown): LiveMessage | null {
     && Number.isInteger(value.count) && (value.count as number) >= 0 ? value as unknown as FindingsUpdated : null;
   const ids = (v: unknown): v is string[] => Array.isArray(v) && v.every((id) => typeof id === 'string' && id.length > 0);
   const labels = (v: unknown) => record(v) && Object.values(v).every((label) => typeof label === 'string');
+  const offset = (v: unknown) => Array.isArray(v) && v.length === 2 && v.every((n) => typeof n === 'number' && Number.isFinite(n));
   if ((value.type === 'scene.edit' || value.type === 'scene.state') && typeof value.doc_id === 'string' && value.doc_id) {
     if (value.type === 'scene.edit') {
-      if (!['highlight', 'hide', 'restore', 'reset', 'isolate'].includes(value.op as string) || !ids(value.item_ids)
+      if (!['highlight', 'hide', 'restore', 'reset', 'isolate', 'move', 'material'].includes(value.op as string) || !ids(value.item_ids)
         || (value.labels !== undefined && !labels(value.labels))
-        || (value.edit_id !== undefined && typeof value.edit_id !== 'string')) return null;
+        || (value.edit_id !== undefined && typeof value.edit_id !== 'string')
+        || (value.op === 'move' && !offset(value.offset_m))
+        || (value.op === 'material' && value.material !== null && typeof value.material !== 'string')) return null;
     } else if (!ids(value.hidden) || !ids(value.highlighted) || !labels(value.labels)
-      || (value.isolated != null && !ids(value.isolated))) return null;
+      || (value.isolated != null && !ids(value.isolated))
+      || (value.moved !== undefined && !(record(value.moved) && Object.values(value.moved).every(offset)))
+      || (value.materials !== undefined && !labels(value.materials))) return null;
     return value as unknown as SceneEvent;
   }
   if (value.type !== 'scene.highlight' || typeof value.doc_id !== 'string' || !value.doc_id

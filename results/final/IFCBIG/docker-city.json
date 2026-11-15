@@ -1,0 +1,175 @@
+{
+  "file": "/source/full/junction-dataset/data/ifc_bench/city_house_munich_arc.ifc",
+  "size_bytes": 33499586,
+  "end_only": false,
+  "status": "partial",
+  "ingest_s": 3.988,
+  "state": {
+    "status": "partial",
+    "stages": [
+      {
+        "stage": "ifc_index",
+        "ok": true,
+        "s": 1.1,
+        "peak_process_rss_mib": 68.4,
+        "peak_worker_rss_mib": 122.9,
+        "memory_budget_mib": 320.0
+      },
+      {
+        "stage": "ifc_scene",
+        "ok": false,
+        "error": "The converter stopped (exit -11); it may have exceeded the server memory budget.",
+        "peak_worker_rss_mib": 276.1,
+        "memory_budget_mib": 320.0
+      }
+    ],
+    "detail": "The 3D view could not be prepared. Counts and quantities stored in the model are available. Measurements that require geometry may be unavailable. The converter stopped (exit -11); it may have exceeded the server memory budget.",
+    "mode": "vlm",
+    "started_at": 1794699506.75161,
+    "step": "ifc_scene",
+    "readable": true,
+    "progress": 0.6666666666666666,
+    "cost_usd": 0.0,
+    "updated": "2026-11-14T23:38:30+0000"
+  },
+  "schema": "IFC4X3",
+  "applications": [
+    "Autodesk Revit 2025 (ENU)"
+  ],
+  "elements": 214,
+  "kinds": {
+    "proxy": 2,
+    "covering": 1,
+    "door": 16,
+    "member": 1,
+    "railing": 5,
+    "roof": 3,
+    "slab": 19,
+    "stairs": 6,
+    "wall": 83,
+    "window": 13,
+    "terminal": 12,
+    "sanitary": 7,
+    "furniture": 26,
+    "room": 19,
+    "site": 1
+  },
+  "rooms_with_area": 19,
+  "answers": [
+    {
+      "question": "How many doors are there?",
+      "answer": {
+        "text_md": "There are **16 doors** in this model. [1]\n\nThe 3D view could not be prepared. Counts and quantities stored in the model are available. Measurements that require geometry may be unavailable. The converter stopped (exit -11); it may have exceeded the server memory budget.",
+        "value": 16,
+        "unit": "count",
+        "confidence": 1.0,
+        "abstained": false
+      },
+      "cost": {
+        "usd_total": 0,
+        "calls": []
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "16 doors on 5 storeys in the building model (IFC), each one numbered",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "citations": 1,
+      "cited_item_count": 16
+    },
+    {
+      "question": "How many windows are there?",
+      "answer": {
+        "text_md": "There are **13 windows** in this model. [1]\n\nThe 3D view could not be prepared. Counts and quantities stored in the model are available. Measurements that require geometry may be unavailable. The converter stopped (exit -11); it may have exceeded the server memory budget.",
+        "value": 13,
+        "unit": "count",
+        "confidence": 1.0,
+        "abstained": false
+      },
+      "cost": {
+        "usd_total": 0,
+        "calls": []
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "13 windows on 4 storeys in the building model (IFC), each one numbered",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "citations": 1,
+      "cited_item_count": 13
+    },
+    {
+      "question": "What is the total floor area of all rooms?",
+      "answer": {
+        "text_md": "The total area of the **19 rooms** in this model is **170.3 m²**. [1]\n\nThe 3D view could not be prepared. Counts and quantities stored in the model are available. Measurements that require geometry may be unavailable. The converter stopped (exit -11); it may have exceeded the server memory budget.",
+        "value": 170.2978,
+        "unit": "m²",
+        "confidence": 1.0,
+        "abstained": false
+      },
+      "cost": {
+        "usd_total": 0,
+        "calls": []
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "19 rooms on 4 storeys in the building model (IFC), each one numbered",
+            "cite": 1,
+            "ok": null
+          },
+          {
+            "kind": "calculated",
+            "title": "Calculated",
+            "text": "Added the stored floor areas of 19 rooms: 170.3 m²; largest 8 34.3, 18 22.7, 16 16.0",
+            "cite": null,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 97,
+          "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+          "improve": null
+        }
+      },
+      "citations": 1,
+      "cited_item_count": 19
+    }
+  ],
+  "container": {
+    "limit_bytes": 536870912,
+    "peak_bytes": 375742464,
+    "api_reserve_bytes": 57671680,
+    "events": {
+      "oom": 0,
+      "oom_kill": 0
+    }
+  }
+}

@@ -1,0 +1,331 @@
+[
+  {
+    "title": " > chromium > final-judge.spec.ts > [WEB] Library browses, searches and opens a real drawing; selection stays reachable",
+    "owner": "WEB",
+    "status": "passed",
+    "duration_ms": 19216,
+    "errors": [],
+    "annotations": [
+      {
+        "type": "document",
+        "description": "swiss_dwellings__site1000-bldg2082-floor9385 (swiss_dwellings)"
+      }
+    ],
+    "attachments": [
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/46fd6a836e0d18f570ba-f43e2326f5f104d92c0e/network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [WEB] Library browses, searches and opens a real model; selection stays reachable",
+    "owner": "WEB",
+    "status": "passed",
+    "duration_ms": 9832,
+    "errors": [],
+    "annotations": [
+      {
+        "type": "document",
+        "description": "ifc_bench__4351-arc (ifc_bench)"
+      }
+    ],
+    "attachments": [
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/46fd6a836e0d18f570ba-fdbb1e84ea5793e2932b/network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [WEB] Library browses, searches and opens a real scan; selection stays reachable",
+    "owner": "WEB",
+    "status": "passed",
+    "duration_ms": 6445,
+    "errors": [],
+    "annotations": [
+      {
+        "type": "document",
+        "description": "cubicasa5k__colorful-10052 (cubicasa5k)"
+      }
+    ],
+    "attachments": [
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/46fd6a836e0d18f570ba-5ac8ffddd245520ada6c/network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [ENGINE] Chat shows live status, bold answer, citations, evidence steps and confidence",
+    "owner": "ENGINE",
+    "status": "passed",
+    "duration_ms": 8607,
+    "errors": [],
+    "annotations": [],
+    "attachments": [
+      {
+        "name": "answer.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/46fd6a836e0d18f570ba-b8e3de58622734d9a664/answer.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "loading.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/46fd6a836e0d18f570ba-b8e3de58622734d9a664/loading.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/46fd6a836e0d18f570ba-b8e3de58622734d9a664/network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [WEB] Export report prepares source evidence; Take-off sheet downloads a cited CSV",
+    "owner": "WEB",
+    "status": "passed",
+    "duration_ms": 13426,
+    "errors": [],
+    "annotations": [],
+    "attachments": [
+      {
+        "name": "answer.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/46fd6a836e0d18f570ba-70c5da78025485d1ef29/answer.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "loading.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/46fd6a836e0d18f570ba-70c5da78025485d1ef29/loading.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "takeoff.csv",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/46fd6a836e0d18f570ba-70c5da78025485d1ef29/takeoff.csv",
+        "contentType": "text/csv"
+      },
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/46fd6a836e0d18f570ba-70c5da78025485d1ef29/network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [3D] Visualise keeps cited item identities; rise, storeys, camera, clear, hide and undo work",
+    "owner": "3D",
+    "status": "passed",
+    "duration_ms": 10567,
+    "errors": [],
+    "annotations": [],
+    "attachments": [
+      {
+        "name": "answer.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/46fd6a836e0d18f570ba-277e72d0cf08bf9d350d/answer.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "loading.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/46fd6a836e0d18f570ba-277e72d0cf08bf9d350d/loading.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/46fd6a836e0d18f570ba-277e72d0cf08bf9d350d/network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [WEB] Overview, Changes and Findings show live data or explicit empty states",
+    "owner": "WEB",
+    "status": "passed",
+    "duration_ms": 6051,
+    "errors": [],
+    "annotations": [],
+    "attachments": [
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/46fd6a836e0d18f570ba-540fe52090c67072c6cf/network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [WEB] Phone 390x844 keeps every screen within the viewport and the composer usable",
+    "owner": "WEB",
+    "status": "passed",
+    "duration_ms": 5338,
+    "errors": [],
+    "annotations": [],
+    "attachments": [
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/46fd6a836e0d18f570ba-c88b51f148395f2a9a2b/network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-uploads.spec.ts > [SERVER] Upload real .png file, show status, finish ingestion and answer first question",
+    "owner": "SERVER",
+    "status": "passed",
+    "duration_ms": 29178,
+    "errors": [],
+    "annotations": [
+      {
+        "type": "real-file",
+        "description": "data/full/junction-dataset/data/cubicasa5k/high_quality_architectural-7607.png (431580 bytes)"
+      }
+    ],
+    "attachments": [
+      {
+        "name": "ingest.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/3202ebca50e68e6b37fa-8d9d304f56e36159303e/ingest.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "answer.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/3202ebca50e68e6b37fa-8d9d304f56e36159303e/answer.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "loading.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/3202ebca50e68e6b37fa-8d9d304f56e36159303e/loading.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/3202ebca50e68e6b37fa-8d9d304f56e36159303e/network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-uploads.spec.ts > [SERVER] Upload real .jpg file, show status, finish ingestion and answer first question",
+    "owner": "SERVER",
+    "status": "failed",
+    "duration_ms": 31604,
+    "errors": [
+      "Error: First answer explains its evidence\n\nexpect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0",
+      "TypeError: expect(received).toMatch(expected)\n\nMatcher error: received value must be a string\n\nReceived has value: undefined",
+      "Error: First answer is cited\n\nexpect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0"
+    ],
+    "annotations": [
+      {
+        "type": "real-file",
+        "description": "data/full/junction-dataset/data/wikimedia/53751789.jpg (578110 bytes)"
+      }
+    ],
+    "attachments": [
+      {
+        "name": "ingest.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/3202ebca50e68e6b37fa-82d1020e58877bc2cb34/ingest.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "answer.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/3202ebca50e68e6b37fa-82d1020e58877bc2cb34/answer.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "loading.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/3202ebca50e68e6b37fa-82d1020e58877bc2cb34/loading.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "screenshot",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/artifacts/final-uploads--SERVER-Uplo-7b3d2-n-and-answer-first-question-chromium/test-failed-1.png",
+        "contentType": "image/png"
+      },
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/3202ebca50e68e6b37fa-82d1020e58877bc2cb34/network-and-browser.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "error-context",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/artifacts/final-uploads--SERVER-Uplo-7b3d2-n-and-answer-first-question-chromium/error-context.md",
+        "contentType": "text/markdown"
+      },
+      {
+        "name": "trace",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/artifacts/final-uploads--SERVER-Uplo-7b3d2-n-and-answer-first-question-chromium/trace.zip",
+        "contentType": "application/zip"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-uploads.spec.ts > [SERVER] Upload real .dxf file, show status, finish ingestion and answer first question",
+    "owner": "SERVER",
+    "status": "passed",
+    "duration_ms": 19651,
+    "errors": [],
+    "annotations": [
+      {
+        "type": "real-file",
+        "description": "data/full/junction-dataset/data/swiss_dwellings/site1142_bldg2293_floor10589.dxf (283060 bytes)"
+      }
+    ],
+    "attachments": [
+      {
+        "name": "ingest.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/3202ebca50e68e6b37fa-e9266115a3799a302b09/ingest.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "answer.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/3202ebca50e68e6b37fa-e9266115a3799a302b09/answer.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "loading.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/3202ebca50e68e6b37fa-e9266115a3799a302b09/loading.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/3202ebca50e68e6b37fa-e9266115a3799a302b09/network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-uploads.spec.ts > [SERVER] Upload real .ifc file, show status, finish ingestion and answer first question (reserved unseen file)",
+    "owner": "SERVER",
+    "status": "passed",
+    "duration_ms": 12046,
+    "errors": [],
+    "annotations": [
+      {
+        "type": "real-file",
+        "description": "data/full/junction-dataset/data/ifc_models/resbim-409_model.ifc (343221 bytes)"
+      }
+    ],
+    "attachments": [
+      {
+        "name": "ingest.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/3202ebca50e68e6b37fa-c2f51cc7002723418143/ingest.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "answer.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/3202ebca50e68e6b37fa-c2f51cc7002723418143/answer.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "loading.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/3202ebca50e68e6b37fa-c2f51cc7002723418143/loading.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-final/attachments/3202ebca50e68e6b37fa-c2f51cc7002723418143/network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  }
+]

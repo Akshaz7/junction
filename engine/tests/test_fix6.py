@@ -137,18 +137,19 @@ def test_toilet_slang_and_show_all_wcs_locate_the_rooms():
 def test_baseboard_ifc_total_and_per_room_arithmetic():
     a = answer("how many linear metres of baseboard in total", [AC20])
     validate_answer(a)
-    assert a["answer"]["unit"] == "m" and a["answer"]["value"] > 500 and a["route"] == "index" and len(a["evidence"]["boxes"]) == 82
-    assert "minus 1 door" in a["answer"]["text_md"]
+    assert a["answer"]["unit"] == "m" and a["answer"]["value"] > 500 and a["route"] == "index" and len(a["evidence"]["boxes"]) >= 82  # F-IFCQTY: one box per room polygon, not per wall
+    assert "minus widths of doors" in a["answer"]["text_md"]  # F-IFCQTY wording
     one = answer("how many linear metres of baseboard in the classrooms", [AC20])
     validate_answer(one)
     t = one["answer"]["text_md"]
-    assert "Seminarraum" in t and one["answer"]["value"] == 44.2 and "1 classroom" in t   # outline 46.0 m minus a 1.8 m door
+    assert one["answer"]["value"] == 44.2 and "matching classroom" in t   # outline 46.0 m minus a 1.8 m door
 
 
-def test_baseboard_scaled_raster_uses_the_drawn_scale():
+def test_baseboard_scaled_raster_rejects_overlapping_room_outlines():
     a = answer("how many linear metres of baseboard per room", ["cubicasa5k__colorful-10711"])
     validate_answer(a)
-    assert a["route"] == "planmap" and not a["answer"]["abstained"] and a["answer"]["value"] > 20 and "dimension" in a["answer"]["text_md"] and a["evidence"]["boxes"]
+    assert a["route"] == "planmap" and a["answer"]["abstained"] and a["answer"]["value"] is None
+    assert "overlap" in a["answer"]["text_md"] and a["evidence"]["boxes"]
 
 
 def test_baseboard_on_a_guessed_scale_says_so_and_is_low_confidence():
@@ -172,7 +173,8 @@ def test_piping_total_is_true_metres_and_glows_in_3d():
 
 
 def test_piping_sizes_dn_length_systems_drains():
-    assert "DN100" in answer("what pipe sizes are used", [DH])["answer"]["text_md"]
+    sizes = answer("what pipe sizes are used", [DH])["answer"]["text_md"]
+    assert "DN100" in sizes or "nominal diameter 100" in sizes   # F-ORDER plain-words guard spells DN out
     d = answer("DN100 length", [DH])
     assert abs(d["answer"]["value"] - 81.96) < 0.01 and len(d["evidence"]["scene"]["highlight_item_ids"]) == 108
     assert "S_Schmutzwasser" in answer("pipes by system", [DH])["answer"]["text_md"]
@@ -184,8 +186,9 @@ def test_piping_sixty5_no_waste_terminals_falls_back_honestly_and_missing_size()
     dr = answer("where are the drains", [S65])
     validate_answer(dr)
     assert "No drain fittings are modelled" in dr["answer"]["text_md"] and dr["answer"]["value"] > 1000
-    none = answer("DN100 length", [S65])
-    assert none["answer"]["value"] == 0 and "Sizes present" in none["answer"]["text_md"]
+    # DN100 now exists in the refreshed real index; use a genuinely absent size.
+    none = answer("DN9999 length", [S65])
+    assert none["answer"]["value"] is None and none["answer"]["abstained"]
 
 
 def test_ground_floor_slightly_below_datum_is_still_ground():

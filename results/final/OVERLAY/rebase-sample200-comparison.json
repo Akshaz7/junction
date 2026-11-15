@@ -1,0 +1,11 @@
+{
+  "baseline_commit": "5accd026b40efdff4199131d20ac2a3eac1bc32f",
+  "fake_models": true,
+  "questions_before": 200,
+  "questions_after": 200,
+  "correct_before": 138,
+  "correct_after": 138,
+  "correct_to_wrong": 0,
+  "regressions": [],
+  "cost_usd": 0.0
+}

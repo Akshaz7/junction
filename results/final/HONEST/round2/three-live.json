@@ -1,0 +1,473 @@
+[
+ {
+  "row": {
+   "path": "data/cubicasa5k/high_quality_architectural-4855.png",
+   "question": "How many saunas are on this floor plan?",
+   "answer": 1,
+   "unit": "count",
+   "type": "count",
+   "doc_id": "cubicasa5k__high-quality-architectural-4855",
+   "source": "cubicasa5k"
+  },
+  "result": {
+   "answer_id": "33849b6264c3437a8ac66ae28b99cd10",
+   "question": "How many saunas are on this floor plan?",
+   "doc_ids": [
+    "cubicasa5k__high-quality-architectural-4855"
+   ],
+   "answer": {
+    "text_md": "**1 sauna identified on this drawing.** [1] Read from the room labels and symbols; check the numbered regions.",
+    "value": 1,
+    "unit": "count",
+    "confidence": 0.5,
+    "abstained": false
+   },
+   "citations": [
+    {
+     "n": 1,
+     "doc_id": "cubicasa5k__high-quality-architectural-4855",
+     "page": 1,
+     "kind": "region",
+     "bbox_px": [
+      195,
+      218,
+      238,
+      264
+     ],
+     "item_ids": [
+      "visual-room-1"
+     ],
+     "quote": null,
+     "label": "Floor plan \u00b7 1 room"
+    }
+   ],
+   "evidence": {
+    "boxes": [
+     {
+      "item_id": "visual-room-1",
+      "page": 1,
+      "bbox_px": [
+       195,
+       218,
+       238,
+       264
+      ],
+      "label": "1"
+     }
+    ],
+    "scene": {
+     "doc_id": "cubicasa5k__high-quality-architectural-4855",
+     "highlight_item_ids": [
+      "visual-room-1"
+     ],
+     "camera_target_item_id": "visual-room-1"
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / room / whole-doc (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "load",
+     "detail": "plan map: 12 room items (conf >= 0.5; 0 below ignored)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "abstain",
+     "detail": "This plan reader has no sauna room type and the label is not reliably read, so I would rather not guess.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "visual_rooms",
+     "detail": "Visual check for sauna labels and room symbols",
+     "ms": 0,
+     "model": "gemini-4-carbon",
+     "cost_usd": 0.002544
+    },
+    {
+     "step": "visual_rooms",
+     "detail": "Visual count 1 agrees with 1 source regions",
+     "ms": 0,
+     "model": "google:gemini@3.5-flash",
+     "cost_usd": 0.00534
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.007884,
+    "calls": [
+     {
+      "task": "recount",
+      "provider": "vision",
+      "model": "gemini-4-carbon",
+      "cost_usd": 0.002544
+     },
+     {
+      "task": "recount_boxes",
+      "provider": "vision",
+      "model": "google:gemini@3.5-flash",
+      "cost_usd": 0.00534
+     }
+    ]
+   },
+   "latency_ms": 9549,
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "read",
+      "title": "Read",
+      "text": "1 marked region of the scanned drawing",
+      "cite": 1,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 62,
+     "reason": "The result was read from the drawing image by a vision model. Confidence is lower due to the model's own confidence.",
+     "improve": "Check the boxed areas, or upload a CAD file to make this exact."
+    }
+   }
+  },
+  "outcome": "correct"
+ },
+ {
+  "row": {
+   "path": "data/cubicasa5k/high_quality_architectural-7567.png",
+   "question": "How many saunas are on this floor plan?",
+   "answer": 1,
+   "unit": "count",
+   "type": "count",
+   "doc_id": "cubicasa5k__high-quality-architectural-7567",
+   "source": "cubicasa5k"
+  },
+  "result": {
+   "answer_id": "110e3248e52046debc1178eb78f260b1",
+   "question": "How many saunas are on this floor plan?",
+   "doc_ids": [
+    "cubicasa5k__high-quality-architectural-7567"
+   ],
+   "answer": {
+    "text_md": "**1 sauna identified on this drawing.** [1] Read from the room labels and symbols; check the numbered regions.",
+    "value": 1,
+    "unit": "count",
+    "confidence": 0.5,
+    "abstained": false
+   },
+   "citations": [
+    {
+     "n": 1,
+     "doc_id": "cubicasa5k__high-quality-architectural-7567",
+     "page": 1,
+     "kind": "region",
+     "bbox_px": [
+      331,
+      81,
+      409,
+      142
+     ],
+     "item_ids": [
+      "visual-room-1"
+     ],
+     "quote": null,
+     "label": "Floor plan \u00b7 1 room"
+    }
+   ],
+   "evidence": {
+    "boxes": [
+     {
+      "item_id": "visual-room-1",
+      "page": 1,
+      "bbox_px": [
+       331,
+       81,
+       409,
+       142
+      ],
+      "label": "1"
+     }
+    ],
+    "scene": {
+     "doc_id": "cubicasa5k__high-quality-architectural-7567",
+     "highlight_item_ids": [
+      "visual-room-1"
+     ],
+     "camera_target_item_id": "visual-room-1"
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / room / whole-doc (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "load",
+     "detail": "plan map: 16 room items (conf >= 0.5; 1 below ignored)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "abstain",
+     "detail": "This plan reader has no sauna room type and the label is not reliably read, so I would rather not guess.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "visual_rooms",
+     "detail": "Visual check for sauna labels and room symbols",
+     "ms": 0,
+     "model": "gemini-4-carbon",
+     "cost_usd": 0.002634
+    },
+    {
+     "step": "visual_rooms",
+     "detail": "Visual count 1 agrees with 1 source regions",
+     "ms": 0,
+     "model": "google:gemini@3.5-flash",
+     "cost_usd": 0.005001
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.007635,
+    "calls": [
+     {
+      "task": "recount",
+      "provider": "vision",
+      "model": "gemini-4-carbon",
+      "cost_usd": 0.002634
+     },
+     {
+      "task": "recount_boxes",
+      "provider": "vision",
+      "model": "google:gemini@3.5-flash",
+      "cost_usd": 0.005001
+     }
+    ]
+   },
+   "latency_ms": 8019,
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "read",
+      "title": "Read",
+      "text": "1 marked region of the scanned drawing",
+      "cite": 1,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 62,
+     "reason": "The result was read from the drawing image by a vision model. Confidence is lower due to the model's own confidence.",
+     "improve": "Check the boxed areas, or upload a CAD file to make this exact."
+    }
+   }
+  },
+  "outcome": "correct"
+ },
+ {
+  "row": {
+   "path": "data/opening_design/Sports_Complex/Sheets - Current Set/A-801 - Door and Finish Schedules & Wall Types.pdf",
+   "question": "On sheet A-801 of the Xcel Sports Complex drawings, what is the area of room 118 (Fitness Center) in the finish room schedule?",
+   "answer": 5183,
+   "unit": "ft2",
+   "type": "area",
+   "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+   "source": "opening_design"
+  },
+  "result": {
+   "answer_id": "56fcb299c2dd4c89b42d013b161e6d45",
+   "question": "On sheet A-801 of the Xcel Sports Complex drawings, what is the area of room 118 (Fitness Center) in the finish room schedule?",
+   "doc_ids": [
+    "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types"
+   ],
+   "answer": {
+    "text_md": "**Room 118 (Fitness Center) has an area of 5183 SF in the finish room schedule on sheet A-801.**\n\n- Finishes listed: floor F1, base B1, ceiling C1.\n- Wall finishes: W2, W2, W1, W1. [1][2][3]",
+    "value": 5183,
+    "unit": "SF",
+    "confidence": 0.95,
+    "abstained": false
+   },
+   "citations": [
+    {
+     "n": 1,
+     "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+     "page": 1,
+     "kind": "text",
+     "bbox_px": [
+      284.0,
+      2404.0,
+      434.0,
+      2440.0
+     ],
+     "item_ids": [],
+     "quote": "0:5183 SF | 1:118 | 2:FITNESS CENTER | 3:F1 | 4:B1 | 5:W2 | 6:W2 | 7:W1 | 8:W1 | 9:C1 | 10:"
+    },
+    {
+     "n": 2,
+     "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+     "page": 1,
+     "kind": "text",
+     "bbox_px": [
+      434.0,
+      2404.0,
+      559.0,
+      2440.0
+     ],
+     "item_ids": [],
+     "quote": "0:5183 SF | 1:118 | 2:FITNESS CENTER | 3:F1 | 4:B1 | 5:W2 | 6:W2 | 7:W1 | 8:W1 | 9:C1 | 10:"
+    },
+    {
+     "n": 3,
+     "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+     "page": 1,
+     "kind": "text",
+     "bbox_px": [
+      559.0,
+      2404.0,
+      894.0,
+      2440.0
+     ],
+     "item_ids": [],
+     "quote": "0:5183 SF | 1:118 | 2:FITNESS CENTER | 3:F1 | 4:B1 | 5:W2 | 6:W2 | 7:W1 | 8:W1 | 9:C1 | 10:"
+    }
+   ],
+   "evidence": {
+    "boxes": [
+     {
+      "item_id": "e12",
+      "page": 1,
+      "bbox_px": [
+       284.0,
+       2404.0,
+       434.0,
+       2440.0
+      ],
+      "label": "1"
+     },
+     {
+      "item_id": "e12",
+      "page": 1,
+      "bbox_px": [
+       434.0,
+       2404.0,
+       559.0,
+       2440.0
+      ],
+      "label": "2"
+     },
+     {
+      "item_id": "e12",
+      "page": 1,
+      "bbox_px": [
+       559.0,
+       2404.0,
+       894.0,
+       2440.0
+      ],
+      "label": "3"
+     }
+    ],
+    "scene": {
+     "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "missing_data",
+     "detail": "**Floor area cannot be measured from this sheet.** No room boundaries or room-area table are recorded; an equipment drawing or site outline is not a floor plan.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "prefetched exact matches and tables",
+     "ms": 8,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "table {\"id\": \"d1.tbl1.6\", \"rows\": [17]} -> d1.tbl1.6 \"Area\" (29 rows x 11 cols). Columns are numbered 0..10; cite a cell as eN#cK.",
+     "ms": 1999,
+     "model": "claude-opus-5-5",
+     "cost_usd": 0.013632
+    },
+    {
+     "step": "read",
+     "detail": "table {\"id\": \"d1.tbl1.6\", \"find\": \"118\"} -> d1.tbl1.6 \"Area\" (29 rows x 11 cols). Columns are numbered 0..10; cite a cell as eN#cK.",
+     "ms": 1570,
+     "model": "claude-opus-5-5",
+     "cost_usd": 0.012248
+    },
+    {
+     "step": "answer",
+     "detail": "12 evidence item(s) gathered, 3 planner step(s)",
+     "ms": 2265,
+     "model": "claude-opus-5-5",
+     "cost_usd": 0.01512
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.041,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "runware_claude",
+      "model": "claude-opus-5-5",
+      "cost_usd": 0.013632
+     },
+     {
+      "task": "reader_plan",
+      "provider": "runware_claude",
+      "model": "claude-opus-5-5",
+      "cost_usd": 0.012248
+     },
+     {
+      "task": "reader_plan",
+      "provider": "runware_claude",
+      "model": "claude-opus-5-5",
+      "cost_usd": 0.01512
+     }
+    ]
+   },
+   "latency_ms": 6410,
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "read",
+      "title": "Read",
+      "text": "Printed on the sheet: \u201c0:5183 SF | 1:118 | 2:FITNESS CENTER | 3:F1 | 4:B1 | 5:W2 | 6:W2 | 7:W1 | 8:W1 | 9:C1\u2026\u201d",
+      "cite": 1,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 73,
+     "reason": "The result was read from the drawing image by a vision model. Confidence is higher due to the model's own confidence.",
+     "improve": "Check the boxed areas, or upload a CAD file to make this exact."
+    }
+   }
+  },
+  "outcome": "correct"
+ }
+]

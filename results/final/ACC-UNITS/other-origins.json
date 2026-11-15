@@ -1,0 +1,41 @@
+[
+  {
+    "doc_id": "opening_design__stephan-brady-balcony-model-source-s-b-large",
+    "file": "data/opening_design/Stephan_Brady_Balcony/Model/source/S&B Large.dxf",
+    "layout": "Model",
+    "entity_types": {
+      "SPLINE": 63,
+      "LWPOLYLINE": 36
+    },
+    "recognised_rooms": 0,
+    "recognised_units": 0,
+    "status": "unsupported layer convention; no inferred area or membership"
+  },
+  {
+    "doc_id": "opening_design__lake-kegonsa-home-model-northstar-northstar",
+    "file": "data/opening_design/Lake_Kegonsa_Home/Model/northstar/northstar.dxf",
+    "layout": "Model",
+    "entity_types": {
+      "DIMENSION": 12,
+      "LINE": 922,
+      "LWPOLYLINE": 35,
+      "CIRCLE": 62,
+      "ARC": 134,
+      "SPLINE": 488
+    },
+    "recognised_rooms": 0,
+    "recognised_units": 0,
+    "status": "unsupported layer convention; no inferred area or membership"
+  },
+  {
+    "doc_id": "opening_design__screened-in-porch-models-cad-bim-linked-cad-data-site-plan",
+    "file": "data/opening_design/Screened_in_Porch/Models & CAD/BIM/Linked - CAD & Data/Site plan.dxf",
+    "layout": "Model",
+    "entity_types": {
+      "INSERT": 9
+    },
+    "recognised_rooms": 0,
+    "recognised_units": 0,
+    "status": "unsupported layer convention; no inferred area or membership"
+  }
+]

@@ -40,13 +40,17 @@ def _load_sheet(record, page):
         sheet["words"] = text if isinstance(text, list) else text.get("words", text.get("items", []))
         sheet["words"] = [{**w, "bbox_px": w.get("bbox_px", w.get("bbox"))} for w in sheet["words"]]
     pm = root / f"planmap-{page}.json"
-    if pm.is_file():
+    has_plan = pm.is_file()
+    if has_plan:
         plan = json.loads(pm.read_text())
         sheet["words"] += [{"text": item.get("label", ""), "bbox_px": item.get("bbox_px")}
                            for item in plan.get("items", []) if item.get("label")]
-        scale = plan.get("scale", {})
+        from engine.scale_policy import RANK, choose
+        scale = choose({**plan, "doc_id": record["doc_id"], "page": page, "image": sheet["image"]}, root)
         # Door priors are estimates and cannot justify an accuracy in millimetres.
-        if scale.get("method") in {"dimension", "scalebar", "dxf-units", "ifc"} and scale.get("m_per_px"):
+        if (scale.get("method") in RANK and scale["method"] != "door-prior"
+                and scale.get("selection", {}).get("id") not in {"ambiguous", "unavailable", "unknown"}
+                and scale.get("m_per_px")):
             sheet["m_per_px"] = scale["m_per_px"]
     files = record.get("files") or {}
     if isinstance(files, str):
@@ -61,7 +65,8 @@ def _load_sheet(record, page):
         pdf = load_pdf_page(source, page, size)
         if not sheet["words"]:
             sheet["words"] = pdf["words"]
-        if "m_per_px" not in sheet and "m_per_px" in pdf:
+        # Never replace a missing/conflicting common-policy scale with a PDF guess.
+        if not has_plan and "m_per_px" in pdf:
             sheet["m_per_px"] = pdf["m_per_px"]
     # A few grid bubble labels can yield well-distributed grid intersections.
     # Rich text sheets already have enough room anchors; avoid unnecessary image work.

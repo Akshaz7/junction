@@ -1,0 +1,6040 @@
+{
+  "generated_at": "2026-11-14T23:19:09.971713+00:00",
+  "inventory": [
+    {
+      "route": "engine.answer:_reader",
+      "source": "engine/answer.py:71",
+      "input_types": [
+        "all"
+      ],
+      "methods": [
+        "Router, no-data/feature/chat branches and recount ladder",
+        "Tool-using reader (engine/reader). None when disabled or it fails; the caller keeps its own abstain."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "F-EVINT",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.answer:_chat_answer",
+      "source": "engine/answer.py:106",
+      "input_types": [
+        "all"
+      ],
+      "methods": [
+        "Router, no-data/feature/chat branches and recount ladder",
+        "No document selected: talk normally with Hologram's system prompt (engine/assistant.py)."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.answer:_recount_ladder",
+      "source": "engine/answer.py:154",
+      "input_types": [
+        "all"
+      ],
+      "methods": [
+        "Router, no-data/feature/chat branches and recount ladder",
+        "Raster plan counts of doors, windows, sinks, WCs, showers/baths are weak. Boxes come from the fine-tuned detector when its\nplanmap-det.json exists, else from the plan map plus a vision recount: a lower recount drops the least confident boxes, a higher\none adds vision-drawn boxes. The headline number always equals the numbered boxes. Vector (DXF) plan maps are exact and skipped."
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "delegated worker",
+      "owner": "F-EVINT",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.answer:_answer_core",
+      "source": "engine/answer.py:401",
+      "input_types": [
+        "all"
+      ],
+      "methods": [
+        "Router, no-data/feature/chat branches and recount ladder",
+        " answer core"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ],
+      "submethods": [
+        "app help/features",
+        "document/sheet catalogue",
+        "starter tasks",
+        "project search",
+        "missing/unselected document",
+        "mistake checks",
+        "wall surfaces",
+        "material orders",
+        "property filters",
+        "complex conditions",
+        "schedules",
+        "title blocks",
+        "text files",
+        "multi-document totals",
+        "engineering sheet lookup",
+        "legend symbols",
+        "locate",
+        "what-if advice",
+        "scene edits",
+        "analytics",
+        "numeric solvers",
+        "model reader fallback"
+      ]
+    },
+    {
+      "route": "engine.tasks.__init__:run_task",
+      "source": "engine/tasks/__init__.py:139",
+      "input_types": [
+        "all"
+      ],
+      "methods": [
+        "Claim/meeting/phase/contract tasks: gather cited evidence, write, then reject unsupported figures or state evidence gaps",
+        "run task"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.assistant:chat",
+      "source": "engine/assistant.py:47",
+      "input_types": [
+        "conversation"
+      ],
+      "methods": [
+        "No-document conversation; no construction quantities can be verified",
+        "Free conversation without a document. Returns engine.models Result (raises if every provider fails)."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.solvers.solve:_apartments",
+      "source": "engine/solvers/solve.py:291",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Kind, confidence, hidden-item, storey, externality and room filters; counts or quantity-field priority",
+        "Swiss-dwellings DXF plan maps carry apartment outlines as items with props.role == 'unit' (label 'App. A').\ncount = number of units; area of apartment X = sum of rooms whose centre lies in the unit, outdoor rooms left out."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.solvers.solve:_apt_area",
+      "source": "engine/solvers/solve.py:315",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Kind, confidence, hidden-item, storey, externality and room filters; counts or quantity-field priority",
+        " apt area"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.solvers.solve:_solve_multi",
+      "source": "engine/solvers/solve.py:364",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Kind, confidence, hidden-item, storey, externality and room filters; counts or quantity-field priority",
+        "'how many windows and doors': one single-kind solve per kind (same filters, still $0), merged into one answer.\nBoxes are numbered 1..N across kinds; every box and citation carries its kind, and scene.item_kinds maps\nitem_id -> kind, so the views can colour by kind."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.solvers.solve:solve",
+      "source": "engine/solvers/solve.py:401",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Kind, confidence, hidden-item, storey, externality and room filters; counts or quantity-field priority",
+        "hidden: {item_id: tag} the chat has hidden in the scene; they are left out and the answer says so."
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ],
+      "submethods": [
+        "count indexed kind",
+        "multiple-kind counts",
+        "declared IFC storeys",
+        "floor-plan layout count",
+        "matched room names/types",
+        "apartment outline selection",
+        "IFC Qto field priority",
+        "GLB room floor area fallback",
+        "opening width × height",
+        "polygon shoelace × scale²",
+        "wall typed length",
+        "net/gross volume field priority",
+        "hidden element exclusion",
+        "IFC stair assembly excludes flights",
+        "fixture property/name classification"
+      ]
+    },
+    {
+      "route": "engine.analytics:filtered_question",
+      "source": "engine/analytics.py:56",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "Apply named rooms, area bounds, thickness and misspelled floor counts before broad totals."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:arithmetic_question",
+      "source": "engine/analytics.py:160",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "Comparisons, percentages and ratios combine independent solver results."
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:multi_doc_total",
+      "source": "engine/analytics.py:242",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "Explicit selected-document totals; the answer dispatcher supplies all selected ids."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:storey_compare",
+      "source": "engine/analytics.py:271",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "storey compare"
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:total_and_storey",
+      "source": "engine/analytics.py:323",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "total and storey"
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:storey_pair",
+      "source": "engine/analytics.py:374",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "\"compare doors on the 1st vs 2nd floor\": one count per named storey, with the difference."
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:storey_table",
+      "source": "engine/analytics.py:405",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "\"compare the ground floor and the first floor\" (no kind named): rooms, area, doors and windows per floor in one table."
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:building_safety",
+      "source": "engine/analytics.py:435",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "\"is this building safe?\": the app's own checks (exits per storey, 848/2017 and the other decrees), a check, not a certificate."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:kind_compare",
+      "source": "engine/analytics.py:467",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "\"are there more windows or doors\": count both kinds, say which is more."
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:exact_size",
+      "source": "engine/analytics.py:502",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "\"how many doors are 1.8 m wide\": equality within 2.5 cm (a bare size is a match, not a threshold)."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:cond_count",
+      "source": "engine/analytics.py:539",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "cond count"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:named_rooms",
+      "source": "engine/analytics.py:620",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "named rooms"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:where_rooms",
+      "source": "engine/analytics.py:696",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "\"where is the kitchen / are the bathrooms\" on a plan map: rooms whose drawn label matches. None when nothing is labelled that way."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:wet_rooms",
+      "source": "engine/analytics.py:763",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "\"total wet-room area\": rooms drawn/typed as bathroom, WC, shower, sauna or laundry, summed."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:count_where",
+      "source": "engine/analytics.py:789",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "\"how many stairs and where\": the count plus where they are (per storey on IFC, by room on a plan map)."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:room_list",
+      "source": "engine/analytics.py:822",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "\"list every room with its area\": one line per room, numbered on the drawing."
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:baseboard",
+      "source": "engine/analytics.py:871",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "\"how many linear metres of baseboard per room / in the classrooms / in total\": room outline minus door openings, code only.\nIFC: room footprint rectangle (bbox) and IfcDoor widths on its walls. Plan map: room box x scale, only when the drawing has a real scale."
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:piping",
+      "source": "engine/analytics.py:1028",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "\"how many metres of pipe\", \"pipe sizes\", \"DN100 length\", \"where are the drains\", \"pipes by system\" from the plumbing extract (vision/piping.py).\nThe model has no 2D geometry, so the answer is shown in 3D: item ids are IFC GlobalIds. Lengths are true metres (the extract converted the mm)."
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:wet_room_takeoff",
+      "source": "engine/analytics.py:1112",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "'floor tiles for the bathrooms': bathrooms mean bath, shower and WC rooms. Area, waste, whole boxes, assumed price, only those rooms boxed."
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:takeoff",
+      "source": "engine/analytics.py:1150",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "takeoff"
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:compliance",
+      "source": "engine/analytics.py:1221",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "compliance"
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:superlative_room",
+      "source": "engine/analytics.py:1281",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "\"what is the biggest room in this plan\": plan maps only (IFC goes through the index route)."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:plan_total",
+      "source": "engine/analytics.py:1311",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "\"how big is this flat\": the indoor rooms added up (plan maps only; IFC has its own model totals)."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:plain_limits",
+      "source": "engine/analytics.py:1330",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "Plan images do not carry accessibility data or heights: say so plainly and offer what does work."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:exists_or_perroom",
+      "source": "engine/analytics.py:1350",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "\"is there a balcony\" -> Yes/No with the count; \"how many doors does the bedroom have\" -> whole-plan counts, said plainly."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:slab_by_type",
+      "source": "engine/analytics.py:1418",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "\"slab area by type\", \"how much 250 mm slab\", \"slab areas by thickness and reinforcement\": IfcSlab grouped by\ntype name and thickness, area summed per group. Reinforcement only when the model carries rebar data."
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.analytics:plan_slab_pipe",
+      "source": "engine/analytics.py:1555",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured quantities, distinct/grouped counts, comparisons, ratios, perimeters, allowances and rule findings",
+        "Judge categories on a floor-plan image: slab area = floor outline; piping = not drawn. Plain about what a plan cannot hold."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_tiling",
+      "source": "engine/complex_q.py:112",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h tiling"
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_external_face",
+      "source": "engine/complex_q.py:153",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h external face"
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_paint",
+      "source": "engine/complex_q.py:177",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h paint"
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_masonry",
+      "source": "engine/complex_q.py:218",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h masonry"
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_wide_doors",
+      "source": "engine/complex_q.py:262",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h wide doors"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_windows",
+      "source": "engine/complex_q.py:296",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h windows"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_offices",
+      "source": "engine/complex_q.py:322",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h offices"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_walls_filter",
+      "source": "engine/complex_q.py:356",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h walls filter"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_shared_wall",
+      "source": "engine/complex_q.py:391",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h shared wall"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_stacking",
+      "source": "engine/complex_q.py:424",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h stacking"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_schedule_doors",
+      "source": "engine/complex_q.py:451",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h schedule doors"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_schedule_rooms",
+      "source": "engine/complex_q.py:477",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h schedule rooms"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_unanswerable",
+      "source": "engine/complex_q.py:505",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h unanswerable"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_remove_wall",
+      "source": "engine/complex_q.py:523",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h remove wall"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_compliance",
+      "source": "engine/complex_q.py:551",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h compliance"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_spatial_honest",
+      "source": "engine/complex_q.py:587",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h spatial honest"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_terrace_side",
+      "source": "engine/complex_q.py:605",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h terrace side"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_bedroom_window",
+      "source": "engine/complex_q.py:616",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h bedroom window"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_labels",
+      "source": "engine/complex_q.py:641",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h labels"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_skirting",
+      "source": "engine/complex_q.py:690",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h skirting"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_extreme_room",
+      "source": "engine/complex_q.py:719",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "'where is the biggest meeting room' names the room and its area, not a count."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_capacity",
+      "source": "engine/complex_q.py:744",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h capacity"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_thickness",
+      "source": "engine/complex_q.py:767",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h thickness"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:h_height",
+      "source": "engine/complex_q.py:790",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "h height"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.complex_q:answer",
+      "source": "engine/complex_q.py:811",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Explicit condition handlers; applied and unresolved conditions retained",
+        "-> an answer object, or None to let the normal pipeline run. Only for a single selected document."
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.mep:no_services",
+      "source": "engine/mep.py:760",
+      "input_types": [
+        "IFC"
+      ],
+      "methods": [
+        "IFC service/structure classification; counts, types, sizes, systems, lengths and material-weighted volumes",
+        "no services"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.mep:_systems_answer",
+      "source": "engine/mep.py:787",
+      "input_types": [
+        "IFC"
+      ],
+      "methods": [
+        "IFC service/structure classification; counts, types, sizes, systems, lengths and material-weighted volumes",
+        " systems answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.mep:_types_answer",
+      "source": "engine/mep.py:827",
+      "input_types": [
+        "IFC"
+      ],
+      "methods": [
+        "IFC service/structure classification; counts, types, sizes, systems, lengths and material-weighted volumes",
+        " types answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.mep:_count_answer",
+      "source": "engine/mep.py:859",
+      "input_types": [
+        "IFC"
+      ],
+      "methods": [
+        "IFC service/structure classification; counts, types, sizes, systems, lengths and material-weighted volumes",
+        " count answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.mep:_length_answer",
+      "source": "engine/mep.py:894",
+      "input_types": [
+        "IFC"
+      ],
+      "methods": [
+        "IFC service/structure classification; counts, types, sizes, systems, lengths and material-weighted volumes",
+        " length answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.mep:_sizes_answer",
+      "source": "engine/mep.py:957",
+      "input_types": [
+        "IFC"
+      ],
+      "methods": [
+        "IFC service/structure classification; counts, types, sizes, systems, lengths and material-weighted volumes",
+        " sizes answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.mep:_struct_answer",
+      "source": "engine/mep.py:1012",
+      "input_types": [
+        "IFC"
+      ],
+      "methods": [
+        "IFC service/structure classification; counts, types, sizes, systems, lengths and material-weighted volumes",
+        "kinds: structural kinds asked about; want: count | types | sizes | volume | material | overview."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.mep:answer",
+      "source": "engine/mep.py:1154",
+      "input_types": [
+        "IFC"
+      ],
+      "methods": [
+        "IFC service/structure classification; counts, types, sizes, systems, lengths and material-weighted volumes",
+        "Building services and structure by code, or None when the question is something else (the existing routes then run unchanged)."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.props:_model_answer",
+      "source": "engine/props.py:430",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Recorded properties and explicit filters; matched schedule text fallback",
+        " model answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.props:_drawing_answer",
+      "source": "engine/props.py:582",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Recorded properties and explicit filters; matched schedule text fallback",
+        " drawing answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.props:answer",
+      "source": "engine/props.py:656",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Recorded properties and explicit filters; matched schedule text fallback",
+        "None means this route does not handle the question, never a guessed answer."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.order:answer_order",
+      "source": "engine/order.py:234",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Measured floor/net wall coverage, associated-door skirting or indexed counts; stated waste and upward rounding",
+        "answer order"
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.wallarea:estimate_planmaps",
+      "source": "engine/wallarea.py:634",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "IFC side faces and actual void cuts; plan-map outline/height approximation when native geometry is absent",
+        "Conditional 2D estimate; no hidden height/scale accuracy percentages.\n\nNeeds source lengths or a page scale. Rectangular outlines and centrelines\nare supported. Complex closed wall networks are reported as unsupported,\nrather than measured as one enormous bounding rectangle."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.wallarea:answer",
+      "source": "engine/wallarea.py:812",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "IFC side faces and actual void cuts; plan-map outline/height approximation when native geometry is absent",
+        "answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.quantity_takeoff:quantity_takeoff",
+      "source": "engine/quantity_takeoff.py:30",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Independent room areas, baseboard, opening counts, slab groups and piping sections",
+        "quantity takeoff"
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.takeoff:takeoff_answer",
+      "source": "engine/takeoff.py:161",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Room-class sum; declared material allowance or explicitly assumed paint coverage/coats",
+        "takeoff answer"
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.projects.multidoc:answer",
+      "source": "engine/projects/multidoc.py:192",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Building/level grouping; choose model then largest item population; totals, differences or ranking",
+        "answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.projects.multidoc:_compare_all",
+      "source": "engine/projects/multidoc.py:332",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Building/level grouping; choose model then largest item population; totals, differences or ranking",
+        "'compare level 1 and level 2' with no thing named: rooms, doors, windows and room area side by side."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.projects.overview:build",
+      "source": "engine/projects/overview.py:134",
+      "input_types": [
+        "all"
+      ],
+      "methods": [
+        "Same project combiner; API overview rather than a chat answer",
+        "build"
+      ],
+      "calc_emitted_before": "comparison API, not chat envelope",
+      "calc_emitted_today": "API native comparison/overview schema",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.project_answer:passage_answer",
+      "source": "engine/project_answer.py:214",
+      "input_types": [
+        "all"
+      ],
+      "methods": [
+        "Catalogue search, source passages, supported-number/citation gate or template fallback",
+        "passage answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.project_answer:document_list_answer",
+      "source": "engine/project_answer.py:247",
+      "input_types": [
+        "all"
+      ],
+      "methods": [
+        "Catalogue search, source passages, supported-number/citation gate or template fallback",
+        "Enumerate all matching docs before limiting output; never ask a model to invent a document list."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.project_answer:project_answer",
+      "source": "engine/project_answer.py:292",
+      "input_types": [
+        "all"
+      ],
+      "methods": [
+        "Catalogue search, source passages, supported-number/citation gate or template fallback",
+        "project answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.revision_compare:compare_ifc",
+      "source": "engine/revision_compare.py:180",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Stable IFC item identities or scale/translation-aligned item overlaps; event counts",
+        "Compare normalized IFC indexes. A change is one event, not one item."
+      ],
+      "calc_emitted_before": "comparison API, not chat envelope",
+      "calc_emitted_today": "API native comparison/overview schema",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.revision_compare:compare_planmaps",
+      "source": "engine/revision_compare.py:373",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Stable IFC item identities or scale/translation-aligned item overlaps; event counts",
+        "compare planmaps"
+      ],
+      "calc_emitted_before": "comparison API, not chat envelope",
+      "calc_emitted_today": "API native comparison/overview schema",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.revision_compare:comparison_answer",
+      "source": "engine/revision_compare.py:499",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Stable IFC item identities or scale/translation-aligned item overlaps; event counts",
+        "Early code route; returning it before context/explain avoids any model call."
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.changes:compare",
+      "source": "engine/changes.py:108",
+      "input_types": [
+        "planmap",
+        "raster"
+      ],
+      "methods": [
+        "Geometry/pixel change API; matched items and connected regions",
+        "compare"
+      ],
+      "calc_emitted_before": "comparison API, not chat envelope",
+      "calc_emitted_today": "API native comparison/overview schema",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.changes:compare_images",
+      "source": "engine/changes.py:161",
+      "input_types": [
+        "planmap",
+        "raster"
+      ],
+      "methods": [
+        "Geometry/pixel change API; matched items and connected regions",
+        "Fallback with no plan map: boxes around regions where two same-size page images differ. Boxes only, no kinds."
+      ],
+      "calc_emitted_before": "comparison API, not chat envelope",
+      "calc_emitted_today": "API native comparison/overview schema",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.design_versions:compare",
+      "source": "engine/design_versions.py:157",
+      "input_types": [
+        "IFC",
+        "planmap"
+      ],
+      "methods": [
+        "Diff of saved edit snapshots; generated from edits",
+        "Changes engine output for two design versions of one document (same pixel frame on every page)."
+      ],
+      "calc_emitted_before": "comparison API, not chat envelope",
+      "calc_emitted_today": "API native comparison/overview schema",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.scene_cmds:scene_answer",
+      "source": "engine/scene_cmds.py:284",
+      "input_types": [
+        "IFC",
+        "planmap"
+      ],
+      "methods": [
+        "Resolve requested tags/kinds, apply per-chat visibility and return scene operations",
+        "scene answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.locate:locate_answer",
+      "source": "engine/locate.py:42",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Indexed position and declared storey; detected fixtures on plan-map pages",
+        "locate answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.locate:fixture_locate",
+      "source": "engine/locate.py:104",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Indexed position and declared storey; detected fixtures on plan-map pages",
+        "fixture locate"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.exits:exit_answer",
+      "source": "engine/exits.py:82",
+      "input_types": [
+        "IFC"
+      ],
+      "methods": [
+        "Exterior-door test from room footprints, not a fire-compliance certification",
+        "exit answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.textqa:facts_for",
+      "source": "engine/textqa.py:176",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured facts with optional number-constrained wording",
+        "facts for"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.textqa:text_answer",
+      "source": "engine/textqa.py:349",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Structured facts with optional number-constrained wording",
+        "text answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.schedules:solve_table",
+      "source": "engine/schedules.py:187",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Ruled-cell schedule extraction and explicit units",
+        "solve table"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.schedules:answer_schedule",
+      "source": "engine/schedules.py:251",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Ruled-cell schedule extraction and explicit units",
+        "answer schedule"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.titleblock:extract",
+      "source": "engine/titleblock.py:308",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Source label proximity, revision row or title-block field",
+        "extract"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.titleblock:answer_text",
+      "source": "engine/titleblock.py:325",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Source label proximity, revision row or title-block field",
+        "Return a grounded answer for supported PDF fields, else defer to the reader."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:scale_answer",
+      "source": "engine/sheetqa.py:160",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "scale answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:tag_count",
+      "source": "engine/sheetqa.py:248",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "tag count"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:room_area",
+      "source": "engine/sheetqa.py:310",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "'area of the dining room': the matching table row ('DINING 164 SF'), never the total."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:schedule_rows",
+      "source": "engine/sheetqa.py:337",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "'how many rooms in the schedule': rows of the table that carry an area figure, TOTAL excluded."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:area_by_type",
+      "source": "engine/sheetqa.py:357",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "'floor area of each room type / list the rooms with areas': every table row with an SF figure, TOTAL excluded."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:takeoff_sheet",
+      "source": "engine/sheetqa.py:440",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "quantity take-off on a PDF sheet: the table's room areas; everything a PDF cannot give is 'not in this file'."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:area_total",
+      "source": "engine/sheetqa.py:457",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "TOTAL ... SF on a square-footage table, in m2, with the column arithmetic checked."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:share_of_total",
+      "source": "engine/sheetqa.py:494",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "share of total"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:note_sum",
+      "source": "engine/sheetqa.py:518",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "'total trench length': the lengths listed in the note that names the thing, summed."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:size_of",
+      "source": "engine/sheetqa.py:566",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "'suction header size', 'sump size': the dimension printed in the segment that names the thing."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:room_count",
+      "source": "engine/sheetqa.py:601",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "'how many dorm rooms on this floor': unique room numbers (one 3-digit series, e.g. 201..248) printed on the plan."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:overall_width",
+      "source": "engine/sheetqa.py:627",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "'width of the north wing': the largest feet-inch (or mm) dimension string on the sheet, when the question names a wing/building."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:rebar_of",
+      "source": "engine/sheetqa.py:649",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "rebar of"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:cross_sheet",
+      "source": "engine/sheetqa.py:668",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "'where is the pipe penetration detail' -> 'see M-303', not uploaded."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:sheet_identity",
+      "source": "engine/sheetqa.py:701",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "'what is this drawing / which sheet number / sheet title': the title block, with its boxes."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:pipe_sizes",
+      "source": "engine/sheetqa.py:751",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "'what are the pipe sizes': the labelled sizes on the sheet with counts."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:answer",
+      "source": "engine/sheetqa.py:769",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "First handler that recognises the question wins; None sends it to the reader."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.sheetqa:dorm_sheet",
+      "source": "engine/sheetqa.py:838",
+      "input_types": [
+        "PDF",
+        "raster"
+      ],
+      "methods": [
+        "Printed tags, dimensions, tables and source-text operands",
+        "dorm sheet"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.textfile:_count_rows",
+      "source": "engine/textfile.py:31",
+      "input_types": [
+        "PDF",
+        "text"
+      ],
+      "methods": [
+        "Printed text-only schedule/room/note lookup",
+        " count rows"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.textfile:_room_table",
+      "source": "engine/textfile.py:88",
+      "input_types": [
+        "PDF",
+        "text"
+      ],
+      "methods": [
+        "Printed text-only schedule/room/note lookup",
+        " room table"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.textfile:_takeoff",
+      "source": "engine/textfile.py:142",
+      "input_types": [
+        "PDF",
+        "text"
+      ],
+      "methods": [
+        "Printed text-only schedule/room/note lookup",
+        "'quantity take-off' / 'floor tiles for the bathrooms' on a sheet with no room areas: say what the text has and what it lacks."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.textfile:_notes",
+      "source": "engine/textfile.py:163",
+      "input_types": [
+        "PDF",
+        "text"
+      ],
+      "methods": [
+        "Printed text-only schedule/room/note lookup",
+        " notes"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.textfile:answer",
+      "source": "engine/textfile.py:209",
+      "input_types": [
+        "PDF",
+        "text"
+      ],
+      "methods": [
+        "Printed text-only schedule/room/note lookup",
+        "answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "Awais",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.library:sheet_count_answer",
+      "source": "engine/library.py:178",
+      "input_types": [
+        "catalogue"
+      ],
+      "methods": [
+        "Catalogue metadata, visible document selection or app capabilities",
+        "sheet count answer"
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.library:library_answer",
+      "source": "engine/library.py:206",
+      "input_types": [
+        "catalogue"
+      ],
+      "methods": [
+        "Catalogue metadata, visible document selection or app capabilities",
+        "library answer"
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.library:library_search_answer",
+      "source": "engine/library.py:242",
+      "input_types": [
+        "catalogue"
+      ],
+      "methods": [
+        "Catalogue metadata, visible document selection or app capabilities",
+        "Document-list searches operate on a filtered view, without changing the shared search index."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.library:drawing_selection_answer",
+      "source": "engine/library.py:265",
+      "input_types": [
+        "catalogue"
+      ],
+      "methods": [
+        "Catalogue metadata, visible document selection or app capabilities",
+        "An unselected drawing is never inferred from a search score for a count or measurement."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.library:app_feature_answer",
+      "source": "engine/library.py:363",
+      "input_types": [
+        "catalogue"
+      ],
+      "methods": [
+        "Catalogue metadata, visible document selection or app capabilities",
+        "app feature answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.app_help:app_help_answer",
+      "source": "engine/app_help.py:115",
+      "input_types": [
+        "application guide"
+      ],
+      "methods": [
+        "Guide passages with optional model wording; no construction measurement",
+        "app help answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.mistakes:answer",
+      "source": "engine/mistakes.py:862",
+      "input_types": [
+        "IFC",
+        "DXF",
+        "raster"
+      ],
+      "methods": [
+        "Source consistency, missing data, duplicate, clash and cross-document checks",
+        "Chat answer built only from find(): numbered items on the drawing, a Checked card. None when this is not that question."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.readdraw:read_drawing",
+      "source": "engine/readdraw.py:94",
+      "input_types": [
+        "raster",
+        "PDF"
+      ],
+      "methods": [
+        "Model drawing read with region checks",
+        "read drawing"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "F-EVINT",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.reader.agent:read_answer",
+      "source": "engine/reader/agent.py:223",
+      "input_types": [
+        "all"
+      ],
+      "methods": [
+        "Tool-using reader; model output is a labelled input",
+        "read answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "F-EVINT",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.symbols:answer_symbols",
+      "source": "engine/symbols.py:967",
+      "input_types": [
+        "raster",
+        "PDF"
+      ],
+      "methods": [
+        "Legend template matching, deduplication and second look",
+        "Answer object for a legend question or a count of a symbol the legend names; None when this is not that kind of question."
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "F-EVINT",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.forced:forced_answer",
+      "source": "engine/forced.py:68",
+      "input_types": [
+        "all"
+      ],
+      "methods": [
+        "Best-effort model fallback with explicit source limits",
+        "forced answer"
+      ],
+      "calc_emitted_before": "numeric finalizer only; text had no calc",
+      "calc_emitted_today": "delegated worker",
+      "owner": "F-EVINT",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    },
+    {
+      "route": "engine.units:convert",
+      "source": "engine/units.py:66",
+      "input_types": [
+        "numeric answer"
+      ],
+      "methods": [
+        "Explicit physical-unit conversion or price multiplication after solving",
+        "Return res with a converted-unit and/or cost clause appended to text_md (copy; input untouched)."
+      ],
+      "calc_emitted_before": "dedicated seed + numeric finalizer",
+      "calc_emitted_today": "method/source trace plus numeric finalizer",
+      "owner": "F-EVMETHOD",
+      "gaps": [
+        "Runtime variants not exercised by the real-file audit remain unmeasured."
+      ]
+    }
+  ],
+  "scope": "Inventory lists all named route entrypoints/subhandlers, not every possible query. Percentages below describe observed cases only; no extrapolation to untested entries.",
+  "summary": {
+    "cases": 80,
+    "run": 80,
+    "numeric": 73,
+    "complete": 80,
+    "methods": 70,
+    "numeric_complete_pct": 100.0,
+    "non_scan_cases": 70,
+    "non_scan_method_pct": 100.0
+  },
+  "observed_routes": {
+    "cad/baseboard": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "cad/count": {
+      "answers": 2,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "cad/filtered-area": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "cad/multi-kind": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "cad/room-area": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "cad/room-count": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "cad/storey-count": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/area-ratio": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/baseboard": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/complex-order": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/count": {
+      "answers": 3,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/description": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/exact-size": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/filtered-area": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/filtered-room-area": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/kind-difference": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/locate": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/multi-kind": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/opening-area": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/percentage": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/quantity-table": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/room-area": {
+      "answers": 2,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/room-count": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/rule-findings": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/size-filter": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/slab-area-by-type": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/slab-volume": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/storey-count": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/storey-difference": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/storey-filter": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/storey-most": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/storey-schedule": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/storey-total": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/takeoff": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/tile-order": {
+      "answers": 2,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/type-filter": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/unit-conversion": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/unit-price": {
+      "answers": 2,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/wall-face": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/wall-length": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/wall-volume": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc/zero-count": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "ifc4x3/count": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "mep/count": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "mep/duct-count": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "mep/duct-length": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "mep/length": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "mep/length-by-storey": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "mep/length-by-system": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "mep/light-count": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "mep/sizes": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "mep/structure-count": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "mep/structure-types": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "mep/structure-volume": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "mep/types": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "multi-document/count": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "order/skirting": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "project/area": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "project/deduplicate": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "project/difference": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "project/ranking": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "props/material": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "props/schedule": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    },
+    "raster/baseboard": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 0.0,
+      "gaps": []
+    },
+    "raster/count": {
+      "answers": 3,
+      "complete_pct": 100.0,
+      "method_pct": 0.0,
+      "gaps": []
+    },
+    "raster/filtered-area": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 0.0,
+      "gaps": []
+    },
+    "raster/multi-kind": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 0.0,
+      "gaps": []
+    },
+    "raster/room-area": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 0.0,
+      "gaps": []
+    },
+    "raster/superlative-area": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 0.0,
+      "gaps": []
+    },
+    "raster/takeoff": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 0.0,
+      "gaps": []
+    },
+    "raster/total-area": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 0.0,
+      "gaps": []
+    },
+    "revision/change-count": {
+      "answers": 1,
+      "complete_pct": 100.0,
+      "method_pct": 100.0,
+      "gaps": []
+    }
+  },
+  "answers": [
+    {
+      "route": "ifc/count",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "How many doors are there?",
+      "value": 77,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "count = Σ(1 per selected item)",
+        "why_chosen": "count / door / unscoped (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 77,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / door / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "77 door elements of 784 in the model"
+        },
+        {
+          "step": "count",
+          "detail": "77 door"
+        }
+      ]
+    },
+    {
+      "route": "ifc/count",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "How many windows are there?",
+      "value": 206,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "count = Σ(1 per selected item)",
+        "why_chosen": "count / window / unscoped (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 206,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / window / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "206 window elements of 784 in the model"
+        },
+        {
+          "step": "count",
+          "detail": "206 window"
+        }
+      ]
+    },
+    {
+      "route": "ifc/count",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "question": "How many walls are there?",
+      "value": 13,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "count = Σ(1 per selected item)",
+        "why_chosen": "count / wall / unscoped (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 13,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / wall / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "13 wall elements of 93 in the model"
+        },
+        {
+          "step": "count",
+          "detail": "13 wall"
+        }
+      ]
+    },
+    {
+      "route": "ifc/storey-count",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "How many storeys are there?",
+      "value": 5,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "storey count = Σ(1 per declared storey)",
+        "why_chosen": "count / storey / unscoped (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 5,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / storey / unscoped (rules)"
+        },
+        {
+          "step": "count",
+          "detail": "5 storey(s) declared in the model"
+        }
+      ]
+    },
+    {
+      "route": "ifc/storey-filter",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "How many doors are on the first floor?",
+      "value": 22,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "count = Σ(1 per selected item)",
+        "why_chosen": "count / door / storey (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 22,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / door / storey (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "77 door elements of 784 in the model"
+        },
+        {
+          "step": "scope",
+          "detail": "storey = 1. Obergeschoss: 22 left"
+        },
+        {
+          "step": "count",
+          "detail": "22 door"
+        }
+      ]
+    },
+    {
+      "route": "ifc/type-filter",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "How many external doors are there?",
+      "value": 1,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "recorded-property-filter",
+        "label": "Read recorded element properties",
+        "why_chosen": "Uses the original model's properties, quantities, types and materials; missing requested properties remain unknown.",
+        "alternatives": [],
+        "filters": {
+          "kind": "door",
+          "prop": "is_external",
+          "schedule": false,
+          "group": false,
+          "predicates": [
+            [
+              "is_external",
+              true
+            ]
+          ],
+          "threshold": null,
+          "tag": null,
+          "special": null
+        },
+        "checked_elements": 77,
+        "scope_elements": 77
+      },
+      "calc_status": "complete",
+      "rows": 1,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "props",
+          "detail": "Requested property present on 77 of 77 elements; checked the original model's properties, quantities, types and materials."
+        }
+      ]
+    },
+    {
+      "route": "ifc/size-filter",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "How many doors are wider than 1 m?",
+      "value": 10,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "recorded-property-filter",
+        "label": "Read recorded element properties",
+        "why_chosen": "Uses the original model's properties, quantities, types and materials; missing requested properties remain unknown.",
+        "alternatives": [],
+        "filters": {
+          "kind": "door",
+          "prop": "width_m",
+          "schedule": false,
+          "group": false,
+          "predicates": [],
+          "threshold": [
+            "width_m",
+            "wider than",
+            1.0
+          ],
+          "tag": null,
+          "special": null
+        },
+        "checked_elements": 77,
+        "scope_elements": 77
+      },
+      "calc_status": "complete",
+      "rows": 10,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "props",
+          "detail": "Requested property present on 77 of 77 elements; checked the original model's properties, quantities, types and materials."
+        }
+      ]
+    },
+    {
+      "route": "ifc/exact-size",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "How many doors are 1.8 m wide?",
+      "value": 9,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "count = Σ(1 per selected item)",
+        "why_chosen": "count / door / exactly 1.8m wide -> code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 9,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / door / exactly 1.8m wide -> code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "9 of 77"
+        }
+      ]
+    },
+    {
+      "route": "ifc/multi-kind",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "How many windows and doors are there?",
+      "value": {
+        "window": 206,
+        "door": 77
+      },
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "count each category separately",
+        "why_chosen": "count / window / unscoped (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 283,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / window / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "[window] 206 window elements of 784 in the model"
+        },
+        {
+          "step": "count",
+          "detail": "[window] 206 window"
+        },
+        {
+          "step": "load",
+          "detail": "[door] 77 door elements of 784 in the model"
+        },
+        {
+          "step": "count",
+          "detail": "[door] 77 door"
+        }
+      ]
+    },
+    {
+      "route": "ifc/room-count",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "How many office rooms are there?",
+      "value": 45,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "count = Σ(1 per selected item)",
+        "why_chosen": "explicit filters -> code over IFC quantities, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 45,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "explicit filters -> code over IFC quantities, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "office; all storeys; no area bound: 45 matches"
+        }
+      ]
+    },
+    {
+      "route": "ifc/room-area",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "What is the total area of all rooms?",
+      "value": 1939.38,
+      "unit": "m2",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(source quantities)",
+        "why_chosen": "list rooms with areas -> room items sorted by area, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 82,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "list rooms with areas -> room items sorted by area, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "82 rooms"
+        }
+      ]
+    },
+    {
+      "route": "ifc/room-area",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "question": "What is the total area of all rooms?",
+      "value": 173.34,
+      "unit": "m2",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(source quantities)",
+        "why_chosen": "list rooms with areas -> room items sorted by area, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 7,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "list rooms with areas -> room items sorted by area, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "7 rooms"
+        }
+      ]
+    },
+    {
+      "route": "ifc/filtered-area",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "What is the total area of all office rooms?",
+      "value": null,
+      "unit": null,
+      "numeric": false,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "Read the cited source records; no numeric aggregation was performed",
+        "why_chosen": "explicit filters -> code over IFC quantities, no model",
+        "alternatives": []
+      },
+      "calc_status": "source-only",
+      "rows": 0,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "explicit filters -> code over IFC quantities, no model"
+        }
+      ]
+    },
+    {
+      "route": "ifc/opening-area",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "question": "What is the total area of all windows?",
+      "value": 23.1702,
+      "unit": "m²",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(source quantities)",
+        "why_chosen": "area / window / unscoped (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 11,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "area / window / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "11 window elements of 93 in the model"
+        },
+        {
+          "step": "area",
+          "detail": "sum over 11 window = 23.1702 m²"
+        }
+      ]
+    },
+    {
+      "route": "ifc/wall-length",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "What is the total length of all walls?",
+      "value": 1166.0,
+      "unit": "m",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(source quantities)",
+        "why_chosen": "length / wall / unscoped (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 121,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "length / wall / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "121 wall elements of 784 in the model"
+        },
+        {
+          "step": "length",
+          "detail": "sum over 121 wall = 1166.0000 m"
+        }
+      ]
+    },
+    {
+      "route": "ifc/wall-volume",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "What is the total volume of all walls?",
+      "value": 662.4846,
+      "unit": "m³",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(source quantities)",
+        "why_chosen": "volume / wall / unscoped (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 121,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "volume / wall / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "121 wall elements of 784 in the model"
+        },
+        {
+          "step": "volume",
+          "detail": "sum over 121 wall = 662.4846 m³"
+        }
+      ]
+    },
+    {
+      "route": "ifc/slab-volume",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "question": "What is the total volume of all slabs?",
+      "value": 76.9916,
+      "unit": "m³",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(source quantities)",
+        "why_chosen": "volume / slab / unscoped (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 4,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "volume / slab / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "4 slab elements of 93 in the model"
+        },
+        {
+          "step": "volume",
+          "detail": "sum over 4 slab = 76.9916 m³"
+        }
+      ]
+    },
+    {
+      "route": "ifc/slab-area-by-type",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "question": "What is the slab area by type and thickness?",
+      "value": 384.96,
+      "unit": "m2",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(source quantities)",
+        "why_chosen": "slab area by type -> IfcSlab grouped by type name and thickness, area summed per group, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 4,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "slab area by type -> IfcSlab grouped by type name and thickness, area summed per group, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "4 slabs, 4 with thickness and area; thickness from the model's thickness quantity"
+        }
+      ]
+    },
+    {
+      "route": "ifc/storey-most",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "Which floor has the most doors?",
+      "value": 22,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "selected floor subtotal = Σ(source quantities on the selected floor)",
+        "why_chosen": "storey comparison / door / count -> code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 77,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "storey comparison / door / count -> code, no model"
+        },
+        {
+          "step": "count",
+          "detail": "Keller 16, Erdgeschoss 18, 1. Obergeschoss 22, 2. Obergeschoss 21, Dachgeschoss 0"
+        }
+      ]
+    },
+    {
+      "route": "ifc/storey-total",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "How many windows are there in total on the building and how many on the 2nd floor?",
+      "value": 206,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(source quantities)",
+        "why_chosen": "count / window / total + storey -> code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 206,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / window / total + storey -> code, no model"
+        },
+        {
+          "step": "count",
+          "detail": "206 total, 54 on 2. Obergeschoss"
+        }
+      ]
+    },
+    {
+      "route": "ifc/storey-difference",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "Compare the doors on the ground floor and first floor",
+      "value": 4,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "difference = |first source subtotal − second source subtotal|",
+        "why_chosen": "storey pair / door / count -> code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 40,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "storey pair / door / count -> code, no model"
+        },
+        {
+          "step": "count",
+          "detail": "**Erdgeschoss**: 18; **1. Obergeschoss**: 22"
+        }
+      ]
+    },
+    {
+      "route": "ifc/kind-difference",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "Are there more windows or doors?",
+      "value": 129,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "difference = |first source subtotal − second source subtotal|",
+        "why_chosen": "kind comparison / window vs door -> code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 283,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "kind comparison / window vs door -> code, no model"
+        },
+        {
+          "step": "count",
+          "detail": "206 windows, 77 doors"
+        }
+      ]
+    },
+    {
+      "route": "ifc/percentage",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "What percentage of doors are on the first floor?",
+      "value": 28.6,
+      "unit": "%",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "combine the independently cited source quantities",
+        "why_chosen": "arithmetic -> independent solver results, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 99,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "arithmetic -> independent solver results, no model"
+        },
+        {
+          "step": "calculate",
+          "detail": "How many doors are there on 1. Obergeschoss: 22; How many doors are there: 77"
+        }
+      ]
+    },
+    {
+      "route": "ifc/area-ratio",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "What is the window-to-floor area ratio?",
+      "value": 16.0,
+      "unit": "%",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "combine the independently cited source quantities",
+        "why_chosen": "arithmetic -> independent solver results, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 288,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "arithmetic -> independent solver results, no model"
+        },
+        {
+          "step": "calculate",
+          "detail": "What is the total area of all windows: 309.5; What is the total area of all rooms: 1939.3839"
+        }
+      ]
+    },
+    {
+      "route": "ifc/baseboard",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "question": "How many linear metres of baseboard per room?",
+      "value": 136.2,
+      "unit": "m",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "baseboard = Σ(max(0, rectangle perimeter − adjacent door widths))",
+        "why_chosen": "baseboard -> room outline minus door openings, code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 7,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "baseboard -> room outline minus door openings, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "7 rooms, 5 doors considered"
+        }
+      ]
+    },
+    {
+      "route": "ifc/tile-order",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "How many square metres of floor tiles should I order for the bathrooms?",
+      "value": 99.02,
+      "unit": "m2",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "order-allowance",
+        "label": "total = Σ(source quantities); order = measured quantity × (1 + waste/100), rounded upward",
+        "why_chosen": "Uses the cited source records available to this route.",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 8,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "order",
+          "detail": "Ordering from cited source measurements; no model call."
+        },
+        {
+          "step": "order_compute",
+          "detail": "Floor tiles: 99.0176 m2 × (1 + 0%) = 99.02 m2, rounded up to 0.01"
+        }
+      ]
+    },
+    {
+      "route": "ifc/tile-order",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "How many m2 of tiles for the bathrooms including 15% waste?",
+      "value": 113.88,
+      "unit": "m2",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "order-allowance",
+        "label": "total = Σ(source quantities); order = measured quantity × (1 + waste/100), rounded upward",
+        "why_chosen": "Uses the cited source records available to this route.",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 8,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "order",
+          "detail": "Ordering from cited source measurements; no model call."
+        },
+        {
+          "step": "order_compute",
+          "detail": "Floor tiles: 99.0176 m2 × (1 + 15%) = 113.88 m2, rounded up to 0.01"
+        }
+      ]
+    },
+    {
+      "route": "ifc/takeoff",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "How many m2 of floor tiles do I need for all the WCs including 10% waste?",
+      "value": 108.92,
+      "unit": "m2",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "order-allowance",
+        "label": "total = Σ(source quantities); order = measured quantity × (1 + waste/100), rounded upward",
+        "why_chosen": "Uses the cited source records available to this route.",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 8,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "order",
+          "detail": "Ordering from cited source measurements; no model call."
+        },
+        {
+          "step": "order_compute",
+          "detail": "Floor tiles: 99.0176 m2 × (1 + 10%) = 108.92 m2, rounded up to 0.01"
+        }
+      ]
+    },
+    {
+      "route": "ifc/quantity-table",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "question": "Give me the full quantity take-off",
+      "value": 7,
+      "unit": "rooms",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "room count = Σ(1 per room); other quantities have separate units and totals",
+        "why_chosen": "quantity take-off -> existing solvers (rooms, baseboard, doors, windows, slabs, piping), code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 34,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "quantity take-off -> existing solvers (rooms, baseboard, doors, windows, slabs, piping), code, no model"
+        },
+        {
+          "step": "rooms",
+          "detail": "7 rooms"
+        },
+        {
+          "step": "slab",
+          "detail": "2 rows"
+        },
+        {
+          "step": "piping",
+          "detail": "not in this file"
+        }
+      ]
+    },
+    {
+      "route": "ifc/unit-conversion",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "What is the total length of all walls in feet?",
+      "value": 1166.0,
+      "unit": "m",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(source quantities)",
+        "why_chosen": "length / wall / unscoped (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 121,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "length / wall / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "121 wall elements of 784 in the model"
+        },
+        {
+          "step": "length",
+          "detail": "sum over 121 wall = 1166.0000 m"
+        }
+      ]
+    },
+    {
+      "route": "ifc/unit-price",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "What is the total area of all rooms at 35 EUR per m2?",
+      "value": null,
+      "unit": null,
+      "numeric": false,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "Read the cited source records; no numeric aggregation was performed",
+        "why_chosen": "explicit filters -> code over IFC quantities, no model",
+        "alternatives": []
+      },
+      "calc_status": "source-only",
+      "rows": 0,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "explicit filters -> code over IFC quantities, no model"
+        }
+      ]
+    },
+    {
+      "route": "ifc/unit-price",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "question": "What is the total area of all rooms at a price of 35 EUR per m2?",
+      "value": 173.34,
+      "unit": "m2",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(source quantities)",
+        "why_chosen": "list rooms with areas -> room items sorted by area, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 7,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "list rooms with areas -> room items sorted by area, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "7 rooms"
+        }
+      ]
+    },
+    {
+      "route": "ifc/complex-order",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "How much floor tiling should I order for all WC rooms, allowing 10% waste, if each box covers 1.44 m² and costs €32?",
+      "value": 108.92,
+      "unit": "m2",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "order-allowance",
+        "label": "total = Σ(source quantities); order = measured quantity × (1 + waste/100), rounded upward",
+        "why_chosen": "Uses the cited source records available to this route.",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 8,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "order",
+          "detail": "Ordering from cited source measurements; no model call."
+        },
+        {
+          "step": "order_compute",
+          "detail": "Floor tiles: 99.0176 m2 × (1 + 10%) = 108.92 m2, rounded up to 0.01"
+        }
+      ]
+    },
+    {
+      "route": "ifc/wall-face",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "What is the net area of one face of all external walls?",
+      "value": 1961.633992,
+      "unit": "m²",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "wall-face-geometry",
+        "label": "wall surface = Σ(net side-face areas)",
+        "why_chosen": "wall side area: gross body minus actual void cuts; code only",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 44,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "wall side area: gross body minus actual void cuts; code only"
+        },
+        {
+          "step": "wallarea",
+          "detail": "44 walls: 2589.033992 - 627.400000 = 1961.633992 m²; both"
+        }
+      ]
+    },
+    {
+      "route": "mep/count",
+      "docs": [
+        "ifc_bench__digital-hub-plumbing"
+      ],
+      "question": "How many pipes are there?",
+      "value": 504,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(selected element quantities)",
+        "why_chosen": "building services / structure -> element index read from the IFC, code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 504,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "504 elements"
+        }
+      ]
+    },
+    {
+      "route": "mep/types",
+      "docs": [
+        "ifc_bench__digital-hub-plumbing"
+      ],
+      "question": "What types of pipes are used?",
+      "value": 3,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "recorded category count = number of distinct recorded category values",
+        "why_chosen": "building services / structure -> element index read from the IFC, code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 504,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "3 types over 504 elements"
+        }
+      ]
+    },
+    {
+      "route": "mep/sizes",
+      "docs": [
+        "ifc_bench__digital-hub-plumbing"
+      ],
+      "question": "What sizes of pipe are used?",
+      "value": 11,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "recorded category count = number of distinct recorded category values",
+        "why_chosen": "building services / structure -> element index read from the IFC, code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 504,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "11 sizes over 504 elements"
+        }
+      ]
+    },
+    {
+      "route": "mep/length",
+      "docs": [
+        "ifc_bench__digital-hub-plumbing"
+      ],
+      "question": "What is the total length of piping?",
+      "value": 301.11,
+      "unit": "m",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(selected element quantities)",
+        "why_chosen": "building services / structure -> element index read from the IFC, code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 504,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "504 runs summed"
+        }
+      ]
+    },
+    {
+      "route": "mep/length-by-system",
+      "docs": [
+        "ifc_bench__digital-hub-plumbing"
+      ],
+      "question": "List the piping systems by length",
+      "value": 301.11,
+      "unit": "m",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(selected element quantities)",
+        "why_chosen": "building services / structure -> element index read from the IFC, code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 504,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "504 runs summed"
+        }
+      ]
+    },
+    {
+      "route": "mep/length-by-storey",
+      "docs": [
+        "ifc_bench__digital-hub-plumbing"
+      ],
+      "question": "What is the total pipe length by level?",
+      "value": 301.11,
+      "unit": "m",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(selected element quantities)",
+        "why_chosen": "building services / structure -> element index read from the IFC, code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 504,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "504 runs summed"
+        }
+      ]
+    },
+    {
+      "route": "mep/duct-length",
+      "docs": [
+        "ifc_bench__digital-hub-ventilation"
+      ],
+      "question": "What is the total duct length by system?",
+      "value": 838.39,
+      "unit": "m",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(selected element quantities)",
+        "why_chosen": "building services / structure -> element index read from the IFC, code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 595,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "595 runs summed"
+        }
+      ]
+    },
+    {
+      "route": "mep/duct-count",
+      "docs": [
+        "ifc_bench__digital-hub-ventilation"
+      ],
+      "question": "How many ducts are there?",
+      "value": 595,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(selected element quantities)",
+        "why_chosen": "building services / structure -> element index read from the IFC, code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 595,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "595 elements"
+        }
+      ]
+    },
+    {
+      "route": "mep/light-count",
+      "docs": [
+        "ifc_models__bsc-clinic-clinic-electrical"
+      ],
+      "question": "How many light fixtures are there?",
+      "value": 1120,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(selected element quantities)",
+        "why_chosen": "building services / structure -> element index read from the IFC, code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 1120,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "1120 elements"
+        }
+      ]
+    },
+    {
+      "route": "mep/structure-count",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "How many columns are there?",
+      "value": 2,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(selected element quantities)",
+        "why_chosen": "building services / structure -> element index read from the IFC, code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 2,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "2 elements"
+        }
+      ]
+    },
+    {
+      "route": "mep/structure-types",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "What types of columns are there?",
+      "value": 1,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "recorded category count = number of distinct recorded category values",
+        "why_chosen": "building services / structure -> element index read from the IFC, code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 2,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "1 types over 2 elements"
+        }
+      ]
+    },
+    {
+      "route": "mep/structure-volume",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "What is the total concrete volume?",
+      "value": 0.0,
+      "unit": "m³",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(source quantities)",
+        "why_chosen": "volume / None / unscoped (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 0,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "volume / None / unscoped (rules)"
+        },
+        {
+          "step": "abstain",
+          "detail": "I could not tell which elements the question is about, so I would rather not guess."
+        }
+      ]
+    },
+    {
+      "route": "ifc4x3/count",
+      "docs": [
+        "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3"
+      ],
+      "question": "How many columns are there?",
+      "value": 1195,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(selected element quantities)",
+        "why_chosen": "building services / structure -> element index read from the IFC, code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 1195,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "1195 elements"
+        }
+      ]
+    },
+    {
+      "route": "ifc/storey-schedule",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "Compare the ground floor and the first floor",
+      "value": null,
+      "unit": null,
+      "numeric": false,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "Each floor and quantity is totalled separately; units are not mixed",
+        "why_chosen": "storey table / rooms, area, doors, windows -> code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 228,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "storey table / rooms, area, doors, windows -> code, no model"
+        }
+      ]
+    },
+    {
+      "route": "ifc/filtered-room-area",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "What is the total area of rooms between 12 and 25 m2?",
+      "value": 602.2148,
+      "unit": "m²",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(source quantities)",
+        "why_chosen": "explicit filters -> code over IFC quantities, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 29,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "explicit filters -> code over IFC quantities, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "room; all storeys; between 12 and 25 m²: 29 matches"
+        }
+      ]
+    },
+    {
+      "route": "ifc/zero-count",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "How many sprinklers are there?",
+      "value": 0,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "total = Σ(selected element quantities)",
+        "why_chosen": "building services / structure -> element index read from the IFC, code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 0,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "0 distribution elements in the IFC"
+        }
+      ]
+    },
+    {
+      "route": "ifc/locate",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "Where are the stairs?",
+      "value": 4,
+      "unit": null,
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "count = Σ(1 per selected item)",
+        "why_chosen": "Uses the cited source records available to this route.",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 4,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "exits",
+          "detail": "stairs: 4 items"
+        }
+      ]
+    },
+    {
+      "route": "ifc/rule-findings",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "question": "Do all doors meet the accessibility clear width requirement?",
+      "value": 0,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "issue count = Σ(1 per finding from the checked rules)",
+        "why_chosen": "rule check / accessibility (241/2017) -> code over the model, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 0,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "rule check / accessibility (241/2017) -> code over the model, no model"
+        },
+        {
+          "step": "findings",
+          "detail": "0 findings from 3 checks"
+        }
+      ]
+    },
+    {
+      "route": "cad/count",
+      "docs": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ],
+      "question": "How many windows are there?",
+      "value": 28,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "cad-planmap",
+        "label": "count = Σ(1 per selected item)",
+        "why_chosen": "count / window / unscoped (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 28,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / window / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "plan map: 28 window items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "28 window"
+        }
+      ]
+    },
+    {
+      "route": "cad/count",
+      "docs": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ],
+      "question": "How many doors are there?",
+      "value": 36,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "cad-planmap",
+        "label": "count = Σ(1 per selected item)",
+        "why_chosen": "count / door / unscoped (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 36,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / door / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "plan map: 36 door items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "36 door"
+        }
+      ]
+    },
+    {
+      "route": "cad/multi-kind",
+      "docs": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ],
+      "question": "How many windows and doors are there?",
+      "value": {
+        "window": 28,
+        "door": 36
+      },
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "cad-planmap",
+        "label": "count each category separately",
+        "why_chosen": "count / window / unscoped (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 64,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / window / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "[window] plan map: 28 window items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "[window] 28 window"
+        },
+        {
+          "step": "load",
+          "detail": "[door] plan map: 36 door items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "[door] 36 door"
+        }
+      ]
+    },
+    {
+      "route": "cad/room-count",
+      "docs": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ],
+      "question": "How many rooms are there?",
+      "value": 47,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "cad-planmap",
+        "label": "count = Σ(1 per selected item)",
+        "why_chosen": "count / room / unscoped (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 47,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / room / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "plan map: 47 room items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "47 room"
+        }
+      ]
+    },
+    {
+      "route": "cad/room-area",
+      "docs": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ],
+      "question": "What is the total area of all rooms?",
+      "value": 343.27,
+      "unit": "m2",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "cad-planmap",
+        "label": "total = Σ(source quantities)",
+        "why_chosen": "list rooms with areas -> room items sorted by area, no model",
+        "alternatives": [],
+        "scales": [
+          {
+            "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+            "page": 1,
+            "id": "dxf_units_fit",
+            "label": "Declared CAD units and page registration",
+            "why_chosen": "Highest available evidence rank (0.5); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact.",
+            "alternatives": [
+              {
+                "id": "ratio-dpi",
+                "value": 0.03386666666666667,
+                "unit": "m/px",
+                "diff_pct": 0.0009842422810740655,
+                "independent": false,
+                "rejected_because": "Lower physical-evidence rank."
+              },
+              {
+                "id": "ratio-dpi",
+                "value": 0.03386666666666667,
+                "unit": "m/px",
+                "diff_pct": 0.0009842422810740655,
+                "independent": false,
+                "rejected_because": "Lower physical-evidence rank."
+              },
+              {
+                "id": "ratio-dpi",
+                "value": 0.03386666666666667,
+                "unit": "m/px",
+                "diff_pct": 0.0009842422810740655,
+                "independent": false,
+                "rejected_because": "Lower physical-evidence rank."
+              },
+              {
+                "id": "door-prior",
+                "value": 0.03302752293577975,
+                "unit": "m/px",
+                "diff_pct": 2.4787464618072232,
+                "independent": false,
+                "rejected_because": "Lower physical-evidence rank."
+              }
+            ],
+            "disagreement": false,
+            "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+          }
+        ]
+      },
+      "calc_status": "complete",
+      "rows": 47,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "list rooms with areas -> room items sorted by area, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "47 rooms"
+        }
+      ]
+    },
+    {
+      "route": "cad/filtered-area",
+      "docs": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ],
+      "question": "What is the total area of the Zimmer rooms?",
+      "value": null,
+      "unit": "m2",
+      "numeric": false,
+      "abstained": false,
+      "method": {
+        "id": "cad-planmap",
+        "label": "Read each source quantity separately; no combined total is claimed",
+        "why_chosen": "count / room / named 'Zimmer' -> code, no model",
+        "alternatives": [],
+        "scales": [
+          {
+            "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+            "page": 1,
+            "id": "dxf_units_fit",
+            "label": "Declared CAD units and page registration",
+            "why_chosen": "Highest available evidence rank (0.5); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact.",
+            "alternatives": [
+              {
+                "id": "ratio-dpi",
+                "value": 0.03386666666666667,
+                "unit": "m/px",
+                "diff_pct": 0.0009842422810740655,
+                "independent": false,
+                "rejected_because": "Lower physical-evidence rank."
+              },
+              {
+                "id": "ratio-dpi",
+                "value": 0.03386666666666667,
+                "unit": "m/px",
+                "diff_pct": 0.0009842422810740655,
+                "independent": false,
+                "rejected_because": "Lower physical-evidence rank."
+              },
+              {
+                "id": "ratio-dpi",
+                "value": 0.03386666666666667,
+                "unit": "m/px",
+                "diff_pct": 0.0009842422810740655,
+                "independent": false,
+                "rejected_because": "Lower physical-evidence rank."
+              },
+              {
+                "id": "door-prior",
+                "value": 0.03302752293577975,
+                "unit": "m/px",
+                "diff_pct": 2.4787464618072232,
+                "independent": false,
+                "rejected_because": "Lower physical-evidence rank."
+              }
+            ],
+            "disagreement": false,
+            "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+          }
+        ]
+      },
+      "calc_status": "complete",
+      "rows": 9,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / room / named 'Zimmer' -> code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "9 rooms match Zimmer"
+        }
+      ]
+    },
+    {
+      "route": "cad/storey-count",
+      "docs": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ],
+      "question": "How many storeys are there?",
+      "value": 1,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "cad-planmap",
+        "label": "floor count = Σ(floor plans detected on each page)",
+        "why_chosen": "count / storey / unscoped (rules)",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 1,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / storey / unscoped (rules)"
+        },
+        {
+          "step": "count",
+          "detail": "1 storey(s): 1 plan page(s); 1 by separate floor plans on the sheet"
+        }
+      ]
+    },
+    {
+      "route": "cad/baseboard",
+      "docs": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ],
+      "question": "How many linear metres of baseboard per room?",
+      "value": 393.5,
+      "unit": "m",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "cad-planmap",
+        "label": "baseboard = Σ(max(0, rectangle perimeter − adjacent door widths))",
+        "why_chosen": "baseboard -> room outline minus door openings, code, no model",
+        "alternatives": [],
+        "scales": [
+          {
+            "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+            "page": 1,
+            "id": "dxf_units_fit",
+            "label": "Declared CAD units and page registration",
+            "why_chosen": "Highest available evidence rank (0.5); 0 independent method families agree within 1%. Original derivation is unavailable; retained from the source artifact.",
+            "alternatives": [
+              {
+                "id": "ratio-dpi",
+                "value": 0.03386666666666667,
+                "unit": "m/px",
+                "diff_pct": 0.0009842422810740655,
+                "independent": false,
+                "rejected_because": "Lower physical-evidence rank."
+              },
+              {
+                "id": "ratio-dpi",
+                "value": 0.03386666666666667,
+                "unit": "m/px",
+                "diff_pct": 0.0009842422810740655,
+                "independent": false,
+                "rejected_because": "Lower physical-evidence rank."
+              },
+              {
+                "id": "ratio-dpi",
+                "value": 0.03386666666666667,
+                "unit": "m/px",
+                "diff_pct": 0.0009842422810740655,
+                "independent": false,
+                "rejected_because": "Lower physical-evidence rank."
+              },
+              {
+                "id": "door-prior",
+                "value": 0.03302752293577975,
+                "unit": "m/px",
+                "diff_pct": 2.4787464618072232,
+                "independent": false,
+                "rejected_because": "Lower physical-evidence rank."
+              }
+            ],
+            "disagreement": false,
+            "agreement_definition": "100 × |a − b| / max(|a|, |b|); agreement ≤1%, disagreement >5%; not an accuracy guarantee"
+          }
+        ]
+      },
+      "calc_status": "complete",
+      "rows": 47,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "baseboard -> room outline minus door openings, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "47 rooms, 36 doors considered"
+        }
+      ]
+    },
+    {
+      "route": "raster/count",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "question": "How many windows are there?",
+      "value": 11,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": null,
+      "calc_status": "complete",
+      "rows": 11,
+      "issues": [],
+      "complete": true,
+      "method_recorded": false,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / window / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "plan map: 11 window items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "11 window"
+        }
+      ]
+    },
+    {
+      "route": "raster/count",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "question": "How many doors are there?",
+      "value": 11,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": null,
+      "calc_status": "complete",
+      "rows": 11,
+      "issues": [],
+      "complete": true,
+      "method_recorded": false,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / door / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "plan map: 11 door items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "11 door"
+        }
+      ]
+    },
+    {
+      "route": "raster/count",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "question": "How many toilets are there?",
+      "value": 2,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": null,
+      "calc_status": "complete",
+      "rows": 2,
+      "issues": [],
+      "complete": true,
+      "method_recorded": false,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / toilet / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "plan map: 2 toilet items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "2 toilet"
+        }
+      ]
+    },
+    {
+      "route": "raster/multi-kind",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "question": "How many windows and doors are there?",
+      "value": {
+        "window": 11,
+        "door": 11
+      },
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": null,
+      "calc_status": "complete",
+      "rows": 22,
+      "issues": [],
+      "complete": true,
+      "method_recorded": false,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / window / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "[window] plan map: 11 window items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "[window] 11 window"
+        },
+        {
+          "step": "load",
+          "detail": "[door] plan map: 11 door items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "[door] 11 door"
+        }
+      ]
+    },
+    {
+      "route": "raster/room-area",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "question": "What is the total area of all rooms?",
+      "value": 93.71,
+      "unit": "m2",
+      "numeric": true,
+      "abstained": false,
+      "method": null,
+      "calc_status": "complete",
+      "rows": 10,
+      "issues": [],
+      "complete": true,
+      "method_recorded": false,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "list rooms with areas -> room items sorted by area, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "10 rooms"
+        }
+      ]
+    },
+    {
+      "route": "raster/filtered-area",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "question": "What is the area of the kitchen?",
+      "value": 13.75,
+      "unit": "m2",
+      "numeric": true,
+      "abstained": false,
+      "method": null,
+      "calc_status": "complete",
+      "rows": 1,
+      "issues": [],
+      "complete": true,
+      "method_recorded": false,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / room / named 'kitchen' -> code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "1 rooms match kitchen"
+        }
+      ]
+    },
+    {
+      "route": "raster/baseboard",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "question": "How many linear metres of baseboard per room?",
+      "value": 92.5,
+      "unit": "m",
+      "numeric": true,
+      "abstained": false,
+      "method": null,
+      "calc_status": "complete",
+      "rows": 8,
+      "issues": [],
+      "complete": true,
+      "method_recorded": false,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "baseboard -> room outline minus door openings, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "8 rooms, 11 doors considered"
+        }
+      ]
+    },
+    {
+      "route": "raster/total-area",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "question": "How big is this flat?",
+      "value": 62.33,
+      "unit": "m2",
+      "numeric": true,
+      "abstained": false,
+      "method": null,
+      "calc_status": "complete",
+      "rows": 8,
+      "issues": [],
+      "complete": true,
+      "method_recorded": false,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "plan total -> sum of room areas, no model"
+        },
+        {
+          "step": "sum",
+          "detail": "8 indoor rooms = 62.33 m2"
+        }
+      ]
+    },
+    {
+      "route": "raster/superlative-area",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "question": "What is the biggest room in this plan?",
+      "value": 21.55,
+      "unit": "m2",
+      "numeric": true,
+      "abstained": false,
+      "method": null,
+      "calc_status": "complete",
+      "rows": 1,
+      "issues": [],
+      "complete": true,
+      "method_recorded": false,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "largest room / plan map -> code, no model"
+        },
+        {
+          "step": "compare",
+          "detail": "8 rooms ranked by area"
+        }
+      ]
+    },
+    {
+      "route": "raster/takeoff",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "question": "How many m2 of flooring for the living room and kitchen with 10% extra?",
+      "value": 38.83,
+      "unit": "m2",
+      "numeric": true,
+      "abstained": false,
+      "method": null,
+      "calc_status": "complete",
+      "rows": 2,
+      "issues": [],
+      "complete": true,
+      "method_recorded": false,
+      "trace": [
+        {
+          "step": "order",
+          "detail": "Ordering from cited source measurements; no model call."
+        },
+        {
+          "step": "order_compute",
+          "detail": "Flooring: 35.3 m2 × (1 + 10%) = 38.83 m2, rounded up to 0.01"
+        }
+      ]
+    },
+    {
+      "route": "multi-document/count",
+      "docs": [
+        "ifc_bench__ac20-arc",
+        "ifc_bench__fzk-house-arc"
+      ],
+      "question": "How many doors are there across both models?",
+      "value": 82,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "multi-document-combination",
+        "label": "multi-document total / door / count -> combine, no model",
+        "why_chosen": "Group by building and level, then choose one source per kind before combining.",
+        "alternatives": [],
+        "selections": [
+          {
+            "building_group": "g1",
+            "level": "Keller",
+            "kind": "door",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 16,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g1",
+            "level": "Erdgeschoss",
+            "kind": "door",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 18,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g1",
+            "level": "1. Obergeschoss",
+            "kind": "door",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 22,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g1",
+            "level": "2. Obergeschoss",
+            "kind": "door",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 21,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g1",
+            "level": "Dachgeschoss",
+            "kind": "door",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 0,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g2",
+            "level": "Erdgeschoss",
+            "kind": "door",
+            "doc_id": "ifc_bench__fzk-house-arc",
+            "value": 5,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g2",
+            "level": "Dachgeschoss",
+            "kind": "door",
+            "doc_id": "ifc_bench__fzk-house-arc",
+            "value": 0,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          }
+        ]
+      },
+      "calc_status": "complete",
+      "rows": 82,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "multi-document total / door / count -> combine, no model"
+        }
+      ]
+    },
+    {
+      "route": "revision/change-count",
+      "docs": [
+        "ifc_models__rwth-digitalhub-fm-hzg-digitalhub-v1",
+        "ifc_models__rwth-digitalhub-digitalhub-fm-hzg-v2"
+      ],
+      "question": "Compare these two versions",
+      "value": 1235,
+      "unit": "changes",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "revision-comparison",
+        "label": "change count = Σ(1 per detected change event)",
+        "why_chosen": "Compared stable item identities, source positions, outer dimensions and recorded properties. Movement threshold: more than 5 cm. Rotation or a changed model coordinate system can also change outer dimensions.",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 1235,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "revision_compare",
+          "detail": "Compared stable item identities, source positions, outer dimensions and recorded properties. Movement threshold: more than 5 cm. Rotation or a changed model coordinate system can also change outer dimensions."
+        }
+      ]
+    },
+    {
+      "route": "project/deduplicate",
+      "docs": [
+        "ifc_bench__ac20-arc",
+        "ifc_models__kit-institute-ac20-institute-var-2"
+      ],
+      "question": "How many doors in total across the set?",
+      "value": 77,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "multi-document-combination",
+        "label": "multi-document total / door / count -> combine, no model",
+        "why_chosen": "Group by building and level, then choose one source per kind before combining.",
+        "alternatives": [],
+        "selections": [
+          {
+            "building_group": "g1",
+            "level": "Keller",
+            "kind": "door",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 16,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": [
+              {
+                "id": "ifc_models__kit-institute-ac20-institute-var-2",
+                "value": 16,
+                "rejected_because": "Same building/level/kind; source selection keeps one source to avoid adding duplicate representations."
+              }
+            ]
+          },
+          {
+            "building_group": "g1",
+            "level": "Erdgeschoss",
+            "kind": "door",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 18,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": [
+              {
+                "id": "ifc_models__kit-institute-ac20-institute-var-2",
+                "value": 18,
+                "rejected_because": "Same building/level/kind; source selection keeps one source to avoid adding duplicate representations."
+              }
+            ]
+          },
+          {
+            "building_group": "g1",
+            "level": "1. Obergeschoss",
+            "kind": "door",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 22,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": [
+              {
+                "id": "ifc_models__kit-institute-ac20-institute-var-2",
+                "value": 22,
+                "rejected_because": "Same building/level/kind; source selection keeps one source to avoid adding duplicate representations."
+              }
+            ]
+          },
+          {
+            "building_group": "g1",
+            "level": "2. Obergeschoss",
+            "kind": "door",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 21,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": [
+              {
+                "id": "ifc_models__kit-institute-ac20-institute-var-2",
+                "value": 21,
+                "rejected_because": "Same building/level/kind; source selection keeps one source to avoid adding duplicate representations."
+              }
+            ]
+          },
+          {
+            "building_group": "g1",
+            "level": "Dachgeschoss",
+            "kind": "door",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 0,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": [
+              {
+                "id": "ifc_models__kit-institute-ac20-institute-var-2",
+                "value": 0,
+                "rejected_because": "Same building/level/kind; source selection keeps one source to avoid adding duplicate representations."
+              }
+            ]
+          }
+        ]
+      },
+      "calc_status": "complete",
+      "rows": 77,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "multi-document total / door / count -> combine, no model"
+        }
+      ]
+    },
+    {
+      "route": "project/difference",
+      "docs": [
+        "ifc_bench__ac20-arc",
+        "ifc_bench__digital-hub-arc"
+      ],
+      "question": "Compare level 1 and level 2 doors",
+      "value": {
+        "rooms": 0,
+        "doors": 1,
+        "windows": 0
+      },
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "multi-document-combination",
+        "label": "multi-document level comparison / rooms, doors, windows -> combine, no model",
+        "why_chosen": "Group by building and level, then choose one source per kind before combining.",
+        "alternatives": [],
+        "selections": [
+          {
+            "building_group": "g1",
+            "level": "1. Obergeschoss",
+            "kind": "room",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 22,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g1",
+            "level": "1. Obergeschoss",
+            "kind": "door",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 22,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g1",
+            "level": "1. Obergeschoss",
+            "kind": "window",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 54,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g1",
+            "level": "2. Obergeschoss",
+            "kind": "room",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 22,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g1",
+            "level": "2. Obergeschoss",
+            "kind": "door",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 21,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g1",
+            "level": "2. Obergeschoss",
+            "kind": "window",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 54,
+            "unit": "count",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          }
+        ]
+      },
+      "calc_status": "complete",
+      "rows": 195,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "multi-document level comparison / rooms, doors, windows -> combine, no model"
+        }
+      ]
+    },
+    {
+      "route": "project/ranking",
+      "docs": [
+        "ifc_bench__ac20-arc",
+        "ifc_bench__digital-hub-arc"
+      ],
+      "question": "Which level has the most doors?",
+      "value": 22,
+      "unit": "count",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "selected floor subtotal = Σ(source quantities on the selected floor)",
+        "why_chosen": "storey comparison / door / count -> code, no model",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 77,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "storey comparison / door / count -> code, no model"
+        },
+        {
+          "step": "count",
+          "detail": "Keller 16, Erdgeschoss 18, 1. Obergeschoss 22, 2. Obergeschoss 21, Dachgeschoss 0"
+        }
+      ]
+    },
+    {
+      "route": "project/area",
+      "docs": [
+        "ifc_bench__ac20-arc",
+        "ifc_bench__digital-hub-arc"
+      ],
+      "question": "What is the total room area across both models?",
+      "value": 4781.51,
+      "unit": "m2",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "multi-document-combination",
+        "label": "multi-document total / room / area -> combine, no model",
+        "why_chosen": "Group by building and level, then choose one source per kind before combining.",
+        "alternatives": [],
+        "selections": [
+          {
+            "building_group": "g1",
+            "level": "Keller",
+            "kind": "room",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 438.149,
+            "unit": "m2",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g1",
+            "level": "Erdgeschoss",
+            "kind": "room",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 442.126,
+            "unit": "m2",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g1",
+            "level": "1. Obergeschoss",
+            "kind": "room",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 428.3714,
+            "unit": "m2",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g1",
+            "level": "2. Obergeschoss",
+            "kind": "room",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 428.3714,
+            "unit": "m2",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g1",
+            "level": "Dachgeschoss",
+            "kind": "room",
+            "doc_id": "ifc_bench__ac20-arc",
+            "value": 202.3662,
+            "unit": "m2",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g2",
+            "level": "B01_OKRD",
+            "kind": "room",
+            "doc_id": "ifc_bench__digital-hub-arc",
+            "value": 558.0987,
+            "unit": "m2",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g2",
+            "level": "E00_OKRD",
+            "kind": "room",
+            "doc_id": "ifc_bench__digital-hub-arc",
+            "value": 1156.9466,
+            "unit": "m2",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          },
+          {
+            "building_group": "g2",
+            "level": "E01_OKRD",
+            "kind": "room",
+            "doc_id": "ifc_bench__digital-hub-arc",
+            "value": 1127.0761,
+            "unit": "m2",
+            "why_chosen": "Model first; otherwise highest item population; document ID breaks exact ties. Derived sheets are not independent checks.",
+            "alternatives": []
+          }
+        ]
+      },
+      "calc_status": "complete",
+      "rows": 146,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "route",
+          "detail": "multi-document total / room / area -> combine, no model"
+        }
+      ]
+    },
+    {
+      "route": "order/skirting",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "question": "Order skirting for all rooms with 10% waste",
+      "value": 149.81,
+      "unit": "m",
+      "numeric": true,
+      "abstained": false,
+      "method": {
+        "id": "order-allowance",
+        "label": "net skirting = Σ(room perimeters − associated door widths); order = measured quantity × (1 + waste/100), rounded upward",
+        "why_chosen": "Uses the cited source records available to this route.",
+        "alternatives": []
+      },
+      "calc_status": "complete",
+      "rows": 7,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "order",
+          "detail": "Ordering from cited source measurements; no model call."
+        },
+        {
+          "step": "order_compute",
+          "detail": "Skirting: 136.19 m × (1 + 10%) = 149.81 m, rounded up to 0.01"
+        }
+      ]
+    },
+    {
+      "route": "props/schedule",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "question": "Give me the door schedule",
+      "value": null,
+      "unit": null,
+      "numeric": false,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "Read the cited source records; no numeric aggregation was performed",
+        "why_chosen": "highlight 5 item(s)",
+        "alternatives": []
+      },
+      "calc_status": "source-only",
+      "rows": 0,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "scene",
+          "detail": "highlight 5 item(s)"
+        }
+      ]
+    },
+    {
+      "route": "props/material",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "question": "What materials are the walls made of?",
+      "value": null,
+      "unit": null,
+      "numeric": false,
+      "abstained": false,
+      "method": {
+        "id": "recorded-property-filter",
+        "label": "Read recorded element properties",
+        "why_chosen": "Uses the original model's properties, quantities, types and materials; missing requested properties remain unknown.",
+        "alternatives": [],
+        "filters": {
+          "kind": "wall",
+          "prop": "material",
+          "schedule": false,
+          "group": false,
+          "predicates": [],
+          "threshold": null,
+          "tag": null,
+          "special": null
+        },
+        "checked_elements": 13,
+        "scope_elements": 13
+      },
+      "calc_status": "complete",
+      "rows": 13,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "props",
+          "detail": "Requested property present on 13 of 13 elements; checked the original model's properties, quantities, types and materials."
+        }
+      ]
+    },
+    {
+      "route": "ifc/description",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "question": "What is this building?",
+      "value": null,
+      "unit": null,
+      "numeric": false,
+      "abstained": false,
+      "method": {
+        "id": "ifc-index",
+        "label": "Read the cited source records; no numeric aggregation was performed",
+        "why_chosen": "count / apartment / room (model)",
+        "alternatives": []
+      },
+      "calc_status": "source-only",
+      "rows": 0,
+      "issues": [],
+      "complete": true,
+      "method_recorded": true,
+      "trace": [
+        {
+          "step": "abstain",
+          "detail": "I could not tell which elements the question is about, so I would rather not guess."
+        }
+      ]
+    }
+  ],
+  "implementation_sha256": {
+    "engine/method_inventory.py": "6e4ab07e94d3c737185083367e1eb9d20be12e1468e97529f4dd3d9a293d04dd",
+    "engine/method_lengths.py": "6ca8ae7ed8aded7dfcae7e1da13cdbd562c690f03dc536c33ef1c57c0923b06a",
+    "engine/method_multidoc.py": "c3d6fe6c3802d8e28e8d74c114ffcbe5dcb16cf6572e2674bcad696d0f1f5a04",
+    "engine/method_properties.py": "f30c833df8914de5e798585dc0529ae419ffc8d90c371508eadac2cd0480995d",
+    "engine/method_rescale.py": "2edd05325967a5739317bb889df47151848cee8ef46117a09a18a2530eb540fe",
+    "engine/method_trace.py": "c29bb36bb59f7d314f05a995d8a879c43ec9d814407a9aeb90758e66c81a1be8",
+    "engine/scale_policy.py": "a428ad4e49ca89611ca38f490589d7b2bd77d60d62755c75c6f3ac7668632dde"
+  }
+}

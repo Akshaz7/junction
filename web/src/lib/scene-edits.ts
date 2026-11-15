@@ -5,6 +5,29 @@ import type { Answer } from './types'
 export interface DrawingEdits {
   state: CommandState
   tags: Record<string, string>
+  /** Shared chat layer, set once a move/material edit (or a state carrying them) was seen. */
+  moved?: Record<string, readonly [number, number]>
+  materials?: Record<string, string>
+}
+
+/** move/material/reset fold into the optional moved/materials maps; other ops leave them as they are. */
+function sharedEdits(drawing: DrawingEdits | undefined, event: SceneEvent): Pick<DrawingEdits, 'moved' | 'materials'> {
+  let moved = drawing?.moved, materials = drawing?.materials
+  if (event.type === 'scene.state') {
+    if (event.moved || moved) moved = { ...event.moved }
+    if (event.materials || materials) materials = { ...event.materials }
+  } else if (event.op === 'reset') {
+    if (moved) moved = {}
+    if (materials) materials = {}
+  } else if (event.op === 'move' && event.offset_m) {
+    const [dx, dz] = event.offset_m
+    moved = { ...moved }
+    for (const id of event.item_ids) { if (Math.abs(dx) + Math.abs(dz) > 1e-6) moved[id] = [dx, dz]; else delete moved[id] }
+  } else if (event.op === 'material' && event.material !== undefined) {
+    materials = { ...materials }
+    for (const id of event.item_ids) { if (event.material) materials[id] = event.material; else delete materials[id] }
+  }
+  return { ...(moved ? { moved } : {}), ...(materials ? { materials } : {}) }
 }
 export interface ChatEdits {
   docs: Record<string, DrawingEdits>
@@ -25,7 +48,7 @@ export function reduceSceneEvent(previous: ChatEdits, event: SceneEvent): ChatEd
   const tags = { ...drawing?.tags, ...event.labels }
   const seen = new Set(previous.seen)
   if (event.type === 'scene.edit' && event.edit_id) seen.add(event.edit_id)
-  return { docs: { ...previous.docs, [event.doc_id]: { state, tags } }, seen }
+  return { docs: { ...previous.docs, [event.doc_id]: { state, tags, ...sharedEdits(drawing, event) } }, seen }
 }
 
 export function answerSceneEvents(answer: Answer): SceneEvent[] {

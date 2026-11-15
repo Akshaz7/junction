@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import ast
 import json
+import math
 import operator
 import re
 import tempfile
@@ -55,6 +56,10 @@ class Session:
         self.tables: dict[str, tuple[str, int, Table]] = {}
         self.views = 0
         self.transcript: list[str] = []            # every observation, for number grounding
+        self.audit: list[dict] = []
+        self.calculations: list[dict] = []
+        self.numeric_results: list[dict] = []     # typed, computed results; never scraped from answer prose
+        self.numeric_inputs: set[float] = set()   # actual structured quantities available for arithmetic
         self._planmaps: dict[str, Doc | None] = {}
         for i, d in enumerate(self.doc_ids, 1):
             self.docs[f"d{i}"] = {"id": d, **self._meta(d)}
@@ -135,6 +140,15 @@ class Session:
         fn = getattr(self, f"t_{tool}", None)
         if fn is None:
             return f"error: unknown tool '{tool}'. Tools: find_text, page_text, tables, table, view, scale, measure, planmap, ifc, compute."
+        # Publish before parsing a large model, not after the expensive load.
+        if tool in ("ifc", "planmap"):
+            nouns = {"door": "doors", "window": "windows", "room": "rooms", "wall": "walls", "pipe": "pipes",
+                     "duct": "ducts", "column": "columns", "stairs": "stairs", "toilet": "toilets", "sink": "sinks"}
+            noun = nouns.get(str(args.get("kind") or ""), "model elements" if tool == "ifc" else "drawing items")
+            level = str(args.get("storey") or "").strip()[:60]
+            self.status(f"Checking {noun}" + (f" on {level}" if level else "") + "…")
+        elif tool == "compute":
+            self.status("Calculating from the findings…")
         try:
             obs = fn(**{k: v for k, v in (args or {}).items()})
         except TypeError as e:
@@ -143,6 +157,7 @@ class Session:
             obs = f"error: {tool} failed ({type(e).__name__}: {str(e)[:120]})"
         obs = obs if len(obs) <= OBS_CAP else obs[:OBS_CAP] + "\n[truncated]"
         self.transcript.append(obs)
+        self.audit.append({'tool': tool, 'args': args or {}, 'observation': obs})
         return obs
 
     def status(self, text: str):
@@ -301,6 +316,10 @@ class Session:
         self.on_cost({"task": "read_drawing", "provider": r.provider, "model": r.model, "cost_usd": r.cost_usd})
         txt = (r.text or "").strip()[:600]
         e = self.reg("region", did, pg, [x0, y0, x1, y1], txt, visual=True)
+        self.calculations.append({'tool': 'view', 'doc_id': did, 'page': pg, 'bbox': [x0, y0, x1, y1],
+                                  'crop_width_px': int(x1) - int(x0), 'crop_height_px': int(y1) - int(y0),
+                                  'model_width_px': crop.width, 'model_height_px': crop.height,
+                                  'model': r.model, 'text': txt, 'evidence_ref': e})
         return f"{e} (visual reading of the crop {[int(x0), int(y0), int(x1), int(y1)]} on p{pg}): {txt}"
 
     def t_scale(self, doc: str = "", page=1) -> str:
@@ -316,6 +335,13 @@ class Session:
             ref = self.reg("text", did, pg, c["bbox_px"], c["text"])
             out.append(f'{ref} printed scale "{c["text"]}" = ratio 1:{_fmt(c["ratio"])}' + (f"; {c['m_per_px']} m per pixel at {dpi:.0f} dpi" if c["m_per_px"] else ""))
         ps = geom.planmap_scale(did, pg, self.root)
+        from pipeline.scale_regions import region_map
+        from engine.scales import scale_description
+        pm = region_map(Path(self.root) / did, pg)
+        for region in pm.get("regions", []):
+            sc = region.get("scale") or {}
+            ref = self.reg("region", did, pg, region["bbox"], sc.get("evidence"))
+            out.append(f"{ref} {scale_description(sc, region.get('title'))}; {sc.get('evidence', '')}")
         if ps:
             out.append(f'plan map scale: {ps["m_per_px"]} m per pixel (method {ps.get("method")}, confidence {ps.get("confidence")})')
         if dpi:
@@ -330,24 +356,67 @@ class Session:
         pts = [[float(p[0]), float(p[1])] for p in (points or [])]
         if len(pts) < 2:
             return "error: need at least 2 points [[x,y],...] in page pixels"
+        if any(not math.isfinite(v) for p in pts for v in p):
+            return "error: measurement coordinates must be finite page pixels"
+        if m_per_px is not None and (not math.isfinite(float(m_per_px)) or float(m_per_px) <= 0):
+            return "error: metres per pixel must be finite and positive"
+        if ratio is not None and (not math.isfinite(float(ratio)) or float(ratio) <= 0):
+            return "error: scale ratio must be finite and positive"
         self.status("Measuring")
         mpp = float(m_per_px) if m_per_px else None
+        scale_dpi = None
+        ps = geom.planmap_scale(did, pg, self.root)
+        selection = (ps or {}).get('selection') or {}
+        from engine.scale_policy import RANK
+        evidenced = bool(ps and ps.get('m_per_px') and RANK.get(selection.get('id'), 6) < RANK['door-prior']
+                          and 'Original derivation is unavailable' not in selection.get('why_chosen', ''))
+        # Prefer source-linked physical evidence over unassociated planner input.
+        if evidenced:
+            mpp, m_per_px, ratio = float(ps['m_per_px']), None, None
         if mpp is None and ratio:
             dpi = geom.page_dpi(did, pg, self.root)
+            scale_dpi = dpi
             mpp = float(ratio) * 0.0254 / dpi if dpi else None
         src = "given"
+        if evidenced:
+            src = 'ranked page scale: ' + selection.get('label', str(ps.get('method')))
+        from pipeline.scale_regions import region_map
+        from engine.scales import points_scale, positive, scale_description
+        pm = region_map(Path(self.root) / did, pg)
+        if pm.get("regions"):
+            sc, region = points_scale(pm, pts)
+            local_mpp = positive(sc.get("m_per_px"))
+            if not local_mpp:
+                return "error: measurement crosses views or this view has no verified scale; " + str(sc.get("evidence") or "")
+            if mpp and abs(mpp / local_mpp - 1) > .01:
+                return "error: supplied scale disagrees with the scale for this view"
+            mpp, src = local_mpp, scale_description(sc, (region or {}).get("title"))
         if mpp is None:
-            ps = geom.planmap_scale(did, pg, self.root)
             if ps and (ps.get("confidence") or 0) >= 0.5:
                 mpp, src = float(ps["m_per_px"]), f"plan map scale ({ps.get('method')}, conf {ps.get('confidence')})"
         if mpp is None:
             return "error: no scale known: call scale first, then pass ratio or m_per_px"
+        if not math.isfinite(mpp) or mpp <= 0:
+            return "error: no finite positive physical scale is established"
         length = geom.polyline_length(pts, closed) * mpp
+        if not math.isfinite(length):
+            return "error: measurement exceeds the supported numeric range"
         res = f"length {length:.3f} m"
         if closed and len(pts) >= 3:
-            res += f", area {geom.polygon_area(pts) * mpp * mpp:.2f} m2"
+            area = geom.polygon_area(pts) * mpp * mpp
+            if not math.isfinite(area):
+                return "error: measurement exceeds the supported numeric range"
+            res += f", area {area:.2f} m2"
         xs, ys = [p[0] for p in pts], [p[1] for p in pts]
         ref = self.reg("region", did, pg, [min(xs), min(ys), max(xs), max(ys)], f"measured {res}")
+        from engine.reader.calc_trace import measurement
+        self.calculations.extend(measurement(did, pg, pts, closed, mpp, src, ref,
+                                             ratio=ratio, dpi=scale_dpi, supplied=m_per_px is not None, root=self.root))
+        self.numeric_results.append({"value": length, "unit": "m", "refs": [ref]})
+        self.numeric_inputs.add(length)
+        if closed and len(pts) >= 3:
+            self.numeric_results.append({"value": geom.polygon_area(pts) * mpp * mpp, "unit": "m2", "refs": [ref]})
+            self.numeric_inputs.add(geom.polygon_area(pts) * mpp * mpp)
         return f"{ref} {res} (scale {mpp:.6f} m/px from {src})"
 
     def t_planmap(self, doc: str = "", kind: str = "", name: str = "", page=None, limit: int = 40) -> str:
@@ -376,6 +445,18 @@ class Session:
             out.append(f"{ref} p{i.page} {i.item_id}: " + " ".join(str(b) for b in bits if b))
         if len(items) > int(limit):
             out.append(f"[{len(items) - int(limit)} more not listed; totals above cover all]")
+        # An inventory citation verifies the full selection, including zero matches
+        # and results larger than the displayed sample. Preserve the typed totals.
+        ref = self.reg("region", did, int(page or 1), None,
+                       f"Checked stored drawing detections: {len(items)} matching {kind or 'items'}"
+                       + (f' named "{name}"' if name else "") + ". Undetected objects may still be present.",
+                       item_ids=[i.item_id for i in items])
+        out.insert(0, f"{ref} (inventory; cites all {len(items)} matching items)")
+        facts = {"refs": [ref], "kind": kind, "name": name, "doc_id": did, "item_ids": [i.item_id for i in items]}
+        self.numeric_inputs.update(v for i in items for v in i.q.values() if isinstance(v, (int, float)) and not isinstance(v, bool))
+        self.numeric_results.append({**facts, "value": len(items), "unit": "count"})
+        self.numeric_results.extend({**facts, "value": v, "unit": "m2" if k == "area_m2" else "m"}
+                                    for k, v in tot.items() if n_with[k])
         return "\n".join(out)
 
     def t_ifc(self, doc: str = "", kind: str = "", ifc_class: str = "", storey: str = "", name: str = "", external: bool | None = None,
@@ -403,9 +484,24 @@ class Session:
         out = [f"{len(items)} element(s) matched" + "".join(f"; sum {k} = {_fmt(v)} over {have[k]}" for k, v in tot.items() if have[k])]
         if by_storey and len(by_storey) > 1:
             out.append("per storey: " + ", ".join(f"{k}: {v}" for k, v in sorted(by_storey.items())))
-        ids = [i.item_id for i in items][:400]
-        ref = self.reg("element", did, 1, None, f"{len(items)} {kind or ifc_class or 'elements'} in the model", item_ids=ids)
+        # Keep the full set behind the count; the observation's sample below
+        # limits planner tokens, while citations can still verify every match.
+        ids = [i.item_id for i in items]
+        nouns = {"door": "doors", "window": "windows", "room": "rooms", "wall": "walls", "pipe": "pipes",
+                 "duct": "ducts", "column": "columns", "stairs": "stairs", "toilet": "toilets", "sink": "sinks"}
+        noun = nouns.get(kind, "model elements")
+        scope = (f" on {storey}" if storey else "") + (f' named "{name}"' if name else "")
+        if external is not None:
+            scope += " (external)" if external else " (not marked external)"
+        quote = f"{len(items)} matching {noun}{scope} in {d.title or 'the selected model'}"
+        ref = self.reg("element", did, 1, None, quote, item_ids=ids)
         out.insert(0, f"{ref} (cites all {len(ids)} matching elements)")
+        facts = {"refs": [ref], "kind": kind, "name": name, "doc_id": did, "item_ids": ids}
+        self.numeric_inputs.update(v for i in items for v in i.q.values() if isinstance(v, (int, float)) and not isinstance(v, bool))
+        self.numeric_results.append({**facts, "value": len(items), "unit": "count"})
+        self.numeric_results.extend({**facts, "value": v,
+                                     "unit": "m3" if k == "volume_m3" else "m2" if k in ("area_m2", "net_floor_area_m2") else "m"}
+                                    for k, v in tot.items() if have[k])
         for i in items[:int(limit)]:
             q = " ".join(f"{k}={_fmt(v)}" for k, v in i.q.items() if k in keys)
             pr = " ".join(f"{k}={v}" for k, v in i.props.items() if k in ("is_external", "fire_rating", "material") and v not in (None, ""))
@@ -416,6 +512,14 @@ class Session:
 
     def t_compute(self, expr: str) -> str:
         v = safe_eval(str(expr))
+        self.calculations.append({'tool': 'compute', 'expr': str(expr), 'value': v,
+                                  'note': 'The planner supplied this expression. Exact arithmetic does not verify that its operands match the drawing.'})
+        clean = re.sub(r"(?<=\d),(?=\d{3}\b)", "", str(expr))
+        literals = [n.value for n in ast.walk(ast.parse(clean, mode="eval")) if isinstance(n, ast.Constant)]
+        grounded = bool(literals) and all(n in self.numeric_inputs for n in literals)
+        self.numeric_results.append({"value": v, "unit": None, "refs": list(self.ev), "compute": True, "grounded": grounded})
+        if grounded:
+            self.numeric_inputs.add(v)
         return f"{expr} = {_fmt(round(v, 6))}"
 
 

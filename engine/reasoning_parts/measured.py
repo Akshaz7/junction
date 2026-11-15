@@ -27,7 +27,7 @@ def _num(v):
 
 def _room_m2(it):
     q, p = it.q or {}, it.props or {}
-    for v in (q.get("area_m2"), q.get("net_area_m2"), p.get("area_m2")):
+    for v in (q.get("net_floor_area_m2"), q.get("area_m2"), q.get("net_area_m2"), p.get("area_m2")):
         if v:
             return float(v)
     return None
@@ -114,8 +114,17 @@ def _area(ctx) -> bool:
         _add(steps, "calculated", "Calculated", _cap(txt + _top3(have, n), txt))
         return True
     # plan maps: DXF outlines and raster outlines
+    from engine.scales import item_scale, scale_description
+    local = [r for r in rooms if "measurement_scale" in (r.props or {})]
+    if local:
+        descriptions = list(dict.fromkeys(scale_description(item_scale(r), r.props.get("scale_region")) for r in local))
+        scale_w = "; ".join(descriptions)
+        sc = item_scale(rooms[0], sc) if n == 1 else sc
+        ctx["scale_w"] = scale_w
+        ctx["scale_c"] = min(float(item_scale(r).get("confidence") or 0) for r in local)
+    else:
+        scale_w = ctx["scale_w"]
     mpp = float((sc or {}).get("m_per_px") or 0)
-    scale_w = ctx["scale_w"]
     rows = [(_name(r), _room_m2(r)) for r in rooms]
     have = [(a, b) for a, b in rows if b]
     if n == 1:
@@ -141,7 +150,7 @@ def _area(ctx) -> bool:
         return True
     txt = f"Added {n} room outlines: {_r(v)} m²" + _top3(have, n)
     full = txt + f"; scale from {scale_w}"
-    _add(steps, "calculated", "Calculated", full if len(full) <= MAX_LEN else _cap(txt, f"Added {n} room outlines: {_r(v)} m²"))
+    _add(steps, "calculated", "Calculated", full if local or len(full) <= MAX_LEN else _cap(txt, f"Added {n} room outlines: {_r(v)} m²"))
     return True
 
 
@@ -186,14 +195,41 @@ def _length(ctx) -> bool:
 
 
 def run(ctx: dict) -> None:
+    from engine.reasoning_parts.wallarea_steps import run as wallarea_steps
+    if wallarea_steps(ctx): return
     steps, unit, value, question, cited = ctx["steps"], ctx["unit"], ctx["value"], ctx["question"], ctx["cited"]
-    area_q = unit == "m2" or (unit not in ("count", "m") and bool(re.search(r"\b(area|how big|size|m2|m²|square)\b", question or "", re.I)))
+    # A count headline can also report a room size in its explanation.
+    text = ctx["ans"].get("text_md") or ""
+    area_in_answer = bool(re.search(r"\d[\d.,]*\s*(?:m²|m2|square met(?:er|re)s)\b", text, re.I))
+    area_q = unit == "m2" or area_in_answer or (unit not in ("count", "m") and bool(re.search(r"\b(area|how big|size|m2|m²|square)\b", question or "", re.I)))
     rooms = [it for it in cited if it.kind in ("room", "space")]
     ctx.update(area_q=area_q, rooms=rooms)
-    if unit == "m":
+    order_math = _trace(ctx["trace"], "order_compute")
+    if order_math:
+        _add(steps, "calculated", "Calculated", "; ".join(order_math), ctx["cites"][0].get("n") if ctx["cites"] else None)
+    elif _trace(ctx["trace"], "order"):
+        _add(steps, "read", "Missing measurements", "The file does not provide complete measurements for the requested order.")
+    elif unit == "m":
+        start = len(steps)
         _length(ctx)
+        from engine.scales import item_scale, scale_description
+        local = [it for it in cited if "measurement_scale" in (it.props or {})]
+        if local:
+            used = "; ".join(dict.fromkeys(scale_description(item_scale(it), it.props.get("scale_region")) for it in local))
+            for step in steps[start:]:
+                step["text"] += "; scale from " + used
     elif area_q and rooms:
         _area(ctx)
+    elif unit in ("m2", "m3"):
+        step = "area" if unit == "m2" else "volume"
+        for detail in _trace(ctx["trace"], step):
+            match = re.search(r"sum over (\d+) (\w+) = ([\d.]+)", detail)
+            if match and _num(value) is not None:
+                n, kind, _ = match.groups()
+                word = KIND_WORD.get(kind, kind)
+                suffix = "²" if unit == "m2" else "³"
+                _add(steps, "calculated", "Calculated", f"Added the recorded {step}s of {n} {word}{'' if int(n) == 1 else 's'}: {_r(value)} m{suffix}")
+                break
     elif unit in ("count", "", None):
         txt = _filter_step(ctx)
         if txt:

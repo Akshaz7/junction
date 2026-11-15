@@ -1,0 +1,136 @@
+{
+  "worker": "ACC-VECTOR",
+  "status": "PARTIAL",
+  "branch": "final/acc-vector",
+  "implementation_commit": "948cfcde7db1d13d94139a967d1ef2d68e8b2351",
+  "baseline_commit": "dbad97f4cec4ff9ae1ea6da4c93a21e993032261",
+  "created": "2026-11-15T02:20:37.302733+02:00",
+  "tests": {
+    "passed": 127,
+    "command": "MODELS_FAKE=1 /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest -q pipeline/tests/test_dxf_symbols.py engine/tests/test_swiss_dxf.py engine/tests/test_scales.py engine/tests/test_reasoning_confidence.py engine/tests/test_reasoning_found.py engine/tests/test_reasoning_checked.py engine/tests/test_reasoning_measured.py --tb=short"
+  },
+  "sample200": {
+    "rows": 200,
+    "numeric_scored": 187,
+    "before_correct": 137,
+    "after_correct": 142,
+    "before_abstained": 20,
+    "after_abstained": 15,
+    "correct_to_incorrect": 0,
+    "errors": 0,
+    "model_cost_usd": 0.0,
+    "reingested_DXF_files_each_arm": 39,
+    "non_Swiss_values_and_outcomes_unchanged": true,
+    "non_Swiss_rows": 143,
+    "changed_rows": [
+      {
+        "doc_id": "swiss_dwellings__site285-bldg527-floor51568",
+        "question": "How many bathtubs are drawn on this floor plan?",
+        "before": null,
+        "after": 4,
+        "gold": 4,
+        "before_outcome": "abstained",
+        "after_outcome": "correct"
+      },
+      {
+        "doc_id": "swiss_dwellings__site303-bldg598-floor2434",
+        "question": "How many toilets (WC) are drawn on this floor plan?",
+        "before": null,
+        "after": 3,
+        "gold": 3,
+        "before_outcome": "abstained",
+        "after_outcome": "correct"
+      },
+      {
+        "doc_id": "swiss_dwellings__site629-bldg1355-floor5906",
+        "question": "How many bathtubs are drawn on this floor plan?",
+        "before": null,
+        "after": 2,
+        "gold": 2,
+        "before_outcome": "abstained",
+        "after_outcome": "correct"
+      },
+      {
+        "doc_id": "swiss_dwellings__site604-bldg1319-floor5779",
+        "question": "How many bathtubs are drawn on this floor plan?",
+        "before": null,
+        "after": 1,
+        "gold": 1,
+        "before_outcome": "abstained",
+        "after_outcome": "correct"
+      },
+      {
+        "doc_id": "swiss_dwellings__site644-bldg1390-floor6077",
+        "question": "How many toilets (WC) are drawn on this floor plan?",
+        "before": null,
+        "after": 5,
+        "gold": 5,
+        "before_outcome": "abstained",
+        "after_outcome": "correct"
+      }
+    ]
+  },
+  "development": {
+    "phase": "development",
+    "baseline_ref": "a05067e^",
+    "files_checked": 15,
+    "dataset_origins": [
+      "opening_design",
+      "swiss_dwellings"
+    ],
+    "before_correct": 24,
+    "after_correct": 36,
+    "questions": 50
+  },
+  "blind": {
+    "reserved_before_development": [
+      "opening_design__kb-classical-moulding-federal-profiles",
+      "swiss_dwellings__site1073-bldg2196-floor10014"
+    ],
+    "files": 2,
+    "questions": 5,
+    "before_correct": 2,
+    "after_correct": 2,
+    "no_post_blind_code_changes": true,
+    "note": "Recognised toilet/bathtub/shower item counts equal the three available source counts, but one unclassified symbol keeps the existing conservative fixture-count guard in abstention. Opening Design safe fallback emitted no false fixtures. No blind result was used for tuning."
+  },
+  "generality": {
+    "native_DXF_dataset_origins": [
+      "swiss_dwellings",
+      "opening_design"
+    ],
+    "different_Swiss_site_files": 13,
+    "Opening_Design_projects_development": 3,
+    "third_dataset_origin_available": false,
+    "no_document_ids_names_gold_counts_or_coordinates_in_production_rules": true,
+    "units": "Shape ratios are unit-independent; declared CAD units only for physical dimensions. Missing units remain unknown.",
+    "semantic_aliases": "English, Finnish, German, Swedish, French/Italian sanitary labels; unknown layers keep existing reader fallback.",
+    "sink_validation": "41 centred drained bowls visually inspected. No sink gold questions in the 12 calibration drawings; do not claim measured sink-answer accuracy.",
+    "confidence": "Shape rules and 0.5 scores are uncalibrated estimates, not probabilities measured from a benchmark."
+  },
+  "benchmark_hygiene": {
+    "forbidden_source_files_opened": 0,
+    "forbidden_doc_references_in_new_code_or_results": 0,
+    "training_performed": false,
+    "blind_docs_absent_from_development_and_sample200": true,
+    "shared_artifacts_modified": false,
+    "real_data_outputs": "Temporary directories only; no refresh of shared plan maps."
+  },
+  "cross_file": [
+    "engine/reasoning_parts/confidence.py"
+  ],
+  "needs_awais": {
+    "hook": "pipeline.dxf_symbols.classify_fixture_shapes(shapes: list[VectorShape]) -> list[dict]",
+    "input": "One sanitary layer/region/block; VectorShape(points=[(x,y),...], closed=bool, primitive=polyline|curve|circle, center=(x,y)|None, radius=float|None, props=source metadata). Closed circle paths require centre/radius. Coordinates remain in the reader coordinate system.",
+    "output": "kind, label, polygon, conf, props including classification/anatomy/uncertainty and source parts. Caller assigns item IDs, page-to-pixel transforms and citations.",
+    "pending": "PDF integration, sanitary region discovery, curve/circle metadata, and estimate confidence propagation; no PDF source files were edited."
+  },
+  "needs": [
+    "Integrator: merge branch and refresh intended DXF plan maps through controlled ingestion; shared artifacts were deliberately not rewritten.",
+    "Awais: integrate vector-PDF hook if desired; PDF ingest remains out of scope.",
+    "Validate on a third independent native DXF dataset origin before claiming general transfer.",
+    "Keep unknown fixtures visible; the existing blanket unknown-symbol guard can still prevent answers even where recognised counts match. Do not tune using the reserved blind file.",
+    "Integrator live-provider gate remains outstanding; all row checks used MODELS_FAKE=1."
+  ],
+  "reproduce": "MODELS_FAKE=1 scripts/heavy.sh /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pipeline.tests.acc_vector_check --phase development|sample200|blind --baseline-ref a05067e^ --forbidden /path/to/forbidden_heldout_docs.txt"
+}

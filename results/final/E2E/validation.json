@@ -1,0 +1,177 @@
+{
+  "status": "PARTIAL",
+  "updated_at": "2026-11-14T21:20:04.771469+00:00",
+  "branch": "final/e2e",
+  "wip_checked": "50cc75bbb4b61dcd29be85887f31f5c6390f084d",
+  "typecheck": "npx tsc --noEmit -p .: passed",
+  "unit_tests": {
+    "files_passed": 77,
+    "passed": 454,
+    "skipped": 9
+  },
+  "targeted_guard_tests": {
+    "passed": 11
+  },
+  "runs": {
+    "local-final": {
+      "run": "local-final",
+      "base_url": "http://127.0.0.1:5174",
+      "status": "failed",
+      "startTime": "2026-11-14T21:13:28.514Z",
+      "duration": 177028.11299999998,
+      "counts": {
+        "passed": 11,
+        "failed": 1
+      }
+    },
+    "api-final": {
+      "run": "api-final",
+      "base_url": "http://127.0.0.1:5174",
+      "status": "failed",
+      "startTime": "2026-11-14T21:16:53.933Z",
+      "duration": 20350.513000000003,
+      "counts": {
+        "passed": 3,
+        "failed": 1
+      }
+    },
+    "projects-final": {
+      "run": "projects-final",
+      "base_url": "http://127.0.0.1:5175",
+      "status": "passed",
+      "startTime": "2026-11-14T21:17:28.071Z",
+      "duration": 29842.167,
+      "counts": {
+        "passed": 4
+      }
+    },
+    "raster-link-final": {
+      "run": "raster-link-final",
+      "base_url": "http://127.0.0.1:5174",
+      "status": "failed",
+      "startTime": "2026-11-14T21:18:40.965Z",
+      "duration": 13386.396999999999,
+      "counts": {
+        "failed": 1
+      }
+    },
+    "prod-read-only-1": {
+      "run": "prod-read-only-1",
+      "base_url": "https://hologram-khaki.vercel.app",
+      "status": "failed",
+      "startTime": "2026-11-14T21:07:04.804Z",
+      "duration": 72823.865,
+      "counts": {
+        "failed": 3,
+        "passed": 5
+      }
+    }
+  },
+  "production": {
+    "origin": "https://hologram-khaki.vercel.app",
+    "questions": 0,
+    "writes": 0,
+    "guard": "All non-GET/HEAD/OPTIONS browser API requests blocked and checked for accidental writes."
+  },
+  "generality": {
+    "selection": "Library docs chosen by kind and available evidence, without fixed IDs, labels, counts or coordinates in selectors. Four real upload formats from different sources.",
+    "upload_fixtures": {
+      ".png": [
+        "data/full/junction-dataset/data/cubicasa5k/high_quality_architectural-7607.png",
+        431580
+      ],
+      ".jpg": [
+        "data/full/junction-dataset/data/wikimedia/53751789.jpg",
+        578110
+      ],
+      ".dxf": [
+        "data/full/junction-dataset/data/swiss_dwellings/site1142_bldg2293_floor10589.dxf",
+        283060
+      ],
+      ".ifc": [
+        "data/full/junction-dataset/data/ifc_models/resbim-409_model.ifc",
+        343221
+      ],
+      "reserved_unseen": {
+        "path": "data/full/junction-dataset/data/ifc_models/resbim-409_model.ifc",
+        "rule": "Randomly selected before development; inspect/upload only in final test; path and size only seen."
+      }
+    },
+    "reserved_unseen": {
+      "fixture": "data/full/junction-dataset/data/ifc_models/resbim-409_model.ifc",
+      "schema": "IFC4",
+      "source_door_count": 5,
+      "answer_value": 5,
+      "cited_ids_match_source": true,
+      "only_opened_after_final_upload": true
+    },
+    "heldout_training": false
+  },
+  "project_integration": {
+    "ui_snapshot": "8506b10d73e1f6d0e5751042f8a291a9270e687c",
+    "engine_snapshot": "0d5c74a8b2d8c12f5f372ca5743c8dfa6e9055cd",
+    "scratch_merge": "a4d1304e36f2a6d7b2c54260b49cae2ac2b7a047",
+    "local_ports": {
+      "web": 5175,
+      "api": 8014
+    },
+    "patch": "Applied the final/e2e chat projectId guard in the scratch merge; proxy pointed at its API. Projects branches themselves were unchanged."
+  },
+  "fixed": [
+    {
+      "owner": "WEB",
+      "files": [
+        "web/src/styles/app.css"
+      ],
+      "behavior": "Desktop library keeps selected file row and search beside document details."
+    },
+    {
+      "owner": "PROJECTS",
+      "files": [
+        "web/src/components/chat-screen.tsx"
+      ],
+      "behavior": "First whole-project drawing question no longer asks the user to attach a document when the project already supplies context."
+    }
+  ],
+  "remaining": [
+    {
+      "owner": "ENGINE",
+      "issue": "JPG ingest succeeds but first count answer has zero citations and no reasoning/confidence card.",
+      "run": "local-final",
+      "test": "Upload real .jpg"
+    },
+    {
+      "owner": "ENGINE",
+      "issue": "Raster recount emits six scene highlight IDs absent from the scene; browser shows no glowing items. Answer says six while citation/evidence copy still describes four.",
+      "runs": [
+        "api-final",
+        "raster-link-final"
+      ],
+      "evidence": "raster-identity-failure.json"
+    },
+    {
+      "owner": "WEB",
+      "issue": "Production library hides all three tested picker selections. Local CSS fix needs merge and deployment.",
+      "run": "prod-read-only-1"
+    },
+    {
+      "owner": "WEB",
+      "issue": "Export report lists raw IFC GlobalIds. Replace with friendly labels while preserving numbered evidence.",
+      "run": "resume-browser-1"
+    }
+  ],
+  "live_spend_recorded_upper_bound_usd": 0.060423,
+  "artifacts": "Screenshots, traces and response attachments remain under each run directory in this worktree. Large binary traces stay untracked per repository size rules.",
+  "cross_file": [
+    "web/src/styles/app.css",
+    "web/src/components/chat-screen.tsx"
+  ],
+  "needs_awais": null,
+  "commands": [
+    "E2E_FINAL=1 E2E_BASE=http://127.0.0.1:5174 E2E_RUN_ID=local-final scripts/heavy.sh web/node_modules/.bin/playwright test -c web/playwright.config.ts final-judge.spec.ts final-uploads.spec.ts",
+    "E2E_FINAL=1 E2E_API=1 E2E_BASE=http://127.0.0.1:5174 E2E_RUN_ID=api-final scripts/heavy.sh web/node_modules/.bin/playwright test -c web/playwright.config.ts final-api.spec.ts --grep 'Read-only|Real .* source'",
+    "E2E_FINAL=1 E2E_PROJECTS=1 E2E_BASE=http://127.0.0.1:5175 E2E_RUN_ID=projects-final scripts/heavy.sh web/node_modules/.bin/playwright test -c web/playwright.config.ts final-projects.spec.ts",
+    "E2E_FINAL=1 E2E_BASE=http://127.0.0.1:5174 E2E_RUN_ID=raster-link-final scripts/heavy.sh web/node_modules/.bin/playwright test -c web/playwright.config.ts final-raster-link.spec.ts",
+    "E2E_FINAL=1 E2E_BASE=https://hologram-khaki.vercel.app E2E_RUN_ID=prod-read-only-1 scripts/heavy.sh web/node_modules/.bin/playwright test -c web/playwright.config.ts final-judge.spec.ts"
+  ]
+}

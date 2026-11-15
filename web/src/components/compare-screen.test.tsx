@@ -4,6 +4,12 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { CompareScreen } from './compare-screen'
+
+// The 3D panel is a dialog over WebGL: record what Compare asks it to show.
+const shown = vi.hoisted(() => [] as { docId: string; highlight?: readonly string[]; labels?: Record<string, string> }[])
+vi.mock('../viewer3d/VisualiseIt', () => ({
+  VisualisePanel: (props: { docId: string; highlight?: readonly string[]; labels?: Record<string, string> }) => { shown.push(props); return <div role="dialog" aria-label="3D view" /> },
+}))
 import { workspaceApi } from '../lib/api'
 
 const doc = 'ifc_bench__ac20-arc'
@@ -12,7 +18,7 @@ const entry = (a: number, b: number) => ({ id: `${prefix}${a}-${b}`, type: 'new_
   summary: { doc_id: doc, title: 'AC20', series_id: `design:${doc}`, n_changes: 1, edited: true, index_a: a, index_b: b, pair_prefix: prefix,
     version_a: a ? `Edited version ${a}` : 'Original', version_b: `Edited version ${b}`, headline: 'x' } })
 const detail = (id: string) => ({ id, type: 'new_version', source: 'edit-diff', edited: true, image: { w: 2400, h: 1046 }, page: 2,
-  pages: [{ page: 1, n_changes: 0 }, { page: 2, n_changes: 2 }], counts: { removed: 1, added: 0, moved: 1, material: 0 },
+  doc_id: doc, item_ids: ['DOOR', 'WIN'], pages: [{ page: 1, n_changes: 0 }, { page: 2, n_changes: 2 }], counts: { removed: 1, added: 0, moved: 1, material: 0 },
   v1: { label: 'Original', page_image: `/api/docs/${doc}/pages/2/image`, thumb: '' },
   v2: { label: 'Edited version 2', page_image: `/api/docs/${doc}/versions/2/pages/2/image`, thumb: '' },
   changes: [
@@ -64,4 +70,36 @@ it('compares any two saved versions of an edited design, with item ids and moved
   expect([...readings.querySelectorAll('article')].map((a) => a.getAttribute('data-item-id'))).toEqual(['DOOR', 'WIN'])
   expect(host.querySelectorAll('.cmp-box.moved')).toHaveLength(2)  // old and new spot of the window
   expect(host.querySelector<HTMLImageElement>('img[alt="Newer version"]')!.getAttribute('src')).toBe(`/api/docs/${doc}/versions/2/pages/2/image`)
+})
+
+it('opens on the most recent edited version against the original, and shows the changed items in 3D', async () => {
+  shown.length = 0
+  await act(async () => { root.render(<CompareScreen docs={[]} demo={false} />); await settle() })
+  const from = host.querySelector<HTMLSelectElement>('[aria-label="From version"]')!
+  const to = host.querySelector<HTMLSelectElement>('[aria-label="To version"]')!
+  expect([from.value, to.value]).toEqual(['0', '2'])
+  expect(transport.mock.calls.map(([u]) => decodeURIComponent(String(u)))).toContain(`/api/changes/${prefix}0-2`)
+  const button = [...host.querySelectorAll('button')].find((b) => b.textContent === 'Show in 3D (2 items)')!
+  await act(async () => { button.click(); await settle() })
+  expect(host.querySelector('[aria-label="3D view"]')).not.toBeNull()
+  expect(shown.at(-1)).toMatchObject({ docId: doc, highlight: ['DOOR', 'WIN'], labels: { DOOR: '1 removed · D30', WIN: '2 moved · W81' } })
+})
+
+it('Wipe and Overlay use the shared seam compare: no range slider, a keyboard-operable seam, labels at the top', async () => {
+  await act(async () => { root.render(<CompareScreen docs={[]} demo={false} />); await settle() })
+  const mode = (name: string) => [...host.querySelectorAll<HTMLButtonElement>('[aria-label="Comparison mode"] button')].find((b) => b.textContent === name)!
+  await act(async () => { mode('Wipe').click(); await settle() })
+  expect(host.querySelector('.sheet-compare')).not.toBeNull()
+  expect(host.querySelector('input[type="range"][aria-label="Wipe position"]')).toBeNull()
+  expect(host.querySelector('.wipe-line')).not.toBeNull()
+  expect(host.querySelector('.wipe-label-a')).not.toBeNull()
+  const grip = host.querySelector<HTMLElement>('[role="slider"][aria-label="Wipe position"]')!
+  const before = Number(grip.getAttribute('aria-valuenow'))
+  await act(async () => { grip.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })) })
+  expect(Number(grip.getAttribute('aria-valuenow'))).toBeGreaterThan(before)
+  await act(async () => { mode('Overlay').click(); await settle() })
+  expect(host.querySelector('.sheet-compare')?.getAttribute('data-mode')).toBe('Overlay')
+  expect(host.querySelector('.compare-segments')).toBeNull()  // the screen's own mode control is the only one
+  await act(async () => { mode('Side by side').click(); await settle() })
+  expect(host.querySelector('.sheet-compare')).toBeNull()
 })

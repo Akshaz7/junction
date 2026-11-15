@@ -1,0 +1,1130 @@
+{
+  "phase": "development",
+  "baseline_ref": "a05067e^",
+  "files": [
+    {
+      "doc_id": "swiss_dwellings__site886-bldg1894-floor8386",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site886_bldg1894_floor8386.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 195997,
+      "units_code": 6,
+      "before": {
+        "room": 37,
+        "other": 28,
+        "wall": 37,
+        "window": 10,
+        "door": 41,
+        "text": 70
+      },
+      "after": {
+        "room": 37,
+        "other": 12,
+        "wall": 37,
+        "window": 10,
+        "door": 41,
+        "text": 70
+      },
+      "uncertain_symbols": 1,
+      "fixture_classifications": {
+        "closed_frame": 51,
+        "kitchen_hob": 4,
+        "parallel_partitions": 3,
+        "unknown": 1
+      },
+      "questions": [
+        {
+          "question": "How many doors (interior doors and entrance doors together) are drawn on this floor plan?",
+          "gold": 41,
+          "before": {
+            "value": 41,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 41,
+            "outcome": "correct",
+            "boxes": 41
+          }
+        },
+        {
+          "question": "How many windows are drawn on this floor plan?",
+          "gold": 10,
+          "before": {
+            "value": 10,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 10,
+            "outcome": "correct",
+            "boxes": 10
+          }
+        },
+        {
+          "question": "How many toilets (WC) are drawn on this floor plan?",
+          "gold": 0,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1125_bldg2268_floor10441.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 305725,
+      "units_code": 6,
+      "before": {
+        "room": 54,
+        "other": 59,
+        "wall": 57,
+        "window": 14,
+        "door": 48,
+        "text": 117
+      },
+      "after": {
+        "room": 54,
+        "other": 18,
+        "wall": 57,
+        "window": 14,
+        "door": 48,
+        "sink": 5,
+        "bathtub": 3,
+        "toilet": 5,
+        "text": 117
+      },
+      "uncertain_symbols": 2,
+      "fixture_classifications": {
+        "closed_frame": 62,
+        "geometry": 13,
+        "kitchen_hob": 5,
+        "empty_outline": 4,
+        "parallel_partitions": 4,
+        "unknown": 2
+      },
+      "questions": [
+        {
+          "question": "How many doors (interior doors and entrance doors together) are drawn on this floor plan?",
+          "gold": 48,
+          "before": {
+            "value": 48,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 48,
+            "outcome": "correct",
+            "boxes": 48
+          }
+        },
+        {
+          "question": "How many windows are drawn on this floor plan?",
+          "gold": 14,
+          "before": {
+            "value": 14,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 14,
+            "outcome": "correct",
+            "boxes": 14
+          }
+        },
+        {
+          "question": "How many toilets (WC) are drawn on this floor plan?",
+          "gold": 5,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        },
+        {
+          "question": "How many bathtubs are drawn on this floor plan?",
+          "gold": 3,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site960_bldg2014_floor8910.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 472167,
+      "units_code": 6,
+      "before": {
+        "room": 60,
+        "other": 66,
+        "wall": 135,
+        "window": 30,
+        "door": 48,
+        "text": 127
+      },
+      "after": {
+        "room": 60,
+        "other": 21,
+        "wall": 135,
+        "window": 30,
+        "door": 48,
+        "toilet": 7,
+        "sink": 9,
+        "bathtub": 6,
+        "text": 127
+      },
+      "uncertain_symbols": 3,
+      "fixture_classifications": {
+        "closed_frame": 78,
+        "parallel_partitions": 7,
+        "geometry": 22,
+        "kitchen_hob": 2,
+        "unknown": 3
+      },
+      "questions": [
+        {
+          "question": "How many doors (interior doors and entrance doors together) are drawn on this floor plan?",
+          "gold": 48,
+          "before": {
+            "value": 48,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 48,
+            "outcome": "correct",
+            "boxes": 48
+          }
+        },
+        {
+          "question": "How many windows are drawn on this floor plan?",
+          "gold": 30,
+          "before": {
+            "value": 30,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 30,
+            "outcome": "correct",
+            "boxes": 30
+          }
+        },
+        {
+          "question": "How many toilets (WC) are drawn on this floor plan?",
+          "gold": 7,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        },
+        {
+          "question": "How many bathtubs are drawn on this floor plan?",
+          "gold": 6,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "swiss_dwellings__site1104-bldg2244-floor10289",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1104_bldg2244_floor10289.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 219514,
+      "units_code": 6,
+      "before": {
+        "room": 33,
+        "other": 37,
+        "wall": 49,
+        "window": 20,
+        "door": 28,
+        "text": 57
+      },
+      "after": {
+        "room": 33,
+        "other": 8,
+        "wall": 49,
+        "window": 20,
+        "door": 28,
+        "bathtub": 2,
+        "toilet": 3,
+        "sink": 3,
+        "text": 57
+      },
+      "uncertain_symbols": 0,
+      "fixture_classifications": {
+        "closed_frame": 48,
+        "kitchen_hob": 4,
+        "geometry": 8,
+        "parallel_partitions": 1
+      },
+      "questions": [
+        {
+          "question": "How many doors (interior doors and entrance doors together) are drawn on this floor plan?",
+          "gold": 28,
+          "before": {
+            "value": 28,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 28,
+            "outcome": "correct",
+            "boxes": 28
+          }
+        },
+        {
+          "question": "How many windows are drawn on this floor plan?",
+          "gold": 20,
+          "before": {
+            "value": 20,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 20,
+            "outcome": "correct",
+            "boxes": 20
+          }
+        },
+        {
+          "question": "How many toilets (WC) are drawn on this floor plan?",
+          "gold": 3,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": 3,
+            "outcome": "correct",
+            "boxes": 3
+          }
+        },
+        {
+          "question": "How many bathtubs are drawn on this floor plan?",
+          "gold": 2,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": 2,
+            "outcome": "correct",
+            "boxes": 2
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "swiss_dwellings__site292-bldg545-floor2188",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site292_bldg545_floor2188.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 209915,
+      "units_code": 6,
+      "before": {
+        "room": 32,
+        "other": 34,
+        "wall": 37,
+        "window": 13,
+        "door": 20,
+        "text": 74
+      },
+      "after": {
+        "room": 32,
+        "other": 8,
+        "wall": 37,
+        "window": 13,
+        "door": 20,
+        "bathtub": 2,
+        "sink": 2,
+        "toilet": 2,
+        "text": 74
+      },
+      "uncertain_symbols": 0,
+      "fixture_classifications": {
+        "closed_frame": 33,
+        "geometry": 6,
+        "kitchen_hob": 4,
+        "empty_outline": 2
+      },
+      "questions": [
+        {
+          "question": "How many doors (interior doors and entrance doors together) are drawn on this floor plan?",
+          "gold": 20,
+          "before": {
+            "value": 20,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 20,
+            "outcome": "correct",
+            "boxes": 20
+          }
+        },
+        {
+          "question": "How many windows are drawn on this floor plan?",
+          "gold": 13,
+          "before": {
+            "value": 13,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 13,
+            "outcome": "correct",
+            "boxes": 13
+          }
+        },
+        {
+          "question": "How many toilets (WC) are drawn on this floor plan?",
+          "gold": 2,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": 2,
+            "outcome": "correct",
+            "boxes": 2
+          }
+        },
+        {
+          "question": "How many bathtubs are drawn on this floor plan?",
+          "gold": 2,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": 2,
+            "outcome": "correct",
+            "boxes": 2
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "swiss_dwellings__site3999-bldg6289-floor25930",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site3999_bldg6289_floor25930.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 145708,
+      "units_code": 6,
+      "before": {
+        "room": 18,
+        "other": 25,
+        "wall": 22,
+        "window": 8,
+        "door": 14,
+        "text": 34
+      },
+      "after": {
+        "room": 18,
+        "other": 7,
+        "wall": 22,
+        "window": 8,
+        "door": 14,
+        "toilet": 2,
+        "sink": 2,
+        "bathtub": 2,
+        "text": 34
+      },
+      "uncertain_symbols": 0,
+      "fixture_classifications": {
+        "closed_frame": 22,
+        "kitchen_hob": 2,
+        "empty_outline": 1,
+        "geometry": 6,
+        "parallel_partitions": 2
+      },
+      "questions": [
+        {
+          "question": "How many doors (interior doors and entrance doors together) are drawn on this floor plan?",
+          "gold": 14,
+          "before": {
+            "value": 14,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 14,
+            "outcome": "correct",
+            "boxes": 14
+          }
+        },
+        {
+          "question": "How many windows are drawn on this floor plan?",
+          "gold": 8,
+          "before": {
+            "value": 8,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 8,
+            "outcome": "correct",
+            "boxes": 8
+          }
+        },
+        {
+          "question": "How many toilets (WC) are drawn on this floor plan?",
+          "gold": 2,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": 2,
+            "outcome": "correct",
+            "boxes": 2
+          }
+        },
+        {
+          "question": "How many bathtubs are drawn on this floor plan?",
+          "gold": 2,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": 2,
+            "outcome": "correct",
+            "boxes": 2
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "swiss_dwellings__site1028-bldg2114-floor9560",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1028_bldg2114_floor9560.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 179784,
+      "units_code": 6,
+      "before": {
+        "room": 32,
+        "other": 19,
+        "wall": 12,
+        "window": 10,
+        "door": 33,
+        "text": 83
+      },
+      "after": {
+        "room": 32,
+        "other": 7,
+        "wall": 12,
+        "window": 10,
+        "door": 33,
+        "toilet": 2,
+        "sink": 2,
+        "bathtub": 1,
+        "text": 83
+      },
+      "uncertain_symbols": 1,
+      "fixture_classifications": {
+        "closed_frame": 43,
+        "geometry": 5,
+        "kitchen_hob": 1,
+        "unknown": 1,
+        "parallel_partitions": 4
+      },
+      "questions": [
+        {
+          "question": "How many doors (interior doors and entrance doors together) are drawn on this floor plan?",
+          "gold": 33,
+          "before": {
+            "value": 33,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 33,
+            "outcome": "correct",
+            "boxes": 33
+          }
+        },
+        {
+          "question": "How many windows are drawn on this floor plan?",
+          "gold": 10,
+          "before": {
+            "value": 10,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 10,
+            "outcome": "correct",
+            "boxes": 10
+          }
+        },
+        {
+          "question": "How many toilets (WC) are drawn on this floor plan?",
+          "gold": 2,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        },
+        {
+          "question": "How many bathtubs are drawn on this floor plan?",
+          "gold": 1,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site2143_bldg2986_floor13618.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 306115,
+      "units_code": 6,
+      "before": {
+        "room": 50,
+        "other": 69,
+        "wall": 72,
+        "window": 28,
+        "door": 47,
+        "text": 83
+      },
+      "after": {
+        "room": 50,
+        "other": 16,
+        "wall": 72,
+        "window": 28,
+        "door": 47,
+        "toilet": 6,
+        "sink": 6,
+        "bathtub": 5,
+        "shower": 1,
+        "text": 83
+      },
+      "uncertain_symbols": 0,
+      "fixture_classifications": {
+        "closed_frame": 75,
+        "geometry": 18,
+        "kitchen_hob": 6,
+        "empty_outline": 1,
+        "parallel_partitions": 4
+      },
+      "questions": [
+        {
+          "question": "How many doors (interior doors and entrance doors together) are drawn on this floor plan?",
+          "gold": 47,
+          "before": {
+            "value": 47,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 47,
+            "outcome": "correct",
+            "boxes": 47
+          }
+        },
+        {
+          "question": "How many windows are drawn on this floor plan?",
+          "gold": 28,
+          "before": {
+            "value": 28,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 28,
+            "outcome": "correct",
+            "boxes": 28
+          }
+        },
+        {
+          "question": "How many toilets (WC) are drawn on this floor plan?",
+          "gold": 6,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": 6,
+            "outcome": "correct",
+            "boxes": 6
+          }
+        },
+        {
+          "question": "How many bathtubs are drawn on this floor plan?",
+          "gold": 5,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": 5,
+            "outcome": "correct",
+            "boxes": 5
+          }
+        },
+        {
+          "question": "How many showers are drawn on this floor plan?",
+          "gold": 1,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": 1,
+            "outcome": "correct",
+            "boxes": 1
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site572_bldg1284_floor48868.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 350880,
+      "units_code": 6,
+      "before": {
+        "room": 41,
+        "other": 48,
+        "wall": 140,
+        "window": 16,
+        "door": 52,
+        "text": 63
+      },
+      "after": {
+        "room": 41,
+        "other": 10,
+        "wall": 140,
+        "window": 16,
+        "door": 52,
+        "toilet": 4,
+        "sink": 6,
+        "bathtub": 2,
+        "shower": 2,
+        "text": 63
+      },
+      "uncertain_symbols": 1,
+      "fixture_classifications": {
+        "closed_frame": 68,
+        "geometry": 14,
+        "empty_outline": 2,
+        "kitchen_hob": 4,
+        "unknown": 1,
+        "parallel_partitions": 2
+      },
+      "questions": [
+        {
+          "question": "How many doors (interior doors and entrance doors together) are drawn on this floor plan?",
+          "gold": 52,
+          "before": {
+            "value": 52,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 52,
+            "outcome": "correct",
+            "boxes": 52
+          }
+        },
+        {
+          "question": "How many windows are drawn on this floor plan?",
+          "gold": 16,
+          "before": {
+            "value": 16,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 16,
+            "outcome": "correct",
+            "boxes": 16
+          }
+        },
+        {
+          "question": "How many toilets (WC) are drawn on this floor plan?",
+          "gold": 4,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        },
+        {
+          "question": "How many bathtubs are drawn on this floor plan?",
+          "gold": 2,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        },
+        {
+          "question": "How many showers are drawn on this floor plan?",
+          "gold": 2,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "swiss_dwellings__site1257-bldg2450-floor11435",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1257_bldg2450_floor11435.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 144539,
+      "units_code": 6,
+      "before": {
+        "room": 11,
+        "other": 25,
+        "wall": 25,
+        "window": 7,
+        "door": 18,
+        "text": 22
+      },
+      "after": {
+        "room": 11,
+        "other": 6,
+        "wall": 25,
+        "window": 7,
+        "door": 18,
+        "toilet": 2,
+        "sink": 3,
+        "bathtub": 1,
+        "shower": 1,
+        "text": 22
+      },
+      "uncertain_symbols": 0,
+      "fixture_classifications": {
+        "closed_frame": 25,
+        "geometry": 7,
+        "empty_outline": 1,
+        "parallel_partitions": 2,
+        "kitchen_hob": 2
+      },
+      "questions": [
+        {
+          "question": "How many doors (interior doors and entrance doors together) are drawn on this floor plan?",
+          "gold": 18,
+          "before": {
+            "value": 18,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 18,
+            "outcome": "correct",
+            "boxes": 18
+          }
+        },
+        {
+          "question": "How many windows are drawn on this floor plan?",
+          "gold": 7,
+          "before": {
+            "value": 7,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 7,
+            "outcome": "correct",
+            "boxes": 7
+          }
+        },
+        {
+          "question": "How many toilets (WC) are drawn on this floor plan?",
+          "gold": 2,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": 2,
+            "outcome": "correct",
+            "boxes": 2
+          }
+        },
+        {
+          "question": "How many bathtubs are drawn on this floor plan?",
+          "gold": 1,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": 1,
+            "outcome": "correct",
+            "boxes": 1
+          }
+        },
+        {
+          "question": "How many showers are drawn on this floor plan?",
+          "gold": 1,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": 1,
+            "outcome": "correct",
+            "boxes": 1
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "swiss_dwellings__site711-bldg1524-floor6605",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site711_bldg1524_floor6605.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 241741,
+      "units_code": 6,
+      "before": {
+        "room": 40,
+        "other": 38,
+        "wall": 47,
+        "window": 20,
+        "door": 44,
+        "text": 82
+      },
+      "after": {
+        "room": 40,
+        "other": 10,
+        "wall": 47,
+        "window": 20,
+        "door": 44,
+        "bathtub": 4,
+        "toilet": 4,
+        "text": 82
+      },
+      "uncertain_symbols": 1,
+      "fixture_classifications": {
+        "closed_frame": 64,
+        "geometry": 8,
+        "kitchen_hob": 4,
+        "parallel_partitions": 1,
+        "unknown": 1
+      },
+      "questions": [
+        {
+          "question": "How many doors (interior doors and entrance doors together) are drawn on this floor plan?",
+          "gold": 44,
+          "before": {
+            "value": 44,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 44,
+            "outcome": "correct",
+            "boxes": 44
+          }
+        },
+        {
+          "question": "How many windows are drawn on this floor plan?",
+          "gold": 20,
+          "before": {
+            "value": 20,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 20,
+            "outcome": "correct",
+            "boxes": 20
+          }
+        },
+        {
+          "question": "How many toilets (WC) are drawn on this floor plan?",
+          "gold": 4,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        },
+        {
+          "question": "How many bathtubs are drawn on this floor plan?",
+          "gold": 4,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1102_bldg2242_floor10281.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 168987,
+      "units_code": 6,
+      "before": {
+        "room": 23,
+        "other": 27,
+        "wall": 18,
+        "window": 13,
+        "door": 21,
+        "text": 61
+      },
+      "after": {
+        "room": 23,
+        "other": 6,
+        "wall": 18,
+        "window": 13,
+        "door": 21,
+        "bathtub": 2,
+        "sink": 3,
+        "toilet": 3,
+        "text": 61
+      },
+      "uncertain_symbols": 1,
+      "fixture_classifications": {
+        "closed_frame": 34,
+        "kitchen_hob": 2,
+        "geometry": 8,
+        "parallel_partitions": 1,
+        "unknown": 1
+      },
+      "questions": [
+        {
+          "question": "How many doors (interior doors and entrance doors together) are drawn on this floor plan?",
+          "gold": 21,
+          "before": {
+            "value": 21,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 21,
+            "outcome": "correct",
+            "boxes": 21
+          }
+        },
+        {
+          "question": "How many windows are drawn on this floor plan?",
+          "gold": 13,
+          "before": {
+            "value": 13,
+            "outcome": "correct"
+          },
+          "after": {
+            "value": 13,
+            "outcome": "correct",
+            "boxes": 13
+          }
+        },
+        {
+          "question": "How many toilets (WC) are drawn on this floor plan?",
+          "gold": 3,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        },
+        {
+          "question": "How many bathtubs are drawn on this floor plan?",
+          "gold": 2,
+          "before": {
+            "value": null,
+            "outcome": "abstained"
+          },
+          "after": {
+            "value": null,
+            "outcome": "abstained",
+            "boxes": 0
+          }
+        }
+      ]
+    },
+    {
+      "doc_id": "opening_design__site-plan",
+      "path": "data/full/junction-dataset/data/opening_design/Screened_in_Porch/Models & CAD/BIM/Linked - CAD & Data/Site plan.dxf",
+      "source": "opening_design",
+      "bytes": 9666,
+      "units_code": 0,
+      "before": {},
+      "after": {},
+      "uncertain_symbols": 0,
+      "fixture_classifications": {},
+      "questions": []
+    },
+    {
+      "doc_id": "opening_design__s-b-large",
+      "path": "data/full/junction-dataset/data/opening_design/Stephan_Brady_Balcony/Model/source/S&B Large.dxf",
+      "source": "opening_design",
+      "bytes": 32318,
+      "units_code": 0,
+      "before": {},
+      "after": {},
+      "uncertain_symbols": 0,
+      "fixture_classifications": {},
+      "questions": []
+    },
+    {
+      "doc_id": "opening_design__northstar",
+      "path": "data/full/junction-dataset/data/opening_design/Lake_Kegonsa_Home/Model/northstar/northstar.dxf",
+      "source": "opening_design",
+      "bytes": 827935,
+      "units_code": 0,
+      "before": {},
+      "after": {},
+      "uncertain_symbols": 0,
+      "fixture_classifications": {},
+      "questions": []
+    }
+  ],
+  "files_checked": 15,
+  "dataset_origins": [
+    "opening_design",
+    "swiss_dwellings"
+  ],
+  "before_correct": 24,
+  "after_correct": 36,
+  "questions": 50
+}

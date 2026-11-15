@@ -1,0 +1,107 @@
+[
+ {
+  "path": "data/external/ifc_round2/viktor_SampleBimModelWebinar.ifc",
+  "reserved_untouched": false,
+  "schema": "IFC4",
+  "authoring_applications": [
+   "Autodesk Revit 2025 (ENU)"
+  ],
+  "index_rows": 316,
+  "index_errors": [],
+  "checks": [
+   {
+    "question": "How many walls of type \"Basic Wall:Exterior - 300mm Concrete\" are there?",
+    "expected": 6,
+    "actual": 6,
+    "pass": true,
+    "evidence_items": 6,
+    "calc": "Count matching wall elements after filters = 6. Sources: IFC class, type and property assignments. "
+   },
+   {
+    "question": "How many slabs of type \"M_Pile-Steel Pipe:500mm Diameter\" are there?",
+    "expected": 120,
+    "actual": 120,
+    "pass": true,
+    "evidence_items": 120,
+    "calc": "Count matching slab elements after filters = 120. Sources: IFC class, type and property assignments. "
+   },
+   {
+    "question": "How many reinforcing bars are in this model?",
+    "expected": 11,
+    "actual": 11,
+    "pass": true
+   }
+  ],
+  "seconds": 0.236
+ },
+ {
+  "path": "data/external/ifc_round2/schependomlaan_design.ifc",
+  "reserved_untouched": false,
+  "schema": "IFC2X3",
+  "authoring_applications": [
+   "ArchiCAD-64"
+  ],
+  "index_rows": 1591,
+  "index_errors": [],
+  "checks": [
+   {
+    "question": "How many walls of type \"IFC_baksteen_roodbruin_100mm_liggend 100\" are there?",
+    "expected": 200,
+    "actual": 200,
+    "pass": true,
+    "evidence_items": 200,
+    "calc": "Count matching wall elements after filters = 200. Sources: IFC class, type and property assignments. "
+   },
+   {
+    "question": "How many slabs of type \"IFC_breedplaat_schil_60mm 60\" are there?",
+    "expected": 52,
+    "actual": 52,
+    "pass": true,
+    "evidence_items": 52,
+    "calc": "Count matching slab elements after filters = 52. Sources: IFC class, type and property assignments. "
+   },
+   {
+    "question": "How many reinforcing bars are in this model?",
+    "expected": 0,
+    "actual": 0,
+    "pass": true
+   }
+  ],
+  "seconds": 5.403
+ },
+ {
+  "path": "data/full/junction-dataset/data/ifc_models/bimspeed-gdynia_ruchu-oporu-18.ifc",
+  "reserved_untouched": true,
+  "schema": "IFC2X3",
+  "authoring_applications": [
+   "Autodesk Revit 2021 (ENU)"
+  ],
+  "index_rows": 153,
+  "index_errors": [],
+  "checks": [
+   {
+    "question": "How many walls of type \"\u015aciana podstawowa:Interior brick wall - 120mm 2\" are there?",
+    "expected": 50,
+    "actual": 50,
+    "pass": true,
+    "evidence_items": 50,
+    "calc": "Count matching wall elements after filters = 50. Sources: IFC class, type and property assignments. "
+   },
+   {
+    "question": "How many slabs of type \"Strop:Bacement Floor 2 - 300mm\" are there?",
+    "expected": 2,
+    "actual": null,
+    "pass": false,
+    "evidence_items": 0,
+    "calc": "No count computed."
+   },
+   {
+    "question": "How many reinforcing bars are in this model?",
+    "expected": 0,
+    "actual": 0,
+    "pass": true
+   }
+  ],
+  "seconds": 0.278
+ }
+]

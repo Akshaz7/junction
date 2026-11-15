@@ -1,0 +1,156 @@
+{
+  "doc_a": "opening_design__facilities-building-transfer-20181108-to-structure-mbm-for-pricing-1810-s-park",
+  "doc_b": "opening_design__facilities-building-models-cad-bim-ifc-1810-s-park",
+  "status": "ready",
+  "summary": {
+    "total": 715,
+    "added": 113,
+    "removed": 82,
+    "moved": 187,
+    "resized": 187,
+    "property_changed": 146,
+    "by_kind": {
+      "beam": {
+        "total": 117,
+        "added": 8,
+        "removed": 7,
+        "moved": 34,
+        "resized": 34,
+        "property_changed": 34
+      },
+      "column": {
+        "total": 93,
+        "added": 9,
+        "removed": 24,
+        "moved": 20,
+        "resized": 20,
+        "property_changed": 20
+      },
+      "door": {
+        "total": 34,
+        "added": 7,
+        "removed": 7,
+        "moved": 10,
+        "resized": 10,
+        "property_changed": 0
+      },
+      "footing": {
+        "total": 75,
+        "added": 5,
+        "removed": 10,
+        "moved": 23,
+        "resized": 23,
+        "property_changed": 14
+      },
+      "member": {
+        "total": 2,
+        "added": 0,
+        "removed": 2,
+        "moved": 0,
+        "resized": 0,
+        "property_changed": 0
+      },
+      "other": {
+        "total": 2,
+        "added": 0,
+        "removed": 0,
+        "moved": 1,
+        "resized": 1,
+        "property_changed": 0
+      },
+      "proxy": {
+        "total": 54,
+        "added": 38,
+        "removed": 1,
+        "moved": 7,
+        "resized": 7,
+        "property_changed": 1
+      },
+      "railing": {
+        "total": 14,
+        "added": 1,
+        "removed": 1,
+        "moved": 6,
+        "resized": 6,
+        "property_changed": 0
+      },
+      "roof": {
+        "total": 4,
+        "added": 0,
+        "removed": 0,
+        "moved": 2,
+        "resized": 2,
+        "property_changed": 0
+      },
+      "site": {
+        "total": 2,
+        "added": 1,
+        "removed": 1,
+        "moved": 0,
+        "resized": 0,
+        "property_changed": 0
+      },
+      "slab": {
+        "total": 97,
+        "added": 12,
+        "removed": 6,
+        "moved": 28,
+        "resized": 28,
+        "property_changed": 23
+      },
+      "stairs": {
+        "total": 12,
+        "added": 4,
+        "removed": 4,
+        "moved": 2,
+        "resized": 2,
+        "property_changed": 0
+      },
+      "terminal": {
+        "total": 4,
+        "added": 4,
+        "removed": 0,
+        "moved": 0,
+        "resized": 0,
+        "property_changed": 0
+      },
+      "wall": {
+        "total": 205,
+        "added": 24,
+        "removed": 19,
+        "moved": 54,
+        "resized": 54,
+        "property_changed": 54
+      }
+    },
+    "by_storey": {
+      "1ST FLOOR": {
+        "total": 620,
+        "added": 111,
+        "removed": 80,
+        "moved": 153,
+        "resized": 153,
+        "property_changed": 123
+      },
+      "MEZZANINE": {
+        "total": 93,
+        "added": 1,
+        "removed": 1,
+        "moved": 34,
+        "resized": 34,
+        "property_changed": 23
+      },
+      "Storey not recorded": {
+        "total": 2,
+        "added": 1,
+        "removed": 1,
+        "moved": 0,
+        "resized": 0,
+        "property_changed": 0
+      }
+    },
+    "affected_items": 382
+  },
+  "matched": 187,
+  "warnings": []
+}

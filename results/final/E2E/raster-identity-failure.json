@@ -1,0 +1,19 @@
+{
+  "answer_id": "5d2200c4a9074fb18666a8b04c6460d2",
+  "doc_id": "cubicasa5k__colorful-10052",
+  "unresolved_scene_item_ids": [
+    "vision-door-01",
+    "vision-door-02",
+    "vision-door-03",
+    "vision-door-04",
+    "vision-door-05",
+    "vision-door-06"
+  ],
+  "answer_value": 6,
+  "reasoning_checked": [
+    "A second, independent look counted 6; kept the 4 boxed"
+  ],
+  "citation_labels": [
+    "Floor plan \u00b7 4 doors"
+  ]
+}

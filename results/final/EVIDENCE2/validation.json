@@ -1,0 +1,514 @@
+{
+  "row": "F-EVIDENCE2",
+  "time": "2026-11-14T23:19:20.867785+02:00",
+  "branch": "final/evidence2",
+  "base_commit": "60efc46c0671dbd10026f2351d4720b15836d1ce",
+  "checks_passed": 6,
+  "documents": 4,
+  "source_formats": [
+    "IFC",
+    "DXF",
+    "scan"
+  ],
+  "before_margin_cards": 0,
+  "after_margin_cards": 6,
+  "before_based_on_cards": 0,
+  "after_based_on_cards": 6,
+  "before_note": "Base engine/reasoning.py had neither margin nor based_on fields; answer accuracy is not claimed to improve.",
+  "local_vision_inference_for_heldout": false,
+  "live_provider_calls": 0,
+  "live_spend_usd": 0,
+  "reserved_file": "data/full/junction-dataset/data/cubicasa5k/high_quality_architectural-11374.png",
+  "reserved_sha256": "f92e5b5021406d95a0550108cbbd81ea6ddd05791532d11134035c0f1a10846e",
+  "selection_seed": 261114,
+  "unseen_policy": "Reserved by the previous run before implementation; first inspected at this script's end-only stage. No training or tuning on it.",
+  "calibration_integration": "Preview reads QA2 worktree only; production percentages remain null until its report is merged at results/final/QA2/calibration.json.",
+  "calibration_sha256": "41c6a65a8786fe8809d5e3d4a08fc3ba21b04fbacfce32ecb09a3cf5edea5613",
+  "calibration_buckets": [
+    {
+      "format": "dxf",
+      "type": "area",
+      "n": 19,
+      "documents": 16,
+      "correct": 18,
+      "wrong": 1,
+      "abstained": 0,
+      "observed_accuracy": 0.947368,
+      "predictions": 19,
+      "mean_predicted_accuracy": 0.932632,
+      "overconfidence_pp": -1.474,
+      "wilson_95": [
+        0.753613,
+        0.990648
+      ],
+      "small_sample": true
+    },
+    {
+      "format": "dxf",
+      "type": "count",
+      "n": 16,
+      "documents": 16,
+      "correct": 16,
+      "wrong": 0,
+      "abstained": 0,
+      "observed_accuracy": 1.0,
+      "predictions": 16,
+      "mean_predicted_accuracy": 0.935,
+      "overconfidence_pp": -6.5,
+      "wilson_95": [
+        0.806392,
+        1
+      ],
+      "small_sample": true
+    },
+    {
+      "format": "ifc",
+      "type": "area",
+      "n": 9,
+      "documents": 2,
+      "correct": 9,
+      "wrong": 0,
+      "abstained": 0,
+      "observed_accuracy": 1.0,
+      "predictions": 9,
+      "mean_predicted_accuracy": 0.936667,
+      "overconfidence_pp": -6.333,
+      "wilson_95": [
+        0.700855,
+        1
+      ],
+      "small_sample": true
+    },
+    {
+      "format": "ifc",
+      "type": "count",
+      "n": 2,
+      "documents": 2,
+      "correct": 2,
+      "wrong": 0,
+      "abstained": 0,
+      "observed_accuracy": 1.0,
+      "predictions": 2,
+      "mean_predicted_accuracy": 0.97,
+      "overconfidence_pp": -3.0,
+      "wilson_95": [
+        0.34238,
+        1
+      ],
+      "small_sample": true
+    },
+    {
+      "format": "ifc",
+      "type": "length",
+      "n": 1,
+      "documents": 1,
+      "correct": 1,
+      "wrong": 0,
+      "abstained": 0,
+      "observed_accuracy": 1.0,
+      "predictions": 1,
+      "mean_predicted_accuracy": 0.97,
+      "overconfidence_pp": -3.0,
+      "wilson_95": [
+        0.206549,
+        1
+      ],
+      "small_sample": true
+    },
+    {
+      "format": "png",
+      "type": "count",
+      "n": 14,
+      "documents": 13,
+      "correct": 8,
+      "wrong": 6,
+      "abstained": 0,
+      "observed_accuracy": 0.571429,
+      "predictions": 14,
+      "mean_predicted_accuracy": 0.784286,
+      "overconfidence_pp": 21.286,
+      "wilson_95": [
+        0.325906,
+        0.786192
+      ],
+      "small_sample": true
+    }
+  ],
+  "limitations": [
+    "No independent count/area truth is claimed for the reserved scan.",
+    "No active-model/source-matched detector precision/recall is currently linked, so scan count margins are unknown.",
+    "Door-icon scatter does not quantify physical door-width variation, so door-prior area margins are unknown.",
+    "Error budgets cover the stated source/measurement components, not source completeness or construction tolerances."
+  ],
+  "cases": [
+    {
+      "doc_id": "ifc_bench__fzk-house-arc",
+      "question": "How many windows are there?",
+      "format": "IFC",
+      "value": 11,
+      "unit": "count",
+      "margin": {
+        "value": 0.0,
+        "unit": "count",
+        "pct": 0.0,
+        "why": "Display rounding only; the cited source quantities reproduce the answer. Source completeness, scope and construction tolerances are not bounded.",
+        "sources": [
+          "ifc_bench__fzk-house-arc: source quantities"
+        ],
+        "scope": "Source quantity and display rounding"
+      },
+      "based_on": {
+        "elements": 11,
+        "estimated": 0,
+        "unresolved": 0,
+        "text": "Based on 11 cited elements from the model; 0 estimated."
+      },
+      "arithmetic_terms": 11,
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "11 windows on Dachgeschoss, Erdgeschoss in the building model (IFC), each one numbered",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "calculated",
+          "title": "Calculated",
+          "text": "Count each cited element once: 1 + 1 + 1 + 1 + 1 + 1 + 5 more = 11 elements.",
+          "cite": null,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": null,
+        "reason": "The cited source quantities reproduce the answer; the source's completeness is not verified. No measured accuracy is available for this answer type.",
+        "improve": null,
+        "calibration": null
+      },
+      "calibrated_preview": {
+        "label": "Verified",
+        "pct": 100,
+        "reason": "The cited source quantities reproduce the answer; the source's completeness is not verified. Audit accuracy: 1 of 1 comparable answers. This is a small sample.",
+        "improve": null,
+        "calibration": {
+          "pct": 100,
+          "n": 1,
+          "correct": 1,
+          "source": "results/final/QA2/calibration.json",
+          "interval_95": [
+            0.206549,
+            1
+          ],
+          "scope": "Observed audit accuracy; not an individual-answer guarantee"
+        }
+      },
+      "correctness": "Not independently gold-scored; validates evidence arithmetic and honest uncertainty only"
+    },
+    {
+      "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+      "question": "What is the total net floor area of all rooms?",
+      "format": "DXF",
+      "value": 343.27,
+      "unit": "m\u00b2",
+      "margin": {
+        "value": 0.05,
+        "unit": "m2",
+        "pct": 0.014565793690098175,
+        "why": "Display rounding only; the cited source quantities reproduce the answer. Source completeness, scope and construction tolerances are not bounded.",
+        "sources": [
+          "swiss_dwellings__site1000-bldg2082-floor9385: source quantities"
+        ],
+        "scope": "Source quantity and display rounding"
+      },
+      "based_on": {
+        "elements": 43,
+        "estimated": 0,
+        "unresolved": 0,
+        "text": "Based on 43 cited elements from the source files; 0 estimated."
+      },
+      "arithmetic_terms": 43,
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "43 rooms in the CAD drawing (DXF), each one numbered, including Zimmer 2.01, K\u00fcche 2.02, Whg. A 2.05",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "calculated",
+          "title": "Calculated",
+          "text": "Add the source quantities: 15.61 + 12.05 + 18.36 + 3.09 + 3.38 + 0.19 + 37 more = 343.27 m\u00b2.",
+          "cite": null,
+          "ok": null
+        },
+        {
+          "kind": "checked",
+          "title": "Checked",
+          "cite": null,
+          "ok": true,
+          "text": "Printed areas on 7 of 7 rooms match their measured outlines within 1%"
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": null,
+        "reason": "The cited source quantities reproduce the answer; the source's completeness is not verified. No measured accuracy is available for this answer type.",
+        "improve": null,
+        "calibration": null
+      },
+      "calibrated_preview": {
+        "label": "Verified",
+        "pct": 100,
+        "reason": "The cited source quantities reproduce the answer; the source's completeness is not verified. Audit accuracy: 5 of 5 comparable answers. This is a small sample.",
+        "improve": null,
+        "calibration": {
+          "pct": 100,
+          "n": 5,
+          "correct": 5,
+          "source": "results/final/QA2/calibration.json",
+          "interval_95": [
+            0.565518,
+            1
+          ],
+          "scope": "Observed audit accuracy; not an individual-answer guarantee"
+        }
+      },
+      "correctness": "Not independently gold-scored; validates evidence arithmetic and honest uncertainty only"
+    },
+    {
+      "doc_id": "cubicasa5k__colorful-11397",
+      "question": "How many windows are there?",
+      "format": "scan",
+      "value": 11,
+      "unit": "count",
+      "margin": {
+        "value": null,
+        "unit": "count",
+        "pct": null,
+        "why": "Detector precision and recall have not been measured for this model and drawing source. Recount agreement alone cannot quantify missed elements.",
+        "sources": []
+      },
+      "based_on": {
+        "elements": 11,
+        "estimated": 11,
+        "unresolved": 0,
+        "text": "Based on 11 cited elements from the source files; 11 estimated."
+      },
+      "arithmetic_terms": 11,
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "11 windows on the scanned drawing, each one numbered",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "calculated",
+          "title": "Calculated",
+          "text": "Count each cited element once: 1 + 1 + 1 + 1 + 1 + 1 + 5 more = 11 elements.",
+          "cite": null,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Estimate",
+        "pct": null,
+        "reason": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type.",
+        "improve": "Check the numbered evidence and the source quantities.",
+        "calibration": null
+      },
+      "calibrated_preview": {
+        "label": "Estimate",
+        "pct": 0,
+        "reason": "The source or calculation has not been independently verified. Audit accuracy: 0 of 1 comparable answers. This is a small sample.",
+        "improve": "Check the numbered evidence and the source quantities.",
+        "calibration": {
+          "pct": 0,
+          "n": 1,
+          "correct": 0,
+          "source": "results/final/QA2/calibration.json",
+          "interval_95": [
+            0,
+            0.793451
+          ],
+          "scope": "Observed audit accuracy; not an individual-answer guarantee"
+        }
+      },
+      "correctness": "Not independently gold-scored; validates evidence arithmetic and honest uncertainty only"
+    },
+    {
+      "doc_id": "cubicasa5k__colorful-11397",
+      "question": "What is the total area of all rooms?",
+      "format": "scan",
+      "value": 93.71,
+      "unit": "m\u00b2",
+      "margin": {
+        "value": null,
+        "unit": "m2",
+        "pct": null,
+        "why": "Scale method: door prior; scale confidence 0.3 (not an error bound); 11 door widths, sample spread 8.66397549252%. Real door-width variation is not measured; icon spread alone cannot bound the scale error.",
+        "sources": [
+          "cubicasa5k__colorful-11397: scale"
+        ]
+      },
+      "based_on": {
+        "elements": 10,
+        "estimated": 10,
+        "unresolved": 0,
+        "text": "Based on 10 cited elements from the source files; 10 estimated."
+      },
+      "arithmetic_terms": 10,
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "10 rooms on the scanned drawing, each one numbered, including TERASSI, PARVEKE, MH",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "calculated",
+          "title": "Calculated",
+          "text": "Add the source quantities: 0.6 + 21.56 + 9.82 + 21.55 + 8.02 + 4.09 + 4 more = 93.71 m\u00b2.",
+          "cite": null,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Estimate",
+        "pct": null,
+        "reason": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type.",
+        "improve": "Supply a known dimension and check the measured outlines.",
+        "calibration": null
+      },
+      "calibrated_preview": {
+        "label": "Estimate",
+        "pct": null,
+        "reason": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type.",
+        "improve": "Supply a known dimension and check the measured outlines.",
+        "calibration": null
+      },
+      "correctness": "Not independently gold-scored; validates evidence arithmetic and honest uncertainty only"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-11374",
+      "question": "How many windows are there?",
+      "format": "scan",
+      "value": 4,
+      "unit": "count",
+      "margin": {
+        "value": null,
+        "unit": "count",
+        "pct": null,
+        "why": "Detector precision and recall have not been measured for this model and drawing source. Recount agreement alone cannot quantify missed elements.",
+        "sources": []
+      },
+      "based_on": {
+        "elements": 4,
+        "estimated": 4,
+        "unresolved": 0,
+        "text": "Based on 4 cited elements from the source files; 4 estimated."
+      },
+      "arithmetic_terms": 4,
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "4 windows on the scanned drawing, each one numbered",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "calculated",
+          "title": "Calculated",
+          "text": "Count each cited element once: 1 + 1 + 1 + 1 = 4 elements.",
+          "cite": null,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Estimate",
+        "pct": null,
+        "reason": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type.",
+        "improve": "Check the numbered evidence and the source quantities.",
+        "calibration": null
+      },
+      "calibrated_preview": {
+        "label": "Estimate",
+        "pct": 0,
+        "reason": "The source or calculation has not been independently verified. Audit accuracy: 0 of 1 comparable answers. This is a small sample.",
+        "improve": "Check the numbered evidence and the source quantities.",
+        "calibration": {
+          "pct": 0,
+          "n": 1,
+          "correct": 0,
+          "source": "results/final/QA2/calibration.json",
+          "interval_95": [
+            0,
+            0.793451
+          ],
+          "scope": "Observed audit accuracy; not an individual-answer guarantee"
+        }
+      },
+      "correctness": "Not independently gold-scored; validates evidence arithmetic and honest uncertainty only"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-11374",
+      "question": "What is the total area of all rooms?",
+      "format": "scan",
+      "value": 66.88,
+      "unit": "m\u00b2",
+      "margin": {
+        "value": null,
+        "unit": "m2",
+        "pct": null,
+        "why": "Scale method: dimension; scale confidence 0.75 (not an error bound). No scale spread, physical prior uncertainty or fit residual was recorded.",
+        "sources": [
+          "cubicasa5k__high-quality-architectural-11374: scale"
+        ]
+      },
+      "based_on": {
+        "elements": 14,
+        "estimated": 14,
+        "unresolved": 0,
+        "text": "Based on 14 cited elements from the source files; 14 estimated."
+      },
+      "arithmetic_terms": 14,
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "14 rooms on the scanned drawing, each one numbered, including VH",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "calculated",
+          "title": "Calculated",
+          "text": "Add the source quantities: 5.2 + 5.93 + 13.42 + 4.15 + 20.36 + 1.56 + 8 more = 66.88 m\u00b2.",
+          "cite": null,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Estimate",
+        "pct": null,
+        "reason": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type.",
+        "improve": "Supply a known dimension and check the measured outlines.",
+        "calibration": null
+      },
+      "calibrated_preview": {
+        "label": "Estimate",
+        "pct": null,
+        "reason": "The source or calculation has not been independently verified. No measured accuracy is available for this answer type.",
+        "improve": "Supply a known dimension and check the measured outlines.",
+        "calibration": null
+      },
+      "correctness": "Not independently gold-scored; validates evidence arithmetic and honest uncertainty only"
+    }
+  ]
+}

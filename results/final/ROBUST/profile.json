@@ -1,0 +1,139 @@
+{
+  "row": "F-ROBUST",
+  "time": "2026-11-14T21:16:17.317212+00:00",
+  "long": true,
+  "reserved": {
+    "path": "data/junction-dataset-preview/data/opening_design/Sports_Complex/IFC Roundtrip/FreeCAD Detail/detail_Yorik_FreeCAD_materials.ifc",
+    "bytes": 1250123,
+    "selection": "random.SystemRandom; selected before implementation; not opened until final matrix"
+  },
+  "reserved_tested_last": false,
+  "environment": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.12.14",
+    "ingest": "deploy VLM mode, Python IFC converter",
+    "database": "no-op adapter; persistence NOT tested",
+    "memory": "Maximum single-process high-water RSS across HTTP worker and its completed ingest/converter children, not simultaneous total RSS",
+    "live_cost_usd": 0
+  },
+  "limits": [
+    "PDF internals excluded (Awais)",
+    "DWG converter unavailable; export to DXF or IFC",
+    "Standalone CSV/XLSX/TXT and ZIP unsupported; actionable 415 responses",
+    "Upload maximum 100 MiB; >200 MiB probe tests clear rejection, not conversion",
+    "IFC4X3 test is a migrated real file, not a native authoring export",
+    "Raster transforms except explicitly live rows test preprocessing only; no model accuracy claim",
+    "DXF simplified line renderer omits text/hatches; arbitrary-layer semantics require the live reader"
+  ],
+  "passed": 1,
+  "total": 1,
+  "transformation_checks": [],
+  "cases": [
+    {
+      "case": "dxf_original",
+      "path": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/swiss_dwellings/site3434_bldg5310_floor23630.dxf",
+      "filename": "site3434_bldg5310_floor23630.dxf",
+      "source": "/Users/akshatthapa/Workspace/wt/robust/data/junction-dataset-preview/data/swiss_dwellings/site3434_bldg5310_floor23630.dxf",
+      "transform": "original",
+      "http_start_peak_rss_mib": 53.1,
+      "bytes": 103770,
+      "upload_http": 200,
+      "upload_seconds": 0.043,
+      "ingest": {
+        "status": "ready",
+        "stages": [
+          {
+            "stage": "pages",
+            "ok": true,
+            "s": 0.5,
+            "peak_process_rss_mib": 103.9
+          },
+          {
+            "stage": "text",
+            "ok": true,
+            "s": 0.0,
+            "peak_process_rss_mib": 103.9
+          },
+          {
+            "stage": "dxf_planmap",
+            "ok": true,
+            "s": 0.1,
+            "peak_process_rss_mib": 107.3
+          },
+          {
+            "stage": "extrude",
+            "ok": true,
+            "s": 0.9,
+            "peak_process_rss_mib": 184.3
+          },
+          {
+            "stage": "usdz",
+            "ok": true,
+            "s": 0.5,
+            "peak_process_rss_mib": 243.4
+          }
+        ],
+        "detail": "plan map on page(s) [1]",
+        "mode": "vlm",
+        "started_at": 1794690971.6231549,
+        "step": "usdz",
+        "readable": true,
+        "progress": 1,
+        "cost_usd": 0.0,
+        "updated": "2026-11-14T23:16:13+0200"
+      },
+      "user_message": "plan map on page(s) [1]",
+      "preview": true,
+      "scene": true,
+      "scene_items": 31,
+      "origin_offset_m": [
+        4.5003,
+        0.0,
+        6.7236
+      ],
+      "preview_size": [
+        2008,
+        3000
+      ],
+      "counts": {
+        "room": 8,
+        "other": 24,
+        "wall": 9,
+        "window": 7,
+        "door": 7,
+        "text": 21
+      },
+      "first_answer": {
+        "question": "How many doors are there?",
+        "text": "There are **7 doors** on this floor plan. [1]",
+        "value": 7,
+        "abstained": false,
+        "citations": 1,
+        "boxes": 7,
+        "reasoning": {
+          "steps": [
+            {
+              "kind": "found",
+              "title": "Found",
+              "text": "7 doors in the CAD drawing (DXF), each one numbered",
+              "cite": 1,
+              "ok": null
+            }
+          ],
+          "confidence": {
+            "label": "Verified",
+            "pct": 95,
+            "reason": "Measured from the CAD file's exact geometry and units.",
+            "improve": null
+          }
+        },
+        "cost_usd": 0
+      },
+      "ok": true,
+      "seconds": 5.621,
+      "peak_process_rss_mib": 2295.7,
+      "peak_http_process_rss_mib": 2295.7,
+      "peak_ingest_process_rss_mib": 243.4
+    }
+  ]
+}

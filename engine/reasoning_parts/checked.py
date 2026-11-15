@@ -73,19 +73,25 @@ def run(ctx: dict) -> None:
     area_q = ctx.get('area_q') or unit == "m2"
 
     # 1. Vision recount vs plan map
+    from engine.reasoning_parts.counts import facts, recount_step
+    count_facts = facts(ctx['res'], ctx['question'])
+    if count_facts and count_facts["reread"]:
+        new = recount_step(count_facts)
     for s in trace:
+        if new is not None:
+            break
         m = re.search(r"plan map (\d+), drawing re-read (\d+)", str(s.get("detail") or ""))
         if m:
             a, b = int(m.group(1)), int(m.group(2))
             new = {"kind": "checked", "title": "Checked", "ok": a == b, "cite": None,
                    "text": f"A second, independent look counted {b}; matches the {a} boxed" if a == b
-                   else f"A second, independent look counted {b}; kept the {a} boxed"}
+                   else f"The plan map originally counted {a}; a second, independent look counted {b}; the counts differ"}
             break
 
     # 2. Printed area vs measured outline (CAD label, or a printed label read inside a raster room)
     if new is None and area_q and rooms and not is_ifc:
-        mpp = float((sc or {}).get("m_per_px") or 0)
-        pairs = [(r, _room_pair(r, doc, mpp)) for r in rooms[:12]]
+        from engine.scales import item_scale
+        pairs = [(r, _room_pair(r, doc, float(item_scale(r, sc).get("m_per_px") or 0))) for r in rooms[:12]]
         pairs = [(r, p) for r, p in pairs if p]
         if pairs:
             tol = 1.0 if all(p[2] == "cad" for _, p in pairs) else 5.0

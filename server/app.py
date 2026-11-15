@@ -48,6 +48,9 @@ async def lifespan(app: FastAPI):
                 await purge_synthetic(conn)
                 mark_checked()
                 await seed_skills(conn)
+            if os.environ.get("SEED_PROJECTS", "1") != "0":
+                from .projects_routes import seed_demo_projects
+                await seed_demo_projects(pool)
         except Exception as e:  # never block startup
             print("migrations failed:", e)
     restore = asyncio.create_task(_restore_uploads())
@@ -78,6 +81,8 @@ app.include_router(docs_router)
 app.include_router(linked_router)
 app.include_router(files_router)
 app.include_router(chats_router)
+from .calc_routes import router as calc_router
+app.include_router(calc_router)
 app.include_router(live_router)
 app.include_router(speech_router)
 app.include_router(advise_router)
@@ -92,6 +97,10 @@ from .design_versions import router as design_versions_router  # noqa: E402
 app.include_router(design_versions_router)
 from .sheet_align_routes import router as sheet_align_router  # noqa: E402
 app.include_router(sheet_align_router)
+from .projects_routes import router as projects_router  # noqa: E402
+app.include_router(projects_router)
+from .markup_routes import router as markup_router  # noqa: E402
+app.include_router(markup_router)
 
 
 @app.get("/api/health")
@@ -116,3 +125,6 @@ async def health():
             "image": image_info(), **file_counts(), "servable_docs": servable_docs,
             "uptime_s": max(0.0, time.monotonic() - app.state.started_at),
             "models_ok": models_ok, "caps_loaded": bool(caps())}
+
+from .kg_routes import router as kg_router  # noqa: E402
+app.include_router(kg_router)

@@ -27,7 +27,7 @@ def library_client(tmp_path, monkeypatch):
             return state["docs"] if "from documents" in sql else []
 
         async def fetchval(self, sql, *args):
-            return uuid.uuid4()
+            return None if "project_id" in sql else uuid.uuid4()
 
         async def execute(self, sql, *args):
             state["answers"].append(json.loads(args[-1]))

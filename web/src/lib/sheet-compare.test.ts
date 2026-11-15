@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest'
 import {
   boxRect, fitSheet, nudgeSeam, panView, regionView, screenToWorld, seamFromPointer, shortVersion, stepZoom, tintMatrix,
-  thumbLayout, versionDate, worldToScreen, zoomAt, usableBox, FIT_VIEW, parseHex,
+  thumbLayout, contrastMatrix, versionDate, worldToScreen, zoomAt, usableBox, FIT_VIEW, parseHex,
 } from './sheet-compare'
 
 const viewport = { w: 499, h: 525 }
@@ -98,6 +98,7 @@ it('zoom to a region centres it and fills about 60% of the canvas', () => {
   expect(rect.width).toBeLessThanOrEqual(viewport.w * 0.6 + 0.5)
   expect(rect.height).toBeLessThanOrEqual(viewport.h * 0.6 + 0.5)
   expect(view.s).toBeGreaterThan(1)
+  expect(regionView([10, 10, 20, 20], sheet, fit, viewport).s).toBe(5)
   // A whole-sheet region never zooms out.
   expect(regionView([0, 0, 6300, 4500], sheet, fit, viewport).s).toBe(1)
 })
@@ -135,11 +136,16 @@ it('short version labels drop the date, which moves to a tooltip', () => {
 })
 
 it('tint matrix keeps white paper white and turns black ink into the tint', () => {
+  // (also: mid grey linework becomes fully tinted, see below)
   const m = tintMatrix(parseHex('#ca482a', [1, 0, 0])).split(' ').map(Number)
   const apply = (r: number, g: number, b: number) => [0, 1, 2].map((row) => m[row * 5] * r + m[row * 5 + 1] * g + m[row * 5 + 2] * b + m[row * 5 + 4])
   expect(apply(1, 1, 1).every((v) => Math.abs(v - 1) < 1e-3)).toBe(true)
   const ink = apply(0, 0, 0)
   expect(ink[0]).toBeCloseTo(0xca / 255, 3)
   expect(ink[1]).toBeCloseTo(0x48 / 255, 3)
+  const c = contrastMatrix().split(' ').map(Number)
+  const lum = (v: number) => Math.min(1, Math.max(0, c[0] * v + c[1] * v + c[2] * v + c[4]))
+  expect(lum(1)).toBeCloseTo(1, 3)
+  expect(lum(0.4)).toBe(0)        // mid-dark linework becomes solid ink
   expect(parseHex('nope', [1, 2, 3])).toEqual([1, 2, 3])
 })

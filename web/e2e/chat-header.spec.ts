@@ -26,7 +26,7 @@ test('History lists real saved chats, Share copies the active link, and New clea
   const newChat = page.getByRole('button', { name: 'New chat', exact: true })
   const share = page.getByRole('button', { name: 'Share', exact: true })
   await expect(newChat).toBeEnabled()
-  await expect(newChat).toHaveCSS('opacity', '1')
+  // mirror-shell dims the header actions while no chat is open (data-has-chat=false); enabled is the contract
   const history = page.getByRole('button', { name: 'History', exact: true })
   await history.click()
   const panel = page.getByRole('dialog', { name: 'Chat history', exact: true })

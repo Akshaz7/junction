@@ -1,0 +1,49 @@
+{
+  "seed": 20261114,
+  "selected_before_audit_implementation": true,
+  "selection_rule": "Random sample of English numeric-question docs not mentioned by doc_id in tracked source/tests/results/docs (<15 MB), with existing doc.json; excludes PDFs. No proof of absence from external or untracked historical runs.",
+  "excluded_referenced_doc_count": 6004,
+  "candidate_doc_count": 123,
+  "files": [
+    {
+      "doc_id": "cubicasa5k__high-quality-10458",
+      "path": "data/cubicasa5k/high_quality-10458.png"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-10220",
+      "path": "data/cubicasa5k/high_quality_architectural-10220.png"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-5138",
+      "path": "data/cubicasa5k/high_quality_architectural-5138.png"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-5873",
+      "path": "data/cubicasa5k/high_quality_architectural-5873.png"
+    },
+    {
+      "doc_id": "ifc_bench__fantasy-office-building-2-arc",
+      "path": "data/ifc_bench/fantasy_office_building_2_arc.ifc"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-3838",
+      "path": "data/cubicasa5k/high_quality_architectural-3838.png"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-4697",
+      "path": "data/cubicasa5k/high_quality_architectural-4697.png"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-8328",
+      "path": "data/cubicasa5k/high_quality_architectural-8328.png"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-473",
+      "path": "data/cubicasa5k/high_quality-473.png"
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-4014",
+      "path": "data/cubicasa5k/high_quality_architectural-4014.png"
+    }
+  ]
+}

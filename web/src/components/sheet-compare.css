@@ -89,9 +89,9 @@
 .sc-card[data-active] .sc-card-text p { color: var(--foreground); -webkit-line-clamp: 6; line-clamp: 6; }
 .ai-mark { display: inline-grid; place-items: center; flex: none; width: 14px; height: 14px; border-radius: 4px; background: var(--ink-well); color: var(--muted-foreground); }
 .cmp-small > summary { padding: 10px 12px; cursor: pointer; font-size: var(--text-caption); color: var(--muted-foreground); }
-.cmp-small .sc-card { padding-left: 36px; }
-.cmp-small .sc-card .reading-number { top: 8px; width: 16px; height: 16px; font-size: 10px; }
-.cmp-small .sc-card .sc-card-text { margin-top: 0; }
+.sc-card.compact { padding-left: 36px; }
+.sc-card.compact .reading-number { top: 8px; width: 16px; height: 16px; font-size: 10px; }
+.sc-card.compact .sc-card-text { margin-top: 0; }
 .sc-empty { margin: 0; padding: 16px 12px; font-size: var(--text-body-sm); color: var(--muted-foreground); }
 
 @media (min-width: 641px) and (max-width: 1000px) { .sheet-compare .comparison-readings { display: none; } }

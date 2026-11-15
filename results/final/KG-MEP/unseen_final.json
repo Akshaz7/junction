@@ -1,0 +1,87 @@
+{
+  "docs": [
+    "ifc_models__resbim-224-model"
+  ],
+  "build_seconds": 0.023,
+  "stats": {
+    "nodes": 57,
+    "edges": 185,
+    "by_kind": {
+      "project": 1,
+      "doc": 1,
+      "level": 2,
+      "door": 5,
+      "type": 7,
+      "slab": 1,
+      "material": 24,
+      "wall": 11,
+      "window": 4,
+      "fixture": 1
+    },
+    "edges_by_kind": {
+      "contains": 56,
+      "on_level": 21,
+      "has_type": 21,
+      "made_of": 78,
+      "hosted_by": 9
+    },
+    "linked_pct": null,
+    "agree_pct": null,
+    "issues": 0,
+    "counterpart_items": 0,
+    "linked_items": 0
+  },
+  "mep": {
+    "documents": {
+      "ifc_models__resbim-224-model": {
+        "schema": "IFC4",
+        "services": 0,
+        "rooms": 0
+      }
+    },
+    "notes": [],
+    "frames": {
+      "ifc_models__resbim-224-model": [
+        {
+          "building_guid": "09kAUjZ9z0nwc0mrimJwZg",
+          "project_guid": "09kAUjZ9z0nwc0mrimJwZh",
+          "matrix_z_up_m": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "rooms_with_services": 0,
+  "declared_ceiling_heights": 0,
+  "services_lengths_known": 0,
+  "dangling_edges": 0,
+  "unknown_length_note": "Whole-element lengths are not lengths inside a room; unrecorded ceilings stay unknown.",
+  "reservation": {
+    "heldout_path": "full/junction-dataset/data/ifc_models/resbim-224_model.ifc",
+    "selection": "SystemRandom before inspecting file contents; used only at final validation"
+  }
+}

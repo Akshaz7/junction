@@ -14,7 +14,6 @@ import sys
 import time
 from pathlib import Path
 
-import ifcopenshell
 import ifcopenshell.util.element as uel
 import ifcopenshell.util.unit as uunit
 import numpy as np
@@ -31,6 +30,7 @@ KINDS = [
     ("IfcRamp", "ramp"), ("IfcRampFlight", "ramp"), ("IfcRailing", "railing"), ("IfcColumn", "column"),
     ("IfcBeam", "beam"), ("IfcMember", "member"), ("IfcPlate", "plate"), ("IfcCovering", "covering"),
     ("IfcFooting", "footing"), ("IfcPile", "pile"), ("IfcFurnishingElement", "furniture"),
+    ("IfcReinforcingBar", "rebar"), ("IfcReinforcingMesh", "reinforcing_mesh"), ("IfcTendon", "tendon"),
     ("IfcPipeSegment", "pipe"), ("IfcPipeFitting", "pipe_fitting"), ("IfcDuctSegment", "duct"),
     ("IfcDuctFitting", "duct_fitting"), ("IfcFlowTerminal", "terminal"), ("IfcFlowController", "valve_damper"),
     ("IfcFlowMovingDevice", "pump_fan"), ("IfcEnergyConversionDevice", "equipment"),
@@ -115,8 +115,15 @@ def quantities_of(el, scale):
             if v is None:
                 continue
             key, dim = m
-            if key not in out:
-                out[key] = round(float(v) * scale ** dim, 5)
+            # IFC area/volume units are independent of length units. A model
+            # commonly has millimetres for lengths and square metres for areas;
+            # an individual quantity can also override the project unit.
+            unit = uunit.get_property_unit(q, el.file, use_cache=True)
+            if unit is None or unit.UnitType != {1: "LENGTHUNIT", 2: "AREAUNIT", 3: "VOLUMEUNIT"}[dim]:
+                continue  # absent units are unknown, never an implied measurement
+            value = float(v) * uunit.get_unit_scale(unit)
+            if key not in out and np.isfinite(value):
+                out[key] = round(value, 5)
     # Generic aliases the solvers look for
     if "area_m2" not in out:
         a = out.get("net_floor_area_m2", out.get("gross_floor_area_m2", out.get("net_area_m2", out.get("gross_area_m2"))))
@@ -171,63 +178,10 @@ def convert_py(ifc: Path, raw_glb: Path):
     """Pure-Python IFC -> GLB (ifcopenshell geometry iterator + trimesh), used where IfcConvert is not available
     (the Linux deploy image). Same contract as IfcConvert --y-up --use-element-guids: node name = GlobalId, metres,
     Y-up, IfcOpeningElement dropped, IfcSpace kept. One mesh per element, coloured by its dominant IFC style.
-    Memory matters here (512 MB container): the iterator runs with IFC_CONVERT_THREADS threads (default 1), geometry is
-    kept as compact float32/int32 arrays, and the IFC model and iterator are freed before trimesh builds the GLB."""
-    import gc
-    import multiprocessing
-
-    import ifcopenshell.geom as geom
-    import trimesh
-    raw_glb.parent.mkdir(parents=True, exist_ok=True)
-    f = ifcopenshell.open(str(ifc))
-    st = geom.settings()
-    st.set("use-world-coords", True)
-    inc = [e for e in list(f.by_type("IfcElement")) + list(f.by_type("IfcSpace")) if not e.is_a("IfcOpeningElement")]
-    threads = int(os.environ.get("IFC_CONVERT_THREADS", "1"))
-    it = geom.iterator(st, f, max(1, min(threads, multiprocessing.cpu_count())), include=inc)
-    parts = []  # (guid, verts float32 Y-up, faces int32, rgba)
-    if it.initialize():
-        while True:
-            sh = it.get()
-            gm = sh.geometry
-            v = np.array(gm.verts, dtype=np.float32).reshape(-1, 3)
-            fc = np.array(gm.faces, dtype=np.int32).reshape(-1, 3)
-            if len(v) and len(fc):
-                v = np.ascontiguousarray(np.column_stack([v[:, 0], v[:, 2], -v[:, 1]]))  # Z-up -> Y-up (as IfcConvert --y-up)
-                rgba = [0.8, 0.8, 0.8, 1.0]
-                try:
-                    mats = list(gm.materials)
-                    if mats:
-                        ids = np.array(gm.material_ids)
-                        ids = ids[ids >= 0]
-                        m = mats[int(np.bincount(ids).argmax())] if len(ids) else mats[0]
-                        d = m.diffuse
-                        a = 1.0 - float(m.transparency) if m.has_transparency else 1.0
-                        rgba = [float(d.r()), float(d.g()), float(d.b()), a]
-                        rgba = [min(1.0, max(0.0, c)) if c == c else dflt for c, dflt in zip(rgba, (0.8, 0.8, 0.8, 1.0))]
-                except Exception:  # noqa: BLE001
-                    pass
-                parts.append((sh.guid, v, fc, rgba))
-            if not it.next():
-                break
-    del it, st, inc, f
-    gc.collect()
-    if not parts:
-        raise RuntimeError("the IFC has no geometry that could be converted")
-    scene = trimesh.Scene()
-    mats = {}  # one material per distinct colour, shared between meshes
-    for guid, v, fc, rgba in parts:
-        key = tuple(int(255 * c) for c in rgba)
-        if key not in mats:
-            mats[key] = trimesh.visual.material.PBRMaterial(
-                baseColorFactor=list(key), metallicFactor=0.0, roughnessFactor=0.9,
-                alphaMode="BLEND" if rgba[3] < 0.99 else "OPAQUE")
-        mesh = trimesh.Trimesh(vertices=v, faces=fc, process=False)
-        mesh.visual = trimesh.visual.TextureVisuals(material=mats[key])
-        scene.add_geometry(mesh, node_name=guid, geom_name=guid)
-    del parts
-    raw_glb.unlink(missing_ok=True)
-    raw_glb.write_bytes(scene.export(file_type="glb"))
+    Triangles are streamed to disk as float32/uint32 arrays; only the current
+    shape and GLB metadata remain in Python memory. One geometry thread by default."""
+    from pipeline.ifc_glb import convert as stream_glb
+    return stream_glb(ifc, raw_glb)
 
 
 def convert(ifc: Path, raw_glb: Path):
@@ -238,20 +192,56 @@ def convert(ifc: Path, raw_glb: Path):
     raw_glb.unlink(missing_ok=True)  # IfcConvert asks before overwriting
     big = ifc.stat().st_size > 50e6
     env = {"HEAVY_SLOTS": "1"} if big else {}
-    cmd = [str(HEAVY), str(IFC_CONVERT), "--exclude", "entities", "IfcOpeningElement", "-j", "4",
+    cmd = [str(IFC_CONVERT), "--exclude", "entities", "IfcOpeningElement", "-j", os.environ.get("IFC_CONVERT_THREADS", "1"),
            "--use-element-guids", "--y-up", str(ifc), str(raw_glb)]
+    if os.environ.get("HEAVY_SLOT_HELD") != "1":
+        cmd.insert(0, str(HEAVY))
+    managed = os.environ.get("INGEST_MANAGED_JOB") == "1"
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
-                            stdin=subprocess.DEVNULL, env={**os.environ, **env}, start_new_session=True)
+                            stdin=subprocess.DEVNULL, env={**os.environ, **env}, start_new_session=not managed)
     try:
         out, _ = proc.communicate(timeout=CONVERT_TIMEOUT_S)
     except subprocess.TimeoutExpired:
-        os.killpg(proc.pid, signal.SIGKILL)  # heavy.sh + IfcConvert
+        if managed:
+            proc.kill()  # the enclosing ingest watchdog owns the process group
+        else:
+            os.killpg(proc.pid, signal.SIGKILL)  # heavy.sh + IfcConvert
         proc.communicate()
         raw_glb.unlink(missing_ok=True)
         raise RuntimeError(f"IfcConvert timed out after {CONVERT_TIMEOUT_S} s")
     (raw_glb.parent / "convert.log").write_text(out or "")
     if not raw_glb.exists():
         raise RuntimeError("IfcConvert produced no GLB; see tmp/convert.log")
+
+
+def node_matrices(g: GLTF2):
+    """World transforms, including glTF parent nodes and TRS transforms."""
+    from trimesh.transformations import quaternion_matrix
+    parents = {child: i for i, node in enumerate(g.nodes) for child in (node.children or [])}
+    world = {}
+    visiting = set()
+
+    def matrix(i):
+        if i in visiting:
+            raise ValueError("The converted scene contains circular node references.")
+        if i in world:
+            return world[i]
+        visiting.add(i)
+        node = g.nodes[i]
+        if node.matrix:
+            local = np.array(node.matrix, dtype=float).reshape(4, 4).T
+        else:
+            x, y, z, w = node.rotation or [0, 0, 0, 1]
+            local = quaternion_matrix([w, x, y, z])
+            local[:3, :3] *= np.array(node.scale or [1, 1, 1])
+            local[:3, 3] = node.translation or [0, 0, 0]
+        world[i] = matrix(parents[i]) @ local if i in parents else local
+        visiting.remove(i)
+        return world[i]
+
+    for i in range(len(g.nodes)):
+        matrix(i)
+    return world
 
 
 def node_boxes(g: GLTF2):
@@ -264,13 +254,16 @@ def node_boxes(g: GLTF2):
             los.append(a.min); his.append(a.max)
         mesh_box[mi] = (np.min(los, 0), np.max(his, 0))
     boxes = {}
+    transforms = node_matrices(g)
     for ni, n in enumerate(g.nodes):
         if n.mesh is None:
             continue
         lo, hi = mesh_box[n.mesh]
-        M = np.array(n.matrix or np.eye(4).flatten().tolist()).reshape(4, 4).T  # column-major
+        M = transforms[ni]
         corners = np.array([[x, y, z, 1] for x in (lo[0], hi[0]) for y in (lo[1], hi[1]) for z in (lo[2], hi[2])])
         w = (M @ corners.T).T[:, :3]
+        if not np.isfinite(w).all():
+            raise ValueError("The converted scene contains invalid geometry coordinates.")
         boxes[ni] = (w.min(0), w.max(0))
     return boxes
 
@@ -288,23 +281,32 @@ def process(ifc: Path, doc: dict, out_dir: Path):
     lo = np.min([b[0] for b in boxes.values()], 0)
     hi = np.max([b[1] for b in boxes.values()], 0)
     off = np.array([(lo[0] + hi[0]) / 2, 0.0, (lo[2] + hi[2]) / 2])
-    for n in g.nodes:
-        if n.mesh is None:
+    # Translate root nodes once, preserving transforms of child meshes.
+    children = {child for node in g.nodes for child in (node.children or [])}
+    transforms = node_matrices(g)
+    for ni, n in enumerate(g.nodes):
+        if ni in children:
             continue
-        m = n.matrix or np.eye(4).flatten().tolist()
-        m = list(m)
-        m[12] -= off[0]; m[14] -= off[2]
-        n.matrix = m
+        matrix = transforms[ni].copy()
+        matrix[:3, 3] -= off
+        n.matrix = matrix.T.flatten().tolist()
+        n.translation = n.rotation = n.scale = None
     boxes = {k: (b[0] - off, b[1] - off) for k, b in boxes.items()}
     name_to_box = {}
     for ni, b in boxes.items():
         name_to_box[g.nodes[ni].name] = b
 
-    f = ifcopenshell.open(str(ifc))
+    from pipeline.ifc_index import open_properties, property_quantities_of
+    f = open_properties(ifc)
     scale = uunit.calculate_unit_scale(f)
+    length_unit_known = uunit.get_project_unit(f, "LENGTHUNIT") is not None
+    warnings = [] if length_unit_known else [
+        "This IFC does not declare length units. Model sizes use the converter's default and cannot be verified."]
     targets = [e for e in list(f.by_type("IfcElement")) + list(f.by_type("IfcSpace")) + list(f.by_type("IfcSite")) if not e.is_a("IfcOpeningElement")]
     by_guid = {e.GlobalId: e for e in targets}
     kinds = {e.GlobalId: kind_of(e) for e in targets}
+    if "proxy" in kinds.values():
+        warnings.append("Some model shapes have no building object type. Counts by object type may be incomplete; check the 3D shapes or export with object classifications.")
     for n in g.nodes:  # viewers can hide rooms / pick kinds without a lookup
         if n.mesh is not None and n.name in kinds:
             n.extras = {"kind": kinds[n.name]}
@@ -337,12 +339,14 @@ def process(ifc: Path, doc: dict, out_dir: Path):
         bbox = [np.round(b[0], 4).tolist(), np.round(b[1], 4).tolist()] if b else None
         q = {}
         qsrc = {}
-        for k, v in attr_dims(e, scale).items():
+        for k, v in (attr_dims(e, scale) if length_unit_known else {}).items():
             q[k] = v; qsrc[k] = "attribute"
+        for k, v in property_quantities_of(e).items():
+            q[k] = v; qsrc[k] = "property"
         for k, v in quantities_of(e, scale).items():
             q[k] = v; qsrc[k] = "qto"  # Qto wins over attribute
         k_ = kinds[gid]
-        if b is not None and src.get(gid) == "glb":  # fill gaps from geometry
+        if length_unit_known and b is not None and src.get(gid) == "glb":  # fill gaps from geometry
             ext = b[1] - b[0]
             if k_ in ("door", "window"):
                 if "width_m" not in q: q["width_m"] = round(float(max(ext[0], ext[2])), 4); qsrc["width_m"] = "bbox"
@@ -353,7 +357,7 @@ def process(ifc: Path, doc: dict, out_dir: Path):
         entry = {
             "item_id": gid, "name": e.Name, "ifc_class": e.is_a(), "kind": k_,
             "predefined_type": uel.get_predefined_type(e), "type_name": typ.Name if typ else None,
-            "storey": ({"name": st.Name, "elevation_m": round((st.Elevation or 0) * scale, 4)} if st is not None else None),
+            "storey": ({"name": st.Name or "Unnamed level", "elevation_m": round((st.Elevation or 0) * scale, 4)} if st is not None else None),
             "bbox_m": bbox, "quantities": q, "quantity_source": qsrc, "props": props_of(e),
             "bbox_source": src.get(gid),
         }
@@ -362,19 +366,29 @@ def process(ifc: Path, doc: dict, out_dir: Path):
             items[gid] = {"node": gid, "usd_name": usd_name(gid), "bbox_m": bbox,
                           "storey": entry["storey"]["name"] if entry["storey"] else None, "kind": k_}
     for s in f.by_type("IfcBuildingStorey"):
-        storeys[s.GlobalId] = {"name": s.Name, "elevation_m": round((s.Elevation or 0) * scale, 4)}
+        storeys[s.GlobalId] = {"name": s.Name or "Unnamed level", "elevation_m": round((s.Elevation or 0) * scale, 4)}
     storey_list = sorted(storeys.values(), key=lambda s: s["elevation_m"])
 
+    from pipeline.scale_provenance import ifc_units
     from pipeline.ifc_props import building_meta, enrich_elements
     enrich_elements(f, elements)
-    (out_dir / "elements.json").write_text(json.dumps(
-        {"doc_id": doc["doc_id"], "version": 2, "schema": f.schema, "units": "m", "building": building_meta(f),
+    from pipeline.ifc_quantities import build as build_quantity_index
+    try:  # optional sidecar: never fail the scene over it
+        (out_dir / "ifc-quantities.json").write_text(json.dumps(build_quantity_index(f, space_geometry=True)))
+    except Exception as e:  # noqa: BLE001
+        warnings.append(f"quantity index skipped: {e}"[:200])
+    elements_tmp = out_dir / "tmp" / "elements-scene.json"
+    elements_tmp.parent.mkdir(exist_ok=True)
+    elements_tmp.write_text(json.dumps(
+        {"doc_id": doc["doc_id"], "version": 2, "schema": f.schema, "units": "m", "unit_provenance": ifc_units(f, doc["doc_id"]), "building": building_meta(f),
          "coords": "recentred in X/Z by origin_offset_m, Y-up (glTF), Y keeps real elevation",
          "storeys": storey_list, "elements": elements}, indent=1))
+    elements_tmp.replace(out_dir / "elements.json")
     lic = (doc.get("licence") or "")
+    source_offset = np.array((g.extras or {}).get("source_origin_offset_m", [0, 0, 0]), dtype=float)
     scene = {"doc_id": doc["doc_id"], "glb": "scene.glb", "usdz": None, "units": "m", "up": "Y",
-             "origin_offset_m": [round(float(x), 5) for x in off], "storeys": storey_list,
-             "plan_image": None, "items": items,
+             "origin_offset_m": [round(float(x), 5) for x in off + source_offset], "storeys": storey_list,
+             "plan_image": None, "items": items, "warnings": warnings,
              "publishable": not (lic.startswith("CC-BY-ND") or lic.startswith("GPL"))}
     (out_dir / "scene.json").write_text(json.dumps(scene, indent=1))
     try:  # names, room areas, door widths for the info cards (pipeline/manifest_info.py)

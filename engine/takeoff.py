@@ -123,11 +123,12 @@ def plan_geom(doc_id: str, root) -> dict:
             pm = json.loads(pf.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
-        sc = pm.get("scale") or {}
-        mpp = sc.get("m_per_px")
-        if not mpp or (sc.get("confidence") or 0) < 0.8:
-            continue
         for x in pm.get("items") or []:
+            from engine.scales import region_scale
+            local, _ = region_scale(pm, x.get("bbox_px"))
+            mpp = local.get("m_per_px")
+            if not mpp or (local.get("confidence") or 0) < 0.8:
+                continue
             poly = x.get("polygon_px")
             if x.get("kind") == "room" and poly and len(poly) >= 3:
                 a = abs(sum(poly[i][0] * poly[(i + 1) % len(poly)][1] - poly[(i + 1) % len(poly)][0] * poly[i][1] for i in range(len(poly)))) / 2
@@ -166,6 +167,7 @@ def takeoff_answer(question: str, docs: list[Doc], tk: Takeoff, t0: float | None
     trace = [{"step": "takeoff", "detail": f"{tk.material or 'area'} for {cls} rooms across {len(docs)} document(s)", "ms": 0,
               "model": None, "cost_usd": 0}]
     cites, boxes, lines, ids_by_doc = [], [], [], {}
+    calc_rows = []
     total, n_rooms, missing, low_conf, geom_used = 0.0, 0, 0, False, False
     doc_lines = []
     for doc in docs:
@@ -198,6 +200,8 @@ def takeoff_answer(question: str, docs: list[Doc], tk: Takeoff, t0: float | None
             else:
                 n = None
             sub += a
+            from engine.calc import row
+            calc_rows.append(row(doc, it, a, "m2"))
             n_rooms += 1
             ids_by_doc.setdefault(doc.doc_id, []).append(it.item_id)
             parts.append(f"{nm}{' (' + it.storey + ')' if it.storey else ''} {_f(a)} m² " + (f"[{n}]" if n else ""))
@@ -249,8 +253,12 @@ def takeoff_answer(question: str, docs: list[Doc], tk: Takeoff, t0: float | None
     text = head + "\n\n" + calc + "\n\n" + "\n".join(body) + ("\n\n" + " ".join(notes) if notes else "")
     ids = [i for v in ids_by_doc.values() for i in v]
     main_doc = doc_lines[0][0]
-    return _out(question, [d for d, _, _ in doc_lines], text, value, unit, 0.55 if low_conf else 0.85, cites, boxes, trace, t0,
-                ids=ids_by_doc.get(main_doc.doc_id, []))
+    res = _out(question, [d for d, _, _ in doc_lines], text, value, unit, 0.55 if low_conf else 0.85, cites, boxes, trace, t0,
+               ids=ids_by_doc.get(main_doc.doc_id, []))
+    from engine.calc import assumption_source
+    from engine.calc_routes import allowance
+    return allowance(res, calc_rows, mat[1] * 100 if mat else 0,
+                     assumption_source(mat[2] if mat else "No waste allowance applied"), paint=tk.material == "paint")
 
 
 def _out(question, docs, text, value, unit, conf, cites, boxes, trace, t0, abstained=False, ids=()):

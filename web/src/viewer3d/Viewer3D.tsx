@@ -16,7 +16,7 @@ import { setHover, setSelected, useLinkedItem } from './link';
 import type { LoadProgress } from './loadGLTF';
 import type { WalkState } from './walk';
 import { WalkJoystick } from './WalkJoystick';
-import { EditPanel, useEditAdvisor } from './EditPanel';
+import { EditPanel, useEditAdvisor, type SaveVersionControl } from './EditPanel';
 import { editSnapshot, hasEdits as snapshotHasEdits, saveDesignVersion, savedMessage } from '../lib/design-versions';
 import type { EditState, ItemEdit } from './edits';
 import { RevisedPlanDialog } from './RevisedPlanDialog';
@@ -24,6 +24,7 @@ import { FindingsPanel } from './FindingsPanel';
 import { roomTypeLabel } from './blueprint';
 import { itemKindKey, pipeSizeLabel } from '../lib/kind-colors';
 import type { FindingPinState } from './findings';
+import { qualitySummary } from '../lib/scene-quality';
 import './viewer3d.css';
 
 interface ViewerOptions {
@@ -213,7 +214,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     function fail(reason: unknown) {
       if (!active) return;
       const message = reason instanceof SceneLoadError && reason.status === 404
-        ? '3D model not available for this document'
+        ? reason.detail || '3D model not available for this document'
         : reason instanceof Error ? reason.message : 'Could not load the 3D scene.';
       setError(message);
       setState('error');
@@ -351,12 +352,17 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
   const approximated = manifest !== null && (Boolean(manifest.plan_image)
     || (manifest as { approx?: boolean }).approx === true
     || Object.values(manifest.items).some((item) => (item.props as { approx?: unknown } | null | undefined)?.approx === true));
+  const quality = qualitySummary(manifest?.quality)
   function selectStorey(name: string | null) {
     cancelMove();
     viewerRef.current?.setStorey(name);
     setPicked(null);
   }
 
+  const saveControl: SaveVersionControl = {
+    canSave: hiddenNow > 0 || Object.keys(edits.moveDelta ?? {}).length > 0 || Object.keys(edits.materials).length > 0,
+    busy: saved.busy, message: saved.message, href: saved.href, onSave: () => { cancelMove(); void saveVersion(); },
+  };
   return <section className="viewer3d" aria-label="3D viewer" data-state={state}
     data-highlighted-item-ids={JSON.stringify(highlightState.highlighted)}
     data-linked-selected={highlightState.highlighted.includes(linked.selected ?? '') ? linked.selected : ''}
@@ -434,7 +440,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
           : 'Loading 3D scene…'}
       </p>}
       {state === 'error' && <p className="viewer3d-message" role="alert">{error}</p>}
-      {state === 'ready' && approximated && <p className="viewer3d-approx" data-testid="approx-note">3D approximated from the drawing</p>}
+      {state === 'ready' && approximated && <p className="viewer3d-approx" data-testid="approx-note">3D approximated from the drawing{quality && <span className="viewer3d-quality" data-testid="quality-badge" title={quality}>{quality}</span>}</p>}
       {state === 'ready' && answerKinds.length > 0 && <KindLegend className="kind-legend-3d" kinds={answerKinds} />}
       {picked && <output className="viewer3d-picked-overlay" aria-label="Picked item" aria-live="polite">{picked}</output>}
       {walking && <WalkJoystick onMove={(x, y) => viewerRef.current?.setWalkJoystick(x, y)} />}
@@ -447,8 +453,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       {state === 'ready' && editing && manifest && <EditPanel selected={picked} manifest={manifest} edits={edits}
         moving={moveItem !== null} advice={advice} hidden={hiddenIds}
         onRestore={(ids) => { cancelMove(); finishEdit(viewerRef.current?.restoreItems(ids) ?? null); }}
-        save={{ canSave: hiddenNow > 0 || Object.keys(edits.moveDelta ?? {}).length > 0 || Object.keys(edits.materials).length > 0,
-          busy: saved.busy, message: saved.message, href: saved.href, onSave: () => { cancelMove(); void saveVersion(); } }}
+        save={saveControl}
         onRemove={() => { cancelMove(); if (picked) { finishEdit(viewerRef.current?.removeItem(picked) ?? null); selectItem(null); } }}
         onMove={() => { cancelMove(); if (picked && moveItem !== picked) setMoveItem(picked); }}
         onMaterial={(choice) => { cancelMove(); if (picked) finishEdit(viewerRef.current?.changeMaterial(picked, choice) ?? null); }}
@@ -463,7 +468,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     </div>
   {revisedOpen && (doc_id ?? manifest?.doc_id) && viewerRef.current && <RevisedPlanDialog docId={(doc_id ?? manifest?.doc_id)!} manifest={manifest}
     removed={viewerRef.current.getCommandState().hidden} moved={viewerRef.current.getEditState().moveDelta ?? {}}
-    onClose={() => setRevisedOpen(false)} />}
+    save={saveControl} onClose={() => setRevisedOpen(false)} />}
   </section>;
 }
 

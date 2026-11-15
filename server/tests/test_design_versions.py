@@ -58,6 +58,7 @@ def test_save_creates_linked_version_and_original_is_kept(client):
     # a second save made from version 1 links to it
     v2 = _save(client, removed=[], moved={WINDOW: [1.0, 0.0]}, materials={}, parent=1).json()
     assert v2["n"] == 2 and v2["parent"] == 1 and v2["counts"]["added"] == 1
+    assert v2["change_id"] == f"dv:{DOC}:1-2" and v2["compare_url"] == f"#/compare?change=dv:{DOC}:0-2"  # link: vs the original
     listed = client.get(f"/api/docs/{DOC}/versions").json()["versions"]
     assert [x["n"] for x in listed] == [0, 1, 2] and listed[0]["label"] == "Original" and listed[2]["parent"] == 1
     assert (REAL / DOC / "planmap-2.json").read_bytes() == planmap  # the original is never overwritten
@@ -112,5 +113,9 @@ def test_any_two_versions_and_raster_doc(client):
         pytest.skip("raster artifacts unavailable")
     r = _save(client, doc=RASTER, removed=["door-001"]).json()
     d = client.get(f"/api/changes/{r['change_id']}").json()
-    assert [(c["item_id"], c["tag"], c["type"]) for c in d["changes"]] == [("door-001", "D1", "removed")]
+    scene = json.loads((REAL / RASTER / "scene.json").read_text()) if (REAL / RASTER / "scene.json").is_file() else {}
+    plan = json.loads((REAL / RASTER / "planmap-1.json").read_text())
+    door = next(it for it in plan["items"] if it["item_id"] == "door-001")
+    tag = scene.get("items", {}).get("door-001", {}).get("tag") or door.get("props", {}).get("tag")
+    assert [(c["item_id"], c["tag"], c["type"]) for c in d["changes"]] == [("door-001", tag, "removed")]
     assert json.dumps(d).count("generated_for_demo") == 0

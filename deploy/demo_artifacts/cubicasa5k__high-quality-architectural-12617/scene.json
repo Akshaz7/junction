@@ -60,12 +60,12 @@
     [
      -0.8957,
      0.0,
-     0.8526
+     1.0435
     ],
     [
      -0.2137,
      2.1,
-     1.2139
+     1.4844
     ]
    ],
    "storey": "Floor 1",
@@ -81,12 +81,12 @@
    "usd_name": "i_352868b26d1644da",
    "bbox_m": [
     [
-     -1.1184,
+     -1.3426,
      0.0,
      2.0141
     ],
     [
-     -0.7397,
+     -0.9639,
      2.1,
      2.7233
     ]
@@ -106,12 +106,12 @@
     [
      -0.4592,
      0.0,
-     2.4833
+     2.4719
     ],
     [
      0.4728,
      2.1,
-     2.9916
+     3.0007
     ]
    ],
    "storey": "Floor 1",
@@ -673,12 +673,12 @@
    "usd_name": "i_c79e904e5ce1928f",
    "bbox_m": [
     [
-     -1.3685,
+     -1.7913,
      0.0,
      -2.9143
     ],
     [
-     -0.6592,
+     0.1819,
      2.7,
      -2.5551
     ]
@@ -1089,12 +1089,12 @@
     [
      -1.7913,
      0.9,
-     -2.8938
+     -2.8847
     ],
     [
      0.1819,
      2.1,
-     -2.5938
+     -2.5847
     ]
    ],
    "storey": "Floor 1",
@@ -1112,12 +1112,12 @@
     [
      1.414,
      0.9,
-     -2.8779
+     -2.8802
     ],
     [
      3.3962,
      2.1,
-     -2.5779
+     -2.5802
     ]
    ],
    "storey": "Floor 1",
@@ -1136,9 +1136,6 @@
   "window_sill_m": 0.9,
   "window_head_m": 2.1
  },
- "note": "3D approximated from the drawing",
- "publishable": true,
- "props": {
-  "approx": true
- }
+ "note": "generated for demo: extruded from plan map with default heights; stairs only when the plan map has a stairs item (none from raster plans)",
+ "publishable": true
 }

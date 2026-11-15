@@ -163,10 +163,10 @@ export class WorkspaceApi {
     return data.sources.flatMap((source) => source.docs)
   }
 
-  async createChat(docIds: string[], title: string): Promise<string> {
+  async createChat(docIds: string[], title: string, projectId?: string | null): Promise<string> {
     const response = await this.request('/api/chats', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ doc_ids: docIds, title }),
+      body: JSON.stringify({ doc_ids: docIds, title, ...(projectId ? { project_id: projectId } : {}) }),
     })
     const chat = await response.json() as { id: string }
     return chat.id
@@ -178,7 +178,7 @@ export class WorkspaceApi {
   }
 
   async getChanges(signal?: AbortSignal): Promise<ChangeEntry[]> {
-    if (this.isDemo) return []
+    // The offline demo lists only designs saved in this session (mock API); there are no real revision series.
     const response = await this.request('/api/changes', { signal })
     return ((await response.json()) as { changes: ChangeEntry[] }).changes
   }
@@ -188,6 +188,11 @@ export class WorkspaceApi {
     const data = await response.json() as Comparison
     if (!data.image || !data.v1 || !data.v2 || !Array.isArray(data.changes)) throw new Error('Comparison images are not available for this change.')
     return data
+  }
+
+  /** Any JSON GET through this client (the offline demo answers from the mock API). */
+  async fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+    return (await this.request(path, { signal })).json() as Promise<T>
   }
 
   async getDocument(docId: string): Promise<Document> {

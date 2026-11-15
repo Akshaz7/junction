@@ -1,0 +1,290 @@
+{
+ "created_at": "2026-11-15T01:46:20.572595+02:00",
+ "branch": "final/honest",
+ "code_commit": "69a52439be2e91d68afc475a34351a97cf242c6e",
+ "tests": {
+  "passed": 318,
+  "failed": 0,
+  "elapsed_s": 10.45,
+  "command": "scripts/heavy.sh env MODELS_FAKE=1 <python> -m pytest engine/tests/{test_honesty,test_readdraw,test_answer,test_reader,test_slab_by_type,test_scales,test_rastersanity,test_order,test_wallarea,test_mep,test_analytics,test_units,test_props,test_solvers,test_solvers_e19,test_fix6}.py -q",
+  "new_honesty_regressions": 37,
+  "slab_source_cases": 12,
+  "slab_source_schemas": [
+   "IFC2X3",
+   "IFC4",
+   "IFC4X3"
+  ],
+  "slab_source_units": [
+   "metre",
+   "foot"
+  ]
+ },
+ "sample200": {
+  "mode": "MODELS_FAKE=1; numeric scoring, text unscored",
+  "before": {
+   "n": 200,
+   "correct": 138,
+   "wrong": 48,
+   "abstained": 1,
+   "unscored": 13,
+   "error": 0,
+   "accuracy": 0.738,
+   "answered_accuracy": 0.7419,
+   "cost_usd_total": 0.0,
+   "cost_usd_per_answer": 0.0,
+   "latency_ms_mean": 49,
+   "latency_ms_p95": 223
+  },
+  "after": {
+   "n": 200,
+   "correct": 138,
+   "wrong": 30,
+   "abstained": 19,
+   "unscored": 13,
+   "error": 0,
+   "accuracy": 0.738,
+   "answered_accuracy": 0.8214,
+   "cost_usd_total": 0.0,
+   "cost_usd_per_answer": 0.0,
+   "latency_ms_mean": 40,
+   "latency_ms_p95": 121
+  },
+  "correct_to_wrong_or_abstained": []
+ },
+ "judge_replay": {
+  "cases": 54,
+  "files": 6,
+  "source": "Exact uploaded doc metadata, plan maps, text, ingest state and page images mirrored read-only through the production GET API into local .honest-replay; no ingest/source changes.",
+  "before": "Original production report plus local fake-model baseline.",
+  "after": "Local engine with real models and then identical cached calls; EXPLAIN=0.",
+  "flagged_cases": 13,
+  "passed_safety_checks": 13,
+  "cases_detail": [
+   {
+    "file": "dxf_northstar",
+    "q": "floor_area",
+    "original_verdict": "fail",
+    "safety_check": "pass",
+    "answer": {
+     "text_md": "**Floor area cannot be measured from this sheet.** No room boundaries or room-area table are recorded; an equipment drawing or site outline is not a floor plan.",
+     "value": null,
+     "unit": null,
+     "confidence": 0.0,
+     "abstained": true
+    }
+   },
+   {
+    "file": "dxf_northstar",
+    "q": "trick",
+    "original_verdict": "fail",
+    "safety_check": "pass",
+    "answer": {
+     "text_md": "**The requested door fire rating is not recorded in this drawing.**",
+     "value": null,
+     "unit": null,
+     "confidence": 0.0,
+     "abstained": true
+    }
+   },
+   {
+    "file": "mep_hvac_m003",
+    "q": "floor_area",
+    "original_verdict": "inconsistent",
+    "safety_check": "pass",
+    "answer": {
+     "text_md": "The model has no area data for rooms, so I cannot give a figure.",
+     "value": null,
+     "unit": null,
+     "confidence": 0.0,
+     "abstained": true
+    }
+   },
+   {
+    "file": "mep_hvac_m003",
+    "q": "baseboard",
+    "original_verdict": "fail",
+    "safety_check": "pass",
+    "answer": {
+     "text_md": "I couldn't find that on this sheet: no matching tags or table rows. Check the legend or ask with the tag (for example FP-1).",
+     "value": null,
+     "unit": null,
+     "confidence": 0.0,
+     "abstained": true
+    }
+   },
+   {
+    "file": "mep_hvac_m003",
+    "q": "pipe_duct",
+    "original_verdict": "fail",
+    "safety_check": "pass",
+    "answer": {
+     "text_md": "**The ducts and pipes cannot be measured from this sheet.** No measured duct and pipe runs are indexed; this does not establish that none are drawn.",
+     "value": null,
+     "unit": null,
+     "confidence": 0.0,
+     "abstained": true
+    }
+   },
+   {
+    "file": "mep_hvac_m003",
+    "q": "trick",
+    "original_verdict": "fail",
+    "safety_check": "pass",
+    "answer": {
+     "text_md": "**The requested door fire rating is not recorded in this drawing.**",
+     "value": null,
+     "unit": null,
+     "confidence": 0.0,
+     "abstained": true
+    }
+   },
+   {
+    "file": "pdf_base_plan",
+    "q": "baseboard",
+    "original_verdict": "likely wrong",
+    "safety_check": "pass",
+    "answer": {
+     "text_md": "**Baseboard length cannot be measured reliably from this sheet.** Room detection boxes are not wall boundaries and can overlap; measured room outlines are needed.",
+     "value": null,
+     "unit": null,
+     "confidence": 0.0,
+     "abstained": true
+    }
+   },
+   {
+    "file": "pdf_base_plan",
+    "q": "slab",
+    "original_verdict": "wrong framing",
+    "safety_check": "pass",
+    "answer": {
+     "text_md": "**Slab area by thickness is not recorded in this drawing.** Room floor areas do not establish slab thicknesses or slab areas.",
+     "value": null,
+     "unit": null,
+     "confidence": 0.0,
+     "abstained": true
+    }
+   },
+   {
+    "file": "pdf_base_plan",
+    "q": "trick",
+    "original_verdict": "fail",
+    "safety_check": "pass",
+    "answer": {
+     "text_md": "**The requested door fire rating is not recorded in this drawing.**",
+     "value": null,
+     "unit": null,
+     "confidence": 0.0,
+     "abstained": true
+    }
+   },
+   {
+    "file": "scan_finna",
+    "q": "floor_area",
+    "original_verdict": "wrong reason",
+    "safety_check": "pass",
+    "answer": {
+     "text_md": "The model has no area data for rooms, so I cannot give a figure.",
+     "value": null,
+     "unit": null,
+     "confidence": 0.0,
+     "abstained": true
+    }
+   },
+   {
+    "file": "scan_finna",
+    "q": "slab",
+    "original_verdict": "wrong framing",
+    "safety_check": "pass",
+    "answer": {
+     "text_md": "**Slab area by thickness is not recorded in this drawing.** Room floor areas do not establish slab thicknesses or slab areas.",
+     "value": null,
+     "unit": null,
+     "confidence": 0.0,
+     "abstained": true
+    }
+   },
+   {
+    "file": "scan_habs",
+    "q": "floor_area",
+    "original_verdict": "fail",
+    "safety_check": "pass",
+    "answer": {
+     "text_md": "**Floor area cannot be measured from this sheet.** No room boundaries or room-area table are recorded; an equipment drawing or site outline is not a floor plan.",
+     "value": null,
+     "unit": null,
+     "confidence": 0.0,
+     "abstained": true
+    }
+   },
+   {
+    "file": "scan_habs",
+    "q": "trick",
+    "original_verdict": "fail",
+    "safety_check": "pass",
+    "answer": {
+     "text_md": "**The requested door fire rating is not recorded in this drawing.**",
+     "value": null,
+     "unit": null,
+     "confidence": 0.0,
+     "abstained": true
+    }
+   }
+  ],
+  "grading_limit": "Safety checks are not a new ground-truth accuracy score. Existing suspect door/window counts remain unverified.",
+  "wall_area_estimate_cases": [
+   {
+    "file": "mep_hvac_m003",
+    "value": 546.848967,
+    "unit": "m\u00b2",
+    "confidence": {
+     "label": "Estimate",
+     "pct": 60,
+     "reason": "2D lengths \u00d7 stated/printed/assumed heights; source accuracy and undetected openings are unquantified. Percentage is an evidence score, not an error bound.",
+     "improve": "Check heights, openings, exterior flags and room boundaries against the source."
+    }
+   },
+   {
+    "file": "pdf_base_plan",
+    "value": 314.105656,
+    "unit": "m\u00b2",
+    "confidence": {
+     "label": "Estimate",
+     "pct": 60,
+     "reason": "2D lengths \u00d7 stated/printed/assumed heights; source accuracy and undetected openings are unquantified. Percentage is an evidence score, not an error bound.",
+     "improve": "Check heights, openings, exterior flags and room boundaries against the source."
+    }
+   },
+   {
+    "file": "scan_finna",
+    "value": 1357.261859,
+    "unit": "m\u00b2",
+    "confidence": {
+     "label": "Estimate",
+     "pct": 60,
+     "reason": "2D lengths \u00d7 stated/printed/assumed heights; source accuracy and undetected openings are unquantified. Percentage is an evidence score, not an error bound.",
+     "improve": "Check heights, openings, exterior flags and room boundaries against the source."
+    }
+   }
+  ]
+ },
+ "cost": {
+  "all_task_logged_live_usd": 0.316524,
+  "first_live_replay_model_calls_usd": 0.305448,
+  "cached_final_replay_usd": 0.0,
+  "budget_usd": 3.0,
+  "note": "All paid calls counted from local model log, including calls discarded before the final answer."
+ },
+ "blind_validation": {
+  "random_unseen_doc": "ifc_models__resbim-469-model",
+  "selected_before_development": true,
+  "pool": "existing IFC artifacts excluding heldout_docs; contents not opened until final validation"
+ },
+ "needs_awais": "Populate engine.honesty.pdf_mep_lengths(doc_id: str, root: Path) -> list[dict] via mep-lengths.json runs: item_id, kind duct|pipe, length_m, page, bbox_px, source=pdf_mep. Use calibrated pipeline.pdf_mep.ducts output; no PDF extraction was modified. Without runs, duct length explicitly abstains.",
+ "limitations": [
+  "The 33 MB uploaded IFC still has its original 15 MB ingest failure; all nine queries report the processing failure. No ingest code changed.",
+  "Mixed-view Finna and HVAC door/window counts have no ground truth and were not corrected by this measurement-honesty row.",
+  "The fit-plan baseboard total is withheld, not replaced by the unverified approximately 48 m suite-perimeter guess.",
+  "2D wall surfaces are estimates from detected lengths, stated/printed/assumed heights and deducted detected openings; scale and completeness remain uncertain."
+ ],
+ "cross_file": []
+}

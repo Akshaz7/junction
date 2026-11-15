@@ -1,0 +1,100 @@
+{
+  "project": {
+    "id": "kg-answer-ifc_bench__sixty5-str",
+    "docs": [
+      {
+        "doc_id": "ifc_bench__sixty5-str"
+      }
+    ]
+  },
+  "questions": [
+    {
+      "question": "What is connected to wall Basic Wall:22_WA_AT_ihw beton_250 (C35/45):588429?",
+      "doc_id": "ifc_bench__sixty5-str",
+      "expect": {
+        "shape": "connections",
+        "required_source_item_ids": []
+      },
+      "truth": "IFC fills/voids and space-boundary relationships; type/material associations are additional connections"
+    },
+    {
+      "question": "If wall Basic Wall:22_WA_AT_ihw beton_250 (C35/45):588429 moves, what is affected?",
+      "doc_id": "ifc_bench__sixty5-str",
+      "expect": {
+        "shape": "either",
+        "required_source_item_ids": []
+      },
+      "truth": "IFC host openings and bounded spaces"
+    },
+    {
+      "question": "Where else does wall Basic Wall:22_WA_AT_ihw beton_250 (C35/45):588429 appear?",
+      "doc_id": "ifc_bench__sixty5-str",
+      "expect": {
+        "shape": "missing"
+      },
+      "truth": "IFC GlobalId in the counterpart index"
+    },
+    {
+      "question": "What is connected to wall Basic Wall:22_WA_AT_ihw beton_300 (C35/45):589012?",
+      "doc_id": "ifc_bench__sixty5-str",
+      "expect": {
+        "shape": "connections",
+        "required_source_item_ids": []
+      },
+      "truth": "IFC fills/voids and space-boundary relationships; type/material associations are additional connections"
+    },
+    {
+      "question": "If wall Basic Wall:22_WA_AT_ihw beton_300 (C35/45):589012 moves, what is affected?",
+      "doc_id": "ifc_bench__sixty5-str",
+      "expect": {
+        "shape": "either",
+        "required_source_item_ids": []
+      },
+      "truth": "IFC host openings and bounded spaces"
+    },
+    {
+      "question": "Where else does wall Basic Wall:22_WA_AT_ihw beton_300 (C35/45):589012 appear?",
+      "doc_id": "ifc_bench__sixty5-str",
+      "expect": {
+        "shape": "missing"
+      },
+      "truth": "IFC GlobalId in the counterpart index"
+    },
+    {
+      "question": "What is connected to wall Basic Wall:22_WA_AT_ihw beton_200 (C25/30):625562?",
+      "doc_id": "ifc_bench__sixty5-str",
+      "expect": {
+        "shape": "connections",
+        "required_source_item_ids": []
+      },
+      "truth": "IFC fills/voids and space-boundary relationships; type/material associations are additional connections"
+    },
+    {
+      "question": "If wall Basic Wall:22_WA_AT_ihw beton_200 (C25/30):625562 moves, what is affected?",
+      "doc_id": "ifc_bench__sixty5-str",
+      "expect": {
+        "shape": "either",
+        "required_source_item_ids": []
+      },
+      "truth": "IFC host openings and bounded spaces"
+    },
+    {
+      "question": "Where else does wall Basic Wall:22_WA_AT_ihw beton_200 (C25/30):625562 appear?",
+      "doc_id": "ifc_bench__sixty5-str",
+      "expect": {
+        "shape": "missing"
+      },
+      "truth": "IFC GlobalId in the counterpart index"
+    },
+    {
+      "question": "Do the drawings agree on doors on the ground floor?",
+      "doc_id": "ifc_bench__sixty5-str",
+      "expect": {
+        "shape": "missing"
+      },
+      "truth": "One source document has no cross-file comparison"
+    }
+  ],
+  "source_schema": "IFC2X3",
+  "source_file": "ifc_bench/sixty5_str.ifc"
+}

@@ -59,3 +59,31 @@ def test_page_adapter_handles_database_json_string_files(tmp_path, monkeypatch):
     monkeypatch.setattr(routes.docmeta_store, 'source_file', lambda record: None if isinstance(record['files'], dict) else (_ for _ in ()).throw(TypeError()))
     page=routes._load_sheet({'doc_id':'source','files':'{"pdf":"source.pdf"}'},1)
     assert page['words'][0]['bbox_px']==[10,10,30,20]
+
+
+@pytest.mark.parametrize('case, expected', [('dimension', .01), ('conflict', None), ('prior', None)])
+def test_page_adapter_uses_common_scale_policy(tmp_path, monkeypatch, case, expected):
+    import json
+    from PIL import Image
+    from engine.scale_proof import candidate, operand
+    monkeypatch.setattr(routes.config, 'artifacts_dir', lambda: tmp_path)
+    monkeypatch.setattr(routes.docmeta_store, 'source_file', lambda record: 'generated-for-demo.pdf')
+    # A native PDF ratio must not override ambiguous or estimated plan-map scale.
+    monkeypatch.setattr('engine.sheet_align.load_pdf_page', lambda *args: {'words': [], 'm_per_px': .2})
+    folder = tmp_path / 'generated-for-demo'; folder.mkdir()
+    Image.new('RGB', (100, 80), 'white').save(folder / 'page-1.png')
+    scale = {'method': 'door-prior', 'm_per_px': .02}
+    items = []
+    if case == 'dimension':
+        items = [{'kind': 'dimension', 'label': '900 mm', 'bbox_px': [0, 0, 90, 20],
+                  'props': {'dimension_line_px': [[0, 0], [90, 0]]}}]
+    elif case == 'conflict':
+        scale = {'method': 'dimension', 'm_per_px': .01, 'candidates': [
+            candidate(method, value, 'recorded candidate', [operand('recorded reading', value, 'm/px', {'definition': 'generated for demo'})])
+            for method, value in [('dimension', .01), ('ratio-dpi', .02)]]}
+    (folder / 'planmap-1.json').write_text(json.dumps({'items': items, 'scale': scale}))
+    result = routes._load_sheet({'doc_id': folder.name}, 1)
+    if expected is None:
+        assert 'm_per_px' not in result
+    else:
+        assert result['m_per_px'] == pytest.approx(expected)

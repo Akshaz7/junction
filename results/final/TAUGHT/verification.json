@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-11-15T01:15:59.833693+02:00",
+  "engine_tests": 84,
+  "server_markup_and_file_tests": 38,
+  "scene_geometry_tests": 3,
+  "web_unit_tests": 6,
+  "browser_tests": 1,
+  "browser_seconds": 6.5,
+  "typescript": "PASS",
+  "production_build": "PASS",
+  "real_sources": 4,
+  "live_model_calls": 0,
+  "live_spend_usd": 0,
+  "notes": [
+    "Legacy find-all records remain stored but are never projected into standard items.",
+    "No matching or propagation occurs when saving a manual selection.",
+    "New IFC geometry is a labelled footprint only when the source supplies a pixel-to-model projection.",
+    "Missing scale, room outlines or projection is reported; unplaced items remain saved in 2D.",
+    "Browser exercise used the real ventilation sheet. Unit geometry fixtures are generated for demo."
+  ]
+}

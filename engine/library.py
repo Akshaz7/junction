@@ -187,6 +187,14 @@ def sheet_count_answer(question, doc_ids=(), root=None, records=None):
     pdfs = [d for d in docs if str(d.get("kind", "")).lower() == "pdf" or "pdf" in (d.get("formats") or [])]
     if pdfs:
         docs = pdfs
+    if len(docs) > 1 and not doc_ids:
+        # Preserve issue qualifiers such as "pricing" or "permit" when several
+        # sets share a project name. A tie remains ambiguous.
+        from engine.project_index import tokenize
+        terms = set(tokenize(question)) - {"sheet", "page", "set"}
+        scores = [len(terms & set(tokenize(d.get("title") or ""))) for d in docs]
+        top = max(scores, default=0)
+        docs = [d for d, score in zip(docs, scores) if score == top]
     if len(docs) != 1:
         return None
     d = docs[0]
@@ -197,8 +205,10 @@ def sheet_count_answer(question, doc_ids=(), root=None, records=None):
         return _result(question, "The document metadata does not state a sheet count. Select the drawing set PDF to count its pages.", abstained=True)
     c = {"n": 1, "doc_id": d["doc_id"], "page": 1, "kind": "text", "bbox_px": None, "item_ids": [],
          "quote": f"Document metadata: {n} pages"}
-    return _result(question, f"**{d.get('title') or d['doc_id']} has {n} {'page' if n == 1 else 'pages'}** in this file. [1]",
-                   docs=[d["doc_id"]], value=n, unit="pages", cites=[c])
+    res = _result(question, f"**{d.get('title') or d['doc_id']} has {n} {'page' if n == 1 else 'pages'}** in this file. [1]",
+                  docs=[d["doc_id"]], value=n, unit="pages", cites=[c])
+    from engine.calc_inventory import metadata
+    return metadata(res, [d], pages=True)
 
 
 def library_answer(question: str, root=None, records=None) -> dict | None:
@@ -212,10 +222,14 @@ def library_answer(question: str, root=None, records=None) -> dict | None:
         text = f"**{len(found)} documents have IFC models:**"
         cites = []
         for n, d in enumerate(found, 1):
-            text += f"\n- {d.get('project') or d.get('title') or d['doc_id']} (`{d['doc_id']}`). [{n}]"
+            title = str(d.get('project') or d.get('title') or "Untitled model")
+            title = re.sub(r"(?<=[a-z])(?=[A-Z])", " ", title).replace("_", " ")
+            text += f"\n- {title}. [{n}]"
             cites.append({"n": n, "doc_id": d["doc_id"], "page": 1, "kind": "text", "bbox_px": None,
                           "item_ids": [], "quote": f"{d.get('title') or d['doc_id']} — IFC file in document metadata"})
-        return _result(question, text, docs=[d["doc_id"] for d in found], value=len(found), unit="documents", cites=cites)
+        res = _result(question, text, docs=[d["doc_id"] for d in found], value=len(found), unit="documents", cites=cites)
+        from engine.calc_inventory import metadata
+        return metadata(res, found)
     n = len(docs)
     proc = [d for d in docs if d.get("mode")]
     by_src = Counter(d.get("source") or "other" for d in docs)
@@ -230,7 +244,9 @@ def library_answer(question: str, root=None, records=None) -> dict | None:
         text += (f" Structured data is indexed for **{len(proc):,}** ({by_mode.get('planmap', 0):,} plan maps, "
                  f"{by_mode.get('ifc', 0):,} IFC models). Other documents may still be processing or awaiting indexing.")
     text += f"\n\nBy source: {src}.\n\nBy type: {kinds}."
-    return _result(question, text, value=len(proc) if asks_processed else n, unit="documents")
+    res = _result(question, text, value=len(proc) if asks_processed else n, unit="documents")
+    from engine.calc_inventory import metadata
+    return metadata(res, proc if asks_processed else docs)
 
 
 def library_search_answer(question, root=None, records=None):
@@ -294,6 +310,8 @@ def drawing_selection_answer(question, root=None, history=None, records=None):
 def reader_partial(question, doc_ids, session, trace, calls, t0):
     """A reader can publish this after each tool: verbatim findings, with its registered evidence only."""
     cites, lines, boxes, ids = [], [], [], []
+    seen_ids = set()
+    scene_doc = None
     for evidence in list(session.ev.values())[-6:]:
         if not evidence.quote:
             continue
@@ -302,15 +320,20 @@ def reader_partial(question, doc_ids, session, trace, calls, t0):
                       "kind": "text" if evidence.kind in ("text", "row") else "element" if evidence.kind == "element" else "region",
                       "bbox_px": evidence.bbox_px, "item_ids": list(evidence.item_ids), "quote": evidence.quote})
         lines.append(f"- {evidence.quote} [{n}]")
-        ids.extend(i for i in evidence.item_ids if i not in ids)
+        if scene_doc is None:
+            scene_doc = evidence.doc_id
+        for iid in evidence.item_ids:
+            if evidence.doc_id == scene_doc and iid not in seen_ids:
+                ids.append(iid)
+                seen_ids.add(iid)
         if evidence.bbox_px:
             boxes.append({"item_id": evidence.item_ids[0] if evidence.item_ids else evidence.ref, "page": evidence.page,
                           "bbox_px": evidence.bbox_px, "label": str(n)})
-    text = "Reader findings so far (not yet a complete answer):\n" + "\n".join(lines) if lines else "No verified findings are available yet."
+    text = "**Findings so far — still checking.**\n\n" + "\n".join(lines) if lines else "No verified findings are available yet."
     ans = _result(question, text, docs=doc_ids, abstained=not cites, cites=cites, step="read")
     ans["answer"]["confidence"] = 0.3 if cites else 0.0
     ans["evidence"]["boxes"] = boxes
-    ans["evidence"]["scene"] = {"doc_id": cites[0]["doc_id"] if cites else (doc_ids[0] if doc_ids else ""),
+    ans["evidence"]["scene"] = {"doc_id": scene_doc or (doc_ids[0] if doc_ids else ""),
                                  "highlight_item_ids": ids, "camera_target_item_id": ids[0] if ids else None}
     ans["trace"] = list(trace)
     ans["route"] = "hybrid"

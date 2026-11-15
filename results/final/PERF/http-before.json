@@ -1,0 +1,143 @@
+{
+  "phase": "before",
+  "models": "fake",
+  "timestamp": "2026-11-14T22:11:25+0200",
+  "stack": "Loopback Uvicorn, real chats router, isolated local Postgres schema, real artifact indexes",
+  "ingestion": "Already converted; skipped; background restore disabled for read-only shared artifacts",
+  "answers": [
+    {
+      "doc_ids": [
+        "ifc_bench__sixty5-arc"
+      ],
+      "question": "How many doors are in this model?",
+      "events": [
+        {
+          "kind": "status",
+          "ms": 10.199
+        },
+        {
+          "kind": "status",
+          "ms": 226.091
+        },
+        {
+          "kind": "trace",
+          "ms": 2708.092
+        },
+        {
+          "kind": "status",
+          "ms": 2708.107
+        },
+        {
+          "kind": "trace",
+          "ms": 2892.407
+        },
+        {
+          "kind": "trace",
+          "ms": 2892.423
+        },
+        {
+          "kind": "answer",
+          "ms": 3338.849
+        }
+      ],
+      "first_status_ms": 10.199,
+      "first_answer_text_ms": null,
+      "final_ms": 3338.849,
+      "value": 1049,
+      "cost": {
+        "usd_total": 0,
+        "calls": []
+      },
+      "latency_ms": 2660,
+      "citation_count": 17,
+      "text_md": "There are **1049 doors** in this model. [1][2][3][4][5][6][7][8][9][10][11][12][13][14][15][16][17]"
+    },
+    {
+      "doc_ids": [
+        "ifc_bench__sixty5-plumbing"
+      ],
+      "question": "How many pipes are in this model?",
+      "events": [
+        {
+          "kind": "status",
+          "ms": 1.859
+        },
+        {
+          "kind": "status",
+          "ms": 115.081
+        },
+        {
+          "kind": "status",
+          "ms": 408.123
+        },
+        {
+          "kind": "trace",
+          "ms": 408.144
+        },
+        {
+          "kind": "trace",
+          "ms": 408.154
+        },
+        {
+          "kind": "answer",
+          "ms": 1569.212
+        }
+      ],
+      "first_status_ms": 1.859,
+      "first_answer_text_ms": null,
+      "final_ms": 1569.212,
+      "value": 7898.0,
+      "cost": {
+        "usd_total": 0.0,
+        "calls": []
+      },
+      "latency_ms": 286,
+      "citation_count": 1,
+      "text_md": "**7,898.0 m of pipe** in **10957 segments**; longest sizes: DN16 2,667.9 m, DN75 1,023.6 m, DN20 971.6 m, DN110 690.0 m. [1] Shown in 3D: the piping model has no 2D plan, so the same pipes glow in the 3D view."
+    },
+    {
+      "doc_ids": [
+        "ifc_bench__sixty5-arc",
+        "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3",
+        "ifc_bench__sixty5-plumbing",
+        "ifc_bench__sixty5-electrical",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000",
+        "ifc_bench__sixty5-ventilation",
+        "ifc_models__bsc-clinic-clinic-plumbing",
+        "opening_design__ctr-models-cad-ifc-ctr-ctr-ctr-1st-phase-shell",
+        "ifc_models__bsc-molio-molio-with-uris",
+        "ifc_bench__molio-arc"
+      ],
+      "question": "How many doors are there across all models?",
+      "events": [
+        {
+          "kind": "status",
+          "ms": 1.612
+        },
+        {
+          "kind": "status",
+          "ms": 124.607
+        },
+        {
+          "kind": "trace",
+          "ms": 692.35
+        },
+        {
+          "kind": "answer",
+          "ms": 938.22
+        }
+      ],
+      "first_status_ms": 1.612,
+      "first_answer_text_ms": null,
+      "final_ms": 938.22,
+      "value": 1346,
+      "cost": {
+        "usd_total": 0.0,
+        "calls": []
+      },
+      "latency_ms": 567,
+      "citation_count": 43,
+      "text_md": "**1346 doors in total** across the 10 selected models. ifc_bench__sixty5-arc: 1049 [1][2][3][4][5][6][7][8][9][10][11][12][13][14][15][16][17]; ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3: 0 [18]; ifc_bench__sixty5-plumbing: 0 [19]; ifc_bench__sixty5-electrical: 0 [20]; ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000: 0 [21]; ifc_bench__sixty5-ventilation: 0 [22]; ifc_models__bsc-clinic-clinic-plumbing: 0 [23]; opening_design__ctr-models-cad-ifc-ctr-ctr-ctr-1st-phase-shell: 59 [24][25][26][27]; ifc_models__bsc-molio-molio-with-uris: 119 [28][29][30][31][32][33][34][35]; ifc_bench__molio-arc: 119 [36][37][38][39][40][41][42][43]."
+    }
+  ]
+}

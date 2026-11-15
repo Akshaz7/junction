@@ -36,7 +36,8 @@ def test_migrations_seed_and_docs(schema_url, tmp_path):
         await c.close()
         return first, second, tables, n, n2
     first, second, tables, n, n2 = asyncio.run(prep())
-    assert first == ["001_init.sql", "002_notify.sql", "003_scene_edits.sql", "004_skills_automations.sql", "005_doc_artifacts.sql", "006_design_versions.sql"] and second == []
+    assert first == ["001_init.sql", "002_notify.sql", "003_scene_edits.sql", "004_skills_automations.sql", "005_doc_artifacts.sql", "006_design_versions.sql", "007_projects.sql",
+                     "008_scene_edit_moves.sql"] and second == []
     assert TABLES <= tables
     assert n == n2 == 3
 

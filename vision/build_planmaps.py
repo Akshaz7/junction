@@ -92,10 +92,12 @@ def run(doc_ids, stages=("seg", "merged"), out_root=None):
             wall_frac = sum((i["bbox_px"][2] - i["bbox_px"][0]) * (i["bbox_px"][3] - i["bbox_px"][1]) for i in seg_walls) / (W * H)
             use_det_walls = wall_frac < P.PARAMS["seg_wall_min_frac"]  # UNet fails on scans/hand-drawn plans
             keep = ([] if use_det_walls else seg_walls) + [i for i in d_items if i["kind"] != "wall" or use_det_walls]
-            keep = VF.free_pass(keep, W, H)  # V-09 free pass: duplicate merge + confidence cut
+            extraction_trace = {}
+            keep = VF.free_pass(keep, W, H, diagnostics=extraction_trace)  # V-09 free pass: duplicate merge + confidence cut
             timing[d]["walls_from"] = "det" if use_det_walls else "seg"
             pm = P.assemble(d, W, H, keep + room_list + text_items, {**models, "det": infer.OfficialModel.NAME, "ocr": "rapidocr-onnxruntime"},
                             s_ms + d_ms + ocr_ms + rooms_ms, scale=scale)
+            pm['provenance']['extraction'] = extraction_trace
             (dd / "planmap-1.json").write_text(json.dumps(pm))
             timing[d]["det_ms"] = round(d_ms, 1)
             timing[d]["ocr_ms"] = round(ocr_ms, 1)

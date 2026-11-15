@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
+from engine.reader.cache import memoized_document
 
 
 @dataclass
@@ -22,6 +23,7 @@ class Item:
     source: str = ""
     bbox_m: list | None = None                  # IFC only: [[minx,miny,minz],[maxx,maxy,maxz]], y up
     polygon_px: list | None = None              # plan map only
+    scale_adjustment: dict = field(default_factory=dict)  # runtime quantities, never persisted over the source
 
 
 @dataclass
@@ -60,12 +62,29 @@ def dedupe_openings(items: list, thr: float = 0.3) -> list:
     drop = set()
     for d in ds:
         for w in ws:
+            if d.props.get('confirmed_by_user') or w.props.get('confirmed_by_user'):
+                continue
             if d.page == w.page and id(d) not in drop and id(w) not in drop and _iou(d.bbox_px, w.bbox_px) > thr:
                 drop.add(id(w if d.conf >= w.conf else d))
     return [i for i in items if id(i) not in drop] if drop else items
 
 
+@memoized_document
 def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
+    """A missing, incomplete or corrupt index is unavailable, never a zero count.
+
+    Upload workers can be interrupted during writes. Callers already handle None
+    as missing evidence; do not let a damaged sidecar crash the first question.
+    """
+    if not doc_id or Path(doc_id).name != doc_id or doc_id in {".", ".."}:
+        return None
+    try:
+        return _load_doc(doc_id, root, prefer)
+    except (OSError, ValueError, TypeError, KeyError, AttributeError, OverflowError):
+        return None
+
+
+def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
     d = Path(root) / doc_id
     if not d.is_dir():
         return None
@@ -78,49 +97,101 @@ def load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
         items = [
             Item(item_id=x["item_id"], kind=x.get("kind") or "other", page=1,
                  storey=(x.get("storey") or {}).get("name"), q=x.get("quantities") or {},
-                 props={**(x.get("props") or {}), "ifc_class": x.get("ifc_class"), "predefined_type": x.get("predefined_type")},
+                 props={**(x.get("props") or {}), "ifc_class": x.get("ifc_class"), "predefined_type": x.get("predefined_type"),
+                        "quantity_source": x.get("quantity_source") or {}},
                  name=x.get("name"), type_name=x.get("type_name"), source="ifc", bbox_m=x.get("bbox_m"))
             for x in e["elements"]
         ]
         # D-07 storey plans: one page per storey. Give each element its page and pixel box so answers can draw 2D boxes.
         placed = {}
+        manual = {}
         for p in pms:
             m = _json(p)
             for x in m.get("items", []):
                 if x.get("bbox_px"):
-                    placed[x["item_id"]] = (m.get("page", 1), x["bbox_px"])
+                    placed[x["item_id"]] = (m.get("page", 1), x["bbox_px"], x.get('polygon_px'))
+                if (x.get('props') or {}).get('confirmed_by_user'):
+                    manual[x['item_id']] = (m.get('page', 1), x)
         for it in items:
             if it.item_id in placed:
-                it.page, it.bbox_px = placed[it.item_id]
-        return Doc(doc_id, "ifc", items, title, e.get("storeys") or [], meta=e.get("building") or {})
+                it.page, it.bbox_px, it.polygon_px = placed[it.item_id]
+            if it.item_id in manual:
+                it.props.update(manual[it.item_id][1].get('props') or {})
+        existing = {it.item_id for it in items}
+        for iid, (page, x) in manual.items():
+            if iid not in existing:
+                # Same-kind overlap links a marked plan box to its IFC identity too.
+                target = next((it for it in items if it.kind == x['kind'] and it.page == page
+                               and it.bbox_px and _iou(it.bbox_px, x['bbox_px']) >= .5), None)
+                if target:
+                    labels = x['props'].get('user_labels', [])
+                    target.props.setdefault('user_labels', []).extend(labels)
+                    target.props['confirmed_by_user'] = True
+                    target.props['linked_item_ids'] = [target.item_id, iid]
+                else:
+                    items.append(Item(iid, x['kind'], label=x.get('label'), page=page, bbox_px=x.get('bbox_px'),
+                                      props=x.get('props') or {}, source='taught', conf=1.0))
+        return Doc(doc_id, "ifc", items, title, e.get("storeys") or [], meta={**(e.get("building") or {}), "unit_provenance": e.get("unit_provenance")})
     if pms:
-        items, scale = [], None
+        items, scale, page_scales = [], None, {}
         for p in pms:
             m = _json(p)
-            scale = scale or m.get("scale")
+            from engine.scales import apply_item_scales
+            from pipeline.scale_regions import annotate_cached
+            if meta.get("kind") in ("raster", "dxf", "dwg"):
+                m = annotate_cached(m, d)
+            page_scale = m.get("scale")
+            page_start = len(items)
             for x in m["items"]:
                 pr = x.get("props") or {}
                 q = {}
-                for ak in ("area_m2", "area_m2_label", "area_m2_geom"):   # printed label area wins over polygon area
+                for ak in ("area_m2_label", "area_m2", "area_m2_geom"):   # printed label area wins over polygon area
                     if pr.get(ak) is not None:
                         q["area_m2"] = pr[ak]
                         break
-                for k in ("width_m", "height_m", "length_m"):
+                for k in ("width_m", "height_m", "length_m", "perimeter_m", "net_skirting_length_m", "thickness_m", "depth_m"):
                     if pr.get(k) is not None:
                         q[k] = pr[k]
                 items.append(Item(item_id=x["item_id"], kind=x["kind"], label=x.get("label"), page=m.get("page", 1),
                                   bbox_px=x.get("bbox_px"), polygon_px=x.get("polygon_px"), conf=float(x.get("conf") or 0), q=q, props=pr,
                                   source=x.get("source", "")))
+            apply_item_scales(items[page_start:], m)
+            regional = any("measurement_scale" in i.props for i in items[page_start:])   # per-view scales already applied
+            original_quantities = [dict(it.q) for it in items[page_start:]]
+            try:   # Refine each page independently; sheets can have different scales.
+                if regional:
+                    raise RuntimeError('regional scales')
+                from engine import scale_text
+                page_number = m.get("page", 1)
+                better = scale_text.refine_scale(d, page_number, page_scale)
+                if better:
+                    scale_text.rescale_items(items[page_start:], (page_scale or {}).get("m_per_px"), better["m_per_px"])
+                    page_scale = {**better, "replaced": (page_scale or {}).get("method")}
+            except Exception:  # noqa: BLE001 - never block a document on scale reading
+                pass
+            from engine.scale_policy import choose
+            selected_scale = page_scale if regional else choose(m, d, effective_scale=page_scale)
+            old_mpp = (page_scale or {}).get("m_per_px")
+            new_mpp = selected_scale.get("m_per_px")
+            if new_mpp and new_mpp != old_mpp:
+                from engine.scale_text import rescale_items
+                rescale_items(items[page_start:], old_mpp, new_mpp)
+            elif not new_mpp and old_mpp:
+                # An ambiguous global scale cannot support dimensional values.
+                for it in items[page_start:]:
+                    for key in ("area_m2", "width_m", "height_m", "length_m"):
+                        if key != "area_m2" or it.props.get("area_m2_label") is None:
+                            it.q.pop(key, None)
+            page_scale = selected_scale
+            for it, original in zip(items[page_start:], original_quantities):
+                changed = {k: {"before": original.get(k), "after": v} for k, v in it.q.items() if original.get(k) != v}
+                if changed:
+                    it.scale_adjustment = {"quantities": changed, "old_scale": m.get("scale") or {}, "new_scale": selected_scale}
+            page_scales[m.get("page", 1)] = page_scale
+            if scale is None:
+                scale = page_scale
         items = dedupe_openings(items)
-        try:   # E-57: a printed scale (scale bar, or 1:200 + sheet size / dpi) beats the door-size guess
-            from engine import scale_text
-            better = scale_text.refine_scale(d, 1, scale)
-            if better:
-                scale_text.rescale_items(items, (scale or {}).get("m_per_px"), better["m_per_px"])
-                scale = {**better, "replaced": (scale or {}).get("method")}
-        except Exception:  # noqa: BLE001 - never block a document on scale reading
-            pass
-        return Doc(doc_id, "planmap", items, title, [], scale, len(pms))
+        return Doc(doc_id, "planmap", items, title, [], scale, len(pms), meta={"page_scales": page_scales})
     return None
 
 

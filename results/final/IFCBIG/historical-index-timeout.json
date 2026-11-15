@@ -1,0 +1,39 @@
+{
+  "file": "data/full/junction-dataset/data/ifc_bench/sixty5_electrical.ifc",
+  "size_bytes": 97058912,
+  "end_only": true,
+  "status": "failed",
+  "ingest_s": 90.034,
+  "state": {
+    "status": "failed",
+    "stages": [
+      {
+        "stage": "ifc_index",
+        "ok": false,
+        "error": "This phase exceeded its 0.0951702 second time limit.",
+        "peak_worker_rss_mib": 64.7,
+        "memory_budget_mib": 320.0,
+        "worker_exit_code": -9
+      }
+    ],
+    "detail": "The IFC properties could not be indexed. Export the model again as IFC. This phase exceeded its 0.0951702 second time limit.",
+    "mode": "vlm",
+    "started_at": 1794699666.2155452,
+    "step": "ifc_index",
+    "readable": false,
+    "progress": 0.5,
+    "cost_usd": 0.0,
+    "updated": "2026-11-15T01:49:19+0200",
+    "reason": "The IFC properties could not be indexed. Export the model again as IFC. This phase exceeded its 0.0951702 second time limit."
+  },
+  "failure_answer": {
+    "text_md": "The IFC properties could not be indexed. Export the model again as IFC. This phase exceeded its 0.0951702 second time limit.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.0,
+    "abstained": true
+  },
+  "time_maximum_rss_bytes": 247939072,
+  "superseded": true,
+  "note": "Historical unsuccessful 90-second indexing attempt. Final 180-second bounded indexing passed in docker-largest-supported.json."
+}

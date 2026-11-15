@@ -1,0 +1,7464 @@
+[
+ {
+  "file": "dxf_northstar",
+  "question": "What is this drawing?",
+  "q": "what",
+  "original_verdict": "correct",
+  "result": {
+   "answer_id": "b0c8dc419a0147f2858e63f20ff87d36",
+   "question": "What is this drawing?",
+   "doc_ids": [
+    "uploads__northstar-31d87a788560"
+   ],
+   "answer": {
+    "text_md": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__northstar-31d87a788560",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / apartment / room (model)",
+     "ms": 59,
+     "model": "fake",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 9,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the drawing image",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "route",
+      "provider": "fake",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 1309
+  }
+ },
+ {
+  "file": "dxf_northstar",
+  "question": "How many doors are there?",
+  "q": "doors",
+  "original_verdict": "correct",
+  "result": {
+   "answer_id": "26cd0370502249b79472d51a7e2dd44f",
+   "question": "How many doors are there?",
+   "doc_ids": [
+    "uploads__northstar-31d87a788560"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0,
+    "unit": "count",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__northstar-31d87a788560",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / door / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 4,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the drawing image",
+     "ms": 7,
+     "model": null,
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "recount",
+      "provider": "vision",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 72
+  }
+ },
+ {
+  "file": "dxf_northstar",
+  "question": "How many windows are there?",
+  "q": "windows",
+  "original_verdict": "correct",
+  "result": {
+   "answer_id": "2ef0814b2fab4bf8be259950eb13bab3",
+   "question": "How many windows are there?",
+   "doc_ids": [
+    "uploads__northstar-31d87a788560"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0,
+    "unit": "count",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__northstar-31d87a788560",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / window / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the drawing image",
+     "ms": 6,
+     "model": null,
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "recount",
+      "provider": "vision",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 70
+  }
+ },
+ {
+  "file": "dxf_northstar",
+  "question": "What is the total floor area in square metres?",
+  "q": "floor_area",
+  "original_verdict": "fail",
+  "result": {
+   "answer_id": "a556f397390b4d15b0a9513f5df381e7",
+   "question": "What is the total floor area in square metres?",
+   "doc_ids": [
+    "uploads__northstar-31d87a788560"
+   ],
+   "answer": {
+    "text_md": "**This file does not show areas.** Its printed text has no room table or note with areas. Upload the plan with its room table, or ask about what the sheet does list.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.6,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__northstar-31d87a788560",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "sheet_text",
+     "detail": "no area text in the file",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "index",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 0
+  }
+ },
+ {
+  "file": "dxf_northstar",
+  "question": "How many linear metres of baseboard do I need?",
+  "q": "baseboard",
+  "original_verdict": "ok",
+  "result": {
+   "answer_id": "318d13c521394d76bbb802d96c65ac3d",
+   "question": "How many linear metres of baseboard do I need?",
+   "doc_ids": [
+    "uploads__northstar-31d87a788560"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0,
+    "unit": "count",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__northstar-31d87a788560",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / apartment / room (model)",
+     "ms": 1,
+     "model": "fake",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the drawing image",
+     "ms": 4,
+     "model": null,
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "route",
+      "provider": "fake",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "recount",
+      "provider": "vision",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 58
+  }
+ },
+ {
+  "file": "dxf_northstar",
+  "question": "What is the wall surface area per floor?",
+  "q": "wall_area",
+  "original_verdict": "ok",
+  "result": {
+   "answer_id": "c24af5ec36574f9aaf8510cf27c67b2b",
+   "question": "What is the wall surface area per floor?",
+   "doc_ids": [
+    "uploads__northstar-31d87a788560"
+   ],
+   "answer": {
+    "text_md": "**Wall surface area cannot be verified from this data.** The original IFC body geometry, or a scaled wall plan with heights, is needed; floor area is not wall area.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.4,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__northstar-31d87a788560",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null,
+     "item_kinds": {}
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "wall side area: gross body minus actual void cuts; code only",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "index",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 0,
+   "wallarea": {
+    "source": "unavailable",
+    "rows": [],
+    "openings": [],
+    "warnings": [],
+    "metric": "both",
+    "gross_m2": 0.0,
+    "opening_m2": 0.0,
+    "net_m2": 0.0,
+    "numerical_allowance_m2": 0.0,
+    "orientation_allowance_m2": 0.0,
+    "complete": false,
+    "checks": [],
+    "assumptions": []
+   },
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "read",
+      "title": "Missing data",
+      "text": "No verifiable wall-side area was substituted from floor area or nominal quantities.",
+      "cite": null,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 0,
+     "reason": "Required source geometry is missing or unsupported.",
+     "improve": "Provide wall bodies, units and room boundaries in the IFC, or a scaled plan with heights."
+    }
+   }
+  }
+ },
+ {
+  "file": "dxf_northstar",
+  "question": "What is the slab area by thickness?",
+  "q": "slab",
+  "original_verdict": "ok",
+  "result": {
+   "answer_id": "6b795ca3c9014b768326516d50362330",
+   "question": "What is the slab area by thickness?",
+   "doc_ids": [
+    "uploads__northstar-31d87a788560"
+   ],
+   "answer": {
+    "text_md": "**Not shown in this file.** Its printed text has no slab note. A structural sheet or an IFC model would carry it.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.6,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__northstar-31d87a788560",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "sheet_text",
+     "detail": "no slab text in the file",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "index",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 0
+  }
+ },
+ {
+  "file": "dxf_northstar",
+  "question": "What is the total length of pipes or ducts, in metres?",
+  "q": "pipe_duct",
+  "original_verdict": "ok",
+  "result": {
+   "answer_id": "95ae2359ab7e4d43b9c9646e61b745ac",
+   "question": "What is the total length of pipes or ducts, in metres?",
+   "doc_ids": [
+    "uploads__northstar-31d87a788560"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0.0,
+    "unit": "m",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__northstar-31d87a788560",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "length / pipe / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 2,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 2,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 5,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 3,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the drawing image",
+     "ms": 2,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 66
+  }
+ },
+ {
+  "file": "dxf_northstar",
+  "question": "What is the fire rating of the doors in the third basement?",
+  "q": "trick",
+  "original_verdict": "fail",
+  "result": {
+   "answer_id": "7361b07c36f1499caf100ca9a9215ac4",
+   "question": "What is the fire rating of the doors in the third basement?",
+   "doc_ids": [
+    "uploads__northstar-31d87a788560"
+   ],
+   "answer": {
+    "text_md": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__northstar-31d87a788560",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "text / door / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "abstain",
+     "detail": "type text is not answered by code",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the drawing image",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 58
+  }
+ },
+ {
+  "file": "ifc_city_house",
+  "question": "What is this drawing?",
+  "q": "what",
+  "original_verdict": "n/a: ingest failed",
+  "result": {
+   "answer_id": "74a69cca09884ddb96b889ef2b229bf7",
+   "question": "What is this drawing?",
+   "doc_ids": [
+    "uploads__city-house-munich-arc-d71cc3749ae0"
+   ],
+   "answer": {
+    "text_md": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__city-house-munich-arc-d71cc3749ae0",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / apartment / room (model)",
+     "ms": 0,
+     "model": "fake",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from no evidence",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "route",
+      "provider": "fake",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 8
+  }
+ },
+ {
+  "file": "ifc_city_house",
+  "question": "How many doors are there?",
+  "q": "doors",
+  "original_verdict": "n/a: ingest failed",
+  "result": {
+   "answer_id": "d0c89ece45574941b296372919526b3d",
+   "question": "How many doors are there?",
+   "doc_ids": [
+    "uploads__city-house-munich-arc-d71cc3749ae0"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the drawing, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0,
+    "unit": "count",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__city-house-munich-arc-d71cc3749ae0",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / door / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from no evidence",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 6
+  }
+ },
+ {
+  "file": "ifc_city_house",
+  "question": "How many windows are there?",
+  "q": "windows",
+  "original_verdict": "n/a: ingest failed",
+  "result": {
+   "answer_id": "737e7751ffd44ae08212949cb6321240",
+   "question": "How many windows are there?",
+   "doc_ids": [
+    "uploads__city-house-munich-arc-d71cc3749ae0"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the drawing, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0,
+    "unit": "count",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__city-house-munich-arc-d71cc3749ae0",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / window / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from no evidence",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 5
+  }
+ },
+ {
+  "file": "ifc_city_house",
+  "question": "What is the total floor area in square metres?",
+  "q": "floor_area",
+  "original_verdict": "n/a: ingest failed",
+  "result": {
+   "answer_id": "beb789437c794a85bcf3ae1e8b760bb2",
+   "question": "What is the total floor area in square metres?",
+   "doc_ids": [
+    "uploads__city-house-munich-arc-d71cc3749ae0"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the drawing, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0.0,
+    "unit": "m\u00b2",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__city-house-munich-arc-d71cc3749ae0",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "area / room / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from no evidence",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 7
+  }
+ },
+ {
+  "file": "ifc_city_house",
+  "question": "How many linear metres of baseboard do I need?",
+  "q": "baseboard",
+  "original_verdict": "n/a: ingest failed",
+  "result": {
+   "answer_id": "f0e2f3d97f284b2998bd036fe73cfef8",
+   "question": "How many linear metres of baseboard do I need?",
+   "doc_ids": [
+    "uploads__city-house-munich-arc-d71cc3749ae0"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the drawing, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0,
+    "unit": "count",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__city-house-munich-arc-d71cc3749ae0",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / apartment / room (model)",
+     "ms": 0,
+     "model": "fake",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from no evidence",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "route",
+      "provider": "fake",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 5
+  }
+ },
+ {
+  "file": "ifc_city_house",
+  "question": "What is the wall surface area per floor?",
+  "q": "wall_area",
+  "original_verdict": "n/a: ingest failed",
+  "result": {
+   "answer_id": "4f58771ee0a54aa9a1d76d31e12103b8",
+   "question": "What is the wall surface area per floor?",
+   "doc_ids": [
+    "uploads__city-house-munich-arc-d71cc3749ae0"
+   ],
+   "answer": {
+    "text_md": "**Wall surface area cannot be verified from this data.** The original IFC body geometry, or a scaled wall plan with heights, is needed; floor area is not wall area.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.4,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__city-house-munich-arc-d71cc3749ae0",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null,
+     "item_kinds": {}
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "wall side area: gross body minus actual void cuts; code only",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "index",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 0,
+   "wallarea": {
+    "source": "unavailable",
+    "rows": [],
+    "openings": [],
+    "warnings": [],
+    "metric": "both",
+    "gross_m2": 0.0,
+    "opening_m2": 0.0,
+    "net_m2": 0.0,
+    "numerical_allowance_m2": 0.0,
+    "orientation_allowance_m2": 0.0,
+    "complete": false,
+    "checks": [],
+    "assumptions": []
+   },
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "read",
+      "title": "Missing data",
+      "text": "No verifiable wall-side area was substituted from floor area or nominal quantities.",
+      "cite": null,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 0,
+     "reason": "Required source geometry is missing or unsupported.",
+     "improve": "Provide wall bodies, units and room boundaries in the IFC, or a scaled plan with heights."
+    }
+   }
+  }
+ },
+ {
+  "file": "ifc_city_house",
+  "question": "What is the slab area by thickness?",
+  "q": "slab",
+  "original_verdict": "n/a: ingest failed",
+  "result": {
+   "answer_id": "9e609166bb7f4958b5cbc121e1008e08",
+   "question": "What is the slab area by thickness?",
+   "doc_ids": [
+    "uploads__city-house-munich-arc-d71cc3749ae0"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the drawing, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0.0,
+    "unit": "m\u00b2",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__city-house-munich-arc-d71cc3749ae0",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "area / slab / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from no evidence",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 5
+  }
+ },
+ {
+  "file": "ifc_city_house",
+  "question": "What is the total length of pipes or ducts, in metres?",
+  "q": "pipe_duct",
+  "original_verdict": "n/a: ingest failed",
+  "result": {
+   "answer_id": "9105777c1a804421829fbdeecce9137b",
+   "question": "What is the total length of pipes or ducts, in metres?",
+   "doc_ids": [
+    "uploads__city-house-munich-arc-d71cc3749ae0"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the drawing, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0.0,
+    "unit": "m",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__city-house-munich-arc-d71cc3749ae0",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "length / pipe / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from no evidence",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 5
+  }
+ },
+ {
+  "file": "ifc_city_house",
+  "question": "What is the fire rating of the doors in the third basement?",
+  "q": "trick",
+  "original_verdict": "n/a: ingest failed",
+  "result": {
+   "answer_id": "4022382c9ecd401c901ccd7804647e5d",
+   "question": "What is the fire rating of the doors in the third basement?",
+   "doc_ids": [
+    "uploads__city-house-munich-arc-d71cc3749ae0"
+   ],
+   "answer": {
+    "text_md": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__city-house-munich-arc-d71cc3749ae0",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "text / door / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 2,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "abstain",
+     "detail": "type text is not answered by code",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from no evidence",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 7
+  }
+ },
+ {
+  "file": "mep_hvac_m003",
+  "question": "What is this drawing?",
+  "q": "what",
+  "original_verdict": "correct",
+  "result": {
+   "answer_id": "8d7bfea1552348cebaf52b11d4905f90",
+   "question": "What is this drawing?",
+   "doc_ids": [
+    "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59"
+   ],
+   "answer": {
+    "text_md": "This is sheet **M.003**, **Hvac 1St & 2Nd Floor Plan Lake Geneva**. [1][2]",
+    "value": "M.003",
+    "unit": null,
+    "confidence": 0.9,
+    "abstained": false
+   },
+   "citations": [
+    {
+     "n": 1,
+     "doc_id": "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59",
+     "page": 1,
+     "kind": "text",
+     "bbox_px": [
+      5287.0,
+      3869.7,
+      5589.8,
+      3975.7
+     ],
+     "item_ids": [],
+     "quote": "M.003"
+    },
+    {
+     "n": 2,
+     "doc_id": "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59",
+     "page": 1,
+     "kind": "text",
+     "bbox_px": [
+      3839.9,
+      3857.0,
+      4900.3,
+      3966.9
+     ],
+     "item_ids": [],
+     "quote": "HVAC 1st & 2nd Floor plan Lake Geneva"
+    }
+   ],
+   "evidence": {
+    "boxes": [
+     {
+      "item_id": "text-1-1",
+      "page": 1,
+      "bbox_px": [
+       5287.0,
+       3869.7,
+       5589.8,
+       3975.7
+      ],
+      "label": "1"
+     },
+     {
+      "item_id": "text-1-2",
+      "page": 1,
+      "bbox_px": [
+       3839.9,
+       3857.0,
+       4900.3,
+       3966.9
+      ],
+      "label": "2"
+     }
+    ],
+    "scene": {
+     "doc_id": "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "sheet_text",
+     "detail": "title block",
+     "ms": 8325,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "index",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 8325,
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "read",
+      "title": "Read",
+      "text": "Printed on the sheet: \u201cM.003\u201d",
+      "cite": 1,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Verified",
+     "pct": 93,
+     "reason": "The result was taken from the text printed in the file.",
+     "improve": null
+    }
+   }
+  }
+ },
+ {
+  "file": "mep_hvac_m003",
+  "question": "How many doors are there?",
+  "q": "doors",
+  "original_verdict": "unverified, doubtful",
+  "result": {
+   "answer_id": "12f40abf9bbd49f894f49bc8e102fb43",
+   "question": "How many doors are there?",
+   "doc_ids": [
+    "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the objects found on the drawing and the printed text and the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0,
+    "unit": "count",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
+     "ms": 6,
+     "model": null,
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "recount",
+      "provider": "vision",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 9
+  }
+ },
+ {
+  "file": "mep_hvac_m003",
+  "question": "How many windows are there?",
+  "q": "windows",
+  "original_verdict": "unverified, doubtful",
+  "result": {
+   "answer_id": "36abed8024b045bbb84bfa5410037582",
+   "question": "How many windows are there?",
+   "doc_ids": [
+    "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the objects found on the drawing and the printed text and the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0,
+    "unit": "count",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
+     "ms": 6,
+     "model": null,
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "recount",
+      "provider": "vision",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 8
+  }
+ },
+ {
+  "file": "mep_hvac_m003",
+  "question": "What is the total floor area in square metres?",
+  "q": "floor_area",
+  "original_verdict": "inconsistent",
+  "result": {
+   "answer_id": "d1265c277f984845a8443f32e81d21ef",
+   "question": "What is the total floor area in square metres?",
+   "doc_ids": [
+    "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the objects found on the drawing and the printed text and the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0.0,
+    "unit": "m\u00b2",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "area / room / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "load",
+     "detail": "plan map: 18 room items (conf >= 0.5; 0 below ignored)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "abstain",
+     "detail": "The model has no area data for rooms, so I cannot give a figure.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "prefetched exact matches and tables",
+     "ms": 243,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
+     "ms": 2,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 434
+  }
+ },
+ {
+  "file": "mep_hvac_m003",
+  "question": "How many linear metres of baseboard do I need?",
+  "q": "baseboard",
+  "original_verdict": "fail",
+  "result": {
+   "answer_id": "fa1c2c0462824c77afb08802548d5ea5",
+   "question": "How many linear metres of baseboard do I need?",
+   "doc_ids": [
+    "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the objects found on the drawing and the printed text and the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0,
+    "unit": "count",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
+     "ms": 5,
+     "model": null,
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "recount",
+      "provider": "vision",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 243
+  }
+ },
+ {
+  "file": "mep_hvac_m003",
+  "question": "What is the wall surface area per floor?",
+  "q": "wall_area",
+  "original_verdict": "no answer",
+  "result": {
+   "answer_id": "6d37a4121fb24979ac628fa895755284",
+   "question": "What is the wall surface area per floor?",
+   "doc_ids": [
+    "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59"
+   ],
+   "answer": {
+    "text_md": "**No wall surfaces could be measured for this request.** Check the wall bodies, room boundaries and exterior/interior flags.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.4,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null,
+     "item_kinds": {}
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "wall side area: gross body minus actual void cuts; code only",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "planmap",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 2,
+   "wallarea": {
+    "source": "2D plan estimate",
+    "rows": [],
+    "openings": [],
+    "warnings": [
+     "49 walls could not be measured; totals are measured subtotals",
+     "50 detected openings could not be assigned and are not deducted"
+    ],
+    "metric": "both",
+    "gross_m2": 0.0,
+    "opening_m2": 0.0,
+    "net_m2": 0.0,
+    "numerical_allowance_m2": 0.0,
+    "orientation_allowance_m2": 0.0,
+    "complete": false,
+    "checks": [],
+    "assumptions": [
+     "Page 1: wall height 2.7 m (assumed; no wall height found); missing door/window heights use 2.10/1.50 m, window sill 0.90 m; 50 detected openings not assigned to a wall"
+    ],
+    "skipped_walls": 49,
+    "unallocated_openings": 50,
+    "floors": [],
+    "face_splits": [],
+    "wall_count": 0,
+    "opening_count": 0
+   },
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "read",
+      "title": "Missing data",
+      "text": "No verifiable wall-side area was substituted from floor area or nominal quantities.",
+      "cite": null,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 0,
+     "reason": "Required source geometry is missing or unsupported.",
+     "improve": "Provide wall bodies, units and room boundaries in the IFC, or a scaled plan with heights."
+    }
+   }
+  }
+ },
+ {
+  "file": "mep_hvac_m003",
+  "question": "What is the slab area by thickness?",
+  "q": "slab",
+  "original_verdict": "doubtful",
+  "result": {
+   "answer_id": "6ae94b7363e445268d7668ba693eb2a7",
+   "question": "What is the slab area by thickness?",
+   "doc_ids": [
+    "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the objects found on the drawing and the printed text and the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0.0,
+    "unit": "m\u00b2",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "area / slab / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "load",
+     "detail": "plan map: 0 slab items (conf >= 0.5; 0 below ignored)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "abstain",
+     "detail": "I do not measure area of slabs from a plan reliably yet.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "prefetched exact matches and tables",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
+     "ms": 2,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 182
+  }
+ },
+ {
+  "file": "mep_hvac_m003",
+  "question": "What is the total length of pipes or ducts, in metres?",
+  "q": "pipe_duct",
+  "original_verdict": "fail",
+  "result": {
+   "answer_id": "b29439294d954fa4a82d20f17f9f651d",
+   "question": "What is the total length of pipes or ducts, in metres?",
+   "doc_ids": [
+    "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59"
+   ],
+   "answer": {
+    "text_md": "**No piping is drawn on this floor plan.** Pipe sizes are read from plumbing sheets, and pipe lengths from MEP models. Upload a plumbing sheet or an IFC plumbing model and ask again.",
+    "value": null,
+    "unit": "m",
+    "confidence": 0.7,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "piping on a plan image -> not drawn, no model",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "planmap",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 1
+  }
+ },
+ {
+  "file": "mep_hvac_m003",
+  "question": "What is the fire rating of the doors in the third basement?",
+  "q": "trick",
+  "original_verdict": "fail",
+  "result": {
+   "answer_id": "9aaccb31e76541fb88b49a795195c33a",
+   "question": "What is the fire rating of the doors in the third basement?",
+   "doc_ids": [
+    "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59"
+   ],
+   "answer": {
+    "text_md": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__the-downtowner-hvac-sheet-m-003-hvac-1st-2nd-floor-plan-d3c28ab24b59",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "text / door / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "page 1 read by fake-1",
+     "ms": 2,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "the drawing does not show the answer",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "prefetched exact matches and tables",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "read_drawing",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 184
+  }
+ },
+ {
+  "file": "pdf_base_plan",
+  "question": "What is this drawing?",
+  "q": "what",
+  "original_verdict": "correct",
+  "result": {
+   "answer_id": "f0a6e782263e415abc0b76114cb7943d",
+   "question": "What is this drawing?",
+   "doc_ids": [
+    "uploads__base-plan-d31972458e90"
+   ],
+   "answer": {
+    "text_md": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__base-plan-d31972458e90",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / apartment / room (model)",
+     "ms": 0,
+     "model": "fake",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I could not tell which elements the question is about, so I would rather not guess.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "prefetched exact matches and tables",
+     "ms": 19,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "route",
+      "provider": "fake",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 50
+  }
+ },
+ {
+  "file": "pdf_base_plan",
+  "question": "How many doors are there?",
+  "q": "doors",
+  "original_verdict": "correct",
+  "result": {
+   "answer_id": "ee9766cfbd3340d5950d2ca6289f3585",
+   "question": "How many doors are there?",
+   "doc_ids": [
+    "uploads__base-plan-d31972458e90"
+   ],
+   "answer": {
+    "text_md": "There is **1 door** on this floor plan. [1]",
+    "value": 1,
+    "unit": "count",
+    "confidence": 0.55,
+    "abstained": false
+   },
+   "citations": [
+    {
+     "n": 1,
+     "doc_id": "uploads__base-plan-d31972458e90",
+     "page": 1,
+     "kind": "region",
+     "bbox_px": [
+      544.8,
+      626.0,
+      630.7,
+      663.0
+     ],
+     "item_ids": [
+      "door-001"
+     ],
+     "quote": null,
+     "label": "Floor plan \u00b7 1 door"
+    }
+   ],
+   "evidence": {
+    "boxes": [
+     {
+      "item_id": "door-001",
+      "page": 1,
+      "bbox_px": [
+       544.8,
+       626.0,
+       630.7,
+       663.0
+      ],
+      "label": "1"
+     }
+    ],
+    "scene": {
+     "doc_id": "uploads__base-plan-d31972458e90",
+     "highlight_item_ids": [
+      "door-001"
+     ],
+     "camera_target_item_id": "door-001"
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / door / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "load",
+     "detail": "plan map: 1 door items (conf >= 0.5; 0 below ignored)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "count",
+     "detail": "1 door",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "planmap",
+   "cost": {
+    "usd_total": 0,
+    "calls": []
+   },
+   "latency_ms": 1,
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "found",
+      "title": "Found",
+      "text": "One door on the scanned drawing",
+      "cite": 1,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 75,
+     "reason": "The objects were detected on a scanned image. Confidence is lower due to detector confidence 55%.",
+     "improve": "Check box 1, or upload a CAD file or vector PDF to make the count exact."
+    }
+   }
+  }
+ },
+ {
+  "file": "pdf_base_plan",
+  "question": "How many windows are there?",
+  "q": "windows",
+  "original_verdict": "doubtful",
+  "result": {
+   "answer_id": "6d4066d8bbf64ffaaf4a75884d4d13b9",
+   "question": "How many windows are there?",
+   "doc_ids": [
+    "uploads__base-plan-d31972458e90"
+   ],
+   "answer": {
+    "text_md": "There are **3 windows** on this floor plan. [1]",
+    "value": 3,
+    "unit": "count",
+    "confidence": 0.55,
+    "abstained": false
+   },
+   "citations": [
+    {
+     "n": 1,
+     "doc_id": "uploads__base-plan-d31972458e90",
+     "page": 1,
+     "kind": "region",
+     "bbox_px": [
+      69.3,
+      272.9,
+      1357.1,
+      886.1
+     ],
+     "item_ids": [
+      "window-001",
+      "window-002",
+      "window-003"
+     ],
+     "quote": null,
+     "label": "Floor plan \u00b7 3 windows"
+    }
+   ],
+   "evidence": {
+    "boxes": [
+     {
+      "item_id": "window-001",
+      "page": 1,
+      "bbox_px": [
+       1347.2,
+       272.9,
+       1357.1,
+       409.3
+      ],
+      "label": "1"
+     },
+     {
+      "item_id": "window-002",
+      "page": 1,
+      "bbox_px": [
+       69.3,
+       596.7,
+       82.6,
+       879.7
+      ],
+      "label": "2"
+     },
+     {
+      "item_id": "window-003",
+      "page": 1,
+      "bbox_px": [
+       1347.2,
+       780.3,
+       1357.1,
+       886.1
+      ],
+      "label": "3"
+     }
+    ],
+    "scene": {
+     "doc_id": "uploads__base-plan-d31972458e90",
+     "highlight_item_ids": [
+      "window-001",
+      "window-002",
+      "window-003"
+     ],
+     "camera_target_item_id": "window-001"
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / window / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "load",
+     "detail": "plan map: 3 window items (conf >= 0.5; 0 below ignored)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "count",
+     "detail": "3 window",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "planmap",
+   "cost": {
+    "usd_total": 0,
+    "calls": []
+   },
+   "latency_ms": 1,
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "found",
+      "title": "Found",
+      "text": "3 windows on the scanned drawing, each one numbered",
+      "cite": 1,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 75,
+     "reason": "The objects were detected on a scanned image. Confidence is lower due to detector confidence 55%.",
+     "improve": "Check box 1, or upload a CAD file or vector PDF to make the count exact."
+    }
+   }
+  }
+ },
+ {
+  "file": "pdf_base_plan",
+  "question": "What is the total floor area in square metres?",
+  "q": "floor_area",
+  "original_verdict": "plausible",
+  "result": {
+   "answer_id": "519ee91d83ae4271bd1650c46cd84889",
+   "question": "What is the total floor area in square metres?",
+   "doc_ids": [
+    "uploads__base-plan-d31972458e90"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the objects found on the drawing and the printed text and the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0.0,
+    "unit": "m\u00b2",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__base-plan-d31972458e90",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "area / room / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "load",
+     "detail": "plan map: 4 room items (conf >= 0.5; 0 below ignored)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "abstain",
+     "detail": "The model has no area data for rooms, so I cannot give a figure.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "prefetched exact matches and tables",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 2,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 31
+  }
+ },
+ {
+  "file": "pdf_base_plan",
+  "question": "How many linear metres of baseboard do I need?",
+  "q": "baseboard",
+  "original_verdict": "likely wrong",
+  "result": {
+   "answer_id": "f0ccd7b84e994b6cbaac6b3cc14f03d6",
+   "question": "How many linear metres of baseboard do I need?",
+   "doc_ids": [
+    "uploads__base-plan-d31972458e90"
+   ],
+   "answer": {
+    "text_md": "**Baseboard: 83.1 linear metres** for 4 rooms, from each room's drawn box at the drawing's scale (0.0120 m/px, dimension) minus detected door widths. Rooms are treated as rectangles and wall openings other than doors are not deducted, so L-shaped rooms are approximate.\n\n- Open workspace  office: 36.9 m (outline 36.9 m, minus 0 doors 0.00 m) [1]\n- Management  office: 15.1 m (outline 15.1 m, minus 0 doors 0.00 m) [2]\n- Waiting Relaxing: 17.3 m (outline 17.3 m, minus 0 doors 0.00 m) [3]\n- Coffee break  kitchen: 13.7 m (outline 13.7 m, minus 0 doors 0.00 m) [4]",
+    "value": 83.1,
+    "unit": "m",
+    "confidence": 0.8,
+    "abstained": false
+   },
+   "citations": [
+    {
+     "n": 1,
+     "doc_id": "uploads__base-plan-d31972458e90",
+     "page": 1,
+     "kind": "region",
+     "bbox_px": [
+      79.2,
+      168.3,
+      1350.5,
+      887.4
+     ],
+     "item_ids": [
+      "room-001",
+      "room-002",
+      "room-003",
+      "room-004"
+     ],
+     "quote": null,
+     "label": "Floor plan \u00b7 4 rooms"
+    }
+   ],
+   "evidence": {
+    "boxes": [
+     {
+      "item_id": "room-001",
+      "page": 1,
+      "bbox_px": [
+       536.6,
+       168.3,
+       1350.5,
+       887.4
+      ],
+      "label": "1"
+     },
+     {
+      "item_id": "room-002",
+      "page": 1,
+      "bbox_px": [
+       536.6,
+       367.2,
+       873.4,
+       659.2
+      ],
+      "label": "2"
+     },
+     {
+      "item_id": "room-003",
+      "page": 1,
+      "bbox_px": [
+       79.2,
+       471.8,
+       383.0,
+       887.4
+      ],
+      "label": "3"
+     },
+     {
+      "item_id": "room-004",
+      "page": 1,
+      "bbox_px": [
+       383.0,
+       471.8,
+       536.6,
+       887.4
+      ],
+      "label": "4"
+     }
+    ],
+    "scene": {
+     "doc_id": "uploads__base-plan-d31972458e90",
+     "highlight_item_ids": [
+      "room-001",
+      "room-002",
+      "room-003",
+      "room-004"
+     ],
+     "camera_target_item_id": "room-001"
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "baseboard -> room outline minus door openings, code, no model",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "filter",
+     "detail": "4 rooms, 1 doors considered",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "planmap",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 20,
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "found",
+      "title": "Found",
+      "text": "4 rooms on the scanned drawing, each one numbered, including Open workspace, Management, Waiting Relaxing",
+      "cite": 1,
+      "ok": null
+     },
+     {
+      "kind": "calculated",
+      "title": "Calculated",
+      "text": "Outline of 4 rooms: 83.1 m, no door openings found",
+      "cite": null,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Cross-checked",
+     "pct": 80,
+     "reason": "The objects were detected on a scanned image.",
+     "improve": null
+    }
+   }
+  }
+ },
+ {
+  "file": "pdf_base_plan",
+  "question": "What is the wall surface area per floor?",
+  "q": "wall_area",
+  "original_verdict": "no answer",
+  "result": {
+   "answer_id": "185c438e34ca4adeac2b22c2b0018414",
+   "question": "What is the wall surface area per floor?",
+   "doc_ids": [
+    "uploads__base-plan-d31972458e90"
+   ],
+   "answer": {
+    "text_md": "**No wall surfaces could be measured for this request.** Check the wall bodies, room boundaries and exterior/interior flags.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.4,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__base-plan-d31972458e90",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null,
+     "item_kinds": {}
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "wall side area: gross body minus actual void cuts; code only",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "planmap",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 0,
+   "wallarea": {
+    "source": "2D plan estimate",
+    "rows": [],
+    "openings": [],
+    "warnings": [
+     "18 walls could not be measured; totals are measured subtotals",
+     "4 detected openings could not be assigned and are not deducted"
+    ],
+    "metric": "both",
+    "gross_m2": 0.0,
+    "opening_m2": 0.0,
+    "net_m2": 0.0,
+    "numerical_allowance_m2": 0.0,
+    "orientation_allowance_m2": 0.0,
+    "complete": false,
+    "checks": [],
+    "assumptions": [
+     "Page 1: wall height 2.7 m (assumed; no wall height found); missing door/window heights use 2.10/1.50 m, window sill 0.90 m; 4 detected openings not assigned to a wall"
+    ],
+    "skipped_walls": 18,
+    "unallocated_openings": 4,
+    "floors": [],
+    "face_splits": [],
+    "wall_count": 0,
+    "opening_count": 0
+   },
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "read",
+      "title": "Missing data",
+      "text": "No verifiable wall-side area was substituted from floor area or nominal quantities.",
+      "cite": null,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 0,
+     "reason": "Required source geometry is missing or unsupported.",
+     "improve": "Provide wall bodies, units and room boundaries in the IFC, or a scaled plan with heights."
+    }
+   }
+  }
+ },
+ {
+  "file": "pdf_base_plan",
+  "question": "What is the slab area by thickness?",
+  "q": "slab",
+  "original_verdict": "wrong framing",
+  "result": {
+   "answer_id": "33df414a72c04a2bbdb5987b5b6df767",
+   "question": "What is the slab area by thickness?",
+   "doc_ids": [
+    "uploads__base-plan-d31972458e90"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the objects found on the drawing and the printed text and the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0.0,
+    "unit": "m\u00b2",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__base-plan-d31972458e90",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "area / slab / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "load",
+     "detail": "plan map: 0 slab items (conf >= 0.5; 0 below ignored)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "abstain",
+     "detail": "I do not measure area of slabs from a plan reliably yet.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "prefetched exact matches and tables",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 27
+  }
+ },
+ {
+  "file": "pdf_base_plan",
+  "question": "What is the total length of pipes or ducts, in metres?",
+  "q": "pipe_duct",
+  "original_verdict": "correct",
+  "result": {
+   "answer_id": "5bf4265984b64e7c988e7364b1d4e424",
+   "question": "What is the total length of pipes or ducts, in metres?",
+   "doc_ids": [
+    "uploads__base-plan-d31972458e90"
+   ],
+   "answer": {
+    "text_md": "**No piping is drawn on this floor plan.** Pipe sizes are read from plumbing sheets, and pipe lengths from MEP models. Upload a plumbing sheet or an IFC plumbing model and ask again.",
+    "value": null,
+    "unit": "m",
+    "confidence": 0.7,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__base-plan-d31972458e90",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "piping on a plan image -> not drawn, no model",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "planmap",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 1
+  }
+ },
+ {
+  "file": "pdf_base_plan",
+  "question": "What is the fire rating of the doors in the third basement?",
+  "q": "trick",
+  "original_verdict": "fail",
+  "result": {
+   "answer_id": "a5690a14ed964f04a391d17de792913a",
+   "question": "What is the fire rating of the doors in the third basement?",
+   "doc_ids": [
+    "uploads__base-plan-d31972458e90"
+   ],
+   "answer": {
+    "text_md": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__base-plan-d31972458e90",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "text / door / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "page 1 read by fake-1",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "the drawing does not show the answer",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "prefetched exact matches and tables",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "read_drawing",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 30
+  }
+ },
+ {
+  "file": "scan_finna",
+  "question": "What is this drawing?",
+  "q": "what",
+  "original_verdict": "correct",
+  "result": {
+   "answer_id": "7986f6af6399408db6b9669f88975445",
+   "question": "What is this drawing?",
+   "doc_ids": [
+    "uploads__hka-139877668752900-168422869617700-a76b8b8537cb"
+   ],
+   "answer": {
+    "text_md": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__hka-139877668752900-168422869617700-a76b8b8537cb",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / apartment / room (model)",
+     "ms": 0,
+     "model": "fake",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I could not tell which elements the question is about, so I would rather not guess.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the objects found on the drawing and the drawing image",
+     "ms": 3,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "route",
+      "provider": "fake",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 4996
+  }
+ },
+ {
+  "file": "scan_finna",
+  "question": "How many doors are there?",
+  "q": "doors",
+  "original_verdict": "unverified, likely wrong",
+  "result": {
+   "answer_id": "068ddbdc79eb48a5a74cc68c70378d7c",
+   "question": "How many doors are there?",
+   "doc_ids": [
+    "uploads__hka-139877668752900-168422869617700-a76b8b8537cb"
+   ],
+   "answer": {
+    "text_md": "There are **33 doors** on this floor plan. [1]",
+    "value": 33,
+    "unit": "count",
+    "confidence": 0.55,
+    "abstained": false
+   },
+   "citations": [
+    {
+     "n": 1,
+     "doc_id": "uploads__hka-139877668752900-168422869617700-a76b8b8537cb",
+     "page": 1,
+     "kind": "region",
+     "bbox_px": [
+      276.0,
+      943.3,
+      2742.0,
+      1995.3
+     ],
+     "item_ids": [
+      "door-001",
+      "door-002",
+      "door-003",
+      "door-004",
+      "door-005",
+      "door-008",
+      "door-009",
+      "door-010",
+      "door-011",
+      "door-006",
+      "door-007",
+      "door-012",
+      "door-013",
+      "door-014",
+      "door-015",
+      "door-016",
+      "door-017",
+      "door-019",
+      "door-018",
+      "door-020",
+      "door-021",
+      "door-022",
+      "door-027",
+      "door-028",
+      "door-023",
+      "door-029",
+      "door-024",
+      "door-025",
+      "door-026",
+      "door-030",
+      "door-031",
+      "door-032",
+      "door-033"
+     ],
+     "quote": null,
+     "label": "Floor plan \u00b7 33 doors"
+    }
+   ],
+   "evidence": {
+    "boxes": [
+     {
+      "item_id": "door-001",
+      "page": 1,
+      "bbox_px": [
+       2475.0,
+       943.3,
+       2508.0,
+       959.5
+      ],
+      "label": "1"
+     },
+     {
+      "item_id": "door-002",
+      "page": 1,
+      "bbox_px": [
+       2523.0,
+       943.3,
+       2553.0,
+       959.5
+      ],
+      "label": "2"
+     },
+     {
+      "item_id": "door-003",
+      "page": 1,
+      "bbox_px": [
+       2568.0,
+       943.3,
+       2601.0,
+       959.5
+      ],
+      "label": "3"
+     },
+     {
+      "item_id": "door-004",
+      "page": 1,
+      "bbox_px": [
+       303.0,
+       998.8,
+       360.0,
+       1017.3
+      ],
+      "label": "4"
+     },
+     {
+      "item_id": "door-005",
+      "page": 1,
+      "bbox_px": [
+       2658.0,
+       1010.3,
+       2703.0,
+       1024.2
+      ],
+      "label": "5"
+     },
+     {
+      "item_id": "door-008",
+      "page": 1,
+      "bbox_px": [
+       432.0,
+       1114.4,
+       465.0,
+       1128.3
+      ],
+      "label": "6"
+     },
+     {
+      "item_id": "door-009",
+      "page": 1,
+      "bbox_px": [
+       501.0,
+       1114.4,
+       534.0,
+       1128.3
+      ],
+      "label": "7"
+     },
+     {
+      "item_id": "door-010",
+      "page": 1,
+      "bbox_px": [
+       567.0,
+       1114.4,
+       600.0,
+       1128.3
+      ],
+      "label": "8"
+     },
+     {
+      "item_id": "door-011",
+      "page": 1,
+      "bbox_px": [
+       633.0,
+       1114.4,
+       666.0,
+       1128.3
+      ],
+      "label": "9"
+     },
+     {
+      "item_id": "door-006",
+      "page": 1,
+      "bbox_px": [
+       2637.0,
+       1091.3,
+       2679.0,
+       1107.4
+      ],
+      "label": "10"
+     },
+     {
+      "item_id": "door-007",
+      "page": 1,
+      "bbox_px": [
+       2703.0,
+       1091.3,
+       2742.0,
+       1107.4
+      ],
+      "label": "11"
+     },
+     {
+      "item_id": "door-012",
+      "page": 1,
+      "bbox_px": [
+       405.0,
+       1137.5,
+       420.0,
+       1183.7
+      ],
+      "label": "12"
+     },
+     {
+      "item_id": "door-013",
+      "page": 1,
+      "bbox_px": [
+       303.0,
+       1190.7,
+       345.0,
+       1206.9
+      ],
+      "label": "13"
+     },
+     {
+      "item_id": "door-014",
+      "page": 1,
+      "bbox_px": [
+       483.0,
+       1190.7,
+       525.0,
+       1206.9
+      ],
+      "label": "14"
+     },
+     {
+      "item_id": "door-015",
+      "page": 1,
+      "bbox_px": [
+       402.0,
+       1315.5,
+       420.0,
+       1359.5
+      ],
+      "label": "15"
+     },
+     {
+      "item_id": "door-016",
+      "page": 1,
+      "bbox_px": [
+       315.0,
+       1491.2,
+       357.0,
+       1505.1
+      ],
+      "label": "16"
+     },
+     {
+      "item_id": "door-017",
+      "page": 1,
+      "bbox_px": [
+       315.0,
+       1556.0,
+       357.0,
+       1569.8
+      ],
+      "label": "17"
+     },
+     {
+      "item_id": "door-019",
+      "page": 1,
+      "bbox_px": [
+       276.0,
+       1676.2,
+       318.0,
+       1690.1
+      ],
+      "label": "18"
+     },
+     {
+      "item_id": "door-018",
+      "page": 1,
+      "bbox_px": [
+       1164.0,
+       1671.6,
+       1206.0,
+       1685.4
+      ],
+      "label": "19"
+     },
+     {
+      "item_id": "door-020",
+      "page": 1,
+      "bbox_px": [
+       402.0,
+       1720.1,
+       420.0,
+       1757.1
+      ],
+      "label": "20"
+     },
+     {
+      "item_id": "door-021",
+      "page": 1,
+      "bbox_px": [
+       1290.0,
+       1720.1,
+       1308.0,
+       1754.8
+      ],
+      "label": "21"
+     },
+     {
+      "item_id": "door-022",
+      "page": 1,
+      "bbox_px": [
+       1335.0,
+       1833.4,
+       1353.0,
+       1868.1
+      ],
+      "label": "22"
+     },
+     {
+      "item_id": "door-027",
+      "page": 1,
+      "bbox_px": [
+       285.0,
+       1872.7,
+       333.0,
+       1888.9
+      ],
+      "label": "23"
+     },
+     {
+      "item_id": "door-028",
+      "page": 1,
+      "bbox_px": [
+       456.0,
+       1872.7,
+       507.0,
+       1888.9
+      ],
+      "label": "24"
+     },
+     {
+      "item_id": "door-023",
+      "page": 1,
+      "bbox_px": [
+       570.0,
+       1840.4,
+       585.0,
+       1875.0
+      ],
+      "label": "25"
+     },
+     {
+      "item_id": "door-029",
+      "page": 1,
+      "bbox_px": [
+       633.0,
+       1872.7,
+       675.0,
+       1888.9
+      ],
+      "label": "26"
+     },
+     {
+      "item_id": "door-024",
+      "page": 1,
+      "bbox_px": [
+       687.0,
+       1845.0,
+       708.0,
+       1882.0
+      ],
+      "label": "27"
+     },
+     {
+      "item_id": "door-025",
+      "page": 1,
+      "bbox_px": [
+       1185.0,
+       1870.4,
+       1230.0,
+       1884.3
+      ],
+      "label": "28"
+     },
+     {
+      "item_id": "door-026",
+      "page": 1,
+      "bbox_px": [
+       1395.0,
+       1870.4,
+       1443.0,
+       1884.3
+      ],
+      "label": "29"
+     },
+     {
+      "item_id": "door-030",
+      "page": 1,
+      "bbox_px": [
+       687.0,
+       1928.2,
+       708.0,
+       1974.4
+      ],
+      "label": "30"
+     },
+     {
+      "item_id": "door-031",
+      "page": 1,
+      "bbox_px": [
+       1290.0,
+       1928.2,
+       1308.0,
+       1965.2
+      ],
+      "label": "31"
+     },
+     {
+      "item_id": "door-032",
+      "page": 1,
+      "bbox_px": [
+       1335.0,
+       1928.2,
+       1353.0,
+       1965.2
+      ],
+      "label": "32"
+     },
+     {
+      "item_id": "door-033",
+      "page": 1,
+      "bbox_px": [
+       738.0,
+       1979.1,
+       801.0,
+       1995.3
+      ],
+      "label": "33"
+     }
+    ],
+    "scene": {
+     "doc_id": "uploads__hka-139877668752900-168422869617700-a76b8b8537cb",
+     "highlight_item_ids": [
+      "door-001",
+      "door-002",
+      "door-003",
+      "door-004",
+      "door-005",
+      "door-008",
+      "door-009",
+      "door-010",
+      "door-011",
+      "door-006",
+      "door-007",
+      "door-012",
+      "door-013",
+      "door-014",
+      "door-015",
+      "door-016",
+      "door-017",
+      "door-019",
+      "door-018",
+      "door-020",
+      "door-021",
+      "door-022",
+      "door-027",
+      "door-028",
+      "door-023",
+      "door-029",
+      "door-024",
+      "door-025",
+      "door-026",
+      "door-030",
+      "door-031",
+      "door-032",
+      "door-033"
+     ],
+     "camera_target_item_id": "door-001"
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / door / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "load",
+     "detail": "plan map: 33 door items (conf >= 0.5; 0 below ignored)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "count",
+     "detail": "33 door",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "planmap",
+   "cost": {
+    "usd_total": 0,
+    "calls": []
+   },
+   "latency_ms": 65,
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "found",
+      "title": "Found",
+      "text": "33 doors on the scanned drawing, each one numbered",
+      "cite": 1,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 75,
+     "reason": "The objects were detected on a scanned image. Confidence is lower due to detector confidence 55%.",
+     "improve": "Check box 1, or upload a CAD file or vector PDF to make the count exact."
+    }
+   }
+  }
+ },
+ {
+  "file": "scan_finna",
+  "question": "How many windows are there?",
+  "q": "windows",
+  "original_verdict": "unverified, likely wrong",
+  "result": {
+   "answer_id": "61c749f0acdd43ed82fc69d47ef8ea33",
+   "question": "How many windows are there?",
+   "doc_ids": [
+    "uploads__hka-139877668752900-168422869617700-a76b8b8537cb"
+   ],
+   "answer": {
+    "text_md": "There are **17 windows** on this floor plan. [1]",
+    "value": 17,
+    "unit": "count",
+    "confidence": 0.55,
+    "abstained": false
+   },
+   "citations": [
+    {
+     "n": 1,
+     "doc_id": "uploads__hka-139877668752900-168422869617700-a76b8b8537cb",
+     "page": 1,
+     "kind": "region",
+     "bbox_px": [
+      240.0,
+      1061.2,
+      1470.0,
+      2080.8
+     ],
+     "item_ids": [
+      "window-001",
+      "window-002",
+      "window-003",
+      "window-004",
+      "window-005",
+      "window-006",
+      "window-007",
+      "window-008",
+      "window-009",
+      "window-011",
+      "window-010",
+      "window-012",
+      "window-013",
+      "window-015",
+      "window-016",
+      "window-017",
+      "window-014"
+     ],
+     "quote": null,
+     "label": "Floor plan \u00b7 17 windows"
+    }
+   ],
+   "evidence": {
+    "boxes": [
+     {
+      "item_id": "window-001",
+      "page": 1,
+      "bbox_px": [
+       240.0,
+       1061.2,
+       258.0,
+       1130.6
+      ],
+      "label": "1"
+     },
+     {
+      "item_id": "window-002",
+      "page": 1,
+      "bbox_px": [
+       240.0,
+       1262.4,
+       258.0,
+       1331.7
+      ],
+      "label": "2"
+     },
+     {
+      "item_id": "window-003",
+      "page": 1,
+      "bbox_px": [
+       285.0,
+       1382.6,
+       363.0,
+       1398.8
+      ],
+      "label": "3"
+     },
+     {
+      "item_id": "window-004",
+      "page": 1,
+      "bbox_px": [
+       441.0,
+       1382.6,
+       519.0,
+       1398.8
+      ],
+      "label": "4"
+     },
+     {
+      "item_id": "window-005",
+      "page": 1,
+      "bbox_px": [
+       573.0,
+       1382.6,
+       651.0,
+       1398.8
+      ],
+      "label": "5"
+     },
+     {
+      "item_id": "window-006",
+      "page": 1,
+      "bbox_px": [
+       240.0,
+       1595.3,
+       258.0,
+       1646.1
+      ],
+      "label": "6"
+     },
+     {
+      "item_id": "window-007",
+      "page": 1,
+      "bbox_px": [
+       447.0,
+       1671.6,
+       522.0,
+       1687.8
+      ],
+      "label": "7"
+     },
+     {
+      "item_id": "window-008",
+      "page": 1,
+      "bbox_px": [
+       594.0,
+       1671.6,
+       666.0,
+       1687.8
+      ],
+      "label": "8"
+     },
+     {
+      "item_id": "window-009",
+      "page": 1,
+      "bbox_px": [
+       1395.0,
+       1671.6,
+       1470.0,
+       1685.4
+      ],
+      "label": "9"
+     },
+     {
+      "item_id": "window-011",
+      "page": 1,
+      "bbox_px": [
+       240.0,
+       1743.2,
+       258.0,
+       1812.6
+      ],
+      "label": "10"
+     },
+     {
+      "item_id": "window-010",
+      "page": 1,
+      "bbox_px": [
+       1125.0,
+       1740.9,
+       1143.0,
+       1798.7
+      ],
+      "label": "11"
+     },
+     {
+      "item_id": "window-012",
+      "page": 1,
+      "bbox_px": [
+       240.0,
+       1942.1,
+       258.0,
+       2011.4
+      ],
+      "label": "12"
+     },
+     {
+      "item_id": "window-013",
+      "page": 1,
+      "bbox_px": [
+       1125.0,
+       1944.4,
+       1143.0,
+       2002.2
+      ],
+      "label": "13"
+     },
+     {
+      "item_id": "window-015",
+      "page": 1,
+      "bbox_px": [
+       285.0,
+       2066.9,
+       366.0,
+       2080.8
+      ],
+      "label": "14"
+     },
+     {
+      "item_id": "window-016",
+      "page": 1,
+      "bbox_px": [
+       444.0,
+       2066.9,
+       522.0,
+       2080.8
+      ],
+      "label": "15"
+     },
+     {
+      "item_id": "window-017",
+      "page": 1,
+      "bbox_px": [
+       579.0,
+       2066.9,
+       657.0,
+       2080.8
+      ],
+      "label": "16"
+     },
+     {
+      "item_id": "window-014",
+      "page": 1,
+      "bbox_px": [
+       1395.0,
+       2062.3,
+       1470.0,
+       2078.5
+      ],
+      "label": "17"
+     }
+    ],
+    "scene": {
+     "doc_id": "uploads__hka-139877668752900-168422869617700-a76b8b8537cb",
+     "highlight_item_ids": [
+      "window-001",
+      "window-002",
+      "window-003",
+      "window-004",
+      "window-005",
+      "window-006",
+      "window-007",
+      "window-008",
+      "window-009",
+      "window-011",
+      "window-010",
+      "window-012",
+      "window-013",
+      "window-015",
+      "window-016",
+      "window-017",
+      "window-014"
+     ],
+     "camera_target_item_id": "window-001"
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / window / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "load",
+     "detail": "plan map: 17 window items (conf >= 0.5; 0 below ignored)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "count",
+     "detail": "17 window",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "planmap",
+   "cost": {
+    "usd_total": 0,
+    "calls": []
+   },
+   "latency_ms": 1,
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "found",
+      "title": "Found",
+      "text": "17 windows on the scanned drawing, each one numbered",
+      "cite": 1,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 75,
+     "reason": "The objects were detected on a scanned image. Confidence is lower due to detector confidence 55%.",
+     "improve": "Check box 1, or upload a CAD file or vector PDF to make the count exact."
+    }
+   }
+  }
+ },
+ {
+  "file": "scan_finna",
+  "question": "What is the total floor area in square metres?",
+  "q": "floor_area",
+  "original_verdict": "wrong reason",
+  "result": {
+   "answer_id": "a24a37fca1b1459fb031dfae6625490b",
+   "question": "What is the total floor area in square metres?",
+   "doc_ids": [
+    "uploads__hka-139877668752900-168422869617700-a76b8b8537cb"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the objects found on the drawing and the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0.0,
+    "unit": "m\u00b2",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__hka-139877668752900-168422869617700-a76b8b8537cb",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "area / room / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "load",
+     "detail": "plan map: 15 room items (conf >= 0.5; 0 below ignored)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "abstain",
+     "detail": "The model has no area data for rooms, so I cannot give a figure.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the objects found on the drawing and the drawing image",
+     "ms": 3,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 132
+  }
+ },
+ {
+  "file": "scan_finna",
+  "question": "How many linear metres of baseboard do I need?",
+  "q": "baseboard",
+  "original_verdict": "unverified",
+  "result": {
+   "answer_id": "5a95edeb5b504494acba1f7932e0f2df",
+   "question": "How many linear metres of baseboard do I need?",
+   "doc_ids": [
+    "uploads__hka-139877668752900-168422869617700-a76b8b8537cb"
+   ],
+   "answer": {
+    "text_md": "**Baseboard: 156.3 linear metres** for 15 rooms, from each room's drawn box minus the detected door widths. Rooms are treated as rectangles and wall openings other than doors are not deducted, so L-shaped rooms are approximate.\n\n- wc: 7.37 m (outline 9.43 m, minus 3 doors 2.06 m) [1]\n- sauna: 10.7 m (outline 11.7 m, minus 1 door 0.96 m) [2]\n- storage: 6.58 m (outline 7.29 m, minus 1 door 0.71 m) [3]\n- storage: 6.58 m (outline 7.29 m, minus 1 door 0.71 m) [4]\n- storage: 6.45 m (outline 7.16 m, minus 1 door 0.71 m) [5]\n- storage: 6.58 m (outline 7.29 m, minus 1 door 0.71 m) [6]\n- corridor: 9.93 m (outline 14.6 m, minus 6 doors 4.72 m) [7]\n- entry: 3.90 m (outline 5.70 m, minus 2 doors 1.80 m) [8]\n- stairwell: 12.7 m (outline 13.6 m, minus 1 door 0.90 m) [9]\n- stairwell: 11.3 m (outline 13.1 m, minus 2 doors 1.80 m) [10]\n- kitchen: 10.6 m (outline 13.0 m, minus 3 doors 2.43 m) [11]\n- room: 13.9 m (outline 15.6 m, minus 2 doors 1.77 m) [12]\n- entry: 19.6 m (outline 21.4 m, minus 2 doors 1.78 m) [13]\n- room: 13.8 m (outline 15.6 m, minus 2 doors 1.82 m) [14]\n- living: 16.2 m (outline 20.0 m, minus 4 doors 3.78 m) [15]\n\nLengths are estimated from door sizes because no printed scale was found, so treat them as approximate.",
+    "value": 156.3,
+    "unit": "m",
+    "confidence": 0.4,
+    "abstained": false
+   },
+   "citations": [
+    {
+     "n": 1,
+     "doc_id": "uploads__hka-139877668752900-168422869617700-a76b8b8537cb",
+     "page": 1,
+     "kind": "region",
+     "bbox_px": [
+      249.0,
+      880.9,
+      2757.0,
+      2069.2
+     ],
+     "item_ids": [
+      "room-002",
+      "room-003",
+      "room-005",
+      "room-006",
+      "room-007",
+      "room-008",
+      "room-010",
+      "room-014",
+      "room-015",
+      "room-016",
+      "room-020",
+      "room-021",
+      "room-022",
+      "room-024",
+      "room-025"
+     ],
+     "quote": null,
+     "label": "Floor plan \u00b7 15 rooms"
+    }
+   ],
+   "evidence": {
+    "boxes": [
+     {
+      "item_id": "room-002",
+      "page": 1,
+      "bbox_px": [
+       2460.0,
+       880.9,
+       2613.0,
+       947.9
+      ],
+      "label": "1"
+     },
+     {
+      "item_id": "room-003",
+      "page": 1,
+      "bbox_px": [
+       2616.0,
+       880.9,
+       2757.0,
+       1012.7
+      ],
+      "label": "2"
+     },
+     {
+      "item_id": "room-005",
+      "page": 1,
+      "bbox_px": [
+       414.0,
+       1012.7,
+       480.0,
+       1116.7
+      ],
+      "label": "3"
+     },
+     {
+      "item_id": "room-006",
+      "page": 1,
+      "bbox_px": [
+       483.0,
+       1012.7,
+       549.0,
+       1116.7
+      ],
+      "label": "4"
+     },
+     {
+      "item_id": "room-007",
+      "page": 1,
+      "bbox_px": [
+       552.0,
+       1012.7,
+       615.0,
+       1116.7
+      ],
+      "label": "5"
+     },
+     {
+      "item_id": "room-008",
+      "page": 1,
+      "bbox_px": [
+       618.0,
+       1012.7,
+       684.0,
+       1116.7
+      ],
+      "label": "6"
+     },
+     {
+      "item_id": "room-010",
+      "page": 1,
+      "bbox_px": [
+       414.0,
+       1123.6,
+       684.0,
+       1195.3
+      ],
+      "label": "7"
+     },
+     {
+      "item_id": "room-014",
+      "page": 1,
+      "bbox_px": [
+       303.0,
+       1493.6,
+       369.0,
+       1560.6
+      ],
+      "label": "8"
+     },
+     {
+      "item_id": "room-015",
+      "page": 1,
+      "bbox_px": [
+       1131.0,
+       1553.7,
+       1326.0,
+       1676.2
+      ],
+      "label": "9"
+     },
+     {
+      "item_id": "room-016",
+      "page": 1,
+      "bbox_px": [
+       249.0,
+       1560.6,
+       435.0,
+       1680.8
+      ],
+      "label": "10"
+     },
+     {
+      "item_id": "room-020",
+      "page": 1,
+      "bbox_px": [
+       579.0,
+       1685.4,
+       693.0,
+       1875.0
+      ],
+      "label": "11"
+     },
+     {
+      "item_id": "room-021",
+      "page": 1,
+      "bbox_px": [
+       1344.0,
+       1685.4,
+       1524.0,
+       1870.4
+      ],
+      "label": "12"
+     },
+     {
+      "item_id": "room-022",
+      "page": 1,
+      "bbox_px": [
+       702.0,
+       1734.0,
+       876.0,
+       2060.0
+      ],
+      "label": "13"
+     },
+     {
+      "item_id": "room-024",
+      "page": 1,
+      "bbox_px": [
+       1344.0,
+       1879.7,
+       1524.0,
+       2064.6
+      ],
+      "label": "14"
+     },
+     {
+      "item_id": "room-025",
+      "page": 1,
+      "bbox_px": [
+       414.0,
+       1882.0,
+       693.0,
+       2069.2
+      ],
+      "label": "15"
+     }
+    ],
+    "scene": {
+     "doc_id": "uploads__hka-139877668752900-168422869617700-a76b8b8537cb",
+     "highlight_item_ids": [
+      "room-002",
+      "room-003",
+      "room-005",
+      "room-006",
+      "room-007",
+      "room-008",
+      "room-010",
+      "room-014",
+      "room-015",
+      "room-016",
+      "room-020",
+      "room-021",
+      "room-022",
+      "room-024",
+      "room-025"
+     ],
+     "camera_target_item_id": "room-002"
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "baseboard -> room outline minus door openings, code, no model",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "filter",
+     "detail": "15 rooms, 33 doors considered",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "planmap",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 94,
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "found",
+      "title": "Found",
+      "text": "15 rooms on the scanned drawing, each one numbered",
+      "cite": 1,
+      "ok": null
+     },
+     {
+      "kind": "calculated",
+      "title": "Calculated",
+      "text": "Outline of 15 rooms 182.9 m, minus 32 doors 26.7 m = 156.3 m",
+      "cite": null,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 68,
+     "reason": "The objects were detected on a scanned image; the scale was estimated from door widths.",
+     "improve": "Add a printed scale (e.g. 1:100) or scale bar to make sizes exact."
+    }
+   }
+  }
+ },
+ {
+  "file": "scan_finna",
+  "question": "What is the wall surface area per floor?",
+  "q": "wall_area",
+  "original_verdict": "no answer",
+  "result": {
+   "answer_id": "0cc673cc765e4f0886536553dcb3fb68",
+   "question": "What is the wall surface area per floor?",
+   "doc_ids": [
+    "uploads__hka-139877668752900-168422869617700-a76b8b8537cb"
+   ],
+   "answer": {
+    "text_md": "**No wall surfaces could be measured for this request.** Check the wall bodies, room boundaries and exterior/interior flags.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.4,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__hka-139877668752900-168422869617700-a76b8b8537cb",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null,
+     "item_kinds": {}
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "wall side area: gross body minus actual void cuts; code only",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "planmap",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 2,
+   "wallarea": {
+    "source": "2D plan estimate",
+    "rows": [],
+    "openings": [],
+    "warnings": [
+     "53 walls could not be measured; totals are measured subtotals",
+     "50 detected openings could not be assigned and are not deducted"
+    ],
+    "metric": "both",
+    "gross_m2": 0.0,
+    "opening_m2": 0.0,
+    "net_m2": 0.0,
+    "numerical_allowance_m2": 0.0,
+    "orientation_allowance_m2": 0.0,
+    "complete": false,
+    "checks": [],
+    "assumptions": [
+     "Page 1: wall height 2.7 m (assumed; no wall height found); missing door/window heights use 2.10/1.50 m, window sill 0.90 m; 50 detected openings not assigned to a wall"
+    ],
+    "skipped_walls": 53,
+    "unallocated_openings": 50,
+    "floors": [],
+    "face_splits": [],
+    "wall_count": 0,
+    "opening_count": 0
+   },
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "read",
+      "title": "Missing data",
+      "text": "No verifiable wall-side area was substituted from floor area or nominal quantities.",
+      "cite": null,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 0,
+     "reason": "Required source geometry is missing or unsupported.",
+     "improve": "Provide wall bodies, units and room boundaries in the IFC, or a scaled plan with heights."
+    }
+   }
+  }
+ },
+ {
+  "file": "scan_finna",
+  "question": "What is the slab area by thickness?",
+  "q": "slab",
+  "original_verdict": "wrong framing",
+  "result": {
+   "answer_id": "a0717e8dd18d4d3aa83fa8c6062a072c",
+   "question": "What is the slab area by thickness?",
+   "doc_ids": [
+    "uploads__hka-139877668752900-168422869617700-a76b8b8537cb"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the objects found on the drawing and the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0.0,
+    "unit": "m\u00b2",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__hka-139877668752900-168422869617700-a76b8b8537cb",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "area / slab / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "load",
+     "detail": "plan map: 0 slab items (conf >= 0.5; 0 below ignored)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "abstain",
+     "detail": "I do not measure area of slabs from a plan reliably yet.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 6,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the objects found on the drawing and the drawing image",
+     "ms": 3,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 130
+  }
+ },
+ {
+  "file": "scan_finna",
+  "question": "What is the total length of pipes or ducts, in metres?",
+  "q": "pipe_duct",
+  "original_verdict": "correct",
+  "result": {
+   "answer_id": "3204c725a6684546af30e7b2390f8062",
+   "question": "What is the total length of pipes or ducts, in metres?",
+   "doc_ids": [
+    "uploads__hka-139877668752900-168422869617700-a76b8b8537cb"
+   ],
+   "answer": {
+    "text_md": "**No piping is drawn on this floor plan.** Pipe sizes are read from plumbing sheets, and pipe lengths from MEP models. Upload a plumbing sheet or an IFC plumbing model and ask again.",
+    "value": null,
+    "unit": "m",
+    "confidence": 0.7,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__hka-139877668752900-168422869617700-a76b8b8537cb",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "piping on a plan image -> not drawn, no model",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "planmap",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 1
+  }
+ },
+ {
+  "file": "scan_finna",
+  "question": "What is the fire rating of the doors in the third basement?",
+  "q": "trick",
+  "original_verdict": "correct",
+  "result": {
+   "answer_id": "bc4cc685a69c41a2823700e5ad3b5769",
+   "question": "What is the fire rating of the doors in the third basement?",
+   "doc_ids": [
+    "uploads__hka-139877668752900-168422869617700-a76b8b8537cb"
+   ],
+   "answer": {
+    "text_md": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__hka-139877668752900-168422869617700-a76b8b8537cb",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "text / door / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "page 1 read by fake-1",
+     "ms": 4,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "the drawing does not show the answer",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 2,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the objects found on the drawing and the drawing image",
+     "ms": 3,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "read_drawing",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 134
+  }
+ },
+ {
+  "file": "scan_habs",
+  "question": "What is this drawing?",
+  "q": "what",
+  "original_verdict": "correct",
+  "result": {
+   "answer_id": "7a7d224d1d3c4f2ea79c107024b9775b",
+   "question": "What is this drawing?",
+   "doc_ids": [
+    "uploads__ak0015-sheet-00001-9527ae2cf0c7"
+   ],
+   "answer": {
+    "text_md": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__ak0015-sheet-00001-9527ae2cf0c7",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / apartment / room (model)",
+     "ms": 2,
+     "model": "fake",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 2,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the drawing image",
+     "ms": 2,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "route",
+      "provider": "fake",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 1218
+  }
+ },
+ {
+  "file": "scan_habs",
+  "question": "How many doors are there?",
+  "q": "doors",
+  "original_verdict": "correct",
+  "result": {
+   "answer_id": "fd4a8359a35b46329405d52f9861b982",
+   "question": "How many doors are there?",
+   "doc_ids": [
+    "uploads__ak0015-sheet-00001-9527ae2cf0c7"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0,
+    "unit": "count",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__ak0015-sheet-00001-9527ae2cf0c7",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / door / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the drawing image",
+     "ms": 5,
+     "model": null,
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "recount",
+      "provider": "vision",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 71
+  }
+ },
+ {
+  "file": "scan_habs",
+  "question": "How many windows are there?",
+  "q": "windows",
+  "original_verdict": "correct",
+  "result": {
+   "answer_id": "aedd4d32d49245e0bb480b7a39f03b91",
+   "question": "How many windows are there?",
+   "doc_ids": [
+    "uploads__ak0015-sheet-00001-9527ae2cf0c7"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0,
+    "unit": "count",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__ak0015-sheet-00001-9527ae2cf0c7",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / window / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the drawing image",
+     "ms": 10,
+     "model": null,
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "recount",
+      "provider": "vision",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 74
+  }
+ },
+ {
+  "file": "scan_habs",
+  "question": "What is the total floor area in square metres?",
+  "q": "floor_area",
+  "original_verdict": "fail",
+  "result": {
+   "answer_id": "8e0b081183254f868439f1a656787821",
+   "question": "What is the total floor area in square metres?",
+   "doc_ids": [
+    "uploads__ak0015-sheet-00001-9527ae2cf0c7"
+   ],
+   "answer": {
+    "text_md": "**This file does not show areas.** Its printed text has no room table or note with areas. Upload the plan with its room table, or ask about what the sheet does list.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.6,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__ak0015-sheet-00001-9527ae2cf0c7",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "sheet_text",
+     "detail": "no area text in the file",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "index",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 1
+  }
+ },
+ {
+  "file": "scan_habs",
+  "question": "How many linear metres of baseboard do I need?",
+  "q": "baseboard",
+  "original_verdict": "ok",
+  "result": {
+   "answer_id": "fba6231281184b7a84eef5b01dccdbd0",
+   "question": "How many linear metres of baseboard do I need?",
+   "doc_ids": [
+    "uploads__ak0015-sheet-00001-9527ae2cf0c7"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0,
+    "unit": "count",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__ak0015-sheet-00001-9527ae2cf0c7",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / apartment / room (model)",
+     "ms": 1,
+     "model": "fake",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 2,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 2,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the drawing image",
+     "ms": 7,
+     "model": null,
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "route",
+      "provider": "fake",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "recount",
+      "provider": "vision",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 148
+  }
+ },
+ {
+  "file": "scan_habs",
+  "question": "What is the wall surface area per floor?",
+  "q": "wall_area",
+  "original_verdict": "ok",
+  "result": {
+   "answer_id": "428f5bf044934ba9852fadfd124931c2",
+   "question": "What is the wall surface area per floor?",
+   "doc_ids": [
+    "uploads__ak0015-sheet-00001-9527ae2cf0c7"
+   ],
+   "answer": {
+    "text_md": "**Wall surface area cannot be verified from this data.** The original IFC body geometry, or a scaled wall plan with heights, is needed; floor area is not wall area.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.4,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__ak0015-sheet-00001-9527ae2cf0c7",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null,
+     "item_kinds": {}
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "wall side area: gross body minus actual void cuts; code only",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "index",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 0,
+   "wallarea": {
+    "source": "unavailable",
+    "rows": [],
+    "openings": [],
+    "warnings": [],
+    "metric": "both",
+    "gross_m2": 0.0,
+    "opening_m2": 0.0,
+    "net_m2": 0.0,
+    "numerical_allowance_m2": 0.0,
+    "orientation_allowance_m2": 0.0,
+    "complete": false,
+    "checks": [],
+    "assumptions": []
+   },
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "read",
+      "title": "Missing data",
+      "text": "No verifiable wall-side area was substituted from floor area or nominal quantities.",
+      "cite": null,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 0,
+     "reason": "Required source geometry is missing or unsupported.",
+     "improve": "Provide wall bodies, units and room boundaries in the IFC, or a scaled plan with heights."
+    }
+   }
+  }
+ },
+ {
+  "file": "scan_habs",
+  "question": "What is the slab area by thickness?",
+  "q": "slab",
+  "original_verdict": "ok",
+  "result": {
+   "answer_id": "a8d8ba5e0321494aba4de25f13b92e8a",
+   "question": "What is the slab area by thickness?",
+   "doc_ids": [
+    "uploads__ak0015-sheet-00001-9527ae2cf0c7"
+   ],
+   "answer": {
+    "text_md": "**Not shown in this file.** Its printed text has no slab note. A structural sheet or an IFC model would carry it.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.6,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__ak0015-sheet-00001-9527ae2cf0c7",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "sheet_text",
+     "detail": "no slab text in the file",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "index",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 0
+  }
+ },
+ {
+  "file": "scan_habs",
+  "question": "What is the total length of pipes or ducts, in metres?",
+  "q": "pipe_duct",
+  "original_verdict": "ok",
+  "result": {
+   "answer_id": "e7f01ed2e5f348deb3f9c7224170a620",
+   "question": "What is the total length of pipes or ducts, in metres?",
+   "doc_ids": [
+    "uploads__ak0015-sheet-00001-9527ae2cf0c7"
+   ],
+   "answer": {
+    "text_md": "**I could not find any** on this drawing. That is what a model could read from the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "value": 0.0,
+    "unit": "m",
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__ak0015-sheet-00001-9527ae2cf0c7",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "length / pipe / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "I have no structured data for this document yet, so I cannot answer that reliably.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the drawing image",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 67
+  }
+ },
+ {
+  "file": "scan_habs",
+  "question": "What is the fire rating of the doors in the third basement?",
+  "q": "trick",
+  "original_verdict": "fail",
+  "result": {
+   "answer_id": "a5b458992f4e47eda0598e63e825ce32",
+   "question": "What is the fire rating of the doors in the third basement?",
+   "doc_ids": [
+    "uploads__ak0015-sheet-00001-9527ae2cf0c7"
+   ],
+   "answer": {
+    "text_md": "I couldn't find that in this document. Try asking about a specific room, door or window, or upload a model or drawing that covers it.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.2,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "uploads__ak0015-sheet-00001-9527ae2cf0c7",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "text / door / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "abstain",
+     "detail": "type text is not answered by code",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "forced",
+     "detail": "best-effort answer from the drawing image",
+     "ms": 1,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    }
+   ],
+   "route": "hybrid",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "forced_answer",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 70
+  }
+ }
+]

@@ -1,0 +1,152 @@
+{
+  "captured_utc": "2026-11-14T21:08:11.254233+00:00",
+  "previous_snapshot": {
+    "captured_utc": "2026-11-14T20:16:17.756254+00:00",
+    "branch_tips": {
+      "final/3d": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+      "final/changes": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+      "final/e2e": "60efc46c0671dbd10026f2351d4720b15836d1ce",
+      "final/evidence2": "60efc46c0671dbd10026f2351d4720b15836d1ce",
+      "final/mep": "d1fa4c6ff1c653f0a2bab0ae5044da04c95d3a37",
+      "final/mistakes": "e61c1b40e0f8add3a93fc69dce7ff8b5b03cb2ac",
+      "final/order": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+      "final/perf": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+      "final/proj-engine": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+      "final/proj-ui": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+      "final/props": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+      "final/qa": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+      "final/qa2": "60efc46c0671dbd10026f2351d4720b15836d1ce",
+      "final/robust": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+      "final/scales": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+      "final/scansym": "f42b9d109c095bcb82608317e06ea7acca05e9cd",
+      "final/wallarea": "60efc46c0671dbd10026f2351d4720b15836d1ce"
+    }
+  },
+  "strategy": "Isolated shared-object clone inside own worktree; sequential scratch merges only; conflicts aborted and recorded. Original Git metadata is sandbox read-only.",
+  "branch_tips": {
+    "final/3d": "fe52a9f5302bead4838970cefe71334e44aafbc3",
+    "final/changes": "faae60b314822253036dbb4bc52a46945fbfa130",
+    "final/e2e": "1e59ab9738c5ee583e764495a983bfc4883454ed",
+    "final/e2e-projects-scratch": "a4d1304e36f2a6d7b2c54260b49cae2ac2b7a047",
+    "final/evidence2": "60efc46c0671dbd10026f2351d4720b15836d1ce",
+    "final/mep": "d09df055637c688da9913173d90dabd4844e2554",
+    "final/mistakes": "e61c1b40e0f8add3a93fc69dce7ff8b5b03cb2ac",
+    "final/order": "f2df35d0715252e6aeb613e502d25e606e803c04",
+    "final/perf": "872cf77bea0ddb2dda30b058d353ad20039cbfad",
+    "final/proj-engine": "c6c37806f3f06f9d0eabda3c0a3e9f72b2c65c5a",
+    "final/proj-ui": "8b3cc9db21c8febf569c8be0ca4a1ba43b237d1c",
+    "final/props": "a5a44093822e0587e59e0f03da52492fff0167e5",
+    "final/qa": "aa436a771bd17c9f2eb2231dd61b0b5de9601e21",
+    "final/qa2": "5cb56946572abb17126a33e3c52212b2ecedd7e7",
+    "final/robust": "9a08558542b6454e9f97546b3dc2ed7e1b8743d5",
+    "final/scales": "1906d78cdfa9ac81a3a9a0b93e300c2f2c99a612",
+    "final/scansym": "b041d486a9a0558aeb4087d1117438404a18dd27",
+    "final/wallarea": "2a725c5e2240206f904ed5c71fac54200c36e72e"
+  },
+  "merges": [
+    {
+      "branch": "final/3d",
+      "commit": "fe52a9f5302bead4838970cefe71334e44aafbc3",
+      "status": "merged"
+    },
+    {
+      "branch": "final/changes",
+      "commit": "faae60b314822253036dbb4bc52a46945fbfa130",
+      "status": "merged"
+    },
+    {
+      "branch": "final/e2e",
+      "commit": "1e59ab9738c5ee583e764495a983bfc4883454ed",
+      "status": "merged"
+    },
+    {
+      "branch": "final/e2e-projects-scratch",
+      "commit": "a4d1304e36f2a6d7b2c54260b49cae2ac2b7a047",
+      "status": "merged"
+    },
+    {
+      "branch": "final/evidence2",
+      "commit": "60efc46c0671dbd10026f2351d4720b15836d1ce",
+      "status": "merged"
+    },
+    {
+      "branch": "final/mep",
+      "commit": "d09df055637c688da9913173d90dabd4844e2554",
+      "status": "merged"
+    },
+    {
+      "branch": "final/mistakes",
+      "commit": "e61c1b40e0f8add3a93fc69dce7ff8b5b03cb2ac",
+      "status": "conflict",
+      "conflicting_files": [
+        "engine/reasoning.py"
+      ]
+    },
+    {
+      "branch": "final/order",
+      "commit": "f2df35d0715252e6aeb613e502d25e606e803c04",
+      "status": "merged"
+    },
+    {
+      "branch": "final/perf",
+      "commit": "872cf77bea0ddb2dda30b058d353ad20039cbfad",
+      "status": "conflict",
+      "conflicting_files": [
+        "engine/answer.py"
+      ]
+    },
+    {
+      "branch": "final/proj-engine",
+      "commit": "c6c37806f3f06f9d0eabda3c0a3e9f72b2c65c5a",
+      "status": "merged"
+    },
+    {
+      "branch": "final/proj-ui",
+      "commit": "8b3cc9db21c8febf569c8be0ca4a1ba43b237d1c",
+      "status": "merged"
+    },
+    {
+      "branch": "final/props",
+      "commit": "a5a44093822e0587e59e0f03da52492fff0167e5",
+      "status": "conflict",
+      "conflicting_files": [
+        "engine/answer.py"
+      ]
+    },
+    {
+      "branch": "final/qa",
+      "commit": "aa436a771bd17c9f2eb2231dd61b0b5de9601e21",
+      "status": "merged"
+    },
+    {
+      "branch": "final/robust",
+      "commit": "9a08558542b6454e9f97546b3dc2ed7e1b8743d5",
+      "status": "merged"
+    },
+    {
+      "branch": "final/scales",
+      "commit": "1906d78cdfa9ac81a3a9a0b93e300c2f2c99a612",
+      "status": "conflict",
+      "conflicting_files": [
+        "engine/reasoning_parts/measured.py",
+        "pipeline/dxf_planmap.py",
+        "pipeline/pages.py",
+        "server/ingest_job.py"
+      ]
+    },
+    {
+      "branch": "final/scansym",
+      "commit": "b041d486a9a0558aeb4087d1117438404a18dd27",
+      "status": "conflict",
+      "conflicting_files": [
+        "engine/reasoning.py"
+      ]
+    },
+    {
+      "branch": "final/wallarea",
+      "commit": "2a725c5e2240206f904ed5c71fac54200c36e72e",
+      "status": "merged"
+    }
+  ],
+  "scratch_commit": "8decc6d0010312e7907c6ba18f271ea3df3b3a2a"
+}

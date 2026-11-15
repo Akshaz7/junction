@@ -37,7 +37,8 @@ _UNDO = re.compile(r"^\W*(?:please\s+|can you\s+|could you\s+)?(undo|undo (?:tha
 _CLEAR = re.compile(r"^\W*(?:please\s+)?clear\s+(?:all\s+|the\s+)?highlights?\W*$", re.I)
 _CHECK_EDIT = re.compile(r"^\W*(?:is|does)\s+(?:it|this|that|the (?:building|model|scene|edit))\s+(?:(?:still|now)\s+)?(?:compliant|comply|meet (?:the )?(?:rules|code))\s*(?:now|after (?:this|that)(?: edit)?)?\W*$", re.I)
 _SHOW = re.compile(r"^\W*(?:please\s+)?(?:show|display|give)\s+(?:me\s+)?(?:all\s+)?(?:of\s+)?(?:the\s+|all\s+)?", re.I)
-_RESTORE = re.compile(r"\b(unhide|bring (?:back|.* back)|show .* again|restore|put .* back|turn .* back on)\b", re.I)
+_RESTORE = re.compile(r"\b(unhide|bring (?:back|.* back)|show .* again|restore|put .* back|turn .* back on|"
+                      r"(?:move|change|set|switch) .*\bback)\b", re.I)
 _HIGHLIGHT = re.compile(r"\b(highlight|light up|glow|label|mark|point out|point to|flag|tag)\b", re.I)
 
 
@@ -220,7 +221,8 @@ def _noun(kind: str | None, n: int) -> str:
 
 
 def undo_commands(doc: Doc, state: dict) -> list[dict]:
-    """Invert the last persisted visibility edit. Highlighting does not consume Undo.
+    """Invert the last persisted visibility, move or material edit. Highlighting does not consume Undo.
+    A move goes back to the item's previous offset (one step), a material to its previous material.
 
     The server can supply ordered `edits` (including when hidden is empty). Older
     callers supply only ordered hidden IDs: restore the last one, never all of them.
@@ -233,6 +235,8 @@ def undo_commands(doc: Doc, state: dict) -> list[dict]:
     isolated: list[str] | None = None
     highlighted: list[str] = []
     labels: dict = {}
+    moved: dict[str, list] = {}
+    mats: dict[str, str] = {}
     before = None
     last = None
     for edit in edits:
@@ -240,7 +244,7 @@ def undo_commands(doc: Doc, state: dict) -> list[dict]:
             continue
         op = edit.get("op")
         ids = list(dict.fromkeys(edit.get("item_ids") or []))
-        previous = (set(hidden), isolated[:] if isolated is not None else None, highlighted[:], dict(labels))
+        previous = (set(hidden), isolated[:] if isolated is not None else None, highlighted[:], dict(labels), dict(moved), dict(mats))
         if op == "hide":
             hidden.update(ids)
             highlighted = [i for i in highlighted if i not in ids]
@@ -250,19 +254,38 @@ def undo_commands(doc: Doc, state: dict) -> list[dict]:
         elif op == "restore":
             hidden.difference_update(ids) if ids else hidden.clear()
         elif op == "reset":
-            hidden, isolated, highlighted, labels = set(), None, [], {}
+            hidden, isolated, highlighted, labels, moved, mats = set(), None, [], {}, {}, {}
         elif op == "isolate":
             isolated, highlighted, labels = ids[:], ids[:], dict(edit.get("labels") or {})
             hidden.difference_update(ids)
         elif op == "highlight":
             highlighted, labels = ids[:], dict(edit.get("labels") or {})
+        elif op in ("move", "material"):   # shared layer: Edit-panel moves / wall materials
+            detail = edit.get("detail") or {}
+            for i in ids:
+                if op == "move":
+                    off = list(detail.get("offset_m") or [0, 0])
+                    if abs(off[0]) + abs(off[1]) > 1e-6:
+                        moved[i] = off
+                    else:
+                        moved.pop(i, None)
+                elif detail.get("material"):
+                    mats[i] = detail["material"]
+                else:
+                    mats.pop(i, None)
         else:
             continue
-        if op != "highlight" and previous != (hidden, isolated, highlighted, labels):
+        if op != "highlight" and previous != (hidden, isolated, highlighted, labels, moved, mats):
             before, last = previous, op
     if before is None:
         return []
-    old_hidden, old_isolated, old_highlighted, old_labels = before
+    old_hidden, old_isolated, old_highlighted, old_labels, old_moved, old_mats = before
+    shared = [{"op": "move", "item_ids": [i], "offset_m": [float(v) for v in old_moved.get(i, [0, 0])]}
+              for i in sorted(set(moved) | set(old_moved)) if moved.get(i) != old_moved.get(i)]
+    shared += [{"op": "material", "item_ids": [i], "material": old_mats.get(i)}
+               for i in sorted(set(mats) | set(old_mats)) if mats.get(i) != old_mats.get(i)]
+    if last in ("move", "material"):
+        return shared
     # Single hide/restore is the common case: keep other edits and selections intact.
     if last in ("hide", "restore") and old_isolated == isolated:
         out = []
@@ -278,7 +301,65 @@ def undo_commands(doc: Doc, state: dict) -> list[dict]:
         out.append({"op": "isolate", "item_ids": old_isolated, "labels": old_labels})
     if old_highlighted != (old_isolated or []):
         out.append({"op": "highlight", "item_ids": old_highlighted, "labels": old_labels})
-    return out
+    return out + shared
+def _revert_target(question: str, doc: Doc, intent: SceneIntent, state: dict, tg: dict[str, str]) -> dict[str, list[str]] | None:
+    """Shared edit layer: undo / "put it back where it was" / "move the window back" reverts a move or material change
+    (Edit panel or chat) when that is the newest edit, or when the named items are moved but not hidden.
+    -> {"move": ids, "material": ids} or None (then the hide/restore path runs)."""
+    moved, mats = state.get("moved") or {}, state.get("materials") or {}
+    # Undo with the ordered edit log is main's undo_commands (one step back); this covers "put it back where it was",
+    # "move the window back" and undo from older callers without `edits`.
+    if not (moved or mats) or intent.op not in ("undo", "restore") or (intent.op == "undo" and isinstance(state.get("edits"), list)):
+        return None
+    last = state.get("last_edit") or {}
+    hidden = set(state.get("hidden") or [])
+    if not intent.kind and not intent.tags:
+        if last.get("op") in ("move", "material"):
+            ids = list(last.get("item_ids") or [])
+            return {"move": [i for i in ids if i in moved] if last["op"] == "move" else [],
+                    "material": [i for i in ids if i in mats] if last["op"] == "material" else []}
+        if intent.op == "restore" and not hidden and re.search(r"\b(?:where it was|moved?|position|place)\b", question, re.I):
+            return {"move": list(moved), "material": []}
+        return None
+    sel = _select(doc, intent, question, tg)
+    if any(i.item_id in hidden for i in sel):
+        return None
+    mv = [i.item_id for i in sel if i.item_id in moved]
+    mt = [i.item_id for i in sel if i.item_id in mats]
+    if not (mv or mt):
+        return None
+    if len(mv) + len(mt) > 1 and intent.kind and not re.search(rf"\b(?:all|every|both|{re.escape(_noun(intent.kind, 2))})\b", question, re.I):
+        ids = set(last.get("item_ids") or [])
+        lm, lt = [i for i in mv if i in ids], [i for i in mt if i in ids]
+        if lm or lt:
+            mv, mt = lm, lt
+    return {"move": mv, "material": mt}
+
+
+def _revert_answer(question: str, doc: Doc, back: dict[str, list[str]], tg: dict[str, str], t0: float) -> dict:
+    mv, mt = back["move"], back["material"]
+    cmds: list[dict] = []
+    if mv:
+        cmds.append({"op": "move", "item_ids": mv, "offset_m": [0.0, 0.0], "labels": {i: tg[i] for i in mv if i in tg}})
+    if mt:
+        cmds.append({"op": "material", "item_ids": mt, "material": None, "labels": {i: tg[i] for i in mt if i in tg}})
+    name = lambda ids: ", ".join(tg.get(i, i) for i in ids[:6]) + (f" and {len(ids) - 6} more" if len(ids) > 6 else "")  # noqa: E731
+    parts = []
+    if mv:
+        parts.append(f"**{name(mv)} {'is' if len(mv) == 1 else 'are'} back where {'it was' if len(mv) == 1 else 'they were'}**")
+    if mt:
+        parts.append(f"**{name(mt)} {'has' if len(mt) == 1 else 'have'} the original material again**")
+    text = "Done. " + " and ".join(parts) + "." if parts else "Nothing was moved or recoloured, so nothing changed."
+    ids = [*mv, *mt]
+    return {
+        "answer_id": uuid.uuid4().hex, "question": question, "doc_ids": [doc.doc_id],
+        "answer": {"text_md": text, "value": None, "unit": None, "confidence": 1.0 if ids else 0.0, "abstained": not ids},
+        "citations": [], "evidence": {"boxes": [], "scene": {"doc_id": doc.doc_id, "highlight_item_ids": [], "camera_target_item_id": None,
+                                                              "commands": cmds}},
+        "trace": [{"step": "scene", "detail": f"revert {len(mv)} move(s), {len(mt)} material(s)", "ms": 0, "model": None, "cost_usd": 0}],
+        "route": "index" if doc.mode == "ifc" else "planmap",
+        "cost": {"usd_total": 0.0, "calls": []}, "latency_ms": int((time.perf_counter() - t0) * 1000),
+    }
 
 
 def scene_answer(question: str, doc: Doc, intent: SceneIntent, state: dict | None = None, t0: float | None = None) -> dict:
@@ -287,6 +368,9 @@ def scene_answer(question: str, doc: Doc, intent: SceneIntent, state: dict | Non
     state = state or {}
     op = intent.op
     hidden_now = list(state.get("hidden") or [])
+    back = _revert_target(question, doc, intent, state, tg)
+    if back is not None:
+        return _revert_answer(question, doc, back, tg, t0)
     undo_ids: list[str] = []
     if op in ("undo", "check") and (op == "check" or isinstance(state.get("edits"), list) or "last_hidden" not in state):
         res = scene_answer(question, doc, SceneIntent("reset"), state, t0)

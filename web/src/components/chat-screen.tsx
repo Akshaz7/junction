@@ -34,7 +34,8 @@ const starters = [
 
 type Mention = { start: number; end: number; query: string }
 
-export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, onOpenCitation, onChatChange, onRefresh }: {
+export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, onOpenCitation, onChatChange, onRefresh, projectId = null }: {
+  projectId?: string | null
   docs: Document[]; loadingDocs: boolean; demo: boolean; contextDocument: Document | null; hidden: boolean
   onChatChange: (id: string | null) => void
   onRefresh?: () => Promise<void>
@@ -64,7 +65,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
   const [fileOver, setFileOver] = useState(false)
   const dragDepth = useRef(0)
   const [activeOption, setActiveOption] = useState(0)
-  const [viewer, setViewer] = useState<{ answer: Answer; citation: Citation; request: number; mode?: '2d' | '3d'; overlayDocId?: string | null } | null>(null)
+  const [viewer, setViewer] = useState<{ answer: Answer; citation: Citation; request: number; mode?: '2d' | '3d'; panel?: 'calc'; overlayDocId?: string | null } | null>(null)
   const [split, setSplit] = useState(48)
   const splitContainer = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -134,6 +135,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       if (link.kind === 'question') {
         setRestoring(false)
         setDraft(link.question)
+        if (new URLSearchParams(window.location.hash.split('?')[1]).get('send') === '1') autoSend.current = link.question
         return
       }
       setRestoring(true)
@@ -384,6 +386,14 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     observer.observe(node)
     return () => observer.disconnect()
   }, [viewer, sheet])
+  // A question sent from a project page arrives as #/chat?question=...&send=1 and is asked once the documents are known.
+  const autoSend = useRef<string | null>(null)
+  useEffect(() => {
+    const text = autoSend.current
+    if (text === null || restoring || !docs.length || draft !== text) return
+    autoSend.current = null
+    void ask(text)
+  }) // eslint-disable-line react-hooks/exhaustive-deps
   async function ask(question: string, documentIds?: string[]) {
     if (!question.trim() || submitting.current || restoring || !docs.length) return
     const overlay = overlayRequest(question, docs, selected)
@@ -396,7 +406,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       return
     }
     // A drawing question with nothing attached would hang on "Thinking…": ask for a document and keep the text.
-    if (!documentIds && !selected.length && !chatId.current && needsDocument(question)) { blocked.current = question; setNeedDoc(true); return }
+    if (!documentIds && !selected.length && !chatId.current && !projectId && needsDocument(question)) { blocked.current = question; setNeedDoc(true); return }
     setNeedDoc(false)
     if (viewer && sheet) setViewer(null) // the answer streams into the conversation behind the sheet
     const version = generation.current
@@ -414,14 +424,14 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
     const streamedTraces: TraceStep[] = []
     try {
       if (!chatId.current) {
-        const id = await workspaceApi.createChat(docIds, question.trim().slice(0, 100))
+        const id = await workspaceApi.createChat(docIds, question.trim().slice(0, 100), projectId)
         if (generation.current !== version) return
         chatId.current = id
         await registerChat(id) // paired devices can now recognise this chat
         if (generation.current !== version) return
         setLiveChatId(id)
         // Preserve the active stream: a hashchange would reload this new chat.
-        window.history.replaceState(window.history.state, '', `#/chat?chat=${encodeURIComponent(id)}`)
+        window.history.replaceState(window.history.state, '', `#/chat?chat=${encodeURIComponent(id)}${projectId ? `&project=${encodeURIComponent(projectId)}` : ''}`)
       }
       const answer = await askUntilReadable(() => workspaceApi.askQuestion(chatId.current!, question.trim(), docIds, {
         onStatus: (text) => { if (generation.current === version) setStatuses((previous) => previous.at(-1) === text ? previous : [...previous, text]) },
@@ -493,6 +503,9 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         onOpenCitation(citation)
       }} onVisualise={(citation) => {
         setViewer((previous) => ({ answer: exchange.answer!, citation, request: (previous?.request ?? 0) + 1, mode: '3d' }))
+        onOpenCitation(citation)
+      }} onOpenCalc={(citation) => {
+        setViewer((previous) => ({ answer: exchange.answer!, citation, request: (previous?.request ?? 0) + 1, mode: '2d', panel: 'calc' }))
         onOpenCitation(citation)
       }} /> : <article className="exchange" key={`${exchange.id}-${index}`}>
         {exchange.question && <div className="question-bubble">{exchange.question}</div>}
@@ -586,7 +599,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         }}
         onPointerUp={(event) => event.currentTarget.releasePointerCapture(event.pointerId)} />
       <DrawingEditsContext value={sceneEdits}>
-        <DocumentViewer key={viewer.citation.doc_id} answer={viewer.answer} citation={viewer.citation} sheet={sheet} initialMode={viewer.mode} openRequest={viewer.request} initialOverlayDocId={viewer.overlayDocId}
+        <DocumentViewer key={viewer.citation.doc_id} answer={viewer.answer} citation={viewer.citation} sheet={sheet} initialMode={viewer.mode} initialPanel={viewer.panel} openRequest={viewer.request} initialOverlayDocId={viewer.overlayDocId}
           onOverlayAlignment={(result, base, overlay, basePage, overlayPage) => {
             if (!viewer.answer.answer_id.startsWith('overlay-')) return
             const updated = overlayAlignedAnswer(viewer.answer, result, base, overlay, basePage, overlayPage)

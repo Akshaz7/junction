@@ -1,0 +1,75 @@
+{
+  "phase": "before",
+  "models": "live",
+  "doc_ids": [
+    "ifc_bench__sixty5-arc",
+    "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+    "ifc_models__resbim-454-model"
+  ],
+  "events": [
+    {
+      "kind": "status",
+      "ms": 1829.005
+    },
+    {
+      "kind": "status",
+      "ms": 2267.144
+    },
+    {
+      "kind": "trace",
+      "ms": 2269.892
+    },
+    {
+      "kind": "status",
+      "ms": 3816.409
+    },
+    {
+      "kind": "status",
+      "ms": 3854.83
+    },
+    {
+      "kind": "trace",
+      "ms": 3855.32
+    },
+    {
+      "kind": "trace",
+      "ms": 6929.1
+    }
+  ],
+  "snapshots": [],
+  "first_status_ms": 1829.005,
+  "first_finding_ms": null,
+  "first_final_token_ms": 6877.031,
+  "final_ms": 7078.419,
+  "answer": {
+    "text_md": "**The Sixty5 model (d1) has 1,049 doors and the Maleva t\u00e4nav 18 model (d2) has 211 doors.**\n- d1 (Sixty5): 1,049 IfcDoor elements across storeys 00 to 16; the largest storey count is 96, on 01 eerste verdieping.\n- d2 (Maleva t\u00e4nav 18): 211 IfcDoor elements across 1.korrus to 5.korrus, with 46 on 1.korrus.\n- Together the two models have 1,260 doors. [1][2]",
+    "value": null,
+    "unit": "doors",
+    "confidence": 0.93,
+    "abstained": false
+  },
+  "cost": {
+    "usd_total": 0.052336,
+    "calls": [
+      {
+        "task": "reader_plan",
+        "provider": "runware_claude",
+        "model": "claude-opus-5-5",
+        "cost_usd": 0.00808
+      },
+      {
+        "task": "reader_plan",
+        "provider": "runware_claude",
+        "model": "claude-opus-5-5",
+        "cost_usd": 0.016608
+      },
+      {
+        "task": "reader_plan",
+        "provider": "runware_claude",
+        "model": "claude-opus-5-5",
+        "cost_usd": 0.027648
+      }
+    ]
+  },
+  "citations": 2
+}

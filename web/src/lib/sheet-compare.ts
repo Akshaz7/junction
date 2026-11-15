@@ -20,6 +20,8 @@ export const THUMB_H = 68
 export const THUMB_MAX_ZOOM = 900
 export const MIN_BOX_PX = 9
 export const SHEET_MARGIN = 10
+/** Focusing a change never zooms past this, so small boxes keep their surroundings and the page raster stays sharp. */
+export const REGION_MAX_SCALE = 5
 
 export const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
 export const FIT_VIEW: View = { s: 1, cx: 0.5, cy: 0.5 }
@@ -111,7 +113,7 @@ export function regionView(bbox: Bbox, sheet: Size, fit: Size, viewport: Size, f
   const rw = Math.max((bbox[2] - bbox[0]) / sheet.w, 0.05)
   const rh = Math.max((bbox[3] - bbox[1]) / sheet.h, 0.05 * fit.w / fit.h)
   const s = Math.min(fill * viewport.w / (rw * fit.w), fill * viewport.h / (rh * fit.h))
-  return clampView({ s: Math.max(1, s), cx: (bbox[0] + bbox[2]) / 2 / sheet.w, cy: (bbox[1] + bbox[3]) / 2 / sheet.h })
+  return clampView({ s: clamp(s, 1, REGION_MAX_SCALE), cx: (bbox[0] + bbox[2]) / 2 / sheet.w, cy: (bbox[1] + bbox[3]) / 2 / sheet.h })
 }
 
 export const lerpView = (a: View, b: View, t: number): View => ({ s: a.s + (b.s - a.s) * t, cx: a.cx + (b.cx - a.cx) * t, cy: a.cy + (b.cy - a.cy) * t })
@@ -155,7 +157,14 @@ export function parseHex(value: string, fallback: [number, number, number]): [nu
   return [parseInt(full.slice(0, 2), 16) / 255, parseInt(full.slice(2, 4), 16) / 255, parseInt(full.slice(4, 6), 16) / 255]
 }
 
-/** feColorMatrix values that turn dark ink into `tint` and keep paper white: out = tint + (1 - tint) * luminance. */
+/** Contrast boost on luminance: L' = GAIN * L - (GAIN - 1), clamped by the filter. Paper stays white, thin grey linework becomes solid. */
+export const TINT_GAIN = 2.2
+export function contrastMatrix(gain = TINT_GAIN): string {
+  const row = `${(gain * 0.2126).toFixed(4)} ${(gain * 0.7152).toFixed(4)} ${(gain * 0.0722).toFixed(4)} 0 ${(-(gain - 1)).toFixed(4)}`
+  return `${row} ${row} ${row} 0 0 0 1 0`
+}
+
+/** feColorMatrix values that turn dark ink into `tint` and keep paper white: out = tint + (1 - tint) * luminance. Apply after contrastMatrix. */
 export function tintMatrix(tint: [number, number, number]): string {
   const row = (t: number) => `${((1 - t) * 0.2126).toFixed(4)} ${((1 - t) * 0.7152).toFixed(4)} ${((1 - t) * 0.0722).toFixed(4)} 0 ${t.toFixed(4)}`
   return `${row(tint[0])} ${row(tint[1])} ${row(tint[2])} 0 0 0 1 0`

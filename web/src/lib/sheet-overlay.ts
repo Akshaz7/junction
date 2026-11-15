@@ -55,23 +55,22 @@ export function overlayActionAnswer(question: string, base: Document, overlay: D
     answer: { text_md: overlay ? '**Opening the sheet overlay.** Check the alignment in the drawing viewer. [1] [2]' : '**Choose a second sheet to overlay.** The drawing viewer will check the alignment. [1]', value: null, unit: null, confidence: 0, abstained: false },
     citations: ids.map((doc_id, i) => ({ n: i+1, doc_id, page: 1, kind: 'region', bbox_px: null, item_ids: [], quote: null })),
     evidence: { boxes: [], scene: { doc_id: base.doc_id, highlight_item_ids: [], camera_target_item_id: null } },
-    reasoning: { steps: [{ kind: 'found', title: 'Source sheets', text: 'Opened the source sheets for comparison. Registration is checked separately in the viewer.', cite: 1 }], confidence: { label: 'Estimate', pct: 0, reason: 'Alignment has not yet been checked.' } },
+    reasoning: { steps: [{ kind: 'found', title: 'Source sheets', text: 'Opened the source sheets for comparison. Registration is checked separately in the viewer.', cite: 1 }], confidence: { label: 'Estimate', pct: null, reason: 'Alignment has not yet been checked. No measured accuracy is available for this answer type.' } },
     trace: [], route: 'index', cost: { usd_total: 0, calls: [] }, latency_ms: 0 }
 }
 
-/** Report the actual fit and cite both originals. Consensus is explicitly anchor agreement, not measurement accuracy. */
+/** Report the actual fit and cite both originals. Anchor consensus is not calibrated accuracy. */
 export function overlayAlignedAnswer(previous: Answer, result: Alignment, base: Document, overlay: Document, basePage = 1, overlayPage = 1): Answer {
   const accepted = result.anchor_count, candidates = result.candidate_count
-  const ratio = candidates > 0 ? accepted / candidates : 0
   const manual = result.status === 'manual', aligned = result.status === 'aligned'
   const boxes = aligned ? result.anchors.filter((a) => a.base_bbox).slice(0, 12).map((a, i) => ({ item_id: `alignment-anchor-${i+1}`, page: basePage, bbox_px: a.base_bbox!, label: String(i+1) })) : []
   return { ...previous, doc_ids: [base.doc_id, overlay.doc_id],
-    answer: { ...previous.answer, text_md: `**${result.detail}** [1] [2]`, confidence: aligned ? ratio : 0 },
+    answer: { ...previous.answer, text_md: `**${result.detail}** [1] [2]`, confidence: 0 },
     citations: [base, overlay].map((doc, i) => ({ n: i+1, doc_id: doc.doc_id, page: i ? overlayPage : basePage, kind: 'region', bbox_px: null, item_ids: i ? [] : boxes.map((b) => b.item_id), quote: null })),
     evidence: { ...previous.evidence, boxes },
     reasoning: { steps: [{ kind: 'checked', title: manual ? 'Manual registration' : aligned ? 'Shared drawing anchors' : 'Alignment needs input', text: result.detail, cite: 1, ok: aligned ? true : null }],
-      confidence: { label: aligned ? 'Cross-checked' : 'Estimate', pct: aligned ? Math.round(ratio*1000)/10 : 0,
-        reason: aligned ? `${accepted} of ${candidates} candidate anchors agree with the fit. This percentage describes anchor agreement, not measurement accuracy.` : 'Automatic accuracy is unavailable. Check a third grid crossing before relying on the overlay.' } } }
+      confidence: { label: aligned ? 'Cross-checked' : 'Estimate', pct: null,
+        reason: aligned ? `${accepted} of ${candidates} candidate anchors agree with the fit. This is registration support, not measurement accuracy. No measured accuracy is available for this answer type.` : 'Automatic accuracy is unavailable. Check a third grid crossing before relying on the overlay.' } } }
 }
 
 export async function requestAlignment(base: string, overlay: string, basePage: number, overlayPage: number, signal: AbortSignal, points?: { base: XY[]; overlay: XY[] }): Promise<Alignment> {

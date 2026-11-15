@@ -43,3 +43,18 @@ it('a failed alignment request has an actionable retry and no drawing overlay', 
   expect(host.querySelector('[role=alert]')?.textContent).toContain('Page image is missing')
   expect(host.querySelector('.overlay-compare')).toBeNull()
 })
+
+it('uses the shared compare modes, opacity and layer controls after registration', async () => {
+  vi.mocked(requestAlignment).mockResolvedValueOnce({ status: 'aligned', matrix: [[1, 0, 5], [0, 1, 10]], method: 'similarity', anchor_count: 4, candidate_count: 5, residual_px: .5, residual_mm: null, detail: 'Aligned on 4 shared labels, ± 0.5 px', anchors: [], base_image: { w: 1000, h: 800 }, overlay_image: { w: 1200, h: 900 } })
+  await act(async () => root.render(<SheetOverlay baseDocId="base" initialOverlayDocId="other" onClose={() => {}} />))
+  expect(host.querySelectorAll('.sheet-compare')).toHaveLength(1)
+  expect(host.querySelector('.sheet-compare')?.getAttribute('data-mode')).toBe('Overlay')
+  expect(host.querySelector('[aria-label="Overlay opacity"]')).not.toBeNull()
+  const checkbox = host.querySelector<HTMLInputElement>('.overlay-controls input')!
+  await act(async () => checkbox.click())
+  expect(host.querySelector('.overlay-compare')?.getAttribute('data-base-visible')).toBe('false')
+  const wipe = [...host.querySelectorAll('button')].find((button) => button.textContent === 'Wipe')!
+  await act(async () => wipe.click())
+  expect(host.querySelector('.sheet-compare')?.getAttribute('data-mode')).toBe('Wipe')
+  expect(host.querySelector('[aria-label="Wipe position"]')).not.toBeNull()
+})

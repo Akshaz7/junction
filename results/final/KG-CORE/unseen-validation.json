@@ -1,0 +1,55 @@
+{
+  "group": "opening_design/Sports_Complex/Transfer/_Archive/20150814 - Issued for Permit",
+  "selection_before_development": true,
+  "files": [
+    {
+      "filename": "XSC - A-801 - Door and Finish Schedules & Wall Types.pdf",
+      "doc_id": "opening_design__sports-complex-transfer-archive-20150814-issued-for-permit-xsc-a-801-door-and-finish-schedules-wall-types",
+      "has_doc_metadata": true,
+      "planmap_pages": 0,
+      "text_pages": 1
+    },
+    {
+      "filename": "Wall Detail.pdf",
+      "doc_id": "opening_design__sports-complex-transfer-archive-20150814-issued-for-permit-wall-detail",
+      "has_doc_metadata": true,
+      "planmap_pages": 0,
+      "text_pages": 1
+    }
+  ],
+  "elapsed_s": 0.0159,
+  "stats": {
+    "nodes": 3,
+    "edges": 2,
+    "by_kind": {
+      "project": 1,
+      "doc": 2
+    },
+    "edges_by_kind": {
+      "contains": 2
+    },
+    "linked_pct": null,
+    "agree_pct": null,
+    "unlinked": [],
+    "issues": 0,
+    "counterpart_items": 0,
+    "linked_items": 0
+  },
+  "warnings": [
+    {
+      "doc_id": "opening_design__sports-complex-transfer-archive-20150814-issued-for-permit-xsc-a-801-door-and-finish-schedules-wall-types",
+      "note": "No readable item index; document retained as a reference."
+    },
+    {
+      "doc_id": "opening_design__sports-complex-transfer-archive-20150814-issued-for-permit-wall-detail",
+      "note": "No readable item index; document retained as a reference."
+    }
+  ],
+  "mep": {
+    "documents": {},
+    "notes": [
+      "Vector-PDF services skipped: optional pipeline.pdf_mep is not installed; no services or alignment inferred."
+    ]
+  },
+  "limitations": "This checks robustness and source-backed graph structure; link accuracy is unknown where no independent item truth exists."
+}

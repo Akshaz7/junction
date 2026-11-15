@@ -45,7 +45,8 @@ def top_faces_xz(tm: trimesh.Trimesh, T, top_only=True):
 def process(doc_id: str, art: Path):
     out = art / doc_id
     scene = json.loads((out / "scene.json").read_text())
-    els = {e["item_id"]: e for e in json.loads((out / "elements.json").read_text())["elements"]}
+    element_data = json.loads((out / "elements.json").read_text())
+    els = {e["item_id"]: e for e in element_data["elements"]}
     sc = trimesh.load(str(out / "scene.glb"), force="scene")
     parts = defaultdict(list)  # item_id -> [(verts, faces)]; trimesh splits multi-material nodes into <guid>_<hash>
     for node in sc.graph.nodes_geometry:
@@ -65,12 +66,14 @@ def process(doc_id: str, art: Path):
             by_storey[(st["elevation_m"], st["name"])].append(gid)
     pages = []
     for n, key in enumerate(sorted(by_storey), start=1):
-        ids = by_storey[key]
+        ids = [i for i in by_storey[key] if len(meshes[i][1])]
+        if not ids:
+            continue
         allv = np.concatenate([meshes[i][0][np.unique(meshes[i][1])] for i in ids if len(meshes[i][1])])
         # extent from walls/doors/windows/rooms footprints only (furniture strays would distort)
         x0, x1 = allv[:, 0].min(), allv[:, 0].max()
         z0, z1 = allv[:, 2].min(), allv[:, 2].max()
-        ppm = max(5.0, min(80.0, (LONG_SIDE - 2 * MARGIN) / max(x1 - x0, z1 - z0, 1e-6)))
+        ppm = min(80.0, (LONG_SIDE - 2 * MARGIN) / max(x1 - x0, z1 - z0, 1e-6))
         W = int((x1 - x0) * ppm) + 2 * MARGIN
         H = int((z1 - z0) * ppm) + 2 * MARGIN
         px = lambda v: np.stack([(v[:, 0] - x0) * ppm + MARGIN, (v[:, 2] - z0) * ppm + MARGIN], 1)
@@ -102,7 +105,7 @@ def process(doc_id: str, art: Path):
                 counter[kind] += 1
                 props = {k: v_ for k, v_ in e["quantities"].items()
                          if k in ("width_m", "height_m", "length_m", "area_m2", "volume_m3", "net_floor_area_m2")}
-                props.update({"ifc_class": e["ifc_class"], "storey": e["storey"]["name"]})
+                props.update({"ifc_class": e["ifc_class"], "storey": (e.get("storey") or {}).get("name")})
                 if kind == "room":
                     props["room_type"] = e["type_name"]
                 items.append({"item_id": gid, "kind": kind, "label": e["name"], "bbox_px": bbox, "polygon_px": poly,
@@ -115,7 +118,7 @@ def process(doc_id: str, art: Path):
         save_page(img, out, n)
         pm = {"doc_id": doc_id, "page": n, "storey": {"name": key[1], "elevation_m": key[0]},
               "image": {"w": W, "h": H},
-              "scale": {"m_per_px": round(1 / ppm, 6), "method": "ifc", "confidence": 1.0},
+              "scale": {"m_per_px": 1 / ppm, "method": "ifc", "confidence": 1.0, "native_units": element_data.get("unit_provenance")},
               "origin_offset_m": scene["origin_offset_m"],
               "projection": {"x_px": "(X - x0)*ppm + 40", "y_px": "(Z - z0)*ppm + 40", "x0": float(x0), "z0": float(z0), "ppm": ppm},
               "items": items,
@@ -139,7 +142,7 @@ def overview_page(doc_id: str, art: Path) -> int:
         return 0
     x0 = min(b[0][0] for _, b in boxes); x1 = max(b[1][0] for _, b in boxes)
     z0 = min(b[0][2] for _, b in boxes); z1 = max(b[1][2] for _, b in boxes)
-    ppm = max(2.0, min(80.0, (LONG_SIDE - 2 * MARGIN) / max(x1 - x0, z1 - z0, 1e-6)))
+    ppm = min(80.0, (LONG_SIDE - 2 * MARGIN) / max(x1 - x0, z1 - z0, 1e-6))
     W = int((x1 - x0) * ppm) + 2 * MARGIN
     H = int((z1 - z0) * ppm) + 2 * MARGIN
     img = Image.new("RGB", (W, H), "white")
