@@ -1,0 +1,553 @@
+{
+ "doc_id": "ifc_models__resbim-469-model",
+ "selected_before_development": true,
+ "mode": "ifc",
+ "origin": {
+  "schema": "IFC4",
+  "header": {
+   "originating_system": "Autodesk - Revit 26.4.0.32 (ENG) - 26.4.0.32",
+   "preprocessor_version": "ODA SDAI 25.12",
+   "time_stamp": "2026-04-15T19:18:35+01:00",
+   "view_definition": "ViewDefinition [CoordinationView_V2.0]; RevitIdentifiers [ContentGUID: 09b8a7ad-8c9f-40c7-a980-c35bcfb0571b, VersionGUID: 3ca1330b-b76f-4cc1-acd7-899e2137e6fa, NumberOfSaves: 588]"
+  },
+  "project": {
+   "name": "Project Number",
+   "long_name": "Project Name",
+   "phase": "Project Status"
+  },
+  "site": {
+   "name": "Default"
+  },
+  "building": {},
+  "applications": [
+   "Autodesk Revit 2026 (ENG)"
+  ]
+ },
+ "items": {
+  "door": 6,
+  "railing": 4,
+  "slab": 1,
+  "wall": 18,
+  "window": 4,
+  "site": 1
+ },
+ "answers": [
+  {
+   "answer_id": "87d85be22bd84d3d82a19e36138f3391",
+   "question": "How many doors are there?",
+   "doc_ids": [
+    "ifc_models__resbim-469-model"
+   ],
+   "answer": {
+    "text_md": "There are **6 doors** in this model. [1]",
+    "value": 6,
+    "unit": "count",
+    "confidence": 1.0,
+    "abstained": false
+   },
+   "citations": [
+    {
+     "n": 1,
+     "doc_id": "ifc_models__resbim-469-model",
+     "page": 1,
+     "kind": "element",
+     "bbox_px": [
+      381.4,
+      75.6,
+      836.0,
+      1155.6
+     ],
+     "item_ids": [
+      "2NtVW5edTASveug9689oK6",
+      "2NtVW5edTASveug9689oKw",
+      "2NtVW5edTASveug9689oKu",
+      "2NtVW5edTASveug9689oLo",
+      "2NtVW5edTASveug9689oK4",
+      "2NtVW5edTASveug9689oK_"
+     ],
+     "quote": null,
+     "label": "Level 0 \u00b7 6 doors"
+    }
+   ],
+   "evidence": {
+    "boxes": [
+     {
+      "item_id": "2NtVW5edTASveug9689oK6",
+      "page": 1,
+      "bbox_px": [
+       435.8,
+       75.6,
+       442.2,
+       219.6
+      ],
+      "label": "1",
+      "kind": "door"
+     },
+     {
+      "item_id": "2NtVW5edTASveug9689oKw",
+      "page": 1,
+      "bbox_px": [
+       685.0,
+       245.2,
+       701.6,
+       331.6
+      ],
+      "label": "2",
+      "kind": "door"
+     },
+     {
+      "item_id": "2NtVW5edTASveug9689oKu",
+      "page": 1,
+      "bbox_px": [
+       819.4,
+       533.2,
+       836.0,
+       619.6
+      ],
+      "label": "3",
+      "kind": "door"
+     },
+     {
+      "item_id": "2NtVW5edTASveug9689oLo",
+      "page": 1,
+      "bbox_px": [
+       381.4,
+       738.2,
+       458.2,
+       754.1
+      ],
+      "label": "4",
+      "kind": "door"
+     },
+     {
+      "item_id": "2NtVW5edTASveug9689oK4",
+      "page": 1,
+      "bbox_px": [
+       685.0,
+       872.4,
+       701.6,
+       958.8
+      ],
+      "label": "5",
+      "kind": "door"
+     },
+     {
+      "item_id": "2NtVW5edTASveug9689oK_",
+      "page": 1,
+      "bbox_px": [
+       443.8,
+       1149.2,
+       587.8,
+       1155.6
+      ],
+      "label": "6",
+      "kind": "door"
+     }
+    ],
+    "scene": {
+     "doc_id": "ifc_models__resbim-469-model",
+     "highlight_item_ids": [
+      "2NtVW5edTASveug9689oK6",
+      "2NtVW5edTASveug9689oKw",
+      "2NtVW5edTASveug9689oKu",
+      "2NtVW5edTASveug9689oLo",
+      "2NtVW5edTASveug9689oK4",
+      "2NtVW5edTASveug9689oK_"
+     ],
+     "camera_target_item_id": "2NtVW5edTASveug9689oK6"
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "count / door / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "load",
+     "detail": "6 door elements of 34 in the model",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "count",
+     "detail": "6 door",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "index",
+   "cost": {
+    "usd_total": 0,
+    "calls": []
+   },
+   "latency_ms": 138,
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "found",
+      "title": "Found",
+      "text": "6 doors on Level 0 in the building model (IFC), each one numbered",
+      "cite": 1,
+      "ok": null
+     }
+    ],
+    "confidence": {
+     "label": "Verified",
+     "pct": 97,
+     "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+     "improve": null
+    }
+   }
+  },
+  {
+   "answer_id": "6a9aa2b1e22347c28699232ce3ecd5dc",
+   "question": "What is the total floor area in square metres?",
+   "doc_ids": [
+    "ifc_models__resbim-469-model"
+   ],
+   "answer": {
+    "text_md": "The model has no area data for rooms, so I cannot give a figure.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.0,
+    "abstained": true
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "ifc_models__resbim-469-model",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "area / room / unscoped (rules)",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0.0
+    },
+    {
+     "step": "load",
+     "detail": "0 room elements of 34 in the model",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "abstain",
+     "detail": "The model has no area data for rooms, so I cannot give a figure.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 11,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "read",
+     "detail": "planner reply was not JSON; retrying",
+     "ms": 0,
+     "model": "fake-1",
+     "cost_usd": 0.0
+    },
+    {
+     "step": "abstain",
+     "detail": "step limit",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "index",
+   "cost": {
+    "usd_total": 0,
+    "calls": [
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     },
+     {
+      "task": "reader_plan",
+      "provider": "fake",
+      "model": "fake-1",
+      "cost_usd": 0.0
+     }
+    ]
+   },
+   "latency_ms": 40
+  },
+  {
+   "answer_id": "156e10b2e58b44c7b3465fcab80e2aff",
+   "question": "What is the slab area by thickness?",
+   "doc_ids": [
+    "ifc_models__resbim-469-model"
+   ],
+   "answer": {
+    "text_md": "**Slab area by thickness is unavailable.** Slabs have no recorded thickness and area; bounding-box height is not a slab thickness.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.0,
+    "abstained": true
+   },
+   "citations": [
+    {
+     "n": 1,
+     "doc_id": "ifc_models__resbim-469-model",
+     "page": 1,
+     "kind": "element",
+     "bbox_px": null,
+     "item_ids": [
+      "2NtVW5edTASveug9689oKM"
+     ],
+     "quote": null,
+     "label": "Level 0 \u00b7 1 slab"
+    }
+   ],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "ifc_models__resbim-469-model",
+     "highlight_item_ids": [
+      "2NtVW5edTASveug9689oKM"
+     ],
+     "camera_target_item_id": "2NtVW5edTASveug9689oKM"
+    }
+   },
+   "trace": [
+    {
+     "step": "missing_data",
+     "detail": "**Slab area by thickness is unavailable.** Slabs have no recorded thickness and area; bounding-box height is not a slab thickness.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "index",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 61,
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "checked",
+      "title": "Missing data",
+      "text": "Slab area by thickness is unavailable. Slabs have no recorded thickness and area; bounding-box height is not a slab thickness.",
+      "cite": 1,
+      "ok": false
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 0,
+     "reason": "The requested source measurement is unavailable.",
+     "improve": "Provide the drawing or schedule with the missing measurement."
+    }
+   }
+  },
+  {
+   "answer_id": "26cb027e93be49a9a7864927f6016a0a",
+   "question": "What is the total length of pipes or ducts, in metres?",
+   "doc_ids": [
+    "ifc_models__resbim-469-model"
+   ],
+   "answer": {
+    "text_md": "**Length is unavailable from the drawing data.** An object count is not a measured length.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.0,
+    "abstained": true
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "ifc_models__resbim-469-model",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "route",
+     "detail": "building services / structure -> element index read from the IFC, code, no model",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "filter",
+     "detail": "0 distribution elements in the IFC",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    },
+    {
+     "step": "missing_data",
+     "detail": "**Length is unavailable from the drawing data.** An object count is not a measured length.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "route": "index",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 29,
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "checked",
+      "title": "Missing data",
+      "text": "Length is unavailable from the drawing data. An object count is not a measured length.",
+      "cite": null,
+      "ok": false
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 0,
+     "reason": "The requested source measurement is unavailable.",
+     "improve": "Provide the drawing or schedule with the missing measurement."
+    }
+   }
+  },
+  {
+   "answer_id": "d8490f65d67345db92991fd9689b2527",
+   "question": "What is the fire rating of the doors in the third basement?",
+   "doc_ids": [
+    "ifc_models__resbim-469-model"
+   ],
+   "answer": {
+    "text_md": "**No matching level is recorded in this model.**",
+    "value": null,
+    "unit": null,
+    "confidence": 0.0,
+    "abstained": false
+   },
+   "citations": [],
+   "evidence": {
+    "boxes": [],
+    "scene": {
+     "doc_id": "ifc_models__resbim-469-model",
+     "highlight_item_ids": [],
+     "camera_target_item_id": null
+    }
+   },
+   "trace": [
+    {
+     "step": "props",
+     "detail": "Requested property present on 0 of 0 elements; checked the original model's properties, quantities, types and materials.",
+     "ms": 0,
+     "model": null,
+     "cost_usd": 0
+    }
+   ],
+   "reasoning": {
+    "steps": [
+     {
+      "kind": "found",
+      "title": "Found",
+      "text": "0 cited model elements; 0 elements in the checked scope",
+      "cite": null,
+      "ok": null
+     },
+     {
+      "kind": "checked",
+      "title": "Checked",
+      "text": "Requested property present on 0 of 0 elements; checked the original model's properties, quantities, types and materials.",
+      "cite": null,
+      "ok": false
+     }
+    ],
+    "confidence": {
+     "label": "Estimate",
+     "pct": 0,
+     "reason": "Some requested data or scope is missing; no value was inferred.",
+     "improve": "Check the missing properties in the source model."
+    }
+   },
+   "route": "index",
+   "cost": {
+    "usd_total": 0.0,
+    "calls": []
+   },
+   "latency_ms": 7
+  }
+ ]
+}

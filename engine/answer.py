@@ -89,10 +89,17 @@ def _use_reader(res, question, doc_ids, root, trace, calls, t0, emit):
     """Run the reader when `res` is an abstention; return the reader's answer if it found one, else `res`."""
     if res is not None and not res["answer"].get("abstained"):
         return res
+    # Some source solvers own their call list. Carry those calls into the
+    # reader's shared ledger without counting the same call object twice.
+    for call in (res or {}).get("cost", {}).get("calls", []):
+        if not any(call is existing for existing in calls):
+            calls.append(call)
     rr = _reader(question, doc_ids, root, trace, calls, t0, emit)
     if rr is not None and not rr["answer"].get("abstained"):
         rr["trace"] = trace
         return rr
+    if res is not None:
+        res["cost"] = {"usd_total": round(sum(c.get("cost_usd", 0) for c in calls), 6), "calls": calls}
     return res if res is not None else rr
 
 
@@ -329,6 +336,8 @@ def _answer_with_evidence(question: str, doc_ids: list[str], on_event: Callable 
     except (OSError, ValueError, TypeError, KeyError):
         marked = None  # A partially ingested or malformed source keeps the normal guarded answer path.
     res = ensure_markers(marked if marked is not None else _guarded(question, doc_ids, on_event, scene_state, history))
+    from engine.honesty import validate_result
+    res = validate_result(res, question)
     try:   # E-61: implausible raster areas and sparse uploaded plans (engine/rastersanity.py)
         if len(doc_ids) == 1:
             from engine import rastersanity
@@ -381,32 +390,14 @@ def _answer_with_evidence(question: str, doc_ids: list[str], on_event: Callable 
 
 def _answer_forced(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None) -> dict:
-    """Code -> vision recount -> reader -> forced best-effort answer. Never abstains on a selected document (FORCE_ANSWER=0 restores abstaining)."""
+    """Code -> vision recount -> reader. Missing evidence remains an abstention."""
     from engine.models import providers as _P
     _tok = _P.DELTA_SINK.set((lambda t: on_event("answer.delta", {"text": t})) if on_event else None)  # answer-text streaming
     try:
         res = _answer_core(question, doc_ids, on_event, scene_state=scene_state, history=history)
     finally:
         _P.DELTA_SINK.reset(_tok)
-    if (os.environ.get("FORCE_ANSWER", "1") == "0" or not doc_ids or not (question or "").strip() or not res["answer"].get("abstained")
-            or "quantity_rows" in res  # Missing IFC quantities must remain unavailable, never a forced zero.
-            or any(s.get("step") == "unclassified" for s in res.get("trace", []))
-            or parse_scene(question) is not None or _other_doc(question, doc_ids)):
-        return res
-    _t = res["answer"].get("text_md", "")
-    if ("does not record" in _t or _t.lstrip("*").startswith(("No beam", "No pipe or MEP"))) and parse(question).type not in ("count", "area", "length", "volume"):
-        res["answer"].update({"abstained": False, "confidence": 0.5})   # a checked statement that the model lacks this data is an answer
-        return res
-    try:
-        from engine.forced import forced_answer
-        (on_event or (lambda k, p: None))("status", {"text": "Estimating from the drawing…"})
-        trace = list(res.get("trace") or [])
-        calls = list((res.get("cost") or {}).get("calls") or [])
-        f = forced_answer(question, doc_ids, _root(), parse(question), trace, calls)
-        f["latency_ms"] = res.get("latency_ms", 0) + f["latency_ms"]
-        return f
-    except Exception:  # noqa: BLE001
-        return res
+    return res
 
 
 _TYPOS = [(r"\bflor\b", "floor"), (r"\bflors\b", "floors"), (r"\bmny\b", "many"), (r"\bpeple\b|\bpeopel\b|\bpepole\b", "people"),
@@ -527,6 +518,17 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             sel = ", ".join(_title(d, root) for d in doc_ids)
             return _abstained(question, doc_ids, f"The question names **{other}**, which is not among the selected documents ({sel}). "
                               "Select that document and ask again, or ask about the selected one.", trace, t0)
+
+        from engine.honesty import before as evidence_gate
+        if (res := evidence_gate(question, doc_ids, root, t0, hidden=(scene_state or {}).get("hidden") or ())) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
+            # Missing indexed rooms/properties do not prove that the printed
+            # drawing or a schedule lacks them. Try the evidence reader first.
+            if res.pop("source_lookup", False):
+                return _use_reader(res, question, doc_ids, root, trace, calls, t0, emit)
+            return res
 
         from engine.wallarea import answer as wallarea_answer
         if (res := wallarea_answer(question, doc_ids, root, t0, hidden=set((scene_state or {}).get("hidden") or []))) is not None:
@@ -857,6 +859,10 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             last["question"] = question
             last["cost"] = {"usd_total": round(sum(c["cost_usd"] for c in calls), 6), "calls": calls}
             last["latency_ms"] = int((time.perf_counter() - t0) * 1000)
+            from engine.visual_rooms import answer as visual_rooms
+            if (visual := visual_rooms(question, doc_ids, root, trace, calls, t0,
+                                       hidden=(scene_state or {}).get("hidden") or ())) is not None:
+                return visual
             return _use_reader(last, question, doc_ids, root, trace, calls, t0, emit)
         return _use_reader(_abstained(question, doc_ids, NOT_YET, trace, t0, "index", calls), question, doc_ids, root, trace, calls, t0, emit)
     except Exception as e:  # the server must always get an answer object back

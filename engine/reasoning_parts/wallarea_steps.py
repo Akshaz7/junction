@@ -8,7 +8,9 @@ def card(report):
         steps.append({"kind": kind, "title": title, "text": text, "cite": 1 if report.get("rows") else None, "ok": ok})
     if not report.get("rows"):
         add("read", "Missing data", "No verifiable wall-side area was substituted from floor area or nominal quantities.")
-        return {"steps": steps, "confidence": {"label": "Estimate", "pct": 0, "reason": "Required source geometry is missing or unsupported.", "improve": "Provide wall bodies, units and room boundaries in the IFC, or a scaled plan with heights."}}
+        improve = ("Provide a scaled wall plan and state or confirm the wall-height assumption." if report.get("source") == "2D plan estimate"
+                   else "Provide wall bodies, units and room boundaries in the IFC, or a scaled plan with heights.")
+        return {"steps": steps, "confidence": {"label": "Estimate", "pct": 0, "reason": "Required source geometry is missing or unsupported.", "improve": improve}}
     gross, opening, net = (report.get(k, 0.) for k in ("gross_m2", "opening_m2", "net_m2"))
     add("measured", "Measured", f"{report['wall_count']} walls, {report.get('metric', 'both')} faces: gross {gross:,.4f} m².")
     ops = report.get("openings", [])

@@ -1,0 +1,292 @@
+{
+ "created_at": "2026-11-15T02:20:58.971651+02:00",
+ "branch": "final/honest",
+ "implementation_commit": "1c01848c73ea2816bfcd472b9d8698af11b764a7",
+ "merged_main": "dbad97f",
+ "merged_behaviours": [
+  "quantity evidence gates",
+  "early wall-area route"
+ ],
+ "live_regressions": {
+  "cases": 3,
+  "failed_baseline_correct": 0,
+  "after_correct": 3,
+  "answers": [
+   {
+    "doc_id": "cubicasa5k__high-quality-architectural-4855",
+    "question": "How many saunas are on this floor plan?",
+    "answer": {
+     "text_md": "**1 sauna identified on this drawing.** [1] Read from the room labels and symbols; check the numbered regions.",
+     "value": 1,
+     "unit": "count",
+     "confidence": 0.5,
+     "abstained": false
+    },
+    "boxes": [
+     {
+      "item_id": "visual-room-1",
+      "page": 1,
+      "bbox_px": [
+       195,
+       218,
+       238,
+       264
+      ],
+      "label": "1"
+     }
+    ],
+    "citations": [
+     {
+      "n": 1,
+      "doc_id": "cubicasa5k__high-quality-architectural-4855",
+      "page": 1,
+      "kind": "region",
+      "bbox_px": [
+       195,
+       218,
+       238,
+       264
+      ],
+      "item_ids": [
+       "visual-room-1"
+      ],
+      "quote": null,
+      "label": "Floor plan \u00b7 1 room"
+     }
+    ]
+   },
+   {
+    "doc_id": "cubicasa5k__high-quality-architectural-7567",
+    "question": "How many saunas are on this floor plan?",
+    "answer": {
+     "text_md": "**1 sauna identified on this drawing.** [1] Read from the room labels and symbols; check the numbered regions.",
+     "value": 1,
+     "unit": "count",
+     "confidence": 0.5,
+     "abstained": false
+    },
+    "boxes": [
+     {
+      "item_id": "visual-room-1",
+      "page": 1,
+      "bbox_px": [
+       331,
+       81,
+       409,
+       142
+      ],
+      "label": "1"
+     }
+    ],
+    "citations": [
+     {
+      "n": 1,
+      "doc_id": "cubicasa5k__high-quality-architectural-7567",
+      "page": 1,
+      "kind": "region",
+      "bbox_px": [
+       331,
+       81,
+       409,
+       142
+      ],
+      "item_ids": [
+       "visual-room-1"
+      ],
+      "quote": null,
+      "label": "Floor plan \u00b7 1 room"
+     }
+    ]
+   },
+   {
+    "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+    "question": "On sheet A-801 of the Xcel Sports Complex drawings, what is the area of room 118 (Fitness Center) in the finish room schedule?",
+    "answer": {
+     "text_md": "**Room 118 (Fitness Center) has an area of 5183 SF in the finish room schedule on sheet A-801.**\n\n- Finishes listed: floor F1, base B1, ceiling C1.\n- Wall finishes: W2, W2, W1, W1. [1][2][3]",
+     "value": 5183,
+     "unit": "SF",
+     "confidence": 0.95,
+     "abstained": false
+    },
+    "boxes": [
+     {
+      "item_id": "e12",
+      "page": 1,
+      "bbox_px": [
+       284.0,
+       2404.0,
+       434.0,
+       2440.0
+      ],
+      "label": "1"
+     },
+     {
+      "item_id": "e12",
+      "page": 1,
+      "bbox_px": [
+       434.0,
+       2404.0,
+       559.0,
+       2440.0
+      ],
+      "label": "2"
+     },
+     {
+      "item_id": "e12",
+      "page": 1,
+      "bbox_px": [
+       559.0,
+       2404.0,
+       894.0,
+       2440.0
+      ],
+      "label": "3"
+     }
+    ],
+    "citations": [
+     {
+      "n": 1,
+      "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+      "page": 1,
+      "kind": "text",
+      "bbox_px": [
+       284.0,
+       2404.0,
+       434.0,
+       2440.0
+      ],
+      "item_ids": [],
+      "quote": "0:5183 SF | 1:118 | 2:FITNESS CENTER | 3:F1 | 4:B1 | 5:W2 | 6:W2 | 7:W1 | 8:W1 | 9:C1 | 10:"
+     },
+     {
+      "n": 2,
+      "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+      "page": 1,
+      "kind": "text",
+      "bbox_px": [
+       434.0,
+       2404.0,
+       559.0,
+       2440.0
+      ],
+      "item_ids": [],
+      "quote": "0:5183 SF | 1:118 | 2:FITNESS CENTER | 3:F1 | 4:B1 | 5:W2 | 6:W2 | 7:W1 | 8:W1 | 9:C1 | 10:"
+     },
+     {
+      "n": 3,
+      "doc_id": "opening_design__sports-complex-sheets-current-set-a-801-door-and-finish-schedules-wall-types",
+      "page": 1,
+      "kind": "text",
+      "bbox_px": [
+       559.0,
+       2404.0,
+       894.0,
+       2440.0
+      ],
+      "item_ids": [],
+      "quote": "0:5183 SF | 1:118 | 2:FITNESS CENTER | 3:F1 | 4:B1 | 5:W2 | 6:W2 | 7:W1 | 8:W1 | 9:C1 | 10:"
+     }
+    ]
+   }
+  ]
+ },
+ "sample200": {
+  "fake_before": {
+   "n": 200,
+   "correct": 138,
+   "wrong": 30,
+   "abstained": 19,
+   "unscored": 13,
+   "error": 0,
+   "accuracy": 0.738,
+   "answered_accuracy": 0.8214,
+   "cost_usd_total": 0.0,
+   "cost_usd_per_answer": 0.0,
+   "latency_ms_mean": 37,
+   "latency_ms_p95": 135
+  },
+  "fake_after": {
+   "n": 200,
+   "correct": 138,
+   "wrong": 30,
+   "abstained": 19,
+   "unscored": 13,
+   "error": 0,
+   "accuracy": 0.738,
+   "answered_accuracy": 0.8214,
+   "cost_usd_total": 0.0,
+   "cost_usd_per_answer": 0.0,
+   "latency_ms_mean": 187,
+   "latency_ms_p95": 772
+  },
+  "mixed_baseline": {
+   "n": 200,
+   "correct": 141,
+   "wrong": 30,
+   "abstained": 16,
+   "unscored": 13,
+   "error": 0,
+   "accuracy": 0.754,
+   "answered_accuracy": 0.8246,
+   "cost_usd_total": 0.0,
+   "cost_usd_per_answer": 0.0,
+   "latency_ms_mean": 41,
+   "latency_ms_p95": 135
+  },
+  "mixed_after": {
+   "n": 200,
+   "correct": 141,
+   "wrong": 30,
+   "abstained": 16,
+   "unscored": 13,
+   "error": 0,
+   "accuracy": 0.754,
+   "answered_accuracy": 0.8246,
+   "cost_usd_total": 0.056519,
+   "cost_usd_per_answer": 0.0002826,
+   "latency_ms_mean": 299,
+   "latency_ms_p95": 839
+  },
+  "correct_to_wrong_or_abstained": [],
+  "mode": "197 fake-provider questions and 3 real-provider source reads; matched modes before/after",
+  "limitation": "The 197 fake-provider rows are compared against a matching fake-provider baseline. These totals are not a full-live 200-question accuracy score; the 3 restored live answers are compared against the previous live baseline."
+ },
+ "judge_replay": {
+  "cases": 54,
+  "files": 6,
+  "provider_mode": "live providers, disk-cache reuse permitted",
+  "numeric_or_abstention_changes_from_round1": 0,
+  "flagged_safety_checks_passed": 13,
+  "flagged_safety_checks": 13,
+  "source": "Exact original upload sidecars and images in the existing local .honest-replay mirror; no shared artifact mutation.",
+  "limitation": "Safety checks are not a new ground-truth accuracy score. Original IFC ingestion failure remains unchanged."
+ },
+ "cost_usd": {
+  "three_live_model_calls": 0.056519,
+  "judge_replay_model_calls": 0.07472,
+  "total": 0.131239,
+  "cap": 3
+ },
+ "test_expectations_updated": [
+  "Incomplete or unread schedule: reader runs, a missing cell stays unknown after unsuccessful lookup; removed generic forced-number expectations.",
+  "Attached material question: drawing image reaches read_drawing; absence of source materials remains an abstention instead of forced masonry.",
+  "Missing-fire-rating citation: permit the existing inventory-check citation introduced on main; still require exact missing-rating wording, no model guess and no numeric answer."
+ ],
+ "cross_file": [
+  "engine/answer.py",
+  "engine/honesty.py",
+  "engine/tests/test_context_tasks.py",
+  "engine/tests/test_honesty.py",
+  "engine/tests/test_od_pdf.py",
+  "engine/tests/honesty_validation.py"
+ ],
+ "needs": "Merge final/honest. No push or deployment performed.",
+ "tests": {
+  "passed": 381,
+  "failed": 0,
+  "elapsed_s": 25.1,
+  "new_round2_regressions": 13,
+  "command": "MODELS_FAKE=1 /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest engine/tests/{test_honesty,test_honesty_round2,test_od_pdf,test_context_tasks,test_readdraw,test_answer,test_reader,test_slab_by_type,test_scales,test_rastersanity,test_order,test_wallarea,test_mep,test_analytics,test_units,test_props,test_solvers,test_solvers_e19,test_fix6}.py -q"
+ },
+ "replay_command": "scripts/heavy.sh /Users/akshatthapa/Workspace/junction/.venv/bin/python -m engine.tests.honesty_validation after --live --report /Users/akshatthapa/Workspace/wt/judgesim/results/final/JUDGESIM/report.json --artifacts .honest-replay --output results/final/HONEST/round2"
+}

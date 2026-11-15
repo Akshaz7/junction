@@ -145,10 +145,11 @@ def test_baseboard_ifc_total_and_per_room_arithmetic():
     assert one["answer"]["value"] == 44.2 and "matching classroom" in t   # outline 46.0 m minus a 1.8 m door
 
 
-def test_baseboard_scaled_raster_uses_the_drawn_scale():
+def test_baseboard_scaled_raster_rejects_overlapping_room_outlines():
     a = answer("how many linear metres of baseboard per room", ["cubicasa5k__colorful-10711"])
     validate_answer(a)
-    assert a["route"] == "planmap" and not a["answer"]["abstained"] and a["answer"]["value"] > 20 and "dimension" in a["answer"]["text_md"] and a["evidence"]["boxes"]
+    assert a["route"] == "planmap" and a["answer"]["abstained"] and a["answer"]["value"] is None
+    assert "overlap" in a["answer"]["text_md"] and a["evidence"]["boxes"]
 
 
 def test_baseboard_on_a_guessed_scale_says_so_and_is_low_confidence():
@@ -185,8 +186,9 @@ def test_piping_sixty5_no_waste_terminals_falls_back_honestly_and_missing_size()
     dr = answer("where are the drains", [S65])
     validate_answer(dr)
     assert "No drain fittings are modelled" in dr["answer"]["text_md"] and dr["answer"]["value"] > 1000
-    none = answer("DN100 length", [S65])
-    assert none["answer"]["value"] == 0 and "Sizes present" in none["answer"]["text_md"]
+    # DN100 now exists in the refreshed real index; use a genuinely absent size.
+    none = answer("DN9999 length", [S65])
+    assert none["answer"]["value"] is None and none["answer"]["abstained"]
 
 
 def test_ground_floor_slightly_below_datum_is_still_ground():
