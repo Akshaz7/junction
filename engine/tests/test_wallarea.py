@@ -341,3 +341,103 @@ def test_facade_area_of_ground_floor_is_not_a_room_filter(tmp_path):
     assert res["answer"]["value"] == pytest.approx(28)
     res = W.answer("Net wall area of external walls", [did], tmp_path)
     assert res["answer"]["value"] == pytest.approx(56)
+
+
+def test_coplanar_disconnected_patches_match_by_overlap_not_first_plane():
+    import numpy as np
+    from shapely.geometry import box
+
+    def patch(x, side):
+        vertices = np.array([[x, 0., 0.], [x + 2, 0., 0.], [x + 2, 0., 2.], [x, 0., 2.]])
+        return W.Face(4., vertices, np.array([[0, 1, 2], [0, 2, 3]]),
+                      np.array([0., -1., 0.]), vertices[0], np.array([1., 0., 0.]),
+                      np.array([0., 0., 1.]), True, box(0, 0, 2, 2), side)
+
+    refs = [patch(0., 0), patch(5., 1)]
+    cut = patch(5., 0)
+    matched = W._side_faces([cut], {"kind": "line", "normal": np.array([0., 1., 0.])}, 1e-6, refs)
+    assert matched[0].side == 1
+
+
+def legacy_measurement(cut=0.):
+    # Generated stored geometry with a retained patch assigned to the wrong side.
+    floor = {"storey_id": "floor", "storey": "Generated floor", "gross_m2": 52.,
+             "net_m2": 52. - cut, "opening_m2": cut, "gross_sides_m2": [30., 22.],
+             "net_sides_m2": [36., 16. - cut], "numerical_allowance_m2": 0.,
+             "orientation_allowance_m2": 0., "category": "external"}
+    wall = {"item_id": "wall", "name": "Generated wall", "inside_side": 0, "is_external": True,
+            "floors": [floor], "gross_m2": 52., "net_m2": 52. - cut, "opening_m2": cut,
+            "rooms": [], "openings": [], "axis_source": "IFC axis", "notes": []}
+    return {"walls": [wall], "storeys": [{"item_id": "floor", "name": "Generated floor", "elevation_m": 0}],
+            "source": "IFC body side faces", "precision_m": 1e-6, "skipped": []}
+
+
+@pytest.mark.parametrize("cut", [0., 4.])
+def test_stored_wrong_side_preserves_total_and_records_unattributed(tmp_path, cut):
+    directory = tmp_path / "legacy"
+    directory.mkdir()
+    original = legacy_measurement(cut)
+    path = directory / W.WALLGEOM
+    source = json.dumps(original)
+    path.write_text(source)
+    measured = W._wallgeom("legacy", tmp_path)
+    wall, = measured["walls"]
+    floor, = wall["floors"]
+    assert sum(floor["net_sides_m2"]) == pytest.approx(52. - cut)
+    assert all(0 <= n <= g for g, n in zip(floor["gross_sides_m2"], floor["net_sides_m2"]))
+    assert measured["unattributed"][0]["area_m2"] == cut
+    assert measured["unattributed"][0]["side_transfer_m2"] == 6
+    assert W._reconcile_sides(measured) == measured
+    assert len(measured["unattributed"]) == 1
+    assert path.read_text() == source  # runtime repair never mutates source artifacts
+    for metric in ("inside", "facade", "both"):
+        gross, opening, net, _ = W._selected_values(wall, floor, metric)
+        assert 0 <= net <= gross
+        assert opening >= 0
+        assert gross - opening == pytest.approx(net)
+    if cut == 0:
+        assert floor["net_sides_m2"] == [30., 22.]
+    else:
+        assert wall["inside_side"] is None
+        assert floor["orientation_unresolved"]
+    result = W.answer("What is the wall surface area per floor?", ["legacy"], tmp_path)
+    assert result["answer"]["value"] == pytest.approx(52. - cut)
+    assert result["wallarea"]["unattributed"][0]["area_m2"] == cut
+    assert any(step["step"] == "unattributed" for step in result["trace"])
+    for split in result["wallarea"]["face_splits"]:
+        for category in ("facade", "external_inside", "internal_both"):
+            assert split[category]["opening_m2"] >= 0
+            assert split[category]["net_m2"] <= split[category]["gross_m2"]
+
+
+def test_merged_cut_face_is_measured_on_each_original_patch(tmp_path, monkeypatch):
+    import numpy as np
+    from shapely.geometry import box
+    from shapely.ops import unary_union
+
+    def patch(x, side):
+        vertices = np.array([[x, 0., 0.], [x + 2, 0., 0.], [x + 2, 0., 2.], [x, 0., 2.]])
+        return W.Face(4., vertices, np.array([[0, 1, 2], [0, 2, 3]]),
+                      np.array([0., -1., 0.]), vertices[0], np.array([1., 0., 0.]),
+                      np.array([0., 0., 1.]), True, box(0, 0, 2, 2), side)
+
+    gross = [patch(0., 0), patch(5., 1)]
+    merged = W.Face(8., np.concatenate([f.vertices for f in gross]),
+                    np.concatenate([gross[0].triangles, gross[1].triangles + 4]),
+                    gross[0].normal, gross[0].origin, gross[0].u, gross[0].v, True,
+                    unary_union([box(0, 0, 2, 2), box(5, 0, 7, 2)]), 0)
+    path = model_file(tmp_path, external=True, qto=False)
+    monkeypatch.setattr(W, "_shape", lambda settings, element:
+                        (None, gross if settings.get("disable-opening-subtractions") else [merged]))
+    monkeypatch.setattr(W, "_faces", lambda shape, settings, tolerance: shape)
+    monkeypatch.setattr(W, "_side_faces", lambda faces, *args: faces)
+    monkeypatch.setattr(W, "_axis", lambda *args:
+                        {"kind": "line", "origin": np.zeros(3), "normal": np.array([0., 1., 0.]), "source": "IFC axis"})
+    result = W.measure_ifc(path)
+    assert not result["skipped"]
+    wall, = result["walls"]
+    floor, = wall["floors"]
+    assert floor["gross_sides_m2"] == [4., 4.]
+    assert floor["net_sides_m2"] == [4., 4.]
+    assert floor["opening_m2"] == 0
+    assert wall["net_m2"] == 8

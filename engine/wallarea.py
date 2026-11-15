@@ -196,6 +196,12 @@ def _side_faces(faces, axis, tolerance, references=None):
                     matches.append(ref)
             if not matches:
                 continue  # reveal / niche back, rather than an original side face
+            # Disconnected patches can share a plane but belong to different
+            # sides (e.g. a roof-cut wall). Plane coincidence alone is not a
+            # correspondence: use the actual overlapping surface region.
+            if f.planar:
+                matches.sort(key=lambda ref: ref.polygon.intersection(
+                    _project(ref, f.vertices, f.triangles)).area, reverse=True)
             f.side = matches[0].side
         chosen.append(f)
     if references is None:
@@ -367,7 +373,8 @@ def _rooms_for_wall(boundaries, gross, net, scale, tolerance):
             if not region.is_valid:
                 continue
             region = region.intersection(face.polygon)
-            cut = unary_union([_project(face, f.vertices, f.triangles) for f in net if f.side == face.side and f.planar])
+            cut = unary_union([_project(face, f.vertices, f.triangles) for f in net if f.planar and
+                               np.max(np.abs((f.vertices - face.origin) @ face.normal)) <= tolerance * 8])
             actual = region.intersection(cut)
             if region.area > tolerance ** 2:
                 rooms.append({"room_id": b.RelatingSpace.GlobalId,
@@ -448,13 +455,15 @@ def measure_ifc(path: str | Path) -> dict:
             # Area removed is measured once from the boolean result, not the sum
             # of nominal opening sizes. Per-opening allocations intersect that
             # removed region and consume it once, even for overlapping voids.
-            removed = []
+            removed, kept_regions = [], {}
             for face in gross:
                 if face.planar:
                     from shapely.ops import unary_union
-                    matching = [f for f in net if f.side == face.side and f.planar and
+                    matching = [f for f in net if f.planar and
                                 np.max(np.abs((f.vertices - face.origin) @ face.normal)) <= precision * 8]
-                    kept = unary_union([_project(face, f.vertices, f.triangles) for f in matching])
+                    kept = face.polygon.intersection(unary_union([
+                        _project(face, f.vertices, f.triangles) for f in matching]))
+                    kept_regions[id(face)] = kept
                     removed.append([face, face.polygon.difference(kept)])
             for rel in wall.HasOpenings:
                 opening = rel.RelatedOpeningElement
@@ -504,12 +513,25 @@ def measure_ifc(path: str | Path) -> dict:
             for k, st in enumerate(relevant):
                 low = st["elevation_m"] if k and not collisions else -math.inf
                 high = relevant[k + 1]["elevation_m"] if k + 1 < len(relevant) and not collisions else math.inf
-                g = [sum(_area(f, low, high) for f in gross if f.side == side) for side in (0, 1)]
-                n = [sum(_area(f, low, high) for f in net if f.side == side) for side in (0, 1)]
+                def surface_area(face, region):
+                    return (_band_polygon(face, region, low, high).area * face.area / face.polygon.area
+                            if face.polygon.area else 0.)
+                g = [sum(surface_area(f, f.polygon) if f.planar else _area(f, low, high)
+                         for f in gross if f.side == side) for side in (0, 1)]
+                # Measure retained regions on each original face. A merged cut
+                # face may overlap several gross patches; assigning its entire
+                # area to a single reference would move area between sides.
+                n = [sum(surface_area(f, kept_regions[id(f)]) for f in gross if f.side == side and f.planar)
+                     + sum(_area(f, low, high) for f in net if f.side == side and not f.planar)
+                     for side in (0, 1)]
                 if sum(g) <= precision ** 2:
                     continue
                 if sum(n) > sum(g) + precision * sum(math.sqrt(f.area) * 4 for f in gross):
                     raise MeasurementUnavailable("Cut side area exceeds gross side area")
+                for side in (0, 1):
+                    if n[side] > g[side] + precision ** 2:
+                        raise MeasurementUnavailable("Unattributed cut surface exceeds its gross face")
+                    n[side] = min(g[side], n[side])
                 allowance = sum(abs(f.area - _mesh_area(f)) + precision * (f.polygon.length if f.planar else 4 * math.sqrt(f.area)) for f in gross + net)
                 category = "external" if external else "internal" if external is False else "unclassified"
                 floor = {"storey_id": st["item_id"], "storey": st["name"], "gross_m2": sum(g), "net_m2": sum(n),
@@ -576,7 +598,7 @@ def measure_ifc(path: str | Path) -> dict:
             result["walls"].append(row)
         except (RuntimeError, ValueError, AttributeError, TypeError, IndexError) as exc:
             result["skipped"].append({"item_id": wall.GlobalId, "reason": str(exc)[:160]})
-    return result
+    return _reconcile_sides(result)
 
 
 @lru_cache(maxsize=4)
@@ -610,6 +632,51 @@ def _source(doc_id, root):
 WALLGEOM = "wallgeom.json"
 
 
+def _reconcile_sides(data):
+    """Handle legacy face assignments without changing measured building totals.
+
+    No removed area means each side is unchanged. With real cuts and no face
+    attribution, use the existing unresolved-orientation midpoint convention;
+    retain the original operands and the unattributed cut in the audit trail.
+    """
+    for wall in data["walls"]:
+        for floor in wall["floors"]:
+            gross, net = floor.get("gross_sides_m2"), floor.get("net_sides_m2")
+            if gross is None or net is None or not any(n > g for g, n in zip(gross, net)):
+                continue
+            excess = sum(max(0., n - g) for g, n in zip(gross, net))
+            if excess <= 1e-9:
+                floor["net_sides_m2"] = [min(g, n) for g, n in zip(gross, net)]
+                continue
+            cut = floor["gross_m2"] - floor["net_m2"]
+            if cut < -1e-9:
+                raise MeasurementUnavailable("Stored cut area exceeds gross wall area")
+            audit = {"item_id": wall["item_id"], "storey_id": floor["storey_id"],
+                     "area_m2": max(0., cut), "side_transfer_m2": excess,
+                     "gross_sides_m2": list(gross), "net_sides_m2": list(net),
+                     "reason": "Legacy coplanar face correspondence moved retained area between sides"}
+            data.setdefault("unattributed", []).append(audit)
+            if abs(cut) <= 1e-9:
+                floor["net_sides_m2"] = list(gross)
+                audit["resolution"] = "No removed area: both net sides equal their gross sides"
+            else:
+                floor["gross_sides_m2"] = [floor["gross_m2"] / 2] * 2
+                floor["net_sides_m2"] = [floor["net_m2"] / 2] * 2
+                wall["inside_side"] = None
+                floor["orientation_unresolved"] = True
+                floor["orientation_allowance_m2"] = floor["gross_m2"] / 2
+                audit["resolution"] = "Cut unattributed to a side; unresolved-orientation midpoint estimate"
+                note = "Some cuts are unattributed to a wall face; side finishes use a midpoint estimate"
+                if note not in wall.setdefault("notes", []):
+                    wall["notes"].append(note)
+            if wall["is_external"]:
+                side = wall.get("inside_side")
+                ns = floor["net_sides_m2"]
+                floor["external_inside_m2"] = ns[side] if side is not None else floor["net_m2"] / 2
+                floor["facade_m2"] = ns[1 - side] if side is not None else floor["net_m2"] / 2
+    return data
+
+
 def _wallgeom(doc_id, root):
     """Stored measure_ifc result (built at ingest/backfill) so deployments without the IFC can still answer."""
     path = Path(root) / doc_id / WALLGEOM
@@ -617,7 +684,7 @@ def _wallgeom(doc_id, root):
         data = json.loads(path.read_text())
     except (OSError, ValueError):
         return None
-    return data if isinstance(data, dict) and data.get("walls") is not None and data.get("storeys") is not None else None
+    return _reconcile_sides(data) if isinstance(data, dict) and data.get("walls") is not None and data.get("storeys") is not None else None
 
 
 def build_wallgeom(doc_dir, source):
@@ -1039,6 +1106,12 @@ def answer(question, doc_ids, root, t0=None, hidden=None):
                 for key, val in zip(("gross_m2", "opening_m2", "net_m2"), values[:3]):
                     st[category][key] += val
     report["face_splits"] = list(splits.values())
+    selected_floors = {(r["item_id"], r["storey_id"]) for r in report["rows"]}
+    report["unattributed"] = [entry for entry in measured.get("unattributed", [])
+                              if (entry["item_id"], entry["storey_id"]) in selected_floors]
+    for entry in report["unattributed"]:
+        trace.append(_step("unattributed", f"Wall {entry['item_id']}: {entry['area_m2']:.6f} m² cut; "
+                           f"{entry['side_transfer_m2']:.6f} m² side correspondence discrepancy. {entry['resolution']}"))
     report["warnings"] = list(dict.fromkeys(report["warnings"]))
     report["wall_count"] = len({r["item_id"] for r in report["rows"]})
     report["opening_count"] = len(report["openings"])
