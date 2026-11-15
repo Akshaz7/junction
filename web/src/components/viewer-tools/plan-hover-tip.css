@@ -1,0 +1,4 @@
+.plan-hover-tip { position: absolute; z-index: 7; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 8px; border-radius: 999px; border: 1px solid var(--border, #e7e7e7); background: var(--popover, #fff); color: var(--popover-foreground, #1a1a1a); box-shadow: 0 4px 14px rgb(0 0 0 / 0.14); font-size: var(--text-caption, 12px); line-height: 16px; white-space: nowrap; pointer-events: none; user-select: none; box-sizing: border-box; }
+.plan-hover-tip-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 0 1px rgb(0 0 0 / 0.15); }
+.plan-hover-tip-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+@media (forced-colors: active) { .plan-hover-tip { border-color: CanvasText; background: Canvas; color: CanvasText; } }

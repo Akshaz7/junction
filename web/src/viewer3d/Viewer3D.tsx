@@ -11,7 +11,7 @@ import { bindLiveCommands, bindLiveHighlight } from './liveViewerHighlight';
 import { createLiveHighlightClient } from './liveHighlight';
 import { clearViewerHighlights, itemsOfPickedKind } from './selection';
 import type { CommandTestState, SceneCommand } from './commands';
-import { cutawayStoreys, isRoof, type CutawayState } from './cutaway';
+import { cutawayStoreys, isRoof, serviceLayerLabel, type CutawayState, type ModelLayer } from './cutaway';
 import { setHover, setSelected, useLinkedItem } from './link';
 import type { LoadProgress } from './loadGLTF';
 import type { WalkState } from './walk';
@@ -88,6 +88,8 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
   const pointerStart = useRef<{ id: number; x: number; y: number } | null>(null);
   const [cutaway, setCutaway] = useState<CutawayState>({ activeStorey: null, showRoof: false, hiddenCount: 0 });
   const [hasRoof, setHasRoof] = useState(false);
+  const [serviceLabel, setServiceLabel] = useState<string | null>(null);
+  const [layer, setLayer] = useState<ModelLayer>('all');
   const [walking, setWalking] = useState(false);
   const [walkMessage, setWalkMessage] = useState('');
   const [storeys, setStoreys] = useState<string[]>([]);
@@ -213,6 +215,8 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     setElements(new Map());
     setDetailFetched(new Set());
     setHasRoof(false);
+    setServiceLabel(null);
+    setLayer('all');
     setWalking(false);
     setWalkMessage('');
     setHighlightState({ highlighted: [], dimmed: 0, labels: {} });
@@ -258,6 +262,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
         setCutaway(viewer!.getCutawayState());
         setStoreys(cutawayStoreys(scene.manifest).map((entry) => entry.name));
         setHasRoof(Object.entries(scene.manifest.items).some(([id, item]) => isRoof(item.kind, scene.elements?.get(id))));
+        setServiceLabel(serviceLayerLabel(scene.manifest));
         setElements(scene.elements ?? new Map());
         setManifest(scene.manifest);
         setState('ready');
@@ -391,6 +396,15 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       </select>
       <button type="button" aria-label="Next storey" disabled={state !== 'ready' || storeyIndex >= storeys.length - 1}
         onClick={() => selectStorey(storeys[storeyIndex + 1])}>+</button>
+      {serviceLabel && <>
+        <label htmlFor={`${selectId}-layer`}>Show</label>
+        <select id={`${selectId}-layer`} aria-label="Model layer" data-testid="model-layer" value={layer} disabled={state !== 'ready'}
+          onChange={(event) => { const next = event.target.value as ModelLayer; setLayer(next); viewerRef.current?.setLayer(next); }}>
+          <option value="all">Floor plan + {serviceLabel.toLowerCase()}</option>
+          <option value="building">Floor plan only</option>
+          <option value="services">{serviceLabel} only</option>
+        </select>
+      </>}
       {hasRoof && <label className="viewer3d-roof-toggle">
         <input type="checkbox" checked={cutaway.showRoof}
           onChange={(event) => viewerRef.current?.setShowRoof(event.target.checked)} /> Show roof
@@ -457,7 +471,7 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       {walking && <WalkJoystick onMove={(x, y) => viewerRef.current?.setWalkJoystick(x, y)} />}
       {state === 'ready' && details && !editing && <ItemDetailsCard key={details.item_id} details={details}
         loading={detailsLoading} viewer={viewerRef.current} onClose={closeDetails}
-        onHighlight={() => viewerRef.current?.highlight([details.item_id])} />}
+        onHighlight={() => viewerRef.current?.highlight([details.item_id])} docId={doc_id ?? manifest?.doc_id ?? null} />}
     </div>
     <div className="viewer3d-footer">
       {state === 'ready' && build && <BuildSlider build={build} viewer={viewerRef.current} />}

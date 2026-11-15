@@ -246,3 +246,102 @@ def test_door_height_note_and_tags():
 def test_empty_inputs():
     assert po.openings({}, []) == []
     assert po.gate({}, [], [])[0] is False
+
+
+def test_door_operation_hinge_side_and_swing_dir(plan_page):
+    """IFC handing: swing_dir = the side the leaf opens into; hinge side as seen facing swing_dir (y-down page)."""
+    doors = [o for o in po.openings(plan_page, _walls()) if o["kind"] == "door"]
+    d1 = next(d for d in doors if d["props"]["width_pt"] > 42)
+    pr = d1["props"]
+    # top wall, hinge (200,100), closed end (245,100), leaf opens down the page: facing down (south), the hinge
+    # (west of the centre) is on the right
+    assert pr["swing_dir"] == pytest.approx([0, 1], abs=1e-3)
+    assert pr["operation"] == "SINGLE_SWING_RIGHT" and pr["hinge_side"] == "right"
+    assert pr["x_dir"] == pytest.approx([-1, 0], abs=1e-3)       # left jamb -> right jamb seen facing south
+    # bottom wall door: hinge (300,290), closed (340,290), leaf opens up the page (north): hinge on the left
+    d2 = next(d for d in doors if d["props"]["width_pt"] < 42)
+    assert d2["props"]["swing_dir"] == pytest.approx([0, -1], abs=1e-3)
+    assert d2["props"]["operation"] == "SINGLE_SWING_LEFT"
+
+
+def _arc_path(cx, cy, r, a0, a1, step=9):
+    pts = [[cx + r * math.cos(math.radians(a)), cy + r * math.sin(math.radians(a))] for a in range(a0, a1 + 1, step)]
+    return {"pts": pts, "closed": False, "fill": None, "stroke": [0, 0, 0], "width": 0.2, "n_curves": 3, "is_arc": True}
+
+
+def test_double_acting_door_and_double_door_operation():
+    walls = [_box(0, 100, 150, 110), _box(195, 100, 400, 110), _box(0, 110, 10, 300), _box(390, 110, 400, 300),
+             _box(0, 290, 400, 300), _box(100, 200, 200, 210), _box(0, 0, 10, 100), _box(390, 0, 400, 100)]
+    # hinge (150,105) in the wall centre line, closed end (195,105): swings 90 deg down AND 90 deg up
+    paths = [_arc_path(150, 105, 45, 0, 90), _arc_path(150, 105, 45, -90, 0), _seg((150, 105), (150, 150))]
+    page = {"W_pt": 600, "H_pt": 400, "paths": paths, "words": [{"text": "1:50", "bbox": [0, 0, 10, 5]}]}
+    doors = [o for o in po.openings(page, walls) if o["kind"] == "door"]
+    assert len(doors) == 1, doors
+    assert doors[0]["props"]["operation"] in ("DOUBLE_SWING_LEFT", "DOUBLE_SWING_RIGHT")
+    assert doors[0]["props"]["double_acting"]
+
+
+def test_window_kind_and_sill():
+    w = [{"kind": "window", "props": {"kind": "window", "width_m": 1.2}},
+         {"kind": "window", "props": {"kind": "window", "width_m": 7.5}},
+         {"kind": "window", "props": {"kind": "glass_partition", "width_m": 2.0}}]
+    po._window_props(w, [{"text": t, "bbox": [10 + 40 * i, 10, 40 + 40 * i, 16]}
+                         for i, t in enumerate(["WINDOW", "SILL", "h=850"])])
+    assert [x["props"]["kind"] for x in w] == ["window", "curtain_wall", "glass_partition"]
+    assert w[0]["props"]["sill_m"] == pytest.approx(0.85) and w[0]["props"]["sill_source"] == "page note"
+    assert w[1]["props"]["sill_m"] == 0.0 and w[2]["props"]["sill_m"] == 0.0
+    w2 = [{"kind": "window", "props": {"kind": "window"}}]
+    po._window_props(w2, [])
+    assert w2[0]["props"]["sill_m"] == pytest.approx(0.9) and w2[0]["props"]["sill_source"] == "default"
+
+
+def _pane(x0, x1, y, t=0.5):
+    """A thin glass pane outline (closed, filled + stroked) along x from x0 to x1 at y."""
+    return {"pts": [[x0, y], [x1, y], [x1, y + t], [x0, y + t]], "closed": True, "fill": [0, 0, 0],
+            "stroke": [0, 0, 0], "width": 0.2, "n_curves": 0, "is_arc": False}
+
+
+def test_glazing_bridge_window_between_wall_pieces():
+    """Facade glazing drawn as thin pane outlines (two panes, a frame gap) bridging two filled wall pieces."""
+    # exterior wall y 100..110 (0.18 m at 1:50), pieces x 0..150 and 250..400; panes inside the band near the outside
+    walls = [_box(0, 100, 150, 110), _box(250, 100, 400, 110), _box(0, 110, 10, 300), _box(390, 110, 400, 300),
+             _box(0, 290, 400, 300), _box(100, 200, 200, 210)]
+    for w in walls:
+        w["style"] = "fill"
+    paths = [_pane(152, 198, 102), _pane(201, 247, 102)]
+    # a thin partition drawn face to face (lines on both faces of a band) between two wall pieces: not a window
+    walls += [_box(10, 150, 60, 160), _box(120, 150, 200, 160)]
+    walls[-1]["style"] = walls[-2]["style"] = "fill"
+    paths += [_seg((60, 150), (120, 150)), _seg((60, 160), (120, 160))]
+    page = {"W_pt": 600, "H_pt": 400, "paths": paths, "words": [{"text": "1:50", "bbox": [0, 0, 10, 5]}]}
+    wins = [o for o in po.openings(page, walls) if o["kind"] == "window"]
+    br = [w for w in wins if w["props"].get("from") == "glazing_bridge"]
+    assert len(br) == 1, wins
+    b = br[0]["bbox"]
+    assert b[0] == pytest.approx(150, abs=1) and b[2] == pytest.approx(250, abs=1)
+    assert b[1] == pytest.approx(100, abs=0.6) and b[3] == pytest.approx(110, abs=0.6)
+    assert br[0]["props"]["kind"] == "window" and br[0]["props"]["sill_m"] == pytest.approx(0.9)
+    assert not any(140 < (w["bbox"][1] + w["bbox"][3]) / 2 < 170 for w in br)
+
+
+def test_gate_single_room_plan_needs_printed_scale():
+    rooms = [{"label": "Galerie", "area_printed_m2": None, "number": "7"}]
+    ok, why = po.gate(_page(["Grundriss: Dachgeschoss", "1:100"]), _walls(), rooms)
+    assert ok, why
+    ok, why = po.gate(_page(["Grundriss: Dachgeschoss"]), _walls(), rooms)     # no printed scale
+    assert not ok
+    ok, why = po.gate(_page(["ROOF PLAN", "1:100"]), _walls(), rooms)            # roof / site / demolition
+    assert not ok
+
+
+def test_leaf_end_prefers_open_end_over_threshold_line():
+    """Both arc ends have a line from the hinge (leaf + threshold): the closed end is the one meeting the far jamb."""
+    walls = [_box(0, 100, 150, 110), _box(195, 100, 400, 110), _box(0, 110, 10, 300), _box(390, 110, 400, 300),
+             _box(0, 290, 400, 300), _box(100, 200, 200, 210)]
+    # hinge (150,110), closed end (195,110) on the wall line, leaf open down to (150,155); threshold line drawn too
+    paths = [_arc_path(150, 110, 45, 0, 90), _seg((150, 110), (150, 155)), _seg((150, 110), (195, 110))]
+    page = {"W_pt": 600, "H_pt": 400, "paths": paths, "words": [{"text": "1:50", "bbox": [0, 0, 10, 5]}]}
+    doors = [o for o in po.openings(page, walls) if o["kind"] == "door"]
+    assert len(doors) == 1
+    pr = doors[0]["props"]
+    assert pr["closed_end"] == pytest.approx([195, 110], abs=0.6) and pr["swing_dir"] == pytest.approx([0, 1], abs=1e-3)

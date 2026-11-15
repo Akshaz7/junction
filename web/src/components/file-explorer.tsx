@@ -10,6 +10,8 @@ import './data-screen.css'
 import { ShowOnTableButton } from './show-on-table'
 import { findSheetText, loadSheetText, type SheetText } from './viewer-tools/sheet-text'
 import { useDialogFocus } from '../lib/use-dialog-focus'
+import { PlanInspectOverlay, PlanInspectTools, usePlanInspect } from './viewer-tools/plan-inspect'
+import { ItemPanel } from './item-panel'
 
 
 export function fileSize(size?: number | null) {
@@ -25,14 +27,15 @@ export function DocumentTitle({ title }: { title: string }) {
   const suffix = title.match(/^(.*?)(\s*[—–-]?\s*generated for demo)$/i)
   return suffix ? <><span className="document-title-name">{suffix[1]}</span><small className="document-demo-label">{suffix[2]}</small></> : <span className="document-title-name">{title}</span>
 }
-export function DocumentImage({ doc, preview = false, page = 1, onLoad }: { doc: Document; preview?: boolean; page?: number; onLoad?: (size: Size) => void }) {
+export function DocumentImage({ doc, preview = false, page = 1, onLoad, overlay }: { doc: Document; preview?: boolean; page?: number; onLoad?: (size: Size) => void; overlay?: ReactNode }) {
   const [failed, setFailed] = useState(false)
   const Icon = doc.kind === 'ifc' || doc.kind === 'dxf' || doc.kind === 'dwg' ? Box : doc.kind === 'raster' || doc.kind === 'svg' ? FileImage : File
-  return <span className={preview ? 'data-preview' : 'data-thumbnail'}>
+  return <span className={`${preview ? 'data-preview' : 'data-thumbnail'}${overlay && preview && !failed ? ' has-plan-inspect' : ''}`}>
     {!preview || failed ? <><Icon size={preview ? 56 : 18} aria-hidden="true" />{preview && <span>Page preview unavailable</span>}</> :
       <img loading="lazy" src={`/api/docs/${encodeURIComponent(doc.doc_id)}/${preview ? `pages/${page}/image` : 'files/page-1.thumb.png'}`}
         alt={preview ? `Page ${page} of ${doc.title}` : ''} onError={() => setFailed(true)}
         onLoad={(event) => onLoad?.({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })} />}
+    {preview && !failed && overlay}
   </span>
 }
 
@@ -47,6 +50,7 @@ export function DocumentDetail({ doc, docked, onClose, onAsk, actionsExtra }: { 
   const [scene, setScene] = useState<'loading' | 'available' | 'missing' | 'error'>('loading')
   const [zoom, setZoom] = useState(100)
   const [page, setPage] = useState(1)
+  const inspect = usePlanInspect(doc.doc_id, page)
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [sheetText, setSheetText] = useState<SheetText[]>([])
@@ -113,7 +117,7 @@ export function DocumentDetail({ doc, docked, onClose, onAsk, actionsExtra }: { 
     else onClose()
   }}>
     <header><FileText size={24} /><div><h2 id={titleId}><DocumentTitle title={doc.title} /></h2><small>/{doc.source}<span className="data-header-demo">{/generated for demo$/i.test(doc.title) ? ' · generated for demo' : ''}</span><ReadOnceChip docId={doc.doc_id} /></small><details ref={credit} className="data-credit-info"><summary aria-label="Drawing credit and licence"><Info size={12} /></summary><div className="data-credit-popover"><dl>{doc.credit && <div><dt>Credit</dt><dd>{doc.credit}</dd></div>}{doc.licence && <div><dt>Licence</dt><dd>{doc.licence}</dd></div>}</dl><div className="data-mobile-scene">{scene === 'available' && <button type="button" className="viewer3d-visualise-button" onClick={() => changeMode('3d')}>Visualise it</button>}</div></div></details></div>{scene === 'available' && <ViewerModeToggle mode={mode} onChange={changeMode} />}<ShowOnTableButton docId={doc.doc_id} sceneAvailable={scene === 'available'} /><button type="button" className="data-header-ask" aria-label="Ask about it" onClick={() => onAsk(doc)}><MessageSquare size={16} /></button><a className="data-compare" href="#/changes" aria-label="Compare document revisions"><GitCompare size={14} /><span>Compare</span></a><Button variant="ghost" size="icon" aria-label="Fit page" onClick={() => setZoom(100)}><Maximize2 size={16} /></Button><button ref={closeButton} type="button" className="data-close-detail" aria-label="Close document details" onClick={onClose}><X size={18} /></button></header>
-    <div className="data-viewer-toolbar" hidden={mode === '3d'}><Button variant="ghost" size="icon-xs" aria-label="Previous drawing page" disabled={page <= 1} onClick={() => changePage(page - 1)}><ChevronLeft size={14} /></Button><span className="page-number">{page}</span><span>/ {doc.pages}</span><Button variant="ghost" size="icon-xs" aria-label="Next drawing page" disabled={page >= doc.pages} onClick={() => changePage(page + 1)}><ChevronRight size={14} /></Button><span className="toolbar-spacer" /><Button variant="ghost" size="icon-xs" aria-label="Search page text" aria-expanded={searchOpen} aria-controls="data-page-search" onClick={(event) => { searchTrigger.current = event.currentTarget; if (searchOpen) closeSearch(); else setSearchOpen(true) }}><Search size={14} /></Button><a aria-label="Download page" href={`/api/docs/${encodeURIComponent(doc.doc_id)}/pages/${page}/image`} download><Download size={14} /></a><span className="viewer-toolbar-divider" /><span className="data-zoom-controls"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => setZoom((n) => Math.max(25, n - 25))}><Minus size={14} /></Button><span aria-label="Page zoom level">{displayedZoom}%</span><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => setZoom((n) => Math.min(400, n + 25))}><Plus size={14} /></Button></span></div>
+    <div className="data-viewer-toolbar" hidden={mode === '3d'}><Button variant="ghost" size="icon-xs" aria-label="Previous drawing page" disabled={page <= 1} onClick={() => changePage(page - 1)}><ChevronLeft size={14} /></Button><span className="page-number">{page}</span><span>/ {doc.pages}</span><Button variant="ghost" size="icon-xs" aria-label="Next drawing page" disabled={page >= doc.pages} onClick={() => changePage(page + 1)}><ChevronRight size={14} /></Button><span className="toolbar-spacer" /><PlanInspectTools state={inspect} /><Button variant="ghost" size="icon-xs" aria-label="Search page text" aria-expanded={searchOpen} aria-controls="data-page-search" onClick={(event) => { searchTrigger.current = event.currentTarget; if (searchOpen) closeSearch(); else setSearchOpen(true) }}><Search size={14} /></Button><a aria-label="Download page" href={`/api/docs/${encodeURIComponent(doc.doc_id)}/pages/${page}/image`} download><Download size={14} /></a><span className="viewer-toolbar-divider" /><span className="data-zoom-controls"><Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => setZoom((n) => Math.max(25, n - 25))}><Minus size={14} /></Button><span aria-label="Page zoom level">{displayedZoom}%</span><Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => setZoom((n) => Math.min(400, n + 25))}><Plus size={14} /></Button></span></div>
     {searchOpen && mode === '2d' && <section className="data-page-search" id="data-page-search" aria-label="Page text search">
       <label>Find on page {page}<Input autoFocus type="search" aria-label="Find in page text" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
       <Button variant="ghost" size="icon-xs" aria-label="Close page search" onClick={closeSearch}><X size={14} /></Button>
@@ -123,7 +127,8 @@ export function DocumentDetail({ doc, docked, onClose, onAsk, actionsExtra }: { 
     <div className="data-detail-body" hidden={mode === '3d'}>
       <div ref={canvas} className="data-page-canvas"><div className={`data-page-plane ${phone ? 'phone-page-plane' : ''}`} style={phone && image && fitted ? {
         width: image.width, height: image.height, transform: `translate(${(viewport.width - image.width * phoneScale) / 2}px, ${fitted.y}px) scale(${phoneScale})`,
-      } : { transform: `scale(${zoom / 100})` }}><DocumentImage key={`${doc.doc_id}:${page}`} doc={doc} page={page} preview onLoad={setImage} /></div></div>
+      } : { transform: `scale(${zoom / 100})` }}><DocumentImage key={`${doc.doc_id}:${page}`} doc={doc} page={page} preview onLoad={setImage} overlay={image ? <PlanInspectOverlay state={inspect} image={image} /> : null} /></div></div>
+      {inspect.selected && <ItemPanel docId={doc.doc_id} itemId={inspect.selected} sheet={false} onClose={() => inspect.setSelected(null)} onOpenPlace={(place) => { if (place.page && place.page !== page) changePage(place.page) }} />}
       <dl className="data-document-credit">{doc.credit && <div><dt>Credit</dt><dd>{doc.credit}</dd></div>}{doc.licence && <div><dt>Licence</dt><dd>{doc.licence}</dd></div>}</dl>
       <div className="data-detail-actions"><Button variant="raised" onClick={() => onAsk(doc)}>Ask about it<ArrowRight size={15} /></Button>{actionsExtra}
         {scene === 'available' && <button type="button" className="viewer3d-visualise-button" onClick={() => changeMode('3d')}>Visualise it</button>}</div>

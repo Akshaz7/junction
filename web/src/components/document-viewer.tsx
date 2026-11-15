@@ -1,13 +1,13 @@
 import type { Alignment, OverlayDoc } from '../lib/sheet-overlay'
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import { ChevronLeft, ChevronRight, Download, FileSymlink, FileText, Highlighter, Maximize2, Minus, PenLine, Plus, Search, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, FileSymlink, FileText, Highlighter, Maximize2, Minus, PenLine, Plus, Ruler, Search, X } from 'lucide-react'
 import { ReadOnceChip } from './read-once-chip'
 import { SheetOverlay } from './sheet-overlay'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document } from '../lib/types'
 import { fitPage, focusBox, focusBoxWithin, zoomAt, type PageTransform, type Point, type Size } from '../lib/page-transform'
 import { viewerEvidence } from '../lib/viewer-evidence'
-import { pickItemAt, type PickBox } from '../lib/pick-item'
+import { pickItemAt, pickPlanItem, type PickBox, type PlanPickItem } from '../lib/pick-item'
 import { Button } from './ui'
 import { setHover, setSelected, useLinkedItem } from '../viewer3d'
 import './document-viewer.css'
@@ -33,6 +33,13 @@ import { TellStoaBubble } from './viewer-tools/tell-stoa-bubble'
 import './viewer-tools/tell-stoa-bubble.css'
 import { markBox, SymbolMarkupLayer, SymbolMarkupPanel, SymbolMarkupTools, useSymbolMarkup } from './viewer-tools/symbol-markup'
 import { useDrawingHighlights } from '../viewer3d/useDrawingHighlights'
+import { PlanHoverTip } from './viewer-tools/plan-hover-tip'
+import { planItemSummary } from '../lib/plan-item-summary'
+import { PlanLayerChips, PlanLayerShapes, usePlanLayers } from './viewer-tools/plan-layers'
+import { MeasureLayer, useMeasure } from './viewer-tools/measure-layer'
+import './viewer-tools/measure-layer.css'
+import './viewer-tools/plan-layers.css'
+import { snapPoint, formatM, formatM2, type Pt } from '../lib/measure'
 
 export function useViewerSheet() {
   const [sheet, setSheet] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 800px)').matches)
@@ -73,15 +80,27 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   const itemTrigger = useRef<Element | null>(null)
   const citation = useMemo(() => place ? { ...originalCitation, kind: 'element' as const, quote: null, doc_id: place.location.doc_id, page: place.location.page, item_ids: [place.item.item_id] } : { ...(calcSource ?? originalCitation), page: pageNumber }, [originalCitation, calcSource, place, pageNumber])
   const { regions, sources, initial } = useMemo(() => place ? placeEvidence(place.location, place.item) : viewerEvidence(calcSource ? { ...answer, citations: [...answer.citations.filter((entry) => entry.n !== calcSource.n || entry.doc_id !== calcSource.doc_id || entry.page !== calcSource.page), calcSource] } : answer, citation), [answer, citation, place, calcSource])
-  const [pickBoxes, setPickBoxes] = useState<PickBox[]>([])
+  // Every plan-map item on this page: picks one item inside an aggregate highlight, and lets a click anywhere
+  // on the plan open that item's details (plain code over the plan map, no model call, no 3D needed).
+  const [planItems, setPlanItems] = useState<(PlanPickItem & { label?: string | null; props?: Record<string, unknown> | null })[]>([])
+  const [mPerPx, setMPerPx] = useState<number | null>(null)
   useEffect(() => {
     const controller = new AbortController()
-    setPickBoxes([])
+    setPlanItems([]); setMPerPx(null)
     workspaceApi.getPlanMap(citation.doc_id, citation.page, controller.signal).then((pm) => {
-      if (!controller.signal.aborted) setPickBoxes((pm.items ?? []).flatMap((item) => item.bbox_px ? [{ id: item.item_id, bbox: item.bbox_px }] : []))
+      if (controller.signal.aborted) return
+      setMPerPx(typeof pm.scale?.m_per_px === 'number' && pm.scale.m_per_px > 0 ? pm.scale.m_per_px : null)
+      setPlanItems((pm.items ?? []).flatMap((item) => item.bbox_px ? [{ id: item.item_id, kind: item.kind ?? kindFromItemId(item.item_id) ?? 'other', bbox: item.bbox_px, polygon: item.polygon_px ?? null, role: typeof item.props?.role === 'string' ? item.props.role : null, label: item.label ?? null, props: item.props ?? null }] : []))
     }).catch(() => {})
     return () => controller.abort()
   }, [citation.doc_id, citation.page])
+  const pickBoxes = useMemo<PickBox[]>(() => planItems.map(({ id, bbox }) => ({ id, bbox })), [planItems])
+  const planById = useMemo(() => new Map(planItems.map((item) => [item.id, item])), [planItems])
+  const [hoverPick, setHoverPick] = useState<string | null>(null)
+  const [hoverAt, setHoverAt] = useState<Point | null>(null)
+  const layers = usePlanLayers()
+  const measure = useMeasure(mPerPx)
+  const tapStart = useRef<{ id: number; x: number; y: number } | null>(null)
   const highlights = useDrawingHighlights(citation.doc_id, answer.answer_id, chatId)
   const answerSelection = !place && answer.citations.some((entry) => entry.doc_id === citation.doc_id && entry.page === citation.page && (entry.item_ids.length > 0 || entry.kind === 'text' || !!entry.bbox_px))
   const navigationKind = answerSelection ? 'highlight' : 'item'
@@ -217,6 +236,32 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
     setSpecOpen(false)
     itemTrigger.current = trigger
     setSelectedItem({ docId: citation.doc_id, itemId: picked ?? sources[index]?.itemIds[0] ?? id })
+  }
+  /** Page-pixel point under the pointer, or null when it is off the page. */
+  function rawPagePoint(clientX: number, clientY: number): [number, number] | null {
+    if (!image || !stage.current) return null
+    const point = pointerPoint(clientX, clientY)
+    const x = (point.x - view.x) / view.scale, y = (point.y - view.y) / view.scale
+    return x < 0 || y < 0 || x > image.width || y > image.height ? null : [x, y]
+  }
+  function planItemAt(clientX: number, clientY: number): string | null {
+    if (!planItems.length || tool !== 'pan' || markup.mode || measure.mode || shownPage !== citation.page) return null
+    const point = rawPagePoint(clientX, clientY)
+    return point ? pickPlanItem(point, planItems, Math.min(6 / Math.max(view.scale, .001), 24)) : null
+  }
+  /** A click on the plan outside any answer box: show the details of the item under it. */
+  function inspectAt(clientX: number, clientY: number) {
+    if (measure.mode) {
+      const point = rawPagePoint(clientX, clientY)
+      if (point) measure.add(snapPoint(point as Pt, planItems, 8 / Math.max(view.scale, .001)))
+      return
+    }
+    const id = planItemAt(clientX, clientY)
+    if (!id) return
+    setSpecOpen(false)
+    itemTrigger.current = stage.current
+    setSelected(id, '2d')
+    setSelectedItem({ docId: citation.doc_id, itemId: id })
   }
 
   useEffect(() => {
@@ -388,6 +433,8 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   return <aside ref={panel} className={`document-viewer ${sheet ? 'viewer-sheet' : ''}`} role={sheet ? 'dialog' : 'region'} aria-modal={sheet || undefined} aria-label={sheet ? undefined : "Drawing viewer"} aria-labelledby={sheet ? titleId : undefined}
     onKeyDown={(event) => {
       if (mode === '3d' && event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); changeMode('2d'); return }
+      if (measure.mode && (event.key === 'Enter' || event.key === 'Backspace')) { event.preventDefault(); if (event.key === 'Enter') measure.close(); else measure.undo(); return }
+      if (event.key === 'Escape' && measure.mode) { event.stopPropagation(); measure.stop(); return }
       if (event.key === 'Escape') { event.stopPropagation(); if (markup.selection || markup.mode || markup.editing) markup.cancel(); else if (markup.open) markup.close(); else if (searchOpen) closeSearch(); else if (tool !== 'pan') chooseTool('pan'); else if (selectedItem) closeItem(); else onClose() }
       if (sheet && event.key === 'Tab') {
         const controls = Array.from(panel.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), a[href], [tabindex="0"]') ?? []).filter((node) => node.getClientRects().length)
@@ -416,6 +463,8 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       <div className="viewer-page-position"><Button variant="ghost" size="icon-xs" aria-label="Previous page" disabled={citation.page <= 1} onClick={() => changePage(citation.page - 1)}><ChevronLeft size={14} /></Button><span className="page-number">{citation.page}</span><span>/ {totalPages ?? '…'}</span><Button variant="ghost" size="icon-xs" aria-label="Next page" disabled={!totalPages || citation.page >= totalPages} onClick={() => changePage(citation.page + 1)}><ChevronRight size={14} /></Button></div>
       <span className="toolbar-spacer" />
       <Button variant="ghost" size="xs" onClick={highlights.clear}>Clear highlights</Button>
+      {mode === '2d' && planItems.length > 0 && <PlanLayerChips items={planItems} shown={layers.shown} onToggle={layers.toggle} />}
+      {mode === '2d' && <Button variant="ghost" size="icon-sm" aria-label="Measure distance on the drawing" title={mPerPx ? 'Measure: click two points (double-click for an area)' : 'Measure (no scale on this drawing)'} aria-pressed={!!measure.mode} disabled={!image} onClick={() => { if (measure.mode) measure.stop(); else { chooseTool('pan'); setSelectedItem(null); measure.start('distance') } }}><Ruler size={16} /></Button>}
       <div className="viewer-markup-tools">
         <Button variant="ghost" size="xs" aria-label="Show drawing view regions" aria-pressed={showViews} onClick={() => setShowViews((shown) => !shown)}>Views</Button>
         <SymbolMarkupTools markup={markup} disabled={!image} onActivate={() => { setTool('pan'); setSelectedItem(null); setSpecOpen(false) }} />
@@ -440,11 +489,17 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       <Button variant="ghost" size="icon-xs" aria-label="Next match" disabled={!hits.length} onClick={() => setHitIndex((hitIndex + 1) % hits.length)}><ChevronRight size={14} /></Button>
       <Button variant="ghost" size="icon-xs" aria-label="Close sheet search" onClick={closeSearch}><X size={14} /></Button>
     </div>}
+    {mode === '2d' && measure.mode && <div className="viewer-annotation-controls viewer-measure-controls" role="status" aria-live="polite">
+      <span>{!mPerPx ? 'No scale on this drawing, so distances cannot be measured.' : measure.result?.distanceM != null ? `Distance: ${formatM(measure.result.distanceM)}` : measure.result?.areaM2 != null ? `Area: ${formatM2(measure.result.areaM2)} · perimeter ${formatM(measure.result.perimeterM ?? 0)}` : measure.mode === 'distance' ? 'Click two points to measure (snaps to plan corners) · Esc to cancel' : 'Click the corners, then double-click or press Enter · Esc to cancel'}</span>
+      <Button variant="ghost" size="xs" aria-pressed={measure.mode === 'distance'} onClick={() => measure.start('distance')}>Distance</Button>
+      <Button variant="ghost" size="xs" aria-pressed={measure.mode === 'area'} onClick={() => measure.start('area')}>Area</Button>
+      <Button variant="ghost" size="xs" onClick={measure.stop}>Done</Button>
+    </div>}
     {mode === '2d' && (tool !== 'pan' || annotations.marks.length > 0) && <div className="viewer-annotation-controls"><span>{tool === 'marker' ? 'Drag over an item to mark it' : tool === 'pen' ? 'Draw on the sheet' : 'Annotations saved on this device'}</span><Button variant="ghost" size="xs" disabled={!annotations.marks.length} onClick={annotations.undo}>Undo annotation</Button><Button variant="ghost" size="xs" disabled={!annotations.marks.length} onClick={annotations.clear}>Clear page annotations</Button>{tool !== 'pan' && <Button variant="ghost" size="xs" onClick={() => chooseTool('pan')}>Done</Button>}</div>}
     {(downloadError || annotations.warning) && <p className="viewer-tool-error" role="alert">{downloadError || annotations.warning}</p>}
     {mode === '2d' && specCitation && !specOpen && <Button className="viewer-passage-control" variant="ghost" size="sm" onClick={() => setSpecOpen(true)}>Show cited passage</Button>}
     <div className="viewer-item-layout" hidden={mode === '3d'}>
-    <div className="drawing-stage" data-tool={tool} ref={stage} data-testid="drawing-viewport" tabIndex={0} aria-label="Drawing canvas. Drag to pan, scroll or pinch to zoom. Arrow keys pan, plus and minus zoom, zero fits."
+    <div className="drawing-stage" data-tool={tool} data-pickable={hoverPick ? 'true' : undefined} ref={stage} data-testid="drawing-viewport" tabIndex={0} aria-label="Drawing canvas. Drag to pan, scroll or pinch to zoom. Click an item on the plan for its details. Arrow keys pan, plus and minus zoom, zero fits."
       onKeyDown={(event) => {
         if (event.target !== event.currentTarget) return
         const moves: Record<string, Point> = { ArrowLeft: { x: 40, y: 0 }, ArrowRight: { x: -40, y: 0 }, ArrowUp: { x: 0, y: 40 }, ArrowDown: { x: 0, y: -40 } }
@@ -453,7 +508,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
         if (event.key === '-') { event.preventDefault(); zoom(1 / 1.25) }
         if (event.key === '0' && image) { event.preventDefault(); setView(fitPage(image, viewport)) }
       }}
-      onDoubleClick={(event) => { if (tool === 'pan') zoom(2, pointerPoint(event.clientX, event.clientY)) }}
+      onDoubleClick={(event) => { if (measure.mode) { if (measure.mode === 'area') measure.close(); return } if (tool === 'pan') zoom(2, pointerPoint(event.clientX, event.clientY)) }}
       onPointerDown={(event) => {
         if (!image || (event.pointerType === 'mouse' && event.button !== 0)) return
         event.currentTarget.setPointerCapture(event.pointerId)
@@ -465,6 +520,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
           const mark: Annotation = { id: crypto.randomUUID(), tool, page: citation.page, points: [point, point], width: 2.5 / view.scale }
           drawingPointer.current = event.pointerId; draftRef.current = mark; setDraft(mark); return
         }
+        if (!pointers.current.size) { const start = pointerPoint(event.clientX, event.clientY); tapStart.current = { id: event.pointerId, ...start } } else tapStart.current = null
         pointers.current.set(event.pointerId, pointerPoint(event.clientX, event.clientY))
       }}
       onPointerMove={(event) => {
@@ -474,7 +530,15 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
           const next = { ...mark, points: mark.tool === 'marker' ? [mark.points[0], point] : [...mark.points, point] }
           draftRef.current = next; setDraft(next); return
         }
-        if (!pointers.current.has(event.pointerId)) return
+        if (!pointers.current.has(event.pointerId)) {
+          if (event.pointerType === 'mouse') {
+            if (measure.mode) { const point = rawPagePoint(event.clientX, event.clientY); measure.move(point ? snapPoint(point as Pt, planItems, 8 / Math.max(view.scale, .001)) : null) }
+            const next = planItemAt(event.clientX, event.clientY)
+            if (next !== hoverPick) setHoverPick(next)
+            setHoverAt(next ? pointerPoint(event.clientX, event.clientY) : null)
+          }
+          return
+        }
         const before = [...pointers.current.values()]
         const old = pointers.current.get(event.pointerId)!
         const point = pointerPoint(event.clientX, event.clientY)
@@ -489,7 +553,17 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
           return { ...previous, x: previous.x + point.x - old.x, y: previous.y + point.y - old.y }
         })
       }}
-      onPointerUp={(event) => { finishAnnotation(event.pointerId, true); pointers.current.delete(event.pointerId) }}
+      onPointerUp={(event) => {
+        finishAnnotation(event.pointerId, true)
+        const start = tapStart.current
+        tapStart.current = null
+        if (start && start.id === event.pointerId && pointers.current.size === 1) {
+          const end = pointerPoint(event.clientX, event.clientY)
+          if (Math.hypot(end.x - start.x, end.y - start.y) < 5) inspectAt(event.clientX, event.clientY)
+        }
+        pointers.current.delete(event.pointerId)
+      }}
+      onPointerLeave={() => { if (hoverPick) setHoverPick(null); setHoverAt(null); if (measure.mode) measure.move(null) }}
       onPointerCancel={(event) => { finishAnnotation(event.pointerId, false); pointers.current.delete(event.pointerId) }}
       onLostPointerCapture={(event) => { finishAnnotation(event.pointerId, false); pointers.current.delete(event.pointerId) }}>
       {imageUrl && <div className="drawing-plane" style={{ width: image?.width, height: image?.height, transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`, visibility: image ? 'visible' : 'hidden' }}>
@@ -499,6 +573,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
         {showViews && image && shownPage === citation.page && <ViewRegions docId={citation.doc_id} page={citation.page} width={image.width} height={image.height} scale={view.scale} />}
         {image && shownPage === citation.page && <RoomLabels docId={citation.doc_id} page={citation.page} width={image.width} height={image.height} scale={view.scale} />}
         {image && shownPage === citation.page && <svg className="drawing-evidence" width={image.width} height={image.height} viewBox={`0 0 ${image.width} ${image.height}`} aria-label="Numbered drawing evidence">
+          <PlanLayerShapes items={planItems} shown={layers.shown} selectedId={selectedItem?.itemId ?? null} />
           {!highlights.cleared && regions.map((region, index) => {
             const [x, y, right, bottom] = region.bbox
             const labelSize = 22 / view.scale
@@ -523,6 +598,18 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
               {secondaryTag && <svg className="evidence-secondary-tag" x={x + labelSize * Math.max(1, label.length / 2)} y={y} width={labelSize * Math.max(1, secondaryTag.length / 2)} height={labelSize} viewBox={`0 0 ${22 * Math.max(1, secondaryTag.length / 2)} 22`}><text x="4" y="15">{secondaryTag}</text></svg>}
             </g>
           })}
+          {measure.mode && <MeasureLayer mode={measure.mode} points={measure.points} cursor={measure.cursor} mPerPx={mPerPx} scale={view.scale} />}
+          {[...new Set([hoverPick, selectedItem?.docId === citation.doc_id ? selectedItem.itemId : null])].map((id) => {
+            const item = id ? planById.get(id) : undefined
+            if (!item) return null
+            const kind = kindStyle(item.kind)
+            const [x, y, right, bottom] = item.bbox
+            const outline = item.polygon && item.polygon.length >= 3 && item.kind !== 'text'
+            return <g key={`pick-${item.id}`} className={`plan-pick ${item.id === selectedItem?.itemId ? 'is-selected' : ''}`} data-testid="plan-pick" data-item-id={item.id} data-kind={item.kind} aria-hidden="true" style={{ '--kind-color': kind.color } as CSSProperties}>
+              {outline ? <polygon points={item.polygon!.map(([px, py]) => `${px},${py}`).join(' ')} vectorEffect="non-scaling-stroke" />
+                : <rect x={x} y={y} width={Math.max(0, right - x)} height={Math.max(0, bottom - y)} vectorEffect="non-scaling-stroke" />}
+            </g>
+          })}
           {!highlights.cleared && leaving.map((region) => {
             const [x, y, right, bottom] = region.bbox
             const kind = region.text ? null : kindStyle(region.kind)
@@ -539,6 +626,10 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
         {image && shownPage === citation.page && <SymbolMarkupLayer markup={markup} image={image} scale={view.scale} />}
       </div>}
       {!highlights.cleared && image && shownPage === citation.page && regions.some((region) => !region.text) && <KindLegend className="kind-legend-2d" kinds={regions.filter((region) => !region.text).map((region) => region.kind)} totals={totalKinds} />}
+      {!measure.mode && hoverPick && hoverAt && (() => {
+        const item = planById.get(hoverPick)
+        return item ? <PlanHoverTip text={planItemSummary(item, mPerPx)} x={hoverAt.x} y={hoverAt.y} containerWidth={viewport.width} containerHeight={viewport.height} /> : null
+      })()}
       {error ? <div className="viewer-message"><p role="alert">{error}</p><Button variant="raised" onClick={() => setRetry(retry + 1)}>Try again</Button></div>
         : !image && <p className="viewer-message" role="status">Loading drawing…</p>}
       {image && shownPage === citation.page && (() => {

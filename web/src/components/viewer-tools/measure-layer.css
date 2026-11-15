@@ -1,0 +1,8 @@
+.measure-layer { color: var(--brand-forest); pointer-events: none; }
+.measure-layer .measure-line, .measure-layer .measure-shape { fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.measure-layer .measure-shape { fill: var(--forest-500, currentColor); fill-opacity: .12; stroke-dasharray: 6 4; }
+.measure-layer .measure-shape.is-closed { stroke-dasharray: none; fill-opacity: .18; }
+.measure-layer .measure-dot { fill: var(--card); stroke: currentColor; stroke-width: 2; }
+.measure-layer .measure-dot.is-cursor { fill: currentColor; fill-opacity: .5; }
+.measure-layer .measure-label { fill: var(--foreground); font-family: var(--font-sans); font-weight: 600; font-variant-numeric: tabular-nums; paint-order: stroke; stroke: var(--card); stroke-width: .3em; stroke-linejoin: round; }
+.measure-layer .measure-label.is-unscaled { fill: var(--muted-foreground); font-weight: 500; }

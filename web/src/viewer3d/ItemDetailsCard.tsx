@@ -2,9 +2,10 @@ import { useEffect, useRef } from 'react';
 import type { ItemDetails } from './identify';
 import type { Viewer } from './viewer';
 import { WallDetails } from '../components/wall-details';
+import { LinkedItemFacts } from '../components/item-panel';
 
-export function ItemDetailsCard({ details, loading, viewer, onClose, onHighlight }: {
-  details: ItemDetails; loading: boolean; onClose: () => void; onHighlight: () => void;
+export function ItemDetailsCard({ details, loading, viewer, onClose, onHighlight, docId }: {
+  details: ItemDetails; loading: boolean; onClose: () => void; onHighlight: () => void; docId?: string | null;
   viewer: Viewer | null;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -54,6 +55,7 @@ export function ItemDetailsCard({ details, loading, viewer, onClose, onHighlight
     <dl>{details.fields.map(({ label, value }) => <div key={label}>
       <dt>{label}</dt><dd>{value}</dd>
     </div>)}</dl>
+    {docId && <LinkedItemFacts docId={docId} itemId={details.item_id} />}
     {details.wall && <WallDetails wall={details.wall} />}
     {details.askHref && <a className="wall-ask" href={details.askHref}>Ask about this wall</a>}
     {!details.hasElement && <p className="viewer3d-item-note" role="status">
