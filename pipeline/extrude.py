@@ -367,6 +367,22 @@ def window_parts(o):
     return [("frame", _flat(_boxes(fr), "frame")), ("glass", _flat(_boxes(glass), "glass"))]
 
 
+def _door_depth(o):
+    """Door frame depth across the wall: the seated wall band, never thicker (no 12 cm minimum, so the
+    frame does not stick out of a thin wall and show from above), 4 cm..30 cm."""
+    x0, x1, z0, z1, ax = o
+    return min(max((z1 - z0) if ax == "x" else (x1 - x0), 0.04), 0.3)
+
+
+def _door_head(local, matrix):
+    """Plan footprint of a door's frame (opening width x frame depth), for the lintel above its head."""
+    a, b, v0, v1, _ = local
+    c, t = (v0 + v1) / 2, _door_depth(local) / 2
+    u = np.array([matrix[0, 0], matrix[2, 0]])
+    v = np.array([matrix[0, 2], matrix[2, 2]])
+    return Polygon([u * s_ + v * t_ for s_, t_ in ((a, c - t), (b, c - t), (b, c + t), (a, c + t))])
+
+
 def door_parts(o):
     """Door in its wall opening: thin jambs + head (wall-deep frame) and a closed 4 cm leaf in the wall plane.
 
@@ -376,7 +392,7 @@ def door_parts(o):
     x0, x1, z0, z1, ax = o
     u0, u1 = (x0, x1) if ax == "x" else (z0, z1)
     c = ((z0 + z1) / 2) if ax == "x" else ((x0 + x1) / 2)
-    T = min(max((z1 - z0) if ax == "x" else (x1 - x0), 0.12), 0.3)
+    T = _door_depth(o)
     f = min(0.05, (u1 - u0) / 8)
     B = lambda a, b, ya, yb, va, vb: _wb(ax, a, b, ya, yb, c + va, c + vb)
     fr = [B(u0, u0 + f, 0, DOOR_H, -T / 2, T / 2), B(u1 - f, u1, 0, DOOR_H, -T / 2, T / 2),
@@ -756,6 +772,13 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False, *
     placed = {"head": Polygon(), "sill": Polygon()}  # two detections of one opening must not stack coplanar blocks
     for iid, (local, matrix, footprint, host) in openings.items():
         gap = _infill_gap(local, matrix, walls_m)
+        if kinds[iid] == "door":
+            # Every door gets a lintel over its whole frame where no wall already stands above the head
+            # (raster walls can lose the host wall); never wider than the opening or deeper than the frame.
+            lintel = _door_head(local, matrix)
+            lintel = lintel if walls_m.is_empty else lintel.difference(walls_m)
+            gap = lintel if gap is None else unary_union([gap, lintel])
+            gap = None if gap.is_empty else gap
         if gap is None:
             continue
         head = gap.difference(placed["head"])
