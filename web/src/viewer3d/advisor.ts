@@ -27,6 +27,9 @@ export interface AdvisorEvent {
   doc_id: string;
   chat_id?: string | null;
   cards: AdvisorCard[];
+  /** Set when a scene reset/restore cleared or re-derived the cards. Monotonic: older versions are stale. */
+  scene_version?: number;
+  cleared?: boolean;
 }
 const record = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
 const text = (value: unknown): value is string => typeof value === 'string' && !!value.trim();
@@ -55,7 +58,9 @@ export function sourcedCards(value: unknown): AdvisorCard[] {
 export function decodeAdvisorEvent(value: unknown): AdvisorEvent | null {
   if (!record(value) || value.type !== 'advisor.cards' || !text(value.doc_id)
     || !Array.isArray(value.cards) || (value.chat_id != null && typeof value.chat_id !== 'string')) return null;
-  return { type: 'advisor.cards', doc_id: value.doc_id, chat_id: value.chat_id as string | null | undefined, cards: sourcedCards(value) };
+  const scene_version = typeof value.scene_version === 'number' ? value.scene_version : undefined;
+  return { type: 'advisor.cards', doc_id: value.doc_id, chat_id: value.chat_id as string | null | undefined, cards: sourcedCards(value),
+    ...(scene_version !== undefined ? { scene_version } : {}), ...(value.cleared === true ? { cleared: true } : {}) };
 }
 
 /** Queue every edit; debounce the network burst without losing intermediate operations. */
@@ -71,6 +76,7 @@ export function createAdvisorRequests(options: {
   let queue: ItemEdit[] = [];
   let revision = 0;
   let disposed = false;
+  let sceneVersion = 0;
   let sending = Promise.resolve();
   const controllers = new Set<AbortController>();
 
@@ -110,7 +116,12 @@ export function createAdvisorRequests(options: {
     },
     receive(event: AdvisorEvent) {
       if (disposed || event.doc_id !== options.doc_id || (event.chat_id ?? null) !== (options.chat_id ?? null)) return;
-      revision++;
+      if (event.scene_version !== undefined) {
+        if (event.scene_version < sceneVersion) return;  // a card event from before the latest reset
+        sceneVersion = event.scene_version;
+        queue = []; clearTimeout(timer);  // queued checks were for the old scene
+      }
+      revision++;  // also discards any in-flight HTTP result for the old scene
       options.onCards(event.cards);
     },
     dispose() {

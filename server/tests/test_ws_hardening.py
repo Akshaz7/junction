@@ -149,6 +149,8 @@ def test_highlight_labels_missing_manifest_and_empty_reset(client):
         assert ws.receive_json() == {"type": "scene.highlight", "doc_id": DOC, "item_ids": ["w1"], "labels": {"w1": "W1"}}
         ws.send_json({"type": "scene.edit", "doc_id": DOC, "op": "reset"})
         assert ws.receive_json()["item_ids"] == []
+        assert ws.receive_json()["cleared"] is True  # F11: a reset clears advisor cards, then re-derives them
+        assert ws.receive_json()["refreshed"] is True
         (d / "scene.json").unlink()
         ws.send_json({"type": "scene.highlight", "doc_id": DOC, "item_ids": ["not-yet-extruded"]})
         assert ws.receive_json()["item_ids"] == ["not-yet-extruded"]

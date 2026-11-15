@@ -8,6 +8,7 @@ fields are dropped (quotes) or cut (title, body); at most 3 cards survive.
 import asyncio
 import importlib
 import json
+import time
 import uuid
 
 from fastapi import APIRouter, HTTPException
@@ -148,12 +149,32 @@ async def advise(body: AdviseBody):
             edit["detail"] = e.detail
     if chat_id is not None and edit is not None:
         edit = effective_edit(await chat_hidden(pool, chat_id, body.doc_id), edit)
-    fn = _engine_advise()
-    cards: list[dict] = []
-    if fn is not None:
-        try:
-            cards = clean_cards(await asyncio.to_thread(fn, body.doc_id, edit, chat_id), body.doc_id)
-        except Exception:  # noqa: BLE001  the advisor never takes the app down; no answer means no cards
-            cards = []
+    cards = await derive_cards(body.doc_id, chat_id, edit)
     await publish({"type": "advisor.cards", "doc_id": body.doc_id, "chat_id": chat_id, "cards": cards})
     return {"cards": cards}
+
+
+async def derive_cards(doc_id: str, chat_id, edit: dict | None) -> list[dict]:
+    """Cards for the scene as it is now, after `edit`. The advisor never takes the app down: no answer, no cards."""
+    fn = _engine_advise()
+    if fn is None:
+        return []
+    try:
+        return clean_cards(await asyncio.to_thread(fn, doc_id, edit, chat_id), doc_id)
+    except Exception:  # noqa: BLE001
+        return []
+
+
+async def refresh_after_reset(event: dict) -> None:
+    """A scene reset/restore (from any client or the chat) makes every card derived from the old scene stale.
+    Clear them on all clients at once, then publish cards re-derived for the current scene. `scene_version` is
+    monotonic, so a client drops a late card event from before the reset."""
+    doc_id, chat_id = event["doc_id"], event.get("chat_id")
+    base = {"type": "advisor.cards", "doc_id": doc_id, "chat_id": chat_id, "after_edit": event.get("edit_id")}
+    await publish({**base, "cards": [], "cleared": True, "scene_version": time.time_ns()})
+    edit = {"op": event["op"], "item_ids": list(event.get("item_ids") or [])}
+    pool = await db.get_pool()
+    if pool is not None and chat_id:
+        edit = effective_edit(await chat_hidden(pool, chat_id, doc_id), edit)
+    cards = await derive_cards(doc_id, chat_id, edit)
+    await publish({**base, "cards": cards, "refreshed": True, "scene_version": time.time_ns()})
