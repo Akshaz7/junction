@@ -134,9 +134,30 @@ export type StepRow =
 
 const norm = (text: string | undefined) => (text ?? '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
 /** "round(22.0, 0)" where the number is already what it rounds to: no information. */
-function isNoopRound(step: Step): boolean {
-  const m = /^round\(\s*(-?[\d.]+(?:e-?\d+)?)\s*,\s*(\d+)\s*\)$/i.exec(step.expr ?? '')
-  return !!m && step.value != null && Number(m[1]) === step.value
+const ROUND = /^round\(\s*(-?[\d.]+(?:e-?\d+)?)\s*,\s*(\d+)\s*\)$/i
+/** Any plain round(x, n): the result line carries the rounding instead. */
+function isNoopRound(step: Step): boolean { return ROUND.test(step.expr ?? '') }
+
+/** The last plain rounding step: what the answer is shown as, and to how many decimals. */
+export function displayRounding(calc: Pick<Calculation, 'steps'>): { value: number; places: number } | null {
+  for (const step of [...(calc.steps ?? [])].reverse()) {
+    const m = ROUND.exec(step.expr ?? '')
+    if (m && typeof step.value === 'number') return { value: step.value, places: Number(m[2]) }
+  }
+  return null
+}
+
+/** Strip float noise from numbers inside an expression: 61.20000000000002 becomes 61.2. */
+export const cleanExpr = (expr: string): string => expr.replace(/-?\d+\.\d{4,}/g, (n) => String(parseFloat(Number(n).toFixed(3))))
+
+/** Columns worth showing: drops a column whose values equal an earlier one on every row (Area == Net). */
+export function distinctColumns(rows: Row[], keys: string[]): string[] {
+  const kept: string[] = []
+  for (const key of keys) {
+    const dup = kept.some((k) => rows.every((r) => r.values?.[k] === r.values?.[key]))
+    if (!dup) kept.push(key)
+  }
+  return kept
 }
 
 /**

@@ -107,3 +107,6 @@ button.calc-node:hover, button.calc-node:focus-visible { background: var(--ink-w
 .calc-group-count { margin-left: auto; font-size: 11px; opacity: .6; }
 .calc-step-group > details { margin-top: 4px; }
 .calc-long-expr > summary { cursor: pointer; list-style: none; } .calc-long-expr > code { display: block; margin-top: 4px; }
+
+.calc-inputs > summary { font-size: 11px; color: var(--muted-foreground, #777); font-weight: 400; }
+.calc-inputs > summary:hover { text-decoration: underline; }

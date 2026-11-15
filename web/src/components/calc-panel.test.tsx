@@ -134,7 +134,7 @@ it('stepRows drops no-op rounding and repeated method text, and folds repeated s
     st('r', 'Result', 'round(22.0, 0)', 22, { note: 'Because of the filters.' }),
     st('a', 'Detections · wall', 'sum', 22), st('b', 'Detections · door', 'sum', 3), st('c', 'Detections · room', 'sum', 5),
     st('m', 'Margin · x', 'max', 0), ...Array.from({ length: 5 }, (_, i) => st(`n${i}`, 'Net wall surface', 'a − b', i)),
-    st('k', 'Keep', 'round(4.56, 1)', 4.6, { note: 'because of the filters' }),
+    st('k', 'Keep', 'a + b', 4.6, { note: 'because of the filters' }),
   ]
   const { main } = stepRows({ steps }, { why_chosen: 'Because of the filters.' })
   expect(main.map((r) => r.kind)).toEqual(['class', 'group', 'step'])
