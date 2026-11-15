@@ -26,7 +26,12 @@ export function withAbort<T>(task: Promise<T>, signal: AbortSignal): Promise<T> 
 
 async function readGeometry(url: string, { signal, onProgress }: SceneLoadOptions): Promise<ArrayBuffer> {
   const response = await fetch(url, { signal });
-  if (!response.ok) throw new Error(`Could not load 3D geometry (${response.status})`);
+  if (!response.ok) {
+    // The server explains a missing model ("3D not available for this file: <reason>"): show that, not a bare status.
+    let detail = '';
+    try { detail = String(((await response.json()) as { detail?: unknown }).detail ?? ''); } catch { /* no JSON body */ }
+    throw new Error(/^3D not available for this file/.test(detail) ? detail : `Could not load 3D geometry (${response.status})`);
+  }
   const length = Number(response.headers.get('content-length'));
   const total = length > 0 ? length : undefined;
   onProgress?.({ phase: 'download', loaded: 0, total });
