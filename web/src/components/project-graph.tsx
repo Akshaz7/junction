@@ -9,36 +9,13 @@ import {
 } from '../lib/kg'
 import { projectsApi, projectsMock, type Project } from '../lib/projects-api'
 import { docTitle } from '../lib/projects-format'
+import { displayNodes, levelDisplay } from '../lib/kg-display'
+import { useProjectGraph } from './use-project-graph'
 import './project-graph.css'
 
 const FILTER_GROUPS: KindGroup[] = ['space', 'element', 'service', 'issue']
 const EXPAND_LIMIT = 40
 const ALL_LIMIT = 2000
-
-/** The cluster graph, then the full one on demand. A partial answer (still being built) is asked for again. */
-function useGraph(projectId: string, docCount: number) {
-  const [state, setState] = useState<{ graph?: KgGraph; error: string }>({ error: '' })
-  const [key, setKey] = useState(0)
-  useEffect(() => {
-    if (!docCount) { setState({ error: '' }); return }
-    let live = true; let timer: ReturnType<typeof setTimeout> | undefined; let tries = 0
-    const load = () => projectsApi.graph(projectId, { depth: 'cluster' }).then((graph) => {
-      if (!live) return
-      setState({ graph, error: '' })
-      if (graph.partial && ++tries < 20) timer = setTimeout(load, 3000)
-    }).catch((error: unknown) => { if (live) setState({ error: error instanceof Error ? error.message : 'The graph could not be loaded.' }) })
-    setState({ error: '' }); void load()
-    return () => { live = false; if (timer) clearTimeout(timer) }
-  }, [projectId, docCount, key])
-  const [slow, setSlow] = useState(false)
-  useEffect(() => {
-    setSlow(false)
-    if (state.graph || state.error || !docCount) return
-    const timer = setTimeout(() => setSlow(true), 8_000)
-    return () => clearTimeout(timer)
-  }, [projectId, docCount, key, state.graph, state.error])
-  return { ...state, slow, retry: () => setKey((value) => value + 1) }
-}
 
 function StatsStrip({ graph, onUnlinked, active }: { graph: KgGraph; onUnlinked: () => void; active: boolean }) {
   const { stats } = graph
@@ -116,7 +93,7 @@ function NodePanel({ project, node, detail, loading, error, canShow3d, onClose, 
   return <aside className="kg-panel" aria-label="Item details">
     <header>
       <div><span className="kg-kind"><span className="kg-dot" data-group={kindGroup(shown.kind)} aria-hidden="true" />{kindLabel(shown.kind)}{ifcClass(shown.props) ? ` (${ifcClass(shown.props)})` : ''}{shown.level ? ` · ${shown.level}` : ''}</span>
-        <h3 title={shown.label}>{shown.label}</h3></div>
+        <h3 title={shown.label}>{shown.kind === 'level' ? levelDisplay(shown.label) : shown.label}</h3></div>
       <Button variant="ghost" size="icon-sm" aria-label="Close details" onClick={onClose}><X size={16} /></Button>
     </header>
     <div className="kg-panel-actions">
@@ -156,7 +133,7 @@ export function GraphTab({ project, focus = [], onShow, onAsk, canShow3d }: {
   project: Project; focus?: string[]
   onShow: (docId: string, itemIds?: string[], mode?: '2d' | '3d') => void; onAsk: (text: string) => void; canShow3d?: (docId: string) => boolean
 }) {
-  const { graph, error, slow, retry } = useGraph(project.id, project.docs.length)
+  const { graph, error, slow, pending, retry } = useProjectGraph(project.id, project.docs.length)
   const [shown, setShown] = useState<{ nodes: KgNode[]; edges: KgGraph['edges'] }>({ nodes: [], edges: [] })
   const [mode, setMode] = useState<'overview' | 'all'>('overview')
   const [filters, setFilters] = useState<GraphFilters>(noFilters)
@@ -184,7 +161,8 @@ export function GraphTab({ project, focus = [], onShow, onAsk, canShow3d }: {
     void fullVersion
     return indexGraph(full.current?.nodes ?? shown.nodes, full.current?.edges ?? shown.edges)
   }, [fullVersion, shown])
-  const visible = useMemo(() => filterGraph(shown.nodes, shown.edges, filters), [shown, filters])
+  const docTitles = useMemo(() => new Map(project.docs.map((doc) => [doc.doc_id, docTitle(doc)] as const)), [project.docs])
+  const visible = useMemo(() => { const out = filterGraph(shown.nodes, shown.edges, filters); return { ...out, nodes: displayNodes(out.nodes, docTitles) } }, [shown, filters, docTitles])
   const levels = useMemo(() => [...new Set((full.current?.nodes ?? shown.nodes).filter((node) => node.kind === 'level').map((node) => node.label))].sort(), [shown, fullVersion])
   const docs = useMemo(() => project.docs.map((doc) => ({ id: doc.doc_id, title: docTitle(doc) })), [project.docs])
   const selectedNode = selectedId ? known.byId.get(selectedId) ?? shown.nodes.find((node) => node.id === selectedId) ?? null : null
@@ -295,7 +273,7 @@ export function GraphTab({ project, focus = [], onShow, onAsk, canShow3d }: {
         {query.trim() && hits.length === 0 && <p className="kg-hits kg-no-hits" role="status">Nothing matches</p>}
       </div>
       <div className="kg-chips" role="group" aria-label="Show">{FILTER_GROUPS.map((group) => <button key={group} type="button" aria-pressed={filters.groups.has(group)} onClick={() => toggleGroup(group)}>{groupLabel[group]}</button>)}</div>
-      <select aria-label="Level" value={filters.level} onChange={(event) => setFilters((prev) => ({ ...prev, level: event.target.value }))}><option value="">All levels</option>{levels.map((level) => <option key={level} value={level}>{level}</option>)}</select>
+      <select aria-label="Level" value={filters.level} onChange={(event) => setFilters((prev) => ({ ...prev, level: event.target.value }))}><option value="">All levels</option>{levels.map((level) => <option key={level} value={level}>{levelDisplay(level)}</option>)}</select>
       <select aria-label="File" value={filters.doc} onChange={(event) => setFilters((prev) => ({ ...prev, doc: event.target.value }))}><option value="">All files</option>{docs.map((doc) => <option key={doc.id} value={doc.id}>{doc.title}</option>)}</select>
       {filtersActive(filters) && <Button variant="ghost" onClick={() => setFilters(noFilters())}>Clear</Button>}
       <Button variant="outline" className="kg-all" aria-pressed={mode === 'all'} onClick={() => void toggleAll()}>{mode === 'all' ? 'Overview' : 'Show all items'}</Button>
@@ -312,7 +290,7 @@ export function GraphTab({ project, focus = [], onShow, onAsk, canShow3d }: {
           canShow3d={canShow3d ?? ((docId) => { const doc = project.docs.find((row) => row.doc_id === docId); return !!doc && (doc.kind === 'ifc' || doc.formats.includes('ifc')) })}
           onClose={() => { setSelectedId(null); setMarked(new Set()) }} onSelect={(id, data) => void reveal(id, data.node.id === id ? data : undefined)} onShow={onShow} onAsk={onAsk} /> : null}
     </div>
-    <div className="kg-foot"><Legend /><p className="pj-hint" role="status">{notice || (projectsMock ? 'Sample graph, generated for demo. Click an item for details, double-click to expand it.' : 'Click an item for details, double-click to expand it. Dashed links are estimates.')}</p></div>
+    <div className="kg-foot"><Legend />{pending && <p className="pj-hint kg-updating" role="status">Updating…</p>}<p className="pj-hint" role="status">{notice || (projectsMock ? 'Sample graph, generated for demo. Click an item for details, double-click to expand it.' : 'Click an item for details, double-click to expand it. Dashed links are estimates.')}</p></div>
   </div>
 }
 

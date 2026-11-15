@@ -73,7 +73,7 @@
   .pj-screen[data-tab="graph"] #pj-tabpanel { display: flex; flex: 1; min-height: 0; }
   .pj-screen[data-tab="graph"] .kg { flex: 1; min-height: 0; grid-template-rows: auto auto minmax(0, 1fr) auto; }
   .pj-screen[data-tab="graph"] .kg-stage { min-height: 0; }
-  .pj-screen[data-tab="graph"] .kg-graph { height: 100%; min-height: 0; }
+  .pj-screen[data-tab="graph"] .kg-graph { height: 100%; min-height: 480px; }
   .pj-screen[data-tab="graph"] .kg-panel { height: 100%; max-height: none; min-height: 0; }
 }
 @media (max-width: 900px) {

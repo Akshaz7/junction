@@ -42,6 +42,12 @@ describe('kg helpers', () => {
 
 describe('graph match totals', () => {
   const empty: KgStats = { nodes: 0, edges: 0, linked_pct: null, agree_pct: null, unlinked: [], issues: 0 }
+  it('says plainly that nothing matched instead of a bare 0%', () => {
+    const result = graphMatchMetrics({ ...empty, linked_pct: 0, counterpart_items: 1707, linked_items: 0 })
+    expect(result.linked.value).toBe('None')
+    expect(result.linked.hint).toMatch(/no item was found in more than one file/i)
+  })
+
   it('explains zero matches and zero comparisons instead of showing dashes or claiming disagreement', () => {
     const result = graphMatchMetrics({ ...empty, nodes: 100, edges: 80, edges_by_kind: { contains: 80 } })
     expect(result.linked).toEqual({ value: '0', hint: 'No items have been matched across files yet.' })
