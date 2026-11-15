@@ -11,7 +11,8 @@ assess(page, planmap) compares the plan map against the PDF's own evidence:
   scale     rung base (printed 1:N 0.95, scale bar / printed-areas fit 0.85, dimensions 0.7, door guess 0.4, none 0),
             times an agreement factor between printed 1:N and the printed-areas fit when both exist
             (1.0 within 2%, falling linearly to 0.5 at 10%); +0.05 when they agree within 2%.
-  openings  fraction of door-swing arcs on the page matched to a door item; fraction of windows on a wall.
+  openings  fraction of door-swing arcs on the page (quarter arcs, Bezier or flattened polylines, r 0.45-1.35 m)
+            whose hinge is at a door item; fraction of windows on a wall.
   overall   weights walls 0.40, rooms 0.30, scale 0.15, openings 0.15 (renormalised over available components);
             95% CI from a bootstrap over 2 m wall tiles, rooms, arcs and windows (scale held fixed).
 All geometry in page points, top-left origin, y down (plan-map px are divided by provenance.px_per_pt).
@@ -72,20 +73,36 @@ class _Grid:
         return np.array(im, dtype=bool)
 
 
+EDT_MIN_R = 4  # disk radius (cells) from which the distance-transform form beats scipy's structured morphology
+
+
 def _dil(m, r):
+    """Binary dilation by a disk of radius r cells (x^2 + y^2 <= r^2), outside the array = False.
+    r >= EDT_MIN_R: the same mask from one Euclidean distance transform (O(n), vs O(n r^2) for the structure)."""
     from scipy import ndimage
     if r <= 0:
         return m
+    if r >= EDT_MIN_R:
+        if not m.any():
+            return np.zeros(m.shape, bool)
+        return ndimage.distance_transform_edt(~m) <= r
     y, x = np.ogrid[-r:r + 1, -r:r + 1]
     return ndimage.binary_dilation(m, structure=(x * x + y * y) <= r * r)
 
 
+def _ero(m, r):
+    """Binary erosion by the same disk, outside the array = False (scipy border_value=0)."""
+    from scipy import ndimage
+    if r >= EDT_MIN_R:
+        return (ndimage.distance_transform_edt(np.pad(m, 1)) > r)[1:-1, 1:-1]
+    y, x = np.ogrid[-r:r + 1, -r:r + 1]
+    return ndimage.binary_erosion(m, structure=(x * x + y * y) <= r * r)
+
+
 def _close_fill(m, r):
     from scipy import ndimage
-    y, x = np.ogrid[-r:r + 1, -r:r + 1]
-    st = (x * x + y * y) <= r * r
     pad = np.pad(m, r + 1)
-    c = ndimage.binary_erosion(ndimage.binary_dilation(pad, structure=st), structure=st)[r + 1:-r - 1, r + 1:-r - 1]
+    c = _ero(_dil(pad, r), r)[r + 1:-r - 1, r + 1:-r - 1]
     return ndimage.binary_fill_holes(c)
 
 
@@ -306,28 +323,172 @@ def _scale_part(pm):
             "score": round(min(1.0, base * f), 4)}
 
 
+ARC_R_M = (0.45, 1.35)      # door-leaf radius range (same as pdf_openings._door_range)
+ARC_SPAN_DEG = (60.0, 115.0)  # a full quarter swing; partial swings are not counted as evidence
+ARC_MATCH_M = 0.3
+ARC_PIECE_M = 0.3          # longest straight piece of a flattened door arc
+
+
+def _arc_chains(segs, max_turn_deg, tol=0.15):
+    """Smooth one-way-turning chains of short segments (a flattened arc split into 2-point paths) -> point arrays.
+    Same rule as pdf_openings._chains (each joint turns 0 < angle < max_turn, all the same way), with integer
+    endpoint keys built in numpy: 10x faster on 50k+ segment sheets, where the quality pass must stay cheap."""
+    from collections import defaultdict
+    n = len(segs)
+    if n == 0:
+        return []
+    d = segs[:, 2:] - segs[:, :2]
+    u = d / np.maximum(np.hypot(d[:, 0], d[:, 1]), 1e-9)[:, None]
+    keys = np.round(np.r_[segs[:, :2], segs[:, 2:]] / tol).astype(np.int64)
+    kk = (keys[:, 0] * 1_000_003 + keys[:, 1]).tolist()
+    at = defaultdict(list)
+    for i in range(n):
+        at[kk[i]].append((i, 0))
+        at[kk[n + i]].append((i, 1))
+    ux, uy = u[:, 0].tolist(), u[:, 1].tolist()
+    P = segs.tolist()
+    cmin = math.cos(math.radians(max_turn_deg))
+    used = bytearray(n)
+
+    def step(i, end, sign):
+        dx, dy = (ux[i], uy[i]) if end == 1 else (-ux[i], -uy[i])
+        best = None
+        for j, e in at[kk[n * end + i]]:
+            if j == i or used[j]:
+                continue
+            ex, ey = (ux[j], uy[j]) if e == 0 else (-ux[j], -uy[j])
+            c = dx * ex + dy * ey
+            if c < cmin or c > 0.99995:
+                continue
+            cr = dx * ey - dy * ex
+            if sign and cr * sign < 0:
+                continue
+            if best is None or c > best[3]:
+                best = (j, 1 - e, cr, c)
+        return best
+
+    out = []
+    for i0 in range(n):
+        if used[i0]:
+            continue
+        used[i0] = 1
+        pts = [P[i0][:2], P[i0][2:]]
+        for end in (1, 0):
+            i, e, sign = i0, end, 0.0
+            while True:
+                nx = step(i, e, sign)
+                if nx is None:
+                    break
+                j, fe, cr, _ = nx
+                used[j] = 1
+                sign = sign or (1.0 if cr > 0 else -1.0)
+                q = P[j][2:] if fe == 1 else P[j][:2]
+                if end == 1:
+                    pts.append(q)
+                else:
+                    pts.insert(0, q)
+                i, e = j, fe
+        if len(pts) >= 4:
+            out.append(np.asarray(pts, float))
+    return out
+
+
+def _arc_of(pts, rmin, rmax):
+    """(cx, cy, r) when the points lie on a circle of radius rmin..rmax spanning ARC_SPAN_DEG, else None."""
+    from pipeline import pdf_openings as po
+    c = po._fit_circle(pts)
+    if c is None:
+        return None
+    cx, cy, r, rms = c
+    if not (rmin <= r <= rmax) or rms > 0.05 * r:
+        return None
+    a = np.sort(np.degrees(np.arctan2(np.asarray(pts)[:, 1] - cy, np.asarray(pts)[:, 0] - cx)) % 360)
+    gaps = np.diff(np.r_[a, a[0] + 360])
+    span = 360 - gaps.max()  # angular extent, order-free
+    return (cx, cy, r) if ARC_SPAN_DEG[0] <= span <= ARC_SPAN_DEG[1] else None
+
+
+def door_arcs(page, mpt, roi):
+    """Door-swing evidence on the page (pt): quarter arcs drawn as Bezier curves, as one flattened polyline path,
+    or as runs of separate short segments (CAD exports usually flatten arcs; is_arc only marks the Bezier ones,
+    which is why the old is_arc-only scan saw a handful of symbol arcs and matched none). Circle-fit radius
+    0.45-1.35 m, span 60-115 deg, hinge inside the wall ROI, de-duplicated. Returns [{"c", "r", "bbox"}]."""
+    from pipeline import pdf_openings as po
+    rmin, rmax = ARC_R_M[0] / mpt, ARC_R_M[1] / mpt
+    if page.get("_arc_polylines") is not None:  # the door reader's own arcs + chains, when it left them on the page
+        segs, cands = np.zeros((0, 4)), [np.asarray(a, float) for a in page["_arc_polylines"] if len(a) >= 3]
+    else:
+        segs, arcs = po._segments(page)
+        cands = [np.asarray(a, float) for a in arcs]
+    cands += [np.asarray(p["pts"], float) for p in page.get("paths", [])
+              if not p.get("closed") and not p.get("n_curves") and len(p.get("pts") or []) >= 4]
+    if len(segs):
+        # flattened arcs drawn as separate short segments: chain the short pieces inside the ROI only
+        # (arc pieces are < ~0.3 m; this keeps the chaining a few % of the page's segments)
+        L = np.hypot(segs[:, 2] - segs[:, 0], segs[:, 3] - segs[:, 1])
+        mx, my = (segs[:, 0] + segs[:, 2]) / 2, (segs[:, 1] + segs[:, 3]) / 2
+        k = (L < min(po.SHORT_SEG_PT, ARC_PIECE_M / mpt)) & (mx >= roi[0]) & (mx <= roi[2]) & (my >= roi[1]) & (my <= roi[3])
+        if k.any():
+            cands += _arc_chains(segs[k], po.MAX_TURN_DEG)
+    out = []
+    for pl in cands:
+        if len(pl) < 3:
+            continue
+        xs, ys = pl[:, 0], pl[:, 1]
+        if xs.max() < roi[0] or xs.min() > roi[2] or ys.max() < roi[1] or ys.min() > roi[3]:
+            continue
+        ext = max(xs.max() - xs.min(), ys.max() - ys.min())
+        if ext > 2.2 * rmax or ext < 0.45 * rmin:  # a >= 60 deg arc of radius r spans >= r / 2
+            continue
+        c = _arc_of(pl, rmin, rmax)
+        if c is None:
+            continue
+        cx, cy, r = c
+        if not (roi[0] <= cx <= roi[2] and roi[1] <= cy <= roi[3]):
+            continue
+        if any(math.dist((cx, cy), k["c"]) < 0.1 * r and abs(r - k["r"]) < 0.1 * r for k in out):
+            continue
+        out.append({"c": (cx, cy), "r": r, "bbox": [float(xs.min()), float(ys.min()), float(xs.max()), float(ys.max())]})
+    return out
+
+
+def _arc_hits(arcs, doors_pt, tol):
+    """1.0 per arc whose hinge (circle centre) lies within tol of a door item (its polygon, bbox or hinge points,
+    all page pt), or whose bbox overlaps a door bbox grown by tol."""
+    out = []
+    for a in arcs:
+        (cx, cy), b = a["c"], a["bbox"]
+        ok = False
+        for d in doors_pt:
+            x0, y0, x1, y1 = d["bbox"]
+            if (x0 - tol <= cx <= x1 + tol and y0 - tol <= cy <= y1 + tol) or \
+                    (b[0] <= x1 + tol and x0 - tol <= b[2] and b[1] <= y1 + tol and y0 - tol <= b[3]) or \
+                    any(h and math.dist((cx, cy), h) <= tol for h in d["hinges"]):
+                ok = True
+                break
+        out.append(1.0 if ok else 0.0)
+    return np.array(out)
+
+
 def _opening_part(page, pm, mpt, to_pt, wall_masks, grid):
-    doors = [[v for xy in to_pt([i["bbox_px"][:2], i["bbox_px"][2:]]) for v in xy] for i in _items(pm, "door")]
+    doors = []
+    for i in _items(pm, "door"):
+        b = [v for xy in to_pt([i["bbox_px"][:2], i["bbox_px"][2:]]) for v in xy]
+        pr = i.get("props") or {}
+        doors.append({"bbox": [min(b[0], b[2]), min(b[1], b[3]), max(b[0], b[2]), max(b[1], b[3])],
+                      "hinges": [pr.get("hinge"), pr.get("hinge2")]})  # props hinge are page pt already
     walls = [to_pt(i["polygon_px"]) for i in _items(pm, "wall") if i.get("polygon_px")]
     if not walls:
         return None
     xs = [q[0] for p in walls for q in p]
     ys = [q[1] for p in walls for q in p]
-    roi = [min(xs), min(ys), max(xs), max(ys)]
-    rmin, rmax = 0.5 / mpt, 1.6 / mpt
-    arcs = []
-    for p in page.get("paths", []):
-        if not p.get("is_arc") or p.get("fill") is not None:
-            continue
-        pts = p["pts"]
-        bx = [min(q[0] for q in pts), min(q[1] for q in pts), max(q[0] for q in pts), max(q[1] for q in pts)]
-        ext = max(bx[2] - bx[0], bx[3] - bx[1])
-        cx, cy = (bx[0] + bx[2]) / 2, (bx[1] + bx[3]) / 2
-        if rmin <= ext <= rmax and roi[0] <= cx <= roi[2] and roi[1] <= cy <= roi[3]:
-            arcs.append(bx)
-    tol = 0.3 / mpt
-    hit = np.array([1.0 if any(b[0] <= d[2] + tol and d[0] - tol <= b[2] and b[1] <= d[3] + tol and d[1] - tol <= b[3]
-                               for d in doors) else 0.0 for b in arcs])
+    m = 0.5 / mpt
+    roi = [min(xs) - m, min(ys) - m, max(xs) + m, max(ys) + m]
+    try:
+        arcs = door_arcs(page, mpt, roi)
+    except Exception:
+        arcs = []
+    hit = _arc_hits(arcs, doors, ARC_MATCH_M / mpt)
     on = []
     if wall_masks is not None:
         Fd = _dil(wall_masks[1], int(round(0.3 / CELL_M)))

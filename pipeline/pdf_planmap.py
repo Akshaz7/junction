@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import re
 import time
 from collections import Counter
@@ -589,6 +590,16 @@ def build(doc_id: str, n: int, W: int, H: int, page: dict, walls: list, rooms_: 
             props["thickness_pt"] = round(t, 3)
         if w.get("height_m"):
             props["height_m"] = w["height_m"]
+        try:  # r5-walls thickness classes -> pdf_to_ifc wall types
+            wp = w.get("props") or {}
+            if "thickness_class" in wp:
+                props["thickness_class"] = wp["thickness_class"]
+                props["thickness_class_m"] = (round(wp["thickness_class_pt"] * mpt, 3)
+                                              if wp.get("thickness_class_pt") else None)
+            if isinstance(wp.get("evidence"), dict):  # DATA RULE: which drawn paths back this wall (pdf_vector)
+                props["evidence"] = wp["evidence"]
+        except Exception:  # noqa: BLE001
+            pass
         props.update(wtag.get(wi, {}))
         add("wall", "", ppx, _bbox(ppx), props, 0.85, {"length_m": round(length_pt * mpt, 3)})
     for oi, o in enumerate(opens):
@@ -647,7 +658,14 @@ def process(doc_id: str, ddir: Path, pdf_path: Path, page_index: int = 0, write:
     if abs(page["H_pt"] * s - H) > max(2.0, 0.01 * H):  # rotation/crop mismatch: pixel mapping would be wrong
         return None
     words_pt = _words_pt(ddir, n, s, page)
-    walls = pdf_vector.walls(page)
+    _wall_mpt = None
+    try:  # r5-walls: metric wall-thickness limits when the sheet prints its scale (None = old behaviour)
+        from engine import scale_text
+        _r, _ = scale_text.ratio_and_sheet([{"text": w["text"]} for w in words_pt])
+        _wall_mpt = (M_PER_PT_1 * _r) if _r else None
+    except Exception:  # noqa: BLE001
+        _wall_mpt = None
+    walls = pdf_vector.walls(page, m_per_pt=_wall_mpt) if _wall_mpt else pdf_vector.walls(page)
     if not walls and draft:
         walls, used["walls"] = _draft_walls(page), "draft"
     rooms_ = pdf_rooms.rooms(page, walls)
@@ -666,11 +684,31 @@ def process(doc_id: str, ddir: Path, pdf_path: Path, page_index: int = 0, write:
         if not sc.get("m_per_pt"):
             return None
     opens = pdf_openings.openings(page, walls)
+    if os.environ.get("PDF_PARTITIONS", "1") != "0":
+        try:  # thin partitions drawn at unhosted doors (both face lines drawn; evidence "measured"), then re-host
+            extra = pdf_vector.partitions_for_doors(
+                page, [o for o in opens if o.get("kind") == "door"], walls, sc.get("m_per_pt"))
+            if extra:
+                walls = walls + extra
+                opens = pdf_openings.openings(page, walls)
+                used["partitions_for_doors"] = len(extra)
+        except Exception as e:  # noqa: BLE001  never breaks the plan map
+            used["partitions_for_doors_error"] = f"{type(e).__name__}: {e}"[:200]
     page.pop("_draft", None)
     pm = build(doc_id, n, W, H, page, walls, rooms_, opens, sc, words_pt, used, ms=(time.time() - t0) * 1000)
     if sum(1 for i in pm["items"] if i["kind"] in ("room", "wall")) < 3:
         return None
     pm["provenance"]["gate"] = reason
+    try:  # fixtures role: sanitary/kitchen/furniture symbols (top-level "fixtures"); never breaks the plan map
+        from pipeline import pdf_fixtures
+        pm["fixtures"] = pdf_fixtures.detect(page, walls, rooms_, opens, sc["m_per_pt"])
+    except Exception:  # noqa: BLE001
+        pass
+    try:  # levels role: storey name/elevation/height and the column grid (provenance only, CONTRACT keys untouched)
+        from pipeline import pdf_levels
+        pm["provenance"].update(pdf_levels.planmap_provenance(page, pm, s))
+    except Exception as e:  # noqa: BLE001
+        pm["provenance"]["levels_error"] = f"{type(e).__name__}: {e}"[:200]
     try:  # ingest-time accuracy score vs the PDF's own evidence; can never break ingest
         from pipeline import pdf_quality
         pm["quality"] = pdf_quality.assess(page, pm, raw_walls=walls, pdf_path=pdf_path, page_index=page_index)

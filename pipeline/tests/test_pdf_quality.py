@@ -72,3 +72,55 @@ def test_extra_wall_lowers_precision():
     extra = w + [_rect(60, 60, 140, 67)]  # a wall the drawing does not have
     q = pdf_quality.assess(_page(w), _pm(extra, area=20.0, printed=20.2), n_boot=10, raw_walls=raw)
     assert q["components"]["walls"]["precision"] < 0.95
+
+
+def _flat_arc(cx, cy, r, a0=0.0, a1=90.0, n=12):
+    """A door swing exported as a flattened polyline (no Bezier curves, is_arc False), as CAD PDFs usually do."""
+    import math
+    return [[cx + r * math.cos(math.radians(a0 + (a1 - a0) * k / n)), cy + r * math.sin(math.radians(a0 + (a1 - a0) * k / n))]
+            for k in range(n + 1)]
+
+
+def _door_page_pm(door_at):
+    """Square room, a 0.9 m flattened door swing hinged on the top wall at (60, 7); one door item at door_at (pt)."""
+    w = _box_walls()
+    r = 0.9 / MPT
+    page = _page(w)
+    page["paths"].append({"pts": _flat_arc(60, 7, r), "closed": False, "fill": None, "stroke": [0, 0, 0],
+                          "width": 0.3, "n_curves": 0, "is_arc": False})
+    pm = _pm(w, area=20.0, printed=20.2)
+    x, y = door_at
+    s = pm["provenance"]["px_per_pt"]
+    pm["items"].append({"item_id": "door-1", "kind": "door", "bbox_px": [x * s, y * s, (x + r) * s, (y + 7) * s],
+                        "polygon_px": [[x * s, y * s], [(x + r) * s, y * s], [(x + r) * s, (y + 7) * s], [x * s, (y + 7) * s]],
+                        "props": {"hinge": [x, y + 7]}})
+    return page, pm, [{"polygon": p} for p in w]
+
+
+def test_flattened_door_arc_matches_door_item():
+    page, pm, raw = _door_page_pm((60, 0))
+    o = pdf_quality.assess(page, pm, n_boot=5, raw_walls=raw)["components"]["openings"]
+    assert o["door_arcs"] == 1 and o["door_arcs_matched"] == 1
+
+
+def test_door_arc_far_from_door_item_is_unmatched():
+    page, pm, raw = _door_page_pm((150, 190))  # door item on the opposite wall
+    o = pdf_quality.assess(page, pm, n_boot=5, raw_walls=raw)["components"]["openings"]
+    assert o["door_arcs"] == 1 and o["door_arcs_matched"] == 0
+
+
+def test_edt_morphology_matches_scipy_disk():
+    """_dil / _close_fill use a distance transform for big radii: must equal scipy's disk-structure morphology."""
+    import numpy as np
+    from scipy import ndimage
+    rng = np.random.default_rng(3)
+    m = ndimage.binary_dilation(rng.random((120, 170)) < 0.004, iterations=2) | (rng.random((120, 170)) < 0.002)
+    for r in (1, 3, 4, 9):
+        y, x = np.ogrid[-r:r + 1, -r:r + 1]
+        st = (x * x + y * y) <= r * r
+        assert (pdf_quality._dil(m, r) == ndimage.binary_dilation(m, structure=st)).all()
+        pad = np.pad(m, r + 1)
+        ref = ndimage.binary_fill_holes(ndimage.binary_erosion(ndimage.binary_dilation(pad, structure=st),
+                                                               structure=st)[r + 1:-r - 1, r + 1:-r - 1])
+        assert (pdf_quality._close_fill(m, r) == ref).all()
+    assert not pdf_quality._dil(np.zeros((5, 5), bool), 6).any()

@@ -21,6 +21,9 @@ def _art() -> Path:
     return config.artifacts_dir()
 
 
+STALE_STATUS_S = 300.0  # = server.files_routes.INGEST_TIMEOUT: an older started_at belongs to a previous run
+
+
 class Status:
     def __init__(self, path: Path):
         self.path, self.stages, self.mode, self.cost = path, [], None, None
@@ -32,6 +35,8 @@ class Status:
                 self.started_at = json.loads(path.read_text()).get("started_at", self.started_at)
             except ValueError:
                 pass
+            if time.time() - float(self.started_at or 0) > STALE_STATUS_S:  # an old run's status: this is a re-run
+                self.started_at = time.time()
         self.write("running")
 
     def write(self, status, detail=""):
@@ -206,6 +211,343 @@ def _dxf_planmap_usable(ddir: Path) -> bool:
 
 MAX_PDF_PLAN_PAGES = 4
 
+# ---------------------------------------------------------------- whole-ingest budget
+# The API (server/files_routes.INGEST_TIMEOUT) kills the job 5 min after the upload was queued, and a kill after
+# "ready" still marks the document failed. run() therefore sets a deadline at started_at (queue time) + INGEST_BUDGET_S
+# and the heavy steps run in forked children with a timeout (_bounded): a page whose vector read would run past its
+# share is dropped (flagged) instead of costing the scene, the IFC route falls back to the plain extrusion, and the
+# post-ready text refine stops in time. Without a deadline (_run called directly, as in tests) everything runs inline.
+INGEST_BUDGET_S = 270.0
+VECTOR_RESERVE_S = 120.0  # kept after the vector plan maps for the IFC route (~70-90 s on a dense sheet) + IFC_RESERVE_S
+                          # (extrude fallback + USDZ): with 75 s the IFC route got ~50 s after a long page and always fell
+                          # back to the extrusion (ARK s01); the page's optional add-ons give way instead
+IFC_RESERVE_S = 25.0      # kept after the IFC route for the extrusion fallback + USDZ
+VECTOR_MIN_PAGE_S = 20.0  # a vector page starts only with this much time (beyond VECTOR_RESERVE_S) left
+_DEADLINE: list = [None]  # time.time() deadline, or None (no budget: inline)
+
+
+def _set_deadline(started_at: float | None):
+    """Deadline = started_at + INGEST_BUDGET_S (env overrides; 0 = no budget). A stale started_at (an old status file)
+    still leaves a quarter of the budget."""
+    try:
+        b = float(os.environ.get("INGEST_BUDGET_S", INGEST_BUDGET_S))
+    except ValueError:
+        b = INGEST_BUDGET_S
+    if b <= 0:
+        _DEADLINE[0] = None
+        return
+    now = time.time()
+    _DEADLINE[0] = max((started_at or now) + b, now + 0.25 * b)
+
+
+def _budget_left() -> float | None:
+    return None if _DEADLINE[0] is None else _DEADLINE[0] - time.time()
+
+
+def _fork_ok() -> bool:
+    import multiprocessing as mp
+    return _DEADLINE[0] is not None and os.environ.get("INGEST_FORK", "1") != "0" and "fork" in mp.get_all_start_methods()
+
+
+def _bounded(fn, timeout_s: float | None):
+    """Run fn() in a forked child (its memory is returned to the OS when it exits) with a hard timeout.
+    -> ("ok", value) | ("error", repr) | ("timeout", None). Inline (no timeout) when there is no budget/fork."""
+    if timeout_s is None or not _fork_ok():
+        try:
+            return "ok", fn()
+        except Exception as e:  # noqa: BLE001
+            return "error", repr(e)[:300]
+    if timeout_s <= 0:
+        return "timeout", None
+    import multiprocessing as mp
+    ctx = mp.get_context("fork")
+    rx, tx = ctx.Pipe(duplex=False)
+
+    def child():
+        try:
+            r = ("ok", fn())
+        except BaseException as e:  # noqa: BLE001
+            r = ("error", repr(e)[:300])
+        try:
+            tx.send(r)
+        except Exception as e:  # noqa: BLE001  unpicklable result
+            tx.send(("error", f"result not sent: {e!r}"[:300]))
+        tx.close()
+        os._exit(0)
+    p = ctx.Process(target=child, daemon=True)
+    p.start()
+    tx.close()
+    out = ("timeout", None)
+    try:
+        if rx.poll(timeout_s):
+            out = rx.recv()
+    except EOFError:
+        out = ("error", f"child exited with code {p.exitcode}")
+    finally:
+        if p.is_alive():
+            p.kill()
+        p.join(5)
+        rx.close()
+    if out[0] == "error" and p.exitcode not in (0, None):
+        out = ("error", f"{out[1]} (child exit {p.exitcode})")
+    return out
+
+
+class _OverBudget(BaseException):
+    """Raised by SIGALRM inside a time-limited stage (BaseException: the stage's own `except Exception` cannot eat it)."""
+
+
+# Degradation order when time runs short (shares are of the time left to the child's deadline when the stage
+# starts; core stages get all of it, optional ones a part, so they are cut first and the core keeps its time):
+# core: rooms, openings, plan region crop (rooms and openings leave PLAN_REGION_RESERVE_S / OPENINGS_RESERVE_S
+# behind them, so the crop that keeps neighbouring roofs out always runs: it takes ~1-5 s, its outline pass caps
+# itself at 2 s) > semantics text (analyse) > optional add-ons: fixtures, levels, quality.
+# In the IFC child: pdf_to_ifc core, ifc_enrich extras and MEP optional.
+PLAN_REGION_RESERVE_S = 12.0  # left by rooms() for openings collection + plan_region
+OPENINGS_RESERVE_S = 6.0      # left by openings() for plan_region
+PAGE_LIMITS = [("pdf_rooms", "rooms", 1.0, PLAN_REGION_RESERVE_S, list),
+               ("pdf_openings", "openings", 1.0, OPENINGS_RESERVE_S, list),
+               ("pdf_semantics", "plan_region", 1.0, 0.0, RuntimeError), ("pdf_semantics", "analyse", 0.5, 0.0, RuntimeError),
+               ("pdf_fixtures", "detect", 0.3, 0.0, RuntimeError), ("pdf_levels", "planmap_provenance", 0.3, 0.0, RuntimeError),
+               ("pdf_quality", "assess", 0.3, 0.0, RuntimeError)]
+# No signal-based limits inside ifcopenshell work: an exception raised in the middle of building entities left a
+# half-built model that crashed the scene step (SIGSEGV in the child). The IFC child has its hard timeout only, and
+# the MEP step its start check (_mep_enrich: PDF_MEP_MIN_LEFT_S).
+IFC_LIMITS: list = []
+
+
+def _mep_page_limits() -> list:
+    """PAGE_LIMITS for an MEP sheet: openings capped at MEP_OPENINGS_CAP_S (absolute), fixtures/levels/quality
+    skipped; rooms (and the scale fit from printed areas) and the plan-region crop keep their time."""
+    out = []
+    for modname, name, share, reserve, empty in PAGE_LIMITS:
+        if name in ("detect", "planmap_provenance", "assess"):
+            share = 0.0
+        out.append((modname, name, share, reserve, empty, MEP_OPENINGS_CAP_S if name == "openings" else None))
+    return out
+
+
+def _soft_limits(page_deadline: float, cut: list, spec: list | None = None) -> list:
+    """Forked child only: per-stage time limits (spec: PAGE_LIMITS / IFC_LIMITS), so a dense sheet returns what it has
+    instead of being killed. A stage over its limit returns its empty result (rooms, openings) or raises a plain
+    error that its caller already absorbs (semantics, fixtures, levels, quality, ifc_enrich, MEP); its name goes to
+    `cut`. Returns [(module, name, original)] to restore."""
+    import importlib
+    import signal
+
+    def handler(signum, frame):
+        raise _OverBudget()
+
+    def limited(mod, name, share, reserve, empty, cap=None):
+        f = getattr(mod, name)
+
+        def g(*a, **k):
+            lim = share * (page_deadline - time.time()) - reserve
+            if cap is not None:
+                lim = min(lim, cap)
+            if lim <= 0.05:
+                cut.append(name)
+                if empty is RuntimeError:
+                    raise RuntimeError(f"skipped: ingest budget ({name})")
+                return empty()
+            old = signal.signal(signal.SIGALRM, handler)
+            signal.setitimer(signal.ITIMER_REAL, lim)
+            try:
+                return f(*a, **k)
+            except _OverBudget:
+                cut.append(name)
+                if empty is RuntimeError:
+                    raise RuntimeError(f"stopped: ingest budget ({name}, {lim:.0f} s)") from None
+                return empty()
+            finally:
+                signal.setitimer(signal.ITIMER_REAL, 0)
+                signal.signal(signal.SIGALRM, old)
+        setattr(mod, name, g)
+        return mod, name, f
+    plan = []
+    for modname, name, share, reserve, empty, *cap in (PAGE_LIMITS if spec is None else spec):
+        try:
+            m = importlib.import_module(f"pipeline.{modname}")
+            if hasattr(m, name):
+                plan.append((m, name, share, reserve, empty, *cap))
+        except Exception:  # noqa: BLE001  optional role module missing
+            pass
+    return [limited(*x) for x in plan]
+
+
+def _parallel_openings(page_deadline: float, cut: list) -> list:
+    """Forked vector-page child only: pdf_openings.openings(page, walls) does not need the rooms, so it starts in a
+    grandchild (os.fork) when pdf_rooms.rooms(page, walls) starts and the later openings call with the same walls
+    takes its result (plus the keys openings leaves on the page, e.g. _arc_polylines for pdf_quality). Same output,
+    the two slowest plan-map stages overlap on a multi-core box. Any problem: openings runs inline as before.
+    Returns the [(module, name, original)] to restore."""
+    import pickle
+    import select
+    import signal
+    from pipeline import pdf_openings, pdf_rooms
+    rooms0, open0 = pdf_rooms.rooms, pdf_openings.openings
+    state = {}
+
+    def rooms(page, walls, *a, **k):
+        if "pid" not in state:
+            try:
+                r_fd, w_fd = os.pipe()
+                pid = os.fork()
+                if pid == 0:  # grandchild
+                    try:
+                        try:  # dies with its parent (a page child killed at the hard timeout leaves no orphan)
+                            import ctypes
+                            ctypes.CDLL(None).prctl(1, signal.SIGKILL)  # PR_SET_PDEATHSIG
+                        except Exception:  # noqa: BLE001  not Linux: the openings soft limit still ends it
+                            pass
+                        os.close(r_fd)
+                        keys = set(page)
+                        try:
+                            r = ("ok", open0(page, walls), {q: page[q] for q in page if q not in keys})
+                        except BaseException as e:  # noqa: BLE001
+                            r = ("error", repr(e)[:200], {})
+                        data = pickle.dumps(r, protocol=pickle.HIGHEST_PROTOCOL)
+                        with os.fdopen(w_fd, "wb") as fh:
+                            fh.write(data)
+                    finally:
+                        os._exit(0)
+                os.close(w_fd)
+                state.update(pid=pid, fd=r_fd, walls=id(walls), page=id(page))
+            except Exception as e:  # noqa: BLE001
+                print("parallel openings off:", repr(e)[:120], file=sys.stderr)
+                state["pid"] = None
+        return rooms0(page, walls, *a, **k)
+
+    def openings(page, walls, *a, **k):
+        pid, fd = state.get("pid"), state.get("fd")
+        if pid and not a and not k and state.get("walls") == id(walls) and state.get("page") == id(page):
+            state["pid"] = None
+            buf, ok = [], False
+            try:
+                while True:
+                    left = page_deadline - time.time() - 1.0
+                    if left <= 0 or not select.select([fd], [], [], left)[0]:
+                        break
+                    chunk = os.read(fd, 1 << 20)
+                    if not chunk:
+                        ok = True
+                        break
+                    buf.append(chunk)
+                if ok and buf:
+                    r = pickle.loads(b"".join(buf))
+                    if r[0] == "ok":
+                        page.update(r[2])
+                        return r[1]
+                elif not ok:
+                    cut.append("openings")
+                    return []
+            except Exception as e:  # noqa: BLE001
+                print("parallel openings result lost:", repr(e)[:120], file=sys.stderr)
+            finally:
+                try:
+                    os.close(fd)
+                    os.kill(pid, signal.SIGKILL)
+                except OSError:
+                    pass
+                try:
+                    os.waitpid(pid, 0)
+                except OSError:
+                    pass
+        return open0(page, walls, *a, **k)
+    pdf_rooms.rooms, pdf_openings.openings = rooms, openings
+    return [(pdf_rooms, "rooms", rooms0), (pdf_openings, "openings", open0)]
+
+
+def _fork_call(fn, timeout_s: float):
+    """fn() in an os.fork child (works inside a multiprocessing daemon child, unlike _bounded), result pickled back
+    through a pipe. -> ("ok", value) | ("error", repr) | ("timeout", None). The child dies with its parent."""
+    import pickle
+    import select
+    import signal
+    if timeout_s <= 0:
+        return "timeout", None
+    r_fd, w_fd = os.pipe()
+    pid = os.fork()
+    if pid == 0:
+        try:
+            try:
+                import ctypes
+                ctypes.CDLL(None).prctl(1, signal.SIGKILL)  # PR_SET_PDEATHSIG
+            except Exception:  # noqa: BLE001
+                pass
+            os.close(r_fd)
+            try:
+                r = ("ok", fn())
+            except BaseException as e:  # noqa: BLE001
+                r = ("error", repr(e)[:300])
+            try:
+                data = pickle.dumps(r, protocol=pickle.HIGHEST_PROTOCOL)
+            except Exception as e:  # noqa: BLE001
+                data = pickle.dumps(("error", f"result not sent: {e!r}"[:300]))
+            with os.fdopen(w_fd, "wb") as fh:
+                fh.write(data)
+        finally:
+            os._exit(0)
+    os.close(w_fd)
+    buf, done, end = [], False, time.time() + timeout_s
+    try:
+        while True:
+            left = end - time.time()
+            if left <= 0 or not select.select([r_fd], [], [], left)[0]:
+                break
+            chunk = os.read(r_fd, 1 << 20)
+            if not chunk:
+                done = True
+                break
+            buf.append(chunk)
+    finally:
+        os.close(r_fd)
+        try:
+            os.kill(pid, signal.SIGKILL)
+        except OSError:
+            pass
+        try:
+            os.waitpid(pid, 0)
+        except OSError:
+            pass
+    if not done:
+        return "timeout", None
+    try:
+        return pickle.loads(b"".join(buf))
+    except Exception as e:  # noqa: BLE001
+        return "error", f"child result lost: {e!r}"[:300]
+
+
+MEP_RESERVE_S = 130.0     # MEP sheet: kept after the vector plan map for IFC + ducts (pdf_mep) + scene + USDZ
+MEP_OPENINGS_CAP_S = 15.0  # MEP sheet: the doors are the underlay's; most arcs are duct bends/dampers
+MEP_SCENE_S = 45.0        # kept after the MEP step inside the IFC child for ifc_scene
+
+
+def _mep_hint(pdf: Path, page_index: int) -> bool:
+    """Cheap text-only MEP test (pdf_mep's own text gate on the pdfium words, no page load): the vector route plans
+    its time for an MEP sheet (small openings cap, more reserve for the ducts). False on any problem."""
+    if os.environ.get("PDF_MEP", "1") == "0":
+        return False
+    try:
+        from pipeline import pdf_mep
+        if not (hasattr(pdf_mep, "text_cues") and hasattr(pdf_mep, "_cue_score")):
+            return False
+        import pypdfium2 as pdfium
+        from pipeline.pdf_vector import _displayer, _words_pdfium
+        doc = pdfium.PdfDocument(str(pdf))
+        try:
+            pg = doc[page_index]
+            rot = pg.get_rotation() % 360
+            cl, cb, cr, ct = pg.get_cropbox()
+            words = _words_pdfium(pg, _displayer(rot, cr - cl, ct - cb, cl, cb))
+            pg.close()
+        finally:
+            doc.close()
+        kinds, n = pdf_mep._cue_score(pdf_mep.text_cues(words))
+        return kinds >= 2 and n >= 4
+    except Exception:  # noqa: BLE001
+        return False
+
 
 def _pdf_vector_pages(doc_id: str, ddir: Path, st: "Status", pdf: Path) -> list[int]:
     """Vector CAD PDF: exact plan maps from the page's drawing operators (pipeline.pdf_planmap), gated per page, at most
@@ -216,17 +558,78 @@ def _pdf_vector_pages(doc_id: str, ddir: Path, st: "Status", pdf: Path) -> list[
     budget = float(os.environ.get("PDF_VECTOR_BUDGET_S", "90"))
     found, notes = [], []
 
+    def one(n):
+        """One page's vector plan map. In the forked child (ingest budget), walls() gets PDF_WALLS_SHARE of the
+        page's time and the later stages soft limits (_soft_limits), so the page returns a flagged partial plan map
+        before the parent's hard timeout. Returns (found, info)."""
+        from pipeline import pdf_vector
+        left = _budget_left()
+        cut, restore = [], []
+        mep = n in mep_pages
+        if left is not None and _fork_ok():
+            page_s = left - (MEP_RESERVE_S if mep else VECTOR_RESERVE_S) - 3.0
+            share = max(5.0, float(os.environ.get("PDF_WALLS_SHARE", "0.35")) * page_s)
+            pdf_vector.DEADLINE = time.monotonic() + share
+            restore = _soft_limits(time.time() + page_s, cut, _mep_page_limits() if mep else None)
+            if os.environ.get("PDF_PAR_OPENINGS", "1") != "0" and (os.cpu_count() or 1) >= 2:
+                try:
+                    restore = _parallel_openings(time.time() + page_s, cut) + restore
+                except Exception as e:  # noqa: BLE001
+                    print("parallel openings skipped:", repr(e)[:120], file=sys.stderr)
+        if mep:
+            restore = _mep_shell_walls() + restore
+        try:
+            pm = pdf_planmap.process(doc_id, ddir, pdf, n - 1)
+        finally:
+            pdf_vector.DEADLINE = None
+            for mod, name, f in restore:
+                setattr(mod, name, f)
+        lw = dict(pdf_vector.LAST_WALLS)
+        info = {"walls_truncated": bool(lw.get("truncated")), "walls_s": lw.get("s"), "cut": cut}
+        if pm is not None and (info["walls_truncated"] or cut):  # flag the partial read on the plan map itself
+            pm.setdefault("provenance", {})["budget"] = {**info, "walls_budget_s": lw.get("budget_s")}
+            (ddir / f"planmap-{n}.json").write_text(json.dumps(pm))
+        return pm is not None, info
+
+    mep_pages = set()
+
     def run_all():
         t0 = time.time()
+        slowest = 0.0
         for p in meta["pages"]:
             n = p["page"]
             if len(found) >= cap or time.time() - t0 > budget:
                 break
-            try:
-                if pdf_planmap.process(doc_id, ddir, pdf, n - 1) is not None:
-                    found.append(n)
-            except Exception as e:  # noqa: BLE001  one odd page never costs the others
-                notes.append(f"p{n}: {e!r}"[:120])
+            if _mep_hint(pdf, n - 1):
+                mep_pages.add(n)
+                notes.append(f"p{n}: MEP sheet (openings capped at {MEP_OPENINGS_CAP_S:.0f} s, add-ons skipped)")
+            left = _budget_left()
+            if left is not None:
+                room = left - (MEP_RESERVE_S if n in mep_pages else VECTOR_RESERVE_S)
+                if found and room < max(VECTOR_MIN_PAGE_S, 1.2 * slowest):  # a further plan page would not fit: keep what we have
+                    notes.append(f"budget: stopped before p{n} ({left:.0f} s left)")
+                    break
+                if room < VECTOR_MIN_PAGE_S:
+                    notes.append(f"budget: no time for p{n} ({left:.0f} s left)")
+                    break
+            t = time.time()
+            res, val = _bounded(lambda: one(n), None if left is None else
+                                left - (MEP_RESERVE_S if n in mep_pages else VECTOR_RESERVE_S))
+            slowest = max(slowest, time.time() - t)
+            if res == "ok" and val[0]:
+                found.append(n)
+                inf = val[1] or {}
+                if inf.get("walls_truncated") or inf.get("cut"):
+                    notes.append(f"p{n}: partial at the ingest budget (walls truncated={inf.get('walls_truncated')}"
+                                 f" at {inf.get('walls_s')} s, cut {inf.get('cut') or []})")
+            elif res == "timeout":
+                notes.append(f"p{n}: vector read stopped at the ingest budget ({time.time() - t:.0f} s)")
+                (ddir / f"planmap-{n}.json").unlink(missing_ok=True)
+                break
+            elif res == "error":  # one odd page never costs the others
+                notes.append(f"p{n}: {val}"[:120])
+                (ddir / f"planmap-{n}.json").unlink(missing_ok=True)
+            else:
                 (ddir / f"planmap-{n}.json").unlink(missing_ok=True)
     ok = st.stage("planmap_pdf_vector", run_all)
     if not ok:  # never fail the upload over the vector reader: the VLM path runs next
@@ -293,26 +696,270 @@ def _copy_quality(ddir: Path, page: int):
         print("quality copy skipped:", repr(e)[:200], file=sys.stderr)
 
 
-def _pdf_via_ifc(doc_id: str, ddir: Path, doc: dict, page: int):
-    """Vector PDF plan map -> IFC4 (pipeline.pdf_to_ifc) -> the IFC scene path (ifc_scene: scene.glb, scene.json,
+def _pdf_words(pdf: Path, page_index: int) -> dict | None:
+    """{"words", "W_pt", "H_pt"} of one PDF page from pdfium's text layer (displayed pt, no path walk)."""
+    import pypdfium2 as pdfium
+    from pipeline.pdf_vector import _displayer, _words_pdfium
+    doc = pdfium.PdfDocument(str(pdf))
+    try:
+        pg = doc[page_index]
+        rot = pg.get_rotation() % 360
+        cl, cb, cr, ct = pg.get_cropbox()
+        w, h = (cr - cl, ct - cb) if rot in (0, 180) else (ct - cb, cr - cl)
+        words = _words_pdfium(pg, _displayer(rot, cr - cl, ct - cb, cl, cb))
+        pg.close()
+    finally:
+        doc.close()
+    return {"words": words, "W_pt": float(w), "H_pt": float(h)}
+
+
+MEP_ARK_MIN_MATCHES = 4     # shared-text anchors an architect sheet needs to be the MEP sheet's own floor
+MEP_ARK_MAX_DOCS = 40       # architect candidates looked at (newest IFC first)
+MEP_ARK_SCAN_S = 20.0       # time for that scan
+
+
+def _mep_architect(pdf: Path, page_index: int, doc_id: str) -> dict | None:
+    """plans2bim-style pairing: the architect plan of the same storey already ingested in the artifacts dir (a PDF
+    doc with a model.ifc, not itself an MEP sheet) whose text aligns with this MEP page (pdf_mep.align, shared
+    room numbers / tags, >= MEP_ARK_MIN_MATCHES inliers). Best by inliers. {"doc_id", "pdf", "ifc", "matches",
+    "rms_pt"} or None (switch PDF_MEP_COMBINE=0; any problem -> None)."""
+    if os.environ.get("PDF_MEP_COMBINE", "1") == "0":
+        return None
+    try:
+        from pipeline import pdf_mep
+        t0 = time.time()
+        me = _pdf_words(pdf, page_index)
+        need = int(os.environ.get("PDF_MEP_ARK_MIN", str(MEP_ARK_MIN_MATCHES)))
+        cands = []
+        for dj in _art().glob("*/doc.json"):
+            d = dj.parent
+            if d.name == doc_id or not (d / "model.ifc").is_file():
+                continue
+            cands.append((-(d / "model.ifc").stat().st_mtime, d))
+        best = None
+        for _, d in sorted(cands)[:MEP_ARK_MAX_DOCS]:
+            if time.time() - t0 > MEP_ARK_SCAN_S:
+                break
+            try:
+                meta = json.loads((d / "doc.json").read_text())
+                rel = (meta.get("files") or {}).get("pdf")
+                if not rel or meta.get("mep_from"):
+                    continue
+                src = REPO / rel if (REPO / rel).is_file() else Path(rel)
+                if not src.is_file() or src.resolve() == Path(pdf).resolve():
+                    continue
+                other = _pdf_words(src, 0)
+                kinds, n = pdf_mep._cue_score(pdf_mep.text_cues(other["words"]))
+                if kinds >= 2 and n >= 4:       # another MEP sheet, not an architect plan
+                    continue
+                T = pdf_mep.align(me, other)
+                if T and T["n_inliers"] >= need and (best is None or T["n_inliers"] > best["matches"]):
+                    best = {"doc_id": d.name, "pdf": src, "ifc": d / "model.ifc", "matches": T["n_inliers"],
+                            "rms_pt": round(T["rms_pt"], 3)}
+            except Exception:  # noqa: BLE001  one unreadable candidate
+                continue
+        return best
+    except Exception as e:  # noqa: BLE001
+        print("mep architect scan skipped:", repr(e)[:160], file=sys.stderr)
+        return None
+
+
+def _mep_shell_walls() -> list:
+    """MEP sheet: pdf_vector.walls swapped for pdf_mep.shell_walls (the detector on the grey architect underlay only,
+    capped at PDF_MEP_SHELL_S, filtered to wall thicknesses), so the sheet gets its building shell instead of a
+    timed-out scan of every duct pen. Returns [(module, name, original)] to restore; [] when pdf_mep lacks it."""
+    if os.environ.get("PDF_MEP_SHELL", "1") == "0":
+        return []
+    try:
+        from pipeline import pdf_mep, pdf_vector
+        if not hasattr(pdf_mep, "shell_walls"):
+            return []
+        orig = pdf_vector.walls
+        cap = float(os.environ.get("PDF_MEP_SHELL_S", str(getattr(pdf_mep, "SHELL_CAP_S", 35.0))))
+
+        def walls(page, budget_s=None):
+            return pdf_mep.shell_walls(page, orig, budget_s=min(cap, budget_s) if budget_s else cap)
+        pdf_vector.walls = walls
+        return [(pdf_vector, "walls", orig)]
+    except Exception as e:  # noqa: BLE001
+        print("mep shell skipped:", repr(e)[:160], file=sys.stderr)
+        return []
+
+
+def _mep_enrich(ifc: Path, doc: dict, page: int, planmap: dict, notes: list | None = None) -> dict | None:
+    """MEP sheet (ventilation over an architect underlay): ducts, fittings and air terminals added to the IFC in place
+    by pipeline.pdf_mep (lazy import). Only when pdf_mep.is_mep_sheet says so; any exception, a missing module or
+    an exhausted ingest budget skips it and leaves the plain IFC (pdf_mep writes atomically). Returns its stats or None."""
+    if os.environ.get("PDF_MEP", "1") == "0":
+        return None
+    try:
+        rel = (doc.get("files") or {}).get("pdf")
+        if not rel:
+            return None
+        pdf = REPO / rel
+        from pipeline import pdf_mep
+        if not (hasattr(pdf_mep, "is_mep_sheet") and hasattr(pdf_mep, "enrich_ifc")):
+            return None
+        left = _budget_left()
+        if left is not None and left < float(os.environ.get("PDF_MEP_MIN_LEFT_S", "30")):
+            if notes is not None:
+                notes.append(f"mep skipped: ingest budget ({left:.0f} s left)")
+            return None
+        t = time.time()
+
+        def run():
+            if not pdf_mep.is_mep_sheet(pdf, page - 1):
+                return None
+            if left is not None and "PDF_VTEXT_S" not in os.environ:
+                # stroke-text size reader (pdf_ducts): only the time this step can spare after ~60 s of detection
+                os.environ["PDF_VTEXT_S"] = str(max(0.0, min(60.0, left - IFC_RESERVE_S - MEP_SCENE_S - 60.0)))
+            arch = _mep_architect(pdf, page - 1, str(doc.get("doc_id") or ""))
+            if arch is not None and hasattr(pdf_mep, "combine"):
+                # the architect model of this storey takes the ducts (its shell, rooms, doors); any failure -> the
+                # sheet's own IFC as before
+                tmp = Path(str(ifc) + ".combined.tmp.ifc")
+                try:
+                    rep = pdf_mep.combine(arch["pdf"], pdf, arch["ifc"], tmp, mep_page_index=page - 1,
+                                          mep_artifact_dir=Path(ifc).parent)
+                    os.replace(tmp, ifc)
+                    rep = {k: v for k, v in rep.items() if k not in ("clusters", "overlay")}
+                    rep["architect"] = {k: str(v) for k, v in arch.items()}
+                    return rep
+                except Exception as e:  # noqa: BLE001
+                    print("mep combine skipped:", repr(e)[:160], file=sys.stderr)
+                    Path(tmp).unlink(missing_ok=True)
+            return pdf_mep.enrich_ifc(Path(ifc), pdf, page - 1, planmap)
+        if left is None or not _fork_ok():
+            r = run()
+        else:  # own child, cut before the scene's share: enrich_ifc writes atomically, a kill leaves the plain IFC
+            res, r = _fork_call(run, left - IFC_RESERVE_S - MEP_SCENE_S)
+            if res != "ok":
+                raise RuntimeError("stopped at the ingest budget" if res == "timeout" else str(r))
+        if r is None:
+            return None
+        if notes is not None:
+            r = r if isinstance(r, dict) else {}
+            notes.append("mep: " + ", ".join(f"{k}={r[k]}" for k in ("ducts", "terminals", "fittings") if k in r)
+                         + (f", on architect {r['architect'].get('doc_id')} ({r['architect'].get('matches')} anchors)"
+                            if isinstance(r.get("architect"), dict) else "") + f" ({time.time() - t:.0f} s)")
+        return r
+    except Exception as e:  # noqa: BLE001  optional extra: the plain IFC stays
+        print("mep enrich skipped:", repr(e)[:200], file=sys.stderr)
+        if notes is not None:
+            notes.append(f"mep skipped: {e!r}"[:160])
+        return None
+
+
+STOREY_SPACING_M = 3.0  # fallback storey-to-storey height when the sheets print no levels
+
+
+def _storeys(pms: list) -> list:
+    """[(storey_name, elevation_m)] for plan maps in page order: pipeline.pdf_levels (title block, level marks) when
+    present, else each plan map's provenance.storey, else "Floor N" at STOREY_SPACING_M per page. Never raises."""
+    out = []
+    for i, pm in enumerate(pms):
+        sto = (pm.get("provenance") or {}).get("storey") or {}
+        out.append([sto.get("name") or f"Floor {i + 1}",
+                    float(sto["elevation_m"]) if sto.get("elevation_m") is not None else STOREY_SPACING_M * i])
+    try:
+        from pipeline import pdf_levels
+        lv = pdf_levels.storeys_from_planmaps(pms)
+        for e in lv or []:
+            k = int(e.get("page_index", -1))
+            if 0 <= k < len(out):
+                if e.get("name"):
+                    out[k][0] = str(e["name"])
+                if e.get("elevation_m") is not None:
+                    out[k][1] = float(e["elevation_m"])
+    except Exception as e:  # noqa: BLE001
+        print("pdf_levels skipped:", repr(e)[:200], file=sys.stderr)
+    return [(n, round(z, 3)) for n, z in out]
+
+
+def _stack_pages(pms: list, names: list) -> list[int]:
+    """Indexes of the plan maps that become storeys: one per storey (a second sheet of the same level, e.g. a
+    demolition plan next to the new plan, or an enlarged plan of it, is not stacked on top). Order kept."""
+    keep, seen = [], set()
+    for i, (n, z) in enumerate(names):
+        key = (str(n).strip().lower(), round(z, 2))
+        if i and (key in seen or any(abs(z - names[k][1]) < 0.05 for k in keep)):
+            continue
+        seen.add(key)
+        keep.append(i)
+    return keep
+
+
+def _pdf_via_ifc(doc_id: str, ddir: Path, doc: dict, page, notes: list | None = None):
+    """Vector PDF plan map(s) -> IFC4 (pipeline.pdf_to_ifc) -> the IFC scene path (ifc_scene: scene.glb, scene.json,
     elements.json), so a PDF looks like an IFC upload in 3D/AR. The page image and planmap-<n>.json stay the PDF's own
     (ifc_plans is not run: it would replace them); plan-map ids are relinked to the IFC GlobalIds. Any failure leaves
-    no IFC files behind and raises, so the caller extrudes the plan map instead."""
+    no IFC files behind and raises, so the caller extrudes the plan map instead. `page` is one plan page or the list
+    of plan pages: several pages of different storeys become one storey each (pdf_to_ifc.build_many, names and
+    elevations from _storeys); one page keeps build() with its own storey name/elevation. An MEP sheet gets its ducts
+    and air terminals added between the IFC build and the scene (_mep_enrich, skipped on any error)."""
     from pipeline import ifc_scene, pdf_to_ifc
-    f = ddir / f"planmap-{page}.json"
-    keep = f.read_text()
+    pages_ = list(page) if isinstance(page, (list, tuple)) else [page]
+    files = {n: ddir / f"planmap-{n}.json" for n in pages_}
+    keep = {n: f.read_text() for n, f in files.items()}
     try:
-        ifc = pdf_to_ifc.build(json.loads(keep), ddir / "model.ifc", storey_name="Floor 1", doc_id=doc_id)
+        pms = [json.loads(keep[n]) for n in pages_]
+        names = _storeys(pms)
+        idx = _stack_pages(pms, names) if len(pms) > 1 else [0]
+        if len(idx) > 1:
+            left = _budget_left()
+            per = float(os.environ.get("IFC_PAGE_EST_S", "20"))
+            fit = len(idx) if left is None else max(1, int((left - IFC_RESERVE_S - 30) // per))
+            if fit < len(idx) and notes is not None:
+                notes.append(f"budget: {fit} of {len(idx)} storeys")
+            idx = idx[:fit]
+        used = [pages_[i] for i in idx]
+        if len(idx) > 1:
+            ifc = pdf_to_ifc.build_many([(pms[i], names[i][0], names[i][1]) for i in idx], ddir / "model.ifc",
+                                        doc_id=doc_id)
+            if notes is not None:
+                notes.append("storeys " + ", ".join(f"p{pages_[i]} {names[i][0]} @{names[i][1]} m" for i in idx))
+        else:
+            ifc = pdf_to_ifc.build(pms[0], ddir / "model.ifc", storey_name=names[0][0], storey_elevation=names[0][1],
+                                   doc_id=doc_id)
+        _mep_enrich(Path(ifc), doc, pages_[0], pms[0], notes)
         ifc_scene.process(Path(ifc), doc, ddir)
-        pdf_to_ifc.link_planmap(f, doc_id)
-        _copy_quality(ddir, page)
+        for n in used:
+            pdf_to_ifc.link_planmap(files[n], doc_id)
+        _copy_quality(ddir, pages_[0])
         mark_ifc_from_pdf(ddir, True)
-    except Exception:
-        f.write_text(keep)
-        for name in ("model.ifc", "elements.json", "scene.glb", "scene.json"):
-            (ddir / name).unlink(missing_ok=True)
-        mark_ifc_from_pdf(ddir, False)
+    except BaseException:
+        _undo_ifc(ddir, files, keep)
         raise
+    return notes
+
+
+def _undo_ifc(ddir: Path, files: dict, keep: dict):
+    """Back to the state before _pdf_via_ifc: original plan maps, no IFC/scene files, no IFC marks in doc.json."""
+    for n, f in files.items():
+        f.write_text(keep[n])
+    for name in ("model.ifc", "elements.json", "scene.glb", "scene.json"):
+        (ddir / name).unlink(missing_ok=True)
+    mark_ifc_from_pdf(ddir, False)
+
+
+def _pdf_via_ifc_bounded(doc_id: str, ddir: Path, doc: dict, plan_pages: list, notes: list):
+    """_pdf_via_ifc in a forked child, cut off IFC_RESERVE_S before the ingest deadline (inline without a budget).
+    Raises on failure or timeout (state restored), so the caller extrudes the plan map instead."""
+    files = {n: ddir / f"planmap-{n}.json" for n in plan_pages}
+    keep = {n: f.read_text() for n, f in files.items()}
+    left = _budget_left()
+    def child():
+        cut = []
+        if left is not None and _fork_ok() and IFC_LIMITS:  # optional extras give way to the core IFC + scene
+            _soft_limits(time.time() + left - IFC_RESERVE_S - 3.0, cut, IFC_LIMITS)
+        out = _pdf_via_ifc(doc_id, ddir, doc, plan_pages, [])
+        return (out or []) + ([f"cut at the ingest budget: {cut}"] if cut else [])
+    res, val = _bounded(child, None if left is None else left - IFC_RESERVE_S)
+    if res == "ok":
+        notes.extend(val or [])
+        return
+    _undo_ifc(ddir, files, keep)
+    raise RuntimeError("IFC route stopped at the ingest budget" if res == "timeout" else str(val))
 
 
 def mark_ifc_from_pdf(ddir: Path, on: bool):
@@ -429,6 +1076,7 @@ def _usdz(doc_id: str, ddir: Path, strict: bool = False):
 
 def run(doc_id: str) -> str:
     st = Status(_art() / doc_id / "ingest.json")
+    _set_deadline(st.started_at)
     try:
         final = _run(doc_id, st)
     except Exception as e:  # noqa: BLE001
@@ -443,10 +1091,106 @@ def run(doc_id: str) -> str:
     return final
 
 
+def _lean_pdf_words(pdf: Path, page_no: int):
+    """pipeline.pages.pdf_words without the drawing: the same pdfminer parse and text layout, but path and image
+    painting are dropped before pdfminer builds an LTCurve/LTImage per drawing operator. Text lines are grouped from
+    LTChar objects only, so the words are the same; a CAD sheet with ~100k paths no longer holds ~1 GB of curve
+    objects. Returns (words, w_pt, h_pt) like pages.pdf_words."""
+    from pdfminer.converter import PDFPageAggregator
+    from pdfminer.layout import LAParams, LTChar, LTFigure, LTTextContainer, LTTextLine
+    from pdfminer.pdfinterp import PDFPageInterpreter, PDFResourceManager
+    from pdfminer.pdfpage import PDFPage
+
+    class TextOnly(PDFPageAggregator):
+        def paint_path(self, gstate, stroke, fill, evenodd, path):
+            return None
+
+        def render_image(self, name, stream):
+            return None
+
+    words = []
+
+    def flush(chars):
+        if not chars:
+            return
+        txt = "".join(c.get_text() for c in chars).strip()
+        if not txt:
+            return
+        words.append((txt, min(c.x0 for c in chars), min(c.y0 for c in chars),
+                      max(c.x1 for c in chars), max(c.y1 for c in chars)))
+
+    def walk(o):
+        if isinstance(o, LTTextLine):
+            cur = []
+            for c in o:
+                if isinstance(c, LTChar) and c.get_text().strip():
+                    cur.append(c)
+                else:
+                    flush(cur)
+                    cur = []
+            flush(cur)
+        elif isinstance(o, (LTTextContainer, LTFigure)) or hasattr(o, "__iter__"):
+            for c in o:
+                walk(c)
+
+    rm = PDFResourceManager(caching=True)
+    dev = TextOnly(rm, laparams=LAParams(char_margin=1.5, line_margin=0.3))
+    interp = PDFPageInterpreter(rm, dev)
+    with open(pdf, "rb") as fp:
+        for i, page in enumerate(PDFPage.get_pages(fp, caching=True)):
+            if i < page_no:
+                continue
+            interp.process_page(page)
+            pg = dev.get_result()
+            for o in pg:
+                walk(o)
+            return words, pg.width, pg.height
+    raise IndexError(f"page {page_no} not in {pdf}")
+
+
+REFINE_MIN_LEFT_S = 15.0  # text refine pages start only with this much ingest budget left
+
+
+def _refine_page(pdf: Path, f: Path, t: dict) -> bool:
+    """One page's pdfium text -> pdfminer words (atomic replace of text-<n>.json). True when replaced."""
+    W, H = t["image"]["w"], t["image"]["h"]
+    import pypdfium2 as pdfium
+    d = pdfium.PdfDocument(str(pdf))
+    w_pt, _ = d[t["page"] - 1].get_size()
+    d.close()
+    s = W / w_pt
+    try:
+        raw, pw, ph = _lean_pdf_words(pdf, t["page"] - 1)
+    except Exception as e:  # noqa: BLE001  pdfminer internals moved: the stock reader
+        print("lean pdfminer words failed, full reader:", repr(e)[:160], file=sys.stderr)
+        from pipeline import pages
+        raw, pw, ph = pages.pdf_words(pdf, t["page"] - 1, s, W, H)
+    words = []
+    for tx, x0, y0, x1, y1 in raw:
+        bx = [round(max(0, min(v, lim)), 1) for v, lim in zip((x0 * s, (ph - y1) * s, x1 * s, (ph - y0) * s), (W, H, W, H))]
+        words.append({"text": tx, "bbox_px": bx})
+    if not words:
+        return False
+    # guard: the refine must not shred the text layer (glyph-by-glyph words break viewer search and labels); keep the
+    # pdfium words when pdfminer's result has clearly more single-character words than they do
+    old = t.get("words") or []
+    if old:
+        one = lambda ws: sum(1 for w in ws if len(str(w.get("text", "")).strip()) <= 1)
+        if one(words) > max(2 * one(old), 0.25 * len(words)) and len(words) > 1.3 * len(old):
+            print(f"text refine kept pdfium words: pdfminer split {len(words)} vs {len(old)}", file=sys.stderr)
+            return False
+    t.update(words=words, extractor="pdfminer")
+    tmp = f.with_suffix(".tmp")
+    tmp.write_text(json.dumps(t, ensure_ascii=False))
+    tmp.replace(f)
+    return True
+
+
 def refine_text(doc_id: str, ddir: Path) -> int:
     """Pages whose text came from pdfium (fast, at ingest) are re-read with pdfminer (slow, exact boxes) once the
-    document is already usable. Files are replaced atomically; text.json is rebuilt. Returns pages refined."""
-    from pipeline import pages
+    document is already usable. Files are replaced atomically; text.json is rebuilt. Returns pages refined.
+    With an ingest budget each page runs in a forked child cut off before the deadline (a kill after "ready" would
+    mark the document failed); pages not refined in time keep the pdfium words."""
     doc = json.loads((ddir / "doc.json").read_text())
     rel = (doc.get("files") or {}).get("pdf")
     if not rel:
@@ -457,24 +1201,19 @@ def refine_text(doc_id: str, ddir: Path) -> int:
         t = json.loads(f.read_text())
         if t.get("extractor") != "pdfium":
             continue
-        W, H = t["image"]["w"], t["image"]["h"]
-        import pypdfium2 as pdfium
-        d = pdfium.PdfDocument(str(pdf))
-        w_pt, _ = d[t["page"] - 1].get_size()
-        d.close()
-        s = W / w_pt
-        raw, pw, ph = pages.pdf_words(pdf, t["page"] - 1, s, W, H)
-        words = []
-        for tx, x0, y0, x1, y1 in raw:
-            bx = [round(max(0, min(v, lim)), 1) for v, lim in zip((x0 * s, (ph - y1) * s, x1 * s, (ph - y0) * s), (W, H, W, H))]
-            words.append({"text": tx, "bbox_px": bx})
-        if not words:
-            continue
-        t.update(words=words, extractor="pdfminer")
-        tmp = f.with_suffix(".tmp")
-        tmp.write_text(json.dumps(t, ensure_ascii=False))
-        tmp.replace(f)
-        n += 1
+        left = _budget_left()
+        if left is not None and left < REFINE_MIN_LEFT_S:
+            print(f"text refine stopped: ingest budget ({left:.0f} s left)", file=sys.stderr)
+            break
+        res, val = _bounded(lambda: _refine_page(pdf, f, t), None if left is None else left - 5.0)
+        if res == "ok" and val:
+            n += 1
+        elif res == "timeout":
+            f.with_suffix(".tmp").unlink(missing_ok=True)
+            print("text refine stopped at the ingest budget", file=sys.stderr)
+            break
+        elif res == "error":
+            print("text refine page skipped:", val, file=sys.stderr)
     if n:
         build_text_json(doc_id, ddir)
     return n
@@ -560,7 +1299,11 @@ def _run(doc_id: str, st: Status) -> str:
             if vector:  # walls come from the PDF's own geometry: no raster wall read
                 ok = False
                 if _pdf_via_ifc_on():
-                    ok = st.stage("ifc_from_pdf", lambda: _pdf_via_ifc(doc_id, ddir, doc, plan_pages[0]))
+                    ifc_notes: list = []
+                    ok = st.stage("ifc_from_pdf", lambda: _pdf_via_ifc_bounded(doc_id, ddir, doc, plan_pages, ifc_notes))
+                    if ifc_notes:
+                        st.stages[-1]["note"] = "; ".join(ifc_notes)[:300]
+                        st.write("running")
                     if not ok:  # IFC route failed: extrude the plan map directly
                         st.stages[-1].update(ok=True, note="fell back to extrude: " + st.stages[-1].pop("error", "")[:200])
                 if not ok:

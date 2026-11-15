@@ -180,3 +180,103 @@ def test_polygons_have_no_holes(tmp_path):
     from shapely.ops import unary_union
     u = unary_union([Polygon(w["polygon"]) for w in ws])
     assert u.area == pytest.approx(2 * 8 * 300 + 2 * 8 * 184, rel=0.02)  # ring area, not the filled box
+
+
+def _w(x0, y0, x1, y1, t, style):
+    from pipeline.pdf_vector import _wall_rect
+    return {"polygon": _wall_rect([x0, y0], [x1, y1], t), "centerline": [[x0, y0], [x1, y1]], "thickness_pt": t,
+            "style": style, **({"height_m": 1.0} if style == "parapet" else {})}
+
+
+def test_settle_parapets_enclosed_open_and_layers():
+    from pipeline.pdf_vector import _settle_parapets
+    box = [_w(0, 0, 400, 0, 10, "double"), _w(0, 300, 400, 300, 10, "double"),
+           _w(0, 0, 0, 300, 10, "double"), _w(400, 0, 400, 300, 10, "double")]
+    inner = _w(200, 10, 200, 290, 3, "parapet")          # partition between two rooms: walls on both sides
+    edge = _w(-150, -150, -150, 450, 3, "parapet")        # balcony edge: nothing beyond it
+    layer = _w(10, 6.5, 390, 6.5, 3, "parapet")           # inner layer lying flat against the top wall
+    out = _settle_parapets([*box, inner, edge, layer])
+    st = {(tuple(w["centerline"][0]), w["style"]) for w in out}
+    assert ((200, 10), "fill") in st and "height_m" not in next(w for w in out if w["centerline"][0] == [200, 10])
+    assert ((-150, -150), "parapet") in st
+    assert len(out) == 6  # the layer merged into the top wall
+    top = next(w for w in out if abs(w["centerline"][0][1]) < 5 and w["style"] == "double")
+    assert abs(top["thickness_pt"] - 13.0) < 0.01 and top["centerline"][0][0] == 0 and top["centerline"][1][0] == 400
+
+
+def test_path_form_and_wipeouts():
+    from pipeline import pdf_vector as pv
+    paths = [{"pts": [[0, 0], [10, 0]], "stroke": [0, 0, 0], "fill": None, "obj": 0},
+             {"pts": [[20, 20], [30, 20]], "stroke": [0, 0, 0], "fill": None, "obj": 1},
+             {"pts": [[-1, -1], [11, -1], [11, 1], [-1, 1]], "stroke": None, "fill": [1, 1, 1], "obj": 2, "closed": True}]
+    assert pv._white_over(paths) == [2]
+    kept = pv.drop_wiped(paths)
+    assert len(kept) == 2 and kept[0]["obj"] == 1  # the line under the later white mask is gone
+    assert pv.path_form({"obj_form": [0, 3]}, {"obj": 1}) == 3 and pv.path_form({}, {"obj": 1}) == -1
+
+
+def _wc(c0, c1, t, style="double"):
+    w = {"style": style}
+    V._set_geom(w, c0, c1, t)
+    return w
+
+
+def test_thickness_classes_and_known_sizes():
+    ws = [_wc((0, 0), (100, 0), 4.0), _wc((0, 10), (100, 10), 4.2), _wc((0, 20), (80, 20), 8.0),
+          _wc((0, 30), (90, 30), 8.3), _wc((0, 40), (5, 40), 6.0)]
+    cl = V.thickness_classes(ws)
+    assert len(cl) == 2 and 3.9 < cl[0] < 4.3 and 7.9 < cl[1] < 8.4
+    mpt = 0.1 / 4.1  # 4.1 pt = 100 mm: the known built size wins
+    cl2 = V.thickness_classes(ws, mpt)
+    assert abs(cl2[0] - 4.1) < 1e-6
+
+
+def test_clean_walls_duplicates_join_and_classes():
+    page = {"paths": []}
+    ws = [_wc((0, 0), (50, 0), 6.0), _wc((50.5, 0), (100, 0), 6.0),  # collinear pieces, small gap -> one run
+          _wc((10, 0), (30, 0), 3.0),                              # inside the wider wall -> duplicate
+          _wc((0, 0), (0, 80), 6.0), _wc((100, 0), (100, 80), 6.0),
+          _wc((0, 80), (40, 80), 6.0), _wc((140, 80), (100, 80), 6.0)]  # 60 pt door gap stays open
+    out = V._clean_walls(page, ws)
+    horiz0 = [w for w in out if abs(w["centerline"][0][1]) < 1 and abs(w["centerline"][1][1]) < 1]
+    assert len(horiz0) == 1 and abs(horiz0[0]["centerline"][1][0] - horiz0[0]["centerline"][0][0]) >= 99
+    top = [w for w in out if abs(w["centerline"][0][1] - 80) < 1 and abs(w["centerline"][1][1] - 80) < 1]
+    assert len(top) == 2
+    assert all(w["props"]["thickness_class"] is not None for w in out)
+
+
+def _partition_page(tmp_path, glazing=False):
+    # room 300 x 200 pt (6 pt walls, our y-down frame y 100..300); a thin partition (faces 3 pt apart) at x 250
+    # from the top wall to a 30 pt door gap (our y 200..230), then on to the bottom wall
+    faces = "".join(f"{x} 294 m {x} 200 l S {x} 170 m {x} 106 l S " for x in (248.5, 251.5))
+    if glazing:
+        faces += "250 294 m 250 200 l S 250 170 m 250 106 l S "
+    pdf = write_pdf(tmp_path / "p.pdf", room_double(100, 100, 400, 300, 6) + "0 G 0.3 w " + faces + "\n")
+    page = V.load_page(pdf, 0)
+    walls = [_wc((100, 103), (400, 103), 6.0), _wc((100, 297), (400, 297), 6.0),
+             _wc((103, 100), (103, 300), 6.0), _wc((397, 100), (397, 300), 6.0)]
+    door = {"kind": "door", "bbox": [248.5, 200.0, 251.5, 230.0],
+            "props": {"hinge": [250.0, 200.0], "axis_deg": 90.0, "width_pt": 30.0, "wall_index": None}}
+    return page, walls, door
+
+
+def test_partitions_for_unhosted_door(tmp_path):
+    page, walls, door = _partition_page(tmp_path)
+    mpt = 0.1 / 3.0  # the 3 pt face spacing = 100 mm
+    out = V.partitions_for_doors(page, [door], walls, mpt)
+    assert len(out) == 2 and all(w["style"] == "double" for w in out)
+    spans = sorted(sorted(p[1] for p in w["centerline"]) for w in out)
+    assert spans[0] == pytest.approx([106, 200], abs=1.0) and spans[1] == pytest.approx([230, 294], abs=1.0)
+    for w in out:  # drawn stretches only: the door gap stays open; measured faces 3 pt apart on x 250
+        assert w["thickness_pt"] == pytest.approx(3.0, abs=0.2)
+        assert all(abs(p[0] - 250) < 0.3 for p in w["centerline"])
+        ev = w["props"]["evidence"]
+        assert ev["source"] == "measured" and ev["rule"] == "partition_for_unhosted_door" and ev["paths"]
+    # a hosted door asks for nothing
+    hosted = dict(door, props=dict(door["props"], wall_index=0))
+    assert V.partitions_for_doors(page, [hosted], walls, mpt) == []
+
+
+def test_partitions_for_doors_skip_glazing(tmp_path):
+    page, walls, door = _partition_page(tmp_path, glazing=True)
+    assert V.partitions_for_doors(page, [door], walls, 0.1 / 3.0) == []
