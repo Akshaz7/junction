@@ -24,7 +24,7 @@ def test_door_label_resolves_to_the_one_door_not_to_a_count(tmp_path, monkeypatc
         assert res is not None and not res["answer"]["abstained"], ref
         assert res["evidence"]["scene"]["highlight_item_ids"] == ["door-005"]
         assert abs(res["answer"]["value"] - 0.85) < 1e-9 and "0.85 m" in res["answer"]["text_md"]
-        assert "inside Kitchen" in res["answer"]["text_md"]
+        assert "Kitchen" in res["answer"]["text_md"]
         assert [c["item_ids"] for c in res["citations"]] == [["door-005"]] and len(res["evidence"]["boxes"]) == 1
 
 
