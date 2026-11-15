@@ -295,8 +295,7 @@ def _pip(pt, poly) -> bool:
 
 
 def _apartments(question, doc, p, trace, route, t0):
-    """Swiss-dwellings DXF plan maps carry apartment outlines as items with props.role == 'unit' (label 'App. A').
-    count = number of units; area of apartment X = sum of rooms whose centre lies in the unit, outdoor rooms left out."""
+    """Count explicit unit outlines; sum their assigned indoor rooms for a named apartment."""
     units = [i for i in doc.items if i.props.get("role") == "unit" and i.conf >= MIN_CONF]
     if not units:
         return None
@@ -307,57 +306,41 @@ def _apartments(question, doc, p, trace, route, t0):
         boxes, cites, scene = _evidence(doc, units)
         text = f"There {'is' if n == 1 else 'are'} **{n} {'apartment' if n == 1 else 'apartments'}** on this floor plan. {_cite_marks(cites)}"
         return _answer_obj(question, [doc_id], text, n, "count", 0.9, False, boxes, cites, scene, trace, route, t0)
-    m = re.search(r"\b(?:apartment|flat|unit|dwelling)\s+([\w-]+)\b", question, re.I)
+    m = re.search(r"\b(?:apartment|flat|dwelling|unit)\s+#?([A-Za-z0-9]+(?:[-.][A-Za-z0-9]+)*)\b", question, re.I)
     if not m:
         return None
     key = m.group(1).casefold()
-    # Some CAD exports keep apartment labels on rooms or text instead of on
-    # their unit outlines. Resolve only explicit labels inside a unique outline;
-    # no nearest-neighbour guess or drawing-specific coordinate threshold.
-    # Observed label provenance is recorded in results/final/ACC-VALUE/constants.json.
-    label_rx = re.compile(r"\b(?:apartment|flat|unit|dwelling|app|apt|appt|whg|wohnung|logement|asunto|lägenhet)\.?\s+([\w-]+)\b", re.I)
-    def named(label):
-        found = label_rx.fullmatch((label or "").strip())
-        return bool(found and found[1].casefold() == key)
-    matched = [u for u in units if named(u.label)]
-    anchors = [i for i in doc.items if i.bbox_px and i.conf >= MIN_CONF and named(i.label)]
-    for anchor in anchors:
-        b = anchor.bbox_px
-        centre = ((b[0] + b[2]) / 2, (b[1] + b[3]) / 2)
-        containing = [u for u in units if u.page == anchor.page and u.polygon_px and _pip(centre, u.polygon_px)]
-        if len(containing) == 1 and containing[0] not in matched:
-            matched.append(containing[0])
+    from pipeline.dxf_units import unit_key
+    matched = [u for u in units if (u.props.get("unit_key") or unit_key(u.label)) == key]
     if not matched:
         return _abstain(question, doc_id, f"I could not find apartment {m.group(1)} on this plan.", trace, route, t0)
     if len(matched) != 1:
-        return _abstain(question, doc_id, f"Apartment {m.group(1)} matches more than one outline, so I cannot verify its area.", trace, route, t0)
-    from dataclasses import replace
-    unit = replace(matched[0], label=matched[0].label or f"Apartment {m.group(1)}")
+        return _abstain(question, doc_id, f"More than one outline is labelled apartment {m.group(1)}; please specify the floor.", trace, route, t0)
+    unit = matched[0]
     poly = [tuple(pt) for pt in (unit.polygon_px or [])]
     return None if not poly else _apt_area(question, doc, unit, poly, trace, route, t0)
 
 
 def _apt_area(question, doc, unit, poly, trace, route, t0):
-    rooms = []
-    for r in doc.items:
-        if r.kind != "room" or not r.bbox_px or r.conf < MIN_CONF or r.page != unit.page:
-            continue
-        c = ((r.bbox_px[0] + r.bbox_px[2]) / 2, (r.bbox_px[1] + r.bbox_px[3]) / 2)
-        if _pip(c, poly) and not OUTDOOR_RE.search(f"{r.label or ''} {r.props.get('room_type') or ''}"):
-            rooms.append(r)
+    from .apartment import indoor_rooms, uncertain_hint
+    rooms, missing = indoor_rooms(doc, unit)
+    if missing:
+        return _abstain(question, doc.doc_id, f"{len(missing)} indoor rooms in {unit.label} have no reliable area; I cannot verify the full apartment total.", trace, "planmap", t0)
     if not rooms:
         return _abstain(question, doc.doc_id, "I could not match rooms to that apartment.", trace, "planmap", t0)
     if any(r.q.get("area_m2") is None for r in rooms):
         return _abstain(question, doc.doc_id, "Some indoor rooms in that apartment have no area recorded, so I cannot verify the full sum.", trace, "planmap", t0)
     total = sum(r.q["area_m2"] for r in rooms)
-    trace.append(_step("area", f"{len(rooms)} indoor rooms inside {unit.label} = {total:.2f} m2"))
+    trace.append(_step("area", f"{len(rooms)} indoor rooms assigned to {unit.label} = {total:.2f} m2; outdoor rooms excluded"))
     boxes, cites, scene = _evidence(doc, rooms)
     text = f"The net floor area of **{unit.label}** is **{_fmt(total, 'area')} m²** across {len(rooms)} indoor rooms. {_cite_marks(cites)}"
-    unknown = [r for r in rooms if not r.label and not r.props.get("number")]
-    if unknown:
-        text = (f"The stored room outlines inside **{unit.label}** sum to **{_fmt(total, 'area')} m²**. {_cite_marks(cites)} "
-                f"This includes {len(unknown)} unlabelled outlines; their indoor use is unverified, so check the net indoor area.")
-    return _answer_obj(question, [doc.doc_id], text, round(total, 4), "m²", MIN_CONF if unknown else 0.9, False, boxes, cites, scene, trace, "planmap", t0)
+    hint = uncertain_hint(rooms, total)
+    if hint:
+        text += " " + hint["reason"]
+    result = _answer_obj(question, [doc.doc_id], text, round(total, 4), "m²", 0.4 if hint else 0.9, False, boxes, cites, scene, trace, "planmap", t0)
+    if hint:
+        result["reasoning_hint"] = hint
+    return result
 
 
 FIXTURE_RX = {

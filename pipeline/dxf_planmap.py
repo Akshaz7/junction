@@ -35,11 +35,11 @@ def fixture_kind(*names):
     return matches[0] if len(matches) == 1 else None
 
 
-def room_texts(ms):
+def room_texts(ms, layer="ROOM_TEXT"):
     """Left/baseline TEXT uses insert even when a default align_point is present."""
     texts = []
     for e in ms.query("TEXT MTEXT"):
-        if e.dxf.layer != "ROOM_TEXT":
+        if layer is not None and e.dxf.layer != layer:
             continue
         if e.dxftype() == "MTEXT":
             v = e.dxf.insert
@@ -54,17 +54,8 @@ def room_texts(ms):
 
 def assign_room_texts(rooms, texts):
     """Boundary labels belong to rooms too; nested outlines prefer the smallest room."""
-    from shapely.geometry import Point, Polygon
-    polygons = [Polygon(r) for r in rooms]
-    assigned = {i: [] for i in range(len(rooms))}
-    for t, x, y in texts:
-        if t.startswith("App."):
-            continue
-        owners = [i for i, poly in enumerate(polygons) if poly.covers(Point(x, y))]
-        if owners:
-            owner = min(owners, key=lambda i: polygons[i].area)
-            assigned[owner].append((t, x, y))
-    return assigned
+    from pipeline.dxf_units import assign_texts
+    return assign_texts(rooms, texts)
 
 
 def _pts(e):
@@ -73,7 +64,11 @@ def _pts(e):
 
 
 def _closed(e):
-    return e.closed if e.dxftype() == "LWPOLYLINE" else e.is_closed
+    closed = e.closed if e.dxftype() == "LWPOLYLINE" else e.is_closed
+    if closed:
+        return True
+    p = _pts(e)
+    return len(p) >= 4 and p[0] == p[-1]
 
 
 def _poly_area(p):
@@ -164,25 +159,42 @@ def process(doc_id: str, art: Path, dxf_path: Path) -> dict:
     def add(kind, label, poly_m, props, src):
         cnt[kind] += 1
         poly = [px(q) for q in poly_m]
-        items.append({"item_id": f"{kind}-{cnt[kind]}", "kind": kind, "label": label, "bbox_px": box(poly),
+        items.append({"item_id": f"{kind}-{cnt[kind]}", "kind": kind, "label": label, "bbox_px": box(poly) if poly else None,
                       "polygon_px": poly, "props": props, "conf": 1.0, "source": src})
+        return items[-1]
 
     # rooms
     rooms = [p for e in ms.query('LWPOLYLINE POLYLINE[layer=="ROOM_OUTLINE"]') if _closed(e) for p in [_pts(e)]]
-    assign = assign_room_texts(rooms, texts)
-    for i, r in enumerate(rooms):
-        ts = [t for t, _, _ in assign[i]]
-        name = next((t for t in ts if not NUM.match(t) and not AREA.match(t) and not t.startswith("App.")), "")
-        num = next((t for t in ts if NUM.match(t)), "")
-        area_txt = next((t for t in ts if AREA.match(t)), "")
-        add("room", name, r,
-            {"number": num, "area_m2_label": float(area_txt.split()[0]) if area_txt else None,
-             "area_m2_geom": round(_poly_area(r) * quantity_factor ** 2, 2) if quantity_factor is not None else None, "labelled": bool(name)}, "dxf")
-    # units
-    for e in ms.query('LWPOLYLINE POLYLINE[layer=="UNIT_OUTLINE"]'):
-        p = _pts(e)
-        lab = next((t for t, x, y in texts if t.startswith("App.") and _inside((x, y), p)), "")
-        add("other", lab, p, {"role": "unit", "area_m2_geom": round(_poly_area(p) * quantity_factor ** 2, 2) if quantity_factor is not None else None}, "dxf")
+    from pipeline.dxf_units import analyse
+    # A repeated endpoint closes CAD rings even when the DXF closed bit is unset.
+    unit_entities = list(ms.query('LWPOLYLINE POLYLINE[layer=="UNIT_OUTLINE"]'))
+    outlines = [_pts(e) for e in unit_entities]
+    records, units = analyse(rooms, texts, outlines, room_texts(ms, layer=None), unit_m,
+                             unit_closed=[_closed(e) for e in unit_entities])
+    room_items = []
+    for r, record in zip(rooms, records):
+        props = record["props"]
+        for key in ("label_point", "centroid"):
+            if key in props:
+                props[key + "_px"] = px(props.pop(key))
+        if "void_outline_indices" in props:
+            props["void_polygons_px"] = [[px(p) for p in rooms[j]] for j in props.pop("void_outline_indices")]
+        item = add("other" if props.get("role") == "room_void" else "room", record["label"], r, props, "dxf")
+        if not props["geometry_valid"] or props.get("classification") == "unlabelled" or props.get("unit_membership_method") == "ambiguous":
+            item["conf"] = 0.4  # existing MIN_CONF is 0.5; unknown geometry is retained for inspection
+        room_items.append(item)
+    unit_items = [add("other", u["label"], p, u["props"], "dxf") for p, u in zip(outlines, units)]
+    for item in unit_items:
+        if not item["props"]["geometry_valid"] or item["props"]["classification"] == "ambiguous":
+            item["conf"] = 0.4
+    for item in room_items:
+        props = item["props"]
+        owner = props.pop("unit_index", None)
+        if owner is not None:
+            props["unit_item_id"] = unit_items[owner]["item_id"]
+        parent = props.pop("parent_room_index", None)
+        if parent is not None:
+            props["parent_room_item_id"] = room_items[parent]["item_id"]
     for e in ms.query('LWPOLYLINE POLYLINE[layer=="WALL"]'):
         add("wall", "", _pts(e), {}, "dxf")
     for e in ms.query('LWPOLYLINE POLYLINE[layer=="WINDOW"]'):
