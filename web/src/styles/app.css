@@ -353,7 +353,7 @@ h1, h2, h3, p { margin: 0; }
 .cost-chip { font-size: 10px; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
 .answer-footer { margin-top: 10px; justify-content: flex-end; }
 .status-lines { position: relative; display: flex; align-items: center; color: var(--muted-foreground); gap: 8px; font-size: 14px; }
-.thinking-mark { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; color: white; background: var(--foreground); font-size: 13px; font-weight: 600; margin-left: -36px; margin-right: 4px; }
+.thinking-mark { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; color: white; background: var(--foreground); font-size: 13px; font-weight: 600; margin-left: 0; margin-right: 4px; }
 .thinking-text { white-space: pre-wrap; }
 .thinking-text span span { animation: thinking-wave var(--thinking-cycle) linear infinite; }
 @keyframes thinking-wave { 0%, 40%, 100% { color: color-mix(in oklab, var(--muted-foreground) 85%, var(--background)); text-shadow: none; } 5% { color: var(--foreground); text-shadow: 0 0 .6px currentColor; } }
