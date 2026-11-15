@@ -95,6 +95,8 @@ from .pair_routes import router as pair_router  # noqa: E402
 app.include_router(pair_router)
 from .design_versions import router as design_versions_router  # noqa: E402
 app.include_router(design_versions_router)
+from .sheet_align_routes import router as sheet_align_router  # noqa: E402
+app.include_router(sheet_align_router)
 from .projects_routes import router as projects_router  # noqa: E402
 app.include_router(projects_router)
 from .markup_routes import router as markup_router  # noqa: E402

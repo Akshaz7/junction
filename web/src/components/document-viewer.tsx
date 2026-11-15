@@ -1,5 +1,7 @@
+import type { Alignment, OverlayDoc } from '../lib/sheet-overlay'
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ChevronLeft, ChevronRight, Download, FileSymlink, FileText, Highlighter, Maximize2, Minus, PenLine, Plus, Search, X } from 'lucide-react'
+import { SheetOverlay } from './sheet-overlay'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Citation, Document } from '../lib/types'
 import { fitPage, focusBox, focusBoxWithin, zoomAt, type PageTransform, type Point, type Size } from '../lib/page-transform'
@@ -40,7 +42,9 @@ export function useViewerSheet() {
   return sheet
 }
 
-export function DocumentViewer({ answer, citation: originalCitation, sheet, onClose, edits, commands, chatId, initialMode, initialPanel, openRequest }: {
+export function DocumentViewer({ answer, citation: originalCitation, sheet, onClose, edits, commands, chatId, initialMode, initialPanel, openRequest, initialOverlayDocId, onOverlayAlignment }: {
+  onOverlayAlignment?: (result: Alignment, base: OverlayDoc, overlay: OverlayDoc, basePage: number, overlayPage: number) => void
+  initialOverlayDocId?: string | null
   /** Changes on every open request, so "Visualise it" re-opens 3D after the user toggled back to 2D. */
   openRequest?: number
   /** Opens straight in this view (the answer card's "Visualise it" passes '3d'). */
@@ -51,6 +55,8 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   edits?: DrawingEdits; commands?: readonly SceneCommand[]
   chatId?: string | null
 }) {
+  const [overlayOpen, setOverlayOpen] = useState(initialOverlayDocId !== undefined)
+  useEffect(() => { if (initialOverlayDocId !== undefined) setOverlayOpen(true) }, [initialOverlayDocId, openRequest])
   const [mode, setMode] = useState<ViewerMode>(initialMode ?? '2d')
   const [modelVisited, setModelVisited] = useState(initialMode === '3d')
   function changeMode(next: ViewerMode) { setMode(next); if (next === '3d') setModelVisited(true) }
@@ -359,6 +365,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
       }
     }}>
     <header className="viewer-heading"><FileText size={24} /><div><strong id={titleId}>{doc?.title ?? citation.doc_id}</strong><small>/{doc?.source || 'Drawings'}</small></div>
+      <Button variant="ghost" size="xs" className="overlay-open-button" onClick={() => setOverlayOpen(true)}>Overlay with…</Button>
       <ViewerModeToggle mode={mode} onChange={changeMode} />
       <div className="viewer-source-nav" hidden={mode === '3d'}>
         {imageUrl && <a className="viewer-open-source" aria-label="Open source page" href={imageUrl} target="_blank" rel="noreferrer"><FileSymlink size={16} /></a>}
@@ -522,5 +529,6 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
     </div>}
     <div className="viewer-3d-slot" hidden={mode === '3d'}><button type="button" className="viewer3d-visualise-button" onClick={() => changeMode('3d')}>Visualise it</button></div>
     <footer className="drawing-credit" data-testid="drawing-credit">{doc ? <>{doc.credit || 'Credit not supplied'} · {doc.licence || 'Licence not supplied'}</> : 'Loading source credit…'}</footer>
+    {overlayOpen && <SheetOverlay key={`${citation.doc_id}-${citation.page}`} baseDocId={citation.doc_id} page={citation.page} initialOverlayDocId={initialOverlayDocId} onAlignment={onOverlayAlignment} onClose={() => setOverlayOpen(false)} />}
   </aside>
 }
