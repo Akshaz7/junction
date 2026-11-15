@@ -125,10 +125,11 @@ def test_outdoor_rooms_are_excluded_from_apartment_area(tmp_path):
 
 
 @pytest.mark.parametrize("unit_code,factor", [(6, 1), (4, .001), (1, .0254), (2, .3048)])
-def test_geometry_area_respects_declared_units(unit_code, factor):
-    rooms, _ = analyse([rect(0, 0, 100, 100), rect(10, 10, 20, 20)],
-                       [("Room", 1, 1)], [], [], factor)
-    assert rooms[0]["props"]["area_m2_geom"] == pytest.approx(9600 * factor ** 2, abs=0.5e-6)
+def test_geometry_area_respects_declared_units(tmp_path, unit_code, factor):
+    pm = drawing(tmp_path, [rect(0, 0, 100, 100), rect(10, 10, 20, 20)], [],
+                 [("Room", 1, 1)], unit_code=unit_code)
+    room = next(i for i in pm["items"] if i["kind"] == "room")
+    assert room["props"]["area_m2_geom"] == pytest.approx(9600 * factor ** 2, abs=0.5e-6)
 
 
 def test_written_area_disagreement_is_preserved():

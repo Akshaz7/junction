@@ -129,5 +129,13 @@
       "balkong",
       "uterum"
     ]
+  },
+  "measured_outline_counts": {
+    "room_outlines": 415,
+    "unlabelled_nested_voids": 1,
+    "unit_outlines": 36
+  },
+  "unit_closure_distribution": {
+    "repeated_endpoint": 36
   }
 }

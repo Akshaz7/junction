@@ -1,0 +1,787 @@
+[
+  {
+    "doc_id": "opening_design__lake-kegonsa-home-model-northstar-northstar",
+    "source": "opening_design",
+    "counts": {},
+    "labelled_units": 0,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "opening_design__screened-in-porch-models-cad-bim-linked-cad-data-site-plan",
+    "source": "opening_design",
+    "counts": {},
+    "labelled_units": 0,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "opening_design__stephan-brady-balcony-model-source-s-b-large",
+    "error": "[Errno 2] No such file or directory: '/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/acc-units-artifacts-mjzzaohe/opening_design__stephan-brady-balcony-model-source-s-b-large/text-1.json'"
+  },
+  {
+    "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 47,
+      "other": 84,
+      "wall": 41,
+      "window": 28,
+      "door": 36,
+      "text": 85
+    },
+    "labelled_units": 4,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 131,
+      "other": 303,
+      "wall": 106,
+      "window": 42,
+      "door": 114,
+      "text": 236
+    },
+    "labelled_units": 15,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1040-bldg2136-floor9659",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 33,
+      "other": 52,
+      "wall": 38,
+      "window": 14,
+      "door": 20,
+      "text": 53
+    },
+    "labelled_units": 3,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site10499-bldg15161-floor39596",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 11,
+      "other": 37,
+      "wall": 14,
+      "window": 9,
+      "door": 15,
+      "text": 21
+    },
+    "labelled_units": 1,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1088-bldg2216-floor10132",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 46,
+      "other": 78,
+      "wall": 50,
+      "window": 23,
+      "door": 42,
+      "text": 79
+    },
+    "labelled_units": 4,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1098-bldg2234-floor10334",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 67,
+      "other": 104,
+      "wall": 91,
+      "window": 26,
+      "door": 53,
+      "text": 92
+    },
+    "labelled_units": 6,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1101-bldg2241-floor10275",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 16,
+      "other": 25,
+      "wall": 13,
+      "window": 3,
+      "door": 6,
+      "text": 25
+    },
+    "labelled_units": 1,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 23,
+      "other": 34,
+      "wall": 18,
+      "window": 13,
+      "door": 21,
+      "text": 61
+    },
+    "labelled_units": 2,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site11265-bldg17059-floor45087",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 21,
+      "other": 44,
+      "wall": 21,
+      "window": 11,
+      "door": 22,
+      "text": 40
+    },
+    "labelled_units": 2,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1137-bldg2291-floor10570",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 131,
+      "other": 206,
+      "wall": 133,
+      "window": 60,
+      "door": 102,
+      "text": 210
+    },
+    "labelled_units": 12,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 125,
+      "other": 213,
+      "wall": 115,
+      "window": 69,
+      "door": 112,
+      "text": 194
+    },
+    "labelled_units": 10,
+    "voids": 2,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site11692-bldg18240-floor48820",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 24,
+      "other": 22,
+      "wall": 46,
+      "window": 20,
+      "door": 23,
+      "text": 44
+    },
+    "labelled_units": 1,
+    "voids": 2,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site11861-bldg18508-floor50415",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 34,
+      "other": 71,
+      "wall": 74,
+      "window": 8,
+      "door": 45,
+      "text": 81
+    },
+    "labelled_units": 3,
+    "voids": 12,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1213-bldg2383-floor48290",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 63,
+      "other": 121,
+      "wall": 85,
+      "window": 20,
+      "door": 52,
+      "text": 127
+    },
+    "labelled_units": 4,
+    "voids": 5,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1689-bldg2841-floor13117",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 22,
+      "other": 37,
+      "wall": 20,
+      "window": 12,
+      "door": 18,
+      "text": 48
+    },
+    "labelled_units": 1,
+    "voids": 1,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1869-bldg2903-floor13293",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 60,
+      "other": 105,
+      "wall": 63,
+      "window": 23,
+      "door": 41,
+      "text": 94
+    },
+    "labelled_units": 6,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site2137-bldg2980-floor13588",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 17,
+      "other": 21,
+      "wall": 15,
+      "window": 6,
+      "door": 7,
+      "text": 31
+    },
+    "labelled_units": 1,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site2146-bldg2990-floor13636",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 15,
+      "other": 32,
+      "wall": 14,
+      "window": 7,
+      "door": 12,
+      "text": 29
+    },
+    "labelled_units": 1,
+    "voids": 5,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site2150-bldg3001-floor13690",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 30,
+      "other": 48,
+      "wall": 31,
+      "window": 12,
+      "door": 32,
+      "text": 49
+    },
+    "labelled_units": 3,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site2294-bldg3383-floor15064",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 19,
+      "other": 41,
+      "wall": 56,
+      "window": 9,
+      "door": 12,
+      "text": 28
+    },
+    "labelled_units": 1,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site248-bldg456-floor1800",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 42,
+      "other": 51,
+      "wall": 36,
+      "window": 20,
+      "door": 43,
+      "text": 69
+    },
+    "labelled_units": 3,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site261-bldg473-floor1873",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 51,
+      "other": 119,
+      "wall": 44,
+      "window": 38,
+      "door": 46,
+      "text": 129
+    },
+    "labelled_units": 6,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site285-bldg527-floor51568",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 35,
+      "other": 60,
+      "wall": 34,
+      "window": 22,
+      "door": 26,
+      "text": 88
+    },
+    "labelled_units": 4,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site289-bldg536-floor2149",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 52,
+      "other": 121,
+      "wall": 62,
+      "window": 17,
+      "door": 36,
+      "text": 130
+    },
+    "labelled_units": 4,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site299-bldg569-floor2304",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 15,
+      "other": 36,
+      "wall": 9,
+      "window": 4,
+      "door": 10,
+      "text": 30
+    },
+    "labelled_units": 2,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site303-bldg598-floor2434",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 18,
+      "other": 52,
+      "wall": 28,
+      "window": 12,
+      "door": 21,
+      "text": 54
+    },
+    "labelled_units": 2,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site3259-bldg4943-floor22529",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 17,
+      "other": 15,
+      "wall": 12,
+      "window": 3,
+      "door": 9,
+      "text": 17
+    },
+    "labelled_units": 1,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site3377-bldg5220-floor23409",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 24,
+      "other": 37,
+      "wall": 31,
+      "window": 11,
+      "door": 26,
+      "text": 57
+    },
+    "labelled_units": 2,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site3468-bldg5347-floor23670",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 7,
+      "other": 14,
+      "wall": 13,
+      "window": 10,
+      "door": 2,
+      "text": 14
+    },
+    "labelled_units": 1,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site3570-bldg5455-floor23806",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 13,
+      "other": 26,
+      "wall": 14,
+      "window": 10,
+      "door": 9,
+      "text": 19
+    },
+    "labelled_units": 1,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site3575-bldg5460-floor23814",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 13,
+      "other": 20,
+      "wall": 21,
+      "window": 9,
+      "door": 12,
+      "text": 21
+    },
+    "labelled_units": 1,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site3614-bldg5546-floor24071",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 57,
+      "other": 65,
+      "wall": 50,
+      "window": 18,
+      "door": 50,
+      "text": 86
+    },
+    "labelled_units": 4,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site3764-bldg5789-floor24598",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 29,
+      "other": 78,
+      "wall": 44,
+      "window": 13,
+      "door": 26,
+      "text": 59
+    },
+    "labelled_units": 3,
+    "voids": 2,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site383-bldg846-floor3730",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 42,
+      "other": 71,
+      "wall": 35,
+      "window": 12,
+      "door": 43,
+      "text": 64
+    },
+    "labelled_units": 4,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site3863-bldg6018-floor25218",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 31,
+      "other": 30,
+      "wall": 34,
+      "window": 11,
+      "door": 19,
+      "text": 38
+    },
+    "labelled_units": 2,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site4038-bldg6362-floor26166",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 35,
+      "other": 81,
+      "wall": 37,
+      "window": 17,
+      "door": 30,
+      "text": 59
+    },
+    "labelled_units": 3,
+    "voids": 2,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site418-bldg1080-floor4724",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 37,
+      "other": 70,
+      "wall": 59,
+      "window": 16,
+      "door": 33,
+      "text": 65
+    },
+    "labelled_units": 3,
+    "voids": 1,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site421-bldg1097-floor4796",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 35,
+      "other": 80,
+      "wall": 39,
+      "window": 19,
+      "door": 32,
+      "text": 59
+    },
+    "labelled_units": 3,
+    "voids": 1,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site4237-bldg7396-floor29509",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 27,
+      "other": 45,
+      "wall": 29,
+      "window": 8,
+      "door": 25,
+      "text": 40
+    },
+    "labelled_units": 2,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site424-bldg1074-floor4711",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 21,
+      "other": 42,
+      "wall": 37,
+      "window": 7,
+      "door": 14,
+      "text": 34
+    },
+    "labelled_units": 2,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site4267-bldg7556-floor30516",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 13,
+      "other": 30,
+      "wall": 24,
+      "window": 10,
+      "door": 16,
+      "text": 35
+    },
+    "labelled_units": 2,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site499-bldg1187-floor5295",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 41,
+      "other": 77,
+      "wall": 60,
+      "window": 19,
+      "door": 40,
+      "text": 91
+    },
+    "labelled_units": 3,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site541-bldg1235-floor5503",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 60,
+      "other": 82,
+      "wall": 90,
+      "window": 19,
+      "door": 78,
+      "text": 100
+    },
+    "labelled_units": 4,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site604-bldg1319-floor5779",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 6,
+      "other": 11,
+      "wall": 7,
+      "window": 5,
+      "door": 5,
+      "text": 11
+    },
+    "labelled_units": 1,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site610-bldg1324-floor50793",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 25,
+      "other": 18,
+      "wall": 34,
+      "window": 19,
+      "door": 23,
+      "text": 65
+    },
+    "labelled_units": 1,
+    "voids": 1,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site629-bldg1355-floor5906",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 16,
+      "other": 28,
+      "wall": 32,
+      "window": 13,
+      "door": 17,
+      "text": 32
+    },
+    "labelled_units": 2,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site644-bldg1390-floor6077",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 45,
+      "other": 64,
+      "wall": 53,
+      "window": 29,
+      "door": 36,
+      "text": 123
+    },
+    "labelled_units": 4,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site719-bldg1540-floor6678",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 16,
+      "other": 29,
+      "wall": 21,
+      "window": 13,
+      "door": 18,
+      "text": 34
+    },
+    "labelled_units": 2,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site799-bldg1747-floor18743",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 26,
+      "other": 70,
+      "wall": 40,
+      "window": 17,
+      "door": 28,
+      "text": 40
+    },
+    "labelled_units": 2,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site891-bldg1900-floor8442",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 24,
+      "other": 49,
+      "wall": 59,
+      "window": 14,
+      "door": 25,
+      "text": 47
+    },
+    "labelled_units": 3,
+    "voids": 0,
+    "invalid": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site926-bldg1958-floor8576",
+    "source": "swiss_dwellings",
+    "counts": {
+      "room": 22,
+      "other": 34,
+      "wall": 23,
+      "window": 12,
+      "door": 20,
+      "text": 58
+    },
+    "labelled_units": 2,
+    "voids": 0,
+    "invalid": 0
+  }
+]
