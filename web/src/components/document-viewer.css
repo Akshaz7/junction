@@ -105,3 +105,9 @@
 @media (min-width: 801px) {
   .route-chat .chat-workspace.has-viewer .document-viewer:not(.viewer-sheet) { padding-top: 64px; }
 }
+
+/* Click-to-inspect: outline of the plan item under the pointer, and of the one whose details are open. */
+.drawing-stage[data-tool="pan"][data-pickable="true"] { cursor: pointer; }
+.plan-pick { color: var(--kind-color, var(--info-text)); pointer-events: none; }
+.plan-pick polygon, .plan-pick rect { fill: currentColor; fill-opacity: .12; stroke: currentColor; stroke-width: 2; }
+.plan-pick.is-selected polygon, .plan-pick.is-selected rect { fill-opacity: .2; stroke-width: 3; }

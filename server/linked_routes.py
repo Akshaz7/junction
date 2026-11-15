@@ -22,7 +22,8 @@ def _shape(doc_id: str, r: dict) -> dict:
     return {"doc_id": doc_id, "item_id": r["item_id"], "kind": r.get("kind"), "tag": r.get("tag"), "name": r.get("name"),
             "storey": r.get("storey"), "type_name": r.get("type"), "ifc_class": r.get("ifc_class"),
             "props": r.get("properties") or {}, "quantities": r.get("quantities") or {},
-            "wall_details": r.get("wall_details"), "places": places}
+            "wall_details": r.get("wall_details"), "places": places,
+            "measures": r.get("measures") or {}, "scale": r.get("scale"), "relations": r.get("relations") or {}}
 
 
 async def _lookup(doc_id: str, ref: str) -> dict | None:
