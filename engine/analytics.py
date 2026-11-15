@@ -286,14 +286,47 @@ def arithmetic_question(question: str, doc: Doc, t0, solve_fn) -> dict | None:
     return None
 
 
+_AGG = re.compile(r"\b(?:across|both|combined|altogether|in total)\b", re.I)
+_MEMBER = re.compile(r"\b(?:structural )?members?\b", re.I)
+
+
+def _valid_zero(res: dict, did: str, root) -> bool:
+    """A readable IFC index that holds none of the kind is a valid 0, not a missing operand. Only a missing, empty or
+    failed index is missing."""
+    from engine.solvers.data import load_doc
+    from engine.solvers.solve import ifc_unreadable
+    a = res["answer"]
+    if a.get("value") is not None and not a.get("abstained"):
+        return False
+    doc = load_doc(did, root)
+    return doc is not None and doc.mode == "ifc" and bool(doc.items) and ifc_unreadable(doc, root) is None
+
+
 def multi_doc_total(question, doc_ids, root, t0=None):
-    """Explicit selected-document totals; the answer dispatcher supplies all selected ids."""
+    """Explicit selected-document totals; the answer dispatcher supplies all selected ids. A project question about a
+    structural kind (beams, columns, members) over several IFC models also lands here, one count per model."""
     from engine.solvers.solve import solve, _abstain
     from engine.router.parser import parse
     p = parse(question)
-    if len(doc_ids) < 2 or p.type != "count" or not re.search(r"\b(?:across|both|combined|altogether|in total)\b", question, re.I):
+    member = p.kind is None and bool(_MEMBER.search(question)) and bool(re.search(r"\bhow many\b|\bnumber of\b|\bcount\b", question, re.I))
+    if len(doc_ids) < 2 or not (p.type == "count" or member):
         return None
-    parts = [solve(question, did, parsed=p, root=root) for did in dict.fromkeys(doc_ids)]
+    struct = member or p.kind in ("beam", "column")
+    if not _AGG.search(question):
+        from engine.solvers.data import load_doc
+        if not (struct and all((d := load_doc(x, root)) is not None and d.mode == "ifc" for x in dict.fromkeys(doc_ids))):
+            return None
+    if member:
+        from engine.answer import answer as _one
+        parts = [_one(question, [did]) for did in dict.fromkeys(doc_ids)]
+        p.kind = "member"
+    else:
+        parts = [solve(question, did, parsed=p, root=root) for did in dict.fromkeys(doc_ids)]
+    for did, r in zip(dict.fromkeys(doc_ids), parts):
+        if _valid_zero(r, did, root):
+            r["answer"].update(value=0, abstained=False)
+            r["doc_ids"] = [did]
+            r.setdefault("citations", [])
     if any(r["answer"]["abstained"] or not isinstance(r["answer"]["value"], (int, float)) for r in parts):
         res = _abstain(question, doc_ids[0], "I cannot compute the total across all selected models because one has no matching count data.", [_step("route", "selected-document total: missing operand")], "index", t0 or time.perf_counter())
         res["doc_ids"] = list(doc_ids)
