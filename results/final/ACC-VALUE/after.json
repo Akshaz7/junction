@@ -1658,7 +1658,7 @@
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 10,
+            "ms": 11,
             "model": "fake-1",
             "cost_usd": 0.0
           },
@@ -1707,7 +1707,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the objects found on the drawing and the drawing image",
-            "ms": 4,
+            "ms": 3,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -4859,7 +4859,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the objects found on the drawing and the drawing image",
-            "ms": 0,
+            "ms": 1,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -5658,7 +5658,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the objects found on the drawing and the drawing image",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -8004,7 +8004,7 @@
           {
             "step": "schedule_lookup",
             "detail": "door / count: exact ruled PDF cells",
-            "ms": 328,
+            "ms": 292,
             "model": null,
             "cost_usd": 0
           }
@@ -8076,7 +8076,7 @@
           {
             "step": "read",
             "detail": "prefetched exact matches and tables",
-            "ms": 8,
+            "ms": 7,
             "model": null,
             "cost_usd": 0
           },
@@ -8132,7 +8132,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the printed text and the drawing image",
-            "ms": 3,
+            "ms": 2,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -8168,7 +8168,7 @@
           {
             "step": "read",
             "detail": "prefetched exact matches and tables",
-            "ms": 6,
+            "ms": 5,
             "model": null,
             "cost_usd": 0
           },
@@ -8231,7 +8231,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the printed text and the drawing image",
-            "ms": 5,
+            "ms": 2,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -8424,7 +8424,7 @@
           {
             "step": "read",
             "detail": "prefetched exact matches and tables",
-            "ms": 45,
+            "ms": 39,
             "model": null,
             "cost_usd": 0
           },
@@ -8938,14 +8938,14 @@
           {
             "step": "read",
             "detail": "prefetched exact matches and tables",
-            "ms": 45,
+            "ms": 39,
             "model": null,
             "cost_usd": 0
           },
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 0,
+            "ms": 1,
             "model": "fake-1",
             "cost_usd": 0.0
           },
@@ -9859,20 +9859,13 @@
           {
             "step": "read",
             "detail": "prefetched exact matches and tables",
-            "ms": 36,
+            "ms": 32,
             "model": null,
             "cost_usd": 0
           },
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
-            "model": "fake-1",
-            "cost_usd": 0.0
-          },
-          {
-            "step": "read",
-            "detail": "planner reply was not JSON; retrying",
             "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
@@ -9887,7 +9880,14 @@
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
+            "model": "fake-1",
+            "cost_usd": 0.0
+          },
+          {
+            "step": "read",
+            "detail": "planner reply was not JSON; retrying",
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
@@ -9915,7 +9915,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -9965,20 +9965,13 @@
           {
             "step": "read",
             "detail": "prefetched exact matches and tables",
-            "ms": 64,
+            "ms": 40,
             "model": null,
             "cost_usd": 0
           },
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 2,
-            "model": "fake-1",
-            "cost_usd": 0.0
-          },
-          {
-            "step": "read",
-            "detail": "planner reply was not JSON; retrying",
             "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
@@ -10000,7 +9993,14 @@
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
+            "model": "fake-1",
+            "cost_usd": 0.0
+          },
+          {
+            "step": "read",
+            "detail": "planner reply was not JSON; retrying",
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
@@ -10021,7 +10021,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
-            "ms": 2,
+            "ms": 1,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -10121,35 +10121,35 @@
           {
             "step": "read",
             "detail": "prefetched exact matches and tables",
-            "ms": 39,
+            "ms": 33,
             "model": null,
             "cost_usd": 0
           },
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 7,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 3,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
@@ -10177,7 +10177,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
-            "ms": 2,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -10320,7 +10320,7 @@
           {
             "step": "read",
             "detail": "prefetched exact matches and tables",
-            "ms": 60,
+            "ms": 36,
             "model": null,
             "cost_usd": 0
           },
@@ -10376,7 +10376,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -10969,13 +10969,6 @@
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
-            "model": "fake-1",
-            "cost_usd": 0.0
-          },
-          {
-            "step": "read",
-            "detail": "planner reply was not JSON; retrying",
             "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
@@ -10997,7 +10990,14 @@
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
+            "model": "fake-1",
+            "cost_usd": 0.0
+          },
+          {
+            "step": "read",
+            "detail": "planner reply was not JSON; retrying",
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
@@ -11018,7 +11018,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -11068,14 +11068,21 @@
           {
             "step": "read",
             "detail": "prefetched exact matches and tables",
-            "ms": 38,
+            "ms": 27,
             "model": null,
             "cost_usd": 0
           },
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
+            "model": "fake-1",
+            "cost_usd": 0.0
+          },
+          {
+            "step": "read",
+            "detail": "planner reply was not JSON; retrying",
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
@@ -11096,13 +11103,6 @@
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
-            "model": "fake-1",
-            "cost_usd": 0.0
-          },
-          {
-            "step": "read",
-            "detail": "planner reply was not JSON; retrying",
             "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
@@ -11110,7 +11110,7 @@
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
@@ -11124,7 +11124,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -11174,7 +11174,7 @@
           {
             "step": "read",
             "detail": "prefetched exact matches and tables",
-            "ms": 49,
+            "ms": 36,
             "model": null,
             "cost_usd": 0
           },
@@ -11230,7 +11230,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the objects found on the drawing and the printed text and the drawing image",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -11466,7 +11466,7 @@
           {
             "step": "read",
             "detail": "prefetched exact matches and tables",
-            "ms": 39,
+            "ms": 28,
             "model": null,
             "cost_usd": 0
           },
@@ -11936,7 +11936,7 @@
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
@@ -11950,28 +11950,28 @@
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
@@ -11985,7 +11985,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the objects found on the drawing and the drawing image",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -12085,42 +12085,42 @@
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
@@ -12134,7 +12134,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the objects found on the drawing and the drawing image",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -12184,13 +12184,6 @@
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 2,
-            "model": "fake-1",
-            "cost_usd": 0.0
-          },
-          {
-            "step": "read",
-            "detail": "planner reply was not JSON; retrying",
             "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
@@ -12205,7 +12198,14 @@
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
+            "model": "fake-1",
+            "cost_usd": 0.0
+          },
+          {
+            "step": "read",
+            "detail": "planner reply was not JSON; retrying",
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
@@ -12233,7 +12233,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the objects found on the drawing and the drawing image",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -13298,7 +13298,7 @@
           {
             "step": "read",
             "detail": "planner reply was not JSON; retrying",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           },
@@ -13999,7 +13999,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the model's data and the printed text and the drawing image",
-            "ms": 25,
+            "ms": 18,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -15048,7 +15048,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the model's data and the drawing image",
-            "ms": 1,
+            "ms": 0,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -15863,7 +15863,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the model's data and the printed text and the drawing image",
-            "ms": 8,
+            "ms": 5,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -15892,7 +15892,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the model's data and the printed text and the drawing image",
-            "ms": 6,
+            "ms": 5,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -15921,7 +15921,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the model's data and the printed text and the drawing image",
-            "ms": 6,
+            "ms": 5,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -15950,7 +15950,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the model's data and the printed text and the drawing image",
-            "ms": 7,
+            "ms": 4,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -15979,7 +15979,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the model's data and the printed text and the drawing image",
-            "ms": 6,
+            "ms": 5,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -16008,7 +16008,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the model's data and the printed text and the drawing image",
-            "ms": 5,
+            "ms": 4,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -16037,7 +16037,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the model's data and the printed text and the drawing image",
-            "ms": 6,
+            "ms": 5,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -16066,7 +16066,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the model's data and the printed text and the drawing image",
-            "ms": 7,
+            "ms": 5,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -16095,7 +16095,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the model's data and the printed text and the drawing image",
-            "ms": 6,
+            "ms": 5,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -16124,7 +16124,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the model's data and the printed text and the drawing image",
-            "ms": 7,
+            "ms": 5,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -16153,7 +16153,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the model's data and the printed text and the drawing image",
-            "ms": 7,
+            "ms": 5,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -16182,7 +16182,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the model's data and the printed text and the drawing image",
-            "ms": 60,
+            "ms": 49,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -16319,7 +16319,7 @@
           {
             "step": "forced",
             "detail": "best-effort answer from the model's data and the printed text and the drawing image",
-            "ms": 7,
+            "ms": 6,
             "model": "fake-1",
             "cost_usd": 0.0
           }
@@ -16814,7 +16814,7 @@
           {
             "step": "route",
             "detail": "count / apartment / room (model)",
-            "ms": 1,
+            "ms": 0,
             "model": "fake",
             "cost_usd": 0.0
           },

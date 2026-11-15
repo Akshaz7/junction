@@ -2,7 +2,7 @@
   "models_fake": true,
   "live_spend_usd": 0,
   "before_source_commit": "dbad97f4cec4ff9ae1ea6da4c93a21e993032261",
-  "after_source_commit": "d9377dee6ca0a66ee47f6aea7721dee2849ff132",
+  "after_source_commit": "094920f8be108e9dd844cacee47c102fd4dcafaa",
   "splits": {
     "sample200": {
       "n": 200,
@@ -97,7 +97,7 @@
     "The independent forbidden benchmark and live-provider gate remain with the integrator."
   ],
   "verification": {
-    "pytest_passed": 70,
+    "pytest_passed": 77,
     "source_consistency": {
       "purpose": "source consistency, not independent gold accuracy",
       "injected_answer_data": "generated for demo",

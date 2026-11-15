@@ -13,8 +13,8 @@ Solvers retain computed numeric fields, including zero. Apartment sums resolve e
 
 sample200 additionally contains 13 unscored text rows. Zero correct-to-wrong or correct-to-abstained transitions in either comparison. Remaining mismatches concern source-room membership/quantities or fixture recognition; fake providers cannot reproduce live sauna readings.
 
-Validation: 70 pytest cases; 12 source-consistency checks on three real-file origins plus the reserved blind file in `selection.json`. These diagnostics establish field/evidence consistency, not independent gold accuracy. No fitted symbol constants, prompt changes, new dependencies, live spend or forbidden-document access. All 745 checked structured sidecars predate the baseline, and final SHA256 fingerprints still match.
+Validation: 77 pytest cases; 12 source-consistency checks on three real-file origins plus the reserved blind file in `selection.json`. These diagnostics establish field/evidence consistency, not independent gold accuracy. No fitted symbol constants, prompt changes, new dependencies, live spend or forbidden-document access. All 745 checked structured sidecars predate the baseline, and final SHA256 fingerprints still match.
 
-CROSS-FILE: shared hooks in engine/answer.py, engine/solvers/solve.py, engine/solvers/filters.py, engine/reader/agent.py, engine/reader/tools.py, engine/textqa.py.
+CROSS-FILE: shared hooks in engine/answer.py, engine/solvers/solve.py, engine/solvers/filters.py, engine/reader/agent.py, engine/reader/tools.py, engine/textqa.py, engine/forced.py.
 
 NEEDS-AWAIS: none. NEEDS: integrate this branch and run the independent measurement-only/live-provider gates. No PDF ingest, model, split or benchmark scorer changes.
