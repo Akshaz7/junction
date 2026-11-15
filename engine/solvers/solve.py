@@ -295,8 +295,7 @@ def _pip(pt, poly) -> bool:
 
 
 def _apartments(question, doc, p, trace, route, t0):
-    """Swiss-dwellings DXF plan maps carry apartment outlines as items with props.role == 'unit' (label 'App. A').
-    count = number of units; area of apartment X = sum of rooms whose centre lies in the unit, outdoor rooms left out."""
+    """Count explicit unit outlines; sum their assigned indoor rooms for a named apartment."""
     units = [i for i in doc.items if i.props.get("role") == "unit" and i.conf >= MIN_CONF]
     if not units:
         return None
@@ -307,32 +306,39 @@ def _apartments(question, doc, p, trace, route, t0):
         boxes, cites, scene = _evidence(doc, units)
         text = f"There {'is' if n == 1 else 'are'} **{n} {'apartment' if n == 1 else 'apartments'}** on this floor plan. {_cite_marks(cites)}"
         return _answer_obj(question, [doc_id], text, n, "count", 0.9, False, boxes, cites, scene, trace, route, t0)
-    m = re.search(r"\bapartment\s+([A-Za-z0-9]{1,3})\b", question)
+    m = re.search(r"\b(?:apartment|flat|dwelling|unit)\s+#?([A-Za-z0-9]+(?:[-.][A-Za-z0-9]+)*)\b", question, re.I)
     if not m:
         return None
     key = m.group(1).casefold()
-    unit = next((u for u in units if (u.label or "").casefold().replace(".", " ").split()[-1:] == [key]), None)
-    if unit is None:
+    from pipeline.dxf_units import unit_key
+    matched = [u for u in units if (u.props.get("unit_key") or unit_key(u.label)) == key]
+    if not matched:
         return _abstain(question, doc_id, f"I could not find apartment {m.group(1)} on this plan.", trace, route, t0)
+    if len(matched) != 1:
+        return _abstain(question, doc_id, f"More than one outline is labelled apartment {m.group(1)}; please specify the floor.", trace, route, t0)
+    unit = matched[0]
     poly = [tuple(pt) for pt in (unit.polygon_px or [])]
     return None if not poly else _apt_area(question, doc, unit, poly, trace, route, t0)
 
 
 def _apt_area(question, doc, unit, poly, trace, route, t0):
-    rooms = []
-    for r in doc.items:
-        if r.kind != "room" or not r.bbox_px or r.conf < MIN_CONF:
-            continue
-        c = ((r.bbox_px[0] + r.bbox_px[2]) / 2, (r.bbox_px[1] + r.bbox_px[3]) / 2)
-        if _pip(c, poly) and not OUTDOOR_RE.search(r.label or "") and r.q.get("area_m2") is not None:
-            rooms.append(r)
+    from .apartment import indoor_rooms, uncertain_hint
+    rooms, missing = indoor_rooms(doc, unit)
+    if missing:
+        return _abstain(question, doc.doc_id, f"{len(missing)} indoor rooms in {unit.label} have no reliable area; I cannot verify the full apartment total.", trace, "planmap", t0)
     if not rooms:
         return _abstain(question, doc.doc_id, "I could not match rooms to that apartment.", trace, "planmap", t0)
     total = sum(r.q["area_m2"] for r in rooms)
-    trace.append(_step("area", f"{len(rooms)} indoor rooms inside {unit.label} = {total:.2f} m2"))
+    trace.append(_step("area", f"{len(rooms)} indoor rooms assigned to {unit.label} = {total:.2f} m2; outdoor rooms excluded"))
     boxes, cites, scene = _evidence(doc, rooms)
     text = f"The net floor area of **{unit.label}** is **{_fmt(total, 'area')} m²** across {len(rooms)} indoor rooms. {_cite_marks(cites)}"
-    return _answer_obj(question, [doc.doc_id], text, round(total, 4), "m²", 0.9, False, boxes, cites, scene, trace, "planmap", t0)
+    hint = uncertain_hint(rooms, total)
+    if hint:
+        text += " " + hint["reason"]
+    result = _answer_obj(question, [doc.doc_id], text, round(total, 4), "m²", 0.4 if hint else 0.9, False, boxes, cites, scene, trace, "planmap", t0)
+    if hint:
+        result["reasoning_hint"] = hint
+    return result
 
 
 FIXTURE_RX = {

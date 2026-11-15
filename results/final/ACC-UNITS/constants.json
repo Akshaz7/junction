@@ -1,0 +1,93 @@
+{
+  "development_files": [
+    {
+      "doc_id": "swiss_dwellings__site3468-bldg5347-floor23670",
+      "file": "data/swiss_dwellings/site3468_bldg5347_floor23670.dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site299-bldg569-floor2304",
+      "file": "data/swiss_dwellings/site299_bldg569_floor2304.dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site2137-bldg2980-floor13588",
+      "file": "data/swiss_dwellings/site2137_bldg2980_floor13588.dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site541-bldg1235-floor5503",
+      "file": "data/swiss_dwellings/site541_bldg1235_floor5503.dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site891-bldg1900-floor8442",
+      "file": "data/swiss_dwellings/site891_bldg1900_floor8442.dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site610-bldg1324-floor50793",
+      "file": "data/swiss_dwellings/site610_bldg1324_floor50793.dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site499-bldg1187-floor5295",
+      "file": "data/swiss_dwellings/site499_bldg1187_floor5295.dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site3570-bldg5455-floor23806",
+      "file": "data/swiss_dwellings/site3570_bldg5455_floor23806.dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site10499-bldg15161-floor39596",
+      "file": "data/swiss_dwellings/site10499_bldg15161_floor39596.dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site3614-bldg5546-floor24071",
+      "file": "data/swiss_dwellings/site3614_bldg5546_floor24071.dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site1137-bldg2291-floor10570",
+      "file": "data/swiss_dwellings/site1137_bldg2291_floor10570.dxf"
+    },
+    {
+      "doc_id": "swiss_dwellings__site3575-bldg5460-floor23814",
+      "file": "data/swiss_dwellings/site3575_bldg5460_floor23814.dxf"
+    }
+  ],
+  "n_files": 12,
+  "observed_unit_prefixes": {
+    "App.": 2,
+    "Whg.": 32
+  },
+  "observed_outdoor_labels": {
+    "Loggia": 13,
+    "Balkon": 19,
+    "Balcon": 3
+  },
+  "observed_room_names": {
+    "Camera da letto": 3,
+    "Bagno": 2,
+    "Soggiorno": 1,
+    "Corridoio": 1,
+    "Cucina": 1,
+    "Vano scala": 2,
+    "Zimmer": 39,
+    "K\u00fcche": 32,
+    "Wohnen/Essen": 14,
+    "Reduit": 15,
+    "Loggia": 13,
+    "Bad": 44,
+    "Korridor": 53,
+    "Lift": 8,
+    "Treppenhaus": 7,
+    "Balkon": 19,
+    "Schlafzimmer": 29,
+    "Wohnen": 10,
+    "Essen": 2,
+    "Balcon": 3,
+    "S\u00e9jour/repas": 1,
+    "Pi\u00e8ce": 8,
+    "R\u00e9duit": 3,
+    "Couloir": 2,
+    "Bain": 3,
+    "Cage d'escalier": 1
+  },
+  "geometry_thresholds": [],
+  "policy": "Containment and even-odd topology only; no fitted size/coordinate constants. Remaining multilingual terms come from ACC-UNITS task vocabulary, not an observed-frequency claim. Confidence 0.4 marks unknown below the existing solver MIN_CONF=0.5. Crosscheck precision follows the written decimal places; stored computed areas rounded to 6 decimals.",
+  "blind_file_reserved": "swiss_dwellings__site317-bldg647-floor2745"
+}
