@@ -403,3 +403,21 @@ def test_same_ifc_element_on_two_pages_does_not_create_room_ambiguity(graph):
     origin["props"].pop("ifc_class")
     extra["props"].clear()
     assert answer("If the ceiling in Office A101 drops to 2.4 m what is affected?", PROJECT, ROOT, graph=graph)["graph_answer"]["shape"] == "missing"
+
+
+def test_file_links_names_the_files_of_a_linked_item(graph):
+    r = answer("Tell me about Office A101, how does it link to all its files?", PROJECT, ROOT, graph=graph)
+    assert r is not None and r["graph_answer"]["shape"] == "file_links"
+    assert set(r["graph_answer"]["linked_docs"]) >= {"plan"}
+    assert "across 2 files" in r["answer"]["text_md"] and "same as" in r["answer"]["text_md"]
+
+
+def test_file_links_without_identity_link_lists_files_on_same_level(graph):
+    r = answer("Which files link to Room B202?", PROJECT, ROOT, graph=graph)
+    assert r is not None and r["graph_answer"]["shape"] == "file_links"
+    assert r["graph_answer"]["linked_docs"] == []
+    assert "No recorded link" in r["answer"]["text_md"] and "same level" in r["answer"]["text_md"]
+
+
+def test_file_links_ignores_ordinary_questions(graph):
+    assert answer("How many doors are on level 2?", PROJECT, ROOT, graph=graph) is None
