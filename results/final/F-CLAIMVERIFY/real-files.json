@@ -1,0 +1,519 @@
+{
+  "fake": true,
+  "note": "Real source sidecars with representative label claims; deterministic audit, not end-to-end description generation.",
+  "cases": [
+    {
+      "doc_id": "cubicasa5k__colorful-12200",
+      "kind": "raster",
+      "card": "4 of 6 claims verified by source text, 0 read only, 2 inferred. No measured accuracy is available for descriptive answers.",
+      "counts": {
+        "claims_total": 6,
+        "verified": 4,
+        "read_only": 0,
+        "inferred": 2
+      },
+      "claims": [
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The layout suggests a studio apartment.",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "inferred",
+          "check": "Interpretation of the drawing; not stated by its source text.",
+          "cite": null,
+          "inputs": []
+        },
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The layout appears residential.",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "inferred",
+          "check": "Interpretation of the drawing; not stated by its source text.",
+          "cite": null,
+          "inputs": []
+        },
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The drawing includes the label \"ET\".",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "verified",
+          "check": "Source text matches: ET.",
+          "cite": 1,
+          "inputs": [
+            {
+              "source": {
+                "doc_id": "cubicasa5k__colorful-12200",
+                "page": 1,
+                "item_id": "rot-6",
+                "bbox": [
+                  241.0,
+                  539.3333333333334,
+                  256.66666666666663,
+                  562.6666666666666
+                ],
+                "crop": null
+              },
+              "text": "ET"
+            }
+          ]
+        },
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The drawing includes the label \"OH\".",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "verified",
+          "check": "Source text matches: OH.",
+          "cite": 2,
+          "inputs": [
+            {
+              "source": {
+                "doc_id": "cubicasa5k__colorful-12200",
+                "page": 1,
+                "item_id": "rot-2",
+                "bbox": [
+                  310.33333333333337,
+                  341.33333333333337,
+                  328.33333333333337,
+                  368.0
+                ],
+                "crop": null
+              },
+              "text": "OH"
+            }
+          ]
+        },
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The drawing includes the label \"KPH\".",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "verified",
+          "check": "Source text matches: KPH; kph.",
+          "cite": 3,
+          "inputs": [
+            {
+              "source": {
+                "doc_id": "cubicasa5k__colorful-12200",
+                "page": 1,
+                "item_id": "room-004",
+                "bbox": [
+                  290,
+                  507,
+                  478,
+                  668
+                ],
+                "crop": null
+              },
+              "text": "KPH"
+            }
+          ]
+        },
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The drawing includes the label \"ranskalainen parveke\".",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "verified",
+          "check": "Source text matches: ranskalainen parveke; parveke; ranskalainen.",
+          "cite": 4,
+          "inputs": [
+            {
+              "source": {
+                "doc_id": "cubicasa5k__colorful-12200",
+                "page": 1,
+                "item_id": "text-001",
+                "bbox": [
+                  242,
+                  44,
+                  263,
+                  140
+                ],
+                "crop": null
+              },
+              "text": "ranskalainen"
+            },
+            {
+              "source": {
+                "doc_id": "cubicasa5k__colorful-12200",
+                "page": 1,
+                "item_id": "text-002",
+                "bbox": [
+                  261,
+                  58,
+                  281,
+                  126
+                ],
+                "crop": null
+              },
+              "text": "parveke"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "doc_id": "cubicasa5k__colorful-11397",
+      "kind": "raster",
+      "card": "4 of 4 claims verified by source text, 0 read only, 0 inferred. No measured accuracy is available for descriptive answers.",
+      "counts": {
+        "claims_total": 4,
+        "verified": 4,
+        "read_only": 0,
+        "inferred": 0
+      },
+      "claims": [
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The drawing includes the label \"TERASSI\".",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "verified",
+          "check": "Source text matches: TERASSI.",
+          "cite": 1,
+          "inputs": [
+            {
+              "source": {
+                "doc_id": "cubicasa5k__colorful-11397",
+                "page": 1,
+                "item_id": "room-002",
+                "bbox": [
+                  25,
+                  12,
+                  210,
+                  157
+                ],
+                "crop": null
+              },
+              "text": "TERASSI"
+            }
+          ]
+        },
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The drawing includes the label \"PARVEKE\".",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "verified",
+          "check": "Source text matches: PARVEKE; parveke.",
+          "cite": 2,
+          "inputs": [
+            {
+              "source": {
+                "doc_id": "cubicasa5k__colorful-11397",
+                "page": 1,
+                "item_id": "room-003",
+                "bbox": [
+                  252,
+                  91,
+                  433,
+                  160
+                ],
+                "crop": null
+              },
+              "text": "PARVEKE"
+            }
+          ]
+        },
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The drawing includes the label \"MH\".",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "verified",
+          "check": "Source text matches: MH.",
+          "cite": 3,
+          "inputs": [
+            {
+              "source": {
+                "doc_id": "cubicasa5k__colorful-11397",
+                "page": 1,
+                "item_id": "room-010",
+                "bbox": [
+                  254,
+                  488,
+                  386,
+                  602
+                ],
+                "crop": null
+              },
+              "text": "MH"
+            }
+          ]
+        },
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The drawing includes the label \"KPH\".",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "verified",
+          "check": "Source text matches: KPH; kph.",
+          "cite": 4,
+          "inputs": [
+            {
+              "source": {
+                "doc_id": "cubicasa5k__colorful-11397",
+                "page": 1,
+                "item_id": "text-006",
+                "bbox": [
+                  329,
+                  477,
+                  346,
+                  484
+                ],
+                "crop": null
+              },
+              "text": "KPH"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+      "kind": "dxf",
+      "card": "4 of 4 claims verified by source text, 0 read only, 0 inferred. No measured accuracy is available for descriptive answers.",
+      "counts": {
+        "claims_total": 4,
+        "verified": 4,
+        "read_only": 0,
+        "inferred": 0
+      },
+      "claims": [
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The drawing includes the label \"Zimmer\".",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "verified",
+          "check": "Source text matches: Zimmer; zimmer.",
+          "cite": 1,
+          "inputs": [
+            {
+              "source": {
+                "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+                "page": 1,
+                "item_id": "room-1",
+                "bbox": [
+                  1043.7,
+                  162.6,
+                  1185.5,
+                  259.9
+                ],
+                "crop": null
+              },
+              "text": "Zimmer"
+            }
+          ]
+        },
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The drawing includes the label \"Küche\".",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "verified",
+          "check": "Source text matches: Küche; küche.",
+          "cite": 2,
+          "inputs": [
+            {
+              "source": {
+                "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+                "page": 1,
+                "item_id": "room-2",
+                "bbox": [
+                  1188.1,
+                  162.2,
+                  1301.2,
+                  259.4
+                ],
+                "crop": null
+              },
+              "text": "Küche"
+            }
+          ]
+        },
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The drawing includes the label \"Korridor\".",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "verified",
+          "check": "Source text matches: Korridor.",
+          "cite": 3,
+          "inputs": [
+            {
+              "source": {
+                "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+                "page": 1,
+                "item_id": "room-6",
+                "bbox": [
+                  1147.1,
+                  262.1,
+                  1215.9,
+                  301.6
+                ],
+                "crop": null
+              },
+              "text": "Korridor"
+            }
+          ]
+        },
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The drawing includes the label \"Wohnen/Essen\".",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "verified",
+          "check": "Source text matches: Wohnen/Essen; wohnen.",
+          "cite": 4,
+          "inputs": [
+            {
+              "source": {
+                "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+                "page": 1,
+                "item_id": "room-8",
+                "bbox": [
+                  1003.9,
+                  264.3,
+                  1157.5,
+                  375.2
+                ],
+                "crop": null
+              },
+              "text": "Wohnen/Essen"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "doc_id": "ifc_models__resbim-160-model",
+      "random_selection_seed": 817,
+      "reserved_until_final_validation": true,
+      "kind": "ifc",
+      "card": "3 of 3 claims verified by source text, 0 read only, 0 inferred. No measured accuracy is available for descriptive answers.",
+      "counts": {
+        "claims_total": 3,
+        "verified": 3,
+        "read_only": 0,
+        "inferred": 0
+      },
+      "claims": [
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The source names an element \"Doors_ExtSgl_11:1000x2110mm:447121\".",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "verified",
+          "check": "Source text matches: Doors_ExtSgl_11:1000x2110mm:447121.",
+          "cite": 1,
+          "inputs": [
+            {
+              "source": {
+                "doc_id": "ifc_models__resbim-160-model",
+                "page": 1,
+                "item_id": "3UVOxkNZLAieaG6QRJ$jQK",
+                "bbox": [
+                  955.1,
+                  895.6,
+                  971.0,
+                  980.4
+                ],
+                "crop": null
+              },
+              "text": "Doors_ExtSgl_11:1000x2110mm:447121 / Doors_ExtSgl_11:1000x2110mm"
+            }
+          ]
+        },
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The source names an element \"双扇推拉门2:1700 x 2100mm:447140\".",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "verified",
+          "check": "Source text matches: 双扇推拉门2:1700 x 2100mm:447140.",
+          "cite": 2,
+          "inputs": [
+            {
+              "source": {
+                "doc_id": "ifc_models__resbim-160-model",
+                "page": 1,
+                "item_id": "3UVOxkNZLAieaG6QRJ$jQX",
+                "bbox": [
+                  217.8,
+                  684.4,
+                  224.2,
+                  820.4
+                ],
+                "crop": null
+              },
+              "text": "双扇推拉门2:1700 x 2100mm:447140 / 双扇推拉门2:1700 x 2100mm"
+            }
+          ]
+        },
+        {
+          "level": "main",
+          "section": "claim",
+          "label": "The source names an element \"Doors_IntSgl:910x2110mm:447142\".",
+          "expr": null,
+          "value": null,
+          "unit": null,
+          "status": "verified",
+          "check": "Source text matches: Doors_IntSgl:910x2110mm:447142.",
+          "cite": 3,
+          "inputs": [
+            {
+              "source": {
+                "doc_id": "ifc_models__resbim-160-model",
+                "page": 1,
+                "item_id": "3UVOxkNZLAieaG6QRJ$jQZ",
+                "bbox": [
+                  557.6,
+                  335.6,
+                  572.2,
+                  414.0
+                ],
+                "crop": null
+              },
+              "text": "Doors_IntSgl:910x2110mm:447142 / Doors_IntSgl:910x2110mm"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

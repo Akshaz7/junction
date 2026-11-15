@@ -1,0 +1,374 @@
+{
+  "doc_id": "cubicasa5k__colorful-12200",
+  "input": "Representative six-claim description; source labels plus two explicit layout interpretations. This is an audit call, not an end-to-end answer generation.",
+  "seconds": 5.96,
+  "confidence_card": {
+    "label": "Estimate",
+    "pct": null,
+    "factors": [
+      {
+        "label": "Claims verified by source text",
+        "delta": null,
+        "note": "4 of 6 claims (67%) matched OCR words, title-block fields or plan-map items"
+      },
+      {
+        "label": "Claims inferred",
+        "delta": null,
+        "note": "2 of 6 claims (33%) are conclusions, not written on the drawing"
+      },
+      {
+        "label": "Model read vs OCR agreement",
+        "delta": null,
+        "note": "3 of 6 claims cite an OCR word; the model's reading and the OCR text are compared in each claim's check line"
+      }
+    ],
+    "reason": "4 of 6 claims verified by source text, 0 read only, 2 inferred. No measured accuracy is available for descriptive answers."
+  },
+  "calc": {
+    "kind": "claims",
+    "formula": null,
+    "method": {
+      "id": "read_and_cite",
+      "label": "Read the drawing once, then cite each claim",
+      "why_chosen": "A description is not a number; each statement is split into claims and tied to the words, title-block fields and plan-map items it rests on.",
+      "alternatives": [
+        "Plain model summary without evidence",
+        "Count/measure solvers (not applicable to prose)"
+      ]
+    },
+    "steps": [
+      {
+        "level": "main",
+        "section": "claim",
+        "label": "The layout suggests a studio apartment.",
+        "expr": null,
+        "value": null,
+        "unit": null,
+        "status": "inferred",
+        "check": "Interpretation of the drawing; not stated by its source text.",
+        "cite": null,
+        "inputs": []
+      },
+      {
+        "level": "main",
+        "section": "claim",
+        "label": "The layout appears residential.",
+        "expr": null,
+        "value": null,
+        "unit": null,
+        "status": "inferred",
+        "check": "Interpretation of the drawing; not stated by its source text.",
+        "cite": 1,
+        "inputs": [
+          {
+            "source": {
+              "doc_id": "cubicasa5k__colorful-12200",
+              "page": 1,
+              "item_id": "rot-2",
+              "bbox": [
+                310.33333333333337,
+                341.33333333333337,
+                328.33333333333337,
+                368.0
+              ],
+              "crop": null
+            },
+            "text": "OH"
+          },
+          {
+            "source": {
+              "doc_id": "cubicasa5k__colorful-12200",
+              "page": 1,
+              "item_id": "rot-6",
+              "bbox": [
+                241.0,
+                539.3333333333334,
+                256.66666666666663,
+                562.6666666666666
+              ],
+              "crop": null
+            },
+            "text": "ET"
+          },
+          {
+            "source": {
+              "doc_id": "cubicasa5k__colorful-12200",
+              "page": 1,
+              "item_id": "room-004",
+              "bbox": [
+                290,
+                507,
+                478,
+                668
+              ],
+              "crop": null
+            },
+            "text": "KPH"
+          }
+        ]
+      },
+      {
+        "level": "main",
+        "section": "claim",
+        "label": "The entrance is labelled \"ET\".",
+        "expr": null,
+        "value": null,
+        "unit": null,
+        "status": "verified",
+        "check": "Source text matches: ET.",
+        "cite": 2,
+        "inputs": [
+          {
+            "source": {
+              "doc_id": "cubicasa5k__colorful-12200",
+              "page": 1,
+              "item_id": "rot-6",
+              "bbox": [
+                241.0,
+                539.3333333333334,
+                256.66666666666663,
+                562.6666666666666
+              ],
+              "crop": null
+            },
+            "text": "ET"
+          }
+        ]
+      },
+      {
+        "level": "main",
+        "section": "claim",
+        "label": "The living room is labelled \"OH\".",
+        "expr": null,
+        "value": null,
+        "unit": null,
+        "status": "verified",
+        "check": "Source text matches: OH.",
+        "cite": 3,
+        "inputs": [
+          {
+            "source": {
+              "doc_id": "cubicasa5k__colorful-12200",
+              "page": 1,
+              "item_id": "rot-2",
+              "bbox": [
+                310.33333333333337,
+                341.33333333333337,
+                328.33333333333337,
+                368.0
+              ],
+              "crop": null
+            },
+            "text": "OH"
+          }
+        ]
+      },
+      {
+        "level": "main",
+        "section": "claim",
+        "label": "The bathroom is labelled \"KPH\".",
+        "expr": null,
+        "value": null,
+        "unit": null,
+        "status": "verified",
+        "check": "Source text matches: KPH; kph.",
+        "cite": 4,
+        "inputs": [
+          {
+            "source": {
+              "doc_id": "cubicasa5k__colorful-12200",
+              "page": 1,
+              "item_id": "room-004",
+              "bbox": [
+                290,
+                507,
+                478,
+                668
+              ],
+              "crop": null
+            },
+            "text": "KPH"
+          }
+        ]
+      },
+      {
+        "level": "main",
+        "section": "claim",
+        "label": "The balcony is labelled \"ranskalainen parveke\".",
+        "expr": null,
+        "value": null,
+        "unit": null,
+        "status": "verified",
+        "check": "Source text matches: ranskalainen parveke; parveke; ranskalainen.",
+        "cite": 5,
+        "inputs": [
+          {
+            "source": {
+              "doc_id": "cubicasa5k__colorful-12200",
+              "page": 1,
+              "item_id": "text-001",
+              "bbox": [
+                242,
+                44,
+                263,
+                140
+              ],
+              "crop": null
+            },
+            "text": "ranskalainen"
+          },
+          {
+            "source": {
+              "doc_id": "cubicasa5k__colorful-12200",
+              "page": 1,
+              "item_id": "text-002",
+              "bbox": [
+                261,
+                58,
+                281,
+                126
+              ],
+              "crop": null
+            },
+            "text": "parveke"
+          }
+        ]
+      },
+      {
+        "level": "detail",
+        "section": "inventory",
+        "label": "Plan-map elements by class",
+        "value": 27,
+        "unit": "elements",
+        "inputs": [],
+        "note": "wall 9, room 5, text 5, door 3, sink 2, toilet 2, window 1"
+      },
+      {
+        "level": "detail",
+        "section": "scale",
+        "label": "Scale status",
+        "value": "door-prior",
+        "unit": null,
+        "inputs": []
+      },
+      {
+        "level": "detail",
+        "section": "model_read",
+        "label": "Claim audit model call",
+        "value": "runware_claude/claude-sonnet-5-5",
+        "unit": "1378+487 tokens, $0.007626",
+        "inputs": []
+      }
+    ],
+    "checks": [
+      {
+        "method": "OCR / title-block text match",
+        "value": "4 of 6",
+        "agrees": false
+      }
+    ],
+    "result": {
+      "claims_total": 6,
+      "verified": 4,
+      "read_only": 0,
+      "inferred": 2
+    }
+  },
+  "citations": [
+    {
+      "n": 1,
+      "doc_id": "cubicasa5k__colorful-12200",
+      "page": 1,
+      "kind": "text",
+      "bbox_px": [
+        241.0,
+        341.33333333333337,
+        478,
+        668
+      ],
+      "item_ids": [
+        "rot-2",
+        "rot-6",
+        "room-004"
+      ],
+      "quote": "OH / ET / KPH"
+    },
+    {
+      "n": 2,
+      "doc_id": "cubicasa5k__colorful-12200",
+      "page": 1,
+      "kind": "text",
+      "bbox_px": [
+        241.0,
+        539.3333333333334,
+        256.66666666666663,
+        562.6666666666666
+      ],
+      "item_ids": [
+        "rot-6"
+      ],
+      "quote": "ET"
+    },
+    {
+      "n": 3,
+      "doc_id": "cubicasa5k__colorful-12200",
+      "page": 1,
+      "kind": "text",
+      "bbox_px": [
+        310.33333333333337,
+        341.33333333333337,
+        328.33333333333337,
+        368.0
+      ],
+      "item_ids": [
+        "rot-2"
+      ],
+      "quote": "OH"
+    },
+    {
+      "n": 4,
+      "doc_id": "cubicasa5k__colorful-12200",
+      "page": 1,
+      "kind": "text",
+      "bbox_px": [
+        290,
+        507,
+        478,
+        668
+      ],
+      "item_ids": [
+        "room-004"
+      ],
+      "quote": "KPH"
+    },
+    {
+      "n": 5,
+      "doc_id": "cubicasa5k__colorful-12200",
+      "page": 1,
+      "kind": "text",
+      "bbox_px": [
+        242,
+        44,
+        281,
+        140
+      ],
+      "item_ids": [
+        "text-001",
+        "text-002"
+      ],
+      "quote": "ranskalainen / parveke"
+    }
+  ],
+  "trace": [
+    {
+      "step": "explain_claims",
+      "detail": "6 claims audited (4 verified)",
+      "ms": 0,
+      "model": "claude-sonnet-5-5",
+      "cost_usd": 0.007626
+    }
+  ],
+  "cost": {
+    "usd_total": 0.007626
+  }
+}
