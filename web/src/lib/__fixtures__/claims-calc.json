@@ -1,0 +1,120 @@
+{
+  "kind": "claims",
+  "formula": null,
+  "method": {
+    "id": "read_and_cite",
+    "label": "Read and cite source text",
+    "why_chosen": "the question asks for a description of the file",
+    "alternatives": []
+  },
+  "steps": [
+    {
+      "level": "main",
+      "section": "claim",
+      "label": "The balcony is labelled “ranskalainen parveke”.",
+      "expr": null,
+      "value": null,
+      "unit": null,
+      "status": "verified",
+      "check": "OCR reads “ranskalainen” and “parveke”; the model read agrees.",
+      "cite": 1,
+      "inputs": [
+        {
+          "source": {
+            "doc_id": "fixture-scan",
+            "page": 1,
+            "item_id": "balcony-label",
+            "bbox": [
+              244,
+              44,
+              281,
+              141
+            ],
+            "crop": "/__claim-crop.png"
+          }
+        }
+      ]
+    },
+    {
+      "level": "main",
+      "section": "claim",
+      "label": "The bathroom label is read as KPH.",
+      "expr": null,
+      "value": null,
+      "unit": null,
+      "status": "read_only",
+      "check": "The model reads KPH; OCR reads KPF. The label needs visual verification.",
+      "cite": 2,
+      "inputs": [
+        {
+          "source": {
+            "doc_id": "fixture-scan",
+            "page": 1,
+            "item_id": "room-label",
+            "bbox": [
+              390,
+              572,
+              404,
+              599
+            ],
+            "crop": "/__claim-crop.png"
+          }
+        }
+      ]
+    },
+    {
+      "level": "main",
+      "section": "claim",
+      "label": "The layout may be a studio apartment.",
+      "expr": null,
+      "value": null,
+      "unit": null,
+      "status": "inferred",
+      "check": "Inferred from the room arrangement; no explicit apartment type was found.",
+      "cite": 3,
+      "inputs": []
+    },
+    {
+      "level": "detail",
+      "section": "inventory",
+      "label": "Element inventory",
+      "value": "Fixture inventory — generated for demo",
+      "unit": null,
+      "inputs": []
+    },
+    {
+      "level": "detail",
+      "section": "scale",
+      "label": "Scale status",
+      "value": "No scale is required for reading labels.",
+      "unit": null,
+      "inputs": []
+    },
+    {
+      "level": "detail",
+      "section": "model_read",
+      "label": "Model read",
+      "value": "Fixture read — generated for demo; no model call",
+      "unit": null,
+      "inputs": []
+    }
+  ],
+  "checks": [
+    {
+      "method": "Balcony label OCR vs model read",
+      "value": "ranskalainen parveke",
+      "agrees": true
+    },
+    {
+      "method": "Bathroom label OCR vs model read",
+      "value": "KPF / KPH",
+      "agrees": false
+    }
+  ],
+  "result": {
+    "claims_total": 3,
+    "verified": 1,
+    "read_only": 1,
+    "inferred": 1
+  }
+}

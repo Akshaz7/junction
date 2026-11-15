@@ -24,6 +24,7 @@ import { RoomLabels } from './viewer-tools/room-labels'
 import { ViewRegions } from './viewer-tools/view-regions'
 import { SpecPanel } from './viewer-tools/spec-panel'
 import { CalculationPanel } from './calc-panel'
+import type { FocusTarget } from '../lib/calc-view'
 import { downloadSource } from './viewer-tools/download-source'
 import { TellStoaBubble } from './viewer-tools/tell-stoa-bubble'
 import './viewer-tools/tell-stoa-bubble.css'
@@ -65,9 +66,10 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   const [place, setPlace] = useState<{ location: ItemPlace; item: LinkedItem } | null>(null)
   const [selectedItem, setSelectedItem] = useState<{ docId: string; itemId: string } | null>(null)
   const [pageNumber, setPageNumber] = useState(originalCitation.page)
+  const [calcSource, setCalcSource] = useState<Citation | null>(null)
   const itemTrigger = useRef<Element | null>(null)
-  const citation = useMemo(() => place ? { ...originalCitation, kind: 'element' as const, quote: null, doc_id: place.location.doc_id, page: place.location.page, item_ids: [place.item.item_id] } : { ...originalCitation, page: pageNumber }, [originalCitation, place, pageNumber])
-  const { regions, sources, initial } = useMemo(() => place ? placeEvidence(place.location, place.item) : viewerEvidence(answer, citation), [answer, citation, place])
+  const citation = useMemo(() => place ? { ...originalCitation, kind: 'element' as const, quote: null, doc_id: place.location.doc_id, page: place.location.page, item_ids: [place.item.item_id] } : { ...(calcSource ?? originalCitation), page: pageNumber }, [originalCitation, calcSource, place, pageNumber])
+  const { regions, sources, initial } = useMemo(() => place ? placeEvidence(place.location, place.item) : viewerEvidence(calcSource ? { ...answer, citations: [...answer.citations.filter((entry) => entry.n !== calcSource.n || entry.doc_id !== calcSource.doc_id || entry.page !== calcSource.page), calcSource] } : answer, citation), [answer, citation, place, calcSource])
   const highlights = useDrawingHighlights(citation.doc_id, answer.answer_id, chatId)
   const table = answerTableSelection(answer)
   const [active, setActive] = useState(initial)
@@ -140,7 +142,7 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
   const returnFocus = useRef(typeof document !== 'undefined' ? document.activeElement as HTMLElement | null : null)
 
   useEffect(() => {
-    setPlace(null); setSelectedItem(null); setPageNumber(originalCitation.page)
+    setPlace(null); setCalcSource(null); setSelectedItem(null); setPageNumber(originalCitation.page)
     setSpecOpen(originalCitation.kind === 'text' || !!originalCitation.quote)
   }, [originalCitation])
   useEffect(() => { setActive(initial) }, [initial, citation.doc_id, citation.page])
@@ -171,7 +173,13 @@ export function DocumentViewer({ answer, citation: originalCitation, sheet, onCl
     })
   }
   /** A calculation source was clicked: highlight its box on the drawing (the same highlight a citation gives). */
-  function focusCalcItem(target: { item_id: string; page?: number }) {
+  function focusCalcItem(target: FocusTarget) {
+    const sourceDoc = target.doc_id ?? citation.doc_id
+    const sourcePage = target.page ?? pageNumber
+    const cited = answer.citations.find((entry) => entry.doc_id === sourceDoc && entry.page === sourcePage && (target.cite != null ? entry.n === target.cite : entry.item_ids.includes(target.item_id)))
+    const box = answer.evidence.boxes.find((entry) => entry.item_id === target.item_id && entry.page === sourcePage && (!entry.doc_id || entry.doc_id === sourceDoc))
+    setPlace(null)
+    setCalcSource({ n: target.cite ?? cited?.n ?? 0, doc_id: sourceDoc, page: sourcePage, kind: 'region', bbox_px: target.bbox ?? cited?.bbox_px ?? box?.bbox_px ?? null, item_ids: [target.item_id], quote: null })
     if (target.page != null && target.page !== pageNumber) setPageNumber(target.page)
     const index = sources.findIndex((source) => source.itemIds.includes(target.item_id))
     if (index >= 0) setActive(index)

@@ -20,7 +20,9 @@ function SourceLink({ source, docTitle, onFocus }: { source: Calculation['rows']
     {target && onFocus
       ? <button type="button" className="calc-source-link" onClick={() => onFocus(target)} aria-label={`Show on the drawing: ${text}`}>{text}</button>
       : <span>{text}</span>}
-    {source?.crop && <img className="calc-crop" src={source.crop} alt="" loading="lazy" />}
+    {source?.crop && (target && onFocus
+      ? <button type="button" className="calc-crop-link" onClick={() => onFocus(target)} aria-label={`Show source crop on the drawing: ${text}`}><img className="calc-crop" src={source.crop} alt="Source region" loading="lazy" /></button>
+      : <img className="calc-crop" src={source.crop} alt="Source region" loading="lazy" />)}
   </span>
 }
 
@@ -64,7 +66,10 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
   reasoning: Reasoning; title?: string; onClose: () => void; onFocus?: (target: FocusTarget) => void; docTitle?: (id: string) => string
 }) {
   // Engine output is data-driven and may omit any part: fill the gaps so every section simply disappears when empty.
-  const calc: Calculation | undefined = reasoning.calc && { ...reasoning.calc, steps: (reasoning.calc.steps ?? []).map((s) => ({ ...s, inputs: s.inputs ?? [] })), rows: reasoning.calc.rows ?? [], checks: reasoning.calc.checks ?? [] }
+  const claims = reasoning.calc?.kind === 'claims' ? reasoning.calc : undefined
+  const numeric = reasoning.calc?.kind !== 'claims' ? reasoning.calc : undefined
+  const calc: Calculation | undefined = numeric && { ...numeric, steps: (numeric.steps ?? []).map((s) => ({ ...s, inputs: s.inputs ?? [] })), rows: numeric.rows ?? [], checks: numeric.checks ?? [] }
+  const method = reasoning.calc?.method
   const [width, setWidth] = useState(440)
   const [expanded, setExpanded] = useState(false)
   const drag = useRef<{ x: number; w: number } | null>(null)
@@ -94,15 +99,36 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
         {result && typeof result.value === 'number' && <p className="calc-result"><span>=</span> <b>{withUnit(result.value, result.unit)}</b>{result.rounded_as && <small>rounded to {result.rounded_as}</small>}</p>}
         {result && typeof result.value !== 'number' && <p className="calc-result">{Object.entries(result.value).map(([k, v]) => <span key={k}><b>{fmt(v)}</b> <small>{k}</small> </span>)}</p>}
       </div>}
-      {calc?.method && <div className="calc-method" data-testid="calc-method">
-        <p><strong>Method:</strong> {calc.method.label}{calc.method.why_chosen && <>, chosen because {calc.method.why_chosen.replace(/^because\s+/i, '').replace(/\.$/, '')}.</>}</p>
-        {!!calc.method.alternatives?.length && <details className="calc-inputs calc-alternatives"><summary>Other methods considered ({calc.method.alternatives.length})</summary>
+      {method && <div className="calc-method" data-testid="calc-method">
+        <p><strong>Method:</strong> {method.label}{method.why_chosen && <>, chosen because {method.why_chosen.replace(/^because\s+/i, '').replace(/\.$/, '')}.</>}</p>
+        {!!method.alternatives?.length && <details className="calc-inputs calc-alternatives"><summary>Other methods considered ({method.alternatives.length})</summary>
           <table aria-label="Other methods considered"><thead><tr><th scope="col">Method</th><th scope="col" className="num">Value</th><th scope="col">Why not used</th></tr></thead>
-            <tbody>{calc.method.alternatives.map((alt, i) => <tr key={i}><th scope="row">{alt.label ?? alt.id}</th><td className="num">{alt.value == null ? '-' : typeof alt.value === 'number' ? withUnit(alt.value, alt.unit ?? '') : alt.value}</td><td>{alt.rejected_because}</td></tr>)}</tbody></table>
+            <tbody>{method.alternatives.map((alt, i) => <tr key={i}><th scope="row">{alt.label ?? alt.id}</th><td className="num">{alt.value == null ? '-' : typeof alt.value === 'number' ? withUnit(alt.value, alt.unit ?? '') : alt.value}</td><td>{alt.rejected_because}</td></tr>)}</tbody></table>
         </details>}
       </div>}
       {calc?.status === 'incomplete' && <p className="calc-warning" role="status">This calculation could not be reproduced in full.{calc.issues?.length ? ` ${calc.issues.join(' ')}` : ''}</p>}
-      {!calc && <p className="calc-none">No calculation was recorded for this answer. The steps are listed on the card.</p>}
+      {!reasoning.calc && <p className="calc-none">No calculation was recorded for this answer. The steps are listed on the card.</p>}
+
+      {claims && <>
+        <Section id="claims" title="Claims" hint={`${claims.result.claims_total}`}>
+          <ol className="calc-steps calc-claims">{(claims.steps ?? []).filter((step) => step.section === 'claim' && step.level !== 'detail').map((step, i) => <li key={step.id ?? i}>
+            <div className="calc-step-head"><span className="calc-index">{i + 1}</span><strong>{step.label}</strong></div>
+            {step.status && <span className={`calc-claim-status is-${step.status}`}>{step.status === 'read_only' ? 'Read only' : step.status === 'verified' ? 'Verified' : 'Inferred'}</span>}
+            {step.check && <p className="calc-note calc-claim-check">{step.check}</p>}
+            <div className="calc-claim-sources">{(step.inputs ?? []).map((input, k) => <SourceLink key={k} source={input.source} docTitle={docTitle} onFocus={focus && ((target) => focus({ ...target, cite: step.cite }))} />)}</div>
+          </li>)}</ol>
+        </Section>
+        {!!claims.steps?.some((step) => step.level === 'detail') && <Section id="claim-details" title="Details" open={false}>
+          <ol className="calc-steps">{claims.steps.filter((step) => step.level === 'detail').map((step, i) => <li key={step.id ?? i} data-section={step.section}>
+            <strong>{step.label}</strong>
+            {step.value != null && <p className="calc-note">{typeof step.value === 'object' ? JSON.stringify(step.value) : withUnit(step.value, step.unit)}</p>}
+            {!!step.inputs?.length && <ul className="calc-detail-inputs">{step.inputs.map((input, k) => <li key={k}>{input.name && <strong>{input.name}: </strong>}{input.value != null && <span>{withUnit(input.value, input.unit)} </span>}<SourceLink source={input.source} docTitle={docTitle} onFocus={focus} /></li>)}</ul>}
+          </li>)}</ol>
+        </Section>}
+        {!!claims.checks?.length && <Section id="claim-checks" title="Checks">
+          <ul className="calc-claim-checks">{claims.checks.map((check, i) => <li key={i}>{check.method}{check.value != null && <>: {fmt(check.value)}</>}{check.agrees != null && <> <span className={`calc-tag ${check.agrees ? 'is-ok' : 'is-off'}`}>{check.agrees ? 'agrees' : 'differs'}</span></>}</li>)}</ul>
+        </Section>}
+      </>}
 
       {!!reasoning.graph_path?.length && <Section id="path" title="Chain of evidence">
         <ol className="calc-path" aria-label="Chain of evidence">{reasoning.graph_path.map((node, i) => <li key={i}>

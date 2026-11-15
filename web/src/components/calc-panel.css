@@ -50,6 +50,16 @@
 .calc-source-link { border: 0; background: none; padding: 0; font: inherit; color: var(--foreground); text-align: left; text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 3px; cursor: pointer; }
 .calc-source-link:hover, .calc-source-link:focus-visible { text-decoration-color: currentColor; }
 .calc-crop { display: block; max-width: 96px; max-height: 64px; border: 1px solid var(--border); border-radius: 4px; object-fit: contain; background: var(--background); }
+.calc-crop-link { border: 0; padding: 0; background: none; cursor: pointer; align-self: start; }
+.calc-claims .calc-step-head { align-items: start; }
+.calc-claims .calc-index { flex: none; }
+.calc-claim-status { display: inline-block; margin: 5px 0 0 26px; padding: 1px 6px; border-radius: 5px; background: var(--ink-well); color: var(--muted-foreground); font-size: var(--text-caption); }
+.calc-claim-status.is-verified { background: var(--change-added-surface); color: var(--change-added-text); }
+.calc-claim-status.is-inferred { background: var(--change-edited-surface); color: var(--change-edited-text); }
+.calc-claim-sources { display: grid; gap: 8px; margin: 6px 0 0 26px; }
+.calc-claim-check { overflow-wrap: anywhere; }
+.calc-detail-inputs, .calc-claim-checks { margin: 4px 0 0; padding-left: 16px; }
+.calc-detail-inputs li, .calc-claim-checks li { margin-top: 6px; overflow-wrap: anywhere; }
 .calc-tag { padding: 1px 6px; border-radius: 5px; background: var(--ink-well); font-size: var(--text-caption); color: var(--muted-foreground); }
 .calc-margin { margin: 0; display: flex; gap: 6px; align-items: baseline; }
 .calc-margin b { font-weight: 600; }

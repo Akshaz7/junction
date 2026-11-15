@@ -111,3 +111,16 @@ it('folds supporting steps behind "Show all N steps", by level or by count', asy
   await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc: { ...base, steps: mk(5) } }} onClose={() => {}} />))
   expect(host.querySelector('[data-testid="calc-more-steps"]')).toBeNull()
 })
+
+import claimsCalc from '../lib/__fixtures__/claims-calc.json'
+it('claims calc: shows claim list with status chips, check line, crop, click-to-box, collapsed details', async () => {
+  const onFocus = vi.fn()
+  const reasoning = { steps: [], calc: claimsCalc, confidence: { label: 'Cross-checked', pct: 80, reason: 'r', improve: null } } as unknown as Parameters<typeof CalculationPanel>[0]['reasoning']
+  await act(async () => root.render(<CalculationPanel reasoning={reasoning} onClose={() => {}} onFocus={onFocus} />))
+  expect(host.querySelectorAll('.calc-claims > li').length).toBeGreaterThan(0)
+  expect(host.querySelector('.calc-claim-status.is-verified')).toBeTruthy()
+  expect(host.querySelector('.calc-claim-check')?.textContent).toBeTruthy()
+  expect(host.querySelector('.calc-crop')).toBeTruthy()
+  await act(async () => host.querySelector<HTMLButtonElement>('.calc-claims .calc-source-link')!.click())
+  expect(onFocus).toHaveBeenCalled()
+})

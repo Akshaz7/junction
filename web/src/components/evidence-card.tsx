@@ -29,6 +29,8 @@ function Clamped({ text, className }: { text: string; className?: string }) {
   return <p className={className}><span className={long && !open ? 'evidence-clamp' : undefined}>{text}</span>{long && <> <button type="button" className="evidence-more" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? 'less' : 'more'}</button></>}</p>
 }
 
+const STATUS_TEXT = { verified: 'Verified', read_only: 'Read only', inferred: 'Inferred' } as const
+
 /** "How we know": the steps behind an answer and how sure we are. Steps with a citation open it. */
 export function EvidenceCard({ answer, selected, onOpenCitation, onShowCalculation }: { answer: Answer; selected?: Citation; onOpenCitation: (citation: Citation) => void; onShowCalculation?: () => void }) {
   const reasoning = answer.reasoning
@@ -36,12 +38,28 @@ export function EvidenceCard({ answer, selected, onOpenCitation, onShowCalculati
   const { confidence } = reasoning
   const numbers = keyNumbers(reasoning.calc)
   const quality = qualitySummary(reasoning.quality)
+  const claims = reasoning.calc?.kind === 'claims' ? (reasoning.calc.steps ?? []).filter((step) => step.section === 'claim' && step.level !== 'detail') : []
   const tone = confidence.label === 'Estimate' ? 'is-estimate' : 'is-verified'
   return <section className="evidence-card" aria-label="How we know" data-testid="evidence-card">
     <h3 className="evidence-heading">How we know</h3>
     {!!numbers.length && <dl className="evidence-numbers" data-testid="evidence-numbers">{numbers.map((n) => <div key={n.label}><dt>{n.label}</dt><dd>{n.text}</dd></div>)}</dl>}
-    <ol className="evidence-steps">
-      {reasoning.steps.map((step, index) => {
+    {claims.length > 0 && <ol className="evidence-steps evidence-claims" data-testid="evidence-claims">
+      {claims.slice(0, 3).map((claim, index) => {
+        const citation = claim.cite == null ? undefined : answer.citations.find((item) => item.n === claim.cite)
+        const body = <>
+          <span className="evidence-dot" aria-hidden="true">{index + 1}</span>
+          <span className="evidence-text">{claim.label} <span className={`evidence-chip is-${claim.status ?? 'read_only'}`}>{STATUS_TEXT[claim.status ?? 'read_only']}</span></span>
+        </>
+        return <li key={index} className="evidence-step" data-kind="claim">
+          {citation
+            ? <button type="button" className="evidence-row is-clickable" aria-label={`${claim.label} ${STATUS_TEXT[claim.status ?? 'read_only']}. Open citation ${citation.n}`} onClick={() => onOpenCitation(citation)}>{body}</button>
+            : <div className="evidence-row">{body}</div>}
+        </li>
+      })}
+      {claims.length > 3 && <li className="evidence-step"><div className="evidence-row"><span className="evidence-text evidence-reason">and {claims.length - 3} more in the calculation</span></div></li>}
+    </ol>}
+    {!claims.length && <ol className="evidence-steps">
+      {(reasoning.steps ?? []).map((step, index) => {
         const citation = step.cite == null ? undefined : answer.citations.find((item) => item.n === step.cite)
         const body = <>
           <span className="evidence-dot" aria-hidden="true">{index + 1}</span>
@@ -57,7 +75,7 @@ export function EvidenceCard({ answer, selected, onOpenCitation, onShowCalculati
             : <div className="evidence-row">{body}</div>}
         </li>
       })}
-    </ol>
+    </ol>}
     {!!reasoning.graph_path?.some((step) => step.edge_kind) && <GraphPath path={reasoning.graph_path!.filter((step) => step.edge_kind)} />}
     {reasoning.based_on && <p className="evidence-quantity">{reasoning.based_on.text}</p>}
     {reasoning.margin && <div className="evidence-quantity">

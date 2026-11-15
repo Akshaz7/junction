@@ -1,4 +1,4 @@
-import type { Calculation, CalculationSource } from './types'
+import type { Calculation, CalculationSource, ClaimsCalculation } from './types'
 
 const valueText = (value: unknown): string => typeof value === 'string' ? value : JSON.stringify(value) ?? ''
 
@@ -8,7 +8,19 @@ function sourceText(source: CalculationSource): string {
 }
 
 /** Complete audit for the existing Markdown and printable report paths. */
-export function calculationLines(calc: Calculation): string[] {
+export function calculationLines(calc: Calculation | ClaimsCalculation): string[] {
+  if (calc.kind === 'claims') {
+    const lines = ['Calculation report', `Method: ${calc.method.label}`, calc.method.why_chosen, 'Claims']
+    for (const step of calc.steps ?? []) {
+      lines.push(`${step.label}${step.status ? ` (${step.status.replace('_', ' ')})` : ''}${step.cite != null ? ` [${step.cite}]` : ''}`)
+      if (step.check) lines.push(`Check: ${step.check}`)
+      if (step.value != null) lines.push(`Value: ${valueText(step.value)} ${step.unit ?? ''}`)
+      for (const input of step.inputs ?? []) lines.push(`Source: ${sourceText(input.source)}${input.source.crop ? `; crop: ${input.source.crop}` : ''}`)
+    }
+    lines.push(`Claims: ${calc.result.claims_total}; verified: ${calc.result.verified}; read only: ${calc.result.read_only}; inferred: ${calc.result.inferred}`)
+    for (const check of calc.checks ?? []) lines.push(`Check — ${check.method}: ${valueText(check.value)}${check.agrees === true ? ' (agrees)' : check.agrees === false ? ' (differs)' : ''}`)
+    return lines
+  }
   const lines = ['Calculation report', `Formula: ${calc.formula}`, `Calculation trace: ${calc.status ?? 'not recorded'}`]
   for (const step of calc.steps) {
     lines.push(`${step.label} (${step.id}): ${step.expr} = ${valueText(step.value)} ${step.unit}`)

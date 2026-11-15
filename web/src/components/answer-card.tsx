@@ -17,6 +17,7 @@ import { isPaired, onPairingChange } from '../lib/pairing'
 import { PairPhoneButton } from './pair-phone'
 import type { DrawingEdits } from '../lib/scene-edits'
 import { EvidenceCard } from './evidence-card'
+import { calculationCitation } from '../lib/calc-view'
 
 export function formatCost(total: number): string {
   return total > 0 && total < 0.0001 ? '< $0.0001' : `$${total.toFixed(4)}`
@@ -113,6 +114,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
   onOpenCalc?: (citation: Citation) => void
 }) {
   const allCitations = answer.answer.abstained ? [] : answer.citations
+  const calcCitation = calculationCitation(answer)
   const [showAll, setShowAll] = useState(false)
   const hidden = showAll ? 0 : Math.max(0, allCitations.length - CITATION_CAP)
   const citations = hidden ? allCitations.slice(0, CITATION_CAP) : allCitations
@@ -136,7 +138,7 @@ export function AnswerCard({ answer, docs, demo, activeCitation, onOpenCitation,
     <div className="question-bubble">{answer.question}</div>
     <details className="answer-detail thought-process"><summary>Show thought process</summary>{answer.trace.map((trace, index) => <p key={index}>{trace.detail}</p>)}</details>
     <AnswerBody answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} />
-    {!!answer.reasoning?.steps?.length && <EvidenceCard answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} onShowCalculation={onOpenCalc && allCitations[0] ? () => onOpenCalc(allCitations[0]) : undefined} />}
+    {(!!answer.reasoning?.steps?.length || !!answer.reasoning?.calc) && <EvidenceCard answer={answer} selected={activeCitation} onOpenCitation={onOpenCitation} onShowCalculation={onOpenCalc && calcCitation ? () => onOpenCalc(calcCitation) : undefined} />}
     {!!docChips.length && <div className="answer-docs" aria-label="Documents used" data-testid="answer-docs">{docChips.map(({ docId, title, first }) => first
       ? <button type="button" key={docId} className="source-file-chip answer-doc-chip" aria-label={`Open document ${title}`} onClick={() => onOpenCitation(first)}><FileText size={14} /><span>{title}</span></button>
       : <span key={docId} className="source-file-chip answer-doc-chip"><FileText size={14} /><span>{title}</span></span>)}</div>}

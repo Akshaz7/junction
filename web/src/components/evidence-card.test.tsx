@@ -122,3 +122,16 @@ it('shows one 3D accuracy line only when the scene has a quality summary', async
   await act(async () => root.render(<EvidenceCard answer={blank} onOpenCitation={vi.fn()} />))
   expect(host.querySelector('[data-testid="evidence-quality"]')).toBeNull()
 })
+
+import claimsCalc from '../lib/__fixtures__/claims-calc.json'
+it('claims calc: lists first 3 claims with status chips and offers Show calculation', async () => {
+  const claimsAnswer = { citations: [citation], reasoning: { steps: [], calc: claimsCalc, confidence: { label: 'Cross-checked', pct: 80, reason: 'r', improve: null } } } as unknown as Answer
+  const onCalc = vi.fn()
+  await act(async () => root.render(<EvidenceCard answer={claimsAnswer} onOpenCitation={vi.fn()} onShowCalculation={onCalc} />))
+  const chips = [...host.querySelectorAll('.evidence-chip')].map((c) => c.textContent)
+  expect(chips.length).toBeGreaterThan(0)
+  expect(chips.length).toBeLessThanOrEqual(3)
+  expect(chips).toContain('Verified')
+  await act(async () => (host.querySelector('.evidence-calc-link') as HTMLButtonElement).click())
+  expect(onCalc).toHaveBeenCalled()
+})
