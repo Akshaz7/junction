@@ -1,0 +1,18 @@
+{
+  "label": "before",
+  "case": "schependomlaan",
+  "input": "artifacts/ext_ifcr2__schependomlaan-design",
+  "work": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-usdzmem-4jv9xd1l",
+  "glb_mb": 16.04654,
+  "sampled_peak_mib": 282.078125,
+  "seconds": 1.7668262919905828,
+  "exit_code": 0,
+  "stopped": null,
+  "ok": true,
+  "result": {
+    "prims": 3510,
+    "parts": 4286,
+    "mb": 2.52
+  },
+  "resource_peak_mib": 284.5
+}

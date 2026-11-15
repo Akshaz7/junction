@@ -1,0 +1,18 @@
+{
+  "label": "before",
+  "case": "reserved",
+  "input": "artifacts/opening_design__ctr-models-cad-ifc-ctr-ctr-ctr-1st-phase-common-walls",
+  "work": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-usdzmem-cx209iww",
+  "glb_mb": 16.03826,
+  "sampled_peak_mib": 270.53125,
+  "seconds": 1.714095332994475,
+  "exit_code": 0,
+  "stopped": null,
+  "ok": true,
+  "result": {
+    "prims": 1316,
+    "parts": 1672,
+    "mb": 2.04
+  },
+  "resource_peak_mib": 272.28125
+}

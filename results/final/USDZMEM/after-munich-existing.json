@@ -1,0 +1,18 @@
+{
+  "label": "after",
+  "case": "munich-existing",
+  "input": "artifacts/ifc_bench__city-house-munich-arc",
+  "work": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-usdzmem-rjopmo2o",
+  "glb_mb": 16.623444,
+  "sampled_peak_mib": 110.234375,
+  "seconds": 0.7346855000068899,
+  "exit_code": 0,
+  "stopped": null,
+  "ok": true,
+  "result": {
+    "prims": 210,
+    "parts": 445,
+    "mb": 4.99
+  },
+  "resource_peak_mib": 110.609375
+}

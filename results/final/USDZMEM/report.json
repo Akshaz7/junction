@@ -1,0 +1,144 @@
+{
+  "status": "PASS",
+  "baseline_commit": "6b49e54bb5b4c867b6becf3ce642c7191f27a334",
+  "platform": "macOS arm64; resource.getrusage max RSS, isolated subprocesses through scripts/heavy.sh",
+  "memory_budget_mib": 320,
+  "triangle_batch_limit": 8192,
+  "accessor_read_window_bytes": 262144,
+  "implementation": "Dense GLB accessors read by bounded windows; transforms and triangle topology retained; USD mesh batches serialized and cleared; single USDA root layer; stored ZIP payloads copied incrementally with 64-byte alignment; atomic output replacement.",
+  "cases": [
+    {
+      "case": "munich",
+      "glb_mb": 4.839188,
+      "before_peak_mib": 196.828125,
+      "after_peak_mib": 106.578125,
+      "before_usdz_mb": 1.44,
+      "after_usdz_mb": 4.79,
+      "audit": {
+        "linked_items": 210,
+        "manifest_items": 210,
+        "mesh_batches": 228,
+        "exact_kind_geometry_checks": 157,
+        "arkit_validator": "Success!",
+        "source_glb_sha256": "ff689193079c228213e7cf72f3506f011fd89e1975dcdb6eef16284803e80bdc"
+      }
+    },
+    {
+      "case": "munich-existing",
+      "glb_mb": 16.623444,
+      "before_peak_mib": 252.9375,
+      "after_peak_mib": 110.609375,
+      "before_usdz_mb": 1.5,
+      "after_usdz_mb": 4.99,
+      "audit": {
+        "linked_items": 210,
+        "manifest_items": 210,
+        "mesh_batches": 445,
+        "exact_kind_geometry_checks": 157,
+        "arkit_validator": "Success!",
+        "source_glb_sha256": "16af328a8e72a201be945ff2a3185bef5ba8c056aa81cede2897557121d40af6"
+      }
+    },
+    {
+      "case": "schependomlaan",
+      "glb_mb": 16.04654,
+      "before_peak_mib": 284.5,
+      "after_peak_mib": 142.859375,
+      "before_usdz_mb": 2.52,
+      "after_usdz_mb": 8.95,
+      "audit": {
+        "linked_items": 3510,
+        "manifest_items": 3510,
+        "mesh_batches": 4286,
+        "exact_kind_geometry_checks": 3048,
+        "arkit_validator": "Success!",
+        "source_glb_sha256": "862726ccc35aa3966811207ca637fb040d0ee330e12863db1cb1b76a54d2845f"
+      }
+    },
+    {
+      "case": "bimspeed",
+      "glb_mb": 99.571088,
+      "before_peak_mib": 709.953125,
+      "after_peak_mib": 253.265625,
+      "before_usdz_mb": 18.68,
+      "after_usdz_mb": 82.19,
+      "audit": {
+        "linked_items": 14808,
+        "manifest_items": 14808,
+        "mesh_batches": 17958,
+        "exact_kind_geometry_checks": 4568,
+        "arkit_validator": "Success!",
+        "source_glb_sha256": "2a01c0db4aa4b9a97dc4b5334da7e579e0716a62bfcd03567329084176b807e5"
+      }
+    },
+    {
+      "case": "reserved",
+      "glb_mb": 16.03826,
+      "before_peak_mib": 272.28125,
+      "after_peak_mib": 118.015625,
+      "before_usdz_mb": 2.04,
+      "after_usdz_mb": 7.35,
+      "audit": {
+        "linked_items": 1316,
+        "manifest_items": 1316,
+        "mesh_batches": 1682,
+        "exact_kind_geometry_checks": 626,
+        "arkit_validator": "Success!",
+        "source_glb_sha256": "2e4b7b1cae62125d7682f3f881fe3339645b67da02b13e75dc53d31c1d51631f"
+      }
+    }
+  ],
+  "production_worker_peak_mib": 108.375,
+  "reserved_id": "opening_design__ctr-models-cad-ifc-ctr-ctr-ctr-1st-phase-common-walls",
+  "reserved_selection": "Random SystemRandom choice from existing >5 MiB IFC GLBs, excluding Munich/AC20; selected before development, first opened after implementation and synthetic tests.",
+  "source_ifcs": [
+    {
+      "case": "munich",
+      "mb": 33.499586,
+      "schema": "IFC4X3_ADD2",
+      "exporter": "Revit 25 / IFC 25.4"
+    },
+    {
+      "case": "schependomlaan",
+      "mb": 49.286967,
+      "schema": "IFC2X3",
+      "exporter": "ArchiCAD 18"
+    },
+    {
+      "case": "bimspeed",
+      "schema": "IFC2X3",
+      "exporter": "Revit alternate UI 19.1",
+      "mb": 85.116839
+    },
+    {
+      "case": "reserved",
+      "schema": "IFC2X3",
+      "exporter": "Revit alternate UI 20.1",
+      "mb": 30.077702
+    }
+  ],
+  "validation": {
+    "unit_tests": 24,
+    "unit_command": "MODELS_FAKE=1 .venv/bin/python -m pytest pipeline/tests/test_usdz_streaming.py pipeline/tests/test_usdz_openings.py -q",
+    "original_fixture_checks": 3,
+    "real_export_audits": 5,
+    "arkit": "all five measured exports and three privately regenerated original fixtures pass usdchecker --arkit",
+    "covered": "Interleaved/normalized accessors; indexed/nonindexed triangle lists, fans and strips; nested transforms/instances; exact ids and leaf/frame source names; normals/materials/alpha/texture UVs; ZIP/ZIP64 alignment; failed-export atomicity; collapsed tiny-mesh identities."
+  },
+  "limitations": [
+    "macOS RSS measured; Linux production container and physical iPhone loading not exercised.",
+    "Streamed USDA replaces monolithic USDC; packages are larger (measured sizes listed per case).",
+    "The default tests/test_usdz.py run against shared stale artifacts had two pre-existing missing-prim failures (Swiss/CubiCasa); all three unchanged test functions pass on newly exported isolated copies. Shared artifacts were not modified.",
+    "Dense GLBs from this pipeline are supported; sparse accessors, Draco geometry and non-surface primitives fail explicitly."
+  ],
+  "reproduce": [
+    "git show 6b49e54bb5b4c867b6becf3ce642c7191f27a334:pipeline/usdz.py > /tmp/f-usdzmem-before.py",
+    "scripts/heavy.sh .venv/bin/python results/final/USDZMEM/measure.py before NAME ARTIFACT_DIR --baseline /tmp/f-usdzmem-before.py",
+    "scripts/heavy.sh .venv/bin/python results/final/USDZMEM/measure.py after NAME ARTIFACT_DIR --cap 320",
+    "scripts/heavy.sh .venv/bin/python results/final/USDZMEM/audit.py NAME",
+    "scripts/heavy.sh .venv/bin/python results/final/USDZMEM/audit.py --fixtures"
+  ],
+  "cross_file": [],
+  "live_calls": 0,
+  "training": false
+}

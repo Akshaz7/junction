@@ -1,0 +1,18 @@
+{
+  "label": "after",
+  "case": "schependomlaan",
+  "input": "artifacts/ext_ifcr2__schependomlaan-design",
+  "work": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-usdzmem-cp_hdusy",
+  "glb_mb": 16.04654,
+  "sampled_peak_mib": 139.015625,
+  "seconds": 1.4791008330066688,
+  "exit_code": 0,
+  "stopped": null,
+  "ok": true,
+  "result": {
+    "prims": 3510,
+    "parts": 4286,
+    "mb": 8.95
+  },
+  "resource_peak_mib": 142.859375
+}

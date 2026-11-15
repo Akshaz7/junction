@@ -9,12 +9,14 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
+import struct
 import tempfile
+import zipfile
 from pathlib import Path
 
 import numpy as np
-import trimesh
-from pxr import Gf, Sdf, Usd, UsdGeom, UsdShade, UsdUtils, Vt
+from pxr import Gf, Sdf, Usd, UsdGeom, UsdShade, Vt
 
 REPO = Path(__file__).resolve().parent.parent
 KIND_RGB = {"wall": (0.69, 0.69, 0.71), "door": (0.78, 0.51, 0.24), "window": (0.35, 0.59, 0.84),
@@ -24,7 +26,7 @@ KIND_RGB = {"wall": (0.69, 0.69, 0.71), "door": (0.78, 0.51, 0.24), "window": (0
 
 # Lean mode (default): AR load time matters on the phone. Vertices are welded at 1 mm, degenerate triangles dropped, colours
 # quantised to 1/32 (fewer materials), normals left out (RealityKit derives them), and clutter kinds are decimated. Walls,
-# doors, windows, rooms, slabs, stairs, columns, beams and roofs stay exact. USDZ_LEAN=0 restores the old output.
+# doors, windows, rooms, slabs, stairs, columns, beams and roofs stay exact. USDZ_LEAN=0 retains full-detail batches and face normals.
 LEAN = os.environ.get("USDZ_LEAN", "1") != "0"
 EXACT_KINDS = {"wall", "door", "window", "room", "slab", "stairs", "column", "beam", "roof", "floor", "covering", "plate"}
 DECIMATE_MIN_TRIS = 120   # meshes with fewer triangles are left alone
@@ -146,64 +148,118 @@ def _item_node(node: str, node_to_item: dict) -> str:
     return base
 
 
+def _layer_body(layer):
+    # USD supplies the serializer; only its fixed file header is omitted.
+    return layer.ExportToString().split("\n\n", 1)[1]
+
+
+def _write_package(output: Path, files):
+    """Stream stored ZIP members, aligning each payload to USDZ's 64-byte boundary.
+
+    A single USDA layer is accepted by RealityKit/usdchecker --arkit. Keeping it
+    textual lets us emit and discard each mesh, without reopening/flattening a
+    stage containing the entire building. See openusd.org/dev/spec_usdz.html.
+    """
+    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED, allowZip64=True) as archive:
+        for source in files:
+            info = zipfile.ZipInfo.from_file(source, source.name)
+            info.compress_type = zipfile.ZIP_STORED
+            zip64 = info.file_size * 1.05 > zipfile.ZIP64_LIMIT
+            zip64_bytes = 20 if zip64 else 0
+            padding = (-(archive.fp.tell() + 30 + len(info.filename.encode("utf-8")) + zip64_bytes + 4)) % 64
+            info.extra = struct.pack("<HH", 0x1986, padding) + bytes(padding)
+            with source.open("rb") as original, archive.open(info, "w", force_zip64=zip64) as target:
+                shutil.copyfileobj(original, target, 1024 * 1024)
+
+
 def process(doc_id: str, art: Path) -> dict:
+    from pipeline.usdz_glb import GLB
+
     sj = json.loads((art / "scene.json").read_text())
-    scene = trimesh.load(art / "scene.glb", process=False)
     node_to_item = {v["node"]: (k, v) for k, v in sj["items"].items()}
-    with tempfile.TemporaryDirectory() as d:
-        d = Path(d)
-        usdc = d / "scene.usdc"
-        stage = Usd.Stage.CreateNew(str(usdc))
-        UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.y)
-        UsdGeom.SetStageMetersPerUnit(stage, 1.0)
-        root = UsdGeom.Xform.Define(stage, "/Root")
-        stage.SetDefaultPrim(root.GetPrim())
-        b = Builder(stage, d)
-        made, parts_n = set(), 0
-        for node in scene.graph.nodes_geometry:
-            T, gname = scene.graph[node]
-            g = scene.geometry[gname]
-            if len(g.faces) == 0:
-                continue
-            base = _item_node(node, node_to_item)
-            verts = trimesh.transformations.transform_points(g.vertices, T)
-            if base in node_to_item:
-                iid, info = node_to_item[base]
-                pname = info["usd_name"]
-                kind = info["kind"]
-            elif base == "plan_floor":
-                iid, pname, kind = None, "plan_floor", "floor"
-            else:
-                continue  # node not described by scene.json (should not happen)
-            parent = f"/Root/{pname}"
-            if pname not in made:
-                UsdGeom.Xform.Define(stage, parent)
-                made.add(pname)
-            rgb, alpha = _base_rgb(g, kind)
-            uv = tex = None
-            if kind == "floor":
-                img = g.visual.material.baseColorTexture if hasattr(g.visual, "material") else None
-                if img is not None:
-                    img.convert("RGB").save(d / "plan.png")
-                    tex = "plan.png"
-                    uv = np.asarray(g.visual.uv)
-                    rgb, alpha = (1.0, 1.0, 1.0), 1.0
-            faces = g.faces
-            if LEAN and uv is None:
-                verts, faces = _lean_mesh(verts, faces, kind)
-                if len(faces) == 0:
+    source = GLB(art / "scene.glb")
+    # Temporary output is on the destination filesystem: publish only complete
+    # packages and retain the previous working AR file after an export failure.
+    try:
+        with tempfile.TemporaryDirectory(prefix=".usdz-", dir=art) as temporary:
+            d = Path(temporary)
+            materials = Usd.Stage.CreateInMemory()
+            material_builder = Builder(materials, d)
+            groups = {}
+            for node, transform, mesh in source.nodes():
+                base = _item_node(node, node_to_item)
+                if base in node_to_item:
+                    _, info = node_to_item[base]
+                    pname, kind = info["usd_name"], info["kind"]
+                elif base == "plan_floor":
+                    pname, kind = "plan_floor", "floor"
+                else:
                     continue
-                rgb = tuple(round(round(c * 31) / 31, 3) for c in rgb)
-            b.mesh(parent, f"p{parts_n}", verts, faces, rgb, alpha, uv, tex)
-            parts_n += 1
-        stage.GetRootLayer().Save()
-        out = art / "scene.usdz"
-        out.unlink(missing_ok=True)
-        ok = UsdUtils.CreateNewARKitUsdzPackage(Sdf.AssetPath(str(usdc)), str(out))
-        if not ok:
-            raise RuntimeError("usdz packaging failed")
+                if not Sdf.Path.IsValidIdentifier(pname):
+                    raise ValueError("Invalid USD prim name in scene manifest")
+                groups.setdefault(pname, []).append((node, transform, mesh, kind))
+            made, parts_n = set(), 0
+            layer = d / "scene.usda"
+            with layer.open("w", encoding="utf-8") as stream:
+                stream.write('#usda 1.0\n(\n    defaultPrim = "Root"\n    metersPerUnit = 1\n    upAxis = "Y"\n)\n\ndef Xform "Root"\n{\n')
+                for pname, nodes in groups.items():
+                    opened = False
+                    for node, transform, mesh, kind in nodes:
+                        for primitive in mesh.get("primitives", []):
+                            rgb, alpha = source.color(primitive, kind, KIND_RGB)
+                            tex = source.texture(primitive, d) if kind == "floor" else None
+                            if tex is not None:
+                                rgb, alpha = (1.0, 1.0, 1.0), 1.0
+                            for verts, faces, uv in source.batches(primitive):
+                                if not opened:
+                                    stream.write(f'    def Xform "{pname}"\n    {{\n')
+                                    made.add(pname)
+                                    opened = True
+                                verts = verts @ transform[:3, :3].T + transform[:3, 3]
+                                if tex is None:
+                                    uv = None
+                                else:
+                                    # glTF's texture origin is top-left; USD's is bottom-left.
+                                    uv = uv.copy() if uv is not None else None
+                                    if uv is not None:
+                                        uv[:, 1] = 1 - uv[:, 1]
+                                if LEAN and uv is None:
+                                    verts, faces = _lean_mesh(verts, faces, kind)
+                                    if not len(faces):
+                                        continue
+                                    rgb = tuple(round(round(c * 31) / 31, 3) for c in rgb)
+                                if not len(faces):
+                                    continue
+                                part = Usd.Stage.CreateInMemory()
+                                builder = Builder(part, d)
+                                # Bind by absolute path to the shared material stage;
+                                # no scene geometry is retained there.
+                                builder.material = material_builder.material
+                                usd_mesh = builder.mesh("", f"p{parts_n}", verts, faces, rgb, alpha, uv, tex)
+                                usd_mesh.GetPrim().SetCustomDataByKey("source_node", node)
+                                stream.write(_layer_body(part.GetRootLayer()))
+                                part.GetRootLayer().Clear()
+                                del usd_mesh, builder, part
+                                parts_n += 1
+                    if opened:
+                        stream.write("    }\n")
+                if material_builder.mats:
+                    body = _layer_body(materials.GetRootLayer())
+                    stream.write(body.split("\n{", 1)[1].rsplit("}", 1)[0])
+                stream.write("}\n")
+            out = art / "scene.usdz"
+            pending = d / "scene.usdz"
+            _write_package(pending, [layer, *sorted(d.glob("*.png"))])
+            pending.replace(out)
+    finally:
+        source.close()
     sj["usdz"] = "scene.usdz"
-    (art / "scene.json").write_text(json.dumps(sj, indent=1))
+    manifest = art / ".scene-usdz.json.tmp"
+    try:
+        manifest.write_text(json.dumps(sj, indent=1))
+        manifest.replace(art / "scene.json")
+    finally:
+        manifest.unlink(missing_ok=True)
     return {"prims": len(made), "parts": parts_n, "mb": round(out.stat().st_size / 1e6, 2)}
 
 
