@@ -644,6 +644,10 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                     add(s_)
                 res["trace"] = trace
                 return res
+        from engine import price_intent  # F-TABLEOPS: "purchase price" is not an order quantity
+        if len(doc_ids) == 1 and price_intent.asks_price(question) and not price_intent.doc_has_price_data(doc_ids[0], root):
+            add(_step("price", "price question: the document records no price data, so no price or order quantity is given"))
+            return _abstained(question, doc_ids, price_intent.NO_PRICE, trace, t0, route="price")
         from engine import props  # F-PROPS: exact properties before broad counts and the reader
         if parse_scene(question) is None and not re.search(r"\b(?:remove|demolish|prop(?:ping)?|knock down|next to|beside)\b", question, re.I) and (res := props.answer(question, doc_ids, root, t0, hidden=(scene_state or {}).get("hidden"))) is not None:
             for s_ in res["trace"]:
