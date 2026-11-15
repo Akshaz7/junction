@@ -32,31 +32,42 @@ def room_name(item: Item) -> str:
 
 
 ROOM_TYPES = {
-    "office": r"\b(?:buro|office|toimisto|kontor)\w*",
+    "office": r"\b(?:buro|office|toimisto|kontor|bureau|ufficio)\w*",
     "meeting room": r"\b(?:besprechung|meeting|conference|sitzung|kokous|motesrum)\w*",
     "lab": r"\b(?:labor|lab|laboratory|laboratories)\w*",
-    "kitchen": r"\b(?:kuche|kitchen|keitti|kok)\w*",
-    "bathroom": r"\b(?:wc|toilet|bath|bad|kylpy|toalett)\w*",
-    "bedroom": r"\b(?:bedroom|schlaf|makuu|sovrum)\w*",
-    "corridor": r"\b(?:flur|corridor|korridor|hallway|kaytav)\w*",
+    "kitchen": r"\b(?:kuche|kitchen|keitti|kok|cuisine|cucina|kochen)\w*",
+    "bathroom": r"\b(?:wc|toilet|bath|bad|kylpy|toalett|bain|bagno|restroom|lavatory|douche|dusche|shower)\w*|\bsalle de bains?\b",
+    "bedroom": r"\b(?:bedroom|schlaf|makuu|sovrum|chambre|camera|kinderzimmer)\w*",
+    "corridor": r"\b(?:flur|corridor|korridor|hallway|kaytav|couloir|corridoio|disimpegno|ingresso|entree|entry|foyer|diele|gang)\w*",
     "classroom": r"\b(?:classroom|klassen|seminar|luokka|klassrum)\w*",
-    "storage": r"\b(?:storage|lager|abstell|varasto|forrad)\w*",
-    "living room": r"\b(?:living|lounge|wohn|olohuone|vardagsrum)\w*",
+    "storage": r"\b(?:storage|lager|abstell|varasto|forrad|reduit|ripostiglio|closet|cellar|pantry|keller)\w*",
+    "living room": r"\b(?:living|lounge|wohn|olohuone|vardagsrum|sejour|salon|soggiorno|family)\w*",
+    "balcony": r"\b(?:balcon|balkon|parveke|terrazz|terrass|terrace|terassi|loggia|deck|patio)\w*",
+    "laundry room": r"\b(?:laundry|buanderie|lavanderia|wasch|tvatt|pesutupa|kodinhoito)\w*",
+    "dining room": r"\b(?:dining|pranzo|essen|repas|ruokailu|matrum)\w*",
+    "stairs": r"\b(?:stairs?|staircase|treppe|escalier|scala|porras|portaat|trappa)\w*",
 }
 ROOM_ALIASES = {"offices": "office", "meeting rooms": "meeting room", "laboratories": "lab", "laboratory": "lab", "labs": "lab",
                 "kitchens": "kitchen", "bathrooms": "bathroom", "toilets": "bathroom", "wc": "bathroom", "bedrooms": "bedroom",
                 "living rooms": "living room", "corridors": "corridor", "hallways": "corridor", "classrooms": "classroom", "storerooms": "storage",
                 "makuuhuone": "bedroom", "schlafzimmer": "bedroom", "sovrum": "bedroom",
                 "keittio": "kitchen", "kok": "kitchen", "kuche": "kitchen", "kokoushuone": "meeting room",
-                "toimisto": "office", "kontor": "office", "luokkahuone": "classroom"}
+                "toimisto": "office", "kontor": "office", "luokkahuone": "classroom",
+                "hall": "corridor", "entry": "corridor", "living": "living room",
+                "balconies": "balcony", "laundry": "laundry room", "laundry rooms": "laundry room",
+                "dining": "dining room", "dining rooms": "dining room"}
+
+
+def _room_type(name: str) -> str | None:
+    """Resolve complete type labels; never shorten an unknown drawn name."""
+    return (ROOM_ALIASES.get(name) or (name if name in ROOM_TYPES else None)
+            or next((k for k, pattern in ROOM_TYPES.items() if re.fullmatch(pattern, name)), None))
 
 
 def room_type_matches(room: Item, base: str) -> bool:
-    label = fold(room_name(room))
     typed = fold(room.props.get("room_type") or "")
-    types = {"bedroom": {"bedroom"}, "kitchen": {"kitchen"}, "bathroom": {"bathroom", "wc"},
-             "corridor": {"corridor", "entry"}, "storage": {"storage"}, "living room": {"living"}}
-    return bool(re.search(ROOM_TYPES[base], label) or typed in types.get(base, {base}))
+    return bool(_room_type(typed) == base
+                or re.search(ROOM_TYPES[base], fold(room_name(room))))
 
 
 _ROOM_NUMBER = re.compile(r"(?<!\w)(?:[^\W\d_]+[-.]?)?\d+(?:[.\-]\d+)*(?:[^\W\d_]+)?(?!\w)")
@@ -79,17 +90,29 @@ def _numbered_rooms(target: str, rooms: list[Item]) -> tuple[str, list[Item]] | 
     scanned = target.casefold()
     numbers = list(_ROOM_NUMBER.finditer(scanned))
     if len(numbers) != 1:
+        # Some drawn names themselves contain digits ("AKA1 WC"). Match a
+        # complete name + declared number without treating the name's digits as ids.
+        if numbers:
+            requested = _ROOM_PREFIX.sub("", fold(target))
+            hit = [r for r in rooms if r.props.get("number") is not None
+                   and any(requested in {fold(f"{v} {r.props['number']}"), fold(f"{r.props['number']} {v}")}
+                           for v in (r.label, r.props.get("long_name")) if v)]
+            if hit:
+                return target, hit
         return None
     number = numbers[0]
     requested = number.group()
     name = _ROOM_PREFIX.sub("", fold(scanned[:number.start()] + " " + scanned[number.end():]))
-    aliases = {**{k: k for k in ROOM_TYPES}, **ROOM_ALIASES}
-    base = aliases.get(name) or next((k for k, pattern in ROOM_TYPES.items() if re.fullmatch(pattern, name)), None)
+    base = _room_type(name)
 
     def ids(room):
         found = set()
         # A type code (e.g. "Space Type 1") is not the room's identifier.
-        for label in (room.props.get("number"), room.name, room.label, room.props.get("long_name")):
+        # A supplied identifier field is authoritative, including an explicit
+        # missing number. Other label text may contain areas or ratings.
+        labels = ((room.props["number"],) if "number" in room.props
+                  else (room.name, room.label, room.props.get("long_name")))
+        for label in labels:
             if label is not None:
                 found.update(m.group() for m in _ROOM_NUMBER.finditer(str(label).casefold()))
         return found
@@ -100,8 +123,9 @@ def _numbered_rooms(target: str, rooms: list[Item]) -> tuple[str, list[Item]] | 
         compact = lambda value: re.sub(r"[.\-]", "", value)
         hit = [r for r, values in indexed if any(compact(requested) == compact(v) for v in values)]
     if name:
-        pattern = ROOM_TYPES[base] if base else rf"(?<!\w){re.escape(name)}(?!\w)"
-        hit = [r for r in hit if any(re.search(pattern, fold(v)) for v in _room_labels(r))]
+        pattern = rf"(?<!\w){re.escape(name)}(?!\w)"
+        hit = [r for r in hit if (room_type_matches(r, base) if base
+               else any(re.search(pattern, fold(v)) for v in _room_labels(r)))]
         if not hit:
             # A full drawn name may use Roman numerals ('Prüfzimmer II' / 'Pruefzimmer 2').
             # Its ordinal alone must never become a room number.
@@ -110,8 +134,11 @@ def _numbered_rooms(target: str, rooms: list[Item]) -> tuple[str, list[Item]] | 
     return target, hit
 
 
-def _target_before_scope(target: str) -> str:
-    return re.split(r"\b(?:on|in|with|between|including|excluding)\b", target, flags=re.I)[0].strip()
+def _target_before_scope(target: str, rooms: list[Item]) -> str:
+    # Scope words can also belong to the drawn name ("WALK IN CLOSET").
+    if any(fold(target) == fold(v) for r in rooms for v in _room_labels(r)):
+        return target.strip()
+    return re.split(r"(?<![-\w])(?:on|in|with|between|including|excluding)\b", target, flags=re.I)[0].strip()
 
 
 def room_filter(question: str, rooms: list[Item]) -> tuple[str, list[Item]] | None:
@@ -127,23 +154,34 @@ def room_filter(question: str, rooms: list[Item]) -> tuple[str, list[Item]] | No
     aliases = {**{k: k for k in ROOM_TYPES}, **ROOM_ALIASES}
     explicit = re.search(r"\b(?:area|size) of (?:the |a |an )?(.+)|\bhow (?:big|large) is (?:the |a |an )?(.+)", question, re.I)
     if explicit:
-        raw_target = _target_before_scope(explicit.group(1) or explicit.group(2))
+        raw_target = _target_before_scope(explicit.group(1) or explicit.group(2), rooms)
         target = fold(raw_target)
         target = re.sub(r"^(?:(?:all|every|each|of|the)\s+)+", "", target)
         if not target or target in ("it", "this", "that") or re.fullmatch(r"(?:(?:whole|entire|total|combined|net|gross|floor)\s+)*(?:rooms?|spaces?|(?:building|model|floor|storey|plan|house|flat|apartment)(?:\s+\d+)?)", target):
             return None
         if STOREY_REQUEST.fullmatch(target):
             return None  # "area of the ground floor" scopes rooms by storey, not by room name.
+        # A full drawn label may include an area/rating-like number, which is
+        # part of its name rather than its separately supplied room identifier.
+        if _ROOM_NUMBER.search(raw_target.casefold()):
+            exact = [r for r in rooms if any(target == fold(v) for v in _room_labels(r))]
+            if exact:
+                return target, exact
         numbered = _numbered_rooms(raw_target, rooms)
         if numbered is not None:
             return numbered
-        if target in aliases:
-            base = aliases[target]
+        base = _room_type(target)
+        if base:
             return base, [r for r in rooms if room_type_matches(r, base)]
         # Never shorten an unknown full name ('Buero Mueller XI') to a known prefix ('Buero').
         return target, [r for r in rooms if re.search(rf"(?<!\w){re.escape(target)}(?!\w)", fold(room_name(r)))]
     reference = re.search(r"\b(?:where (?:is|are)|(?:show|locate|find)(?: me)?|how many|number of|list)\s+(?:the\s+)?(.+)", question, re.I)
-    target = _target_before_scope(reference.group(1) if reference else question)
+    target = _target_before_scope(reference.group(1) if reference else question, rooms)
+    scoped_q = fold(target)
+    if _ROOM_NUMBER.search(target.casefold()):
+        exact = [r for r in rooms if any(scoped_q == fold(v) for v in _room_labels(r))]
+        if exact:
+            return target, exact
     numbered = _numbered_rooms(target, rooms)
     if numbered is not None:
         return numbered
@@ -151,10 +189,15 @@ def room_filter(question: str, rooms: list[Item]) -> tuple[str, list[Item]] | No
     names = sorted({room_name(r) for r in rooms if len(fold(room_name(r))) > 2 and not room_name(r).isdigit()}, key=lambda s: len(fold(s)), reverse=True)
     for name in names:
         n = fold(name)
-        if re.search(rf"(?<!\w){re.escape(n)}(?!\w)", q):
+        if re.search(rf"(?<!\w){re.escape(n)}(?!\w)", scoped_q):
             return name, [r for r in rooms if fold(room_name(r)) == n]
+    # Bare fragments also serve as exclusion lists for callers. Preserve their
+    # exact-label/alias path (e.g. "WCs" must not widen to all bathrooms).
+    base = _room_type(scoped_q) if reference else None
+    if base:
+        return base, [r for r in rooms if room_type_matches(r, base)]
     for alias, base in sorted(aliases.items(), key=lambda x: -len(x[0])):
-        if re.search(rf"\b{re.escape(alias)}\b", q):
+        if re.search(rf"\b{re.escape(alias)}\b", scoped_q):
             return base, [r for r in rooms if room_type_matches(r, base)]
     return None
 

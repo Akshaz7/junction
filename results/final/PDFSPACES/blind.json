@@ -1,0 +1,765 @@
+{
+  "baseline": "2ba8777",
+  "documents": [
+    {
+      "pdf": "data/junction-dataset-preview/data/swiss_dwellings/site1101_bldg2241_floor10275.pdf",
+      "page": 1,
+      "vector_paths": 169,
+      "indexed_rooms": 9,
+      "source": "pdf_vector",
+      "scale": {
+        "m_per_pt": 0.035044748899700814,
+        "method": "printed areas fit",
+        "confidence": 0.65,
+        "ratio": "1:99",
+        "check": {
+          "printed_areas_rel_err": 0.022,
+          "fit_m_per_pt": 0.035044748899700814,
+          "fit_n": 3
+        }
+      },
+      "checks": [
+        {
+          "question": "What is the area of Cucina?",
+          "kind": "drawn label",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 5.05?",
+          "kind": "source number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Cucina 5.05?",
+          "kind": "source name and number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is kitchen 5.05?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Soggiorno/pranzo?",
+          "kind": "drawn label",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 5.03?",
+          "kind": "source number",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Soggiorno/pranzo 5.03?",
+          "kind": "source name and number",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is living room 5.03?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Ripostiglio?",
+          "kind": "drawn label",
+          "expected": [
+            "room-003",
+            "room-006"
+          ],
+          "before": [
+            "room-003",
+            "room-006"
+          ],
+          "after": [
+            "room-003",
+            "room-006"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 5.01?",
+          "kind": "source number",
+          "expected": [
+            "room-003"
+          ],
+          "before": [
+            "room-003"
+          ],
+          "after": [
+            "room-003"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Ripostiglio 5.01?",
+          "kind": "source name and number",
+          "expected": [
+            "room-003"
+          ],
+          "before": [
+            "room-003"
+          ],
+          "after": [
+            "room-003"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is storage 5.01?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-003"
+          ],
+          "before": [
+            "room-003"
+          ],
+          "after": [
+            "room-003"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Bagno?",
+          "kind": "drawn label",
+          "expected": [
+            "room-005"
+          ],
+          "before": [
+            "room-005"
+          ],
+          "after": [
+            "room-005"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 5.06?",
+          "kind": "source number",
+          "expected": [
+            "room-005"
+          ],
+          "before": [
+            "room-005"
+          ],
+          "after": [
+            "room-005"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Bagno 5.06?",
+          "kind": "source name and number",
+          "expected": [
+            "room-005"
+          ],
+          "before": [
+            "room-005"
+          ],
+          "after": [
+            "room-005"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is bathroom 5.06?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-005"
+          ],
+          "before": [
+            "room-005"
+          ],
+          "after": [
+            "room-005"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 5.07?",
+          "kind": "source number",
+          "expected": [
+            "room-006"
+          ],
+          "before": [
+            "room-006"
+          ],
+          "after": [
+            "room-006"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Ripostiglio 5.07?",
+          "kind": "source name and number",
+          "expected": [
+            "room-006"
+          ],
+          "before": [
+            "room-006"
+          ],
+          "after": [
+            "room-006"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is storage 5.07?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-006"
+          ],
+          "before": [
+            "room-006"
+          ],
+          "after": [
+            "room-006"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Corridoio?",
+          "kind": "drawn label",
+          "expected": [
+            "room-007",
+            "room-008"
+          ],
+          "before": [
+            "room-007",
+            "room-008"
+          ],
+          "after": [
+            "room-007",
+            "room-008"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 5.08?",
+          "kind": "source number",
+          "expected": [
+            "room-007"
+          ],
+          "before": [
+            "room-007"
+          ],
+          "after": [
+            "room-007"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Corridoio 5.08?",
+          "kind": "source name and number",
+          "expected": [
+            "room-007"
+          ],
+          "before": [
+            "room-007"
+          ],
+          "after": [
+            "room-007"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is corridor 5.08?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-007"
+          ],
+          "before": [],
+          "after": [
+            "room-007"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 5.02?",
+          "kind": "source number",
+          "expected": [
+            "room-008"
+          ],
+          "before": [
+            "room-008"
+          ],
+          "after": [
+            "room-008"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Corridoio 5.02?",
+          "kind": "source name and number",
+          "expected": [
+            "room-008"
+          ],
+          "before": [
+            "room-008"
+          ],
+          "after": [
+            "room-008"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "Where is corridor 5.02?",
+          "kind": "translated producer type and number",
+          "expected": [
+            "room-008"
+          ],
+          "before": [],
+          "after": [
+            "room-008"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Stanza?",
+          "kind": "drawn label",
+          "expected": [
+            "room-009"
+          ],
+          "before": [
+            "room-009"
+          ],
+          "after": [
+            "room-009"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of room 5.04?",
+          "kind": "source number",
+          "expected": [
+            "room-009"
+          ],
+          "before": [
+            "room-009"
+          ],
+          "after": [
+            "room-009"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of Stanza 5.04?",
+          "kind": "source name and number",
+          "expected": [
+            "room-009"
+          ],
+          "before": [
+            "room-009"
+          ],
+          "after": [
+            "room-009"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of bathroom?",
+          "kind": "producer type",
+          "expected": [
+            "room-005"
+          ],
+          "before": [
+            "room-005"
+          ],
+          "after": [
+            "room-005"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of corridor?",
+          "kind": "producer type",
+          "expected": [
+            "room-007",
+            "room-008"
+          ],
+          "before": [],
+          "after": [
+            "room-007",
+            "room-008"
+          ],
+          "before_pass": false,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of kitchen?",
+          "kind": "producer type",
+          "expected": [
+            "room-001"
+          ],
+          "before": [
+            "room-001"
+          ],
+          "after": [
+            "room-001"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of living room?",
+          "kind": "producer type",
+          "expected": [
+            "room-002"
+          ],
+          "before": [
+            "room-002"
+          ],
+          "after": [
+            "room-002"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        },
+        {
+          "question": "What is the area of storage?",
+          "kind": "producer type",
+          "expected": [
+            "room-003",
+            "room-006"
+          ],
+          "before": [
+            "room-003",
+            "room-006"
+          ],
+          "after": [
+            "room-003",
+            "room-006"
+          ],
+          "before_pass": true,
+          "after_pass": true
+        }
+      ],
+      "evidence": [
+        {
+          "question": "What is the area of Cucina?",
+          "item_ids": [
+            "room-001"
+          ],
+          "value": 5.34,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 5.05?",
+          "item_ids": [
+            "room-001"
+          ],
+          "value": 5.34,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Cucina 5.05?",
+          "item_ids": [
+            "room-001"
+          ],
+          "value": 5.34,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Soggiorno/pranzo?",
+          "item_ids": [
+            "room-002"
+          ],
+          "value": 34.13,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 5.03?",
+          "item_ids": [
+            "room-002"
+          ],
+          "value": 34.13,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Soggiorno/pranzo 5.03?",
+          "item_ids": [
+            "room-002"
+          ],
+          "value": 34.13,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Ripostiglio?",
+          "item_ids": [
+            "room-003",
+            "room-006"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 5.01?",
+          "item_ids": [
+            "room-003"
+          ],
+          "value": 5.08,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Ripostiglio 5.01?",
+          "item_ids": [
+            "room-003"
+          ],
+          "value": 5.08,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Bagno?",
+          "item_ids": [
+            "room-005"
+          ],
+          "value": 4.49,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 5.06?",
+          "item_ids": [
+            "room-005"
+          ],
+          "value": 4.49,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Bagno 5.06?",
+          "item_ids": [
+            "room-005"
+          ],
+          "value": 4.49,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 5.07?",
+          "item_ids": [
+            "room-006"
+          ],
+          "value": 3.49,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Ripostiglio 5.07?",
+          "item_ids": [
+            "room-006"
+          ],
+          "value": 3.49,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Corridoio?",
+          "item_ids": [
+            "room-007",
+            "room-008"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 5.08?",
+          "item_ids": [
+            "room-007"
+          ],
+          "value": 10.62,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Corridoio 5.08?",
+          "item_ids": [
+            "room-007"
+          ],
+          "value": 10.62,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 5.02?",
+          "item_ids": [
+            "room-008"
+          ],
+          "value": 4.06,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Corridoio 5.02?",
+          "item_ids": [
+            "room-008"
+          ],
+          "value": 4.06,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Stanza?",
+          "item_ids": [
+            "room-009"
+          ],
+          "value": 18.91,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of room 5.04?",
+          "item_ids": [
+            "room-009"
+          ],
+          "value": 18.91,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of Stanza 5.04?",
+          "item_ids": [
+            "room-009"
+          ],
+          "value": 18.91,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of bathroom?",
+          "item_ids": [
+            "room-005"
+          ],
+          "value": 4.49,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of corridor?",
+          "item_ids": [
+            "room-007",
+            "room-008"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of kitchen?",
+          "item_ids": [
+            "room-001"
+          ],
+          "value": 5.34,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of living room?",
+          "item_ids": [
+            "room-002"
+          ],
+          "value": 34.13,
+          "cost_usd": 0.0
+        },
+        {
+          "question": "What is the area of storage?",
+          "item_ids": [
+            "room-003",
+            "room-006"
+          ],
+          "value": null,
+          "cost_usd": 0.0
+        }
+      ],
+      "before_pass": 31,
+      "after_pass": 34,
+      "total": 34
+    }
+  ]
+}

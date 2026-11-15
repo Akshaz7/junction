@@ -1,0 +1,13 @@
+{
+  "passed": 220,
+  "failed": [
+    "engine/tests/test_analytics.py::test_named_rooms_and_planmap_superlative",
+    "engine/tests/test_fix13.py::test_X25_translated_meeting_rooms",
+    "engine/tests/test_fix13.py::test_X15_nonexistent_room",
+    "engine/tests/test_fix13.py::test_X14_nonexistent_floor",
+    "engine/tests/test_fix13.py::test_unknown_full_name_does_not_match_known_prefix",
+    "engine/tests/test_order.py::test_order_doors_floor_scope_and_whole_item_rounding",
+    "engine/tests/test_order.py::test_wall_area_is_one_face_and_net_not_gross",
+    "engine/tests/test_wallarea.py::test_full_dispatch_evidence_reasoning_and_csv_table"
+  ]
+}
