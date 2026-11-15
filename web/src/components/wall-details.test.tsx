@@ -3,7 +3,7 @@ import { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { expect, it } from 'vitest'
 import { WallDetails } from './wall-details'
-import { wallAskHref, type WallDetails as Details } from '../lib/wall-details'
+import { howMeasured, wallAskHref, type WallDetails as Details } from '../lib/wall-details'
 import { buildItemDetails } from '../viewer3d/identify'
 import type { SceneManifest } from '../viewer3d/scene'
 
@@ -32,4 +32,15 @@ it('preserves drawing and wall reference in the ask link', () => {
   const params = new URLSearchParams(wallAskHref('drawing / one', 'WL 12').split('?')[1])
   expect(params.get('doc')).toBe('drawing / one')
   expect(params.get('question')).toContain('wall WL 12')
+})
+
+it('explains the measurement with the wall\'s own numbers', async () => {
+  const host = document.createElement('div')
+  const root = createRoot(host)
+  await act(async () => root.render(<WallDetails wall={{ ...wall, scale_method: 'door prior: median door 43 px = 0.9 m' }} />))
+  expect(host.querySelector('details.wall-detail-how')?.hasAttribute('open')).toBe(true)
+  for (const t of ['How we measured this', 'door prior: median door 43 px', 'half the outline perimeter', 'Face A: Net = 10.80 − 2.10 = 8.70 m²']) expect(host.textContent).toContain(t)
+  const ifc = howMeasured({ ...wall, status: 'Measured' })
+  expect(ifc[0]).toContain('read from the IFC model twice')
+  await act(async () => root.unmount())
 })
