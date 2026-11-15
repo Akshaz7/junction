@@ -699,6 +699,12 @@ def process(doc_id: str, ddir: Path, pdf_path: Path, page_index: int = 0, write:
     if sum(1 for i in pm["items"] if i["kind"] in ("room", "wall")) < 3:
         return None
     pm["provenance"]["gate"] = reason
+    try:  # EXPERIMENT detector (OFF unless PDF_DETECT=1): door confirm only; never adds geometry
+        from pipeline import pdf_detect
+        if pdf_detect.enabled():
+            pdf_detect.apply(pm, pdf_path, page_index, s, sc.get("m_per_pt"))
+    except Exception as e:  # noqa: BLE001
+        pm["detector"] = {"error": f"{type(e).__name__}: {e}"[:200]}
     try:  # fixtures role: sanitary/kitchen/furniture symbols (top-level "fixtures"); never breaks the plan map
         from pipeline import pdf_fixtures
         pm["fixtures"] = pdf_fixtures.detect(page, walls, rooms_, opens, sc["m_per_pt"])
