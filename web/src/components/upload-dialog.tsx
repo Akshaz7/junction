@@ -110,6 +110,7 @@ function UploadSession({ onClose, onAsk, onOpen, onReady, onUploaded, initialFil
       })
       if (controller.signal.aborted) return
       dispatch({ type: 'uploaded', docId: receipt.doc_id })
+      onUploaded?.(receipt.doc_id)
       phase = 'poll'
       await monitor(receipt.doc_id, controller)
     } catch (error) {

@@ -129,7 +129,7 @@ export interface PlanMap {
 export interface SavedChat {
   id: string
   doc_id: string | null
-  messages: { id: string; role: string; content: string; answer: Answer | null }[]
+  messages: { id: string; role: string; content: string; created_at?: string; answer: Answer | null }[]
   /** Set while a question in this chat is still being answered (late joiners catch up from it). */
   active?: { question: string; statuses: string[]; traces: TraceStep[]; text?: string }
 }
